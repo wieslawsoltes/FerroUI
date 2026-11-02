@@ -117,6 +117,7 @@ mod source;
 mod transform;
 mod theme_tables;
 mod template_bindings;
+mod template_values;
 mod factory_shapes;
 mod imports;
 mod selector_plans;

@@ -3863,11 +3863,10 @@ fn build_control_template_parts_xaml_deferred_0(
     // control_template_parts.xaml(1,237) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 1, 237)?;
     // control_template_parts.xaml(1,266) Content (setter chosen at run time)
-    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
     let provided_1 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), || ::ferroui_controls::presenters::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 1, 266)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), || ::ferroui_controls::presenters::ContentPresenter::content_property(), &value_0, ::ferroui_base::data::BindingPriority::Template, "ContentControl.Content", 1, 266)?;
     rt::end_init(&content_presenter_0, 1, 220)?;
     rt::end_init(&border_0, 1, 151)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
@@ -3990,11 +3989,10 @@ fn build_control_theme_template_xaml_deferred_1(
     content_presenter_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // control_theme_template.xaml(1,253) Content (setter chosen at run time)
-    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
     let provided_0 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), || ::ferroui_controls::presenters::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 1, 253)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), || ::ferroui_controls::presenters::ContentPresenter::content_property(), &value_0, ::ferroui_base::data::BindingPriority::Template, "ContentControl.Content", 1, 253)?;
     rt::end_init(&content_presenter_0, 1, 236)?;
     rt::end_init(&border_0, 1, 211)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
@@ -5757,8 +5755,7 @@ fn build_scoped_namespace_bindings_xaml_deferred_0(
     // scoped_namespace_bindings.xaml(1,524) Name
     rt::set_and_register_name(name_scope.as_ref(), &text_block_0, "PART_Value", 1, 524)?;
     // scoped_namespace_bindings.xaml(1,514) Row
-    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    text_block_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 11_i32, priority_0);
+    text_block_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 11_i32, ::ferroui_base::data::BindingPriority::Template);
     // scoped_namespace_bindings.xaml(1,556) Text
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("(p:Grid.Row)"));
     rt::push_parent(&context, &reflection_binding_extension_0);

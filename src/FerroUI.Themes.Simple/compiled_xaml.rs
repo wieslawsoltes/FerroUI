@@ -3192,11 +3192,10 @@ fn build_controls_simplecontrols_xaml_deferred_3(
     // Controls/SimpleControls.xaml(16,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R0)?;
     // Controls/SimpleControls.xaml(22,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 22, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 22, 27)?;
     // Controls/SimpleControls.xaml(23,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R1)?;
     rt::end_init(&content_presenter_0, 15, 10)?;
@@ -3334,19 +3333,15 @@ fn build_controls_simplecontrols_xaml_deferred_5(
     // Controls/SimpleControls.xaml(13,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &ellipse_0, "border", 13, 20)?;
     // Controls/SimpleControls.xaml(13,12) Width
-    let priority_0 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::width_property(), 18.0_f64, priority_0);
+    ellipse_0.set_value_with_priority(__t::Layoutable::width_property(), 18.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(13,12) Height
-    let priority_1 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::height_property(), 18.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_1(&ellipse_0);
     // Controls/SimpleControls.xaml(13,12) VerticalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_2(&ellipse_0);
     // Controls/SimpleControls.xaml(17,20) Stroke
     rt::apply_template_binding(ellipse_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Shape::stroke_property()), 17, 20)?;
     // Controls/SimpleControls.xaml(13,12) StrokeThickness
-    let priority_3 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 1.0_f64, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_3(&ellipse_0);
     rt::end_init(&ellipse_0, 13, 12)?;
     // Controls/SimpleControls.xaml(19,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -3357,23 +3352,17 @@ fn build_controls_simplecontrols_xaml_deferred_5(
     // Controls/SimpleControls.xaml(19,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &ellipse_1, "checkMark", 19, 20)?;
     // Controls/SimpleControls.xaml(19,12) Width
-    let priority_4 = __t::BindingPriority::Template;
-    ellipse_1.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_4(&ellipse_1);
     // Controls/SimpleControls.xaml(19,12) Height
-    let priority_5 = __t::BindingPriority::Template;
-    ellipse_1.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_5(&ellipse_1);
     // Controls/SimpleControls.xaml(19,12) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    ellipse_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_6(&ellipse_1);
     // Controls/SimpleControls.xaml(19,12) VerticalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    ellipse_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_2(&ellipse_1);
     // Controls/SimpleControls.xaml(19,12) Stretch
-    let priority_8 = __t::BindingPriority::Template;
-    ellipse_1.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_7(&ellipse_1);
     // Controls/SimpleControls.xaml(19,12) UseLayoutRounding
-    let priority_9 = __t::BindingPriority::Template;
-    ellipse_1.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&false), priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_8(&ellipse_1);
     rt::end_init(&ellipse_1, 19, 12)?;
     // Controls/SimpleControls.xaml(26,12) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -3385,25 +3374,19 @@ fn build_controls_simplecontrols_xaml_deferred_5(
     // Controls/SimpleControls.xaml(26,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &ellipse_2, "indeterminateMark", 26, 20)?;
     // Controls/SimpleControls.xaml(26,12) Width
-    let priority_10 = __t::BindingPriority::Template;
-    ellipse_2.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_4(&ellipse_2);
     // Controls/SimpleControls.xaml(26,12) Height
-    let priority_11 = __t::BindingPriority::Template;
-    ellipse_2.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_5(&ellipse_2);
     // Controls/SimpleControls.xaml(26,12) HorizontalAlignment
-    let priority_12 = __t::BindingPriority::Template;
-    ellipse_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_6(&ellipse_2);
     // Controls/SimpleControls.xaml(26,12) VerticalAlignment
-    let priority_13 = __t::BindingPriority::Template;
-    ellipse_2.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_2(&ellipse_2);
     // Controls/SimpleControls.xaml(31,20) Fill
     rt::bind_dynamic_resource(&context, ellipse_2.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeAccentBrush", 31, 20)?;
     // Controls/SimpleControls.xaml(26,12) Stretch
-    let priority_14 = __t::BindingPriority::Template;
-    ellipse_2.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_7(&ellipse_2);
     // Controls/SimpleControls.xaml(26,12) UseLayoutRounding
-    let priority_15 = __t::BindingPriority::Template;
-    ellipse_2.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&false), priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_8(&ellipse_2);
     rt::pop_parent_and_end_init(&context, &ellipse_2, 26, 12)?;
     // Controls/SimpleControls.xaml(34,12) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -3414,20 +3397,16 @@ fn build_controls_simplecontrols_xaml_deferred_5(
     // Controls/SimpleControls.xaml(34,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 34, 29)?;
     // Controls/SimpleControls.xaml(34,12) Column
-    let priority_16 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_9(&content_presenter_0);
     // Controls/SimpleControls.xaml(34,12) Margin
-    let priority_17 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_17);
+    content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(34,12) VerticalAlignment
-    let priority_18 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_0);
     // Controls/SimpleControls.xaml(38,29) Content (setter chosen at run time)
-    let priority_19 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
     let value_0: __t::MarkupValue = rt::to_value(provided_3);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_19, "ContentControl.Content", 38, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 38, 29)?;
     // Controls/SimpleControls.xaml(39,29) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 39, 29)?;
     rt::end_init(&content_presenter_0, 34, 12)?;
@@ -3510,11 +3489,10 @@ fn build_controls_simplecontrols_xaml_deferred_7(
     // Controls/SimpleControls.xaml(16,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R2)?;
     // Controls/SimpleControls.xaml(22,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 22, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 22, 27)?;
     // Controls/SimpleControls.xaml(23,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R3)?;
     rt::end_init(&content_presenter_0, 15, 10)?;
@@ -3628,11 +3606,10 @@ fn build_controls_simplecontrols_xaml_deferred_9(
     // Controls/SimpleControls.xaml(16,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R4)?;
     // Controls/SimpleControls.xaml(22,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 22, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 22, 27)?;
     // Controls/SimpleControls.xaml(23,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R5)?;
     rt::end_init(&content_presenter_0, 15, 10)?;
@@ -3747,8 +3724,7 @@ fn build_controls_simplecontrols_xaml_deferred_11(
     // Controls/SimpleControls.xaml(17,19) Background
     rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R6)?;
     // Controls/SimpleControls.xaml(16,12) ClipToBounds
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_10(&border_0);
     // Controls/SimpleControls.xaml(21,19) CornerRadius
     rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 21, 19)?;
     // Controls/SimpleControls.xaml(22,14) Child
@@ -3763,16 +3739,14 @@ fn build_controls_simplecontrols_xaml_deferred_11(
     // Controls/SimpleControls.xaml(24,18) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(24,18) Width
-    let priority_1 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_1);
+    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(25,18) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(25,18) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(25,18) Width
-    let priority_2 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_2);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(28,16) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -3783,16 +3757,14 @@ fn build_controls_simplecontrols_xaml_deferred_11(
     // Controls/SimpleControls.xaml(28,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 28, 33)?;
     // Controls/SimpleControls.xaml(28,16) Column
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_11(&content_presenter_0);
     // Controls/SimpleControls.xaml(30,33) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R7)?;
     // Controls/SimpleControls.xaml(33,33) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     let value_0: __t::MarkupValue = rt::to_value(provided_7);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_4, "ContentControl.Content", 33, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 33, 33)?;
     // Controls/SimpleControls.xaml(34,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 34, 33)?;
     rt::end_init(&content_presenter_0, 28, 16)?;
@@ -3805,29 +3777,21 @@ fn build_controls_simplecontrols_xaml_deferred_11(
     // Controls/SimpleControls.xaml(36,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_icon_0, "DropDownGlyph", 36, 25)?;
     // Controls/SimpleControls.xaml(36,16) Column
-    let priority_5 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_9(&path_icon_0);
     // Controls/SimpleControls.xaml(36,16) Width
-    let priority_6 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_12(&path_icon_0);
     // Controls/SimpleControls.xaml(36,16) Height
-    let priority_7 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_13(&path_icon_0);
     // Controls/SimpleControls.xaml(36,16) Margin
-    let priority_8 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 10.0_f64, 0.0_f64), priority_8);
+    path_icon_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 10.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(36,16) HorizontalAlignment
-    let priority_9 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_14(&path_icon_0);
     // Controls/SimpleControls.xaml(36,16) VerticalAlignment
-    let priority_10 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_icon_0);
     // Controls/SimpleControls.xaml(36,16) IsHitTestVisible
-    let priority_11 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_15(&path_icon_0);
     // Controls/SimpleControls.xaml(36,16) UseLayoutRounding
-    let priority_12 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&false), priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_8(&path_icon_0);
     rt::end_init(&path_icon_0, 36, 16)?;
     rt::end_init(&grid_0, 22, 14)?;
     rt::end_init(&border_0, 16, 12)?;
@@ -3890,8 +3854,7 @@ fn build_controls_simplecontrols_xaml_deferred_13(
     // Controls/SimpleControls.xaml(14,19) Data
     rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R9)?;
     // Controls/SimpleControls.xaml(14,14) Stretch
-    let priority_0 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_0);
     rt::end_init(&path_0, 14, 14)?;
     rt::end_init(&viewbox_0, 12, 12)?;
     rt::end_init(&border_0, 11, 10)?;
@@ -4035,14 +3998,11 @@ fn build_controls_simplecontrols_xaml_deferred_15(
     // Controls/SimpleControls.xaml(16,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "border", 16, 19)?;
     // Controls/SimpleControls.xaml(16,12) Width
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::width_property(), 18.0_f64, priority_0);
+    border_0.set_value_with_priority(__t::Layoutable::width_property(), 18.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(16,12) Height
-    let priority_1 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::height_property(), 18.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_1(&border_0);
     // Controls/SimpleControls.xaml(16,12) VerticalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_2(&border_0);
     // Controls/SimpleControls.xaml(20,19) Background
     rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R10)?;
     // Controls/SimpleControls.xaml(24,14) Child
@@ -4061,29 +4021,22 @@ fn build_controls_simplecontrols_xaml_deferred_15(
     // Controls/SimpleControls.xaml(25,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_0, "checkMark", 25, 21)?;
     // Controls/SimpleControls.xaml(25,16) Width
-    let priority_3 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::width_property(), 11.0_f64, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_16(&path_0);
     // Controls/SimpleControls.xaml(25,16) Height
-    let priority_4 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_5(&path_0);
     // Controls/SimpleControls.xaml(25,16) HorizontalAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_0);
     // Controls/SimpleControls.xaml(25,16) VerticalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(25,16) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 1145.607177734375,430 C1145.607177734375,430 1141.449951171875,435.0772705078125 1141.449951171875,435.0772705078125 1141.449951171875,435.0772705078125 1139.232177734375,433.0999755859375 1139.232177734375,433.0999755859375 1139.232177734375,433.0999755859375 1138,434.5538330078125 1138,434.5538330078125 1138,434.5538330078125 1141.482177734375,438 1141.482177734375,438 1141.482177734375,438 1141.96875,437.9375 1141.96875,437.9375 1141.96875,437.9375 1147,431.34619140625 1147,431.34619140625 1147,431.34619140625 1145.607177734375,430 1145.607177734375,430 z")), 30, 21)?;
-    let priority_7 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_7);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(31,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "HighlightBrush", 31, 21)?;
     // Controls/SimpleControls.xaml(25,16) FlowDirection
-    let priority_8 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Visual::flow_direction_property(), ::ferroui_base::media::FlowDirection::LeftToRight, priority_8);
+    path_0.set_value_with_priority(__t::Visual::flow_direction_property(), ::ferroui_base::media::FlowDirection::LeftToRight, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(25,16) Stretch
-    let priority_9 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 25, 16)?;
     // Controls/SimpleControls.xaml(34,16) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
@@ -4095,22 +4048,17 @@ fn build_controls_simplecontrols_xaml_deferred_15(
     // Controls/SimpleControls.xaml(34,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "indeterminateMark", 34, 26)?;
     // Controls/SimpleControls.xaml(34,16) Width
-    let priority_10 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_4(&rectangle_0);
     // Controls/SimpleControls.xaml(34,16) Height
-    let priority_11 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_5(&rectangle_0);
     // Controls/SimpleControls.xaml(34,16) HorizontalAlignment
-    let priority_12 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_0);
     // Controls/SimpleControls.xaml(34,16) VerticalAlignment
-    let priority_13 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_2(&rectangle_0);
     // Controls/SimpleControls.xaml(39,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "HighlightBrush", 39, 26)?;
     // Controls/SimpleControls.xaml(34,16) Stretch
-    let priority_14 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_7(&rectangle_0);
     rt::pop_parent_and_end_init(&context, &rectangle_0, 34, 16)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 24, 14)?;
     rt::pop_parent_and_end_init(&context, &border_0, 16, 12)?;
@@ -4123,16 +4071,14 @@ fn build_controls_simplecontrols_xaml_deferred_15(
     // Controls/SimpleControls.xaml(43,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 43, 29)?;
     // Controls/SimpleControls.xaml(43,12) Column
-    let priority_15 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_9(&content_presenter_0);
     // Controls/SimpleControls.xaml(45,29) Margin
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R11)?;
     // Controls/SimpleControls.xaml(48,29) Content (setter chosen at run time)
-    let priority_16 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_9 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     let value_1: __t::MarkupValue = rt::to_value(provided_9);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_16, "ContentControl.Content", 48, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 48, 29)?;
     // Controls/SimpleControls.xaml(49,29) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 49, 29)?;
     // Controls/SimpleControls.xaml(50,29) IsVisible
@@ -4197,11 +4143,10 @@ fn build_controls_simplecontrols_xaml_deferred_17(
     // Controls/SimpleControls.xaml(13,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R12)?;
     // Controls/SimpleControls.xaml(17,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 17, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 17, 27)?;
     // Controls/SimpleControls.xaml(18,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R13)?;
     rt::end_init(&content_presenter_0, 12, 10)?;
@@ -4254,11 +4199,10 @@ fn build_controls_simplecontrols_xaml_deferred_19(
     // Controls/SimpleControls.xaml(10,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R14)?;
     // Controls/SimpleControls.xaml(16,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 16, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 16, 27)?;
     // Controls/SimpleControls.xaml(17,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R15)?;
     rt::end_init(&content_presenter_0, 9, 10)?;
@@ -4360,11 +4304,10 @@ fn build_controls_simplecontrols_xaml_deferred_21(
     // Controls/SimpleControls.xaml(13,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R16)?;
     // Controls/SimpleControls.xaml(19,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 19, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 19, 27)?;
     // Controls/SimpleControls.xaml(20,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R17)?;
     rt::end_init(&content_presenter_0, 12, 10)?;
@@ -4445,7 +4388,7 @@ fn build_controls_simplecontrols_xaml_deferred_22(
     // Controls/SimpleControls.xaml(113,8) Content
     rt::add_setter(style_2.upcast_ref::<__t::StyleBase>(), rt::property(__t::InputElement::is_tab_stop_property()), rt::to_object(__t::Clone::clone(&false)));
     // Controls/SimpleControls.xaml(114,8) Content
-    rt::add_setter(style_2.upcast_ref::<__t::StyleBase>(), rt::property(__t::KeyboardNavigation::tab_navigation_property()), rt::to_object(__t::KeyboardNavigationMode::Local));
+    rt::add_setter(style_2.upcast_ref::<__t::StyleBase>(), rt::property(__t::KeyboardNavigation::tab_navigation_property()), rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local));
     rt::style_program::attach(control_theme_0.upcast_ref::<__t::StyleBase>(), &style_2, 112, 6)?;
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -4492,8 +4435,7 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     // Controls/SimpleControls.xaml(24,24) Name
     rt::set_and_register_name(name_scope.as_ref(), &text_block_0, "PlaceholderTextBlock", 24, 24)?;
     // Controls/SimpleControls.xaml(24,14) Column
-    let priority_0 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_11(&text_block_0);
     // Controls/SimpleControls.xaml(26,24) Margin
     rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R19)?;
     // Controls/SimpleControls.xaml(30,24) Opacity
@@ -4547,11 +4489,10 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     // Controls/SimpleControls.xaml(39,29) Margin
     rt::bind_template_rows(content_control_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R20)?;
     // Controls/SimpleControls.xaml(42,29) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_12 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ComboBox::selection_box_item_property()));
     let provided_17 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
     let value_2: __t::MarkupValue = rt::to_value(provided_17);
-    rt::bind_or_set_null(content_control_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_2, priority_1, "ContentControl.Content", 42, 29)?;
+    rt::bind_or_set_null(content_control_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 42, 29)?;
     // Controls/SimpleControls.xaml(43,29) ContentTemplate
     rt::apply_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ComboBox::selection_box_item_template_property()), || rt::property(__t::ContentControl::content_template_property()), 43, 29)?;
     // Controls/SimpleControls.xaml(44,29) IsVisible
@@ -4576,13 +4517,11 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     // Controls/SimpleControls.xaml(46,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &text_box_0, "PART_EditableTextBox", 46, 22)?;
     // Controls/SimpleControls.xaml(46,14) Column
-    let priority_2 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_11(&text_box_0);
     // Controls/SimpleControls.xaml(48,22) Padding
     rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R21)?;
     // Controls/SimpleControls.xaml(46,14) Background
-    let priority_3 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_3);
+    text_box_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(53,22) Text
     let template_binding_19 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ComboBox::text_property()));
     // Controls/SimpleControls.xaml(53,22) Mode
@@ -4592,8 +4531,7 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     // Controls/SimpleControls.xaml(54,22) PlaceholderText
     rt::apply_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ComboBox::placeholder_text_property()), || rt::property(__t::TextBox::placeholder_text_property()), 54, 22)?;
     // Controls/SimpleControls.xaml(46,14) BorderThickness
-    let priority_4 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
+    text_box_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(56,22) IsVisible
     rt::apply_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ComboBox::is_editable_property()), || rt::property(__t::Visual::is_visible_property()), 56, 22)?;
     // Controls/SimpleControls.xaml(58,71) Resources (resource)
@@ -4618,20 +4556,15 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     // Controls/SimpleControls.xaml(63,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &toggle_button_0, "toggle", 63, 27)?;
     // Controls/SimpleControls.xaml(63,14) Column
-    let priority_5 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_9(&toggle_button_0);
     // Controls/SimpleControls.xaml(63,14) Background
-    let priority_6 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_6);
+    toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(63,14) BorderThickness
-    let priority_7 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_7);
+    toggle_button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(63,14) ClickMode
-    let priority_8 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Button::click_mode_property(), ::ferroui_controls::ClickMode::Press, priority_8);
+    toggle_button_0.set_value_with_priority(__t::Button::click_mode_property(), ::ferroui_controls::ClickMode::Press, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(63,14) Focusable
-    let priority_9 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_19(&toggle_button_0);
     // Controls/SimpleControls.xaml(69,27) IsChecked
     let template_binding_22 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ComboBox::is_drop_down_open_property()));
     // Controls/SimpleControls.xaml(69,27) Mode
@@ -4645,26 +4578,20 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     toggle_button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_0)));
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(71,16) Width
-    let priority_10 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::width_property(), 8.0_f64, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_20(&path_0);
     // Controls/SimpleControls.xaml(71,16) Height
-    let priority_11 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::height_property(), 4.0_f64, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_21(&path_0);
     // Controls/SimpleControls.xaml(71,16) HorizontalAlignment
-    let priority_12 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_0);
     // Controls/SimpleControls.xaml(71,16) VerticalAlignment
-    let priority_13 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(71,16) Data
     let value_4 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z")), 75, 21)?;
-    let priority_14 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_4)), priority_14);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_4)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(76,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundBrush", 76, 21)?;
     // Controls/SimpleControls.xaml(71,16) Stretch
-    let priority_15 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 71, 16)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_0, 63, 14)?;
     // Controls/SimpleControls.xaml(79,14) Children
@@ -4689,8 +4616,7 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     // Controls/SimpleControls.xaml(81,20) MaxHeight
     rt::apply_template_binding(popup_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ComboBox::max_drop_down_height_property()), || rt::property(__t::Layoutable::max_height_property()), 81, 20)?;
     // Controls/SimpleControls.xaml(79,14) IsLightDismissEnabled
-    let priority_16 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&true), priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_22(&popup_0);
     // Controls/SimpleControls.xaml(83,20) IsOpen
     let template_binding_24 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ComboBox::is_drop_down_open_property()));
     // Controls/SimpleControls.xaml(83,20) Mode
@@ -4702,8 +4628,7 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     let provided_33 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_25);
     rt::bind(popup_0.upcast_ref::<__t::FerroObject>(), __t::Popup::placement_target_property(), provided_33, 85, 20)?;
     // Controls/SimpleControls.xaml(79,14) InheritsTransform
-    let priority_17 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::inherits_transform_property(), __t::Clone::clone(&true), priority_17);
+    popup_0.set_value_with_priority(__t::Popup::inherits_transform_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(87,16) Child
     // Controls/SimpleControls.xaml(87,16) Border
     let border_1 = __t::Border::new();
@@ -4715,8 +4640,7 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     // Controls/SimpleControls.xaml(88,23) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ThemeBorderMidBrush", 88, 23)?;
     // Controls/SimpleControls.xaml(87,16) BorderThickness
-    let priority_18 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), priority_18);
+    border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(90,18) Child
     // Controls/SimpleControls.xaml(90,18) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -4725,8 +4649,7 @@ fn build_controls_simplecontrols_xaml_deferred_23(
     // Controls/SimpleControls.xaml(90,31) HorizontalScrollBarVisibility
     rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R22)?;
     // Controls/SimpleControls.xaml(90,18) IsScrollChainingEnabled
-    let priority_19 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::is_scroll_chaining_enabled_property(), __t::Clone::clone(&false), priority_19);
+    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::is_scroll_chaining_enabled_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(94,20) Content
     // Controls/SimpleControls.xaml(94,20) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -4817,8 +4740,7 @@ fn build_controls_simplecontrols_xaml_deferred_27(
     // Controls/SimpleControls.xaml(14,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "PART_TransparencyFallback", 14, 19)?;
     // Controls/SimpleControls.xaml(14,12) IsHitTestVisible
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_15(&border_0);
     rt::end_init(&border_0, 14, 12)?;
     // Controls/SimpleControls.xaml(16,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -4829,8 +4751,7 @@ fn build_controls_simplecontrols_xaml_deferred_27(
     // Controls/SimpleControls.xaml(16,19) Background
     rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 16, 19)?;
     // Controls/SimpleControls.xaml(16,12) IsHitTestVisible
-    let priority_1 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_15(&border_1);
     rt::end_init(&border_1, 16, 12)?;
     // Controls/SimpleControls.xaml(18,12) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
@@ -4841,8 +4762,7 @@ fn build_controls_simplecontrols_xaml_deferred_27(
     // Controls/SimpleControls.xaml(18,18) Margin
     rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(::ferroui_controls::Window::window_decoration_margin_property()), || rt::property(__t::Layoutable::margin_property()), 18, 18)?;
     // Controls/SimpleControls.xaml(18,12) Background
-    let priority_2 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
+    panel_1.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     rt::end_init(&panel_1, 18, 12)?;
     // Controls/SimpleControls.xaml(20,12) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_0);
@@ -4862,11 +4782,10 @@ fn build_controls_simplecontrols_xaml_deferred_27(
     // Controls/SimpleControls.xaml(22,31) Margin
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R23)?;
     // Controls/SimpleControls.xaml(25,31) Content (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_3, "ContentControl.Content", 25, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 25, 31)?;
     // Controls/SimpleControls.xaml(26,31) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 26, 31)?;
     rt::end_init(&content_presenter_0, 21, 14)?;
@@ -4920,14 +4839,11 @@ fn build_controls_simplecontrols_xaml_deferred_29(
     // Controls/SimpleControls.xaml(8,23) Background
     rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R24)?;
     // Controls/SimpleControls.xaml(7,10) BringIntoViewOnFocusChange
-    let priority_0 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::bring_into_view_on_focus_change_property(), __t::Clone::clone(&false), priority_0);
+    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::bring_into_view_on_focus_change_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(7,10) HorizontalScrollBarVisibility
-    let priority_1 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_1);
+    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(7,10) VerticalScrollBarVisibility
-    let priority_2 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_27(&scroll_viewer_0);
     // Controls/SimpleControls.xaml(14,12) Content
     // Controls/SimpleControls.xaml(14,12) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -5010,17 +4926,15 @@ fn build_controls_simplecontrols_xaml_deferred_31(
     // Controls/SimpleControls.xaml(21,20) ClearSelectionOnLostFocus
     rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R27)?;
     // Controls/SimpleControls.xaml(26,20) InnerLeftContent (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::AutoCompleteBox::inner_left_content_property()));
     let provided_11 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_11);
     let value_0: __t::MarkupValue = rt::to_value(provided_11);
-    rt::bind_or_set_null(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::TextBox::inner_left_content_property(), &value_0, priority_0, "TextBox.InnerLeftContent", 26, 20)?;
+    rt::bind_or_set_null(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::TextBox::inner_left_content_property(), &value_0, __t::BindingPriority::Template, "TextBox.InnerLeftContent", 26, 20)?;
     // Controls/SimpleControls.xaml(27,20) InnerRightContent (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_12 = __t::TemplateBinding::__markup_new_1(rt::property(__t::AutoCompleteBox::inner_right_content_property()));
     let provided_12 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
     let value_1: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_null(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::TextBox::inner_right_content_property(), &value_1, priority_1, "TextBox.InnerRightContent", 27, 20)?;
+    rt::bind_or_set_null(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::TextBox::inner_right_content_property(), &value_1, __t::BindingPriority::Template, "TextBox.InnerRightContent", 27, 20)?;
     rt::end_init(&text_box_0, 14, 12)?;
     // Controls/SimpleControls.xaml(30,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -5044,8 +4958,7 @@ fn build_controls_simplecontrols_xaml_deferred_31(
     // Controls/SimpleControls.xaml(32,18) MaxHeight
     rt::apply_template_binding(popup_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::AutoCompleteBox::max_drop_down_height_property()), || rt::property(__t::Layoutable::max_height_property()), 32, 18)?;
     // Controls/SimpleControls.xaml(30,12) IsLightDismissEnabled
-    let priority_2 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&true), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_22(&popup_0);
     // Controls/SimpleControls.xaml(34,18) PlacementTarget
     let template_binding_14 = __t::TemplateBinding::__markup_new_0();
     let provided_16 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_14);
@@ -5061,8 +4974,7 @@ fn build_controls_simplecontrols_xaml_deferred_31(
     // Controls/SimpleControls.xaml(36,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ThemeBorderMidBrush", 36, 21)?;
     // Controls/SimpleControls.xaml(35,14) BorderThickness
-    let priority_3 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), priority_3);
+    border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,16) Child
     // Controls/SimpleControls.xaml(38,16) ListBox
     let list_box_0 = __t::ListBox::new();
@@ -5073,19 +4985,15 @@ fn build_controls_simplecontrols_xaml_deferred_31(
     // Controls/SimpleControls.xaml(39,24) Background
     rt::apply_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::TemplatedControl::background_property()), 39, 24)?;
     // Controls/SimpleControls.xaml(38,16) BorderThickness
-    let priority_4 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
+    list_box_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(41,24) Foreground
     rt::bind_template_rows(list_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R28)?;
     // Controls/SimpleControls.xaml(38,16) IsScrollChainingEnabled
-    let priority_5 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::ScrollViewer::is_scroll_chaining_enabled_property(), __t::Clone::clone(&false), priority_5);
+    list_box_0.set_value_with_priority(__t::ScrollViewer::is_scroll_chaining_enabled_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,16) HorizontalScrollBarVisibility
-    let priority_6 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Auto, priority_6);
+    list_box_0.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Auto, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,16) VerticalScrollBarVisibility
-    let priority_7 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Auto, priority_7);
+    list_box_0.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Auto, __t::BindingPriority::Template);
     rt::end_init(&list_box_0, 38, 16)?;
     rt::pop_parent_and_end_init(&context, &border_0, 35, 14)?;
     rt::pop_parent_and_end_init(&context, &popup_0, 30, 12)?;
@@ -5139,8 +5047,7 @@ fn build_controls_simplecontrols_xaml_deferred_33(
     dock_panel_0.begin_init();
     rt::push_parent(&context, &dock_panel_0);
     // Controls/SimpleControls.xaml(8,10) LastChildFill
-    let priority_0 = __t::BindingPriority::Template;
-    dock_panel_0.set_value_with_priority(__t::DockPanel::last_child_fill_property(), __t::Clone::clone(&true), priority_0);
+    dock_panel_0.set_value_with_priority(__t::DockPanel::last_child_fill_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(9,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(9,12) ContentControl
@@ -5149,22 +5056,19 @@ fn build_controls_simplecontrols_xaml_deferred_33(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_control_0).upcast::<__t::Control>());
     rt::push_parent(&context, &content_control_0);
     // Controls/SimpleControls.xaml(10,27) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("(DataValidationErrors.Errors)"));
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::ContentControl::content_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
-    rt::bind_or_set_null(content_control_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, priority_1, "ContentControl.Content", 10, 27)?;
+    rt::bind_or_set_null(content_control_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 10, 27)?;
     // Controls/SimpleControls.xaml(11,27) ContentTemplate
     rt::apply_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DataValidationErrors::error_template_property()), || rt::property(__t::ContentControl::content_template_property()), 11, 27)?;
     // Controls/SimpleControls.xaml(12,27) DataContext (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let template_binding_1 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DataValidationErrors::owner_property()));
     let provided_2 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
     let value_1: __t::MarkupValue = rt::to_value(provided_2);
-    rt::bind_or_set_null(content_control_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::data_context_property(), &value_1, priority_2, "StyledElement.DataContext", 12, 27)?;
+    rt::bind_or_set_null(content_control_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::data_context_property(), &value_1, __t::BindingPriority::Template, "StyledElement.DataContext", 12, 27)?;
     // Controls/SimpleControls.xaml(9,12) Dock
-    let priority_3 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Right, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_31(&content_control_0);
     // Controls/SimpleControls.xaml(14,27) IsVisible
     let reflection_binding_extension_1 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("(DataValidationErrors.HasErrors)"));
     let provided_3 = rt::provide_value(&context, rt::property_value(__t::Visual::is_visible_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -5181,11 +5085,10 @@ fn build_controls_simplecontrols_xaml_deferred_33(
     // Controls/SimpleControls.xaml(16,29) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R29)?;
     // Controls/SimpleControls.xaml(20,29) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_8 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_2: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_4, "ContentControl.Content", 20, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 20, 29)?;
     // Controls/SimpleControls.xaml(21,29) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R30)?;
     rt::end_init(&content_presenter_0, 15, 12)?;
@@ -5325,17 +5228,14 @@ fn build_controls_simplecontrols_xaml_deferred_36(
     // Controls/SimpleControls.xaml(24,31) Margin
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R33)?;
     // Controls/SimpleControls.xaml(23,14) HorizontalContentAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_0);
     // Controls/SimpleControls.xaml(23,14) VerticalContentAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_33(&content_presenter_0);
     // Controls/SimpleControls.xaml(29,31) Content (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let template_binding_9 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_9 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_9);
     let value_0: __t::MarkupValue = rt::to_value(provided_9);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_2, "ContentControl.Content", 29, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 29, 31)?;
     // Controls/SimpleControls.xaml(30,31) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 30, 31)?;
     rt::end_init(&content_presenter_0, 23, 14)?;
@@ -5404,10 +5304,9 @@ fn build_controls_simplecontrols_xaml_deferred_38(
     // Controls/SimpleControls.xaml(18,25) HorizontalScrollBarVisibility
     rt::apply_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), || rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 18, 25)?;
     // Controls/SimpleControls.xaml(19,25) Theme (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let provided_5 = rt::provide_static_resource(&context, "SimpleMenuScrollViewer", || rt::property_value(__t::StyledElement::theme_property()), 19, 25)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 19, 25)?;
+    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 19, 25)?;
     // Controls/SimpleControls.xaml(20,25) VerticalScrollBarVisibility
     rt::apply_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), || rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 20, 25)?;
     // Controls/SimpleControls.xaml(21,14) Content
@@ -5420,13 +5319,11 @@ fn build_controls_simplecontrols_xaml_deferred_38(
     // Controls/SimpleControls.xaml(22,29) Margin
     rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 22, 29)?;
     // Controls/SimpleControls.xaml(21,14) IsSharedSizeScope
-    let priority_1 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_34(&items_presenter_0);
     // Controls/SimpleControls.xaml(24,29) ItemsPanel
     rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 24, 29)?;
     // Controls/SimpleControls.xaml(21,14) TabNavigation
-    let priority_2 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_35(&items_presenter_0);
     rt::end_init(&items_presenter_0, 21, 14)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_0, 18, 12)?;
     rt::pop_parent_and_end_init(&context, &border_0, 13, 10)?;
@@ -5596,11 +5493,10 @@ fn build_controls_simplecontrols_xaml_deferred_43(
     // Controls/SimpleControls.xaml(28,27) Background
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R36)?;
     // Controls/SimpleControls.xaml(33,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 33, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 33, 27)?;
     // Controls/SimpleControls.xaml(34,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R37)?;
     rt::end_init(&content_presenter_0, 27, 10)?;
@@ -5740,11 +5636,10 @@ fn build_controls_simplecontrols_xaml_deferred_47(
     // Controls/SimpleControls.xaml(13,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R39)?;
     // Controls/SimpleControls.xaml(19,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 19, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 19, 27)?;
     // Controls/SimpleControls.xaml(20,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R40)?;
     rt::end_init(&content_presenter_0, 12, 10)?;
@@ -5954,11 +5849,10 @@ fn build_controls_simplecontrols_xaml_deferred_54(
     // Controls/SimpleControls.xaml(13,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R44)?;
     // Controls/SimpleControls.xaml(19,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 19, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 19, 27)?;
     // Controls/SimpleControls.xaml(20,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R45)?;
     rt::end_init(&content_presenter_0, 12, 10)?;
@@ -6128,8 +6022,7 @@ fn build_controls_simplecontrols_xaml_deferred_56(
     panel_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&panel_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(19,14) ClipToBounds
-    let priority_0 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_10(&panel_0);
     // Controls/SimpleControls.xaml(20,16) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(20,16) ContentPresenter
@@ -6141,8 +6034,7 @@ fn build_controls_simplecontrols_xaml_deferred_56(
     // Controls/SimpleControls.xaml(21,33) Margin
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R47)?;
     // Controls/SimpleControls.xaml(20,16) IsVisible
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_36(&content_presenter_0);
     rt::end_init(&content_presenter_0, 20, 16)?;
     // Controls/SimpleControls.xaml(25,16) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_0);
@@ -6289,11 +6181,10 @@ fn build_controls_simplecontrols_xaml_deferred_58(
     // Controls/SimpleControls.xaml(14,27) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R49)?;
     // Controls/SimpleControls.xaml(20,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 20, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 20, 27)?;
     // Controls/SimpleControls.xaml(21,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R50)?;
     rt::end_init(&content_presenter_0, 13, 10)?;
@@ -6430,14 +6321,11 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     // Controls/SimpleControls.xaml(19,21) Orientation
     rt::apply_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::PipsPager::orientation_property()), || rt::property(__t::StackPanel::orientation_property()), 19, 21)?;
     // Controls/SimpleControls.xaml(18,10) HorizontalAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_6(&stack_panel_0);
     // Controls/SimpleControls.xaml(18,10) VerticalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_2(&stack_panel_0);
     // Controls/SimpleControls.xaml(18,10) ClipToBounds
-    let priority_2 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&false), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_37(&stack_panel_0);
     // Controls/SimpleControls.xaml(24,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(24,14) Button
@@ -6449,46 +6337,35 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     // Controls/SimpleControls.xaml(25,21) Theme
     rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::PipsPager::previous_button_theme_property()), || rt::property(__t::StyledElement::theme_property()), 25, 21)?;
     // Controls/SimpleControls.xaml(24,14) Width
-    let priority_3 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::width_property(), 24.0_f64, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_38(&button_0);
     // Controls/SimpleControls.xaml(24,14) Height
-    let priority_4 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::height_property(), 24.0_f64, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_39(&button_0);
     // Controls/SimpleControls.xaml(24,14) Padding
-    let priority_5 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_5);
+    button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(24,14) HorizontalContentAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_40(&button_0);
     // Controls/SimpleControls.xaml(24,14) VerticalContentAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Center, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_41(&button_0);
     // Controls/SimpleControls.xaml(31,21) IsVisible
     rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::PipsPager::is_previous_button_visible_property()), || rt::property(__t::Visual::is_visible_property()), 31, 21)?;
     // Controls/SimpleControls.xaml(24,14) VerticalAlignment
-    let priority_8 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_2(&button_0);
     // Controls/SimpleControls.xaml(24,14) HorizontalAlignment
-    let priority_9 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_6(&button_0);
     // Controls/SimpleControls.xaml(24,14) Margin
-    let priority_10 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_10);
+    button_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(35,18) Content
     // Controls/SimpleControls.xaml(35,18) PathIcon
     let path_icon_0 = __t::PathIcon::new();
     path_icon_0.begin_init();
     button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_icon_0)));
     // Controls/SimpleControls.xaml(35,18) Width
-    let priority_11 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_12(&path_icon_0);
     // Controls/SimpleControls.xaml(35,18) Height
-    let priority_12 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_13(&path_icon_0);
     // Controls/SimpleControls.xaml(35,18) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 8.12,2.29 L 3.41,7.00 C 3.14,7.27 3.14,7.71 3.41,7.98 L 8.12,12.69 C 8.57,13.14 9.33,12.82 9.33,12.19 L 9.33,2.79 C 9.33,2.16 8.57,1.84 8.12,2.29 Z")), 35, 50)?;
-    let priority_13 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_13);
+    path_icon_0.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     rt::end_init(&path_icon_0, 35, 18)?;
     rt::end_init(&button_0, 24, 14)?;
     // Controls/SimpleControls.xaml(38,14) Children
@@ -6501,26 +6378,19 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     // Controls/SimpleControls.xaml(38,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &list_box_0, "PART_PipsPagerList", 38, 22)?;
     // Controls/SimpleControls.xaml(38,14) Background
-    let priority_14 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_14);
+    list_box_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,14) BorderThickness
-    let priority_15 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_15);
+    list_box_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,14) Padding
-    let priority_16 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_16);
+    list_box_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,14) HorizontalAlignment
-    let priority_17 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_6(&list_box_0);
     // Controls/SimpleControls.xaml(38,14) VerticalAlignment
-    let priority_18 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_2(&list_box_0);
     // Controls/SimpleControls.xaml(38,14) HorizontalScrollBarVisibility
-    let priority_19 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_19);
+    list_box_0.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,14) VerticalScrollBarVisibility
-    let priority_20 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_20);
+    __build_controls_simplecontrols_xaml_template_setter_27(&list_box_0);
     // Controls/SimpleControls.xaml(46,22) ItemsSource
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("TemplateSettings.Pips"));
     rt::push_parent(&context, &reflection_binding_extension_0);
@@ -6544,11 +6414,9 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let provided_6 = rt::provide_value(&context, rt::property_value(__t::SelectingItemsControl::selected_index_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(list_box_0.upcast_ref::<__t::FerroObject>(), __t::SelectingItemsControl::selected_index_property(), provided_6, 47, 22)?;
     // Controls/SimpleControls.xaml(38,14) AutoScrollToSelectedItem
-    let priority_21 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::SelectingItemsControl::auto_scroll_to_selected_item_property(), __t::Clone::clone(&false), priority_21);
+    list_box_0.set_value_with_priority(__t::SelectingItemsControl::auto_scroll_to_selected_item_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,14) ClipToBounds
-    let priority_22 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&false), priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_37(&list_box_0);
     // Controls/SimpleControls.xaml(51,22) ItemsPanel
     let items_panel_template_0 = __t::ItemsPanelTemplate::__markup_new_0();
     rt::push_parent(&context, &items_panel_template_0);
@@ -6556,8 +6424,7 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_61, 52, 26)?;
     __t::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
-    let priority_23 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::ItemsControl::items_panel_property(), __t::Clone::clone(&items_panel_template_0) as __t::Rc<dyn __t::ITemplateOf<::std::option::Option<__t::Ref<__t::Panel>>>>, priority_23);
+    list_box_0.set_value_with_priority(__t::ItemsControl::items_panel_property(), __t::Clone::clone(&items_panel_template_0) as __t::Rc<dyn __t::ITemplateOf<::std::option::Option<__t::Ref<__t::Panel>>>>, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(59,22) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(list_box_0.upcast_ref::<__t::StyledElement>());
     // Controls/SimpleControls.xaml(59,22) Style
@@ -6680,46 +6547,35 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     // Controls/SimpleControls.xaml(106,21) Theme
     rt::apply_template_binding(button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::PipsPager::next_button_theme_property()), || rt::property(__t::StyledElement::theme_property()), 106, 21)?;
     // Controls/SimpleControls.xaml(105,14) Width
-    let priority_24 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::width_property(), 24.0_f64, priority_24);
+    __build_controls_simplecontrols_xaml_template_setter_38(&button_1);
     // Controls/SimpleControls.xaml(105,14) Height
-    let priority_25 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::height_property(), 24.0_f64, priority_25);
+    __build_controls_simplecontrols_xaml_template_setter_39(&button_1);
     // Controls/SimpleControls.xaml(105,14) Padding
-    let priority_26 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_26);
+    button_1.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(105,14) HorizontalContentAlignment
-    let priority_27 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, priority_27);
+    __build_controls_simplecontrols_xaml_template_setter_40(&button_1);
     // Controls/SimpleControls.xaml(105,14) VerticalContentAlignment
-    let priority_28 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Center, priority_28);
+    __build_controls_simplecontrols_xaml_template_setter_41(&button_1);
     // Controls/SimpleControls.xaml(112,21) IsVisible
     rt::apply_template_binding(button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::PipsPager::is_next_button_visible_property()), || rt::property(__t::Visual::is_visible_property()), 112, 21)?;
     // Controls/SimpleControls.xaml(105,14) VerticalAlignment
-    let priority_29 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_29);
+    __build_controls_simplecontrols_xaml_template_setter_2(&button_1);
     // Controls/SimpleControls.xaml(105,14) HorizontalAlignment
-    let priority_30 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_30);
+    __build_controls_simplecontrols_xaml_template_setter_6(&button_1);
     // Controls/SimpleControls.xaml(105,14) Margin
-    let priority_31 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_31);
+    button_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(116,18) Content
     // Controls/SimpleControls.xaml(116,18) PathIcon
     let path_icon_1 = __t::PathIcon::new();
     path_icon_1.begin_init();
     button_1.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_icon_1)));
     // Controls/SimpleControls.xaml(116,18) Width
-    let priority_32 = __t::BindingPriority::Template;
-    path_icon_1.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_32);
+    __build_controls_simplecontrols_xaml_template_setter_12(&path_icon_1);
     // Controls/SimpleControls.xaml(116,18) Height
-    let priority_33 = __t::BindingPriority::Template;
-    path_icon_1.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, priority_33);
+    __build_controls_simplecontrols_xaml_template_setter_13(&path_icon_1);
     // Controls/SimpleControls.xaml(116,18) Data
     let value_1 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 3.88,2.29 L 8.59,7.00 C 8.86,7.27 8.86,7.71 8.59,7.98 L 3.88,12.69 C 3.43,13.14 2.67,12.82 2.67,12.19 L 2.67,2.79 C 2.67,2.16 3.43,1.84 3.88,2.29 Z")), 116, 50)?;
-    let priority_34 = __t::BindingPriority::Template;
-    path_icon_1.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), priority_34);
+    path_icon_1.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), __t::BindingPriority::Template);
     rt::end_init(&path_icon_1, 116, 18)?;
     rt::end_init(&button_1, 105, 14)?;
     rt::pop_parent_and_end_init(&context, &stack_panel_0, 18, 10)?;
@@ -6751,14 +6607,11 @@ fn build_controls_simplecontrols_xaml_deferred_61(
     let provided_1 = rt::provide_value(&context, rt::property_value(__t::StackPanel::orientation_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::StackPanel::orientation_property(), provided_1, 52, 37)?;
     // Controls/SimpleControls.xaml(52,26) HorizontalAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_6(&stack_panel_0);
     // Controls/SimpleControls.xaml(52,26) VerticalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_2(&stack_panel_0);
     // Controls/SimpleControls.xaml(52,26) Spacing
-    let priority_2 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 4.0_f64, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_43(&stack_panel_0);
     rt::pop_parent_and_end_init(&context, &stack_panel_0, 52, 26)?;
     __t::Result::Ok(rt::to_value(stack_panel_0.clone()))
 }
@@ -6775,8 +6628,7 @@ fn build_controls_simplecontrols_xaml_deferred_62(
     panel_0.begin_init();
     rt::push_parent(&context, &panel_0);
     // Controls/SimpleControls.xaml(73,34) Background
-    let priority_0 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    panel_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(74,38) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(74,38) Ellipse
@@ -6787,11 +6639,9 @@ fn build_controls_simplecontrols_xaml_deferred_62(
     // Controls/SimpleControls.xaml(74,46) Name
     rt::set_and_register_name(name_scope.as_ref(), &ellipse_0, "Pip", 74, 46)?;
     // Controls/SimpleControls.xaml(74,38) Width
-    let priority_1 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_12(&ellipse_0);
     // Controls/SimpleControls.xaml(74,38) Height
-    let priority_2 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_13(&ellipse_0);
     // Controls/SimpleControls.xaml(74,80) Fill
     rt::bind_dynamic_resource(&context, ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlLowBrush", 74, 80)?;
     // Controls/SimpleControls.xaml(76,46) Transitions
@@ -6805,8 +6655,7 @@ fn build_controls_simplecontrols_xaml_deferred_62(
     let value_0 = __t::TimeSpan::__markup_FromTicks_0(1000000_i64);
     brush_transition_0.set_direct_value(__t::TransitionBase::duration_property(), __t::Clone::clone(&value_0));
     __t::Transitions::__markup_Add_0(&transitions_0, rt::cast(brush_transition_0.clone(), 77, 50)?);
-    let priority_3 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Animatable::transitions_property(), rt::cast(__t::Clone::clone(&transitions_0), 77, 50)?, priority_3);
+    ellipse_0.set_value_with_priority(__t::Animatable::transitions_property(), rt::cast(__t::Clone::clone(&transitions_0), 77, 50)?, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &ellipse_0, 74, 38)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 73, 34)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -6888,8 +6737,7 @@ fn build_controls_simplecontrols_xaml_deferred_64(
     // Controls/SimpleControls.xaml(18,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "PART_TransparencyFallback", 18, 21)?;
     // Controls/SimpleControls.xaml(18,14) IsHitTestVisible
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_15(&border_0);
     rt::end_init(&border_0, 18, 14)?;
     // Controls/SimpleControls.xaml(20,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -6909,11 +6757,10 @@ fn build_controls_simplecontrols_xaml_deferred_64(
     // Controls/SimpleControls.xaml(22,33) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R51)?;
     // Controls/SimpleControls.xaml(24,33) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
     let value_0: __t::MarkupValue = rt::to_value(provided_3);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_1, "ContentControl.Content", 24, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 24, 33)?;
     // Controls/SimpleControls.xaml(25,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 25, 33)?;
     rt::end_init(&content_presenter_0, 21, 16)?;
@@ -6995,11 +6842,10 @@ fn build_controls_simplecontrols_xaml_deferred_66(
     // Controls/SimpleControls.xaml(18,31) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R52)?;
     // Controls/SimpleControls.xaml(20,31) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
     let value_0: __t::MarkupValue = rt::to_value(provided_3);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 20, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 20, 31)?;
     // Controls/SimpleControls.xaml(21,31) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 21, 31)?;
     rt::end_init(&content_presenter_0, 17, 14)?;
@@ -7156,11 +7002,9 @@ fn build_controls_simplecontrols_xaml_deferred_69(
     stack_panel_0.begin_init();
     rt::push_parent(&context, &stack_panel_0);
     // Controls/SimpleControls.xaml(12,16) Margin
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64), priority_0);
+    stack_panel_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(12,16) Spacing
-    let priority_1 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 8.0_f64, priority_1);
+    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 8.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(14,18) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(14,18) TextBlock
@@ -7170,8 +7014,7 @@ fn build_controls_simplecontrols_xaml_deferred_69(
     rt::push_parent(&context, &text_block_0);
     // Controls/SimpleControls.xaml(14,18) FontWeight
     let value_0 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Medium")), 14, 28)?;
-    let priority_2 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::TextBlock::font_weight_property(), __t::Clone::clone(&value_0), priority_2);
+    text_block_0.set_value_with_priority(__t::TextBlock::font_weight_property(), __t::Clone::clone(&value_0), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(15,28) Text
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("Title"));
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::TextBlock::text_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -7185,18 +7028,15 @@ fn build_controls_simplecontrols_xaml_deferred_69(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&text_block_1).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_1);
     // Controls/SimpleControls.xaml(16,18) MaxHeight
-    let priority_3 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::Layoutable::max_height_property(), 80.0_f64, priority_3);
+    text_block_1.set_value_with_priority(__t::Layoutable::max_height_property(), 80.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(16,18) Margin
-    let priority_4 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 12.0_f64, 0.0_f64), priority_4);
+    text_block_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 12.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(18,28) Text
     let reflection_binding_extension_1 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("Message"));
     let provided_1 = rt::provide_value(&context, rt::property_value(__t::TextBlock::text_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), provided_1, 18, 28)?;
     // Controls/SimpleControls.xaml(16,18) TextWrapping
-    let priority_5 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::Wrap, priority_5);
+    text_block_1.set_value_with_priority(__t::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::Wrap, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &text_block_1, 16, 18)?;
     rt::pop_parent_and_end_init(&context, &stack_panel_0, 12, 16)?;
     __t::Result::Ok(rt::to_value(stack_panel_0.clone()))
@@ -7213,8 +7053,7 @@ fn build_controls_simplecontrols_xaml_deferred_70(
     text_block_0.begin_init();
     rt::push_parent(&context, &text_block_0);
     // Controls/SimpleControls.xaml(23,16) Margin
-    let priority_0 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64), priority_0);
+    text_block_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(24,26) Text
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_0();
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::TextBlock::text_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -7276,8 +7115,7 @@ fn build_controls_simplecontrols_xaml_deferred_72(
     // Controls/SimpleControls.xaml(13,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "PART_TransparencyFallback", 13, 19)?;
     // Controls/SimpleControls.xaml(13,12) IsHitTestVisible
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_15(&border_0);
     rt::end_init(&border_0, 13, 12)?;
     // Controls/SimpleControls.xaml(15,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -7304,11 +7142,10 @@ fn build_controls_simplecontrols_xaml_deferred_72(
     // Controls/SimpleControls.xaml(18,33) Margin
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 18, 33)?;
     // Controls/SimpleControls.xaml(19,33) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_2 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
     let value_0: __t::MarkupValue = rt::to_value(provided_2);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_1, "ContentControl.Content", 19, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 19, 33)?;
     // Controls/SimpleControls.xaml(20,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 20, 33)?;
     rt::end_init(&content_presenter_0, 17, 16)?;
@@ -7548,10 +7385,9 @@ fn build_controls_simplecontrols_xaml_deferred_80(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &scroll_viewer_0);
     // Controls/SimpleControls.xaml(20,25) Theme (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let provided_5 = rt::provide_static_resource(&context, "SimpleMenuScrollViewer", || rt::property_value(__t::StyledElement::theme_property()), 20, 25)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 20, 25)?;
+    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 20, 25)?;
     // Controls/SimpleControls.xaml(21,14) Content
     // Controls/SimpleControls.xaml(21,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -7562,8 +7398,7 @@ fn build_controls_simplecontrols_xaml_deferred_80(
     // Controls/SimpleControls.xaml(22,29) ItemsPanel
     rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 22, 29)?;
     // Controls/SimpleControls.xaml(21,14) TabNavigation
-    let priority_1 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_35(&items_presenter_0);
     rt::end_init(&items_presenter_0, 21, 14)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_0, 20, 12)?;
     rt::pop_parent_and_end_init(&context, &border_0, 15, 10)?;
@@ -7681,11 +7516,9 @@ fn build_controls_simplecontrols_xaml_deferred_82(
     // Controls/SimpleControls.xaml(26,22) Fill
     rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 26, 22)?;
     // Controls/SimpleControls.xaml(25,12) IsVisible
-    let priority_0 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_0);
     // Controls/SimpleControls.xaml(25,12) Opacity
-    let priority_1 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Visual::opacity_property(), 0.75_f64, priority_1);
+    rectangle_0.set_value_with_priority(__t::Visual::opacity_property(), 0.75_f64, __t::BindingPriority::Template);
     rt::end_init(&rectangle_0, 25, 12)?;
     // Controls/SimpleControls.xaml(30,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -7698,11 +7531,9 @@ fn build_controls_simplecontrols_xaml_deferred_82(
     // Controls/SimpleControls.xaml(31,22) Fill
     rt::apply_template_binding(rectangle_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 31, 22)?;
     // Controls/SimpleControls.xaml(30,12) IsVisible
-    let priority_2 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_1);
     // Controls/SimpleControls.xaml(30,12) Opacity
-    let priority_3 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::opacity_property(), 0.5_f64, priority_3);
+    rectangle_1.set_value_with_priority(__t::Visual::opacity_property(), 0.5_f64, __t::BindingPriority::Template);
     rt::end_init(&rectangle_1, 30, 12)?;
     // Controls/SimpleControls.xaml(36,12) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -7713,16 +7544,14 @@ fn build_controls_simplecontrols_xaml_deferred_82(
     // Controls/SimpleControls.xaml(36,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 36, 29)?;
     // Controls/SimpleControls.xaml(36,12) Margin
-    let priority_4 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(1.0_f64, 0.0_f64, 1.0_f64, 1.0_f64), priority_4);
+    content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(1.0_f64, 0.0_f64, 1.0_f64, 1.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,29) HorizontalAlignment
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R60)?;
     // Controls/SimpleControls.xaml(40,29) Content (setter chosen at run time)
-    let priority_5 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_5, "ContentControl.Content", 40, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 40, 29)?;
     // Controls/SimpleControls.xaml(41,29) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R61)?;
     rt::end_init(&content_presenter_0, 36, 12)?;
@@ -7736,16 +7565,13 @@ fn build_controls_simplecontrols_xaml_deferred_82(
     // Controls/SimpleControls.xaml(45,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_2, "FocusVisual", 45, 22)?;
     // Controls/SimpleControls.xaml(45,12) IsHitTestVisible
-    let priority_6 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_15(&rectangle_2);
     // Controls/SimpleControls.xaml(45,12) IsVisible
-    let priority_7 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_2);
     // Controls/SimpleControls.xaml(48,22) Stroke
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), "HighlightBrush", 48, 22)?;
     // Controls/SimpleControls.xaml(45,12) StrokeThickness
-    let priority_8 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Shape::stroke_thickness_property(), 1.0_f64, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_3(&rectangle_2);
     rt::pop_parent_and_end_init(&context, &rectangle_2, 45, 12)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 23, 10)?;
     __t::Result::Ok(rt::to_value(grid_0.clone()))
@@ -7898,8 +7724,7 @@ fn build_controls_simplecontrols_xaml_deferred_84(
     panel_0.begin_init();
     rt::push_parent(&context, &panel_0);
     // Controls/SimpleControls.xaml(23,10) Background
-    let priority_0 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    panel_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(25,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(25,12) Rectangle
@@ -7912,8 +7737,7 @@ fn build_controls_simplecontrols_xaml_deferred_84(
     // Controls/SimpleControls.xaml(26,22) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "HighlightBrush", 26, 22)?;
     // Controls/SimpleControls.xaml(25,12) IsVisible
-    let priority_1 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_0);
     rt::pop_parent_and_end_init(&context, &rectangle_0, 25, 12)?;
     // Controls/SimpleControls.xaml(29,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -7926,11 +7750,9 @@ fn build_controls_simplecontrols_xaml_deferred_84(
     // Controls/SimpleControls.xaml(30,22) Fill
     rt::apply_template_binding(rectangle_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 30, 22)?;
     // Controls/SimpleControls.xaml(29,12) IsVisible
-    let priority_2 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_1);
     // Controls/SimpleControls.xaml(29,12) Opacity
-    let priority_3 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::opacity_property(), 0.75_f64, priority_3);
+    rectangle_1.set_value_with_priority(__t::Visual::opacity_property(), 0.75_f64, __t::BindingPriority::Template);
     rt::end_init(&rectangle_1, 29, 12)?;
     // Controls/SimpleControls.xaml(34,12) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
@@ -7943,11 +7765,9 @@ fn build_controls_simplecontrols_xaml_deferred_84(
     // Controls/SimpleControls.xaml(35,22) Fill
     rt::apply_template_binding(rectangle_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 35, 22)?;
     // Controls/SimpleControls.xaml(34,12) IsVisible
-    let priority_4 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_2);
     // Controls/SimpleControls.xaml(34,12) Opacity
-    let priority_5 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Visual::opacity_property(), 0.5_f64, priority_5);
+    rectangle_2.set_value_with_priority(__t::Visual::opacity_property(), 0.5_f64, __t::BindingPriority::Template);
     rt::end_init(&rectangle_2, 34, 12)?;
     // Controls/SimpleControls.xaml(39,12) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_0);
@@ -7958,21 +7778,18 @@ fn build_controls_simplecontrols_xaml_deferred_84(
     // Controls/SimpleControls.xaml(39,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 39, 29)?;
     // Controls/SimpleControls.xaml(39,12) Margin
-    let priority_6 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(5.0_f64, 1.0_f64, 5.0_f64, 1.0_f64), priority_6);
+    content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(5.0_f64, 1.0_f64, 5.0_f64, 1.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(41,29) HorizontalAlignment
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R62)?;
     // Controls/SimpleControls.xaml(43,29) Content (setter chosen at run time)
-    let priority_7 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_7, "ContentControl.Content", 43, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 43, 29)?;
     // Controls/SimpleControls.xaml(44,29) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R63)?;
     // Controls/SimpleControls.xaml(39,12) Opacity
-    let priority_8 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Visual::opacity_property(), 1.0_f64, priority_8);
+    content_presenter_0.set_value_with_priority(__t::Visual::opacity_property(), 1.0_f64, __t::BindingPriority::Template);
     rt::end_init(&content_presenter_0, 39, 12)?;
     // Controls/SimpleControls.xaml(49,12) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(&panel_0);
@@ -7984,29 +7801,22 @@ fn build_controls_simplecontrols_xaml_deferred_84(
     // Controls/SimpleControls.xaml(49,17) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_0, "BlackoutVisual", 49, 17)?;
     // Controls/SimpleControls.xaml(49,12) Margin
-    let priority_9 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64), priority_9);
+    path_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(49,12) HorizontalAlignment
-    let priority_10 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_50(&path_0);
     // Controls/SimpleControls.xaml(49,12) VerticalAlignment
-    let priority_11 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_51(&path_0);
     // Controls/SimpleControls.xaml(49,12) Data
     let value_1 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M8.1772461,11.029181 L10.433105,11.029181 L11.700684,12.801641 L12.973633,11.029181 L15.191895,11.029181 L12.844727,13.999395 L15.21875,17.060919 L12.962891,17.060919 L11.673828,15.256231 L10.352539,17.060919 L8.1396484,17.060919 L10.519043,14.042364 z")), 53, 17)?;
-    let priority_12 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), priority_12);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(54,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundBrush", 54, 17)?;
     // Controls/SimpleControls.xaml(49,12) IsVisible
-    let priority_13 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_36(&path_0);
     // Controls/SimpleControls.xaml(49,12) RenderTransformOrigin
-    let priority_14 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Visual::render_transform_origin_property(), __t::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, __t::RelativeUnit::Absolute), priority_14);
+    path_0.set_value_with_priority(__t::Visual::render_transform_origin_property(), __t::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, __t::RelativeUnit::Absolute), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(49,12) Stretch
-    let priority_15 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Fill, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_52(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 49, 12)?;
     // Controls/SimpleControls.xaml(59,12) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(&panel_0);
@@ -8018,16 +7828,13 @@ fn build_controls_simplecontrols_xaml_deferred_84(
     // Controls/SimpleControls.xaml(59,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_3, "FocusVisual", 59, 22)?;
     // Controls/SimpleControls.xaml(59,12) IsHitTestVisible
-    let priority_16 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_15(&rectangle_3);
     // Controls/SimpleControls.xaml(59,12) IsVisible
-    let priority_17 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_3);
     // Controls/SimpleControls.xaml(62,22) Stroke
     rt::bind_dynamic_resource(&context, rectangle_3.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), "HighlightBrush", 62, 22)?;
     // Controls/SimpleControls.xaml(59,12) StrokeThickness
-    let priority_18 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Shape::stroke_thickness_property(), 1.0_f64, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_3(&rectangle_3);
     rt::pop_parent_and_end_init(&context, &rectangle_3, 59, 12)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 23, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -8126,8 +7933,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&border_0).upcast::<__t::Control>());
     rt::push_parent(&context, &border_0);
     // Controls/SimpleControls.xaml(20,12) Margin
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64), priority_0);
+    border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(21,19) Background
     rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R64)?;
     // Controls/SimpleControls.xaml(26,14) Child
@@ -8139,11 +7945,9 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(26,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ThemeBackgroundBrush", 26, 21)?;
     // Controls/SimpleControls.xaml(26,14) BorderThickness
-    let priority_1 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_1);
+    border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(26,14) CornerRadius
-    let priority_2 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), priority_2);
+    border_1.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(29,16) Child
     // Controls/SimpleControls.xaml(29,16) Grid
     let grid_0 = __t::Grid::new();
@@ -8151,39 +7955,34 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     border_1.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&grid_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &grid_0);
     // Controls/SimpleControls.xaml(29,16) IsSharedSizeScope
-    let priority_3 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_34(&grid_0);
     // Controls/SimpleControls.xaml(31,20) RowDefinitions
     let row_definitions_collection_0 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(31,20) RowDefinition
     let row_definition_0 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(31,20) Height
-    let priority_4 = __t::BindingPriority::Template;
-    row_definition_0.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_4);
+    row_definition_0.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_0, __t::Clone::clone(&row_definition_0));
     // Controls/SimpleControls.xaml(32,20) RowDefinitions
     let row_definitions_collection_1 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(32,20) RowDefinition
     let row_definition_1 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(32,20) Height
-    let priority_5 = __t::BindingPriority::Template;
-    row_definition_1.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_5);
+    row_definition_1.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_1, __t::Clone::clone(&row_definition_1));
     // Controls/SimpleControls.xaml(35,20) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(35,20) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(35,20) Width
-    let priority_6 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_6);
+    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(36,20) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(36,20) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(36,20) Width
-    let priority_7 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_7);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(40,20) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(grid_0.upcast_ref::<__t::StyledElement>());
@@ -8267,8 +8066,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     grid_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&grid_1).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(65,18) ColumnSpan
-    let priority_8 = __t::BindingPriority::Template;
-    grid_1.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_53(&grid_1);
     // Controls/SimpleControls.xaml(66,20) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(66,20) Rectangle
@@ -8276,19 +8074,15 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     rectangle_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&rectangle_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(66,20) ColumnSpan
-    let priority_9 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_span_property(), 3_i32, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_54(&rectangle_0);
     // Controls/SimpleControls.xaml(66,20) Height
-    let priority_10 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::height_property(), 22.0_f64, priority_10);
+    rectangle_0.set_value_with_priority(__t::Layoutable::height_property(), 22.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(66,20) VerticalAlignment
-    let priority_11 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_56(&rectangle_0);
     // Controls/SimpleControls.xaml(69,30) Fill
     rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::CalendarItem::header_background_property()), || rt::property(__t::Shape::fill_property()), 69, 30)?;
     // Controls/SimpleControls.xaml(66,20) Stretch
-    let priority_12 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Fill, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_52(&rectangle_0);
     rt::end_init(&rectangle_0, 66, 20)?;
     // Controls/SimpleControls.xaml(72,20) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -8299,8 +8093,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(72,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_0, "PART_PreviousButton", 72, 27)?;
     // Controls/SimpleControls.xaml(72,20) HorizontalAlignment
-    let priority_13 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_57(&button_0);
     // Controls/SimpleControls.xaml(72,20) Classes
     let classes_collection_0 = __t::StyledElement::__markup_get_Classes(button_0.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_0, __t::String::from("CalendarHeader"));
@@ -8308,35 +8101,27 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     let classes_collection_1 = __t::StyledElement::__markup_get_Classes(button_0.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_1, __t::String::from("CalendarNavigation"));
     // Controls/SimpleControls.xaml(72,20) IsVisible
-    let priority_14 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_36(&button_0);
     // Controls/SimpleControls.xaml(77,22) Content
     // Controls/SimpleControls.xaml(77,22) Path
     let path_0 = __t::Path::new();
     path_0.begin_init();
     button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_0)));
     // Controls/SimpleControls.xaml(77,22) Width
-    let priority_15 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::width_property(), 6.0_f64, priority_15);
+    path_0.set_value_with_priority(__t::Layoutable::width_property(), 6.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(77,22) Height
-    let priority_16 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_5(&path_0);
     // Controls/SimpleControls.xaml(77,22) Margin
-    let priority_17 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(14.0_f64, -6.0_f64, 0.0_f64, 0.0_f64), priority_17);
+    path_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(14.0_f64, -6.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(77,22) HorizontalAlignment
-    let priority_18 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_57(&path_0);
     // Controls/SimpleControls.xaml(77,22) VerticalAlignment
-    let priority_19 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(77,22) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M288.75,232.25 L288.75,240.625 L283,236.625 z")), 82, 27)?;
-    let priority_20 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_20);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(77,22) Stretch
-    let priority_21 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Fill, priority_21);
+    __build_controls_simplecontrols_xaml_template_setter_52(&path_0);
     rt::end_init(&path_0, 77, 22)?;
     rt::end_init(&button_0, 72, 20)?;
     // Controls/SimpleControls.xaml(87,20) Children
@@ -8348,27 +8133,21 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(87,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_1, "PART_HeaderButton", 87, 27)?;
     // Controls/SimpleControls.xaml(87,20) Column
-    let priority_22 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_9(&button_1);
     // Controls/SimpleControls.xaml(87,20) Padding
-    let priority_23 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(1.0_f64, 5.0_f64, 1.0_f64, 9.0_f64), priority_23);
+    button_1.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(1.0_f64, 5.0_f64, 1.0_f64, 9.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(87,20) HorizontalAlignment
-    let priority_24 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_24);
+    __build_controls_simplecontrols_xaml_template_setter_6(&button_1);
     // Controls/SimpleControls.xaml(87,20) VerticalAlignment
-    let priority_25 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_25);
+    __build_controls_simplecontrols_xaml_template_setter_2(&button_1);
     // Controls/SimpleControls.xaml(87,20) Classes
     let classes_collection_2 = __t::StyledElement::__markup_get_Classes(button_1.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_2, __t::String::from("CalendarHeader"));
     // Controls/SimpleControls.xaml(87,20) FontSize
-    let priority_26 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::TemplatedControl::font_size_property(), 10.5_f64, priority_26);
+    button_1.set_value_with_priority(__t::TemplatedControl::font_size_property(), 10.5_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(87,20) FontWeight
     let value_1 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Bold")), 94, 27)?;
-    let priority_27 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::TemplatedControl::font_weight_property(), __t::Clone::clone(&value_1), priority_27);
+    button_1.set_value_with_priority(__t::TemplatedControl::font_weight_property(), __t::Clone::clone(&value_1), __t::BindingPriority::Template);
     rt::end_init(&button_1, 87, 20)?;
     // Controls/SimpleControls.xaml(96,20) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -8379,11 +8158,9 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(96,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_2, "PART_NextButton", 96, 27)?;
     // Controls/SimpleControls.xaml(96,20) Column
-    let priority_28 = __t::BindingPriority::Template;
-    button_2.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_28);
+    __build_controls_simplecontrols_xaml_template_setter_60(&button_2);
     // Controls/SimpleControls.xaml(96,20) HorizontalAlignment
-    let priority_29 = __t::BindingPriority::Template;
-    button_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_29);
+    __build_controls_simplecontrols_xaml_template_setter_14(&button_2);
     // Controls/SimpleControls.xaml(96,20) Classes
     let classes_collection_3 = __t::StyledElement::__markup_get_Classes(button_2.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_3, __t::String::from("CalendarHeader"));
@@ -8391,35 +8168,27 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     let classes_collection_4 = __t::StyledElement::__markup_get_Classes(button_2.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_4, __t::String::from("CalendarNavigation"));
     // Controls/SimpleControls.xaml(96,20) IsVisible
-    let priority_30 = __t::BindingPriority::Template;
-    button_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_30);
+    __build_controls_simplecontrols_xaml_template_setter_36(&button_2);
     // Controls/SimpleControls.xaml(102,22) Content
     // Controls/SimpleControls.xaml(102,22) Path
     let path_1 = __t::Path::new();
     path_1.begin_init();
     button_2.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_1)));
     // Controls/SimpleControls.xaml(102,22) Width
-    let priority_31 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::width_property(), 6.0_f64, priority_31);
+    path_1.set_value_with_priority(__t::Layoutable::width_property(), 6.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(102,22) Height
-    let priority_32 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_32);
+    __build_controls_simplecontrols_xaml_template_setter_5(&path_1);
     // Controls/SimpleControls.xaml(102,22) Margin
-    let priority_33 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, -6.0_f64, 14.0_f64, 0.0_f64), priority_33);
+    path_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, -6.0_f64, 14.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(102,22) HorizontalAlignment
-    let priority_34 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_34);
+    __build_controls_simplecontrols_xaml_template_setter_14(&path_1);
     // Controls/SimpleControls.xaml(102,22) VerticalAlignment
-    let priority_35 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_35);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_1);
     // Controls/SimpleControls.xaml(102,22) Data
     let value_2 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M282.875,231.875 L282.875,240.375 L288.625,236 z")), 107, 27)?;
-    let priority_36 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_2)), priority_36);
+    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_2)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(102,22) Stretch
-    let priority_37 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Fill, priority_37);
+    __build_controls_simplecontrols_xaml_template_setter_52(&path_1);
     rt::end_init(&path_1, 102, 22)?;
     rt::end_init(&button_2, 96, 20)?;
     rt::end_init(&grid_1, 65, 18)?;
@@ -8433,99 +8202,79 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(113,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_2, "PART_ElementWeekNumberLabels", 113, 23)?;
     // Controls/SimpleControls.xaml(113,18) Row
-    let priority_38 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_38);
+    __build_controls_simplecontrols_xaml_template_setter_61(&grid_2);
     // Controls/SimpleControls.xaml(113,18) Column
-    let priority_39 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_39);
+    __build_controls_simplecontrols_xaml_template_setter_11(&grid_2);
     // Controls/SimpleControls.xaml(113,18) IsVisible
-    let priority_40 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_40);
+    __build_controls_simplecontrols_xaml_template_setter_36(&grid_2);
     // Controls/SimpleControls.xaml(113,18) MinWidth
-    let priority_41 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Layoutable::min_width_property(), 20.0_f64, priority_41);
+    __build_controls_simplecontrols_xaml_template_setter_62(&grid_2);
     // Controls/SimpleControls.xaml(113,18) Margin
-    let priority_42 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, -1.0_f64, 6.0_f64, 6.0_f64), priority_42);
+    grid_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, -1.0_f64, 6.0_f64, 6.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(113,18) VerticalAlignment
-    let priority_43 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_43);
+    __build_controls_simplecontrols_xaml_template_setter_51(&grid_2);
     // Controls/SimpleControls.xaml(121,22) RowDefinitions
     let row_definitions_collection_2 = __t::Grid::__markup_get_RowDefinitions(&grid_2);
     // Controls/SimpleControls.xaml(121,22) RowDefinition
     let row_definition_2 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(121,22) Height
-    let priority_44 = __t::BindingPriority::Template;
-    row_definition_2.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_44);
+    row_definition_2.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(121,50) SharedSizeGroup
-    let priority_45 = __t::BindingPriority::Template;
-    row_definition_2.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewHeaderRow")), priority_45);
+    row_definition_2.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewHeaderRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_2, __t::Clone::clone(&row_definition_2));
     // Controls/SimpleControls.xaml(122,22) RowDefinitions
     let row_definitions_collection_3 = __t::Grid::__markup_get_RowDefinitions(&grid_2);
     // Controls/SimpleControls.xaml(122,22) RowDefinition
     let row_definition_3 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(122,22) Height
-    let priority_46 = __t::BindingPriority::Template;
-    row_definition_3.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_46);
+    row_definition_3.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(122,50) SharedSizeGroup
-    let priority_47 = __t::BindingPriority::Template;
-    row_definition_3.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_47);
+    row_definition_3.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_3, __t::Clone::clone(&row_definition_3));
     // Controls/SimpleControls.xaml(123,22) RowDefinitions
     let row_definitions_collection_4 = __t::Grid::__markup_get_RowDefinitions(&grid_2);
     // Controls/SimpleControls.xaml(123,22) RowDefinition
     let row_definition_4 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(123,22) Height
-    let priority_48 = __t::BindingPriority::Template;
-    row_definition_4.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_48);
+    row_definition_4.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(123,50) SharedSizeGroup
-    let priority_49 = __t::BindingPriority::Template;
-    row_definition_4.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_49);
+    row_definition_4.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_4, __t::Clone::clone(&row_definition_4));
     // Controls/SimpleControls.xaml(124,22) RowDefinitions
     let row_definitions_collection_5 = __t::Grid::__markup_get_RowDefinitions(&grid_2);
     // Controls/SimpleControls.xaml(124,22) RowDefinition
     let row_definition_5 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(124,22) Height
-    let priority_50 = __t::BindingPriority::Template;
-    row_definition_5.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_50);
+    row_definition_5.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(124,50) SharedSizeGroup
-    let priority_51 = __t::BindingPriority::Template;
-    row_definition_5.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_51);
+    row_definition_5.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_5, __t::Clone::clone(&row_definition_5));
     // Controls/SimpleControls.xaml(125,22) RowDefinitions
     let row_definitions_collection_6 = __t::Grid::__markup_get_RowDefinitions(&grid_2);
     // Controls/SimpleControls.xaml(125,22) RowDefinition
     let row_definition_6 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(125,22) Height
-    let priority_52 = __t::BindingPriority::Template;
-    row_definition_6.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_52);
+    row_definition_6.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(125,50) SharedSizeGroup
-    let priority_53 = __t::BindingPriority::Template;
-    row_definition_6.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_53);
+    row_definition_6.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_6, __t::Clone::clone(&row_definition_6));
     // Controls/SimpleControls.xaml(126,22) RowDefinitions
     let row_definitions_collection_7 = __t::Grid::__markup_get_RowDefinitions(&grid_2);
     // Controls/SimpleControls.xaml(126,22) RowDefinition
     let row_definition_7 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(126,22) Height
-    let priority_54 = __t::BindingPriority::Template;
-    row_definition_7.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_54);
+    row_definition_7.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(126,50) SharedSizeGroup
-    let priority_55 = __t::BindingPriority::Template;
-    row_definition_7.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_55);
+    row_definition_7.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_7, __t::Clone::clone(&row_definition_7));
     // Controls/SimpleControls.xaml(127,22) RowDefinitions
     let row_definitions_collection_8 = __t::Grid::__markup_get_RowDefinitions(&grid_2);
     // Controls/SimpleControls.xaml(127,22) RowDefinition
     let row_definition_8 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(127,22) Height
-    let priority_56 = __t::BindingPriority::Template;
-    row_definition_8.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_56);
+    row_definition_8.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(127,50) SharedSizeGroup
-    let priority_57 = __t::BindingPriority::Template;
-    row_definition_8.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_57);
+    row_definition_8.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_8, __t::Clone::clone(&row_definition_8));
     // Controls/SimpleControls.xaml(130,20) Children
     let children_collection_7 = __t::Panel::__markup_get_Children(grid_2.upcast_ref::<__t::Panel>());
@@ -8535,23 +8284,18 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     __t::Controls::__markup_Add_0(&children_collection_7, __t::Clone::clone(&content_control_0).upcast::<__t::Control>());
     rt::push_parent(&context, &content_control_0);
     // Controls/SimpleControls.xaml(130,35) Content (setter chosen at run time)
-    let priority_58 = __t::BindingPriority::Template;
     let dynamic_resource_extension_4 = __t::DynamicResourceExtension::__markup_new_1(rt::string_object("StringCalendarWeekNumberHeader"));
     let provided_9 = rt::provide_value(&context, rt::property_value(__t::ContentControl::content_property()), &dynamic_resource_extension_4, __t::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_3: __t::MarkupValue = rt::to_value(provided_9);
-    rt::bind_or_set_null(content_control_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_3, priority_58, "ContentControl.Content", 130, 35)?;
+    rt::bind_or_set_null(content_control_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_3, __t::BindingPriority::Template, "ContentControl.Content", 130, 35)?;
     // Controls/SimpleControls.xaml(130,20) FontSize
-    let priority_59 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::TemplatedControl::font_size_property(), 9.5_f64, priority_59);
+    content_control_0.set_value_with_priority(__t::TemplatedControl::font_size_property(), 9.5_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(130,20) VerticalAlignment
-    let priority_60 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_60);
+    __build_controls_simplecontrols_xaml_template_setter_56(&content_control_0);
     // Controls/SimpleControls.xaml(130,20) VerticalContentAlignment
-    let priority_61 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Center, priority_61);
+    __build_controls_simplecontrols_xaml_template_setter_41(&content_control_0);
     // Controls/SimpleControls.xaml(130,20) HorizontalContentAlignment
-    let priority_62 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, priority_62);
+    __build_controls_simplecontrols_xaml_template_setter_40(&content_control_0);
     rt::pop_parent_and_end_init(&context, &content_control_0, 130, 20)?;
     rt::pop_parent_and_end_init(&context, &grid_2, 113, 18)?;
     // Controls/SimpleControls.xaml(137,18) Children
@@ -8563,149 +8307,124 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(137,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_3, "PART_MonthView", 137, 23)?;
     // Controls/SimpleControls.xaml(137,18) Row
-    let priority_63 = __t::BindingPriority::Template;
-    grid_3.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_63);
+    __build_controls_simplecontrols_xaml_template_setter_61(&grid_3);
     // Controls/SimpleControls.xaml(137,18) Column
-    let priority_64 = __t::BindingPriority::Template;
-    grid_3.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_64);
+    __build_controls_simplecontrols_xaml_template_setter_9(&grid_3);
     // Controls/SimpleControls.xaml(137,18) Margin
-    let priority_65 = __t::BindingPriority::Template;
-    grid_3.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, -1.0_f64, 6.0_f64, 6.0_f64), priority_65);
+    grid_3.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, -1.0_f64, 6.0_f64, 6.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(137,18) IsVisible
-    let priority_66 = __t::BindingPriority::Template;
-    grid_3.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_66);
+    __build_controls_simplecontrols_xaml_template_setter_36(&grid_3);
     // Controls/SimpleControls.xaml(143,22) RowDefinitions
     let row_definitions_collection_9 = __t::Grid::__markup_get_RowDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(143,22) RowDefinition
     let row_definition_9 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(143,22) Height
-    let priority_67 = __t::BindingPriority::Template;
-    row_definition_9.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_67);
+    row_definition_9.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(143,50) SharedSizeGroup
-    let priority_68 = __t::BindingPriority::Template;
-    row_definition_9.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewHeaderRow")), priority_68);
+    row_definition_9.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewHeaderRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_9, __t::Clone::clone(&row_definition_9));
     // Controls/SimpleControls.xaml(144,22) RowDefinitions
     let row_definitions_collection_10 = __t::Grid::__markup_get_RowDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(144,22) RowDefinition
     let row_definition_10 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(144,22) Height
-    let priority_69 = __t::BindingPriority::Template;
-    row_definition_10.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_69);
+    row_definition_10.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(144,50) SharedSizeGroup
-    let priority_70 = __t::BindingPriority::Template;
-    row_definition_10.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_70);
+    row_definition_10.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_10, __t::Clone::clone(&row_definition_10));
     // Controls/SimpleControls.xaml(145,22) RowDefinitions
     let row_definitions_collection_11 = __t::Grid::__markup_get_RowDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(145,22) RowDefinition
     let row_definition_11 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(145,22) Height
-    let priority_71 = __t::BindingPriority::Template;
-    row_definition_11.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_71);
+    row_definition_11.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(145,50) SharedSizeGroup
-    let priority_72 = __t::BindingPriority::Template;
-    row_definition_11.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_72);
+    row_definition_11.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_11, __t::Clone::clone(&row_definition_11));
     // Controls/SimpleControls.xaml(146,22) RowDefinitions
     let row_definitions_collection_12 = __t::Grid::__markup_get_RowDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(146,22) RowDefinition
     let row_definition_12 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(146,22) Height
-    let priority_73 = __t::BindingPriority::Template;
-    row_definition_12.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_73);
+    row_definition_12.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(146,50) SharedSizeGroup
-    let priority_74 = __t::BindingPriority::Template;
-    row_definition_12.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_74);
+    row_definition_12.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_12, __t::Clone::clone(&row_definition_12));
     // Controls/SimpleControls.xaml(147,22) RowDefinitions
     let row_definitions_collection_13 = __t::Grid::__markup_get_RowDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(147,22) RowDefinition
     let row_definition_13 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(147,22) Height
-    let priority_75 = __t::BindingPriority::Template;
-    row_definition_13.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_75);
+    row_definition_13.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(147,50) SharedSizeGroup
-    let priority_76 = __t::BindingPriority::Template;
-    row_definition_13.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_76);
+    row_definition_13.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_13, __t::Clone::clone(&row_definition_13));
     // Controls/SimpleControls.xaml(148,22) RowDefinitions
     let row_definitions_collection_14 = __t::Grid::__markup_get_RowDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(148,22) RowDefinition
     let row_definition_14 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(148,22) Height
-    let priority_77 = __t::BindingPriority::Template;
-    row_definition_14.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_77);
+    row_definition_14.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(148,50) SharedSizeGroup
-    let priority_78 = __t::BindingPriority::Template;
-    row_definition_14.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_78);
+    row_definition_14.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_14, __t::Clone::clone(&row_definition_14));
     // Controls/SimpleControls.xaml(149,22) RowDefinitions
     let row_definitions_collection_15 = __t::Grid::__markup_get_RowDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(149,22) RowDefinition
     let row_definition_15 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(149,22) Height
-    let priority_79 = __t::BindingPriority::Template;
-    row_definition_15.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_79);
+    row_definition_15.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(149,50) SharedSizeGroup
-    let priority_80 = __t::BindingPriority::Template;
-    row_definition_15.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), priority_80);
+    row_definition_15.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("CalendarMonthViewWeekRow")), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_15, __t::Clone::clone(&row_definition_15));
     // Controls/SimpleControls.xaml(152,22) ColumnDefinitions
     let column_definitions_collection_2 = __t::Grid::__markup_get_ColumnDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(152,22) ColumnDefinition
     let column_definition_2 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(152,22) Width
-    let priority_81 = __t::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_81);
+    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, __t::Clone::clone(&column_definition_2));
     // Controls/SimpleControls.xaml(153,22) ColumnDefinitions
     let column_definitions_collection_3 = __t::Grid::__markup_get_ColumnDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(153,22) ColumnDefinition
     let column_definition_3 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(153,22) Width
-    let priority_82 = __t::BindingPriority::Template;
-    column_definition_3.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_82);
+    column_definition_3.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_3, __t::Clone::clone(&column_definition_3));
     // Controls/SimpleControls.xaml(154,22) ColumnDefinitions
     let column_definitions_collection_4 = __t::Grid::__markup_get_ColumnDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(154,22) ColumnDefinition
     let column_definition_4 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(154,22) Width
-    let priority_83 = __t::BindingPriority::Template;
-    column_definition_4.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_83);
+    column_definition_4.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_4, __t::Clone::clone(&column_definition_4));
     // Controls/SimpleControls.xaml(155,22) ColumnDefinitions
     let column_definitions_collection_5 = __t::Grid::__markup_get_ColumnDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(155,22) ColumnDefinition
     let column_definition_5 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(155,22) Width
-    let priority_84 = __t::BindingPriority::Template;
-    column_definition_5.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_84);
+    column_definition_5.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_5, __t::Clone::clone(&column_definition_5));
     // Controls/SimpleControls.xaml(156,22) ColumnDefinitions
     let column_definitions_collection_6 = __t::Grid::__markup_get_ColumnDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(156,22) ColumnDefinition
     let column_definition_6 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(156,22) Width
-    let priority_85 = __t::BindingPriority::Template;
-    column_definition_6.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_85);
+    column_definition_6.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_6, __t::Clone::clone(&column_definition_6));
     // Controls/SimpleControls.xaml(157,22) ColumnDefinitions
     let column_definitions_collection_7 = __t::Grid::__markup_get_ColumnDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(157,22) ColumnDefinition
     let column_definition_7 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(157,22) Width
-    let priority_86 = __t::BindingPriority::Template;
-    column_definition_7.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_86);
+    column_definition_7.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_7, __t::Clone::clone(&column_definition_7));
     // Controls/SimpleControls.xaml(158,22) ColumnDefinitions
     let column_definitions_collection_8 = __t::Grid::__markup_get_ColumnDefinitions(&grid_3);
     // Controls/SimpleControls.xaml(158,22) ColumnDefinition
     let column_definition_8 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(158,22) Width
-    let priority_87 = __t::BindingPriority::Template;
-    column_definition_8.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_87);
+    column_definition_8.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_8, __t::Clone::clone(&column_definition_8));
     rt::end_init(&grid_3, 137, 18)?;
     // Controls/SimpleControls.xaml(162,18) Children
@@ -8717,72 +8436,61 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(162,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_4, "PART_YearView", 162, 23)?;
     // Controls/SimpleControls.xaml(162,18) Row
-    let priority_88 = __t::BindingPriority::Template;
-    grid_4.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_88);
+    __build_controls_simplecontrols_xaml_template_setter_61(&grid_4);
     // Controls/SimpleControls.xaml(162,18) ColumnSpan
-    let priority_89 = __t::BindingPriority::Template;
-    grid_4.set_value_with_priority(__t::Grid::column_span_property(), 3_i32, priority_89);
+    __build_controls_simplecontrols_xaml_template_setter_54(&grid_4);
     // Controls/SimpleControls.xaml(162,18) Margin
-    let priority_90 = __t::BindingPriority::Template;
-    grid_4.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, -3.0_f64, 7.0_f64, 6.0_f64), priority_90);
+    grid_4.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, -3.0_f64, 7.0_f64, 6.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(162,18) IsVisible
-    let priority_91 = __t::BindingPriority::Template;
-    grid_4.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_91);
+    __build_controls_simplecontrols_xaml_template_setter_36(&grid_4);
     // Controls/SimpleControls.xaml(168,22) RowDefinitions
     let row_definitions_collection_16 = __t::Grid::__markup_get_RowDefinitions(&grid_4);
     // Controls/SimpleControls.xaml(168,22) RowDefinition
     let row_definition_16 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(168,22) Height
-    let priority_92 = __t::BindingPriority::Template;
-    row_definition_16.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_92);
+    row_definition_16.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_16, __t::Clone::clone(&row_definition_16));
     // Controls/SimpleControls.xaml(169,22) RowDefinitions
     let row_definitions_collection_17 = __t::Grid::__markup_get_RowDefinitions(&grid_4);
     // Controls/SimpleControls.xaml(169,22) RowDefinition
     let row_definition_17 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(169,22) Height
-    let priority_93 = __t::BindingPriority::Template;
-    row_definition_17.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_93);
+    row_definition_17.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_17, __t::Clone::clone(&row_definition_17));
     // Controls/SimpleControls.xaml(170,22) RowDefinitions
     let row_definitions_collection_18 = __t::Grid::__markup_get_RowDefinitions(&grid_4);
     // Controls/SimpleControls.xaml(170,22) RowDefinition
     let row_definition_18 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(170,22) Height
-    let priority_94 = __t::BindingPriority::Template;
-    row_definition_18.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_94);
+    row_definition_18.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_18, __t::Clone::clone(&row_definition_18));
     // Controls/SimpleControls.xaml(173,22) ColumnDefinitions
     let column_definitions_collection_9 = __t::Grid::__markup_get_ColumnDefinitions(&grid_4);
     // Controls/SimpleControls.xaml(173,22) ColumnDefinition
     let column_definition_9 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(173,22) Width
-    let priority_95 = __t::BindingPriority::Template;
-    column_definition_9.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_95);
+    column_definition_9.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_9, __t::Clone::clone(&column_definition_9));
     // Controls/SimpleControls.xaml(174,22) ColumnDefinitions
     let column_definitions_collection_10 = __t::Grid::__markup_get_ColumnDefinitions(&grid_4);
     // Controls/SimpleControls.xaml(174,22) ColumnDefinition
     let column_definition_10 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(174,22) Width
-    let priority_96 = __t::BindingPriority::Template;
-    column_definition_10.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_96);
+    column_definition_10.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_10, __t::Clone::clone(&column_definition_10));
     // Controls/SimpleControls.xaml(175,22) ColumnDefinitions
     let column_definitions_collection_11 = __t::Grid::__markup_get_ColumnDefinitions(&grid_4);
     // Controls/SimpleControls.xaml(175,22) ColumnDefinition
     let column_definition_11 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(175,22) Width
-    let priority_97 = __t::BindingPriority::Template;
-    column_definition_11.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_97);
+    column_definition_11.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_11, __t::Clone::clone(&column_definition_11));
     // Controls/SimpleControls.xaml(176,22) ColumnDefinitions
     let column_definitions_collection_12 = __t::Grid::__markup_get_ColumnDefinitions(&grid_4);
     // Controls/SimpleControls.xaml(176,22) ColumnDefinition
     let column_definition_12 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(176,22) Width
-    let priority_98 = __t::BindingPriority::Template;
-    column_definition_12.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_98);
+    column_definition_12.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_12, __t::Clone::clone(&column_definition_12));
     rt::end_init(&grid_4, 162, 18)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 29, 16)?;
@@ -8798,18 +8506,15 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     // Controls/SimpleControls.xaml(183,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "DisabledVisual", 183, 22)?;
     // Controls/SimpleControls.xaml(183,12) Margin
-    let priority_99 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64), priority_99);
+    rectangle_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(185,22) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlLowBrush", 185, 22)?;
     // Controls/SimpleControls.xaml(183,12) IsVisible
-    let priority_100 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_100);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_1);
     // Controls/SimpleControls.xaml(187,22) Opacity
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Visual::opacity_property(), "ThemeDisabledOpacity", 187, 22)?;
     // Controls/SimpleControls.xaml(183,12) Stretch
-    let priority_101 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Fill, priority_101);
+    __build_controls_simplecontrols_xaml_template_setter_52(&rectangle_1);
     rt::pop_parent_and_end_init(&context, &rectangle_1, 183, 12)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 19, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -8891,11 +8596,9 @@ fn build_controls_simplecontrols_xaml_deferred_89(
     // Controls/SimpleControls.xaml(20,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &stack_panel_0, "PART_Root", 20, 21)?;
     // Controls/SimpleControls.xaml(20,10) HorizontalAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_6(&stack_panel_0);
     // Controls/SimpleControls.xaml(20,10) ClipToBounds
-    let priority_1 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_10(&stack_panel_0);
     // Controls/SimpleControls.xaml(23,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(23,12) CalendarItem
@@ -9042,8 +8745,7 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     // Controls/SimpleControls.xaml(95,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &text_box_0, "PART_TextBox", 95, 20)?;
     // Controls/SimpleControls.xaml(95,12) Column
-    let priority_0 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_11(&text_box_0);
     // Controls/SimpleControls.xaml(97,20) Padding
     rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R66)?;
     rt::end_init(&text_box_0, 95, 12)?;
@@ -9056,32 +8758,24 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     // Controls/SimpleControls.xaml(109,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_0, "PART_Button", 109, 19)?;
     // Controls/SimpleControls.xaml(109,12) Column
-    let priority_1 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_9(&button_0);
     // Controls/SimpleControls.xaml(109,12) Width
-    let priority_2 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::width_property(), 20.0_f64, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_73(&button_0);
     // Controls/SimpleControls.xaml(109,12) Margin
-    let priority_3 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 0.0_f64, 2.0_f64, 0.0_f64), priority_3);
+    button_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 0.0_f64, 2.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(109,12) Padding
-    let priority_4 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
+    button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(109,12) Background
-    let priority_5 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
+    button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(109,12) BorderThickness
-    let priority_6 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_6);
+    button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(109,12) Classes
     let classes_collection_0 = __t::StyledElement::__markup_get_Classes(button_0.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_0, __t::String::from("CalendarDropDown"));
     // Controls/SimpleControls.xaml(109,12) ClipToBounds
-    let priority_7 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&false), priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_37(&button_0);
     // Controls/SimpleControls.xaml(109,12) Focusable
-    let priority_8 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_19(&button_0);
     // Controls/SimpleControls.xaml(119,19) Foreground
     rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 119, 19)?;
     rt::end_init(&button_0, 109, 12)?;
@@ -9099,8 +8793,7 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     let provided_13 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
     rt::bind(popup_0.upcast_ref::<__t::FerroObject>(), __t::Popup::placement_target_property(), provided_13, 122, 18)?;
     // Controls/SimpleControls.xaml(121,12) IsLightDismissEnabled
-    let priority_9 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&true), priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_22(&popup_0);
     // Controls/SimpleControls.xaml(124,14) Child
     // Controls/SimpleControls.xaml(124,14) Calendar
     let calendar_0 = __t::Calendar::new();
@@ -9145,25 +8838,19 @@ fn build_controls_simplecontrols_xaml_deferred_92(
     grid_0.begin_init();
     rt::push_parent(&context, &grid_0);
     // Controls/SimpleControls.xaml(29,20) Width
-    let priority_0 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::width_property(), 19.0_f64, priority_0);
+    grid_0.set_value_with_priority(__t::Layoutable::width_property(), 19.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(29,20) Height
-    let priority_1 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::height_property(), 18.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_1(&grid_0);
     // Controls/SimpleControls.xaml(29,20) Margin
-    let priority_2 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_2);
+    grid_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(29,20) HorizontalAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_6(&grid_0);
     // Controls/SimpleControls.xaml(29,20) VerticalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_2(&grid_0);
     // Controls/SimpleControls.xaml(34,25) Background
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), "ThemeControlLowBrush", 34, 25)?;
     // Controls/SimpleControls.xaml(29,20) ClipToBounds
-    let priority_5 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&false), priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_37(&grid_0);
     // Controls/SimpleControls.xaml(29,20) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 4_i32), 36, 25)?;
@@ -9206,22 +8893,17 @@ fn build_controls_simplecontrols_xaml_deferred_92(
     // Controls/SimpleControls.xaml(39,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "Highlight", 39, 29)?;
     // Controls/SimpleControls.xaml(39,22) Row
-    let priority_6 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_65(&border_0);
     // Controls/SimpleControls.xaml(39,22) RowSpan
-    let priority_7 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::row_span_property(), 4_i32, priority_7);
+    border_0.set_value_with_priority(__t::Grid::row_span_property(), 4_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(39,22) ColumnSpan
-    let priority_8 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::column_span_property(), 4_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_67(&border_0);
     // Controls/SimpleControls.xaml(39,22) Margin
-    let priority_9 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(-1.0_f64, -1.0_f64, -1.0_f64, -1.0_f64), priority_9);
+    border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(-1.0_f64, -1.0_f64, -1.0_f64, -1.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(44,29) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "HighlightBrush", 44, 29)?;
     // Controls/SimpleControls.xaml(39,22) BorderThickness
-    let priority_10 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), priority_10);
+    border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &border_0, 39, 22)?;
     // Controls/SimpleControls.xaml(46,22) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -9233,25 +8915,19 @@ fn build_controls_simplecontrols_xaml_deferred_92(
     // Controls/SimpleControls.xaml(46,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_1, "Background", 46, 29)?;
     // Controls/SimpleControls.xaml(46,22) Row
-    let priority_11 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_61(&border_1);
     // Controls/SimpleControls.xaml(46,22) RowSpan
-    let priority_12 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_68(&border_1);
     // Controls/SimpleControls.xaml(46,22) ColumnSpan
-    let priority_13 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::column_span_property(), 4_i32, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_67(&border_1);
     // Controls/SimpleControls.xaml(46,22) Margin
-    let priority_14 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, -1.0_f64, 0.0_f64, 0.0_f64), priority_14);
+    border_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, -1.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(51,29) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ThemeBorderHighBrush", 51, 29)?;
     // Controls/SimpleControls.xaml(46,22) BorderThickness
-    let priority_15 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), priority_15);
+    border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(46,22) CornerRadius
-    let priority_16 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(0.5_f64, 0.5_f64, 0.5_f64, 0.5_f64), priority_16);
+    border_1.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(0.5_f64, 0.5_f64, 0.5_f64, 0.5_f64), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &border_1, 46, 22)?;
     // Controls/SimpleControls.xaml(54,22) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -9261,18 +8937,15 @@ fn build_controls_simplecontrols_xaml_deferred_92(
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&rectangle_0).upcast::<__t::Control>());
     rt::push_parent(&context, &rectangle_0);
     // Controls/SimpleControls.xaml(54,22) RowSpan
-    let priority_17 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::row_span_property(), 1_i32, priority_17);
+    rectangle_0.set_value_with_priority(__t::Grid::row_span_property(), 1_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(54,22) ColumnSpan
-    let priority_18 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_span_property(), 4_i32, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_67(&rectangle_0);
     // Controls/SimpleControls.xaml(56,32) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeAccentBrush", 56, 32)?;
     // Controls/SimpleControls.xaml(57,32) Stroke
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), "ThemeBorderHighBrush", 57, 32)?;
     // Controls/SimpleControls.xaml(54,22) StrokeThickness
-    let priority_19 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 1.0_f64, priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_3(&rectangle_0);
     rt::pop_parent_and_end_init(&context, &rectangle_0, 54, 22)?;
     // Controls/SimpleControls.xaml(59,22) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -9282,26 +8955,19 @@ fn build_controls_simplecontrols_xaml_deferred_92(
     __t::Controls::__markup_Add_0(&children_collection_3, __t::Clone::clone(&text_block_0).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_0);
     // Controls/SimpleControls.xaml(59,22) Row
-    let priority_20 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_20);
+    __build_controls_simplecontrols_xaml_template_setter_61(&text_block_0);
     // Controls/SimpleControls.xaml(59,22) RowSpan
-    let priority_21 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_21);
+    __build_controls_simplecontrols_xaml_template_setter_68(&text_block_0);
     // Controls/SimpleControls.xaml(59,22) Column
-    let priority_22 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_11(&text_block_0);
     // Controls/SimpleControls.xaml(59,22) ColumnSpan
-    let priority_23 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Grid::column_span_property(), 4_i32, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_67(&text_block_0);
     // Controls/SimpleControls.xaml(59,22) Margin
-    let priority_24 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, -1.0_f64, 0.0_f64, 0.0_f64), priority_24);
+    text_block_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, -1.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(59,22) HorizontalAlignment
-    let priority_25 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_25);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_0);
     // Controls/SimpleControls.xaml(59,22) VerticalAlignment
-    let priority_26 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_26);
+    __build_controls_simplecontrols_xaml_template_setter_2(&text_block_0);
     // Controls/SimpleControls.xaml(66,32) FontSize
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), "FontSizeSmall", 66, 32)?;
     // Controls/SimpleControls.xaml(67,32) Foreground
@@ -9324,25 +8990,19 @@ fn build_controls_simplecontrols_xaml_deferred_92(
     __t::Controls::__markup_Add_0(&children_collection_4, __t::Clone::clone(&ellipse_0).upcast::<__t::Control>());
     rt::push_parent(&context, &ellipse_0);
     // Controls/SimpleControls.xaml(70,22) ColumnSpan
-    let priority_27 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Grid::column_span_property(), 4_i32, priority_27);
+    __build_controls_simplecontrols_xaml_template_setter_67(&ellipse_0);
     // Controls/SimpleControls.xaml(70,22) Width
-    let priority_28 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::width_property(), 3.0_f64, priority_28);
+    ellipse_0.set_value_with_priority(__t::Layoutable::width_property(), 3.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(70,22) Height
-    let priority_29 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::height_property(), 3.0_f64, priority_29);
+    ellipse_0.set_value_with_priority(__t::Layoutable::height_property(), 3.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(70,22) HorizontalAlignment
-    let priority_30 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_30);
+    __build_controls_simplecontrols_xaml_template_setter_6(&ellipse_0);
     // Controls/SimpleControls.xaml(70,22) VerticalAlignment
-    let priority_31 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_31);
+    __build_controls_simplecontrols_xaml_template_setter_2(&ellipse_0);
     // Controls/SimpleControls.xaml(75,30) Fill
     rt::bind_dynamic_resource(&context, ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlLowBrush", 75, 30)?;
     // Controls/SimpleControls.xaml(70,22) StrokeThickness
-    let priority_32 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 0.0_f64, priority_32);
+    ellipse_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 0.0_f64, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &ellipse_0, 70, 22)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 29, 20)?;
     __t::Result::Ok(rt::to_value(grid_0.clone()))
@@ -9687,8 +9347,7 @@ fn build_controls_simplecontrols_xaml_deferred_94(
     // Controls/SimpleControls.xaml(14,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &layout_transform_control_0, "PART_LayoutTransformControl", 14, 33)?;
     // Controls/SimpleControls.xaml(14,10) UseRenderTransform
-    let priority_0 = __t::BindingPriority::Template;
-    layout_transform_control_0.set_value_with_priority(__t::LayoutTransformControl::use_render_transform_property(), __t::Clone::clone(&true), priority_0);
+    layout_transform_control_0.set_value_with_priority(__t::LayoutTransformControl::use_render_transform_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(16,12) Child
     // Controls/SimpleControls.xaml(16,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -9697,19 +9356,16 @@ fn build_controls_simplecontrols_xaml_deferred_94(
     // Controls/SimpleControls.xaml(16,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 16, 29)?;
     // Controls/SimpleControls.xaml(16,12) MinHeight
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::min_height_property(), 150.0_f64, priority_1);
+    content_presenter_0.set_value_with_priority(__t::Layoutable::min_height_property(), 150.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(16,12) Padding
-    let priority_2 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::padding_property(), __t::Thickness::__markup_new_3(8.0_f64, 8.0_f64, 0.0_f64, 0.0_f64), priority_2);
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::padding_property(), __t::Thickness::__markup_new_3(8.0_f64, 8.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(19,29) Background
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R69)?;
     // Controls/SimpleControls.xaml(23,29) Content (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_3, "ContentControl.Content", 23, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 23, 29)?;
     rt::end_init(&content_presenter_0, 16, 12)?;
     rt::end_init(&layout_transform_control_0, 14, 10)?;
     __t::Result::Ok(rt::to_value(layout_transform_control_0.clone()))
@@ -9773,20 +9429,15 @@ fn build_controls_simplecontrols_xaml_deferred_96(
     // Controls/SimpleControls.xaml(14,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_spinner_0, "PART_Spinner", 14, 26)?;
     // Controls/SimpleControls.xaml(14,12) HorizontalContentAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    button_spinner_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
+    button_spinner_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(14,12) VerticalContentAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    button_spinner_0.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_1);
+    button_spinner_0.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(14,12) IsTabStop
-    let priority_2 = __t::BindingPriority::Template;
-    button_spinner_0.set_value_with_priority(__t::InputElement::is_tab_stop_property(), __t::Clone::clone(&false), priority_2);
+    button_spinner_0.set_value_with_priority(__t::InputElement::is_tab_stop_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(14,12) Padding
-    let priority_3 = __t::BindingPriority::Template;
-    button_spinner_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_3);
+    button_spinner_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(14,12) MinWidth
-    let priority_4 = __t::BindingPriority::Template;
-    button_spinner_0.set_value_with_priority(__t::Layoutable::min_width_property(), 0.0_f64, priority_4);
+    button_spinner_0.set_value_with_priority(__t::Layoutable::min_width_property(), 0.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(20,26) AllowSpin
     rt::bind_template_rows(button_spinner_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R70)?;
     // Controls/SimpleControls.xaml(27,14) Content
@@ -9798,35 +9449,28 @@ fn build_controls_simplecontrols_xaml_deferred_96(
     // Controls/SimpleControls.xaml(27,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &text_box_0, "PART_TextBox", 27, 22)?;
     // Controls/SimpleControls.xaml(27,14) MinWidth
-    let priority_5 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::Layoutable::min_width_property(), 20.0_f64, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_62(&text_box_0);
     // Controls/SimpleControls.xaml(27,14) Margin
-    let priority_6 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_6);
+    text_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(30,22) Padding
     rt::apply_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::TemplatedControl::padding_property()), 30, 22)?;
     // Controls/SimpleControls.xaml(27,14) VerticalScrollBarVisibility
-    let priority_7 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_7);
+    text_box_0.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(32,22) HorizontalContentAlignment
     rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R71)?;
     // Controls/SimpleControls.xaml(27,14) AcceptsReturn
-    let priority_8 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::TextBox::accepts_return_property(), __t::Clone::clone(&false), priority_8);
+    text_box_0.set_value_with_priority(__t::TextBox::accepts_return_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(35,22) Background
     rt::apply_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::TemplatedControl::background_property()), 35, 22)?;
     // Controls/SimpleControls.xaml(27,14) BorderThickness
-    let priority_9 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_9);
+    text_box_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(37,22) IsReadOnly
     rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R72)?;
     // Controls/SimpleControls.xaml(27,14) TextWrapping
-    let priority_10 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::TextBox::text_wrapping_property(), ::ferroui_base::media::TextWrapping::NoWrap, priority_10);
+    text_box_0.set_value_with_priority(__t::TextBox::text_wrapping_property(), ::ferroui_base::media::TextWrapping::NoWrap, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(41,22) PlaceholderText
     rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R73)?;
     // Controls/SimpleControls.xaml(43,22) InnerLeftContent (setter chosen at run time)
-    let priority_11 = __t::BindingPriority::Template;
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("InnerLeftContent"));
     rt::push_parent(&context, &reflection_binding_extension_0);
     // Controls/SimpleControls.xaml(43,22) RelativeSource
@@ -9836,9 +9480,8 @@ fn build_controls_simplecontrols_xaml_deferred_96(
     context.pop_parent();
     let provided_17 = rt::provide_value(&context, rt::property_value(__t::TextBox::inner_left_content_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     let value_0: __t::MarkupValue = rt::to_value(provided_17);
-    rt::bind_or_set_null(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::TextBox::inner_left_content_property(), &value_0, priority_11, "TextBox.InnerLeftContent", 43, 22)?;
+    rt::bind_or_set_null(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::TextBox::inner_left_content_property(), &value_0, __t::BindingPriority::Template, "TextBox.InnerLeftContent", 43, 22)?;
     // Controls/SimpleControls.xaml(44,22) InnerRightContent (setter chosen at run time)
-    let priority_12 = __t::BindingPriority::Template;
     let reflection_binding_extension_1 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("InnerRightContent"));
     rt::push_parent(&context, &reflection_binding_extension_1);
     // Controls/SimpleControls.xaml(44,22) RelativeSource
@@ -9848,7 +9491,7 @@ fn build_controls_simplecontrols_xaml_deferred_96(
     context.pop_parent();
     let provided_19 = rt::provide_value(&context, rt::property_value(__t::TextBox::inner_right_content_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     let value_1: __t::MarkupValue = rt::to_value(provided_19);
-    rt::bind_or_set_null(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::TextBox::inner_right_content_property(), &value_1, priority_12, "TextBox.InnerRightContent", 44, 22)?;
+    rt::bind_or_set_null(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::TextBox::inner_right_content_property(), &value_1, __t::BindingPriority::Template, "TextBox.InnerRightContent", 44, 22)?;
     rt::pop_parent_and_end_init(&context, &text_box_0, 27, 14)?;
     rt::pop_parent_and_end_init(&context, &button_spinner_0, 14, 12)?;
     rt::pop_parent_and_end_init(&context, &data_validation_errors_0, 13, 10)?;
@@ -9888,11 +9531,10 @@ fn build_controls_simplecontrols_xaml_deferred_98(
     // Controls/SimpleControls.xaml(10,29) Background
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R74)?;
     // Controls/SimpleControls.xaml(15,29) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 15, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 15, 29)?;
     // Controls/SimpleControls.xaml(16,29) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R75)?;
     rt::end_init(&content_presenter_0, 9, 12)?;
@@ -9965,14 +9607,11 @@ fn build_controls_simplecontrols_xaml_deferred_100(
     rt::set_and_register_name(name_scope.as_ref(), &path_icon_0, "PART_Icon", 18, 19)?;
     // Controls/SimpleControls.xaml(18,10) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M18.6195264,3.31842271 C19.0080059,3.31842271 19.3290603,3.60710385 19.3798716,3.9816481 L19.3868766,4.08577298 L19.3868766,6.97963208 C19.3868766,7.36811161 19.0981955,7.68916605 18.7236513,7.73997735 L18.6195264,7.74698235 L15.7256673,7.74698235 C15.3018714,7.74698235 14.958317,7.40342793 14.958317,6.97963208 C14.958317,6.59115255 15.2469981,6.27009811 15.6215424,6.21928681 L15.7256673,6.21228181 L16.7044011,6.21182461 C13.7917384,3.87107476 9.52212532,4.05209336 6.81933829,6.75488039 C3.92253872,9.65167996 3.92253872,14.34832 6.81933829,17.2451196 C9.71613786,20.1419192 14.4127779,20.1419192 17.3095775,17.2451196 C19.0725398,15.4821573 19.8106555,12.9925923 19.3476248,10.58925 C19.2674502,10.173107 19.5398064,9.77076216 19.9559494,9.69058758 C20.3720923,9.610413 20.7744372,9.88276918 20.8546118,10.2989121 C21.4129973,13.1971899 20.5217103,16.2033812 18.3947747,18.3303168 C14.8986373,21.8264542 9.23027854,21.8264542 5.73414113,18.3303168 C2.23800371,14.8341794 2.23800371,9.16582064 5.73414113,5.66968323 C9.05475132,2.34907304 14.3349409,2.18235834 17.8523166,5.16953912 L17.8521761,4.08577298 C17.8521761,3.66197713 18.1957305,3.31842271 18.6195264,3.31842271 Z")), 19, 19)?;
-    let priority_0 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_0);
+    path_icon_0.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(18,10) Width
-    let priority_1 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::width_property(), 24.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_38(&path_icon_0);
     // Controls/SimpleControls.xaml(18,10) Height
-    let priority_2 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::height_property(), 24.0_f64, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_39(&path_icon_0);
     rt::end_init(&path_icon_0, 18, 10)?;
     __t::Result::Ok(rt::to_value(path_icon_0.clone()))
 }
@@ -9990,8 +9629,7 @@ fn build_controls_simplecontrols_xaml_deferred_101(
     // Controls/SimpleControls.xaml(27,15) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_0, "PART_Root", 27, 15)?;
     // Controls/SimpleControls.xaml(27,10) MinHeight
-    let priority_0 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::min_height_property(), 80.0_f64, priority_0);
+    grid_0.set_value_with_priority(__t::Layoutable::min_height_property(), 80.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(29,15) Background
     rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 29, 15)?;
     rt::end_init(&grid_0, 27, 10)?;
@@ -10091,16 +9729,14 @@ fn build_controls_simplecontrols_xaml_deferred_104(
     // Controls/SimpleControls.xaml(16,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_HeaderPresenter", 16, 31)?;
     // Controls/SimpleControls.xaml(17,31) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 17, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 17, 31)?;
     // Controls/SimpleControls.xaml(18,31) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R77)?;
     // Controls/SimpleControls.xaml(16,14) Row
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_65(&content_presenter_0);
     rt::end_init(&content_presenter_0, 16, 14)?;
     // Controls/SimpleControls.xaml(26,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -10113,16 +9749,14 @@ fn build_controls_simplecontrols_xaml_deferred_104(
     // Controls/SimpleControls.xaml(27,31) ContentTemplate
     rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 27, 31)?;
     // Controls/SimpleControls.xaml(28,31) Content (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let template_binding_14 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_14 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_14);
     let value_1: __t::MarkupValue = rt::to_value(provided_14);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_2, "ContentControl.Content", 28, 31)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 28, 31)?;
     // Controls/SimpleControls.xaml(29,31) VerticalContentAlignment
     rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R78)?;
     // Controls/SimpleControls.xaml(26,14) Row
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_61(&content_presenter_1);
     rt::end_init(&content_presenter_1, 26, 14)?;
     rt::end_init(&grid_0, 15, 12)?;
     rt::end_init(&border_0, 10, 10)?;
@@ -10176,14 +9810,11 @@ fn build_controls_simplecontrols_xaml_deferred_106(
     // Controls/SimpleControls.xaml(19,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_TopCommandBar", 19, 29)?;
     // Controls/SimpleControls.xaml(19,12) Dock
-    let priority_0 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_84(&content_presenter_0);
     // Controls/SimpleControls.xaml(19,12) HorizontalContentAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_0);
     // Controls/SimpleControls.xaml(19,12) IsVisible
-    let priority_2 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_36(&content_presenter_0);
     rt::end_init(&content_presenter_0, 19, 12)?;
     // Controls/SimpleControls.xaml(25,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
@@ -10194,14 +9825,11 @@ fn build_controls_simplecontrols_xaml_deferred_106(
     // Controls/SimpleControls.xaml(25,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_BottomCommandBar", 25, 29)?;
     // Controls/SimpleControls.xaml(25,12) Dock
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_85(&content_presenter_1);
     // Controls/SimpleControls.xaml(25,12) HorizontalContentAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_1);
     // Controls/SimpleControls.xaml(25,12) IsVisible
-    let priority_5 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_36(&content_presenter_1);
     rt::end_init(&content_presenter_1, 25, 12)?;
     // Controls/SimpleControls.xaml(30,12) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
@@ -10214,11 +9842,10 @@ fn build_controls_simplecontrols_xaml_deferred_106(
     // Controls/SimpleControls.xaml(31,29) HorizontalContentAlignment
     rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R79)?;
     // Controls/SimpleControls.xaml(36,29) Content (setter chosen at run time)
-    let priority_6 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentPage::content_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_2.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_6, "ContentControl.Content", 36, 29)?;
+    rt::bind_or_set_null(content_presenter_2.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 36, 29)?;
     // Controls/SimpleControls.xaml(37,29) ContentTemplate
     rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R80)?;
     rt::end_init(&content_presenter_2, 30, 12)?;
@@ -10266,11 +9893,9 @@ fn build_controls_simplecontrols_xaml_deferred_108(
     // Controls/SimpleControls.xaml(22,19) Background
     rt::bind_template_rows(carousel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R81)?;
     // Controls/SimpleControls.xaml(21,10) HorizontalAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    carousel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_50(&carousel_0);
     // Controls/SimpleControls.xaml(21,10) VerticalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    carousel_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_51(&carousel_0);
     rt::end_init(&carousel_0, 21, 10)?;
     __t::Result::Ok(rt::to_value(carousel_0.clone()))
 }
@@ -10327,8 +9952,7 @@ fn build_controls_simplecontrols_xaml_deferred_110(
     // Controls/SimpleControls.xaml(54,17) Background
     rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 54, 17)?;
     // Controls/SimpleControls.xaml(54,10) BorderThickness
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), priority_0);
+    border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(56,12) Child
     // Controls/SimpleControls.xaml(56,12) Grid
     let grid_0 = __t::Grid::new();
@@ -10353,20 +9977,15 @@ fn build_controls_simplecontrols_xaml_deferred_110(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     rt::push_parent(&context, &border_1);
     // Controls/SimpleControls.xaml(57,14) Column
-    let priority_1 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_11(&border_1);
     // Controls/SimpleControls.xaml(57,14) Width
-    let priority_2 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::width_property(), 20.0_f64, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_73(&border_1);
     // Controls/SimpleControls.xaml(57,14) Height
-    let priority_3 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::height_property(), 20.0_f64, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_86(&border_1);
     // Controls/SimpleControls.xaml(57,14) HorizontalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_6(&border_1);
     // Controls/SimpleControls.xaml(57,14) VerticalAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_2(&border_1);
     // Controls/SimpleControls.xaml(62,16) Child
     // Controls/SimpleControls.xaml(62,16) Path
     let path_0 = __t::Path::new();
@@ -10374,15 +9993,12 @@ fn build_controls_simplecontrols_xaml_deferred_110(
     border_1.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&path_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(62,16) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_0);
     // Controls/SimpleControls.xaml(62,16) VerticalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(62,16) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0 2 L 4 6 L 0 10 Z")), 64, 21)?;
-    let priority_8 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_8);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(65,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundBrush", 65, 21)?;
     rt::pop_parent_and_end_init(&context, &path_0, 62, 16)?;
@@ -10397,24 +10013,20 @@ fn build_controls_simplecontrols_xaml_deferred_110(
     // Controls/SimpleControls.xaml(67,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 67, 31)?;
     // Controls/SimpleControls.xaml(67,14) Column
-    let priority_9 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_9(&content_presenter_0);
     // Controls/SimpleControls.xaml(69,31) Padding
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::ContentPresenter::padding_property()), 69, 31)?;
     // Controls/SimpleControls.xaml(67,14) VerticalAlignment
-    let priority_10 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_0);
     // Controls/SimpleControls.xaml(71,31) HorizontalContentAlignment
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R82)?;
     // Controls/SimpleControls.xaml(67,14) Background
-    let priority_11 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_11);
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(74,31) Content (setter chosen at run time)
-    let priority_12 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_1: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_12, "ContentControl.Content", 74, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 74, 31)?;
     // Controls/SimpleControls.xaml(75,31) ContentTemplate
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[Expander].HeaderTemplate"));
     let provided_6 = rt::provide_value(&context, rt::property_value(__t::ContentPresenter::content_template_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -10450,8 +10062,7 @@ fn build_controls_simplecontrols_xaml_deferred_111(
     // Controls/SimpleControls.xaml(89,10) RotateTransform
     let rotate_transform_0 = __t::RotateTransform::new();
     // Controls/SimpleControls.xaml(89,10) Angle
-    let priority_0 = __t::BindingPriority::Template;
-    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), -90.0_f64, priority_0);
+    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), -90.0_f64, __t::BindingPriority::Template);
     rt::add_setter_value(style_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&rotate_transform_0)));
     rt::style_program::attach(control_theme_0.upcast_ref::<__t::StyleBase>(), &style_0, 87, 6)?;
     context.pop_parent();
@@ -10483,8 +10094,7 @@ fn build_controls_simplecontrols_xaml_deferred_112(
     // Controls/SimpleControls.xaml(98,10) RotateTransform
     let rotate_transform_0 = __t::RotateTransform::new();
     // Controls/SimpleControls.xaml(98,10) Angle
-    let priority_0 = __t::BindingPriority::Template;
-    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), 90.0_f64, priority_0);
+    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), 90.0_f64, __t::BindingPriority::Template);
     rt::add_setter_value(style_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&rotate_transform_0)));
     rt::style_program::attach(control_theme_0.upcast_ref::<__t::StyleBase>(), &style_0, 96, 6)?;
     context.pop_parent();
@@ -10516,8 +10126,7 @@ fn build_controls_simplecontrols_xaml_deferred_113(
     // Controls/SimpleControls.xaml(107,10) RotateTransform
     let rotate_transform_0 = __t::RotateTransform::new();
     // Controls/SimpleControls.xaml(107,10) Angle
-    let priority_0 = __t::BindingPriority::Template;
-    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), 180.0_f64, priority_0);
+    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), 180.0_f64, __t::BindingPriority::Template);
     rt::add_setter_value(style_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&rotate_transform_0)));
     rt::style_program::attach(control_theme_0.upcast_ref::<__t::StyleBase>(), &style_0, 105, 6)?;
     context.pop_parent();
@@ -10549,8 +10158,7 @@ fn build_controls_simplecontrols_xaml_deferred_114(
     // Controls/SimpleControls.xaml(116,10) RotateTransform
     let rotate_transform_0 = __t::RotateTransform::new();
     // Controls/SimpleControls.xaml(116,10) Angle
-    let priority_0 = __t::BindingPriority::Template;
-    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), 0.0_f64, priority_0);
+    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), 0.0_f64, __t::BindingPriority::Template);
     rt::add_setter_value(style_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&rotate_transform_0)));
     rt::style_program::attach(control_theme_0.upcast_ref::<__t::StyleBase>(), &style_0, 114, 6)?;
     context.pop_parent();
@@ -10738,16 +10346,14 @@ fn build_controls_simplecontrols_xaml_deferred_116(
     // Controls/SimpleControls.xaml(136,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &toggle_button_0, "PART_toggle", 136, 29)?;
     // Controls/SimpleControls.xaml(136,16) Row
-    let priority_0 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_65(&toggle_button_0);
     // Controls/SimpleControls.xaml(138,29) HorizontalAlignment
     rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R84)?;
     // Controls/SimpleControls.xaml(140,29) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, priority_1, "ContentControl.Content", 140, 29)?;
+    rt::bind_or_set_null(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 140, 29)?;
     // Controls/SimpleControls.xaml(141,29) IsChecked
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Expander::is_expanded_property()));
     // Controls/SimpleControls.xaml(141,29) Mode
@@ -10755,10 +10361,9 @@ fn build_controls_simplecontrols_xaml_deferred_116(
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_7, 141, 29)?;
     // Controls/SimpleControls.xaml(143,29) Theme (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let provided_8 = rt::provide_static_resource(&context, "SimpleExpanderToggleButtonRightTheme", || rt::property_value(__t::StyledElement::theme_property()), 143, 29)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 143, 29)?;
+    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 143, 29)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_0, 136, 16)?;
     // Controls/SimpleControls.xaml(144,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -10769,16 +10374,14 @@ fn build_controls_simplecontrols_xaml_deferred_116(
     // Controls/SimpleControls.xaml(144,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 144, 33)?;
     // Controls/SimpleControls.xaml(144,16) Row
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_61(&content_presenter_0);
     // Controls/SimpleControls.xaml(146,33) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R85)?;
     // Controls/SimpleControls.xaml(149,33) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_12 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_11);
     let value_2: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_4, "ContentControl.Content", 149, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 149, 33)?;
     // Controls/SimpleControls.xaml(150,33) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R86)?;
     rt::end_init(&content_presenter_0, 144, 16)?;
@@ -10826,16 +10429,14 @@ fn build_controls_simplecontrols_xaml_deferred_117(
     // Controls/SimpleControls.xaml(168,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &toggle_button_0, "PART_toggle", 168, 29)?;
     // Controls/SimpleControls.xaml(168,16) Row
-    let priority_0 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_61(&toggle_button_0);
     // Controls/SimpleControls.xaml(170,29) HorizontalAlignment
     rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R88)?;
     // Controls/SimpleControls.xaml(172,29) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, priority_1, "ContentControl.Content", 172, 29)?;
+    rt::bind_or_set_null(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 172, 29)?;
     // Controls/SimpleControls.xaml(173,29) IsChecked
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Expander::is_expanded_property()));
     // Controls/SimpleControls.xaml(173,29) Mode
@@ -10843,10 +10444,9 @@ fn build_controls_simplecontrols_xaml_deferred_117(
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_7, 173, 29)?;
     // Controls/SimpleControls.xaml(175,29) Theme (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let provided_8 = rt::provide_static_resource(&context, "SimpleExpanderToggleButtonRightTheme", || rt::property_value(__t::StyledElement::theme_property()), 175, 29)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 175, 29)?;
+    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 175, 29)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_0, 168, 16)?;
     // Controls/SimpleControls.xaml(176,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -10857,16 +10457,14 @@ fn build_controls_simplecontrols_xaml_deferred_117(
     // Controls/SimpleControls.xaml(176,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 176, 33)?;
     // Controls/SimpleControls.xaml(176,16) Row
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_65(&content_presenter_0);
     // Controls/SimpleControls.xaml(178,33) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R89)?;
     // Controls/SimpleControls.xaml(181,33) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_12 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_11);
     let value_2: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_4, "ContentControl.Content", 181, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 181, 33)?;
     // Controls/SimpleControls.xaml(182,33) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R90)?;
     rt::end_init(&content_presenter_0, 176, 16)?;
@@ -10914,16 +10512,14 @@ fn build_controls_simplecontrols_xaml_deferred_118(
     // Controls/SimpleControls.xaml(200,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &toggle_button_0, "PART_toggle", 200, 29)?;
     // Controls/SimpleControls.xaml(200,16) Column
-    let priority_0 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_11(&toggle_button_0);
     // Controls/SimpleControls.xaml(202,29) HorizontalAlignment
     rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R92)?;
     // Controls/SimpleControls.xaml(204,29) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, priority_1, "ContentControl.Content", 204, 29)?;
+    rt::bind_or_set_null(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 204, 29)?;
     // Controls/SimpleControls.xaml(205,29) IsChecked
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Expander::is_expanded_property()));
     // Controls/SimpleControls.xaml(205,29) Mode
@@ -10931,10 +10527,9 @@ fn build_controls_simplecontrols_xaml_deferred_118(
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_7, 205, 29)?;
     // Controls/SimpleControls.xaml(207,29) Theme (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let provided_8 = rt::provide_static_resource(&context, "SimpleExpanderToggleButtonLeftTheme", || rt::property_value(__t::StyledElement::theme_property()), 207, 29)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 207, 29)?;
+    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 207, 29)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_0, 200, 16)?;
     // Controls/SimpleControls.xaml(208,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -10945,16 +10540,14 @@ fn build_controls_simplecontrols_xaml_deferred_118(
     // Controls/SimpleControls.xaml(208,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 208, 33)?;
     // Controls/SimpleControls.xaml(208,16) Column
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_9(&content_presenter_0);
     // Controls/SimpleControls.xaml(210,33) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R93)?;
     // Controls/SimpleControls.xaml(213,33) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_12 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_11);
     let value_2: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_4, "ContentControl.Content", 213, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 213, 33)?;
     // Controls/SimpleControls.xaml(214,33) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R94)?;
     rt::end_init(&content_presenter_0, 208, 16)?;
@@ -11002,16 +10595,14 @@ fn build_controls_simplecontrols_xaml_deferred_119(
     // Controls/SimpleControls.xaml(232,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &toggle_button_0, "PART_toggle", 232, 29)?;
     // Controls/SimpleControls.xaml(232,16) Column
-    let priority_0 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_9(&toggle_button_0);
     // Controls/SimpleControls.xaml(234,29) HorizontalAlignment
     rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R96)?;
     // Controls/SimpleControls.xaml(236,29) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, priority_1, "ContentControl.Content", 236, 29)?;
+    rt::bind_or_set_null(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 236, 29)?;
     // Controls/SimpleControls.xaml(237,29) IsChecked
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Expander::is_expanded_property()));
     // Controls/SimpleControls.xaml(237,29) Mode
@@ -11019,10 +10610,9 @@ fn build_controls_simplecontrols_xaml_deferred_119(
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_7, 237, 29)?;
     // Controls/SimpleControls.xaml(239,29) Theme (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let provided_8 = rt::provide_static_resource(&context, "SimpleExpanderToggleButtonRightTheme", || rt::property_value(__t::StyledElement::theme_property()), 239, 29)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 239, 29)?;
+    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 239, 29)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_0, 232, 16)?;
     // Controls/SimpleControls.xaml(240,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -11033,16 +10623,14 @@ fn build_controls_simplecontrols_xaml_deferred_119(
     // Controls/SimpleControls.xaml(240,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 240, 33)?;
     // Controls/SimpleControls.xaml(240,16) Column
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_11(&content_presenter_0);
     // Controls/SimpleControls.xaml(242,33) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R97)?;
     // Controls/SimpleControls.xaml(245,33) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_12 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_11);
     let value_2: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_4, "ContentControl.Content", 245, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 245, 33)?;
     // Controls/SimpleControls.xaml(246,33) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R98)?;
     rt::end_init(&content_presenter_0, 240, 16)?;
@@ -11427,21 +11015,18 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(62,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 62, 29)?;
     // Controls/SimpleControls.xaml(62,12) Row
-    let priority_0 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_65(&content_presenter_0);
     // Controls/SimpleControls.xaml(64,29) Margin
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "ToggleSwitchTopHeaderMargin", 64, 29)?;
     // Controls/SimpleControls.xaml(65,29) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_1 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_2 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
     let value_0: __t::MarkupValue = rt::to_value(provided_2);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_1, "ContentControl.Content", 65, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 65, 29)?;
     // Controls/SimpleControls.xaml(66,29) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 66, 29)?;
     // Controls/SimpleControls.xaml(62,12) VerticalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_56(&content_presenter_0);
     rt::pop_parent_and_end_init(&context, &content_presenter_0, 62, 12)?;
     // Controls/SimpleControls.xaml(69,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -11451,19 +11036,15 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&grid_1).upcast::<__t::Control>());
     rt::push_parent(&context, &grid_1);
     // Controls/SimpleControls.xaml(69,12) Row
-    let priority_3 = __t::BindingPriority::Template;
-    grid_1.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_61(&grid_1);
     // Controls/SimpleControls.xaml(70,17) MinWidth (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let provided_4 = rt::provide_static_resource(&context, "ToggleSwitchThemeMinWidth", || rt::property_value(__t::Layoutable::min_width_property()), 70, 17)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_priority(grid_1.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::min_width_property(), value_1, priority_4, || __t::ValueType::of::<f64>(), false, "Layoutable.MinWidth", 70, 17)?;
+    rt::bind_or_set_priority(grid_1.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::min_width_property(), value_1, __t::BindingPriority::Template, || __t::ValueType::of::<f64>(), false, "Layoutable.MinWidth", 70, 17)?;
     // Controls/SimpleControls.xaml(69,12) HorizontalAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    grid_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_57(&grid_1);
     // Controls/SimpleControls.xaml(69,12) VerticalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    grid_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_56(&grid_1);
     // Controls/SimpleControls.xaml(75,16) RowDefinitions
     let row_definitions_collection_0 = __t::Grid::__markup_get_RowDefinitions(&grid_1);
     // Controls/SimpleControls.xaml(75,16) RowDefinition
@@ -11478,8 +11059,7 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(76,16) RowDefinition
     let row_definition_3 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(76,16) Height
-    let priority_7 = __t::BindingPriority::Template;
-    row_definition_3.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_7);
+    row_definition_3.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_1, __t::Clone::clone(&row_definition_3));
     // Controls/SimpleControls.xaml(77,16) RowDefinitions
     let row_definitions_collection_2 = __t::Grid::__markup_get_RowDefinitions(&grid_1);
@@ -11495,27 +11075,23 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(81,16) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(81,16) Width
-    let priority_8 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_8);
+    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(82,16) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_1);
     // Controls/SimpleControls.xaml(82,16) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(82,16) Width
-    let priority_9 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(12.0_f64, __t::GridUnitType::Pixel), priority_9);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(12.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(82,16) MaxWidth
-    let priority_10 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::max_width_property(), 12.0_f64, priority_10);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::max_width_property(), 12.0_f64, __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(83,16) ColumnDefinitions
     let column_definitions_collection_2 = __t::Grid::__markup_get_ColumnDefinitions(&grid_1);
     // Controls/SimpleControls.xaml(83,16) ColumnDefinition
     let column_definition_2 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(83,16) Width
-    let priority_11 = __t::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_11);
+    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, __t::Clone::clone(&column_definition_2));
     // Controls/SimpleControls.xaml(86,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -11526,20 +11102,15 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(86,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_2, "SwitchAreaGrid", 86, 19)?;
     // Controls/SimpleControls.xaml(86,14) RowSpan
-    let priority_12 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_68(&grid_2);
     // Controls/SimpleControls.xaml(86,14) ColumnSpan
-    let priority_13 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Grid::column_span_property(), 3_i32, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_54(&grid_2);
     // Controls/SimpleControls.xaml(86,14) Background
-    let priority_14 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_14);
+    grid_2.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(86,14) IsTemplateFocusTarget
-    let priority_15 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_92(&grid_2);
     // Controls/SimpleControls.xaml(86,14) Margin
-    let priority_16 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), priority_16);
+    grid_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), __t::BindingPriority::Template);
     rt::end_init(&grid_2, 86, 14)?;
     // Controls/SimpleControls.xaml(93,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -11550,17 +11121,14 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(93,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_OffContentPresenter", 93, 31)?;
     // Controls/SimpleControls.xaml(93,14) RowSpan
-    let priority_17 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_68(&content_presenter_1);
     // Controls/SimpleControls.xaml(93,14) Column
-    let priority_18 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_60(&content_presenter_1);
     // Controls/SimpleControls.xaml(96,31) Content (setter chosen at run time)
-    let priority_19 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ToggleSwitch::off_content_property()));
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
     let value_2: __t::MarkupValue = rt::to_value(provided_7);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_19, "ContentControl.Content", 96, 31)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 96, 31)?;
     // Controls/SimpleControls.xaml(97,31) ContentTemplate
     rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R99)?;
     rt::end_init(&content_presenter_1, 93, 14)?;
@@ -11573,17 +11141,14 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(101,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_2, "PART_OnContentPresenter", 101, 31)?;
     // Controls/SimpleControls.xaml(101,14) RowSpan
-    let priority_20 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_20);
+    __build_controls_simplecontrols_xaml_template_setter_68(&content_presenter_2);
     // Controls/SimpleControls.xaml(101,14) Column
-    let priority_21 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_21);
+    __build_controls_simplecontrols_xaml_template_setter_60(&content_presenter_2);
     // Controls/SimpleControls.xaml(104,31) Content (setter chosen at run time)
-    let priority_22 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ToggleSwitch::on_content_property()));
     let provided_11 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     let value_3: __t::MarkupValue = rt::to_value(provided_11);
-    rt::bind_or_set_null(content_presenter_2.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_3, priority_22, "ContentControl.Content", 104, 31)?;
+    rt::bind_or_set_null(content_presenter_2.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_3, __t::BindingPriority::Template, "ContentControl.Content", 104, 31)?;
     // Controls/SimpleControls.xaml(105,31) ContentTemplate
     rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R100)?;
     rt::end_init(&content_presenter_2, 101, 14)?;
@@ -11597,20 +11162,15 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(109,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "OuterBorder", 109, 21)?;
     // Controls/SimpleControls.xaml(109,14) Row
-    let priority_23 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_61(&border_0);
     // Controls/SimpleControls.xaml(109,14) Height
-    let priority_24 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::height_property(), 20.0_f64, priority_24);
+    __build_controls_simplecontrols_xaml_template_setter_86(&border_0);
     // Controls/SimpleControls.xaml(109,14) Width
-    let priority_25 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::width_property(), 40.0_f64, priority_25);
+    border_0.set_value_with_priority(__t::Layoutable::width_property(), 40.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(109,14) CornerRadius
-    let priority_26 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(10.0_f64, 10.0_f64, 10.0_f64, 10.0_f64), priority_26);
+    border_0.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(10.0_f64, 10.0_f64, 10.0_f64, 10.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(109,14) Background
-    let priority_27 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_27);
+    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(115,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ThemeBorderMidColor", 115, 21)?;
     // Controls/SimpleControls.xaml(116,21) BorderThickness
@@ -11626,17 +11186,13 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(118,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_1, "SwitchKnobBounds", 118, 21)?;
     // Controls/SimpleControls.xaml(118,14) Row
-    let priority_28 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_28);
+    __build_controls_simplecontrols_xaml_template_setter_61(&border_1);
     // Controls/SimpleControls.xaml(118,14) Height
-    let priority_29 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::height_property(), 20.0_f64, priority_29);
+    __build_controls_simplecontrols_xaml_template_setter_86(&border_1);
     // Controls/SimpleControls.xaml(118,14) Width
-    let priority_30 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::width_property(), 40.0_f64, priority_30);
+    border_1.set_value_with_priority(__t::Layoutable::width_property(), 40.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(118,14) CornerRadius
-    let priority_31 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(10.0_f64, 10.0_f64, 10.0_f64, 10.0_f64), priority_31);
+    border_1.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(10.0_f64, 10.0_f64, 10.0_f64, 10.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(123,21) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "ThemeAccentColor", 123, 21)?;
     // Controls/SimpleControls.xaml(124,21) BorderBrush
@@ -11654,17 +11210,13 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(127,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &canvas_0, "PART_SwitchKnob", 127, 21)?;
     // Controls/SimpleControls.xaml(127,14) Row
-    let priority_32 = __t::BindingPriority::Template;
-    canvas_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_32);
+    __build_controls_simplecontrols_xaml_template_setter_61(&canvas_0);
     // Controls/SimpleControls.xaml(127,14) HorizontalAlignment
-    let priority_33 = __t::BindingPriority::Template;
-    canvas_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_33);
+    __build_controls_simplecontrols_xaml_template_setter_57(&canvas_0);
     // Controls/SimpleControls.xaml(127,14) Width
-    let priority_34 = __t::BindingPriority::Template;
-    canvas_0.set_value_with_priority(__t::Layoutable::width_property(), 20.0_f64, priority_34);
+    __build_controls_simplecontrols_xaml_template_setter_73(&canvas_0);
     // Controls/SimpleControls.xaml(127,14) Height
-    let priority_35 = __t::BindingPriority::Template;
-    canvas_0.set_value_with_priority(__t::Layoutable::height_property(), 20.0_f64, priority_35);
+    __build_controls_simplecontrols_xaml_template_setter_86(&canvas_0);
     // Controls/SimpleControls.xaml(131,16) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(canvas_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(131,16) Grid
@@ -11675,11 +11227,9 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(131,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_3, "PART_MovingKnobs", 131, 21)?;
     // Controls/SimpleControls.xaml(131,16) Width
-    let priority_36 = __t::BindingPriority::Template;
-    grid_3.set_value_with_priority(__t::Layoutable::width_property(), 20.0_f64, priority_36);
+    __build_controls_simplecontrols_xaml_template_setter_73(&grid_3);
     // Controls/SimpleControls.xaml(131,16) Height
-    let priority_37 = __t::BindingPriority::Template;
-    grid_3.set_value_with_priority(__t::Layoutable::height_property(), 20.0_f64, priority_37);
+    __build_controls_simplecontrols_xaml_template_setter_86(&grid_3);
     // Controls/SimpleControls.xaml(134,18) Children
     let children_collection_9 = __t::Panel::__markup_get_Children(grid_3.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(134,18) Ellipse
@@ -11692,11 +11242,9 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(135,26) Fill
     rt::bind_dynamic_resource(&context, ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "HighlightForegroundColor", 135, 26)?;
     // Controls/SimpleControls.xaml(134,18) Width
-    let priority_38 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_38);
+    __build_controls_simplecontrols_xaml_template_setter_4(&ellipse_0);
     // Controls/SimpleControls.xaml(134,18) Height
-    let priority_39 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_39);
+    __build_controls_simplecontrols_xaml_template_setter_5(&ellipse_0);
     rt::pop_parent_and_end_init(&context, &ellipse_0, 134, 18)?;
     // Controls/SimpleControls.xaml(138,18) Children
     let children_collection_10 = __t::Panel::__markup_get_Children(grid_3.upcast_ref::<__t::Panel>());
@@ -11710,11 +11258,9 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     // Controls/SimpleControls.xaml(139,26) Fill
     rt::bind_dynamic_resource(&context, ellipse_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeBorderMidColor", 139, 26)?;
     // Controls/SimpleControls.xaml(138,18) Width
-    let priority_40 = __t::BindingPriority::Template;
-    ellipse_1.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_40);
+    __build_controls_simplecontrols_xaml_template_setter_4(&ellipse_1);
     // Controls/SimpleControls.xaml(138,18) Height
-    let priority_41 = __t::BindingPriority::Template;
-    ellipse_1.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_41);
+    __build_controls_simplecontrols_xaml_template_setter_5(&ellipse_1);
     rt::pop_parent_and_end_init(&context, &ellipse_1, 138, 18)?;
     rt::pop_parent_and_end_init(&context, &grid_3, 131, 16)?;
     rt::pop_parent_and_end_init(&context, &canvas_0, 127, 14)?;
@@ -11879,16 +11425,13 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     // Controls/SimpleControls.xaml(36,28) Name
     rt::set_and_register_name(name_scope.as_ref(), &uniform_grid_0, "PART_SpinnerPanel", 36, 28)?;
     // Controls/SimpleControls.xaml(36,16) TabIndex
-    let priority_0 = __t::BindingPriority::Template;
-    uniform_grid_0.set_value_with_priority(__t::InputElement::tab_index_property(), 2_i32, priority_0);
+    uniform_grid_0.set_value_with_priority(__t::InputElement::tab_index_property(), 2_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(36,16) Dock
-    let priority_1 = __t::BindingPriority::Template;
-    uniform_grid_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Right, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_31(&uniform_grid_0);
     // Controls/SimpleControls.xaml(39,28) IsVisible
     rt::apply_template_binding(uniform_grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), || rt::property(__t::Visual::is_visible_property()), 39, 28)?;
     // Controls/SimpleControls.xaml(36,16) Rows
-    let priority_2 = __t::BindingPriority::Template;
-    uniform_grid_0.set_value_with_priority(__t::UniformGrid::rows_property(), 2_i32, priority_2);
+    uniform_grid_0.set_value_with_priority(__t::UniformGrid::rows_property(), 2_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(41,18) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(uniform_grid_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(41,18) RepeatButton
@@ -11901,10 +11444,9 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     // Controls/SimpleControls.xaml(42,31) IsTabStop
     rt::apply_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::InputElement::is_tab_stop_property()), || rt::property(__t::InputElement::is_tab_stop_property()), 42, 31)?;
     // Controls/SimpleControls.xaml(43,31) Theme (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let provided_9 = rt::provide_static_resource(&context, "SimpleButtonSpinnerRepeatButton", || rt::property_value(__t::StyledElement::theme_property()), 43, 31)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_9);
-    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_3, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 43, 31)?;
+    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 43, 31)?;
     // Controls/SimpleControls.xaml(44,20) Content
     // Controls/SimpleControls.xaml(44,20) Path
     let path_0 = __t::Path::new();
@@ -11912,26 +11454,20 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     repeat_button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_0)));
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(44,20) Width
-    let priority_4 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::width_property(), 8.0_f64, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_20(&path_0);
     // Controls/SimpleControls.xaml(44,20) Height
-    let priority_5 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::height_property(), 4.0_f64, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_21(&path_0);
     // Controls/SimpleControls.xaml(44,20) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_0);
     // Controls/SimpleControls.xaml(44,20) VerticalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(44,20) Data
     let value_1 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M0,5 L4.5,.5 9,5 6,5 4.5,3.5 3,5 z")), 48, 25)?;
-    let priority_8 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), priority_8);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(49,25) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundBrush", 49, 25)?;
     // Controls/SimpleControls.xaml(44,20) Stretch
-    let priority_9 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 44, 20)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_0, 41, 18)?;
     // Controls/SimpleControls.xaml(52,18) Children
@@ -11946,10 +11482,9 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     // Controls/SimpleControls.xaml(53,31) IsTabStop
     rt::apply_template_binding(repeat_button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::InputElement::is_tab_stop_property()), || rt::property(__t::InputElement::is_tab_stop_property()), 53, 31)?;
     // Controls/SimpleControls.xaml(54,31) Theme (setter chosen at run time)
-    let priority_10 = __t::BindingPriority::Template;
     let provided_12 = rt::provide_static_resource(&context, "SimpleButtonSpinnerRepeatButton", || rt::property_value(__t::StyledElement::theme_property()), 54, 31)?;
     let value_2: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_10, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 54, 31)?;
+    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 54, 31)?;
     // Controls/SimpleControls.xaml(55,20) Content
     // Controls/SimpleControls.xaml(55,20) Path
     let path_1 = __t::Path::new();
@@ -11957,26 +11492,20 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     repeat_button_1.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_1)));
     rt::push_parent(&context, &path_1);
     // Controls/SimpleControls.xaml(55,20) Width
-    let priority_11 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::width_property(), 8.0_f64, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_20(&path_1);
     // Controls/SimpleControls.xaml(55,20) Height
-    let priority_12 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::height_property(), 4.0_f64, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_21(&path_1);
     // Controls/SimpleControls.xaml(55,20) HorizontalAlignment
-    let priority_13 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_1);
     // Controls/SimpleControls.xaml(55,20) VerticalAlignment
-    let priority_14 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_1);
     // Controls/SimpleControls.xaml(55,20) Data
     let value_3 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M0,0 L3,0 4.5,1.5 6,0 9,0 4.5,4.5 z")), 59, 25)?;
-    let priority_15 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_3)), priority_15);
+    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_3)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(60,25) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundBrush", 60, 25)?;
     // Controls/SimpleControls.xaml(55,20) Stretch
-    let priority_16 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_1);
     rt::pop_parent_and_end_init(&context, &path_1, 55, 20)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_1, 52, 18)?;
     rt::pop_parent_and_end_init(&context, &uniform_grid_0, 36, 16)?;
@@ -11989,19 +11518,16 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     // Controls/SimpleControls.xaml(64,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 64, 33)?;
     // Controls/SimpleControls.xaml(64,16) Column
-    let priority_17 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_9(&content_presenter_0);
     // Controls/SimpleControls.xaml(64,16) TabIndex
-    let priority_18 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::InputElement::tab_index_property(), 1_i32, priority_18);
+    content_presenter_0.set_value_with_priority(__t::InputElement::tab_index_property(), 1_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(67,33) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R102)?;
     // Controls/SimpleControls.xaml(70,33) Content (setter chosen at run time)
-    let priority_19 = __t::BindingPriority::Template;
     let template_binding_13 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_17 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_13);
     let value_4: __t::MarkupValue = rt::to_value(provided_17);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_4, priority_19, "ContentControl.Content", 70, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_4, __t::BindingPriority::Template, "ContentControl.Content", 70, 33)?;
     // Controls/SimpleControls.xaml(71,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 71, 33)?;
     rt::end_init(&content_presenter_0, 64, 16)?;
@@ -12091,14 +11617,12 @@ fn build_controls_simplecontrols_xaml_deferred_128(
     // Controls/SimpleControls.xaml(21,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 21, 27)?;
     // Controls/SimpleControls.xaml(21,10) Background
-    let priority_0 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(23,27) Content (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let template_binding_0 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_0 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_1, "ContentControl.Content", 23, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 23, 27)?;
     rt::end_init(&content_presenter_0, 21, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -12369,15 +11893,13 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(46,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "PART_WindowBorder", 46, 23)?;
     // Controls/SimpleControls.xaml(46,16) Background
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(48,23) BorderThickness
     rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::frame_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 48, 23)?;
     // Controls/SimpleControls.xaml(49,23) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ThemeBorderMidBrush", 49, 23)?;
     // Controls/SimpleControls.xaml(46,16) IsHitTestVisible
-    let priority_1 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_15(&border_0);
     rt::pop_parent_and_end_init(&context, &border_0, 46, 16)?;
     // Controls/SimpleControls.xaml(52,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -12389,8 +11911,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(52,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_1, "PART_TitleBar", 52, 22)?;
     // Controls/SimpleControls.xaml(52,16) VerticalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_56(&panel_1);
     // Controls/SimpleControls.xaml(53,22) Height
     rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 53, 22)?;
     // Controls/SimpleControls.xaml(54,22) Background
@@ -12398,8 +11919,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(55,22) IsVisible
     rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), || rt::property(__t::Visual::is_visible_property()), 55, 22)?;
     // Controls/SimpleControls.xaml(52,16) ElementRole
-    let priority_3 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::TitleBar, priority_3);
+    panel_1.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::TitleBar, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &panel_1, 52, 16)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 45, 14)?;
     // Controls/SimpleControls.xaml(62,14) Overlay
@@ -12419,13 +11939,11 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(64,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_3, "PART_TitleTextPanel", 64, 22)?;
     // Controls/SimpleControls.xaml(64,16) VerticalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    panel_3.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_56(&panel_3);
     // Controls/SimpleControls.xaml(65,22) Height
     rt::apply_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 65, 22)?;
     // Controls/SimpleControls.xaml(64,16) IsHitTestVisible
-    let priority_5 = __t::BindingPriority::Template;
-    panel_3.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_15(&panel_3);
     // Controls/SimpleControls.xaml(67,22) IsVisible
     rt::apply_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), || rt::property(__t::Visual::is_visible_property()), 67, 22)?;
     // Controls/SimpleControls.xaml(68,18) Children
@@ -12437,14 +11955,11 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(68,28) Text
     rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_property()), || rt::property(__t::TextBlock::text_property()), 68, 28)?;
     // Controls/SimpleControls.xaml(68,18) VerticalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_2(&text_block_0);
     // Controls/SimpleControls.xaml(68,18) Margin
-    let priority_7 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_7);
+    text_block_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(68,18) FontSize
-    let priority_8 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 12.0_f64, priority_8);
+    text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 12.0_f64, __t::BindingPriority::Template);
     rt::end_init(&text_block_0, 68, 18)?;
     rt::end_init(&panel_3, 64, 16)?;
     // Controls/SimpleControls.xaml(73,16) Children
@@ -12457,24 +11972,19 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(73,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &stack_panel_0, "PART_OverlayPanel", 73, 27)?;
     // Controls/SimpleControls.xaml(73,16) VerticalAlignment
-    let priority_9 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_56(&stack_panel_0);
     // Controls/SimpleControls.xaml(73,16) HorizontalAlignment
-    let priority_10 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_14(&stack_panel_0);
     // Controls/SimpleControls.xaml(76,27) Height
     rt::apply_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 76, 27)?;
     // Controls/SimpleControls.xaml(73,16) Orientation
-    let priority_11 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_99(&stack_panel_0);
     // Controls/SimpleControls.xaml(73,16) Spacing
-    let priority_12 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 2.0_f64, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_100(&stack_panel_0);
     // Controls/SimpleControls.xaml(79,27) IsVisible
     rt::apply_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), || rt::property(__t::Visual::is_visible_property()), 79, 27)?;
     // Controls/SimpleControls.xaml(73,16) FontSize
-    let priority_13 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::TextElement::font_size_property(), 10.0_f64, priority_13);
+    stack_panel_0.set_value_with_priority(__t::TextElement::font_size_property(), 10.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(81,18) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(81,18) Button
@@ -12485,13 +11995,11 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(81,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_0, "PART_FullScreenButton", 81, 25)?;
     // Controls/SimpleControls.xaml(82,25) Theme (setter chosen at run time)
-    let priority_14 = __t::BindingPriority::Template;
     let provided_10 = rt::provide_static_resource(&context, "SimpleDrawnCaptionButton", || rt::property_value(__t::StyledElement::theme_property()), 82, 25)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_10);
-    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_14, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 82, 25)?;
+    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 82, 25)?;
     // Controls/SimpleControls.xaml(81,18) ElementRole
-    let priority_15 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::FullScreenButton, priority_15);
+    button_0.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::FullScreenButton, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(84,20) Content
     // Controls/SimpleControls.xaml(84,20) Viewbox
     let viewbox_0 = __t::Viewbox::new();
@@ -12499,11 +12007,9 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&viewbox_0)));
     rt::push_parent(&context, &viewbox_0);
     // Controls/SimpleControls.xaml(84,20) Width
-    let priority_16 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::width_property(), 11.0_f64, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_16(&viewbox_0);
     // Controls/SimpleControls.xaml(84,20) Margin
-    let priority_17 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_17);
+    viewbox_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(85,22) Child
     // Controls/SimpleControls.xaml(85,22) Path
     let path_0 = __t::Path::new();
@@ -12513,14 +12019,12 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(85,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_0, "FullScreenButtonPath", 85, 27)?;
     // Controls/SimpleControls.xaml(85,22) Stretch
-    let priority_18 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::UniformToFill, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_103(&path_0);
     // Controls/SimpleControls.xaml(87,27) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "CaptionButtonForeground", 87, 27)?;
     // Controls/SimpleControls.xaml(85,22) Data
     let value_1 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M2048 2048v-819h-205v469l-1493 -1493h469v-205h-819v819h205v-469l1493 1493h-469v205h819z")), 88, 27)?;
-    let priority_19 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), priority_19);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &path_0, 85, 22)?;
     rt::pop_parent_and_end_init(&context, &viewbox_0, 84, 20)?;
     rt::pop_parent_and_end_init(&context, &button_0, 81, 18)?;
@@ -12534,16 +12038,13 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(91,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_1, "PART_MinimizeButton", 91, 25)?;
     // Controls/SimpleControls.xaml(92,25) Theme (setter chosen at run time)
-    let priority_20 = __t::BindingPriority::Template;
     let provided_12 = rt::provide_static_resource(&context, "SimpleDrawnCaptionButton", || rt::property_value(__t::StyledElement::theme_property()), 92, 25)?;
     let value_2: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_20, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 92, 25)?;
+    rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 92, 25)?;
     // Controls/SimpleControls.xaml(91,18) ElementRole
-    let priority_21 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::MinimizeButton, priority_21);
+    button_1.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::MinimizeButton, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(94,25) Name
-    let priority_22 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Minimize")), priority_22);
+    button_1.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Minimize")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(95,20) Content
     // Controls/SimpleControls.xaml(95,20) Viewbox
     let viewbox_1 = __t::Viewbox::new();
@@ -12551,11 +12052,9 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     button_1.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&viewbox_1)));
     rt::push_parent(&context, &viewbox_1);
     // Controls/SimpleControls.xaml(95,20) Width
-    let priority_23 = __t::BindingPriority::Template;
-    viewbox_1.set_value_with_priority(__t::Layoutable::width_property(), 11.0_f64, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_16(&viewbox_1);
     // Controls/SimpleControls.xaml(95,20) Margin
-    let priority_24 = __t::BindingPriority::Template;
-    viewbox_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_24);
+    viewbox_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(96,22) Child
     // Controls/SimpleControls.xaml(96,22) Path
     let path_1 = __t::Path::new();
@@ -12563,14 +12062,12 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     viewbox_1.set_value(__t::Viewbox::child_property(), __t::Option::Some(__t::Clone::clone(&path_1).upcast::<__t::Control>()));
     rt::push_parent(&context, &path_1);
     // Controls/SimpleControls.xaml(96,22) Stretch
-    let priority_25 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::UniformToFill, priority_25);
+    __build_controls_simplecontrols_xaml_template_setter_103(&path_1);
     // Controls/SimpleControls.xaml(97,27) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "CaptionButtonForeground", 97, 27)?;
     // Controls/SimpleControls.xaml(96,22) Data
     let value_3 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M2048 1229v-205h-2048v205h2048z")), 98, 27)?;
-    let priority_26 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_3)), priority_26);
+    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_3)), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &path_1, 96, 22)?;
     rt::pop_parent_and_end_init(&context, &viewbox_1, 95, 20)?;
     rt::pop_parent_and_end_init(&context, &button_1, 91, 18)?;
@@ -12584,16 +12081,13 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(101,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_2, "PART_MaximizeButton", 101, 25)?;
     // Controls/SimpleControls.xaml(102,25) Theme (setter chosen at run time)
-    let priority_27 = __t::BindingPriority::Template;
     let provided_14 = rt::provide_static_resource(&context, "SimpleDrawnCaptionButton", || rt::property_value(__t::StyledElement::theme_property()), 102, 25)?;
     let value_4: __t::MarkupValue = rt::to_value(provided_14);
-    rt::bind_or_set_priority(button_2.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_4, priority_27, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 102, 25)?;
+    rt::bind_or_set_priority(button_2.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_4, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 102, 25)?;
     // Controls/SimpleControls.xaml(101,18) ElementRole
-    let priority_28 = __t::BindingPriority::Template;
-    button_2.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::MaximizeButton, priority_28);
+    button_2.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::MaximizeButton, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(104,25) Name
-    let priority_29 = __t::BindingPriority::Template;
-    button_2.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Maximize")), priority_29);
+    button_2.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Maximize")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(105,20) Content
     // Controls/SimpleControls.xaml(105,20) Viewbox
     let viewbox_2 = __t::Viewbox::new();
@@ -12601,19 +12095,15 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     button_2.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&viewbox_2)));
     rt::push_parent(&context, &viewbox_2);
     // Controls/SimpleControls.xaml(105,20) Width
-    let priority_30 = __t::BindingPriority::Template;
-    viewbox_2.set_value_with_priority(__t::Layoutable::width_property(), 11.0_f64, priority_30);
+    __build_controls_simplecontrols_xaml_template_setter_16(&viewbox_2);
     // Controls/SimpleControls.xaml(105,20) Margin
-    let priority_31 = __t::BindingPriority::Template;
-    viewbox_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_31);
+    viewbox_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(107,24) RenderTransform
     // Controls/SimpleControls.xaml(107,24) RotateTransform
     let rotate_transform_0 = __t::RotateTransform::new();
     // Controls/SimpleControls.xaml(107,24) Angle
-    let priority_32 = __t::BindingPriority::Template;
-    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), -90.0_f64, priority_32);
-    let priority_33 = __t::BindingPriority::Template;
-    viewbox_2.set_value_with_priority(__t::Visual::render_transform_property(), rt::cast(rotate_transform_0.clone(), 105, 39)?, priority_33);
+    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), -90.0_f64, __t::BindingPriority::Template);
+    viewbox_2.set_value_with_priority(__t::Visual::render_transform_property(), rt::cast(rotate_transform_0.clone(), 105, 39)?, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(109,22) Child
     // Controls/SimpleControls.xaml(109,22) Path
     let path_2 = __t::Path::new();
@@ -12623,14 +12113,12 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(109,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_2, "RestoreButtonPath", 109, 27)?;
     // Controls/SimpleControls.xaml(109,22) Stretch
-    let priority_34 = __t::BindingPriority::Template;
-    path_2.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::UniformToFill, priority_34);
+    __build_controls_simplecontrols_xaml_template_setter_103(&path_2);
     // Controls/SimpleControls.xaml(111,27) Fill
     rt::bind_dynamic_resource(&context, path_2.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "CaptionButtonForeground", 111, 27)?;
     // Controls/SimpleControls.xaml(109,22) Data
     let value_5 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M2048 2048v-2048h-2048v2048h2048zM1843 1843h-1638v-1638h1638v1638z")), 112, 27)?;
-    let priority_35 = __t::BindingPriority::Template;
-    path_2.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_5)), priority_35);
+    path_2.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_5)), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &path_2, 109, 22)?;
     rt::pop_parent_and_end_init(&context, &viewbox_2, 105, 20)?;
     rt::pop_parent_and_end_init(&context, &button_2, 101, 18)?;
@@ -12648,16 +12136,13 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(117,25) BorderBrush
     rt::bind_dynamic_resource(&context, button_3.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), "CaptionButtonCloseBorderBrush", 117, 25)?;
     // Controls/SimpleControls.xaml(118,25) Theme (setter chosen at run time)
-    let priority_36 = __t::BindingPriority::Template;
     let provided_18 = rt::provide_static_resource(&context, "SimpleDrawnCaptionButton", || rt::property_value(__t::StyledElement::theme_property()), 118, 25)?;
     let value_6: __t::MarkupValue = rt::to_value(provided_18);
-    rt::bind_or_set_priority(button_3.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_6, priority_36, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 118, 25)?;
+    rt::bind_or_set_priority(button_3.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_6, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 118, 25)?;
     // Controls/SimpleControls.xaml(115,18) ElementRole
-    let priority_37 = __t::BindingPriority::Template;
-    button_3.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::CloseButton, priority_37);
+    button_3.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::CloseButton, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(120,25) Name
-    let priority_38 = __t::BindingPriority::Template;
-    button_3.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Close")), priority_38);
+    button_3.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Close")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(121,20) Content
     // Controls/SimpleControls.xaml(121,20) Viewbox
     let viewbox_3 = __t::Viewbox::new();
@@ -12665,11 +12150,9 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     button_3.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&viewbox_3)));
     rt::push_parent(&context, &viewbox_3);
     // Controls/SimpleControls.xaml(121,20) Width
-    let priority_39 = __t::BindingPriority::Template;
-    viewbox_3.set_value_with_priority(__t::Layoutable::width_property(), 11.0_f64, priority_39);
+    __build_controls_simplecontrols_xaml_template_setter_16(&viewbox_3);
     // Controls/SimpleControls.xaml(121,20) Margin
-    let priority_40 = __t::BindingPriority::Template;
-    viewbox_3.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_40);
+    viewbox_3.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(122,22) Child
     // Controls/SimpleControls.xaml(122,22) Path
     let path_3 = __t::Path::new();
@@ -12677,14 +12160,12 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     viewbox_3.set_value(__t::Viewbox::child_property(), __t::Option::Some(__t::Clone::clone(&path_3).upcast::<__t::Control>()));
     rt::push_parent(&context, &path_3);
     // Controls/SimpleControls.xaml(122,22) Stretch
-    let priority_41 = __t::BindingPriority::Template;
-    path_3.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::UniformToFill, priority_41);
+    __build_controls_simplecontrols_xaml_template_setter_103(&path_3);
     // Controls/SimpleControls.xaml(123,27) Fill
     rt::bind_dynamic_resource(&context, path_3.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "CaptionButtonForeground", 123, 27)?;
     // Controls/SimpleControls.xaml(122,22) Data
     let value_7 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M1169 1024l879 -879l-145 -145l-879 879l-879 -879l-145 145l879 879l-879 879l145 145l879 -879l879 879l145 -145z")), 124, 27)?;
-    let priority_42 = __t::BindingPriority::Template;
-    path_3.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_7)), priority_42);
+    path_3.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_7)), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &path_3, 122, 22)?;
     rt::pop_parent_and_end_init(&context, &viewbox_3, 121, 20)?;
     rt::pop_parent_and_end_init(&context, &button_3, 115, 18)?;
@@ -12697,16 +12178,13 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     __t::WindowDrawnDecorationsContent::__markup_set_FullscreenPopover(&window_drawn_decorations_content_0, __t::Option::Some(__t::Clone::clone(&panel_4).upcast::<__t::Control>()));
     rt::push_parent(&context, &panel_4);
     // Controls/SimpleControls.xaml(133,14) Height
-    let priority_43 = __t::BindingPriority::Template;
-    panel_4.set_value_with_priority(__t::Layoutable::height_property(), 30.0_f64, priority_43);
+    panel_4.set_value_with_priority(__t::Layoutable::height_property(), 30.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(133,14) VerticalAlignment
-    let priority_44 = __t::BindingPriority::Template;
-    panel_4.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_44);
+    __build_controls_simplecontrols_xaml_template_setter_56(&panel_4);
     // Controls/SimpleControls.xaml(135,20) Background
     rt::bind_dynamic_resource(&context, panel_4.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), "ThemeAccentBrush", 135, 20)?;
     // Controls/SimpleControls.xaml(133,14) ElementRole
-    let priority_45 = __t::BindingPriority::Template;
-    panel_4.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::DecorationsElement, priority_45);
+    panel_4.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::DecorationsElement, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(137,16) Children
     let children_collection_9 = __t::Panel::__markup_get_Children(&panel_4);
     // Controls/SimpleControls.xaml(137,16) TextBlock
@@ -12719,16 +12197,13 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(138,26) Text
     rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_property()), || rt::property(__t::TextBlock::text_property()), 138, 26)?;
     // Controls/SimpleControls.xaml(137,16) VerticalAlignment
-    let priority_46 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_46);
+    __build_controls_simplecontrols_xaml_template_setter_2(&text_block_1);
     // Controls/SimpleControls.xaml(140,26) Foreground
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "HighlightForegroundBrush", 140, 26)?;
     // Controls/SimpleControls.xaml(137,16) Margin
-    let priority_47 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_47);
+    text_block_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(137,16) FontSize
-    let priority_48 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::TextBlock::font_size_property(), 12.0_f64, priority_48);
+    text_block_1.set_value_with_priority(__t::TextBlock::font_size_property(), 12.0_f64, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &text_block_1, 137, 16)?;
     // Controls/SimpleControls.xaml(143,16) Children
     let children_collection_10 = __t::Panel::__markup_get_Children(&panel_4);
@@ -12738,17 +12213,13 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     __t::Controls::__markup_Add_0(&children_collection_10, __t::Clone::clone(&stack_panel_1).upcast::<__t::Control>());
     rt::push_parent(&context, &stack_panel_1);
     // Controls/SimpleControls.xaml(143,16) HorizontalAlignment
-    let priority_49 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_49);
+    __build_controls_simplecontrols_xaml_template_setter_14(&stack_panel_1);
     // Controls/SimpleControls.xaml(143,16) Orientation
-    let priority_50 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_50);
+    __build_controls_simplecontrols_xaml_template_setter_99(&stack_panel_1);
     // Controls/SimpleControls.xaml(143,16) Spacing
-    let priority_51 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::StackPanel::spacing_property(), 2.0_f64, priority_51);
+    __build_controls_simplecontrols_xaml_template_setter_100(&stack_panel_1);
     // Controls/SimpleControls.xaml(143,16) FontSize
-    let priority_52 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::TextElement::font_size_property(), 10.0_f64, priority_52);
+    stack_panel_1.set_value_with_priority(__t::TextElement::font_size_property(), 10.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(147,18) Children
     let children_collection_11 = __t::Panel::__markup_get_Children(stack_panel_1.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(147,18) Button
@@ -12759,13 +12230,11 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(147,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_4, "PART_PopoverFullScreenButton", 147, 25)?;
     // Controls/SimpleControls.xaml(148,25) Theme (setter chosen at run time)
-    let priority_53 = __t::BindingPriority::Template;
     let provided_23 = rt::provide_static_resource(&context, "SimpleDrawnCaptionButton", || rt::property_value(__t::StyledElement::theme_property()), 148, 25)?;
     let value_8: __t::MarkupValue = rt::to_value(provided_23);
-    rt::bind_or_set_priority(button_4.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_8, priority_53, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 148, 25)?;
+    rt::bind_or_set_priority(button_4.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_8, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 148, 25)?;
     // Controls/SimpleControls.xaml(147,18) ElementRole
-    let priority_54 = __t::BindingPriority::Template;
-    button_4.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::FullScreenButton, priority_54);
+    button_4.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::FullScreenButton, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(150,20) Content
     // Controls/SimpleControls.xaml(150,20) Viewbox
     let viewbox_4 = __t::Viewbox::new();
@@ -12773,11 +12242,9 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     button_4.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&viewbox_4)));
     rt::push_parent(&context, &viewbox_4);
     // Controls/SimpleControls.xaml(150,20) Width
-    let priority_55 = __t::BindingPriority::Template;
-    viewbox_4.set_value_with_priority(__t::Layoutable::width_property(), 11.0_f64, priority_55);
+    __build_controls_simplecontrols_xaml_template_setter_16(&viewbox_4);
     // Controls/SimpleControls.xaml(150,20) Margin
-    let priority_56 = __t::BindingPriority::Template;
-    viewbox_4.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_56);
+    viewbox_4.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(151,22) Child
     // Controls/SimpleControls.xaml(151,22) Path
     let path_4 = __t::Path::new();
@@ -12785,14 +12252,12 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     viewbox_4.set_value(__t::Viewbox::child_property(), __t::Option::Some(__t::Clone::clone(&path_4).upcast::<__t::Control>()));
     rt::push_parent(&context, &path_4);
     // Controls/SimpleControls.xaml(151,22) Stretch
-    let priority_57 = __t::BindingPriority::Template;
-    path_4.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::UniformToFill, priority_57);
+    __build_controls_simplecontrols_xaml_template_setter_103(&path_4);
     // Controls/SimpleControls.xaml(152,27) Fill
     rt::bind_dynamic_resource(&context, path_4.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "CaptionButtonForeground", 152, 27)?;
     // Controls/SimpleControls.xaml(151,22) Data
     let value_9 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M205 1024h819v-819h-205v469l-674 -674l-145 145l674 674h-469v205zM1374 1229h469v-205h-819v819h205v-469l674 674l145 -145z")), 153, 27)?;
-    let priority_58 = __t::BindingPriority::Template;
-    path_4.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_9)), priority_58);
+    path_4.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_9)), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &path_4, 151, 22)?;
     rt::pop_parent_and_end_init(&context, &viewbox_4, 150, 20)?;
     rt::pop_parent_and_end_init(&context, &button_4, 147, 18)?;
@@ -12810,16 +12275,13 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     // Controls/SimpleControls.xaml(158,25) BorderBrush
     rt::bind_dynamic_resource(&context, button_5.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), "CaptionButtonCloseBorderBrush", 158, 25)?;
     // Controls/SimpleControls.xaml(159,25) Theme (setter chosen at run time)
-    let priority_59 = __t::BindingPriority::Template;
     let provided_27 = rt::provide_static_resource(&context, "SimpleDrawnCaptionButton", || rt::property_value(__t::StyledElement::theme_property()), 159, 25)?;
     let value_10: __t::MarkupValue = rt::to_value(provided_27);
-    rt::bind_or_set_priority(button_5.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_10, priority_59, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 159, 25)?;
+    rt::bind_or_set_priority(button_5.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_10, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 159, 25)?;
     // Controls/SimpleControls.xaml(156,18) ElementRole
-    let priority_60 = __t::BindingPriority::Template;
-    button_5.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::CloseButton, priority_60);
+    button_5.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::CloseButton, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(161,25) Name
-    let priority_61 = __t::BindingPriority::Template;
-    button_5.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Close")), priority_61);
+    button_5.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Close")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(162,20) Content
     // Controls/SimpleControls.xaml(162,20) Viewbox
     let viewbox_5 = __t::Viewbox::new();
@@ -12827,11 +12289,9 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     button_5.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&viewbox_5)));
     rt::push_parent(&context, &viewbox_5);
     // Controls/SimpleControls.xaml(162,20) Width
-    let priority_62 = __t::BindingPriority::Template;
-    viewbox_5.set_value_with_priority(__t::Layoutable::width_property(), 11.0_f64, priority_62);
+    __build_controls_simplecontrols_xaml_template_setter_16(&viewbox_5);
     // Controls/SimpleControls.xaml(162,20) Margin
-    let priority_63 = __t::BindingPriority::Template;
-    viewbox_5.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_63);
+    viewbox_5.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(163,22) Child
     // Controls/SimpleControls.xaml(163,22) Path
     let path_5 = __t::Path::new();
@@ -12839,14 +12299,12 @@ fn build_controls_simplecontrols_xaml_deferred_130(
     viewbox_5.set_value(__t::Viewbox::child_property(), __t::Option::Some(__t::Clone::clone(&path_5).upcast::<__t::Control>()));
     rt::push_parent(&context, &path_5);
     // Controls/SimpleControls.xaml(163,22) Stretch
-    let priority_64 = __t::BindingPriority::Template;
-    path_5.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::UniformToFill, priority_64);
+    __build_controls_simplecontrols_xaml_template_setter_103(&path_5);
     // Controls/SimpleControls.xaml(164,27) Fill
     rt::bind_dynamic_resource(&context, path_5.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "CaptionButtonForeground", 164, 27)?;
     // Controls/SimpleControls.xaml(163,22) Data
     let value_11 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M1169 1024l879 -879l-145 -145l-879 879l-879 -879l-145 145l879 879l-879 879l145 145l879 -879l879 879l145 -145z")), 165, 27)?;
-    let priority_65 = __t::BindingPriority::Template;
-    path_5.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_11)), priority_65);
+    path_5.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_11)), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &path_5, 163, 22)?;
     rt::pop_parent_and_end_init(&context, &viewbox_5, 162, 20)?;
     rt::pop_parent_and_end_init(&context, &button_5, 156, 18)?;
@@ -13048,8 +12506,7 @@ fn build_controls_simplecontrols_xaml_deferred_136(
     // Controls/SimpleControls.xaml(24,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "PART_ButtonLayoutBorder", 24, 19)?;
     // Controls/SimpleControls.xaml(24,12) Background
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(26,19) BorderThickness
     rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 26, 19)?;
     // Controls/SimpleControls.xaml(27,14) Child
@@ -13061,27 +12518,21 @@ fn build_controls_simplecontrols_xaml_deferred_136(
     // Controls/SimpleControls.xaml(27,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_0, "PART_GlyphElement", 27, 19)?;
     // Controls/SimpleControls.xaml(27,14) Width
-    let priority_1 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_4(&path_0);
     // Controls/SimpleControls.xaml(27,14) Height
-    let priority_2 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_5(&path_0);
     // Controls/SimpleControls.xaml(27,14) HorizontalAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_0);
     // Controls/SimpleControls.xaml(27,14) VerticalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(32,19) Data (setter chosen at run time)
-    let priority_5 = __t::BindingPriority::Template;
     let provided_1 = rt::provide_static_resource(&context, "TextBoxClearButtonData", || rt::property_value(__t::Path::data_property()), 32, 19)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
-    rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_5, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 32, 19)?;
+    rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 32, 19)?;
     // Controls/SimpleControls.xaml(33,19) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundColor", 33, 19)?;
     // Controls/SimpleControls.xaml(27,14) Stretch
-    let priority_6 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 27, 14)?;
     rt::pop_parent_and_end_init(&context, &border_0, 24, 12)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -13151,11 +12602,9 @@ fn build_controls_simplecontrols_xaml_deferred_138(
     // Controls/SimpleControls.xaml(48,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "PART_ButtonLayoutBorder", 48, 19)?;
     // Controls/SimpleControls.xaml(48,12) Width
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_12(&border_0);
     // Controls/SimpleControls.xaml(48,12) Background
-    let priority_1 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_1);
+    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(51,14) Child
     // Controls/SimpleControls.xaml(51,14) Panel
     let panel_0 = __t::Panel::new();
@@ -13172,24 +12621,19 @@ fn build_controls_simplecontrols_xaml_deferred_138(
     // Controls/SimpleControls.xaml(52,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_0, "PART_GlyphElement_Reveal", 52, 21)?;
     // Controls/SimpleControls.xaml(52,16) Width
-    let priority_2 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_12(&path_0);
     // Controls/SimpleControls.xaml(52,16) Height
-    let priority_3 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::height_property(), 8.0_f64, priority_3);
+    path_0.set_value_with_priority(__t::Layoutable::height_property(), 8.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(52,16) HorizontalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_0);
     // Controls/SimpleControls.xaml(52,16) VerticalAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(57,21) Data
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Path::data_property(), "PasswordBoxRevealButtonData", 57, 21)?;
     // Controls/SimpleControls.xaml(58,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundColor", 58, 21)?;
     // Controls/SimpleControls.xaml(52,16) Stretch
-    let priority_6 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 52, 16)?;
     // Controls/SimpleControls.xaml(60,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -13201,24 +12645,19 @@ fn build_controls_simplecontrols_xaml_deferred_138(
     // Controls/SimpleControls.xaml(60,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_1, "PART_GlyphElement_Hide", 60, 21)?;
     // Controls/SimpleControls.xaml(60,16) Width
-    let priority_7 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_12(&path_1);
     // Controls/SimpleControls.xaml(60,16) Height
-    let priority_8 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_13(&path_1);
     // Controls/SimpleControls.xaml(60,16) HorizontalAlignment
-    let priority_9 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_1);
     // Controls/SimpleControls.xaml(60,16) VerticalAlignment
-    let priority_10 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_1);
     // Controls/SimpleControls.xaml(65,21) Data
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<__t::FerroObject>(), __t::Path::data_property(), "PasswordBoxHideButtonData", 65, 21)?;
     // Controls/SimpleControls.xaml(66,21) Fill
     rt::bind_dynamic_resource(&context, path_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundColor", 66, 21)?;
     // Controls/SimpleControls.xaml(60,16) Stretch
-    let priority_11 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_1);
     rt::pop_parent_and_end_init(&context, &path_1, 60, 16)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 51, 14)?;
     rt::pop_parent_and_end_init(&context, &border_0, 48, 12)?;
@@ -13424,8 +12863,7 @@ fn build_controls_simplecontrols_xaml_deferred_140(
     // Controls/SimpleControls.xaml(106,24) Name
     rt::set_and_register_name(name_scope.as_ref(), &text_block_0, "floatingPlaceholder", 106, 24)?;
     // Controls/SimpleControls.xaml(106,14) Dock
-    let priority_0 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_84(&text_block_0);
     // Controls/SimpleControls.xaml(108,24) FontSize
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), "FontSizeSmall", 108, 24)?;
     // Controls/SimpleControls.xaml(109,24) Foreground
@@ -13501,17 +12939,14 @@ fn build_controls_simplecontrols_xaml_deferred_140(
     content_presenter_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&content_presenter_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(125,18) Column
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_11(&content_presenter_0);
     // Controls/SimpleControls.xaml(125,18) ColumnSpan
-    let priority_2 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_span_property(), 1_i32, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_110(&content_presenter_0);
     // Controls/SimpleControls.xaml(127,35) Content (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let template_binding_9 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_left_content_property()));
     let provided_14 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_9);
     let value_2: __t::MarkupValue = rt::to_value(provided_14);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_3, "ContentControl.Content", 127, 35)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 127, 35)?;
     rt::end_init(&content_presenter_0, 125, 18)?;
     // Controls/SimpleControls.xaml(128,18) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -13523,11 +12958,9 @@ fn build_controls_simplecontrols_xaml_deferred_140(
     // Controls/SimpleControls.xaml(128,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &scroll_viewer_0, "PART_ScrollViewer", 128, 31)?;
     // Controls/SimpleControls.xaml(128,18) Column
-    let priority_4 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_9(&scroll_viewer_0);
     // Controls/SimpleControls.xaml(128,18) ColumnSpan
-    let priority_5 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::Grid::column_span_property(), 1_i32, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_110(&scroll_viewer_0);
     // Controls/SimpleControls.xaml(131,31) AllowAutoHide
     rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R106)?;
     // Controls/SimpleControls.xaml(171,22) Styles
@@ -13629,17 +13062,14 @@ fn build_controls_simplecontrols_xaml_deferred_140(
     content_presenter_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_6, __t::Clone::clone(&content_presenter_1).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(176,18) Column
-    let priority_6 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_60(&content_presenter_1);
     // Controls/SimpleControls.xaml(176,18) ColumnSpan
-    let priority_7 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Grid::column_span_property(), 1_i32, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_110(&content_presenter_1);
     // Controls/SimpleControls.xaml(178,35) Content (setter chosen at run time)
-    let priority_8 = __t::BindingPriority::Template;
     let template_binding_37 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_right_content_property()));
     let provided_46 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_37);
     let value_7: __t::MarkupValue = rt::to_value(provided_46);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_7, priority_8, "ContentControl.Content", 178, 35)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_7, __t::BindingPriority::Template, "ContentControl.Content", 178, 35)?;
     rt::end_init(&content_presenter_1, 176, 18)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 124, 16)?;
     rt::pop_parent_and_end_init(&context, &data_validation_errors_0, 122, 14)?;
@@ -13663,16 +13093,13 @@ fn build_controls_simplecontrols_xaml_deferred_141(
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_0, 208, 19)?;
     // Controls/SimpleControls.xaml(208,12) Focusable
-    let priority_0 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_19(&button_0);
     // Controls/SimpleControls.xaml(210,19) Theme (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let provided_1 = rt::provide_static_resource(&context, "SimpleTextBoxClearButtonTheme", || rt::property_value(__t::StyledElement::theme_property()), 210, 19)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
-    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_1, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 210, 19)?;
+    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 210, 19)?;
     // Controls/SimpleControls.xaml(208,12) ClipToBounds
-    let priority_2 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_10(&button_0);
     rt::pop_parent_and_end_init(&context, &button_0, 208, 12)?;
     __t::Result::Ok(rt::to_value(button_0.clone()))
 }
@@ -13688,8 +13115,7 @@ fn build_controls_simplecontrols_xaml_deferred_142(
     panel_0.begin_init();
     rt::push_parent(&context, &panel_0);
     // Controls/SimpleControls.xaml(219,12) Margin
-    let priority_0 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64), priority_0);
+    panel_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(221,16) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(panel_0.upcast_ref::<__t::StyledElement>());
     // Controls/SimpleControls.xaml(221,16) Style
@@ -13720,11 +13146,9 @@ fn build_controls_simplecontrols_xaml_deferred_142(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&toggle_button_0).upcast::<__t::Control>());
     rt::push_parent(&context, &toggle_button_0);
     // Controls/SimpleControls.xaml(228,14) Background
-    let priority_1 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_1);
+    toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(228,14) Focusable
-    let priority_2 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_19(&toggle_button_0);
     // Controls/SimpleControls.xaml(230,27) IsChecked
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[TextBox].RevealPassword"));
     // Controls/SimpleControls.xaml(230,27) Mode
@@ -13732,13 +13156,11 @@ fn build_controls_simplecontrols_xaml_deferred_142(
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::ToggleButton::is_checked_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_0, 230, 27)?;
     // Controls/SimpleControls.xaml(231,27) Theme (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let provided_1 = rt::provide_static_resource(&context, "SimplePasswordBoxRevealButtonTheme", || rt::property_value(__t::StyledElement::theme_property()), 231, 27)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
-    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_3, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 231, 27)?;
+    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 231, 27)?;
     // Controls/SimpleControls.xaml(228,14) ClipToBounds
-    let priority_4 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_10(&toggle_button_0);
     rt::pop_parent_and_end_init(&context, &toggle_button_0, 228, 14)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 219, 12)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -13816,8 +13238,7 @@ fn build_controls_simplecontrols_xaml_deferred_145(
     // Controls/SimpleControls.xaml(19,15) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_0, "RootGrid", 19, 15)?;
     // Controls/SimpleControls.xaml(19,10) UseLayoutRounding
-    let priority_0 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&true), priority_0);
+    grid_0.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(19,10) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 4_i32), 19, 58)?;
@@ -13857,22 +13278,17 @@ fn build_controls_simplecontrols_xaml_deferred_145(
     border_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&border_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(21,12) Row
-    let priority_1 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_61(&border_0);
     // Controls/SimpleControls.xaml(21,12) RowSpan
-    let priority_2 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_68(&border_0);
     // Controls/SimpleControls.xaml(21,12) Column
-    let priority_3 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_11(&border_0);
     // Controls/SimpleControls.xaml(21,12) ColumnSpan
-    let priority_4 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::column_span_property(), 4_i32, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_67(&border_0);
     // Controls/SimpleControls.xaml(25,19) CornerRadius
     rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R111)?;
     // Controls/SimpleControls.xaml(21,12) BorderBrush
-    let priority_5 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
+    border_0.set_value_with_priority(__t::Border::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(28,19) Background
     rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 28, 19)?;
     rt::end_init(&border_0, 21, 12)?;
@@ -13884,14 +13300,11 @@ fn build_controls_simplecontrols_xaml_deferred_145(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     rt::push_parent(&context, &border_1);
     // Controls/SimpleControls.xaml(30,12) Row
-    let priority_6 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_61(&border_1);
     // Controls/SimpleControls.xaml(30,12) RowSpan
-    let priority_7 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_68(&border_1);
     // Controls/SimpleControls.xaml(30,12) ColumnSpan
-    let priority_8 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::column_span_property(), 4_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_67(&border_1);
     // Controls/SimpleControls.xaml(33,19) CornerRadius
     rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R112)?;
     // Controls/SimpleControls.xaml(37,16) OpacityMask
@@ -13949,17 +13362,13 @@ fn build_controls_simplecontrols_xaml_deferred_145(
     // Controls/SimpleControls.xaml(50,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_2, "Header", 50, 19)?;
     // Controls/SimpleControls.xaml(50,12) Padding
-    let priority_9 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(3.0_f64, 0.0_f64, 3.0_f64, 0.0_f64), priority_9);
+    border_2.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(3.0_f64, 0.0_f64, 3.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(50,12) Row
-    let priority_10 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_65(&border_2);
     // Controls/SimpleControls.xaml(50,12) RowSpan
-    let priority_11 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Grid::row_span_property(), 2_i32, priority_11);
+    border_2.set_value_with_priority(__t::Grid::row_span_property(), 2_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(50,12) Column
-    let priority_12 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_9(&border_2);
     // Controls/SimpleControls.xaml(55,14) Child
     // Controls/SimpleControls.xaml(55,14) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -13968,11 +13377,10 @@ fn build_controls_simplecontrols_xaml_deferred_145(
     // Controls/SimpleControls.xaml(55,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_HeaderPresenter", 55, 31)?;
     // Controls/SimpleControls.xaml(56,31) Content (setter chosen at run time)
-    let priority_13 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     let provided_12 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_0: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_13, "ContentControl.Content", 56, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 56, 31)?;
     // Controls/SimpleControls.xaml(57,31) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R113)?;
     rt::end_init(&content_presenter_0, 55, 14)?;
@@ -13984,24 +13392,20 @@ fn build_controls_simplecontrols_xaml_deferred_145(
     content_presenter_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_3, __t::Clone::clone(&content_presenter_1).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(63,12) Row
-    let priority_14 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Grid::row_property(), 2_i32, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_113(&content_presenter_1);
     // Controls/SimpleControls.xaml(63,12) Column
-    let priority_15 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_9(&content_presenter_1);
     // Controls/SimpleControls.xaml(63,12) ColumnSpan
-    let priority_16 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_53(&content_presenter_1);
     // Controls/SimpleControls.xaml(66,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_ContentPresenter", 66, 29)?;
     // Controls/SimpleControls.xaml(67,29) ContentTemplate
     rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 67, 29)?;
     // Controls/SimpleControls.xaml(68,29) Content (setter chosen at run time)
-    let priority_17 = __t::BindingPriority::Template;
     let template_binding_12 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_18 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
     let value_1: __t::MarkupValue = rt::to_value(provided_18);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_17, "ContentControl.Content", 68, 29)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 68, 29)?;
     // Controls/SimpleControls.xaml(69,29) VerticalContentAlignment
     rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R114)?;
     rt::end_init(&content_presenter_1, 63, 12)?;
@@ -14584,8 +13988,7 @@ fn build_controls_simplecontrols_xaml_deferred_149(
     // Controls/SimpleControls.xaml(39,19) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "ThemeControlMidBrush", 39, 19)?;
     // Controls/SimpleControls.xaml(39,12) UseLayoutRounding
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&false), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_8(&border_0);
     // Controls/SimpleControls.xaml(41,14) Child
     // Controls/SimpleControls.xaml(41,14) Grid
     let grid_0 = __t::Grid::new();
@@ -14615,25 +14018,20 @@ fn build_controls_simplecontrols_xaml_deferred_149(
     // Controls/SimpleControls.xaml(42,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_0, "PART_LineUpButton", 42, 29)?;
     // Controls/SimpleControls.xaml(42,16) Row
-    let priority_1 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_65(&repeat_button_0);
     // Controls/SimpleControls.xaml(42,16) Column
-    let priority_2 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_11(&repeat_button_0);
     // Controls/SimpleControls.xaml(45,29) MinWidth
     rt::bind_dynamic_resource(&context, repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "ScrollBarThickness", 45, 29)?;
     // Controls/SimpleControls.xaml(42,16) VerticalAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_2(&repeat_button_0);
     // Controls/SimpleControls.xaml(42,16) Classes
     let classes_collection_0 = __t::StyledElement::__markup_get_Classes(repeat_button_0.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_0, __t::String::from("repeat"));
     // Controls/SimpleControls.xaml(42,16) Focusable
-    let priority_4 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_19(&repeat_button_0);
     // Controls/SimpleControls.xaml(49,29) Name
-    let priority_5 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Column left")), priority_5);
+    repeat_button_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Column left")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(50,18) Content
     // Controls/SimpleControls.xaml(50,18) Path
     let path_0 = __t::Path::new();
@@ -14641,8 +14039,7 @@ fn build_controls_simplecontrols_xaml_deferred_149(
     repeat_button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_0)));
     // Controls/SimpleControls.xaml(50,18) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 4 0 L 4 8 L 0 4 Z")), 50, 23)?;
-    let priority_6 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_6);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     rt::end_init(&path_0, 50, 18)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_0, 42, 16)?;
     // Controls/SimpleControls.xaml(52,16) Children
@@ -14652,11 +14049,9 @@ fn build_controls_simplecontrols_xaml_deferred_149(
     track_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&track_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(52,16) Row
-    let priority_7 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_61(&track_0);
     // Controls/SimpleControls.xaml(52,16) Column
-    let priority_8 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_9(&track_0);
     // Controls/SimpleControls.xaml(54,22) Maximum
     rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R115)?;
     // Controls/SimpleControls.xaml(59,22) Value
@@ -14669,37 +14064,31 @@ fn build_controls_simplecontrols_xaml_deferred_149(
     // Controls/SimpleControls.xaml(62,20) RepeatButton
     let repeat_button_1 = __t::RepeatButton::new();
     repeat_button_1.begin_init();
-    let priority_9 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::decrease_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_1).upcast::<__t::Button>()), priority_9);
+    track_0.set_value_with_priority(__t::Track::decrease_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_1).upcast::<__t::Button>()), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(62,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_1, "PART_PageUpButton", 62, 33)?;
     // Controls/SimpleControls.xaml(62,20) Classes
     let classes_collection_1 = __t::StyledElement::__markup_get_Classes(repeat_button_1.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_1, __t::String::from("repeattrack"));
     // Controls/SimpleControls.xaml(62,20) Focusable
-    let priority_10 = __t::BindingPriority::Template;
-    repeat_button_1.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_19(&repeat_button_1);
     // Controls/SimpleControls.xaml(65,33) Name
-    let priority_11 = __t::BindingPriority::Template;
-    repeat_button_1.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Page left")), priority_11);
+    repeat_button_1.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Page left")), __t::BindingPriority::Template);
     rt::end_init(&repeat_button_1, 62, 20)?;
     // Controls/SimpleControls.xaml(68,20) IncreaseButton
     // Controls/SimpleControls.xaml(68,20) RepeatButton
     let repeat_button_2 = __t::RepeatButton::new();
     repeat_button_2.begin_init();
-    let priority_12 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::increase_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_2).upcast::<__t::Button>()), priority_12);
+    track_0.set_value_with_priority(__t::Track::increase_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_2).upcast::<__t::Button>()), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(68,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_2, "PART_PageDownButton", 68, 33)?;
     // Controls/SimpleControls.xaml(68,20) Classes
     let classes_collection_2 = __t::StyledElement::__markup_get_Classes(repeat_button_2.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_2, __t::String::from("repeattrack"));
     // Controls/SimpleControls.xaml(68,20) Focusable
-    let priority_13 = __t::BindingPriority::Template;
-    repeat_button_2.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_19(&repeat_button_2);
     // Controls/SimpleControls.xaml(71,33) Name
-    let priority_14 = __t::BindingPriority::Template;
-    repeat_button_2.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Page right")), priority_14);
+    repeat_button_2.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Page right")), __t::BindingPriority::Template);
     rt::end_init(&repeat_button_2, 68, 20)?;
     // Controls/SimpleControls.xaml(73,18) Thumb
     // Controls/SimpleControls.xaml(73,18) Thumb
@@ -14709,8 +14098,7 @@ fn build_controls_simplecontrols_xaml_deferred_149(
     // Controls/SimpleControls.xaml(73,24) Name
     rt::set_and_register_name(name_scope.as_ref(), &thumb_0, "thumb", 73, 24)?;
     // Controls/SimpleControls.xaml(74,24) Name
-    let priority_15 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Position")), priority_15);
+    thumb_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Position")), __t::BindingPriority::Template);
     rt::end_init(&thumb_0, 73, 18)?;
     rt::end_init(&track_0, 52, 16)?;
     // Controls/SimpleControls.xaml(76,16) Children
@@ -14723,25 +14111,20 @@ fn build_controls_simplecontrols_xaml_deferred_149(
     // Controls/SimpleControls.xaml(76,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_3, "PART_LineDownButton", 76, 29)?;
     // Controls/SimpleControls.xaml(76,16) Row
-    let priority_16 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::Grid::row_property(), 2_i32, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_113(&repeat_button_3);
     // Controls/SimpleControls.xaml(76,16) Column
-    let priority_17 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_60(&repeat_button_3);
     // Controls/SimpleControls.xaml(79,29) MinWidth
     rt::bind_dynamic_resource(&context, repeat_button_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "ScrollBarThickness", 79, 29)?;
     // Controls/SimpleControls.xaml(76,16) VerticalAlignment
-    let priority_18 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_2(&repeat_button_3);
     // Controls/SimpleControls.xaml(76,16) Classes
     let classes_collection_3 = __t::StyledElement::__markup_get_Classes(repeat_button_3.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_3, __t::String::from("repeat"));
     // Controls/SimpleControls.xaml(76,16) Focusable
-    let priority_19 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_19(&repeat_button_3);
     // Controls/SimpleControls.xaml(83,29) Name
-    let priority_20 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Column right")), priority_20);
+    repeat_button_3.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Column right")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(84,18) Content
     // Controls/SimpleControls.xaml(84,18) Path
     let path_1 = __t::Path::new();
@@ -14749,8 +14132,7 @@ fn build_controls_simplecontrols_xaml_deferred_149(
     repeat_button_3.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_1)));
     // Controls/SimpleControls.xaml(84,18) Data
     let value_1 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0 0 L 4 4 L 0 8 Z")), 84, 23)?;
-    let priority_21 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), priority_21);
+    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), __t::BindingPriority::Template);
     rt::end_init(&path_1, 84, 18)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_3, 76, 16)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 41, 14)?;
@@ -14772,8 +14154,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     // Controls/SimpleControls.xaml(96,19) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "ThemeControlMidBrush", 96, 19)?;
     // Controls/SimpleControls.xaml(96,12) UseLayoutRounding
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&false), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_8(&border_0);
     // Controls/SimpleControls.xaml(98,14) Child
     // Controls/SimpleControls.xaml(98,14) Grid
     let grid_0 = __t::Grid::new();
@@ -14803,22 +14184,18 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     // Controls/SimpleControls.xaml(99,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_0, "PART_LineUpButton", 99, 29)?;
     // Controls/SimpleControls.xaml(99,16) Row
-    let priority_1 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_65(&repeat_button_0);
     // Controls/SimpleControls.xaml(101,29) MinHeight
     rt::bind_dynamic_resource(&context, repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "ScrollBarThickness", 101, 29)?;
     // Controls/SimpleControls.xaml(99,16) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_6(&repeat_button_0);
     // Controls/SimpleControls.xaml(99,16) Classes
     let classes_collection_0 = __t::StyledElement::__markup_get_Classes(repeat_button_0.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_0, __t::String::from("repeat"));
     // Controls/SimpleControls.xaml(99,16) Focusable
-    let priority_3 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_19(&repeat_button_0);
     // Controls/SimpleControls.xaml(105,29) Name
-    let priority_4 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Line up")), priority_4);
+    repeat_button_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Line up")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(106,18) Content
     // Controls/SimpleControls.xaml(106,18) Path
     let path_0 = __t::Path::new();
@@ -14826,8 +14203,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     repeat_button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_0)));
     // Controls/SimpleControls.xaml(106,18) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0 4 L 8 4 L 4 0 Z")), 106, 23)?;
-    let priority_5 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_5);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     rt::end_init(&path_0, 106, 18)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_0, 99, 16)?;
     // Controls/SimpleControls.xaml(108,16) Children
@@ -14837,14 +14213,11 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     track_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&track_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(108,16) Row
-    let priority_6 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_61(&track_0);
     // Controls/SimpleControls.xaml(108,16) Column
-    let priority_7 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_9(&track_0);
     // Controls/SimpleControls.xaml(108,16) IsDirectionReversed
-    let priority_8 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::is_direction_reversed_property(), __t::Clone::clone(&true), priority_8);
+    track_0.set_value_with_priority(__t::Track::is_direction_reversed_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(111,22) Maximum
     rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R116)?;
     // Controls/SimpleControls.xaml(116,22) Value
@@ -14857,37 +14230,31 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     // Controls/SimpleControls.xaml(119,20) RepeatButton
     let repeat_button_1 = __t::RepeatButton::new();
     repeat_button_1.begin_init();
-    let priority_9 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::decrease_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_1).upcast::<__t::Button>()), priority_9);
+    track_0.set_value_with_priority(__t::Track::decrease_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_1).upcast::<__t::Button>()), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(119,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_1, "PART_PageUpButton", 119, 33)?;
     // Controls/SimpleControls.xaml(119,20) Classes
     let classes_collection_1 = __t::StyledElement::__markup_get_Classes(repeat_button_1.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_1, __t::String::from("repeattrack"));
     // Controls/SimpleControls.xaml(119,20) Focusable
-    let priority_10 = __t::BindingPriority::Template;
-    repeat_button_1.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_19(&repeat_button_1);
     // Controls/SimpleControls.xaml(122,33) Name
-    let priority_11 = __t::BindingPriority::Template;
-    repeat_button_1.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Page up")), priority_11);
+    repeat_button_1.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Page up")), __t::BindingPriority::Template);
     rt::end_init(&repeat_button_1, 119, 20)?;
     // Controls/SimpleControls.xaml(125,20) IncreaseButton
     // Controls/SimpleControls.xaml(125,20) RepeatButton
     let repeat_button_2 = __t::RepeatButton::new();
     repeat_button_2.begin_init();
-    let priority_12 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::increase_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_2).upcast::<__t::Button>()), priority_12);
+    track_0.set_value_with_priority(__t::Track::increase_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_2).upcast::<__t::Button>()), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(125,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_2, "PART_PageDownButton", 125, 33)?;
     // Controls/SimpleControls.xaml(125,20) Classes
     let classes_collection_2 = __t::StyledElement::__markup_get_Classes(repeat_button_2.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_2, __t::String::from("repeattrack"));
     // Controls/SimpleControls.xaml(125,20) Focusable
-    let priority_13 = __t::BindingPriority::Template;
-    repeat_button_2.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_19(&repeat_button_2);
     // Controls/SimpleControls.xaml(128,33) Name
-    let priority_14 = __t::BindingPriority::Template;
-    repeat_button_2.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Page down")), priority_14);
+    repeat_button_2.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Page down")), __t::BindingPriority::Template);
     rt::end_init(&repeat_button_2, 125, 20)?;
     // Controls/SimpleControls.xaml(130,18) Thumb
     // Controls/SimpleControls.xaml(130,18) Thumb
@@ -14897,8 +14264,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     // Controls/SimpleControls.xaml(130,24) Name
     rt::set_and_register_name(name_scope.as_ref(), &thumb_0, "thumb", 130, 24)?;
     // Controls/SimpleControls.xaml(131,24) Name
-    let priority_15 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Position")), priority_15);
+    thumb_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Position")), __t::BindingPriority::Template);
     rt::end_init(&thumb_0, 130, 18)?;
     rt::end_init(&track_0, 108, 16)?;
     // Controls/SimpleControls.xaml(133,16) Children
@@ -14911,25 +14277,20 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     // Controls/SimpleControls.xaml(133,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_3, "PART_LineDownButton", 133, 29)?;
     // Controls/SimpleControls.xaml(133,16) Row
-    let priority_16 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::Grid::row_property(), 2_i32, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_113(&repeat_button_3);
     // Controls/SimpleControls.xaml(133,16) Column
-    let priority_17 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_60(&repeat_button_3);
     // Controls/SimpleControls.xaml(136,29) MinHeight
     rt::bind_dynamic_resource(&context, repeat_button_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "ScrollBarThickness", 136, 29)?;
     // Controls/SimpleControls.xaml(133,16) HorizontalAlignment
-    let priority_18 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_6(&repeat_button_3);
     // Controls/SimpleControls.xaml(133,16) Classes
     let classes_collection_3 = __t::StyledElement::__markup_get_Classes(repeat_button_3.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_3, __t::String::from("repeat"));
     // Controls/SimpleControls.xaml(133,16) Focusable
-    let priority_19 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_19(&repeat_button_3);
     // Controls/SimpleControls.xaml(140,29) Name
-    let priority_20 = __t::BindingPriority::Template;
-    repeat_button_3.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Line down")), priority_20);
+    repeat_button_3.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Line down")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(141,18) Content
     // Controls/SimpleControls.xaml(141,18) Path
     let path_1 = __t::Path::new();
@@ -14937,8 +14298,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     repeat_button_3.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_1)));
     // Controls/SimpleControls.xaml(141,18) Data
     let value_1 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0 0 L 4 4 L 8 0 Z")), 141, 23)?;
-    let priority_21 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), priority_21);
+    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), __t::BindingPriority::Template);
     rt::end_init(&path_1, 141, 18)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_3, 133, 16)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 98, 14)?;
@@ -15102,11 +14462,9 @@ fn build_controls_simplecontrols_xaml_deferred_154(
     // Controls/SimpleControls.xaml(29,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &scroll_bar_0, "PART_HorizontalScrollBar", 29, 22)?;
     // Controls/SimpleControls.xaml(29,12) Row
-    let priority_0 = __t::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_61(&scroll_bar_0);
     // Controls/SimpleControls.xaml(29,12) Orientation
-    let priority_1 = __t::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(__t::ScrollBar::orientation_property(), __t::Orientation::Horizontal, priority_1);
+    scroll_bar_0.set_value_with_priority(__t::ScrollBar::orientation_property(), __t::Orientation::Horizontal, __t::BindingPriority::Template);
     rt::end_init(&scroll_bar_0, 29, 12)?;
     // Controls/SimpleControls.xaml(32,12) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -15117,11 +14475,9 @@ fn build_controls_simplecontrols_xaml_deferred_154(
     // Controls/SimpleControls.xaml(32,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &scroll_bar_1, "PART_VerticalScrollBar", 32, 22)?;
     // Controls/SimpleControls.xaml(32,12) Column
-    let priority_2 = __t::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_9(&scroll_bar_1);
     // Controls/SimpleControls.xaml(32,12) Orientation
-    let priority_3 = __t::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(__t::ScrollBar::orientation_property(), __t::Orientation::Vertical, priority_3);
+    scroll_bar_1.set_value_with_priority(__t::ScrollBar::orientation_property(), __t::Orientation::Vertical, __t::BindingPriority::Template);
     rt::end_init(&scroll_bar_1, 32, 12)?;
     // Controls/SimpleControls.xaml(35,12) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -15131,11 +14487,9 @@ fn build_controls_simplecontrols_xaml_deferred_154(
     __t::Controls::__markup_Add_0(&children_collection_3, __t::Clone::clone(&panel_0).upcast::<__t::Control>());
     rt::push_parent(&context, &panel_0);
     // Controls/SimpleControls.xaml(35,12) Row
-    let priority_4 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_61(&panel_0);
     // Controls/SimpleControls.xaml(35,12) Column
-    let priority_5 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_9(&panel_0);
     // Controls/SimpleControls.xaml(37,18) Background
     rt::bind_dynamic_resource(&context, panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), "ThemeControlMidBrush", 37, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 35, 12)?;
@@ -15210,11 +14564,9 @@ fn build_controls_simplecontrols_xaml_deferred_156(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&repeat_button_0).upcast::<__t::Control>());
     rt::push_parent(&context, &repeat_button_0);
     // Controls/SimpleControls.xaml(50,12) Background
-    let priority_0 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    repeat_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(50,12) BorderThickness
-    let priority_1 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_1);
+    repeat_button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(52,25) Command
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("LineUp"));
     rt::push_parent(&context, &reflection_binding_extension_0);
@@ -15226,8 +14578,7 @@ fn build_controls_simplecontrols_xaml_deferred_156(
     let provided_1 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_1, 52, 25)?;
     // Controls/SimpleControls.xaml(50,12) Dock
-    let priority_2 = __t::BindingPriority::Template;
-    repeat_button_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_84(&repeat_button_0);
     // Controls/SimpleControls.xaml(55,16) IsVisible
     let multi_binding_0 = __t::MultiBinding::__markup_new_0();
     rt::push_parent(&context, &multi_binding_0);
@@ -15297,8 +14648,7 @@ fn build_controls_simplecontrols_xaml_deferred_156(
     repeat_button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_0)));
     // Controls/SimpleControls.xaml(67,14) Data
     let value_1 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0 4 L 8 4 L 4 0 Z")), 67, 19)?;
-    let priority_3 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), priority_3);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_1)), __t::BindingPriority::Template);
     rt::end_init(&path_0, 67, 14)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_0, 50, 12)?;
     // Controls/SimpleControls.xaml(69,12) Children
@@ -15309,11 +14659,9 @@ fn build_controls_simplecontrols_xaml_deferred_156(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&repeat_button_1).upcast::<__t::Control>());
     rt::push_parent(&context, &repeat_button_1);
     // Controls/SimpleControls.xaml(69,12) Background
-    let priority_4 = __t::BindingPriority::Template;
-    repeat_button_1.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_4);
+    repeat_button_1.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(69,12) BorderThickness
-    let priority_5 = __t::BindingPriority::Template;
-    repeat_button_1.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_5);
+    repeat_button_1.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(71,25) Command
     let reflection_binding_extension_5 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("LineDown"));
     rt::push_parent(&context, &reflection_binding_extension_5);
@@ -15325,8 +14673,7 @@ fn build_controls_simplecontrols_xaml_deferred_156(
     let provided_11 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_5, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(repeat_button_1.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_11, 71, 25)?;
     // Controls/SimpleControls.xaml(69,12) Dock
-    let priority_6 = __t::BindingPriority::Template;
-    repeat_button_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_85(&repeat_button_1);
     // Controls/SimpleControls.xaml(74,16) IsVisible
     let multi_binding_1 = __t::MultiBinding::__markup_new_0();
     rt::push_parent(&context, &multi_binding_1);
@@ -15396,8 +14743,7 @@ fn build_controls_simplecontrols_xaml_deferred_156(
     repeat_button_1.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_1)));
     // Controls/SimpleControls.xaml(86,14) Data
     let value_3 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0 0 L 4 4 L 8 0 Z")), 86, 19)?;
-    let priority_7 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_3)), priority_7);
+    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_3)), __t::BindingPriority::Template);
     rt::end_init(&path_1, 86, 14)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_1, 69, 12)?;
     // Controls/SimpleControls.xaml(88,12) Children
@@ -15465,20 +14811,15 @@ fn build_controls_simplecontrols_xaml_deferred_158(
     border_0.begin_init();
     rt::push_parent(&context, &border_0);
     // Controls/SimpleControls.xaml(11,10) Width
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::width_property(), 14.0_f64, priority_0);
+    border_0.set_value_with_priority(__t::Layoutable::width_property(), 14.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(11,10) Height
-    let priority_1 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_13(&border_0);
     // Controls/SimpleControls.xaml(11,10) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_6(&border_0);
     // Controls/SimpleControls.xaml(11,10) VerticalAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_2(&border_0);
     // Controls/SimpleControls.xaml(11,10) Background
-    let priority_4 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_4);
+    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(16,12) Child
     // Controls/SimpleControls.xaml(16,12) Path
     let path_0 = __t::Path::new();
@@ -15486,15 +14827,12 @@ fn build_controls_simplecontrols_xaml_deferred_158(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&path_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(16,12) HorizontalAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_0);
     // Controls/SimpleControls.xaml(16,12) VerticalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(16,12) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0 2 L 4 6 L 0 10 Z")), 18, 17)?;
-    let priority_7 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_7);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(19,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundBrush", 19, 17)?;
     rt::pop_parent_and_end_init(&context, &path_0, 16, 12)?;
@@ -15621,11 +14959,9 @@ fn build_controls_simplecontrols_xaml_deferred_160(
     // Controls/SimpleControls.xaml(39,19) Background
     rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R118)?;
     // Controls/SimpleControls.xaml(38,12) Focusable
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&true), priority_0);
+    border_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,12) IsTemplateFocusTarget
-    let priority_1 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_92(&border_0);
     // Controls/SimpleControls.xaml(45,14) Child
     // Controls/SimpleControls.xaml(45,14) Grid
     let grid_0 = __t::Grid::new();
@@ -15682,11 +15018,9 @@ fn build_controls_simplecontrols_xaml_deferred_160(
     // Controls/SimpleControls.xaml(53,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &toggle_button_0, "PART_ExpandCollapseChevron", 53, 29)?;
     // Controls/SimpleControls.xaml(53,16) Focusable
-    let priority_2 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_19(&toggle_button_0);
     // Controls/SimpleControls.xaml(53,16) Background
-    let priority_3 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_3);
+    toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(56,29) IsChecked
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TreeViewItem::is_expanded_property()));
     // Controls/SimpleControls.xaml(56,29) Mode
@@ -15694,10 +15028,9 @@ fn build_controls_simplecontrols_xaml_deferred_160(
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_7, 56, 29)?;
     // Controls/SimpleControls.xaml(58,29) Theme (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let provided_8 = rt::provide_static_resource(&context, "SimpleTreeViewItemToggleButtonTheme", || rt::property_value(__t::StyledElement::theme_property()), 58, 29)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_4, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 58, 29)?;
+    rt::bind_or_set_priority(toggle_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 58, 29)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_0, 53, 16)?;
     // Controls/SimpleControls.xaml(59,16) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -15708,24 +15041,20 @@ fn build_controls_simplecontrols_xaml_deferred_160(
     // Controls/SimpleControls.xaml(59,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_HeaderPresenter", 59, 33)?;
     // Controls/SimpleControls.xaml(59,16) Column
-    let priority_5 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_9(&content_presenter_0);
     // Controls/SimpleControls.xaml(59,16) Background
-    let priority_6 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_6);
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(62,33) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R119)?;
     // Controls/SimpleControls.xaml(64,33) Content (setter chosen at run time)
-    let priority_7 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedItemsControl::header_property()));
     let provided_11 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     let value_2: __t::MarkupValue = rt::to_value(provided_11);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_7, "ContentControl.Content", 64, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 64, 33)?;
     // Controls/SimpleControls.xaml(65,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(::ferroui_controls::primitives::HeaderedItemsControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 65, 33)?;
     // Controls/SimpleControls.xaml(59,16) Focusable
-    let priority_8 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_19(&content_presenter_0);
     rt::end_init(&content_presenter_0, 59, 16)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 45, 14)?;
     rt::pop_parent_and_end_init(&context, &border_0, 38, 12)?;
@@ -15837,8 +15166,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     // Controls/SimpleControls.xaml(79,12) RotateTransform
     let rotate_transform_0 = __t::RotateTransform::new();
     // Controls/SimpleControls.xaml(79,12) Angle
-    let priority_0 = __t::BindingPriority::Template;
-    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), 90.0_f64, priority_0);
+    rotate_transform_0.set_value_with_priority(__t::RotateTransform::angle_property(), 90.0_f64, __t::BindingPriority::Template);
     rt::add_setter_value(style_4.upcast_ref::<__t::StyleBase>(), &setter_11, rt::to_object(__t::Clone::clone(&rotate_transform_0)));
     rt::style_program::attach(control_theme_0.upcast_ref::<__t::StyleBase>(), &style_4, 76, 6)?;
     // Controls/SimpleControls.xaml(84,6) Content
@@ -16083,11 +15411,9 @@ fn build_controls_simplecontrols_xaml_deferred_163(
     // Controls/SimpleControls.xaml(39,35) Name
     rt::set_and_register_name(name_scope.as_ref(), &layout_transform_control_0, "PART_LayoutTransformControl", 39, 35)?;
     // Controls/SimpleControls.xaml(39,12) HorizontalAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    layout_transform_control_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_6(&layout_transform_control_0);
     // Controls/SimpleControls.xaml(39,12) VerticalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    layout_transform_control_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_2(&layout_transform_control_0);
     // Controls/SimpleControls.xaml(42,35) IsVisible
     let reflection_binding_extension_2 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("ShowProgressText"));
     rt::push_parent(&context, &reflection_binding_extension_2);
@@ -16256,11 +15582,10 @@ fn build_controls_simplecontrols_xaml_deferred_165(
     // Controls/SimpleControls.xaml(20,31) Margin
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 20, 31)?;
     // Controls/SimpleControls.xaml(21,31) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedSelectingItemsControl::header_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 21, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 21, 31)?;
     // Controls/SimpleControls.xaml(22,31) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 22, 31)?;
     // Controls/SimpleControls.xaml(24,18) DataTemplates
@@ -16285,8 +15610,7 @@ fn build_controls_simplecontrols_xaml_deferred_165(
     // Controls/SimpleControls.xaml(29,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &popup_0, "PART_Popup", 29, 20)?;
     // Controls/SimpleControls.xaml(29,14) IsLightDismissEnabled
-    let priority_1 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_22(&popup_0);
     // Controls/SimpleControls.xaml(31,20) IsOpen
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::MenuItem::is_sub_menu_open_property()));
     // Controls/SimpleControls.xaml(31,20) Mode
@@ -16294,8 +15618,7 @@ fn build_controls_simplecontrols_xaml_deferred_165(
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     rt::bind(popup_0.upcast_ref::<__t::FerroObject>(), __t::Popup::is_open_property(), provided_7, 31, 20)?;
     // Controls/SimpleControls.xaml(29,14) Placement
-    let priority_2 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::placement_property(), __t::PlacementMode::BottomEdgeAlignedLeft, priority_2);
+    popup_0.set_value_with_priority(__t::Popup::placement_property(), __t::PlacementMode::BottomEdgeAlignedLeft, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(33,20) OverlayInputPassThroughElement
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[Menu]"));
     let provided_8 = rt::provide_value(&context, rt::property_value(__t::Popup::overlay_input_pass_through_element_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -16319,10 +15642,9 @@ fn build_controls_simplecontrols_xaml_deferred_165(
     border_1.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &scroll_viewer_0);
     // Controls/SimpleControls.xaml(37,31) Theme (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let provided_12 = rt::provide_static_resource(&context, "SimpleMenuScrollViewer", || rt::property_value(__t::StyledElement::theme_property()), 37, 31)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_12);
-    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_3, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 37, 31)?;
+    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 37, 31)?;
     // Controls/SimpleControls.xaml(38,20) Content
     // Controls/SimpleControls.xaml(38,20) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -16331,11 +15653,9 @@ fn build_controls_simplecontrols_xaml_deferred_165(
     // Controls/SimpleControls.xaml(38,35) Name
     rt::set_and_register_name(name_scope.as_ref(), &items_presenter_0, "PART_ItemsPresenter", 38, 35)?;
     // Controls/SimpleControls.xaml(38,20) Margin
-    let priority_4 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_4);
+    items_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(38,20) IsSharedSizeScope
-    let priority_5 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_34(&items_presenter_0);
     // Controls/SimpleControls.xaml(41,35) ItemsPanel
     rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 41, 35)?;
     rt::end_init(&items_presenter_0, 38, 20)?;
@@ -16414,8 +15734,7 @@ fn build_controls_simplecontrols_xaml_deferred_168(
     // Controls/SimpleControls.xaml(75,27) ItemsPanel
     rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 75, 27)?;
     // Controls/SimpleControls.xaml(74,12) TabNavigation
-    let priority_0 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_35(&items_presenter_0);
     rt::end_init(&items_presenter_0, 74, 12)?;
     rt::end_init(&border_0, 69, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -16587,43 +15906,37 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     // Controls/SimpleControls.xaml(22,16) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(22,16) Width
-    let priority_0 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(20.0_f64, __t::GridUnitType::Pixel), priority_0);
+    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(20.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(23,16) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(23,16) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(23,16) Width
-    let priority_1 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(5.0_f64, __t::GridUnitType::Pixel), priority_1);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(5.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(24,16) ColumnDefinitions
     let column_definitions_collection_2 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(24,16) ColumnDefinition
     let column_definition_2 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(24,16) Width
-    let priority_2 = __t::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_2);
+    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, __t::Clone::clone(&column_definition_2));
     // Controls/SimpleControls.xaml(25,16) ColumnDefinitions
     let column_definitions_collection_3 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(25,16) ColumnDefinition
     let column_definition_3 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(25,16) Width
-    let priority_3 = __t::BindingPriority::Template;
-    column_definition_3.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_3);
+    column_definition_3.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(26,33) SharedSizeGroup
-    let priority_4 = __t::BindingPriority::Template;
-    column_definition_3.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("MenuItemIGT")), priority_4);
+    column_definition_3.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("MenuItemIGT")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_3, __t::Clone::clone(&column_definition_3));
     // Controls/SimpleControls.xaml(27,16) ColumnDefinitions
     let column_definitions_collection_4 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(27,16) ColumnDefinition
     let column_definition_4 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(27,16) Width
-    let priority_5 = __t::BindingPriority::Template;
-    column_definition_4.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(20.0_f64, __t::GridUnitType::Pixel), priority_5);
+    column_definition_4.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(20.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_4, __t::Clone::clone(&column_definition_4));
     // Controls/SimpleControls.xaml(29,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -16632,22 +15945,17 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     content_control_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_control_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(29,14) Column
-    let priority_6 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_11(&content_control_0);
     // Controls/SimpleControls.xaml(30,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_control_0, "PART_ToggleIconPresenter", 30, 29)?;
     // Controls/SimpleControls.xaml(29,14) IsVisible
-    let priority_7 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_36(&content_control_0);
     // Controls/SimpleControls.xaml(29,14) Margin
-    let priority_8 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64), priority_8);
+    content_control_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(29,14) Width
-    let priority_9 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_120(&content_control_0);
     // Controls/SimpleControls.xaml(29,14) Height
-    let priority_10 = __t::BindingPriority::Template;
-    content_control_0.set_value_with_priority(__t::Layoutable::height_property(), 16.0_f64, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_121(&content_control_0);
     rt::end_init(&content_control_0, 29, 14)?;
     // Controls/SimpleControls.xaml(35,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -16656,31 +15964,24 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     content_control_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&content_control_1).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(35,14) Column
-    let priority_11 = __t::BindingPriority::Template;
-    content_control_1.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_11(&content_control_1);
     // Controls/SimpleControls.xaml(36,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_control_1, "PART_IconPresenter", 36, 29)?;
     // Controls/SimpleControls.xaml(35,14) Width
-    let priority_12 = __t::BindingPriority::Template;
-    content_control_1.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_120(&content_control_1);
     // Controls/SimpleControls.xaml(35,14) Height
-    let priority_13 = __t::BindingPriority::Template;
-    content_control_1.set_value_with_priority(__t::Layoutable::height_property(), 16.0_f64, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_121(&content_control_1);
     // Controls/SimpleControls.xaml(35,14) Margin
-    let priority_14 = __t::BindingPriority::Template;
-    content_control_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64), priority_14);
+    content_control_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(35,14) HorizontalAlignment
-    let priority_15 = __t::BindingPriority::Template;
-    content_control_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_control_1);
     // Controls/SimpleControls.xaml(35,14) VerticalAlignment
-    let priority_16 = __t::BindingPriority::Template;
-    content_control_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_control_1);
     // Controls/SimpleControls.xaml(42,29) Content (setter chosen at run time)
-    let priority_17 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::MenuItem::icon_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_control_1.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, priority_17, "ContentControl.Content", 42, 29)?;
+    rt::bind_or_set_null(content_control_1.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 42, 29)?;
     rt::end_init(&content_control_1, 35, 14)?;
     // Controls/SimpleControls.xaml(43,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -16692,19 +15993,16 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     // Controls/SimpleControls.xaml(43,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_HeaderPresenter", 43, 31)?;
     // Controls/SimpleControls.xaml(43,14) Column
-    let priority_18 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_60(&content_presenter_0);
     // Controls/SimpleControls.xaml(45,31) Margin
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 45, 31)?;
     // Controls/SimpleControls.xaml(43,14) VerticalAlignment
-    let priority_19 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_0);
     // Controls/SimpleControls.xaml(47,31) Content (setter chosen at run time)
-    let priority_20 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedSelectingItemsControl::header_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_1: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_20, "ContentControl.Content", 47, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 47, 31)?;
     // Controls/SimpleControls.xaml(48,31) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 48, 31)?;
     // Controls/SimpleControls.xaml(50,18) DataTemplates
@@ -16729,11 +16027,9 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     // Controls/SimpleControls.xaml(55,24) Name
     rt::set_and_register_name(name_scope.as_ref(), &text_block_0, "PART_InputGestureText", 55, 24)?;
     // Controls/SimpleControls.xaml(55,14) Column
-    let priority_21 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_21);
+    __build_controls_simplecontrols_xaml_template_setter_122(&text_block_0);
     // Controls/SimpleControls.xaml(55,14) VerticalAlignment
-    let priority_22 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_2(&text_block_0);
     // Controls/SimpleControls.xaml(58,24) Text
     let template_binding_8 = __t::TemplateBinding::__markup_new_1(rt::property(__t::MenuItem::input_gesture_property()));
     rt::push_parent(&context, &template_binding_8);
@@ -16754,18 +16050,14 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     // Controls/SimpleControls.xaml(60,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &path_0, "rightArrow", 60, 19)?;
     // Controls/SimpleControls.xaml(60,14) Column
-    let priority_23 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_123(&path_0);
     // Controls/SimpleControls.xaml(60,14) Margin
-    let priority_24 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(10.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_24);
+    path_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(10.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(60,14) VerticalAlignment
-    let priority_25 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_25);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(60,14) Data
     let value_2 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M0,0L4,3.5 0,7z")), 64, 19)?;
-    let priority_26 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_2)), priority_26);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_2)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(65,19) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeForegroundBrush", 65, 19)?;
     rt::pop_parent_and_end_init(&context, &path_0, 60, 14)?;
@@ -16779,8 +16071,7 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     // Controls/SimpleControls.xaml(66,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &popup_0, "PART_Popup", 66, 20)?;
     // Controls/SimpleControls.xaml(66,14) IsLightDismissEnabled
-    let priority_27 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&false), priority_27);
+    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(68,20) IsOpen
     let template_binding_9 = __t::TemplateBinding::__markup_new_1(rt::property(__t::MenuItem::is_sub_menu_open_property()));
     // Controls/SimpleControls.xaml(68,20) Mode
@@ -16788,8 +16079,7 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     let provided_11 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_9);
     rt::bind(popup_0.upcast_ref::<__t::FerroObject>(), __t::Popup::is_open_property(), provided_11, 68, 20)?;
     // Controls/SimpleControls.xaml(66,14) Placement
-    let priority_28 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::placement_property(), __t::PlacementMode::RightEdgeAlignedTop, priority_28);
+    popup_0.set_value_with_priority(__t::Popup::placement_property(), __t::PlacementMode::RightEdgeAlignedTop, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(71,16) Child
     // Controls/SimpleControls.xaml(71,16) Border
     let border_1 = __t::Border::new();
@@ -16809,10 +16099,9 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     border_1.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &scroll_viewer_0);
     // Controls/SimpleControls.xaml(74,31) Theme (setter chosen at run time)
-    let priority_29 = __t::BindingPriority::Template;
     let provided_15 = rt::provide_static_resource(&context, "SimpleMenuScrollViewer", || rt::property_value(__t::StyledElement::theme_property()), 74, 31)?;
     let value_3: __t::MarkupValue = rt::to_value(provided_15);
-    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_29, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 74, 31)?;
+    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 74, 31)?;
     // Controls/SimpleControls.xaml(75,20) Content
     // Controls/SimpleControls.xaml(75,20) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -16821,11 +16110,9 @@ fn build_controls_simplecontrols_xaml_deferred_171(
     // Controls/SimpleControls.xaml(75,35) Name
     rt::set_and_register_name(name_scope.as_ref(), &items_presenter_0, "PART_ItemsPresenter", 75, 35)?;
     // Controls/SimpleControls.xaml(75,20) Margin
-    let priority_30 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_30);
+    items_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(75,20) IsSharedSizeScope
-    let priority_31 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), priority_31);
+    __build_controls_simplecontrols_xaml_template_setter_34(&items_presenter_0);
     // Controls/SimpleControls.xaml(78,35) ItemsPanel
     rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 78, 35)?;
     rt::end_init(&items_presenter_0, 75, 20)?;
@@ -16879,12 +16166,10 @@ fn build_controls_simplecontrols_xaml_deferred_174(
     path_0.begin_init();
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(117,12) VerticalAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     // Controls/SimpleControls.xaml(117,12) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("F1M10,1.2L4.7,9.1 4.5,9.1 0,5.2 1.3,3.5 4.3,6.1 8.3,0 10,1.2z")), 118, 17)?;
-    let priority_1 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_1);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(119,17) Fill
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[MenuItem].Foreground"));
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::Shape::fill_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -16908,14 +16193,11 @@ fn build_controls_simplecontrols_xaml_deferred_175(
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::Shape::fill_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), provided_0, 126, 20)?;
     // Controls/SimpleControls.xaml(126,12) Margin
-    let priority_0 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_0);
+    ellipse_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(126,12) Width
-    let priority_1 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::width_property(), 8.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_20(&ellipse_0);
     // Controls/SimpleControls.xaml(126,12) Height
-    let priority_2 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::height_property(), 8.0_f64, priority_2);
+    ellipse_0.set_value_with_priority(__t::Layoutable::height_property(), 8.0_f64, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &ellipse_0, 126, 12)?;
     __t::Result::Ok(rt::to_value(ellipse_0.clone()))
 }
@@ -17093,27 +16375,23 @@ fn build_controls_simplecontrols_xaml_deferred_179(
     // Controls/SimpleControls.xaml(25,16) RowDefinition
     let row_definition_0 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(25,16) Height
-    let priority_0 = __t::BindingPriority::Template;
-    row_definition_0.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_0);
+    row_definition_0.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_0, __t::Clone::clone(&row_definition_0));
     // Controls/SimpleControls.xaml(26,16) RowDefinitions
     let row_definitions_collection_1 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(26,16) RowDefinition
     let row_definition_1 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(26,16) Height
-    let priority_1 = __t::BindingPriority::Template;
-    row_definition_1.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_1);
+    row_definition_1.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(26,16) MinHeight
-    let priority_2 = __t::BindingPriority::Template;
-    row_definition_1.set_value_with_priority(__t::RowDefinition::min_height_property(), 20.0_f64, priority_2);
+    row_definition_1.set_value_with_priority(__t::RowDefinition::min_height_property(), 20.0_f64, __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_1, __t::Clone::clone(&row_definition_1));
     // Controls/SimpleControls.xaml(28,16) RowDefinitions
     let row_definitions_collection_2 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(28,16) RowDefinition
     let row_definition_2 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(28,16) Height
-    let priority_3 = __t::BindingPriority::Template;
-    row_definition_2.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_3);
+    row_definition_2.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_2, __t::Clone::clone(&row_definition_2));
     // Controls/SimpleControls.xaml(30,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -17124,17 +16402,13 @@ fn build_controls_simplecontrols_xaml_deferred_179(
     // Controls/SimpleControls.xaml(30,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "TrackBackground", 30, 21)?;
     // Controls/SimpleControls.xaml(30,14) Row
-    let priority_4 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_61(&border_0);
     // Controls/SimpleControls.xaml(30,14) Height
-    let priority_5 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::height_property(), 4.0_f64, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_21(&border_0);
     // Controls/SimpleControls.xaml(30,14) Margin
-    let priority_6 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, 0.0_f64, 6.0_f64, 0.0_f64), priority_6);
+    border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, 0.0_f64, 6.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(30,14) VerticalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_2(&border_0);
     rt::end_init(&border_0, 30, 14)?;
     // Controls/SimpleControls.xaml(35,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -17146,42 +16420,36 @@ fn build_controls_simplecontrols_xaml_deferred_179(
     // Controls/SimpleControls.xaml(35,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &track_0, "PART_Track", 35, 20)?;
     // Controls/SimpleControls.xaml(35,14) Row
-    let priority_8 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_61(&track_0);
     // Controls/SimpleControls.xaml(37,20) IsDirectionReversed
     rt::apply_template_binding(track_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Slider::is_direction_reversed_property()), || rt::property(__t::Track::is_direction_reversed_property()), 37, 20)?;
     // Controls/SimpleControls.xaml(35,14) Orientation
-    let priority_9 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::orientation_property(), __t::Orientation::Horizontal, priority_9);
+    track_0.set_value_with_priority(__t::Track::orientation_property(), __t::Orientation::Horizontal, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(40,18) DecreaseButton
     // Controls/SimpleControls.xaml(40,18) RepeatButton
     let repeat_button_0 = __t::RepeatButton::new();
     repeat_button_0.begin_init();
-    let priority_10 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::decrease_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_0).upcast::<__t::Button>()), priority_10);
+    track_0.set_value_with_priority(__t::Track::decrease_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_0).upcast::<__t::Button>()), __t::BindingPriority::Template);
     rt::push_parent(&context, &repeat_button_0);
     // Controls/SimpleControls.xaml(40,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_0, "PART_DecreaseButton", 40, 31)?;
     // Controls/SimpleControls.xaml(41,31) Theme (setter chosen at run time)
-    let priority_11 = __t::BindingPriority::Template;
     let provided_1 = rt::provide_static_resource(&context, "SliderRepeatTrackTheme", || rt::property_value(__t::StyledElement::theme_property()), 41, 31)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
-    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_11, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 41, 31)?;
+    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 41, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_0, 40, 18)?;
     // Controls/SimpleControls.xaml(44,18) IncreaseButton
     // Controls/SimpleControls.xaml(44,18) RepeatButton
     let repeat_button_1 = __t::RepeatButton::new();
     repeat_button_1.begin_init();
-    let priority_12 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::increase_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_1).upcast::<__t::Button>()), priority_12);
+    track_0.set_value_with_priority(__t::Track::increase_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_1).upcast::<__t::Button>()), __t::BindingPriority::Template);
     rt::push_parent(&context, &repeat_button_1);
     // Controls/SimpleControls.xaml(44,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_1, "PART_IncreaseButton", 44, 31)?;
     // Controls/SimpleControls.xaml(45,31) Theme (setter chosen at run time)
-    let priority_13 = __t::BindingPriority::Template;
     let provided_2 = rt::provide_static_resource(&context, "SliderRepeatTrackTheme", || rt::property_value(__t::StyledElement::theme_property()), 45, 31)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_2);
-    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_13, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 45, 31)?;
+    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 45, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_1, 44, 18)?;
     // Controls/SimpleControls.xaml(47,16) Thumb
     // Controls/SimpleControls.xaml(47,16) Thumb
@@ -17192,11 +16460,9 @@ fn build_controls_simplecontrols_xaml_deferred_179(
     // Controls/SimpleControls.xaml(47,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &thumb_0, "thumb", 47, 22)?;
     // Controls/SimpleControls.xaml(47,16) MinWidth
-    let priority_14 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::Layoutable::min_width_property(), 20.0_f64, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_62(&thumb_0);
     // Controls/SimpleControls.xaml(47,16) MinHeight
-    let priority_15 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::Layoutable::min_height_property(), 20.0_f64, priority_15);
+    thumb_0.set_value_with_priority(__t::Layoutable::min_height_property(), 20.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(51,20) Template
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     rt::push_parent(&context, &control_template_0);
@@ -17204,8 +16470,7 @@ fn build_controls_simplecontrols_xaml_deferred_179(
     let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_180, 52, 22)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
-    let priority_16 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::TemplatedControl::template_property(), __t::Option::Some(__t::Clone::clone(&control_template_0) as __t::Rc<dyn __t::IControlTemplate>), priority_16);
+    thumb_0.set_value_with_priority(__t::TemplatedControl::template_property(), __t::Option::Some(__t::Clone::clone(&control_template_0) as __t::Rc<dyn __t::IControlTemplate>), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &thumb_0, 47, 16)?;
     rt::pop_parent_and_end_init(&context, &track_0, 35, 14)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 23, 12)?;
@@ -17240,11 +16505,9 @@ fn __build_controls_simplecontrols_xaml_factory_shape_180(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&ellipse_0).upcast::<__t::Control>());
     rt::push_parent(&context, &ellipse_0);
     // Controls/SimpleControls.xaml(53,24) Width
-    let priority_0 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_12(&ellipse_0);
     // Controls/SimpleControls.xaml(53,24) Height
-    let priority_1 = __t::BindingPriority::Template;
-    ellipse_0.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_13(&ellipse_0);
     // Controls/SimpleControls.xaml(55,32) Fill
     rt::bind_dynamic_resource(&context, ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeAccentBrush", arg0, 32)?;
     rt::pop_parent_and_end_init(&context, &ellipse_0, arg1, 24)?;
@@ -17268,27 +16531,23 @@ fn build_controls_simplecontrols_xaml_deferred_181(
     // Controls/SimpleControls.xaml(72,16) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(72,16) Width
-    let priority_0 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_0);
+    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(73,16) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(73,16) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(73,16) Width
-    let priority_1 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_1);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(73,16) MinWidth
-    let priority_2 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::min_width_property(), 26.0_f64, priority_2);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::min_width_property(), 26.0_f64, __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(75,16) ColumnDefinitions
     let column_definitions_collection_2 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(75,16) ColumnDefinition
     let column_definition_2 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(75,16) Width
-    let priority_3 = __t::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_3);
+    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, __t::Clone::clone(&column_definition_2));
     // Controls/SimpleControls.xaml(77,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -17299,17 +16558,13 @@ fn build_controls_simplecontrols_xaml_deferred_181(
     // Controls/SimpleControls.xaml(77,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "TrackBackground", 77, 21)?;
     // Controls/SimpleControls.xaml(77,14) Column
-    let priority_4 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_9(&border_0);
     // Controls/SimpleControls.xaml(77,14) Width
-    let priority_5 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::width_property(), 4.0_f64, priority_5);
+    border_0.set_value_with_priority(__t::Layoutable::width_property(), 4.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(77,14) Margin
-    let priority_6 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 6.0_f64, 0.0_f64, 6.0_f64), priority_6);
+    border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 6.0_f64, 0.0_f64, 6.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(77,14) HorizontalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_6(&border_0);
     rt::end_init(&border_0, 77, 14)?;
     // Controls/SimpleControls.xaml(82,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -17321,42 +16576,36 @@ fn build_controls_simplecontrols_xaml_deferred_181(
     // Controls/SimpleControls.xaml(82,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &track_0, "PART_Track", 82, 20)?;
     // Controls/SimpleControls.xaml(82,14) Column
-    let priority_8 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_9(&track_0);
     // Controls/SimpleControls.xaml(84,20) IsDirectionReversed
     rt::apply_template_binding(track_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Slider::is_direction_reversed_property()), || rt::property(__t::Track::is_direction_reversed_property()), 84, 20)?;
     // Controls/SimpleControls.xaml(82,14) Orientation
-    let priority_9 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::orientation_property(), __t::Orientation::Vertical, priority_9);
+    track_0.set_value_with_priority(__t::Track::orientation_property(), __t::Orientation::Vertical, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(87,18) DecreaseButton
     // Controls/SimpleControls.xaml(87,18) RepeatButton
     let repeat_button_0 = __t::RepeatButton::new();
     repeat_button_0.begin_init();
-    let priority_10 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::decrease_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_0).upcast::<__t::Button>()), priority_10);
+    track_0.set_value_with_priority(__t::Track::decrease_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_0).upcast::<__t::Button>()), __t::BindingPriority::Template);
     rt::push_parent(&context, &repeat_button_0);
     // Controls/SimpleControls.xaml(87,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_0, "PART_DecreaseButton", 87, 31)?;
     // Controls/SimpleControls.xaml(88,31) Theme (setter chosen at run time)
-    let priority_11 = __t::BindingPriority::Template;
     let provided_1 = rt::provide_static_resource(&context, "SliderRepeatTrackTheme", || rt::property_value(__t::StyledElement::theme_property()), 88, 31)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
-    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_11, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 88, 31)?;
+    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 88, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_0, 87, 18)?;
     // Controls/SimpleControls.xaml(91,18) IncreaseButton
     // Controls/SimpleControls.xaml(91,18) RepeatButton
     let repeat_button_1 = __t::RepeatButton::new();
     repeat_button_1.begin_init();
-    let priority_12 = __t::BindingPriority::Template;
-    track_0.set_value_with_priority(__t::Track::increase_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_1).upcast::<__t::Button>()), priority_12);
+    track_0.set_value_with_priority(__t::Track::increase_button_property(), __t::Option::Some(__t::Clone::clone(&repeat_button_1).upcast::<__t::Button>()), __t::BindingPriority::Template);
     rt::push_parent(&context, &repeat_button_1);
     // Controls/SimpleControls.xaml(91,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_1, "PART_IncreaseButton", 91, 31)?;
     // Controls/SimpleControls.xaml(92,31) Theme (setter chosen at run time)
-    let priority_13 = __t::BindingPriority::Template;
     let provided_2 = rt::provide_static_resource(&context, "SliderRepeatTrackTheme", || rt::property_value(__t::StyledElement::theme_property()), 92, 31)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_2);
-    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_13, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 92, 31)?;
+    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 92, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_1, 91, 18)?;
     // Controls/SimpleControls.xaml(94,16) Thumb
     // Controls/SimpleControls.xaml(94,16) Thumb
@@ -17367,11 +16616,9 @@ fn build_controls_simplecontrols_xaml_deferred_181(
     // Controls/SimpleControls.xaml(94,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &thumb_0, "thumb", 94, 22)?;
     // Controls/SimpleControls.xaml(94,16) MinWidth
-    let priority_14 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::Layoutable::min_width_property(), 20.0_f64, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_62(&thumb_0);
     // Controls/SimpleControls.xaml(94,16) MinHeight
-    let priority_15 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::Layoutable::min_height_property(), 20.0_f64, priority_15);
+    thumb_0.set_value_with_priority(__t::Layoutable::min_height_property(), 20.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(98,20) Template
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     rt::push_parent(&context, &control_template_0);
@@ -17379,8 +16626,7 @@ fn build_controls_simplecontrols_xaml_deferred_181(
     let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_182, 99, 22)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
-    let priority_16 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::TemplatedControl::template_property(), __t::Option::Some(__t::Clone::clone(&control_template_0) as __t::Rc<dyn __t::IControlTemplate>), priority_16);
+    thumb_0.set_value_with_priority(__t::TemplatedControl::template_property(), __t::Option::Some(__t::Clone::clone(&control_template_0) as __t::Rc<dyn __t::IControlTemplate>), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &thumb_0, 94, 16)?;
     rt::pop_parent_and_end_init(&context, &track_0, 82, 14)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 70, 12)?;
@@ -17519,8 +16765,7 @@ fn build_controls_simplecontrols_xaml_deferred_184(
     let solid_color_brush_0 = __t::SolidColorBrush::new();
     rt::push_parent(&context, &solid_color_brush_0);
     // Controls/SimpleControls.xaml(89,10) Opacity
-    let priority_0 = __t::BindingPriority::Template;
-    solid_color_brush_0.set_value_with_priority(__t::Brush::opacity_property(), 0.6_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_132(&solid_color_brush_0);
     // Controls/SimpleControls.xaml(90,26) Color
     rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<__t::FerroObject>(), __t::SolidColorBrush::color_property(), "ThemeControlMidHighColor", 90, 26)?;
     context.pop_parent();
@@ -17567,11 +16812,10 @@ fn build_controls_simplecontrols_xaml_deferred_185(
     // Controls/SimpleControls.xaml(73,29) BorderThickness
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), "DateTimeFlyoutButtonBorderThickness", 73, 29)?;
     // Controls/SimpleControls.xaml(74,29) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_7);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 74, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 74, 29)?;
     // Controls/SimpleControls.xaml(75,29) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R126)?;
     // Controls/SimpleControls.xaml(77,29) Foreground
@@ -17632,17 +16876,13 @@ fn build_controls_simplecontrols_xaml_deferred_187(
     viewbox_0.begin_init();
     rt::push_parent(&context, &viewbox_0);
     // Controls/SimpleControls.xaml(108,10) Width
-    let priority_0 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_4(&viewbox_0);
     // Controls/SimpleControls.xaml(108,10) Height
-    let priority_1 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_5(&viewbox_0);
     // Controls/SimpleControls.xaml(108,10) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_6(&viewbox_0);
     // Controls/SimpleControls.xaml(108,10) VerticalAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_2(&viewbox_0);
     // Controls/SimpleControls.xaml(112,12) Child
     // Controls/SimpleControls.xaml(112,12) Path
     let path_0 = __t::Path::new();
@@ -17651,15 +16891,13 @@ fn build_controls_simplecontrols_xaml_deferred_187(
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(112,12) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0,9 L 9,0 L 18,9")), 112, 17)?;
-    let priority_4 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_4);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(113,17) Stroke
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[RepeatButton].Foreground"));
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::Shape::stroke_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), provided_0, 113, 17)?;
     // Controls/SimpleControls.xaml(112,12) StrokeThickness
-    let priority_5 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 1.0_f64, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_3(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 112, 12)?;
     rt::pop_parent_and_end_init(&context, &viewbox_0, 108, 10)?;
     __t::Result::Ok(rt::to_value(viewbox_0.clone()))
@@ -17716,17 +16954,13 @@ fn build_controls_simplecontrols_xaml_deferred_189(
     viewbox_0.begin_init();
     rt::push_parent(&context, &viewbox_0);
     // Controls/SimpleControls.xaml(131,10) Width
-    let priority_0 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_4(&viewbox_0);
     // Controls/SimpleControls.xaml(131,10) Height
-    let priority_1 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_5(&viewbox_0);
     // Controls/SimpleControls.xaml(131,10) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_6(&viewbox_0);
     // Controls/SimpleControls.xaml(131,10) VerticalAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    viewbox_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_2(&viewbox_0);
     // Controls/SimpleControls.xaml(135,12) Child
     // Controls/SimpleControls.xaml(135,12) Path
     let path_0 = __t::Path::new();
@@ -17735,15 +16969,13 @@ fn build_controls_simplecontrols_xaml_deferred_189(
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(135,12) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M 0,0 L 9,9 L 18,0")), 135, 17)?;
-    let priority_4 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_4);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(136,17) Stroke
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[RepeatButton].Foreground"));
     let provided_0 = rt::provide_value(&context, rt::property_value(__t::Shape::stroke_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), provided_0, 136, 17)?;
     // Controls/SimpleControls.xaml(135,12) StrokeThickness
-    let priority_5 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 1.0_f64, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_3(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 135, 12)?;
     rt::pop_parent_and_end_init(&context, &viewbox_0, 131, 10)?;
     __t::Result::Ok(rt::to_value(viewbox_0.clone()))
@@ -17799,8 +17031,7 @@ fn build_controls_simplecontrols_xaml_deferred_190(
     let solid_color_brush_0 = __t::SolidColorBrush::new();
     rt::push_parent(&context, &solid_color_brush_0);
     // Controls/SimpleControls.xaml(69,10) Opacity
-    let priority_0 = __t::BindingPriority::Template;
-    solid_color_brush_0.set_value_with_priority(__t::Brush::opacity_property(), 0.6_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_132(&solid_color_brush_0);
     // Controls/SimpleControls.xaml(70,26) Color
     rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<__t::FerroObject>(), __t::SolidColorBrush::color_property(), "ThemeControlMidHighColor", 70, 26)?;
     context.pop_parent();
@@ -17839,19 +17070,16 @@ fn build_controls_simplecontrols_xaml_deferred_191(
     // Controls/SimpleControls.xaml(49,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 49, 27)?;
     // Controls/SimpleControls.xaml(49,10) HorizontalContentAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_0);
     // Controls/SimpleControls.xaml(49,10) VerticalContentAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_33(&content_presenter_0);
     // Controls/SimpleControls.xaml(52,27) Background
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R127)?;
     // Controls/SimpleControls.xaml(55,27) Content (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
     let value_0: __t::MarkupValue = rt::to_value(provided_3);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_2, "ContentControl.Content", 55, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 55, 27)?;
     // Controls/SimpleControls.xaml(56,27) CornerRadius
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R128)?;
     rt::end_init(&content_presenter_0, 49, 10)?;
@@ -17968,21 +17196,17 @@ fn build_controls_simplecontrols_xaml_deferred_193(
     // Controls/SimpleControls.xaml(97,21) MaxWidth
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), "DatePickerThemeMaxWidth", 97, 21)?;
     // Controls/SimpleControls.xaml(95,14) HorizontalAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_50(&button_0);
     // Controls/SimpleControls.xaml(95,14) VerticalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_0);
     // Controls/SimpleControls.xaml(100,21) Background
     rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R129)?;
     // Controls/SimpleControls.xaml(95,14) IsTemplateFocusTarget
-    let priority_2 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_92(&button_0);
     // Controls/SimpleControls.xaml(107,21) Theme (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let provided_9 = rt::provide_static_resource(&context, "SimpleDatePickerFlyoutButton", || rt::property_value(__t::StyledElement::theme_property()), 107, 21)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_9);
-    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_3, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 107, 21)?;
+    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 107, 21)?;
     // Controls/SimpleControls.xaml(108,16) Content
     // Controls/SimpleControls.xaml(108,16) Grid
     let grid_1 = __t::Grid::new();
@@ -18022,8 +17246,7 @@ fn build_controls_simplecontrols_xaml_deferred_193(
     // Controls/SimpleControls.xaml(111,28) Padding
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "DatePickerHostPadding", 111, 28)?;
     // Controls/SimpleControls.xaml(110,18) HorizontalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_0);
     // Controls/SimpleControls.xaml(113,28) FontFamily
     rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R130)?;
     // Controls/SimpleControls.xaml(116,28) Text
@@ -18045,8 +17268,7 @@ fn build_controls_simplecontrols_xaml_deferred_193(
     // Controls/SimpleControls.xaml(122,28) Text
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), "StringDatePickerMonthText", 122, 28)?;
     // Controls/SimpleControls.xaml(117,18) TextAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::TextBlock::text_alignment_property(), ::ferroui_base::media::TextAlignment::Left, priority_5);
+    text_block_1.set_value_with_priority(__t::TextBlock::text_alignment_property(), ::ferroui_base::media::TextAlignment::Left, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &text_block_1, 117, 18)?;
     // Controls/SimpleControls.xaml(124,18) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -18060,8 +17282,7 @@ fn build_controls_simplecontrols_xaml_deferred_193(
     // Controls/SimpleControls.xaml(125,28) Padding
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "DatePickerHostPadding", 125, 28)?;
     // Controls/SimpleControls.xaml(124,18) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    text_block_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_2);
     // Controls/SimpleControls.xaml(127,28) FontFamily
     rt::bind_template_rows(text_block_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R132)?;
     // Controls/SimpleControls.xaml(130,28) Text
@@ -18077,14 +17298,11 @@ fn build_controls_simplecontrols_xaml_deferred_193(
     // Controls/SimpleControls.xaml(131,28) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "PART_FirstSpacer", 131, 28)?;
     // Controls/SimpleControls.xaml(131,18) Column
-    let priority_7 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_9(&rectangle_0);
     // Controls/SimpleControls.xaml(131,18) Width
-    let priority_8 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_0);
     // Controls/SimpleControls.xaml(131,18) HorizontalAlignment
-    let priority_9 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_0);
     // Controls/SimpleControls.xaml(135,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "DatePickerSpacerFill", 135, 28)?;
     rt::pop_parent_and_end_init(&context, &rectangle_0, 131, 18)?;
@@ -18098,14 +17316,11 @@ fn build_controls_simplecontrols_xaml_deferred_193(
     // Controls/SimpleControls.xaml(136,28) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "PART_SecondSpacer", 136, 28)?;
     // Controls/SimpleControls.xaml(136,18) Column
-    let priority_10 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_122(&rectangle_1);
     // Controls/SimpleControls.xaml(136,18) Width
-    let priority_11 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_1);
     // Controls/SimpleControls.xaml(136,18) HorizontalAlignment
-    let priority_12 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_1);
     // Controls/SimpleControls.xaml(140,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "DatePickerSpacerFill", 140, 28)?;
     rt::pop_parent_and_end_init(&context, &rectangle_1, 136, 18)?;
@@ -18120,18 +17335,15 @@ fn build_controls_simplecontrols_xaml_deferred_193(
     // Controls/SimpleControls.xaml(144,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &popup_0, "PART_Popup", 144, 20)?;
     // Controls/SimpleControls.xaml(144,14) IsLightDismissEnabled
-    let priority_13 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&true), priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_22(&popup_0);
     // Controls/SimpleControls.xaml(144,14) Placement
-    let priority_14 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::placement_property(), __t::PlacementMode::Bottom, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_135(&popup_0);
     // Controls/SimpleControls.xaml(147,20) PlacementTarget
     let template_binding_16 = __t::TemplateBinding::__markup_new_0();
     let provided_27 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_16);
     rt::bind(popup_0.upcast_ref::<__t::FerroObject>(), __t::Popup::placement_target_property(), provided_27, 147, 20)?;
     // Controls/SimpleControls.xaml(144,14) WindowManagerAddShadowHint
-    let priority_15 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::window_manager_add_shadow_hint_property(), __t::Clone::clone(&false), priority_15);
+    popup_0.set_value_with_priority(__t::Popup::window_manager_add_shadow_hint_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(149,16) Child
     // Controls/SimpleControls.xaml(149,16) DatePickerPresenter
     let date_picker_presenter_0 = ::ferroui_controls::DatePickerPresenter::new();
@@ -18223,8 +17435,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(184,17) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "Background", 184, 17)?;
     // Controls/SimpleControls.xaml(184,10) MaxHeight
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::max_height_property(), 398.0_f64, priority_0);
+    border_0.set_value_with_priority(__t::Layoutable::max_height_property(), 398.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(186,17) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "DateTimeFlyoutBorderPadding", 186, 17)?;
     // Controls/SimpleControls.xaml(187,17) Background
@@ -18288,11 +17499,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>());
     rt::push_parent(&context, &scroll_viewer_0);
     // Controls/SimpleControls.xaml(201,18) HorizontalScrollBarVisibility
-    let priority_1 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_138(&scroll_viewer_0);
     // Controls/SimpleControls.xaml(201,18) VerticalScrollBarVisibility
-    let priority_2 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_27(&scroll_viewer_0);
     // Controls/SimpleControls.xaml(203,20) Content
     // Controls/SimpleControls.xaml(203,20) DateTimePickerPanel
     let date_time_picker_panel_0 = __t::DateTimePickerPanel::new();
@@ -18304,11 +17513,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(204,40) ItemHeight
     rt::bind_dynamic_resource(&context, date_time_picker_panel_0.upcast_ref::<__t::FerroObject>(), __t::DateTimePickerPanel::item_height_property(), "DatePickerFlyoutPresenterItemHeight", 204, 40)?;
     // Controls/SimpleControls.xaml(203,20) PanelType
-    let priority_3 = __t::BindingPriority::Template;
-    date_time_picker_panel_0.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Month, priority_3);
+    date_time_picker_panel_0.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Month, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(203,20) ShouldLoop
-    let priority_4 = __t::BindingPriority::Template;
-    date_time_picker_panel_0.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&true), priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_140(&date_time_picker_panel_0);
     rt::pop_parent_and_end_init(&context, &date_time_picker_panel_0, 203, 20)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_0, 201, 18)?;
     // Controls/SimpleControls.xaml(208,18) Children
@@ -18321,10 +17528,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(208,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_0, "PART_MonthUpButton", 208, 31)?;
     // Controls/SimpleControls.xaml(209,31) Theme (setter chosen at run time)
-    let priority_5 = __t::BindingPriority::Template;
     let provided_7 = rt::provide_static_resource(&context, "SimpleDateTimePickerUpButton", || rt::property_value(__t::StyledElement::theme_property()), 209, 31)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_7);
-    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_5, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 209, 31)?;
+    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 209, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_0, 208, 18)?;
     // Controls/SimpleControls.xaml(210,18) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(&panel_0);
@@ -18336,10 +17542,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(210,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_1, "PART_MonthDownButton", 210, 31)?;
     // Controls/SimpleControls.xaml(211,31) Theme (setter chosen at run time)
-    let priority_6 = __t::BindingPriority::Template;
     let provided_8 = rt::provide_static_resource(&context, "SimpleDateTimePickerDownButton", || rt::property_value(__t::StyledElement::theme_property()), 211, 31)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_6, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 211, 31)?;
+    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 211, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_1, 210, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 200, 16)?;
     // Controls/SimpleControls.xaml(213,16) Children
@@ -18359,11 +17564,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     __t::Controls::__markup_Add_0(&children_collection_6, __t::Clone::clone(&scroll_viewer_1).upcast::<__t::Control>());
     rt::push_parent(&context, &scroll_viewer_1);
     // Controls/SimpleControls.xaml(214,18) HorizontalScrollBarVisibility
-    let priority_7 = __t::BindingPriority::Template;
-    scroll_viewer_1.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_138(&scroll_viewer_1);
     // Controls/SimpleControls.xaml(214,18) VerticalScrollBarVisibility
-    let priority_8 = __t::BindingPriority::Template;
-    scroll_viewer_1.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_27(&scroll_viewer_1);
     // Controls/SimpleControls.xaml(216,20) Content
     // Controls/SimpleControls.xaml(216,20) DateTimePickerPanel
     let date_time_picker_panel_1 = __t::DateTimePickerPanel::new();
@@ -18375,11 +17578,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(217,40) ItemHeight
     rt::bind_dynamic_resource(&context, date_time_picker_panel_1.upcast_ref::<__t::FerroObject>(), __t::DateTimePickerPanel::item_height_property(), "DatePickerFlyoutPresenterItemHeight", 217, 40)?;
     // Controls/SimpleControls.xaml(216,20) PanelType
-    let priority_9 = __t::BindingPriority::Template;
-    date_time_picker_panel_1.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Day, priority_9);
+    date_time_picker_panel_1.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Day, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(216,20) ShouldLoop
-    let priority_10 = __t::BindingPriority::Template;
-    date_time_picker_panel_1.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&true), priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_140(&date_time_picker_panel_1);
     rt::pop_parent_and_end_init(&context, &date_time_picker_panel_1, 216, 20)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_1, 214, 18)?;
     // Controls/SimpleControls.xaml(221,18) Children
@@ -18392,10 +17593,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(221,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_2, "PART_DayUpButton", 221, 31)?;
     // Controls/SimpleControls.xaml(222,31) Theme (setter chosen at run time)
-    let priority_11 = __t::BindingPriority::Template;
     let provided_10 = rt::provide_static_resource(&context, "SimpleDateTimePickerUpButton", || rt::property_value(__t::StyledElement::theme_property()), 222, 31)?;
     let value_2: __t::MarkupValue = rt::to_value(provided_10);
-    rt::bind_or_set_priority(repeat_button_2.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_11, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 222, 31)?;
+    rt::bind_or_set_priority(repeat_button_2.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 222, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_2, 221, 18)?;
     // Controls/SimpleControls.xaml(223,18) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(&panel_1);
@@ -18407,10 +17607,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(223,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_3, "PART_DayDownButton", 223, 31)?;
     // Controls/SimpleControls.xaml(224,31) Theme (setter chosen at run time)
-    let priority_12 = __t::BindingPriority::Template;
     let provided_11 = rt::provide_static_resource(&context, "SimpleDateTimePickerDownButton", || rt::property_value(__t::StyledElement::theme_property()), 224, 31)?;
     let value_3: __t::MarkupValue = rt::to_value(provided_11);
-    rt::bind_or_set_priority(repeat_button_3.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_12, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 224, 31)?;
+    rt::bind_or_set_priority(repeat_button_3.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 224, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_3, 223, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_1, 213, 16)?;
     // Controls/SimpleControls.xaml(226,16) Children
@@ -18430,11 +17629,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     __t::Controls::__markup_Add_0(&children_collection_10, __t::Clone::clone(&scroll_viewer_2).upcast::<__t::Control>());
     rt::push_parent(&context, &scroll_viewer_2);
     // Controls/SimpleControls.xaml(227,18) HorizontalScrollBarVisibility
-    let priority_13 = __t::BindingPriority::Template;
-    scroll_viewer_2.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_138(&scroll_viewer_2);
     // Controls/SimpleControls.xaml(227,18) VerticalScrollBarVisibility
-    let priority_14 = __t::BindingPriority::Template;
-    scroll_viewer_2.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_27(&scroll_viewer_2);
     // Controls/SimpleControls.xaml(229,20) Content
     // Controls/SimpleControls.xaml(229,20) DateTimePickerPanel
     let date_time_picker_panel_2 = __t::DateTimePickerPanel::new();
@@ -18446,11 +17643,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(230,40) ItemHeight
     rt::bind_dynamic_resource(&context, date_time_picker_panel_2.upcast_ref::<__t::FerroObject>(), __t::DateTimePickerPanel::item_height_property(), "DatePickerFlyoutPresenterItemHeight", 230, 40)?;
     // Controls/SimpleControls.xaml(229,20) PanelType
-    let priority_15 = __t::BindingPriority::Template;
-    date_time_picker_panel_2.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Year, priority_15);
+    date_time_picker_panel_2.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Year, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(229,20) ShouldLoop
-    let priority_16 = __t::BindingPriority::Template;
-    date_time_picker_panel_2.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&false), priority_16);
+    date_time_picker_panel_2.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &date_time_picker_panel_2, 229, 20)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_2, 227, 18)?;
     // Controls/SimpleControls.xaml(234,18) Children
@@ -18463,10 +17658,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(234,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_4, "PART_YearUpButton", 234, 31)?;
     // Controls/SimpleControls.xaml(235,31) Theme (setter chosen at run time)
-    let priority_17 = __t::BindingPriority::Template;
     let provided_13 = rt::provide_static_resource(&context, "SimpleDateTimePickerUpButton", || rt::property_value(__t::StyledElement::theme_property()), 235, 31)?;
     let value_4: __t::MarkupValue = rt::to_value(provided_13);
-    rt::bind_or_set_priority(repeat_button_4.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_4, priority_17, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 235, 31)?;
+    rt::bind_or_set_priority(repeat_button_4.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_4, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 235, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_4, 234, 18)?;
     // Controls/SimpleControls.xaml(236,18) Children
     let children_collection_12 = __t::Panel::__markup_get_Children(&panel_2);
@@ -18478,10 +17672,9 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(236,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_5, "PART_YearDownButton", 236, 31)?;
     // Controls/SimpleControls.xaml(237,31) Theme (setter chosen at run time)
-    let priority_18 = __t::BindingPriority::Template;
     let provided_14 = rt::provide_static_resource(&context, "SimpleDateTimePickerDownButton", || rt::property_value(__t::StyledElement::theme_property()), 237, 31)?;
     let value_5: __t::MarkupValue = rt::to_value(provided_14);
-    rt::bind_or_set_priority(repeat_button_5.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_5, priority_18, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 237, 31)?;
+    rt::bind_or_set_priority(repeat_button_5.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_5, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 237, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_5, 236, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_2, 226, 16)?;
     // Controls/SimpleControls.xaml(239,16) Children
@@ -18494,34 +17687,27 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(239,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "HighlightRect", 239, 26)?;
     // Controls/SimpleControls.xaml(239,16) Column
-    let priority_19 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_11(&rectangle_0);
     // Controls/SimpleControls.xaml(239,16) ColumnSpan
-    let priority_20 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_span_property(), 5_i32, priority_20);
+    rectangle_0.set_value_with_priority(__t::Grid::column_span_property(), 5_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(242,26) Height
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "DatePickerFlyoutPresenterHighlightHeight", 242, 26)?;
     // Controls/SimpleControls.xaml(239,16) VerticalAlignment
-    let priority_21 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_21);
+    __build_controls_simplecontrols_xaml_template_setter_2(&rectangle_0);
     // Controls/SimpleControls.xaml(239,16) IsHitTestVisible
-    let priority_22 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_15(&rectangle_0);
     // Controls/SimpleControls.xaml(239,16) ZIndex
-    let priority_23 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Visual::z_index_property(), -1_i32, priority_23);
+    rectangle_0.set_value_with_priority(__t::Visual::z_index_property(), -1_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(247,20) Fill
     // Controls/SimpleControls.xaml(247,20) SolidColorBrush
     let solid_color_brush_0 = __t::SolidColorBrush::new();
     rt::push_parent(&context, &solid_color_brush_0);
     // Controls/SimpleControls.xaml(247,20) Opacity
-    let priority_24 = __t::BindingPriority::Template;
-    solid_color_brush_0.set_value_with_priority(__t::Brush::opacity_property(), 0.6_f64, priority_24);
+    __build_controls_simplecontrols_xaml_template_setter_132(&solid_color_brush_0);
     // Controls/SimpleControls.xaml(248,36) Color
     rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<__t::FerroObject>(), __t::SolidColorBrush::color_property(), "ThemeAccentColor", 248, 36)?;
     context.pop_parent();
-    let priority_25 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), rt::cast(solid_color_brush_0.clone(), 248, 36)?, priority_25);
+    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), rt::cast(solid_color_brush_0.clone(), 248, 36)?, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &rectangle_0, 239, 16)?;
     // Controls/SimpleControls.xaml(251,16) Children
     let children_collection_14 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -18533,13 +17719,11 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(251,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "PART_FirstSpacer", 251, 26)?;
     // Controls/SimpleControls.xaml(251,16) Column
-    let priority_26 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_26);
+    __build_controls_simplecontrols_xaml_template_setter_9(&rectangle_1);
     // Controls/SimpleControls.xaml(253,26) Width
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "DatePickerSpacerThemeWidth", 253, 26)?;
     // Controls/SimpleControls.xaml(251,16) HorizontalAlignment
-    let priority_27 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_27);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_1);
     // Controls/SimpleControls.xaml(255,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidHighBrush", 255, 26)?;
     rt::pop_parent_and_end_init(&context, &rectangle_1, 251, 16)?;
@@ -18553,13 +17737,11 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(256,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_2, "PART_SecondSpacer", 256, 26)?;
     // Controls/SimpleControls.xaml(256,16) Column
-    let priority_28 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_28);
+    __build_controls_simplecontrols_xaml_template_setter_122(&rectangle_2);
     // Controls/SimpleControls.xaml(258,26) Width
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "DatePickerSpacerThemeWidth", 258, 26)?;
     // Controls/SimpleControls.xaml(256,16) HorizontalAlignment
-    let priority_29 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_29);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_2);
     // Controls/SimpleControls.xaml(260,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidHighBrush", 260, 26)?;
     rt::pop_parent_and_end_init(&context, &rectangle_2, 256, 16)?;
@@ -18574,8 +17756,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(263,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_2, "AcceptDismissGrid", 263, 19)?;
     // Controls/SimpleControls.xaml(263,14) Row
-    let priority_30 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_30);
+    __build_controls_simplecontrols_xaml_template_setter_61(&grid_2);
     // Controls/SimpleControls.xaml(263,14) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 265, 19)?;
@@ -18594,13 +17775,11 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     __t::Controls::__markup_Add_0(&children_collection_17, __t::Clone::clone(&rectangle_3).upcast::<__t::Control>());
     rt::push_parent(&context, &rectangle_3);
     // Controls/SimpleControls.xaml(266,16) ColumnSpan
-    let priority_31 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_31);
+    __build_controls_simplecontrols_xaml_template_setter_53(&rectangle_3);
     // Controls/SimpleControls.xaml(267,26) Height
     rt::bind_dynamic_resource(&context, rectangle_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "DatePickerSpacerThemeWidth", 267, 26)?;
     // Controls/SimpleControls.xaml(266,16) VerticalAlignment
-    let priority_32 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_32);
+    __build_controls_simplecontrols_xaml_template_setter_56(&rectangle_3);
     // Controls/SimpleControls.xaml(269,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_3.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidHighBrush", 269, 26)?;
     rt::pop_parent_and_end_init(&context, &rectangle_3, 266, 16)?;
@@ -18614,21 +17793,17 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(270,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_0, "PART_AcceptButton", 270, 23)?;
     // Controls/SimpleControls.xaml(270,16) Column
-    let priority_33 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_33);
+    __build_controls_simplecontrols_xaml_template_setter_11(&button_0);
     // Controls/SimpleControls.xaml(272,23) Height
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", 272, 23)?;
     // Controls/SimpleControls.xaml(270,16) HorizontalAlignment
-    let priority_34 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_34);
+    __build_controls_simplecontrols_xaml_template_setter_50(&button_0);
     // Controls/SimpleControls.xaml(270,16) VerticalAlignment
-    let priority_35 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_35);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_0);
     // Controls/SimpleControls.xaml(275,23) Theme (setter chosen at run time)
-    let priority_36 = __t::BindingPriority::Template;
     let provided_24 = rt::provide_static_resource(&context, "SimpleDateTimePickerButton", || rt::property_value(__t::StyledElement::theme_property()), 275, 23)?;
     let value_6: __t::MarkupValue = rt::to_value(provided_24);
-    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_6, priority_36, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 275, 23)?;
+    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_6, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 275, 23)?;
     // Controls/SimpleControls.xaml(276,18) Content
     // Controls/SimpleControls.xaml(276,18) Path
     let path_0 = __t::Path::new();
@@ -18637,18 +17812,15 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(276,18) Data
     let value_7 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M0.5,8.5 5,13.5 15.5,3")), 276, 23)?;
-    let priority_37 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_7)), priority_37);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_7)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(277,23) Stroke
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[Button].Foreground"));
     let provided_25 = rt::provide_value(&context, rt::property_value(__t::Shape::stroke_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), provided_25, 277, 23)?;
     // Controls/SimpleControls.xaml(276,18) StrokeLineCap
-    let priority_38 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stroke_line_cap_property(), __t::PenLineCap::Round, priority_38);
+    __build_controls_simplecontrols_xaml_template_setter_146(&path_0);
     // Controls/SimpleControls.xaml(276,18) StrokeThickness
-    let priority_39 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 0.75_f64, priority_39);
+    __build_controls_simplecontrols_xaml_template_setter_147(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 276, 18)?;
     rt::pop_parent_and_end_init(&context, &button_0, 270, 16)?;
     // Controls/SimpleControls.xaml(281,16) Children
@@ -18661,21 +17833,17 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     // Controls/SimpleControls.xaml(281,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_1, "PART_DismissButton", 281, 23)?;
     // Controls/SimpleControls.xaml(281,16) Column
-    let priority_40 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_40);
+    __build_controls_simplecontrols_xaml_template_setter_9(&button_1);
     // Controls/SimpleControls.xaml(283,23) Height
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", 283, 23)?;
     // Controls/SimpleControls.xaml(281,16) HorizontalAlignment
-    let priority_41 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_41);
+    __build_controls_simplecontrols_xaml_template_setter_50(&button_1);
     // Controls/SimpleControls.xaml(281,16) VerticalAlignment
-    let priority_42 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_42);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_1);
     // Controls/SimpleControls.xaml(286,23) Theme (setter chosen at run time)
-    let priority_43 = __t::BindingPriority::Template;
     let provided_27 = rt::provide_static_resource(&context, "SimpleDateTimePickerButton", || rt::property_value(__t::StyledElement::theme_property()), 286, 23)?;
     let value_8: __t::MarkupValue = rt::to_value(provided_27);
-    rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_8, priority_43, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 286, 23)?;
+    rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_8, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 286, 23)?;
     // Controls/SimpleControls.xaml(287,18) Content
     // Controls/SimpleControls.xaml(287,18) Path
     let path_1 = __t::Path::new();
@@ -18684,18 +17852,15 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     rt::push_parent(&context, &path_1);
     // Controls/SimpleControls.xaml(287,18) Data
     let value_9 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M2,2 14,14 M2,14 14 2")), 287, 23)?;
-    let priority_44 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_9)), priority_44);
+    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_9)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(288,23) Stroke
     let reflection_binding_extension_1 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[Button].Foreground"));
     let provided_28 = rt::provide_value(&context, rt::property_value(__t::Shape::stroke_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(path_1.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), provided_28, 288, 23)?;
     // Controls/SimpleControls.xaml(287,18) StrokeLineCap
-    let priority_45 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Shape::stroke_line_cap_property(), __t::PenLineCap::Round, priority_45);
+    __build_controls_simplecontrols_xaml_template_setter_146(&path_1);
     // Controls/SimpleControls.xaml(287,18) StrokeThickness
-    let priority_46 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Shape::stroke_thickness_property(), 0.75_f64, priority_46);
+    __build_controls_simplecontrols_xaml_template_setter_147(&path_1);
     rt::pop_parent_and_end_init(&context, &path_1, 287, 18)?;
     rt::pop_parent_and_end_init(&context, &button_1, 281, 16)?;
     rt::pop_parent_and_end_init(&context, &grid_2, 263, 14)?;
@@ -18751,8 +17916,7 @@ fn build_controls_simplecontrols_xaml_deferred_196(
     let solid_color_brush_0 = __t::SolidColorBrush::new();
     rt::push_parent(&context, &solid_color_brush_0);
     // Controls/SimpleControls.xaml(67,10) Opacity
-    let priority_0 = __t::BindingPriority::Template;
-    solid_color_brush_0.set_value_with_priority(__t::Brush::opacity_property(), 0.6_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_132(&solid_color_brush_0);
     // Controls/SimpleControls.xaml(68,26) Color
     rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<__t::FerroObject>(), __t::SolidColorBrush::color_property(), "ThemeControlMidHighColor", 68, 26)?;
     context.pop_parent();
@@ -18794,19 +17958,16 @@ fn build_controls_simplecontrols_xaml_deferred_197(
     // Controls/SimpleControls.xaml(48,27) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 48, 27)?;
     // Controls/SimpleControls.xaml(48,10) HorizontalContentAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_0);
     // Controls/SimpleControls.xaml(48,10) VerticalContentAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_33(&content_presenter_0);
     // Controls/SimpleControls.xaml(51,27) Background
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R134)?;
     // Controls/SimpleControls.xaml(54,27) Content (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
     let value_0: __t::MarkupValue = rt::to_value(provided_3);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_2, "ContentControl.Content", 54, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 54, 27)?;
     // Controls/SimpleControls.xaml(55,27) CornerRadius
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R135)?;
     rt::end_init(&content_presenter_0, 48, 10)?;
@@ -18924,18 +18085,15 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(95,21) MaxWidth
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), "TimePickerThemeMaxWidth", 95, 21)?;
     // Controls/SimpleControls.xaml(93,14) HorizontalAlignment
-    let priority_0 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_50(&button_0);
     // Controls/SimpleControls.xaml(93,14) VerticalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_0);
     // Controls/SimpleControls.xaml(98,21) Background
     rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R136)?;
     // Controls/SimpleControls.xaml(104,21) Theme (setter chosen at run time)
-    let priority_2 = __t::BindingPriority::Template;
     let provided_9 = rt::provide_static_resource(&context, "SimpleTimePickerFlyoutButton", || rt::property_value(__t::StyledElement::theme_property()), 104, 21)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_9);
-    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 104, 21)?;
+    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 104, 21)?;
     // Controls/SimpleControls.xaml(106,16) Content
     // Controls/SimpleControls.xaml(106,16) Grid
     let grid_1 = __t::Grid::new();
@@ -18954,14 +18112,11 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(108,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "PART_FirstPickerHost", 108, 25)?;
     // Controls/SimpleControls.xaml(108,18) Column
-    let priority_3 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_11(&border_0);
     // Controls/SimpleControls.xaml(108,18) HorizontalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_50(&border_0);
     // Controls/SimpleControls.xaml(108,18) VerticalAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_51(&border_0);
     // Controls/SimpleControls.xaml(112,20) Child
     // Controls/SimpleControls.xaml(112,20) TextBlock
     let text_block_0 = __t::TextBlock::new();
@@ -18975,8 +18130,7 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(114,30) Padding
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 114, 30)?;
     // Controls/SimpleControls.xaml(112,20) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_0);
     // Controls/SimpleControls.xaml(116,30) FontFamily
     rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R137)?;
     rt::pop_parent_and_end_init(&context, &text_block_0, 112, 20)?;
@@ -18991,13 +18145,11 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(121,28) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "PART_FirstColumnDivider", 121, 28)?;
     // Controls/SimpleControls.xaml(121,18) Column
-    let priority_7 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_9(&rectangle_0);
     // Controls/SimpleControls.xaml(123,28) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "TimePickerSpacerThemeWidth", 123, 28)?;
     // Controls/SimpleControls.xaml(121,18) HorizontalAlignment
-    let priority_8 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_0);
     // Controls/SimpleControls.xaml(125,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "TimePickerSpacerFill", 125, 28)?;
     rt::pop_parent_and_end_init(&context, &rectangle_0, 121, 18)?;
@@ -19011,14 +18163,11 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(127,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_1, "PART_SecondPickerHost", 127, 25)?;
     // Controls/SimpleControls.xaml(127,18) Column
-    let priority_9 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_60(&border_1);
     // Controls/SimpleControls.xaml(127,18) HorizontalAlignment
-    let priority_10 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_50(&border_1);
     // Controls/SimpleControls.xaml(127,18) VerticalAlignment
-    let priority_11 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_51(&border_1);
     // Controls/SimpleControls.xaml(131,20) Child
     // Controls/SimpleControls.xaml(131,20) TextBlock
     let text_block_1 = __t::TextBlock::new();
@@ -19032,8 +18181,7 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(133,30) Padding
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 133, 30)?;
     // Controls/SimpleControls.xaml(131,20) HorizontalAlignment
-    let priority_12 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_1);
     // Controls/SimpleControls.xaml(135,30) FontFamily
     rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R138)?;
     rt::pop_parent_and_end_init(&context, &text_block_1, 131, 20)?;
@@ -19048,13 +18196,11 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(140,28) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "PART_SecondColumnDivider", 140, 28)?;
     // Controls/SimpleControls.xaml(140,18) Column
-    let priority_13 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_122(&rectangle_1);
     // Controls/SimpleControls.xaml(142,28) Width
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "TimePickerSpacerThemeWidth", 142, 28)?;
     // Controls/SimpleControls.xaml(140,18) HorizontalAlignment
-    let priority_14 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_1);
     // Controls/SimpleControls.xaml(144,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "TimePickerSpacerFill", 144, 28)?;
     rt::pop_parent_and_end_init(&context, &rectangle_1, 140, 18)?;
@@ -19068,14 +18214,11 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(146,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_2, "PART_ThirdPickerHost", 146, 25)?;
     // Controls/SimpleControls.xaml(146,18) Column
-    let priority_15 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_123(&border_2);
     // Controls/SimpleControls.xaml(146,18) HorizontalAlignment
-    let priority_16 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_50(&border_2);
     // Controls/SimpleControls.xaml(146,18) VerticalAlignment
-    let priority_17 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_51(&border_2);
     // Controls/SimpleControls.xaml(150,20) Child
     // Controls/SimpleControls.xaml(150,20) TextBlock
     let text_block_2 = __t::TextBlock::new();
@@ -19089,8 +18232,7 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(152,30) Padding
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 152, 30)?;
     // Controls/SimpleControls.xaml(150,20) HorizontalAlignment
-    let priority_18 = __t::BindingPriority::Template;
-    text_block_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_2);
     // Controls/SimpleControls.xaml(154,30) FontFamily
     rt::bind_template_rows(text_block_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R139)?;
     rt::pop_parent_and_end_init(&context, &text_block_2, 150, 20)?;
@@ -19105,13 +18247,11 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(159,28) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_2, "PART_ThirdColumnDivider", 159, 28)?;
     // Controls/SimpleControls.xaml(159,18) Column
-    let priority_19 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Grid::column_property(), 5_i32, priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_148(&rectangle_2);
     // Controls/SimpleControls.xaml(161,28) Width
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "TimePickerSpacerThemeWidth", 161, 28)?;
     // Controls/SimpleControls.xaml(159,18) HorizontalAlignment
-    let priority_20 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_20);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_2);
     // Controls/SimpleControls.xaml(163,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "TimePickerSpacerFill", 163, 28)?;
     rt::pop_parent_and_end_init(&context, &rectangle_2, 159, 18)?;
@@ -19125,14 +18265,11 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(165,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_3, "PART_FourthPickerHost", 165, 25)?;
     // Controls/SimpleControls.xaml(165,18) Column
-    let priority_21 = __t::BindingPriority::Template;
-    border_3.set_value_with_priority(__t::Grid::column_property(), 6_i32, priority_21);
+    __build_controls_simplecontrols_xaml_template_setter_149(&border_3);
     // Controls/SimpleControls.xaml(165,18) HorizontalAlignment
-    let priority_22 = __t::BindingPriority::Template;
-    border_3.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_50(&border_3);
     // Controls/SimpleControls.xaml(165,18) VerticalAlignment
-    let priority_23 = __t::BindingPriority::Template;
-    border_3.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_51(&border_3);
     // Controls/SimpleControls.xaml(169,20) Child
     // Controls/SimpleControls.xaml(169,20) TextBlock
     let text_block_3 = __t::TextBlock::new();
@@ -19144,8 +18281,7 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(170,30) Padding
     rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 170, 30)?;
     // Controls/SimpleControls.xaml(169,20) HorizontalAlignment
-    let priority_24 = __t::BindingPriority::Template;
-    text_block_3.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_24);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_3);
     // Controls/SimpleControls.xaml(172,30) FontFamily
     rt::bind_template_rows(text_block_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R140)?;
     rt::pop_parent_and_end_init(&context, &text_block_3, 169, 20)?;
@@ -19161,18 +18297,15 @@ fn build_controls_simplecontrols_xaml_deferred_199(
     // Controls/SimpleControls.xaml(179,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &popup_0, "PART_Popup", 179, 20)?;
     // Controls/SimpleControls.xaml(179,14) IsLightDismissEnabled
-    let priority_25 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&true), priority_25);
+    __build_controls_simplecontrols_xaml_template_setter_22(&popup_0);
     // Controls/SimpleControls.xaml(179,14) Placement
-    let priority_26 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::placement_property(), __t::PlacementMode::Bottom, priority_26);
+    __build_controls_simplecontrols_xaml_template_setter_135(&popup_0);
     // Controls/SimpleControls.xaml(182,20) PlacementTarget
     let template_binding_19 = __t::TemplateBinding::__markup_new_0();
     let provided_35 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_19);
     rt::bind(popup_0.upcast_ref::<__t::FerroObject>(), __t::Popup::placement_target_property(), provided_35, 182, 20)?;
     // Controls/SimpleControls.xaml(179,14) WindowManagerAddShadowHint
-    let priority_27 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::window_manager_add_shadow_hint_property(), __t::Clone::clone(&false), priority_27);
+    popup_0.set_value_with_priority(__t::Popup::window_manager_add_shadow_hint_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(184,16) Child
     // Controls/SimpleControls.xaml(184,16) TimePickerPresenter
     let time_picker_presenter_0 = ::ferroui_controls::TimePickerPresenter::new();
@@ -19261,8 +18394,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(216,17) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "Background", 216, 17)?;
     // Controls/SimpleControls.xaml(216,10) MaxHeight
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Layoutable::max_height_property(), 398.0_f64, priority_0);
+    border_0.set_value_with_priority(__t::Layoutable::max_height_property(), 398.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(218,17) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "DateTimeFlyoutBorderPadding", 218, 17)?;
     // Controls/SimpleControls.xaml(219,17) Background
@@ -19319,8 +18451,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(232,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_0, "PART_HourHost", 232, 22)?;
     // Controls/SimpleControls.xaml(232,16) Column
-    let priority_1 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_11(&panel_0);
     // Controls/SimpleControls.xaml(234,18) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(234,18) ScrollViewer
@@ -19329,11 +18460,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>());
     rt::push_parent(&context, &scroll_viewer_0);
     // Controls/SimpleControls.xaml(234,18) HorizontalScrollBarVisibility
-    let priority_2 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_138(&scroll_viewer_0);
     // Controls/SimpleControls.xaml(234,18) VerticalScrollBarVisibility
-    let priority_3 = __t::BindingPriority::Template;
-    scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_27(&scroll_viewer_0);
     // Controls/SimpleControls.xaml(236,20) Content
     // Controls/SimpleControls.xaml(236,20) DateTimePickerPanel
     let date_time_picker_panel_0 = __t::DateTimePickerPanel::new();
@@ -19345,11 +18474,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(237,40) ItemHeight
     rt::bind_dynamic_resource(&context, date_time_picker_panel_0.upcast_ref::<__t::FerroObject>(), __t::DateTimePickerPanel::item_height_property(), "TimePickerFlyoutPresenterItemHeight", 237, 40)?;
     // Controls/SimpleControls.xaml(236,20) PanelType
-    let priority_4 = __t::BindingPriority::Template;
-    date_time_picker_panel_0.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Hour, priority_4);
+    date_time_picker_panel_0.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Hour, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(236,20) ShouldLoop
-    let priority_5 = __t::BindingPriority::Template;
-    date_time_picker_panel_0.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&true), priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_140(&date_time_picker_panel_0);
     rt::pop_parent_and_end_init(&context, &date_time_picker_panel_0, 236, 20)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_0, 234, 18)?;
     // Controls/SimpleControls.xaml(241,18) Children
@@ -19362,10 +18489,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(241,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_0, "PART_HourUpButton", 241, 31)?;
     // Controls/SimpleControls.xaml(242,31) Theme (setter chosen at run time)
-    let priority_6 = __t::BindingPriority::Template;
     let provided_7 = rt::provide_static_resource(&context, "SimpleDateTimePickerUpButton", || rt::property_value(__t::StyledElement::theme_property()), 242, 31)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_7);
-    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_6, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 242, 31)?;
+    rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 242, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_0, 241, 18)?;
     // Controls/SimpleControls.xaml(243,18) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(&panel_0);
@@ -19377,10 +18503,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(243,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_1, "PART_HourDownButton", 243, 31)?;
     // Controls/SimpleControls.xaml(244,31) Theme (setter chosen at run time)
-    let priority_7 = __t::BindingPriority::Template;
     let provided_8 = rt::provide_static_resource(&context, "SimpleDateTimePickerDownButton", || rt::property_value(__t::StyledElement::theme_property()), 244, 31)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_7, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 244, 31)?;
+    rt::bind_or_set_priority(repeat_button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 244, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_1, 243, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 232, 16)?;
     // Controls/SimpleControls.xaml(247,16) Children
@@ -19393,8 +18518,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(247,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_1, "PART_MinuteHost", 247, 22)?;
     // Controls/SimpleControls.xaml(247,16) Column
-    let priority_8 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_60(&panel_1);
     // Controls/SimpleControls.xaml(249,18) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/SimpleControls.xaml(249,18) ScrollViewer
@@ -19403,11 +18527,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     __t::Controls::__markup_Add_0(&children_collection_6, __t::Clone::clone(&scroll_viewer_1).upcast::<__t::Control>());
     rt::push_parent(&context, &scroll_viewer_1);
     // Controls/SimpleControls.xaml(249,18) HorizontalScrollBarVisibility
-    let priority_9 = __t::BindingPriority::Template;
-    scroll_viewer_1.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_138(&scroll_viewer_1);
     // Controls/SimpleControls.xaml(249,18) VerticalScrollBarVisibility
-    let priority_10 = __t::BindingPriority::Template;
-    scroll_viewer_1.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_27(&scroll_viewer_1);
     // Controls/SimpleControls.xaml(251,20) Content
     // Controls/SimpleControls.xaml(251,20) DateTimePickerPanel
     let date_time_picker_panel_1 = __t::DateTimePickerPanel::new();
@@ -19419,11 +18541,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(252,40) ItemHeight
     rt::bind_dynamic_resource(&context, date_time_picker_panel_1.upcast_ref::<__t::FerroObject>(), __t::DateTimePickerPanel::item_height_property(), "TimePickerFlyoutPresenterItemHeight", 252, 40)?;
     // Controls/SimpleControls.xaml(251,20) PanelType
-    let priority_11 = __t::BindingPriority::Template;
-    date_time_picker_panel_1.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Minute, priority_11);
+    date_time_picker_panel_1.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Minute, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(251,20) ShouldLoop
-    let priority_12 = __t::BindingPriority::Template;
-    date_time_picker_panel_1.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&true), priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_140(&date_time_picker_panel_1);
     rt::pop_parent_and_end_init(&context, &date_time_picker_panel_1, 251, 20)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_1, 249, 18)?;
     // Controls/SimpleControls.xaml(256,18) Children
@@ -19436,10 +18556,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(256,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_2, "PART_MinuteUpButton", 256, 31)?;
     // Controls/SimpleControls.xaml(257,31) Theme (setter chosen at run time)
-    let priority_13 = __t::BindingPriority::Template;
     let provided_10 = rt::provide_static_resource(&context, "SimpleDateTimePickerUpButton", || rt::property_value(__t::StyledElement::theme_property()), 257, 31)?;
     let value_2: __t::MarkupValue = rt::to_value(provided_10);
-    rt::bind_or_set_priority(repeat_button_2.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_13, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 257, 31)?;
+    rt::bind_or_set_priority(repeat_button_2.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 257, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_2, 256, 18)?;
     // Controls/SimpleControls.xaml(258,18) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(&panel_1);
@@ -19451,10 +18570,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(258,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_3, "PART_MinuteDownButton", 258, 31)?;
     // Controls/SimpleControls.xaml(259,31) Theme (setter chosen at run time)
-    let priority_14 = __t::BindingPriority::Template;
     let provided_11 = rt::provide_static_resource(&context, "SimpleDateTimePickerDownButton", || rt::property_value(__t::StyledElement::theme_property()), 259, 31)?;
     let value_3: __t::MarkupValue = rt::to_value(provided_11);
-    rt::bind_or_set_priority(repeat_button_3.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_14, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 259, 31)?;
+    rt::bind_or_set_priority(repeat_button_3.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 259, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_3, 258, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_1, 247, 16)?;
     // Controls/SimpleControls.xaml(262,16) Children
@@ -19467,8 +18585,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(262,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_2, "PART_SecondHost", 262, 22)?;
     // Controls/SimpleControls.xaml(262,16) Column
-    let priority_15 = __t::BindingPriority::Template;
-    panel_2.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_123(&panel_2);
     // Controls/SimpleControls.xaml(264,18) Children
     let children_collection_10 = __t::Panel::__markup_get_Children(&panel_2);
     // Controls/SimpleControls.xaml(264,18) ScrollViewer
@@ -19477,11 +18594,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     __t::Controls::__markup_Add_0(&children_collection_10, __t::Clone::clone(&scroll_viewer_2).upcast::<__t::Control>());
     rt::push_parent(&context, &scroll_viewer_2);
     // Controls/SimpleControls.xaml(264,18) HorizontalScrollBarVisibility
-    let priority_16 = __t::BindingPriority::Template;
-    scroll_viewer_2.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_138(&scroll_viewer_2);
     // Controls/SimpleControls.xaml(264,18) VerticalScrollBarVisibility
-    let priority_17 = __t::BindingPriority::Template;
-    scroll_viewer_2.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_27(&scroll_viewer_2);
     // Controls/SimpleControls.xaml(266,20) Content
     // Controls/SimpleControls.xaml(266,20) DateTimePickerPanel
     let date_time_picker_panel_2 = __t::DateTimePickerPanel::new();
@@ -19493,11 +18608,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(267,40) ItemHeight
     rt::bind_dynamic_resource(&context, date_time_picker_panel_2.upcast_ref::<__t::FerroObject>(), __t::DateTimePickerPanel::item_height_property(), "TimePickerFlyoutPresenterItemHeight", 267, 40)?;
     // Controls/SimpleControls.xaml(266,20) PanelType
-    let priority_18 = __t::BindingPriority::Template;
-    date_time_picker_panel_2.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Second, priority_18);
+    date_time_picker_panel_2.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::Second, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(266,20) ShouldLoop
-    let priority_19 = __t::BindingPriority::Template;
-    date_time_picker_panel_2.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&true), priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_140(&date_time_picker_panel_2);
     rt::pop_parent_and_end_init(&context, &date_time_picker_panel_2, 266, 20)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_2, 264, 18)?;
     // Controls/SimpleControls.xaml(271,18) Children
@@ -19510,10 +18623,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(271,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_4, "PART_SecondUpButton", 271, 31)?;
     // Controls/SimpleControls.xaml(272,31) Theme (setter chosen at run time)
-    let priority_20 = __t::BindingPriority::Template;
     let provided_13 = rt::provide_static_resource(&context, "SimpleDateTimePickerUpButton", || rt::property_value(__t::StyledElement::theme_property()), 272, 31)?;
     let value_4: __t::MarkupValue = rt::to_value(provided_13);
-    rt::bind_or_set_priority(repeat_button_4.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_4, priority_20, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 272, 31)?;
+    rt::bind_or_set_priority(repeat_button_4.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_4, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 272, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_4, 271, 18)?;
     // Controls/SimpleControls.xaml(273,18) Children
     let children_collection_12 = __t::Panel::__markup_get_Children(&panel_2);
@@ -19525,10 +18637,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(273,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_5, "PART_SecondDownButton", 273, 31)?;
     // Controls/SimpleControls.xaml(274,31) Theme (setter chosen at run time)
-    let priority_21 = __t::BindingPriority::Template;
     let provided_14 = rt::provide_static_resource(&context, "SimpleDateTimePickerDownButton", || rt::property_value(__t::StyledElement::theme_property()), 274, 31)?;
     let value_5: __t::MarkupValue = rt::to_value(provided_14);
-    rt::bind_or_set_priority(repeat_button_5.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_5, priority_21, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 274, 31)?;
+    rt::bind_or_set_priority(repeat_button_5.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_5, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 274, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_5, 273, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_2, 262, 16)?;
     // Controls/SimpleControls.xaml(277,16) Children
@@ -19541,8 +18652,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(277,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_3, "PART_PeriodHost", 277, 22)?;
     // Controls/SimpleControls.xaml(277,16) Column
-    let priority_22 = __t::BindingPriority::Template;
-    panel_3.set_value_with_priority(__t::Grid::column_property(), 6_i32, priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_149(&panel_3);
     // Controls/SimpleControls.xaml(279,18) Children
     let children_collection_14 = __t::Panel::__markup_get_Children(&panel_3);
     // Controls/SimpleControls.xaml(279,18) ScrollViewer
@@ -19551,11 +18661,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     __t::Controls::__markup_Add_0(&children_collection_14, __t::Clone::clone(&scroll_viewer_3).upcast::<__t::Control>());
     rt::push_parent(&context, &scroll_viewer_3);
     // Controls/SimpleControls.xaml(279,18) HorizontalScrollBarVisibility
-    let priority_23 = __t::BindingPriority::Template;
-    scroll_viewer_3.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_138(&scroll_viewer_3);
     // Controls/SimpleControls.xaml(279,18) VerticalScrollBarVisibility
-    let priority_24 = __t::BindingPriority::Template;
-    scroll_viewer_3.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, priority_24);
+    __build_controls_simplecontrols_xaml_template_setter_27(&scroll_viewer_3);
     // Controls/SimpleControls.xaml(281,20) Content
     // Controls/SimpleControls.xaml(281,20) DateTimePickerPanel
     let date_time_picker_panel_3 = __t::DateTimePickerPanel::new();
@@ -19567,11 +18675,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(282,40) ItemHeight
     rt::bind_dynamic_resource(&context, date_time_picker_panel_3.upcast_ref::<__t::FerroObject>(), __t::DateTimePickerPanel::item_height_property(), "TimePickerFlyoutPresenterItemHeight", 282, 40)?;
     // Controls/SimpleControls.xaml(281,20) PanelType
-    let priority_25 = __t::BindingPriority::Template;
-    date_time_picker_panel_3.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::TimePeriod, priority_25);
+    date_time_picker_panel_3.set_value_with_priority(__t::DateTimePickerPanel::panel_type_property(), __t::DateTimePickerPanelType::TimePeriod, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(281,20) ShouldLoop
-    let priority_26 = __t::BindingPriority::Template;
-    date_time_picker_panel_3.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&false), priority_26);
+    date_time_picker_panel_3.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &date_time_picker_panel_3, 281, 20)?;
     rt::pop_parent_and_end_init(&context, &scroll_viewer_3, 279, 18)?;
     // Controls/SimpleControls.xaml(286,18) Children
@@ -19584,10 +18690,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(286,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_6, "PART_PeriodUpButton", 286, 31)?;
     // Controls/SimpleControls.xaml(287,31) Theme (setter chosen at run time)
-    let priority_27 = __t::BindingPriority::Template;
     let provided_16 = rt::provide_static_resource(&context, "SimpleDateTimePickerUpButton", || rt::property_value(__t::StyledElement::theme_property()), 287, 31)?;
     let value_6: __t::MarkupValue = rt::to_value(provided_16);
-    rt::bind_or_set_priority(repeat_button_6.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_6, priority_27, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 287, 31)?;
+    rt::bind_or_set_priority(repeat_button_6.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_6, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 287, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_6, 286, 18)?;
     // Controls/SimpleControls.xaml(288,18) Children
     let children_collection_16 = __t::Panel::__markup_get_Children(&panel_3);
@@ -19599,10 +18704,9 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(288,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &repeat_button_7, "PART_PeriodDownButton", 288, 31)?;
     // Controls/SimpleControls.xaml(289,31) Theme (setter chosen at run time)
-    let priority_28 = __t::BindingPriority::Template;
     let provided_17 = rt::provide_static_resource(&context, "SimpleDateTimePickerDownButton", || rt::property_value(__t::StyledElement::theme_property()), 289, 31)?;
     let value_7: __t::MarkupValue = rt::to_value(provided_17);
-    rt::bind_or_set_priority(repeat_button_7.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_7, priority_28, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 289, 31)?;
+    rt::bind_or_set_priority(repeat_button_7.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_7, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 289, 31)?;
     rt::pop_parent_and_end_init(&context, &repeat_button_7, 288, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_3, 277, 16)?;
     // Controls/SimpleControls.xaml(292,16) Children
@@ -19615,31 +18719,25 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(292,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "HighlightRect", 292, 26)?;
     // Controls/SimpleControls.xaml(292,16) Column
-    let priority_29 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_29);
+    __build_controls_simplecontrols_xaml_template_setter_11(&rectangle_0);
     // Controls/SimpleControls.xaml(292,16) ColumnSpan
-    let priority_30 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_span_property(), 5_i32, priority_30);
+    rectangle_0.set_value_with_priority(__t::Grid::column_span_property(), 5_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(295,26) Height
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "TimePickerFlyoutPresenterHighlightHeight", 295, 26)?;
     // Controls/SimpleControls.xaml(292,16) VerticalAlignment
-    let priority_31 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_31);
+    __build_controls_simplecontrols_xaml_template_setter_2(&rectangle_0);
     // Controls/SimpleControls.xaml(292,16) ZIndex
-    let priority_32 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Visual::z_index_property(), -1_i32, priority_32);
+    rectangle_0.set_value_with_priority(__t::Visual::z_index_property(), -1_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(299,20) Fill
     // Controls/SimpleControls.xaml(299,20) SolidColorBrush
     let solid_color_brush_0 = __t::SolidColorBrush::new();
     rt::push_parent(&context, &solid_color_brush_0);
     // Controls/SimpleControls.xaml(299,20) Opacity
-    let priority_33 = __t::BindingPriority::Template;
-    solid_color_brush_0.set_value_with_priority(__t::Brush::opacity_property(), 0.6_f64, priority_33);
+    __build_controls_simplecontrols_xaml_template_setter_132(&solid_color_brush_0);
     // Controls/SimpleControls.xaml(300,36) Color
     rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<__t::FerroObject>(), __t::SolidColorBrush::color_property(), "ThemeAccentColor", 300, 36)?;
     context.pop_parent();
-    let priority_34 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), rt::cast(solid_color_brush_0.clone(), 300, 36)?, priority_34);
+    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), rt::cast(solid_color_brush_0.clone(), 300, 36)?, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &rectangle_0, 292, 16)?;
     // Controls/SimpleControls.xaml(303,16) Children
     let children_collection_18 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -19651,13 +18749,11 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(303,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "PART_FirstSpacer", 303, 26)?;
     // Controls/SimpleControls.xaml(303,16) Column
-    let priority_35 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_35);
+    __build_controls_simplecontrols_xaml_template_setter_9(&rectangle_1);
     // Controls/SimpleControls.xaml(305,26) Width
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "TimePickerSpacerThemeWidth", 305, 26)?;
     // Controls/SimpleControls.xaml(303,16) HorizontalAlignment
-    let priority_36 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_36);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_1);
     // Controls/SimpleControls.xaml(307,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidHighBrush", 307, 26)?;
     rt::pop_parent_and_end_init(&context, &rectangle_1, 303, 16)?;
@@ -19671,13 +18767,11 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(308,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_2, "PART_SecondSpacer", 308, 26)?;
     // Controls/SimpleControls.xaml(308,16) Column
-    let priority_37 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_37);
+    __build_controls_simplecontrols_xaml_template_setter_122(&rectangle_2);
     // Controls/SimpleControls.xaml(310,26) Width
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "TimePickerSpacerThemeWidth", 310, 26)?;
     // Controls/SimpleControls.xaml(308,16) HorizontalAlignment
-    let priority_38 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_38);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_2);
     // Controls/SimpleControls.xaml(312,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidHighBrush", 312, 26)?;
     rt::pop_parent_and_end_init(&context, &rectangle_2, 308, 16)?;
@@ -19691,13 +18785,11 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(313,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_3, "PART_ThirdSpacer", 313, 26)?;
     // Controls/SimpleControls.xaml(313,16) Column
-    let priority_39 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Grid::column_property(), 5_i32, priority_39);
+    __build_controls_simplecontrols_xaml_template_setter_148(&rectangle_3);
     // Controls/SimpleControls.xaml(315,26) Width
     rt::bind_dynamic_resource(&context, rectangle_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "TimePickerSpacerThemeWidth", 315, 26)?;
     // Controls/SimpleControls.xaml(313,16) HorizontalAlignment
-    let priority_40 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_40);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_3);
     // Controls/SimpleControls.xaml(317,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_3.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidHighBrush", 317, 26)?;
     rt::pop_parent_and_end_init(&context, &rectangle_3, 313, 16)?;
@@ -19712,8 +18804,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(320,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &grid_2, "AcceptDismissGrid", 320, 19)?;
     // Controls/SimpleControls.xaml(320,14) Row
-    let priority_41 = __t::BindingPriority::Template;
-    grid_2.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_41);
+    __build_controls_simplecontrols_xaml_template_setter_61(&grid_2);
     // Controls/SimpleControls.xaml(320,14) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 322, 19)?;
@@ -19732,13 +18823,11 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     __t::Controls::__markup_Add_0(&children_collection_22, __t::Clone::clone(&rectangle_4).upcast::<__t::Control>());
     rt::push_parent(&context, &rectangle_4);
     // Controls/SimpleControls.xaml(323,16) ColumnSpan
-    let priority_42 = __t::BindingPriority::Template;
-    rectangle_4.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_42);
+    __build_controls_simplecontrols_xaml_template_setter_53(&rectangle_4);
     // Controls/SimpleControls.xaml(324,26) Height
     rt::bind_dynamic_resource(&context, rectangle_4.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "TimePickerSpacerThemeWidth", 324, 26)?;
     // Controls/SimpleControls.xaml(323,16) VerticalAlignment
-    let priority_43 = __t::BindingPriority::Template;
-    rectangle_4.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_43);
+    __build_controls_simplecontrols_xaml_template_setter_56(&rectangle_4);
     // Controls/SimpleControls.xaml(326,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_4.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidHighBrush", 326, 26)?;
     rt::pop_parent_and_end_init(&context, &rectangle_4, 323, 16)?;
@@ -19752,21 +18841,17 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(327,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_0, "PART_AcceptButton", 327, 23)?;
     // Controls/SimpleControls.xaml(327,16) Column
-    let priority_44 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_44);
+    __build_controls_simplecontrols_xaml_template_setter_11(&button_0);
     // Controls/SimpleControls.xaml(329,23) Height
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", 329, 23)?;
     // Controls/SimpleControls.xaml(327,16) HorizontalAlignment
-    let priority_45 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_45);
+    __build_controls_simplecontrols_xaml_template_setter_50(&button_0);
     // Controls/SimpleControls.xaml(327,16) VerticalAlignment
-    let priority_46 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_46);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_0);
     // Controls/SimpleControls.xaml(332,23) Theme (setter chosen at run time)
-    let priority_47 = __t::BindingPriority::Template;
     let provided_29 = rt::provide_static_resource(&context, "SimpleDateTimePickerButton", || rt::property_value(__t::StyledElement::theme_property()), 332, 23)?;
     let value_8: __t::MarkupValue = rt::to_value(provided_29);
-    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_8, priority_47, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 332, 23)?;
+    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_8, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 332, 23)?;
     // Controls/SimpleControls.xaml(333,18) Content
     // Controls/SimpleControls.xaml(333,18) Path
     let path_0 = __t::Path::new();
@@ -19775,18 +18860,15 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::push_parent(&context, &path_0);
     // Controls/SimpleControls.xaml(333,18) Data
     let value_9 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M0.5,8.5 5,13.5 15.5,3")), 333, 23)?;
-    let priority_48 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_9)), priority_48);
+    path_0.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_9)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(334,23) Stroke
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[Button].Foreground"));
     let provided_30 = rt::provide_value(&context, rt::property_value(__t::Shape::stroke_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), provided_30, 334, 23)?;
     // Controls/SimpleControls.xaml(333,18) StrokeLineCap
-    let priority_49 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stroke_line_cap_property(), __t::PenLineCap::Round, priority_49);
+    __build_controls_simplecontrols_xaml_template_setter_146(&path_0);
     // Controls/SimpleControls.xaml(333,18) StrokeThickness
-    let priority_50 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 0.75_f64, priority_50);
+    __build_controls_simplecontrols_xaml_template_setter_147(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 333, 18)?;
     rt::pop_parent_and_end_init(&context, &button_0, 327, 16)?;
     // Controls/SimpleControls.xaml(338,16) Children
@@ -19799,24 +18881,19 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     // Controls/SimpleControls.xaml(338,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_1, "PART_DismissButton", 338, 23)?;
     // Controls/SimpleControls.xaml(338,16) Column
-    let priority_51 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_51);
+    __build_controls_simplecontrols_xaml_template_setter_9(&button_1);
     // Controls/SimpleControls.xaml(340,23) Height
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", 340, 23)?;
     // Controls/SimpleControls.xaml(338,16) HorizontalAlignment
-    let priority_52 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_52);
+    __build_controls_simplecontrols_xaml_template_setter_50(&button_1);
     // Controls/SimpleControls.xaml(338,16) VerticalAlignment
-    let priority_53 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_53);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_1);
     // Controls/SimpleControls.xaml(338,16) FontSize
-    let priority_54 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::TemplatedControl::font_size_property(), 16.0_f64, priority_54);
+    button_1.set_value_with_priority(__t::TemplatedControl::font_size_property(), 16.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(344,23) Theme (setter chosen at run time)
-    let priority_55 = __t::BindingPriority::Template;
     let provided_32 = rt::provide_static_resource(&context, "SimpleDateTimePickerButton", || rt::property_value(__t::StyledElement::theme_property()), 344, 23)?;
     let value_10: __t::MarkupValue = rt::to_value(provided_32);
-    rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_10, priority_55, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 344, 23)?;
+    rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_10, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 344, 23)?;
     // Controls/SimpleControls.xaml(345,18) Content
     // Controls/SimpleControls.xaml(345,18) Path
     let path_1 = __t::Path::new();
@@ -19825,18 +18902,15 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     rt::push_parent(&context, &path_1);
     // Controls/SimpleControls.xaml(345,18) Data
     let value_11 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M2,2 14,14 M2,14 14 2")), 345, 23)?;
-    let priority_56 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_11)), priority_56);
+    path_1.set_value_with_priority(__t::Path::data_property(), __t::Option::Some(__t::Clone::clone(&value_11)), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(346,23) Stroke
     let reflection_binding_extension_1 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("$parent[Button].Foreground"));
     let provided_33 = rt::provide_value(&context, rt::property_value(__t::Shape::stroke_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(path_1.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), provided_33, 346, 23)?;
     // Controls/SimpleControls.xaml(345,18) StrokeLineCap
-    let priority_57 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Shape::stroke_line_cap_property(), __t::PenLineCap::Round, priority_57);
+    __build_controls_simplecontrols_xaml_template_setter_146(&path_1);
     // Controls/SimpleControls.xaml(345,18) StrokeThickness
-    let priority_58 = __t::BindingPriority::Template;
-    path_1.set_value_with_priority(__t::Shape::stroke_thickness_property(), 0.75_f64, priority_58);
+    __build_controls_simplecontrols_xaml_template_setter_147(&path_1);
     rt::pop_parent_and_end_init(&context, &path_1, 345, 18)?;
     rt::pop_parent_and_end_init(&context, &button_1, 338, 16)?;
     rt::pop_parent_and_end_init(&context, &grid_2, 320, 14)?;
@@ -21017,8 +20091,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(450,26) Color
     rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<__t::FerroObject>(), __t::SolidColorBrush::color_property(), "ThemeControlLowColor", 450, 26)?;
     // Controls/SimpleControls.xaml(450,10) Opacity
-    let priority_0 = __t::BindingPriority::Template;
-    solid_color_brush_0.set_value_with_priority(__t::Brush::opacity_property(), 0.6_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_132(&solid_color_brush_0);
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, style_45.upcast_ref::<__t::StyleBase>(), &setter_105, rt::to_object(__t::Clone::clone(&solid_color_brush_0)));
     context.pop_parent();
@@ -21084,8 +20157,7 @@ fn build_controls_simplecontrols_xaml_deferred_204(
     // Controls/SimpleControls.xaml(42,16) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(42,16) Width
-    let priority_0 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_0);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(45,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -21098,14 +20170,11 @@ fn build_controls_simplecontrols_xaml_deferred_204(
     // Controls/SimpleControls.xaml(45,41) Background
     rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_background_property()), || rt::property(__t::Panel::background_property()), 45, 41)?;
     // Controls/SimpleControls.xaml(45,14) ClipToBounds
-    let priority_1 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_10(&panel_0);
     // Controls/SimpleControls.xaml(45,14) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_57(&panel_0);
     // Controls/SimpleControls.xaml(45,14) ZIndex
-    let priority_3 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::z_index_property(), 100_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_155(&panel_0);
     // Controls/SimpleControls.xaml(49,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(49,16) ContentPresenter
@@ -21115,11 +20184,10 @@ fn build_controls_simplecontrols_xaml_deferred_204(
     // Controls/SimpleControls.xaml(49,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_PanePresenter", 49, 33)?;
     // Controls/SimpleControls.xaml(49,61) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitView::pane_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_4, "ContentControl.Content", 49, 61)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 49, 61)?;
     // Controls/SimpleControls.xaml(50,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 50, 33)?;
     rt::end_init(&content_presenter_0, 49, 16)?;
@@ -21132,14 +20200,11 @@ fn build_controls_simplecontrols_xaml_deferred_204(
     // Controls/SimpleControls.xaml(51,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "HCPaneBorder", 51, 26)?;
     // Controls/SimpleControls.xaml(51,16) Fill
-    let priority_5 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
+    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(51,16) Width
-    let priority_6 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_0);
     // Controls/SimpleControls.xaml(51,16) HorizontalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_14(&rectangle_0);
     rt::end_init(&rectangle_0, 51, 16)?;
     rt::end_init(&panel_0, 45, 14)?;
     // Controls/SimpleControls.xaml(55,14) Children
@@ -21151,8 +20216,7 @@ fn build_controls_simplecontrols_xaml_deferred_204(
     // Controls/SimpleControls.xaml(55,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_1, "ContentRoot", 55, 20)?;
     // Controls/SimpleControls.xaml(55,14) Column
-    let priority_8 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_9(&panel_1);
     // Controls/SimpleControls.xaml(56,16) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/SimpleControls.xaml(56,16) ContentPresenter
@@ -21162,11 +20226,10 @@ fn build_controls_simplecontrols_xaml_deferred_204(
     // Controls/SimpleControls.xaml(56,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_ContentPresenter", 56, 33)?;
     // Controls/SimpleControls.xaml(56,64) Content (setter chosen at run time)
-    let priority_9 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_1: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_9, "ContentControl.Content", 56, 64)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 56, 64)?;
     // Controls/SimpleControls.xaml(57,33) ContentTemplate
     rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 57, 33)?;
     rt::end_init(&content_presenter_1, 56, 16)?;
@@ -21179,8 +20242,7 @@ fn build_controls_simplecontrols_xaml_deferred_204(
     // Controls/SimpleControls.xaml(58,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "LightDismissLayer", 58, 26)?;
     // Controls/SimpleControls.xaml(58,16) IsVisible
-    let priority_10 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_1);
     rt::end_init(&rectangle_1, 58, 16)?;
     rt::end_init(&panel_1, 55, 14)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 37, 12)?;
@@ -21207,8 +20269,7 @@ fn build_controls_simplecontrols_xaml_deferred_205(
     // Controls/SimpleControls.xaml(120,16) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(120,16) Width
-    let priority_0 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_0);
+    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(121,16) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
@@ -21240,14 +20301,11 @@ fn build_controls_simplecontrols_xaml_deferred_205(
     // Controls/SimpleControls.xaml(125,41) Background
     rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_background_property()), || rt::property(__t::Panel::background_property()), 125, 41)?;
     // Controls/SimpleControls.xaml(125,14) ClipToBounds
-    let priority_1 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_10(&panel_0);
     // Controls/SimpleControls.xaml(125,14) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_14(&panel_0);
     // Controls/SimpleControls.xaml(125,14) ZIndex
-    let priority_3 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::z_index_property(), 100_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_155(&panel_0);
     // Controls/SimpleControls.xaml(129,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(129,16) ContentPresenter
@@ -21257,11 +20315,10 @@ fn build_controls_simplecontrols_xaml_deferred_205(
     // Controls/SimpleControls.xaml(129,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_PanePresenter", 129, 33)?;
     // Controls/SimpleControls.xaml(129,61) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitView::pane_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_4, "ContentControl.Content", 129, 61)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 129, 61)?;
     // Controls/SimpleControls.xaml(130,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 130, 33)?;
     rt::end_init(&content_presenter_0, 129, 16)?;
@@ -21274,14 +20331,11 @@ fn build_controls_simplecontrols_xaml_deferred_205(
     // Controls/SimpleControls.xaml(131,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "HCPaneBorder", 131, 26)?;
     // Controls/SimpleControls.xaml(131,16) Fill
-    let priority_5 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
+    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(131,16) Width
-    let priority_6 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_0);
     // Controls/SimpleControls.xaml(131,16) HorizontalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_57(&rectangle_0);
     rt::end_init(&rectangle_0, 131, 16)?;
     rt::end_init(&panel_0, 125, 14)?;
     // Controls/SimpleControls.xaml(136,14) Children
@@ -21293,8 +20347,7 @@ fn build_controls_simplecontrols_xaml_deferred_205(
     // Controls/SimpleControls.xaml(136,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_1, "ContentRoot", 136, 20)?;
     // Controls/SimpleControls.xaml(136,14) Column
-    let priority_8 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_11(&panel_1);
     // Controls/SimpleControls.xaml(137,16) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/SimpleControls.xaml(137,16) ContentPresenter
@@ -21304,11 +20357,10 @@ fn build_controls_simplecontrols_xaml_deferred_205(
     // Controls/SimpleControls.xaml(137,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_ContentPresenter", 137, 33)?;
     // Controls/SimpleControls.xaml(137,64) Content (setter chosen at run time)
-    let priority_9 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_1: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_9, "ContentControl.Content", 137, 64)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 137, 64)?;
     // Controls/SimpleControls.xaml(138,33) ContentTemplate
     rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 138, 33)?;
     rt::end_init(&content_presenter_1, 137, 16)?;
@@ -21321,8 +20373,7 @@ fn build_controls_simplecontrols_xaml_deferred_205(
     // Controls/SimpleControls.xaml(139,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "LightDismissLayer", 139, 26)?;
     // Controls/SimpleControls.xaml(139,16) IsVisible
-    let priority_10 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_1);
     rt::end_init(&rectangle_1, 139, 16)?;
     rt::end_init(&panel_1, 136, 14)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 118, 12)?;
@@ -21368,8 +20419,7 @@ fn build_controls_simplecontrols_xaml_deferred_206(
     // Controls/SimpleControls.xaml(202,16) RowDefinition
     let row_definition_1 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(202,16) Height
-    let priority_0 = __t::BindingPriority::Template;
-    row_definition_1.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_0);
+    row_definition_1.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_1, __t::Clone::clone(&row_definition_1));
     // Controls/SimpleControls.xaml(205,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -21382,14 +20432,11 @@ fn build_controls_simplecontrols_xaml_deferred_206(
     // Controls/SimpleControls.xaml(206,20) Background
     rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_background_property()), || rt::property(__t::Panel::background_property()), 206, 20)?;
     // Controls/SimpleControls.xaml(205,14) ClipToBounds
-    let priority_1 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_10(&panel_0);
     // Controls/SimpleControls.xaml(205,14) VerticalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_56(&panel_0);
     // Controls/SimpleControls.xaml(205,14) ZIndex
-    let priority_3 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::z_index_property(), 100_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_155(&panel_0);
     // Controls/SimpleControls.xaml(210,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(210,16) ContentPresenter
@@ -21399,11 +20446,10 @@ fn build_controls_simplecontrols_xaml_deferred_206(
     // Controls/SimpleControls.xaml(210,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_PanePresenter", 210, 33)?;
     // Controls/SimpleControls.xaml(211,33) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitView::pane_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_4, "ContentControl.Content", 211, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 211, 33)?;
     // Controls/SimpleControls.xaml(212,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 212, 33)?;
     rt::end_init(&content_presenter_0, 210, 16)?;
@@ -21416,14 +20462,11 @@ fn build_controls_simplecontrols_xaml_deferred_206(
     // Controls/SimpleControls.xaml(213,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "HCPaneBorder", 213, 26)?;
     // Controls/SimpleControls.xaml(213,16) Fill
-    let priority_5 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
+    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(213,16) Height
-    let priority_6 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::height_property(), 1.0_f64, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_156(&rectangle_0);
     // Controls/SimpleControls.xaml(213,16) VerticalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Bottom, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_157(&rectangle_0);
     rt::end_init(&rectangle_0, 213, 16)?;
     rt::end_init(&panel_0, 205, 14)?;
     // Controls/SimpleControls.xaml(219,14) Children
@@ -21435,8 +20478,7 @@ fn build_controls_simplecontrols_xaml_deferred_206(
     // Controls/SimpleControls.xaml(219,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_1, "ContentRoot", 219, 20)?;
     // Controls/SimpleControls.xaml(219,14) Row
-    let priority_8 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_61(&panel_1);
     // Controls/SimpleControls.xaml(220,16) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/SimpleControls.xaml(220,16) ContentPresenter
@@ -21446,11 +20488,10 @@ fn build_controls_simplecontrols_xaml_deferred_206(
     // Controls/SimpleControls.xaml(220,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_ContentPresenter", 220, 33)?;
     // Controls/SimpleControls.xaml(221,33) Content (setter chosen at run time)
-    let priority_9 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_1: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_9, "ContentControl.Content", 221, 33)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 221, 33)?;
     // Controls/SimpleControls.xaml(222,33) ContentTemplate
     rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 222, 33)?;
     rt::end_init(&content_presenter_1, 220, 16)?;
@@ -21463,8 +20504,7 @@ fn build_controls_simplecontrols_xaml_deferred_206(
     // Controls/SimpleControls.xaml(223,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "LightDismissLayer", 223, 26)?;
     // Controls/SimpleControls.xaml(223,16) IsVisible
-    let priority_10 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_1);
     rt::end_init(&rectangle_1, 223, 16)?;
     rt::end_init(&panel_1, 219, 14)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 199, 12)?;
@@ -21491,8 +20531,7 @@ fn build_controls_simplecontrols_xaml_deferred_207(
     // Controls/SimpleControls.xaml(284,16) RowDefinition
     let row_definition_0 = __t::RowDefinition::new();
     // Controls/SimpleControls.xaml(284,16) Height
-    let priority_0 = __t::BindingPriority::Template;
-    row_definition_0.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_0);
+    row_definition_0.set_value_with_priority(__t::RowDefinition::height_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::RowDefinitions::__markup_Add_0(&row_definitions_collection_0, __t::Clone::clone(&row_definition_0));
     // Controls/SimpleControls.xaml(285,16) RowDefinitions
     let row_definitions_collection_1 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
@@ -21524,14 +20563,11 @@ fn build_controls_simplecontrols_xaml_deferred_207(
     // Controls/SimpleControls.xaml(289,20) Background
     rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_background_property()), || rt::property(__t::Panel::background_property()), 289, 20)?;
     // Controls/SimpleControls.xaml(288,14) ClipToBounds
-    let priority_1 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_10(&panel_0);
     // Controls/SimpleControls.xaml(288,14) VerticalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Bottom, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_157(&panel_0);
     // Controls/SimpleControls.xaml(288,14) ZIndex
-    let priority_3 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::z_index_property(), 100_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_155(&panel_0);
     // Controls/SimpleControls.xaml(293,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(293,16) ContentPresenter
@@ -21541,11 +20577,10 @@ fn build_controls_simplecontrols_xaml_deferred_207(
     // Controls/SimpleControls.xaml(293,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_PanePresenter", 293, 33)?;
     // Controls/SimpleControls.xaml(294,33) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitView::pane_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_4, "ContentControl.Content", 294, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 294, 33)?;
     // Controls/SimpleControls.xaml(295,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 295, 33)?;
     rt::end_init(&content_presenter_0, 293, 16)?;
@@ -21558,14 +20593,11 @@ fn build_controls_simplecontrols_xaml_deferred_207(
     // Controls/SimpleControls.xaml(296,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_0, "HCPaneBorder", 296, 26)?;
     // Controls/SimpleControls.xaml(296,16) Fill
-    let priority_5 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
+    rectangle_0.set_value_with_priority(__t::Shape::fill_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(296,16) Height
-    let priority_6 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::height_property(), 1.0_f64, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_156(&rectangle_0);
     // Controls/SimpleControls.xaml(296,16) VerticalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_56(&rectangle_0);
     rt::end_init(&rectangle_0, 296, 16)?;
     rt::end_init(&panel_0, 288, 14)?;
     // Controls/SimpleControls.xaml(302,14) Children
@@ -21577,8 +20609,7 @@ fn build_controls_simplecontrols_xaml_deferred_207(
     // Controls/SimpleControls.xaml(302,20) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_1, "ContentRoot", 302, 20)?;
     // Controls/SimpleControls.xaml(302,14) Row
-    let priority_8 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_65(&panel_1);
     // Controls/SimpleControls.xaml(303,16) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/SimpleControls.xaml(303,16) ContentPresenter
@@ -21588,11 +20619,10 @@ fn build_controls_simplecontrols_xaml_deferred_207(
     // Controls/SimpleControls.xaml(303,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_ContentPresenter", 303, 33)?;
     // Controls/SimpleControls.xaml(304,33) Content (setter chosen at run time)
-    let priority_9 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_6 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_1: __t::MarkupValue = rt::to_value(provided_6);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_9, "ContentControl.Content", 304, 33)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 304, 33)?;
     // Controls/SimpleControls.xaml(305,33) ContentTemplate
     rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 305, 33)?;
     rt::end_init(&content_presenter_1, 303, 16)?;
@@ -21605,8 +20635,7 @@ fn build_controls_simplecontrols_xaml_deferred_207(
     // Controls/SimpleControls.xaml(306,26) Name
     rt::set_and_register_name(name_scope.as_ref(), &rectangle_1, "LightDismissLayer", 306, 26)?;
     // Controls/SimpleControls.xaml(306,16) IsVisible
-    let priority_10 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_36(&rectangle_1);
     rt::end_init(&rectangle_1, 306, 16)?;
     rt::end_init(&panel_1, 302, 14)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 282, 12)?;
@@ -21892,8 +20921,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&dock_panel_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &dock_panel_0);
     // Controls/SimpleControls.xaml(60,12) Margin
-    let priority_0 = __t::BindingPriority::Template;
-    dock_panel_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64), priority_0);
+    dock_panel_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(61,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(61,14) DockPanel
@@ -21902,11 +20930,9 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&dock_panel_1).upcast::<__t::Control>());
     rt::push_parent(&context, &dock_panel_1);
     // Controls/SimpleControls.xaml(61,14) Margin
-    let priority_1 = __t::BindingPriority::Template;
-    dock_panel_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 5.0_f64), priority_1);
+    dock_panel_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 5.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(61,14) Dock
-    let priority_2 = __t::BindingPriority::Template;
-    dock_panel_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_84(&dock_panel_1);
     // Controls/SimpleControls.xaml(63,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(63,16) ChildFitter
@@ -21923,8 +20949,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     let provided_5 = rt::provide_value(&context, rt::property_value(__t::Layoutable::width_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(child_fitter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), provided_5, 63, 37)?;
     // Controls/SimpleControls.xaml(63,16) Dock
-    let priority_3 = __t::BindingPriority::Template;
-    child_fitter_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Right, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_31(&child_fitter_0);
     // Controls/SimpleControls.xaml(65,18) Child
     // Controls/SimpleControls.xaml(65,18) Button
     let button_0 = __t::Button::new();
@@ -21942,17 +20967,15 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&image_0)));
     rt::push_parent(&context, &image_0);
     // Controls/SimpleControls.xaml(66,20) Stretch
-    let priority_4 = __t::BindingPriority::Template;
-    image_0.set_value_with_priority(__t::Image::stretch_property(), __t::Stretch::Fill, priority_4);
+    image_0.set_value_with_priority(__t::Image::stretch_property(), __t::Stretch::Fill, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(67,22) Source
     // Controls/SimpleControls.xaml(67,22) DrawingImage
     let drawing_image_0 = __t::DrawingImage::new();
     rt::push_parent(&context, &drawing_image_0);
     // Controls/SimpleControls.xaml(67,35) Drawing (setter chosen at run time)
-    let priority_5 = __t::BindingPriority::Template;
     let provided_7 = rt::provide_static_resource(&context, "LevelUp", || rt::property_value(__t::DrawingImage::drawing_property()), 67, 35)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_7);
-    rt::bind_or_set_priority(drawing_image_0.upcast_ref::<__t::FerroObject>(), || __t::DrawingImage::drawing_property(), value_0, priority_5, || rt::class_handle(<__t::Drawing as __t::StaticType>::TYPE), true, "DrawingImage.Drawing", 67, 35)?;
+    rt::bind_or_set_priority(drawing_image_0.upcast_ref::<__t::FerroObject>(), || __t::DrawingImage::drawing_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::Drawing as __t::StaticType>::TYPE), true, "DrawingImage.Drawing", 67, 35)?;
     context.pop_parent();
     image_0.set_value(__t::Image::source_property(), rt::cast(drawing_image_0.clone(), 67, 35)?);
     rt::pop_parent_and_end_init(&context, &image_0, 66, 20)?;
@@ -21974,8 +20997,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     let provided_8 = rt::provide_value(&context, rt::property_value(__t::Layoutable::width_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(child_fitter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), provided_8, 71, 37)?;
     // Controls/SimpleControls.xaml(71,16) Dock
-    let priority_6 = __t::BindingPriority::Template;
-    child_fitter_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Right, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_31(&child_fitter_1);
     // Controls/SimpleControls.xaml(73,18) Child
     // Controls/SimpleControls.xaml(73,18) Button
     let button_1 = __t::Button::new();
@@ -21993,17 +21015,15 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     button_1.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&image_1)));
     rt::push_parent(&context, &image_1);
     // Controls/SimpleControls.xaml(74,20) Stretch
-    let priority_7 = __t::BindingPriority::Template;
-    image_1.set_value_with_priority(__t::Image::stretch_property(), __t::Stretch::Fill, priority_7);
+    image_1.set_value_with_priority(__t::Image::stretch_property(), __t::Stretch::Fill, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(75,22) Source
     // Controls/SimpleControls.xaml(75,22) DrawingImage
     let drawing_image_1 = __t::DrawingImage::new();
     rt::push_parent(&context, &drawing_image_1);
     // Controls/SimpleControls.xaml(75,35) Drawing (setter chosen at run time)
-    let priority_8 = __t::BindingPriority::Template;
     let provided_10 = rt::provide_static_resource(&context, "Refresh", || rt::property_value(__t::DrawingImage::drawing_property()), 75, 35)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_10);
-    rt::bind_or_set_priority(drawing_image_1.upcast_ref::<__t::FerroObject>(), || __t::DrawingImage::drawing_property(), value_1, priority_8, || rt::class_handle(<__t::Drawing as __t::StaticType>::TYPE), true, "DrawingImage.Drawing", 75, 35)?;
+    rt::bind_or_set_priority(drawing_image_1.upcast_ref::<__t::FerroObject>(), || __t::DrawingImage::drawing_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::Drawing as __t::StaticType>::TYPE), true, "DrawingImage.Drawing", 75, 35)?;
     context.pop_parent();
     image_1.set_value(__t::Image::source_property(), rt::cast(drawing_image_1.clone(), 75, 35)?);
     rt::pop_parent_and_end_init(&context, &image_1, 74, 20)?;
@@ -22019,8 +21039,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     // Controls/SimpleControls.xaml(79,24) Name
     rt::set_and_register_name(name_scope.as_ref(), &text_box_0, "Location", 79, 24)?;
     // Controls/SimpleControls.xaml(79,16) Margin
-    let priority_9 = __t::BindingPriority::Template;
-    text_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 5.0_f64, 0.0_f64), priority_9);
+    text_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 5.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(81,24) Text
     let reflection_binding_extension_4 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("Location"));
     let provided_11 = rt::provide_value(&context, rt::property_value(__t::TextBox::text_property()), &reflection_binding_extension_4, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -22036,8 +21055,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     rt::bind(key_binding_0.upcast_ref::<__t::FerroObject>(), __t::KeyBinding::command_property(), provided_12, 83, 31)?;
     // Controls/SimpleControls.xaml(83,20) Gesture
     let value_2 = rt::invoked(::ferroui_base::input::KeyGesture::__markup_parse(__t::String::from("Enter")), 84, 31)?;
-    let priority_10 = __t::BindingPriority::Template;
-    key_binding_0.set_value_with_priority(__t::KeyBinding::gesture_property(), rt::cast(__t::Clone::clone(&value_2), 84, 31)?, priority_10);
+    key_binding_0.set_value_with_priority(__t::KeyBinding::gesture_property(), rt::cast(__t::Clone::clone(&value_2), 84, 31)?, __t::BindingPriority::Template);
     context.pop_parent();
     <__t::FerroList<__t::Ref<__t::KeyBinding>>>::__markup_Add_0(&key_bindings_collection_0, __t::Clone::clone(&key_binding_0));
     rt::pop_parent_and_end_init(&context, &text_box_0, 79, 16)?;
@@ -22050,11 +21068,9 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_4, __t::Clone::clone(&dock_panel_2).upcast::<__t::Control>());
     rt::push_parent(&context, &dock_panel_2);
     // Controls/SimpleControls.xaml(88,14) Margin
-    let priority_11 = __t::BindingPriority::Template;
-    dock_panel_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 0.0_f64), priority_11);
+    dock_panel_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(88,14) Dock
-    let priority_12 = __t::BindingPriority::Template;
-    dock_panel_2.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_85(&dock_panel_2);
     // Controls/SimpleControls.xaml(90,16) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(dock_panel_2.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(90,16) StackPanel
@@ -22063,11 +21079,9 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_5, __t::Clone::clone(&stack_panel_0).upcast::<__t::Control>());
     rt::push_parent(&context, &stack_panel_0);
     // Controls/SimpleControls.xaml(90,16) Dock
-    let priority_13 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_159(&stack_panel_0);
     // Controls/SimpleControls.xaml(90,16) Orientation
-    let priority_14 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_99(&stack_panel_0);
     // Controls/SimpleControls.xaml(92,18) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(92,18) CheckBox
@@ -22098,14 +21112,11 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_7, __t::Clone::clone(&stack_panel_1).upcast::<__t::Control>());
     rt::push_parent(&context, &stack_panel_1);
     // Controls/SimpleControls.xaml(96,16) HorizontalAlignment
-    let priority_15 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_14(&stack_panel_1);
     // Controls/SimpleControls.xaml(96,16) Orientation
-    let priority_16 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_99(&stack_panel_1);
     // Controls/SimpleControls.xaml(96,16) Spacing
-    let priority_17 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::StackPanel::spacing_property(), 10.0_f64, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_160(&stack_panel_1);
     // Controls/SimpleControls.xaml(100,20) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(stack_panel_1.upcast_ref::<__t::StyledElement>());
     // Controls/SimpleControls.xaml(100,20) Style
@@ -22128,14 +21139,12 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     let provided_15 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_7, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_2.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_15, 104, 25)?;
     // Controls/SimpleControls.xaml(104,18) MinWidth
-    let priority_18 = __t::BindingPriority::Template;
-    button_2.set_value_with_priority(__t::Layoutable::min_width_property(), 60.0_f64, priority_18);
+    button_2.set_value_with_priority(__t::Layoutable::min_width_property(), 60.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(104,62) Content (setter chosen at run time)
-    let priority_19 = __t::BindingPriority::Template;
     let dynamic_resource_extension_1 = __t::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserOkText"));
     let provided_16 = rt::provide_value(&context, rt::property_value(__t::ContentControl::content_property()), &dynamic_resource_extension_1, __t::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_3: __t::MarkupValue = rt::to_value(provided_16);
-    rt::bind_or_set_null(button_2.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_3, priority_19, "ContentControl.Content", 104, 62)?;
+    rt::bind_or_set_null(button_2.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_3, __t::BindingPriority::Template, "ContentControl.Content", 104, 62)?;
     rt::pop_parent_and_end_init(&context, &button_2, 104, 18)?;
     // Controls/SimpleControls.xaml(105,18) Children
     let children_collection_9 = __t::Panel::__markup_get_Children(stack_panel_1.upcast_ref::<__t::Panel>());
@@ -22149,14 +21158,12 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     let provided_17 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_8, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_3.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_17, 105, 25)?;
     // Controls/SimpleControls.xaml(105,18) MinWidth
-    let priority_20 = __t::BindingPriority::Template;
-    button_3.set_value_with_priority(__t::Layoutable::min_width_property(), 60.0_f64, priority_20);
+    button_3.set_value_with_priority(__t::Layoutable::min_width_property(), 60.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(105,66) Content (setter chosen at run time)
-    let priority_21 = __t::BindingPriority::Template;
     let dynamic_resource_extension_2 = __t::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserCancelText"));
     let provided_18 = rt::provide_value(&context, rt::property_value(__t::ContentControl::content_property()), &dynamic_resource_extension_2, __t::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_4: __t::MarkupValue = rt::to_value(provided_18);
-    rt::bind_or_set_null(button_3.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_4, priority_21, "ContentControl.Content", 105, 66)?;
+    rt::bind_or_set_null(button_3.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_4, __t::BindingPriority::Template, "ContentControl.Content", 105, 66)?;
     rt::pop_parent_and_end_init(&context, &button_3, 105, 18)?;
     rt::pop_parent_and_end_init(&context, &stack_panel_1, 96, 16)?;
     rt::pop_parent_and_end_init(&context, &dock_panel_2, 88, 14)?;
@@ -22168,11 +21175,9 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_10, __t::Clone::clone(&combo_box_0).upcast::<__t::Control>());
     rt::push_parent(&context, &combo_box_0);
     // Controls/SimpleControls.xaml(109,14) Margin
-    let priority_22 = __t::BindingPriority::Template;
-    combo_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 0.0_f64), priority_22);
+    combo_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(109,14) Dock
-    let priority_23 = __t::BindingPriority::Template;
-    combo_box_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_85(&combo_box_0);
     // Controls/SimpleControls.xaml(111,23) IsVisible
     let reflection_binding_extension_9 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("ShowFilters"));
     let provided_19 = rt::provide_value(&context, rt::property_value(__t::Visual::is_visible_property()), &reflection_binding_extension_9, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -22199,8 +21204,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_11, __t::Clone::clone(&text_box_1).upcast::<__t::Control>());
     rt::push_parent(&context, &text_box_1);
     // Controls/SimpleControls.xaml(115,14) Dock
-    let priority_24 = __t::BindingPriority::Template;
-    text_box_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, priority_24);
+    __build_controls_simplecontrols_xaml_template_setter_85(&text_box_1);
     // Controls/SimpleControls.xaml(116,22) IsVisible
     let reflection_binding_extension_12 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("!SelectingFolder"));
     let provided_22 = rt::provide_value(&context, rt::property_value(__t::Visual::is_visible_property()), &reflection_binding_extension_12, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -22222,20 +21226,15 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     // Controls/SimpleControls.xaml(120,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &list_box_0, "PART_QuickLinks", 120, 22)?;
     // Controls/SimpleControls.xaml(120,14) MaxWidth
-    let priority_25 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::Layoutable::max_width_property(), 200.0_f64, priority_25);
+    list_box_0.set_value_with_priority(__t::Layoutable::max_width_property(), 200.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(120,14) Margin
-    let priority_26 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 5.0_f64, 5.0_f64), priority_26);
+    list_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 5.0_f64, 5.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(120,14) BorderBrush
-    let priority_27 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::TemplatedControl::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_27);
+    list_box_0.set_value_with_priority(__t::TemplatedControl::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(120,14) Dock
-    let priority_28 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_28);
+    __build_controls_simplecontrols_xaml_template_setter_159(&list_box_0);
     // Controls/SimpleControls.xaml(120,14) Focusable
-    let priority_29 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_29);
+    __build_controls_simplecontrols_xaml_template_setter_19(&list_box_0);
     // Controls/SimpleControls.xaml(126,22) ItemsSource
     let reflection_binding_extension_14 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("QuickLinks"));
     let provided_25 = rt::provide_value(&context, rt::property_value(__t::ItemsControl::items_source_property()), &reflection_binding_extension_14, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -22251,8 +21250,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_213, 130, 20)?;
     __t::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
-    let priority_30 = __t::BindingPriority::Template;
-    list_box_0.set_value_with_priority(__t::ItemsControl::item_template_property(), __t::Option::Some(__t::Clone::clone(&data_template_0) as __t::Rc<dyn __t::IDataTemplate>), priority_30);
+    list_box_0.set_value_with_priority(__t::ItemsControl::item_template_property(), __t::Option::Some(__t::Clone::clone(&data_template_0) as __t::Rc<dyn __t::IDataTemplate>), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &list_box_0, 120, 14)?;
     // Controls/SimpleControls.xaml(142,14) Children
     let children_collection_13 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
@@ -22262,8 +21260,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_13, __t::Clone::clone(&dock_panel_3).upcast::<__t::Control>());
     rt::push_parent(&context, &dock_panel_3);
     // Controls/SimpleControls.xaml(142,14) IsSharedSizeScope
-    let priority_31 = __t::BindingPriority::Template;
-    dock_panel_3.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), priority_31);
+    __build_controls_simplecontrols_xaml_template_setter_34(&dock_panel_3);
     // Controls/SimpleControls.xaml(143,16) Children
     let children_collection_14 = __t::Panel::__markup_get_Children(dock_panel_3.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(143,16) Grid
@@ -22272,112 +21269,91 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_14, __t::Clone::clone(&grid_0).upcast::<__t::Control>());
     rt::push_parent(&context, &grid_0);
     // Controls/SimpleControls.xaml(143,16) Margin
-    let priority_32 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(15.0_f64, 5.0_f64, 0.0_f64, 0.0_f64), priority_32);
+    grid_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(15.0_f64, 5.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(143,16) HorizontalAlignment
-    let priority_33 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_33);
+    __build_controls_simplecontrols_xaml_template_setter_50(&grid_0);
     // Controls/SimpleControls.xaml(143,16) Dock
-    let priority_34 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_34);
+    __build_controls_simplecontrols_xaml_template_setter_84(&grid_0);
     // Controls/SimpleControls.xaml(147,20) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(147,20) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(147,20) Width
-    let priority_35 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(20.0_f64, __t::GridUnitType::Pixel), priority_35);
+    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(20.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(147,48) SharedSizeGroup
-    let priority_36 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Icon")), priority_36);
+    column_definition_0.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Icon")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(148,20) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(148,20) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(148,20) Width
-    let priority_37 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(400.0_f64, __t::GridUnitType::Pixel), priority_37);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(400.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(148,49) SharedSizeGroup
-    let priority_38 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Name")), priority_38);
+    column_definition_1.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Name")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(149,20) ColumnDefinitions
     let column_definitions_collection_2 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(149,20) ColumnDefinition
     let column_definition_2 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(149,20) Width
-    let priority_39 = __t::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(16.0_f64, __t::GridUnitType::Pixel), priority_39);
+    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(16.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(149,48) SharedSizeGroup
-    let priority_40 = __t::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), priority_40);
+    column_definition_2.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, __t::Clone::clone(&column_definition_2));
     // Controls/SimpleControls.xaml(150,20) ColumnDefinitions
     let column_definitions_collection_3 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(150,20) ColumnDefinition
     let column_definition_3 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(150,20) Width
-    let priority_41 = __t::BindingPriority::Template;
-    column_definition_3.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(200.0_f64, __t::GridUnitType::Pixel), priority_41);
+    column_definition_3.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(200.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(150,49) SharedSizeGroup
-    let priority_42 = __t::BindingPriority::Template;
-    column_definition_3.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Modified")), priority_42);
+    column_definition_3.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Modified")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_3, __t::Clone::clone(&column_definition_3));
     // Controls/SimpleControls.xaml(151,20) ColumnDefinitions
     let column_definitions_collection_4 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(151,20) ColumnDefinition
     let column_definition_4 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(151,20) Width
-    let priority_43 = __t::BindingPriority::Template;
-    column_definition_4.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(16.0_f64, __t::GridUnitType::Pixel), priority_43);
+    column_definition_4.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(16.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(151,48) SharedSizeGroup
-    let priority_44 = __t::BindingPriority::Template;
-    column_definition_4.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), priority_44);
+    column_definition_4.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_4, __t::Clone::clone(&column_definition_4));
     // Controls/SimpleControls.xaml(152,20) ColumnDefinitions
     let column_definitions_collection_5 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(152,20) ColumnDefinition
     let column_definition_5 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(152,20) Width
-    let priority_45 = __t::BindingPriority::Template;
-    column_definition_5.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(150.0_f64, __t::GridUnitType::Pixel), priority_45);
+    column_definition_5.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(150.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(152,49) SharedSizeGroup
-    let priority_46 = __t::BindingPriority::Template;
-    column_definition_5.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Type")), priority_46);
+    column_definition_5.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Type")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_5, __t::Clone::clone(&column_definition_5));
     // Controls/SimpleControls.xaml(153,20) ColumnDefinitions
     let column_definitions_collection_6 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(153,20) ColumnDefinition
     let column_definition_6 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(153,20) Width
-    let priority_47 = __t::BindingPriority::Template;
-    column_definition_6.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(16.0_f64, __t::GridUnitType::Pixel), priority_47);
+    column_definition_6.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(16.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(153,48) SharedSizeGroup
-    let priority_48 = __t::BindingPriority::Template;
-    column_definition_6.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), priority_48);
+    column_definition_6.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_6, __t::Clone::clone(&column_definition_6));
     // Controls/SimpleControls.xaml(154,20) ColumnDefinitions
     let column_definitions_collection_7 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(154,20) ColumnDefinition
     let column_definition_7 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(154,20) Width
-    let priority_49 = __t::BindingPriority::Template;
-    column_definition_7.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(200.0_f64, __t::GridUnitType::Pixel), priority_49);
+    column_definition_7.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(200.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(154,49) SharedSizeGroup
-    let priority_50 = __t::BindingPriority::Template;
-    column_definition_7.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Size")), priority_50);
+    column_definition_7.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Size")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_7, __t::Clone::clone(&column_definition_7));
     // Controls/SimpleControls.xaml(155,20) ColumnDefinitions
     let column_definitions_collection_8 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(155,20) ColumnDefinition
     let column_definition_8 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(155,20) Width
-    let priority_51 = __t::BindingPriority::Template;
-    column_definition_8.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(16.0_f64, __t::GridUnitType::Pixel), priority_51);
+    column_definition_8.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(16.0_f64, __t::GridUnitType::Pixel), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(155,48) SharedSizeGroup
-    let priority_52 = __t::BindingPriority::Template;
-    column_definition_8.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), priority_52);
+    column_definition_8.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_8, __t::Clone::clone(&column_definition_8));
     // Controls/SimpleControls.xaml(157,18) Children
     let children_collection_15 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -22387,8 +21363,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_15, __t::Clone::clone(&text_block_1).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_1);
     // Controls/SimpleControls.xaml(157,18) Column
-    let priority_53 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_53);
+    __build_controls_simplecontrols_xaml_template_setter_9(&text_block_1);
     // Controls/SimpleControls.xaml(158,28) Text
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), "StringManagedFileChooserNameColumn", 158, 28)?;
     rt::pop_parent_and_end_init(&context, &text_block_1, 157, 18)?;
@@ -22399,14 +21374,11 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     grid_splitter_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_16, __t::Clone::clone(&grid_splitter_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(159,18) Column
-    let priority_54 = __t::BindingPriority::Template;
-    grid_splitter_0.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_54);
+    __build_controls_simplecontrols_xaml_template_setter_60(&grid_splitter_0);
     // Controls/SimpleControls.xaml(159,18) ResizeDirection
-    let priority_55 = __t::BindingPriority::Template;
-    grid_splitter_0.set_value_with_priority(__t::GridSplitter::resize_direction_property(), ::ferroui_controls::GridResizeDirection::Columns, priority_55);
+    __build_controls_simplecontrols_xaml_template_setter_163(&grid_splitter_0);
     // Controls/SimpleControls.xaml(159,18) Background
-    let priority_56 = __t::BindingPriority::Template;
-    grid_splitter_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_56);
+    grid_splitter_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     rt::end_init(&grid_splitter_0, 159, 18)?;
     // Controls/SimpleControls.xaml(162,18) Children
     let children_collection_17 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -22416,17 +21388,13 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_17, __t::Clone::clone(&rectangle_0).upcast::<__t::Control>());
     rt::push_parent(&context, &rectangle_0);
     // Controls/SimpleControls.xaml(162,18) HorizontalAlignment
-    let priority_57 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_57);
+    __build_controls_simplecontrols_xaml_template_setter_57(&rectangle_0);
     // Controls/SimpleControls.xaml(162,18) Column
-    let priority_58 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_58);
+    __build_controls_simplecontrols_xaml_template_setter_60(&rectangle_0);
     // Controls/SimpleControls.xaml(162,18) VerticalAlignment
-    let priority_59 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_59);
+    __build_controls_simplecontrols_xaml_template_setter_51(&rectangle_0);
     // Controls/SimpleControls.xaml(162,18) Width
-    let priority_60 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_60);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_0);
     // Controls/SimpleControls.xaml(162,109) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidBrush", 162, 109)?;
     rt::pop_parent_and_end_init(&context, &rectangle_0, 162, 18)?;
@@ -22438,8 +21406,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_18, __t::Clone::clone(&text_block_2).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_2);
     // Controls/SimpleControls.xaml(163,18) Column
-    let priority_61 = __t::BindingPriority::Template;
-    text_block_2.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_61);
+    __build_controls_simplecontrols_xaml_template_setter_122(&text_block_2);
     // Controls/SimpleControls.xaml(164,28) Text
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), "StringManagedFileChooserDateModifiedColumn", 164, 28)?;
     rt::pop_parent_and_end_init(&context, &text_block_2, 163, 18)?;
@@ -22450,14 +21417,11 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     grid_splitter_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_19, __t::Clone::clone(&grid_splitter_1).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(165,18) Column
-    let priority_62 = __t::BindingPriority::Template;
-    grid_splitter_1.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_62);
+    __build_controls_simplecontrols_xaml_template_setter_123(&grid_splitter_1);
     // Controls/SimpleControls.xaml(165,18) ResizeDirection
-    let priority_63 = __t::BindingPriority::Template;
-    grid_splitter_1.set_value_with_priority(__t::GridSplitter::resize_direction_property(), ::ferroui_controls::GridResizeDirection::Columns, priority_63);
+    __build_controls_simplecontrols_xaml_template_setter_163(&grid_splitter_1);
     // Controls/SimpleControls.xaml(165,18) Background
-    let priority_64 = __t::BindingPriority::Template;
-    grid_splitter_1.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_64);
+    grid_splitter_1.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     rt::end_init(&grid_splitter_1, 165, 18)?;
     // Controls/SimpleControls.xaml(168,18) Children
     let children_collection_20 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -22467,17 +21431,13 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_20, __t::Clone::clone(&rectangle_1).upcast::<__t::Control>());
     rt::push_parent(&context, &rectangle_1);
     // Controls/SimpleControls.xaml(168,18) HorizontalAlignment
-    let priority_65 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_65);
+    __build_controls_simplecontrols_xaml_template_setter_57(&rectangle_1);
     // Controls/SimpleControls.xaml(168,18) Column
-    let priority_66 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_66);
+    __build_controls_simplecontrols_xaml_template_setter_123(&rectangle_1);
     // Controls/SimpleControls.xaml(168,18) VerticalAlignment
-    let priority_67 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_67);
+    __build_controls_simplecontrols_xaml_template_setter_51(&rectangle_1);
     // Controls/SimpleControls.xaml(168,18) Width
-    let priority_68 = __t::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_68);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_1);
     // Controls/SimpleControls.xaml(172,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidBrush", 172, 28)?;
     rt::pop_parent_and_end_init(&context, &rectangle_1, 168, 18)?;
@@ -22489,8 +21449,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_21, __t::Clone::clone(&text_block_3).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_3);
     // Controls/SimpleControls.xaml(174,18) Column
-    let priority_69 = __t::BindingPriority::Template;
-    text_block_3.set_value_with_priority(__t::Grid::column_property(), 5_i32, priority_69);
+    __build_controls_simplecontrols_xaml_template_setter_148(&text_block_3);
     // Controls/SimpleControls.xaml(175,28) Text
     rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), "StringManagedFileChooserTypeColumn", 175, 28)?;
     rt::pop_parent_and_end_init(&context, &text_block_3, 174, 18)?;
@@ -22501,14 +21460,11 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     grid_splitter_2.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_22, __t::Clone::clone(&grid_splitter_2).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(176,18) Column
-    let priority_70 = __t::BindingPriority::Template;
-    grid_splitter_2.set_value_with_priority(__t::Grid::column_property(), 6_i32, priority_70);
+    __build_controls_simplecontrols_xaml_template_setter_149(&grid_splitter_2);
     // Controls/SimpleControls.xaml(176,18) ResizeDirection
-    let priority_71 = __t::BindingPriority::Template;
-    grid_splitter_2.set_value_with_priority(__t::GridSplitter::resize_direction_property(), ::ferroui_controls::GridResizeDirection::Columns, priority_71);
+    __build_controls_simplecontrols_xaml_template_setter_163(&grid_splitter_2);
     // Controls/SimpleControls.xaml(176,18) Background
-    let priority_72 = __t::BindingPriority::Template;
-    grid_splitter_2.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_72);
+    grid_splitter_2.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     rt::end_init(&grid_splitter_2, 176, 18)?;
     // Controls/SimpleControls.xaml(178,18) Children
     let children_collection_23 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -22518,17 +21474,13 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_23, __t::Clone::clone(&rectangle_2).upcast::<__t::Control>());
     rt::push_parent(&context, &rectangle_2);
     // Controls/SimpleControls.xaml(178,18) HorizontalAlignment
-    let priority_73 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_73);
+    __build_controls_simplecontrols_xaml_template_setter_57(&rectangle_2);
     // Controls/SimpleControls.xaml(178,18) Column
-    let priority_74 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Grid::column_property(), 6_i32, priority_74);
+    __build_controls_simplecontrols_xaml_template_setter_149(&rectangle_2);
     // Controls/SimpleControls.xaml(178,18) VerticalAlignment
-    let priority_75 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_75);
+    __build_controls_simplecontrols_xaml_template_setter_51(&rectangle_2);
     // Controls/SimpleControls.xaml(178,18) Width
-    let priority_76 = __t::BindingPriority::Template;
-    rectangle_2.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_76);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_2);
     // Controls/SimpleControls.xaml(182,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidBrush", 182, 28)?;
     rt::pop_parent_and_end_init(&context, &rectangle_2, 178, 18)?;
@@ -22540,8 +21492,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_24, __t::Clone::clone(&text_block_4).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_4);
     // Controls/SimpleControls.xaml(184,18) Column
-    let priority_77 = __t::BindingPriority::Template;
-    text_block_4.set_value_with_priority(__t::Grid::column_property(), 7_i32, priority_77);
+    text_block_4.set_value_with_priority(__t::Grid::column_property(), 7_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(185,28) Text
     rt::bind_dynamic_resource(&context, text_block_4.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), "StringManagedFileChooserSizeColumn", 185, 28)?;
     rt::pop_parent_and_end_init(&context, &text_block_4, 184, 18)?;
@@ -22552,14 +21503,11 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     grid_splitter_3.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_25, __t::Clone::clone(&grid_splitter_3).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(186,18) Column
-    let priority_78 = __t::BindingPriority::Template;
-    grid_splitter_3.set_value_with_priority(__t::Grid::column_property(), 8_i32, priority_78);
+    grid_splitter_3.set_value_with_priority(__t::Grid::column_property(), 8_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(186,18) ResizeDirection
-    let priority_79 = __t::BindingPriority::Template;
-    grid_splitter_3.set_value_with_priority(__t::GridSplitter::resize_direction_property(), ::ferroui_controls::GridResizeDirection::Columns, priority_79);
+    __build_controls_simplecontrols_xaml_template_setter_163(&grid_splitter_3);
     // Controls/SimpleControls.xaml(186,18) Background
-    let priority_80 = __t::BindingPriority::Template;
-    grid_splitter_3.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_80);
+    grid_splitter_3.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     rt::end_init(&grid_splitter_3, 186, 18)?;
     // Controls/SimpleControls.xaml(189,18) Children
     let children_collection_26 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -22569,17 +21517,13 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     __t::Controls::__markup_Add_0(&children_collection_26, __t::Clone::clone(&rectangle_3).upcast::<__t::Control>());
     rt::push_parent(&context, &rectangle_3);
     // Controls/SimpleControls.xaml(189,18) HorizontalAlignment
-    let priority_81 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_81);
+    __build_controls_simplecontrols_xaml_template_setter_57(&rectangle_3);
     // Controls/SimpleControls.xaml(189,18) Column
-    let priority_82 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Grid::column_property(), 8_i32, priority_82);
+    rectangle_3.set_value_with_priority(__t::Grid::column_property(), 8_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(189,18) VerticalAlignment
-    let priority_83 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_83);
+    __build_controls_simplecontrols_xaml_template_setter_51(&rectangle_3);
     // Controls/SimpleControls.xaml(189,18) Width
-    let priority_84 = __t::BindingPriority::Template;
-    rectangle_3.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_84);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_3);
     // Controls/SimpleControls.xaml(193,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_3.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeControlMidBrush", 193, 28)?;
     rt::pop_parent_and_end_init(&context, &rectangle_3, 189, 18)?;
@@ -22594,15 +21538,13 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     // Controls/SimpleControls.xaml(195,24) Name
     rt::set_and_register_name(name_scope.as_ref(), &list_box_1, "PART_Files", 195, 24)?;
     // Controls/SimpleControls.xaml(195,16) Margin
-    let priority_85 = __t::BindingPriority::Template;
-    list_box_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), priority_85);
+    list_box_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(197,24) ItemsSource
     let reflection_binding_extension_16 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("Items"));
     let provided_35 = rt::provide_value(&context, rt::property_value(__t::ItemsControl::items_source_property()), &reflection_binding_extension_16, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(list_box_1.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::items_source_property(), provided_35, 197, 24)?;
     // Controls/SimpleControls.xaml(195,16) HorizontalScrollBarVisibility
-    let priority_86 = __t::BindingPriority::Template;
-    list_box_1.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, priority_86);
+    __build_controls_simplecontrols_xaml_template_setter_138(&list_box_1);
     // Controls/SimpleControls.xaml(199,24) SelectedItems
     let reflection_binding_extension_17 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("SelectedItems"));
     let provided_36 = rt::provide_value(&context, rt::property_value(__t::SelectingItemsControl::selected_items_property()), &reflection_binding_extension_17, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -22618,8 +21560,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
     let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_214, 203, 22)?;
     __t::DataTemplate::__markup_set_Content(&data_template_1, rt::to_object(__t::Clone::clone(&deferred_1)));
     context.pop_parent();
-    let priority_87 = __t::BindingPriority::Template;
-    list_box_1.set_value_with_priority(__t::ItemsControl::item_template_property(), __t::Option::Some(__t::Clone::clone(&data_template_1) as __t::Rc<dyn __t::IDataTemplate>), priority_87);
+    list_box_1.set_value_with_priority(__t::ItemsControl::item_template_property(), __t::Option::Some(__t::Clone::clone(&data_template_1) as __t::Rc<dyn __t::IDataTemplate>), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &list_box_1, 195, 16)?;
     rt::pop_parent_and_end_init(&context, &dock_panel_3, 142, 14)?;
     rt::pop_parent_and_end_init(&context, &dock_panel_0, 60, 12)?;
@@ -22638,14 +21579,11 @@ fn build_controls_simplecontrols_xaml_deferred_213(
     stack_panel_0.begin_init();
     rt::push_parent(&context, &stack_panel_0);
     // Controls/SimpleControls.xaml(130,20) Background
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    stack_panel_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(130,20) Orientation
-    let priority_1 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_99(&stack_panel_0);
     // Controls/SimpleControls.xaml(130,20) Spacing
-    let priority_2 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 4.0_f64, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_43(&stack_panel_0);
     // Controls/SimpleControls.xaml(133,22) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(133,22) Image
@@ -22654,11 +21592,9 @@ fn build_controls_simplecontrols_xaml_deferred_213(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&image_0).upcast::<__t::Control>());
     rt::push_parent(&context, &image_0);
     // Controls/SimpleControls.xaml(133,22) Width
-    let priority_3 = __t::BindingPriority::Template;
-    image_0.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_120(&image_0);
     // Controls/SimpleControls.xaml(133,22) Height
-    let priority_4 = __t::BindingPriority::Template;
-    image_0.set_value_with_priority(__t::Layoutable::height_property(), 16.0_f64, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_121(&image_0);
     // Controls/SimpleControls.xaml(135,24) Source
     // Controls/SimpleControls.xaml(135,24) DrawingImage
     let drawing_image_0 = __t::DrawingImage::new();
@@ -22702,79 +21638,69 @@ fn build_controls_simplecontrols_xaml_deferred_214(
     grid_0.begin_init();
     rt::push_parent(&context, &grid_0);
     // Controls/SimpleControls.xaml(203,22) Background
-    let priority_0 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    grid_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(205,26) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(205,26) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(205,43) SharedSizeGroup
-    let priority_1 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Icon")), priority_1);
+    column_definition_0.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Icon")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(206,26) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(206,26) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(206,43) SharedSizeGroup
-    let priority_2 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Name")), priority_2);
+    column_definition_1.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Name")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(207,26) ColumnDefinitions
     let column_definitions_collection_2 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(207,26) ColumnDefinition
     let column_definition_2 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(207,43) SharedSizeGroup
-    let priority_3 = __t::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), priority_3);
+    column_definition_2.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, __t::Clone::clone(&column_definition_2));
     // Controls/SimpleControls.xaml(208,26) ColumnDefinitions
     let column_definitions_collection_3 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(208,26) ColumnDefinition
     let column_definition_3 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(208,43) SharedSizeGroup
-    let priority_4 = __t::BindingPriority::Template;
-    column_definition_3.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Modified")), priority_4);
+    column_definition_3.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Modified")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_3, __t::Clone::clone(&column_definition_3));
     // Controls/SimpleControls.xaml(209,26) ColumnDefinitions
     let column_definitions_collection_4 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(209,26) ColumnDefinition
     let column_definition_4 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(209,43) SharedSizeGroup
-    let priority_5 = __t::BindingPriority::Template;
-    column_definition_4.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), priority_5);
+    column_definition_4.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_4, __t::Clone::clone(&column_definition_4));
     // Controls/SimpleControls.xaml(210,26) ColumnDefinitions
     let column_definitions_collection_5 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(210,26) ColumnDefinition
     let column_definition_5 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(210,43) SharedSizeGroup
-    let priority_6 = __t::BindingPriority::Template;
-    column_definition_5.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Type")), priority_6);
+    column_definition_5.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Type")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_5, __t::Clone::clone(&column_definition_5));
     // Controls/SimpleControls.xaml(211,26) ColumnDefinitions
     let column_definitions_collection_6 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(211,26) ColumnDefinition
     let column_definition_6 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(211,43) SharedSizeGroup
-    let priority_7 = __t::BindingPriority::Template;
-    column_definition_6.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), priority_7);
+    column_definition_6.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_6, __t::Clone::clone(&column_definition_6));
     // Controls/SimpleControls.xaml(212,26) ColumnDefinitions
     let column_definitions_collection_7 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(212,26) ColumnDefinition
     let column_definition_7 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(212,43) SharedSizeGroup
-    let priority_8 = __t::BindingPriority::Template;
-    column_definition_7.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Size")), priority_8);
+    column_definition_7.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Size")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_7, __t::Clone::clone(&column_definition_7));
     // Controls/SimpleControls.xaml(213,26) ColumnDefinitions
     let column_definitions_collection_8 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(213,26) ColumnDefinition
     let column_definition_8 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(213,43) SharedSizeGroup
-    let priority_9 = __t::BindingPriority::Template;
-    column_definition_8.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), priority_9);
+    column_definition_8.set_value_with_priority(__t::DefinitionBase::shared_size_group_property(), __t::Option::Some(__t::String::from("Splitter")), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_8, __t::Clone::clone(&column_definition_8));
     // Controls/SimpleControls.xaml(215,24) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -22784,14 +21710,11 @@ fn build_controls_simplecontrols_xaml_deferred_214(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&image_0).upcast::<__t::Control>());
     rt::push_parent(&context, &image_0);
     // Controls/SimpleControls.xaml(215,24) Column
-    let priority_10 = __t::BindingPriority::Template;
-    image_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_11(&image_0);
     // Controls/SimpleControls.xaml(215,24) Width
-    let priority_11 = __t::BindingPriority::Template;
-    image_0.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_120(&image_0);
     // Controls/SimpleControls.xaml(215,24) Height
-    let priority_12 = __t::BindingPriority::Template;
-    image_0.set_value_with_priority(__t::Layoutable::height_property(), 16.0_f64, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_121(&image_0);
     // Controls/SimpleControls.xaml(218,26) Source
     // Controls/SimpleControls.xaml(218,26) DrawingImage
     let drawing_image_0 = __t::DrawingImage::new();
@@ -22816,8 +21739,7 @@ fn build_controls_simplecontrols_xaml_deferred_214(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&text_block_0).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_0);
     // Controls/SimpleControls.xaml(220,24) Column
-    let priority_13 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_9(&text_block_0);
     // Controls/SimpleControls.xaml(221,34) Text
     let reflection_binding_extension_1 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("DisplayName"));
     let provided_2 = rt::provide_value(&context, rt::property_value(__t::TextBlock::text_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -22831,8 +21753,7 @@ fn build_controls_simplecontrols_xaml_deferred_214(
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&text_block_1).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_1);
     // Controls/SimpleControls.xaml(222,24) Column
-    let priority_14 = __t::BindingPriority::Template;
-    text_block_1.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_122(&text_block_1);
     // Controls/SimpleControls.xaml(223,34) Text
     let reflection_binding_extension_2 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("Modified"));
     let provided_3 = rt::provide_value(&context, rt::property_value(__t::TextBlock::text_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -22846,8 +21767,7 @@ fn build_controls_simplecontrols_xaml_deferred_214(
     __t::Controls::__markup_Add_0(&children_collection_3, __t::Clone::clone(&text_block_2).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_2);
     // Controls/SimpleControls.xaml(224,24) Column
-    let priority_15 = __t::BindingPriority::Template;
-    text_block_2.set_value_with_priority(__t::Grid::column_property(), 5_i32, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_148(&text_block_2);
     // Controls/SimpleControls.xaml(225,34) Text
     let reflection_binding_extension_3 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("Type"));
     let provided_4 = rt::provide_value(&context, rt::property_value(__t::TextBlock::text_property()), &reflection_binding_extension_3, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -22861,11 +21781,9 @@ fn build_controls_simplecontrols_xaml_deferred_214(
     __t::Controls::__markup_Add_0(&children_collection_4, __t::Clone::clone(&text_block_3).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_3);
     // Controls/SimpleControls.xaml(226,24) Column
-    let priority_16 = __t::BindingPriority::Template;
-    text_block_3.set_value_with_priority(__t::Grid::column_property(), 7_i32, priority_16);
+    text_block_3.set_value_with_priority(__t::Grid::column_property(), 7_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(226,24) HorizontalAlignment
-    let priority_17 = __t::BindingPriority::Template;
-    text_block_3.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_14(&text_block_3);
     // Controls/SimpleControls.xaml(228,28) Text
     let reflection_binding_extension_4 = __t::ReflectionBindingExtension::__markup_new_0();
     // Controls/SimpleControls.xaml(228,36) Path
@@ -22927,8 +21845,7 @@ fn build_controls_simplecontrols_xaml_deferred_216(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&stack_panel_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &stack_panel_0);
     // Controls/SimpleControls.xaml(256,12) Spacing
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 10.0_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_160(&stack_panel_0);
     // Controls/SimpleControls.xaml(257,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(257,14) TextBlock
@@ -22937,8 +21854,7 @@ fn build_controls_simplecontrols_xaml_deferred_216(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&text_block_0).upcast::<__t::Control>());
     rt::push_parent(&context, &text_block_0);
     // Controls/SimpleControls.xaml(257,14) TextWrapping
-    let priority_1 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::Wrap, priority_1);
+    text_block_0.set_value_with_priority(__t::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::Wrap, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(259,18) Text
     let multi_binding_0 = __t::MultiBinding::__markup_new_0();
     rt::push_parent(&context, &multi_binding_0);
@@ -22976,14 +21892,11 @@ fn build_controls_simplecontrols_xaml_deferred_216(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&stack_panel_1).upcast::<__t::Control>());
     rt::push_parent(&context, &stack_panel_1);
     // Controls/SimpleControls.xaml(268,14) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_14(&stack_panel_1);
     // Controls/SimpleControls.xaml(268,14) Spacing
-    let priority_3 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::StackPanel::spacing_property(), 10.0_f64, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_160(&stack_panel_1);
     // Controls/SimpleControls.xaml(268,14) Orientation
-    let priority_4 = __t::BindingPriority::Template;
-    stack_panel_1.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_99(&stack_panel_1);
     // Controls/SimpleControls.xaml(271,16) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(stack_panel_1.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(271,16) Button
@@ -22995,20 +21908,16 @@ fn build_controls_simplecontrols_xaml_deferred_216(
     let classes_collection_0 = __t::StyledElement::__markup_get_Classes(button_0.upcast_ref::<__t::StyledElement>());
     __t::Classes::__markup_Add_0(&classes_collection_0, __t::String::from("accent"));
     // Controls/SimpleControls.xaml(271,40) Content (setter chosen at run time)
-    let priority_5 = __t::BindingPriority::Template;
     let dynamic_resource_extension_1 = __t::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserOverwritePromptConfirmText"));
     let provided_8 = rt::provide_value(&context, rt::property_value(__t::ContentControl::content_property()), &dynamic_resource_extension_1, __t::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_0: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_null(button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, priority_5, "ContentControl.Content", 271, 40)?;
+    rt::bind_or_set_null(button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 271, 40)?;
     // Controls/SimpleControls.xaml(271,16) MinWidth
-    let priority_6 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::min_width_property(), 80.0_f64, priority_6);
+    button_0.set_value_with_priority(__t::Layoutable::min_width_property(), 80.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(271,16) HorizontalContentAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_40(&button_0);
     // Controls/SimpleControls.xaml(271,16) IsDefault
-    let priority_8 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Button::is_default_property(), __t::Clone::clone(&true), priority_8);
+    button_0.set_value_with_priority(__t::Button::is_default_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(275,23) Command
     let reflection_binding_extension_1 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("Confirm"));
     rt::push_parent(&context, &reflection_binding_extension_1);
@@ -23028,20 +21937,16 @@ fn build_controls_simplecontrols_xaml_deferred_216(
     __t::Controls::__markup_Add_0(&children_collection_3, __t::Clone::clone(&button_1).upcast::<__t::Control>());
     rt::push_parent(&context, &button_1);
     // Controls/SimpleControls.xaml(276,23) Content (setter chosen at run time)
-    let priority_9 = __t::BindingPriority::Template;
     let dynamic_resource_extension_2 = __t::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserOverwritePromptCancelText"));
     let provided_11 = rt::provide_value(&context, rt::property_value(__t::ContentControl::content_property()), &dynamic_resource_extension_2, __t::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_1: __t::MarkupValue = rt::to_value(provided_11);
-    rt::bind_or_set_null(button_1.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_1, priority_9, "ContentControl.Content", 276, 23)?;
+    rt::bind_or_set_null(button_1.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 276, 23)?;
     // Controls/SimpleControls.xaml(276,16) MinWidth
-    let priority_10 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::min_width_property(), 80.0_f64, priority_10);
+    button_1.set_value_with_priority(__t::Layoutable::min_width_property(), 80.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(276,16) IsCancel
-    let priority_11 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Button::is_cancel_property(), __t::Clone::clone(&true), priority_11);
+    button_1.set_value_with_priority(__t::Button::is_cancel_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(276,16) HorizontalContentAlignment
-    let priority_12 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_40(&button_1);
     // Controls/SimpleControls.xaml(280,23) Command
     let reflection_binding_extension_2 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("Cancel"));
     rt::push_parent(&context, &reflection_binding_extension_2);
@@ -23390,11 +22295,10 @@ fn build_controls_simplecontrols_xaml_deferred_225(
     // Controls/SimpleControls.xaml(34,27) Background
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R144)?;
     // Controls/SimpleControls.xaml(38,27) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 38, 27)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 38, 27)?;
     // Controls/SimpleControls.xaml(39,27) ContentTemplate
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R145)?;
     rt::end_init(&content_presenter_0, 33, 10)?;
@@ -23497,24 +22401,21 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     // Controls/SimpleControls.xaml(133,14) ColumnDefinition
     let column_definition_0 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(133,14) Width
-    let priority_0 = __t::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), priority_0);
+    column_definition_0.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(1.0_f64, __t::GridUnitType::Star), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, __t::Clone::clone(&column_definition_0));
     // Controls/SimpleControls.xaml(134,14) ColumnDefinitions
     let column_definitions_collection_1 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(134,14) ColumnDefinition
     let column_definition_1 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(134,14) Width
-    let priority_1 = __t::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_1);
+    column_definition_1.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, __t::Clone::clone(&column_definition_1));
     // Controls/SimpleControls.xaml(135,14) ColumnDefinitions
     let column_definitions_collection_2 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/SimpleControls.xaml(135,14) ColumnDefinition
     let column_definition_2 = __t::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(135,14) Width
-    let priority_2 = __t::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), priority_2);
+    column_definition_2.set_value_with_priority(__t::ColumnDefinition::width_property(), __t::GridLength::__markup_new_2(0.0_f64, __t::GridUnitType::Auto), __t::BindingPriority::Template);
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, __t::Clone::clone(&column_definition_2));
     // Controls/SimpleControls.xaml(138,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -23526,13 +22427,11 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     // Controls/SimpleControls.xaml(138,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_0, "PART_PrimaryButton", 138, 19)?;
     // Controls/SimpleControls.xaml(138,12) Column
-    let priority_3 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_11(&button_0);
     // Controls/SimpleControls.xaml(140,19) Theme (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let provided_0 = rt::provide_static_resource(&context, "SimpleSplitButtonComponent", || rt::property_value(__t::StyledElement::theme_property()), 140, 19)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
-    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_4, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 140, 19)?;
+    rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 140, 19)?;
     // Controls/SimpleControls.xaml(141,19) MinWidth
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "SplitButtonPrimaryButtonSize", 141, 19)?;
     // Controls/SimpleControls.xaml(142,19) Foreground
@@ -23549,19 +22448,17 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     // Controls/SimpleControls.xaml(145,19) BorderBrush
     rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::TemplatedControl::border_brush_property()), 145, 19)?;
     // Controls/SimpleControls.xaml(146,19) Content (setter chosen at run time)
-    let priority_5 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_7 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_1: __t::MarkupValue = rt::to_value(provided_7);
-    rt::bind_or_set_null(button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_1, priority_5, "ContentControl.Content", 146, 19)?;
+    rt::bind_or_set_null(button_0.upcast_ref::<__t::FerroObject>(), || __t::ContentControl::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 146, 19)?;
     // Controls/SimpleControls.xaml(147,19) ContentTemplate
     rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R147)?;
     // Controls/SimpleControls.xaml(149,19) CommandParameter (setter chosen at run time)
-    let priority_6 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitButton::command_parameter_property()));
     let provided_10 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     let value_2: __t::MarkupValue = rt::to_value(provided_10);
-    rt::bind_or_set_null(button_0.upcast_ref::<__t::FerroObject>(), || __t::Button::command_parameter_property(), &value_2, priority_6, "Button.CommandParameter", 149, 19)?;
+    rt::bind_or_set_null(button_0.upcast_ref::<__t::FerroObject>(), || __t::Button::command_parameter_property(), &value_2, __t::BindingPriority::Template, "Button.CommandParameter", 149, 19)?;
     // Controls/SimpleControls.xaml(150,19) CornerRadius
     let template_binding_8 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TemplatedControl::corner_radius_property()));
     rt::push_parent(&context, &template_binding_8);
@@ -23574,19 +22471,15 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     // Controls/SimpleControls.xaml(151,19) FontFamily
     rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R148)?;
     // Controls/SimpleControls.xaml(138,12) HorizontalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_50(&button_0);
     // Controls/SimpleControls.xaml(138,12) VerticalAlignment
-    let priority_8 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_0);
     // Controls/SimpleControls.xaml(156,19) HorizontalContentAlignment
     rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R149)?;
     // Controls/SimpleControls.xaml(138,12) Focusable
-    let priority_9 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_19(&button_0);
     // Controls/SimpleControls.xaml(138,12) IsTabStop
-    let priority_10 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::KeyboardNavigation::is_tab_stop_property(), __t::Clone::clone(&false), priority_10);
+    button_0.set_value_with_priority(__t::KeyboardNavigation::is_tab_stop_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &button_0, 138, 12)?;
     // Controls/SimpleControls.xaml(162,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -23598,11 +22491,9 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     // Controls/SimpleControls.xaml(162,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "SeparatorBorder", 162, 19)?;
     // Controls/SimpleControls.xaml(162,12) Column
-    let priority_11 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_9(&border_0);
     // Controls/SimpleControls.xaml(162,12) Background
-    let priority_12 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_12);
+    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(165,19) Width
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "SplitButtonSeparatorWidth", 165, 19)?;
     // Controls/SimpleControls.xaml(166,19) BorderThickness
@@ -23627,13 +22518,11 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     // Controls/SimpleControls.xaml(169,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_1, "PART_SecondaryButton", 169, 19)?;
     // Controls/SimpleControls.xaml(169,12) Column
-    let priority_13 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_60(&button_1);
     // Controls/SimpleControls.xaml(171,19) Theme (setter chosen at run time)
-    let priority_14 = __t::BindingPriority::Template;
     let provided_23 = rt::provide_static_resource(&context, "SimpleSplitButtonComponent", || rt::property_value(__t::StyledElement::theme_property()), 171, 19)?;
     let value_3: __t::MarkupValue = rt::to_value(provided_23);
-    rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_14, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 171, 19)?;
+    rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 171, 19)?;
     // Controls/SimpleControls.xaml(172,19) MinWidth
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "SplitButtonSecondaryButtonSize", 172, 19)?;
     // Controls/SimpleControls.xaml(173,19) BorderBrush
@@ -23657,41 +22546,31 @@ fn build_controls_simplecontrols_xaml_deferred_227(
     let provided_31 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_21);
     rt::bind(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), provided_31, 177, 19)?;
     // Controls/SimpleControls.xaml(169,12) Padding
-    let priority_15 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_15);
+    button_1.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(169,12) HorizontalContentAlignment
-    let priority_16 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_40(&button_1);
     // Controls/SimpleControls.xaml(169,12) VerticalContentAlignment
-    let priority_17 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Center, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_41(&button_1);
     // Controls/SimpleControls.xaml(169,12) HorizontalAlignment
-    let priority_18 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_50(&button_1);
     // Controls/SimpleControls.xaml(169,12) VerticalAlignment
-    let priority_19 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_1);
     // Controls/SimpleControls.xaml(169,12) Focusable
-    let priority_20 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_20);
+    __build_controls_simplecontrols_xaml_template_setter_19(&button_1);
     // Controls/SimpleControls.xaml(169,12) IsTabStop
-    let priority_21 = __t::BindingPriority::Template;
-    button_1.set_value_with_priority(__t::KeyboardNavigation::is_tab_stop_property(), __t::Clone::clone(&false), priority_21);
+    button_1.set_value_with_priority(__t::KeyboardNavigation::is_tab_stop_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(185,14) Content
     // Controls/SimpleControls.xaml(185,14) PathIcon
     let path_icon_0 = __t::PathIcon::new();
     path_icon_0.begin_init();
     button_1.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_icon_0)));
     // Controls/SimpleControls.xaml(185,14) Height
-    let priority_22 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_13(&path_icon_0);
     // Controls/SimpleControls.xaml(185,14) Width
-    let priority_23 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_12(&path_icon_0);
     // Controls/SimpleControls.xaml(185,14) Data
     let value_4 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M1939 486L2029 576L1024 1581L19 576L109 486L1024 1401L1939 486Z")), 186, 23)?;
-    let priority_24 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_4)), priority_24);
+    path_icon_0.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_4)), __t::BindingPriority::Template);
     rt::end_init(&path_icon_0, 185, 14)?;
     rt::pop_parent_and_end_init(&context, &button_1, 169, 12)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 131, 10)?;
@@ -23920,11 +22799,9 @@ fn build_controls_simplecontrols_xaml_deferred_233(
     // Controls/SimpleControls.xaml(94,10) ScaleTransform
     let scale_transform_0 = __t::ScaleTransform::new();
     // Controls/SimpleControls.xaml(94,10) ScaleX
-    let priority_0 = __t::BindingPriority::Template;
-    scale_transform_0.set_value_with_priority(__t::ScaleTransform::scale_x_property(), -1.0_f64, priority_0);
+    scale_transform_0.set_value_with_priority(__t::ScaleTransform::scale_x_property(), -1.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(94,10) ScaleY
-    let priority_1 = __t::BindingPriority::Template;
-    scale_transform_0.set_value_with_priority(__t::ScaleTransform::scale_y_property(), 1.0_f64, priority_1);
+    scale_transform_0.set_value_with_priority(__t::ScaleTransform::scale_y_property(), 1.0_f64, __t::BindingPriority::Template);
     rt::add_setter_value(style_1.upcast_ref::<__t::StyleBase>(), &setter_4, rt::to_object(__t::Clone::clone(&scale_transform_0)));
     rt::style_program::attach(control_theme_0.upcast_ref::<__t::StyleBase>(), &style_1, 92, 6)?;
     // Controls/SimpleControls.xaml(97,6) Content
@@ -23977,14 +22854,11 @@ fn build_controls_simplecontrols_xaml_deferred_234(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&border_0).upcast::<__t::Control>());
     rt::push_parent(&context, &border_0);
     // Controls/SimpleControls.xaml(72,14) Padding
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 10.0_f64), priority_0);
+    border_0.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 10.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(72,14) IsHitTestVisible
-    let priority_1 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&true), priority_1);
+    border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(72,14) Background
-    let priority_2 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
+    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(73,16) Child
     // Controls/SimpleControls.xaml(73,16) Image
     let image_0 = __t::Image::new();
@@ -23992,11 +22866,9 @@ fn build_controls_simplecontrols_xaml_deferred_234(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&image_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &image_0);
     // Controls/SimpleControls.xaml(73,16) Stretch
-    let priority_3 = __t::BindingPriority::Template;
-    image_0.set_value_with_priority(__t::Image::stretch_property(), __t::Stretch::Uniform, priority_3);
+    image_0.set_value_with_priority(__t::Image::stretch_property(), __t::Stretch::Uniform, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(73,16) Cursor
-    let priority_4 = __t::BindingPriority::Template;
-    image_0.set_value_with_priority(__t::InputElement::cursor_property(), rt::cast(__t::Cursor::__markup_new_0(__t::StandardCursorType::Arrow), 74, 22)?, priority_4);
+    image_0.set_value_with_priority(__t::InputElement::cursor_property(), rt::cast(__t::Cursor::__markup_new_0(__t::StandardCursorType::Arrow), 74, 22)?, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(75,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &image_0, "PART_HandlePathIcon", 75, 22)?;
     // Controls/SimpleControls.xaml(76,22) Height
@@ -24012,22 +22884,17 @@ fn build_controls_simplecontrols_xaml_deferred_234(
     border_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(79,14) Background
-    let priority_5 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
+    border_1.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(80,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_1, "PART_Indicator", 80, 21)?;
     // Controls/SimpleControls.xaml(79,14) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_6(&border_1);
     // Controls/SimpleControls.xaml(79,14) Width
-    let priority_7 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_134(&border_1);
     // Controls/SimpleControls.xaml(79,14) VerticalAlignment
-    let priority_8 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_56(&border_1);
     // Controls/SimpleControls.xaml(79,14) Height
-    let priority_9 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::height_property(), 5.0_f64, priority_9);
+    border_1.set_value_with_priority(__t::Layoutable::height_property(), 5.0_f64, __t::BindingPriority::Template);
     rt::end_init(&border_1, 79, 14)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 71, 12)?;
     __t::Result::Ok(rt::to_value(grid_0.clone()))
@@ -24244,14 +23111,11 @@ fn build_controls_simplecontrols_xaml_deferred_236(
     // Controls/SimpleControls.xaml(41,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &stack_panel_0, "PART_LayoutRoot", 41, 23)?;
     // Controls/SimpleControls.xaml(41,12) Spacing
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 4.0_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_43(&stack_panel_0);
     // Controls/SimpleControls.xaml(41,12) HorizontalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_6(&stack_panel_0);
     // Controls/SimpleControls.xaml(41,12) VerticalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_2(&stack_panel_0);
     // Controls/SimpleControls.xaml(45,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(45,14) ContentPresenter
@@ -24261,16 +23125,14 @@ fn build_controls_simplecontrols_xaml_deferred_236(
     // Controls/SimpleControls.xaml(45,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_IconPresenter", 45, 31)?;
     // Controls/SimpleControls.xaml(46,31) Content (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::CommandBarButton::icon_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_3, "ContentControl.Content", 46, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 46, 31)?;
     // Controls/SimpleControls.xaml(47,31) Foreground
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 47, 31)?;
     // Controls/SimpleControls.xaml(45,14) HorizontalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_presenter_0);
     rt::end_init(&content_presenter_0, 45, 14)?;
     // Controls/SimpleControls.xaml(49,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
@@ -24283,15 +23145,12 @@ fn build_controls_simplecontrols_xaml_deferred_236(
     // Controls/SimpleControls.xaml(50,24) Text
     rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R152)?;
     // Controls/SimpleControls.xaml(49,14) FontSize
-    let priority_5 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 11.0_f64, priority_5);
+    text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 11.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(49,14) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_0);
     // Controls/SimpleControls.xaml(49,14) TextTrimming
     let value_1 = <dyn ::ferroui_base::media::TextTrimming>::__markup_static_get_CharacterEllipsis();
-    let priority_7 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::TextBlock::text_trimming_property(), __t::Clone::clone(&value_1), priority_7);
+    text_block_0.set_value_with_priority(__t::TextBlock::text_trimming_property(), __t::Clone::clone(&value_1), __t::BindingPriority::Template);
     rt::end_init(&text_block_0, 49, 14)?;
     rt::end_init(&stack_panel_0, 41, 12)?;
     rt::end_init(&border_0, 35, 10)?;
@@ -24522,14 +23381,11 @@ fn build_controls_simplecontrols_xaml_deferred_238(
     // Controls/SimpleControls.xaml(137,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &stack_panel_0, "PART_LayoutRoot", 137, 23)?;
     // Controls/SimpleControls.xaml(137,12) Spacing
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 4.0_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_43(&stack_panel_0);
     // Controls/SimpleControls.xaml(137,12) HorizontalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_6(&stack_panel_0);
     // Controls/SimpleControls.xaml(137,12) VerticalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_2(&stack_panel_0);
     // Controls/SimpleControls.xaml(141,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(141,14) ContentPresenter
@@ -24539,16 +23395,14 @@ fn build_controls_simplecontrols_xaml_deferred_238(
     // Controls/SimpleControls.xaml(141,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_IconPresenter", 141, 31)?;
     // Controls/SimpleControls.xaml(142,31) Content (setter chosen at run time)
-    let priority_3 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::CommandBarToggleButton::icon_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_3, "ContentControl.Content", 142, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 142, 31)?;
     // Controls/SimpleControls.xaml(143,31) Foreground
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 143, 31)?;
     // Controls/SimpleControls.xaml(141,14) HorizontalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_presenter_0);
     rt::end_init(&content_presenter_0, 141, 14)?;
     // Controls/SimpleControls.xaml(145,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
@@ -24561,15 +23415,12 @@ fn build_controls_simplecontrols_xaml_deferred_238(
     // Controls/SimpleControls.xaml(146,24) Text
     rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R154)?;
     // Controls/SimpleControls.xaml(145,14) FontSize
-    let priority_5 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 11.0_f64, priority_5);
+    text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 11.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(145,14) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_6(&text_block_0);
     // Controls/SimpleControls.xaml(145,14) TextTrimming
     let value_1 = <dyn ::ferroui_base::media::TextTrimming>::__markup_static_get_CharacterEllipsis();
-    let priority_7 = __t::BindingPriority::Template;
-    text_block_0.set_value_with_priority(__t::TextBlock::text_trimming_property(), __t::Clone::clone(&value_1), priority_7);
+    text_block_0.set_value_with_priority(__t::TextBlock::text_trimming_property(), __t::Clone::clone(&value_1), __t::BindingPriority::Template);
     rt::end_init(&text_block_0, 145, 14)?;
     rt::end_init(&stack_panel_0, 137, 12)?;
     rt::end_init(&border_0, 131, 10)?;
@@ -24714,8 +23565,7 @@ fn build_controls_simplecontrols_xaml_deferred_242(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&dock_panel_0).upcast::<__t::Control>());
     rt::push_parent(&context, &dock_panel_0);
     // Controls/SimpleControls.xaml(265,14) TabNavigation
-    let priority_0 = __t::BindingPriority::Template;
-    dock_panel_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Cycle, priority_0);
+    dock_panel_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), ::ferroui_base::input::KeyboardNavigationMode::Cycle, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(267,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(267,16) Button
@@ -24725,23 +23575,17 @@ fn build_controls_simplecontrols_xaml_deferred_242(
     // Controls/SimpleControls.xaml(267,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_0, "PART_OverflowButton", 267, 23)?;
     // Controls/SimpleControls.xaml(267,16) Dock
-    let priority_1 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Right, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_31(&button_0);
     // Controls/SimpleControls.xaml(267,16) Background
-    let priority_2 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
+    button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(267,16) BorderThickness
-    let priority_3 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_3);
+    button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(267,16) Padding
-    let priority_4 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64), priority_4);
+    button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(267,16) MinWidth
-    let priority_5 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::min_width_property(), 40.0_f64, priority_5);
+    button_0.set_value_with_priority(__t::Layoutable::min_width_property(), 40.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(267,16) VerticalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_0);
     // Controls/SimpleControls.xaml(274,23) IsVisible
     rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::CommandBar::is_overflow_button_visible_property()), || rt::property(__t::Visual::is_visible_property()), 274, 23)?;
     // Controls/SimpleControls.xaml(275,18) Content
@@ -24750,17 +23594,14 @@ fn build_controls_simplecontrols_xaml_deferred_242(
     path_icon_0.begin_init();
     button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&path_icon_0)));
     // Controls/SimpleControls.xaml(275,18) Width
-    let priority_7 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_120(&path_icon_0);
     // Controls/SimpleControls.xaml(275,18) Height
-    let priority_8 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::height_property(), 16.0_f64, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_121(&path_icon_0);
     // Controls/SimpleControls.xaml(276,27) Foreground
     rt::apply_template_binding(path_icon_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 276, 27)?;
     // Controls/SimpleControls.xaml(275,18) Data
     let value_0 = rt::invoked(__t::Geometry::__markup_parse(__t::String::from("M6,10A2,2 0 0,0 4,12A2,2 0 0,0 6,14A2,2 0 0,0 8,12A2,2 0 0,0 6,10M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M18,10A2,2 0 0,0 16,12A2,2 0 0,0 18,14A2,2 0 0,0 20,12A2,2 0 0,0 18,10Z")), 277, 27)?;
-    let priority_9 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), priority_9);
+    path_icon_0.set_value_with_priority(__t::PathIcon::data_property(), __t::Option::Some(__t::Clone::clone(&value_0)), __t::BindingPriority::Template);
     rt::end_init(&path_icon_0, 275, 18)?;
     rt::end_init(&button_0, 267, 16)?;
     // Controls/SimpleControls.xaml(281,16) Children
@@ -24772,17 +23613,14 @@ fn build_controls_simplecontrols_xaml_deferred_242(
     // Controls/SimpleControls.xaml(281,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_ContentPresenter", 281, 33)?;
     // Controls/SimpleControls.xaml(282,33) Content (setter chosen at run time)
-    let priority_10 = __t::BindingPriority::Template;
     let template_binding_8 = __t::TemplateBinding::__markup_new_1(rt::property(__t::CommandBar::content_property()));
     let provided_8 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_8);
     let value_1: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_10, "ContentControl.Content", 282, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 282, 33)?;
     // Controls/SimpleControls.xaml(281,16) Dock
-    let priority_11 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_159(&content_presenter_0);
     // Controls/SimpleControls.xaml(281,16) VerticalAlignment
-    let priority_12 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_0);
     rt::end_init(&content_presenter_0, 281, 16)?;
     // Controls/SimpleControls.xaml(287,16) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
@@ -24804,21 +23642,17 @@ fn build_controls_simplecontrols_xaml_deferred_242(
     let provided_10 = rt::provide_value(&context, rt::property_value(__t::ItemsControl::items_source_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(items_control_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::items_source_property(), provided_10, 288, 29)?;
     // Controls/SimpleControls.xaml(287,16) HorizontalAlignment
-    let priority_13 = __t::BindingPriority::Template;
-    items_control_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_14(&items_control_0);
     // Controls/SimpleControls.xaml(287,16) VerticalAlignment
-    let priority_14 = __t::BindingPriority::Template;
-    items_control_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_51(&items_control_0);
     // Controls/SimpleControls.xaml(287,16) ClipToBounds
-    let priority_15 = __t::BindingPriority::Template;
-    items_control_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_10(&items_control_0);
     // Controls/SimpleControls.xaml(293,20) ItemsPanel
     let items_panel_template_0 = __t::ItemsPanelTemplate::__markup_new_0();
     // Controls/SimpleControls.xaml(294,22) Content
     let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_243, 294, 22)?;
     __t::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    let priority_16 = __t::BindingPriority::Template;
-    items_control_0.set_value_with_priority(__t::ItemsControl::items_panel_property(), __t::Clone::clone(&items_panel_template_0) as __t::Rc<dyn __t::ITemplateOf<::std::option::Option<__t::Ref<__t::Panel>>>>, priority_16);
+    items_control_0.set_value_with_priority(__t::ItemsControl::items_panel_property(), __t::Clone::clone(&items_panel_template_0) as __t::Rc<dyn __t::ITemplateOf<::std::option::Option<__t::Ref<__t::Panel>>>>, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &items_control_0, 287, 16)?;
     rt::pop_parent_and_end_init(&context, &dock_panel_0, 265, 14)?;
     // Controls/SimpleControls.xaml(301,14) Children
@@ -24841,14 +23675,11 @@ fn build_controls_simplecontrols_xaml_deferred_242(
     let provided_12 = rt::provide_value(&context, rt::property_value(__t::Popup::placement_target_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(popup_0.upcast_ref::<__t::FerroObject>(), __t::Popup::placement_target_property(), provided_12, 303, 20)?;
     // Controls/SimpleControls.xaml(301,14) Placement
-    let priority_17 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::placement_property(), __t::PlacementMode::Bottom, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_135(&popup_0);
     // Controls/SimpleControls.xaml(301,14) IsLightDismissEnabled
-    let priority_18 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&true), priority_18);
+    __build_controls_simplecontrols_xaml_template_setter_22(&popup_0);
     // Controls/SimpleControls.xaml(301,14) WindowManagerAddShadowHint
-    let priority_19 = __t::BindingPriority::Template;
-    popup_0.set_value_with_priority(__t::Popup::window_manager_add_shadow_hint_property(), __t::Clone::clone(&true), priority_19);
+    popup_0.set_value_with_priority(__t::Popup::window_manager_add_shadow_hint_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(307,16) Child
     // Controls/SimpleControls.xaml(307,16) Border
     let border_1 = __t::Border::new();
@@ -24862,11 +23693,9 @@ fn build_controls_simplecontrols_xaml_deferred_242(
     // Controls/SimpleControls.xaml(309,23) BorderThickness
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), "ThemeBorderThickness", 309, 23)?;
     // Controls/SimpleControls.xaml(307,16) Padding
-    let priority_20 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_20);
+    border_1.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(307,16) MinWidth
-    let priority_21 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::min_width_property(), 160.0_f64, priority_21);
+    border_1.set_value_with_priority(__t::Layoutable::min_width_property(), 160.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(312,18) Child
     // Controls/SimpleControls.xaml(312,18) ItemsControl
     let items_control_1 = __t::ItemsControl::new();
@@ -24890,8 +23719,7 @@ fn build_controls_simplecontrols_xaml_deferred_242(
     // Controls/SimpleControls.xaml(316,24) Content
     let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_244, 316, 24)?;
     __t::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_1, rt::to_object(__t::Clone::clone(&deferred_1)));
-    let priority_22 = __t::BindingPriority::Template;
-    items_control_1.set_value_with_priority(__t::ItemsControl::items_panel_property(), __t::Clone::clone(&items_panel_template_1) as __t::Rc<dyn __t::ITemplateOf<::std::option::Option<__t::Ref<__t::Panel>>>>, priority_22);
+    items_control_1.set_value_with_priority(__t::ItemsControl::items_panel_property(), __t::Clone::clone(&items_panel_template_1) as __t::Rc<dyn __t::ITemplateOf<::std::option::Option<__t::Ref<__t::Panel>>>>, __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &items_control_1, 312, 18)?;
     rt::pop_parent_and_end_init(&context, &border_1, 307, 16)?;
     rt::pop_parent_and_end_init(&context, &popup_0, 301, 14)?;
@@ -24910,11 +23738,9 @@ fn build_controls_simplecontrols_xaml_deferred_243(
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
     stack_panel_0.begin_init();
     // Controls/SimpleControls.xaml(294,22) Orientation
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_99(&stack_panel_0);
     // Controls/SimpleControls.xaml(294,22) Spacing
-    let priority_1 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 2.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_100(&stack_panel_0);
     rt::end_init(&stack_panel_0, 294, 22)?;
     __t::Result::Ok(rt::to_value(stack_panel_0.clone()))
 }
@@ -24929,8 +23755,7 @@ fn build_controls_simplecontrols_xaml_deferred_244(
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
     stack_panel_0.begin_init();
     // Controls/SimpleControls.xaml(316,24) Spacing
-    let priority_0 = __t::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(__t::StackPanel::spacing_property(), 2.0_f64, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_100(&stack_panel_0);
     rt::end_init(&stack_panel_0, 316, 24)?;
     __t::Result::Ok(rt::to_value(stack_panel_0.clone()))
 }
@@ -25175,8 +24000,7 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(30,14) DockPanel
     let dock_panel_0 = __t::DockPanel::new();
     dock_panel_0.begin_init();
-    let priority_0 = __t::BindingPriority::Template;
-    split_view_0.set_value_with_priority(__t::SplitView::pane_property(), rt::to_object(__t::Clone::clone(&dock_panel_0)), priority_0);
+    split_view_0.set_value_with_priority(__t::SplitView::pane_property(), rt::to_object(__t::Clone::clone(&dock_panel_0)), __t::BindingPriority::Template);
     rt::push_parent(&context, &dock_panel_0);
     // Controls/SimpleControls.xaml(30,24) Background
     rt::apply_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_background_property()), || rt::property(__t::Panel::background_property()), 30, 24)?;
@@ -25190,8 +24014,7 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(32,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &toggle_button_0, "PART_CompactPaneToggle", 32, 29)?;
     // Controls/SimpleControls.xaml(32,16) Dock
-    let priority_1 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_84(&toggle_button_0);
     // Controls/SimpleControls.xaml(34,29) IsChecked
     let reflection_binding_extension_2 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("#PART_SplitView.IsPaneOpen"));
     // Controls/SimpleControls.xaml(34,29) Mode
@@ -25199,22 +24022,17 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     let provided_8 = rt::provide_value(&context, rt::property_value(__t::ToggleButton::is_checked_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_8, 34, 29)?;
     // Controls/SimpleControls.xaml(32,16) Background
-    let priority_2 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
+    toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(32,16) IsVisible
-    let priority_3 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_36(&toggle_button_0);
     // Controls/SimpleControls.xaml(32,16) HorizontalAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_57(&toggle_button_0);
     // Controls/SimpleControls.xaml(38,29) Width
     rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R158)?;
     // Controls/SimpleControls.xaml(40,29) Name
-    let priority_5 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Toggle navigation drawer")), priority_5);
+    toggle_button_0.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Toggle navigation drawer")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(41,29) Tip
-    let priority_6 = __t::BindingPriority::Template;
-    toggle_button_0.set_value_with_priority(__t::ToolTip::tip_property(), rt::string_object("Toggle navigation drawer"), priority_6);
+    toggle_button_0.set_value_with_priority(__t::ToolTip::tip_property(), rt::string_object("Toggle navigation drawer"), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(42,18) Content
     // Controls/SimpleControls.xaml(42,18) Panel
     let panel_0 = __t::Panel::new();
@@ -25244,11 +24062,9 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(45,21) Data
     rt::bind_dynamic_resource(&context, path_icon_0.upcast_ref::<__t::FerroObject>(), __t::PathIcon::data_property(), "DrawerPaneButtonIcon", 45, 21)?;
     // Controls/SimpleControls.xaml(43,20) HorizontalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_icon_0);
     // Controls/SimpleControls.xaml(43,20) VerticalAlignment
-    let priority_8 = __t::BindingPriority::Template;
-    path_icon_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_icon_0);
     rt::pop_parent_and_end_init(&context, &path_icon_0, 43, 20)?;
     // Controls/SimpleControls.xaml(48,20) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
@@ -25260,11 +24076,10 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(49,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_CompactPaneIconPresenter", 49, 21)?;
     // Controls/SimpleControls.xaml(50,21) Content (setter chosen at run time)
-    let priority_9 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_icon_property()));
     let provided_14 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     let value_1: __t::MarkupValue = rt::to_value(provided_14);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_9, "ContentControl.Content", 50, 21)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 50, 21)?;
     // Controls/SimpleControls.xaml(51,21) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 51, 21)?;
     // Controls/SimpleControls.xaml(52,21) IsVisible
@@ -25281,11 +24096,9 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     let provided_17 = rt::provide_value(&context, rt::property_value(__t::Visual::is_visible_property()), &reflection_binding_extension_4, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), provided_17, 52, 21)?;
     // Controls/SimpleControls.xaml(48,20) HorizontalAlignment
-    let priority_10 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_presenter_0);
     // Controls/SimpleControls.xaml(48,20) VerticalAlignment
-    let priority_11 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_11);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_0);
     rt::pop_parent_and_end_init(&context, &content_presenter_0, 48, 20)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 42, 18)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_0, 32, 16)?;
@@ -25298,14 +24111,12 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(57,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_DrawerHeader", 57, 33)?;
     // Controls/SimpleControls.xaml(57,16) Dock
-    let priority_12 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_84(&content_presenter_1);
     // Controls/SimpleControls.xaml(59,33) Content (setter chosen at run time)
-    let priority_13 = __t::BindingPriority::Template;
     let template_binding_8 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_header_property()));
     let provided_18 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_8);
     let value_3: __t::MarkupValue = rt::to_value(provided_18);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_3, priority_13, "ContentControl.Content", 59, 33)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_3, __t::BindingPriority::Template, "ContentControl.Content", 59, 33)?;
     // Controls/SimpleControls.xaml(60,33) ContentTemplate
     rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R159)?;
     // Controls/SimpleControls.xaml(62,33) IsVisible
@@ -25325,14 +24136,12 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(63,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_2, "PART_DrawerFooter", 63, 33)?;
     // Controls/SimpleControls.xaml(63,16) Dock
-    let priority_14 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, priority_14);
+    __build_controls_simplecontrols_xaml_template_setter_85(&content_presenter_2);
     // Controls/SimpleControls.xaml(65,33) Content (setter chosen at run time)
-    let priority_15 = __t::BindingPriority::Template;
     let template_binding_12 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_footer_property()));
     let provided_22 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
     let value_5: __t::MarkupValue = rt::to_value(provided_22);
-    rt::bind_or_set_null(content_presenter_2.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_5, priority_15, "ContentControl.Content", 65, 33)?;
+    rt::bind_or_set_null(content_presenter_2.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_5, __t::BindingPriority::Template, "ContentControl.Content", 65, 33)?;
     // Controls/SimpleControls.xaml(66,33) ContentTemplate
     rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R160)?;
     // Controls/SimpleControls.xaml(68,33) IsVisible
@@ -25352,17 +24161,14 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(69,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_3, "PART_DrawerPresenter", 69, 33)?;
     // Controls/SimpleControls.xaml(69,16) HorizontalContentAlignment
-    let priority_16 = __t::BindingPriority::Template;
-    content_presenter_3.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_16);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_3);
     // Controls/SimpleControls.xaml(69,16) VerticalContentAlignment
-    let priority_17 = __t::BindingPriority::Template;
-    content_presenter_3.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_33(&content_presenter_3);
     // Controls/SimpleControls.xaml(72,33) Content (setter chosen at run time)
-    let priority_18 = __t::BindingPriority::Template;
     let template_binding_16 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_property()));
     let provided_26 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_16);
     let value_7: __t::MarkupValue = rt::to_value(provided_26);
-    rt::bind_or_set_null(content_presenter_3.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_7, priority_18, "ContentControl.Content", 72, 33)?;
+    rt::bind_or_set_null(content_presenter_3.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_7, __t::BindingPriority::Template, "ContentControl.Content", 72, 33)?;
     // Controls/SimpleControls.xaml(73,33) ContentTemplate
     rt::apply_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 73, 33)?;
     rt::end_init(&content_presenter_3, 69, 16)?;
@@ -25374,11 +24180,9 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     split_view_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&grid_0)));
     rt::push_parent(&context, &grid_0);
     // Controls/SimpleControls.xaml(76,12) HorizontalAlignment
-    let priority_19 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_19);
+    __build_controls_simplecontrols_xaml_template_setter_50(&grid_0);
     // Controls/SimpleControls.xaml(76,12) VerticalAlignment
-    let priority_20 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_20);
+    __build_controls_simplecontrols_xaml_template_setter_51(&grid_0);
     // Controls/SimpleControls.xaml(78,14) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(78,14) DockPanel
@@ -25398,15 +24202,13 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(80,17) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_0, "PART_TopBar", 80, 17)?;
     // Controls/SimpleControls.xaml(79,16) Padding
-    let priority_21 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64), priority_21);
+    border_0.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(82,17) Height
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "NavigationControlNavBarHeight", 82, 17)?;
     // Controls/SimpleControls.xaml(83,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "ThemeBackgroundBrush", 83, 17)?;
     // Controls/SimpleControls.xaml(79,16) Dock
-    let priority_22 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_84(&border_0);
     // Controls/SimpleControls.xaml(85,18) Child
     // Controls/SimpleControls.xaml(85,18) DockPanel
     let dock_panel_2 = __t::DockPanel::new();
@@ -25414,8 +24216,7 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&dock_panel_2).upcast::<__t::Control>()));
     rt::push_parent(&context, &dock_panel_2);
     // Controls/SimpleControls.xaml(85,18) HorizontalAlignment
-    let priority_23 = __t::BindingPriority::Template;
-    dock_panel_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_50(&dock_panel_2);
     // Controls/SimpleControls.xaml(86,20) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(dock_panel_2.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(86,20) ToggleButton
@@ -25432,17 +24233,13 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     let provided_30 = rt::provide_value(&context, rt::property_value(__t::ToggleButton::is_checked_property()), &reflection_binding_extension_5, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(toggle_button_1.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_30, 87, 33)?;
     // Controls/SimpleControls.xaml(86,20) Background
-    let priority_24 = __t::BindingPriority::Template;
-    toggle_button_1.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_24);
+    toggle_button_1.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(86,20) Dock
-    let priority_25 = __t::BindingPriority::Template;
-    toggle_button_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_25);
+    __build_controls_simplecontrols_xaml_template_setter_159(&toggle_button_1);
     // Controls/SimpleControls.xaml(90,33) Name
-    let priority_26 = __t::BindingPriority::Template;
-    toggle_button_1.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Toggle navigation drawer")), priority_26);
+    toggle_button_1.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Toggle navigation drawer")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(91,33) Tip
-    let priority_27 = __t::BindingPriority::Template;
-    toggle_button_1.set_value_with_priority(__t::ToolTip::tip_property(), rt::string_object("Toggle navigation drawer"), priority_27);
+    toggle_button_1.set_value_with_priority(__t::ToolTip::tip_property(), rt::string_object("Toggle navigation drawer"), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(92,22) Content
     // Controls/SimpleControls.xaml(92,22) Panel
     let panel_1 = __t::Panel::new();
@@ -25472,11 +24269,9 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(95,25) Data
     rt::bind_dynamic_resource(&context, path_icon_1.upcast_ref::<__t::FerroObject>(), __t::PathIcon::data_property(), "DrawerPaneButtonIcon", 95, 25)?;
     // Controls/SimpleControls.xaml(93,24) HorizontalAlignment
-    let priority_28 = __t::BindingPriority::Template;
-    path_icon_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_28);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_icon_1);
     // Controls/SimpleControls.xaml(93,24) VerticalAlignment
-    let priority_29 = __t::BindingPriority::Template;
-    path_icon_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_29);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_icon_1);
     rt::pop_parent_and_end_init(&context, &path_icon_1, 93, 24)?;
     // Controls/SimpleControls.xaml(98,24) Children
     let children_collection_10 = __t::Panel::__markup_get_Children(&panel_1);
@@ -25488,11 +24283,10 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(99,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_4, "PART_PaneIconPresenter", 99, 25)?;
     // Controls/SimpleControls.xaml(100,25) Content (setter chosen at run time)
-    let priority_30 = __t::BindingPriority::Template;
     let template_binding_18 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_icon_property()));
     let provided_34 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_18);
     let value_9: __t::MarkupValue = rt::to_value(provided_34);
-    rt::bind_or_set_null(content_presenter_4.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_9, priority_30, "ContentControl.Content", 100, 25)?;
+    rt::bind_or_set_null(content_presenter_4.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_9, __t::BindingPriority::Template, "ContentControl.Content", 100, 25)?;
     // Controls/SimpleControls.xaml(101,25) ContentTemplate
     rt::apply_template_binding(content_presenter_4.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 101, 25)?;
     // Controls/SimpleControls.xaml(102,25) IsVisible
@@ -25509,11 +24303,9 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     let provided_37 = rt::provide_value(&context, rt::property_value(__t::Visual::is_visible_property()), &reflection_binding_extension_7, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(content_presenter_4.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), provided_37, 102, 25)?;
     // Controls/SimpleControls.xaml(98,24) HorizontalAlignment
-    let priority_31 = __t::BindingPriority::Template;
-    content_presenter_4.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_31);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_presenter_4);
     // Controls/SimpleControls.xaml(98,24) VerticalAlignment
-    let priority_32 = __t::BindingPriority::Template;
-    content_presenter_4.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_32);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_4);
     rt::pop_parent_and_end_init(&context, &content_presenter_4, 98, 24)?;
     rt::pop_parent_and_end_init(&context, &panel_1, 92, 22)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_1, 86, 20)?;
@@ -25526,29 +24318,23 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(107,37) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_5, "PART_TitlePresenter", 107, 37)?;
     // Controls/SimpleControls.xaml(108,37) Content (setter chosen at run time)
-    let priority_33 = __t::BindingPriority::Template;
     let template_binding_20 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Page::header_property()));
     let provided_38 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_20);
     let value_11: __t::MarkupValue = rt::to_value(provided_38);
-    rt::bind_or_set_null(content_presenter_5.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_11, priority_33, "ContentControl.Content", 108, 37)?;
+    rt::bind_or_set_null(content_presenter_5.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_11, __t::BindingPriority::Template, "ContentControl.Content", 108, 37)?;
     // Controls/SimpleControls.xaml(109,37) ContentTemplate
     rt::apply_template_binding(content_presenter_5.upcast_ref::<__t::FerroObject>(), rt::property(__t::Page::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 109, 37)?;
     // Controls/SimpleControls.xaml(107,20) VerticalAlignment
-    let priority_34 = __t::BindingPriority::Template;
-    content_presenter_5.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_34);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_5);
     // Controls/SimpleControls.xaml(107,20) VerticalContentAlignment
-    let priority_35 = __t::BindingPriority::Template;
-    content_presenter_5.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Center, priority_35);
+    content_presenter_5.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Center, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(107,20) FontSize
-    let priority_36 = __t::BindingPriority::Template;
-    content_presenter_5.set_value_with_priority(__t::ContentPresenter::font_size_property(), 16.0_f64, priority_36);
+    content_presenter_5.set_value_with_priority(__t::ContentPresenter::font_size_property(), 16.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(107,20) FontWeight
     let value_12 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("SemiBold")), 113, 37)?;
-    let priority_37 = __t::BindingPriority::Template;
-    content_presenter_5.set_value_with_priority(__t::ContentPresenter::font_weight_property(), __t::Clone::clone(&value_12), priority_37);
+    content_presenter_5.set_value_with_priority(__t::ContentPresenter::font_weight_property(), __t::Clone::clone(&value_12), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(107,20) Margin
-    let priority_38 = __t::BindingPriority::Template;
-    content_presenter_5.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_38);
+    content_presenter_5.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(115,37) IsVisible
     let template_binding_22 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Page::header_property()));
     // Controls/SimpleControls.xaml(115,37) Converter
@@ -25569,18 +24355,15 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(119,17) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_1, "PART_BottomBar", 119, 17)?;
     // Controls/SimpleControls.xaml(118,16) Padding
-    let priority_39 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64), priority_39);
+    border_1.set_value_with_priority(__t::Decorator::padding_property(), __t::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(121,17) Height
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "NavigationControlNavBarHeight", 121, 17)?;
     // Controls/SimpleControls.xaml(122,17) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "ThemeBackgroundBrush", 122, 17)?;
     // Controls/SimpleControls.xaml(118,16) Dock
-    let priority_40 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, priority_40);
+    __build_controls_simplecontrols_xaml_template_setter_85(&border_1);
     // Controls/SimpleControls.xaml(118,16) IsVisible
-    let priority_41 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_41);
+    __build_controls_simplecontrols_xaml_template_setter_36(&border_1);
     // Controls/SimpleControls.xaml(125,18) Child
     // Controls/SimpleControls.xaml(125,18) DockPanel
     let dock_panel_3 = __t::DockPanel::new();
@@ -25588,8 +24371,7 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     border_1.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&dock_panel_3).upcast::<__t::Control>()));
     rt::push_parent(&context, &dock_panel_3);
     // Controls/SimpleControls.xaml(125,18) HorizontalAlignment
-    let priority_42 = __t::BindingPriority::Template;
-    dock_panel_3.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_42);
+    __build_controls_simplecontrols_xaml_template_setter_50(&dock_panel_3);
     // Controls/SimpleControls.xaml(126,20) Children
     let children_collection_13 = __t::Panel::__markup_get_Children(dock_panel_3.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(126,20) ToggleButton
@@ -25606,17 +24388,13 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     let provided_43 = rt::provide_value(&context, rt::property_value(__t::ToggleButton::is_checked_property()), &reflection_binding_extension_8, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(toggle_button_2.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_43, 127, 33)?;
     // Controls/SimpleControls.xaml(126,20) Background
-    let priority_43 = __t::BindingPriority::Template;
-    toggle_button_2.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_43);
+    toggle_button_2.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(126,20) Dock
-    let priority_44 = __t::BindingPriority::Template;
-    toggle_button_2.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_44);
+    __build_controls_simplecontrols_xaml_template_setter_159(&toggle_button_2);
     // Controls/SimpleControls.xaml(130,33) Name
-    let priority_45 = __t::BindingPriority::Template;
-    toggle_button_2.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Toggle navigation drawer")), priority_45);
+    toggle_button_2.set_value_with_priority(__t::AutomationProperties::name_property(), __t::Option::Some(__t::String::from("Toggle navigation drawer")), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(131,33) Tip
-    let priority_46 = __t::BindingPriority::Template;
-    toggle_button_2.set_value_with_priority(__t::ToolTip::tip_property(), rt::string_object("Toggle navigation drawer"), priority_46);
+    toggle_button_2.set_value_with_priority(__t::ToolTip::tip_property(), rt::string_object("Toggle navigation drawer"), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(132,22) Content
     // Controls/SimpleControls.xaml(132,22) Panel
     let panel_2 = __t::Panel::new();
@@ -25646,11 +24424,9 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(135,25) Data
     rt::bind_dynamic_resource(&context, path_icon_2.upcast_ref::<__t::FerroObject>(), __t::PathIcon::data_property(), "DrawerPaneButtonIcon", 135, 25)?;
     // Controls/SimpleControls.xaml(133,24) HorizontalAlignment
-    let priority_47 = __t::BindingPriority::Template;
-    path_icon_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_47);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_icon_2);
     // Controls/SimpleControls.xaml(133,24) VerticalAlignment
-    let priority_48 = __t::BindingPriority::Template;
-    path_icon_2.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_48);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_icon_2);
     rt::pop_parent_and_end_init(&context, &path_icon_2, 133, 24)?;
     // Controls/SimpleControls.xaml(138,24) Children
     let children_collection_15 = __t::Panel::__markup_get_Children(&panel_2);
@@ -25662,11 +24438,10 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(139,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_6, "PART_BottomPaneIconPresenter", 139, 25)?;
     // Controls/SimpleControls.xaml(140,25) Content (setter chosen at run time)
-    let priority_49 = __t::BindingPriority::Template;
     let template_binding_23 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_icon_property()));
     let provided_47 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_23);
     let value_15: __t::MarkupValue = rt::to_value(provided_47);
-    rt::bind_or_set_null(content_presenter_6.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_15, priority_49, "ContentControl.Content", 140, 25)?;
+    rt::bind_or_set_null(content_presenter_6.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_15, __t::BindingPriority::Template, "ContentControl.Content", 140, 25)?;
     // Controls/SimpleControls.xaml(141,25) ContentTemplate
     rt::apply_template_binding(content_presenter_6.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 141, 25)?;
     // Controls/SimpleControls.xaml(142,25) IsVisible
@@ -25683,11 +24458,9 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     let provided_50 = rt::provide_value(&context, rt::property_value(__t::Visual::is_visible_property()), &reflection_binding_extension_10, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(content_presenter_6.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), provided_50, 142, 25)?;
     // Controls/SimpleControls.xaml(138,24) HorizontalAlignment
-    let priority_50 = __t::BindingPriority::Template;
-    content_presenter_6.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_50);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_presenter_6);
     // Controls/SimpleControls.xaml(138,24) VerticalAlignment
-    let priority_51 = __t::BindingPriority::Template;
-    content_presenter_6.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_51);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_6);
     rt::pop_parent_and_end_init(&context, &content_presenter_6, 138, 24)?;
     rt::pop_parent_and_end_init(&context, &panel_2, 132, 22)?;
     rt::pop_parent_and_end_init(&context, &toggle_button_2, 126, 20)?;
@@ -25700,29 +24473,23 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(147,37) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_7, "PART_BottomTitlePresenter", 147, 37)?;
     // Controls/SimpleControls.xaml(148,37) Content (setter chosen at run time)
-    let priority_52 = __t::BindingPriority::Template;
     let template_binding_25 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Page::header_property()));
     let provided_51 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_25);
     let value_17: __t::MarkupValue = rt::to_value(provided_51);
-    rt::bind_or_set_null(content_presenter_7.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_17, priority_52, "ContentControl.Content", 148, 37)?;
+    rt::bind_or_set_null(content_presenter_7.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_17, __t::BindingPriority::Template, "ContentControl.Content", 148, 37)?;
     // Controls/SimpleControls.xaml(149,37) ContentTemplate
     rt::apply_template_binding(content_presenter_7.upcast_ref::<__t::FerroObject>(), rt::property(__t::Page::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 149, 37)?;
     // Controls/SimpleControls.xaml(147,20) VerticalAlignment
-    let priority_53 = __t::BindingPriority::Template;
-    content_presenter_7.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_53);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_7);
     // Controls/SimpleControls.xaml(147,20) VerticalContentAlignment
-    let priority_54 = __t::BindingPriority::Template;
-    content_presenter_7.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Center, priority_54);
+    content_presenter_7.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Center, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(147,20) FontSize
-    let priority_55 = __t::BindingPriority::Template;
-    content_presenter_7.set_value_with_priority(__t::ContentPresenter::font_size_property(), 16.0_f64, priority_55);
+    content_presenter_7.set_value_with_priority(__t::ContentPresenter::font_size_property(), 16.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(147,20) FontWeight
     let value_18 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("SemiBold")), 153, 37)?;
-    let priority_56 = __t::BindingPriority::Template;
-    content_presenter_7.set_value_with_priority(__t::ContentPresenter::font_weight_property(), __t::Clone::clone(&value_18), priority_56);
+    content_presenter_7.set_value_with_priority(__t::ContentPresenter::font_weight_property(), __t::Clone::clone(&value_18), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(147,20) Margin
-    let priority_57 = __t::BindingPriority::Template;
-    content_presenter_7.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_57);
+    content_presenter_7.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(155,37) IsVisible
     let template_binding_27 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Page::header_property()));
     // Controls/SimpleControls.xaml(155,37) Converter
@@ -25744,11 +24511,10 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(159,33) HorizontalContentAlignment
     rt::bind_template_rows(content_presenter_8.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R161)?;
     // Controls/SimpleControls.xaml(164,33) Content (setter chosen at run time)
-    let priority_58 = __t::BindingPriority::Template;
     let template_binding_33 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::content_property()));
     let provided_59 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_33);
     let value_20: __t::MarkupValue = rt::to_value(provided_59);
-    rt::bind_or_set_null(content_presenter_8.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_20, priority_58, "ContentControl.Content", 164, 33)?;
+    rt::bind_or_set_null(content_presenter_8.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_20, __t::BindingPriority::Template, "ContentControl.Content", 164, 33)?;
     // Controls/SimpleControls.xaml(165,33) ContentTemplate
     rt::bind_template_rows(content_presenter_8.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R162)?;
     rt::end_init(&content_presenter_8, 158, 16)?;
@@ -25764,11 +24530,9 @@ fn build_controls_simplecontrols_xaml_deferred_247(
     // Controls/SimpleControls.xaml(169,21) Background
     rt::apply_template_binding(border_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::backdrop_brush_property()), || rt::property(__t::Border::background_property()), 169, 21)?;
     // Controls/SimpleControls.xaml(168,14) IsVisible
-    let priority_59 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_59);
+    __build_controls_simplecontrols_xaml_template_setter_36(&border_2);
     // Controls/SimpleControls.xaml(168,14) IsHitTestVisible
-    let priority_60 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_60);
+    __build_controls_simplecontrols_xaml_template_setter_15(&border_2);
     rt::end_init(&border_2, 168, 14)?;
     rt::pop_parent_and_end_init(&context, &grid_0, 76, 12)?;
     rt::pop_parent_and_end_init(&context, &split_view_0, 23, 10)?;
@@ -25957,8 +24721,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     panel_0.begin_init();
     rt::push_parent(&context, &panel_0);
     // Controls/SimpleControls.xaml(50,10) ClipToBounds
-    let priority_0 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_10(&panel_0);
     // Controls/SimpleControls.xaml(51,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(51,12) DockPanel
@@ -25977,11 +24740,9 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(53,21) Height
     rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::effective_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 53, 21)?;
     // Controls/SimpleControls.xaml(52,14) IsVisible
-    let priority_1 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_36(&border_0);
     // Controls/SimpleControls.xaml(52,14) Dock
-    let priority_2 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_84(&border_0);
     rt::end_init(&border_0, 52, 14)?;
     // Controls/SimpleControls.xaml(57,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
@@ -25993,15 +24754,12 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(57,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_BottomCommandBar", 57, 31)?;
     // Controls/SimpleControls.xaml(57,14) Dock
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_85(&content_presenter_0);
     // Controls/SimpleControls.xaml(57,14) HorizontalContentAlignment
-    let priority_4 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_0);
     // Controls/SimpleControls.xaml(60,31) Background
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 60, 31)?;
     // Controls/SimpleControls.xaml(61,31) Content (setter chosen at run time)
-    let priority_5 = __t::BindingPriority::Template;
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("CurrentPage?.(NavigationPage.BottomCommandBar)"));
     rt::push_parent(&context, &reflection_binding_extension_0);
     // Controls/SimpleControls.xaml(61,31) RelativeSource
@@ -26013,7 +24771,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     context.pop_parent();
     let provided_3 = rt::provide_value(&context, rt::property_value(__t::ContentPresenter::content_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     let value_0: __t::MarkupValue = rt::to_value(provided_3);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_5, "ContentControl.Content", 61, 31)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 61, 31)?;
     rt::pop_parent_and_end_init(&context, &content_presenter_0, 57, 14)?;
     // Controls/SimpleControls.xaml(63,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
@@ -26026,8 +24784,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(64,19) Background
     rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 64, 19)?;
     // Controls/SimpleControls.xaml(63,14) ClipToBounds
-    let priority_6 = __t::BindingPriority::Template;
-    grid_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_10(&grid_0);
     // Controls/SimpleControls.xaml(66,16) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/SimpleControls.xaml(66,16) ContentPresenter
@@ -26037,11 +24794,9 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(66,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_PageBackPresenter", 66, 33)?;
     // Controls/SimpleControls.xaml(66,16) HorizontalAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_50(&content_presenter_1);
     // Controls/SimpleControls.xaml(66,16) VerticalAlignment
-    let priority_8 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_51(&content_presenter_1);
     rt::end_init(&content_presenter_1, 66, 16)?;
     // Controls/SimpleControls.xaml(69,16) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -26052,11 +24807,9 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(69,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_2, "PART_PagePresenter", 69, 33)?;
     // Controls/SimpleControls.xaml(69,16) HorizontalAlignment
-    let priority_9 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_50(&content_presenter_2);
     // Controls/SimpleControls.xaml(69,16) VerticalAlignment
-    let priority_10 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_51(&content_presenter_2);
     rt::end_init(&content_presenter_2, 69, 16)?;
     rt::end_init(&grid_0, 63, 14)?;
     rt::pop_parent_and_end_init(&context, &dock_panel_0, 51, 12)?;
@@ -26070,14 +24823,11 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(75,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_1, "PART_NavigationBar", 75, 19)?;
     // Controls/SimpleControls.xaml(75,12) ZIndex
-    let priority_11 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Visual::z_index_property(), 1_i32, priority_11);
+    border_1.set_value_with_priority(__t::Visual::z_index_property(), 1_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(75,12) VerticalAlignment
-    let priority_12 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_12);
+    __build_controls_simplecontrols_xaml_template_setter_56(&border_1);
     // Controls/SimpleControls.xaml(75,12) ClipToBounds
-    let priority_13 = __t::BindingPriority::Template;
-    border_1.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_13);
+    __build_controls_simplecontrols_xaml_template_setter_10(&border_1);
     // Controls/SimpleControls.xaml(79,19) Height
     rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::effective_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 79, 19)?;
     // Controls/SimpleControls.xaml(80,14) Child
@@ -26087,8 +24837,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     border_1.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&grid_1).upcast::<__t::Control>()));
     rt::push_parent(&context, &grid_1);
     // Controls/SimpleControls.xaml(80,14) Margin
-    let priority_14 = __t::BindingPriority::Template;
-    grid_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_14);
+    grid_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(80,14) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 3_i32), 80, 37)?;
@@ -26225,24 +24974,19 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(114,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &button_0, "PART_BackButton", 114, 23)?;
     // Controls/SimpleControls.xaml(114,16) Column
-    let priority_15 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_15);
+    __build_controls_simplecontrols_xaml_template_setter_11(&button_0);
     // Controls/SimpleControls.xaml(114,16) Background
-    let priority_16 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_16);
+    button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(117,23) Foreground
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), "NavigationBarForeground", 117, 23)?;
     // Controls/SimpleControls.xaml(118,23) IsVisible
     rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::is_back_button_effectively_visible_property()), || rt::property(__t::Visual::is_visible_property()), 118, 23)?;
     // Controls/SimpleControls.xaml(114,16) VerticalAlignment
-    let priority_17 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_17);
+    __build_controls_simplecontrols_xaml_template_setter_51(&button_0);
     // Controls/SimpleControls.xaml(114,16) Padding
-    let priority_18 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 8.0_f64, 0.0_f64), priority_18);
+    button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 8.0_f64, 0.0_f64), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(121,23) Tip
-    let priority_19 = __t::BindingPriority::Template;
-    button_0.set_value_with_priority(__t::ToolTip::tip_property(), __t::Option::None, priority_19);
+    button_0.set_value_with_priority(__t::ToolTip::tip_property(), __t::Option::None, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(122,18) Content
     // Controls/SimpleControls.xaml(122,18) Panel
     let panel_1 = __t::Panel::new();
@@ -26250,8 +24994,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     button_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&panel_1)));
     rt::push_parent(&context, &panel_1);
     // Controls/SimpleControls.xaml(122,18) Background
-    let priority_20 = __t::BindingPriority::Template;
-    panel_1.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_20);
+    panel_1.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(123,20) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/SimpleControls.xaml(123,20) Path
@@ -26266,20 +25009,15 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(125,25) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "NavigationBarForeground", 125, 25)?;
     // Controls/SimpleControls.xaml(123,20) Width
-    let priority_21 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::width_property(), 24.0_f64, priority_21);
+    __build_controls_simplecontrols_xaml_template_setter_38(&path_0);
     // Controls/SimpleControls.xaml(123,20) Height
-    let priority_22 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::height_property(), 24.0_f64, priority_22);
+    __build_controls_simplecontrols_xaml_template_setter_39(&path_0);
     // Controls/SimpleControls.xaml(123,20) Stretch
-    let priority_23 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_23);
+    __build_controls_simplecontrols_xaml_template_setter_7(&path_0);
     // Controls/SimpleControls.xaml(123,20) HorizontalAlignment
-    let priority_24 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_24);
+    __build_controls_simplecontrols_xaml_template_setter_6(&path_0);
     // Controls/SimpleControls.xaml(123,20) VerticalAlignment
-    let priority_25 = __t::BindingPriority::Template;
-    path_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_25);
+    __build_controls_simplecontrols_xaml_template_setter_2(&path_0);
     rt::pop_parent_and_end_init(&context, &path_0, 123, 20)?;
     // Controls/SimpleControls.xaml(131,20) Children
     let children_collection_9 = __t::Panel::__markup_get_Children(&panel_1);
@@ -26290,11 +25028,9 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(132,21) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_3, "PART_BackButtonContentPresenter", 132, 21)?;
     // Controls/SimpleControls.xaml(131,20) VerticalAlignment
-    let priority_26 = __t::BindingPriority::Template;
-    content_presenter_3.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_26);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_3);
     // Controls/SimpleControls.xaml(131,20) HorizontalAlignment
-    let priority_27 = __t::BindingPriority::Template;
-    content_presenter_3.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_27);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_presenter_3);
     rt::end_init(&content_presenter_3, 131, 20)?;
     rt::pop_parent_and_end_init(&context, &panel_1, 122, 18)?;
     rt::pop_parent_and_end_init(&context, &button_0, 114, 16)?;
@@ -26308,15 +25044,12 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(138,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_4, "PART_Header", 138, 33)?;
     // Controls/SimpleControls.xaml(138,16) Column
-    let priority_28 = __t::BindingPriority::Template;
-    content_presenter_4.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_28);
+    __build_controls_simplecontrols_xaml_template_setter_9(&content_presenter_4);
     // Controls/SimpleControls.xaml(138,16) FontSize
-    let priority_29 = __t::BindingPriority::Template;
-    content_presenter_4.set_value_with_priority(__t::ContentPresenter::font_size_property(), 18.0_f64, priority_29);
+    content_presenter_4.set_value_with_priority(__t::ContentPresenter::font_size_property(), 18.0_f64, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(141,33) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_4.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "NavigationBarForeground", 141, 33)?;
     // Controls/SimpleControls.xaml(142,33) Content (setter chosen at run time)
-    let priority_30 = __t::BindingPriority::Template;
     let reflection_binding_extension_1 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("CurrentPage?.Header"));
     rt::push_parent(&context, &reflection_binding_extension_1);
     // Controls/SimpleControls.xaml(142,33) RelativeSource
@@ -26328,7 +25061,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     context.pop_parent();
     let provided_17 = rt::provide_value(&context, rt::property_value(__t::ContentPresenter::content_property()), &reflection_binding_extension_1, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     let value_1: __t::MarkupValue = rt::to_value(provided_17);
-    rt::bind_or_set_null(content_presenter_4.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, priority_30, "ContentControl.Content", 142, 33)?;
+    rt::bind_or_set_null(content_presenter_4.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_1, __t::BindingPriority::Template, "ContentControl.Content", 142, 33)?;
     // Controls/SimpleControls.xaml(143,33) ContentTemplate
     let reflection_binding_extension_2 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("CurrentPage?.HeaderTemplate"));
     rt::push_parent(&context, &reflection_binding_extension_2);
@@ -26342,17 +25075,13 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let provided_19 = rt::provide_value(&context, rt::property_value(__t::ContentPresenter::content_template_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(content_presenter_4.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), provided_19, 143, 33)?;
     // Controls/SimpleControls.xaml(138,16) VerticalAlignment
-    let priority_31 = __t::BindingPriority::Template;
-    content_presenter_4.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_31);
+    __build_controls_simplecontrols_xaml_template_setter_2(&content_presenter_4);
     // Controls/SimpleControls.xaml(138,16) HorizontalAlignment
-    let priority_32 = __t::BindingPriority::Template;
-    content_presenter_4.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_32);
+    __build_controls_simplecontrols_xaml_template_setter_50(&content_presenter_4);
     // Controls/SimpleControls.xaml(138,16) HorizontalContentAlignment
-    let priority_33 = __t::BindingPriority::Template;
-    content_presenter_4.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_33);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_4);
     // Controls/SimpleControls.xaml(138,16) Margin
-    let priority_34 = __t::BindingPriority::Template;
-    content_presenter_4.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 12.0_f64, 0.0_f64), priority_34);
+    content_presenter_4.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 12.0_f64, 0.0_f64), __t::BindingPriority::Template);
     rt::pop_parent_and_end_init(&context, &content_presenter_4, 138, 16)?;
     // Controls/SimpleControls.xaml(149,16) Children
     let children_collection_11 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -26364,18 +25093,14 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(149,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_5, "PART_TopCommandBar", 149, 33)?;
     // Controls/SimpleControls.xaml(149,16) Column
-    let priority_35 = __t::BindingPriority::Template;
-    content_presenter_5.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_35);
+    __build_controls_simplecontrols_xaml_template_setter_60(&content_presenter_5);
     // Controls/SimpleControls.xaml(149,16) HorizontalAlignment
-    let priority_36 = __t::BindingPriority::Template;
-    content_presenter_5.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_36);
+    __build_controls_simplecontrols_xaml_template_setter_14(&content_presenter_5);
     // Controls/SimpleControls.xaml(149,16) VerticalContentAlignment
-    let priority_37 = __t::BindingPriority::Template;
-    content_presenter_5.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_37);
+    __build_controls_simplecontrols_xaml_template_setter_33(&content_presenter_5);
     // Controls/SimpleControls.xaml(153,33) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_5.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "NavigationBarForeground", 153, 33)?;
     // Controls/SimpleControls.xaml(154,33) Content (setter chosen at run time)
-    let priority_38 = __t::BindingPriority::Template;
     let reflection_binding_extension_3 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("CurrentPage?.(NavigationPage.TopCommandBar)"));
     rt::push_parent(&context, &reflection_binding_extension_3);
     // Controls/SimpleControls.xaml(154,33) RelativeSource
@@ -26387,7 +25112,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     context.pop_parent();
     let provided_22 = rt::provide_value(&context, rt::property_value(__t::ContentPresenter::content_property()), &reflection_binding_extension_3, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     let value_2: __t::MarkupValue = rt::to_value(provided_22);
-    rt::bind_or_set_null(content_presenter_5.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_38, "ContentControl.Content", 154, 33)?;
+    rt::bind_or_set_null(content_presenter_5.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 154, 33)?;
     // Controls/SimpleControls.xaml(156,20) Styles
     let styles_collection_9 = __t::StyledElement::__markup_get_Styles(content_presenter_5.upcast_ref::<__t::StyledElement>());
     // Controls/SimpleControls.xaml(156,20) Style
@@ -26417,20 +25142,15 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(167,19) Name
     rt::set_and_register_name(name_scope.as_ref(), &border_2, "PART_NavBarShadow", 167, 19)?;
     // Controls/SimpleControls.xaml(167,12) ZIndex
-    let priority_39 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Visual::z_index_property(), 1_i32, priority_39);
+    border_2.set_value_with_priority(__t::Visual::z_index_property(), 1_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(167,12) VerticalAlignment
-    let priority_40 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_40);
+    __build_controls_simplecontrols_xaml_template_setter_56(&border_2);
     // Controls/SimpleControls.xaml(167,12) IsVisible
-    let priority_41 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_41);
+    __build_controls_simplecontrols_xaml_template_setter_36(&border_2);
     // Controls/SimpleControls.xaml(167,12) Height
-    let priority_42 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::Layoutable::height_property(), 4.0_f64, priority_42);
+    __build_controls_simplecontrols_xaml_template_setter_21(&border_2);
     // Controls/SimpleControls.xaml(167,12) IsHitTestVisible
-    let priority_43 = __t::BindingPriority::Template;
-    border_2.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_43);
+    __build_controls_simplecontrols_xaml_template_setter_15(&border_2);
     // Controls/SimpleControls.xaml(173,19) Background
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "NavigationBarShadowBackground", 173, 19)?;
     rt::pop_parent_and_end_init(&context, &border_2, 167, 12)?;
@@ -26443,11 +25163,9 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(175,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_6, "PART_ModalBackPresenter", 175, 29)?;
     // Controls/SimpleControls.xaml(175,12) ZIndex
-    let priority_44 = __t::BindingPriority::Template;
-    content_presenter_6.set_value_with_priority(__t::Visual::z_index_property(), 99_i32, priority_44);
+    content_presenter_6.set_value_with_priority(__t::Visual::z_index_property(), 99_i32, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(175,12) IsVisible
-    let priority_45 = __t::BindingPriority::Template;
-    content_presenter_6.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_45);
+    __build_controls_simplecontrols_xaml_template_setter_36(&content_presenter_6);
     // Controls/SimpleControls.xaml(178,29) Background
     rt::apply_template_binding(content_presenter_6.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 178, 29)?;
     rt::end_init(&content_presenter_6, 175, 12)?;
@@ -26460,11 +25178,9 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     // Controls/SimpleControls.xaml(179,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_7, "PART_ModalPresenter", 179, 29)?;
     // Controls/SimpleControls.xaml(179,12) ZIndex
-    let priority_46 = __t::BindingPriority::Template;
-    content_presenter_7.set_value_with_priority(__t::Visual::z_index_property(), 100_i32, priority_46);
+    __build_controls_simplecontrols_xaml_template_setter_155(&content_presenter_7);
     // Controls/SimpleControls.xaml(179,12) IsVisible
-    let priority_47 = __t::BindingPriority::Template;
-    content_presenter_7.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_47);
+    __build_controls_simplecontrols_xaml_template_setter_36(&content_presenter_7);
     // Controls/SimpleControls.xaml(182,29) Background
     rt::apply_template_binding(content_presenter_7.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 182, 29)?;
     rt::end_init(&content_presenter_7, 179, 12)?;
@@ -26566,8 +25282,7 @@ fn build_controls_simplecontrols_xaml_deferred_268(
     // Controls/SimpleControls.xaml(76,20) Content
     let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_269, 76, 20)?;
     __t::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    let priority_0 = __t::BindingPriority::Template;
-    items_presenter_0.set_value_with_priority(__t::ItemsPresenter::items_panel_property(), __t::Clone::clone(&items_panel_template_0) as __t::Rc<dyn __t::ITemplateOf<::std::option::Option<__t::Ref<__t::Panel>>>>, priority_0);
+    items_presenter_0.set_value_with_priority(__t::ItemsPresenter::items_panel_property(), __t::Clone::clone(&items_panel_template_0) as __t::Rc<dyn __t::ITemplateOf<::std::option::Option<__t::Ref<__t::Panel>>>>, __t::BindingPriority::Template);
     rt::end_init(&items_presenter_0, 73, 14)?;
     rt::pop_parent_and_end_init(&context, &border_0, 65, 12)?;
     // Controls/SimpleControls.xaml(81,12) Children
@@ -26577,8 +25292,7 @@ fn build_controls_simplecontrols_xaml_deferred_268(
     panel_0.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&panel_0).upcast::<__t::Control>());
     // Controls/SimpleControls.xaml(81,12) ClipToBounds
-    let priority_1 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_10(&panel_0);
     // Controls/SimpleControls.xaml(82,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/SimpleControls.xaml(82,14) ContentPresenter
@@ -26588,14 +25302,11 @@ fn build_controls_simplecontrols_xaml_deferred_268(
     // Controls/SimpleControls.xaml(82,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_SelectedContentHost2", 82, 31)?;
     // Controls/SimpleControls.xaml(82,14) HorizontalContentAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_0);
     // Controls/SimpleControls.xaml(82,14) VerticalContentAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_33(&content_presenter_0);
     // Controls/SimpleControls.xaml(82,14) IsVisible
-    let priority_4 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_36(&content_presenter_0);
     rt::end_init(&content_presenter_0, 82, 14)?;
     // Controls/SimpleControls.xaml(86,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_0);
@@ -26606,11 +25317,9 @@ fn build_controls_simplecontrols_xaml_deferred_268(
     // Controls/SimpleControls.xaml(86,31) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_SelectedContentHost", 86, 31)?;
     // Controls/SimpleControls.xaml(86,14) HorizontalContentAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_1);
     // Controls/SimpleControls.xaml(86,14) VerticalContentAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_33(&content_presenter_1);
     rt::end_init(&content_presenter_1, 86, 14)?;
     rt::end_init(&panel_0, 81, 12)?;
     rt::pop_parent_and_end_init(&context, &dock_panel_0, 64, 10)?;
@@ -26627,8 +25336,7 @@ fn build_controls_simplecontrols_xaml_deferred_269(
     context.set_intermediate_root_object(rt::to_value(uniform_grid_0.clone()));
     uniform_grid_0.begin_init();
     // Controls/SimpleControls.xaml(76,20) Rows
-    let priority_0 = __t::BindingPriority::Template;
-    uniform_grid_0.set_value_with_priority(__t::UniformGrid::rows_property(), 1_i32, priority_0);
+    uniform_grid_0.set_value_with_priority(__t::UniformGrid::rows_property(), 1_i32, __t::BindingPriority::Template);
     rt::end_init(&uniform_grid_0, 76, 20)?;
     __t::Result::Ok(rt::to_value(uniform_grid_0.clone()))
 }
@@ -26950,16 +25658,14 @@ fn build_controls_simplecontrols_xaml_deferred_272(
     // Controls/SimpleControls.xaml(135,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_0, "PART_IconPresenter", 135, 33)?;
     // Controls/SimpleControls.xaml(136,33) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TabItem::icon_property()));
     let provided_8 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     let value_0: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 136, 33)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 136, 33)?;
     // Controls/SimpleControls.xaml(137,33) ContentTemplate
     rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TabItem::icon_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 137, 33)?;
     // Controls/SimpleControls.xaml(135,16) HorizontalAlignment
-    let priority_1 = __t::BindingPriority::Template;
-    content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_presenter_0);
     // Controls/SimpleControls.xaml(139,33) IsVisible
     let template_binding_9 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TabItem::icon_property()));
     // Controls/SimpleControls.xaml(139,33) Converter
@@ -26982,17 +25688,14 @@ fn build_controls_simplecontrols_xaml_deferred_272(
     // Controls/SimpleControls.xaml(142,33) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_1, "PART_ContentPresenter", 142, 33)?;
     // Controls/SimpleControls.xaml(142,16) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_6(&content_presenter_1);
     // Controls/SimpleControls.xaml(142,16) HorizontalContentAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    content_presenter_1.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, priority_3);
+    content_presenter_1.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(145,33) Content (setter chosen at run time)
-    let priority_4 = __t::BindingPriority::Template;
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     let provided_13 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_10);
     let value_2: __t::MarkupValue = rt::to_value(provided_13);
-    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, priority_4, "ContentControl.Content", 145, 33)?;
+    rt::bind_or_set_null(content_presenter_1.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_2, __t::BindingPriority::Template, "ContentControl.Content", 145, 33)?;
     // Controls/SimpleControls.xaml(146,33) ContentTemplate
     rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R167)?;
     // Controls/SimpleControls.xaml(148,33) FontSize
@@ -27011,28 +25714,22 @@ fn build_controls_simplecontrols_xaml_deferred_272(
     // Controls/SimpleControls.xaml(152,29) Name
     rt::set_and_register_name(name_scope.as_ref(), &content_presenter_2, "PART_SelectedPipe", 152, 29)?;
     // Controls/SimpleControls.xaml(152,12) VerticalAlignment
-    let priority_5 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Bottom, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_157(&content_presenter_2);
     // Controls/SimpleControls.xaml(152,12) HorizontalAlignment
-    let priority_6 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_6);
+    __build_controls_simplecontrols_xaml_template_setter_50(&content_presenter_2);
     // Controls/SimpleControls.xaml(152,12) HorizontalContentAlignment
-    let priority_7 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_32(&content_presenter_2);
     // Controls/SimpleControls.xaml(152,12) VerticalContentAlignment
-    let priority_8 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_33(&content_presenter_2);
     // Controls/SimpleControls.xaml(157,29) Content (setter chosen at run time)
-    let priority_9 = __t::BindingPriority::Template;
     let template_binding_14 = __t::TemplateBinding::__markup_new_1(rt::property(__t::StyledElement::data_context_property()));
     let provided_18 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_14);
     let value_3: __t::MarkupValue = rt::to_value(provided_18);
-    rt::bind_or_set_null(content_presenter_2.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_3, priority_9, "ContentControl.Content", 157, 29)?;
+    rt::bind_or_set_null(content_presenter_2.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_3, __t::BindingPriority::Template, "ContentControl.Content", 157, 29)?;
     // Controls/SimpleControls.xaml(158,29) ContentTemplate
     rt::apply_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TabItem::indicator_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 158, 29)?;
     // Controls/SimpleControls.xaml(152,12) IsVisible
-    let priority_10 = __t::BindingPriority::Template;
-    content_presenter_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_36(&content_presenter_2);
     rt::end_init(&content_presenter_2, 152, 12)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 124, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -27140,21 +25837,17 @@ fn build_controls_simplecontrols_xaml_deferred_276(
     // Controls/SimpleControls.xaml(251,23) Name
     rt::set_and_register_name(name_scope.as_ref(), &tab_control_0, "PART_TabControl", 251, 23)?;
     // Controls/SimpleControls.xaml(252,23) Theme (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let provided_1 = rt::provide_static_resource(&context, "TabbedPageTabControlTheme", || rt::property_value(__t::StyledElement::theme_property()), 252, 23)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
-    rt::bind_or_set_priority(tab_control_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 252, 23)?;
+    rt::bind_or_set_priority(tab_control_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 252, 23)?;
     // Controls/SimpleControls.xaml(253,23) ItemContainerTheme (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let provided_2 = rt::provide_static_resource(&context, "TabbedPageTabItemTheme", || rt::property_value(__t::ItemsControl::item_container_theme_property()), 253, 23)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_2);
-    rt::bind_or_set_priority(tab_control_0.upcast_ref::<__t::FerroObject>(), || __t::ItemsControl::item_container_theme_property(), value_1, priority_1, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "ItemsControl.ItemContainerTheme", 253, 23)?;
+    rt::bind_or_set_priority(tab_control_0.upcast_ref::<__t::FerroObject>(), || __t::ItemsControl::item_container_theme_property(), value_1, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "ItemsControl.ItemContainerTheme", 253, 23)?;
     // Controls/SimpleControls.xaml(251,12) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    tab_control_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_50(&tab_control_0);
     // Controls/SimpleControls.xaml(251,12) VerticalAlignment
-    let priority_3 = __t::BindingPriority::Template;
-    tab_control_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_3);
+    __build_controls_simplecontrols_xaml_template_setter_51(&tab_control_0);
     rt::pop_parent_and_end_init(&context, &tab_control_0, 251, 12)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 250, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -27238,8 +25931,7 @@ fn build_controls_simplecontrols_xaml_deferred_278(
     // Controls/SimpleControls.xaml(25,23) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "TableViewRowPadding", 25, 23)?;
     // Controls/SimpleControls.xaml(24,16) Dock
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_0);
+    __build_controls_simplecontrols_xaml_template_setter_84(&border_0);
     // Controls/SimpleControls.xaml(27,18) Child
     // Controls/SimpleControls.xaml(27,18) TableViewColumnHeadersPresenter
     let table_view_column_headers_presenter_0 = ::ferroui_controls::presenters::TableViewColumnHeadersPresenter::new();
@@ -27255,13 +25947,11 @@ fn build_controls_simplecontrols_xaml_deferred_278(
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&rectangle_0).upcast::<__t::Control>());
     rt::push_parent(&context, &rectangle_0);
     // Controls/SimpleControls.xaml(29,16) Height
-    let priority_1 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::height_property(), 1.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_156(&rectangle_0);
     // Controls/SimpleControls.xaml(30,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeBorderMidBrush", 30, 26)?;
     // Controls/SimpleControls.xaml(29,16) Dock
-    let priority_2 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_84(&rectangle_0);
     rt::pop_parent_and_end_init(&context, &rectangle_0, 29, 16)?;
     // Controls/SimpleControls.xaml(32,16) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
@@ -27311,14 +26001,11 @@ fn build_controls_simplecontrols_xaml_deferred_278(
     // Controls/SimpleControls.xaml(47,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &scroll_bar_0, "PART_HorizontalScrollBar", 47, 22)?;
     // Controls/SimpleControls.xaml(47,12) Orientation
-    let priority_3 = __t::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(__t::ScrollBar::orientation_property(), __t::Orientation::Horizontal, priority_3);
+    scroll_bar_0.set_value_with_priority(__t::ScrollBar::orientation_property(), __t::Orientation::Horizontal, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(47,12) Column
-    let priority_4 = __t::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_4);
+    __build_controls_simplecontrols_xaml_template_setter_11(&scroll_bar_0);
     // Controls/SimpleControls.xaml(47,12) Row
-    let priority_5 = __t::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_5);
+    __build_controls_simplecontrols_xaml_template_setter_61(&scroll_bar_0);
     rt::end_init(&scroll_bar_0, 47, 12)?;
     // Controls/SimpleControls.xaml(51,12) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -27329,14 +26016,11 @@ fn build_controls_simplecontrols_xaml_deferred_278(
     // Controls/SimpleControls.xaml(51,22) Name
     rt::set_and_register_name(name_scope.as_ref(), &scroll_bar_1, "PART_VerticalScrollBar", 51, 22)?;
     // Controls/SimpleControls.xaml(51,12) Orientation
-    let priority_6 = __t::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(__t::ScrollBar::orientation_property(), __t::Orientation::Vertical, priority_6);
+    scroll_bar_1.set_value_with_priority(__t::ScrollBar::orientation_property(), __t::Orientation::Vertical, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(51,12) Column
-    let priority_7 = __t::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_7);
+    __build_controls_simplecontrols_xaml_template_setter_9(&scroll_bar_1);
     // Controls/SimpleControls.xaml(51,12) Row
-    let priority_8 = __t::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(__t::Grid::row_property(), 0_i32, priority_8);
+    __build_controls_simplecontrols_xaml_template_setter_65(&scroll_bar_1);
     rt::end_init(&scroll_bar_1, 51, 12)?;
     // Controls/SimpleControls.xaml(55,12) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -27348,11 +26032,9 @@ fn build_controls_simplecontrols_xaml_deferred_278(
     // Controls/SimpleControls.xaml(55,18) Name
     rt::set_and_register_name(name_scope.as_ref(), &panel_0, "PART_ScrollBarsSeparator", 55, 18)?;
     // Controls/SimpleControls.xaml(55,12) Row
-    let priority_9 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_9);
+    __build_controls_simplecontrols_xaml_template_setter_61(&panel_0);
     // Controls/SimpleControls.xaml(55,12) Column
-    let priority_10 = __t::BindingPriority::Template;
-    panel_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_10);
+    __build_controls_simplecontrols_xaml_template_setter_9(&panel_0);
     // Controls/SimpleControls.xaml(58,18) Background
     rt::bind_dynamic_resource(&context, panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), "ThemeControlMidBrush", 58, 18)?;
     rt::pop_parent_and_end_init(&context, &panel_0, 55, 12)?;
@@ -27431,10 +26113,9 @@ fn build_controls_simplecontrols_xaml_deferred_280(
     // Controls/SimpleControls.xaml(82,25) Name
     rt::set_and_register_name(name_scope.as_ref(), &scroll_viewer_0, "PART_ScrollViewer", 82, 25)?;
     // Controls/SimpleControls.xaml(83,25) Theme (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let provided_5 = rt::provide_static_resource(&context, "TableViewScrollViewerTheme", || rt::property_value(__t::StyledElement::theme_property()), 83, 25)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 83, 25)?;
+    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, __t::BindingPriority::Template, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 83, 25)?;
     // Controls/SimpleControls.xaml(84,25) VerticalSnapPointsType
     rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R170)?;
     // Controls/SimpleControls.xaml(93,14) Content
@@ -27496,8 +26177,7 @@ fn build_controls_simplecontrols_xaml_deferred_283(
     border_0.begin_init();
     rt::push_parent(&context, &border_0);
     // Controls/SimpleControls.xaml(15,6) Background
-    let priority_0 = __t::BindingPriority::Template;
-    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
+    border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(16,8) Child
     // Controls/SimpleControls.xaml(16,8) Rectangle
     let rectangle_0 = __t::Rectangle::new();
@@ -27505,13 +26185,11 @@ fn build_controls_simplecontrols_xaml_deferred_283(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&rectangle_0).upcast::<__t::Control>()));
     rt::push_parent(&context, &rectangle_0);
     // Controls/SimpleControls.xaml(16,8) Width
-    let priority_1 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, priority_1);
+    __build_controls_simplecontrols_xaml_template_setter_134(&rectangle_0);
     // Controls/SimpleControls.xaml(17,18) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), "ThemeBorderMidBrush", 17, 18)?;
     // Controls/SimpleControls.xaml(16,8) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_6(&rectangle_0);
     rt::pop_parent_and_end_init(&context, &rectangle_0, 16, 8)?;
     rt::pop_parent_and_end_init(&context, &border_0, 15, 6)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -27577,11 +26255,10 @@ fn build_controls_simplecontrols_xaml_deferred_285(
     // Controls/SimpleControls.xaml(32,29) Background
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R172)?;
     // Controls/SimpleControls.xaml(37,29) Content (setter chosen at run time)
-    let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
-    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, priority_0, "ContentControl.Content", 37, 29)?;
+    rt::bind_or_set_null(content_presenter_0.upcast_ref::<__t::FerroObject>(), || __t::ContentPresenter::content_property(), &value_0, __t::BindingPriority::Template, "ContentControl.Content", 37, 29)?;
     // Controls/SimpleControls.xaml(38,29) Padding
     rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_simplecontrols_xaml_bindings::R173)?;
     rt::end_init(&content_presenter_0, 31, 12)?;
@@ -27595,18 +26272,15 @@ fn build_controls_simplecontrols_xaml_deferred_285(
     // Controls/SimpleControls.xaml(41,18) Name
     rt::set_and_register_name(name_scope.as_ref(), &thumb_0, "PART_Resizer", 41, 18)?;
     // Controls/SimpleControls.xaml(42,18) Template (setter chosen at run time)
-    let priority_1 = __t::BindingPriority::Template;
     let provided_9 = rt::provide_static_resource(&context, "TableViewColumnHeaderResizerTemplate", || rt::property_value(__t::TemplatedControl::template_property()), 42, 18)?;
     let value_1: __t::MarkupValue = rt::to_value(provided_9);
-    rt::bind_or_set_priority(thumb_0.upcast_ref::<__t::FerroObject>(), || __t::TemplatedControl::template_property(), value_1, priority_1, || rt::markup_handle(<dyn __t::IControlTemplate as __t::MarkupTyped>::MARKUP), true, "TemplatedControl.Template", 42, 18)?;
+    rt::bind_or_set_priority(thumb_0.upcast_ref::<__t::FerroObject>(), || __t::TemplatedControl::template_property(), value_1, __t::BindingPriority::Template, || rt::markup_handle(<dyn __t::IControlTemplate as __t::MarkupTyped>::MARKUP), true, "TemplatedControl.Template", 42, 18)?;
     // Controls/SimpleControls.xaml(43,18) Width
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "TableViewColumnResizerWidth", 43, 18)?;
     // Controls/SimpleControls.xaml(41,12) HorizontalAlignment
-    let priority_2 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_2);
+    __build_controls_simplecontrols_xaml_template_setter_14(&thumb_0);
     // Controls/SimpleControls.xaml(41,12) Cursor
-    let priority_3 = __t::BindingPriority::Template;
-    thumb_0.set_value_with_priority(__t::InputElement::cursor_property(), rt::cast(__t::Cursor::__markup_new_0(__t::StandardCursorType::SizeWestEast), 45, 18)?, priority_3);
+    thumb_0.set_value_with_priority(__t::InputElement::cursor_property(), rt::cast(__t::Cursor::__markup_new_0(__t::StandardCursorType::SizeWestEast), 45, 18)?, __t::BindingPriority::Template);
     // Controls/SimpleControls.xaml(46,18) Margin
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "TableViewColumnResizerMargin", 46, 18)?;
     // Controls/SimpleControls.xaml(47,18) IsEnabled
@@ -27781,6 +26455,456 @@ fn build_controls_simplecontrols_xaml_deferred_287(
     __t::Result::Ok(rt::to_value(border_0.clone()))
 }
 
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_1(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(13,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::height_property(), 18.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_2(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(13,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_3(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(13,12) Template setter
+    target.set_value_with_priority(__t::Shape::stroke_thickness_property(), 1.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_4(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(19,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_5(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(19,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::height_property(), 10.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_6(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(19,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_7(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(19,12) Template setter
+    target.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_8(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(19,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_9(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(34,12) Template setter
+    target.set_value_with_priority(__t::Grid::column_property(), 1_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_10(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(16,12) Template setter
+    target.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_11(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(28,16) Template setter
+    target.set_value_with_priority(__t::Grid::column_property(), 0_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_12(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(36,16) Template setter
+    target.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_13(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(36,16) Template setter
+    target.set_value_with_priority(__t::Layoutable::height_property(), 12.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_14(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(36,16) Template setter
+    target.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_15(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(36,16) Template setter
+    target.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_16(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(25,16) Template setter
+    target.set_value_with_priority(__t::Layoutable::width_property(), 11.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_19(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(63,14) Template setter
+    target.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_20(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(71,16) Template setter
+    target.set_value_with_priority(__t::Layoutable::width_property(), 8.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_21(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(71,16) Template setter
+    target.set_value_with_priority(__t::Layoutable::height_property(), 4.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_22(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(79,14) Template setter
+    target.set_value_with_priority(__t::Popup::is_light_dismiss_enabled_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_27(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(7,10) Template setter
+    target.set_value_with_priority(__t::ScrollViewer::vertical_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Hidden, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_31(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(9,12) Template setter
+    target.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Right, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_32(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(23,14) Template setter
+    target.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_33(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(23,14) Template setter
+    target.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_34(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(21,14) Template setter
+    target.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_35(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(21,14) Template setter
+    target.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), ::ferroui_base::input::KeyboardNavigationMode::Continue, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_36(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(20,16) Template setter
+    target.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_37(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(18,10) Template setter
+    target.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&false), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_38(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(24,14) Template setter
+    target.set_value_with_priority(__t::Layoutable::width_property(), 24.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_39(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(24,14) Template setter
+    target.set_value_with_priority(__t::Layoutable::height_property(), 24.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_40(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(24,14) Template setter
+    target.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Center, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_41(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(24,14) Template setter
+    target.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Center, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_43(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(52,26) Template setter
+    target.set_value_with_priority(__t::StackPanel::spacing_property(), 4.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_50(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(49,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_51(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(49,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_52(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(49,12) Template setter
+    target.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Fill, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_53(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(65,18) Template setter
+    target.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_54(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(66,20) Template setter
+    target.set_value_with_priority(__t::Grid::column_span_property(), 3_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_56(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(66,20) Template setter
+    target.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_57(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(72,20) Template setter
+    target.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_60(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(96,20) Template setter
+    target.set_value_with_priority(__t::Grid::column_property(), 2_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_61(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(113,18) Template setter
+    target.set_value_with_priority(__t::Grid::row_property(), 1_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_62(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(113,18) Template setter
+    target.set_value_with_priority(__t::Layoutable::min_width_property(), 20.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_65(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(39,22) Template setter
+    target.set_value_with_priority(__t::Grid::row_property(), 0_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_67(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(39,22) Template setter
+    target.set_value_with_priority(__t::Grid::column_span_property(), 4_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_68(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(46,22) Template setter
+    target.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_73(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(109,12) Template setter
+    target.set_value_with_priority(__t::Layoutable::width_property(), 20.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_84(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(19,12) Template setter
+    target.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_85(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(25,12) Template setter
+    target.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Bottom, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_86(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(57,14) Template setter
+    target.set_value_with_priority(__t::Layoutable::height_property(), 20.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_92(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(86,14) Template setter
+    target.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_99(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(73,16) Template setter
+    target.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_100(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(73,16) Template setter
+    target.set_value_with_priority(__t::StackPanel::spacing_property(), 2.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_103(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(85,22) Template setter
+    target.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::UniformToFill, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_110(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(125,18) Template setter
+    target.set_value_with_priority(__t::Grid::column_span_property(), 1_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_113(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(63,12) Template setter
+    target.set_value_with_priority(__t::Grid::row_property(), 2_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_120(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(29,14) Template setter
+    target.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_121(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(29,14) Template setter
+    target.set_value_with_priority(__t::Layoutable::height_property(), 16.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_122(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(55,14) Template setter
+    target.set_value_with_priority(__t::Grid::column_property(), 3_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_123(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(60,14) Template setter
+    target.set_value_with_priority(__t::Grid::column_property(), 4_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_132(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(89,10) Template setter
+    target.set_value_with_priority(__t::Brush::opacity_property(), 0.6_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_134(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(131,18) Template setter
+    target.set_value_with_priority(__t::Layoutable::width_property(), 1.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_135(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(144,14) Template setter
+    target.set_value_with_priority(__t::Popup::placement_property(), __t::PlacementMode::Bottom, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_138(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(201,18) Template setter
+    target.set_value_with_priority(__t::ScrollViewer::horizontal_scroll_bar_visibility_property(), __t::ScrollBarVisibility::Disabled, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_140(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(203,20) Template setter
+    target.set_value_with_priority(__t::DateTimePickerPanel::should_loop_property(), __t::Clone::clone(&true), __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_146(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(276,18) Template setter
+    target.set_value_with_priority(__t::Shape::stroke_line_cap_property(), ::ferroui_base::media::PenLineCap::Round, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_147(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(276,18) Template setter
+    target.set_value_with_priority(__t::Shape::stroke_thickness_property(), 0.75_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_148(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(159,18) Template setter
+    target.set_value_with_priority(__t::Grid::column_property(), 5_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_149(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(165,18) Template setter
+    target.set_value_with_priority(__t::Grid::column_property(), 6_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_155(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(45,14) Template setter
+    target.set_value_with_priority(__t::Visual::z_index_property(), 100_i32, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_156(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(213,16) Template setter
+    target.set_value_with_priority(__t::Layoutable::height_property(), 1.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_157(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(213,16) Template setter
+    target.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Bottom, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_159(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(90,16) Template setter
+    target.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_160(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(96,16) Template setter
+    target.set_value_with_priority(__t::StackPanel::spacing_property(), 10.0_f64, __t::BindingPriority::Template);
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_template_setter_163(target: &__t::FerroObject) {
+    // Controls/SimpleControls.xaml(159,18) Template setter
+    target.set_value_with_priority(__t::GridSplitter::resize_direction_property(), ::ferroui_controls::GridResizeDirection::Columns, __t::BindingPriority::Template);
+}
+
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,
 /// `rt::uri_equals`); `Ok(None)` if this file has no such document, the load error of the build
@@ -27851,7 +26975,6 @@ mod __t {
     pub(super) use ::ferroui_base::input::InputElement;
     pub(super) use ::ferroui_base::input::KeyBinding;
     pub(super) use ::ferroui_base::input::KeyboardNavigation;
-    pub(super) use ::ferroui_base::input::KeyboardNavigationMode;
     pub(super) use ::ferroui_base::input::StandardCursorType;
     pub(super) use ::ferroui_base::input::WindowDecorationsElementRole;
     pub(super) use ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer;
@@ -27875,7 +26998,6 @@ mod __t {
     pub(super) use ::ferroui_base::media::IBrush;
     pub(super) use ::ferroui_base::media::MediaCollection;
     pub(super) use ::ferroui_base::media::Pen;
-    pub(super) use ::ferroui_base::media::PenLineCap;
     pub(super) use ::ferroui_base::media::RectangleGeometry;
     pub(super) use ::ferroui_base::media::RotateTransform;
     pub(super) use ::ferroui_base::media::ScaleTransform;

@@ -54,6 +54,7 @@ use super::source::rust_string_literal;
 use super::selector_plans::{Op as SelectorOp, SelectorPlans};
 use super::style_setters::StyleSetters;
 use super::template_bindings::TemplateBindings;
+use super::template_values::{TemplateValues, TEMPLATE_PRIORITY};
 use super::theme_tables::{Factory, ThemeTables};
 
 /// Why a document is not eligible for emission: the first node (or member)
@@ -678,6 +679,7 @@ struct Emitter<'a> {
     selectors: SelectorPlans,
     styles: StyleSetters,
     bindings: TemplateBindings,
+    template_values: TemplateValues,
     /// The Rust types of the locals whose type the emitter states (`let` of
     /// an object created with its default constructor): what a part of a
     /// split function can be passed ([`split_into_parts`]).
@@ -1960,6 +1962,10 @@ impl<'a> Emitter<'a> {
         let text = self
             .coerce(&priority, self.types.known(Known::BindingPriority))
             .ok_or_else(|| unsupported(node, "a priority that is not a binding priority"))?;
+        // A constant enum variant has no evaluation to sequence before the setter.
+        if text == TEMPLATE_PRIORITY {
+            return Ok(text);
+        }
         let local = self.local_named("priority");
         self.line(format!("let {local} = {text};"));
         Ok(local)
@@ -1971,7 +1977,7 @@ impl<'a> Emitter<'a> {
     /// declared setter, `rt::bind` for a binding setter, `rt::unset_value`
     /// for an unset-value setter.
     fn setter_statement(
-        &self,
+        &mut self,
         node: &Rc<dyn IXamlAstNode>,
         assignment: &XamlPropertyAssignmentNode,
         setter: &Rc<dyn IXamlPropertySetter>,
@@ -2020,7 +2026,11 @@ impl<'a> Emitter<'a> {
                 SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
             };
             let priority = priority.ok_or_else(|| unsupported(node, format!("{property_name}: a priority setter without a priority")))?;
-            return Ok(format!("{}.set_value_with_priority({definition}, {value}, {priority});", target.expr));
+            let statement = format!("{}.set_value_with_priority({definition}, {value}, {priority});", target.expr);
+            if priority == TEMPLATE_PRIORITY && matches!(values, SetterValues::Typed(_, _)) {
+                self.template_values.record(&statement, &target.expr, &definition, &value, node.line(), node.position());
+            }
+            return Ok(statement);
         }
         if let Some(binding_field) = binding_field {
             object_target()?;
@@ -4217,6 +4227,7 @@ pub fn emit_function<'a>(
         selectors: SelectorPlans::default(),
         styles: StyleSetters::default(),
         bindings: TemplateBindings::default(),
+        template_values: TemplateValues::default(),
         local_types: HashMap::new(),
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
@@ -4311,7 +4322,7 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(function);
     }
-    Ok(source)
+    Ok(emitter.template_values.lower(source, function_name, document_name))
 }
 
 /// A function body with more top-level statements than this is split into
