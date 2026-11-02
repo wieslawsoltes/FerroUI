@@ -822,7 +822,7 @@ pub fn generate_class_file_with_binary_resources(
     let mut read_modifier = |parsed: &xamlx::ast::XamlDocument| {
         modifiers.push(parsed_root_directive(parsed, "ClassModifier").and_then(modifier_visibility));
     };
-    let transformed = transform_group_with_parsed(host.type_system.clone(), &sources, options, &host.parsers, Some(&mut read_modifier))
+    let transformed = transform_group_with_parsed(host.type_system.clone(), &sources, options, &host.parsers, binary.is_some(), Some(&mut read_modifier))
         .map_err(|error| format!("{CLASS_GROUP_NOT_TRANSFORMED}{}", error.message()))?;
     let constructor = match group.constructor {
         Some(constructor) => Some(Constructor::from(constructor)),

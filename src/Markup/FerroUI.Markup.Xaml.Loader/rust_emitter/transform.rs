@@ -133,7 +133,7 @@ pub fn transform_group(
     options: &TransformOptions,
     parsers: &[Rc<dyn IXamlCompileTimeValueParser>],
 ) -> XamlResult<Vec<TransformedDocument>> {
-    transform_group_with_parsed(type_system, sources, options, parsers, None)
+    transform_group_with_parsed(type_system, sources, options, parsers, false, None)
 }
 
 /// A class group also reads its root directives. Expose the already-parsed XML AST
@@ -143,6 +143,7 @@ pub(super) fn transform_group_with_parsed(
     sources: &[DocumentSource<'_>],
     options: &TransformOptions,
     parsers: &[Rc<dyn IXamlCompileTimeValueParser>],
+    record_inlining: bool,
     mut inspect: Option<&mut dyn FnMut(&XamlDocument)>,
 ) -> XamlResult<Vec<TransformedDocument>> {
     let (mut mappings, emit_mappings) = FerroXamlIlLanguage::configure(&type_system)?;
@@ -241,7 +242,9 @@ pub(super) fn transform_group_with_parsed(
         providers.push(provider);
     }
 
-    transformer_configuration.get_or_create_extra::<crate::compiler_extensions::group_transformers::InlinedDocuments>();
+    if record_inlining {
+        transformer_configuration.get_or_create_extra::<crate::compiler_extensions::group_transformers::InlinedDocuments>();
+    }
     compiler.transform_group(&parsed_documents)?;
     throw_exception_if_any_error(&diagnostics.borrow())?;
 

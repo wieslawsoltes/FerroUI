@@ -25,6 +25,7 @@ pub struct XamlMergeResourceGroupTransformer;
 
 /// The AOT emitter requests this set when it needs to certify independently
 /// replaceable build methods. A document may be both inlined and called.
+#[cfg(any(feature = "compiler", all(test, feature = "runtime")))]
 #[derive(Default)]
 pub(crate) struct InlinedDocuments(pub std::cell::RefCell<std::collections::HashSet<String>>);
 
@@ -436,6 +437,7 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 result?;
                 traversal.prepared.borrow_mut().insert(target);
             }
+            #[cfg(any(feature = "compiler", all(test, feature = "runtime")))]
             if let Ok(inlined) = context.configuration().get_extra::<InlinedDocuments>() {
                 if let Some(uri) = target_document.uri() { inlined.0.borrow_mut().insert(uri); }
             }
