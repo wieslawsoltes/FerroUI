@@ -253,6 +253,25 @@ fn compact_template_setter_preserves_priority_null_and_error_location() {
 }
 
 #[test]
+fn nullable_binding_overload_matches_the_expanded_calls_for_both_branches() {
+    use super::compiled::{bind, bind_or_set_null};
+    use ferroui_base::{data::BindingPriority, FerroObject};
+    use ferroui_controls::TextBlock;
+
+    crate::register_types();
+    let text = TextBlock::new();
+    let target = text.upcast_ref::<FerroObject>();
+    let property = TextBlock::text_property;
+    text.set_value_with_priority(property(), Some("initial".into()), BindingPriority::Template);
+    bind_or_set_null(target, property, &None, BindingPriority::Template, "TextBlock.Text", 8, 13).unwrap();
+    assert_eq!(text.text(), None);
+    let invalid = to_value("bad binding".to_owned());
+    let expected = bind(target, property(), invalid.clone(), 8, 13).unwrap_err();
+    let actual = bind_or_set_null(target, property, &invalid, BindingPriority::Template, "TextBlock.Text", 8, 13).unwrap_err();
+    assert_eq!(actual.message(), expected.message());
+}
+
+#[test]
 fn local_setter_checks_the_overloads_before_registering_the_property() {
     use super::compiled::{no_setter, set_local_value};
     use ferroui_base::{data::core::ValueType, FerroObject, FerroProperty, Visual};

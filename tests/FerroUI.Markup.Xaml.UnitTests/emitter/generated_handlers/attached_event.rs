@@ -57,11 +57,10 @@ pub fn populate_handlers_attachedevent_xaml(
     button_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     // Handlers/AttachedEvent.xaml(1,212) Name
-    button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("target")));
-    rt::register_name_value(name_scope.as_ref(), "target", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 1, 212)?;
-    rt::invoked(button_0.try_end_init(), 1, 205)?;
-    rt::invoked(grid_0.try_end_init(), 1, 175)?;
-    rt::invoked(root.try_end_init(), 1, 2)?;
+    rt::set_and_register_name(name_scope.as_ref(), &button_0, "target", 1, 212)?;
+    rt::end_init(&button_0, 1, 205)?;
+    rt::end_init(&grid_0, 1, 175)?;
+    rt::end_init(&root, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&root), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(())
 }

@@ -47,13 +47,12 @@ pub fn populate_handlers_delegateproperty_xaml(
     border_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Handlers/DelegateProperty.xaml(1,158) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("target")));
-    rt::register_name_value(name_scope.as_ref(), "target", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 1, 158)?;
+    rt::set_and_register_name(name_scope.as_ref(), &border_0, "target", 1, 158)?;
     // Handlers/DelegateProperty.xaml(1,151) Placement
     border_0.set_value(::ferroui_controls::ToolTip::placement_property(), ::ferroui_controls::PlacementMode::Custom);
     // Handlers/DelegateProperty.xaml(1,151) CustomPopupPlacementCallback
     border_0.set_value(::ferroui_controls::ToolTip::custom_popup_placement_callback_property(), rt::cast(rt::method_delegate(&context, 1, |this, arguments| { crate::support::xaml::event_tests::MyHost::__markup_OnCustomPlacement_0(this, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }), 1, 151)?);
-    rt::invoked(border_0.try_end_init(), 1, 151)?;
+    rt::end_init(&border_0, 1, 151)?;
     // Handlers/DelegateProperty.xaml(1,258) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(root.upcast_ref::<::ferroui_controls::Panel>());
     // Handlers/DelegateProperty.xaml(1,258) Button
@@ -61,8 +60,7 @@ pub fn populate_handlers_delegateproperty_xaml(
     button_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     // Handlers/DelegateProperty.xaml(1,265) Name
-    button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("button")));
-    rt::register_name_value(name_scope.as_ref(), "button", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 1, 265)?;
+    rt::set_and_register_name(name_scope.as_ref(), &button_0, "button", 1, 265)?;
     // Handlers/DelegateProperty.xaml(1,295) Flyout
     // Handlers/DelegateProperty.xaml(1,295) Flyout
     let flyout_0 = ::ferroui_controls::Flyout::new();
@@ -73,8 +71,8 @@ pub fn populate_handlers_delegateproperty_xaml(
     // Handlers/DelegateProperty.xaml(1,295) Opening
     rt::add_event_handler(rt::class_markup(<::ferroui_controls::primitives::PopupFlyoutBase as ::ferroui_base::StaticType>::TYPE), "Opening", rt::to_value(flyout_0.clone()), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyHost::__markup_OnOpening_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }), 1, 295)?;
     button_0.set_value(::ferroui_controls::Button::flyout_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&flyout_0).upcast::<::ferroui_controls::primitives::FlyoutBase>()));
-    rt::invoked(button_0.try_end_init(), 1, 258)?;
-    rt::invoked(root.try_end_init(), 1, 2)?;
+    rt::end_init(&button_0, 1, 258)?;
+    rt::end_init(&root, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&root), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(())
 }

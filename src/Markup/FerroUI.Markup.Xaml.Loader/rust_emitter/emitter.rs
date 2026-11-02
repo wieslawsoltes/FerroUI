@@ -1761,7 +1761,7 @@ impl<'a> Emitter<'a> {
         if supports_initialize {
             // The interpreter calls `EndInit` as a member of the contract: its failure is the
             // exception that wraps the exception of the member.
-            self.line(format!("{};", invoked(format!("{}.try_end_init()", target.expr), true, node)));
+            self.line(format!("rt::end_init(&{}, {}, {})?;", target.expr, node.line(), node.position()));
         }
         Ok(())
     }
@@ -2506,7 +2506,7 @@ impl<'a> Emitter<'a> {
         value: &str,
         priority: &str,
     ) -> Option<String> {
-        let [(SetterTest::Instance(_), bind), (SetterTest::Instance(expected), set)] = branches else { return None };
+        let [(binding_test, bind), (value_test, set)] = branches else { return None };
         let bind = bind.as_any().downcast_ref::<BindingWithPrioritySetter>()?;
         let set = set.as_any().downcast_ref::<SetValueWithPrioritySetter>()?;
         let field = set.ferro_property();
@@ -2519,10 +2519,19 @@ impl<'a> Emitter<'a> {
         let definition = self.types.property_definition(property, self.types.class_of(&*field.declaring_type())).ok()?;
         let member = rust_string_literal(&format!("{}.{}", property.owner_name(), property.name()));
         let nullable = set.binder_parameters().allow_runtime_null.get();
-        Some(format!(
-            "rt::bind_or_set_priority({}.upcast_ref::<::ferroui_base::FerroObject>(), || {definition}, {value}, {priority}, || {expected}, {nullable}, {member}, {}, {})?;",
-            target.expr, node.line(), node.position()
-        ))
+        let target = format!("{}.upcast_ref::<::ferroui_base::FerroObject>()", target.expr);
+        let (line, column) = (node.line(), node.position());
+        match (binding_test, value_test) {
+            (SetterTest::Instance(_), SetterTest::Instance(expected)) => Some(format!(
+                "rt::bind_or_set_priority({target}, || {definition}, {value}, {priority}, || {expected}, {nullable}, {member}, {line}, {column})?;"
+            )),
+            // The static source type already satisfies the binding overload.
+            // A null value selects the nullable styled-value overload instead.
+            (SetterTest::NonNull, SetterTest::Always) if nullable => Some(format!(
+                "rt::bind_or_set_null({target}, || {definition}, &{value}, {priority}, {member}, {line}, {column})?;"
+            )),
+            _ => None,
+        }
     }
 
     /// The expression of the canonical handle of a type (`rt::class_handle`
@@ -4028,13 +4037,27 @@ impl<'a> Emitter<'a> {
             .ok_or_else(|| unsupported(node, "a name that is not text"))?
             .text();
         self.uses_name_scope = true;
-        self.line(format!(
-            "rt::register_name_value(name_scope.as_ref(), {}, ::std::rc::Rc::new(::core::clone::Clone::clone(&{})), {}, {})?;",
-            rust_string_literal(&name),
-            target.expr,
-            node.line(),
-            node.position()
-        ));
+        let literal = rust_string_literal(&name);
+        // Name can also be supplied by a custom property or evaluated expression.
+        // Fuse only the exact built-in assignment immediately before this registration.
+        let object = &target.expr;
+        let set_name = format!(
+            "    {object}.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from({literal})));"
+        );
+        if matches!(target.kind, Kind::Class(class) if self.types.is_styled_element(class))
+            && self.lines.last() == Some(&set_name)
+        {
+            self.lines.pop();
+            self.line(format!(
+                "rt::set_and_register_name(name_scope.as_ref(), &{object}, {literal}, {}, {})?;",
+                node.line(), node.position()
+            ));
+        } else {
+            self.line(format!(
+                "rt::register_name_value(name_scope.as_ref(), {literal}, ::std::rc::Rc::new(::core::clone::Clone::clone(&{object})), {}, {})?;",
+                node.line(), node.position()
+            ));
+        }
         Ok(())
     }
 }

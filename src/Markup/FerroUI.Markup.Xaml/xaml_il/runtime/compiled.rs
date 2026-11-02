@@ -581,6 +581,27 @@ pub fn bind_or_set_priority<T: ferroui_base::PropertyValue>(
     Err(no_setter(name, &value, line, position))
 }
 
+/// For a statically binding-valued expression the first overload only tests for
+/// null. Preserve the original value conversion, priority, position and evaluation
+/// of its property getter in the selected branch.
+#[inline(never)]
+pub fn bind_or_set_null<T: ferroui_base::PropertyValue>(
+    target: &Ref<FerroObject>,
+    property: fn() -> &'static ferroui_base::StyledProperty<T>,
+    value: &MarkupValue,
+    priority: BindingPriority,
+    member: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    if value.is_some() {
+        bind(target, property(), value.clone(), line, position)
+    } else {
+        target.set_value_with_priority(property(), exact(value.clone(), member, 1, line, position)?, priority);
+        Ok(())
+    }
+}
+
 /// XamlX's local-value overload sequence for a writable styled property. The
 /// getter runs only in the branch that takes the value. An invalid value never
 /// registers the property and the binding branch never registers the value type.
@@ -1178,6 +1199,27 @@ pub fn register_name(
     position: i32,
 ) -> Result<(), XamlLoadError> {
     register_name_value(scope, name, Rc::new(element), line, position)
+}
+
+/// Complete initialization through the styled element's virtual slot. Share the
+/// result conversion and its unwind path across every generated template.
+#[inline(never)]
+pub fn end_init(element: &StyledElement, line: i32, position: i32) -> Result<(), XamlLoadError> {
+    invoked(element.try_end_init(), line, position)
+}
+
+/// Set the built-in Name before registering the original concrete class handle.
+/// The property notification still precedes a missing, completed or duplicate scope error.
+#[inline(never)]
+pub fn set_and_register_name<T: ferroui_base::ObjectType + ferroui_base::Upcast<StyledElement>>(
+    scope: Option<&Rc<dyn INameScope>>,
+    element: &Ref<T>,
+    name: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    element.upcast_ref::<StyledElement>().set_direct_value(StyledElement::name_property(), Some(name.to_owned()));
+    register_name_value(scope, name, Rc::new(element.clone()), line, position)
 }
 
 /// Registers any non-null named object in the shared context scope, including

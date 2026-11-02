@@ -58,9 +58,12 @@ fn has_location(call: &str) -> bool {
             | "rt::bind_template_binding"
             | "rt::apply_template_binding"
             | "rt::bind_or_set_priority"
+            | "rt::bind_or_set_null"
             | "rt::defer"
             | "rt::add_deferred_resource"
             | "rt::register_name"
+            | "rt::end_init"
+            | "rt::set_and_register_name"
             | "rt::register_name_value"
             | "rt::complete_root_name_scope"
             | "rt::static_resource_content"
@@ -127,7 +130,9 @@ fn operands(line: &str, offset: usize, out: &mut Vec<Operand>) {
                             Some(Kind::Float)
                         } else if matches!(call.name, "rt::defer" | "rt::add_deferred_resource")
                             && call.previous.as_ref().is_some_and(|r| &line[r.clone()] == "&context")
-                            && super::emitter::is_identifier(arg)
+                            && arg.rsplit_once("_deferred_").is_some_and(|(document, slot)| {
+                                super::emitter::is_identifier(document) && slot.parse::<usize>().is_ok()
+                            })
                         {
                             // Both signatures take a DeferredBuild immediately after the
                             // context. Passing that fn item through the thunk retains only
@@ -386,7 +391,7 @@ mod tests {
     ControlTheme::set_target(&parent, Some(<::controls::{class} as ::ferroui_base::StaticType>::TYPE));
     let base = rt::provide_static_resource(&context, "base", || descriptor(<::controls::Theme as ::ferroui_base::StaticType>::TYPE), {id}, 2)?;
     let base = rt::cast_checked(base, getter(), "Theme", {id}, 2)?;
-    let child = rt::defer(result_type, &context, child_{id}, {id}, 2)?;
+    let child = rt::defer(result_type, &context, doc_deferred_{id}, {id}, 2)?;
     Ok(set_base(parent, base, child))
 }}
 "#);
@@ -397,9 +402,9 @@ mod tests {
         assert!(factories[0].contains("rt::cast_checked(base, getter(), \"Theme\", arg1, 2)"));
         assert!(factories[0].contains("|| descriptor(<::controls::Theme as ::ferroui_base::StaticType>::TYPE)"));
         assert!(factories[0].contains("arg2: rt::DeferredBuild"));
-        assert!(!factories[0].contains("child_1"));
+        assert!(!factories[0].contains("doc_deferred_1"));
         assert!(!factories[0].contains("::controls::TextBox"));
-        assert!(factories[1].contains("__doc_factory_shape_0(service_provider, <::controls::TextBox as ::ferroui_base::StaticType>::TYPE, 1, child_1)"));
+        assert!(factories[1].contains("__doc_factory_shape_0(service_provider, <::controls::TextBox as ::ferroui_base::StaticType>::TYPE, 1, doc_deferred_1)"));
         assert!(!is_static_type("<::controls::Generic<T> as ::ferroui_base::StaticType>::TYPE"));
     }
 
