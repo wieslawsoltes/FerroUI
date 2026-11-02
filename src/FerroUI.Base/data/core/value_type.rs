@@ -136,6 +136,7 @@ enum ConvertFn {
     StaticBox(fn(&BoxedValue) -> Option<BoxedValue>),
     Boxed(Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>),
     FromRoot(FromObjectFn),
+    Number(fn(&dyn std::any::Any, bool) -> Option<BoxedValue>, bool),
 }
 
 impl ConvertFn {
@@ -145,6 +146,7 @@ impl ConvertFn {
             Self::StaticBox(f) => f(value),
             Self::Boxed(f) => f(value),
             Self::FromRoot(f) => f(value.downcast_ref::<Ref<FerroObject>>()?),
+            Self::Number(f, nullable) => f(value.as_any(), *nullable),
         }
     }
 
@@ -1591,15 +1593,32 @@ fn implicit_numeric(value: &dyn std::any::Any, target: TypeId) -> Option<BoxedVa
     None
 }
 
+type NumberConversion = fn(&dyn std::any::Any, bool) -> Option<BoxedValue>;
+
+fn number_conversion<F: NumericCast<T> + Copy + 'static, T: PropertyValue>(
+    value: &dyn std::any::Any, nullable: bool,
+) -> Option<BoxedValue> {
+    let converted = value.downcast_ref::<F>()?.cast()?;
+    Some(if nullable { Rc::new(Some(converted)) } else { Rc::new(converted) })
+}
+
 macro_rules! numeric_conversions {
-    ($($from:ty),* => $all:tt) => {
-        $( numeric_conversions!(@from $from => $all); )*
-    };
-    (@from $from:ty => [$($to:ty),*]) => {
-        $(
-            ValueTypes::register_conversion::<$from, $to>(|v| NumericCast::<$to>::cast(*v));
-            ValueTypes::register_conversion::<$from, Option<$to>>(|v| NumericCast::<$to>::cast(*v).map(Some));
-        )*
+    ($types:tt) => { numeric_conversions!(@table $types $types) };
+    (@table [$($from:ty),*] $targets:tt) => {{
+        let types = [$( (TypeId::of::<$from>(), TypeId::of::<Option<$from>>()) ),*];
+        const OPERATIONS: &[&[NumberConversion]] = &[$(numeric_conversions!(@row $from $targets)),*];
+        with_registry(|r| {
+            r.conversions.reserve(types.len() * types.len() * 2);
+            for (&(source, _), row) in types.iter().zip(OPERATIONS.iter().copied()) {
+                for (&(target, nullable), &operation) in types.iter().zip(row) {
+                    r.set_conversion((source, target), ConvertFn::Number(operation, false));
+                    r.set_conversion((source, nullable), ConvertFn::Number(operation, true));
+                }
+            }
+        });
+    }};
+    (@row $from:ty [$($to:ty),*]) => {
+        &[$(number_conversion::<$from, $to> as NumberConversion),*]
     };
 }
 
@@ -1845,8 +1864,7 @@ fn parse_bool(s: &str) -> Option<bool> {
 
 fn register_defaults() {
     primitive!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64, char);
-    numeric_conversions!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64
-        => [i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64]);
+    numeric_conversions!([i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64]);
 
     // The managed runtime shows booleans as "True"/"False".
     fn display_bool(value: &dyn AnyValue) -> String {
@@ -1983,6 +2001,24 @@ mod tests {
         let first = ValueTypes::try_convert_for_property(source.as_any(), target.id()).unwrap();
         assert_eq!(first.downcast_ref::<Target>(), Some(&Target(15)));
         check([16, 16, 16]);
+    }
+
+    #[test]
+    fn registered_numeric_conversions_keep_exact_target_types_and_checked_edges() {
+        let input: BoxedValue = Rc::new(f64::from_bits(0x7ff8_1234_5678_9012));
+        let float = ValueTypes::try_convert_registered(&input, ValueType::of::<Option<f64>>()).unwrap();
+        assert_eq!(float.downcast_ref::<Option<f64>>().unwrap().unwrap().to_bits(), 0x7ff8_1234_5678_9012);
+        assert!(ValueTypes::try_convert_registered(&input, ValueType::of::<i64>()).is_none());
+
+        for (value, expected) in [(-1.5, -2), (-0.5, 0), (2.5, 2), (3.5, 4)] {
+            let input: BoxedValue = Rc::new(value as f64);
+            let int = ValueTypes::try_convert_registered(&input, ValueType::of::<Option<i32>>()).unwrap();
+            assert_eq!(int.downcast_ref::<Option<i32>>(), Some(&Some(expected)));
+        }
+        let large: BoxedValue = Rc::new(u64::MAX);
+        assert!(ValueTypes::try_convert_registered(&large, ValueType::of::<i64>()).is_none());
+        let unsigned = ValueTypes::try_convert_registered(&large, ValueType::of::<u64>()).unwrap();
+        assert_eq!(unsigned.downcast_ref::<u64>(), Some(&u64::MAX));
     }
 
     trait IShape {
