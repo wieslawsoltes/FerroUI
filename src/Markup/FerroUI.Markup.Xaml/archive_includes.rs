@@ -35,14 +35,21 @@ mod scoped {
     }
 
     /// Offers the replacement plan to precisely the next matching class populate.
-    pub fn with_revision<R>(root: &'static ferroui_base::TypeInfo, plan: Includes, run: impl FnOnce() -> R) -> R {
+    pub fn with_revision<R>(
+        root: &'static ferroui_base::TypeInfo,
+        plan: Includes,
+        run: impl FnOnce() -> R,
+    ) -> R {
         scoped(&NEXT, Some((root, Rc::new(plan))), run)
     }
 
     pub fn populate<R>(root: &ferroui_base::TypeInfo, run: impl FnOnce() -> R) -> R {
         let plan = NEXT.with(|slot| {
             let mut slot = slot.borrow_mut();
-            if slot.as_ref().is_some_and(|(uri, _)| std::ptr::eq(*uri, root)) {
+            if slot
+                .as_ref()
+                .is_some_and(|(uri, _)| std::ptr::eq(*uri, root))
+            {
                 slot.take().map(|(_, plan)| plan)
             } else {
                 None
@@ -103,6 +110,10 @@ pub fn populate<R>(_: &ferroui_base::TypeInfo, run: impl FnOnce() -> R) -> R {
     run()
 }
 #[cfg(not(all(feature = "binary-resources", feature = "runtime-populate")))]
-pub fn with_revision<R>(_: &'static ferroui_base::TypeInfo, _: Includes, run: impl FnOnce() -> R) -> R {
+pub fn with_revision<R>(
+    _: &'static ferroui_base::TypeInfo,
+    _: Includes,
+    run: impl FnOnce() -> R,
+) -> R {
     run()
 }

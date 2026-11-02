@@ -209,3 +209,45 @@ fn replacement_archive_initializes_compact_density_from_its_own_revision() {
     theme.set_density_style(crate::DensityStyle::Compact);
     assert_eq!(read(), "compact");
 }
+
+/// Replacing an entire private dictionary must preserve its declaration site,
+/// its own deferred resources, and every existing theme generation.
+#[cfg(feature = "precompiled-theme")]
+#[test]
+fn independent_dictionary_edit_executes_inside_the_compiled_theme() {
+    use ferroui_base::{media::Color, metadata::from_markup_value, utilities::Uri, Ref};
+    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+    use ferroui_markup_xaml_loader::binary_document::pack::compile_paged_documents;
+
+    let _app = start_application();
+    crate::register_types();
+    let linked = crate::compiled_archive_root();
+    assert!(linked.dictionaries.iter().any(|(p, _)| *p == "DensityStyles/Compact.xaml"));
+    assert!(linked.dictionaries.iter().all(|(p, _)| *p != "Resources/Generic.xaml"));
+    let mut config = RuntimeXamlLoaderConfiguration::new();
+    config.local_assembly = Some(&crate::ASSEMBLY);
+    let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();
+    let before = WinUITheme::new();
+    let replacement = r#"<ResourceDictionary xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        <x:Double x:Key="ControlContentThemeFontSize">29</x:Double>
+        <Color x:Key="RevisionColor">#FF112233</Color>
+        <StaticResource x:Key="RevisionAlias" ResourceKey="RevisionColor"/>
+    </ResourceDictionary>"#;
+    let documents: Vec<_> = crate::assets::documents().iter()
+        .filter(|(p, _)| !crate::assets::is_excluded(p))
+        .map(|(p, b)| (p.trim_start_matches('/'), if *p == "/DensityStyles/Compact.xaml" { replacement } else { std::str::from_utf8(b).unwrap() }))
+        .collect();
+    let image = compile_paged_documents(&documents).unwrap();
+    let edited = FerroRuntimeXamlLoader::try_load_compiled_archive(&linked, &image, &uri, &config, None)
+        .unwrap().expect("the entire edit stays behind a single native include boundary");
+    let edited = from_markup_value::<Ref<WinUITheme>>(&Some(edited)).unwrap();
+    let after = WinUITheme::new();
+    let font = |theme: &Ref<WinUITheme>| {
+        theme.set_density_style(crate::DensityStyle::Compact);
+        from_markup_value::<f64>(&theme.try_get_resource(&"ControlContentThemeFontSize".into(), None).unwrap())
+    };
+    assert_eq!((font(&before), font(&edited), font(&after)), (Some(14.0), Some(29.0), Some(14.0)));
+    let alias = edited.try_get_resource(&"RevisionAlias".into(), None).unwrap();
+    assert_eq!(from_markup_value::<Color>(&alias), Some(Color::from_rgb(17, 34, 51)));
+}

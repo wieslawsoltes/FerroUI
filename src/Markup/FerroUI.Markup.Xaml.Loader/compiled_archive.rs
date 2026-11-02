@@ -128,3 +128,31 @@ impl FerroRuntimeXamlLoader {
         archive_includes::with_revision(root.class, includes, || (root.load)(parent, root.uri))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn only_closed_untyped_dictionary_roots_are_incrementally_linked() {
+        let parse = |xml: &str| {
+            crate::compiler_extensions::FerroXamlIlCompiler::parse_source_syntax(xml).unwrap()
+        };
+        let ns = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+        let accepts = |xml: String| standalone_dictionary(&parse(&xml)).unwrap();
+        assert!(accepts(format!(
+            "<ResourceDictionary {ns}><x:Double x:Key='A'>9</x:Double></ResourceDictionary>"
+        )));
+        assert!(!accepts(format!("<Styles {ns}/>")));
+        assert!(!accepts(format!(
+            "<ResourceDictionary {ns} x:Class='Other'/>"
+        )));
+        assert!(!accepts("<ResourceDictionary xmlns='urn:user'/>".into()));
+        for include in ["ResourceInclude", "MergeResourceInclude", "StyleInclude"] {
+            assert!(!accepts(format!(
+                "<ResourceDictionary {ns}><{include} Source='Other.xaml'/></ResourceDictionary>"
+            )));
+            assert!(!accepts(format!("<ResourceDictionary {ns}><{include} Source='{{Binding Path}}'/></ResourceDictionary>")));
+        }
+    }
+}
