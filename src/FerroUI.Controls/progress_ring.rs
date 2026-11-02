@@ -12,7 +12,7 @@ use crate::primitives::{
 };
 use crate::shapes::Arc;
 use crate::ControlImpl;
-use ferroui_base::animation::{Animatable, IClock, IGlobalClock, TimeSpan};
+use ferroui_base::animation::{Animatable, IClock, IGlobalClock, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -75,7 +75,7 @@ pub struct ProgressRing {
     visibility_subscription: RefCell<Option<Subscription>>,
     animation_subscription: RefCell<Option<Subscription>>,
     animation_epoch: Cell<u64>,
-    animation_start: Cell<Option<TimeSpan>>,
+    animation_start: Cell<Option<SignedDuration>>,
     animation_from: Cell<f64>,
     animation_target: Cell<f64>,
     displayed_progress: Cell<f64>,
@@ -450,7 +450,7 @@ impl ProgressRing {
         }
     }
 
-    fn animation_tick(&self, time: TimeSpan) {
+    fn animation_tick(&self, time: SignedDuration) {
         if !self.wants_animation() {
             self.stop_animation();
             return;

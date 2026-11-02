@@ -1,4 +1,4 @@
-use crate::media::effects::{IEffect, IImmutableEffect};
+use crate::media::effects::{Effect, IEffect, IImmutableEffect, ImmutableCustomEffect};
 use crate::{Rect, Thickness, Vector};
 use std::rc::Rc;
 
@@ -14,7 +14,8 @@ impl EffectExtensions {
     }
 
     /// How far the output of the effect extends beyond the bounds of the
-    /// content it is applied to.
+    /// content it is applied to. For a custom effect, the padding of its
+    /// snapshot ([`ImmutableCustomEffect::padding`]).
     ///
     /// Panics for an effect of an unknown kind.
     pub fn get_effect_output_padding(effect: Option<&dyn IEffect>) -> Thickness {
@@ -37,7 +38,29 @@ impl EffectExtensions {
             );
         }
 
+        if let Some(custom) = effect.as_custom_effect() {
+            return custom.padding();
+        }
+        if let Some(custom) = Self::custom_class_snapshot(effect) {
+            return custom.padding();
+        }
+
         panic!("Unknown effect type");
+    }
+
+    /// The snapshot of a custom effect (#455, not from upstream): the effect
+    /// itself when it is an [`ImmutableCustomEffect`], the snapshot of its
+    /// values when it is a custom effect class
+    /// ([`Effect::construct_custom`]); `None` for the other effects.
+    pub fn to_custom_effect(effect: &dyn IEffect) -> Option<ImmutableCustomEffect> {
+        match effect.as_custom_effect() {
+            Some(custom) => Some(custom.clone()),
+            None => Self::custom_class_snapshot(effect),
+        }
+    }
+
+    fn custom_class_snapshot(effect: &dyn IEffect) -> Option<ImmutableCustomEffect> {
+        effect.as_object()?.downcast_ref::<Effect>()?.custom_snapshot()
     }
 
     /// Converts an effect to an immutable effect: the result of

@@ -7,7 +7,7 @@ use crate::{
     Border, Button, ColumnDefinition, ColumnDefinitions, ContentControl, ControlImpl, Grid, GridLength, PlacementMode,
     TextBlock,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::BindingMode;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
@@ -58,7 +58,7 @@ pub struct TimePicker {
 ferro_class! {
     TimePicker: TemplatedControl, virtuals TimePickerImpl: TemplatedControlImpl {
         /// Raises the `SelectedTimeChanged` event.
-        fn on_selected_time_changed(this, old_time: Option<TimeSpan>, new_time: Option<TimeSpan>);
+        fn on_selected_time_changed(this, old_time: Option<SignedDuration>, new_time: Option<SignedDuration>);
     }
 }
 
@@ -122,7 +122,7 @@ impl FerroObjectImpl for TimePicker {
             this.set_grid();
             this.set_selected_time_text();
         } else if property == Self::selected_time_property().as_property() {
-            let (old_value, new_value) = change.get_old_and_new_value::<Option<TimeSpan>>();
+            let (old_value, new_value) = change.get_old_and_new_value::<Option<SignedDuration>>();
             this.on_selected_time_changed(old_value, new_value);
             this.set_selected_time_text();
         }
@@ -222,7 +222,7 @@ impl ControlImpl for TimePicker {
 }
 
 impl TimePickerImpl for TimePicker {
-    fn on_selected_time_changed(this: &Self, old_time: Option<TimeSpan>, new_time: Option<TimeSpan>) {
+    fn on_selected_time_changed(this: &Self, old_time: Option<SignedDuration>, new_time: Option<SignedDuration>) {
         let e = TimePickerSelectedValueChangedEventArgs::new(old_time, new_time);
         for (_, handler) in this.selected_time_changed.snapshot().iter() {
             handler(&e);
@@ -270,7 +270,7 @@ ferro_properties! {
         }
 
         /// Defines the `SelectedTime` property.
-        pub fn selected_time_property() -> StyledProperty<Option<TimeSpan>> {
+        pub fn selected_time_property() -> StyledProperty<Option<SignedDuration>> {
             FerroProperty::register_with::<TimePicker, _>(
                 "SelectedTime",
                 StyledPropertyOptions::new(None)
@@ -387,11 +387,11 @@ impl TimePicker {
     }
 
     /// The selected time; can be `None`.
-    pub fn selected_time(&self) -> Option<TimeSpan> {
+    pub fn selected_time(&self) -> Option<SignedDuration> {
         self.get_value(Self::selected_time_property())
     }
 
-    pub fn set_selected_time(&self, value: Option<TimeSpan>) {
+    pub fn set_selected_time(&self, value: Option<SignedDuration>) {
         self.set_value(Self::selected_time_property(), value)
     }
 
@@ -497,7 +497,7 @@ impl TimePicker {
                 } else {
                     hr
                 };
-                new_time = TimeSpan::from_hms(hr, new_time.minutes(), new_time.seconds());
+                new_time = SignedDuration::from_hms(hr, new_time.minutes(), new_time.seconds());
             }
 
             hour_text.set_text(Some(&new_time.to_string_format("%h")));

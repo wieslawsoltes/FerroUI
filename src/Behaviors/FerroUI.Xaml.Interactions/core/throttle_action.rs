@@ -1,7 +1,7 @@
 //! Port of `Core/ThrottleAction.cs`.
 
 use super::{attach_actions_to_logical_tree, detach_actions_from_logical_tree};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::utilities::DateTime;
 use ferroui_base::{
@@ -32,8 +32,8 @@ ferro_class_info!(ThrottleAction {
 ferro_properties! {
     impl ThrottleAction {
         /// Identifies the `Interval` property.
-        pub fn interval_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<ThrottleAction, _>("Interval", TimeSpan::ZERO)
+        pub fn interval_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<ThrottleAction, _>("Interval", SignedDuration::ZERO)
         }
 
         /// Identifies the `Actions` property.
@@ -115,11 +115,11 @@ impl ThrottleAction {
 
     /// Gets or sets the minimum interval between executions. This is a property of the object
     /// model.
-    pub fn interval(&self) -> TimeSpan {
+    pub fn interval(&self) -> SignedDuration {
         self.get_value(Self::interval_property())
     }
 
-    pub fn set_interval(&self, value: TimeSpan) {
+    pub fn set_interval(&self, value: SignedDuration) {
         self.set_value(Self::interval_property(), value)
     }
 

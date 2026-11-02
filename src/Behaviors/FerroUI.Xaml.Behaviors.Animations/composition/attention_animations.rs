@@ -1,7 +1,7 @@
 //! Ported from `Composition/AttentionAnimations.cs`.
 
 use super::composition_animation_helpers::{CompositionAnimationHelpers, ScalarKeyFrame, Vector3KeyFrame};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::numerics::{Vector2, Vector3};
 use ferroui_base::rendering::composition::{CompositionVisual, ElementComposition};
 use ferroui_controls::Control;
@@ -74,7 +74,7 @@ impl AttentionAnimations {
     fn run(
         element: &Control,
         milliseconds: f64,
-        animation: fn(&Control, &CompositionVisual, TimeSpan),
+        animation: fn(&Control, &CompositionVisual, SignedDuration),
         ensure_center_point: bool,
         anchor: Option<Vector2>,
     ) {
@@ -92,11 +92,11 @@ impl AttentionAnimations {
                 CompositionAnimationHelpers::ensure_center_point(element, &visual);
             }
 
-            animation(element, &visual, TimeSpan::from_milliseconds(milliseconds));
+            animation(element, &visual, SignedDuration::from_milliseconds(milliseconds));
         });
     }
 
-    fn apply_bounce(element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_bounce(element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_offset_animation(
             element,
             visual,
@@ -115,7 +115,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_flash(_element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_flash(_element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_scalar_animation(
             visual,
             "Opacity",
@@ -130,7 +130,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_pulse(_element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_pulse(_element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_vector3_animation(
             visual,
             "Scale",
@@ -143,7 +143,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_rubber_band(_element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_rubber_band(_element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_vector3_animation(
             visual,
             "Scale",
@@ -160,7 +160,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_shake(element: &Control, visual: &CompositionVisual, duration: TimeSpan, horizontal: bool) {
+    fn apply_shake(element: &Control, visual: &CompositionVisual, duration: SignedDuration, horizontal: bool) {
         let shake = |amount: f32| {
             if horizontal {
                 Vector3::new(amount, 0.0, 0.0)
@@ -187,7 +187,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_head_shake(element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_head_shake(element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_offset_animation(
             element,
             visual,
@@ -219,7 +219,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_swing(_element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_swing(_element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_scalar_animation(
             visual,
             "RotationAngle",
@@ -235,7 +235,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_tada(_element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_tada(_element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_vector3_animation(
             visual,
             "Scale",
@@ -273,7 +273,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_wobble(element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_wobble(element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_offset_animation(
             element,
             visual,
@@ -305,7 +305,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_jello(_element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_jello(_element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_vector3_animation(
             visual,
             "Scale",
@@ -323,7 +323,7 @@ impl AttentionAnimations {
         );
     }
 
-    fn apply_heart_beat(_element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_heart_beat(_element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         CompositionAnimationHelpers::start_vector3_animation(
             visual,
             "Scale",

@@ -9,7 +9,7 @@
 //! which a test pulses where the reference lets the platform tick.
 
 use crate::register_types;
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::data::TemplateBinding;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::Dispatcher;
@@ -27,7 +27,7 @@ use std::rc::Rc;
 /// The global clock of the test application. It pulses when a test tells it to
 /// ([`pulse`](Self::pulse)).
 pub(crate) struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
@@ -37,13 +37,13 @@ impl MockGlobalClock {
     }
 
     /// Ticks the clock: its subscribers are told that the time is `time`.
-    pub(crate) fn pulse(&self, time: TimeSpan) {
+    pub(crate) fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

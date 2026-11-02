@@ -20,7 +20,7 @@ use crate::{
     AssignedBinding, ContentControl, ControlImpl, ItemsChangedEventArgs, ItemsChangedHandler, ItemsSource,
     SelectionChangedEventArgs, TextBlock, TextBox, TextChangedEventArgs,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction};
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::data::core::ValueTypes;
@@ -559,10 +559,10 @@ ferro_properties! {
         }
 
         /// Identifies the `MinimumPopulateDelay` property.
-        pub fn minimum_populate_delay_property() -> StyledProperty<TimeSpan> {
+        pub fn minimum_populate_delay_property() -> StyledProperty<SignedDuration> {
             FerroProperty::register_with::<AutoCompleteBox, _>(
                 "MinimumPopulateDelay",
-                StyledPropertyOptions::new(TimeSpan::ZERO).validate(AutoCompleteBox::is_valid_minimum_populate_delay),
+                StyledPropertyOptions::new(SignedDuration::ZERO).validate(AutoCompleteBox::is_valid_minimum_populate_delay),
             )
         }
 
@@ -728,7 +728,7 @@ impl AutoCompleteBox {
         *value >= -1
     }
 
-    fn is_valid_minimum_populate_delay(value: &TimeSpan) -> bool {
+    fn is_valid_minimum_populate_delay(value: &SignedDuration) -> bool {
         value.total_milliseconds() >= 0.0
     }
 
@@ -767,21 +767,21 @@ impl AutoCompleteBox {
     /// dispatcher timer will be stopped. The timer will not be restarted
     /// until the next text update call by the user.
     fn on_minimum_populate_delay_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
-        let new_value = e.get_new_value::<TimeSpan>();
+        let new_value = e.get_new_value::<SignedDuration>();
 
         // Stop any existing timer.
         let existing = self.delay_timer.borrow().as_ref().map(|(timer, _)| timer.clone());
         if let Some(timer) = existing {
             timer.stop();
 
-            if new_value == TimeSpan::ZERO {
+            if new_value == SignedDuration::ZERO {
                 if let Some((_, tick)) = self.delay_timer.take() {
                     tick.dispose();
                 }
             }
         }
 
-        if new_value > TimeSpan::ZERO {
+        if new_value > SignedDuration::ZERO {
             // Create or clear a dispatcher timer instance.
             let timer = self.delay_timer.borrow().as_ref().map(|(timer, _)| timer.clone());
             let timer = timer.unwrap_or_else(|| {
@@ -1074,11 +1074,11 @@ impl AutoCompleteBox {
     /// Gets or sets the minimum delay after text is typed in the text box
     /// before the control populates the list of possible matches in the
     /// drop-down. The default is zero.
-    pub fn minimum_populate_delay(&self) -> TimeSpan {
+    pub fn minimum_populate_delay(&self) -> SignedDuration {
         self.get_value(Self::minimum_populate_delay_property())
     }
 
-    pub fn set_minimum_populate_delay(&self, value: TimeSpan) {
+    pub fn set_minimum_populate_delay(&self, value: SignedDuration) {
         self.set_value(Self::minimum_populate_delay_property(), value)
     }
 

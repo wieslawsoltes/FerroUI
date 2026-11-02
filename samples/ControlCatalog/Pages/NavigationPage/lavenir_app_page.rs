@@ -4,7 +4,7 @@
 use super::{LAvenirDishDetailView, LAvenirMenuView, LAvenirProfileView, LAvenirReservationsView};
 use crate::markup::xaml_class;
 use crate::pages::navigation_demo_helper::{boxed_text, parse_color, parse_geometry};
-use ferroui_base::animation::{PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::input::InputElementImpl;
@@ -167,7 +167,7 @@ impl LAvenirAppPage {
         tp.set_background(solid(bg_light()));
         tp.set_tab_placement(TabPlacement::Bottom);
         tp.set_page_transition(Some(Rc::new(PageSlide::with_duration(
-            TimeSpan::from_milliseconds(200.0),
+            SignedDuration::from_milliseconds(200.0),
             SlideAxis::Horizontal,
         ))));
         tp.resources().set("TabItemHeaderFontSize", Some(Rc::new(12.0_f64)));

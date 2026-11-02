@@ -3,7 +3,7 @@ use crate::{
     DeferredContentPresentationBudgetMode as Mode, DeferredContentPresentationSettings as Settings,
     DeferredContentPresentationTimeline as Timeline,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::threading::{CancellationToken, Dispatcher};
 use ferroui_controls::{AppBuilder, Application};
 use ferroui_headless::{
@@ -110,11 +110,11 @@ fn source_defaults_clamping_and_default_settings_share_one_timeline() {
         assert_eq!(t.max_presentations_per_pass(), 8);
         assert_eq!(
             t.max_realization_time_per_pass(),
-            TimeSpan::from_milliseconds(10.0)
+            SignedDuration::from_milliseconds(10.0)
         );
-        assert_eq!(t.initial_delay(), TimeSpan::ZERO);
-        assert_eq!(t.follow_up_delay(), TimeSpan::from_milliseconds(1.0));
-        assert_eq!(t.reveal_duration(), TimeSpan::from_milliseconds(90.0));
+        assert_eq!(t.initial_delay(), SignedDuration::ZERO);
+        assert_eq!(t.follow_up_delay(), SignedDuration::from_milliseconds(1.0));
+        assert_eq!(t.reveal_duration(), SignedDuration::from_milliseconds(90.0));
         assert!(t.auto_schedule());
         t.set_budget_mode(Mode::RealizationTime);
         assert_eq!(t.budget_mode(), Mode::RealizationTime);
@@ -123,38 +123,38 @@ fn source_defaults_clamping_and_default_settings_share_one_timeline() {
             assert_eq!(t.max_presentations_per_pass(), value.max(1));
         }
         for value in [
-            TimeSpan::from_ticks(-1),
-            TimeSpan::ZERO,
-            TimeSpan::from_milliseconds(3.0),
+            SignedDuration::from_ticks(-1),
+            SignedDuration::ZERO,
+            SignedDuration::from_milliseconds(3.0),
         ] {
             t.set_initial_delay(value);
             t.set_follow_up_delay(value);
             t.set_reveal_duration(value);
             t.set_max_realization_time_per_pass(value);
-            assert_eq!(t.initial_delay(), value.max(TimeSpan::ZERO));
-            assert_eq!(t.follow_up_delay(), value.max(TimeSpan::ZERO));
-            assert_eq!(t.reveal_duration(), value.max(TimeSpan::ZERO));
-            assert_eq!(t.max_realization_time_per_pass(), value.max(TimeSpan::ZERO));
+            assert_eq!(t.initial_delay(), value.max(SignedDuration::ZERO));
+            assert_eq!(t.follow_up_delay(), value.max(SignedDuration::ZERO));
+            assert_eq!(t.reveal_duration(), value.max(SignedDuration::ZERO));
+            assert_eq!(t.max_realization_time_per_pass(), value.max(SignedDuration::ZERO));
         }
         let shared = Settings::default_timeline();
         assert!(Rc::ptr_eq(&shared, &Settings::default_timeline()));
         Settings::set_budget_mode(Mode::RealizationTime);
         Settings::set_max_presentations_per_pass(3);
-        Settings::set_max_realization_time_per_pass(TimeSpan::ZERO);
-        Settings::set_initial_delay(TimeSpan::from_ticks(-2));
-        Settings::set_follow_up_delay(TimeSpan::ZERO);
-        Settings::set_reveal_duration(TimeSpan::ZERO);
+        Settings::set_max_realization_time_per_pass(SignedDuration::ZERO);
+        Settings::set_initial_delay(SignedDuration::from_ticks(-2));
+        Settings::set_follow_up_delay(SignedDuration::ZERO);
+        Settings::set_reveal_duration(SignedDuration::ZERO);
         assert_eq!(Settings::budget_mode(), Mode::RealizationTime);
         assert_eq!(Settings::max_presentations_per_pass(), 3);
-        assert_eq!(Settings::max_realization_time_per_pass(), TimeSpan::ZERO);
-        assert_eq!(Settings::initial_delay(), TimeSpan::ZERO);
-        assert_eq!(Settings::follow_up_delay(), TimeSpan::ZERO);
-        assert_eq!(Settings::reveal_duration(), TimeSpan::ZERO);
+        assert_eq!(Settings::max_realization_time_per_pass(), SignedDuration::ZERO);
+        assert_eq!(Settings::initial_delay(), SignedDuration::ZERO);
+        assert_eq!(Settings::follow_up_delay(), SignedDuration::ZERO);
+        assert_eq!(Settings::reveal_duration(), SignedDuration::ZERO);
         Settings::set_budget_mode(Mode::ItemCount);
         Settings::set_max_presentations_per_pass(8);
-        Settings::set_max_realization_time_per_pass(TimeSpan::from_milliseconds(10.0));
-        Settings::set_follow_up_delay(TimeSpan::from_milliseconds(1.0));
-        Settings::set_reveal_duration(TimeSpan::from_milliseconds(90.0));
+        Settings::set_max_realization_time_per_pass(SignedDuration::from_milliseconds(10.0));
+        Settings::set_follow_up_delay(SignedDuration::from_milliseconds(1.0));
+        Settings::set_reveal_duration(SignedDuration::from_milliseconds(90.0));
     });
 }
 #[test]
@@ -170,7 +170,7 @@ fn source_not_ready_targets_do_not_starve_ready_targets() {
             Target::new(true),
         ];
         for target in &targets {
-            t.enqueue(target.erased(), TimeSpan::ZERO, 0);
+            t.enqueue(target.erased(), SignedDuration::ZERO, 0);
         }
         assert_eq!(t.pending_count(), 5);
         t.flush_pending_batch_for_testing();
@@ -197,7 +197,7 @@ fn source_never_revisits_blocked_target_within_one_item_count_pass() {
         let targets = [Target::new(false), Target::new(false), Target::new(false)];
         for target in &targets {
             target.max_attempts.set(1);
-            t.enqueue(target.erased(), TimeSpan::ZERO, 0);
+            t.enqueue(target.erased(), SignedDuration::ZERO, 0);
         }
         t.flush_pending_batch_for_testing();
         for target in &targets {
@@ -213,7 +213,7 @@ fn source_drops_not_ready_real_target_without_polling() {
         let t = manual();
         let target = Target::new(false);
         target.retain.set(false);
-        t.enqueue(target.erased(), TimeSpan::ZERO, 0);
+        t.enqueue(target.erased(), SignedDuration::ZERO, 0);
         assert_eq!(t.pending_count(), 1);
         t.flush_pending_batch_for_testing();
         assert_eq!(target.attempts.get(), 1);
@@ -229,11 +229,11 @@ fn source_time_budget_counts_elapsed_work_instead_of_completed_item_limit() {
         let t = manual();
         t.set_budget_mode(Mode::RealizationTime);
         t.set_max_presentations_per_pass(1);
-        t.set_max_realization_time_per_pass(TimeSpan::from_milliseconds(10.0));
+        t.set_max_realization_time_per_pass(SignedDuration::from_milliseconds(10.0));
         let targets = [Target::new(true), Target::new(true), Target::new(true)];
         targets[0].delay.set(Duration::from_millis(25));
         for target in &targets {
-            t.enqueue(target.erased(), TimeSpan::ZERO, 0);
+            t.enqueue(target.erased(), SignedDuration::ZERO, 0);
         }
         t.flush_pending_batch_for_testing();
         assert_eq!(targets[0].successes.get(), 1);
@@ -251,12 +251,12 @@ fn source_low_order_first_and_zero_time_budget_still_attempts_one_target() {
     run(|| {
         let t = manual();
         t.set_budget_mode(Mode::RealizationTime);
-        t.set_max_realization_time_per_pass(TimeSpan::ZERO);
+        t.set_max_realization_time_per_pass(SignedDuration::ZERO);
         let slow = Target::new(true);
         slow.delay.set(Duration::from_millis(20));
         let fast = Target::new(true);
-        t.enqueue(slow.erased(), TimeSpan::ZERO, 10);
-        t.enqueue(fast.erased(), TimeSpan::ZERO, -10);
+        t.enqueue(slow.erased(), SignedDuration::ZERO, 10);
+        t.enqueue(fast.erased(), SignedDuration::ZERO, -10);
         t.flush_pending_batch_for_testing();
         assert_eq!(fast.successes.get(), 1);
         assert_eq!(slow.successes.get(), 0);
@@ -273,9 +273,9 @@ fn reenqueue_updates_same_entry_due_order_and_sequence_without_duplicate_realiza
         t.set_max_presentations_per_pass(1);
         let a = Target::new(true);
         let b = Target::new(true);
-        t.enqueue(a.erased(), TimeSpan::ZERO, 0);
-        t.enqueue(b.erased(), TimeSpan::ZERO, 0);
-        t.enqueue(a.erased(), TimeSpan::ZERO, 0);
+        t.enqueue(a.erased(), SignedDuration::ZERO, 0);
+        t.enqueue(b.erased(), SignedDuration::ZERO, 0);
+        t.enqueue(a.erased(), SignedDuration::ZERO, 0);
         assert_eq!(t.pending_count(), 2);
         t.flush_pending_batch_for_testing();
         assert_eq!(b.successes.get(), 1);
@@ -295,10 +295,10 @@ fn callback_removal_and_replacement_skip_old_snapshot_identity() {
         a.action.replace(Some(Box::new(move || {
             let t = weak.upgrade().unwrap();
             t.remove(&next);
-            t.enqueue(next.clone(), TimeSpan::ZERO, 0);
+            t.enqueue(next.clone(), SignedDuration::ZERO, 0);
         })));
-        t.enqueue(a.erased(), TimeSpan::ZERO, 0);
-        t.enqueue(b.erased(), TimeSpan::ZERO, 0);
+        t.enqueue(a.erased(), SignedDuration::ZERO, 0);
+        t.enqueue(b.erased(), SignedDuration::ZERO, 0);
         t.flush_pending_batch_for_testing();
         assert_eq!(a.successes.get(), 1);
         assert_eq!(b.attempts.get(), 0);
@@ -313,8 +313,8 @@ fn late_removal_from_old_timeline_keeps_current_timeline_reference() {
         let a = manual();
         let b = manual();
         let target = Target::new(true);
-        a.enqueue(target.erased(), TimeSpan::ZERO, 0);
-        b.enqueue(target.erased(), TimeSpan::ZERO, 0);
+        a.enqueue(target.erased(), SignedDuration::ZERO, 0);
+        b.enqueue(target.erased(), SignedDuration::ZERO, 0);
         a.remove(&target.erased());
         assert!(Rc::ptr_eq(&target.enqueued_timeline().unwrap(), &b));
         b.remove(&target.erased());
@@ -329,8 +329,8 @@ fn delayed_auto_schedule_reschedules_earlier_work_and_stale_posts_do_not_reapply
                 let t = Timeline::new();
                 let late = Target::new(true);
                 let early = Target::new(true);
-                t.enqueue(late.erased(), TimeSpan::from_milliseconds(35.0), 0);
-                t.enqueue(early.erased(), TimeSpan::ZERO, 0);
+                t.enqueue(late.erased(), SignedDuration::from_milliseconds(35.0), 0);
+                t.enqueue(early.erased(), SignedDuration::ZERO, 0);
                 Dispatcher::ui_thread().run_jobs(None);
                 assert_eq!(early.successes.get(), 1);
                 assert_eq!(late.successes.get(), 0);
@@ -341,7 +341,7 @@ fn delayed_auto_schedule_reschedules_earlier_work_and_stale_posts_do_not_reapply
                 }
                 assert_eq!(late.successes.get(), 1);
                 assert_eq!(t.pending_count(), 0);
-                t.enqueue(early.erased(), TimeSpan::ZERO, 0);
+                t.enqueue(early.erased(), SignedDuration::ZERO, 0);
                 t.remove(&early.erased());
                 Dispatcher::ui_thread().run_jobs(None);
                 assert_eq!(early.successes.get(), 1);

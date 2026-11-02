@@ -29,7 +29,7 @@ use crate::{
 };
 use ferroui_base::animation::{
     CrossFade, IClock, IGlobalClock, IPageTransition, IProgressPageTransition, PageSlide, PlayState,
-    Rotate3DTransition, SlideAxis, TimeSpan,
+    Rotate3DTransition, SlideAxis, SignedDuration,
 };
 use ferroui_base::data::TemplateBinding;
 use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
@@ -414,18 +414,18 @@ fn page_template_changed_after_containers_realized_updates_selected_page() {
 
 /// The global clock of a test: pulses every subscriber.
 struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
 impl MockGlobalClock {
-    fn pulse(&self, time: TimeSpan) {
+    fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -472,7 +472,7 @@ fn create_swipe_ready_carousel_page() -> SwipeReady {
     cp.set_height(300.0);
     cp.set_is_gesture_enabled(true);
     let transition: Rc<dyn IPageTransition> =
-        Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(1.0), SlideAxis::Horizontal));
+        Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(1.0), SlideAxis::Horizontal));
     cp.set_page_transition(Some(transition));
     cp.set_pages(Some(pages_of([&content_page("A"), &content_page("B"), &content_page("C")])));
     cp.set_template(Some(FuncControlTemplate::for_type::<CarouselPage>(|_parent, scope| {
@@ -534,8 +534,8 @@ fn mouse_swipe_advances_page() {
     mouse.down_at(&target.panel, MouseButton::Left, Point::new(200.0, 100.0), 1);
     mouse.move_(&target.panel, Point::new(40.0, 100.0));
     mouse.up_at(&target.panel, MouseButton::Left, Point::new(40.0, 100.0));
-    clock.pulse(TimeSpan::ZERO);
-    clock.pulse(TimeSpan::from_seconds(1.0));
+    clock.pulse(SignedDuration::ZERO);
+    clock.pulse(SignedDuration::from_seconds(1.0));
     run_jobs();
 
     assert_eq!(1, target.carousel.selected_index());
@@ -553,8 +553,8 @@ fn touch_swipe_advances_page() {
     touch.down(&target.panel, Point::new(200.0, 100.0));
     touch.move_(&target.panel, Point::new(40.0, 100.0));
     touch.up(&target.panel, Point::new(40.0, 100.0));
-    clock.pulse(TimeSpan::ZERO);
-    clock.pulse(TimeSpan::from_seconds(1.0));
+    clock.pulse(SignedDuration::ZERO);
+    clock.pulse(SignedDuration::from_seconds(1.0));
     run_jobs();
 
     assert_eq!(1, target.carousel.selected_index());
@@ -583,7 +583,7 @@ fn page_slide_update() -> (Ref<Border>, Ref<Border>, Ref<Canvas>) {
     parent.measure(Size::new(400.0, 300.0));
     parent.arrange(Rect::new(0.0, 0.0, 400.0, 300.0));
 
-    let slide = PageSlide::with_duration(TimeSpan::from_milliseconds(300.0), SlideAxis::Horizontal);
+    let slide = PageSlide::with_duration(SignedDuration::from_milliseconds(300.0), SlideAxis::Horizontal);
     slide.update(
         0.5,
         Some(&from.clone().upcast::<Visual>()),
@@ -617,7 +617,7 @@ fn cross_fade_update_sets_opacity() {
     let from = Border::new();
     let to = Border::new();
 
-    let cross_fade = CrossFade::with_duration(TimeSpan::from_milliseconds(300.0));
+    let cross_fade = CrossFade::with_duration(SignedDuration::from_milliseconds(300.0));
     cross_fade.update(0.5, Some(&from.clone().upcast::<Visual>()), Some(&to.clone().upcast::<Visual>()), true, 0.0, &[]);
 
     assert!((from.opacity() - 0.5).abs() < 0.005);
@@ -655,7 +655,7 @@ fn get_transition_axis_returns_null_when_no_transition() {
 fn get_transition_axis_returns_null_when_non_page_slide_transition() {
     let _scope = test_scope();
     let carousel = Carousel::new();
-    let transition: Rc<dyn IPageTransition> = Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(200.0)));
+    let transition: Rc<dyn IPageTransition> = Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(200.0)));
     carousel.set_page_transition(Some(transition));
     assert!(carousel.get_transition_axis().is_none());
 }
@@ -665,7 +665,7 @@ fn get_transition_axis_returns_vertical_when_page_slide_vertical() {
     let _scope = test_scope();
     let carousel = Carousel::new();
     let transition: Rc<dyn IPageTransition> =
-        Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(200.0), SlideAxis::Vertical));
+        Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(200.0), SlideAxis::Vertical));
     carousel.set_page_transition(Some(transition));
     assert_eq!(Some(SlideAxis::Vertical), carousel.get_transition_axis());
 }
@@ -675,7 +675,7 @@ fn get_transition_axis_returns_vertical_when_rotate_3d_vertical() {
     let _scope = test_scope();
     let carousel = Carousel::new();
     let transition: Rc<dyn IPageTransition> =
-        Rc::new(Rotate3DTransition::with_duration(TimeSpan::from_milliseconds(200.0), SlideAxis::Vertical, None));
+        Rc::new(Rotate3DTransition::with_duration(SignedDuration::from_milliseconds(200.0), SlideAxis::Vertical, None));
     carousel.set_page_transition(Some(transition));
     assert_eq!(Some(SlideAxis::Vertical), carousel.get_transition_axis());
 }

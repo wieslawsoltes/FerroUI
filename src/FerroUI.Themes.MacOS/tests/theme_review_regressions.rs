@@ -3,7 +3,7 @@
 use super::{shadow_margin, DECORATIVE_SHADOW_KEYS};
 use crate::tests::support::start_themed_application;
 use crate::MacOSTheme;
-use ferroui_base::animation::{TimeSpan, TransitionBase, Transitions};
+use ferroui_base::animation::{SignedDuration, TransitionBase, Transitions};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::BoxShadows;
 use ferroui_base::metadata::from_markup_value;
@@ -22,7 +22,7 @@ fn resource<T: Clone + 'static>(theme: &MacOSTheme, key: &str, variant: &ThemeVa
     from_markup_value::<T>(&value).unwrap_or_else(|| panic!("incorrect type: {key}"))
 }
 
-fn opacity_duration(transitions: &Transitions) -> TimeSpan {
+fn opacity_duration(transitions: &Transitions) -> SignedDuration {
     assert_eq!(1, transitions.count());
     let transition = transitions.get(0);
     assert_eq!(Visual::opacity_property().as_property(), transition.property());
@@ -42,10 +42,10 @@ fn tooltip_transition_resource_is_eager_and_independently_owned() {
     let theme = installed_theme();
     let first = resource::<Transitions>(&theme, "MacOSToolTipTransitions", &ThemeVariant::light());
     let second = resource::<Transitions>(&theme, "MacOSToolTipTransitions", &ThemeVariant::light());
-    assert_eq!(TimeSpan::from_milliseconds(100.0), opacity_duration(&first));
+    assert_eq!(SignedDuration::from_milliseconds(100.0), opacity_duration(&first));
     assert!(!first.ptr_eq(&second));
     first.clear();
-    assert_eq!(TimeSpan::from_milliseconds(100.0), opacity_duration(&second));
+    assert_eq!(SignedDuration::from_milliseconds(100.0), opacity_duration(&second));
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn existing_tooltip_transitions_follow_reduce_motion_and_restore() {
     window.update_layout();
     for reduced in [false, true, false] {
         theme.set_reduce_motion(reduced);
-        let expected = if reduced { TimeSpan::ZERO } else { TimeSpan::from_milliseconds(100.0) };
+        let expected = if reduced { SignedDuration::ZERO } else { SignedDuration::from_milliseconds(100.0) };
         assert_eq!(expected, opacity_duration(&tip.transitions().expect("installed transition")));
     }
     window.close();

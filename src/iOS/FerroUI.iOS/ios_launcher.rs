@@ -1,7 +1,6 @@
 //! The launcher: opens a URI with the application the system has for it,
 //! and previews a file.
 
-use crate::completion::Completion;
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
 use ferroui_base::utilities::Uri;
@@ -11,6 +10,8 @@ use objc2::runtime::{AnyObject, Bool};
 use objc2::MainThreadMarker;
 use objc2_foundation::{NSDictionary, NSString, NSURL};
 use objc2_ui_kit::{UIApplication, UIApplicationOpenExternalURLOptionsKey, UIDocumentInteractionController};
+use ferroui_system::task::oneshot;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// The launcher of iOS.
@@ -43,9 +44,13 @@ impl ILauncher for IosLauncher {
         let url = if uri.is_absolute_uri() { NSURL::URLWithString(&NSString::from_str(uri.absolute_uri())) } else { None };
         match url {
             Some(url) if application.canOpenURL(&url) => {
-                let (completion, future) = Completion::new();
+                let (completion, future) = oneshot::channel();
+                let completion = RefCell::new(Some(completion));
                 let block = RcBlock::new(move |success: Bool| {
-                    completion.try_set_result(success.as_bool());
+                    if let Some(completion) = completion.take() {
+                        // A launch whose wait was dropped does not want the answer.
+                        let _ = completion.send(success.as_bool());
+                    }
                 });
                 let options = NSDictionary::<UIApplicationOpenExternalURLOptionsKey, AnyObject>::new();
                 // SAFETY: the options are an empty dictionary, which is
@@ -53,7 +58,10 @@ impl ILauncher for IosLauncher {
                 // completion handler on the main queue, the thread the
                 // completion and the future that waits for it belong to.
                 unsafe { application.openURL_options_completionHandler(&url, &options, Some(&block)) };
-                Box::pin(future)
+                // Deviation (DEVIATIONS.md, iOS platform): a completion handler that UIKit releases
+                // without calling it answers `false`; the task of the reference would never
+                // complete.
+                Box::pin(async move { future.await.unwrap_or(false) })
             }
             _ => Box::pin(std::future::ready(false)),
         }

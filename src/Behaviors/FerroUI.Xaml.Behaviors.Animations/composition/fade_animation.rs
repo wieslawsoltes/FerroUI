@@ -1,7 +1,7 @@
 //! Ported from `Composition/FadeAnimation.cs`.
 
 use super::composition_animation_helpers::{CompositionAnimationHelpers, ScalarKeyFrame};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::Visual;
 use ferroui_controls::Control;
@@ -14,7 +14,7 @@ impl FadeAnimation {
     pub fn set_fade_in(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, 0.0, 1.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 0.0, 1.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -23,7 +23,7 @@ impl FadeAnimation {
     pub fn set_fade_out(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, 1.0, 0.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 1.0, 0.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -33,13 +33,13 @@ impl FadeAnimation {
     pub fn set_custom_fade(element: &Control, from_opacity: f64, to_opacity: f64, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, from_opacity as f32, to_opacity as f32, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, from_opacity as f32, to_opacity as f32, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
 
     /// Applies an opacity animation to the visual.
-    fn apply(visual: &Visual, from_opacity: f32, to_opacity: f32, duration: TimeSpan) {
+    fn apply(visual: &Visual, from_opacity: f32, to_opacity: f32, duration: SignedDuration) {
         let Some(composition_visual) = ElementComposition::get_element_visual(visual) else {
             return;
         };

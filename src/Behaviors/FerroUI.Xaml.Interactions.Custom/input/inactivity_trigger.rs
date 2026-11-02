@@ -1,6 +1,6 @@
 //! Port of `Input/InactivityTrigger.cs`.
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::{InputElement, KeyEventArgs, PointerEventArgs};
 use ferroui_base::interactivity::{Interactive, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::reactive::IDisposable;
@@ -37,8 +37,8 @@ ferroui_base::ferro_impl_classes!(InactivityTrigger: FerroObjectImpl);
 ferro_properties! {
     impl InactivityTrigger {
         /// Identifies the `Timeout` property.
-        pub fn timeout_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<InactivityTrigger, _>("Timeout", TimeSpan::from_seconds(5.0))
+        pub fn timeout_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<InactivityTrigger, _>("Timeout", SignedDuration::from_seconds(5.0))
         }
     }
 }
@@ -133,11 +133,11 @@ impl InactivityTrigger {
     }
 
     /// Gets or sets the inactivity timeout duration.
-    pub fn timeout(&self) -> TimeSpan {
+    pub fn timeout(&self) -> SignedDuration {
         self.get_value(Self::timeout_property())
     }
 
-    pub fn set_timeout(&self, value: TimeSpan) {
+    pub fn set_timeout(&self, value: SignedDuration) {
         self.set_value(Self::timeout_property(), value)
     }
 

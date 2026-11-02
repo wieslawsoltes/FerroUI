@@ -1,7 +1,7 @@
 //! Ported from `Composition/SlidingAnimation.cs`.
 
 use super::composition_animation_helpers::{CompositionAnimationHelpers, Vector3KeyFrame};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::numerics::Vector3;
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_controls::Control;
@@ -14,7 +14,7 @@ impl SlidingAnimation {
     pub fn set_left(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Control>() {
-                Self::apply(element, -element.bounds().width, 0.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, -element.bounds().width, 0.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -24,7 +24,7 @@ impl SlidingAnimation {
     pub fn set_right(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Control>() {
-                Self::apply(element, 2.0 * element.bounds().width, 0.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 2.0 * element.bounds().width, 0.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -33,7 +33,7 @@ impl SlidingAnimation {
     pub fn set_top(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Control>() {
-                Self::apply(element, 0.0, -element.bounds().height, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 0.0, -element.bounds().height, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -43,14 +43,14 @@ impl SlidingAnimation {
     pub fn set_bottom(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Control>() {
-                Self::apply(element, 0.0, 2.0 * element.bounds().height, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 0.0, 2.0 * element.bounds().height, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
 
     /// Animates the offset of the visual from (`offset_x`, `offset_y`) relative to its layout
     /// offset back to the layout offset.
-    fn apply(visual: &Control, offset_x: f64, offset_y: f64, duration: TimeSpan) {
+    fn apply(visual: &Control, offset_x: f64, offset_y: f64, duration: SignedDuration) {
         let Some(composition_visual) = ElementComposition::get_element_visual(visual) else {
             return;
         };

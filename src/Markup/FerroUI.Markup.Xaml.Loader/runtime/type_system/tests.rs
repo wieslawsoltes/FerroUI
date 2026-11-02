@@ -532,7 +532,7 @@ fn system_types_with_registered_metadata_are_projections_of_it() {
     assert!(time_span.is_value_type());
     let parse = method(&time_span, "Parse");
     let parsed = parse.invoke(&[boxed("0:0:1.5".to_string())]).ok().flatten().expect("parsed");
-    assert_eq!(parsed.downcast_ref::<ferroui_base::animation::TimeSpan>().map(|t| t.ticks()), Some(15_000_000));
+    assert_eq!(parsed.downcast_ref::<ferroui_base::animation::SignedDuration>().map(|t| t.ticks()), Some(15_000_000));
     // Members only the metadata declares.
     assert!(time_span.methods().iter().any(|m| m.name() == "FromSeconds"));
     assert!(time_span.properties().iter().any(|p| p.name() == "Ticks"));

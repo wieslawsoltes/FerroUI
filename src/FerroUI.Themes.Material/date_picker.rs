@@ -17,7 +17,7 @@ use crate::motion::{
     MaterialMotionRole, MaterialMotionScheme, MaterialSpringState, animations_enabled,
 };
 use crate::text_field::MaterialTextField;
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::data::BindingMode;
 use ferroui_base::input::text_input::{
     TextInputContentType, TextInputOptions, TextInputReturnKeyType,
@@ -1667,7 +1667,7 @@ impl MaterialDatePicker {
         let weak = self.to_ref().downgrade();
         self.last_frame.set(None);
         *self.clock_subscription.borrow_mut() = Some(Subscription::new(clock.subscribe(Rc::new(
-            AnonymousObserver::new(move |time: TimeSpan| {
+            AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     let now = time.total_seconds();
                     if now.is_finite() {

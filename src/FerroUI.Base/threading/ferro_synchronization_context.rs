@@ -3,7 +3,7 @@ use std::future::Future;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
-use super::dispatcher_task::{wrap_local_future, wrap_send_future};
+use super::dispatcher_task::{new_local_task, new_send_task};
 use super::{Dispatcher, DispatcherPriority, DispatcherTask};
 use crate::reactive::IDisposable;
 
@@ -204,6 +204,11 @@ impl Drop for RestoreContext {
 /// Runs futures on a [`Dispatcher`] at a fixed priority: every poll of a
 /// future started here is a dispatcher job of that priority.
 ///
+/// The futures are tasks of the dispatcher
+/// ([`Dispatcher::spawn_local_with_priority`],
+/// [`Dispatcher::spawn_with_priority`]), with handles that keep the contract
+/// of [`DispatcherTask`].
+///
 /// Obtained from [`Dispatcher::to_task_scheduler`] or
 /// [`FerroSynchronizationContext::to_task_scheduler`].
 #[derive(Clone)]
@@ -227,12 +232,10 @@ impl DispatcherTaskScheduler {
         Fut: Future + Send + 'static,
         Fut::Output: Send + 'static,
     {
-        let dispatcher = self.context.dispatcher.clone();
-        let priority = self.context.priority;
-        let (task, completion, wrap) = wrap_send_future::<Fut>(&dispatcher);
-        let target = dispatcher.clone();
+        let dispatcher = &self.context.dispatcher;
+        let (task, start) = new_send_task::<Fut::Output>(dispatcher);
         // When the job is aborted its closure is dropped, which cancels the task.
-        dispatcher.post(move || target.start_task(priority, wrap(future), completion, true), priority);
+        drop(dispatcher.spawn_with_priority(move || start.body(future), self.context.priority));
         task
     }
 
@@ -247,8 +250,8 @@ impl DispatcherTaskScheduler {
     {
         let dispatcher = &self.context.dispatcher;
         dispatcher.verify_access();
-        let (task, completion, wrap) = wrap_local_future::<Fut>(dispatcher);
-        dispatcher.start_task(self.context.priority, wrap(future), completion, false);
+        let (task, start) = new_local_task::<Fut::Output>(dispatcher);
+        drop(dispatcher.spawn_local_with_priority(start.body(future), self.context.priority));
         task
     }
 
@@ -268,8 +271,8 @@ impl DispatcherTaskScheduler {
     {
         let dispatcher = &self.context.dispatcher;
         dispatcher.verify_access();
-        let (task, completion, wrap) = wrap_local_future::<Fut>(dispatcher);
-        dispatcher.start_task(self.context.priority, wrap(future), completion, true);
+        let (task, start) = new_local_task::<Fut::Output>(dispatcher);
+        drop(dispatcher.start_local_with_priority(start.body(future), self.context.priority));
         task
     }
 }
@@ -297,10 +300,7 @@ impl Dispatcher {
     /// is taken from the current [`FerroSynchronizationContext`] if one is
     /// available. Otherwise, [`DispatcherPriority::DEFAULT`] is used.
     pub fn to_task_scheduler(&self) -> DispatcherTaskScheduler {
-        match FerroSynchronizationContext::current() {
-            Some(context) => self.to_task_scheduler_with_priority(context.priority()),
-            None => self.to_task_scheduler_with_priority(DispatcherPriority::DEFAULT),
-        }
+        self.to_task_scheduler_with_priority(self.current_job_priority())
     }
 
     /// Gets a scheduler which runs futures on this dispatcher with the

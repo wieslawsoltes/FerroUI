@@ -11,7 +11,7 @@ use crate::{
     Button, Control, DataValidationErrors, Grid, GridLength, ListBoxItem, Panel, RowDefinition, ScrollViewer, StackPanel,
     TextBlock, Window,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
 use ferroui_base::input::{InputElement, Key, KeyEventArgs};
 use ferroui_base::layout::{ILayoutManager, VerticalAlignment};
@@ -61,7 +61,7 @@ impl Drop for CultureScope {
 }
 
 fn date(year: i32, month: i32, day: i32) -> DateTimeOffset {
-    DateTimeOffset::new(year, month, day, 0, 0, 0, TimeSpan::default())
+    DateTimeOffset::new(year, month, day, 0, 0, 0, SignedDuration::default())
 }
 
 fn named<T>(control: Ref<T>, name: &str) -> Ref<T>
@@ -352,7 +352,7 @@ fn selected_date_enable_data_validation() {
     assert_errors_are(&date_picker, &exception);
 
     Dispatcher::ui_thread().run_jobs(None);
-    date_picker.set_selected_date(Some(DateTimeOffset::new(2005, 5, 10, 11, 12, 13, TimeSpan::default())));
+    date_picker.set_selected_date(Some(DateTimeOffset::new(2005, 5, 10, 11, 12, 13, SignedDuration::default())));
     assert!(handled.get());
 }
 

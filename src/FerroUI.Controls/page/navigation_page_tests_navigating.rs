@@ -6,7 +6,7 @@ use super::navigation_page_tests::*;
 use super::{BarLayoutBehavior, NavigationPage, Page};
 use crate::test_support::test_scope;
 use crate::Control;
-use ferroui_base::animation::{CrossFade, IPageTransition, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, SignedDuration};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::Thickness;
 use std::cell::Cell;
@@ -210,7 +210,7 @@ fn content_set_after_push_is_ignored() {
 // --- TransitionCancellationTests ---
 
 fn cross_fade() -> Option<Rc<dyn IPageTransition>> {
-    Some(Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(100.0))))
+    Some(Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(100.0))))
 }
 
 #[test]

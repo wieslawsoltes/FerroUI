@@ -18,6 +18,10 @@
 //!   the arguments of a change).
 //! - [`threading`]: `System.Threading` (`CancellationToken` and its source) and
 //!   `System.Threading.Tasks` (`Task<T>`, `TaskCompletionSource<T>`, futures run on their thread).
+//! - [`task`]: the executor of the workspace (named after `std::task`): futures spawned on their
+//!   thread, their handles ([`task::JoinHandle`], [`task::Shared`]) and where their polls run
+//!   ([`task::Schedule`]), and the one-shot channel ([`task::oneshot`]); `threading::tasks` runs
+//!   on it.
 //! - [`events`]: the multicast events and the lists of handlers that FerroUI's events are built on.
 //! - [`ferro_thread_local!`]: thread-local variables, `std::thread_local!` on every target with
 //!   thread-local statics and one table per thread on Android ([`mod@ferro_thread_local`]).
@@ -30,6 +34,7 @@ mod i_disposable;
 mod subscription;
 mod i_observable;
 mod i_progress;
+pub mod task;
 pub mod threading;
 
 pub use i_disposable::IDisposable;

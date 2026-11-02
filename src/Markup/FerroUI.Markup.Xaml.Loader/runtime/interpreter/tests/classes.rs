@@ -5,7 +5,7 @@
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{
     IServiceProvider, MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition,
@@ -1054,7 +1054,7 @@ pub(crate) struct ConvertersTestClass {
     pub bool_property: RefCell<bool>,
     pub double_property: RefCell<f64>,
     pub float_property: RefCell<f32>,
-    pub time_span_property: RefCell<TimeSpan>,
+    pub time_span_property: RefCell<SignedDuration>,
     pub type_property: RefCell<Option<RuntimeTypeValue>>,
     pub uri_kind_property: RefCell<RtUriKind>,
     pub custom_property: RefCell<ConvertersTestValueType>,
@@ -1077,8 +1077,8 @@ test_class!(ConvertersTestClass {
             get: g!(ConvertersTestClass, double_property), set: s!(ConvertersTestClass, double_property: f64)
         },
         FloatProperty: f32 { get: g!(ConvertersTestClass, float_property), set: s!(ConvertersTestClass, float_property: f32) },
-        TimeSpanProperty: TimeSpan {
-            get: g!(ConvertersTestClass, time_span_property), set: s!(ConvertersTestClass, time_span_property: TimeSpan)
+        TimeSpanProperty: SignedDuration {
+            get: g!(ConvertersTestClass, time_span_property), set: s!(ConvertersTestClass, time_span_property: SignedDuration)
         },
         TypeProperty: Option<RuntimeTypeValue> {
             get: g!(ConvertersTestClass, type_property),
@@ -1111,11 +1111,11 @@ test_class!(ConvertersTestClass {
 
 pub(crate) struct ConvertersTestsClassWithConstructor {
     pub int: i32,
-    pub converted: TimeSpan,
+    pub converted: SignedDuration,
 }
 
 test_class!(ConvertersTestsClassWithConstructor {
-    constructors: [(i32, TimeSpan) => |int: i32, converted: TimeSpan| Rc::new(ConvertersTestsClassWithConstructor { int, converted })],
+    constructors: [(i32, SignedDuration) => |int: i32, converted: SignedDuration| Rc::new(ConvertersTestsClassWithConstructor { int, converted })],
 });
 
 #[derive(Default)]
@@ -1319,8 +1319,8 @@ macro_rules! special_handler {
 }
 
 special_handler!(Option<Uri>);
-special_handler!(TimeSpan);
-special_handler!(Option<TimeSpan>);
+special_handler!(SignedDuration);
+special_handler!(Option<SignedDuration>);
 special_handler!(Option<String>);
 
 /// `DynamicSettersClass<T1, T2>`.
@@ -1374,8 +1374,8 @@ macro_rules! dynamic_setters_class {
 }
 
 dynamic_setters_class!(Option<String>, Option<Uri>);
-dynamic_setters_class!(i32, TimeSpan);
-dynamic_setters_class!(Option<i32>, Option<TimeSpan>);
+dynamic_setters_class!(i32, SignedDuration);
+dynamic_setters_class!(Option<i32>, Option<SignedDuration>);
 dynamic_setters_class!(i32, Option<String>);
 dynamic_setters_class!(Option<i32>, Option<String>);
 
@@ -1415,7 +1415,7 @@ test_class!(DynamicProvider {
                 ProvidedValueType::String => Some(Rc::new("foo".to_string())),
                 ProvidedValueType::Uri => Some(Rc::new(Uri::absolute("https://ferroui.net/").expect("a URI"))),
                 ProvidedValueType::Int32 => Some(Rc::new(1234i32)),
-                ProvidedValueType::TimeSpan => Some(Rc::new(TimeSpan::from_seconds(45296.789))),
+                ProvidedValueType::TimeSpan => Some(Rc::new(SignedDuration::from_seconds(45296.789))),
                 ProvidedValueType::DateTime => Some(Rc::new(UnrelatedValue)),
             }
         }
@@ -1530,12 +1530,12 @@ pub(crate) fn register() {
             ItemNode,
             GenericClassOfTypeArgument,
             SpecialHandler<Option<Uri>>,
-            SpecialHandler<TimeSpan>,
-            SpecialHandler<Option<TimeSpan>>,
+            SpecialHandler<SignedDuration>,
+            SpecialHandler<Option<SignedDuration>>,
             SpecialHandler<Option<String>>,
             DynamicSettersClass<Option<String>, Option<Uri>>,
-            DynamicSettersClass<i32, TimeSpan>,
-            DynamicSettersClass<Option<i32>, Option<TimeSpan>>,
+            DynamicSettersClass<i32, SignedDuration>,
+            DynamicSettersClass<Option<i32>, Option<SignedDuration>>,
             DynamicSettersClass<i32, Option<String>>,
             DynamicSettersClass<Option<i32>, Option<String>>,
             ProvidedValueType,
@@ -1552,7 +1552,7 @@ pub(crate) fn register() {
     }
     nullable![
         Uri,
-        TimeSpan,
+        SignedDuration,
         Rc<InitializationTestsClass>,
         Rc<ServiceProviderTestsClass>,
         Rc<ConvertersTestsClassWithConverter>,

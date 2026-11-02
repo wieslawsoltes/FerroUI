@@ -2,7 +2,7 @@
 
 use super::support::{control, run_jobs, start_app};
 use crate::{AnimationRunner, IAnimationBuilder};
-use ferroui_base::animation::{Animatable, Animation, TimeSpan};
+use ferroui_base::animation::{Animatable, Animation, SignedDuration};
 use ferroui_base::Ref;
 use ferroui_controls::{Border, Control};
 use std::cell::Cell;
@@ -65,7 +65,7 @@ fn try_build_and_run_async_returns_completion_task_for_explicit_animation() {
     let app = start_app();
     let builder = NullAnimationBuilder::default();
     let animation = Animation::new();
-    animation.set_duration(TimeSpan::ZERO);
+    animation.set_duration(SignedDuration::ZERO);
     let border = Border::new();
 
     let task = AnimationRunner::try_build_and_run_async(Some(control(&border)), Some(&animation), Some(&builder));
@@ -75,7 +75,7 @@ fn try_build_and_run_async_returns_completion_task_for_explicit_animation() {
     // `await task`: the completion of the run is posted to the dispatcher (and ticks of the
     // global clock, which the headless platform of the reference makes, drive the animators).
     run_jobs();
-    app.clock.pulse(TimeSpan::ZERO);
+    app.clock.pulse(SignedDuration::ZERO);
     run_jobs();
     assert!(matches!(task.result(), Some(Ok(()))));
 }

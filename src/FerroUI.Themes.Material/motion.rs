@@ -13,7 +13,7 @@
 //! uses `DefaultEffects`, while the switch thumb uses `FastSpatial`.
 
 use ferroui_base::animation::easings::{Easing, IEasing, SharedEasing};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::platform::IPlatformSettings;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -124,11 +124,11 @@ impl MaterialMotionScheme {
     /// This is a settling-time adapter, not a Material duration token: the easing evaluates
     /// the source spring in real seconds and the duration only bounds its imperceptible tail.
     /// Install this value with the matching [`Self::easing`] resource.
-    pub fn duration(self, role: MaterialMotionRole, reduced_motion: bool) -> TimeSpan {
+    pub fn duration(self, role: MaterialMotionRole, reduced_motion: bool) -> SignedDuration {
         if reduced_motion {
-            TimeSpan::ZERO
+            SignedDuration::ZERO
         } else {
-            TimeSpan::from_seconds(self.spring(role).settling_duration())
+            SignedDuration::from_seconds(self.spring(role).settling_duration())
         }
     }
 
@@ -541,8 +541,8 @@ pub struct MaterialSpringEasing {
 }
 
 impl MaterialSpringEasing {
-    pub fn new(spec: MaterialSpringSpec, duration: TimeSpan, reduced_motion: bool) -> Self {
-        assert!(duration >= TimeSpan::ZERO, "negative spring duration");
+    pub fn new(spec: MaterialSpringSpec, duration: SignedDuration, reduced_motion: bool) -> Self {
+        assert!(duration >= SignedDuration::ZERO, "negative spring duration");
         Self {
             spec,
             seconds: duration.total_seconds(),
@@ -831,7 +831,7 @@ mod tests {
     fn reduced_motion_snaps_existing_and_new_targets() {
         let scheme = MaterialMotionScheme::Expressive;
         let role = MaterialMotionRole::DefaultSpatial;
-        assert_eq!(TimeSpan::ZERO, scheme.duration(role, true));
+        assert_eq!(SignedDuration::ZERO, scheme.duration(role, true));
         assert_eq!(1.0, scheme.easing(role, true).ease(0.0));
         let mut state = MaterialSpringState::new(scheme.spring(role), 0.0);
         state.retarget(40.0);

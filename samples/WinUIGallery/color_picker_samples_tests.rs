@@ -336,7 +336,7 @@ fn color_picker_callbacks_do_not_retain_the_gallery_page() {
 #[cfg(feature = "theme")]
 mod themed {
     use super::*;
-    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
     use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
     use ferroui_base::styling::ThemeVariant;
     use ferroui_controls::shapes::Path;
@@ -348,12 +348,12 @@ mod themed {
     // The real theme needs a clock for its transitions. Like its own test host,
     // this clock does not pulse; the header foregrounds have no transitions.
     struct ThemeClock {
-        ticks: LightweightSubject<TimeSpan>,
+        ticks: LightweightSubject<SignedDuration>,
         state: Cell<PlayState>,
     }
 
-    impl IObservable<TimeSpan> for ThemeClock {
-        fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+    impl IObservable<SignedDuration> for ThemeClock {
+        fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
             self.ticks.subscribe(observer)
         }
     }

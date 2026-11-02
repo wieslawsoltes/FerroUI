@@ -7,6 +7,7 @@ use crate::selections::clipboard::clipboard_read_session_factory;
 use crate::selections::data_format_helper;
 use crate::selections::selection_data_provider::SelectionDataProvider;
 use crate::selections::selection_data_reader::create_items_async;
+#[allow(deprecated)]
 use crate::selections::selection_helper::{create_event_window, TaskCompletionSource};
 use crate::x11_platform::FerroX11Platform;
 use crate::x11_structs::XEventName;
@@ -26,6 +27,7 @@ pub struct X11ClipboardImpl {
     weak_self: Weak<X11ClipboardImpl>,
     provider: SelectionDataProvider,
     selection: Atom,
+    #[allow(deprecated)]
     store_atom_tcs: RefCell<Option<Rc<TaskCompletionSource<()>>>>,
     handle: Cell<XID>,
 }
@@ -60,6 +62,7 @@ impl X11ClipboardImpl {
         &self.provider
     }
 
+    #[allow(deprecated)]
     fn store_atom_tcs(&self) -> Option<Rc<TaskCompletionSource<()>>> {
         self.store_atom_tcs.borrow().clone()
     }
@@ -90,6 +93,7 @@ impl X11ClipboardImpl {
         }
     }
 
+    #[allow(deprecated)]
     fn store_atoms_in_clipboard_manager(
         &self,
         data_transfer: Rc<dyn IAsyncDataTransfer>,

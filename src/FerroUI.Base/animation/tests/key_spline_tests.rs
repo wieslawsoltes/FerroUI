@@ -103,7 +103,7 @@ fn check_key_spline_handled_properly() {
     let _task = animation.run_async_with_clock(&rect, Some(clock.as_clock()), CancellationToken::none());
 
     // position is what you'd expect at end and beginning
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(rotate_transform.angle(), -2.5);
     clock.step(seconds(5.0));
     assert_eq!(rotate_transform.angle(), 2.5);
@@ -116,7 +116,7 @@ fn check_key_spline_handled_properly() {
         ("00:00:12.6158773", 0.3967885416786294),
         ("00:00:14.6495256", 1.8016358493761722),
     ] {
-        clock.step(TimeSpan::parse(time).unwrap());
+        clock.step(SignedDuration::parse(time).unwrap());
         assert_close(rotate_transform.angle(), expected, tolerance);
     }
 }
@@ -129,7 +129,7 @@ fn check_key_spline_parsing_is_correct() {
     let clock = TestClock::new();
     let _task = animation.run_async_with_clock(&rect, Some(clock.as_clock()), CancellationToken::none());
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(rotate_transform.angle(), -2.5);
     clock.step(seconds(5.0));
     assert_eq!(rotate_transform.angle(), 2.5);
@@ -141,7 +141,7 @@ fn check_key_spline_parsing_is_correct() {
         ("00:00:12.6158773", 0.3967885416786294),
         ("00:00:14.6495256", 1.8016358493761722),
     ] {
-        clock.step(TimeSpan::parse(time).unwrap());
+        clock.step(SignedDuration::parse(time).unwrap());
         assert_close(rotate_transform.angle(), expected, tolerance);
     }
 }
@@ -223,7 +223,7 @@ fn key_spline_progress_less_than_zero_or_greater_than_one_works() {
         let clock = TestClock::new();
         let _run = animation.run_async_with_clock(&rect, Some(clock.as_clock()), CancellationToken::none());
 
-        clock.step(TimeSpan::ZERO);
+        clock.step(SignedDuration::ZERO);
         assert_close(transform.y(), 10.0, 0.0001);
 
         let mut time = seconds(0.1);
@@ -248,7 +248,7 @@ fn key_spline_progress_less_than_zero_or_greater_than_one_works_with_single_key_
         let clock = TestClock::new();
         let _run = animation.run_async_with_clock(&rect, Some(clock.as_clock()), CancellationToken::none());
 
-        clock.step(TimeSpan::ZERO);
+        clock.step(SignedDuration::ZERO);
         assert_close(transform.y(), 50.0, 0.0001);
 
         let mut time = seconds(0.1);

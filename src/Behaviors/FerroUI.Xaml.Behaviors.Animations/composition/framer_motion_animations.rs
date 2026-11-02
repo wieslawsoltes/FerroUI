@@ -2,7 +2,7 @@
 
 use super::composition_animation_definition::CompositionAnimationDefinition;
 use super::composition_animation_helpers::{CompositionAnimationHelpers, ScalarKeyFrame, Vector3KeyFrame};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::numerics::Vector3;
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_controls::Control;
@@ -141,7 +141,7 @@ impl FramerMotionAnimations {
                 CompositionAnimationHelpers::ensure_center_point(element, &visual);
             }
 
-            let duration = TimeSpan::from_milliseconds(milliseconds);
+            let duration = SignedDuration::from_milliseconds(milliseconds);
 
             if let Some(frames) = definition.offset_frames().filter(|frames| !frames.is_empty()) {
                 CompositionAnimationHelpers::start_offset_animation(element, &visual, duration, frames);

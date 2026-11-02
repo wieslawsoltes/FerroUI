@@ -1,7 +1,7 @@
 use crate::animation::easings::Easing;
 use crate::animation::{
     Animation, Cue, IAnimationSetter, IPageTransition, IProgressPageTransition, KeyFrame,
-    PageSlide, PageTransitionItem, SlideAxis, TimeSpan,
+    PageSlide, PageTransitionItem, SlideAxis, SignedDuration,
 };
 use crate::media::{ITransform, Rotate3DTransform};
 use crate::styling::Setter;
@@ -45,7 +45,7 @@ impl Rotate3DTransition {
     /// Creates a rotation with the given duration and axis. `depth`
     /// defines the depth of the 3D effect; when `None` it is calculated
     /// automatically.
-    pub fn with_duration(duration: TimeSpan, orientation: SlideAxis, depth: Option<f64>) -> Self {
+    pub fn with_duration(duration: SignedDuration, orientation: SlideAxis, depth: Option<f64>) -> Self {
         Self { base: PageSlide::with_duration(duration, orientation), depth: Cell::new(depth) }
     }
 

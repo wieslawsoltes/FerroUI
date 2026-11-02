@@ -29,7 +29,7 @@ const SIZE: (f64, f64) = (800.0, 600.0);
 const ACCEPTED: &[(&str, &str, usize)] = &[
     (
         "MainWindow",
-        "ThicknessTransition.Duration <- InputPaneDuration: Could not convert '(null)' (null) to 'ferroui_base::animation::time_span::TimeSpan'.",
+        "ThicknessTransition.Duration <- InputPaneDuration: Could not convert '(null)' (null) to 'ferroui_base::animation::time_span::SignedDuration'.",
         1,
     ),
     (

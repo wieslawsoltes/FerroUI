@@ -2,6 +2,7 @@
 //! `EventStreamWindow.cs`).
 
 use crate::selections::i_x_event_waiter::{IXEventWaiter, XEventPredicate};
+#[allow(deprecated)]
 use crate::selections::selection_helper::{create_event_window, TaskCompletionSource};
 use crate::x11_platform::FerroX11Platform;
 use crate::x11_window_info::X11WindowInfo;
@@ -81,6 +82,7 @@ impl<C> Listeners<C> {
     }
 }
 
+#[allow(deprecated)]
 type EventCompletion = Rc<TaskCompletionSource<Option<XEvent>>>;
 
 pub struct EventStreamWindow {
@@ -173,6 +175,7 @@ impl EventStreamWindow {
 }
 
 impl IXEventWaiter for EventStreamWindow {
+    #[allow(deprecated)]
     fn wait_for_event_async(&self, predicate: XEventPredicate, timeout: Duration) -> LocalBoxFuture<Option<XEvent>> {
         let tcs = TaskCompletionSource::new();
         self.listeners.borrow_mut().add(predicate, tcs.clone(), Instant::now() + timeout);

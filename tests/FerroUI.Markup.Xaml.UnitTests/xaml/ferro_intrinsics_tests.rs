@@ -3,7 +3,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, IBrush, TextDecorations, TextTrimming};
@@ -45,7 +45,7 @@ fn all_intrinsics_are_parsed_and_set() {
     let color = Color::parse("#44ff11").expect("a color");
     let brush: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(color));
 
-    assert_eq!(TimeSpan::from_seconds(610.0), target.time_span_property());
+    assert_eq!(SignedDuration::from_seconds(610.0), target.time_span_property());
     assert_eq!(Thickness::uniform(1.0), target.thickness_property());
     assert_eq!(Thickness::uniform(1.0), target.thickness_property());
     assert_eq!(Point::new(15.0, 15.0), target.point_property());

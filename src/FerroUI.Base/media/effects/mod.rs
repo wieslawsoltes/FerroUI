@@ -1,6 +1,11 @@
-//! Bitmap effects applied to visuals and drawings.
+//! Bitmap effects applied to visuals and drawings: the built-in blur and
+//! drop shadow, and custom effects (#455, docs/porting/custom-effects.md).
 
 mod blur_effect;
+mod custom_effect;
+mod custom_effect_registry;
+#[cfg(test)]
+mod custom_effect_tests;
 mod drop_shadow_effect;
 mod effect;
 mod effect_extensions;
@@ -10,6 +15,8 @@ mod i_effect;
 mod immutable_luminance_to_alpha_effect;
 
 pub use blur_effect::BlurEffect;
+pub use custom_effect::{CustomEffect, CustomEffectClass, EffectParameterValue, ImmutableCustomEffect};
+pub use custom_effect_registry::{CustomEffectRegistrationError, CustomEffectRegistry};
 pub use drop_shadow_effect::{DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase};
 pub use effect::Effect;
 pub use effect_extensions::EffectExtensions;

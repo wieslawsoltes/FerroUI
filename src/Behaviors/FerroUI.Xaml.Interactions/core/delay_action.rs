@@ -1,7 +1,7 @@
 //! Port of `Core/DelayAction.cs`.
 
 use crate::action_task::{delay, ActionTask};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Ref,
     StyledElementImpl, StyledProperty,
@@ -25,8 +25,8 @@ ferroui_base::ferro_impl_classes!(DelayAction: FerroObjectImpl, StyledElementImp
 ferro_properties! {
     impl DelayAction {
         /// Identifies the `Duration` property.
-        pub fn duration_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<DelayAction, _>("Duration", TimeSpan::ZERO)
+        pub fn duration_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<DelayAction, _>("Duration", SignedDuration::ZERO)
         }
     }
 }
@@ -35,7 +35,7 @@ impl StyledElementActionImpl for DelayAction {
     fn execute(this: &Self, _sender: Option<&BoxedValue>, _parameter: Option<&BoxedValue>) -> Option<BoxedValue> {
         let duration = this.duration();
         // Minus one millisecond waits forever (`Timeout.InfiniteTimeSpan`).
-        if duration == TimeSpan::from_milliseconds(-1.0) {
+        if duration == SignedDuration::from_milliseconds(-1.0) {
             return Some(Rc::new(ActionTask::spawn(std::future::pending::<()>())));
         }
 
@@ -61,11 +61,11 @@ impl DelayAction {
     }
 
     /// Gets or sets the duration to wait. This is a property of the object model.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.get_value(Self::duration_property())
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.set_value(Self::duration_property(), value)
     }
 }

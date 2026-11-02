@@ -2,7 +2,7 @@ use crate::animation::animators::{apply_with_visual, Animator, AnimatorBase, Col
 use crate::animation::{Animatable, Animation, AnimatorFactory, AnimatorKeyFrame, IAnimator, IClock};
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::effects::{
-    IBlurEffect, IDropShadowEffect, IEffect, ImmutableBlurEffect, ImmutableDropShadowDirectionEffect,
+    EffectExtensions, IBlurEffect, IDropShadowEffect, IEffect, ImmutableBlurEffect, ImmutableDropShadowDirectionEffect,
     ImmutableDropShadowEffect,
 };
 use crate::reactive::{IDisposable, IObservable};
@@ -84,7 +84,12 @@ impl Animator for EffectAnimator {
     ) -> Option<Rc<dyn IDisposable>> {
         let animator = this
             .try_create_animator::<BlurEffectAnimator>(|effect| effect.as_blur_effect().is_some())
-            .or_else(|| this.try_create_animator::<DropShadowEffectAnimator>(|effect| effect.as_drop_shadow_effect().is_some()));
+            .or_else(|| this.try_create_animator::<DropShadowEffectAnimator>(|effect| effect.as_drop_shadow_effect().is_some()))
+            .or_else(|| {
+                this.try_create_animator::<CustomEffectAnimator>(|effect| {
+                    effect.as_custom_effect().is_some() || EffectExtensions::to_custom_effect(effect).is_some()
+                })
+            });
         if let Some(animator) = animator {
             return animator.apply(animation, control, clock, match_, on_complete, should_pause_on_invisible);
         }
@@ -224,6 +229,50 @@ impl DropShadowEffectAnimator {
 }
 
 impl Animator for DropShadowEffectAnimator {
+    type Value = EffectValue;
+
+    fn base(&self) -> &AnimatorBase {
+        &self.base
+    }
+
+    fn interpolate(&self, progress: f64, old_value: &EffectValue, new_value: &EffectValue) -> EffectValue {
+        Self::interpolate_core(progress, old_value, new_value)
+    }
+}
+
+/// Animator that interpolates custom effects (#455, not from upstream):
+/// two snapshots of the same custom effect type interpolate as the type
+/// says ([`CustomEffect::interpolate`](crate::media::effects::CustomEffect::interpolate)).
+/// Other values, and custom effects of different types, are not
+/// interpolated.
+#[derive(Default)]
+pub struct CustomEffectAnimator {
+    base: AnimatorBase,
+}
+
+impl CustomEffectAnimator {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Interpolates between two effects using the specified progress.
+    pub fn interpolate_core(progress: f64, old_value: &EffectValue, new_value: &EffectValue) -> EffectValue {
+        let old = old_value.as_ref().and_then(|effect| EffectExtensions::to_custom_effect(&**effect));
+        let new = new_value.as_ref().and_then(|effect| EffectExtensions::to_custom_effect(&**effect));
+        if let (Some(old), Some(new)) = (old, new) {
+            if let Some(value) = old.interpolate(&new, progress) {
+                return Some(Rc::new(value));
+            }
+        }
+        if progress >= 0.5 {
+            new_value.clone()
+        } else {
+            old_value.clone()
+        }
+    }
+}
+
+impl Animator for CustomEffectAnimator {
     type Value = EffectValue;
 
     fn base(&self) -> &AnimatorBase {

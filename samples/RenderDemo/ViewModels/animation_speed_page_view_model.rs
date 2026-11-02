@@ -1,6 +1,6 @@
 //! Port of `ViewModels/AnimationSpeedPageViewModel.cs`.
 
-use ferroui_base::animation::{PlaybackDirection, TimeSpan};
+use ferroui_base::animation::{PlaybackDirection, SignedDuration};
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::ferro_markup_type;
 use ferroui_controls::ItemsSource;
@@ -20,8 +20,8 @@ pub struct AnimationSpeedPageViewModel {
     speed_ratio: Cell<f64>,
     playback_direction: Cell<PlaybackDirection>,
     playback_direction_opposite: Cell<PlaybackDirection>,
-    delay: Cell<TimeSpan>,
-    delay_iters: Cell<TimeSpan>,
+    delay: Cell<SignedDuration>,
+    delay_iters: Cell<SignedDuration>,
 }
 
 impl PartialEq for AnimationSpeedPageViewModel {
@@ -80,11 +80,11 @@ impl AnimationSpeedPageViewModel {
         self.base.raise_property_changed("PlaybackDirection");
     }
 
-    pub fn delay(&self) -> TimeSpan {
+    pub fn delay(&self) -> SignedDuration {
         self.delay.get()
     }
 
-    pub fn set_delay(&self, value: TimeSpan) {
+    pub fn set_delay(&self, value: SignedDuration) {
         self.base.raise_and_set_if_changed_cell(&self.delay, value, "Delay");
     }
 
@@ -93,14 +93,14 @@ impl AnimationSpeedPageViewModel {
     }
 
     pub fn set_delay_input(&self, value: f64) {
-        self.set_delay(TimeSpan::from_seconds(value));
+        self.set_delay(SignedDuration::from_seconds(value));
     }
 
-    pub fn delay_iters(&self) -> TimeSpan {
+    pub fn delay_iters(&self) -> SignedDuration {
         self.delay_iters.get()
     }
 
-    pub fn set_delay_iters(&self, value: TimeSpan) {
+    pub fn set_delay_iters(&self, value: SignedDuration) {
         self.base.raise_and_set_if_changed_cell(&self.delay_iters, value, "DelayIters");
     }
 
@@ -109,7 +109,7 @@ impl AnimationSpeedPageViewModel {
     }
 
     pub fn set_delay_iters_input(&self, value: f64) {
-        self.set_delay_iters(TimeSpan::from_seconds(value));
+        self.set_delay_iters(SignedDuration::from_seconds(value));
     }
 
     pub fn new() -> Rc<AnimationSpeedPageViewModel> {
@@ -118,8 +118,8 @@ impl AnimationSpeedPageViewModel {
             speed_ratio: Cell::new(0.0),
             playback_direction: Cell::new(PlaybackDirection::default()),
             playback_direction_opposite: Cell::new(PlaybackDirection::default()),
-            delay: Cell::new(TimeSpan::ZERO),
-            delay_iters: Cell::new(TimeSpan::ZERO),
+            delay: Cell::new(SignedDuration::ZERO),
+            delay_iters: Cell::new(SignedDuration::ZERO),
         });
         this.set_speed_ratio(1.0);
         this.set_playback_direction(PlaybackDirection::Normal);
@@ -152,17 +152,17 @@ ferro_markup_type!(class AnimationSpeedPageViewModel {
                 this.set_playback_direction_opposite(value)
             }
         },
-        Delay: TimeSpan {
+        Delay: SignedDuration {
             get: |this: &Rc<AnimationSpeedPageViewModel>| this.delay(),
-            set: |this: &Rc<AnimationSpeedPageViewModel>, value: TimeSpan| this.set_delay(value)
+            set: |this: &Rc<AnimationSpeedPageViewModel>, value: SignedDuration| this.set_delay(value)
         },
         DelayInput: f64 {
             get: |this: &Rc<AnimationSpeedPageViewModel>| this.delay_input(),
             set: |this: &Rc<AnimationSpeedPageViewModel>, value: f64| this.set_delay_input(value)
         },
-        DelayIters: TimeSpan {
+        DelayIters: SignedDuration {
             get: |this: &Rc<AnimationSpeedPageViewModel>| this.delay_iters(),
-            set: |this: &Rc<AnimationSpeedPageViewModel>, value: TimeSpan| this.set_delay_iters(value)
+            set: |this: &Rc<AnimationSpeedPageViewModel>, value: SignedDuration| this.set_delay_iters(value)
         },
         DelayItersInput: f64 {
             get: |this: &Rc<AnimationSpeedPageViewModel>| this.delay_iters_input(),

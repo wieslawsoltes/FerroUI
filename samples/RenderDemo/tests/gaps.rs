@@ -3,7 +3,7 @@
 
 use super::support::start_application_with_clock;
 use crate::SAMPLE;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
@@ -54,11 +54,11 @@ fn r001_a_setter_of_a_key_frame_takes_a_custom_animator() {
     window.show();
     Dispatcher::ui_thread().run_jobs(None);
 
-    clock.pulse(TimeSpan::from_milliseconds(0.0));
-    clock.pulse(TimeSpan::from_milliseconds(550.0));
+    clock.pulse(SignedDuration::from_milliseconds(0.0));
+    clock.pulse(SignedDuration::from_milliseconds(550.0));
     // A progress of 0.55 over ten characters: the first six.
     assert_eq!(text_block.text().as_deref(), Some("012345"));
-    clock.pulse(TimeSpan::from_milliseconds(850.0));
+    clock.pulse(SignedDuration::from_milliseconds(850.0));
     assert_eq!(text_block.text().as_deref(), Some("012345678"));
     window.close();
 }

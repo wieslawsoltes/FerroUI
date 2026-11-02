@@ -14,7 +14,7 @@ use crate::{
     FluidMoveBehavior, FluidMoveScope, ParallaxBehavior, PlayAnimationBehavior, RunAnimationTrigger,
     StartAnimationAction, StartBuiltAnimationAction, TransitionsBehavior, TransitionsChangedTrigger, ASSEMBLY,
 };
-use ferroui_base::animation::{Animation, Cue, FillMode, IAnimationSetter, KeyFrame, TimeSpan, Transitions};
+use ferroui_base::animation::{Animation, Cue, FillMode, IAnimationSetter, KeyFrame, SignedDuration, Transitions};
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::numerics::Vector3;
@@ -45,7 +45,7 @@ impl IAnimationBuilder for RecordingAnimationBuilder {
     fn build(&self, _control: &Control) -> Option<Ref<Animation>> {
         self.build_count.set(self.build_count.get() + 1);
         let animation = Animation::new();
-        animation.set_duration(TimeSpan::ZERO);
+        animation.set_duration(SignedDuration::ZERO);
         Some(animation)
     }
 }
@@ -90,7 +90,7 @@ fn builder_ref(builder: &Rc<RecordingAnimationBuilder>) -> Option<AnimationBuild
 /// `new Animation { Duration = TimeSpan.Zero }`.
 fn zero_animation() -> Ref<Animation> {
     let animation = Animation::new();
-    animation.set_duration(TimeSpan::ZERO);
+    animation.set_duration(SignedDuration::ZERO);
     animation
 }
 
@@ -179,7 +179,7 @@ fn fluid_move_behavior_animates_changed_child_position_through_shared_primitive(
     canvas.children().add(child.clone().upcast::<Control>());
     let behavior = FluidMoveBehavior::new();
     behavior.set_applies_to(FluidMoveScope::Children);
-    behavior.set_duration(TimeSpan::ZERO);
+    behavior.set_duration(SignedDuration::ZERO);
     add_behavior(&canvas, &behavior);
     let window = window_with(&canvas);
     window.show();
@@ -290,7 +290,7 @@ fn play_animation_behavior_runs_configured_animation_on_associated_visual() {
 
     window.show();
     run_jobs();
-    app.clock.pulse(TimeSpan::ZERO);
+    app.clock.pulse(SignedDuration::ZERO);
     run_jobs();
 
     assert_eq!(0.25, target.opacity());
@@ -329,9 +329,9 @@ fn run_animation_trigger_uses_builder_and_executes_after_completion() {
     window.show();
     run_jobs();
     // `await Task.Delay(20)`: the clock of the animations ticks.
-    app.clock.pulse(TimeSpan::ZERO);
+    app.clock.pulse(SignedDuration::ZERO);
     run_jobs();
-    app.clock.pulse(TimeSpan::from_milliseconds(20.0));
+    app.clock.pulse(SignedDuration::from_milliseconds(20.0));
     run_jobs();
 
     assert_eq!(1, builder.build_count());
@@ -345,6 +345,6 @@ fn fade_in_behavior_has_the_default_delays_of_the_reference() {
     let _app = start_app();
     let behavior = FadeInBehavior::new();
 
-    assert!(behavior.initial_delay() == TimeSpan::from_milliseconds(500.0));
-    assert!(behavior.duration() == TimeSpan::from_milliseconds(250.0));
+    assert!(behavior.initial_delay() == SignedDuration::from_milliseconds(500.0));
+    assert!(behavior.duration() == SignedDuration::from_milliseconds(250.0));
 }

@@ -1,7 +1,7 @@
 //! Port of `Pages/NavigationPage/Transitions/FadeThroughTransition.cs`.
 
 use ferroui_base::animation::easings::{Easing, CubicEaseOut};
-use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, SignedDuration};
 use ferroui_base::media::{ITransform, ScaleTransform};
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::{CancellationToken, DispatcherTask};
@@ -12,7 +12,7 @@ use std::rc::Rc;
 
 /// Example custom page transition: a fade through with a scale. The outgoing page fades out while scaling down; the incoming page fades in while scaling up, producing a smooth zoom-like transition.
 pub struct FadeThroughTransition {
-    duration: Cell<TimeSpan>,
+    duration: Cell<SignedDuration>,
     fade_easing: RefCell<Easing>,
 }
 
@@ -25,22 +25,22 @@ impl Default for FadeThroughTransition {
 impl FadeThroughTransition {
     /// `new FadeThroughTransition()`.
     pub fn new() -> Self {
-        Self { duration: Cell::new(TimeSpan::from_milliseconds(300.0)), fade_easing: RefCell::new(CubicEaseOut.into()) }
+        Self { duration: Cell::new(SignedDuration::from_milliseconds(300.0)), fade_easing: RefCell::new(CubicEaseOut.into()) }
     }
 
     /// `new FadeThroughTransition(duration)`.
-    pub fn with_duration(duration: TimeSpan) -> Self {
+    pub fn with_duration(duration: SignedDuration) -> Self {
         let result = Self::new();
         result.set_duration(duration);
         result
     }
 
     /// The duration of the transition.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.duration.get()
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.duration.set(value)
     }
 
@@ -150,7 +150,7 @@ mod tests {
 
     #[test]
     fn defaults_and_the_constructor_with_a_duration() {
-        assert_eq!(TimeSpan::from_milliseconds(300.0), FadeThroughTransition::new().duration());
-        assert_eq!(TimeSpan::from_milliseconds(75.0), FadeThroughTransition::with_duration(TimeSpan::from_milliseconds(75.0)).duration());
+        assert_eq!(SignedDuration::from_milliseconds(300.0), FadeThroughTransition::new().duration());
+        assert_eq!(SignedDuration::from_milliseconds(75.0), FadeThroughTransition::with_duration(SignedDuration::from_milliseconds(75.0)).duration());
     }
 }

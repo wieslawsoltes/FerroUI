@@ -19200,10 +19200,10 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(20,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 20, 53)?, rt::string_object("SplitViewCompactPaneThemeLength"), rt::to_object(48.0_f64)), 20, 53)?;
     // Controls/FluentControls.xaml(21,60) Content (resource)
-    let value_6 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2000000_i64);
+    let value_6 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 21, 60)?, rt::string_object("SplitViewPaneAnimationOpenDuration"), rt::to_object(::core::clone::Clone::clone(&value_6))), 21, 60)?;
     // Controls/FluentControls.xaml(22,61) Content (resource)
-    let value_7 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_7 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 22, 61)?, rt::string_object("SplitViewPaneAnimationCloseDuration"), rt::to_object(::core::clone::Clone::clone(&value_7))), 22, 61)?;
     // Controls/FluentControls.xaml(23,48) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitViewPaneAnimationEasing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_287, 23, 48)?;
@@ -19538,7 +19538,7 @@ fn build_controls_fluentcontrols_xaml_deferred_0(
     // Controls/FluentControls.xaml(25,10) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/FluentControls.xaml(25,10) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(750000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(750000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(transform_operations_transition_0.clone(), 25, 10)?);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&transitions_0)));
@@ -21757,7 +21757,7 @@ fn build_controls_fluentcontrols_xaml_deferred_27(
     // Controls/FluentControls.xaml(37,8) Animation
     let animation_0 = ::ferroui_base::animation::Animation::new();
     // Controls/FluentControls.xaml(37,8) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(4500000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(4500000_i64);
     animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/FluentControls.xaml(37,8) Easing
     let value_1 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("QuadraticEaseIn")), 37, 38)?;
@@ -21904,7 +21904,7 @@ fn build_controls_fluentcontrols_xaml_deferred_27(
     // Controls/FluentControls.xaml(59,10) Animation
     let animation_1 = ::ferroui_base::animation::Animation::new();
     // Controls/FluentControls.xaml(59,10) Duration
-    let value_5 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(7500000_i64);
+    let value_5 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
     animation_1.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_5));
     // Controls/FluentControls.xaml(59,10) Easing
     let value_6 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("QuadraticEaseOut")), 59, 40)?;
@@ -21999,7 +21999,7 @@ fn build_controls_fluentcontrols_xaml_deferred_27(
     // Controls/FluentControls.xaml(78,10) Animation
     let animation_2 = ::ferroui_base::animation::Animation::new();
     // Controls/FluentControls.xaml(78,10) Duration
-    let value_10 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(12500000_i64);
+    let value_10 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(12500000_i64);
     animation_2.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_10));
     // Controls/FluentControls.xaml(78,10) Easing
     let value_11 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("QuadraticEaseOut")), 78, 40)?;
@@ -23063,7 +23063,7 @@ fn build_controls_fluentcontrols_xaml_deferred_40(
     // Controls/FluentControls.xaml(59,18) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/FluentControls.xaml(59,18) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 59, 18)?);
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
@@ -23262,7 +23262,7 @@ fn build_controls_fluentcontrols_xaml_deferred_46(
     // Controls/FluentControls.xaml(26,10) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/FluentControls.xaml(26,10) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(750000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(750000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(transform_operations_transition_0.clone(), 26, 10)?);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&transitions_0)));
@@ -27077,7 +27077,7 @@ fn build_controls_fluentcontrols_xaml_deferred_91(
     // Controls/FluentControls.xaml(27,10) Value
     let page_slide_0 = ::ferroui_base::animation::PageSlide::__markup_new_0();
     // Controls/FluentControls.xaml(27,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(3000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(3000000_i64);
     ::ferroui_base::animation::PageSlide::__markup_set_Duration(&page_slide_0, ::core::clone::Clone::clone(&value_0));
     // Controls/FluentControls.xaml(27,10) Orientation
     ::ferroui_base::animation::PageSlide::__markup_set_Orientation(&page_slide_0, ::ferroui_base::animation::SlideAxis::Horizontal);
@@ -27111,7 +27111,7 @@ fn build_controls_fluentcontrols_xaml_deferred_91(
     // Controls/FluentControls.xaml(39,10) Value
     let page_slide_1 = ::ferroui_base::animation::PageSlide::__markup_new_0();
     // Controls/FluentControls.xaml(39,10) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2500000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2500000_i64);
     ::ferroui_base::animation::PageSlide::__markup_set_Duration(&page_slide_1, ::core::clone::Clone::clone(&value_1));
     // Controls/FluentControls.xaml(39,10) Orientation
     ::ferroui_base::animation::PageSlide::__markup_set_Orientation(&page_slide_1, ::ferroui_base::animation::SlideAxis::Vertical);
@@ -29441,7 +29441,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     // Controls/FluentControls.xaml(120,10) FillMode
     animation_0.set_direct_value(::ferroui_base::animation::Animation::fill_mode_property(), ::ferroui_base::animation::FillMode::Both);
     // Controls/FluentControls.xaml(120,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(625000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(625000_i64);
     animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/FluentControls.xaml(121,12) Children
     let children_collection_0 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
@@ -29478,7 +29478,7 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
     // Controls/FluentControls.xaml(130,10) FillMode
     animation_1.set_direct_value(::ferroui_base::animation::Animation::fill_mode_property(), ::ferroui_base::animation::FillMode::Both);
     // Controls/FluentControls.xaml(130,10) Duration
-    let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(625000_i64);
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(625000_i64);
     animation_1.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_2));
     // Controls/FluentControls.xaml(131,12) Children
     let children_collection_1 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_1);
@@ -30787,7 +30787,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_0 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 127, 20)?;
     animation_0.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/FluentControls.xaml(127,10) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_1));
     // Controls/FluentControls.xaml(128,12) Children
     let children_collection_0 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
@@ -30798,7 +30798,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_2 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 128, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_0, ::core::option::Option::Some(::core::clone::Clone::clone(&value_2)));
     // Controls/FluentControls.xaml(128,12) KeyTime
-    let value_3 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_3 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_0, ::core::clone::Clone::clone(&value_3));
     // Controls/FluentControls.xaml(129,14) Setters
     let setters_collection_0 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_0);
@@ -30823,7 +30823,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_4 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 131, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_1, ::core::option::Option::Some(::core::clone::Clone::clone(&value_4)));
     // Controls/FluentControls.xaml(131,12) KeyTime
-    let value_5 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(15000000_i64);
+    let value_5 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(15000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_1, ::core::clone::Clone::clone(&value_5));
     // Controls/FluentControls.xaml(132,14) Setters
     let setters_collection_1 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_1);
@@ -30848,7 +30848,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_6 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 134, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_2, ::core::option::Option::Some(::core::clone::Clone::clone(&value_6)));
     // Controls/FluentControls.xaml(134,12) KeyTime
-    let value_7 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_7 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_2, ::core::clone::Clone::clone(&value_7));
     // Controls/FluentControls.xaml(135,14) Setters
     let setters_collection_2 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_2);
@@ -30889,7 +30889,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_8 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 142, 20)?;
     animation_1.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_8));
     // Controls/FluentControls.xaml(142,10) Duration
-    let value_9 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_9 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_1.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_9));
     // Controls/FluentControls.xaml(143,12) Children
     let children_collection_3 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_1);
@@ -30900,7 +30900,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_10 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 143, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_3, ::core::option::Option::Some(::core::clone::Clone::clone(&value_10)));
     // Controls/FluentControls.xaml(143,12) KeyTime
-    let value_11 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_11 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_3, ::core::clone::Clone::clone(&value_11));
     // Controls/FluentControls.xaml(144,14) Setters
     let setters_collection_3 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_3);
@@ -30925,7 +30925,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_12 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 146, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_4, ::core::option::Option::Some(::core::clone::Clone::clone(&value_12)));
     // Controls/FluentControls.xaml(146,12) KeyTime
-    let value_13 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(7500000_i64);
+    let value_13 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_4, ::core::clone::Clone::clone(&value_13));
     // Controls/FluentControls.xaml(147,14) Setters
     let setters_collection_4 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_4);
@@ -30950,7 +30950,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_14 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 149, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_5, ::core::option::Option::Some(::core::clone::Clone::clone(&value_14)));
     // Controls/FluentControls.xaml(149,12) KeyTime
-    let value_15 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_15 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_5, ::core::clone::Clone::clone(&value_15));
     // Controls/FluentControls.xaml(150,14) Setters
     let setters_collection_5 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_5);
@@ -30991,7 +30991,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_16 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 157, 20)?;
     animation_2.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_16));
     // Controls/FluentControls.xaml(157,10) Duration
-    let value_17 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_17 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_2.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_17));
     // Controls/FluentControls.xaml(158,12) Children
     let children_collection_6 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_2);
@@ -31002,7 +31002,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_18 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 158, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_6, ::core::option::Option::Some(::core::clone::Clone::clone(&value_18)));
     // Controls/FluentControls.xaml(158,12) KeyTime
-    let value_19 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_19 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_6, ::core::clone::Clone::clone(&value_19));
     // Controls/FluentControls.xaml(159,14) Setters
     let setters_collection_6 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_6);
@@ -31027,7 +31027,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_20 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 161, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_7, ::core::option::Option::Some(::core::clone::Clone::clone(&value_20)));
     // Controls/FluentControls.xaml(161,12) KeyTime
-    let value_21 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(15000000_i64);
+    let value_21 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(15000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_7, ::core::clone::Clone::clone(&value_21));
     // Controls/FluentControls.xaml(162,14) Setters
     let setters_collection_7 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_7);
@@ -31052,7 +31052,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_22 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 164, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_8, ::core::option::Option::Some(::core::clone::Clone::clone(&value_22)));
     // Controls/FluentControls.xaml(164,12) KeyTime
-    let value_23 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_23 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_8, ::core::clone::Clone::clone(&value_23));
     // Controls/FluentControls.xaml(165,14) Setters
     let setters_collection_8 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_8);
@@ -31093,7 +31093,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_24 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 172, 20)?;
     animation_3.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_24));
     // Controls/FluentControls.xaml(172,10) Duration
-    let value_25 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_25 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_3.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_25));
     // Controls/FluentControls.xaml(173,12) Children
     let children_collection_9 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_3);
@@ -31104,7 +31104,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_26 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 173, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_9, ::core::option::Option::Some(::core::clone::Clone::clone(&value_26)));
     // Controls/FluentControls.xaml(173,12) KeyTime
-    let value_27 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_27 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_9, ::core::clone::Clone::clone(&value_27));
     // Controls/FluentControls.xaml(174,14) Setters
     let setters_collection_9 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_9);
@@ -31129,7 +31129,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_28 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 176, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_10, ::core::option::Option::Some(::core::clone::Clone::clone(&value_28)));
     // Controls/FluentControls.xaml(176,12) KeyTime
-    let value_29 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(7500000_i64);
+    let value_29 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_10, ::core::clone::Clone::clone(&value_29));
     // Controls/FluentControls.xaml(177,14) Setters
     let setters_collection_10 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_10);
@@ -31154,7 +31154,7 @@ fn build_controls_fluentcontrols_xaml_deferred_126(
     let value_30 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 179, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_11, ::core::option::Option::Some(::core::clone::Clone::clone(&value_30)));
     // Controls/FluentControls.xaml(179,12) KeyTime
-    let value_31 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_31 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_11, ::core::clone::Clone::clone(&value_31));
     // Controls/FluentControls.xaml(180,14) Setters
     let setters_collection_11 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_11);
@@ -31305,7 +31305,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     // Controls/FluentControls.xaml(49,20) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/FluentControls.xaml(49,20) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1970000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1970000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 49, 20)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -31347,7 +31347,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     // Controls/FluentControls.xaml(61,20) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/FluentControls.xaml(61,20) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1970000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1970000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_1.clone(), 61, 20)?);
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -35143,7 +35143,7 @@ fn build_controls_fluentcontrols_xaml_deferred_153(
     // Controls/FluentControls.xaml(30,10) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/FluentControls.xaml(30,10) Duration
-    let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(750000_i64);
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(750000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_2));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(transform_operations_transition_0.clone(), 30, 10)?);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&transitions_0)));
@@ -38649,7 +38649,7 @@ fn build_controls_fluentcontrols_xaml_deferred_265(
     // Controls/FluentControls.xaml(91,18) Property
     brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::shapes::Shape::fill_property())));
     // Controls/FluentControls.xaml(91,18) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(brush_transition_0.clone(), 91, 18)?);
     // Controls/FluentControls.xaml(92,18) Content
@@ -38658,7 +38658,7 @@ fn build_controls_fluentcontrols_xaml_deferred_265(
     // Controls/FluentControls.xaml(92,18) Property
     brush_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::shapes::Shape::stroke_property())));
     // Controls/FluentControls.xaml(92,18) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     brush_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(brush_transition_1.clone(), 92, 18)?);
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -38697,7 +38697,7 @@ fn build_controls_fluentcontrols_xaml_deferred_265(
     // Controls/FluentControls.xaml(104,18) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/FluentControls.xaml(104,18) Duration
-    let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_2));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_0.clone(), 104, 18)?);
     // Controls/FluentControls.xaml(105,18) Content
@@ -38706,7 +38706,7 @@ fn build_controls_fluentcontrols_xaml_deferred_265(
     // Controls/FluentControls.xaml(105,18) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/FluentControls.xaml(105,18) Duration
-    let value_3 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_3 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_3));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_1.clone(), 105, 18)?);
     // Controls/FluentControls.xaml(106,18) Content
@@ -38715,7 +38715,7 @@ fn build_controls_fluentcontrols_xaml_deferred_265(
     // Controls/FluentControls.xaml(106,18) Property
     brush_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::shapes::Shape::fill_property())));
     // Controls/FluentControls.xaml(106,18) Duration
-    let value_4 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     brush_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_4));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(brush_transition_2.clone(), 106, 18)?);
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
@@ -39626,7 +39626,7 @@ fn build_controls_fluentcontrols_xaml_deferred_271(
     // Controls/FluentControls.xaml(59,10) Property
     corner_radius_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property())));
     // Controls/FluentControls.xaml(59,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     corner_radius_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(corner_radius_transition_0.clone(), 59, 10)?);
     // Controls/FluentControls.xaml(60,10) Content
@@ -39635,7 +39635,7 @@ fn build_controls_fluentcontrols_xaml_deferred_271(
     // Controls/FluentControls.xaml(60,10) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/FluentControls.xaml(60,10) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(transform_operations_transition_0.clone(), 60, 10)?);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&transitions_0)));
@@ -39783,7 +39783,7 @@ fn build_controls_fluentcontrols_xaml_deferred_275(
     // Controls/FluentControls.xaml(100,10) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/FluentControls.xaml(100,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 100, 10)?);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&transitions_0)));
@@ -40147,7 +40147,7 @@ fn build_controls_fluentcontrols_xaml_deferred_278(
     // Controls/FluentControls.xaml(156,24) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/FluentControls.xaml(156,24) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 156, 24)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -40491,7 +40491,7 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
     // Controls/FluentControls.xaml(240,24) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/FluentControls.xaml(240,24) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 240, 24)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -42441,7 +42441,7 @@ fn build_controls_fluentcontrols_xaml_deferred_288(
         rt::unset_value(double_transition_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property());
     } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(double_transition_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), value_0.clone(), 370, 29)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), rt::exact(value_0.clone(), "FerroUI.Animation.TransitionBase.set_Duration", 0, 370, 29)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_0, 370, 29));
@@ -42512,7 +42512,7 @@ fn build_controls_fluentcontrols_xaml_deferred_288(
         rt::unset_value(double_transition_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property());
     } else if rt::is_instance(&value_2, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(double_transition_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), value_2.clone(), 380, 29)?;
-    } else if rt::is_instance(&value_2, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_2, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), rt::exact(value_2.clone(), "FerroUI.Animation.TransitionBase.set_Duration", 0, 380, 29)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_2, 380, 29));
@@ -42583,7 +42583,7 @@ fn build_controls_fluentcontrols_xaml_deferred_288(
         rt::unset_value(double_transition_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property());
     } else if rt::is_instance(&value_4, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(double_transition_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), value_4.clone(), 390, 46)?;
-    } else if rt::is_instance(&value_4, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_4, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), rt::exact(value_4.clone(), "FerroUI.Animation.TransitionBase.set_Duration", 0, 390, 46)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_4, 390, 46));
@@ -42654,7 +42654,7 @@ fn build_controls_fluentcontrols_xaml_deferred_288(
         rt::unset_value(double_transition_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property());
     } else if rt::is_instance(&value_6, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(double_transition_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), value_6.clone(), 398, 46)?;
-    } else if rt::is_instance(&value_6, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_6, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), rt::exact(value_6.clone(), "FerroUI.Animation.TransitionBase.set_Duration", 0, 398, 46)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_6, 398, 46));
@@ -42725,7 +42725,7 @@ fn build_controls_fluentcontrols_xaml_deferred_288(
         rt::unset_value(double_transition_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property());
     } else if rt::is_instance(&value_8, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(double_transition_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), value_8.clone(), 409, 29)?;
-    } else if rt::is_instance(&value_8, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_8, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         double_transition_4.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), rt::exact(value_8.clone(), "FerroUI.Animation.TransitionBase.set_Duration", 0, 409, 29)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_8, 409, 29));
@@ -42796,7 +42796,7 @@ fn build_controls_fluentcontrols_xaml_deferred_288(
         rt::unset_value(double_transition_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property());
     } else if rt::is_instance(&value_10, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(double_transition_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), value_10.clone(), 420, 29)?;
-    } else if rt::is_instance(&value_10, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_10, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         double_transition_5.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), rt::exact(value_10.clone(), "FerroUI.Animation.TransitionBase.set_Duration", 0, 420, 29)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_10, 420, 29));
@@ -42867,7 +42867,7 @@ fn build_controls_fluentcontrols_xaml_deferred_288(
         rt::unset_value(double_transition_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property());
     } else if rt::is_instance(&value_12, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(double_transition_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), value_12.clone(), 430, 47)?;
-    } else if rt::is_instance(&value_12, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_12, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         double_transition_6.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), rt::exact(value_12.clone(), "FerroUI.Animation.TransitionBase.set_Duration", 0, 430, 47)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_12, 430, 47));
@@ -42938,7 +42938,7 @@ fn build_controls_fluentcontrols_xaml_deferred_288(
         rt::unset_value(double_transition_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property());
     } else if rt::is_instance(&value_14, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(double_transition_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), value_14.clone(), 439, 47)?;
-    } else if rt::is_instance(&value_14, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_14, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         double_transition_7.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), rt::exact(value_14.clone(), "FerroUI.Animation.TransitionBase.set_Duration", 0, 439, 47)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_14, 439, 47));
@@ -44468,7 +44468,7 @@ fn build_controls_fluentcontrols_xaml_deferred_298(
     // Controls/FluentControls.xaml(59,18) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/FluentControls.xaml(59,18) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 59, 18)?);
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
@@ -46601,7 +46601,7 @@ fn build_controls_fluentcontrols_xaml_deferred_323(
     // Controls/FluentControls.xaml(32,12) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Canvas::left_property())));
     // Controls/FluentControls.xaml(32,12) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2000000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 32, 12)?);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&transitions_0)));
@@ -47466,7 +47466,7 @@ fn build_controls_fluentcontrols_xaml_deferred_325(
     // Controls/FluentControls.xaml(34,10) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/FluentControls.xaml(34,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1500000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1500000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 34, 10)?);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&transitions_0)));

@@ -59,6 +59,8 @@ fn effect_text(effect: &dyn IEffect) -> String {
         format!("blur({})", blur.radius())
     } else if let Some(shadow) = effect.as_drop_shadow_effect() {
         format!("drop-shadow({} {} {})", shadow.offset_x(), shadow.offset_y(), shadow.blur_radius())
+    } else if let Some(custom) = effect.as_custom_effect() {
+        custom.to_string()
     } else {
         "effect".to_string()
     }

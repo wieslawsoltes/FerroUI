@@ -3,7 +3,7 @@
 
 use super::*;
 use crate::{DateTimeIntervalType, LineSeries, LinearAxis, Samples};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 
 fn close(actual: f64, expected: f64) {
@@ -505,9 +505,9 @@ fn unmatched_and_invalid_x_pairs_cannot_distort_automatic_y_range() {
 #[test]
 fn date_bars_outside_explicit_bounds_do_not_emit_outside_geometry_or_annotations() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let first = DateTimeOffset::new(2020, 1, 1, 0, 0, 0, TimeSpan::ZERO);
-    let middle = DateTimeOffset::new(2020, 1, 2, 0, 0, 0, TimeSpan::ZERO);
-    let last = DateTimeOffset::new(2020, 1, 3, 0, 0, 0, TimeSpan::ZERO);
+    let first = DateTimeOffset::new(2020, 1, 1, 0, 0, 0, SignedDuration::ZERO);
+    let middle = DateTimeOffset::new(2020, 1, 2, 0, 0, 0, SignedDuration::ZERO);
+    let last = DateTimeOffset::new(2020, 1, 3, 0, 0, 0, SignedDuration::ZERO);
     for orientation in [BarOrientation::Vertical, BarOrientation::Horizontal] {
         let chart = Chart::new();
         let x = DateTimeAxis::new();
@@ -774,9 +774,9 @@ fn bars_sharing_categories_group_without_overlap_across_distinct_value_axes() {
 #[test]
 fn automatic_date_bar_bounds_reserve_complete_edge_bars_and_single_date_bars() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let first = DateTimeOffset::new(2020, 1, 1, 0, 0, 0, TimeSpan::ZERO);
-    let next = DateTimeOffset::new(2020, 1, 2, 0, 0, 0, TimeSpan::ZERO);
-    let last = DateTimeOffset::new(2020, 1, 9, 0, 0, 0, TimeSpan::ZERO);
+    let first = DateTimeOffset::new(2020, 1, 1, 0, 0, 0, SignedDuration::ZERO);
+    let next = DateTimeOffset::new(2020, 1, 2, 0, 0, 0, SignedDuration::ZERO);
+    let last = DateTimeOffset::new(2020, 1, 9, 0, 0, 0, SignedDuration::ZERO);
     for orientation in [BarOrientation::Vertical, BarOrientation::Horizontal] {
         for dates in [vec![first, next, last], vec![first]] {
             let chart = Chart::new();
@@ -840,7 +840,7 @@ fn horizontal_date_tick_labels_stay_complete_and_separated_at_narrow_and_wide_si
     chart.axes().add(&x).unwrap();
     chart.axes().add(&y).unwrap();
     let dates: Vec<_> = (1..=15)
-        .map(|day| DateTimeOffset::new(2020, 1, day, 0, 0, 0, TimeSpan::ZERO))
+        .map(|day| DateTimeOffset::new(2020, 1, day, 0, 0, 0, SignedDuration::ZERO))
         .collect();
     let series = LineSeries::new();
     series.set_x_axis(Some(x.clone().upcast())).unwrap();

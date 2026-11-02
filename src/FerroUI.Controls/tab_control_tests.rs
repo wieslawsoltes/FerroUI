@@ -16,7 +16,7 @@ use crate::{
     Panel, StackPanel, TabControl, TabItem, TextBlock,
 };
 use crate::{ContentControlImpl, ControlImpl, TopLevel, TopLevelImpl};
-use ferroui_base::animation::{CrossFade, IPageTransition, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, SignedDuration};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::core::{Maybe, ModelRef, Value};
 use ferroui_base::data::model::{Event, INotifyPropertyChanged, Model};
@@ -1061,7 +1061,7 @@ fn page_transition_is_null_by_default() {
 #[test]
 fn page_transition_round_trips() {
     let _scope = start();
-    let transition: Rc<dyn IPageTransition> = Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(100.0)));
+    let transition: Rc<dyn IPageTransition> = Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(100.0)));
     let target = TabControl::new();
     target.set_template(tab_control_template());
     target.set_page_transition(Some(transition.clone()));

@@ -4,7 +4,7 @@ use super::control_of;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, ElementRef, FerroObjectImpl, FerroProperty, Nullable, Ref, StyledElementImpl, StyledProperty, Visual};
 use ferroui_controls::Control;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::DispatcherTimer;
 use std::cell::RefCell;
@@ -31,8 +31,8 @@ ferroui_base::ferro_impl_classes!(DelayedShowControlAction: FerroObjectImpl, Sty
 ferro_properties! {
     impl DelayedShowControlAction {
         /// Identifies the `Delay` property.
-        pub fn delay_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<DelayedShowControlAction, _>("Delay", TimeSpan::from_milliseconds(500.0))
+        pub fn delay_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<DelayedShowControlAction, _>("Delay", SignedDuration::from_milliseconds(500.0))
         }
 
         /// Identifies the `TargetControl` property.
@@ -101,11 +101,11 @@ impl DelayedShowControlAction {
     }
 
     /// Gets or sets the delay before the control is shown. This is a property of the object model.
-    pub fn delay(&self) -> TimeSpan {
+    pub fn delay(&self) -> SignedDuration {
         self.get_value(Self::delay_property())
     }
 
-    pub fn set_delay(&self, value: TimeSpan) {
+    pub fn set_delay(&self, value: SignedDuration) {
         self.set_value(Self::delay_property(), value)
     }
 }

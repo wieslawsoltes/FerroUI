@@ -1,7 +1,7 @@
 //! Port of `Pages/Transitions/WaveRevealPageTransition.cs`.
 
 use ferroui_base::animation::easings::{CubicEaseOut, Easing};
-use ferroui_base::animation::{IPageTransition, IProgressPageTransition, PageSlide, PageTransitionItem, SlideAxis, TimeSpan};
+use ferroui_base::animation::{IPageTransition, IProgressPageTransition, PageSlide, PageTransitionItem, SlideAxis, SignedDuration};
 use ferroui_base::media::{Geometry, RectangleGeometry, StreamGeometry};
 use ferroui_base::platform::IGeometryContext;
 use ferroui_base::threading::{CancellationToken, DispatcherTask};
@@ -161,7 +161,7 @@ impl WaveRevealPageTransition {
 
     /// `new WaveRevealPageTransition(duration, orientation)`: `duration` is the duration of
     /// the animation and `orientation` the axis on which the animation occurs.
-    pub fn with_duration(duration: TimeSpan, orientation: SlideAxis) -> Self {
+    pub fn with_duration(duration: SignedDuration, orientation: SlideAxis) -> Self {
         Self::from_slide(PageSlide::with_duration(duration, orientation))
     }
 
@@ -281,7 +281,7 @@ impl WaveRevealPageTransition {
     #[allow(clippy::too_many_arguments)]
     async fn animate_progress(
         wave: Wave,
-        duration: TimeSpan,
+        duration: SignedDuration,
         slide_in_easing: Easing,
         from: f64,
         to: f64,
@@ -548,8 +548,8 @@ mod tests {
         assert_eq!(1.0, transition.center_sensitivity());
         assert_eq!(1.0, transition.bulge_exponent());
 
-        let transition = WaveRevealPageTransition::with_duration(TimeSpan::from_seconds(0.8), SlideAxis::Vertical);
-        assert_eq!(TimeSpan::from_seconds(0.8), transition.page_slide().duration());
+        let transition = WaveRevealPageTransition::with_duration(SignedDuration::from_seconds(0.8), SlideAxis::Vertical);
+        assert_eq!(SignedDuration::from_seconds(0.8), transition.page_slide().duration());
         assert_eq!(SlideAxis::Vertical, transition.page_slide().orientation());
     }
 

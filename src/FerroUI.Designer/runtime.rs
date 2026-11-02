@@ -1,4 +1,4 @@
-use ferroui_base::animation::{IClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::IDisposable;
@@ -897,8 +897,8 @@ impl Drop for RuntimePreview {
 // Design mode owns time. Inherited runtime animations and transitions remain frozen until the
 // host explicitly enables interaction; timeline sampling uses disposable animation layers.
 struct DesignClock;
-impl IObservable<TimeSpan> for DesignClock {
-    fn subscribe(&self, _observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for DesignClock {
+    fn subscribe(&self, _observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         Disposable::empty()
     }
 }

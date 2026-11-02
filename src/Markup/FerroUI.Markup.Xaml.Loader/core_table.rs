@@ -523,7 +523,9 @@ pub fn core_handles() -> Vec<(String, CoreRef)> {
         add(&format!("Vec<{rust}>"), CoreRef::Array(Box::new(t(full_name))));
         add(&format!("Option<Vec<{rust}>>"), CoreRef::Array(Box::new(t(full_name))));
     }
+    add("::ferroui_base::animation::SignedDuration", t("System.TimeSpan"));
     add("::ferroui_base::animation::TimeSpan", t("System.TimeSpan"));
+    add("Option<::ferroui_base::animation::SignedDuration>", nullable("System.TimeSpan"));
     add("Option<::ferroui_base::animation::TimeSpan>", nullable("System.TimeSpan"));
     reference(&mut add, "String", "System.String");
     reference(&mut add, "&'static ::ferroui_base::TypeInfo", "System.Type");

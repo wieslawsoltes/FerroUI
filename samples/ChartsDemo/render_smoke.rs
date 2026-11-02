@@ -3,7 +3,7 @@
 //! Images are evidence of native rendering, not upstream pixel comparisons.
 
 use crate::ChartsDemo;
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::media::imaging::{PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
@@ -19,7 +19,7 @@ use std::path::Path;
 use std::rc::Rc;
 
 struct CaptureClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     seconds: Cell<i32>,
     state: Cell<PlayState>,
 }
@@ -38,15 +38,15 @@ impl CaptureClock {
         // advances beyond the WinUI theme's brief brush transitions.
         for _ in 0..2 {
             self.subject
-                .on_next(TimeSpan::from_seconds(f64::from(self.seconds.get())));
+                .on_next(SignedDuration::from_seconds(f64::from(self.seconds.get())));
             self.seconds.set(self.seconds.get() + 1);
             Dispatcher::ui_thread().run_jobs(None);
         }
     }
 }
 
-impl IObservable<TimeSpan> for CaptureClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for CaptureClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

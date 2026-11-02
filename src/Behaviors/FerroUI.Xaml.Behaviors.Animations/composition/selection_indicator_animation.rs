@@ -3,7 +3,7 @@
 use super::composition_animation_helpers::to_duration;
 use crate::argument_out_of_range::throw_if_less_than;
 use ferroui_base::animation::easings::{IEasing, SpringEasing};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::numerics::Vector3;
 use ferroui_base::rendering::composition::animations::{ICompositionAnimation, ICompositionAnimationBase};
 use ferroui_base::rendering::composition::ElementComposition;
@@ -19,8 +19,8 @@ impl SelectionIndicatorAnimation {
     const INDICATOR_PART_NAME: &'static str = "PART_SelectedPipe";
 
     /// Gets the default selection indicator animation duration.
-    pub fn default_duration() -> TimeSpan {
-        TimeSpan::from_milliseconds(250.0)
+    pub fn default_duration() -> SignedDuration {
+        SignedDuration::from_milliseconds(250.0)
     }
 
     /// Finds the standard selection indicator parts in the newly and the previously selected
@@ -34,9 +34,9 @@ impl SelectionIndicatorAnimation {
     pub fn try_start(
         new_selection: Option<&TemplatedControl>,
         old_selection: Option<&TemplatedControl>,
-        duration: TimeSpan,
+        duration: SignedDuration,
     ) -> bool {
-        throw_if_less_than(duration, TimeSpan::ZERO, "duration");
+        throw_if_less_than(duration, SignedDuration::ZERO, "duration");
 
         let (Some(new_selection), Some(old_selection)) = (new_selection, old_selection) else {
             return false;
@@ -78,11 +78,11 @@ impl SelectionIndicatorAnimation {
         old_indicator: Option<&Visual>,
         new_selection: Option<&Visual>,
         old_selection: Option<&Visual>,
-        duration: TimeSpan,
+        duration: SignedDuration,
     ) -> bool {
-        throw_if_less_than(duration, TimeSpan::ZERO, "duration");
+        throw_if_less_than(duration, SignedDuration::ZERO, "duration");
 
-        if duration == TimeSpan::ZERO {
+        if duration == SignedDuration::ZERO {
             return false;
         }
         let (Some(new_indicator), Some(old_indicator), Some(new_selection), Some(old_selection)) =

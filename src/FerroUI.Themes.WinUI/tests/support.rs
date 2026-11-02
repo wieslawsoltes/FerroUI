@@ -42,7 +42,7 @@ pub fn start_themed_application() -> UnitTestApplicationScope {
 /// It pulses only when a test pulses it ([`MockGlobalClock::pulse`]), so a transition otherwise
 /// keeps its start value.
 pub struct MockGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     play_state: std::cell::Cell<ferroui_base::animation::PlayState>,
 }
 
@@ -56,7 +56,7 @@ impl MockGlobalClock {
 
     /// Pulses the clock with the time `now` since it started (what the render passes of the media
     /// context do), for the tests that step the transitions.
-    pub fn pulse(&self, now: ferroui_base::animation::TimeSpan) {
+    pub fn pulse(&self, now: ferroui_base::animation::SignedDuration) {
         use ferroui_base::reactive::IObserver;
         self.subject.on_next(now);
     }
@@ -75,10 +75,10 @@ pub fn start_themed_application_with_clock() -> (UnitTestApplicationScope, Rc<Mo
     (scope, clock)
 }
 
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for MockGlobalClock {
     fn subscribe(
         &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
     }

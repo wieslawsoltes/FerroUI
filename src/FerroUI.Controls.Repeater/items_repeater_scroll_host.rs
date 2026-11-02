@@ -8,7 +8,7 @@ use ferroui_controls::{
     Panel, PanelImpl, ScrollViewer,
 };
 use ferroui_base::animation::easings::{Easing, SplineEasing};
-use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
@@ -770,7 +770,7 @@ impl ItemsRepeaterScrollHost {
         let animation = Animation::new();
         // ChangeView's duration is platform-owned in WinUI. The native host
         // supplies a 250 ms scrolling transition on the framework clock.
-        animation.set_duration(TimeSpan::from_milliseconds(250.0));
+        animation.set_duration(SignedDuration::from_milliseconds(250.0));
         animation.set_easing(Easing::new(SplineEasing::with_points(0.25, 0.1, 0.25, 1.0)));
         animation.set_fill_mode(FillMode::Both);
         animation.children().add(KeyFrame::with_cue(

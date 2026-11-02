@@ -84,7 +84,7 @@ use super::support::*;
 use crate::models::PageItem;
 use crate::view_models::MainWindowViewModel;
 use crate::MainView;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::testing::{CompositorTestServices, MockWindowImpl, MockWindowingPlatform};
@@ -207,7 +207,7 @@ impl Tour {
         Dispatcher::ui_thread().run_jobs(None);
         let time = self.time.get() + FRAME_TIME_MS;
         self.time.set(time);
-        self.clock.pulse(TimeSpan::from_milliseconds(time));
+        self.clock.pulse(SignedDuration::from_milliseconds(time));
         Dispatcher::ui_thread().run_jobs(None);
         let start = Instant::now();
         self.services.render_loop().tick();

@@ -1,6 +1,6 @@
 //! The global clock of the tests.
 
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -9,19 +9,19 @@ use std::rc::Rc;
 /// the test tells it to ([`pulse`](Self::pulse)).
 #[derive(Default)]
 pub struct TestGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<Option<PlayState>>,
 }
 
-impl IObservable<TimeSpan> for TestGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
 
 impl TestGlobalClock {
     /// Ticks the clock: its subscribers are told that the time is `time`.
-    pub fn pulse(&self, time: TimeSpan) {
+    pub fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 }

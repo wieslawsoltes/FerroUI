@@ -8,7 +8,7 @@ use crate::{
     MaterialTheme, MaterialTimeDisplayMode, MaterialTimePicker, MaterialTimePickerDial,
     MaterialTimePickerField, MaterialTimeSelection, register_types,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::input::{
     IPointer, InputElement, Key, KeyEventArgs, KeyModifiers, KeyboardDevice, MouseButton,
     NavigationMethod, Pointer, PointerEventArgs, PointerPointProperties, PointerPressedEventArgs,
@@ -249,13 +249,13 @@ fn selected_time_updates_atomically_and_format_changes_preserve_the_value() {
     });
     picker.set_time(23, 59);
     assert_eq!(1, changes.borrow().len());
-    assert_eq!(TimeSpan::from_minutes(1439.0), picker.selected_time());
+    assert_eq!(SignedDuration::from_minutes(1439.0), picker.selected_time());
     assert_eq!("11", picker.hour_input());
     picker.set_is_24_hour(true);
     assert_eq!("23", picker.hour_input());
     picker.set_display_mode(MaterialTimeDisplayMode::Input);
     assert_eq!(1, changes.borrow().len());
-    picker.set_selected_time(TimeSpan::from_minutes(65.0));
+    picker.set_selected_time(SignedDuration::from_minutes(65.0));
     assert_eq!((1, 5), (picker.hour(), picker.minute()));
     assert_eq!(2, changes.borrow().len());
 }
@@ -740,11 +740,11 @@ fn dragging_hour_advances_only_after_release_and_can_be_disabled_for_touch_explo
 }
 
 struct Clock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for Clock {
-    fn subscribe(&self, o: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for Clock {
+    fn subscribe(&self, o: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(o)
     }
 }
@@ -773,7 +773,7 @@ fn animated() -> (UnitTestApplicationScope, Rc<Clock>) {
     (app, clock)
 }
 fn tick(clock: &Clock, time: f64) {
-    clock.subject.on_next(TimeSpan::from_seconds(time));
+    clock.subject.on_next(SignedDuration::from_seconds(time));
 }
 
 #[test]

@@ -1,4 +1,4 @@
-use crate::animation::{PlayState, TimeSpan};
+use crate::animation::{PlayState, SignedDuration};
 use crate::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -10,9 +10,9 @@ use std::rc::Rc;
 /// The owning clock forwards its source's ticks to [`pulse`](Self::pulse)
 /// and supplies what to do when the clock stops.
 pub struct ClockBase {
-    observable: LightweightSubject<TimeSpan>,
-    previous_time: Cell<Option<TimeSpan>>,
-    internal_time: Cell<TimeSpan>,
+    observable: LightweightSubject<SignedDuration>,
+    previous_time: Cell<Option<SignedDuration>>,
+    internal_time: Cell<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
@@ -27,7 +27,7 @@ impl ClockBase {
         Self {
             observable: LightweightSubject::new(),
             previous_time: Cell::new(None),
-            internal_time: Cell::new(TimeSpan::ZERO),
+            internal_time: Cell::new(SignedDuration::ZERO),
             play_state: Cell::new(PlayState::Run),
         }
     }
@@ -51,11 +51,11 @@ impl ClockBase {
 
     /// Advances the clock to `system_time` and notifies the subscribers.
     /// `stop` runs afterwards if the clock has been stopped.
-    pub fn pulse(&self, system_time: TimeSpan, stop: impl FnOnce()) {
+    pub fn pulse(&self, system_time: SignedDuration, stop: impl FnOnce()) {
         match self.previous_time.get() {
             None => {
                 self.previous_time.set(Some(system_time));
-                self.internal_time.set(TimeSpan::ZERO);
+                self.internal_time.set(SignedDuration::ZERO);
             }
             Some(previous_time) => {
                 if self.play_state.get() == PlayState::Pause {
@@ -76,7 +76,7 @@ impl ClockBase {
     }
 
     /// Subscribes to the clock's time.
-    pub fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+    pub fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.observable.subscribe(observer)
     }
 }

@@ -1,7 +1,7 @@
 use crate::platform::{IInputPane, InputPaneStateEventArgs};
 use crate::{ControlImpl, Decorator, InputPaneAwareBehavior, TopLevel};
 use ferroui_base::animation::easings::{Easing, LinearEasing};
-use ferroui_base::animation::{DoubleTransition, ITransition, TimeSpan, Transitions};
+use ferroui_base::animation::{DoubleTransition, ITransition, SignedDuration, Transitions};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl, LayoutableImplExt};
@@ -192,7 +192,7 @@ impl InputPaneAwareDecorator {
     fn input_pane_aware_view_state_changed(&self, e: &InputPaneStateEventArgs) {
         let transition = DoubleTransition::new();
         transition.set_property(Some(Self::current_input_pane_padding_property().as_property()));
-        transition.set_duration(TimeSpan::from(e.animation_duration()));
+        transition.set_duration(SignedDuration::from(e.animation_duration()));
         // Only an easing class is used; anything else is replaced by the
         // linear easing.
         transition.set_easing(match e.easing() {

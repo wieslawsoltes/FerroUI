@@ -19,7 +19,7 @@ use super::classes::RoutedEventOf;
 use crate::ScrollChangedEventArgs;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEvent};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::Vector;
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
@@ -163,7 +163,7 @@ ferro_markup_type!(class ItemsSourceView {
 /// delay is upstream when the notification is shown.
 fn set_notification_expiration(
     notification: &Rc<crate::notifications::Notification>,
-    value: TimeSpan,
+    value: SignedDuration,
 ) -> Result<(), &'static str> {
     match value.to_duration() {
         Some(expiration) => Ok(notification.set_expiration(expiration)),
@@ -197,8 +197,8 @@ ferro_markup_type!(class crate::notifications::Notification as "Notification" {
             get: |n: &Rc<crate::notifications::Notification>| n.type_(),
             set: |n: &Rc<crate::notifications::Notification>, value: crate::notifications::NotificationType| n.set_type(value)
         },
-        Expiration: TimeSpan {
-            get: |n: &Rc<crate::notifications::Notification>| TimeSpan::from(n.expiration()),
+        Expiration: SignedDuration {
+            get: |n: &Rc<crate::notifications::Notification>| SignedDuration::from(n.expiration()),
             try_set: set_notification_expiration
         },
     ],

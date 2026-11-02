@@ -9,7 +9,7 @@
 //! renderer over the test compositor of the framework, driven one frame per
 //! [`CompositionApp::run_jobs`]), as the tests of the animations crate do.
 
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::input::ICommand;
 use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::Dispatcher;
@@ -25,19 +25,19 @@ use std::rc::Rc;
 /// The global clock of the themed application: the transitions of the Fluent control themes and
 /// the animations of the behaviors need one. It pulses when a test tells it to.
 pub(crate) struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
 impl MockGlobalClock {
     /// Ticks the clock: its subscribers are told that the time is `time`.
-    pub(crate) fn pulse(&self, time: TimeSpan) {
+    pub(crate) fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

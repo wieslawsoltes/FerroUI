@@ -3,7 +3,7 @@
 
 use crate::markup::{user_control_class, xaml_class};
 use crate::pages::navigation_demo_helper::boxed_text;
-use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEventArgs};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{Color, FontWeight, SolidColorBrush, TextAlignment, TextWrapping};
@@ -224,7 +224,7 @@ impl NavigationPageModalTransitionsPage {
             return;
         };
 
-        let duration = TimeSpan::from_milliseconds(self.duration_slider().value());
+        let duration = SignedDuration::from_milliseconds(self.duration_slider().value());
         let transition: Option<Rc<dyn IPageTransition>> = match self.transition_combo().selected_index() {
             1 => Some(Rc::new(CrossFade::with_duration(duration))),
             2 => None,

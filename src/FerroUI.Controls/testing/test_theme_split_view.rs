@@ -14,7 +14,7 @@ use crate::{
     SplitViewPanePlacement,
 };
 use ferroui_base::animation::easings::{Easing, SplineEasing};
-use ferroui_base::animation::{Animatable, DoubleTransition, ITransition, TimeSpan, Transitions};
+use ferroui_base::animation::{Animatable, DoubleTransition, ITransition, SignedDuration, Transitions};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::{BindingBase, ReflectionBinding, RelativeSource, RelativeSourceMode, TemplateBinding};
 use ferroui_base::layout::{HorizontalAlignment, Layoutable, VerticalAlignment};
@@ -191,7 +191,7 @@ fn templated_parent_setter(property: &'static FerroProperty, path: &str) -> Rc<S
 
 /// The setter of the transitions of the pane root: one double transition of
 /// `property` with the pane animation easing of the reference theme.
-fn transitions_setter(property: &'static FerroProperty, duration: TimeSpan) -> Rc<Setter> {
+fn transitions_setter(property: &'static FerroProperty, duration: SignedDuration) -> Rc<Setter> {
     let transition = DoubleTransition::new();
     transition.set_property(Some(property));
     transition.set_duration(duration);
@@ -312,8 +312,8 @@ pub fn split_view_theme() -> Ref<ControlTheme> {
 
     // Open/close pane animation: width for the horizontal placements, height
     // for the vertical ones.
-    let open_duration = TimeSpan::from_seconds(0.2);
-    let close_duration = TimeSpan::from_seconds(0.1);
+    let open_duration = SignedDuration::from_seconds(0.2);
+    let close_duration = SignedDuration::from_seconds(0.1);
     let width = Layoutable::width_property().as_property();
     let height = Layoutable::height_property().as_property();
     for (placement_class, property) in [(":left", width), (":right", width)] {

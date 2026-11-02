@@ -17,13 +17,14 @@ use ferroui_base::native_functions;
 use ferroui_base::platform::native_library::{NativeLibrary, NativeLibraryError};
 use bitflags::bitflags;
 use ferroui_base::logging::{LogEventLevel, Logger};
+use ferroui_system::task::oneshot;
 use std::any::Any;
 use std::ffi::{c_char, c_int, c_uint, c_ulong, c_void, CString};
 use std::future::Future;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::pin::Pin;
 use std::sync::{Arc, Mutex, OnceLock, PoisonError};
-use std::task::{Context, Poll, Waker};
+use std::task::{Context, Poll};
 
 const GLIB_NAME: &std::ffi::CStr = c"libglib-2.0.so.0";
 const GOBJECT_NAME: &std::ffi::CStr = c"libgobject-2.0.so.0";
@@ -268,30 +269,19 @@ impl Drop for GMainLoop {
     }
 }
 
-/// What a call on the thread of GLib answers with: a slot one thread
-/// fills and a task of another awaits (the `TaskCompletionSource` of
-/// `RunOnGlibThread`).
-struct Slot<T> {
-    value: Option<Result<T, String>>,
-    waker: Option<Waker>,
-}
-
-/// The sending half of a [`GlibTask`].
-pub struct GlibTaskCompletion<T>(Arc<Mutex<Slot<T>>>);
+/// The sending half of a [`GlibTask`] (the `TaskCompletionSource` of `RunOnGlibThread`): a
+/// one-shot channel ([`oneshot`]) that any clone completes, the first result winning. When every
+/// clone is dropped without a result, the task ends with an error.
+pub struct GlibTaskCompletion<T>(Arc<Mutex<Option<oneshot::Sender<Result<T, String>>>>>);
 
 impl<T> GlibTaskCompletion<T> {
     /// Completes the task, unless it is completed already.
     pub fn try_set_result(&self, value: Result<T, String>) {
-        let waker = {
-            let mut slot = self.0.lock().unwrap_or_else(PoisonError::into_inner);
-            if slot.value.is_some() {
-                return;
-            }
-            slot.value = Some(value);
-            slot.waker.take()
-        };
-        if let Some(waker) = waker {
-            waker.wake();
+        // Taken before it sends: the task is woken with the completion released.
+        let sender = self.0.lock().unwrap_or_else(PoisonError::into_inner).take();
+        if let Some(sender) = sender {
+            // A task that was dropped does not want the result.
+            let _ = sender.send(value);
         }
     }
 }
@@ -302,28 +292,24 @@ impl<T> Clone for GlibTaskCompletion<T> {
     }
 }
 
-/// The future of a result that is computed on the thread of GLib.
-pub struct GlibTask<T>(Arc<Mutex<Slot<T>>>);
+/// The future of a result that is computed on the thread of GLib: the receiver of the one-shot
+/// channel of a [`GlibTaskCompletion`].
+pub struct GlibTask<T>(oneshot::Receiver<Result<T, String>>);
 
 impl<T> GlibTask<T> {
     pub fn new() -> (GlibTaskCompletion<T>, GlibTask<T>) {
-        let slot = Arc::new(Mutex::new(Slot { value: None, waker: None }));
-        (GlibTaskCompletion(slot.clone()), GlibTask(slot))
+        let (sender, receiver) = oneshot::channel();
+        (GlibTaskCompletion(Arc::new(Mutex::new(Some(sender)))), GlibTask(receiver))
     }
 }
 
 impl<T> Future for GlibTask<T> {
     type Output = Result<T, String>;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let mut slot = self.0.lock().unwrap_or_else(PoisonError::into_inner);
-        match slot.value.take() {
-            Some(value) => Poll::Ready(value),
-            None => {
-                slot.waker = Some(cx.waker().clone());
-                Poll::Pending
-            }
-        }
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        // Deviation (DEVIATIONS.md, X11 platform): every completion dropped without a result
+        // ends the task with an error, where the task of the reference would never complete.
+        Pin::new(&mut self.0).poll(cx).map(|outcome| outcome.unwrap_or_else(|canceled| Err(canceled.to_string())))
     }
 }
 
@@ -534,6 +520,7 @@ pub(crate) mod tests {
     use super::*;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::MutexGuard;
+    use std::task::Waker;
 
     /// The default main context is one for the process: tests that run it
     /// take turns.
@@ -656,5 +643,19 @@ pub(crate) mod tests {
         };
         assert_eq!(block(ok), Ok(42));
         assert_eq!(block(failed), Err("no answer".to_string()));
+    }
+
+    #[test]
+    fn a_task_whose_completions_are_all_dropped_ends_with_an_error() {
+        let (tcs, task) = GlibTask::<i32>::new();
+        let other = tcs.clone();
+        drop(tcs);
+        let mut task = std::pin::pin!(task);
+        assert!(task.as_mut().poll(&mut Context::from_waker(Waker::noop())).is_pending());
+        drop(other);
+        match task.as_mut().poll(&mut Context::from_waker(Waker::noop())) {
+            Poll::Ready(Err(message)) => assert_eq!(message, "the operation was canceled"),
+            _ => panic!("the task did not end"),
+        }
     }
 }
