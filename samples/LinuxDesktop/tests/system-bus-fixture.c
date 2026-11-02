@@ -1,4 +1,4 @@
-// NetworkManager and UPower property endpoints on the smoke test's private bus.
+// NetworkManager, BlueZ and UPower endpoints on the smoke test's private bus.
 // The desktop uses its production system-bus proxies against these endpoints.
 #include <gio/gio.h>
 #include <stdio.h>
@@ -6,6 +6,9 @@
 
 #define NETWORK "org.freedesktop.NetworkManager"
 #define POWER "org.freedesktop.UPower"
+#define BLUEZ "org.bluez"
+#define ADAPTER BLUEZ ".Adapter1"
+#define RADIO "/org/bluez/hci0"
 #define MANAGER "/org/freedesktop/NetworkManager"
 #define ACTIVE MANAGER "/ActiveConnection/1"
 #define DISPLAY_DEVICE "/org/freedesktop/UPower/devices/DisplayDevice"
@@ -25,14 +28,36 @@ static const char xml[] =
     "<property name='Percentage' type='d' access='read'/>"
     "<property name='State' type='u' access='read'/>"
     "</interface>"
+    "<interface name='" ADAPTER "'>"
+    "<property name='Powered' type='b' access='readwrite'/>"
+    "</interface>"
+    "<interface name='org.freedesktop.DBus.ObjectManager'>"
+    "<method name='GetManagedObjects'><arg type='a{oa{sa{sv}}}' direction='out'/></method>"
+    "</interface>"
     "</node>";
 
 static gboolean wifi = TRUE;
+static gboolean powered = TRUE;
+
+static void managed_objects(GDBusConnection *connection, const gchar *sender, const gchar *path,
+                            const gchar *interface, const gchar *method, GVariant *args,
+                            GDBusMethodInvocation *invocation, gpointer data) {
+    GVariantBuilder properties, interfaces, objects;
+    g_variant_builder_init(&properties, G_VARIANT_TYPE("a{sv}"));
+    g_variant_builder_add(&properties, "{sv}", "Powered", g_variant_new_boolean(powered));
+    g_variant_builder_init(&interfaces, G_VARIANT_TYPE("a{sa{sv}}"));
+    g_variant_builder_add(&interfaces, "{s@a{sv}}", ADAPTER, g_variant_builder_end(&properties));
+    g_variant_builder_init(&objects, G_VARIANT_TYPE("a{oa{sa{sv}}}"));
+    g_variant_builder_add(&objects, "{o@a{sa{sv}}}", RADIO, g_variant_builder_end(&interfaces));
+    g_dbus_method_invocation_return_value(invocation,
+        g_variant_new("(@a{oa{sa{sv}}})", g_variant_builder_end(&objects)));
+}
 
 static GVariant *read_property(GDBusConnection *connection, const gchar *sender, const gchar *path,
                                const gchar *interface, const gchar *property, GError **error,
                                gpointer data) {
     g_print("Read %s.%s\n", interface, property);
+    if (!strcmp(property, "Powered")) return g_variant_new_boolean(powered);
     if (!strcmp(property, "WirelessEnabled")) return g_variant_new_boolean(wifi);
     if (!strcmp(property, "WirelessHardwareEnabled") || !strcmp(property, "IsPresent"))
         return g_variant_new_boolean(TRUE);
@@ -47,6 +72,11 @@ static GVariant *read_property(GDBusConnection *connection, const gchar *sender,
 static gboolean write_property(GDBusConnection *connection, const gchar *sender, const gchar *path,
                                const gchar *interface, const gchar *property, GVariant *value,
                                GError **error, gpointer data) {
+    if (!strcmp(interface, ADAPTER) && !strcmp(property, "Powered")) {
+        powered = g_variant_get_boolean(value);
+        g_print("Set Bluetooth Powered=%d\n", powered);
+        return TRUE;
+    }
     if (strcmp(interface, NETWORK) || strcmp(property, "WirelessEnabled")) {
         g_set_error_literal(error, G_DBUS_ERROR, G_DBUS_ERROR_PROPERTY_READ_ONLY, "Read only");
         return FALSE;
@@ -64,11 +94,15 @@ int main(void) {
     GDBusNodeInfo *node = g_dbus_node_info_new_for_xml(xml, &error);
     if (!node) g_error("%s", error->message);
     const GDBusInterfaceVTable properties = {.get_property = read_property, .set_property = write_property};
-    const char *paths[] = {MANAGER, ACTIVE, DISPLAY_DEVICE};
+    const char *paths[] = {MANAGER, ACTIVE, DISPLAY_DEVICE, RADIO};
     for (size_t i = 0; i < G_N_ELEMENTS(paths); i++) {
         if (!g_dbus_connection_register_object(bus, paths[i], node->interfaces[i], &properties,
                                                NULL, NULL, &error)) g_error("%s", error->message);
     }
+    const GDBusInterfaceVTable manager = {.method_call = managed_objects};
+    if (!g_dbus_connection_register_object(bus, "/", node->interfaces[4], &manager, NULL, NULL, &error))
+        g_error("%s", error->message);
+    g_bus_own_name_on_connection(bus, BLUEZ, G_BUS_NAME_OWNER_FLAGS_NONE, NULL, NULL, NULL, NULL);
     g_bus_own_name_on_connection(bus, NETWORK, G_BUS_NAME_OWNER_FLAGS_NONE, NULL, NULL, NULL, NULL);
     g_bus_own_name_on_connection(bus, POWER, G_BUS_NAME_OWNER_FLAGS_NONE, NULL, NULL, NULL, NULL);
     g_main_loop_run(g_main_loop_new(NULL, FALSE));

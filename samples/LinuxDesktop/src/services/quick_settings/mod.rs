@@ -8,6 +8,8 @@ use zbus::proxy::CacheProperties;
 
 const NETWORK: &str = "org.freedesktop.NetworkManager";
 const NETWORK_PATH: &str = "/org/freedesktop/NetworkManager";
+const BLUEZ: &str = "org.bluez";
+const ADAPTER: &str = "org.bluez.Adapter1";
 const POWER: &str = "org.freedesktop.UPower";
 const POWER_PATH: &str = "/org/freedesktop/UPower/devices/DisplayDevice";
 const LOGIN: &str = "org.freedesktop.login1";
@@ -20,6 +22,12 @@ pub struct Wifi {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Bluetooth {
+    pub path: zbus::zvariant::OwnedObjectPath,
+    pub powered: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Backlight {
     pub device: String,
     pub percent: u8,
@@ -29,6 +37,7 @@ pub struct Backlight {
 pub struct Snapshot {
     pub audio: Option<Audio>,
     pub wifi: Option<Wifi>,
+    pub bluetooth: Option<Bluetooth>,
     pub battery: Option<String>,
     pub backlights: Vec<Backlight>,
     pub login_available: bool,
@@ -40,7 +49,8 @@ pub enum Change {
     Volume(Mixer, bool),
     SetLevel(Mixer, u16),
     Wifi(bool),
-    Brightness(String, bool),
+    Bluetooth(zbus::zvariant::OwnedObjectPath, bool),
+    SetBrightness(String, u8),
 }
 
 fn system_bus() -> zbus::Result<Connection> {
@@ -87,6 +97,28 @@ fn wifi(bus: &Connection) -> Option<Wifi> {
         hardware_enabled,
         connection,
     })
+}
+
+// BlueZ exposes adapters through ObjectManager. Use a stable adapter even
+// when powering it off and prefer the first object path on multi-radio hosts.
+fn bluetooth(bus: &Connection) -> Option<Bluetooth> {
+    let objects: zbus::fdo::ManagedObjects =
+        proxy(bus, BLUEZ, "/", "org.freedesktop.DBus.ObjectManager")
+            .ok()?
+            .call("GetManagedObjects", &())
+            .ok()?;
+    objects
+        .into_iter()
+        .filter_map(|(path, interfaces)| {
+            let (_, properties) = interfaces
+                .iter()
+                .find(|(name, _)| name.as_str() == ADAPTER)?;
+            Some(Bluetooth {
+                path,
+                powered: bool::try_from(properties.get("Powered")?).ok()?,
+            })
+        })
+        .min_by(|a, b| a.path.as_str().cmp(b.path.as_str()))
 }
 
 fn battery(bus: &Connection) -> Option<String> {
@@ -144,13 +176,10 @@ fn backlights(root: &Path) -> Vec<Backlight> {
     items
 }
 
-fn next_level(current: u32, maximum: u32, increase: bool) -> u32 {
-    let step = maximum.div_ceil(10);
-    if increase {
-        current.saturating_add(step).min(maximum)
-    } else {
-        current.saturating_sub(step).max(1)
-    }
+/// logind takes hardware units. Keep one unit of light available on displays
+/// that turn completely off at zero, including devices with very small ranges.
+fn brightness_level(maximum: u32, percent: u8) -> u32 {
+    ((u64::from(maximum) * u64::from(percent.min(100)) + 50) / 100).max(1) as u32
 }
 
 pub fn update(change: Change) -> (Snapshot, Option<String>) {
@@ -170,10 +199,16 @@ pub fn update(change: Change) -> (Snapshot, Option<String>) {
                 .map_err(io::Error::other)?
                 .set_property("WirelessEnabled", value)
                 .map_err(io::Error::other),
-            Change::Brightness(ref device, increase) => {
-                let (current, max) = read_brightness(root, device)
+            Change::Bluetooth(ref path, powered) => {
+                proxy(connected()?, BLUEZ, path.as_str(), ADAPTER)
+                    .map_err(io::Error::other)?
+                    .set_property("Powered", powered)
+                    .map_err(io::Error::other)
+            }
+            Change::SetBrightness(ref device, percent) => {
+                let (_, max) = read_brightness(root, device)
                     .ok_or_else(|| io::Error::other("Backlight device disconnected"))?;
-                let level = next_level(current, max, increase);
+                let level = brightness_level(max, percent);
                 proxy(
                     connected()?,
                     LOGIN,
@@ -190,6 +225,7 @@ pub fn update(change: Change) -> (Snapshot, Option<String>) {
     let backlights = backlights(root);
     let snapshot = Snapshot {
         wifi: bus.as_ref().and_then(wifi),
+        bluetooth: bus.as_ref().and_then(bluetooth),
         battery: bus.as_ref().and_then(battery),
         audio: audio::default_output(),
         login_available: !backlights.is_empty()
@@ -212,12 +248,11 @@ pub fn update(change: Change) -> (Snapshot, Option<String>) {
 mod tests {
     use super::*;
     #[test]
-    fn light_steps_handle_small_and_large_devices() {
-        assert_eq!(next_level(1, 2, false), 1);
-        assert_eq!(next_level(1, 2, true), 2);
-        assert_eq!(next_level(2, 2, true), 2);
-        assert_eq!(next_level(u32::MAX, u32::MAX, true), u32::MAX);
-        assert_eq!(next_level(50, 100, false), 40);
+    fn absolute_brightness_preserves_light_and_hardware_resolution() {
+        assert_eq!(brightness_level(2, 0), 1);
+        assert_eq!(brightness_level(2, 75), 2);
+        assert_eq!(brightness_level(255, 50), 128);
+        assert_eq!(brightness_level(u32::MAX, 255), u32::MAX);
     }
     #[test]
     fn stale_or_relative_device_ids_cannot_escape_sysfs() {

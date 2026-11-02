@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Exercise the real audio client and both system-bus protocols on an isolated X11 session.
+# Exercise the real audio client and system-bus protocols on an isolated X11 session.
 # Usage: tests/system-controls.sh target/debug/ferro-desktop output-directory [--software]
 set -euo pipefail
 here=$(cd -- "$(dirname -- "$0")" && pwd)
@@ -48,6 +48,7 @@ name_owned() {
 wait_until ready_audio
 wait_until name_owned org.freedesktop.NetworkManager
 wait_until name_owned org.freedesktop.UPower
+wait_until name_owned org.bluez
 pactl set-default-sink ferro_fixture
 pactl set-sink-mute ferro_fixture 0
 pactl set-sink-volume ferro_fixture 45%
@@ -63,6 +64,10 @@ wifi_is() {
     gdbus call --session --dest org.freedesktop.NetworkManager \
         --object-path /org/freedesktop/NetworkManager --method org.freedesktop.DBus.Properties.Get \
         org.freedesktop.NetworkManager WirelessEnabled | grep -q "$1"
+}
+bluetooth_is() {
+    gdbus call --session --dest org.bluez --object-path /org/bluez/hci0 \
+        --method org.freedesktop.DBus.Properties.Get org.bluez.Adapter1 Powered | grep -q "$1"
 }
 # Surface readbacks can settle after the asynchronous platform write has completed.
 # Poll the independently observed device state and use bounded retries for the key press.
@@ -98,10 +103,16 @@ press_until minus volume_is 45
 press_until w wifi_is false
 press_until w wifi_is true
 wait_until grep -q 'Set WirelessEnabled=1' "$output/system-bus.log"
-# From Close, traverse the three sound buttons to the native OutputVolume
-# slider. Its arrows step by one percent. Focus must survive the first
-# asynchronous device write and refresh for the second edit to reach it.
-key Tab Tab Tab Tab Right
+press_until b bluetooth_is false
+press_until b bluetooth_is true
+# Discover the native Slider in normal tab order. Optional monitor controls
+# and each profile's spatial layout may change the number of preceding tabs.
+# Only the volume Slider can advance the audio sink by one keyboard step.
+for ((tab=0;tab<16;tab++)); do
+    key Tab Right
+    for ((i=0;i<6;i++)); do volume_is 46 && break; sleep .08; done
+    volume_is 46 && break
+done
 wait_until volume_is 46
 sleep .2; key Right
 wait_until volume_is 47
@@ -128,6 +139,20 @@ original_month_visible() {
         -v forward="$(difference calendar-focused calendar-next)" 'BEGIN { exit !(back < forward / 2) }'
 }
 wait_until original_month_visible
+# Exercise both remaining layouts in the same shell and audio session. The
+# external D-Bus readbacks prove the active panel, including after a rebuild.
+for entry in '2 macos macos-control-center' '3 material material-quick-settings'; do
+    read -r choice profile frame <<<"$entry"
+    key Escape ctrl+comma
+    key "$choice"
+    wait_until grep -qx "$profile" "$XDG_CONFIG_HOME/ferro-desktop/appearance"
+    key Escape ctrl+shift+q
+    press_until w wifi_is false
+    press_until w wifi_is true
+    press_until b bluetooth_is false
+    press_until b bluetooth_is true
+    capture "$frame"
+done
 key Escape alt+F4
 wait "${children[-1]}"
-echo 'Quick Settings changed real PulseAudio mute and volume through buttons and the native slider, toggled the private network service, read battery state, and navigated Calendar forward and back.'
+echo 'Quick Settings changed real PulseAudio mute and volume through buttons and the native slider, toggled Wi-Fi and BlueZ adapter power in all three profiles, read battery state, and navigated Calendar forward and back.'

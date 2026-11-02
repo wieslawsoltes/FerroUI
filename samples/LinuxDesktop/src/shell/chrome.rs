@@ -26,6 +26,10 @@ pub(super) enum Icon {
     Bell,
     Settings,
     Sound,
+    SoundOff,
+    Bluetooth,
+    Moon,
+    Refresh,
     Brightness,
     Network,
     Battery,
@@ -60,6 +64,10 @@ pub(super) fn glyph(icon: Icon, size: f64, color: &'static str) -> Element {
         Icon::Sound => {
             "M2 8 H6 L12 3 V21 L6 16 H2 Z M15 7 Q21 12 15 17 V14 Q18 12 15 10 Z M17 2 Q29 12 17 22 V19 Q25 12 17 5 Z"
         }
+        Icon::SoundOff => "M2 8 H6 L12 3 V21 L6 16 H2 Z M15 8 L18 11 L21 8 L22.4 9.4 L19.4 12.4 L22.4 15.4 L21 16.8 L18 13.8 L15 16.8 L13.6 15.4 L16.6 12.4 L13.6 9.4 Z",
+        Icon::Bluetooth => "F0 M10 1 L18 8 L13.7 12 L18 16 L10 23 V14.8 L5.4 19.2 L4 17.7 L10 12 L4 6.3 L5.4 4.8 L10 9.2 Z M12 5.5 V10.4 L15 8 Z M12 13.6 V18.5 L15 16 Z",
+        Icon::Moon => "M15.8 2.1 A10 10 0 1 0 21.9 16 A8.5 8.5 0 0 1 15.8 2.1 Z",
+        Icon::Refresh => "M20 4 V10 H14 L16.3 7.7 A6.4 6.4 0 1 0 18.1 15.1 L20.3 15.8 A8.7 8.7 0 1 1 18 6.1 Z",
         Icon::Brightness => {
             "M11 0 H13 V4 H11 Z M11 20 H13 V24 H11 Z M0 11 H4 V13 H0 Z M20 11 H24 V13 H20 Z M12 6 A6 6 0 1 1 12 18 A6 6 0 1 1 12 6 Z"
         }
