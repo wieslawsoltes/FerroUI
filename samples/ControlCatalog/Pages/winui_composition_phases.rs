@@ -564,7 +564,8 @@ impl Animations {
             if let Some(status) = status.upgrade() {
                 status.set_text(Some(&format!("Completed raised after {} ms", started.elapsed().as_millis())));
             }
-        });
+        })
+        .detach();
         *self.batch.borrow_mut() = Some((batch, subscription));
     }
 }

@@ -68,7 +68,7 @@ impl WaylandWorkerClient {
 
         let after_commit = {
             let worker = worker.clone();
-            compositor.after_commit(move || worker.on_after_commit())
+            compositor.after_commit(move || worker.on_after_commit()).detach()
         };
 
         let marshaller: WorkerMarshaller = {

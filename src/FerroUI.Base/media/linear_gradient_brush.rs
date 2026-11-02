@@ -141,7 +141,7 @@ mod tests {
         target.set_gradient_stops(GradientStops::new());
         let raised = Rc::new(Cell::new(false));
         let r = raised.clone();
-        target.invalidated(move || r.set(true));
+        target.invalidated(move || r.set(true)).detach();
         old.add(GradientStop::new());
         stop.set_offset(1.0);
         assert!(!raised.get());

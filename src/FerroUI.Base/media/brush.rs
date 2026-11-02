@@ -2,7 +2,7 @@ use crate::animation::Animatable;
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{Color, IBrush, ITransform, KnownColors};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::rendering::composition::drawing::{
     transform_get_server, CompositorResourceHolder, ICompositionRenderResource,
 };
@@ -260,19 +260,20 @@ impl Brush {
     }
 
     /// Subscribes to invalidation of the brush: raised whenever a change
-    /// requires the brush to be redrawn. Disposing the returned handle
-    /// unsubscribes.
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// requires the brush to be redrawn. Dropping the returned guard removes
+    /// the handler; [`Subscription::detach`] keeps it for the life of the
+    /// brush.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let object: &FerroObject = self.upcast();
         let weak = object.to_weak();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 if let Some(this) = this.downcast_ref::<Brush>() {
                     this.invalidated.remove(token);
                 }
             }
-        })
+        }))
     }
 
     /// Raises the invalidated notification.
@@ -375,7 +376,7 @@ mod tests {
         let target = SolidColorBrush::new();
         let raised = Rc::new(Cell::new(false));
         let r = raised.clone();
-        target.invalidated(move || r.set(true));
+        target.invalidated(move || r.set(true)).detach();
         target.set_opacity(0.5);
         assert!(raised.get());
     }

@@ -128,7 +128,7 @@ series_props = [
 series = HEADER + IMPORTS + '''use crate::{ChartPoints, ChartPoint};
 use ferroui_base::{FerroObjectImplExt,FerroPropertyChangedEventArgs,Point};
 use ferroui_base::media::{Color,IBrush,PenLineCap,PenLineJoin};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_livecharts::{Series as SeriesSnapshot, SeriesKind, BrushSpace,RadialAlignment,PolarLabelsPosition};
 use ferroui_livecharts::kernel::Coordinate;
@@ -141,7 +141,7 @@ pub struct ChartSeries {
     entity_id:u64,
     values_listener: RefCell<Option<(ChartPoints,u64)>>,
     point_listeners: RefCell<Vec<Rc<dyn IDisposable>>>,
-    brush_listeners: RefCell<Vec<Rc<dyn IDisposable>>>,
+    brush_listeners: RefCell<Vec<Subscription>>,
     changed: HandlerList<dyn Fn()>,
 }
 ferro_class!(ChartSeries: FerroObject);

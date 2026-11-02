@@ -56,7 +56,7 @@ impl FerroObjectImpl for DrawingBrush {
                         this.invalidate_content();
                     }
                 });
-                *this.drawing_subscription.borrow_mut() = Some(Subscription::new(subscription));
+                *this.drawing_subscription.borrow_mut() = Some(subscription);
             }
             this.invalidate_content();
         }
@@ -223,7 +223,7 @@ mod tests {
         let target = DrawingBrush::new();
         let raised = Rc::new(Cell::new(0));
         let r = raised.clone();
-        target.invalidated(move || r.set(r.get() + 1));
+        target.invalidated(move || r.set(r.get() + 1)).detach();
 
         let drawing = GeometryDrawing::new();
         target.set_drawing(&drawing);
