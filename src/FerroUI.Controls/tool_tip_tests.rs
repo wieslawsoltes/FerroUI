@@ -50,7 +50,7 @@ impl Fixture {
                 }
             })
         });
-        Fixture { overlay, tool_tip_open_subscription: tool_tip_open_subscription.map(Subscription::new) }
+        Fixture { overlay, tool_tip_open_subscription }
     }
 
     fn configure_services(&self, base_services: TestServices) -> TestServices {

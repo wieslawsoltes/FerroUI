@@ -57,12 +57,12 @@ impl ToolTipService {
                     this.service_enabled_changed(args);
                 }
             }
-        }));
+        }).detach());
         service.subscriptions.add(ToolTip::tip_property().changed().subscribe(move |e| {
             if let Some(this) = weak.upgrade() {
                 this.tip_changed(e);
             }
-        }));
+        }).detach());
 
         service
     }

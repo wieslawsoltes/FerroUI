@@ -445,7 +445,7 @@ impl TreeViewItem {
             .override_default_value::<TreeViewItem>(crate::automation::IsOffscreenBehavior::FromClip);
         Control::request_bring_into_view_event()
             .add_class_handler::<TreeViewItem>(|x, e| x.on_request_bring_into_view(e)).detach();
-        Self::is_expanded_property().changed().add_class_handler::<TreeViewItem>(|x, e| x.on_is_expanded_changed(e));
+        Self::is_expanded_property().changed().add_class_handler::<TreeViewItem>(|x, e| x.on_is_expanded_changed(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -474,38 +474,44 @@ impl Calendar {
     fn static_constructor() {
         InputElement::is_enabled_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, e| x.on_is_enabled_changed(e.get_new_value::<bool>()));
+            .add_class_handler::<Calendar>(|x, e| x.on_is_enabled_changed(e.get_new_value::<bool>()))
+            .detach();
         Self::first_day_of_week_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, e| x.on_first_day_of_week_changed(e.get_new_value::<DayOfWeek>()));
+            .add_class_handler::<Calendar>(|x, e| x.on_first_day_of_week_changed(e.get_new_value::<DayOfWeek>()))
+            .detach();
         Self::is_today_highlighted_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, _| x.on_is_today_highlighted_changed());
+            .add_class_handler::<Calendar>(|x, _| x.on_is_today_highlighted_changed())
+            .detach();
         Self::display_mode_property().changed().add_class_handler::<Calendar>(|x, e| {
             let (old_mode, mode) = e.get_old_and_new_value::<CalendarMode>();
             x.on_display_mode_property_changed(old_mode, mode);
-        });
+        }).detach();
         Self::selection_mode_property().changed().add_class_handler::<Calendar>(|x, e| {
             x.on_selection_mode_changed(e.get_new_value::<CalendarSelectionMode>())
-        });
+        }).detach();
         Self::allow_tap_range_selection_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, _| x.on_allow_tap_range_selection_changed());
+            .add_class_handler::<Calendar>(|x, _| x.on_allow_tap_range_selection_changed())
+            .detach();
         Self::selected_date_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, e| x.on_selected_date_changed(e.get_new_value::<Option<DateTime>>()));
+            .add_class_handler::<Calendar>(|x, e| x.on_selected_date_changed(e.get_new_value::<Option<DateTime>>()))
+            .detach();
         Self::display_date_property().changed().add_class_handler::<Calendar>(|x, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<DateTime>();
             x.on_display_date_changed(new_value, old_value);
-        });
+        }).detach();
         Self::display_date_start_property().changed().add_class_handler::<Calendar>(|x, e| {
             x.on_display_date_start_changed(e.get_new_value::<Option<DateTime>>())
-        });
+        }).detach();
         Self::display_date_end_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, e| x.on_display_date_end_changed(e.get_new_value::<Option<DateTime>>()));
-        Self::is_week_number_visible_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months());
-        Self::week_number_rule_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months());
+            .add_class_handler::<Calendar>(|x, e| x.on_display_date_end_changed(e.get_new_value::<Option<DateTime>>()))
+            .detach();
+        Self::is_week_number_visible_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months()).detach();
+        Self::week_number_rule_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months()).detach();
         InputElement::key_down_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_down(e)).detach();
         InputElement::key_up_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_up(e)).detach();
     }

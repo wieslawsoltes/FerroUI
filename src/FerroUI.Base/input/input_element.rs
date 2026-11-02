@@ -583,7 +583,7 @@ impl InputElement {
             if let Some(sender) = e.sender().downcast_ref::<InputElement>() {
                 sender.update_is_effectively_enabled();
             }
-        });
+        }).detach();
 
         Self::got_focus_event().add_class_handler::<InputElement>(|x, e| x.on_got_focus_core(e)).detach();
         Self::lost_focus_event().add_class_handler::<InputElement>(|x, e| x.on_lost_focus_core(e)).detach();

@@ -485,10 +485,11 @@ ferroui_base::ferro_properties! { impl PopupFlyoutBase {
 
 impl PopupFlyoutBase {
     fn static_constructor() {
-        FlyoutBase::is_open_property().changed().add_class_handler::<PopupFlyoutBase>(|x, e| x.is_open_changed(e));
+        FlyoutBase::is_open_property().changed().add_class_handler::<PopupFlyoutBase>(|x, e| x.is_open_changed(e)).detach();
         Control::context_flyout_property()
             .changed()
-            .add_class_handler::<Control>(Self::on_context_flyout_property_changed);
+            .add_class_handler::<Control>(Self::on_context_flyout_property_changed)
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

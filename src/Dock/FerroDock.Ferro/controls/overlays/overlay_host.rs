@@ -62,10 +62,12 @@ impl OverlayHost {
         ValueTypes::register_nullable::<OverlayLayerCollection>();
         Self::content_property()
             .changed()
-            .add_class_handler::<Self>(|h, _| h.request_rebuild());
+            .add_class_handler::<Self>(|h, _| h.request_rebuild())
+            .detach();
         Self::content_template_property()
             .changed()
-            .add_class_handler::<Self>(|h, _| h.request_rebuild());
+            .add_class_handler::<Self>(|h, _| h.request_rebuild())
+            .detach();
         Self::overlays_property()
             .changed()
             .add_class_handler::<Self>(|h, e| {
@@ -75,7 +77,8 @@ impl OverlayHost {
                         .cloned()
                         .flatten(),
                 )
-            });
+            })
+            .detach();
         Self::overlay_layers_property()
             .changed()
             .add_class_handler::<Self>(|h, e| {
@@ -85,13 +88,15 @@ impl OverlayHost {
                         .cloned()
                         .flatten(),
                 )
-            });
+            })
+            .detach();
         Self::use_service_layers_property()
             .changed()
             .add_class_handler::<Self>(|h, _| {
                 h.reset_service_layers();
                 h.request_rebuild();
-            });
+            })
+            .detach();
     }
     /// Constructs native source state for this class.
     pub fn construct() -> Self {

@@ -160,13 +160,15 @@ impl LayoutTransformControl {
 
         Self::layout_transform_property()
             .changed()
-            .add_class_handler::<LayoutTransformControl>(|x, e| x.on_layout_transform_changed(e));
+            .add_class_handler::<LayoutTransformControl>(|x, e| x.on_layout_transform_changed(e))
+            .detach();
 
-        Decorator::child_property().changed().add_class_handler::<LayoutTransformControl>(|x, _| x.on_child_changed());
+        Decorator::child_property().changed().add_class_handler::<LayoutTransformControl>(|x, _| x.on_child_changed()).detach();
 
         Self::use_render_transform_property()
             .changed()
-            .add_class_handler::<LayoutTransformControl>(|x, e| x.on_use_render_transform_property_changed(e));
+            .add_class_handler::<LayoutTransformControl>(|x, e| x.on_use_render_transform_property_changed(e))
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -229,7 +231,7 @@ impl LayoutTransformControl {
                     target.set_layout_transform(target.render_transform());
                 }
             });
-            *self.render_transform_changed_event.borrow_mut() = Some(subscription);
+            *self.render_transform_changed_event.borrow_mut() = Some(subscription.detach());
         } else {
             let subscription = self.render_transform_changed_event.borrow().clone();
             if let Some(subscription) = subscription {

@@ -599,7 +599,7 @@ impl SplitButton {
                         this.flyout_placement_property_changed();
                     }
                 });
-            *self.flyout_property_changed_disposable.borrow_mut() = Some(Subscription::new(subscription));
+            *self.flyout_property_changed_disposable.borrow_mut() = Some(subscription);
         }
     }
 
