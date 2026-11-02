@@ -109,8 +109,8 @@ impl Desktop {
         let (w, h) = self.extent.get();
         let (w, h) = (f64::from(w.max(1)), f64::from(h.max(1)));
         let mut spaces = vec![Vec::new(); scene.workspace_count];
-        for win in &scene.windows {
-            if !win.minimized && let Some(space) = spaces.get_mut(win.workspace) {
+        for win in scene.windows.iter().filter(|w| !w.minimized) {
+            if let Some(space) = spaces.get_mut(win.workspace) {
                 space.push(ferroui_base::Rect::new(
                     f64::from(win.x) / w, f64::from(win.y) / h,
                     f64::from(win.width) / w, f64::from(win.height) / h,

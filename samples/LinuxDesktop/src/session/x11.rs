@@ -7,7 +7,7 @@ mod decorations;
 #[path = "placement.rs"]
 mod placement;
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelRect, Ref};
 use ferroui_controls::platform::{X11NetWmWindowType, X11Properties};
@@ -66,7 +66,7 @@ pub struct Session {
     hidden: RefCell<Option<Rc<dyn Fn()>>>,
     desktop: Cell<XID>,
     showing: Cell<bool>,
-    screens_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    screens_subscription: RefCell<Option<Subscription>>,
     screen_bounds: Cell<Option<(PixelRect, f64, i32)>>,
     panel_insets: Cell<(f64, f64)>,
 }
@@ -632,9 +632,7 @@ impl Session {
                     session.fit_primary(&window);
                 }
             });
-            if let Some(previous) = self.screens_subscription.replace(Some(token)) {
-                previous.dispose();
-            }
+            self.screens_subscription.replace(Some(token));
         }
     }
 
@@ -685,9 +683,7 @@ impl Session {
 impl Drop for Session {
     fn drop(&mut self) {
         self.platform.globals().root_property_changed.unsubscribe(self.root_subscription.get());
-        if let Some(token) = self.screens_subscription.take() {
-            token.dispose();
-        }
+        self.screens_subscription.take();
         for id in self.clients.take().into_keys() {
             self.unwatch(id);
         }
