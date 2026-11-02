@@ -40,11 +40,11 @@ pub(super) fn enabled(requested: bool) -> Result<bool, String> {
 }
 
 /// Calls `f` with the values of the build script's environment.
-fn with_environment<R>(f: impl FnOnce(Environment<'_>) -> R) -> R {
+fn with_environment<R>(f: impl FnOnce(ProfileInputs<'_>) -> R) -> R {
     let var = |name: &str| std::env::var(name).ok();
     let (encoded_rustflags, rustflags) = (var("CARGO_ENCODED_RUSTFLAGS"), var("RUSTFLAGS"));
     let (profile, opt_level, debug) = (var("PROFILE"), var("OPT_LEVEL"), var("DEBUG"));
-    f(Environment {
+    f(ProfileInputs {
         cfg_debug_assertions: std::env::var_os("CARGO_CFG_DEBUG_ASSERTIONS").is_some(),
         encoded_rustflags: encoded_rustflags.as_deref(),
         rustflags: rustflags.as_deref(),
@@ -56,7 +56,7 @@ fn with_environment<R>(f: impl FnOnce(Environment<'_>) -> R) -> R {
 
 /// The values Cargo gives a build script that decide the gate.
 #[derive(Clone, Copy, Default)]
-struct Environment<'a> {
+struct ProfileInputs<'a> {
     /// `CARGO_CFG_DEBUG_ASSERTIONS` is set.
     cfg_debug_assertions: bool,
     /// `CARGO_ENCODED_RUSTFLAGS`: the target rustflags separated by `\x1f`.
@@ -73,7 +73,7 @@ struct Environment<'a> {
 
 /// The rule of the module documentation. `cargo_version` is the output of `cargo -V`, read
 /// only for step 5.
-fn decide(environment: &Environment<'_>, cargo_version: impl FnOnce() -> Option<String>) -> Result<bool, String> {
+fn decide(environment: &ProfileInputs<'_>, cargo_version: impl FnOnce() -> Option<String>) -> Result<bool, String> {
     if let Some(value) = rustflag_override(environment) {
         return Ok(value);
     }
@@ -103,7 +103,7 @@ fn decide(environment: &Environment<'_>, cargo_version: impl FnOnce() -> Option<
 }
 
 /// The last `-C debug-assertions[=value]` of the target rustflags.
-fn rustflag_override(environment: &Environment<'_>) -> Option<bool> {
+fn rustflag_override(environment: &ProfileInputs<'_>) -> Option<bool> {
     match environment.encoded_rustflags {
         Some(flags) => last_debug_assertions(flags.split('\u{1f}')),
         None => last_debug_assertions(environment.rustflags.unwrap_or_default().split_whitespace()),
@@ -131,7 +131,7 @@ fn last_debug_assertions<'a>(mut flags: impl Iterator<Item = &'a str>) -> Option
 }
 
 /// Whether the root of the profile has debug assertions: `PROFILE`, else `OPT_LEVEL`.
-fn profile_default(environment: &Environment<'_>) -> Option<bool> {
+fn profile_default(environment: &ProfileInputs<'_>) -> Option<bool> {
     match environment.profile {
         Some("debug") => Some(true),
         Some("release") => Some(false),
@@ -179,7 +179,7 @@ fn is_date(word: &str) -> bool {
         })
 }
 
-fn describe(environment: &Environment<'_>) -> String {
+fn describe(environment: &ProfileInputs<'_>) -> String {
     let show = |value: Option<&str>| value.map_or("unset".to_string(), |value| format!("`{value}`"));
     format!(
         "PROFILE {}, OPT_LEVEL {}, DEBUG {}",
@@ -205,26 +205,26 @@ mod tests {
     const NEW_CARGO: &str = "cargo 1.93.0 (083ac5135 2025-12-15)\n";
     const OLD_CARGO: &str = "cargo 1.90.0 (840b83a10 2025-07-30)\n";
 
-    fn profile(profile: &'static str, opt_level: &'static str) -> Environment<'static> {
+    fn profile(profile: &'static str, opt_level: &'static str) -> ProfileInputs<'static> {
         let debug = if profile == "debug" { "true" } else { "false" };
-        Environment { profile: Some(profile), opt_level: Some(opt_level), debug: Some(debug), encoded_rustflags: Some(""), ..Environment::default() }
+        ProfileInputs { profile: Some(profile), opt_level: Some(opt_level), debug: Some(debug), encoded_rustflags: Some(""), ..ProfileInputs::default() }
     }
 
-    fn with_cfg(environment: Environment<'static>) -> Environment<'static> {
-        Environment { cfg_debug_assertions: true, ..environment }
+    fn with_cfg(environment: ProfileInputs<'static>) -> ProfileInputs<'static> {
+        ProfileInputs { cfg_debug_assertions: true, ..environment }
     }
 
-    fn with_flags(environment: Environment<'static>, flags: &'static str) -> Environment<'static> {
-        Environment { encoded_rustflags: Some(flags), ..environment }
+    fn with_flags(environment: ProfileInputs<'static>, flags: &'static str) -> ProfileInputs<'static> {
+        ProfileInputs { encoded_rustflags: Some(flags), ..environment }
     }
 
     /// The decision with a Cargo of the given `cargo -V` output.
-    fn on(environment: Environment<'_>, cargo: &str) -> Result<bool, String> {
+    fn on(environment: ProfileInputs<'_>, cargo: &str) -> Result<bool, String> {
         decide(&environment, || Some(cargo.to_string()))
     }
 
     /// The decision where reading the Cargo version is a test failure.
-    fn without_version(environment: Environment<'_>) -> Result<bool, String> {
+    fn without_version(environment: ProfileInputs<'_>) -> Result<bool, String> {
         decide(&environment, || panic!("the Cargo version is not needed"))
     }
 
@@ -238,7 +238,7 @@ mod tests {
         for (root, opt_level) in [("debug", "0"), ("release", "3"), ("release", "0"), ("debug", "3")] {
             assert_eq!(without_version(with_cfg(profile(root, opt_level))), Ok(true), "{root} {opt_level}");
         }
-        assert_eq!(without_version(with_cfg(Environment::default())), Ok(true));
+        assert_eq!(without_version(with_cfg(ProfileInputs::default())), Ok(true));
     }
 
     #[test]
@@ -261,7 +261,7 @@ mod tests {
 
     #[test]
     fn without_a_known_profile_root_the_opt_level_decides() {
-        let level = |profile: Option<&'static str>, opt_level| Environment { profile, opt_level: Some(opt_level), ..Environment::default() };
+        let level = |profile: Option<&'static str>, opt_level| ProfileInputs { profile, opt_level: Some(opt_level), ..ProfileInputs::default() };
         assert_eq!(on(level(None, "0"), OLD_CARGO), Ok(true));
         assert_eq!(on(level(Some("custom"), "0"), OLD_CARGO), Ok(true));
         assert_eq!(on(level(None, "0"), NEW_CARGO), Ok(false));
@@ -272,10 +272,10 @@ mod tests {
 
     #[test]
     fn an_undetermined_profile_is_an_error() {
-        let error = without_version(Environment::default()).unwrap_err();
+        let error = without_version(ProfileInputs::default()).unwrap_err();
         assert!(error.contains("CARGO_CFG_DEBUG_ASSERTIONS is not set"), "{error}");
         assert!(error.contains("PROFILE unset, OPT_LEVEL unset, DEBUG unset"), "{error}");
-        let unknown = Environment { profile: Some("other"), opt_level: Some("4"), ..Environment::default() };
+        let unknown = ProfileInputs { profile: Some("other"), opt_level: Some("4"), ..ProfileInputs::default() };
         assert!(without_version(unknown).unwrap_err().contains("PROFILE `other`, OPT_LEVEL `4`"));
     }
 
@@ -308,7 +308,7 @@ mod tests {
             ("-Cdebug-assertions=off\u{1f}-Copt-level=0\u{1f}-Cdebug-assertions=on", true),
         ];
         for (flags, expected) in cases {
-            for environment in [profile("debug", "0"), profile("release", "3"), with_cfg(profile("debug", "0")), with_cfg(profile("release", "3")), Environment::default()] {
+            for environment in [profile("debug", "0"), profile("release", "3"), with_cfg(profile("debug", "0")), with_cfg(profile("release", "3")), ProfileInputs::default()] {
                 assert_eq!(without_version(with_flags(environment, flags)), Ok(expected), "{flags:?}");
             }
         }
@@ -323,10 +323,10 @@ mod tests {
 
     #[test]
     fn rustflags_are_read_only_without_the_encoded_variable() {
-        let plain = |rustflags| Environment { rustflags: Some(rustflags), encoded_rustflags: None, ..profile("release", "3") };
+        let plain = |rustflags| ProfileInputs { rustflags: Some(rustflags), encoded_rustflags: None, ..profile("release", "3") };
         assert_eq!(without_version(plain("-C debug-assertions=on")), Ok(true));
         assert_eq!(without_version(plain("-Cdebug-assertions  -C  debug-assertions=off")), Ok(false));
-        let both = Environment { rustflags: Some("-Cdebug-assertions=on"), ..profile("release", "3") };
+        let both = ProfileInputs { rustflags: Some("-Cdebug-assertions=on"), ..profile("release", "3") };
         assert_eq!(without_version(both), Ok(false));
     }
 

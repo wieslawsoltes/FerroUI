@@ -48,7 +48,7 @@ pub(super) fn before_cargo_1_93(requested: bool) -> Result<bool, String> {
         return Ok(false);
     }
     with_environment(|environment| {
-        let environment = Environment { cfg_debug_assertions: false, ..environment };
+        let environment = ProfileInputs { cfg_debug_assertions: false, ..environment };
         decide(&environment, || Some("cargo 1.90.0 (840b83a10 2025-07-30)".to_string()))
     })
 }
