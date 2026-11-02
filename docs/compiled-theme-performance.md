@@ -2,7 +2,25 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
-## The 600 KB full-theme target
+## What the 59.50 MB WinUI executable contains
+
+The stripped Linux x86-64 consumer at `9c484e44` embeds a 245,385-byte FXP containing the complete WinUI theme. Its LLD map accounts for the following allocated input sections. Code instantiated in another crate is charged to the crate that supplied the object file.
+
+| Input archive | Allocated MB |
+| --- | ---: |
+| FerroUI.Controls | 27.51 |
+| FerroUI.Base | 17.54 |
+| Markup.Xaml.Loader | 2.13 |
+| Markup.Xaml | 1.83 |
+| Dialogs | 1.69 |
+| XamlX | 0.63 |
+| WinUI including the archive | 0.59 |
+
+In the same executable, machine code occupies 38.88 MB, exception and unwind tables 11.21 MB, and dynamic relocations 4.70 MB. These ELF section totals cut across the crates in the table. [ELF and archive breakdown](benchmarks/solid-theme-link-allocations-linux-x86_64.json)
+
+Sharing inherited virtual-table construction, cast adapters and the slow path for markup argument coercion removed **4,471,800 bytes** from that executable. Rebuilding with the same archive, release settings and open reflection registrations produced a 55,026,792-byte binary. Inherited virtual-table builders fell from 1,236,349 to 223,872 bytes, registered cast routines from 709,884 to 232,491 bytes, and specialized markup argument readers from 623,216 to 320,687 bytes. Interpreting the syntax archive still took approximately 1.8 seconds through first Button. [Isolated source comparison, linked sections and launches](benchmarks/solid-theme-framework-erasure-linux-x86_64.json)
+
+## Earlier 600 KB full-theme result
 
 The complete WinUI crate occupies **585,562 allocated bytes** with the solid FXP backend on Linux x86-64. This includes the 245,385-byte archive of all 169 WinUI documents, native code, metadata, writable data, TLS and unwind tables. The size profile sets only the WinUI crate to `opt-level="z"` and `codegen-units=1`. The remaining dependencies use release optimization for speed. The resulting application occupies 59,498,592 bytes after stripping.
 
