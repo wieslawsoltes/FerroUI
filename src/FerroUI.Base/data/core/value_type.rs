@@ -1887,6 +1887,13 @@ fn register_defaults() {
     ValueTypes::register_cast::<std::time::Duration, crate::animation::SignedDuration>(|duration| {
         crate::animation::SignedDuration::from(*duration)
     });
+    // Text converts to a duration as it converts to a time span, and a negative one does not
+    // convert.
+    fn parse_duration(text: &str) -> Option<std::time::Duration> {
+        crate::animation::SignedDuration::parse(text).ok()?.to_duration()
+    }
+    ValueTypes::register_parse::<std::time::Duration>(parse_duration);
+    ValueTypes::register_conversion::<String, Option<std::time::Duration>>(|text| parse_duration(text).map(Some));
 }
 
 impl ValueTypes {
@@ -2761,9 +2768,16 @@ mod tests {
         let longest = ValueTypes::try_cast(&(Rc::new(Duration::MAX) as BoxedValue), span).expect("a time span");
         assert_eq!(longest.downcast_ref::<SignedDuration>(), Some(&SignedDuration::MAX_VALUE));
 
-        // Its text and its order are the ones of the time span.
+        // Its text and its order are the ones of the time span, and text converts to it as
+        // to a time span.
         let text = ValueTypes::to_display_string(Some(&(Rc::new(Duration::from_millis(1500)) as BoxedValue)));
         assert_eq!(text, "00:00:01.5000000");
+        let parsed = ValueTypes::try_convert(Some(&(Rc::new(text) as BoxedValue)), duration).flatten().expect("a duration");
+        assert_eq!(parsed.downcast_ref::<Duration>(), Some(&Duration::from_millis(1500)));
+        let nullable_text: BoxedValue = Rc::new("0:0:2".to_string());
+        let parsed = ValueTypes::try_convert(Some(&nullable_text), ValueType::of::<Option<Duration>>()).flatten();
+        assert_eq!(parsed.expect("a nullable duration").downcast_ref::<Option<Duration>>(), Some(&Some(Duration::from_secs(2))));
+        assert!(ValueTypes::try_convert(Some(&(Rc::new("-0:0:1".to_string()) as BoxedValue)), duration).is_none());
         let shorter: BoxedValue = Rc::new(Duration::from_secs(1));
         let longer: BoxedValue = Rc::new(Duration::from_secs(2));
         assert_eq!(ValueTypes::compare(&shorter, &longer), Some(std::cmp::Ordering::Less));
