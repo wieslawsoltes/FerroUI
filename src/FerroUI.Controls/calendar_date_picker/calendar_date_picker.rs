@@ -469,7 +469,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                     this.pop_up_closed();
                 }
             });
-            *this.pop_up_closed_subscription.borrow_mut() = Some(Subscription::new(closed));
+            *this.pop_up_closed_subscription.borrow_mut() = Some(closed);
 
             if this.is_drop_down_open() {
                 this.open_drop_down();

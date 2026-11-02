@@ -92,10 +92,10 @@ fn impl_activate_should_call_raise_activated_event() {
 
     let raised = Rc::new(Cell::new(false));
     let target = TestWindowBase::with_impl(&platform_impl);
-    let _ = target.activated({
+    target.activated({
         let raised = raised.clone();
         move || raised.set(true)
-    });
+    }).detach();
 
     activated(&platform_impl);
 
@@ -109,10 +109,10 @@ fn impl_deactivate_should_call_raise_deativated_event() {
 
     let raised = Rc::new(Cell::new(false));
     let target = TestWindowBase::with_impl(&platform_impl);
-    let _ = target.deactivated({
+    target.deactivated({
         let raised = raised.clone();
         move || raised.set(true)
-    });
+    }).detach();
 
     deactivated(&platform_impl);
 
@@ -155,10 +155,10 @@ fn active_window_should_be_deactivated_when_impl_signals_close() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let target = TestWindowBase::with_impl(&window_impl);
     let deactivated = Rc::new(Cell::new(0));
-    let _ = target.deactivated({
+    target.deactivated({
         let deactivated = deactivated.clone();
         move || deactivated.set(deactivated.get() + 1)
-    });
+    }).detach();
 
     target.show();
     activated(&window_impl);
@@ -178,10 +178,10 @@ fn inactive_window_should_not_raise_deactivated_when_impl_signals_close() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let target = TestWindowBase::with_impl(&window_impl);
     let deactivated = Rc::new(Cell::new(0));
-    let _ = target.deactivated({
+    target.deactivated({
         let deactivated = deactivated.clone();
         move || deactivated.set(deactivated.get() + 1)
-    });
+    }).detach();
 
     target.show();
     assert!(!target.is_active());
@@ -245,10 +245,10 @@ fn showing_should_raise_opened() {
     let target = TestWindowBase::new();
     let raised = Rc::new(Cell::new(false));
 
-    let _ = target.opened({
+    target.opened({
         let raised = raised.clone();
         move || raised.set(true)
-    });
+    }).detach();
 
     target.show();
 

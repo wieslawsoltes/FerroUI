@@ -49,7 +49,7 @@ pub struct ComboBox {
     base: SelectingItemsControl,
     popup: RefCell<Option<Ref<Popup>>>,
     // The subscriptions to the opened and closed events of the popup.
-    popup_subscriptions: RefCell<Option<(Rc<dyn IDisposable>, Rc<dyn IDisposable>)>>,
+    popup_subscriptions: RefCell<Option<(ferroui_base::reactive::Subscription, ferroui_base::reactive::Subscription)>>,
     selection_box_item: RefCell<Option<BoxedValue>>,
     subscriptions_on_open: CompositeDisposable,
     input_text_box: RefCell<Option<Ref<TextBox>>>,

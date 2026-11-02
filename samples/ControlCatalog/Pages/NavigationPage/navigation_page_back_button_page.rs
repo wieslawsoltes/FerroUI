@@ -150,13 +150,13 @@ impl NavigationPageBackButtonPage {
             if let Some(this) = weak.upgrade() {
                 this.add_log(&format!("Pushed: \"{}\"", header_text(&ev.page())));
             }
-        });
+        }).detach();
         let weak = self.to_ref().downgrade();
         demo_nav.popped(move |ev| {
             if let Some(this) = weak.upgrade() {
                 this.add_log(&format!("Popped: \"{}\"", header_text(&ev.page())));
             }
-        });
+        }).detach();
 
         let page = self.create_page(
             "Home",
@@ -304,7 +304,7 @@ impl NavigationPageBackButtonPage {
                     }
                 }
             })
-        });
+        }).detach();
 
         self.push_then_log(page, move |_| format!("Guarded page ({mode}) pushed"));
     }

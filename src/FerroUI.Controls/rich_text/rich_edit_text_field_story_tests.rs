@@ -528,12 +528,12 @@ fn rich_field_live_publication_installs_acted_endpoints_before_newer_callback_ra
     let updated = range.clone();
     let called = Rc::new(Cell::new(false));
     let observed = called.clone();
-    let _subscription = document.editor().changed(move || {
+    document.editor().changed(move || {
         if !observed.replace(true) {
             assert_eq!(positions(&updated), 0..18);
             updated.set_range(offset(0), offset(0)).unwrap();
         }
-    });
+    }).detach();
     assert!(range.set_link(Some("\"x\"")).unwrap());
     assert!(called.get());
     assert_eq!(positions(&range), 0..0);
@@ -549,14 +549,14 @@ fn rich_field_live_external_publication_write_survives_interrupted_link_and_clea
     let model = document.document();
     let called = Rc::new(Cell::new(false));
     let observed = called.clone();
-    let _subscription = document.editor().changed(move || {
+    document.editor().changed(move || {
         if !observed.replace(true) {
             model
                 .replace_text(0..model.text_length(), "external")
                 .unwrap();
             updated.set_range(offset(0), offset(0)).unwrap();
         }
-    });
+    }).detach();
     assert!(matches!(
         range.set_link(Some("\"x\"")),
         Err(TextFieldError::Edit(EditError::ReentrantEdit))

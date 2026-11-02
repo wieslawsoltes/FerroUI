@@ -295,7 +295,7 @@ impl LAvenirAppPage {
                 nav_page.resources().set("NavigationBarBackground", solid_resource(bg_light()));
                 nav_page.resources().set("NavigationBarForeground", solid_resource(text_dark()));
             }
-        });
+        }).detach();
 
         drop(nav_page.push_async(detail));
     }

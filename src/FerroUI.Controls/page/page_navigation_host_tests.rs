@@ -33,7 +33,7 @@ fn page_set_fires_navigated_to() {
     let page = page_with_header("Home");
     let fired = Rc::new(RefCell::new(false));
     let f = fired.clone();
-    page.navigated_to(move |_| *f.borrow_mut() = true);
+    page.navigated_to(move |_| *f.borrow_mut() = true).detach();
 
     let host = PageNavigationHost::new();
     let _root = TestRoot::with_child(host.clone());
@@ -48,7 +48,7 @@ fn page_set_navigated_to_navigation_type_is_replace() {
     let page = page_with_header("Home");
     let args: Rc<RefCell<Option<NavigatedToEventArgs>>> = Rc::default();
     let a = args.clone();
-    page.navigated_to(move |e| *a.borrow_mut() = Some(e.clone()));
+    page.navigated_to(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     let host = PageNavigationHost::new();
     let _root = TestRoot::with_child(host.clone());
@@ -64,7 +64,7 @@ fn page_set_navigated_to_previous_page_is_null() {
     let page = page_with_header("Home");
     let args: Rc<RefCell<Option<NavigatedToEventArgs>>> = Rc::default();
     let a = args.clone();
-    page.navigated_to(move |e| *a.borrow_mut() = Some(e.clone()));
+    page.navigated_to(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     let host = PageNavigationHost::new();
     let _root = TestRoot::with_child(host.clone());
@@ -85,7 +85,7 @@ fn page_changed_fires_navigated_from_on_old_page() {
 
     let args: Rc<RefCell<Option<NavigatedFromEventArgs>>> = Rc::default();
     let a = args.clone();
-    first.navigated_from(move |e| *a.borrow_mut() = Some(e.clone()));
+    first.navigated_from(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     host.set_page(&second);
 
@@ -105,7 +105,7 @@ fn page_changed_fires_navigated_to_on_new_page() {
 
     let args: Rc<RefCell<Option<NavigatedToEventArgs>>> = Rc::default();
     let a = args.clone();
-    second.navigated_to(move |e| *a.borrow_mut() = Some(e.clone()));
+    second.navigated_to(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     host.set_page(&second);
 
@@ -124,7 +124,7 @@ fn page_set_to_null_fires_navigated_from_on_old_page() {
 
     let args: Rc<RefCell<Option<NavigatedFromEventArgs>>> = Rc::default();
     let a = args.clone();
-    page.navigated_from(move |e| *a.borrow_mut() = Some(e.clone()));
+    page.navigated_from(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     host.set_page(None);
 
@@ -144,9 +144,9 @@ fn page_changed_fires_lifecycle_events_in_order() {
 
     let order: Rc<RefCell<Vec<&'static str>>> = Rc::default();
     let o = order.clone();
-    first.navigated_from(move |_| o.borrow_mut().push("NavigatedFrom"));
+    first.navigated_from(move |_| o.borrow_mut().push("NavigatedFrom")).detach();
     let o = order.clone();
-    second.navigated_to(move |_| o.borrow_mut().push("NavigatedTo"));
+    second.navigated_to(move |_| o.borrow_mut().push("NavigatedTo")).detach();
 
     host.set_page(&second);
 

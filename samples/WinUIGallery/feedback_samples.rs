@@ -79,7 +79,7 @@ fn wire_progress_rings(root: &Ref<Control>) {
             }
             ring.set_range_value(value.value());
         }
-    });
+    }).detach();
     for (ring_name, option_name) in [
         ("ProgressRing1", "BackgroundComboBox1"),
         ("ProgressRing2", "BackgroundComboBox2"),
@@ -109,7 +109,7 @@ fn wire_ratings(root: &Ref<Control>) {
     let Some(rating) = find::<RatingControl>(root, "RatingControl1") else {
         return;
     };
-    rating.value_changed(|sender| sender.set_caption("Your rating"));
+    rating.value_changed(|sender| sender.set_caption("Your rating")).detach();
     let weak_output = root.get_control::<TextBlock>("RatingOutput").downgrade();
     let weak_rating = rating.downgrade();
     rating.property_changed(move |change| {
@@ -139,7 +139,7 @@ fn wire_badges(root: &Ref<Control>) {
                 badge.set_numeric_value(number as i32);
             }
         }
-    });
+    }).detach();
     let options = root.get_control::<ComboBox>("InfoBadgeStyleComboBox");
     let weak_root = root.downgrade();
     let weak_options = options.downgrade();

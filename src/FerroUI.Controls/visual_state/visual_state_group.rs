@@ -6,7 +6,7 @@
 
 use super::{AppliedSetters, VisualState, VisualStateChangedEventArgs};
 use ferroui_base::collections::FerroList;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use crate::Control;
 use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObject, FerroObjectImpl, Ref, WeakRef};
@@ -104,34 +104,38 @@ impl VisualStateGroup {
         self.states.snapshot().iter().find(|state| state.is_named(name)).cloned()
     }
 
-    /// Adds a handler of `CurrentStateChanging`, raised when a change of state begins. Disposing
-    /// the returned handle removes it.
+    /// Adds a handler of `CurrentStateChanging`, raised when a change of state begins.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for
+    /// the life of the group.
     pub fn current_state_changing(
         &self,
         handler: impl Fn(&Ref<VisualStateGroup>, &VisualStateChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.current_state_changing.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.current_state_changing.remove(token);
             }
-        })
+        }))
     }
 
     /// Adds a handler of `CurrentStateChanged`, raised when a change of state has completed.
-    /// Disposing the returned handle removes it.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it
+    /// for the life of the group.
     pub fn current_state_changed(
         &self,
         handler: impl Fn(&Ref<VisualStateGroup>, &VisualStateChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.current_state_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.current_state_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Enters `state` (or no state): applies its setters, then removes the values of the state

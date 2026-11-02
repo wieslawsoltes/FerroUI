@@ -32,7 +32,7 @@ impl FerroObjectImpl for WindowAutomationPeer {
                     this.on_opened();
                 }
             });
-            *this.opened_subscription.borrow_mut() = Some(Subscription::new(subscription));
+            *this.opened_subscription.borrow_mut() = Some(subscription);
         }
 
         let weak = this.to_ref().downgrade();
@@ -41,7 +41,7 @@ impl FerroObjectImpl for WindowAutomationPeer {
                 this.on_closed();
             }
         });
-        *this.closed_subscription.borrow_mut() = Some(Subscription::new(subscription));
+        *this.closed_subscription.borrow_mut() = Some(subscription);
     }
 }
 

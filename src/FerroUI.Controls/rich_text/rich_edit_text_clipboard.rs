@@ -8,7 +8,7 @@ use crate::rich_text::rich_text_transfer::RichTextTransferContent;
 use crate::rich_text::{RichEditClipboardFormat, RichTextPasteFormat, RichTextTransfer};
 use ferroui_base::input::platform::{ClipboardError, IClipboard};
 use ferroui_base::input::{IAsyncDataTransfer, LocalBoxFuture};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use std::cell::Cell;
 
 /// Only data retrieved from the clipboard belongs to the caller. Keep it alive
@@ -30,7 +30,8 @@ struct PendingRange {
     generation: u64,
     mutation_version: u64,
     editor_changed: Rc<Cell<bool>>,
-    subscription: Rc<dyn IDisposable>,
+    /// The observation of the editor, removed when the request is dropped.
+    _subscription: Subscription,
 }
 
 impl PendingRange {
@@ -43,7 +44,7 @@ impl PendingRange {
             generation: range.data.borrow().generation,
             mutation_version: range.document().mutation_version(),
             editor_changed: changed,
-            subscription,
+            _subscription: subscription,
         }
     }
 
@@ -58,12 +59,6 @@ impl PendingRange {
             ));
         }
         Ok(())
-    }
-}
-
-impl Drop for PendingRange {
-    fn drop(&mut self) {
-        self.subscription.dispose();
     }
 }
 

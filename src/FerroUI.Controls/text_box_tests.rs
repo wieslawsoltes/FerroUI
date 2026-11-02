@@ -2334,11 +2334,11 @@ fn preedit_survives_reentrant_layout_invalidation_from_caret_bounds_changed() {
     // does exactly that). The preedit update must still complete against the layout
     // it computed with instead of dereferencing the reentrantly cleared field.
     let weak = presenter.downgrade();
-    let _subscription = presenter.caret_bounds_changed(move || {
+    presenter.caret_bounds_changed(move || {
         if let Some(presenter) = weak.upgrade() {
             presenter.hide_caret();
         }
-    });
+    }).detach();
 
     client.set_preedit_text_with_cursor(Some("かん"), Some(2));
 

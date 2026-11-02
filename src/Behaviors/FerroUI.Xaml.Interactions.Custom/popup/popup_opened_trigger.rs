@@ -35,7 +35,7 @@ ferroui_base::ferro_overrides! {
                         trigger.on_opened();
                     }
                 });
-                *this.opened.borrow_mut() = Some(Subscription::new(subscription));
+                *this.opened.borrow_mut() = Some(subscription);
             }
         }
 

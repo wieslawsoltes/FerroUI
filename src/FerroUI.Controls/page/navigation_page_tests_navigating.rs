@@ -228,7 +228,7 @@ fn push_async_with_transition_when_cancelled_stack_unchanged_after_cancel() {
             args.set_cancel(true);
         }
         completed()
-    });
+    }).detach();
 
     let custom_transition = cross_fade();
     wait(nav.push_async_with_transition(page(), custom_transition));
@@ -251,7 +251,7 @@ fn pop_async_with_transition_when_cancelled_stack_unchanged_after_cancel() {
     let top = page();
     wait(nav.push_async(&top));
 
-    top.navigating(cancel_navigation(&flag()));
+    top.navigating(cancel_navigation(&flag())).detach();
 
     wait(nav.pop_async_with_transition(cross_fade()));
 
@@ -271,7 +271,7 @@ fn pop_to_root_async_awaits_async_navigating_handler() {
     wait(nav.push_async(&top));
 
     let handler_invoked = flag();
-    top.navigating(cancel_navigation(&handler_invoked));
+    top.navigating(cancel_navigation(&handler_invoked)).detach();
 
     wait(nav.pop_to_root_async());
 
@@ -292,7 +292,7 @@ fn pop_to_page_async_awaits_async_navigating_handler() {
     wait(nav.push_async(&top));
 
     let handler_invoked = flag();
-    top.navigating(cancel_navigation(&handler_invoked));
+    top.navigating(cancel_navigation(&handler_invoked)).detach();
 
     wait(nav.pop_to_page_async(&root));
 
@@ -309,7 +309,7 @@ fn push_sync_invokes_navigating_event() {
     wait(nav.push_async(&root));
 
     let handler_invoked = flag();
-    root.navigating(cancel_navigation(&handler_invoked));
+    root.navigating(cancel_navigation(&handler_invoked)).detach();
 
     wait(nav.push_async(page()));
 
@@ -327,7 +327,7 @@ fn pop_sync_invokes_navigating_event() {
     wait(nav.push_async(&top));
 
     let handler_invoked = flag();
-    top.navigating(cancel_navigation(&handler_invoked));
+    top.navigating(cancel_navigation(&handler_invoked)).detach();
 
     wait(nav.pop_async());
 
@@ -345,12 +345,12 @@ fn navigating_cancel_in_first_handler_skips_subsequent_handlers() {
     wait(nav.push_async(&top));
 
     let second_handler_invoked = flag();
-    top.navigating(cancel_navigation(&flag()));
+    top.navigating(cancel_navigation(&flag())).detach();
     let invoked = second_handler_invoked.clone();
     top.navigating(move |_| {
         invoked.set(true);
         completed()
-    });
+    }).detach();
 
     wait(nav.pop_async());
 
@@ -372,7 +372,7 @@ fn navigating_cancel_in_on_navigating_from_skips_navigating_event() {
     top.navigating(move |_| {
         invoked.set(true);
         completed()
-    });
+    }).detach();
 
     wait(nav.pop_async());
 

@@ -20,7 +20,7 @@ use std::rc::Rc;
 struct TopLevelSubscriptions {
     top_level: Ref<TopLevel>,
     back_requested: RoutedEventHandlerToken,
-    scaling_changed: Rc<dyn IDisposable>,
+    scaling_changed: Subscription,
 }
 
 /// The subscription made on the insets manager of the top-level.

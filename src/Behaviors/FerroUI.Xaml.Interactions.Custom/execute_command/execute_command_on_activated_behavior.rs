@@ -43,7 +43,7 @@ ferroui_base::ferro_overrides! {
                     if let Some(behavior) = behavior.upgrade() {
                         behavior.window_on_activated();
                     }
-                });
+                }).detach();
             }
 
             DisposableAction::empty()

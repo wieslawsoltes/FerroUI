@@ -288,7 +288,7 @@ impl Interaction {
                         HandlerSet::FromChangedEvent => Self::top_level_opened_from_changed_event(&d),
                     }
                 }
-            }));
+            }).detach());
         }
 
         *handlers.0.borrow_mut() = subscriptions;

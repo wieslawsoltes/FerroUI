@@ -428,7 +428,7 @@ fn detach_and_reattach_collection_changed_still_fires_pages_changed() {
 
     let fire_count = Rc::new(Cell::new(0));
     let f = fire_count.clone();
-    tp.pages_changed(move |_| f.set(f.get() + 1));
+    tp.pages_changed(move |_| f.set(f.get() + 1)).detach();
 
     pages.add(hp("A"));
     pages.add(hp("B"));
@@ -466,7 +466,7 @@ fn dropped_page_keeps_subscription_of_other_page_sharing_its_pages() {
 
     let fire_count = Rc::new(Cell::new(0));
     let f = fire_count.clone();
-    second.pages_changed(move |_| f.set(f.get() + 1));
+    second.pages_changed(move |_| f.set(f.get() + 1)).detach();
 
     drop(first);
 

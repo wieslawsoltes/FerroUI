@@ -106,8 +106,8 @@ fn create_main_window() -> Ref<Window> {
     window.set_height(400.0);
     window.set_content(Some(Control::boxed(border)));
 
-    window.opened(|| println!("Window opened"));
-    window.closed(|| println!("Window closed"));
+    window.opened(|| println!("Window opened")).detach();
+    window.closed(|| println!("Window closed")).detach();
 
     if let Some(ms) = std::env::var("FERROUI_SMOKE_EXIT_MS").ok().and_then(|v| v.parse::<u64>().ok()) {
         println!("Will close the main window after {ms} ms");
@@ -168,7 +168,7 @@ fn smoke_tray(application: &Application) {
     let icon = TrayIcon::new();
     icon.set_tool_tip_text(Some("FerroUI hello window".to_string()));
     icon.set_menu(Some(menu));
-    let _ = icon.clicked(|_| println!("Tray icon clicked"));
+    icon.clicked(|_| println!("Tray icon clicked")).detach();
 
     let icons = TrayIcons::new();
     icons.add(icon.clone());

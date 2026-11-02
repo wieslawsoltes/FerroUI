@@ -107,13 +107,13 @@ impl FerroObjectImpl for HostWindow {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let owner = this.to_ref();
-        let _ = this.position_changed(move |_| owner.host_position_changed());
+        this.position_changed(move |_| owner.host_position_changed()).detach();
         let owner = this.to_ref();
         let _ = this.layout_updated(move || owner.host_layout_updated()).detach();
         let owner = this.to_ref();
-        let _ = this.activated(move || owner.host_activated());
+        this.activated(move || owner.host_activated()).detach();
         let owner = this.to_ref();
-        let _ = this.deactivated(move || owner.host_deactivated());
+        this.deactivated(move || owner.host_deactivated()).detach();
         let options = this
             .construction_options
             .borrow_mut()

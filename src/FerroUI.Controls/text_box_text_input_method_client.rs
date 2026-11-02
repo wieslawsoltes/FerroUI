@@ -524,7 +524,7 @@ impl TextBoxTextInputMethodClient {
                     this.on_presenter_caret_bounds_changed();
                 }
             });
-            *self.caret_bounds_changed.borrow_mut() = Some(Subscription::new(caret_bounds_changed));
+            *self.caret_bounds_changed.borrow_mut() = Some(caret_bounds_changed);
         }
 
         self.raise_text_view_visual_changed();

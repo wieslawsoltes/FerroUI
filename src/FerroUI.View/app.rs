@@ -26,7 +26,7 @@ pub fn mount_window(view: impl FnOnce() -> crate::Element) -> Ref<Window> {
             }
         }
     });
-    let _closed = window.closed(move || owner.dispose());
+    window.closed(move || owner.dispose()).detach();
     window
 }
 

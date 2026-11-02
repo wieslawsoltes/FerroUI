@@ -102,13 +102,13 @@ impl ContentPageEventsPage {
             if let (Some(this), Some(page)) = (weak.upgrade(), weak_page.upgrade()) {
                 this.add_log(&format!("[{}] NavigatedTo (type: {:?})", header(&page), e.navigation_type()));
             }
-        });
+        }).detach();
         let (weak, weak_page) = (self.to_ref().downgrade(), page.downgrade());
         page.navigated_from(move |_| {
             if let (Some(this), Some(page)) = (weak.upgrade(), weak_page.upgrade()) {
                 this.add_log(&format!("[{}] NavigatedFrom", header(&page)));
             }
-        });
+        }).detach();
         let (weak, weak_page) = (self.to_ref().downgrade(), page.downgrade());
         page.navigating(move |args| {
             let (weak, weak_page, args) = (weak.clone(), weak_page.clone(), args.clone());
@@ -126,7 +126,7 @@ impl ContentPageEventsPage {
                     this.add_log(&format!("[{}] Navigating", header(&page)));
                 }
             })
-        });
+        }).detach();
     }
 
     /// `async void`: nothing follows the push.

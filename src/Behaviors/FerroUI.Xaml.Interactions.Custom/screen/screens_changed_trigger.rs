@@ -1,7 +1,7 @@
 //! Port of `Screen/ScreensChangedTrigger.cs`.
 
 use crate::{AttachedToVisualTreeTriggerBase, AttachedToVisualTreeTriggerBaseImpl, ScreensRef};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::EventArgs;
 use ferroui_base::{
@@ -23,7 +23,7 @@ pub struct ScreensChangedTrigger {
     base: AttachedToVisualTreeTriggerBase,
     // The screens the trigger listens to, with the subscription to their change (the reference
     // removes its delegate).
-    subscribed: RefCell<Option<(ScreensRef, Rc<dyn IDisposable>)>>,
+    subscribed: RefCell<Option<(ScreensRef, Subscription)>>,
 }
 
 ferro_class!(ScreensChangedTrigger: AttachedToVisualTreeTriggerBase);

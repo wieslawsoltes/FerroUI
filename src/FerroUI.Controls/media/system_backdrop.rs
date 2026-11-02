@@ -380,7 +380,8 @@ impl SystemBackdropImpl for SystemBackdrop {
                     configuration.set_is_input_active(active);
                     notify();
                 };
-                subscriptions.push(if active { window.activated(handler) } else { window.deactivated(handler) });
+                let subscription = if active { window.activated(handler) } else { window.deactivated(handler) };
+                subscriptions.push(subscription.detach());
             }
         }
         this.configurations.borrow_mut().push(PerTargetConfiguration {

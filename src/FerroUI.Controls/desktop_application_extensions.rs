@@ -44,7 +44,7 @@ impl Application {
         };
         let cts = CancellationTokenSource::new();
         let source = cts.clone();
-        main_window.closed(move || source.cancel());
+        main_window.closed(move || source.cancel()).detach();
         if !main_window.is_visible() {
             main_window.show();
         }

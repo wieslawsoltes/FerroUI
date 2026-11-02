@@ -1326,17 +1326,21 @@ impl RichTextBlock {
         }
     }
 
+    /// Adds a handler of the changes of the selection.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the block.
     pub fn selection_changed(
         &self,
         handler: impl Fn(&RichTextSelectionChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.selection_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.selection_changed.remove(token);
             }
-        })
+        }))
     }
 
     pub fn selected_text(&self) -> String {

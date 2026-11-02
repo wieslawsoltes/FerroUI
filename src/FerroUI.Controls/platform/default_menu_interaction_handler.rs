@@ -581,7 +581,7 @@ impl DefaultMenuInteractionHandler {
                         this.window_deactivated();
                     }
                 });
-                *self.window_deactivated.borrow_mut() = Some(Subscription::new(subscription));
+                *self.window_deactivated.borrow_mut() = Some(subscription);
             }
 
             if root.platform_impl().is_some() {
@@ -591,7 +591,7 @@ impl DefaultMenuInteractionHandler {
                         this.top_level_lost_platform_focus();
                     }
                 });
-                *self.top_level_lost_platform_focus.borrow_mut() = Some(Subscription::new(subscription));
+                *self.top_level_lost_platform_focus.borrow_mut() = Some(subscription);
             }
         }
 
