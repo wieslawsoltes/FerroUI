@@ -81,12 +81,12 @@ samples/LinuxDesktop/build.sh run -- --theme=material --scene=applications
 | Ctrl+P / Ctrl+Shift+P in search | Pin or unpin the selected result / switch between all applications and pins. In the pinned list, Alt+Left or Alt+Right moves the entry. |
 | Ctrl+W | Switch or create workspaces, arrange a client, or move it to a named workspace. The overview exposes actions supported by the window manager. |
 | Ctrl+N | Read or dismiss notifications, invoke actions and toggle Do Not Disturb. Banners leave the active application's keyboard focus intact. |
-| Ctrl+Shift+Q | Open Quick Settings. Adjust default audio output, toggle Wi-Fi and control available backlights. While open, M toggles mute, + and − change volume, and W toggles the wireless radio. |
+| Ctrl+Shift+Q | Open the system controls. M mutes the default audio output, + and − step its volume, W toggles Wi-Fi and B toggles the Bluetooth adapter. The panel also provides Do Not Disturb, appearance, and a slider for each detected backlight. |
 | Ctrl+Shift+C, or the date and time | Open the native FerroUI calendar and browse months with the mouse or keyboard. |
 
 The managed login session can provide the freedesktop notification service. Windowed previews share the surrounding desktop and leave its notification service alone. See [Notifications](NOTIFICATIONS.md) and [Windows and workspaces](WINDOWS.md).
 
-Quick Settings reads the current default sink using WirePlumber or PulseAudio, including PipeWire's PulseAudio compatibility server. NetworkManager supplies radio state and the active connection. UPower supplies the display battery. Brightness uses the kernel backlight class and the current logind session's `SetBrightness` method. Device operations run outside the UI dispatcher. The panel refreshes while visible and reconciles changes with the provider's response.
+Quick Settings reads the current default sink using WirePlumber or PulseAudio, including PipeWire's PulseAudio compatibility server. NetworkManager supplies radio state and the active connection. BlueZ supplies Bluetooth adapter power through its ObjectManager and Adapter1 interfaces. UPower supplies the display battery. Brightness uses the kernel backlight class and the current logind session's `SetBrightness` method. Device operations run outside the UI dispatcher. The panel refreshes while visible and reconciles changes with the provider's response.
 
 ## Login session
 

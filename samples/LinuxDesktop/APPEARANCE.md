@@ -28,6 +28,16 @@ The Android profile reserves 48 logical pixels for the status strip and 72 for i
 
 In the FerroUI compositor, wallpaper, client buffers and chrome share the scene. Backdrop brushes sample the content underneath as it changes. Windowed previews can sample their wallpaper. Independent Wayland layer surfaces and separate notification windows use solid theme brushes because client pixels belong to another render target. The acrylic effect graph also observes FerroUI's platform transparency and energy-saving policy.
 
+## System controls
+
+| Windows quick actions | macOS Control Center | Android Quick Settings |
+| --- | --- | --- |
+| ![Three WinUI quick actions and the native sound slider](screenshots/quick-settings.webp) | ![Wi-Fi and Bluetooth modules, Focus, appearance and Sound](screenshots/macos-control-center.webp) | ![Android shade with time, tonal tiles and the media volume slider](screenshots/material-quick-settings.webp) |
+
+Windows opens a compact quick-action grid above the taskbar. On macOS the connectivity module groups Wi-Fi and Bluetooth next to Focus and Dark mode. Android opens its two-column shade below the status strip. Each profile uses the shell's notification service for Do Not Disturb and the active theme for color mode. High Contrast preserves the selected Windows accessibility mode.
+
+Volume and brightness sliders support keyboard adjustment and commit the final thumb position on release. While a device write is in flight, the shell keeps the latest requested percentage for each destination. Bluetooth power is read back from the same BlueZ adapter after a write. The panel disables controls for unavailable providers and requests a fresh snapshot while it is open.
+
 ## Profile color modes
 
 The appearance chooser offers **Light** and **Dark** for macOS and Material. With the chooser focused, press **L** or **D**. Each profile keeps its own selection in `macos-style` or `material-style` beside the `appearance` file. Switching away and returning, including after restarting the shell, restores that profile's choice. Both default to dark. A color change updates the existing control theme, shell palette and managed window decorations together.

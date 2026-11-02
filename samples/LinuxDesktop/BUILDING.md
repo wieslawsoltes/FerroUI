@@ -70,7 +70,7 @@ For comparisons, use the same compiler profile, Vulkan driver, display resolutio
 
 ## Exercise desktop services
 
-The native suites create private X displays, settings directories and D-Bus sessions. The device-controls suite also starts an isolated PulseAudio daemon with a null sink and exports NetworkManager and UPower test objects. It verifies the sink volume, mute state and radio writes through the same interfaces used by the shell. Physical backlight access depends on the active logind session and hardware.
+The native suites create private X displays, settings directories and D-Bus sessions. The device-controls suite also starts an isolated PulseAudio daemon with a null sink and exports NetworkManager, BlueZ and UPower test objects. It checks volume and mute against the sink and checks both Wi-Fi and Bluetooth power writes on the private bus across all three profiles. Physical backlight access depends on the active logind session and hardware.
 
 ```sh
 samples/LinuxDesktop/tests/favorites.sh target/release/ferro-desktop /tmp/ferro-favorites
