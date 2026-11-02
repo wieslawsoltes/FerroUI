@@ -1,4 +1,4 @@
-//! FXB v1 compiled theme resource blocks. A block belongs to one dictionary run and
+//! FXB compiled theme resource blocks. A block belongs to one dictionary run and
 //! contains exactly one factory kind. There are no type names, constructors or pointers.
 //! Strings are interned in lexical order, UTF-8 prefix-compressed, and expanded once
 //! into a shared buffer. Every integer except ARGB is canonical unsigned LEB128.
@@ -8,7 +8,9 @@
 
 use std::{fmt, sync::Arc};
 
-const HEADER: &[u8; 5] = b"FXB\0\x01";
+const MAGIC: &[u8; 4] = b"FXB\0";
+const STEP_LINE: u8 = 16;
+const REPEAT: u8 = 15;
 pub const MAX_BLOCK_BYTES: usize = 16 << 20;
 const MAX_ITEMS: usize = 1 << 20;
 
@@ -148,21 +150,49 @@ impl Batch {
     /// Decode one whole immutable block. Truncation, trailing data, unbounded counts,
     /// dangling references and out-of-range source locations are errors.
     pub fn decode(bytes: &[u8]) -> Result<Self, Error> {
-        if bytes.len() > MAX_BLOCK_BYTES || !bytes.starts_with(HEADER) {
+        if bytes.len() > MAX_BLOCK_BYTES || !bytes.starts_with(MAGIC) {
             return Err(Error("invalid FXB header, version or length"));
         }
-        let mut bytes = &bytes[HEADER.len()..];
+        let mut bytes = &bytes[MAGIC.len()..];
+        let version = take(&mut bytes, 1)?[0];
         let kind =
             Kind::from_wire(take(&mut bytes, 1)?[0]).ok_or(Error("unsupported FXB record kind"))?;
+        let repeat = match version {
+            1 => 0,
+            2 => {
+                let flags = take(&mut bytes, 1)?[0];
+                if flags & REPEAT == 0 || flags > (STEP_LINE | REPEAT)
+                    || flags & STEP_LINE != 0 && flags & 1 == 0 {
+                    return Err(Error("invalid FXB location flags"));
+                }
+                flags
+            }
+            _ => return Err(Error("unsupported FXB version")),
+        };
         let strings = uint(&mut bytes)? as usize;
         let count = uint(&mut bytes)? as usize;
-        // Every string requires two lengths, every row at least six bytes.
-        if strings > MAX_ITEMS || count > MAX_ITEMS || strings * 2 + count * 6 > bytes.len() {
+        if strings > MAX_ITEMS || count > MAX_ITEMS {
+            return Err(Error("invalid FXB counts"));
+        }
+        let shared = (repeat & REPEAT).count_ones() as usize;
+        // First row stores all four coordinates. Later rows omit predictable fields.
+        let location_bytes = count * 4 - count.saturating_sub(1) * shared;
+        let components = match kind {
+            Kind::Double => 1,
+            Kind::Thickness | Kind::CornerRadius => 4,
+            _ => 0,
+        };
+        let value_bytes = match kind {
+            Kind::Color | Kind::LiteralBrush => 4,
+            _ => components.max(1),
+        };
+        let minimum_rows = location_bytes + count * (1 + value_bytes);
+        if strings * 2 + minimum_rows > bytes.len() {
             return Err(Error("invalid FXB counts"));
         }
         // A resource name is often longer than its compressed spelling. Seed the
         // pool without trusting a count alone or reserving space used by records.
-        let estimated_text = strings.saturating_mul(32).min(bytes.len() - count * 6);
+        let estimated_text = strings.saturating_mul(32).min(bytes.len() - minimum_rows);
         let mut text = String::with_capacity(estimated_text);
         let mut ends = Vec::with_capacity(strings + 1);
         ends.push(0);
@@ -186,19 +216,13 @@ impl Batch {
             previous_start = start;
         }
 
-        let components = match kind {
-            Kind::Double => 1,
-            Kind::Thickness | Kind::CornerRadius => 4,
-            _ => 0,
-        };
-        // Counts have already been bounded. Each numeric component needs at least
-        // one wire byte before any backing storage is reserved.
-        if count * (5 + components) > bytes.len() {
+        if minimum_rows > bytes.len() {
             return Err(Error("truncated FXB block"));
         }
         let mut rows = Vec::with_capacity(count);
         let mut numbers = Vec::with_capacity(count * components);
-        for _ in 0..count {
+        let mut locations = [0u32; 4];
+        for row in 0..count {
             let key = uint(&mut bytes)?;
             let value = match kind {
                 Kind::Double | Kind::Thickness | Kind::CornerRadius => {
@@ -223,10 +247,18 @@ impl Batch {
             {
                 return Err(Error("invalid FXB string index"));
             }
-            let line = uint(&mut bytes)?;
-            let column = uint(&mut bytes)?;
-            let value_line = relative(line, uint(&mut bytes)?)?;
-            let value_column = relative(column, uint(&mut bytes)?)?;
+            let mask = if row == 0 { 0 } else { repeat };
+            if mask & STEP_LINE != 0 {
+                locations[0] += 1; // the preceding line was checked against i32::MAX
+            }
+            for (field, value) in locations.iter_mut().enumerate() {
+                if mask & (1 << field) == 0 {
+                    *value = uint(&mut bytes)?;
+                }
+            }
+            let [line, column, dl, dc] = locations;
+            let value_line = relative(line, dl)?;
+            let value_column = relative(column, dc)?;
             if line > i32::MAX as u32 || column > i32::MAX as u32 {
                 return Err(Error("invalid FXB source position"));
             }

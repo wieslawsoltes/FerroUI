@@ -13,6 +13,32 @@ fn zigzag(base: u32, next: u32) -> u32 {
     ((delta << 1) ^ (delta >> 31)) as u32
 }
 
+fn location(row: &Resource<'_>) -> [u32; 4] {
+    [row.line, row.column, zigzag(row.line, row.value_line), zigzag(row.column, row.value_column)]
+}
+
+// Select lanes only when every row satisfies the prediction. Singletons and
+// irregular blocks keep their v1 encoding, without an extra mode byte.
+fn location_flags(rows: &[Resource<'_>]) -> u8 {
+    let Some(first) = rows.first() else { return 0 };
+    let base = location(first);
+    let mut same = REPEAT;
+    let mut steps = true;
+    for (i, row) in rows.iter().enumerate().skip(1) {
+        let next = location(row);
+        for field in 0..4 {
+            if next[field] != base[field] {
+                same &= !(1 << field);
+            }
+        }
+        steps &= next[0] == base[0] + i as u32;
+    }
+    if steps {
+        same |= STEP_LINE | 1;
+    }
+    if (rows.len() - 1) * (same & REPEAT).count_ones() as usize > 1 { same } else { 0 }
+}
+
 /// Encode a homogeneous run without changing insertion or error order.
 pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
     if rows.len() > MAX_ITEMS {
@@ -48,8 +74,13 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
     {
         return Err(Error("FXB string table too large"));
     }
-    let mut out = HEADER.to_vec();
+    let repeat = location_flags(rows);
+    let mut out = MAGIC.to_vec();
+    out.push(if repeat == 0 { 1 } else { 2 });
     out.push(kind as u8);
+    if repeat != 0 {
+        out.push(repeat);
+    }
     uint(&mut out, strings.len() as u32);
     uint(&mut out, rows.len() as u32);
     let mut previous = "";
@@ -68,7 +99,7 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
         previous = s;
     }
     let index = |s: &str| strings.binary_search(&s).expect("interned resource string") as u32;
-    for row in rows {
+    for (i, row) in rows.iter().enumerate() {
         uint(&mut out, index(row.key));
         match row.value {
             Value::Argb(value) => out.extend_from_slice(&value.to_le_bytes()),
@@ -81,10 +112,11 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
                 }
             }
         }
-        uint(&mut out, row.line);
-        uint(&mut out, row.column);
-        uint(&mut out, zigzag(row.line, row.value_line));
-        uint(&mut out, zigzag(row.column, row.value_column));
+        for (field, value) in location(row).into_iter().enumerate() {
+            if i == 0 || repeat & (1 << field) == 0 {
+                uint(&mut out, value);
+            }
+        }
     }
     if out.len() > MAX_BLOCK_BYTES {
         return Err(Error("FXB block too large"));

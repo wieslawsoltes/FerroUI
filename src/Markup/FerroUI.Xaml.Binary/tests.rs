@@ -154,3 +154,30 @@ fn numeric_operands_preserve_every_ieee_bit_and_reject_partial_wide_values() {
         }
     }
 }
+
+#[test]
+fn predictable_positions_roundtrip_with_explicit_v1_and_overflow_checks() {
+    let old = b"FXB\0\x01\x02\x01\x01\x00\x01A\x00\xff\x00\x00\xff\x01\x01\x00\x00";
+    assert_eq!(Batch::decode(old).unwrap().records().next().unwrap().line, 1);
+    let rows: Vec<_> = (0..3).map(|i| Resource {
+        key: "A", value: Value::Import(i), line: i32::MAX as u32 - 2 + i, column: i,
+        value_line: i32::MAX as u32 - 3 + i, value_column: i + 4,
+    }).collect();
+    let image = encode(Kind::DeferredFactory, &rows).unwrap();
+    assert_eq!(image[4], 2);
+    for (row, expected) in Batch::decode(&image).unwrap().records().zip(&rows) {
+        assert_eq!([row.line, row.column, row.value_line, row.value_column],
+            [expected.line as i32, expected.column as i32, expected.value_line as i32, expected.value_column as i32]);
+    }
+    for end in 0..image.len() {
+        assert!(Batch::decode(&image[..end]).is_err());
+    }
+    for flags in [0, 16, 18, 255] {
+        let mut bad = image.clone();
+        bad[6] = flags;
+        assert!(Batch::decode(&bad).is_err());
+    }
+    // Two rows with a consecutive-line prediction starting at i32::MAX.
+    let overflow = b"FXB\0\x02\x05\x1f\x01\x02\x00\x01A\x00\x00\xff\xff\xff\xff\x07\x00\x00\x00\x00\x00";
+    assert!(Batch::decode(overflow).is_err());
+}
