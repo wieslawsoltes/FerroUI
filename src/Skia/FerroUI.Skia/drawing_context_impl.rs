@@ -1961,6 +1961,52 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         }
     }
 
+    /// A save layer whose paint has Skia's matrix convolution: the kernel
+    /// turned by half a turn (Skia correlates, SVG and Direct2D convolve),
+    /// the bias on Skia's scale of 0 to 255; the hard edges are a crop of
+    /// the layer to the bounds that repeats its edge pixels.
+    fn push_convolve_matrix_layer(&mut self, bounds: Rect, convolution: &ferroui_base::media::ConvolveMatrix) {
+        self.check_lease();
+        let kernel = convolution.correlation_kernel();
+        let (target_x, target_y) = convolution.target();
+        let size = sk::ISize::new(convolution.kernel_width as i32, convolution.kernel_height as i32);
+        let bounds = to_sk_rect(bounds);
+        let (tile_mode, crop) = if convolution.clamp_edges {
+            (sk::TileMode::Clamp, sk::image_filters::CropRect::from(bounds))
+        } else {
+            (sk::TileMode::Decal, sk::image_filters::CropRect::NO_CROP_RECT)
+        };
+        let filter = if (size.width * size.height) as usize == kernel.len() {
+            sk::image_filters::matrix_convolution(
+                size,
+                &kernel,
+                convolution.gain(),
+                convolution.bias * 255.0,
+                sk::IPoint::new(target_x as i32, target_y as i32),
+                tile_mode,
+                !convolution.preserve_alpha,
+                None,
+                crop,
+            )
+        } else {
+            None
+        };
+        let mut paint = SkPaintCache::get();
+        paint.set_image_filter(filter);
+        let canvas = self.canvas.get();
+        canvas.save();
+        // Nothing outside the bounds is kept.
+        canvas.clip_rect(bounds, sk::ClipOp::Intersect, false);
+        canvas.save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+        SkPaintCache::return_reset(paint);
+    }
+
+    fn pop_convolve_matrix_layer(&mut self) {
+        self.check_lease();
+        self.restore_canvas();
+        self.restore_canvas();
+    }
+
     fn draw_lighting(&mut self, rect: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
         self.check_lease();
         let Some(shader) =
