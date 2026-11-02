@@ -69,6 +69,14 @@ search() {
     key ctrl+a
     xdotool type --clearmodifiers --delay 12 "Ferro Fixture $1"
 }
+# A catalog group comes from GDesktopAppInfo, independent of display names.
+cat >"$XDG_DATA_HOME/applications/ferro-ide.desktop" <<ENTRY
+[Desktop Entry]
+Type=Application
+Name=00 Fixture IDE
+Categories=IDE;Development;
+Exec=/usr/bin/touch "$fixture/ide.launched"
+ENTRY
 start_shell windows "$@"
 key ctrl+k; sleep .25
 search Atlas; key ctrl+p; pins_are '["ferro-atlas.desktop"]'
@@ -95,6 +103,21 @@ echo 'Verified GIO launch from restored pins, reordering and removal.'
 # Spotlight has six rows per page. The wide Material drawer has fifteen tiles.
 key alt+F4
 wait "$shell_pid"; shell_pid=
+start_shell windows "$@"
+key ctrl+k; sleep .25
+key ctrl+3
+for ((i=0; i<60; i++)); do [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/start-view" 2>/dev/null || :) == Category ]] && break; sleep .1; done
+[[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/start-view") == Category ]]
+sleep .2; import -window "$shell_window" "$output/start-categories.png"
+# Development sorts first. Return opens its folder; Alt+Left returns to All.
+key Return alt+Left Return Return
+for ((i=0; i<80; i++)); do [[ -f "$fixture/ide.launched" ]] && break; sleep .1; done
+[[ -f "$fixture/ide.launched" ]] || { echo "Start category did not launch its selected app" >&2; exit 1; }
+key ctrl+k; sleep .25; key ctrl+2
+for ((i=0; i<60; i++)); do [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/start-view") == List ]] && break; sleep .1; done
+[[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/start-view") == List ]]
+sleep .2; import -window "$shell_window" "$output/start-recent-list.png"
+key alt+F4; wait "$shell_pid"; shell_pid=
 for number in {01..18}; do
     cat >"$XDG_DATA_HOME/applications/ferro-navigation-$number.desktop" <<ENTRY
 [Desktop Entry]

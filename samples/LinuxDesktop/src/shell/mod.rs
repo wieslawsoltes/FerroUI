@@ -53,6 +53,7 @@ struct Shell {
     snapshot: Signal<Snapshot>,
     status: Signal<String>,
     launching: Signal<bool>,
+    recent_apps: Signal<Vec<usize>>,
     owner: Owner,
     clicked_output: std::cell::RefCell<Option<String>>,
     desktop_focus: NodeRef<ferroui_controls::Button>,
@@ -167,6 +168,7 @@ impl Shell {
         }
         self.launching.set(true);
         self.status.set(format!("Opening {}…", application.name));
+        let index = self.catalog.index_of(&application.id);
         let application = application.clone();
         let display = self
             .session
@@ -186,6 +188,13 @@ impl Shell {
                 shell.launching.set(false);
                 match result {
                     Ok(_) => {
+                        if let Some(index) = index {
+                            shell.recent_apps.update(|items| {
+                                items.retain(|&old| old != index);
+                                items.insert(0, index);
+                                items.truncate(6);
+                            });
+                        }
                         shell.dismiss();
                         shell.query.set_if_changed(String::new());
                         shell.page.set_if_changed(0);
@@ -310,6 +319,7 @@ fn create(
         session,
         status: signal(initial_status),
         launching: signal(false),
+        recent_apps: signal(Vec::new()),
         clicked_output: Default::default(),
         owner: Owner::current().expect("desktop view must be mounted in a FerroUI owner"),
         desktop_focus: NodeRef::new(),

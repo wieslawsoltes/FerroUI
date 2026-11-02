@@ -1,5 +1,6 @@
 //! Keyboard-first search with a bounded number of mounted results. Changing the
 //! query leaves the text box, its selection and its input-method context intact.
+mod browse;
 use super::appearance::Layout;
 use super::chrome::*;
 use super::{feedback, Shell};
@@ -7,6 +8,7 @@ use crate::services::{
     favorites::{self, Edit},
     DesktopApplication,
 };
+use browse::{Entry, StartView};
 use ferroui_base::input::{Key, KeyModifiers};
 use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
 use ferroui_base::media::FontWeight;
@@ -21,8 +23,24 @@ enum Results {
 }
 
 impl Results {
-    fn for_view(layout: Layout, width: f64, searching: bool, pinned: bool) -> Self {
-        if pinned || layout == Layout::MenuBarDock || (layout == Layout::Taskbar && searching) {
+    fn for_view(
+        layout: Layout,
+        width: f64,
+        searching: bool,
+        pinned: bool,
+        start: StartView,
+        groups: bool,
+    ) -> Self {
+        if groups {
+            return Self::Tiles {
+                columns: (((width - 58.0) / 155.0) as usize).clamp(1, 3),
+                rows: 2,
+            };
+        }
+        if pinned
+            || layout == Layout::MenuBarDock
+            || (layout == Layout::Taskbar && (searching || start == StartView::List))
+        {
             return Self::List;
         }
         let columns = ((width - 64.0) / 96.0) as usize;
@@ -30,6 +48,28 @@ impl Results {
             columns: columns.clamp(1, if layout == Layout::Taskbar { 6 } else { 5 }),
             rows: if layout == Layout::Taskbar { 2 } else { 3 },
         }
+    }
+
+    fn navigate(self, key: Key, current: usize, length: usize, editing: bool) -> Option<usize> {
+        let last = length.checked_sub(1)?;
+        let columns = match self {
+            Self::Tiles { columns, .. } if !editing => columns,
+            _ => 1,
+        };
+        let next = match key {
+            Key::Down => current.saturating_add(columns),
+            Key::Up => current.saturating_sub(columns),
+            Key::Left if !editing && matches!(self, Self::Tiles { .. }) => {
+                current.saturating_sub(1)
+            }
+            Key::Right if !editing && matches!(self, Self::Tiles { .. }) => {
+                current.saturating_add(1)
+            }
+            Key::PageDown => current.saturating_add(self.capacity()),
+            Key::PageUp => current.saturating_sub(self.capacity()),
+            _ => return None,
+        };
+        Some(next.min(last))
     }
 
     fn capacity(self) -> usize {
@@ -50,16 +90,55 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let pinned_only = signal(false);
     let favorites = shell.favorites;
     let searching = memo(move |_| query.with(|q| !q.trim().is_empty()));
-    let presentation =
-        memo(move |_| Results::for_view(layout, width.get(), searching.get(), pinned_only.get()));
+    let start_view = signal(if layout == Layout::Taskbar {
+        StartView::preferred()
+    } else {
+        StartView::Grid
+    });
+    let category = signal(None::<&'static str>);
+    let categories = memo(move |_| {
+        layout == Layout::Taskbar
+            && start_view.get() == StartView::Categories
+            && !searching.get()
+            && !pinned_only.get()
+    });
+    let group_page = memo(move |_| categories.get() && category.get().is_none());
+    let presentation = memo(move |_| {
+        Results::for_view(
+            layout,
+            width.get(),
+            searching.get(),
+            pinned_only.get(),
+            start_view.get(),
+            group_page.get(),
+        )
+    });
     let matches = memo(move |_| {
-        query.with(|q| {
-            if pinned_only.get() {
-                favorites.with(|pins| catalog.pinned_indices(pins, q))
-            } else {
-                catalog.search_indices(q)
-            }
-        })
+        if group_page.get() {
+            return catalog
+                .groups()
+                .keys()
+                .copied()
+                .map(Entry::Category)
+                .collect();
+        }
+        let apps = if categories.get() {
+            category.with(|label| {
+                label
+                    .and_then(|name| catalog.groups().get(name))
+                    .cloned()
+                    .unwrap_or_default()
+            })
+        } else {
+            query.with(|q| {
+                if pinned_only.get() {
+                    favorites.with(|pins| catalog.pinned_indices(pins, q))
+                } else {
+                    catalog.search_indices(q)
+                }
+            })
+        };
+        apps.into_iter().map(Entry::App).collect::<Vec<_>>()
     });
     let count = memo(move |_| matches.with(Vec::len));
     let pages = memo(move |_| count.get().div_ceil(presentation.get().capacity()).max(1));
@@ -73,7 +152,8 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 .min(presentation.get().capacity() - 1);
         position.min(count.get().saturating_sub(1))
     });
-    let selected_app = memo(move |_| matches.with(|items| items.get(selected.get()).copied()));
+    let selected_entry = memo(move |_| matches.with(|items| items.get(selected.get()).copied()));
+    let selected_app = memo(move |_| selected_entry.get().and_then(Entry::app));
     let highlight = memo(move |_| {
         if slot.get().is_some() || searching.get() || layout == Layout::MenuBarDock {
             selected_app.get()
@@ -94,6 +174,25 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         })
     };
 
+    let set_category = move |next| {
+        batch(|| {
+            category.set_if_changed(next);
+            set_page(0);
+        })
+    };
+    let status = shell.status;
+    let select_view = move |view: StartView| {
+        if view == start_view.get_untracked() {
+            return;
+        }
+        batch(|| {
+            start_view.set(view);
+            set_category(None);
+        });
+        if let Err(error) = view.save() {
+            status.set(format!("Could not save the Start view. {error}"));
+        }
+    };
     let state = shell.clone();
     let results = dynamic(move || -> Element {
         if count.get() == 0 {
@@ -137,14 +236,27 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     .columns(columns as i32)
                     .children(
                         items
-                            .map(|index| result_tile(&state, index, highlight, layout))
+                            .map(|entry| match entry {
+                                Entry::App(index) => result_tile(&state, index, highlight, layout),
+                                Entry::Category(name) => {
+                                    browse::category_tile(&state, name, selected_entry, move || {
+                                        set_category(Some(name))
+                                    })
+                                }
+                            })
                             .collect::<Vec<_>>(),
                     )
                     .into(),
+                Results::List
+                    if layout == Layout::Taskbar && !searching.get() && !pinned_only.get() =>
+                {
+                    browse::alphabetic_list(&state, items.filter_map(Entry::app), highlight)
+                }
                 Results::List => stack_panel()
                     .spacing(2.0)
                     .children(
                         items
+                            .filter_map(Entry::app)
                             .map(|index| result_row(&state, index, pinned_only.get(), highlight))
                             .collect::<Vec<_>>(),
                     )
@@ -159,7 +271,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let search = text_box()
         .name("ApplicationSearch")
         .automation_properties_name("Search installed applications")
-        .automation_properties_help_text("Use Up and Down to select an application. Press Enter to open it or Control+P to pin it.")
+        .automation_properties_help_text("Use arrow keys to select, Enter to open, or Control+P to pin an application. In Start, Alt+Left returns to categories.")
         .placeholder_text(match layout {
             Layout::Taskbar => "Search for apps",
             Layout::MenuBarDock => "Spotlight Search",
@@ -180,7 +292,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 ring.set_is_visible(false);
             }
         })
-        .on_changed(ferroui_controls::TextBox::text_property(), move |_| set_page(0))
+        .on_changed(ferroui_controls::TextBox::text_property(), move |_| set_category(None))
         .with(move |input| {
             input.set_focus_adorner(None);
             let weak = input.downgrade();
@@ -196,16 +308,14 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 let capacity = presentation.get_untracked().capacity();
                 let index = selected_app.get_untracked();
                 match (e.key, e.key_modifiers) {
-                    (Key::Down | Key::Up | Key::PageDown | Key::PageUp, KeyModifiers::NONE) => {
-                        let current = selected.get_untracked();
-                        let length = count.get_untracked();
-                        if length == 0 { return; }
-                        let next = match e.key {
-                            Key::Down => current + 1,
-                            Key::Up => current.saturating_sub(1),
-                            Key::PageDown => current + capacity,
-                            _ => current.saturating_sub(capacity),
-                        }.min(length - 1);
+                    (Key::D1 | Key::D2 | Key::D3, KeyModifiers::CONTROL) if layout == Layout::Taskbar => {
+                        select_view(StartView::ALL[(e.key as i32 - Key::D1 as i32) as usize]);
+                    }
+                    (Key::Left, KeyModifiers::ALT) if categories.get_untracked() && category.get_untracked().is_some() => set_category(None),
+                    (Key::Down | Key::Up | Key::PageDown | Key::PageUp | Key::Right | Key::Left, KeyModifiers::NONE) => {
+                        let Some(next) = presentation.get_untracked().navigate(
+                            e.key, selected.get_untracked(), count.get_untracked(), !shell.query.get_untracked().is_empty()
+                        ) else { return; };
                         batch(|| {
                             page.set_if_changed(next / capacity);
                             slot.set_if_changed(Some(next % capacity));
@@ -221,7 +331,11 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                         if let Some(index) = index { toggle_pin(&shell, index); }
                     }
                     (Key::Return, KeyModifiers::NONE) => {
-                        if let Some(index) = index { shell.launch(&shell.catalog.applications()[index]); }
+                        match selected_entry.get_untracked() {
+                            Some(Entry::App(i)) => shell.launch(&shell.catalog.applications()[i]),
+                            Some(Entry::Category(name)) => set_category(Some(name)),
+                            None => {}
+                        }
                     }
                     _ => return,
                 }
@@ -255,6 +369,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         (true, _, _) => "Pinned applications",
         (_, true, _) => "Search results",
         (_, _, Layout::MenuBarDock) => "Applications",
+        _ if categories.get() => category.get().unwrap_or("All apps"),
         _ => "All apps",
     };
     let previous = icon_action("Previous results", Icon::Back, move || {
@@ -288,6 +403,48 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     .background(p.muted),
             )
             .into()
+    } else {
+        Element::Empty
+    };
+    let show_recent = memo(move |_| {
+        !searching.get() && !pinned_only.get() && category.get().is_none() && active_page.get() == 0
+    });
+    let picker: Element = if layout == Layout::Taskbar {
+        combo_box()
+            .name("StartCatalogView")
+            .automation_properties_name("All apps view")
+            .tool_tip_tip("All apps view (Ctrl+1 Grid, Ctrl+2 List, Ctrl+3 Category)")
+            .min_width(88.0)
+            .min_height(28.0)
+            .height(30.0)
+            .children(StartView::ALL.map(StartView::label))
+            .selected_index(move || start_view.get() as i32)
+            .on_changed(
+                ferroui_controls::primitives::SelectingItemsControl::selected_index_property(),
+                move |&i| {
+                    if let Ok(i) = usize::try_from(i) {
+                        if let Some(&view) = StartView::ALL.get(i) {
+                            select_view(view);
+                        }
+                    }
+                },
+            )
+            .is_visible(move || !searching.get() && !pinned_only.get())
+            .into()
+    } else {
+        Element::Empty
+    };
+    let back: Element = if layout == Layout::Taskbar {
+        icon_action("Back to app categories", Icon::Back, move || {
+            set_category(None)
+        })
+        .width(28.0)
+        .height(28.0)
+        .padding(6)
+        .border_thickness(0)
+        .background("Transparent")
+        .is_visible(move || categories.get() && category.get().is_some())
+        .into()
     } else {
         Element::Empty
     };
@@ -329,35 +486,43 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                             ),
                     ),
             )
-            .child(pinned_preview(
-                shell,
-                layout,
-                searching,
-                pinned_only,
-                active_page,
-            ))
+            .child(
+                stack_panel()
+                    .grid_row(2)
+                    .child(pinned_preview(
+                        shell,
+                        layout,
+                        searching,
+                        pinned_only,
+                        active_page,
+                    ))
+                    .child(browse::recent(shell, layout, show_recent)),
+            )
             .child(
                 grid()
                     .grid_row(3)
                     .column_definitions("*,Auto")
                     .margin((6.0, 9.0, 4.0, 5.0))
                     .child(
-                        shell_text("", if spotlight { 12.0 } else { 16.0 }, Ink::Primary)
-                            .text(section)
-                            .font_weight(FontWeight::SemiBold),
+                        row(5.0).child(back).child(
+                            shell_text("", if spotlight { 12.0 } else { 16.0 }, Ink::Primary)
+                                .text(section)
+                                .font_weight(FontWeight::SemiBold),
+                        ),
                     )
                     .child(
-                        action("Change application scope", toggle_scope)
-                            .grid_column(1)
-                            .automation_properties_name(scope_name)
-                            .height(30.0)
-                            .min_height(0.0)
-                            .padding((10.0, 2.0))
-                            .child(
-                                row(6.0)
-                                    .child(shell_text("", 12.0, Ink::Primary).text(scope_name))
-                                    .child(glyph(Icon::Forward, 9.0, p.muted)),
-                            ),
+                        row(5.0).grid_column(1).child(picker).child(
+                            action("Change application scope", toggle_scope)
+                                .automation_properties_name(scope_name)
+                                .height(30.0)
+                                .min_height(0.0)
+                                .padding((10.0, 2.0))
+                                .child(
+                                    row(6.0)
+                                        .child(shell_text("", 12.0, Ink::Primary).text(scope_name))
+                                        .child(glyph(Icon::Forward, 9.0, p.muted)),
+                                ),
+                        ),
                     ),
             )
             .child(
@@ -374,12 +539,16 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     .grid_row(5)
                     .column_definitions("*,Auto")
                     .margin((6.0, 7.0, 4.0, 0.0))
-                    .child(
-                        shell_text("", 12.0, Ink::Secondary).text(move || match count.get() {
-                            1 => "1 application".to_owned(),
-                            n => format!("{n} applications"),
-                        }),
-                    )
+                    .child(shell_text("", 12.0, Ink::Secondary).text(move || {
+                        if group_page.get() {
+                            format!("{} categories", count.get())
+                        } else {
+                            match count.get() {
+                                1 => "1 application".to_owned(),
+                                n => format!("{n} applications"),
+                            }
+                        }
+                    }))
                     .child(
                         row(7.0)
                             .grid_column(1)
@@ -526,15 +695,10 @@ fn pin_button(shell: &Rc<Shell>, index: usize) -> El<ferroui_controls::Button> {
 /// Grid tiles expose the desktop's native context gesture without a row of
 /// pin buttons over the application artwork. The explicit pin button remains
 /// available in every list, including search on Windows and pinned management.
-fn result_tile(
-    shell: &Rc<Shell>,
-    index: usize,
-    selected: Memo<Option<usize>>,
-    layout: Layout,
-) -> Element {
-    let app = &shell.catalog.applications()[index];
-    let state = shell.clone();
-    let pinned = shell.favorites.with(|ids| ids.contains(&app.id));
+fn pin_menu(shell: &Rc<Shell>, index: usize) -> ferroui_base::Ref<ferroui_controls::ContextMenu> {
+    let pinned = shell
+        .favorites
+        .with(|ids| ids.contains(&shell.catalog.applications()[index].id));
     let pin = ferroui_controls::MenuItem::new();
     pin.set_header(Some(Rc::new(if pinned {
         "Unpin application".to_owned()
@@ -548,6 +712,18 @@ fn result_tile(
     let menu = ferroui_controls::ContextMenu::new();
     menu.items()
         .add(Some(ferroui_controls::Control::boxed(pin)));
+    menu
+}
+
+fn result_tile(
+    shell: &Rc<Shell>,
+    index: usize,
+    selected: Memo<Option<usize>>,
+    layout: Layout,
+) -> Element {
+    let app = &shell.catalog.applications()[index];
+    let state = shell.clone();
+    let menu = pin_menu(shell, index);
     let p = colors();
     let material = layout == Layout::BottomNavigation;
     let artwork = if material {
