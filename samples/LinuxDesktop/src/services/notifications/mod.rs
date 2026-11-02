@@ -379,7 +379,7 @@ mod delivery_tests {
             .unwrap();
         service.timer.replace(Some(Alarm {
             deadline: start + Duration::from_millis(10),
-            cancel: Disposable::create(|| {}),
+            _timer: Disposable::create(|| {}).into(),
         }));
         assert!(matches!(
             service.notify(id, request(0)),
@@ -403,7 +403,7 @@ mod delivery_tests {
         let flag = cancelled.clone();
         service.timer.replace(Some(Alarm {
             deadline: now + Duration::from_secs(60),
-            cancel: Disposable::create(move || flag.set(true)),
+            _timer: Disposable::create(move || flag.set(true)).into(),
         }));
         service.notify(0, request(0)).unwrap();
         assert!(!cancelled.get(), "an unrelated arrival restarted the timer");
