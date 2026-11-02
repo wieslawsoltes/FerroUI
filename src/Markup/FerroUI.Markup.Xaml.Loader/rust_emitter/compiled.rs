@@ -405,6 +405,7 @@ pub(super) fn file_of(assembly_name: &str, root_uri: &str, compiled: Vec<Compile
         .filter(|document| document.source.is_ok())
         .map(|document| (document.function_name.clone(), document.name.clone()))
         .collect();
+    let source = super::imports::finish(source, None);
     let position_map = position_map(&source, &names);
     GeneratedFile {
         source,
@@ -962,8 +963,8 @@ pub fn generate_class_file_with_binary_resources(
     source.push_str(&loader_table(documents, &names, &loadable, class_path, constructor.as_ref()));
     // The file is a module of the crate of the class: that crate is `crate` in it.
     let own_crate = class_path.trim_start_matches("::").split("::").next().unwrap_or_default();
-    let mut source = source.replace(&format!("::{own_crate}::"), "crate::");
     if let Some(binary) = binary { binary.declare_manifest(&mut source); }
+    let source = super::imports::finish(source, Some(own_crate));
 
     // The emitted documents, as other crates see them: the class, and every other
     // document with its build function.
