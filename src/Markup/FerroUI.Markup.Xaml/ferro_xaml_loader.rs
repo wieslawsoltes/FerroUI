@@ -4,7 +4,7 @@ use crate::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadE
 use ferroui_base::metadata::{IServiceProvider, MarkupAssembly};
 use ferroui_base::platform::IAssetLoader;
 use ferroui_base::utilities::Uri;
-use ferroui_base::{ferro_markup_type, BoxedValue, FerroLocator, LocatorExtensions};
+use ferroui_base::{ferro_markup_type, BoxedValue, FerroLocator, LocatorExtensions, TypeInfo};
 use std::collections::HashMap;
 use std::io::Read;
 use std::rc::Rc;
@@ -52,6 +52,13 @@ fn compiled_loaders() -> &'static RwLock<HashMap<String, CompiledXamlLoader>> {
     LOADERS.get_or_init(Default::default)
 }
 
+/// The documents of the classes with markup, by class.
+#[cfg(feature = "runtime-populate")]
+fn class_documents() -> &'static RwLock<HashMap<usize, String>> {
+    static DOCUMENTS: OnceLock<RwLock<HashMap<usize, String>>> = OnceLock::new();
+    DOCUMENTS.get_or_init(Default::default)
+}
+
 const NO_ASSET_LOADER: &str = "Could not create IAssetLoader : maybe Application.RegisterServices() wasn't called?";
 const RELATIVE_WITHOUT_BASE: &str = "Cannot load relative Uri when BaseUri is null";
 
@@ -59,6 +66,41 @@ const RELATIVE_WITHOUT_BASE: &str = "Cannot load relative Uri when BaseUri is nu
 pub struct FerroXamlLoader;
 
 impl FerroXamlLoader {
+    /// States that the markup of `class` (the class its root element names with
+    /// `x:Class`) is the document with the absolute URI `uri`, an asset of the crate.
+    /// Process-wide; a later registration for the same class replaces the earlier one.
+    pub fn register_class_document(class: &'static TypeInfo, uri: &str) {
+        #[cfg(not(feature = "runtime-populate"))]
+        let _ = (class, uri);
+        #[cfg(feature = "runtime-populate")]
+        let mut documents = class_documents().write().unwrap_or_else(|e| e.into_inner());
+        #[cfg(feature = "runtime-populate")]
+        documents.insert(class as *const TypeInfo as usize, uri.to_string());
+    }
+
+    /// The URI of the document registered for `class` or, failing that, for the
+    /// nearest of its base classes that has one.
+    #[cfg(feature = "runtime-populate")]
+    pub fn class_document(class: &'static TypeInfo) -> Option<String> {
+        let documents = class_documents().read().unwrap_or_else(|e| e.into_inner());
+        let mut current = Some(class);
+        while let Some(class) = current {
+            if let Some(uri) = documents.get(&(class as *const TypeInfo as usize)) {
+                return Some(uri.clone());
+            }
+            current = class.base_type();
+        }
+        None
+    }
+
+    /// Whether a document is registered for exactly `class`.
+    #[cfg(feature = "runtime-populate")]
+    pub fn has_class_document(class: &'static TypeInfo) -> bool {
+        let documents = class_documents().read().unwrap_or_else(|e| e.into_inner());
+        documents.contains_key(&(class as *const TypeInfo as usize))
+    }
+
+
     /// Registers the loader of the compiled documents of the assembly
     /// (crate) named `assembly_name`, replacing a previous registration.
     /// Called by the generated startup code of a crate with compiled XAML.

@@ -24,10 +24,8 @@
 //! A class without a registered document reports the error of the managed
 //! original ("No precompiled XAML found for ..").
 
-use std::collections::HashMap;
 use std::io::{Cursor, Read};
 use std::rc::Rc;
-use std::sync::{OnceLock, RwLock};
 
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupAssembly};
@@ -190,33 +188,18 @@ impl FerroRuntimeXamlLoader {
         })
     }
 
-    /// States that the markup of `class` (the class its root element names with
-    /// `x:Class`) is the document with the absolute URI `uri`, an asset of the crate.
-    /// Process-wide; a later registration for the same class replaces the earlier one.
-    /// See the module documentation.
+    /// Registers the class with the XAML runtime shared by compiled markup and the interpreter.
     pub fn register_class_document(class: &'static TypeInfo, uri: &str) {
-        let mut documents = class_documents().write().unwrap_or_else(|e| e.into_inner());
-        documents.insert(class as *const TypeInfo as usize, uri.to_string());
+        ferroui_markup_xaml::FerroXamlLoader::register_class_document(class, uri);
     }
 
-    /// The URI of the document registered for `class` or, failing that, for the
-    /// nearest of its base classes that has one.
+    /// The registered document for this class or its nearest registered base class.
     pub fn class_document(class: &'static TypeInfo) -> Option<String> {
-        let documents = class_documents().read().unwrap_or_else(|e| e.into_inner());
-        let mut current = Some(class);
-        while let Some(class) = current {
-            if let Some(uri) = documents.get(&(class as *const TypeInfo as usize)) {
-                return Some(uri.clone());
-            }
-            current = class.base_type();
-        }
-        None
+        ferroui_markup_xaml::FerroXamlLoader::class_document(class)
     }
 
-    /// Whether a document is registered for exactly `class`.
     pub(crate) fn has_class_document(class: &'static TypeInfo) -> bool {
-        let documents = class_documents().read().unwrap_or_else(|e| e.into_inner());
-        documents.contains_key(&(class as *const TypeInfo as usize))
+        ferroui_markup_xaml::FerroXamlLoader::has_class_document(class)
     }
 
     /// Runs `create` (the constructor of `class`) with `populate` in place of the
@@ -346,12 +329,6 @@ impl IRuntimeXamlLoader for RuntimeXamlLoaderService {
     ) -> Result<(), XamlLoadError> {
         FerroRuntimeXamlLoader::load_object(instance, service_provider)
     }
-}
-
-/// The documents of the classes with markup, by class.
-fn class_documents() -> &'static RwLock<HashMap<usize, String>> {
-    static DOCUMENTS: OnceLock<RwLock<HashMap<usize, String>>> = OnceLock::new();
-    DOCUMENTS.get_or_init(Default::default)
 }
 
 /// The asset loader service, or the loader of the registered assets when there is none:
