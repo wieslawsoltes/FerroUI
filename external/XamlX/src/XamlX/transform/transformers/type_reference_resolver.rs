@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crate::ast::{
-    IXamlAstNode, IXamlLineInfo, XamlAstClrTypeReference, XamlAstNodeExtensions,
+    IXamlAstNode, IXamlAstTypeReference, IXamlLineInfo, XamlAstClrTypeReference, XamlAstNodeExtensions,
     XamlAstXmlTypeReference,
 };
 use crate::exceptions::{XamlError, XamlResult};
@@ -17,7 +17,7 @@ pub struct TypeReferenceResolver;
 
 #[derive(Default)]
 struct TypeResolverCache {
-    cache_dictionary: RefCell<HashMap<(Option<String>, String, bool), Rc<dyn IXamlType>>>,
+    cache_dictionary: RefCell<HashMap<(Option<String>, String, bool), (Rc<dyn IXamlType>, bool)>>,
 }
 
 impl TypeReferenceResolver {
@@ -38,11 +38,11 @@ impl TypeReferenceResolver {
                 is_markup_extension,
             );
             let cached = cache.cache_dictionary.borrow().get(&cache_key).cloned();
-            if let Some(type_) = cached {
+            if let Some((type_, resolved_extension)) = cached {
                 return Ok(XamlAstClrTypeReference::new(
                     line_info,
                     type_,
-                    is_markup_extension,
+                    resolved_extension,
                 ));
             }
 
@@ -57,7 +57,7 @@ impl TypeReferenceResolver {
             cache
                 .cache_dictionary
                 .borrow_mut()
-                .insert(cache_key, res.type_.clone());
+                .insert(cache_key, (res.type_.clone(), res.is_markup_extension()));
             Ok(res)
         } else {
             Self::resolve_type_core(

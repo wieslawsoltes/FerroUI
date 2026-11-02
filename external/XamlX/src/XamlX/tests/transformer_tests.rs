@@ -66,6 +66,21 @@ fn types_are_resolved_through_xmlns_definitions_and_clr_namespaces() {
 }
 
 #[test]
+fn cached_type_resolution_preserves_extension_inference_and_source_locations() {
+    use crate::transform::{transformers::TypeReferenceResolver, AstTransformationContext};
+    let host = TestHost::new();
+    let ctx = AstTransformationContext::new(host.configuration, None);
+    for line in [4, 27] {
+        let source = XamlLineInfo::new(line, 5);
+        let resolved = TypeReferenceResolver::resolve_type(&ctx, Some("test"), "Test", false, &[], &source)
+            .expect("the implicit Extension suffix resolves");
+        assert!(resolved.is_markup_extension());
+        assert_eq!(resolved.type_.name(), "TestExtension");
+        assert_eq!(resolved.line(), line);
+    }
+}
+
+#[test]
 fn unresolved_types_are_reported() {
     let host = TestHost::new();
     let doc = host
