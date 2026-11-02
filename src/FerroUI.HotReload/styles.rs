@@ -392,7 +392,7 @@ mod portable_tests {
     fn exact_archive_restore_uses_the_compiled_class_only_outside_override_scopes() {
         use ferroui_markup_xaml::{CompiledArchiveRoot, FerroXamlLoader};
         use std::{cell::Cell, sync::OnceLock};
-        thread_local! { static BUILDS: Cell<u32> = const { Cell::new(0) }; }
+        ferroui_base::ferro_thread_local! { static BUILDS: Cell<u32> = const { Cell::new(0) }; }
         let _scope = Dispatcher::unit_test_scope();
         ferroui_markup_xaml::register_types();
         const URI: &str = "ferres://archive-dispatch/Root.xaml";

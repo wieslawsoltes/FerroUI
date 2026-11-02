@@ -11,7 +11,8 @@ pub type Includes = BTreeMap<&'static str, DictionaryBuilder>;
 #[cfg(all(feature = "binary-resources", feature = "runtime-populate"))]
 mod scoped {
     use super::*;
-    use std::{cell::RefCell, thread::LocalKey};
+    use ferroui_base::ferro_thread_local::LocalKey;
+    use std::cell::RefCell;
 
     type Slot<T> = LocalKey<RefCell<Option<T>>>;
     #[derive(Default)]
@@ -21,7 +22,7 @@ mod scoped {
         blocks: super::updates::Blocks,
     }
     type Pending = (&'static ferroui_base::TypeInfo, Rc<Revision>);
-    thread_local! {
+    ferroui_base::ferro_thread_local! {
         static NEXT: RefCell<Option<Pending>> = const { RefCell::new(None) };
         static ACTIVE: RefCell<Option<Rc<Revision>>> = const { RefCell::new(None) };
     }

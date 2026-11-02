@@ -304,7 +304,7 @@ fn template_binding_rows_resolve_operands_in_order_and_stop_on_unwind() {
     use std::cell::RefCell;
     use super::compiled::{bind_template_rows, property};
 
-    thread_local! { static TRACE: RefCell<Vec<&'static str>> = const { RefCell::new(Vec::new()) }; }
+    ferroui_base::ferro_thread_local! { static TRACE: RefCell<Vec<&'static str>> = const { RefCell::new(Vec::new()) }; }
     fn source() -> &'static FerroProperty {
         TRACE.with(|trace| trace.borrow_mut().push("source"));
         property(Border::background_property())
