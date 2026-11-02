@@ -2,7 +2,59 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
-## Current main and shipping solid under the same compact profile
+## Full WinUI on Linux x86-64, 2 November 2026
+
+The startup marker is flushed after the first freshly constructed theme returns the correct typed Button `ControlTheme`. The release consumer uses size optimization, ThinLTO, 16 codegen units and normal unwinding. The ordinary editable consumer links the external interpreter. A separate run enables compiler-produced operand updates while retaining that interpreter. This opt-in costs 46,152 additional executable bytes with the ordinary ELF link. Both executable size and startup below include the framework. These measurements cover theme readiness before rendering a window.
+
+| Consumer | Stripped bytes | Median spawn to Button (ms) | p95 (ms) |
+| --- | ---: | ---: | ---: |
+| Main native, `b7537398` | 54,511,936 | 16.21 | 22.68 |
+| Previous editable PR, `74a4b1ee` | 49,962,376 | 13.09 | 17.93 |
+| Native Rust | 47,043,592 | 11.58 | 18.37 |
+| Typed FXB | 46,702,520 | 12.43 | 16.81 |
+| Portable solid FXP, interpreter only | 45,478,776 | 1670.78 | 1823.91 |
+| Shipping editable FXP | 49,664,936 | 11.37 | 16.42 |
+| Shipping plus FXU | 49,711,088 | 12.27 | 17.53 |
+| Shipping editable FXP, Button root | 46,155,320 | 6.81 | 9.40 |
+| Shipping editable FXP, Linux RELR | 43,919,472 | 12.21 | 15.81 |
+| Main native, Linux RELR | 48,755,952 | 16.39 | 28.23 |
+| Shipping plus FXU, Linux RELR | 43,964,616 | 12.30 | 17.27 |
+
+| First load of an external revision | Median spawn to Button (ms) | p95 (ms) |
+| --- | ---: | ---: |
+| Same installed v3 FXP read from disk | 11.86 | 15.99 |
+| Edited compact dictionary, v3 FXP | 15.84 | 21.64 |
+| Structural replacement of compact dictionary, v3 FXP | 14.23 | 19.43 |
+| Edited compact dictionary, indexed v1 FXP | 33.74 | 45.42 |
+| Edited compact dictionary, monolithic v2 FXP | 39.36 | 54.13 |
+| Edited merged and compact dictionaries, v3 FXP | 1632.55 | 1790.20 |
+| Same merged and compact scalar edits, 837-byte FXU | 11.69 | 16.41 |
+
+The primary table uses fresh processes on warm filesystem pages, with 61 rotating launches per fast case and nine per interpreter or mixed-archive fallback. For the compact scalar edit, the median was 0.38 ms below main. Its paired 95% bootstrap ratio interval was 0.921–1.045. That case passed the median gate and the samples do not establish a speedup. The FXU mixed edit had a median ratio of 0.721 with interval 0.703–0.789.
+
+In 31 additional launches per case, Linux reported zero pages of the tested executable and external archive resident before each launch. Main then measured 44.46 ms, installed shipping 36.74 ms, the external v3 scalar edit 43.61 ms, and the mixed FXU edit 33.68 ms. Shared libraries and device caches remained warm.
+
+The report records every sample, rotation, ELF section, artifact hash and compiler observation. The Linux RELR variant changes only the final link and requires a compatible dynamic loader. [Raw measurements and confidence intervals](benchmarks/compiled-theme-incremental-linux-x86_64.json)
+
+The generator now shares more deferred factory bodies and passes type and child-builder operands through the individual resource thunks. It also shares name registration, virtual `EndInit` and nullable binding operations. Reachable call sites determine which type and factory pointers survive linking. The full native Rust output is 5,710,160 bytes and the full editable configuration emits 5,096,702 bytes. In the ordinary no-LTO generator isolation, linked WinUI fell from 10,118,051 to 9,578,256 bytes. The XAML build script took 30.76 s on main, 10.94 s for native Rust, 12.17 s for typed FXB, 14.03 s for editable shipping and 1.88 s for portable FXP (one observation per configuration). Two matched theme-only rustc replays per revision averaged 79.70 s on main and 36.98 s on the PR. These unit timings exclude XAML generation and the final application link. [Generator isolation, decode checks and execution-only FXU results](benchmarks/compiled-theme-codegen-and-operands-linux-x86_64.json)
+
+The full theme has 894 linked FXB leaves, totaling 211,373 bytes. Predictable source coordinates use FXB v2. The prior build emitted 236,219 bytes, with identical keys, payloads, factory slots and locations across all 7,354 rows. The distribution-sized portable FXP is 245,385 bytes. The editable v3 FXP spends 50,962 more bytes on independently compressed pages. An explicit `FERROUI_WINUI_THEME_ROOTS=Button` build emits 718,804 bytes of Rust, 137 FXB leaves totaling 28,671 bytes, and a 102,173-byte FXP.
+
+The build currently certifies one separate native include in full WinUI, `DensityStyles/Compact.xaml`. Its FXP document can be structurally replaced. Inlined resources take full-group transformation when supplied in a complete FXP. For caller-compatible edits, the editor can instead generate an FXU update from two compiler emissions. The measured 837-byte file changes a merged resource in `Resources/Generic.xaml` and a private compact resource. The validation runs checked both values (19 and 17) and the defaults of a fresh theme (14 and 14). Changes to the compiled caller require a rebuild or full FXP. [FXP page layout and incremental execution](porting/xaml-compiler/fxp-solid.md) · [FXB/FXU formats and authoring](porting/xaml-compiler/fxb.md)
+
+To reproduce the warm-cache gate with two worktrees and independent Cargo target directories, run from the candidate checkout. Use the exact installed and edited manifests to produce `density.fxu`. Rebuilding the edited theme with `cargo check --release` runs its build script without linking the application.
+
+```sh
+python3 scripts/themes/bench/measure.py --source "$MAIN_CHECKOUT" \
+  --work-dir "$BENCH/main" --compact-app --rebuilds 0 --launches 61
+python3 scripts/themes/bench/measure.py --solid --compact-app --compiled-updates \
+  --work-dir "$BENCH/edited" --rebuilds 0 --launches 61 \
+  --startup-baseline "$BENCH/main/stripped-probe" \
+  --require-archive-startup "$EDITED_COMPACT_FXP" \
+  --require-archive-startup "$MERGED_OPERAND_FXU"
+```
+
+## Earlier shipping comparison against main at c6279e98
 
 On Linux x86-64, the full editable WinUI consumer reached its first typed Button theme in **13.05 ms** versus **16.16 ms** on main at `c6279e98`. Both used size optimization, ThinLTO and ordinary unwinding. The shipping consumer also links the runtime that handles independently edited archives. Both executables used the same probe source, a warm filesystem cache, and the complete theme. The marker follows the typed lookup and precedes process teardown. First-frame rendering is outside this headless benchmark.
 
@@ -19,7 +71,7 @@ Build-script times are single Cargo unit observations. Theme rustc times are mea
 
 ## Shipping WinUI with startup parity
 
-Use `ferroui-themes-winui/solid-theme` for an installed full theme with a reloadable FXP revision. The build resolves XAML types, overloads, includes, property getters and deferred builders. The constructor executes that typed program with FXB resource operands. The application can also install independently supplied FXP files. An exact revision can dispatch to the installed program after checking the bytes, URI, assembly, compiler settings and active overrides. A changed revision is resolved through XamlX. The `portable-solid-theme` feature offers a separate, interpreter-only configuration with a smaller WinUI contribution.
+Use `ferroui-themes-winui/solid-theme` for an installed full theme with a reloadable FXP revision. The build resolves XAML types, overloads, includes, property getters and deferred builders. The constructor executes that typed program with FXB resource operands. The application can also install independently supplied FXP files. An exact revision can dispatch to the installed program after checking the bytes, URI, assembly, compiler settings and active overrides. A changed revision can use the incremental paths described above or be resolved through XamlX. The `portable-solid-theme` feature offers a separate, interpreter-only configuration with a smaller WinUI contribution.
 
 The original no-LTO consumer comparison used all 169 WinUI documents, open-ended resource lookup, Linux x86-64, and a warm filesystem cache. Fast lanes rotated in 31 fresh processes each. The two slow lanes used seven launches each. The source-only framework comparison below is a different experiment.
 
