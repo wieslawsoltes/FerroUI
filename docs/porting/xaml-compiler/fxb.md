@@ -32,6 +32,40 @@ For a deferred builder import, the generated call supplies a slice of `rt::Defer
 
 The original four FXB v1 kinds retain their encoding. Readers that predate the additional kinds report an unsupported factory kind on a new block.
 
+## Editor-compiled operand updates
+
+The `ferroui-themes-winui/compiled-updates` feature emits an FXS schema beside the FXB manifest and exposes `ferroui_themes_winui::load_theme_update`. This feature supports a resource merged into the native root when changing its operands preserves the generated code and local factory imports. For example, an editor can change the normal density font size in `Resources/Generic.xaml` and the compact value in `DensityStyles/Compact.xaml` together.
+
+Keep separate Cargo output directories for the installed and edited themes. Build both using the same compiler revision, features, root set and source-info options. Then run the authoring tool on the two generated manifests.
+
+```sh
+python3 scripts/themes/operand_update.py \
+  "$BASELINE_OUT/xaml/compiled_xaml.fxb.json" \
+  "$REVISION_OUT/xaml/compiled_xaml.fxb.json" \
+  density.fxu
+```
+
+The tool verifies both compiler emissions, including the schema digest of the module name, file stem, generated Rust, compiler options, slot layouts and original FXB bytes. It requires exact caller and slot compatibility, collects the changed leaves in schema order and atomically replaces the output. A change to the native program requires a full FXP or an application rebuild. An update is always relative to its installed baseline, so an editor can publish a new complete revision of the operands without chaining patches.
+
+```rust
+use ferroui_base::Ref;
+use ferroui_markup_xaml::XamlLoadError;
+use ferroui_themes_winui::{load_theme_update, WinUITheme};
+
+fn apply_editor_revision(image: &[u8]) -> Result<Ref<WinUITheme>, XamlLoadError> {
+    load_theme_update(image)
+}
+```
+
+The loader takes its schema from the installed program. It checks the incoming SHA-256 target identity and payload checksum, all slot ordinals, factory kinds, import bounds, and decoded allocation budget before constructing a theme. A replacement can select only a factory from that block's existing caller-local table. Deferred builders retain the operand revision that created them.
+
+| Artifact | Layout in byte order |
+| --- | --- |
+| FXS | `FXS 01` (three ASCII bytes and version byte), 32-byte generation digest, length-prefixed module and file stem, u32 slot count, then 15 bytes per slot in filename order. Each slot stores u64 filename ID, u16 collision ordinal, u8 FXB kind, u32 number of native imports. |
+| FXU | `FXU 01`, SHA-256 of the complete installed FXS, u32 change count, then strictly increasing u32 slot ordinals and length-prefixed FXB blobs. The last 32 bytes are SHA-256 of the preceding FXU bytes. |
+
+Integers and field lengths are little-endian. The generation digest starts with ASCII `FerroUI/FXU/1`, then length-prefixed module, file stem, Rust source and options, followed by each 15-byte slot and its length-prefixed baseline blob. The limits are 65,536 slots, 2 MiB of schema, 64 MiB of update, 16 MiB per block and 128 MiB of decoded batch allocations. SHA-256 identifies content and detects corruption. A host that authenticates editor updates must establish publisher identity at its transport or distribution boundary.
+
 ## Hot reload
 
 A reload client can decode and replace one run independently. Build the candidate using the same emitter to obtain the new bytes. Each block has a module-qualified ID, for example `my_app::compiled_xaml/compiled_xaml-0123456789abcdef.fxb`. The suffix is derived from the compiled function name, factory kind and first key, with deterministic disambiguation. Editing another run usually leaves the ID intact. Changing the set of calls, the factory kind, or the first key of a run can change the generated Rust and requires rebuilding.
