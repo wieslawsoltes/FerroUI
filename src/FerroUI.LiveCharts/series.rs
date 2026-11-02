@@ -112,6 +112,9 @@ ferroui_base::ferro_markup_enum!(PolarLabelsPosition {
     Outer
 });
 
+/// The outline of a box series in the source's light theme.
+pub const BOX_STROKE: Color = Color::from_rgb(30, 30, 30);
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Series {
     pub name: String,
@@ -174,7 +177,7 @@ impl Default for Series {
 }
 impl Series {
     pub fn new(kind: SeriesKind) -> Self {
-        Self {
+        let mut series = Self {
             name: String::new(),
             kind,
             values: Vec::new(),
@@ -225,7 +228,20 @@ impl Series {
             polar_closed: true,
             polar_stacked: false,
             data_padding: Self::default_data_padding(kind),
+        };
+        // The family defaults of the source series and of its default theme
+        // (ThemesExtensions.AddDefaultTheme).
+        match kind {
+            // CoreBoxSeries.Padding, and the theme's MaxBarWidth of a box series.
+            SeriesKind::Box => {
+                series.padding = 5.0;
+                series.max_bar_width = 60.0;
+            }
+            // HasRuleForStackedLineSeries and HasRuleForStackedStepLineSeries: no geometry.
+            SeriesKind::StackedArea | SeriesKind::StackedStepArea => series.geometry_size = 0.0,
+            _ => {}
         }
+        series
     }
     /// Constructor defaults from each upstream series family.
     pub fn default_data_padding(kind: SeriesKind) -> Point {
@@ -266,8 +282,46 @@ impl Series {
                     .as_ref()
                     .and_then(|brush| representative_color(brush.as_ref()))
             })
-            .or(self.fill)
+            // A transparent fill is the source's `Fill = null`, not the series colour.
+            .or(self.fill.filter(|fill| fill.a != 0))
             .unwrap_or_else(|| palette_color(index))
+    }
+    /// The fill of the area of a line-family series, or `None` when it has no area: an
+    /// explicitly transparent fill is the source's `Fill = null`. Without a fill of its own the
+    /// series takes the source theme's: its colour at alpha 50 under a line, step or range
+    /// line (HasRuleForLineSeries), its full colour for a stacked area.
+    pub fn area_style(&self, index: usize) -> Option<PaintStyle> {
+        if self.fill_brush.is_none() && self.fill.is_some_and(|fill| fill.a == 0) {
+            return None;
+        }
+        let mut style = self.style(index, true);
+        if self.fill.is_none() && self.fill_brush.is_none() && !self.kind.is_stacked() {
+            let color = self.color(index);
+            style.fill = Some(Color::from_argb(50, color.r, color.g, color.b));
+        }
+        style.stroke = None;
+        style.stroke_brush = None;
+        Some(style)
+    }
+    /// The stroke of a line-family series, or `None` for a stacked area without a stroke of its
+    /// own (the source theme removes it).
+    pub fn line_style(&self, index: usize) -> Option<PaintStyle> {
+        if self.kind.is_stacked() && self.stroke.is_none() && self.stroke_brush.is_none() {
+            return None;
+        }
+        let mut style = self.style(index, false);
+        style.fill = None;
+        style.fill_brush = None;
+        Some(style)
+    }
+    /// The paint of a box: its fill (the series colour by default) under a dark outline, the
+    /// theme's `Stroke` of a box series.
+    pub fn box_style(&self, index: usize) -> PaintStyle {
+        let mut style = self.style(index, true);
+        if self.stroke.is_none() && self.stroke_brush.is_none() {
+            style.stroke = Some(BOX_STROKE);
+        }
+        style
     }
     pub fn style(&self, index: usize, filled: bool) -> PaintStyle {
         let color = self.color(index);

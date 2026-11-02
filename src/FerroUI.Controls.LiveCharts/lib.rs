@@ -1,6 +1,6 @@
 //! Live chart controls using FerroUI's property, input and drawing services: the Cartesian and
-//! pie charts of the LiveCharts2 port (docs/porting/livecharts2.md, L2); see NOTICE.md for the
-//! source attribution.
+//! pie charts (L2) and the polar chart (L4) of the LiveCharts2 port (docs/porting/livecharts2.md);
+//! see NOTICE.md for the source attribution.
 
 pub use ferroui_livecharts as core;
 
@@ -29,7 +29,8 @@ pub use chart_series::ChartSeries;
 pub use collections::{Axes, ChartPoints, ChartSeriesCollection};
 pub use enums::{ChartKind, LegendPosition, TooltipPosition, ZoomAndPanMode};
 pub use ferroui_livecharts::{
-    AxisPosition, BrushSpace, FindingStrategy, PolarLabelsPosition, RadialAlignment, SeriesKind,
+    AxisPosition, BrushSpace, FindingStrategy, PolarLabelsPosition, PolarScale, RadialAlignment,
+    SeriesKind,
 };
 pub use register_types::{register_types, ASSEMBLY};
 pub use series_classes::*;
