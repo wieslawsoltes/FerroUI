@@ -2,6 +2,18 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
+## A further 30% from the profiled WinUI release
+
+The baseline for this round is the **28,324,712-byte** fully editable Linux x86-64 release. Another 30% requires a file of at most **19,827,298 bytes**. The final rebuild reproduced the original release byte for byte (SHA-256 `459ea34851eb89e3556a9539da29b3bcbc7fa5a8af34ee2c2291f393dae85f21`). Three independently linked, full-featured candidates missed the combined size and runtime-performance goal.
+
+| Candidate | Stripped executable | Saving from the 28,324,712-byte reference | Performance result against the reference |
+|---|---:|---:|---|
+| Shared observer and compiled binding lifecycle | 27,534,728 B | 789,984 B (2.79%) | Boxed style delivery and read took 39.8% longer |
+| Typed delivery restored, shared installation and allocation identity | 27,751,768 B | 572,944 B (2.02%) | Boxed style delivery and read took 36.7% longer |
+| Batched required-type lookup only | 28,187,888 B | 136,824 B (0.48%) | The full-interpreter fallback took 6.8% longer in a 19-pair CPU-7 repeat. An eight-pair CPU-6 run was inconclusive |
+
+The first two builds passed 338 property and binding cases. The isolated XAML trial reproduced the original Base library and all 45 transitive library or host-macro inputs byte for byte. Eight archive checks and panic cleanup passed on all three full builds. The experiments remain available at their pinned commits. [Architecture analysis, comparison and reproduction](compiled-theme-size-architecture.md) · [Full application measurements](benchmarks/compiled-theme-architecture-comparison-linux-x86_64.json)
+
 ## Whole-graph profile-guided release
 
 The size target for this full editable WinUI application is **27,288,924 bytes**, half the 54,577,848-byte original shipping main at `df3e12ad`. All candidate builds use the same runtime source at `ff5ea13a`, all 169 WinUI documents, the external FXP loader and the interpreter for structural edits.

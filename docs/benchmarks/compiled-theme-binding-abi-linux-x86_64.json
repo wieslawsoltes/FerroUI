@@ -808,6 +808,241 @@
    "<ferroui_base::property_store::binding_entry::TypedObserver<i32> as ferroui_system::i_observable::IObserver<i32>>::on_next"
   ]
  },
+ "conservative_base_equivalence": {
+  "base_sha256": "21bbe149e80c86552f402434a8e676f7555511d9064fab06a640bbc287f300a3",
+  "reference_sha256": "21bbe149e80c86552f402434a8e676f7555511d9064fab06a640bbc287f300a3",
+  "same_base_archive": true,
+  "same_transitive_dependency_content_and_timestamps": true,
+  "transitive_inputs": {
+   "target/libtime-de53a1086c5c47a6.rlib": {
+    "sha256": "1b1c45a8fdb11de919a368ba50fdb555b73c3679ae0fe4f586563855ec06e3cd",
+    "bytes": 1817914,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libnum_conv-aafdfb8af198fe1a.rlib": {
+    "sha256": "de8dd42661529556d665a7e9110511c686f40a43160340ef0734630f24191104",
+    "bytes": 210334,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libpowerfmt-dd12eb20c6da7418.rlib": {
+    "sha256": "5db37c6b107d3d3c6a5412a6976b9f02b6cdcb21612e9f9a1ad468da04202e57",
+    "bytes": 177310,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libderanged-abe2623536b1c892.rlib": {
+    "sha256": "ddae1b226ff86755c909ea1a4451b6681249eac470cfe938aa8abd27ee61ecc7",
+    "bytes": 3649558,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libtime_core-c81aa780fcd802ba.rlib": {
+    "sha256": "a7715cb26caae6a072d85ca7fd293fe705f713028d7d1dd2b4e1fcbae38bf622",
+    "bytes": 487876,
+    "last_write_before_reference_fixture": true
+   },
+   "target/liburl-996cbd752af40cc9.rlib": {
+    "sha256": "8aaaf0efa59607d1d02d4b67c53733559d061c7b8cfde15d6aceb137cecf1932",
+    "bytes": 944942,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libform_urlencoded-f797b752607534eb.rlib": {
+    "sha256": "1dd69f2f4d12ce4ce88f6700716ffed8887a4acf502a6a9a85b79a87e7f6049a",
+    "bytes": 82942,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libpercent_encoding-8c72a7247d737260.rlib": {
+    "sha256": "e9698c11f3023f76b27aeb3d6ee00b60a9e836bd2d5294d39e42c80ea5b52a2f",
+    "bytes": 116302,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libidna-4becc8948a4c46fa.rlib": {
+    "sha256": "a3acb34717044a48fc10d90a0e75fe8d32cb1bc5dcb8780cfb8ed93fbbcc0de5",
+    "bytes": 807520,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libutf8_iter-f25e9848b93408d3.rlib": {
+    "sha256": "c1f9f40f9dcbe21b698ab05dcb36391b66f2a21f92c1fb6dceb653189212e014",
+    "bytes": 64684,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libsmallvec-852befe94af65574.rlib": {
+    "sha256": "4c5d2475869ddc1fc3de84ae746331db252fce51569790c5f94d7bffa7949416",
+    "bytes": 242498,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libidna_adapter-f23c44583e84194c.rlib": {
+    "sha256": "c1d4f0649bd452cfc654f02444512e7ea021b8241f4834498ead5060d8f17c72",
+    "bytes": 83356,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libicu_normalizer-48308b34e7ab81a3.rlib": {
+    "sha256": "a3f26bd8d2432d314663e582fb3f9478e08a9f10ec60258140910b6f31c08a0c",
+    "bytes": 1298614,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libicu_normalizer_data-44ac030d1f2c1d94.rlib": {
+    "sha256": "426b9840017b6b4e5c48c83fb0728d8f376c3e271ab5d75ca220a78ce3050ab2",
+    "bytes": 447596,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libicu_collections-f7877a964c3ca280.rlib": {
+    "sha256": "3eac6d41de562aeb6c412615e05f77197f4ef95fa99f698b62bc0b4b471f7637",
+    "bytes": 760722,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libzerovec-4030bdec629d3d90.rlib": {
+    "sha256": "55c0fba1797a2853b333d5861eac649f421d1c62eda1b157368c2bfed5af1417",
+    "bytes": 1910830,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libzerovec_derive-48a965bef2fa29dd.so": {
+    "sha256": "9fc9ea39d6083d582c3794cabb076124595a69f8c27c34cc5b5878599dbbb33b",
+    "bytes": 2833680,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libquote-0bed3c71a09f0285.rlib": {
+    "sha256": "2dcfd9e2f2378d33fa9417cdc00c1f2240c5f228f9c6958f44a3963b3ea34bd6",
+    "bytes": 510752,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libproc_macro2-2a588920b4722f6f.rlib": {
+    "sha256": "583eeab974ad80ea075d84e4121ae4a32790a369f00aba823275a72c08b0b19d",
+    "bytes": 1508602,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libunicode_ident-a2008fe18640462b.rlib": {
+    "sha256": "9ff4d93511e66da1781305eb89abe26457076065912b907fceb3a2edee49e00a",
+    "bytes": 52598,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libsyn-48c6e8d938fbcb7f.rlib": {
+    "sha256": "28ded8351e82c0033569d392c2ff3b4e36025d499a49cdfe0da6b41f0f2bbf46",
+    "bytes": 8052968,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libyoke-0385f91e203ef01b.rlib": {
+    "sha256": "cef087e3e83be5572edabfb6347a80ea93cdbb2731937ddcf5f4941f268b7cfe",
+    "bytes": 249892,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libyoke_derive-0fe6ed0e33d92cd1.so": {
+    "sha256": "af8ab415412787f6e9e3f594a0eaac411df593ddbb49ac8eb2adf8e139210496",
+    "bytes": 2847544,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libsynstructure-e7cbf8921bdea98c.rlib": {
+    "sha256": "e2267ac27a6a35deb212a82e6783dea4a34cced4396980b98bf3657995908cca",
+    "bytes": 1022328,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libzerofrom-f0c011872da3af5f.rlib": {
+    "sha256": "79949824f4aa20da87e2ac9716e52c939eb7f698ac2b59139b5665e248c25efd",
+    "bytes": 90830,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libzerofrom_derive-0fafa7f4138ce728.so": {
+    "sha256": "aa5540457a954bee0ca5cc587aa93fdf363453fcdfda45086ab1b71585620d37",
+    "bytes": 2982000,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libstable_deref_trait-e2e4a45dea2c00e0.rlib": {
+    "sha256": "c051b4e2eb5e85bbd8bad45a6918b4f5022d2b1d45bf4bcc2b4e256b6d4ade16",
+    "bytes": 15774,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libdisplaydoc-4f81b7522d09b694.so": {
+    "sha256": "d5ffbc051e5ef4daaed965c051ef88c92e5fd5fc859dd0451d39253c4fa65532",
+    "bytes": 2648288,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libpotential_utf-f11c92b2a63249af.rlib": {
+    "sha256": "6ce708f67eec78920cd72f9e39c5146f0be6fe5439e06f07acc395a981cda32f",
+    "bytes": 103070,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libicu_provider-e50cccb08085955c.rlib": {
+    "sha256": "1b499afc71e8fb857dd0af0f674bc1347e1b7b02dd43c5b1f584cde9d16b4f87",
+    "bytes": 665916,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libicu_locale_core-c0b5accc124ed6a8.rlib": {
+    "sha256": "90b4eb8eee9d6300717a472a5472e660d1db42d45d2c54a796e7c7bc3bdf4390",
+    "bytes": 3589662,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libwriteable-c01ae3f34dfe8dd1.rlib": {
+    "sha256": "9d33e10774bd36bc79b66c44e31435b211568914cd6eacd6216fe8ffdbb7c953",
+    "bytes": 496312,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libtinystr-da8df7f20d226df2.rlib": {
+    "sha256": "8c9f7f3f837a4f813a766014f2af29209f93826531e5597c4b4d5d096ede580c",
+    "bytes": 353944,
+    "last_write_before_reference_fixture": true
+   },
+   "target/liblitemap-f0e48a256e169268.rlib": {
+    "sha256": "52477a546cf6bb7325e021cce3006f503b50070d97c94d3248cb948dad0e7ee5",
+    "bytes": 343904,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libzerotrie-05cf3327e6c0bb3d.rlib": {
+    "sha256": "ec7c9176cf36e6e8c23736fae8440e488e2f1466edaf7bdf3fb7eba92d71b891",
+    "bytes": 516428,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libicu_properties-292ef66b067b40ca.rlib": {
+    "sha256": "f733428733a28d40345ad982f7ccf6079473098c75e68135bc5527c9ac88585d",
+    "bytes": 4063806,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libicu_properties_data-e7df504f8bfcb1a4.rlib": {
+    "sha256": "ebec19ec205ecc5ac9434c4aa02b52827be1fdeb0406b895a706cd665317d0bb",
+    "bytes": 2004648,
+    "last_write_before_reference_fixture": true
+   },
+   "target/librustc_hash-dc89152ba3ddb222.rlib": {
+    "sha256": "a865ccc444995fc8b0f61f872976c80324c206debfa48af442f49a5af54f6a52",
+    "bytes": 39872,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libferroui_system-b4d8914c81ba317d.rlib": {
+    "sha256": "4abdcbe0201860af14006d0bb7a1a96b49d4918c4a1632477e524e0609e50486",
+    "bytes": 1286044,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libbitflags-a9ef646cd3cc0eb7.rlib": {
+    "sha256": "8b0014d95555fa3ca0411ec28805eed759b94f6f598e11bfb060dd71cc946575",
+    "bytes": 266268,
+    "last_write_before_reference_fixture": true
+   },
+   "target/librust_decimal-a73a8d81d841b772.rlib": {
+    "sha256": "f6bc150a130ea460da1377d2a66e7fd1c5ac0825c3d4dd315043a6019e65b0be",
+    "bytes": 1005802,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libnum_traits-4f07fe6a999973e5.rlib": {
+    "sha256": "fc3197c888118950e5e8e07f5a7d4c1fb44d301df05320729e54c588daf66ffc",
+    "bytes": 1755836,
+    "last_write_before_reference_fixture": true
+   },
+   "target/libarrayvec-19fdfd15052d0852.rlib": {
+    "sha256": "8a7a60ec6ba5563b3a91e6722ce368b4958706832b853b024bb740cd36977892",
+    "bytes": 259116,
+    "last_write_before_reference_fixture": true
+   },
+   "target/liblibc-b412ff2097174257.rlib": {
+    "sha256": "e62de6613437ffe91ad20c617cb027ed7dfbde84dd668055c314ab2cb1a2beb0",
+    "bytes": 4539042,
+    "last_write_before_reference_fixture": true
+   },
+   "host/libpaste-28bb4fa3786cc7b2.so": {
+    "sha256": "da4dd42d93fccac6817b769f99e89aae4335c7f26c4c38ba5fa46bf88be396c2",
+    "bytes": 722528,
+    "last_write_before_reference_fixture": true
+   }
+  },
+  "profile_sha256": "558545eb183f3892affee0b55cab5b0b4dac8396ddac612675683afa091b5965",
+  "interpretation": "C supplied the bit-identical Base archive and all 45 linked dependency/proc-macro artifacts used for the reference fixture. The measured existing reference fixture therefore directly exercises this same Base API implementation. No separate C timing samples are claimed. The equivalent reference binary was executed again after the C archive verification; all 338 tests and all seven workload checksum assertions passed. Whole-application code placement, other framework crates, first resource lookup and control/template activation require measurements of the final application."
+ },
  "independent_three_arm_repeat": {
   "method": "CPU 6 independent three-arm interleaved repeat. Three warmup and 42 measured randomized six-process mirror blocks, two processes for each arm per block. Values are paired median ratios to the reference with 4,000 bootstrap block medians. All other options/inputs match the primary cohorts.",
   "seed": 496309,
@@ -1280,7 +1515,181 @@
     ]
    }
   },
-  "interpretation": "The original and B boxed style observers occupy 8 bytes and have identical normalized 220-byte, 67-instruction on_next bodies. The A observer occupies 16 bytes and its 83-byte forwarding body contains an indirect tail jump. Eight of the nine locally resolved original/B direct call targets have identical normalized machine-code bodies. The target reached at offset +122 in the common observer occupies 14,380 bytes in the original consumer and 1,475 in B. This narrows the difference to downstream code generation, without apportioning the measured CPU cost among changed callees, profile matching and placement."
+  "interpretation": "The original and B boxed style observers occupy 8 bytes and have identical normalized 220-byte, 67-instruction on_next bodies. The A observer occupies 16 bytes and its 83-byte forwarding body contains an indirect tail jump. Eight of the nine locally resolved original/B direct call targets have identical normalized machine-code bodies. The target reached at offset +122 in the common observer occupies 14,380 bytes in the original consumer and 1,475 in B. This narrows the difference to downstream code generation, without apportioning the measured CPU cost among changed callees, profile matching and placement.",
+  "execution_samples": {
+   "method": "100 fresh processes per arm in randomized interleaved order on CPU 6. During only the measured 40,000 boxed style emit/read operations, a separate CPU 5 thread sends SIGUSR2 after jittered 35\u201368 microsecond requested sleeps. The handler records interrupted PCs inside executable mappings; kernel, other DSOs and locations outside the sample window are excluded. Sampling is diagnostic only and is not used for latency. FDE-local sample self time is not a call graph or an inclusive cost.",
+   "seed": 342490,
+   "summary": {
+    "reference": {
+     "total_executable_samples": 3036,
+     "samples_mapped_to_fde": 3036,
+     "observer_entry_fde": 377,
+     "publication_callee_fde": 1697,
+     "callee_sample_histogram": {
+      "0x3485d5": 85,
+      "0x5b7268": 115,
+      "0x4bcc5e": 96,
+      "0x2dc6bd": 1697,
+      "0x463dbc": 0,
+      "0x2ad7a1": 0,
+      "0x94f400": 0,
+      "0x44f9e3": 0
+     },
+     "top_8_fdes": [
+      {
+       "start": "0x2dc6bd",
+       "bytes": 14380,
+       "samples": 1697
+      },
+      {
+       "start": "0x4e4a2a",
+       "bytes": 220,
+       "samples": 377
+      },
+      {
+       "start": "0x3580ac",
+       "bytes": 419,
+       "samples": 222
+      },
+      {
+       "start": "0x3a1102",
+       "bytes": 2128,
+       "samples": 213
+      },
+      {
+       "start": "0x5b7268",
+       "bytes": 444,
+       "samples": 115
+      },
+      {
+       "start": "0x2dfee9",
+       "bytes": 191,
+       "samples": 103
+      },
+      {
+       "start": "0x4bcc5e",
+       "bytes": 191,
+       "samples": 96
+      },
+      {
+       "start": "0x3485d5",
+       "bytes": 32,
+       "samples": 85
+      }
+     ]
+    },
+    "candidate": {
+     "total_executable_samples": 3969,
+     "samples_mapped_to_fde": 3969,
+     "observer_entry_fde": 54,
+     "publication_callee_fde": null,
+     "callee_sample_histogram": {
+      "0x42c2ac": 56
+     },
+     "top_8_fdes": [
+      {
+       "start": "0x2b0c3c",
+       "bytes": 11497,
+       "samples": 1434
+      },
+      {
+       "start": "0x5ab43e",
+       "bytes": 488,
+       "samples": 698
+      },
+      {
+       "start": "0x369803",
+       "bytes": 2128,
+       "samples": 256
+      },
+      {
+       "start": "0x2c6854",
+       "bytes": 5,
+       "samples": 209
+      },
+      {
+       "start": "0x325ec7",
+       "bytes": 419,
+       "samples": 175
+      },
+      {
+       "start": "0x2a4d83",
+       "bytes": 237,
+       "samples": 157
+      },
+      {
+       "start": "0x577fb5",
+       "bytes": 136,
+       "samples": 136
+      },
+      {
+       "start": "0x58da8e",
+       "bytes": 187,
+       "samples": 129
+      }
+     ]
+    },
+    "remediated": {
+     "total_executable_samples": 3972,
+     "samples_mapped_to_fde": 3972,
+     "observer_entry_fde": 355,
+     "publication_callee_fde": 307,
+     "callee_sample_histogram": {
+      "0x307b7c": 59,
+      "0x51662b": 101,
+      "0x686a43": 99,
+      "0x2ac38f": 307,
+      "0x41bd2b": 0,
+      "0x2abe2a": 0,
+      "0x91abc0": 0,
+      "0x407bd3": 0
+     },
+     "top_8_fdes": [
+      {
+       "start": "0x2ac9ad",
+       "bytes": 1289,
+       "samples": 436
+      },
+      {
+       "start": "0x2b088d",
+       "bytes": 1419,
+       "samples": 377
+      },
+      {
+       "start": "0x6a69ed",
+       "bytes": 220,
+       "samples": 355
+      },
+      {
+       "start": "0x2ac38f",
+       "bytes": 1475,
+       "samples": 307
+      },
+      {
+       "start": "0x644228",
+       "bytes": 343,
+       "samples": 273
+      },
+      {
+       "start": "0x35aaa2",
+       "bytes": 2128,
+       "samples": 195
+      },
+      {
+       "start": "0x31273f",
+       "bytes": 419,
+       "samples": 189
+      },
+      {
+       "start": "0x4161b7",
+       "bytes": 5,
+       "samples": 156
+      }
+     ]
+    }
+   },
+   "preload_source": "#define _GNU_SOURCE\n#include <link.h>\n#include <unistd.h>\n#include <stdint.h>\n#include <stdio.h>\n#include <signal.h>\n#include <time.h>\n#include <string.h>\n#include <stdlib.h>\n#include <fcntl.h>\n#include <pthread.h>\n#include <sched.h>\n#include <stdatomic.h>\n#include <ucontext.h>\n#include <sys/syscall.h>\nstatic __thread int enabled,phase;\nstatic _Atomic int active, stopping, ready; static volatile sig_atomic_t count;\nstatic uintptr_t origin,lo,hi;static uint32_t offsets[65536];static pid_t tid;\nstatic pthread_t worker;static int file=-1;\nstatic int image(struct dl_phdr_info*x,size_t z,void*v){(void)z;(void)v;if(x->dlpi_name[0])return 0;origin=x->dlpi_addr;for(unsigned i=0;i<x->dlpi_phnum;i++){const ElfW(Phdr)*p=x->dlpi_phdr+i;if(p->p_type==PT_LOAD&&(p->p_flags&PF_X)){lo=origin+p->p_vaddr;hi=lo+p->p_memsz;}}return 1;}\nstatic void capture(int sig,siginfo_t*info,void*context){(void)sig;(void)info;uintptr_t pc=((ucontext_t*)context)->uc_mcontext.gregs[REG_RIP];if(active&&pc>=lo&&pc<hi&&count<65536)offsets[count++]=(uint32_t)(pc-origin);}\nstatic void *sample(void*x){(void)x;cpu_set_t set;CPU_ZERO(&set);CPU_SET(5,&set);pthread_setaffinity_np(pthread_self(),sizeof set,&set);unsigned r=(unsigned)tid;ready=1;\n while(!stopping){r=r*1664525u+1013904223u;struct timespec t={.tv_sec=0,.tv_nsec=(long)(35000+(r>>17))};syscall(SYS_nanosleep,&t,0);if(active)syscall(SYS_tgkill,getpid(),tid,SIGUSR2);}return 0;}\n__attribute__((constructor))static void init(void){dl_iterate_phdr(image,0);const char*path=getenv(\"ABI_PCS\");if(path)file=open(path,O_WRONLY|O_CREAT|O_APPEND|O_CLOEXEC,0600);struct sigaction sa={0};sa.sa_sigaction=capture;sigemptyset(&sa.sa_mask);sa.sa_flags=SA_SIGINFO|SA_RESTART;sigaction(SIGUSR2,&sa,0);}\nssize_t write(int fd,const void*buf,size_t len){if(fd==1){if(memmem(buf,len,\"BOXED local_notify \",19)){enabled=1;phase=0;} if(memmem(buf,len,\"BOXED style_notify \",19))enabled=0;}return syscall(SYS_write,fd,buf,len);}\nint clock_gettime(clockid_t c,struct timespec*t){if(enabled&&c==CLOCK_THREAD_CPUTIME_ID){phase++;if(phase==1){tid=syscall(SYS_gettid);count=0;active=0;ready=0;stopping=0;if(pthread_create(&worker,0,sample,0))ready=-1;while(!ready)sched_yield();}else if(phase==3&&ready==1){active=1;}else if(phase==4&&ready==1){active=0;stopping=1;pthread_join(worker,0);if(file>=0&&count)syscall(SYS_write,file,offsets,count*sizeof(*offsets));}}\n return syscall(SYS_clock_gettime,c,t);}\n"
+  }
  },
  "fixed_profile_base_diagnostics": {
   "reference": {
