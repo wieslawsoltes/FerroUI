@@ -203,6 +203,13 @@
       "Material",
       "MacOS",
       "WinUI"
-    ]
+    ],
+    "full_precompiled_execution": {
+      "archive_retained": true,
+      "resource": "Button type key",
+      "template_part": "PART_ContentPresenter",
+      "live_bindings": "Applying the templated parent and updating Button.Padding to 27 then 31 made ContentPresenter.Padding follow both updates.",
+      "scope": "Correctness probe against the conventional full-release consumer with shared-pair tables."
+    }
   }
 }
