@@ -2,6 +2,7 @@
 
 mod ferro_thread_local_tests;
 mod task_tests;
+mod async_ordering_tests;
 mod synchronization_context_tests;
 mod dictionary_tests;
 mod property_path_tests;
