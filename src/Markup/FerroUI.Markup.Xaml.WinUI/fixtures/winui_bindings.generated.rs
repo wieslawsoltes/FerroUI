@@ -56,7 +56,7 @@ pub fn build_root_xaml(
     let context = rt::populate_context(service_provider, &BUILD_ROOT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // root.xaml(3,13) Tag
     stack_panel_0.set_value(::ferroui_controls::Control::tag_property(), rt::string_object("construction value"));
     // root.xaml(4,4) Children
@@ -65,7 +65,7 @@ pub fn build_root_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // root.xaml(4,14) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("initial")));
     rt::register_name_value(name_scope.as_ref(), "initial", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 4, 14)?;
@@ -91,7 +91,7 @@ pub fn build_root_xaml(
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // root.xaml(5,12) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
     rt::register_name_value(name_scope.as_ref(), "editor", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 5, 12)?;
@@ -117,7 +117,7 @@ pub fn build_root_xaml(
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // root.xaml(6,14) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("mirror")));
     rt::register_name_value(name_scope.as_ref(), "mirror", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 6, 14)?;
@@ -162,10 +162,10 @@ pub fn build_template_xaml(
     let context = rt::populate_context(service_provider, &BUILD_TEMPLATE_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
-    context.push_parent(rt::to_value(content_control_0.clone()));
+    rt::push_parent(&context, &content_control_0);
     // template.xaml(4,6) ContentTemplate
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(data_template_0.clone()));
+    rt::push_parent(&context, &data_template_0);
     // template.xaml(4,6) DataType
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_DataType(&data_template_0, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     // template.xaml(5,8) Content
@@ -189,14 +189,14 @@ fn build_template_xaml_deferred_0(
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // template.xaml(6,10) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // template.xaml(6,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // template.xaml(6,20) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("initial")));
     rt::register_name_value(name_scope.as_ref(), "initial", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 6, 20)?;
@@ -224,7 +224,7 @@ fn build_template_xaml_deferred_0(
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // template.xaml(7,18) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
     rt::register_name_value(name_scope.as_ref(), "editor", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 7, 18)?;
@@ -254,7 +254,7 @@ fn build_template_xaml_deferred_0(
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // template.xaml(8,20) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("mirror")));
     rt::register_name_value(name_scope.as_ref(), "mirror", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 8, 20)?;
@@ -454,7 +454,7 @@ pub fn build_native_controls_xaml(
     let context = rt::populate_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(::ferroui_base::StyledElement::__markup_get_Resources(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>()));
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 1, 2)?);
@@ -657,7 +657,7 @@ pub fn build_native_controls_xaml(
     let info_badge_0 = ::ferroui_controls::InfoBadge::new();
     info_badge_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&info_badge_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(info_badge_0.clone()));
+    rt::push_parent(&context, &info_badge_0);
     // native_controls.xaml(32,14) Name
     info_badge_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Badge")));
     rt::register_name_value(name_scope.as_ref(), "Badge", ::std::rc::Rc::new(::core::clone::Clone::clone(&info_badge_0)), 32, 14)?;

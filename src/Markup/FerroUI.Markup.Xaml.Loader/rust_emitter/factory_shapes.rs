@@ -63,6 +63,7 @@ fn has_location(call: &str) -> bool {
             | "rt::add_deferred_resource"
             | "rt::register_name"
             | "rt::end_init"
+            | "rt::pop_parent_and_end_init"
             | "rt::set_and_register_name"
             | "rt::register_name_value"
             | "rt::complete_root_name_scope"

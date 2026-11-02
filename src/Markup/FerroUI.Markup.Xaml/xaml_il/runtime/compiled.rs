@@ -1210,6 +1210,22 @@ pub fn register_name(
     register_name_value(scope, name, Rc::new(element), line, position)
 }
 
+/// Put the concrete typed parent on the XAML stack. A single function per parent
+/// representation performs the clone and the framework's canonical boxing.
+#[inline(never)]
+pub fn push_parent<T: Clone + PartialEq + 'static>(context: &XamlIlContext, parent: &T) {
+    context.push_parent(to_value(parent.clone()));
+}
+
+/// Leave a nested parent scope before its virtual EndInit runs.
+#[inline(never)]
+pub fn pop_parent_and_end_init(
+    context: &XamlIlContext, element: &StyledElement, line: i32, position: i32,
+) -> Result<(), XamlLoadError> {
+    context.pop_parent();
+    end_init(element, line, position)
+}
+
 /// Complete initialization through the styled element's virtual slot. Share the
 /// result conversion and its unwind path across every generated template.
 #[inline(never)]

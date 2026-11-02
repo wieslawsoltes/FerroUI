@@ -385,7 +385,7 @@ fn fused_setter_add(types: &dyn EmitTypes, styles: &mut StyleSetters, lines: &[S
     if !is_plain_borrow(style) {
         return None;
     }
-    let push = format!("context.push_parent(rt::to_value({local}.clone()));");
+    let push = format!("rt::push_parent(&context, &{local});");
     let with_parent = rest.first() == Some(&push.as_str());
     if with_parent {
         rest = &rest[1..];
@@ -1752,16 +1752,17 @@ impl<'a> Emitter<'a> {
             && self.parent_stack_nodes.contains(&node_address(node));
         if push_parent {
             self.uses_context = true;
-            self.line(format!("context.push_parent(rt::to_value({}.clone()));", target.expr));
+            self.line(format!("rt::push_parent(&context, &{});", target.expr));
         }
         self.manipulation(&init.manipulation().as_node(), target)?;
-        if push_parent {
-            self.line("context.pop_parent();".to_string());
-        }
-        if supports_initialize {
-            // The interpreter calls `EndInit` as a member of the contract: its failure is the
-            // exception that wraps the exception of the member.
-            self.line(format!("rt::end_init(&{}, {}, {})?;", target.expr, node.line(), node.position()));
+        // Popping first ensures EndInit sees the enclosing object's parent stack.
+        match (push_parent, supports_initialize) {
+            (true, true) => self.line(format!(
+                "rt::pop_parent_and_end_init(&context, &{}, {}, {})?;", target.expr, node.line(), node.position()
+            )),
+            (true, false) => self.line("context.pop_parent();".to_string()),
+            (false, true) => self.line(format!("rt::end_init(&{}, {}, {})?;", target.expr, node.line(), node.position())),
+            (false, false) => {}
         }
         Ok(())
     }

@@ -74,7 +74,7 @@ impl StyleSetters {
             return None;
         }
         let ctor = format!("    let {child} = {STYLE}::new();");
-        let push = format!("    context.push_parent(rt::to_value({child}.clone()));");
+        let push = format!("    rt::push_parent(&context, &{child});");
         let first = (start..lines.len()).find(|&i| !lines[i].trim_start().starts_with("// "));
         if let Some(i) = first {
             if lines[i] == ctor && lines.get(i + 1) == Some(&push) {

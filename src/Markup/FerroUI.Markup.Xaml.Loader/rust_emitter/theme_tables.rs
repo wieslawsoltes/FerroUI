@@ -99,7 +99,7 @@ impl Factory {
     /// subscriptions, parent-stack operations or constructor changes take the ordinary path.
     pub fn brush(lines: &[String], returned: &str) -> Option<Self> {
         const CREATE: &str = "let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();";
-        const PUSH: &str = "context.push_parent(rt::to_value(solid_color_brush_0.clone()));";
+        const PUSH: &str = "rt::push_parent(&context, &solid_color_brush_0);";
         const SET: &str = "solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));";
         const BIND: &str = "rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), ";
         if returned != "rt::to_value(solid_color_brush_0.clone())" {
