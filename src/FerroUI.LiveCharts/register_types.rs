@@ -14,7 +14,8 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 };
 ferroui_base::ferro_rust_paths! {
     classes:[],
-    types:[crate::SeriesKind,crate::AxisPosition,crate::FindingStrategy,crate::BrushSpace,crate::RadialAlignment,crate::PolarLabelsPosition],
+    types:[crate::SeriesKind,crate::AxisPosition,crate::FindingStrategy,crate::BrushSpace,crate::RadialAlignment,crate::PolarLabelsPosition,
+        crate::SankeyLabelPosition,crate::SankeyLayoutKind],
     contracts:[],generics:[],generic_contracts:[],
 }
 pub fn register_types() {
@@ -30,6 +31,8 @@ pub fn register_types() {
             <crate::BrushSpace as MarkupTyped>::MARKUP,
             <crate::RadialAlignment as MarkupTyped>::MARKUP,
             <crate::PolarLabelsPosition as MarkupTyped>::MARKUP,
+            <crate::SankeyLabelPosition as MarkupTyped>::MARKUP,
+            <crate::SankeyLayoutKind as MarkupTyped>::MARKUP,
         ]);
         register_rust_paths();
     });
