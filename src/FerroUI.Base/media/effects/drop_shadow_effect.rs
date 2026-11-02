@@ -247,7 +247,7 @@ mod tests {
 
         let shadow = DropShadowEffect::new();
         let c = count.clone();
-        shadow.invalidated(move || c.set(c.get() + 1));
+        shadow.invalidated(move || c.set(c.get() + 1)).detach();
         shadow.set_offset_x(1.0);
         shadow.set_blur_radius(2.0);
         shadow.set_color(Colors::RED);
@@ -255,7 +255,7 @@ mod tests {
 
         let direction = DropShadowDirectionEffect::new();
         let c = count.clone();
-        direction.invalidated(move || c.set(c.get() + 1));
+        direction.invalidated(move || c.set(c.get() + 1)).detach();
         direction.set_direction(0.0);
         direction.set_opacity(0.5);
         assert_eq!(6, count.get());

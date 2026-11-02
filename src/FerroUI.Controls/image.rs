@@ -287,7 +287,7 @@ impl Image {
             }
         });
 
-        let previous = self.source_invalidated_subscription.replace(Some(Subscription::new(subscription)));
+        let previous = self.source_invalidated_subscription.replace(Some(subscription));
         if let Some(previous) = previous {
             previous.dispose();
         }

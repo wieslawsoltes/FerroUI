@@ -1,7 +1,7 @@
 use crate::animation::Animatable;
 use crate::media::immutable::ImmutableDashStyle;
 use crate::media::MediaCollection;
-use crate::reactive::{Disposable, IDisposable, Subscription};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -40,7 +40,7 @@ impl FerroObjectImpl for DashStyle {
                         this.raise_invalidated();
                     }
                 });
-                *this.dashes_subscription.borrow_mut() = Some(Subscription::new(subscription));
+                *this.dashes_subscription.borrow_mut() = Some(subscription);
             }
         }
     }
@@ -138,15 +138,16 @@ impl DashStyle {
     }
 
     /// Subscribes to invalidation of the dash style: raised when the dashes
-    /// or the offset change. Disposing the returned handle unsubscribes.
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// or the offset change. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the dash style.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.invalidated.remove(token);
             }
-        })
+        }))
     }
 
     fn raise_invalidated(&self) {

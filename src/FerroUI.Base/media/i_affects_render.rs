@@ -19,43 +19,43 @@ pub trait IAffectsRender {
 
 impl IAffectsRender for Brush {
     fn invalidated(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        Brush::invalidated(self, move || handler())
+        Brush::invalidated(self, move || handler()).detach()
     }
 }
 
 impl IAffectsRender for Pen {
     fn invalidated(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        Pen::invalidated(self, move || handler())
+        Pen::invalidated(self, move || handler()).detach()
     }
 }
 
 impl IAffectsRender for Geometry {
     fn invalidated(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.changed(move || handler())
+        self.changed(move || handler()).detach()
     }
 }
 
 impl IAffectsRender for Transform {
     fn invalidated(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.changed(move || handler())
+        self.changed(move || handler()).detach()
     }
 }
 
 impl IAffectsRender for Effect {
     fn invalidated(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        Effect::invalidated(self, move || handler())
+        Effect::invalidated(self, move || handler()).detach()
     }
 }
 
 impl IAffectsRender for CroppedBitmap {
     fn invalidated(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        CroppedBitmap::invalidated(self, move || handler())
+        CroppedBitmap::invalidated(self, move || handler()).detach()
     }
 }
 
 impl IAffectsRender for DrawingImage {
     fn invalidated(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        DrawingImage::invalidated(self, move || handler())
+        DrawingImage::invalidated(self, move || handler()).detach()
     }
 }
 

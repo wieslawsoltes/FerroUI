@@ -28,7 +28,7 @@
 //! have to keep the batch alive to get the event, as in WinUI.
 
 use super::{AsCompositionObject, CompositionObject, CompositionPropertySet, Compositor};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::threading::{Dispatcher, DispatcherPriority};
 use crate::utilities::HandlerList;
 use bitflags::bitflags;
@@ -99,18 +99,18 @@ fn register_pending_completion(id: u64, handlers: Rc<CompletedHandlers>) {
     });
 }
 
-/// Subscribes `handler` to `handlers`; disposing the result unsubscribes.
+/// Subscribes `handler` to `handlers`; dropping the guard unsubscribes.
 fn subscribe(
     handlers: &Rc<CompletedHandlers>,
     handler: impl Fn(&CompositionBatchCompletedEventArgs) + 'static,
-) -> Rc<dyn IDisposable> {
+) -> Subscription {
     let token = handlers.add(Rc::new(handler));
     let weak = Rc::downgrade(handlers);
-    Disposable::create(move || {
+    Subscription::new(Disposable::create(move || {
         if let Some(handlers) = weak.upgrade() {
             handlers.remove(token);
         }
-    })
+    }))
 }
 
 struct BatchState {
@@ -381,11 +381,12 @@ impl CompositionScopedBatch {
     }
 
     /// Raised once all animations of the ended batch have completed.
-    /// Disposing the returned handle unsubscribes.
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the batch.
     // Deviation (winui-composition.md): the handler gets the arguments only,
     // not the sender, as the other events of FerroUI; the batch need not be
     // kept alive by the application to raise the event.
-    pub fn completed(&self, handler: impl Fn(&CompositionBatchCompletedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    pub fn completed(&self, handler: impl Fn(&CompositionBatchCompletedEventArgs) + 'static) -> Subscription {
         subscribe(&self.completed, handler)
     }
 }
@@ -430,9 +431,10 @@ impl CompositionCommitBatch {
         self.shared.is_ended()
     }
 
-    /// Raised once all animations of the batch have completed. Disposing
-    /// the returned handle unsubscribes.
-    pub fn completed(&self, handler: impl Fn(&CompositionBatchCompletedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Raised once all animations of the batch have completed. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it
+    /// for the life of the batch.
+    pub fn completed(&self, handler: impl Fn(&CompositionBatchCompletedEventArgs) + 'static) -> Subscription {
         subscribe(&self.completed, handler)
     }
 }

@@ -3,7 +3,7 @@
 //! noise texture the materials share.
 
 use crate::platform::IPlatformSettings;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::{
     CompositionStretch, CompositionSurfaceBrush, Compositor, ICompositionSurface, LoadedImageSurface,
 };
@@ -133,9 +133,10 @@ impl MaterialPolicy {
     }
 
     /// `PolicyChanged`: `handler` is called now with the current state, and
-    /// whenever the state changes. Disposing the returned handle
-    /// unsubscribes.
-    pub fn policy_changed(handler: impl Fn(bool) + 'static) -> Rc<dyn IDisposable> {
+    /// whenever the state changes. Dropping the returned guard removes the
+    /// handler; [`Subscription::detach`] keeps it for the life of the
+    /// thread.
+    pub fn policy_changed(handler: impl Fn(bool) + 'static) -> Subscription {
         Self::ensure_initialized();
         let handler: PolicyHandler = Rc::new(handler);
         let (token, disabled) = POLICY.with(|state| {
@@ -146,9 +147,9 @@ impl MaterialPolicy {
             (token, state.disabled)
         });
         handler(disabled);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             let _ = POLICY.try_with(|state| state.borrow_mut().listeners.retain(|(existing, _)| *existing != token));
-        })
+        }))
     }
 
     /// Reads the settings of the platform again and tells the listeners
@@ -253,8 +254,9 @@ impl MaterialPolicy {
     }
 
     /// `handler` is called whenever [`is_window_active`](Self::is_window_active)
-    /// changes. Disposing the returned handle unsubscribes.
-    pub fn window_activation_changed(handler: impl Fn(bool) + 'static) -> Rc<dyn IDisposable> {
+    /// changes. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the thread.
+    pub fn window_activation_changed(handler: impl Fn(bool) + 'static) -> Subscription {
         let handler: Rc<dyn Fn(bool)> = Rc::new(handler);
         let token = POLICY.with(|state| {
             let mut state = state.borrow_mut();
@@ -263,9 +265,9 @@ impl MaterialPolicy {
             state.activation_listeners.push((token, handler));
             token
         });
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             let _ = POLICY.try_with(|state| state.borrow_mut().activation_listeners.retain(|(existing, _)| *existing != token));
-        })
+        }))
     }
 
     /// The noise brush the materials share on `compositor` (WinUI's

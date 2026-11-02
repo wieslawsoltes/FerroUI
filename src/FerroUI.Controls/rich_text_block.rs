@@ -981,7 +981,7 @@ impl RichTextBlock {
                 }
             })
         });
-        *self.font_features_subscription.borrow_mut() = subscription.map(Subscription::new);
+        *self.font_features_subscription.borrow_mut() = subscription;
     }
 
     /// The shared document of the view (the property `RichDocument`, D3).

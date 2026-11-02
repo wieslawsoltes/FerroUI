@@ -644,7 +644,7 @@ impl TextBlock {
                 }
             })
         });
-        *self.font_features_subscription.borrow_mut() = subscription.map(Subscription::new);
+        *self.font_features_subscription.borrow_mut() = subscription;
     }
 
     /// Baseline of the current measured text, without creating a layout or

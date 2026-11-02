@@ -95,7 +95,7 @@ impl<T: ObjectType + Upcast<Transform>> ITransform for RefAdapter<T> {
 
 impl<T: ObjectType + Upcast<Transform>> IMutableTransform for RefAdapter<T> {
     fn changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.transform().changed(move || handler())
+        self.transform().changed(move || handler()).detach()
     }
 }
 

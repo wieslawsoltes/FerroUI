@@ -56,7 +56,7 @@ impl FerroObjectImpl for GradientBrush {
                         }
                     }
                 });
-                *this.gradient_stops_collection_subscription.borrow_mut() = Some(Subscription::new(collection_subscription));
+                *this.gradient_stops_collection_subscription.borrow_mut() = Some(collection_subscription);
 
                 let subscription = track_item_property_changed(&new_value, move || {
                     if let Some(this) = weak.upgrade() {
@@ -64,7 +64,7 @@ impl FerroObjectImpl for GradientBrush {
                         this.raise_invalidated();
                     }
                 });
-                *this.gradient_stops_subscription.borrow_mut() = Some(Subscription::new(subscription));
+                *this.gradient_stops_subscription.borrow_mut() = Some(subscription);
             }
         }
 

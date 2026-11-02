@@ -240,7 +240,7 @@ impl ImplicitEntry {
             let Some(visual) = entry.visual.upgrade() else { return };
             entry.end_hiding(&visual);
         });
-        *self.hiding.borrow_mut() = Some(Subscription::new(subscription));
+        *self.hiding.borrow_mut() = Some(subscription);
     }
 
     /// The visual was removed from its tree: its composition visual is gone, so the hide
@@ -295,6 +295,6 @@ impl ImplicitEntry {
                 subscription.dispose();
             }
         });
-        *subscription.borrow_mut() = Some(completed);
+        *subscription.borrow_mut() = Some(completed.detach());
     }
 }
