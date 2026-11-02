@@ -326,7 +326,7 @@ fn pages_changed_fires_on_add() {
 
     let received: ReceivedChange = Rc::default();
     let r = received.clone();
-    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share()));
+    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share())).detach();
 
     pages.add(page().upcast());
 
@@ -344,7 +344,7 @@ fn pages_changed_fires_on_remove() {
 
     let received: ReceivedChange = Rc::default();
     let r = received.clone();
-    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share()));
+    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share())).detach();
 
     pages.remove(&page);
 
@@ -360,7 +360,7 @@ fn pages_changed_not_fired_after_pages_replaced() {
     tp.set_pages(Some(old_pages.clone()));
     let fired = Rc::new(Cell::new(false));
     let f = fired.clone();
-    tp.pages_changed(move |_| f.set(true));
+    tp.pages_changed(move |_| f.set(true)).detach();
 
     tp.set_pages(Some(PageList::new()));
     old_pages.add(page().upcast());
@@ -376,7 +376,7 @@ fn pages_changed_add_args_contain_added_page() {
 
     let received: ReceivedChange = Rc::default();
     let r = received.clone();
-    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share()));
+    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share())).detach();
 
     let page = hp("New");
     pages.add(page.clone());
@@ -396,7 +396,7 @@ fn pages_changed_remove_args_contain_removed_page() {
 
     let received: ReceivedChange = Rc::default();
     let r = received.clone();
-    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share()));
+    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share())).detach();
 
     pages.remove(&page);
 
@@ -414,7 +414,7 @@ fn pages_changed_fires_on_clear_with_reset_action() {
 
     let received: ReceivedChange = Rc::default();
     let r = received.clone();
-    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share()));
+    tp.pages_changed(move |e| *r.borrow_mut() = Some(e.share())).detach();
 
     pages.clear();
 
@@ -533,7 +533,7 @@ fn current_page_changed_fires_on_commit_selection() {
     let tp = TabbedPage::new();
     let count = Rc::new(Cell::new(0));
     let c = count.clone();
-    tp.current_page_changed(move || c.set(c.get() + 1));
+    tp.current_page_changed(move || c.set(c.get() + 1)).detach();
 
     call_commit_selection(&tp, 0, Some(&page().upcast()));
 
@@ -549,7 +549,7 @@ fn current_page_changed_not_fired_when_same_page_committed() {
 
     let count = Rc::new(Cell::new(0));
     let c = count.clone();
-    tp.current_page_changed(move || c.set(c.get() + 1));
+    tp.current_page_changed(move || c.set(c.get() + 1)).detach();
 
     call_commit_selection(&tp, 0, Some(&page));
 
@@ -568,7 +568,7 @@ fn commit_selection_fires_navigated_from_on_previous_page() {
 
     let args: Rc<RefCell<Option<NavigatedFromEventArgs>>> = Rc::default();
     let a = args.clone();
-    page1.navigated_from(move |e| *a.borrow_mut() = Some(e.clone()));
+    page1.navigated_from(move |e| *a.borrow_mut() = Some(e.clone())).detach();
     call_commit_selection(&tp, 1, Some(&page2));
 
     let args = args.borrow().clone().expect("navigated from");
@@ -586,7 +586,7 @@ fn commit_selection_fires_navigated_to_on_new_page() {
 
     let args: Rc<RefCell<Option<NavigatedToEventArgs>>> = Rc::default();
     let a = args.clone();
-    page2.navigated_to(move |e| *a.borrow_mut() = Some(e.clone()));
+    page2.navigated_to(move |e| *a.borrow_mut() = Some(e.clone())).detach();
     call_commit_selection(&tp, 1, Some(&page2));
 
     let args = args.borrow().clone().expect("navigated to");
@@ -604,9 +604,9 @@ fn commit_selection_lifecycle_order_navigated_from_navigated_to() {
 
     let order: Rc<RefCell<Vec<&'static str>>> = Rc::default();
     let o = order.clone();
-    page1.navigated_from(move |_| o.borrow_mut().push("NavigatedFrom"));
+    page1.navigated_from(move |_| o.borrow_mut().push("NavigatedFrom")).detach();
     let o = order.clone();
-    page2.navigated_to(move |_| o.borrow_mut().push("NavigatedTo"));
+    page2.navigated_to(move |_| o.borrow_mut().push("NavigatedTo")).detach();
     call_commit_selection(&tp, 1, Some(&page2));
 
     assert_eq!(*order.borrow(), ["NavigatedFrom", "NavigatedTo"]);
@@ -621,9 +621,9 @@ fn commit_selection_same_page_no_lifecycle_events() {
 
     let events: Rc<RefCell<Vec<&'static str>>> = Rc::default();
     let ev = events.clone();
-    page.navigated_to(move |_| ev.borrow_mut().push("NavigatedTo"));
+    page.navigated_to(move |_| ev.borrow_mut().push("NavigatedTo")).detach();
     let ev = events.clone();
-    page.navigated_from(move |_| ev.borrow_mut().push("NavigatedFrom"));
+    page.navigated_from(move |_| ev.borrow_mut().push("NavigatedFrom")).detach();
     call_commit_selection(&tp, 0, Some(&page));
 
     assert!(events.borrow().is_empty());
@@ -642,9 +642,9 @@ fn commit_selection_first_page_navigated_to_has_null_previous() {
     page.navigated_to(move |e| {
         *a.borrow_mut() = Some(e.clone());
         ev.borrow_mut().push("NavigatedTo");
-    });
+    }).detach();
     let ev = events.clone();
-    page.navigated_from(move |_| ev.borrow_mut().push("NavigatedFrom"));
+    page.navigated_from(move |_| ev.borrow_mut().push("NavigatedFrom")).detach();
 
     call_commit_selection(&tp, 0, Some(&page));
 
@@ -668,7 +668,7 @@ fn commit_selection_to_null_fires_navigated_from_with_null_destination() {
     page.navigated_from(move |e| {
         *a.borrow_mut() = Some(e.clone());
         ev.borrow_mut().push("NavigatedFrom");
-    });
+    }).detach();
 
     call_commit_selection(&tp, -1, None);
 

@@ -77,7 +77,7 @@ impl TopmostWindowTest {
                 if let Some(this) = weak.upgrade() {
                     this.current_position().set_text(Some(&this.position().to_string()));
                 }
-            });
+            }).detach();
         }
 
         if cfg!(target_os = "macos") {

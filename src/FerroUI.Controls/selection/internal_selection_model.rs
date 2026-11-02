@@ -77,14 +77,14 @@ impl InternalSelectionModel {
             if let Some(this) = this.upgrade() {
                 this.on_selection_changed(e);
             }
-        });
+        }).detach();
 
         let this = Rc::downgrade(&result);
         result.model.source_reset(move || {
             if let Some(this) = this.upgrade() {
                 this.sync_from_selected_items();
             }
-        });
+        }).detach();
 
         result
     }

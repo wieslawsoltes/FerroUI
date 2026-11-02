@@ -554,7 +554,7 @@ impl WindowDrawnDecorations {
                         this.on_allowed_window_actions_changed(actions);
                     }
                 }
-            }),
+            }).detach(),
             FerroObjectExtensions::get_observable(object, Window::title_property()).subscribe_fn({
                 let weak = weak.clone();
                 move |title| {

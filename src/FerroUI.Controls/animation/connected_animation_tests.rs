@@ -326,10 +326,10 @@ mod connected_animation_tests {
         let animation = service.prepare_to_animate("hero", &border());
 
         let received = Rc::new(Cell::new(None));
-        let _ = animation.completed({
+        animation.completed({
             let received = received.clone();
             move |e| received.set(Some(*e))
-        });
+        }).detach();
 
         animation.try_start(&border()); // no top level ancestor
 
@@ -343,10 +343,10 @@ mod connected_animation_tests {
         let animation = service.prepare_to_animate("hero", &border());
 
         let cancelled = Rc::new(Cell::new(None));
-        let _ = animation.completed({
+        animation.completed({
             let cancelled = cancelled.clone();
             move |e| cancelled.set(Some(e.cancelled()))
-        });
+        }).detach();
 
         animation.try_start(&border());
 
@@ -372,10 +372,10 @@ mod connected_animation_tests {
         let coordinated = [border(), border()];
 
         let fired = Rc::new(Cell::new(false));
-        let _ = animation.completed({
+        animation.completed({
             let fired = fired.clone();
             move |_| fired.set(true)
-        });
+        }).detach();
 
         animation.try_start_with_coordinated_elements(&border(), &coordinated);
 
@@ -411,10 +411,10 @@ mod connected_animation_tests {
         let animation = service.prepare_to_animate("hero", &border());
 
         let fired = Rc::new(Cell::new(false));
-        let _ = animation.completed({
+        animation.completed({
             let fired = fired.clone();
             move |_| fired.set(true)
-        });
+        }).detach();
 
         animation.dispose();
 
@@ -662,10 +662,10 @@ mod overlay_flight {
         assert!(service == ConnectedAnimationService::get_for_top_level(&window));
         let animation = service.prepare_to_animate("hero", &source);
         let completed = Rc::new(Cell::new(None));
-        let _ = animation.completed({
+        animation.completed({
             let completed = completed.clone();
             move |e| completed.set(Some(e.cancelled()))
-        });
+        }).detach();
 
         assert!(animation.try_start_with_coordinated_elements(&destination, &[coordinated.clone().upcast()]));
         Dispatcher::ui_thread().run_jobs(None);
@@ -709,14 +709,14 @@ mod overlay_flight {
         let service = ConnectedAnimationService::get_for_top_level(&window);
         let animation = service.prepare_to_animate("hero", &source);
         let cancelled = Rc::new(Cell::new(None));
-        let _ = animation.completed({
+        animation.completed({
             let cancelled = cancelled.clone();
             move |e| {
                 if cancelled.get().is_none() {
                     cancelled.set(Some(e.cancelled()));
                 }
             }
-        });
+        }).detach();
 
         assert!(animation.try_start(&destination));
         Dispatcher::ui_thread().run_jobs(None);

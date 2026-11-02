@@ -1283,15 +1283,11 @@ impl DockControl {
         self.detach_main_window_handlers();
         self.attached_window.replace(Some(window.clone()));
         let owner = self.to_ref();
-        self.activated_subscription.replace(Some(Subscription::new(
-            window.activated(move || owner.on_main_window_activated()),
-        )));
+        self.activated_subscription.replace(Some(window.activated(move || owner.on_main_window_activated())));
         if DockSettings::close_floating_windows_on_main_window_close() {
             let owner = self.to_ref();
             let sender = window.clone();
-            self.closing_subscription.replace(Some(Subscription::new(
-                window.closing(move |_| owner.on_main_window_closing(sender.clone())),
-            )));
+            self.closing_subscription.replace(Some(window.closing(move |_| owner.on_main_window_closing(sender.clone()))));
         }
     }
     fn detach_main_window_handlers(&self) {

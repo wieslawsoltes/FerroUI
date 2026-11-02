@@ -365,7 +365,7 @@ fn rich_selection_tracks_external_edits_and_is_shared_across_columns() {
     overflow.select(6, 10);
     let changes = Rc::new(Cell::new(0));
     let observed = changes.clone();
-    let _subscription = overflow.selection_changed(move |_| observed.set(observed.get() + 1));
+    overflow.selection_changed(move |_| observed.set(observed.get() + 1)).detach();
     view.document().replace_text(0..0, "😀 ").unwrap();
     assert_eq!(view.selected_text(), "beta");
     assert_eq!(overflow.selected_text(), "beta");

@@ -69,7 +69,7 @@ fn pop_all_modals_fires_modal_popped_for_each_modal() {
 
     let popped: Rc<RefCell<Vec<Ref<Page>>>> = Rc::default();
     let p = popped.clone();
-    nav.modal_popped(move |e: &ModalPoppedEventArgs| p.borrow_mut().push(e.modal()));
+    nav.modal_popped(move |e: &ModalPoppedEventArgs| p.borrow_mut().push(e.modal())).detach();
 
     wait(nav.pop_all_modals_async());
 
@@ -89,8 +89,8 @@ fn pop_all_modals_fires_navigated_from_on_all_modals() {
     wait(nav.push_modal_async(&m2));
 
     let navigated_from = log();
-    m1.navigated_from(record(&navigated_from, "M1"));
-    m2.navigated_from(record(&navigated_from, "M2"));
+    m1.navigated_from(record(&navigated_from, "M1")).detach();
+    m2.navigated_from(record(&navigated_from, "M2")).detach();
 
     wait(nav.pop_all_modals_async());
 
@@ -108,7 +108,7 @@ fn pop_all_modals_fires_navigated_to_on_underlying_page() {
     wait(nav.push_modal_async(page_h("M2")));
 
     let navigated_to = flag();
-    root.navigated_to(raise_flag(&navigated_to));
+    root.navigated_to(raise_flag(&navigated_to)).detach();
 
     wait(nav.pop_all_modals_async());
 
@@ -127,8 +127,8 @@ fn pop_all_modals_navigated_from_navigation_type_is_pop_modal() {
 
     let m1_args = slot::<NavigatedFromEventArgs>();
     let m2_args = slot::<NavigatedFromEventArgs>();
-    m1.navigated_from(store(&m1_args));
-    m2.navigated_from(store(&m2_args));
+    m1.navigated_from(store(&m1_args)).detach();
+    m2.navigated_from(store(&m2_args)).detach();
 
     wait(nav.pop_all_modals_async());
 
@@ -145,7 +145,7 @@ fn pop_all_modals_navigated_to_navigation_type_is_pop_modal() {
     wait(nav.push_modal_async(page()));
 
     let args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
 
     wait(nav.pop_all_modals_async());
 
@@ -164,7 +164,7 @@ fn pop_all_modals_navigated_to_previous_page_is_top_modal() {
     wait(nav.push_modal_async(&m2));
 
     let args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
 
     wait(nav.pop_all_modals_async());
 
@@ -183,9 +183,9 @@ fn pop_all_modals_multiple_modals_navigated_to_fired_only_on_base_current_page()
     wait(nav.push_modal_async(&m2));
 
     let navigated_to_pages = log();
-    root.navigated_to(record(&navigated_to_pages, "root"));
-    m1.navigated_to(record(&navigated_to_pages, "m1"));
-    m2.navigated_to(record(&navigated_to_pages, "m2"));
+    root.navigated_to(record(&navigated_to_pages, "root")).detach();
+    m1.navigated_to(record(&navigated_to_pages, "m1")).detach();
+    m2.navigated_to(record(&navigated_to_pages, "m2")).detach();
 
     wait(nav.pop_all_modals_async());
 
@@ -203,7 +203,7 @@ fn pop_all_modals_when_top_modal_cancels_navigating_does_not_clear_modal_stack()
     wait(nav.push_modal_async(&m2));
 
     let handler_invoked = flag();
-    m2.navigating(cancel_navigation(&handler_invoked));
+    m2.navigating(cancel_navigation(&handler_invoked)).detach();
 
     wait(nav.pop_all_modals_async());
 
@@ -275,8 +275,8 @@ fn replace_async_with_current_page_is_no_op() {
     wait(nav.push_async(&top));
 
     let lifecycle_events = counter();
-    top.navigated_from(count(&lifecycle_events));
-    top.navigated_to(count(&lifecycle_events));
+    top.navigated_from(count(&lifecycle_events)).detach();
+    top.navigated_to(count(&lifecycle_events)).detach();
 
     wait(nav.replace_async(&top));
 
@@ -294,8 +294,8 @@ fn replace_async_fires_lifecycle_events_in_order() {
 
     let replacement = page_h("Replacement");
     let order = log();
-    original.navigated_from(record(&order, "Original: NavigatedFrom"));
-    replacement.navigated_to(record(&order, "Replacement: NavigatedTo"));
+    original.navigated_from(record(&order, "Original: NavigatedFrom")).detach();
+    replacement.navigated_to(record(&order, "Replacement: NavigatedTo")).detach();
 
     wait(nav.replace_async(&replacement));
 
@@ -312,8 +312,8 @@ fn replace_async_navigation_type_is_replace() {
     let replacement = page_h("Replacement");
     let arrived = slot::<NavigatedToEventArgs>();
     let departed = slot::<NavigatedFromEventArgs>();
-    replacement.navigated_to(store(&arrived));
-    original.navigated_from(store(&departed));
+    replacement.navigated_to(store(&arrived)).detach();
+    original.navigated_from(store(&departed)).detach();
 
     wait(nav.replace_async(&replacement));
 
@@ -328,7 +328,7 @@ fn replace_async_when_cancelled_does_not_replace() {
     let original = page_h("Original");
     wait(nav.push_async(&original));
 
-    original.navigating(cancel_navigation(&flag()));
+    original.navigating(cancel_navigation(&flag())).detach();
 
     let replacement = page_h("Replacement");
     wait(nav.replace_async(&replacement));
@@ -344,7 +344,7 @@ fn replace_passes_parameter_with_event_args() {
     let root = page();
     let param: BoxedValue = Rc::new(());
     let args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
     wait(nav.replace_async_with_parameter(&root, None, Some(param.clone())));
     assert!(taken(&args).parameter().is_some_and(|parameter| Rc::ptr_eq(&parameter, &param)));
 }
@@ -374,7 +374,7 @@ fn pop_to_root_async_previous_page_is_not_null() {
     wait(nav.push_async(&third));
 
     let args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
 
     wait(nav.pop_to_root_async());
 
@@ -390,7 +390,7 @@ fn pop_to_root_async_navigation_type_is_pop_to_root() {
     wait(nav.push_async(page()));
 
     let args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
 
     wait(nav.pop_to_root_async());
 
@@ -411,7 +411,7 @@ fn pop_to_page_async_previous_page_is_not_null() {
     wait(nav.push_async(&top));
 
     let args = slot::<NavigatedToEventArgs>();
-    target.navigated_to(store(&args));
+    target.navigated_to(store(&args)).detach();
 
     wait(nav.pop_to_page_async(&target));
 
@@ -429,7 +429,7 @@ fn pop_to_page_async_navigation_type_is_pop() {
     wait(nav.push_async(page()));
 
     let args = slot::<NavigatedToEventArgs>();
-    target.navigated_to(store(&args));
+    target.navigated_to(store(&args)).detach();
 
     wait(nav.pop_to_page_async(&target));
 
@@ -451,8 +451,8 @@ fn pop_to_page_async_intermediate_pages_navigation_type_is_pop() {
 
     let middle_args = slot::<NavigatedFromEventArgs>();
     let top_args = slot::<NavigatedFromEventArgs>();
-    middle.navigated_from(store(&middle_args));
-    top.navigated_from(store(&top_args));
+    middle.navigated_from(store(&middle_args)).detach();
+    top.navigated_from(store(&top_args)).detach();
 
     wait(nav.pop_to_page_async(&target));
 
@@ -479,7 +479,7 @@ fn pop_to_page_async_target_is_already_top_is_no_op() {
     wait(nav.push_async(&top));
 
     let navigated_to_count = counter();
-    top.navigated_to(count(&navigated_to_count));
+    top.navigated_to(count(&navigated_to_count)).detach();
 
     wait(nav.pop_to_page_async(&top));
 
@@ -501,9 +501,9 @@ fn push_modal_async_cancelled_transition_still_fires_lifecycle_events() {
     let navigated_from_fired = flag();
     let navigated_to_fired = flag();
     let modal_pushed_fired = flag();
-    root.navigated_from(raise_flag(&navigated_from_fired));
-    modal.navigated_to(raise_flag(&navigated_to_fired));
-    nav.modal_pushed(raise_flag(&modal_pushed_fired));
+    root.navigated_from(raise_flag(&navigated_from_fired)).detach();
+    modal.navigated_to(raise_flag(&navigated_to_fired)).detach();
+    nav.modal_pushed(raise_flag(&modal_pushed_fired)).detach();
 
     wait(nav.push_modal_async_with_transition(&modal, None));
 
@@ -538,9 +538,9 @@ fn pop_all_modals_async_cancelled_transition_still_clears_stack_and_fires_events
             if same(&e.modal(), &m2) {
                 m2_fired.set(true);
             }
-        });
+        }).detach();
     }
-    root.navigated_to(raise_flag(&root_navigated_to_fired));
+    root.navigated_to(raise_flag(&root_navigated_to_fired)).detach();
 
     wait(nav.pop_all_modals_async_with_transition(None));
 
@@ -574,9 +574,9 @@ fn push_async_lifecycle_events_fire_after_transition() {
     let pushed_during_transition = flag();
 
     let second = page_h("Second");
-    root.navigated_from(during_transition(&navigated_from_during_transition, &tcs));
-    second.navigated_to(during_transition(&navigated_to_during_transition, &tcs));
-    nav.pushed(during_transition::<NavigationEventArgs>(&pushed_during_transition, &tcs));
+    root.navigated_from(during_transition(&navigated_from_during_transition, &tcs)).detach();
+    second.navigated_to(during_transition(&navigated_to_during_transition, &tcs)).detach();
+    nav.pushed(during_transition::<NavigationEventArgs>(&pushed_during_transition, &tcs)).detach();
 
     let push_task = nav.push_async(&second);
     tcs.set_result();
@@ -604,9 +604,9 @@ fn pop_async_lifecycle_events_fire_after_transition() {
     let navigated_to_during_transition = flag();
     let popped_during_transition = flag();
 
-    top.navigated_from(during_transition(&navigated_from_during_transition, &tcs));
-    root.navigated_to(during_transition(&navigated_to_during_transition, &tcs));
-    nav.popped(during_transition::<NavigationEventArgs>(&popped_during_transition, &tcs));
+    top.navigated_from(during_transition(&navigated_from_during_transition, &tcs)).detach();
+    root.navigated_to(during_transition(&navigated_to_during_transition, &tcs)).detach();
+    nav.popped(during_transition::<NavigationEventArgs>(&popped_during_transition, &tcs)).detach();
 
     let pop_task = nav.pop_async();
     tcs.set_result();
@@ -636,10 +636,10 @@ fn pop_to_root_async_lifecycle_events_fire_after_transition() {
     let navigated_to_during_transition = flag();
     let popped_to_root_during_transition = flag();
 
-    second.navigated_from(during_transition(&navigated_from_during_transition, &tcs));
-    third.navigated_from(during_transition(&navigated_from_during_transition, &tcs));
-    root.navigated_to(during_transition(&navigated_to_during_transition, &tcs));
-    nav.popped_to_root(during_transition::<NavigationEventArgs>(&popped_to_root_during_transition, &tcs));
+    second.navigated_from(during_transition(&navigated_from_during_transition, &tcs)).detach();
+    third.navigated_from(during_transition(&navigated_from_during_transition, &tcs)).detach();
+    root.navigated_to(during_transition(&navigated_to_during_transition, &tcs)).detach();
+    nav.popped_to_root(during_transition::<NavigationEventArgs>(&popped_to_root_during_transition, &tcs)).detach();
 
     let pop_task = nav.pop_to_root_async();
     tcs.set_result();
@@ -665,8 +665,8 @@ fn replace_async_lifecycle_events_fire_after_transition() {
     let navigated_to_during_transition = flag();
 
     let replacement = page_h("Replacement");
-    root.navigated_from(during_transition(&navigated_from_during_transition, &tcs));
-    replacement.navigated_to(during_transition(&navigated_to_during_transition, &tcs));
+    root.navigated_from(during_transition(&navigated_from_during_transition, &tcs)).detach();
+    replacement.navigated_to(during_transition(&navigated_to_during_transition, &tcs)).detach();
 
     let replace_task = nav.replace_async(&replacement);
     tcs.set_result();
@@ -1053,7 +1053,7 @@ fn drawer_page_content_replaced_resends_navigated_to_on_load() {
     root.execute_initial_layout_pass();
 
     let first_args = slot::<NavigatedToEventArgs>();
-    page1.navigated_to(store(&first_args));
+    page1.navigated_to(store(&first_args)).detach();
     nav1.set_content(Some(Control::boxed(page1.clone())));
 
     assert!(first_args.borrow().is_some());
@@ -1062,7 +1062,7 @@ fn drawer_page_content_replaced_resends_navigated_to_on_load() {
     let page2 = page();
 
     let second_args = slot::<NavigatedToEventArgs>();
-    page2.navigated_to(store(&second_args));
+    page2.navigated_to(store(&second_args)).detach();
 
     drawer.set_content(Some(Control::boxed(nav2.clone())));
     nav2.set_content(Some(Control::boxed(page2.clone())));

@@ -795,7 +795,7 @@ fn rich_selection_home_end_editor_publication_model_write_preserves_external_sta
     let changed = Rc::new(Cell::new(false));
     let observed = changed.clone();
     let weak = Rc::downgrade(&document.editor());
-    let _subscription = document.editor().changed(move || {
+    document.editor().changed(move || {
         if !changed.replace(true) {
             model.replace_text(0..model.text_length(), "q").unwrap();
             weak.upgrade()
@@ -803,7 +803,7 @@ fn rich_selection_home_end_editor_publication_model_write_preserves_external_sta
                 .set_selection(EditorSelection::caret(0))
                 .unwrap();
         }
-    });
+    }).detach();
     assert!(matches!(
         document.selection().end_key(TextRangeUnit::Story, true),
         Err(EditError::ReentrantEdit)

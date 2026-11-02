@@ -4,7 +4,7 @@ use crate::documents::{
     TextGravity,
 };
 use ferroui_base::media::TextDecorations;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{Ref, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -582,31 +582,37 @@ impl RichTextEditor {
 
     /// Observes completed editing or selection changes. Handlers run after document
     /// notifications and outside all history borrows.
-    pub fn changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`]
+    /// keeps it for the life of the editor.
+    pub fn changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.changed.add(Rc::new(handler));
         let weak = Rc::downgrade(&self.changed);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(events) = weak.upgrade() {
                 events.remove(token);
             }
-        })
+        }))
     }
 
     /// Observes accepted composition causes after the editor's change notifications.
     /// A completed editor edit group delivers its queued causes in order; callbacks
     /// observe the settled group state. A failed group discards them. A separately
     /// held model edit batch may defer its public document notification further.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`]
+    /// keeps it for the life of the editor.
     pub fn composition_changed(
         &self,
         handler: impl Fn(&RichTextCompositionChange) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.composition_changed.add(Rc::new(handler));
         let weak = Rc::downgrade(&self.composition_changed);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(events) = weak.upgrade() {
                 events.remove(token);
             }
-        })
+        }))
     }
 
     fn queue_composition_change(&self, change: RichTextCompositionChange) {

@@ -441,7 +441,7 @@ fn push_fires_pushed_event() {
     let _scope = test_scope();
     let nav = NavigationPage::new();
     let received = slot::<NavigationEventArgs>();
-    nav.pushed(store(&received));
+    nav.pushed(store(&received)).detach();
 
     let page = page();
     wait(nav.push_async(&page));
@@ -460,7 +460,7 @@ fn push_invokes_navigated_to_on_pushed_page() {
 
     let args = slot();
     let second = page();
-    second.navigated_to(store(&args));
+    second.navigated_to(store(&args)).detach();
 
     wait(nav.push_async(&second));
 
@@ -475,7 +475,7 @@ fn push_invokes_navigated_from_on_previous_page() {
     let nav = NavigationPage::new();
     let root = page();
     let args = slot();
-    root.navigated_from(store(&args));
+    root.navigated_from(store(&args)).detach();
     wait(nav.push_async(&root));
 
     let second = page();
@@ -493,7 +493,7 @@ fn push_async_when_navigating_from_cancels_does_not_push() {
     let root = page();
     wait(nav.push_async(&root));
 
-    root.navigating(cancel_navigation(&flag()));
+    root.navigating(cancel_navigation(&flag())).detach();
 
     wait(nav.push_async(page()));
 
@@ -513,7 +513,7 @@ fn push_reentrant_from_navigated_to_is_ignored_not_thrown() {
     second.navigated_to(move |_| {
         let nav = weak.upgrade().expect("the navigation page is alive");
         wait(nav.push_async(page()));
-    });
+    }).detach();
 
     wait(nav.push_async(&second));
 
@@ -532,7 +532,7 @@ fn push_passes_parameter_with_event_args() {
     let root = page();
     let param: BoxedValue = Rc::new(());
     let args = slot();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
     wait(nav.push_async_with_parameter(&root, None, Some(param.clone())));
     assert!(same_value(&taken(&args).parameter(), &param));
 }
@@ -553,7 +553,7 @@ fn push_modal_passes_parameter_with_event_args() {
     let root = page();
     let param: BoxedValue = Rc::new(());
     let args = slot();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
     wait(nav.push_modal_async_with_parameter(&root, None, Some(param.clone())));
     assert!(same_value(&taken(&args).parameter(), &param));
 }
@@ -587,7 +587,7 @@ fn pop_reentrant_from_navigated_to_is_ignored() {
     root.navigated_to(move |_| {
         let nav = weak.upgrade().expect("the navigation page is alive");
         wait(nav.pop_async());
-    });
+    }).detach();
 
     wait(nav.pop_async());
 
@@ -606,7 +606,7 @@ fn push_modal_reentrant_from_navigated_to_is_ignored() {
     modal.navigated_to(move |_| {
         let nav = weak.upgrade().expect("the navigation page is alive");
         wait(nav.push_modal_async(page()));
-    });
+    }).detach();
 
     wait(nav.push_modal_async(&modal));
 
@@ -626,7 +626,7 @@ fn pop_modal_reentrant_from_navigated_to_is_ignored() {
     root.navigated_to(move |_| {
         let nav = weak.upgrade().expect("the navigation page is alive");
         wait(nav.pop_modal_async());
-    });
+    }).detach();
 
     wait(nav.pop_modal_async());
 
@@ -691,7 +691,7 @@ fn pop_fires_popped_event() {
     let _scope = test_scope();
     let nav = NavigationPage::new();
     let received = slot::<NavigationEventArgs>();
-    nav.popped(store(&received));
+    nav.popped(store(&received)).detach();
 
     let root = page();
     let top = page();
@@ -710,7 +710,7 @@ fn pop_invokes_navigated_to_on_revealed_page() {
     let nav = NavigationPage::new();
     let root = page();
     let args = slot();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
     wait(nav.push_async(&root));
 
     let top = page();
@@ -730,7 +730,7 @@ fn pop_async_when_navigating_from_cancels_does_not_pop() {
     let top = page();
     wait(nav.push_async(&top));
 
-    top.navigating(cancel_navigation(&flag()));
+    top.navigating(cancel_navigation(&flag())).detach();
 
     wait(nav.pop_async());
 
@@ -748,7 +748,7 @@ fn pop_async_invokes_navigated_to_on_revealed_page() {
     wait(nav.push_async(&top));
 
     let navigated_to = flag();
-    root.navigated_to(raise_flag(&navigated_to));
+    root.navigated_to(raise_flag(&navigated_to)).detach();
 
     wait(nav.pop_async());
 

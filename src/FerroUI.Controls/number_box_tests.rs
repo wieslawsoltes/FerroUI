@@ -53,7 +53,7 @@ fn nan_and_equal_values_raise_no_change() {
     let control = NumberBox::new();
     let changes = Rc::new(RefCell::new(Vec::new()));
     let recorded = changes.clone();
-    control.value_changed(move |e| recorded.borrow_mut().push((e.old_value, e.new_value)));
+    control.value_changed(move |e| recorded.borrow_mut().push((e.old_value, e.new_value))).detach();
     control.set_numeric_value(f64::NAN);
     control.set_numeric_value(5.0);
     control.set_numeric_value(5.0);
@@ -75,7 +75,7 @@ fn the_bounds_coerce_the_value_and_each_other() {
     control.set_maximum(10.0);
     let changes = Rc::new(Cell::new(0));
     let observed = changes.clone();
-    control.value_changed(move |_| observed.set(observed.get() + 1));
+    control.value_changed(move |_| observed.set(observed.get() + 1)).detach();
     control.set_numeric_value(50.0);
     assert_eq!(10.0, control.value());
     assert_eq!(1, changes.get());
@@ -349,7 +349,7 @@ fn the_peer_reports_the_coerced_value_after_the_handlers_and_the_changes_of_the_
     assert_eq!("Explicit label", peer.get_name());
     let events = Rc::new(RefCell::new(Vec::new()));
     let recorded = events.clone();
-    control.value_changed(move |_| recorded.borrow_mut().push("application".to_string()));
+    control.value_changed(move |_| recorded.borrow_mut().push("application".to_string())).detach();
     let recorded = events.clone();
     peer.property_changed(move |event| {
         if std::ptr::eq(event.property(), RangeValuePatternIdentifiers::value_property()) {

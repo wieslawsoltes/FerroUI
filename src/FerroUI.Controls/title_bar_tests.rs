@@ -50,9 +50,9 @@ fn the_buttons_raise_their_requests() {
     let back = Rc::new(Cell::new(0));
     let toggle = Rc::new(Cell::new(0));
     let counter = back.clone();
-    let _a = bar.back_requested(move |_| counter.set(counter.get() + 1));
+    bar.back_requested(move |_| counter.set(counter.get() + 1)).detach();
     let counter = toggle.clone();
-    let _b = bar.pane_toggle_requested(move |_| counter.set(counter.get() + 1));
+    bar.pane_toggle_requested(move |_| counter.set(counter.get() + 1)).detach();
     bar.raise_back_requested_for_tests();
     bar.raise_pane_toggle_requested_for_tests();
     assert_eq!((1, 1), (back.get(), toggle.get()));

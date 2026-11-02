@@ -438,7 +438,7 @@ impl TemplatedControlImpl for AutoSuggestBox {
                 if let Some(this) = weak.upgrade() {
                     this.set_current_value(Self::is_suggestion_list_open_property(), false);
                 }
-            }));
+            }).detach());
         }
         *this.template_subscriptions.borrow_mut() = subscriptions;
         this.set_text_box_query_button_icon();

@@ -170,7 +170,7 @@ impl ShowWindowTest {
                 if let Some(this) = weak.upgrade() {
                     this.current_position().set_text(Some(&this.position().to_string()));
                 }
-            });
+            }).detach();
         }
 
         {

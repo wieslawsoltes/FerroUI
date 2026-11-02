@@ -72,12 +72,12 @@ fn count_properties(target: &Target, raised: &Rc<Cell<i32>>) {
 
 fn count_selection_changed(target: &Target, raised: &Rc<Cell<i32>>) {
     let r = raised.clone();
-    target.selection_changed(move |_| inc(&r));
+    target.selection_changed(move |_| inc(&r)).detach();
 }
 
 fn count_indexes_changed(target: &Target, raised: &Rc<Cell<i32>>) {
     let r = raised.clone();
-    target.indexes_changed(move |_| inc(&r));
+    target.indexes_changed(move |_| inc(&r)).detach();
 }
 
 mod no_source {
@@ -102,7 +102,7 @@ mod no_source {
             assert_eq!(e.selected_indexes().to_vec(), vec![index]);
             assert_eq!(e.selected_items().to_vec(), vec![None]);
             inc(&r);
-        });
+        }).detach();
 
         target.set_selected_index(5);
         target.select(10);
@@ -132,7 +132,7 @@ mod no_source {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.set_source(source(&["foo", "bar", "baz"]));
 
@@ -269,7 +269,7 @@ mod no_source {
                 let _ = e.selected_indexes().to_vec();
                 let _ = e.selected_items().to_vec();
                 inc(&r);
-            });
+            }).detach();
 
             target.select_all();
 
@@ -316,7 +316,7 @@ mod selected_index {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.set_selected_index(15);
 
@@ -357,7 +357,7 @@ mod selected_index {
             assert_eq!(e.selected_indexes().to_vec(), vec![1]);
             assert_eq!(e.selected_items().to_vec(), strs(&["bar"]));
             inc(&r);
-        });
+        }).detach();
 
         target.set_selected_index(1);
 
@@ -449,7 +449,7 @@ mod select {
             assert_eq!(e.selected_indexes().to_vec(), vec![1]);
             assert_eq!(e.selected_items().to_vec(), strs(&["bar"]));
             inc(&r);
-        });
+        }).detach();
 
         target.select(1);
 
@@ -507,7 +507,7 @@ mod select_range {
             assert_eq!(e.selected_indexes().to_vec(), vec![1, 2]);
             assert_eq!(e.selected_items().to_vec(), strs(&["bar", "baz"]));
             inc(&r);
-        });
+        }).detach();
 
         target.select_range(1, 2);
 
@@ -531,7 +531,7 @@ mod select_range {
             assert_eq!(e.selected_indexes().to_vec(), vec![11, 12]);
             assert_eq!(e.selected_items().to_vec(), strs(&["xyzzy", "thud"]));
             inc(&r);
-        });
+        }).detach();
 
         target.select_range(11, 20);
 
@@ -576,7 +576,7 @@ mod deselect {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.deselect(1);
 
@@ -615,7 +615,7 @@ mod deselect_range {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.deselect_range(1, 2);
 
@@ -640,7 +640,7 @@ mod deselect_range {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.deselect_range(0, 1);
 
@@ -686,7 +686,7 @@ mod clear {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.clear();
 
@@ -783,7 +783,7 @@ mod single_select {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.set_single_select(true);
 
@@ -823,7 +823,7 @@ mod collection_changes {
             assert_eq!(e.start_index(), 0);
             assert_eq!(e.delta(), 1);
             inc(&r);
-        });
+        }).detach();
 
         data.insert(0, "new".to_string());
 
@@ -872,7 +872,7 @@ mod collection_changes {
             assert_eq!(e.start_index(), 4);
             assert_eq!(e.delta(), 2);
             inc(&r);
-        });
+        }).detach();
 
         data.insert_range(4, ["frank", "tank"].map(str::to_string));
 
@@ -900,7 +900,7 @@ mod collection_changes {
             assert_eq!(e.start_index(), 8);
             assert_eq!(e.delta(), 2);
             inc(&r);
-        });
+        }).detach();
 
         data.insert_range(8, ["frank", "tank"].map(str::to_string));
 
@@ -928,7 +928,7 @@ mod collection_changes {
             assert_eq!(e.start_index(), 6);
             assert_eq!(e.delta(), 2);
             inc(&r);
-        });
+        }).detach();
 
         data.insert_range(6, ["frank", "tank"].map(str::to_string));
 
@@ -958,7 +958,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.remove_at(1);
 
@@ -986,7 +986,7 @@ mod collection_changes {
             assert_eq!(e.start_index(), 0);
             assert_eq!(e.delta(), -1);
             inc(&r);
-        });
+        }).detach();
 
         data.remove_at(0);
 
@@ -1037,7 +1037,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.remove_range(4, 5);
 
@@ -1067,7 +1067,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.remove_range(0, 7);
 
@@ -1097,7 +1097,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.remove_range(7, 3);
 
@@ -1127,7 +1127,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.remove_range(5, 3);
 
@@ -1161,7 +1161,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.set(1, "new".to_string());
 
@@ -1197,7 +1197,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.move_item(1, 0);
 
@@ -1225,7 +1225,7 @@ mod collection_changes {
 
         count_selection_changed(&target, &selection_changed_raised);
         let r = reset_raised.clone();
-        target.source_reset(move || inc(&r));
+        target.source_reset(move || inc(&r)).detach();
 
         data.clear();
 
@@ -1286,7 +1286,7 @@ mod batch_update {
             assert_eq!(e.selected_indexes().to_vec(), vec![2, 3]);
             assert_eq!(e.selected_items().to_vec(), strs(&["baz", "qux"]));
             inc(&r);
-        });
+        }).detach();
 
         let update = target.batch_update();
         target.select(2);
@@ -1308,7 +1308,7 @@ mod batch_update {
             assert_eq!(e.selected_indexes().to_vec(), vec![2, 3, 5, 6]);
             assert_eq!(e.selected_items().to_vec(), strs(&["baz", "qux", "corge", "grault"]));
             inc(&r);
-        });
+        }).detach();
 
         let update = target.batch_update();
         target.select_range(2, 3);
@@ -1330,7 +1330,7 @@ mod batch_update {
             assert_eq!(e.selected_indexes().to_vec(), vec![2, 3]);
             assert_eq!(e.selected_items().to_vec(), strs(&["baz", "qux"]));
             inc(&r);
-        });
+        }).detach();
 
         let update = target.batch_update();
         target.select(2);
@@ -1356,7 +1356,7 @@ mod batch_update {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         let update = target.batch_update();
         target.deselect(2);
@@ -1380,7 +1380,7 @@ mod batch_update {
             assert_eq!(e.selected_indexes().to_vec(), vec![2, 3]);
             assert_eq!(e.selected_items().to_vec(), strs(&["baz", "qux"]));
             inc(&r);
-        });
+        }).detach();
 
         let update = target.batch_update();
         target.select_range(2, 6);
@@ -1404,7 +1404,7 @@ mod batch_update {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         let update = target.batch_update();
         target.deselect_range(2, 6);
@@ -1428,7 +1428,7 @@ mod batch_update {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         let update = target.batch_update();
         target.clear();
@@ -1452,7 +1452,7 @@ mod batch_update {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         let update = target.batch_update();
         target.clear();
@@ -1480,12 +1480,12 @@ mod lost_selection {
             assert_eq!(e.selected_indexes().to_vec(), vec![0]);
             assert_eq!(e.selected_items().to_vec(), strs(&["foo"]));
             inc(&r);
-        });
+        }).detach();
 
         let t = target.clone();
         target.lost_selection(move || {
             t.select(0);
-        });
+        }).detach();
 
         target.clear();
 
@@ -1507,12 +1507,12 @@ mod lost_selection {
             assert_eq!(e.selected_indexes().to_vec(), vec![0]);
             assert_eq!(e.selected_items().to_vec(), strs(&["quux"]));
             inc(&r);
-        });
+        }).detach();
 
         let t = target.clone();
         target.lost_selection(move || {
             t.select(0);
-        });
+        }).detach();
 
         data.remove_range(0, 4);
 
@@ -1538,7 +1538,7 @@ mod source_reset {
         target.source_reset(move || {
             t.set_selected_index(d.index_of_str("bar"));
             inc(&r);
-        });
+        }).detach();
 
         let r = selection_changed_raised.clone();
         target.selection_changed(move |e| {
@@ -1547,7 +1547,7 @@ mod source_reset {
             assert_eq!(e.selected_indexes().to_vec(), vec![3]);
             assert_eq!(e.selected_items().to_vec(), strs(&["bar"]));
             inc(&r);
-        });
+        }).detach();
 
         data.reset(Some(&["qux", "foo", "quux", "bar", "baz"]));
 

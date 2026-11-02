@@ -76,7 +76,7 @@ fn AdjustDiameter(drawer: Drawer, id: u32, x: f64, y: f64, diameter: f64) -> Ele
     rsx! {
         Window { title: "Adjust diameter", width: 360.0, height: 120.0,
             with(move |window: &ferroui_base::Ref<ferroui_controls::Window>| {
-                let _ = window.closed(move || drawer.commit_adjustment());
+                window.closed(move || drawer.commit_adjustment()).detach();
             }),
             StackPanel { margin: 16.0, spacing: 8.0,
                 TextBlock { text: format!("Adjust the diameter of the circle at ({x:.0}, {y:.0}).") }

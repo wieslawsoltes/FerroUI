@@ -1573,7 +1573,7 @@ fn rich_edit_selection_changing_cancellation_preserves_selection_and_properties(
     });
     let changed = Rc::new(Cell::new(0));
     let count = changed.clone();
-    editor.selection_changed(move |_| count.set(count.get() + 1));
+    editor.selection_changed(move |_| count.set(count.get() + 1)).detach();
     let property_changes = Rc::new(Cell::new(0));
     let count = property_changes.clone();
     editor.property_changed(move |change| {
@@ -1616,7 +1616,7 @@ fn rich_edit_selection_changing_reentrant_view_and_tom_changes_publish_once() {
         assert_eq!((args.old_start, args.old_end), (0, 0));
         assert_eq!((args.start, args.end), (6, 3));
         seen.borrow_mut().push("changed");
-    });
+    }).detach();
     editor.text_document().selection().set_range(1, 4).unwrap();
     assert_eq!(editor.editor().selection(), EditorSelection::new(6, 3));
     assert_eq!((editor.selection_start(), editor.selection_end()), (6, 3));

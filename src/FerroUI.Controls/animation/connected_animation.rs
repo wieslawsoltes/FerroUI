@@ -230,18 +230,21 @@ impl ConnectedAnimation {
 
     /// Raised when the animation finishes or is cancelled. Check
     /// [`ConnectedAnimationCompletedEventArgs::cancelled`] to distinguish the
-    /// cases. Disposing the returned handle unsubscribes.
+    /// cases.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the animation.
     pub fn completed(
         &self,
         handler: impl Fn(&ConnectedAnimationCompletedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let id = self.completed.add(Rc::new(handler));
         let this = self.this.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = this.upgrade() {
                 this.completed.remove(id);
             }
-        })
+        }))
     }
 
     fn raise_completed(&self, cancelled: bool) {

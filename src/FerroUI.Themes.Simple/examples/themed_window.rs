@@ -173,8 +173,8 @@ fn create_main_window() -> Ref<Window> {
                 }
             }
         }
-    });
-    window.closed(|| println!("Window closed"));
+    }).detach();
+    window.closed(|| println!("Window closed")).detach();
 
     if let Some(ms) = std::env::var("FERROUI_SMOKE_EXIT_MS").ok().and_then(|v| v.parse::<u64>().ok()) {
         println!("Will close the main window after {ms} ms");

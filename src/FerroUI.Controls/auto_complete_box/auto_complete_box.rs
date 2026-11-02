@@ -287,7 +287,7 @@ pub struct AutoCompleteBox {
 
     /// The drop down popup control, with the subscription to its closed
     /// event.
-    drop_down_popup: RefCell<Option<(Ref<Popup>, Rc<dyn IDisposable>)>>,
+    drop_down_popup: RefCell<Option<(Ref<Popup>, Subscription)>>,
 
     populating: HandlerList<dyn Fn(&PopulatingEventArgs)>,
     populated: HandlerList<dyn Fn(&PopulatedEventArgs)>,

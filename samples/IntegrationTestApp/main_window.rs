@@ -82,7 +82,7 @@ impl MainWindow {
             if let Some(this) = weak.upgrade() {
                 this.on_position_changed(e);
             }
-        });
+        }).detach();
         this
     }
 

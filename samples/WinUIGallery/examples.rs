@@ -151,7 +151,7 @@ fn wire(root: &Ref<Control>) {
                 };
                 output.set_text(Some(&format!("Value: {value}")));
             }
-        });
+        }).detach();
     } else if let Some(primary) = find_control::<ToggleSplitButton>(root, "Primary") {
         let weak_output = output.downgrade();
         let weak_primary = primary.downgrade();

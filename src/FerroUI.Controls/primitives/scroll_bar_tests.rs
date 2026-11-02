@@ -117,7 +117,7 @@ fn create_context_requested(target: &Ref<ScrollBar>, pointer_type: PointerType) 
 fn record_scroll(target: &ScrollBar) -> Rc<RefCell<Vec<ScrollEventArgs>>> {
     let events = Rc::new(RefCell::new(Vec::new()));
     let recorded = events.clone();
-    target.scroll(move |e| recorded.borrow_mut().push(*e));
+    target.scroll(move |e| recorded.borrow_mut().push(*e)).detach();
     events
 }
 

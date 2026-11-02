@@ -58,7 +58,7 @@ mod imp {
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
     use ferroui_base::media::imaging::WriteableBitmap;
     use ferroui_base::platform::{AlphaFormat, PixelFormat};
-    use ferroui_base::reactive::IDisposable;
+    use ferroui_base::reactive::{IDisposable, Subscription};
     use ferroui_base::{
         ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, PixelPoint, PixelSize, Point, Rect, Ref,
         Size, StaticType, StyledElementImpl, TypeInfo, Vector, VisualImpl, WeakRef,
@@ -429,7 +429,7 @@ mod imp {
         base: Window,
         positioner: ManagedPopupPositioner,
         positioner_helper: Rc<TrayIconManagedPopupPositionerPopupImplHelper>,
-        deactivated: RefCell<Option<Rc<dyn IDisposable>>>,
+        deactivated: RefCell<Option<Subscription>>,
     }
 
     ferro_class!(TrayPopupRoot: Window);

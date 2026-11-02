@@ -526,7 +526,7 @@ impl TemplatedControlImpl for CommandBar {
                     this.on_overflow_popup_opened();
                 }
             });
-            *this.overflow_popup_opened.borrow_mut() = Some(Subscription::new(opened));
+            *this.overflow_popup_opened.borrow_mut() = Some(opened);
         }
 
         this.apply_label_position_to_children();

@@ -378,14 +378,14 @@ impl MainView {
                 } else {
                     let _ = this.content_frame().go_back();
                 }
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             title_bar.pane_toggle_requested(move |_| {
                 if let Some(this) = weak.upgrade() {
                     let navigation = this.navigation_view();
                     navigation.set_is_pane_open(!navigation.is_pane_open());
                 }
-            });
+            }).detach();
             // The search box filters the pages and opens the one chosen.
             let search = self.get_control::<AutoSuggestBox>("SearchBox");
             let weak = self.to_ref().downgrade();
@@ -454,13 +454,13 @@ impl MainView {
                     if let Some(this) = weak.upgrade() {
                         this.update_back_button();
                     }
-                });
+                }).detach();
                 let weak = this.downgrade();
                 navigation_page.popped(move |_| {
                     if let Some(this) = weak.upgrade() {
                         this.update_back_button();
                     }
-                });
+                }).detach();
                 view_model.set_navigator(Some(navigation_page.as_navigation()));
                 this.select(&item);
                 this.update_back_button();

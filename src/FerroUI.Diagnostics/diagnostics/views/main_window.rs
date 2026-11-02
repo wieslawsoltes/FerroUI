@@ -49,7 +49,7 @@ pub struct MainWindow {
     base: Window,
     input_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     /// The frozen popups, with the subscriptions of their `Closing` events.
-    frozen_popup_states: RefCell<Vec<(Ref<Popup>, Rc<dyn IDisposable>)>>,
+    frozen_popup_states: RefCell<Vec<(Ref<Popup>, Subscription)>>,
     root: RefCell<Option<Ref<FerroObject>>>,
     /// The subscription to the `Closed` event of the root.
     root_closed_subscription: RefCell<Option<Subscription>>,
@@ -203,7 +203,7 @@ impl MainWindow {
                 }
             }
         });
-        *opened_subscription.borrow_mut() = Some(subscription);
+        *opened_subscription.borrow_mut() = Some(subscription.detach());
 
         this
     }

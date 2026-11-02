@@ -174,7 +174,7 @@ fn read_only_and_disabled_block_the_user_and_not_the_application() {
     let rating = RatingControl::new();
     let count = Rc::new(Cell::new(0));
     let log = count.clone();
-    rating.value_changed(move |_| log.set(log.get() + 1));
+    rating.value_changed(move |_| log.set(log.get() + 1)).detach();
     rating.set_is_read_only(true);
     assert!(!press(&rating, Key::End).handled());
     rating.set_rating_to(2.0, true);

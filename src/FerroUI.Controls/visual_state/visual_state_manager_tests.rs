@@ -182,9 +182,9 @@ fn the_current_state_and_the_events_of_a_group() {
         format!("{}>{}", name(args.old_state()), name(args.new_state()))
     };
     let changing = log.clone();
-    let _a = group.current_state_changing(move |_, args| changing.borrow_mut().push(format!("changing {}", names(args))));
+    group.current_state_changing(move |_, args| changing.borrow_mut().push(format!("changing {}", names(args)))).detach();
     let changed = log.clone();
-    let _b = group.current_state_changed(move |_, args| changed.borrow_mut().push(format!("changed {}", names(args))));
+    group.current_state_changed(move |_, args| changed.borrow_mut().push(format!("changed {}", names(args)))).detach();
 
     assert!(VisualStateManager::go_to_state(&control, "PointerOver", true));
     assert_eq!(group.current_state().map(|state| state.name()).as_deref(), Some("PointerOver"));

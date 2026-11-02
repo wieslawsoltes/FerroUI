@@ -21,7 +21,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::TextAlignment;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_markup_enum, ferro_markup_type, ferro_property, instantiate, BoxedValue,
@@ -688,15 +688,18 @@ impl NumberBox {
     }
 
     /// Adds a handler of the `ValueChanged` event, raised after a change of the value with the
-    /// value before it and the coerced new value. Disposing the result removes the handler.
-    pub fn value_changed(&self, handler: impl Fn(&NumberBoxValueChangedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// value before it and the coerced new value.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for
+    /// the life of the box.
+    pub fn value_changed(&self, handler: impl Fn(&NumberBoxValueChangedEventArgs) + 'static) -> Subscription {
         let token = self.value_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.value_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Commits the text of the box (WinUI's `ValidateInput`): empty text clears the value; text

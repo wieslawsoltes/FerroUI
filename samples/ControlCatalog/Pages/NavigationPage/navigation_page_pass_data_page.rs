@@ -143,13 +143,13 @@ impl NavigationPagePassDataPage {
             if let Some(this) = weak.upgrade() {
                 this.append_navigation_log(&format!("Pushed \u{2192} {}", header_text(&ev.page())));
             }
-        });
+        }).detach();
         let weak = self.to_ref().downgrade();
         demo_nav.popped(move |ev| {
             if let Some(this) = weak.upgrade() {
                 this.append_navigation_log(&format!("Popped \u{2190} {}", header_text(&ev.page())));
             }
-        });
+        }).detach();
 
         drop(demo_nav.push_async_with_transition(self.create_contact_list_page(), None));
     }

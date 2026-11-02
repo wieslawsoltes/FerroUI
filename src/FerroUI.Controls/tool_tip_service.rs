@@ -332,7 +332,7 @@ impl ToolTipService {
                 tool_tip.remove_handler(InputElement::pointer_exited_event(), pointer_exited);
             }
         });
-        *closed.borrow_mut() = Some(subscription);
+        *closed.borrow_mut() = Some(subscription.detach());
     }
 
     fn close(&self, control: &Control) {

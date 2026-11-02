@@ -502,11 +502,13 @@ impl PinnedDockControl {
                     let this = self.to_ref();
                     let position = self
                         .owner_window()
-                        .position_changed(move |_| this.owner_window_position_changed());
+                        .position_changed(move |_| this.owner_window_position_changed())
+                        .detach();
                     let this = self.to_ref();
                     let resized = self
                         .owner_window()
-                        .resized(move |_| this.owner_window_resized());
+                        .resized(move |_| this.owner_window_resized())
+                        .detach();
                     let this = self.to_ref();
                     let pressed = self.owner_window().add_disposable_handler_with(
                         InputElement::pointer_pressed_event(),
@@ -517,7 +519,8 @@ impl PinnedDockControl {
                     let this = self.to_ref();
                     let deactivated = self
                         .owner_window()
-                        .deactivated(move || this.owner_window_deactivated());
+                        .deactivated(move || this.owner_window_deactivated())
+                        .detach();
                     self.owner_events
                         .replace(vec![position, resized, pressed, deactivated]);
                     self.window().show_with_owner(&self.owner_window());
