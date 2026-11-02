@@ -3,6 +3,10 @@
 //!
 //! Each test runs on a thread of its own, so that the context it sets is not seen by another test
 //! that the harness runs on the same thread.
+//!
+//! The items are deprecated since 0.5.0 (step A5 of phase C4 of #423); these tests keep their
+//! behaviour on top of the schedules of `task`.
+#![allow(deprecated)]
 
 use crate::threading::tasks::{run, run_pending_wakes};
 use crate::threading::{current_synchronization_context, set_synchronization_context, CancellationToken, SynchronizationContext};
@@ -273,5 +277,25 @@ fn setting_a_context_runs_the_wakes_that_came_before() {
         assert!(ran.get());
 
         set_synchronization_context(None);
+    });
+}
+
+#[test]
+fn setting_a_context_makes_an_adapter_of_it_the_schedule_of_the_thread_and_the_current_schedule() {
+    use crate::task::{current_schedule, is_current_schedule, thread_schedule, Schedule};
+    use crate::threading::context_schedule;
+
+    on_own_thread(|| {
+        let context: Arc<dyn SynchronizationContext> = Arc::new(QueueContext::default());
+        set_synchronization_context(Some(context.clone()));
+        let current = current_schedule().expect("a current schedule");
+        assert!(thread_schedule().is_some());
+        // Two adapters of one context are the same schedule.
+        assert!(is_current_schedule(&context_schedule(context.clone())));
+        assert_eq!(current.identity(), Arc::as_ptr(&context).cast::<()>());
+
+        set_synchronization_context(None);
+        assert!(current_schedule().is_none());
+        assert!(thread_schedule().is_none());
     });
 }
