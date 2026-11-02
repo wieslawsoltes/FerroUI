@@ -239,6 +239,13 @@ struct RichTextDocumentData {
     /// incremental paths are compared with.
     #[cfg(test)]
     full_rebuild: Cell<bool>,
+    /// The open journals of the blocks the edits being recorded change (S8), one per edit of an
+    /// editor, in the order they began.
+    journals: RefCell<Vec<delta::JournalFrame>>,
+    next_journal: Cell<u64>,
+    /// Set while the document makes a change of blocks that it notes in the journals itself: any
+    /// other change of the tree is one the journals cannot follow.
+    journaling: Cell<usize>,
     text_changes: RefCell<Vec<DocumentTextChange>>,
     installing: Cell<bool>,
     delivering: Cell<bool>,
@@ -326,6 +333,9 @@ impl RichTextDocument {
             exact_text: RefCell::new(None),
             #[cfg(test)]
             full_rebuild: Cell::new(false),
+            journals: RefCell::new(Vec::new()),
+            next_journal: Cell::new(0),
+            journaling: Cell::new(0),
             text_changes: RefCell::new(Vec::new()),
             installing: Cell::new(false),
             delivering: Cell::new(false),
@@ -555,25 +565,7 @@ impl RichTextDocument {
 
     pub fn snapshot(&self) -> DocumentSnapshot {
         DocumentSnapshot {
-            paragraphs: self
-                .0
-                .blocks
-                .snapshot()
-                .iter()
-                .map(|block| {
-                    if let Some(paragraph) = block.cast::<Paragraph>() {
-                        ParagraphSnapshot::from_paragraph(&paragraph)
-                    } else {
-                        ParagraphSnapshot {
-                            format: ParagraphFormat {
-                                character: CharacterFormat::from_element(block),
-                                ..Default::default()
-                            },
-                            inlines: vec![InlineSnapshot::run(block.text())],
-                        }
-                    }
-                })
-                .collect(),
+            paragraphs: self.0.blocks.snapshot().iter().map(block_snapshot).collect(),
             link_fields: self.0.link_fields.borrow().clone(),
             next_link_field_id: self.0.next_link_field_id.get(),
         }
@@ -681,7 +673,12 @@ impl RichTextDocument {
                 self.0.exact_splice.set(
                     self.mutation_version() == start_version && self.0.observed_version.get() == start_version,
                 );
+                // The journals of the edits being recorded hold this paragraph, or cannot follow
+                // the change (S8): the splice reads nothing more.
+                self.journal_replacement(found.block, 1, 1, None);
+                let journaling = self.journaling();
                 found.run.set_text(Some(&value));
+                drop(journaling);
                 self.0.exact_splice.set(false);
                 if tracking
                     .as_ref()
@@ -994,6 +991,7 @@ impl RichTextDocument {
             BlockReplacement {
                 start: removed.start,
                 removed: &blocks,
+                before: Some(&old[prefix..old.len() - suffix]),
                 inserted,
                 text,
             },
@@ -1281,7 +1279,8 @@ impl RichTextDocument {
             version,
             BlockReplacement {
                 start: prefix,
-                removed: &blocks[removed],
+                removed: &blocks[removed.clone()],
+                before: Some(&old.paragraphs[removed]),
                 inserted,
                 text,
             },
@@ -1321,6 +1320,13 @@ impl RichTextDocument {
         let range_change = range_change
             .map(|(range, inserted)| (range, inserted, self.0.range_position_changed.snapshot()));
         let _batch = self.begin_edit();
+        self.journal_replacement(
+            replacement.start,
+            replacement.removed.len(),
+            replacement.inserted.len(),
+            replacement.before,
+        );
+        let journaling = self.journaling();
         self.0.installing.set(true);
         self.0.change_kind.set(Some(kind));
         self.blocks()
@@ -1348,6 +1354,7 @@ impl RichTextDocument {
         *self.0.exact_text.borrow_mut() = replacement.text;
         self.on_invalidated();
         self.0.exact_text.borrow_mut().take();
+        drop(journaling);
         if tracking
             .as_ref()
             .is_some_and(|scope| scope.was_interrupted())
@@ -1501,12 +1508,13 @@ impl RichTextDocument {
 
     fn find_splice_run(&self, range: Range<usize>) -> Option<RunLocation> {
         let mut offset = 0;
-        for block in self.0.blocks.snapshot().iter() {
+        for (index, block) in self.0.blocks.snapshot().iter().enumerate() {
             if let Some(paragraph) = block.cast::<Paragraph>() {
                 if range.start >= offset && range.end <= offset + paragraph.text_length() {
-                    if let Some(found) =
+                    if let Some(mut found) =
                         find_run_in_collection(&paragraph.inlines(), &range, offset)
                     {
+                        found.block = index;
                         return Some(found);
                     }
                 }
@@ -1532,6 +1540,15 @@ impl RichTextDocument {
         }
         let _batch = self.begin_edit();
         self.0.change_kind.set(Some(DocumentChangeKind::Formatting));
+        // The journals of the edits being recorded hold this paragraph (S8). With link fields
+        // the observation of the change reconciles fields in any paragraph: the journals cannot
+        // follow it.
+        if self.0.link_fields.borrow().is_empty() {
+            self.journal_replacement(found.block, 1, 1, None);
+        } else {
+            self.journal_untracked_change();
+        }
+        let _journaling = self.journaling();
         if local.start == 0 && local.end == length {
             self.0.installing.set(true);
             format.apply_to(&found.run);
@@ -1578,6 +1595,10 @@ impl RichTextDocument {
     fn on_invalidated(&self) {
         if self.0.silent_depth.get() != 0 {
             return;
+        }
+        if self.0.journaling.get() == 0 {
+            // A write to the tree that went around the document's edits (S8).
+            self.journal_untracked_change();
         }
         self.0
             .mutation_version
@@ -2088,6 +2109,22 @@ fn format_paragraph(
     }
 }
 
+/// The snapshot of a block, as a snapshot of the document has it: a block that is not a
+/// `Paragraph` is a paragraph of its text in its character format.
+fn block_snapshot(block: &Ref<Block>) -> ParagraphSnapshot {
+    if let Some(paragraph) = block.cast::<Paragraph>() {
+        ParagraphSnapshot::from_paragraph(&paragraph)
+    } else {
+        ParagraphSnapshot {
+            format: ParagraphFormat {
+                character: CharacterFormat::from_element(block),
+                ..Default::default()
+            },
+            inlines: vec![InlineSnapshot::run(block.text())],
+        }
+    }
+}
+
 /// How many paragraphs at the start and at the end of a replacement of `old` by `new` stay as
 /// they are: the same snapshot before and after, of a block that is a paragraph
 /// (`is_paragraph`, by the index in `old`; another block is always rebuilt as a paragraph).
@@ -2181,6 +2218,9 @@ struct BlockReplacement<'a> {
     /// The index of the first block replaced (or of the insertion).
     start: usize,
     removed: &'a [Ref<Block>],
+    /// The snapshots of the removed blocks, when the caller has them: the journals of the edits
+    /// being recorded keep them (S8).
+    before: Option<&'a [ParagraphSnapshot]>,
     inserted: &'a [ParagraphSnapshot],
     /// The text of the tree after the replacement, when the observed text gives it.
     text: Option<String>,
@@ -2303,6 +2343,8 @@ struct RunLocation {
     collection: InlineCollection,
     index: usize,
     offset: usize,
+    /// The index of the block of the run.
+    block: usize,
 }
 
 fn find_run_in_collection(
@@ -2319,6 +2361,7 @@ fn find_run_in_collection(
                     collection: collection.clone(),
                     index,
                     offset,
+                    block: 0,
                 });
             }
             length
@@ -2594,6 +2637,11 @@ fn compatible(a: &InlineSnapshotKind, b: &InlineSnapshotKind) -> bool {
         _ => std::mem::discriminant(a) == std::mem::discriminant(b),
     }
 }
+
+#[path = "document_delta.rs"]
+mod delta;
+
+pub(crate) use delta::{BlockJournal, DocumentDelta};
 
 #[cfg(test)]
 #[path = "rich_text_structural_edit_tests.rs"]
