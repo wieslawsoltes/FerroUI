@@ -54,6 +54,11 @@ fn paths(source: &str, own_crate: Option<&str>, mut visit: impl FnMut(Range<usiz
                 if !(name.starts_with("ferroui_") || matches!(name, "core" | "std")) {
                     continue;
                 }
+                // Primitive names are lowercase types. Their constants are valid
+                // expression paths, but cannot be imported through the type.
+                if matches!(name, "core" | "std") && source[i..].starts_with("::primitive::") {
+                    continue;
+                }
                 while s.get(i..i + 2) == Some(b"::") {
                     i += 2;
                     let segment = i;
@@ -160,6 +165,13 @@ let c = '"'; let t = ::custom::Widget::new();
             finish(source.to_string(), Some("custom")),
             source.replace("= ::custom::Widget", "= crate::Widget")
         );
+    }
+
+    #[test]
+    fn primitive_associated_constants_remain_expression_paths() {
+        let text = "let x = (::core::primitive::f64::NAN, ::std::primitive::i32::MAX);\n";
+        let source = text.repeat(9_000);
+        assert_eq!(finish(source.clone(), None), source);
     }
 
     #[test]
