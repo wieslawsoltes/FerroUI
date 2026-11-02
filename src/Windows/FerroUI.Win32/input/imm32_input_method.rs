@@ -19,7 +19,7 @@
 #[path = "imm32_input_options.rs"]
 mod input_options;
 
-use super::imm32_caret_manager::Imm32CaretManager;
+use super::imm32_caret_manager::{CaretRect, Imm32CaretManager};
 use super::imm32_context::{ImmContext, ImmWindowContext, OwnedImmContext};
 use crate::interop::unmanaged_methods::{
     lgid, primary_lang_id, CANDIDATEFORM, CFS_EXCLUDE, CFS_POINT, COMPOSITIONFORM, CPS_CANCEL, CPS_COMPLETE, GCS,
@@ -59,8 +59,12 @@ pub(crate) trait ImmSystem {
     /// A number of the composition (the cursor position); negative for an
     /// error.
     fn imm_get_composition_value(&self, himc: isize, flag: u32) -> i32;
+    /// Creates the caret of the thread for a window, of a size in pixels
+    /// (on Windows with a blank bitmap, so it draws nothing when shown);
+    /// it replaces the caret there was. False when the system refuses.
     fn create_caret(&self, hwnd: isize, width: i32, height: i32) -> bool;
     fn set_caret_pos(&self, x: i32, y: i32);
+    fn show_caret(&self, hwnd: isize);
     fn destroy_caret(&self);
     fn get_active_window(&self) -> isize;
     /// Sets the input scopes of a window of the calling thread; one
@@ -299,9 +303,12 @@ impl Imm32InputMethod {
             self.system.imm_release_context(hwnd, himc);
 
             self.current_himc.set(himc);
-
-            self.caret_manager.try_create(&*self.system, hwnd);
         }
+
+        // Also with the same context (the reference only creates the caret
+        // with a new one): the caret is the window's, which may be another
+        // window of the thread, or the same one after a new client (#430).
+        self.caret_manager.try_create(&*self.system, hwnd);
     }
 
     pub fn disable_imm(&self) {
@@ -373,8 +380,6 @@ impl Imm32InputMethod {
         let s = self.parent().map_or(1.0, |parent| parent.desktop_scaling());
         let (x1, y1, x2, y2) = cursor_rect_in_pixels(rect, s);
 
-        self.caret_manager.try_move(&*self.system, x2, y2);
-
         if self.show_composition_window() {
             self.configure_composition_window(x1, y1, himc, y2 - y1);
             // Don't need to set the position of candidate window.
@@ -384,6 +389,68 @@ impl Imm32InputMethod {
         let exclude_rectangle = candidate_exclude_rectangle(x1, y1, x2, y2, self.lang_id.get());
 
         self.system.imm_set_candidate_window(himc, &exclude_rectangle);
+    }
+
+    /// The caret of the system follows the text cursor (#430; the reference
+    /// moves its caret with the candidate window, and only while the window
+    /// has an input context): the rectangle, in device-independent pixels of
+    /// the client area of `source` (the window whose text input method was
+    /// given it), is scaled for that window and mapped to the client area of
+    /// the window the input method serves, which owns the caret. A client in
+    /// a popup that does not take activation so has its caret where its text
+    /// cursor is on the screen.
+    fn move_caret(&self, rect: Rect, source: Option<Rc<dyn Imm32Parent>>) {
+        let hwnd = self.hwnd.get();
+        let Some(source) = source else {
+            return;
+        };
+        let source_hwnd = source.hwnd();
+        if hwnd == 0 || source_hwnd == 0 {
+            return;
+        }
+        let (x1, y1, x2, y2) = cursor_rect_in_pixels(rect, source.desktop_scaling());
+        let pixels = RECT { left: x1, top: y1, right: x2, bottom: y2 };
+        let mapped =
+            if source_hwnd == hwnd { Some(pixels) } else { self.system.map_window_rect(source_hwnd, hwnd, pixels) };
+        if let Some(mapped) = mapped {
+            let caret = CaretRect::from_corners(mapped.left, mapped.top, mapped.right, mapped.bottom);
+            self.caret_manager.try_move(&*self.system, hwnd, caret);
+        }
+    }
+
+    /// `SetCursorRect` from the text input method of a window: `source` is
+    /// that window, `None` the window the input method serves.
+    pub(crate) fn set_cursor_rect_from(&self, rect: Rect, source: Option<Weak<dyn Imm32Parent>>) {
+        if self.managed_input.get() {
+            self.set_managed_cursor_rect(rect);
+            return;
+        }
+
+        let focused = self.system.get_active_window() == self.hwnd.get();
+
+        if !focused {
+            return;
+        }
+
+        let this = self.this.clone();
+        self.system.post(Box::new(move || {
+            let Some(this) = this.upgrade() else {
+                return;
+            };
+            let source = source.as_ref().and_then(Weak::upgrade).or_else(|| this.parent());
+            this.move_caret(rect, source);
+
+            let hwnd = this.hwnd.get();
+            let himc = this.system.imm_get_context(hwnd);
+
+            if himc == 0 {
+                return;
+            }
+
+            this.move_ime_window(rect, himc);
+
+            this.system.imm_release_context(hwnd, himc);
+        }));
     }
 
     fn configure_composition_window(&self, x1: i32, y1: i32, himc: isize, height: i32) {
@@ -552,6 +619,13 @@ impl Imm32InputMethod {
 
 impl ITextInputMethodImpl for Imm32InputMethod {
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
+        // The caret of the system goes where the new client's cursor is, not
+        // where the old one's was.
+        let same_client =
+            matches!((self.client.borrow().as_ref(), client.as_ref()), (Some(old), Some(new)) if Rc::ptr_eq(old, new));
+        if !same_client {
+            self.caret_manager.forget_cursor();
+        }
         let connection = client.as_ref().and_then(connection_of);
         if self.managed_input.get() || connection.is_some() {
             self.set_managed_client(client, connection);
@@ -589,33 +663,7 @@ impl ITextInputMethodImpl for Imm32InputMethod {
     }
 
     fn set_cursor_rect(&self, rect: Rect) {
-        if self.managed_input.get() {
-            self.set_managed_cursor_rect(rect);
-            return;
-        }
-
-        let focused = self.system.get_active_window() == self.hwnd.get();
-
-        if !focused {
-            return;
-        }
-
-        let this = self.this.clone();
-        self.system.post(Box::new(move || {
-            let Some(this) = this.upgrade() else {
-                return;
-            };
-            let hwnd = this.hwnd.get();
-            let himc = this.system.imm_get_context(hwnd);
-
-            if himc == 0 {
-                return;
-            }
-
-            this.move_ime_window(rect, himc);
-
-            this.system.imm_release_context(hwnd, himc);
-        }));
+        self.set_cursor_rect_from(rect, None);
     }
 
     fn set_options(&self, options: &TextInputOptions) {
@@ -980,7 +1028,7 @@ impl Imm32InputMethod {
         }
         let (x1, y1, x2, y2) = (mapped.left, mapped.top, mapped.right, mapped.bottom);
 
-        self.caret_manager.try_move(&*self.system, x2, y2);
+        self.caret_manager.try_move(&*self.system, hwnd, CaretRect::from_corners(x1, y1, x2, y2));
         if !is_current() {
             return;
         }
@@ -1378,7 +1426,7 @@ impl ITextInputMethodImpl for Imm32InputMethodSite {
 
     fn set_cursor_rect(&self, rect: Rect) {
         if self.may_act() {
-            self.transport.set_cursor_rect(rect);
+            self.transport.set_cursor_rect_from(rect, Some(self.parent.clone()));
         }
     }
 
@@ -1488,6 +1536,10 @@ mod imp {
             native::set_caret_pos(x, y);
         }
 
+        fn show_caret(&self, hwnd: isize) {
+            native::show_caret(hwnd);
+        }
+
         fn destroy_caret(&self) {
             native::destroy_caret();
         }
@@ -1546,6 +1598,7 @@ pub(crate) mod tests {
         SetCompositionFont(isize, i32, u8),
         CreateCaret(isize, i32, i32),
         SetCaretPos(i32, i32),
+        ShowCaret(isize),
         DestroyCaret,
         SetInputScopes(isize, Vec<i32>),
     }
@@ -1582,6 +1635,9 @@ pub(crate) mod tests {
         /// Whether `SetInputScopes` takes effect only after its callback ran.
         pub complete_input_scopes_after_callback: Cell<bool>,
         pub input_scopes: RefCell<std::collections::BTreeMap<isize, Vec<i32>>>,
+        /// Where the client area of a window is on the screen, for
+        /// `MapWindowPoints`; a window without one maps only to itself.
+        pub client_origins: RefCell<std::collections::BTreeMap<isize, (i32, i32)>>,
     }
 
     impl FakeSystem {
@@ -1605,6 +1661,7 @@ pub(crate) mod tests {
                 refuse_input_scopes: Cell::new(false),
                 complete_input_scopes_after_callback: Cell::new(false),
                 input_scopes: RefCell::new(std::collections::BTreeMap::new()),
+                client_origins: RefCell::new(std::collections::BTreeMap::new()),
             })
         }
 
@@ -1741,6 +1798,10 @@ pub(crate) mod tests {
             self.record(Call::SetCaretPos(x, y));
         }
 
+        fn show_caret(&self, hwnd: isize) {
+            self.record(Call::ShowCaret(hwnd));
+        }
+
         fn destroy_caret(&self) {
             self.record(Call::DestroyCaret);
         }
@@ -1775,6 +1836,16 @@ pub(crate) mod tests {
             self.next_result.get()
         }
 
+        fn map_window_rect(&self, from: isize, to: isize, rect: RECT) -> Option<RECT> {
+            if from == to {
+                return Some(rect);
+            }
+            let origins = self.client_origins.borrow();
+            let (from, to) = (origins.get(&from)?, origins.get(&to)?);
+            let (dx, dy) = (from.0 - to.0, from.1 - to.1);
+            Some(RECT { left: rect.left + dx, top: rect.top + dy, right: rect.right + dx, bottom: rect.bottom + dy })
+        }
+
         fn post(&self, action: Box<dyn FnOnce()>) {
             self.posted.borrow_mut().push(action);
         }
@@ -1782,6 +1853,8 @@ pub(crate) mod tests {
 
     #[derive(Default)]
     struct FakeParent {
+        /// The handle of the window; `HWND` when not set.
+        hwnd: Cell<Option<isize>>,
         scaling: Cell<f64>,
         no_input_callback: Cell<bool>,
         ignore_wm_char: Cell<Option<bool>>,
@@ -1791,7 +1864,7 @@ pub(crate) mod tests {
 
     impl Imm32Parent for FakeParent {
         fn hwnd(&self) -> isize {
-            HWND
+            self.hwnd.get().unwrap_or(HWND)
         }
 
         fn desktop_scaling(&self) -> f64 {
@@ -1962,10 +2035,11 @@ pub(crate) mod tests {
                 Call::GetContext(HWND),
                 Call::AssociateContext(HWND, 0x1C),
                 Call::ReleaseContext(HWND, 0x1C),
-                Call::CreateCaret(HWND, 2, 2)
             ],
             system.take_calls()
         );
+        // The caret is the window's; it is made once the text cursor is known.
+        assert_eq!(None, input_method.caret_manager.caret());
 
         // The same context again: nothing to do.
         input_method.enable_imm();
@@ -1987,7 +2061,6 @@ pub(crate) mod tests {
                 Call::CreateContext,
                 Call::AssociateContext(HWND, 0x2C),
                 Call::ReleaseContext(HWND, 0x2C),
-                Call::CreateCaret(HWND, 2, 2)
             ],
             system.take_calls()
         );
@@ -2006,7 +2079,6 @@ pub(crate) mod tests {
 
         assert_eq!(
             vec![
-                Call::DestroyCaret,
                 Call::AssociateContext(HWND, 0),
                 // The reset that disabling posted: the composition is completed.
                 Call::GetContext(HWND),
@@ -2185,9 +2257,12 @@ pub(crate) mod tests {
 
         assert_eq!(
             vec![
+                // The caret of the system is made where the cursor is, of its
+                // height and at least a pixel wide, then shown.
+                Call::CreateCaret(HWND, 2, 32),
+                Call::SetCaretPos(20, 40),
+                Call::ShowCaret(HWND),
                 Call::GetContext(HWND),
-                // The caret goes to the lower right corner of the cursor.
-                Call::SetCaretPos(22, 72),
                 Call::SetCandidateWindow(
                     0x1C,
                     CANDIDATEFORM {
@@ -2216,12 +2291,10 @@ pub(crate) mod tests {
         let calls = system.take_calls();
         assert_eq!(
             vec![
-                Call::DestroyCaret,
                 Call::AssociateContext(HWND, 0),
                 Call::GetContext(HWND),
                 Call::AssociateContext(HWND, 0x1C),
                 Call::ReleaseContext(HWND, 0x1C),
-                Call::CreateCaret(HWND, 2, 2),
             ],
             calls
         );
@@ -2237,7 +2310,7 @@ pub(crate) mod tests {
         assert_eq!(0, input_method.hwnd());
         assert!(!input_method.is_active());
         assert!(!input_method.is_composing());
-        assert_eq!(vec![Call::DestroyCaret, Call::AssociateContext(HWND, 0)], system.take_calls());
+        assert_eq!(vec![Call::AssociateContext(HWND, 0)], system.take_calls());
         // The posted reset finds no window.
         system.context.set(0);
         system.run_posted();
@@ -2296,7 +2369,6 @@ pub(crate) mod tests {
         system.run_posted();
         assert_eq!(
             vec![
-                Call::DestroyCaret,
                 Call::AssociateContext(HWND, 0),
                 Call::GetContext(HWND),
                 Call::NotifyIme(0x1C, NI_COMPOSITIONSTR, CPS_COMPLETE, 0),
@@ -2360,8 +2432,10 @@ pub(crate) mod tests {
         system.run_posted();
         assert_eq!(
             vec![
+                Call::CreateCaret(HWND, 1, 10),
+                Call::SetCaretPos(1, 2),
+                Call::ShowCaret(HWND),
                 Call::GetContext(HWND),
-                Call::SetCaretPos(2, 12),
                 Call::SetCandidateWindow(
                     0x1C,
                     CANDIDATEFORM {
@@ -2401,7 +2475,174 @@ pub(crate) mod tests {
         input_method.release_window(HWND, &weak);
         assert_eq!(0, input_method.hwnd());
         assert!(!input_method.is_active());
-        assert_eq!(vec![Call::DestroyCaret, Call::AssociateContext(HWND, 0)], system.take_calls());
+        assert_eq!(vec![Call::AssociateContext(HWND, 0)], system.take_calls());
+    }
+
+    // #430: the caret of the system follows the text cursor of every client,
+    // so that screen readers and magnifiers follow it.
+
+    /// The calls of the caret of the system among calls.
+    fn caret_calls(calls: Vec<Call>) -> Vec<Call> {
+        calls
+            .into_iter()
+            .filter(|call| {
+                matches!(call, Call::CreateCaret(..) | Call::SetCaretPos(..) | Call::ShowCaret(_) | Call::DestroyCaret)
+            })
+            .collect()
+    }
+
+    #[test]
+    fn the_caret_of_the_system_follows_the_text_cursor_and_is_asked_for_only_when_it_changes() {
+        let Setup { system, parent, input_method, .. } = setup(HKL_JA);
+        parent.scaling.set(1.0);
+        system.active_window.set(HWND);
+
+        input_method.set_cursor_rect(Rect::new(10.0, 20.0, 0.0, 16.0));
+        system.run_posted();
+        assert_eq!(
+            vec![Call::CreateCaret(HWND, 1, 16), Call::SetCaretPos(10, 20), Call::ShowCaret(HWND)],
+            caret_calls(system.take_calls())
+        );
+
+        // The same rectangle: nothing.
+        input_method.set_cursor_rect(Rect::new(10.0, 20.0, 0.0, 16.0));
+        system.run_posted();
+        assert!(caret_calls(system.take_calls()).is_empty());
+
+        // Another position: a move.
+        input_method.set_cursor_rect(Rect::new(14.0, 20.0, 0.0, 16.0));
+        system.run_posted();
+        assert_eq!(vec![Call::SetCaretPos(14, 20)], caret_calls(system.take_calls()));
+
+        // Another height: a caret of that height.
+        input_method.set_cursor_rect(Rect::new(14.0, 20.0, 0.0, 20.0));
+        system.run_posted();
+        assert_eq!(
+            vec![Call::CreateCaret(HWND, 1, 20), Call::SetCaretPos(14, 20), Call::ShowCaret(HWND)],
+            caret_calls(system.take_calls())
+        );
+
+        // No client: no caret.
+        input_method.set_client(None);
+        system.run_posted();
+        assert_eq!(vec![Call::DestroyCaret], caret_calls(system.take_calls()));
+        assert_eq!(None, input_method.caret_manager.caret());
+    }
+
+    #[test]
+    fn the_caret_follows_the_text_cursor_also_where_the_window_has_no_input_context() {
+        let Setup { system, parent, input_method, .. } = setup(HKL_JA);
+        parent.scaling.set(1.0);
+        system.active_window.set(HWND);
+        system.context.set(0);
+
+        input_method.set_cursor_rect(Rect::new(10.0, 20.0, 0.0, 16.0));
+        system.run_posted();
+
+        assert_eq!(
+            vec![
+                Call::CreateCaret(HWND, 1, 16),
+                Call::SetCaretPos(10, 20),
+                Call::ShowCaret(HWND),
+                // No candidate window without a context.
+                Call::GetContext(HWND),
+            ],
+            system.take_calls()
+        );
+    }
+
+    #[test]
+    fn the_caret_of_a_client_in_a_popup_is_where_its_cursor_is_on_the_screen() {
+        const POPUP: isize = 0x88;
+        let Setup { system, parent, input_method, .. } = setup(HKL_JA);
+        parent.scaling.set(1.0);
+        system.active_window.set(HWND);
+        // A popup that does not take activation: its client area is at
+        // (150, 180) of the screen, that of the window at (100, 100).
+        system.client_origins.borrow_mut().insert(HWND, (100, 100));
+        system.client_origins.borrow_mut().insert(POPUP, (150, 180));
+        let popup = Rc::new(FakeParent::default());
+        popup.hwnd.set(Some(POPUP));
+        popup.scaling.set(1.0);
+        let popup_input_method = input_method.for_window(Rc::downgrade(&(popup.clone() as Rc<dyn Imm32Parent>)));
+
+        popup_input_method.set_cursor_rect(Rect::new(5.0, 6.0, 0.0, 16.0));
+        system.run_posted();
+
+        // The caret is the focused window's, at the cursor of the popup.
+        assert_eq!(
+            vec![Call::CreateCaret(HWND, 1, 16), Call::SetCaretPos(55, 86), Call::ShowCaret(HWND)],
+            caret_calls(system.take_calls())
+        );
+    }
+
+    #[test]
+    fn a_change_of_the_language_makes_the_caret_again_where_the_cursor_was() {
+        let Setup { system, parent, input_method, .. } = setup(HKL_JA);
+        parent.scaling.set(1.0);
+        system.active_window.set(HWND);
+        input_method.set_cursor_rect(Rect::new(10.0, 20.0, 0.0, 16.0));
+        system.run_posted();
+        system.take_calls();
+
+        let weak: Weak<dyn Imm32Parent> = Rc::downgrade(&(parent.clone() as Rc<dyn Imm32Parent>));
+        input_method.set_language_and_window(weak, HWND, HKL_KO);
+
+        assert_eq!(
+            vec![Call::DestroyCaret, Call::CreateCaret(HWND, 1, 16), Call::SetCaretPos(10, 20), Call::ShowCaret(HWND)],
+            caret_calls(system.take_calls())
+        );
+    }
+
+    #[test]
+    fn a_new_client_gets_the_caret_where_its_own_cursor_is() {
+        let Setup { system, parent, input_method, .. } = setup(HKL_JA);
+        parent.scaling.set(1.0);
+        system.active_window.set(HWND);
+        input_method.set_cursor_rect(Rect::new(10.0, 20.0, 0.0, 16.0));
+        system.run_posted();
+        system.take_calls();
+
+        // Focus moves to another text box of the window: the old caret goes ...
+        input_method.set_client(Some(Client::new()));
+        system.run_posted();
+        assert_eq!(vec![Call::DestroyCaret], caret_calls(system.take_calls()));
+
+        // ... and the new one comes with the new client's cursor.
+        input_method.set_cursor_rect(Rect::new(10.0, 60.0, 0.0, 16.0));
+        system.run_posted();
+        assert_eq!(
+            vec![Call::CreateCaret(HWND, 1, 16), Call::SetCaretPos(10, 60), Call::ShowCaret(HWND)],
+            caret_calls(system.take_calls())
+        );
+    }
+
+    #[test]
+    fn the_caret_goes_to_the_window_that_takes_the_input_method() {
+        const OTHER: isize = 0x99;
+        let Setup { system, parent, input_method, .. } = setup(HKL_JA);
+        parent.scaling.set(1.0);
+        system.active_window.set(HWND);
+        input_method.set_cursor_rect(Rect::new(10.0, 20.0, 0.0, 16.0));
+        system.run_posted();
+        system.take_calls();
+
+        // Another window of the thread is activated with the same language.
+        let other = Rc::new(FakeParent::default());
+        other.hwnd.set(Some(OTHER));
+        other.scaling.set(1.0);
+        input_method.set_language_and_window(Rc::downgrade(&(other.clone() as Rc<dyn Imm32Parent>)), OTHER, HKL_JA);
+        assert!(system.take_calls().is_empty());
+        system.active_window.set(OTHER);
+
+        input_method.set_cursor_rect(Rect::new(3.0, 4.0, 0.0, 16.0));
+        system.run_posted();
+
+        // Creating the caret for that window replaces the old one's.
+        assert_eq!(
+            vec![Call::CreateCaret(OTHER, 1, 16), Call::SetCaretPos(3, 4), Call::ShowCaret(OTHER)],
+            caret_calls(system.take_calls())
+        );
     }
 }
 

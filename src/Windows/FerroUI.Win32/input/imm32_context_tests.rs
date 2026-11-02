@@ -440,7 +440,8 @@ fn imm32_context_reentrant_caret_creation_does_not_resurrect_destroyed_caret() {
         }),
     ));
     input.enable_imm();
-    input.caret_manager.try_move(&*system, 1, 2);
+    // The caret is made once the text cursor is known.
+    input.caret_manager.try_move(&*system, FIRST, CaretRect { x: 1, y: 2, width: 1, height: 16 });
     drop(input);
     let calls = system.take_calls();
     assert_eq!(
