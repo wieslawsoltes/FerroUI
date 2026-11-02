@@ -3,7 +3,10 @@
 use super::*;
 use crate::services::ApplicationCatalog;
 use ferroui_base::input::InputElement;
+use ferroui_base::interactivity::RoutingStrategies;
+use ferroui_controls::platform::{FeedbackAction, PlatformFeedbackExtensions};
 use ferroui_controls::{Control, MenuFlyout, MenuItem, PlacementMode, Separator};
+use std::cell::Cell;
 
 const SLOT: f64 = 80.0;
 
@@ -93,6 +96,8 @@ fn shortcut_button(shell: &Rc<Shell>, shortcut: Shortcut) -> El<Button> {
     };
     let state = shell.clone();
     let menu = shortcut_menu(shell, shortcut);
+    let held = Rc::new(Cell::new(false));
+    let suppress_click = held.clone();
     let icon = border()
         .width(50)
         .height(50)
@@ -103,7 +108,9 @@ fn shortcut_button(shell: &Rc<Shell>, shortcut: Shortcut) -> El<Button> {
         .border_thickness(if shortcut.suggested { 3 } else { 0 })
         .child(super::super::launcher::app_icon(shell, app));
     action(&caption, move || {
-        state.launch(&state.catalog.applications()[index])
+        if !suppress_click.replace(false) {
+            state.launch(&state.catalog.applications()[index]);
+        }
     })
     .class("text")
     .width(SLOT)
@@ -123,8 +130,53 @@ fn shortcut_button(shell: &Rc<Shell>, shortcut: Shortcut) -> El<Button> {
         ),
     )
     .with(move |button| {
-        InputElement::set_is_holding_enabled(button, true);
-        InputElement::set_is_hold_with_mouse_enabled(button, true);
+        // The gesture recognizer reads its attached property from the original
+        // captured visual, which can be a template child rather than the Button.
+        let pressed = held.clone();
+        button.add_handler_with(
+            InputElement::pointer_pressed_event(),
+            move |_, e| {
+                pressed.set(false);
+                if let Some(target) = e
+                    .pointer()
+                    .captured()
+                    .or_else(|| e.source()?.cast::<InputElement>())
+                {
+                    InputElement::set_is_hold_with_mouse_enabled(&target, true);
+                }
+            },
+            RoutingStrategies::TUNNEL,
+            true,
+        );
+        let keyboard = held.clone();
+        button.add_handler_with(
+            InputElement::key_down_event(),
+            move |_, _| keyboard.set(false),
+            RoutingStrategies::TUNNEL,
+            true,
+        );
+        let target = button.downgrade();
+        let holding = held.clone();
+        let anchored = menu.clone();
+        button.add_handler_with(
+            InputElement::context_requested_event(),
+            move |_, e| {
+                if let Some(button) = target.upgrade() {
+                    // A shortcut menu opens against the whole tile, clear of
+                    // the contact. Native popup constraints can flip it at an edge.
+                    anchored.show_at(&button);
+                    if anchored.is_open() {
+                        holding.set(e.is_holding());
+                        e.set_handled(true);
+                        if e.is_holding() {
+                            button.perform_feedback(FeedbackAction::hold());
+                        }
+                    }
+                }
+            },
+            RoutingStrategies::TUNNEL,
+            false,
+        );
         button.set_context_flyout(&menu);
     })
 }

@@ -674,6 +674,8 @@ fn mutate_pin(shell: &Rc<Shell>, index: usize, edit: Edit) {
     }
     let id = shell.catalog.applications()[index].id.clone();
     let weak = Rc::downgrade(shell);
+    let from_home = shell.scene.get_untracked() == super::Scene::Desktop
+        && shell.appearance.get_untracked().layout() == Layout::BottomNavigation;
     shell.pin_editing.set(true);
     let _task = ferroui_system::threading::tasks::spawn_local(async move {
         let result =
@@ -681,7 +683,19 @@ fn mutate_pin(shell: &Rc<Shell>, index: usize, edit: Edit) {
         if let Some(shell) = weak.upgrade().filter(|shell| shell.owner.is_alive()) {
             shell.pin_editing.set(false);
             match result {
-                Ok(pins) => shell.favorites.set_if_changed(pins),
+                Ok(pins) => {
+                    shell.favorites.set_if_changed(pins);
+                    // The edited Home shortcut can just have been removed or
+                    // replaced by a suggestion. Its menu cannot restore focus to it.
+                    if from_home
+                        && shell.scene.get_untracked() == super::Scene::Desktop
+                        && shell.appearance.get_untracked().layout() == Layout::BottomNavigation
+                    {
+                        if let Some(home) = shell.desktop_focus.get_untracked() {
+                            home.focus();
+                        }
+                    }
+                }
                 Err(error) => shell
                     .status
                     .set(format!("Could not update pinned applications. {error}")),

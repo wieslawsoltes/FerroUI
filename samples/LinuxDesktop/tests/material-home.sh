@@ -101,11 +101,24 @@ cp "$fixture/menu.png" "$out/material-app-shortcuts.png"
 key Home Return
 until_ok test -f "$fixture/compose"
 [[ ! -e $fixture/default ]]
+# GIO can dispatch the action before the closing popup leaves the frame.
+# Synchronize with its former location before testing a second opening.
+menu_dismissed() {
+    capture "$fixture/frame.png"
+    local region="270x135+$((x-135))+$((y-178))"
+    convert "$fixture/frame.png" -crop "$region" +repage "$fixture/after.png"
+    convert "$out/material-home.png" -crop "$region" +repage "$fixture/before.png"
+    local delta=$(compare -fuzz 3% -metric AE "$fixture/before.png" "$fixture/after.png" null: 2>&1 || :)
+    awk -v pixels="$delta" 'BEGIN {exit !(pixels+0<250)}'
+}
+until_ok menu_dismissed
 until_ok find_note
 open_menu hold
 until_ok menu_visible
 key End Return
 until_ok pins_are '["studio.desktop"]'
+note_absent() { ! note_location >/dev/null; }
+until_ok note_absent
 [[ ! -e $fixture/default ]] || { echo 'Holding a shortcut also launched its app' >&2; exit 1; }
 # A real default launch now suggests Leaf Notes in the next empty slot.
 key ctrl+k; sleep .35
@@ -126,7 +139,6 @@ toggle_suggestions() {
 }
 toggle_suggestions off
 until_ok pins_are '["studio.desktop"]'
-note_absent() { ! note_location >/dev/null; }
 until_ok note_absent
 toggle_suggestions on
 until_ok find_note
