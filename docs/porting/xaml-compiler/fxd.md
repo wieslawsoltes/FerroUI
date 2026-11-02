@@ -136,3 +136,9 @@ Counts and section lengths inside the stream use unsigned LEB128. The decoder bo
 On the complete 169-document WinUI input, `--pack-solid` produces 245,385 bytes and `--pack` produces 432,438 bytes. Both outputs preserve the same canonical XamlX graphs. These are serialized theme sizes. The application benchmark in [compiled-theme-performance.md](../../compiled-theme-performance.md) accounts separately for native code, metadata, unwind tables and the runtime loader.
 
 The byte-level specification defines the directory record, all twelve data streams, how to reconstruct each opcode row, and the expansion limits. [FXP v2 wire layout](fxp-solid.md)
+
+### Runtime transformation cost
+
+Profiling the 169-document WinUI load recorded 9,971 per-document transformer calls. The 59 passes consumed 1.23 s in an instrumented release process. Property-value assignment conversion used 73 ms, XML type resolution 66 ms, setter lowering 46 ms, markup extension handling 44 ms and ordinary property resolution 44 ms. Deferring all these passes until lookup would also defer XAML diagnostics and would require a representation for previously validated deferred bodies.
+
+Runtime assignability between projected object-model classes checks their immutable `TypeInfo` base chain before requesting member metadata. In two interleaved pairs of pinned release processes, 625,000 class comparisons took median times of 74.15 and 75.76 ms before the change and 8.16 and 9.11 ms afterward. Each sample covered all 25 pairs of FerroObject, Control, Button, Brush and SolidColorBrush, with 21 samples per process. An indexed full-theme comparison across 16 fresh processes measured first Button lookup inside the process at 1.739 s before and 1.748 s after. The class check accelerated substantially while median application startup in that comparison stayed within 1%.
