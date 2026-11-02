@@ -376,8 +376,7 @@ impl ValueStore {
         }
 
         if instance.priority() == BindingPriority::LocalValue {
-            let disposable: Rc<dyn IDisposable> = instance.clone();
-            self.on_local_value_binding_completed(owner, property, &disposable);
+            self.on_local_value_binding_completed(owner, property, instance.as_ref());
         }
     }
 
@@ -703,12 +702,12 @@ impl ValueStore {
         &self,
         owner: &FerroObject,
         property: &'static FerroProperty,
-        observer: &Rc<dyn IDisposable>,
+        observer: &dyn IDisposable,
     ) {
         let removed = {
             let mut bindings = self.local_value_bindings.borrow_mut();
             match bindings.iter().position(|(id, _)| *id == property.id()) {
-                Some(index) if std::ptr::addr_eq(Rc::as_ptr(&bindings[index].1), Rc::as_ptr(observer)) => {
+                Some(index) if std::ptr::addr_eq(Rc::as_ptr(&bindings[index].1), std::ptr::from_ref(observer)) => {
                     bindings.remove(index);
                     self.local_value_expressions.borrow_mut().retain(|(id, _)| *id != property.id());
                     true

@@ -1,42 +1,87 @@
 use super::BindingSource;
-use crate::data::{BindingValue, BindingValueType};
+use crate::data::{BindingError, BindingValue, BindingValueType};
 use crate::reactive::{IDisposable, IObserver, ObservableError, Subscription};
-use crate::{BoxedValue, DirectPropertyBase, FerroObject, PropertyValue, Ref, StyledProperty, WeakRef};
+use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+
+/// The source keeps its observer weakly. The value store holds the observer
+/// for the binding lifetime, and its subscription guard detaches on drop.
+struct LocalBindingState {
+    // Release the source while the remaining observer fields are still alive.
+    subscription: RefCell<Option<Subscription>>,
+    owner: WeakRef<FerroObject>,
+    has_data_validation: bool,
+}
+
+enum ClearValidation {
+    BeforeRemoval,
+    AfterRemoval,
+    Keep,
+}
+
+impl LocalBindingState {
+    fn new(owner: &FerroObject, has_data_validation: bool) -> Self {
+        Self { subscription: RefCell::new(None), owner: owner.to_weak(), has_data_validation }
+    }
+
+    fn started(&self, subscription: Rc<dyn IDisposable>) {
+        self.subscription.replace(Some(Subscription::new(subscription)));
+    }
+
+    fn detach(&self) {
+        drop(self.subscription.take());
+    }
+
+    fn validate(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        kind: BindingValueType,
+        error: Option<BindingError>,
+    ) {
+        if self.has_data_validation {
+            owner.on_update_data_validation(property, kind, error);
+        }
+    }
+
+    fn completed(&self, property: &'static FerroProperty, this: &dyn IDisposable, clear: ClearValidation) {
+        let Some(owner) = self.owner.upgrade() else { return };
+        if matches!(clear, ClearValidation::BeforeRemoval) {
+            self.validate(&owner, property, BindingValueType::UNSET_VALUE, None);
+        }
+        owner.values().on_local_value_binding_completed(&owner, property, this);
+        if matches!(clear, ClearValidation::AfterRemoval) {
+            self.validate(&owner, property, BindingValueType::UNSET_VALUE, None);
+        }
+    }
+}
 
 /// Observes a binding source and writes its values to a styled property with
 /// local value priority.
 pub(crate) struct LocalValueBindingObserver<T: PropertyValue> {
-    this: Weak<LocalValueBindingObserver<T>>,
-    owner: WeakRef<FerroObject>,
+    state: LocalBindingState,
     property: &'static StyledProperty<T>,
-    has_data_validation: bool,
-    subscription: RefCell<Option<Subscription>>,
     default_value: RefCell<Option<T>>,
 }
 
 impl<T: PropertyValue> LocalValueBindingObserver<T> {
     pub fn new(owner: &FerroObject, property: &'static StyledProperty<T>) -> Rc<Self> {
         let has_data_validation = property.get_metadata_for(owner).enable_data_validation().unwrap_or(false);
-        Rc::new_cyclic(|this| Self {
-            this: this.clone(),
-            owner: owner.to_weak(),
+        Rc::new(Self {
+            state: LocalBindingState::new(owner, has_data_validation),
             property,
-            has_data_validation,
-            subscription: RefCell::new(None),
             default_value: RefCell::new(None),
         })
     }
 
-    pub fn start(&self, source: BindingSource<T>) {
-        let this = &self.this;
+    pub fn start(self: &Rc<Self>, source: BindingSource<T>) {
         let subscription = match source {
-            BindingSource::Typed(source) => source.subscribe(Rc::new(Typed(this.clone()))),
-            BindingSource::Value(source) => source.subscribe(Rc::new(Value(this.clone()))),
-            BindingSource::Untyped(source) => source.subscribe(Rc::new(Untyped(this.clone()))),
+            BindingSource::Typed(source) => source.subscribe(Rc::new(Typed(Rc::downgrade(self)))),
+            BindingSource::Value(source) => source.subscribe(Rc::new(Value(Rc::downgrade(self)))),
+            BindingSource::Untyped(source) => source.subscribe(Rc::new(Untyped(Rc::downgrade(self)))),
         };
-        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
+        self.state.started(subscription);
     }
 
     fn cached_default_value(&self, owner: &Ref<FerroObject>) -> T {
@@ -49,69 +94,41 @@ impl<T: PropertyValue> LocalValueBindingObserver<T> {
     }
 
     fn completed(&self) {
-        let Some(owner) = self.owner.upgrade() else { return };
-        if self.has_data_validation {
-            owner.on_update_data_validation(self.property, BindingValueType::UNSET_VALUE, None);
-        }
-        let this: Rc<dyn IDisposable> = self.this.upgrade().expect("observer is alive");
-        owner.values().on_local_value_binding_completed(&owner, self.property, &this);
+        self.state.completed(self.property, self, ClearValidation::BeforeRemoval);
     }
 
     fn next(&self, mut value: T) {
-        let Some(owner) = self.owner.upgrade() else { return };
+        let Some(owner) = self.state.owner.upgrade() else { return };
         if !self.property.is_valid(&value) {
             value = self.cached_default_value(&owner);
         }
         owner.values().set_local_value(&owner, self.property, value);
-        if self.has_data_validation {
-            owner.on_update_data_validation(self.property, BindingValueType::VALUE, None);
-        }
+        self.state.validate(&owner, self.property, BindingValueType::VALUE, None);
     }
 
-    fn next_value(&self, mut value: BindingValue<T>) {
-        if value.value_type() == BindingValueType::DO_NOTHING {
+    fn next_value(&self, value: BindingValue<T>) {
+        let kind = value.value_type();
+        if kind == BindingValueType::DO_NOTHING {
             return;
         }
-        let Some(owner) = self.owner.upgrade() else { return };
-        let original_type = value.value_type();
-        // Revert to the default value if the binding value fails validation, or
-        // if there was no value (though not if there was a data validation error).
-        if (value.has_value() && !self.property.is_valid(value.value()))
-            || (!value.has_value() && value.value_type() != BindingValueType::DATA_VALIDATION_ERROR)
-        {
-            value = value.with_value(self.cached_default_value(&owner));
-        }
-        let error = value.error().cloned();
-        if let Some(v) = value.into_option() {
+        let Some(owner) = self.state.owner.upgrade() else { return };
+        let (value, error) = value.into_value_and_error();
+        let value = match value {
+            Some(v) if self.property.is_valid(&v) => Some(v),
+            None if kind == BindingValueType::DATA_VALIDATION_ERROR => None,
+            _ => Some(self.cached_default_value(&owner)),
+        };
+        if let Some(v) = value {
             owner.values().set_local_value(&owner, self.property, v);
         }
-        if self.has_data_validation {
-            owner.on_update_data_validation(self.property, original_type, error);
-        }
+        self.state.validate(&owner, self.property, kind, error);
     }
 }
 
 impl<T: PropertyValue> IDisposable for LocalValueBindingObserver<T> {
     fn dispose(&self) {
-        if let Some(s) = self.subscription.take() {
-            s.dispose();
-        }
+        self.state.detach();
         self.completed();
-    }
-}
-
-// Deviation (DEVIATIONS.md, Property system): the source holds its observers,
-// and the observer its subscription to the source: in the managed original the observer is the object that subscribes
-// itself, and the collector frees the two when the object of the value store
-// is gone, the binding disposed or not. Here the observers the source holds
-// are objects of their own that hold this one weakly, the value store holds
-// it for as long as the binding lasts, and it leaves its source when it is
-// dropped with the store (as `BindingEntry` does).
-impl<T: PropertyValue> Drop for LocalValueBindingObserver<T> {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.subscription.get_mut().take() {
-            subscription.dispose();
-        }
     }
 }
 
@@ -174,57 +191,49 @@ impl<T: PropertyValue> IObserver<BoxedValue> for Untyped<T> {
 
 /// Observes a binding source and writes its values to a direct property.
 pub(crate) struct DirectBindingObserver<T: PropertyValue> {
-    this: Weak<DirectBindingObserver<T>>,
-    owner: WeakRef<FerroObject>,
+    state: LocalBindingState,
     property: &'static DirectPropertyBase<T>,
-    has_data_validation: bool,
     /// Whether the source produces untyped values.
     is_untyped: Cell<bool>,
-    subscription: RefCell<Option<Subscription>>,
 }
 
 impl<T: PropertyValue> DirectBindingObserver<T> {
     pub fn new(owner: &FerroObject, property: &'static DirectPropertyBase<T>) -> Rc<Self> {
         let has_data_validation = property.get_metadata_for(owner).enable_data_validation().unwrap_or(false);
-        Rc::new_cyclic(|this| Self {
-            this: this.clone(),
-            owner: owner.to_weak(),
+        Rc::new(Self {
+            state: LocalBindingState::new(owner, has_data_validation),
             property,
-            has_data_validation,
             is_untyped: Cell::new(false),
-            subscription: RefCell::new(None),
         })
     }
 
-    pub fn start(&self, source: BindingSource<T>) {
-        let this = &self.this;
+    pub fn start(self: &Rc<Self>, source: BindingSource<T>) {
         self.is_untyped.set(matches!(source, BindingSource::Untyped(_)));
         let subscription = match source {
-            BindingSource::Typed(source) => source.subscribe(Rc::new(DirectTyped(this.clone()))),
-            BindingSource::Value(source) => source.subscribe(Rc::new(DirectValue(this.clone()))),
-            BindingSource::Untyped(source) => source.subscribe(Rc::new(DirectUntyped(this.clone()))),
+            BindingSource::Typed(source) => source.subscribe(Rc::new(DirectTyped(Rc::downgrade(self)))),
+            BindingSource::Value(source) => source.subscribe(Rc::new(DirectValue(Rc::downgrade(self)))),
+            BindingSource::Untyped(source) => source.subscribe(Rc::new(DirectUntyped(Rc::downgrade(self)))),
         };
-        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
+        self.state.started(subscription);
     }
 
     /// `disposing` is true when the binding is disposed, false when its
     /// source completes or fails.
     fn completed(&self, disposing: bool) {
-        let Some(owner) = self.owner.upgrade() else { return };
-        let this: Rc<dyn IDisposable> = self.this.upgrade().expect("observer is alive");
-        owner.values().on_local_value_binding_completed(&owner, self.property, &this);
-        // As upstream: a binding to an untyped source only clears the data
-        // validation state when it is disposed, not when its source completes.
-        if self.has_data_validation && (disposing || !self.is_untyped.get()) {
-            owner.on_update_data_validation(self.property.as_property(), BindingValueType::UNSET_VALUE, None);
-        }
+        // Untyped direct bindings clear validation only on explicit disposal.
+        let clear = if disposing || !self.is_untyped.get() {
+            ClearValidation::AfterRemoval
+        } else {
+            ClearValidation::Keep
+        };
+        self.state.completed(self.property.as_property(), self, clear);
     }
 
     fn next_value(&self, value: BindingValue<T>) {
         if value.value_type() == BindingValueType::DO_NOTHING {
             return;
         }
-        if let Some(owner) = self.owner.upgrade() {
+        if let Some(owner) = self.state.owner.upgrade() {
             owner.set_direct_value_unchecked(self.property, value);
         }
     }
@@ -232,20 +241,8 @@ impl<T: PropertyValue> DirectBindingObserver<T> {
 
 impl<T: PropertyValue> IDisposable for DirectBindingObserver<T> {
     fn dispose(&self) {
-        if let Some(s) = self.subscription.take() {
-            s.dispose();
-        }
+        self.state.detach();
         self.completed(true);
-    }
-}
-
-// As `LocalValueBindingObserver`: the source holds this observer weakly, and
-// it leaves its source when it is dropped with its value store.
-impl<T: PropertyValue> Drop for DirectBindingObserver<T> {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.subscription.get_mut().take() {
-            subscription.dispose();
-        }
     }
 }
 

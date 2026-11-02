@@ -172,6 +172,12 @@ impl<T> BindingValue<T> {
         self.value
     }
 
+    /// Takes the value and its validation error for delivery to a property.
+    #[inline]
+    pub(crate) fn into_value_and_error(self) -> (Option<T>, Option<BindingError>) {
+        (self.value, self.error)
+    }
+
     /// Returns the value, or `default` if there is none.
     #[inline]
     pub fn get_value_or_default(self, default: T) -> T {
