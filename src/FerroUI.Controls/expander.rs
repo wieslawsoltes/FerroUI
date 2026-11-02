@@ -10,7 +10,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::threading::{
-    CancellationTokenSource, Dispatcher, DispatcherPriority, FerroSynchronizationContext,
+    CancellationToken, Dispatcher, DispatcherPriority, FerroSynchronizationContext,
 };
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, FerroObject, FerroObjectImpl,
@@ -45,7 +45,7 @@ pub enum ExpandDirection {
 pub struct Expander {
     base: HeaderedContentControl,
     ignore_property_changed: Cell<bool>,
-    last_transition_cts: RefCell<Option<CancellationTokenSource>>,
+    last_transition_cts: RefCell<Option<CancellationToken>>,
 }
 
 ferro_class! {
@@ -329,8 +329,8 @@ impl Expander {
             let expand_direction = self.expand_direction();
             let forward = expand_direction == ExpandDirection::Left || expand_direction == ExpandDirection::Up;
 
-            let cts = CancellationTokenSource::new();
-            let token = cts.token();
+            let cts = CancellationToken::new();
+            let token = cts.clone();
             let last = self.last_transition_cts.replace(Some(cts));
             if let Some(last) = last {
                 last.cancel();

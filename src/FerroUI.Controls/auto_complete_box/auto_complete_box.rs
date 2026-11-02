@@ -35,8 +35,7 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
 use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{
-    CancellationToken, CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer,
-    FerroSynchronizationContext, OperationCanceledError,
+    CancellationToken, Canceled, Dispatcher, DispatcherPriority, DispatcherTimer, FerroSynchronizationContext,
 };
 use ferroui_base::utilities::{CancelEventArgs, HandlerList, StringComparison};
 use ferroui_base::{
@@ -126,7 +125,7 @@ impl<T: 'static> PartialEq for AutoCompleteSelector<T> {
 
 /// The pending result of an [`AutoCompleteAsyncPopulator`]: the items for
 /// the drop-down, or the notice that the population was cancelled.
-pub type AutoCompletePopulation = Pin<Box<dyn Future<Output = Result<Vec<Option<BoxedValue>>, OperationCanceledError>>>>;
+pub type AutoCompletePopulation = Pin<Box<dyn Future<Output = Result<Vec<Option<BoxedValue>>, Canceled>>>>;
 
 /// The asynchronous populator of an [`AutoCompleteBox`]: given the search
 /// text and a cancellation token it produces the items for the drop-down.
@@ -278,7 +277,7 @@ pub struct AutoCompleteBox {
     /// and the token of the handler.
     collection_change_subscription: RefCell<Option<(ItemsSource, u64)>>,
 
-    population_cancellation_token_source: RefCell<Option<CancellationTokenSource>>,
+    population_cancellation_token: RefCell<Option<CancellationToken>>,
 
     item_template_is_from_value_member_binding: Cell<bool>,
     setting_item_template_from_value_member_binding: Cell<bool>,
@@ -1000,7 +999,7 @@ impl AutoCompleteBox {
             adapter_subscriptions: RefCell::new(Vec::new()),
             value_member_binding_evaluator: RefCell::new(None),
             collection_change_subscription: RefCell::new(None),
-            population_cancellation_token_source: RefCell::new(None),
+            population_cancellation_token: RefCell::new(None),
             item_template_is_from_value_member_binding: Cell::new(true),
             setting_item_template_from_value_member_binding: Cell::new(false),
             search_text: RefCell::new(Some(String::new())),
@@ -1675,17 +1674,16 @@ impl AutoCompleteBox {
     }
 
     fn try_populate_async(&self, search_text: Option<String>) -> bool {
-        if let Some(source) = self.population_cancellation_token_source.take() {
-            source.cancel();
+        if let Some(token) = self.population_cancellation_token.take() {
+            token.cancel();
         }
 
         let Some(populator) = self.async_populator() else {
             return false;
         };
 
-        let source = CancellationTokenSource::new();
-        let token = source.token();
-        *self.population_cancellation_token_source.borrow_mut() = Some(source);
+        let token = CancellationToken::new();
+        *self.population_cancellation_token.borrow_mut() = Some(token.clone());
 
         // Started the way an asynchronous method is called: it runs up to
         // its first pending await before this returns.
@@ -1705,11 +1703,11 @@ impl AutoCompleteBox {
     ) {
         // A cancelled population is dropped silently.
         if let Ok(result_list) = populator.invoke(search_text, cancellation_token.clone()).await {
-            if !cancellation_token.is_cancellation_requested() {
+            if !cancellation_token.is_cancelled() {
                 let target = this.clone();
                 let token = cancellation_token.clone();
                 let operation = Dispatcher::ui_thread().invoke_async_local(move || {
-                    if !token.is_cancellation_requested() {
+                    if !token.is_cancelled() {
                         target.set_current_value(
                             Self::items_source_property(),
                             Some(ItemsSource::from_items(result_list)),
@@ -1723,7 +1721,7 @@ impl AutoCompleteBox {
             }
         }
 
-        this.population_cancellation_token_source.take();
+        this.population_cancellation_token.take();
     }
 
     /// Private method that directly opens the popup, checks the expander

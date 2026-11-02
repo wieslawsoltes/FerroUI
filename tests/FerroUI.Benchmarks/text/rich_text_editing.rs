@@ -1,15 +1,17 @@
 //! Not from upstream: editing a large rich text document shown by a `RichTextBlock` (F1 of
 //! `docs/porting/winui-rich-text.md`; #243 review S7 and S9). Each benchmark changes the document
 //! or the selection by one step and measures and arranges the view again, as a keystroke does:
-//! the time of a step against the size of the document.
+//! the time of a step against the size of the document. `move_selection_and_render` also draws
+//! the view, which is where the selection is painted since it is an overlay.
 
 use crate::harness::Registry;
 use ferroui_base::{Ref, Size};
-use ferroui_base::media::FontWeight;
+use ferroui_base::media::{DrawingContext, FontWeight, PlatformDrawingContext};
 use ferroui_controls::documents::{CharacterFormat, Paragraph, RichTextDocument};
 use ferroui_controls::rich_text::{EditKind, EditorSelection, RichTextEditor};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::RichTextBlock;
+use ferroui_headless::testing::headless_drawing_context_stub;
 use std::cell::Cell;
 
 const SENTENCE: &str = "Start with a thought, add emphasis, and mark the next step of the plan. ";
@@ -23,6 +25,7 @@ pub struct RichTextEditing {
     /// The paragraph mark nearest after the middle of the document.
     boundary: usize,
     bold: Cell<bool>,
+    drawing_context: DrawingContext<'static>,
     _app: UnitTestApplicationScope,
 }
 
@@ -46,6 +49,9 @@ impl RichTextEditing {
             length,
             boundary,
             bold: Cell::new(false),
+            drawing_context: DrawingContext::owned(Box::new(PlatformDrawingContext::new(
+                headless_drawing_context_stub(),
+            ))),
             _app: app,
         };
         this.layout();
@@ -122,6 +128,12 @@ impl RichTextEditing {
         self.layout();
     }
 
+    /// One step of the selection of the view, and a drawing of the view.
+    pub fn move_selection_and_render(&mut self) {
+        self.move_selection();
+        self.view.render(&mut self.drawing_context);
+    }
+
     /// One update of the preview of an input method.
     pub fn update_ime_preview(&self) {
         if !self.editor.is_composing() {
@@ -140,6 +152,7 @@ pub fn register(registry: &mut Registry) {
         let parameters = format!("Paragraphs={paragraphs}");
         class.benchmark("type_character", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.type_character());
         class.benchmark("move_selection", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.move_selection());
+        class.benchmark("move_selection_and_render", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.move_selection_and_render());
         class.benchmark("update_ime_preview", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.update_ime_preview());
         class.benchmark("split_paragraph", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.split_paragraph());
         class.benchmark("format_paragraphs", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.format_paragraphs());

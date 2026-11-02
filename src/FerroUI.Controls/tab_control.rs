@@ -21,7 +21,7 @@ use ferroui_base::layout::{HorizontalAlignment, Layoutable, LayoutableImpl, Layo
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
 use ferroui_base::threading::{
-    CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext,
+    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext,
 };
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, DirectProperty, FerroObject,
@@ -48,7 +48,7 @@ pub struct TabControl {
     content_part: RefCell<Option<Ref<ContentPresenter>>>,
     content_presenter2: RefCell<Option<Ref<ContentPresenter>>>,
     previous_selected_index: Cell<i32>,
-    current_transition: RefCell<Option<Rc<CancellationTokenSource>>>,
+    current_transition: RefCell<Option<Rc<CancellationToken>>>,
     should_animate: Cell<bool>,
     pending_forward: Cell<bool>,
 }
@@ -118,7 +118,7 @@ impl LayoutableImpl for TabControl {
             if let Some(current_transition) = this.current_transition.take() {
                 current_transition.cancel();
             }
-            let cancel = Rc::new(CancellationTokenSource::new());
+            let cancel = Rc::new(CancellationToken::new());
             *this.current_transition.borrow_mut() = Some(cancel.clone());
             let from = this.content_part();
             let to = this.content_presenter2();
@@ -640,7 +640,7 @@ impl TabControl {
         from: Ref<ContentPresenter>,
         to: Ref<ContentPresenter>,
         forward: bool,
-        cts: Rc<CancellationTokenSource>,
+        cts: Rc<CancellationToken>,
     ) {
         let this = self.to_ref().downgrade();
         let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
@@ -651,7 +651,7 @@ impl TabControl {
         // call.
         let from_visual: Ref<Visual> = from.clone().upcast();
         let to_visual: Ref<Visual> = to.upcast();
-        let task = transition.start(Some(&from_visual), Some(&to_visual), forward, cts.token());
+        let task = transition.start(Some(&from_visual), Some(&to_visual), forward, (*cts).clone());
 
         let _ = context.to_task_scheduler().start_local(async move {
             match (TransitionOutcomeFuture { task }).await {
@@ -668,7 +668,7 @@ impl TabControl {
                 TransitionOutcome::Completed => {}
             }
 
-            if cts.is_cancellation_requested() {
+            if cts.is_cancelled() {
                 return;
             }
 

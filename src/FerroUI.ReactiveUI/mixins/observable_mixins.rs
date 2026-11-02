@@ -4,9 +4,9 @@
 use crate::PanicError;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_system::threading::tasks::Task;
-use ferroui_system::threading::{CancellationToken, CancellationTokenRegistration, CancellationTokenSource};
+use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
@@ -43,7 +43,7 @@ pub fn from_async_with_all_notifications<T: 'static, Fut: Future<Output = Result
 ) -> Rc<dyn IObservable<AsyncExecution<T>>> {
     let action_async: Rc<dyn Fn(CancellationToken) -> BoxedOutcome<T>> = Rc::new(move |token| Box::pin(action_async(token)));
     Rc::new(DeferredValueObservable::new(move || {
-        let cts = CancellationTokenSource::new();
+        let cts = CancellationToken::new();
         let result: Rc<dyn IObservable<T>> = Rc::new(FromAsyncObservable { factory: action_async.clone(), outer_cancellation: cts.clone() });
         let cancel: Rc<dyn Fn()> = Rc::new(move || request_cancel(&cts));
         Ok((result, cancel))
@@ -62,7 +62,7 @@ pub fn from_async_with_all_notifications_param<P: Clone + 'static, T: 'static, F
 }
 
 /// `RequestCancel(CancellationTokenSource)`.
-fn request_cancel(source: &CancellationTokenSource) {
+fn request_cancel(source: &CancellationToken) {
     source.cancel();
 }
 
@@ -131,7 +131,7 @@ impl<T> IObservable<T> for DeferredValueObservable<T> {
 /// token that the outer source and the disposal of the subscription cancel.
 struct FromAsyncObservable<T> {
     factory: Rc<dyn Fn(CancellationToken) -> BoxedOutcome<T>>,
-    outer_cancellation: CancellationTokenSource,
+    outer_cancellation: CancellationToken,
 }
 
 impl<T: 'static> IObservable<T> for FromAsyncObservable<T> {
@@ -140,10 +140,9 @@ impl<T: 'static> IObservable<T> for FromAsyncObservable<T> {
             observer,
             emitted: Cell::new(false),
             disposed: Cell::new(false),
-            linked: CancellationTokenSource::new(),
-            registration: RefCell::new(None),
+            linked: self.outer_cancellation.child_token(),
         });
-        run.clone().start(&self.factory, &self.outer_cancellation);
+        run.clone().start(&self.factory);
         run
     }
 }
@@ -151,27 +150,22 @@ impl<T: 'static> IObservable<T> for FromAsyncObservable<T> {
 /// `FromAsyncObservable<T>.Run`.
 ///
 /// Upstream links the outer source and a source of the subscription
-/// (`CancellationTokenSource.CreateLinkedTokenSource`); here the linked source is cancelled by a
-/// registration on the outer one and by the disposal of the subscription, which is the same.
+/// (`CancellationTokenSource.CreateLinkedTokenSource`); here the linked token is a child of the
+/// outer one, which the outer cancels and the disposal of the subscription cancels on its own.
 struct Run<T> {
     observer: Rc<dyn IObserver<T>>,
     /// `_emitted`.
     emitted: Cell<bool>,
     /// `_disposed`.
     disposed: Cell<bool>,
-    /// `_linked`: the source of the token the factory receives.
-    linked: CancellationTokenSource,
-    /// The registration that cancels the linked source when the outer one is.
-    registration: RefCell<Option<CancellationTokenRegistration>>,
+    /// `_linked`: the token the factory receives, a child of the outer one.
+    linked: CancellationToken,
 }
 
 impl<T: 'static> Run<T> {
     /// `Start()`: runs the factory as a task (`RunAsync`).
-    fn start(self: Rc<Self>, factory: &Rc<dyn Fn(CancellationToken) -> BoxedOutcome<T>>, outer: &CancellationTokenSource) {
-        let linked = self.linked.clone();
-        let registration = outer.token().register(move || linked.cancel());
-        *self.registration.borrow_mut() = Some(registration);
-        let outcome = factory(self.linked.token());
+    fn start(self: Rc<Self>, factory: &Rc<dyn Fn(CancellationToken) -> BoxedOutcome<T>>) {
+        let outcome = factory(self.linked.clone());
         let run = self;
         let _ = Task::spawn_local(async move {
             let outcome = outcome.await;
@@ -196,9 +190,5 @@ impl<T> IDisposable for Run<T> {
             return;
         }
         self.linked.cancel();
-        let registration = self.registration.borrow_mut().take();
-        if let Some(registration) = registration {
-            registration.dispose();
-        }
     }
 }

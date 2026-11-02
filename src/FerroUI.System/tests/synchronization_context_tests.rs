@@ -5,7 +5,7 @@
 //! that the harness runs on the same thread.
 
 use crate::threading::tasks::{run, run_pending_wakes};
-use crate::threading::{current_synchronization_context, set_synchronization_context, CancellationTokenSource, SynchronizationContext};
+use crate::threading::{current_synchronization_context, set_synchronization_context, CancellationToken, SynchronizationContext};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::Rc;
@@ -216,10 +216,10 @@ fn a_cancellation_from_another_thread_is_posted_to_the_context() {
         let context = Arc::new(QueueContext::default());
         set_synchronization_context(Some(context.clone()));
 
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
         let ran = Rc::new(Cell::new(false));
         let r = ran.clone();
-        let _registration = source.token().register_local(move || r.set(true));
+        let _registration = source.register_local(move || r.set(true));
 
         let remote = source.clone();
         std::thread::spawn(move || remote.cancel()).join().unwrap();
@@ -240,10 +240,10 @@ fn clearing_the_context_removes_the_poster() {
         set_synchronization_context(Some(context.clone()));
         set_synchronization_context(None);
 
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
         let ran = Rc::new(Cell::new(false));
         let r = ran.clone();
-        let _registration = source.token().register_local(move || r.set(true));
+        let _registration = source.register_local(move || r.set(true));
 
         let remote = source.clone();
         std::thread::spawn(move || remote.cancel()).join().unwrap();
@@ -258,10 +258,10 @@ fn clearing_the_context_removes_the_poster() {
 #[test]
 fn setting_a_context_runs_the_wakes_that_came_before() {
     on_own_thread(|| {
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
         let ran = Rc::new(Cell::new(false));
         let r = ran.clone();
-        let _registration = source.token().register_local(move || r.set(true));
+        let _registration = source.register_local(move || r.set(true));
 
         let remote = source.clone();
         std::thread::spawn(move || remote.cancel()).join().unwrap();

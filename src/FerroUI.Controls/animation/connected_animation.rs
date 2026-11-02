@@ -21,7 +21,7 @@ use ferroui_base::media::{
 use ferroui_base::platform::IPlatformRenderInterface;
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, CornerRadius, FerroLocator,
@@ -100,9 +100,9 @@ pub struct ConnectedAnimation {
     is_consumed: Cell<bool>,
     disposed: Cell<bool>,
 
-    timeout_cts: RefCell<Option<CancellationTokenSource>>,
+    timeout_cts: RefCell<Option<CancellationToken>>,
     timeout_timer_disposable: RefCell<Option<Subscription>>,
-    animation_cts: RefCell<Option<CancellationTokenSource>>,
+    animation_cts: RefCell<Option<CancellationToken>>,
     animation_timer: RefCell<Option<Rc<DispatcherTimer>>>,
 
     // Active-flight state used by `dispose` to clean up if cancelled
@@ -188,13 +188,13 @@ impl ConnectedAnimation {
         }
 
         // Auto-dispose after 3 s if not consumed (matches UWP behaviour).
-        let timeout_cts = CancellationTokenSource::new();
-        let token = timeout_cts.token();
+        let timeout_cts = CancellationToken::new();
+        let token = timeout_cts.clone();
         *animation.timeout_cts.borrow_mut() = Some(timeout_cts);
         let this = animation.clone();
         let timeout_timer_disposable = DispatcherTimer::run_once(
             move || {
-                if !token.is_cancellation_requested() && !this.is_consumed.get() {
+                if !token.is_cancelled() && !this.is_consumed.get() {
                     this.dispose();
                 }
             },
@@ -646,8 +646,8 @@ impl ConnectedAnimation {
 
         let animate_shadow = use_shadow && use_gravity_dip;
 
-        let animation_cts = CancellationTokenSource::new();
-        let animation_token = animation_cts.token();
+        let animation_cts = CancellationToken::new();
+        let animation_token = animation_cts.clone();
         *self.animation_cts.borrow_mut() = Some(animation_cts);
 
         let weak_proxy = proxy.downgrade();
@@ -914,8 +914,8 @@ impl ConnectedAnimation {
             }
         });
 
-        let animation_cts = CancellationTokenSource::new();
-        let reg = animation_cts.token().register({
+        let animation_cts = CancellationToken::new();
+        let reg = animation_cts.register({
             let tcs = tcs.clone();
             move || tcs.try_set(CompletionOutcome::Canceled)
         });

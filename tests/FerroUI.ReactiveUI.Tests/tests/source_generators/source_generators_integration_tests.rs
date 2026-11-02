@@ -126,7 +126,7 @@ impl PersonViewModel {
     /// `LoadAsync`.
     async fn load_async(id: i32, token: CancellationToken) -> Result<i32, ObservableError> {
         YieldNow(false).await;
-        if token.is_cancellation_requested() {
+        if token.is_cancelled() {
             return Err(Rc::new(OperationCanceled));
         }
         Ok(id + 1)

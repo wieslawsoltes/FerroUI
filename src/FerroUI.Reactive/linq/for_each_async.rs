@@ -85,7 +85,7 @@ pub(crate) fn for_each_async<T: 'static>(
         subscription: SingleAssignmentDisposableValue::new(),
         registration: RefCell::new(None),
     });
-    if token.can_be_canceled() {
+    if token.can_be_cancelled() {
         let target = state.clone();
         let registration = TokenRegistration::register(&token, move || {
             target.completion.try_set_canceled();
@@ -93,7 +93,7 @@ pub(crate) fn for_each_async<T: 'static>(
         });
         *state.registration.borrow_mut() = Some(registration);
     }
-    if !token.is_cancellation_requested() {
+    if !token.is_cancelled() {
         let observer = Rc::new(ForEachObserver { state: state.clone(), on_next, is_stopped: Cell::new(false) });
         let subscription = source.subscribe(observer);
         state.subscription.set_disposable(Some(subscription));

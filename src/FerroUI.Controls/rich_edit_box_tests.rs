@@ -2474,7 +2474,7 @@ fn rich_edit_caret_scroll_keeps_template_chrome_fixed_and_ime_geometry_in_owner_
 #[test]
 fn rich_edit_selection_focus_brushes_restore_inline_format_and_observe_mutable_transparency() {
     use crate::documents::{Paragraph, Run};
-    
+    use crate::rich_text_selection_overlay_tests::{close, fills, glyphs, overlaps, render};
     use ferroui_base::input::{FocusChangedEventArgs, InputElement};
     use ferroui_base::media::text_formatting::{ITextSource, TextRunProperties};
     use ferroui_base::media::{Brushes, Colors, IBrush, SolidColorBrush};
@@ -2510,9 +2510,33 @@ fn rich_edit_selection_focus_brushes_restore_inline_format_and_observe_mutable_t
             .and_then(|brush| brush.as_solid_color_brush())
             .map(|brush| brush.color())
     };
+    // The selection is drawn over the lines (#439): whatever the focus, the runs keep the
+    // document's format, and the drawing shows the selected text in the selection foreground
+    // over the highlight, without the run's background under it.
+    let shows_selection = |expected: bool| {
+        let drawn = render(&presenter);
+        let rects = presenter.get_rects_for_range(0..3);
+        let span = (rects[0].x, rects[0].right());
+        let selected = glyphs(&drawn, Colors::WHITE);
+        let backgrounds = fills(&drawn, Colors::GREEN);
+        if expected {
+            assert_eq!(selected.len(), 1, "{drawn:#?}");
+            let visible = selected[0].visible();
+            assert!(close(visible.0, span.0) && close(visible.1, span.1));
+            assert!(backgrounds
+                .iter()
+                .all(|rect| !overlaps((rect.x, rect.right()), span)));
+        } else {
+            assert!(selected.is_empty(), "{drawn:#?}");
+            assert!(backgrounds
+                .iter()
+                .any(|rect| overlaps((rect.x, rect.right()), span)));
+        }
+        assert_eq!(color(properties().foreground_brush()), Some(Colors::BLUE));
+        assert_eq!(color(properties().background_brush()), Some(Colors::GREEN));
+    };
     assert!(!presenter.selection_is_visible());
-    assert_eq!(color(properties().foreground_brush()), Some(Colors::BLUE));
-    assert_eq!(color(properties().background_brush()), Some(Colors::GREEN));
+    shows_selection(false);
 
     editor.raise_event(&FocusChangedEventArgs::new(InputElement::got_focus_event()));
     assert!(presenter.selection_is_visible());
@@ -2520,21 +2544,23 @@ fn rich_edit_selection_focus_brushes_restore_inline_format_and_observe_mutable_t
         color(presenter.selection_render_brush().as_ref()),
         Some(Colors::RED)
     );
-    assert_eq!(color(properties().foreground_brush()), Some(Colors::WHITE));
-    assert!(properties().background_brush().is_none());
+    assert_eq!(
+        fills(&render(&presenter), Colors::RED),
+        presenter.selection_rects()
+    );
+    shows_selection(true);
     editor.raise_event(&FocusChangedEventArgs::new(InputElement::lost_focus_event()));
     assert!(!presenter.selection_is_visible());
-    assert_eq!(color(properties().background_brush()), Some(Colors::GREEN));
+    shows_selection(false);
 
     let inactive = SolidColorBrush::with_color(Colors::TRANSPARENT);
     editor.set_selection_highlight_color_when_not_focused(Some(inactive.clone().into()));
     inactive.set_color(Colors::RED);
     assert!(presenter.selection_is_visible());
-    assert_eq!(color(properties().foreground_brush()), Some(Colors::WHITE));
+    shows_selection(true);
     inactive.set_opacity(0.0);
     assert!(!presenter.selection_is_visible());
-    assert_eq!(color(properties().foreground_brush()), Some(Colors::BLUE));
-    assert_eq!(color(properties().background_brush()), Some(Colors::GREEN));
+    shows_selection(false);
     assert_eq!(editor.rich_document().revision(), revision);
 }
 

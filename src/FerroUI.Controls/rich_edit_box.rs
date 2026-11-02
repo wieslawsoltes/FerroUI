@@ -572,7 +572,7 @@ impl FerroObjectImpl for RichEditBox {
             || property == Self::selection_highlight_color_when_not_focused_property().as_property()
         {
             this.refresh_selection_brush_subscriptions();
-            this.text_presenter.invalidate_document_layout();
+            this.text_presenter.invalidate_selection_visual();
         }
     }
 }
@@ -605,7 +605,7 @@ impl InputElementImpl for RichEditBox {
         this.im_client.raise_cursor_rectangle_changed();
         this.reset_caret_blink();
         this.ensure_caret_visible();
-        this.text_presenter.invalidate_document_layout();
+        this.text_presenter.invalidate_selection_visual();
     }
     fn on_lost_focus(this: &Self, event: &FocusChangedEventArgs) {
         Self::parent_on_lost_focus(this, event);
@@ -1221,7 +1221,7 @@ impl RichEditBox {
             return;
         }
         self.pseudo_classes().set(":flyout-focus", value);
-        self.text_presenter.invalidate_document_layout();
+        self.text_presenter.invalidate_selection_visual();
         let previous = self.flyout_focus_subscription.take();
         if let Some(previous) = previous {
             previous.dispose();
@@ -1276,7 +1276,7 @@ impl RichEditBox {
         self.editor().checkpoint();
         self.im_client.request_reset();
         self.stop_caret_blink();
-        self.text_presenter.invalidate_document_layout();
+        self.text_presenter.invalidate_selection_visual();
     }
 
     pub(crate) fn selection_is_visible(&self) -> bool {
@@ -1299,7 +1299,7 @@ impl RichEditBox {
                 &brush,
                 Rc::new(move || {
                     if let Some(owner) = weak.upgrade() {
-                        owner.text_presenter.invalidate_document_layout();
+                        owner.text_presenter.invalidate_selection_visual();
                     }
                 }),
             ) {

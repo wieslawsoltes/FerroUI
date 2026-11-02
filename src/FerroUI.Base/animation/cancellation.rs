@@ -6,8 +6,15 @@
 //! action therefore stays in a per-thread table and the token only carries
 //! its key: cancelling on the owning thread runs the action right away,
 //! cancelling on another thread posts it to the owning thread's dispatcher.
+//!
+//! [`CancellationToken::register_local`] brings a callback back to its thread
+//! through the thread's schedule, which the dispatcher is not yet (step A5 of
+//! phase C4 of #423, docs/idiomatic-rust-async.md, section 3.1): a callback
+//! cancelled from another thread would wait for `run_pending_wakes`. This
+//! module keeps posting to the dispatcher until then, with the guard of the
+//! token.
 
-use crate::threading::{CancellationToken, CancellationTokenRegistration, Dispatcher, DispatcherPriority};
+use crate::threading::{CancellationGuard, CancellationToken, Dispatcher, DispatcherPriority};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 
@@ -23,18 +30,28 @@ fn run_local(id: u64) {
     }
 }
 
-/// An action registered with [`register_local`].
+/// An action registered with [`register_local`]; dropping it removes the
+/// action, on the thread that registered it.
 pub(crate) struct LocalCancellationRegistration {
     id: u64,
-    registration: CancellationTokenRegistration,
+    _registration: CancellationGuard,
+    /// The action belongs to the thread that registered it.
+    _thread_bound: std::marker::PhantomData<std::rc::Rc<()>>,
 }
 
 impl LocalCancellationRegistration {
-    /// Removes the action so that it no longer runs on cancellation. Must
-    /// be called on the thread that registered it.
-    pub(crate) fn dispose(&self) {
-        self.registration.dispose();
-        let action = ACTIONS.with(|actions| actions.borrow_mut().remove(&self.id));
+    /// Removes the action so that it no longer runs on cancellation, the same
+    /// as dropping the registration.
+    pub(crate) fn dispose(self) {
+        drop(self);
+    }
+}
+
+impl Drop for LocalCancellationRegistration {
+    fn drop(&mut self) {
+        // Dropped outside of the borrow: the action may own something whose
+        // drop reaches the table.
+        let action = ACTIONS.try_with(|actions| actions.borrow_mut().remove(&self.id)).ok().flatten();
         drop(action);
     }
 }
@@ -57,5 +74,5 @@ pub(crate) fn register_local(token: &CancellationToken, action: impl FnOnce() + 
             dispatcher.post(move || run_local(id), DispatcherPriority::SEND);
         }
     });
-    LocalCancellationRegistration { id, registration }
+    LocalCancellationRegistration { id, _registration: registration, _thread_bound: std::marker::PhantomData }
 }

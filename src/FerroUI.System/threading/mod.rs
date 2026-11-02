@@ -4,8 +4,9 @@ mod cancellation_token;
 mod synchronization_context;
 pub mod tasks;
 
+pub use cancellation_token::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
+#[allow(deprecated)]
 pub use cancellation_token::{
-    CancellationGuard, CancellationToken, CancellationTokenRegistration, CancellationTokenSource,
-    DropGuard, LocalCancellationTokenRegistration, WaitForCancellation,
+    CancellationTokenRegistration, CancellationTokenSource, LocalCancellationTokenRegistration,
 };
 pub use synchronization_context::{current_synchronization_context, set_synchronization_context, SynchronizationContext};
