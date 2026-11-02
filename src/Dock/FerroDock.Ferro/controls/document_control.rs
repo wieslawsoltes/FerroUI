@@ -84,7 +84,7 @@ impl VisualImpl for DocumentControl {
             move |_, _| owner.pressed_handler(),
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         this.pressed.replace(Some(pressed));
         let owner = this.to_ref();
         let subscription =

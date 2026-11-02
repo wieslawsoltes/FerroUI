@@ -254,7 +254,7 @@ impl MainViewModel {
                     this.keyboard_property_changed(property_name);
                 }
             });
-            *this.keyboard_property_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
+            *this.keyboard_property_changed_subscription.borrow_mut() = Some(subscription);
         }
         this.set_selected_tab(0);
 

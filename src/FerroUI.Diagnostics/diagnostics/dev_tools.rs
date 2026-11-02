@@ -48,7 +48,7 @@ impl DevTools {
             },
             RoutingStrategies::TUNNEL,
             false,
-        )
+        ).detach()
     }
 
     /// C# `Open(TopLevel root, DevToolsOptions options)`: opens DevTools for `root`. Disposing

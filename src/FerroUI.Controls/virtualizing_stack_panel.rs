@@ -1791,10 +1791,10 @@ impl IScrollSnapPointsInfo for VirtualizingStackPanel {
     }
 
     fn horizontal_snap_points_changed(&self, handler: SnapPointsChangedHandler) -> Rc<dyn IDisposable> {
-        self.add_disposable_handler(Self::horizontal_snap_points_changed_event(), move |sender, e| handler(sender, e))
+        self.add_disposable_handler(Self::horizontal_snap_points_changed_event(), move |sender, e| handler(sender, e)).detach()
     }
 
     fn vertical_snap_points_changed(&self, handler: SnapPointsChangedHandler) -> Rc<dyn IDisposable> {
-        self.add_disposable_handler(Self::vertical_snap_points_changed_event(), move |sender, e| handler(sender, e))
+        self.add_disposable_handler(Self::vertical_snap_points_changed_event(), move |sender, e| handler(sender, e)).detach()
     }
 }

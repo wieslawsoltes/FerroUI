@@ -400,7 +400,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                     },
                     RoutingStrategies::BUBBLE,
                     false,
-                ));
+                ).detach());
         }
         for (index, editor) in [&p.start_input, &p.end_input].iter().enumerate() {
             TextInputOptions::set_content_type(editor, TextInputContentType::Digits);
@@ -418,7 +418,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                     },
                     RoutingStrategies::TUNNEL,
                     false,
-                ));
+                ).detach());
             this.subscriptions
                 .borrow_mut()
                 .push(editor.add_disposable_handler_with(
@@ -434,7 +434,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                     },
                     RoutingStrategies::TUNNEL,
                     false,
-                ));
+                ).detach());
             let weak = this.to_ref().downgrade();
             this.subscriptions
                 .borrow_mut()
@@ -458,7 +458,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                 },
                 RoutingStrategies::BUBBLE,
                 false,
-            ));
+            ).detach());
         let weak = this.to_ref().downgrade();
         this.subscriptions
             .borrow_mut()
@@ -518,7 +518,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                     true,
                 ),
             };
-            this.subscriptions.borrow_mut().push(subscription);
+            this.subscriptions.borrow_mut().push(subscription.detach());
         }
         let weak = this.to_ref().downgrade();
         this.subscriptions
@@ -534,7 +534,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                 },
                 RoutingStrategies::BUBBLE,
                 true,
-            ));
+            ).detach());
         p.range_months.set_owner(this);
         this.rebuild_weekdays();
         this.refresh_calendar();

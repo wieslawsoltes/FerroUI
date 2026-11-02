@@ -1,31 +1,33 @@
 //! Extension methods for [`Interactive`].
 
 use super::{IRoutedEventArgs, Interactive, RoutedEvent, RoutingStrategies};
-use crate::reactive::{Disposable, IDisposable, IObservable, Observable};
+use crate::reactive::{Disposable, IObservable, Observable, Subscription};
 use crate::Ref;
 use std::rc::Rc;
 
 impl Interactive {
     /// Adds a handler for a routed event (direct and bubble routes,
-    /// unhandled events) and returns a disposable that removes the handler
-    /// when disposed.
+    /// unhandled events) and returns the guard of the handler: dropping it
+    /// removes the handler; [`Subscription::detach`] keeps it for the life
+    /// of the object.
     pub fn add_disposable_handler<TEventArgs: IRoutedEventArgs>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
         handler: impl Fn(&Interactive, &TEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.add_disposable_handler_with(routed_event, handler, Self::DEFAULT_ROUTES, false)
     }
 
-    /// Adds a handler for a routed event and returns a disposable that
-    /// removes the handler when disposed.
+    /// Adds a handler for a routed event and returns the guard of the
+    /// handler: dropping it removes the handler; [`Subscription::detach`]
+    /// keeps it for the life of the object.
     pub fn add_disposable_handler_with<TEventArgs: IRoutedEventArgs>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
         handler: impl Fn(&Interactive, &TEventArgs) + 'static,
         routes: RoutingStrategies,
         handled_events_too: bool,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.add_handler_with(routed_event, handler, routes, handled_events_too);
         // Deviation (DEVIATIONS.md, Routed events): the managed original
         // captures the object. An element that keeps the
@@ -35,11 +37,11 @@ impl Interactive {
         let instance = self.to_ref().downgrade();
         let routed_event = routed_event.as_routed_event();
 
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(instance) = instance.upgrade() {
                 instance.remove_handler(&routed_event, token);
             }
-        })
+        }))
     }
 
     /// The interactive parent of the object for bubbling and tunneling
@@ -81,6 +83,7 @@ impl Interactive {
                 routes,
                 handled_events_too,
             )
+            .detach()
         })
     }
 }

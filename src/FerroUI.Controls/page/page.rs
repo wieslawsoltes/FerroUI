@@ -208,7 +208,7 @@ impl Page {
             if sender.on_system_back_button_pressed() {
                 event_args.set_handled(true);
             }
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

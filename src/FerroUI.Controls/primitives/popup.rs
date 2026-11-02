@@ -772,11 +772,14 @@ impl Popup {
 
         if self.inherits_transform() {
             let weak = weak.clone();
-            handler_cleanup.add(TransformTrackingHelper::track(&placement_target.clone().upcast(), true, move |v, m| {
-                if let Some(this) = weak.upgrade() {
-                    this.placement_target_transform_changed(v, m);
-                }
-            }));
+            handler_cleanup.add(
+                TransformTrackingHelper::track(&placement_target.clone().upcast(), true, move |v, m| {
+                    if let Some(this) = weak.upgrade() {
+                        this.placement_target_transform_changed(v, m);
+                    }
+                })
+                .detach(),
+            );
         } else {
             popup_host.set_transform(None);
         }

@@ -842,7 +842,7 @@ impl RichEditBox {
             Self::on_context_requested,
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         InputElement::text_input_method_client_requested_event().add_class_handler::<RichEditBox>(
             |this, event| {
                 if !this.is_read_only() && event.source().as_ref() == Some(&this.to_ref().upcast())
@@ -850,7 +850,7 @@ impl RichEditBox {
                     event.set_client(Some(this.im_client.clone()));
                 }
             },
-        );
+        ).detach();
     }
     pub fn construct() -> Self {
         Self {
@@ -1225,14 +1225,13 @@ impl RichEditBox {
         if value {
             if let Some(device) = KeyboardDevice::instance() {
                 let weak = self.to_ref().downgrade();
-                *self.flyout_focus_subscription.borrow_mut() =
-                    Some(Subscription::new(device.property_changed(move |property| {
-                        if property == "FocusedElement" {
-                            if let Some(owner) = weak.upgrade() {
-                                owner.refresh_flyout_focus_state();
-                            }
+                *self.flyout_focus_subscription.borrow_mut() = Some(device.property_changed(move |property| {
+                    if property == "FocusedElement" {
+                        if let Some(owner) = weak.upgrade() {
+                            owner.refresh_flyout_focus_state();
                         }
-                    })));
+                    }
+                }));
             }
         }
     }
@@ -1777,11 +1776,11 @@ impl RichEditBox {
         }
         if let Some(scope) = self.input_scope() {
             let weak = self.to_ref().downgrade();
-            *self.input_scope_subscription.borrow_mut() = Some(Subscription::new(scope.changed(move || {
+            *self.input_scope_subscription.borrow_mut() = Some(scope.changed(move || {
                 if let Some(this) = weak.upgrade() {
                     this.update_input_scope_snapshot();
                 }
-            })));
+            }));
         }
         self.update_input_scope_snapshot();
     }

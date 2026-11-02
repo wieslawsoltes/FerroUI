@@ -139,7 +139,7 @@ impl TabItem {
             .override_default_value::<TabItem>(Some(crate::automation::peers::AutomationControlType::TabItem));
         crate::automation::AutomationProperties::is_offscreen_behavior_property()
             .override_default_value::<TabItem>(crate::automation::IsOffscreenBehavior::FromClip);
-        AccessKeyHandler::access_key_pressed_event().add_class_handler::<TabItem>(Self::on_access_key_pressed);
+        AccessKeyHandler::access_key_pressed_event().add_class_handler::<TabItem>(Self::on_access_key_pressed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

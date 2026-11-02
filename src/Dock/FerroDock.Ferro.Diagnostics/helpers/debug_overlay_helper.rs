@@ -53,7 +53,7 @@ impl DebugOverlayHelper {
             move |_, event| owner.on_pointer_moved(event),
             routes,
             false,
-        );
+        ).detach();
         self.remember(&control, SubscriptionKind::Moved, moved);
         let owner = self.clone();
         let leave = control.add_disposable_handler_with(
@@ -61,7 +61,7 @@ impl DebugOverlayHelper {
             move |_, _| owner.on_pointer_leave(),
             routes,
             false,
-        );
+        ).detach();
         self.remember(&control, SubscriptionKind::Leave, leave);
         let owner = self.clone();
         let layout = control.layout_updated(move || owner.on_layout_updated());

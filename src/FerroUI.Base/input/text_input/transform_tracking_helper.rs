@@ -1,5 +1,5 @@
 use crate::media::MediaContext;
-use crate::reactive::{Disposable, IDisposable, IObservable, Observable};
+use crate::reactive::{Disposable, IDisposable, IObservable, Observable, Subscription};
 use crate::threading::{Dispatcher, DispatcherPriority};
 use crate::utilities::HandlerList;
 use crate::{FerroPropertyChangedEventArgs, Matrix, Ref, Visual, WeakRef};
@@ -77,16 +77,17 @@ impl TransformTrackingHelper {
         self.matrix.get()
     }
 
-    /// Raised when [`matrix`](Self::matrix) has changed. Disposing the
-    /// returned handle unsubscribes.
-    pub fn matrix_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when [`matrix`](Self::matrix) has changed. Dropping the
+    /// returned guard unsubscribes; [`Subscription::detach`] keeps the
+    /// handler for the life of the helper.
+    pub fn matrix_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.matrix_changed.add(Rc::new(handler));
         let weak = self.this.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.matrix_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Stops tracking the visual.
@@ -173,13 +174,14 @@ impl TransformTrackingHelper {
     }
 
     /// Tracks the transform of a visual, calling `cb` with the visual and
-    /// its transform whenever it changes. Disposing the returned handle
-    /// stops tracking.
+    /// its transform whenever it changes. Dropping the returned guard stops
+    /// tracking; [`Subscription::detach`] keeps tracking for the life of the
+    /// visual.
     pub fn track(
         visual: &Ref<Visual>,
         defer_after_render_pass: bool,
         cb: impl Fn(&Ref<Visual>, Option<Matrix>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let rv = TransformTrackingHelper::new(defer_after_render_pass);
         {
             let weak = Rc::downgrade(&rv);
@@ -188,10 +190,11 @@ impl TransformTrackingHelper {
                 if let (Some(rv), Some(visual)) = (weak.upgrade(), visual.upgrade()) {
                     cb(&visual, rv.matrix());
                 }
-            });
+            })
+            .detach();
         }
         rv.set_visual(Some(visual));
-        rv
+        Subscription::new(rv)
     }
 
     /// Returns an observable of the transform of a visual to its visual
@@ -206,7 +209,8 @@ impl TransformTrackingHelper {
                     if let Some(rv) = weak.upgrade() {
                         observer.on_next(rv.matrix());
                     }
-                });
+                })
+                .detach();
             }
             rv.set_visual(visual.upgrade().as_ref());
             rv as Rc<dyn IDisposable>

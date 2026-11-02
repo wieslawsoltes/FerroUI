@@ -533,7 +533,7 @@ impl Button {
 
         InputElement::focusable_property().override_default_value::<Button>(true);
         PlatformFeedback::feedback_type_property().override_default_value::<Button>(FeedbackType::Auto);
-        AccessKeyHandler::access_key_pressed_event().add_class_handler::<Button>(Self::on_access_key_pressed);
+        AccessKeyHandler::access_key_pressed_event().add_class_handler::<Button>(Self::on_access_key_pressed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

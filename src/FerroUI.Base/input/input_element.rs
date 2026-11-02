@@ -585,26 +585,26 @@ impl InputElement {
             }
         });
 
-        Self::got_focus_event().add_class_handler::<InputElement>(|x, e| x.on_got_focus_core(e));
-        Self::lost_focus_event().add_class_handler::<InputElement>(|x, e| x.on_lost_focus_core(e));
-        Self::getting_focus_event().add_class_handler::<InputElement>(|x, e| x.on_getting_focus(e));
-        Self::losing_focus_event().add_class_handler::<InputElement>(|x, e| x.on_losing_focus(e));
-        Self::key_down_event().add_class_handler::<InputElement>(|x, e| x.on_key_down(e));
-        Self::key_up_event().add_class_handler::<InputElement>(|x, e| x.on_key_up(e));
-        Self::text_input_event().add_class_handler::<InputElement>(|x, e| x.on_text_input(e));
-        Self::pointer_entered_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_entered_core(e));
-        Self::pointer_exited_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_exited_core(e));
-        Self::pointer_moved_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_moved(e));
-        Self::pointer_pressed_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_pressed(e));
-        Self::pointer_released_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_released(e));
+        Self::got_focus_event().add_class_handler::<InputElement>(|x, e| x.on_got_focus_core(e)).detach();
+        Self::lost_focus_event().add_class_handler::<InputElement>(|x, e| x.on_lost_focus_core(e)).detach();
+        Self::getting_focus_event().add_class_handler::<InputElement>(|x, e| x.on_getting_focus(e)).detach();
+        Self::losing_focus_event().add_class_handler::<InputElement>(|x, e| x.on_losing_focus(e)).detach();
+        Self::key_down_event().add_class_handler::<InputElement>(|x, e| x.on_key_down(e)).detach();
+        Self::key_up_event().add_class_handler::<InputElement>(|x, e| x.on_key_up(e)).detach();
+        Self::text_input_event().add_class_handler::<InputElement>(|x, e| x.on_text_input(e)).detach();
+        Self::pointer_entered_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_entered_core(e)).detach();
+        Self::pointer_exited_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_exited_core(e)).detach();
+        Self::pointer_moved_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_moved(e)).detach();
+        Self::pointer_pressed_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_pressed(e)).detach();
+        Self::pointer_released_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_released(e)).detach();
         Self::pointer_capture_changing_event()
-            .add_class_handler::<InputElement>(|x, e| x.on_pointer_capture_changing(e));
-        Self::pointer_capture_lost_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_capture_lost(e));
-        Self::pointer_wheel_changed_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_wheel_changed(e));
-        Self::tapped_event().add_class_handler::<InputElement>(|x, e| x.on_tapped(e));
-        Self::right_tapped_event().add_class_handler::<InputElement>(|x, e| x.on_right_tapped(e));
-        Self::double_tapped_event().add_class_handler::<InputElement>(|x, e| x.on_double_tapped(e));
-        Self::holding_event().add_class_handler::<InputElement>(|x, e| x.on_holding(e));
+            .add_class_handler::<InputElement>(|x, e| x.on_pointer_capture_changing(e)).detach();
+        Self::pointer_capture_lost_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_capture_lost(e)).detach();
+        Self::pointer_wheel_changed_event().add_class_handler::<InputElement>(|x, e| x.on_pointer_wheel_changed(e)).detach();
+        Self::tapped_event().add_class_handler::<InputElement>(|x, e| x.on_tapped(e)).detach();
+        Self::right_tapped_event().add_class_handler::<InputElement>(|x, e| x.on_right_tapped(e)).detach();
+        Self::double_tapped_event().add_class_handler::<InputElement>(|x, e| x.on_double_tapped(e)).detach();
+        Self::holding_event().add_class_handler::<InputElement>(|x, e| x.on_holding(e)).detach();
 
         Gestures::TYPE.ensure_class_init();
         Gestures::add_tapped(|s, e| {
@@ -625,29 +625,29 @@ impl InputElement {
         Gestures::add_holding(Self::on_preview_holding);
 
         // Access Key Handling
-        AccessKeyHandler::access_key_event().add_class_handler::<InputElement>(|x, e| x.on_access_key(e));
+        AccessKeyHandler::access_key_event().add_class_handler::<InputElement>(|x, e| x.on_access_key(e)).detach();
 
         // Gesture only handlers
         Self::pointer_moved_event().add_class_handler_with::<InputElement>(
             |x, e| x.on_gesture_pointer_moved(e),
             Interactive::DEFAULT_ROUTES,
             true,
-        );
+        ).detach();
         Self::pointer_pressed_event().add_class_handler_with::<InputElement>(
             |x, e| x.on_gesture_pointer_pressed(e),
             Interactive::DEFAULT_ROUTES,
             true,
-        );
+        ).detach();
         Self::pointer_released_event().add_class_handler_with::<InputElement>(
             |x, e| x.on_gesture_pointer_released(e),
             Interactive::DEFAULT_ROUTES,
             true,
-        );
+        ).detach();
         Self::pointer_capture_lost_event().add_class_handler_with::<InputElement>(
             |x, e| x.on_gesture_pointer_capture_lost(e),
             Interactive::DEFAULT_ROUTES,
             true,
-        );
+        ).detach();
     }
 
     /// Creates the class data; see [`crate::FerroObject::construct`].
