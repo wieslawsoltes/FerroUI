@@ -857,12 +857,16 @@ impl AiTranslationManager {
                 return Poll::Ready(Err(StudioError::Cancelled));
             }
             match pending.as_mut().poll(context) {
-                Poll::Ready(result) => Poll::Ready(check_cancelled(cancellation).and(result).map_err(
-                    |error| match error {
-                        StudioError::Cancelled => StudioError::Cancelled,
-                        _ => provider_error(config.provider, &redact(config, &error.to_string())),
-                    },
-                )),
+                Poll::Ready(result) => {
+                    Poll::Ready(check_cancelled(cancellation).and(result).map_err(|error| {
+                        match error {
+                            StudioError::Cancelled => StudioError::Cancelled,
+                            _ => {
+                                provider_error(config.provider, &redact(config, &error.to_string()))
+                            }
+                        }
+                    }))
+                }
                 Poll::Pending => Poll::Pending,
             }
         })

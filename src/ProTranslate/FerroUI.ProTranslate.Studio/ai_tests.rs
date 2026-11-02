@@ -626,13 +626,9 @@ fn request_validation_rejects_duplicates_without_sending_or_faking_connection_su
         AiProvider::OpenAI,
         r#"[{"key":"single","text":"Hola"}]"#,
     ));
-    assert!(
-        ready(manager.test_connection(AiProvider::OpenAI, &CancellationToken::new())).unwrap()
-    );
+    assert!(ready(manager.test_connection(AiProvider::OpenAI, &CancellationToken::new())).unwrap());
     transport.push(response(AiProvider::OpenAI, "broken JSON"));
-    assert!(
-        ready(manager.test_connection(AiProvider::OpenAI, &CancellationToken::new())).is_err()
-    );
+    assert!(ready(manager.test_connection(AiProvider::OpenAI, &CancellationToken::new())).is_err());
 }
 
 #[test]
@@ -691,8 +687,7 @@ fn discovery_works_before_explicit_selection_and_never_changes_configuration() {
     }
     let list = ready(manager.list_models(AiProvider::OpenAI, &CancellationToken::new())).unwrap();
     assert_eq!(list.models, ["live-model"]);
-    let empty =
-        ready(manager.list_models(AiProvider::OpenAI, &CancellationToken::new())).unwrap();
+    let empty = ready(manager.list_models(AiProvider::OpenAI, &CancellationToken::new())).unwrap();
     assert!(empty.models.is_empty());
     assert_eq!(empty.source, AiModelListSource::Live);
     assert!(empty.warning.is_none());
