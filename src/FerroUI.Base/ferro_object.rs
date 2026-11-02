@@ -905,11 +905,11 @@ impl FerroObject {
         self.notify_property_changed(&e);
     }
 
-    pub(crate) fn raise_inherited_property_changed<T: PropertyValue>(
+    pub(crate) fn raise_inherited_property_changed(
         &self,
         property: &'static FerroProperty,
-        old_value: &T,
-        new_value: &T,
+        old_value: &dyn Any,
+        new_value: &dyn Any,
         priority: BindingPriority,
     ) {
         let e = FerroPropertyChangedEventArgs::new(
