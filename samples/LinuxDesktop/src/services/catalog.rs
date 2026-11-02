@@ -30,6 +30,8 @@ impl DesktopApplication {
 pub struct ApplicationCatalog {
     applications: Vec<DesktopApplication>,
     ids: HashMap<String, usize>,
+    /// Keyed without the desktop-file suffix for allocation-free xdg app ID lookup.
+    window_ids: HashMap<Box<str>, usize>,
     /// Postings preserve catalog order and contain each application at most once.
     trigrams: HashMap<[u8; 3], Vec<usize>>,
     unavailable_reason: Option<String>,
@@ -39,9 +41,13 @@ impl ApplicationCatalog {
     pub(super) fn from_applications(mut applications: Vec<DesktopApplication>) -> Self {
         applications.sort_by_cached_key(|app| (app.name.to_lowercase(), app.id.clone()));
         let mut ids = HashMap::with_capacity(applications.len());
+        let mut window_ids = HashMap::with_capacity(applications.len());
         let mut trigrams: HashMap<_, Vec<usize>> = HashMap::new();
         for (i, app) in applications.iter().enumerate() {
             ids.insert(app.id.clone(), i);
+            if let Some(id) = app.id.strip_suffix(".desktop") {
+                window_ids.insert(Box::<str>::from(id), i);
+            }
             // A linear scan wins for a small local menu. Larger development
             // and managed installations amortize the index over keystrokes.
             if applications.len() >= 256 {
@@ -56,6 +62,7 @@ impl ApplicationCatalog {
         Self {
             applications,
             ids,
+            window_ids,
             trigrams,
             unavailable_reason: None,
         }
@@ -83,9 +90,13 @@ impl ApplicationCatalog {
             return None;
         }
         let id = app_id.strip_suffix(".desktop").unwrap_or(app_id);
-        let desktop_id = format!("{id}.desktop");
-        self.index_of(&desktop_id)
-            .or_else(|| self.index_of(&desktop_id.to_ascii_lowercase()))
+        self.window_ids.get(id).copied().or_else(|| {
+            if id.bytes().any(|byte| byte.is_ascii_uppercase()) {
+                self.window_ids.get(id.to_ascii_lowercase().as_str()).copied()
+            } else {
+                None
+            }
+        })
     }
 
     pub fn unavailable_reason(&self) -> Option<&str> {

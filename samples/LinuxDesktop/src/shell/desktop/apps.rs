@@ -62,6 +62,9 @@ fn entries(
     model: &Snapshot,
     slots: usize,
 ) -> Vec<Entry> {
+    if slots == 0 {
+        return Vec::new();
+    }
     let mut items: Vec<_> = pins
         .iter()
         .filter_map(|id| catalog.index_of(id))
