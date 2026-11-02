@@ -75,10 +75,20 @@ def measure_launches(executables, rounds):
         offset = index % len(executables)
         for executable in executables[offset:] + executables[:offset]:
             start = time.perf_counter_ns()
-            output = command_output([executable])
+            # The probe flushes a line after resolving Button. Waiting for process
+            # exit here would also charge theme destruction to user-visible startup.
+            with subprocess.Popen([executable], stdout=subprocess.PIPE, text=True) as process:
+                output = process.stdout.readline()
+                ready = time.perf_counter_ns() - start
+                return_code = process.wait()
+                if return_code:
+                    raise subprocess.CalledProcessError(return_code, [executable])
             elapsed = time.perf_counter_ns() - start
             create, lookup = map(int, output.split())
-            samples[executable].append({"create_ns": create, "create_and_button_ns": lookup, "process_ns": elapsed})
+            samples[executable].append({
+                "create_ns": create, "create_and_button_ns": lookup,
+                "process_ready_ns": ready, "process_ns": elapsed,
+            })
     return samples
 
 

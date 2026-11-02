@@ -2,7 +2,7 @@
 use ferroui_base::controls::ResourceKey;
 use ferroui_controls::Button;
 use ferroui_themes_winui::WinUITheme;
-use std::time::Instant;
+use std::{io::Write, time::Instant};
 
 fn main() {
     let start = Instant::now();
@@ -11,4 +11,5 @@ fn main() {
     let button = theme.try_get_resource(&ResourceKey::Type(Button::TYPE), None).flatten();
     assert!(button.is_some(), "WinUI must resolve the Button control theme");
     println!("{} {}", created.as_nanos(), start.elapsed().as_nanos());
+    std::io::stdout().flush().expect("flush ready marker");
 }
