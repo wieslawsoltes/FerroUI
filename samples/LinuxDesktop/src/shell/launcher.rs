@@ -1,12 +1,13 @@
 //! Keyboard-first search with a bounded number of mounted results. Changing the
 //! query leaves the text box, its selection and its input-method context intact.
 mod browse;
+mod spotlight;
 use super::appearance::Layout;
 use super::chrome::*;
-use super::{feedback, Shell};
+use super::{Shell, feedback};
 use crate::services::{
-    favorites::{self, Edit},
     DesktopApplication,
+    favorites::{self, Edit},
 };
 use browse::{Entry, StartView};
 use ferroui_base::input::{Key, KeyModifiers};
@@ -37,10 +38,7 @@ impl Results {
                 rows: 2,
             };
         }
-        if pinned
-            || layout == Layout::MenuBarDock
-            || (layout == Layout::Taskbar && (searching || start == StartView::List))
-        {
+        if pinned || (layout == Layout::Taskbar && (searching || start == StartView::List)) {
             return Self::List;
         }
         let columns = ((width - 64.0) / 96.0) as usize;
@@ -72,7 +70,7 @@ impl Results {
         Some(next.min(last))
     }
 
-    fn capacity(self) -> usize {
+    const fn capacity(self) -> usize {
         match self {
             Self::List => 6,
             Self::Tiles { columns, rows } => columns * rows,
@@ -82,6 +80,9 @@ impl Results {
 
 pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let layout = look().layout();
+    if layout == Layout::MenuBarDock {
+        return spotlight::view(shell);
+    }
     let width = shell.metrics().width;
     let query = shell.query;
     let page = shell.page;
@@ -155,7 +156,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let selected_entry = memo(move |_| matches.with(|items| items.get(selected.get()).copied()));
     let selected_app = memo(move |_| selected_entry.get().and_then(Entry::app));
     let highlight = memo(move |_| {
-        if slot.get().is_some() || searching.get() || layout == Layout::MenuBarDock {
+        if slot.get().is_some() || searching.get() {
             selected_app.get()
         } else {
             None
@@ -265,46 +266,17 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         })
     });
 
-    let field = NodeRef::<ferroui_controls::TextBox>::new();
     let field_focused = signal(false);
     let state = shell.clone();
-    let search = text_box()
-        .name("ApplicationSearch")
-        .automation_properties_name("Search installed applications")
-        .automation_properties_help_text("Use arrow keys to select, Enter to open, or Control+P to pin an application. In Start, Alt+Left returns to categories.")
-        .placeholder_text(match layout {
-            Layout::Taskbar => "Search for apps",
-            Layout::MenuBarDock => "Spotlight Search",
-            Layout::BottomNavigation => "Search apps",
-        })
-        .text(query.two_way())
-        .on_got_focus(move |_| field_focused.set_if_changed(true))
-        .on_lost_focus(move |_| field_focused.set_if_changed(false))
-        .on_template_applied(|args| {
-            // Search owns one focus border around its icon, text and close command.
-            // Keep the themed presenter, editing commands, caret and IME host.
-            let scope = args.name_scope();
-            if let Some(chrome) = scope.find_as::<ferroui_controls::Border>("BorderElement") {
-                chrome.set_background(Some(ferroui_base::media::Brushes::transparent()));
-                chrome.set_border_thickness(ferroui_base::Thickness::uniform(0.0));
-            }
-            if let Some(ring) = scope.find_as::<ferroui_controls::Border>("MacOSPointerFocusRing") {
-                ring.set_is_visible(false);
-            }
-        })
-        .on_changed(ferroui_controls::TextBox::text_property(), move |_| set_category(None))
-        .with(move |input| {
-            input.set_focus_adorner(None);
-            let weak = input.downgrade();
-            state.search_box.replace(Some(weak.clone()));
-            let shell = state.clone();
-            let event = ferroui_base::input::InputElement::key_down_event();
-            // Route selection above TextBox's caret navigation. Leave composition,
-            // horizontal editing and modified selection gestures to the text host.
-            let token = input.add_handler_with(event, move |_, e| {
-                if weak.upgrade().is_none_or(|input| input.is_composing_text()) {
-                    return;
-                }
+    let search = search_editor(
+        shell,
+        if layout == Layout::Taskbar { "Search for apps" } else { "Search apps" },
+        "Use arrow keys to select, Enter to open, or Control+P to pin an application. In Start, Alt+Left returns to categories.",
+        15.0,
+        field_focused,
+        move || set_category(None),
+        move |e| {
+            let shell = &state;
                 let capacity = presentation.get_untracked().capacity();
                 let index = selected_app.get_untracked();
                 match (e.key, e.key_modifiers) {
@@ -323,12 +295,12 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     }
                     (Key::Left | Key::Right, KeyModifiers::ALT) if pinned_only.get_untracked() => {
                         if let Some(index) = index {
-                            mutate_pin(&shell, index, if e.key == Key::Left { Edit::Earlier } else { Edit::Later });
+                            mutate_pin(shell, index, if e.key == Key::Left { Edit::Earlier } else { Edit::Later });
                         }
                     }
                     (Key::P, modifiers) if modifiers == (KeyModifiers::CONTROL | KeyModifiers::SHIFT) => toggle_scope(),
                     (Key::P, KeyModifiers::CONTROL) => {
-                        if let Some(index) = index { toggle_pin(&shell, index); }
+                        if let Some(index) = index { toggle_pin(shell, index); }
                     }
                     (Key::Return, KeyModifiers::NONE) => {
                         match selected_entry.get_untracked() {
@@ -339,24 +311,10 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     }
                     _ => return,
                 }
-                e.set_handled(true);
-            }, ferroui_base::interactivity::RoutingStrategies::TUNNEL, false);
-            let weak = input.downgrade();
-            on_cleanup(move || {
-                if let Some(input) = weak.upgrade() { input.remove_handler(event, token); }
-            });
-        })
-        .node_ref(field)
-        .on_loaded(move |_| {
-            if let Some(input) = field.get_untracked() { input.focus(); }
-        })
-        .grid_column(1)
-        .foreground(colors().text)
-        .background("Transparent")
-        .border_thickness(0)
-        .font_size(if layout == Layout::MenuBarDock { 23.0 } else { 15.0 })
-        .padding((9.0, 5.0))
-        .vertical_alignment(V::Center);
+            e.set_handled(true);
+        },
+    )
+    .grid_column(1);
 
     let scope_name = move || {
         if pinned_only.get() {
@@ -368,7 +326,6 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let section = move || match (pinned_only.get(), searching.get(), layout) {
         (true, _, _) => "Pinned applications",
         (_, true, _) => "Search results",
-        (_, _, Layout::MenuBarDock) => "Applications",
         _ if categories.get() => category.get().unwrap_or("All apps"),
         _ => "All apps",
     };
@@ -386,7 +343,6 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let scene = shell.scene;
     let launching = shell.launching;
     let is_drawer = layout == Layout::BottomNavigation;
-    let spotlight = layout == Layout::MenuBarDock;
     let handle = if is_drawer {
         super::desktop::drawer_handle(shell)
             .height(30.0)
@@ -465,7 +421,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 .margin((6.0, 9.0, 4.0, 5.0))
                 .child(
                     row(5.0).child(back).child(
-                        shell_text("", if spotlight { 12.0 } else { 16.0 }, Ink::Primary)
+                        shell_text("", 16.0, Ink::Primary)
                             .text(section)
                             .font_weight(FontWeight::SemiBold),
                     ),
@@ -493,7 +449,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
             .child(
                 border()
                     .grid_row(1)
-                    .background(if spotlight { "Transparent" } else { p.tile })
+                    .background(p.tile)
                     .border_brush(move || {
                         if field_focused.get() {
                             p.accent
@@ -507,11 +463,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     .child(
                         grid()
                             .column_definitions("Auto,*,Auto")
-                            .child(glyph(
-                                Icon::Search,
-                                if spotlight { 23.0 } else { 18.0 },
-                                p.muted,
-                            ))
+                            .child(glyph(Icon::Search, 18.0, p.muted))
                             .child(search)
                             .child(
                                 icon_action("Close launcher", Icon::Close, move || state.cancel())
@@ -573,9 +525,84 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
             Layout::BottomNavigation => 540.0,
         })
         .max_height(690.0)
-        .padding(if spotlight { 13.0 } else { 19.0 })
+        .padding(19.0)
         .child(content)
         .into()
+}
+
+// All profiles retain the same native editing host, IME composition and focus
+// handoff when their launcher is hidden and reopened.
+fn search_editor(
+    shell: &Rc<Shell>,
+    placeholder: &str,
+    help: &str,
+    size: f64,
+    focused: Signal<bool>,
+    changed: impl Fn() + 'static,
+    key: impl Fn(&ferroui_base::input::KeyEventArgs) + 'static,
+) -> El<ferroui_controls::TextBox> {
+    let state = shell.clone();
+    let field = NodeRef::<ferroui_controls::TextBox>::new();
+    text_box()
+        .name("ApplicationSearch")
+        .automation_properties_name("Search installed applications")
+        .automation_properties_help_text(help)
+        .placeholder_text(placeholder)
+        .text(shell.query.two_way())
+        .on_got_focus(move |_| focused.set_if_changed(true))
+        .on_lost_focus(move |_| focused.set_if_changed(false))
+        .on_template_applied(|args| {
+            // Search owns one focus border around its icon, text and close command.
+            // Keep the themed presenter, editing commands, caret and IME host.
+            let scope = args.name_scope();
+            if let Some(chrome) = scope.find_as::<ferroui_controls::Border>("BorderElement") {
+                chrome.set_background(Some(ferroui_base::media::Brushes::transparent()));
+                chrome.set_border_thickness(ferroui_base::Thickness::uniform(0.0));
+            }
+            if let Some(ring) = scope.find_as::<ferroui_controls::Border>("MacOSPointerFocusRing") {
+                ring.set_is_visible(false);
+            }
+        })
+        .on_changed(ferroui_controls::TextBox::text_property(), move |_| {
+            changed()
+        })
+        .with(move |input| {
+            input.set_focus_adorner(None);
+            let weak = input.downgrade();
+            state.search_box.replace(Some(weak.clone()));
+            let event = ferroui_base::input::InputElement::key_down_event();
+            let token = input.add_handler_with(
+                event,
+                move |_, e| {
+                    if weak
+                        .upgrade()
+                        .is_some_and(|input| !input.is_composing_text())
+                    {
+                        key(e);
+                    }
+                },
+                ferroui_base::interactivity::RoutingStrategies::TUNNEL,
+                false,
+            );
+            let weak = input.downgrade();
+            on_cleanup(move || {
+                if let Some(input) = weak.upgrade() {
+                    input.remove_handler(event, token);
+                }
+            });
+        })
+        .node_ref(field)
+        .on_loaded(move |_| {
+            if let Some(input) = field.get_untracked() {
+                input.focus();
+            }
+        })
+        .foreground(colors().text)
+        .background("Transparent")
+        .border_thickness(0)
+        .font_size(size)
+        .padding((9.0, 5.0))
+        .vertical_alignment(V::Center)
 }
 
 // Start keeps real user pins within reach above the alphabetic catalog.
@@ -809,9 +836,8 @@ fn result_row(
         }
     }
     let p = colors();
-    let spotlight = look().layout() == Layout::MenuBarDock;
     border()
-        .corner_radius(if spotlight { 7 } else { 6 })
+        .corner_radius(6)
         .border_thickness(1)
         .border_brush(move || {
             if selected.get() == Some(index) {
@@ -820,13 +846,7 @@ fn result_row(
                 "Transparent"
             }
         })
-        .background(move || {
-            if selected.get() == Some(index) && spotlight {
-                p.selected
-            } else {
-                "Transparent"
-            }
-        })
+        .background("Transparent")
         .child(
             grid()
                 .column_definitions("*,Auto")
@@ -892,12 +912,16 @@ fn result_button(shell: &Rc<Shell>, index: usize) -> El<ferroui_controls::Button
 }
 
 pub(super) fn app_icon(shell: &Shell, application: &DesktopApplication) -> Element {
+    app_icon_sized(shell, application, 32.)
+}
+
+fn app_icon_sized(shell: &Shell, application: &DesktopApplication, size: f64) -> Element {
     if let Some(bitmap) = shell.icons.get(application) {
         let source: Rc<dyn ferroui_base::media::IImage> = bitmap;
         return image()
             .source(source)
-            .width(32.0)
-            .height(32.0)
+            .width(size)
+            .height(size)
             .stretch(ferroui_base::media::Stretch::Uniform)
             .is_hit_test_visible(false)
             .into();

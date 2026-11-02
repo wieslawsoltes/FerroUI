@@ -26,6 +26,7 @@ fi
 
 fixture=$(mktemp -d)
 cleanup() {
+    if [[ -n "${spotlight_client:-}" ]]; then kill "$spotlight_client" 2>/dev/null || true; fi
     if [[ -n "${shell_pid:-}" ]]; then kill "$shell_pid" 2>/dev/null || true; fi
     if [[ -n "${wm_pid:-}" ]]; then kill "$wm_pid" 2>/dev/null || true; fi
     rm -rf -- "$fixture"
@@ -53,6 +54,24 @@ Comment=Open the Ferro color study in ImageMagick
 Icon=display-im6.q16
 Exec=display -nostdin -title "Color study - ImageMagick" "$fixture/study.png"
 EOF
+
+# A live GTK window uses this same desktop ID. A description-only match
+# sorts before it alphabetically. Opening the top hit must activate GTK.
+for entry in primary secondary; do
+    if [[ $entry == primary ]]; then
+        desktop=org.ferro.SpotlightStudy name="Ferro Color Studio" comment="Inspect a color study"
+    else
+        desktop=org.ferro.ColorMetadata name="Auxiliary palette" comment="Metadata for Ferro Color Studio"
+    fi
+    cat >"$XDG_DATA_HOME/applications/$desktop.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=$name
+Comment=$comment
+Icon=applications-graphics
+Exec=touch "$fixture/spotlight-launched-$entry"
+EOF
+done
 
 # Disable the WM's own shortcuts so a workspace switch tests the shell's
 # keyboard handler and EWMH request.
@@ -223,7 +242,38 @@ for choice in '2 macos' '3 material' '1 windows'; do
         # installed catalog for the screenshot.
         xdotool key --clearmodifiers ctrl+a BackSpace
         capture "$theme-applications" "$theme"
-        dismiss_launcher "$theme" "$theme-applications" "$theme"
+        if [[ $theme == macos ]]; then
+            GDK_BACKEND=x11 /usr/bin/python3 - <<'PYGTK' &
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+window = Gtk.Window(title="Colour mixing study")
+window.set_wmclass("org.ferro.SpotlightStudy", "org.ferro.SpotlightStudy")
+window.set_default_size(300, 180)
+window.show_all()
+Gtk.main()
+PYGTK
+            spotlight_client=$!
+            live=$(await_window '^Colour mixing study$')
+            xdotool windowactivate --sync "$shell_window"
+            xdotool type --clearmodifiers --delay 25 'Ferro Color Studio'
+            capture macos-spotlight-results macos-applications
+            xdotool key --clearmodifiers Return
+            for ((i=0; i<70; i++)); do
+                [[ $(xdotool getactivewindow 2>/dev/null || :) == "$live" ]] && break
+                sleep .1
+            done
+            [[ $(xdotool getactivewindow) == "$live" && ! -e $fixture/spotlight-launched-primary && ! -e $fixture/spotlight-launched-secondary ]] || {
+                echo 'Spotlight failed to activate the selected real GTK window' >&2; exit 1;
+            }
+            kill "$spotlight_client"; wait "$spotlight_client" || :; unset spotlight_client
+            xdotool windowactivate --sync "$shell_window" key --clearmodifiers ctrl+k ctrl+a BackSpace
+            xdotool key --clearmodifiers ctrl+1
+            capture macos-spotlight-applications macos-applications
+            dismiss_launcher "$theme" macos-spotlight-applications "$theme"
+        else
+            dismiss_launcher "$theme" "$theme-applications" "$theme"
+        fi
         xdotool key --clearmodifiers ctrl+comma
         set_color_mode "$theme" l light
         xdotool key --clearmodifiers Escape
