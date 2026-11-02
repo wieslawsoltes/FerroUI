@@ -70,9 +70,13 @@ Open the window overview with **Super+Tab** in the composed session. Task View, 
 
 Each overview thumbnail binds a FerroUI `CompositionVisualSurface` to the client container. A uniformly scaled surface brush shows the window in its natural proportions, including portions obscured by other windows. The overview creates these brushes only while mounted. A client buffer update feeds both views through the existing drawing surface. The shell uses an icon for minimized clients and for clients owned by a separate compositor.
 
-The capture below shows the Qt color inspector and GTK notes window. The GTK test client updated the purple swatch while the overview held keyboard focus. The compositor fixture checks both preview colors on the presented output.
+The overview hides the client plane at its presentation parent. The underlying windows and their Wayland buffers stay attached. Task View puts the workspace strip below its window cards. Mission Control puts Spaces above the cards. Both strips draw workspace outlines from the positions of the mapped windows. Android Recents lays out tasks horizontally in activation order. Select a preview to return to its window, or open More for the window commands.
 
-![Live Qt and GTK previews in Task View](screenshots/compositor-live-overview.webp)
+These frames show the same Qt color inspector and GTK notes window. The client swatches occupy different screen positions in the overview and on the desktop. The integration test checks both relocated swatches and a new GTK buffer delivered while the overview held keyboard focus.
+
+| Task View | Mission Control | Recents |
+| --- | --- | --- |
+| [![Windows Task View](screenshots/compositor-live-overview.webp)](screenshots/compositor-live-overview.webp) | [![macOS Mission Control](screenshots/compositor-mission-control.webp)](screenshots/compositor-mission-control.webp) | [![Android Recents](screenshots/compositor-recents.webp)](screenshots/compositor-recents.webp) |
 
 ## Scope
 

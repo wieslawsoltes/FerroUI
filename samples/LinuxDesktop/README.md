@@ -6,7 +6,7 @@ The **FerroUI compositor** can also host applications on its own Wayland display
 
 ## Screenshots
 
-**Task View on the FerroUI compositor.** The Qt and GTK cards are live views of their Wayland surface trees. Select a card to activate its window or use the controls below it to arrange the window.
+**Task View on the FerroUI compositor.** The Qt and GTK cards are live views of their Wayland surface trees. Select a preview to activate its window. The card’s More menu exposes window and workspace commands.
 
 ![Ferro Desktop Task View showing two live client previews](screenshots/compositor-live-overview.webp)
 
@@ -38,6 +38,8 @@ The following X11 captures use Skia Graphite on Mesa Lavapipe. The bottom row fo
 | ![Notification above a focused external application](screenshots/toast.webp) | ![Volume slider, wireless radio and battery state](screenshots/quick-settings.webp) |
 
 The Quick Settings capture uses a real PulseAudio null sink and isolated NetworkManager and UPower test services. See the [notification center](screenshots/notifications.webp) for actions on earlier messages.
+
+On the FerroUI compositor, hovering over a grouped Windows taskbar button shows live thumbnails. On delegated X11 and Wayland desktops, the picker lists the real window titles. Spotlight can activate an open document and invoke an installed desktop action. Material Home fills vacant favorites slots with recent apps when suggestions are enabled. [Windows taskbar previews](screenshots/windows-taskbar-group.webp) · [Spotlight results](screenshots/macos-launcher.webp) · [Material Home](screenshots/material-home-favorites.webp)
 
 ## Architecture
 
