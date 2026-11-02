@@ -25,6 +25,8 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+# Embed the complete FXP archive and resolve its FXD documents through XamlX on first load.
+packed-theme = ["dep:ferroui-markup-xaml-loader"]
 binary-resources = ["ferroui-markup-xaml/binary-resources"]
 # Original control-theme documents for opt-in designer definition libraries.
 # Normal applications continue to ship only compiled markup.
@@ -38,12 +40,14 @@ ferroui-controls = { workspace = true }
 # The managed dialogs, whose control themes are part of the theme (as for the Fluent theme).
 ferroui-dialogs = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime", "portable-xaml"] }
 
 [build-dependencies]
 # The build script compiles the documents of the theme against the type models (`build.rs`): the
 # compiler, which reads the types from the scan of the sources of this crate and from the models the
 # crates it is built on export.
 ferroui-build = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["portable-xaml"] }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

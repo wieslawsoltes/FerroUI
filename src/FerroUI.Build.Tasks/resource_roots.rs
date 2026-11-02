@@ -120,7 +120,7 @@ impl Graph<'_> {
 }
 
 /// Blanks unreachable elements in place, preserving the original positions for diagnostics.
-pub(super) fn trim(documents: &mut [(String, String)], roots: &[String]) -> Result<(), String> {
+pub fn trim(documents: &mut [(String, String)], roots: &[String]) -> Result<(), String> {
     let mut parsed = Vec::with_capacity(documents.len());
     for (name, source) in documents.iter() {
         match Document::parse(source) {

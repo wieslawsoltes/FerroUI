@@ -47,6 +47,10 @@ pub mod primitives;
 // is the reference `tests/compiled_xaml_tests.rs` compares the output of the build with, byte
 // for byte; it is not a module of the crate. (`compiled_markup`, which the same file declares,
 // is not used: the theme registers its assets and its loader table itself.)
+#[cfg(feature = "packed-theme")]
+#[doc(hidden)]
+#[path = "packed_xaml.rs"]
+pub mod compiled_xaml;
 ferroui_markup_xaml::include_compiled_xaml!();
 mod register_types;
 mod rust_paths;

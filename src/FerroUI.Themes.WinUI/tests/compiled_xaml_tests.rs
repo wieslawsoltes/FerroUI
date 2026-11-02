@@ -72,15 +72,18 @@ fn compiled_xaml_is_up_to_date() {
 /// refused document fails the build of the crate).
 #[test]
 fn build_script_output_is_the_checked_in_reference() {
-    let built = include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"));
-    let checked_in = std::fs::read_to_string(PATH).expect("compiled_xaml.rs can be read");
-    if !cfg!(feature = "binary-resources") && built != checked_in {
-        let line = built
-            .lines()
-            .zip(checked_in.lines())
-            .position(|(a, b)| a != b)
-            .unwrap_or_else(|| built.lines().count().min(checked_in.lines().count()));
-        panic!("compiled_xaml.rs of the build script differs from the checked-in reference (first difference at line {})", line + 1);
+    #[cfg(not(feature = "packed-theme"))]
+    {
+        let built = include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"));
+        let checked_in = std::fs::read_to_string(PATH).expect("compiled_xaml.rs can be read");
+        if !cfg!(feature = "binary-resources") && built != checked_in {
+            let line = built
+                .lines()
+                .zip(checked_in.lines())
+                .position(|(a, b)| a != b)
+                .unwrap_or_else(|| built.lines().count().min(checked_in.lines().count()));
+            panic!("compiled_xaml.rs of the build script differs from the checked-in reference (first difference at line {})", line + 1);
+        }
     }
     // The `.xamlmeta` of the build has the same documents, next to the type model of the crate
     // and the files of the crates it is built on.
@@ -95,7 +98,7 @@ fn build_script_output_is_the_checked_in_reference() {
 
 /// Model and runtime hosts must choose the same rows, factory order, source locations,
 /// reload identifiers and payload bytes even with different host-side type tables.
-#[cfg(feature = "binary-resources")]
+#[cfg(all(feature = "binary-resources", not(feature = "packed-theme")))]
 #[test]
 fn binary_build_matches_runtime_host() {
     let binary = BinaryResourceFiles::new("compiled_xaml");

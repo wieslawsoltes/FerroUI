@@ -158,6 +158,7 @@
 pub mod deterministic_id_generator;
 mod diagnostics;
 mod resource_roots;
+pub use resource_roots::trim as trim_resource_documents;
 // The model, the scanner and the export are the crate the framework crates scan themselves
 // with (`ferroui-build-scan`, which links nothing of the framework); they are exported
 // here under the names they had in this crate.
@@ -882,7 +883,7 @@ impl Build {
             }
         }
         // A crate that only exports its model includes nothing.
-        if self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty() {
+        if self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty() || !self.loaders.is_empty() {
             let text = crate_file(&assembly_name, &modules, &self.loaders, &assets);
             write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
         }

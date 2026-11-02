@@ -132,28 +132,51 @@ fn main() {
             (asset_path.trim_start_matches('/').to_string(), text)
         })
         .collect();
-    let documents: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
-    let mut group = ferroui_build::XamlGroup::new("compiled_xaml")
-        .documents(&documents)
-        .binary_resources(cfg!(feature = "binary-resources"))
-        .class_document("WinUITheme.xaml")
-        .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider"));
-    // Cargo tracks this input even for builds that use the full dictionary. WinUITheme's
-    // constructor looks up CompactStyles from Rust, independently of the application's XAML.
     println!("cargo::rerun-if-env-changed=FERROUI_WINUI_THEME_ROOTS");
-    if let Some(value) = env::var_os("FERROUI_WINUI_THEME_ROOTS") {
-        let value = value.to_str().expect("FERROUI_WINUI_THEME_ROOTS must be UTF-8");
-        let mut roots: Vec<_> = value.split(',').map(str::trim).filter(|s| !s.is_empty()).collect();
-        roots.push("CompactStyles");
-        group = group.resource_roots(&roots);
-    }
-    ferroui_build::Build::from_env()
-        .type_system(ferroui_build::TypeSystem::Model)
-        .compile_group(group)
-        .run();
+    let roots = env::var_os("FERROUI_WINUI_THEME_ROOTS").map(|value| {
+        let value = value.into_string().expect("FERROUI_WINUI_THEME_ROOTS must be UTF-8");
+        let mut roots: Vec<_> = value.split(',').map(str::trim).filter(|s| !s.is_empty()).map(str::to_owned).collect();
+        // The constructor looks this up from Rust.
+        roots.push("CompactStyles".to_string());
+        roots
+    });
+    compile_theme(documents, roots);
 
     // Written only when it changed, so that the crate is not rebuilt for nothing.
     if fs::read_to_string(&out).ok().as_deref() != Some(text.as_str()) {
         fs::write(&out, text).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
     }
+}
+
+#[cfg(not(feature = "packed-theme"))]
+fn compile_theme(documents: Vec<(String, String)>, roots: Option<Vec<String>>) {
+    let documents: Vec<_> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+    let mut group = ferroui_build::XamlGroup::new("compiled_xaml")
+        .documents(&documents)
+        .binary_resources(cfg!(feature = "binary-resources"))
+        .class_document("WinUITheme.xaml")
+        .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider"));
+    if let Some(roots) = roots {
+        group = group.resource_roots(&roots.iter().map(String::as_str).collect::<Vec<_>>());
+    }
+    ferroui_build::Build::from_env().type_system(ferroui_build::TypeSystem::Model).compile_group(group).run();
+}
+
+#[cfg(feature = "packed-theme")]
+fn compile_theme(mut documents: Vec<(String, String)>, roots: Option<Vec<String>>) {
+    if let Some(roots) = roots {
+        ferroui_build::trim_resource_documents(&mut documents, &roots).expect("trim WinUI theme");
+    }
+    let documents: Vec<_> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+    let pack = ferroui_markup_xaml_loader::binary_document::pack::compile_documents(&documents)
+        .unwrap_or_else(|error| panic!("cannot compile WinUI theme pack: {error}"));
+    let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("winui.fxp");
+    if fs::read(&out).ok().as_deref() != Some(&pack) {
+        fs::write(out, pack).expect("write WinUI theme pack");
+    }
+    ferroui_build::Build::from_env()
+        .export_metadata()
+        .checked_in_metadata("compiled_xaml.xamlmeta")
+        .loader("crate::compiled_xaml::try_load")
+        .run();
 }
