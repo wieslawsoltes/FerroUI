@@ -760,14 +760,18 @@ macro_rules! __ferro_markup_typed_path {
             use $crate::metadata::typed_path::{
                 TypedPathFallback as _, TypedPathNotifying as _, TypedPathShared as _,
             };
-            let get: ::std::option::Option<$crate::metadata::typed_path::TypedPathGetter<$this, $type_>> =
-                $crate::__ferro_markup_typed_path!(@getter $this, $type_; $($get)*);
-            let set: ::std::option::Option<$crate::metadata::typed_path::TypedPathSetter<$this, $type_>> =
-                $crate::__ferro_markup_typed_path!(@setter $this, $type_; $($set)*);
-            // The most specific form that applies: a notifying shared type, a shared
-            // type, anything else (see `metadata::typed_path`).
-            (&&$crate::metadata::typed_path::TypedPathProbe::<$this, $type_>::new())
-                .typed_path_element(builder, accepts_null, $name, get, set)
+            // Method resolution selects a notifying source, a plain shared source, or the fallback.
+            let probe = &&$crate::metadata::typed_path::TypedPathProbe::<$this, $type_>::new();
+            let accessors = probe.typed_path_accessors(|| {
+                let get: ::std::option::Option<$crate::metadata::typed_path::TypedPathGetter<$this, $type_>> =
+                    $crate::__ferro_markup_typed_path!(@getter $this, $type_; $($get)*);
+                let set: ::std::option::Option<$crate::metadata::typed_path::TypedPathSetter<$this, $type_>> =
+                    $crate::__ferro_markup_typed_path!(@setter $this, $type_; $($set)*);
+                (get, set)
+            });
+            let name: &str = $name;
+            let (get, set) = accessors?;
+            probe.typed_path_element(builder, accepts_null, name, get, set)
         })
     };
     ($this:ty, $type_:ty, $name:expr; [$($get:tt)*] $set:tt get: $new:expr $(, $($rest:tt)*)?) => {

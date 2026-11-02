@@ -888,6 +888,32 @@ mod metadata_typed_path {
     }
 
     #[test]
+    fn only_supported_typed_paths_construct_accessors() {
+        use crate::metadata::typed_path::{
+            TypedPathFallback as _, TypedPathNotifying as _, TypedPathProbe, TypedPathShared as _,
+        };
+
+        let builds = Cell::new(0);
+        let build = || builds.set(builds.get() + 1);
+        assert_eq!((&&TypedPathProbe::<HookPlain, i32>::new()).typed_path_accessors(build), None);
+        assert_eq!((&&TypedPathProbe::<Rc<HookVm>, BoxedValue>::new()).typed_path_accessors(build), None);
+        assert_eq!((&&TypedPathProbe::<Rc<HookSilent>, Option<BoxedValue>>::new()).typed_path_accessors(build), None);
+        assert_eq!(builds.get(), 0);
+        assert_eq!((&&TypedPathProbe::<Rc<HookVm>, i32>::new()).typed_path_accessors(build), Some(()));
+        assert_eq!((&&TypedPathProbe::<Rc<HookSilent>, i32>::new()).typed_path_accessors(build), Some(()));
+        assert_eq!(builds.get(), 2);
+
+        // A name expression is evaluated even if the projection declines the property.
+        let names = Cell::new(0);
+        let hook = crate::__ferro_markup_typed_path!(HookPlain, i32, {
+            names.set(names.get() + 1);
+            "Value"
+        }; [] [] get: |m: &HookPlain| m.value);
+        assert!(hook.unwrap()(&CompiledBindingPathBuilder::new(), false).is_none());
+        assert_eq!(names.get(), 1);
+    }
+
+    #[test]
     fn other_declarations_have_no_typed_path_element() {
         let builder = CompiledBindingPathBuilder::new();
         // A value type: no shared handle.

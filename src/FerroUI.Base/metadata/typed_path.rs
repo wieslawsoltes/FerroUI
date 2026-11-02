@@ -54,6 +54,15 @@ impl<This, V> TypedPathProbe<This, V> {
 /// notifications (selected first).
 #[doc(hidden)]
 pub trait TypedPathNotifying<This, V> {
+    /// Construct the accessors only when this property has a typed path.
+    fn typed_path_accessors<A>(&self, build: impl FnOnce() -> A) -> Option<A>
+    where
+        Self: Sized,
+        V: 'static,
+    {
+        (!is_untyped::<V>()).then(build)
+    }
+
     fn typed_path_element(
         &self,
         builder: &CompiledBindingPathBuilder,
@@ -86,6 +95,15 @@ impl<S: INotifyPropertyChanged + PartialEq + 'static, V: PropertyValue> TypedPat
 /// The declarations of any other shared type (selected second).
 #[doc(hidden)]
 pub trait TypedPathShared<This, V> {
+    /// Construct the accessors only when this property has a typed path.
+    fn typed_path_accessors<A>(&self, build: impl FnOnce() -> A) -> Option<A>
+    where
+        Self: Sized,
+        V: 'static,
+    {
+        (!is_untyped::<V>()).then(build)
+    }
+
     fn typed_path_element(
         &self,
         builder: &CompiledBindingPathBuilder,
@@ -125,6 +143,14 @@ fn is_untyped<V: 'static>() -> bool {
 /// Every other declaration: no typed form (selected last).
 #[doc(hidden)]
 pub trait TypedPathFallback<This, V> {
+    /// The property has no typed path, so its accessors are never constructed.
+    fn typed_path_accessors<A>(&self, _build: impl FnOnce() -> A) -> Option<A>
+    where
+        Self: Sized,
+    {
+        None
+    }
+
     fn typed_path_element(
         &self,
         _builder: &CompiledBindingPathBuilder,
