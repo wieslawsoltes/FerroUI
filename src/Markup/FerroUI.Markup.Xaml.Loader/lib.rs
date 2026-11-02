@@ -49,6 +49,8 @@ mod ferro_xaml_il_runtime_compiler;
 pub use ferro_runtime_xaml_loader::{DocumentGroup, FerroRuntimeXamlLoader};
 #[cfg(feature = "runtime")]
 pub use ferro_xaml_il_runtime_compiler::FerroXamlIlRuntimeCompiler;
+#[cfg(all(feature = "runtime", feature = "portable-xaml"))]
+pub use ferro_xaml_il_runtime_compiler::PreparedPackedDocument;
 
 /// The in-memory framework type system used by unit tests of the compiler extensions.
 #[cfg(any(test, feature = "testing"))]

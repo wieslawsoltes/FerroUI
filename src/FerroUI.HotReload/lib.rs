@@ -34,6 +34,8 @@ mod styles;
 pub use panel::PanelReloadTarget;
 pub use resources::ResourceReloadTarget;
 pub use styles::StyleReloadTarget;
+#[cfg(feature = "portable-xaml")]
+pub use styles::PreparedStyleArchive;
 mod content;
 mod control_state;
 pub use control_state::{CapturedControlState, ControlStateAdapter, ControlStateRestoreContext};

@@ -96,7 +96,8 @@ impl FerroRuntimeXamlLoader {
         let input = DocumentInput::read(&mut **document.xaml_stream())
             .map_err(|e| XamlLoadError::with_inner(format!("Unable to read the XAML document: {e}"), e))?;
         let assets = asset_loader();
-        Self::load_root(document, input, &configuration, &|uri| read_included_asset(&*assets, uri))
+        let inputs = Self::collect_inputs(document, input, &|uri| read_included_asset(&*assets, uri))?;
+        Self::build_root(inputs, &configuration)
     }
 
     /// Loads one document and its transitive includes from an FXP archive. References
@@ -110,6 +111,28 @@ impl FerroRuntimeXamlLoader {
         parent: Option<Rc<dyn IServiceProvider>>,
         configuration: RuntimeXamlLoaderConfiguration,
     ) -> Result<BoxedValue, XamlLoadError> {
+        let inputs = Self::packed_inputs(pack, uri, root, parent)?;
+        Self::build_root(inputs, &configuration)
+    }
+
+    /// Resolve a complete include closure once. The returned plan constructs a fresh
+    /// root on each call, retaining the resolved program independently of the source
+    /// archive and the process-wide registrations used to resolve its members.
+    #[cfg(feature = "portable-xaml")]
+    pub fn prepare_packed_document(
+        pack: &crate::binary_document::pack::ThemePack<'_>,
+        uri: Uri,
+        configuration: RuntimeXamlLoaderConfiguration,
+    ) -> Result<crate::PreparedPackedDocument, XamlLoadError> {
+        let inputs = Self::packed_inputs(pack, uri, None, None)?;
+        crate::PreparedPackedDocument::prepare(inputs, &configuration).map_err(load_exception)
+    }
+
+    #[cfg(feature = "portable-xaml")]
+    fn packed_inputs(
+        pack: &crate::binary_document::pack::ThemePack<'_>, uri: Uri,
+        root: Option<BoxedValue>, parent: Option<Rc<dyn IServiceProvider>>,
+    ) -> Result<Vec<(RuntimeXamlLoaderDocument, DocumentInput)>, XamlLoadError> {
         use ferroui_base::utilities::UriExtensions;
         if !uri.is_absolute_uri() || !UriExtensions::is_asset(&uri) || UriExtensions::authority(&uri).is_empty() {
             return Err(XamlLoadError::with_message("A packed document requires an absolute ferres asset URI"));
@@ -124,7 +147,7 @@ impl FerroRuntimeXamlLoader {
         document.service_provider = parent;
         let input = |path: &str| pack.document(path).map(DocumentInput::from_portable).map_err(load_exception);
         let assets = asset_loader();
-        Self::load_root(document, input(path)?, &configuration, &|uri| {
+        Self::collect_inputs(document, input(path)?, &|uri| {
             if UriExtensions::is_asset(uri) && UriExtensions::authority(uri).eq_ignore_ascii_case(&authority) {
                 let name = UriExtensions::get_unescape_absolute_path(uri);
                 let name = name.trim_start_matches('/');
@@ -136,12 +159,11 @@ impl FerroRuntimeXamlLoader {
         })
     }
 
-    fn load_root(
+    fn collect_inputs(
         document: RuntimeXamlLoaderDocument,
         mut input: DocumentInput,
-        configuration: &RuntimeXamlLoaderConfiguration,
         open: &OpenInclude<'_>,
-    ) -> Result<BoxedValue, XamlLoadError> {
+    ) -> Result<Vec<(RuntimeXamlLoaderDocument, DocumentInput)>, XamlLoadError> {
         let uri = document.base_uri.clone().filter(|uri| uri.is_absolute_uri());
         let mut included = Vec::new();
         let mut visited: Vec<String> = uri.iter().map(|uri| uri.absolute_uri().to_string()).collect();
@@ -153,6 +175,13 @@ impl FerroRuntimeXamlLoader {
             included.document = Some(name);
             (included, input)
         }));
+        Ok(documents)
+    }
+
+    fn build_root(
+        documents: Vec<(RuntimeXamlLoaderDocument, DocumentInput)>,
+        configuration: &RuntimeXamlLoaderConfiguration,
+    ) -> Result<BoxedValue, XamlLoadError> {
         // A root load creates a single object. Included documents participate in
         // group transforms and are built by their referring sites, with the parent
         // services and ambient resources of that site.
@@ -427,6 +456,33 @@ mod portable_tests {
             let dictionary = from_markup_value::<Ref<ResourceDictionary>>(&Some(root)).unwrap();
             assert_eq!(from_markup_value::<String>(&dictionary.get(&"Message".into())).as_deref(), Some("from the leaf"));
         }
+    }
+
+    #[test]
+    fn prepared_document_keeps_its_includes_but_builds_fresh_instances() {
+        use crate::binary_document::pack::{compile_documents, ThemePack};
+        let prepare = |text: &str| {
+            let root = r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="Child.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary>"#;
+            let child = format!(r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:String x:Key="Label">{text}</x:String></ResourceDictionary>"#);
+            let bytes = compile_documents(&[("Root.xaml", root), ("Child.xaml", &child)]).unwrap();
+            let pack = ThemePack::open(&bytes).unwrap();
+            FerroRuntimeXamlLoader::prepare_packed_document(
+                &pack, Uri::absolute("ferres://prepared-test/Root.xaml").unwrap(), Default::default(),
+            ).unwrap()
+        };
+        let first = prepare("one");
+        let second = prepare("two");
+        let build = |plan: &crate::PreparedPackedDocument| {
+            from_markup_value::<Ref<ResourceDictionary>>(&Some(plan.build(None).unwrap())).unwrap()
+        };
+        let label = |dict: &Ref<ResourceDictionary>| from_markup_value::<String>(&dict.get(&"Label".into())).unwrap();
+        let a = build(&first);
+        let b = build(&second);
+        assert_eq!(label(&b), "two");
+        a.remove(&"Label".into());
+        let c = build(&first);
+        assert!(!c.ptr_eq(&a));
+        assert_eq!(label(&c), "one");
     }
 
     #[test]

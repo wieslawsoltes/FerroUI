@@ -85,29 +85,32 @@ impl StyleReloadTarget {
         Ok(())
     }
 
-    /// Replace this contribution from a complete FXP revision. All member graphs
-    /// must validate, including any outside this style's include closure. Relative
-    /// includes resolve in the candidate archive during preparation.
+    /// Resolve a complete FXP revision without changing the installed contribution.
+    /// The prepared revision can be reapplied after an intervening edit. Each
+    /// application constructs a fresh style in the contribution's current slot.
     #[cfg(feature = "portable-xaml")]
-    pub fn replace_packed(&self, bytes: &[u8]) -> Result<(), ReloadError> {
+    pub fn prepare_packed(&self, bytes: &[u8]) -> Result<PreparedStyleArchive<'_>, ReloadError> {
         use ferroui_markup_xaml_loader::{binary_document::pack, FerroRuntimeXamlLoader};
-        self.slot.replace_if_current(|| false, || {
+        crate::catch_reload(|| {
             let indexed;
             let bytes = if pack::is_solid(bytes) {
                 indexed = pack::expand_solid(bytes).map_err(|error| ReloadError::Failed(error.to_string()))?;
                 indexed.as_slice()
             } else { bytes };
-            let archive = pack::ThemePack::open(bytes)
-                .map_err(|error| ReloadError::Failed(error.to_string()))?;
+            let archive = pack::ThemePack::open(bytes).map_err(|error| ReloadError::Failed(error.to_string()))?;
             archive.validate().map_err(|error| ReloadError::Failed(error.to_string()))?;
             let uri = ferroui_base::utilities::Uri::absolute(&self.uri)
                 .map_err(|error| ReloadError::Failed(error.to_string()))?;
-            let candidate = FerroRuntimeXamlLoader::load_packed_document(
-                &archive, uri, None, None, self.configuration.clone(),
-            ).map_err(|error| ReloadError::Failed(error.to_string()))?;
-            Rc::<dyn IStyle>::from_xaml_object(&candidate)
-                .ok_or_else(|| ReloadError::Failed("Expected style".into()))
-        })?;
+            let plan = FerroRuntimeXamlLoader::prepare_packed_document(&archive, uri, self.configuration.clone())
+                .map_err(|error| ReloadError::Failed(error.to_string()))?;
+            Ok(PreparedStyleArchive { slot: &self.slot, plan })
+        })
+    }
+
+    /// Validate every archive member and replace the contribution atomically.
+    #[cfg(feature = "portable-xaml")]
+    pub fn replace_packed(&self, bytes: &[u8]) -> Result<(), ReloadError> {
+        self.slot.replace_if_current(|| false, || self.prepare_packed(bytes)?.build())?;
         Ok(())
     }
 
@@ -249,6 +252,28 @@ impl StyleReloadTarget {
             .ok_or_else(|| ReloadError::Failed("Expected style".into()))
     }
 }
+/// A linked portable style revision bound to the slot and configuration that
+/// prepared it. Retaining this handle does not retain previously installed styles.
+#[cfg(feature = "portable-xaml")]
+pub struct PreparedStyleArchive<'a> {
+    slot: &'a StyleSlot,
+    plan: ferroui_markup_xaml_loader::PreparedPackedDocument,
+}
+
+#[cfg(feature = "portable-xaml")]
+impl PreparedStyleArchive<'_> {
+    fn build(&self) -> Result<Rc<dyn IStyle>, ReloadError> {
+        let root = self.plan.build(None).map_err(|error| ReloadError::Failed(error.to_string()))?;
+        Rc::<dyn IStyle>::from_xaml_object(&root).ok_or_else(|| ReloadError::Failed("Expected style".into()))
+    }
+
+    /// Build and install a fresh instance. Reuse the linked program while
+    /// preserving slot ownership checks, rollback and sibling ordering.
+    pub fn apply(&self) -> Result<(), ReloadError> {
+        self.slot.replace_if_current(|| false, || self.build())?;
+        Ok(())
+    }
+}
 impl StyleSlot {
     #[cfg(any(feature = "binary-resources", feature = "portable-xaml"))]
     pub(crate) fn replace_if_current(
@@ -367,9 +392,15 @@ mod portable_tests {
         let accepted = container.get(0);
         assert!(!style_ptr_eq(&initial, &accepted));
         let mut solid = binary_document::pack::compile_solid_documents(&docs).unwrap();
-        target.replace_packed(&solid).unwrap();
+        let prepared = target.prepare_packed(&solid).unwrap();
+        // Preparation holds no live contribution. Applying twice creates independent
+        // style instances after the archive and its decoded index have been dropped.
+        prepared.apply().unwrap();
+        let first = container.get(0);
+        prepared.apply().unwrap();
         let last_good = container.get(0);
         assert!(!style_ptr_eq(&accepted, &last_good));
+        assert!(!style_ptr_eq(&first, &last_good));
         solid.pop();
         assert!(target.replace_packed(&solid).is_err());
         let mut corrupt = revision;
