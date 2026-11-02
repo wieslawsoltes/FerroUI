@@ -96,8 +96,9 @@ fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
 
 /// Not from upstream (C5 of #423, decision O2 of docs/idiomatic-rust-signatures.md): the
 /// compiled form of the test of `xaml::ferro_intrinsics_tests`. A time span literal for a
-/// property that declares a `Duration` (`AcrylicBrush.TintTransitionDuration`) is written as
-/// the duration, a constant; the run-time loader sets the same value.
+/// property that declares a `Duration` (`AcrylicBrush.TintTransitionDuration`) is set as the
+/// duration of the same value (`rt::duration`, which the compiler writes only for a literal
+/// that is not negative); the run-time loader sets the same value.
 #[test]
 fn a_time_span_literal_sets_a_duration_property() {
     let _app = xaml_test_base();
@@ -105,7 +106,8 @@ fn a_time_span_literal_sets_a_duration_property() {
     let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
     assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
     assert!(
-        generated.source.contains("tint_transition_duration_property(), ::core::time::Duration::new(1_u64, 500000000_u32));"),
+        generated.source.contains("SignedDuration::__markup_FromTicks_0(15000000_i64);")
+            && generated.source.contains("tint_transition_duration_property(), rt::duration(value_0));"),
         "{}",
         generated.source
     );

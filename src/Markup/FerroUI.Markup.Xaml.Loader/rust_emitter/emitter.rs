@@ -631,9 +631,6 @@ fn time_span_literal(node: &Rc<dyn IXamlAstNode>) -> Option<i64> {
     }
 }
 
-/// The ticks of a time span in one second.
-const TICKS_PER_SECOND: u64 = 10_000_000;
-
 struct Emitter<'a> {
     /// What the type system the document was transformed with states for the emitter.
     types: &'a dyn EmitTypes,
@@ -681,7 +678,7 @@ struct Emitter<'a> {
     /// dictionary can contribute thousands of values with the same lexical declaration.
     namespace_tables: Vec<ScopedNamespaceTable>,
     /// The locals that hold a time span literal ([`time_span_literal`]), with its ticks:
-    /// for a member that declares a `Duration` the literal is written as the duration
+    /// a member that declares a `Duration` takes the literal only when it is not negative
     /// ([`Emitter::coerce_time_span_literal`]).
     time_span_literals: HashMap<String, i64>,
 }
@@ -1497,25 +1494,27 @@ impl<'a> Emitter<'a> {
 
     /// Whether `target` is `Duration` (`false`) or its nullable form (`true`).
     fn duration_target(&self, target: TypeKey<'a>) -> Option<bool> {
-        match target {
-            _ if target == self.types.known(Known::Duration) => Some(false),
-            _ if target == self.types.option_of_known(Known::Duration) => Some(true),
-            _ => None,
+        if target == self.types.known(Known::Duration) {
+            Some(false)
+        } else if target == self.types.option_of_known(Known::Duration) {
+            Some(true)
+        } else {
+            None
         }
     }
 
     /// A time span literal ([`time_span_literal`]) as the `Duration` (or the nullable form)
-    /// a member declares: the duration, written as a constant. A negative literal is no
+    /// a member declares: `rt::duration` of the local, a conversion that cannot fail, since
+    /// the compiler checked that the literal is not negative. A negative literal is no
     /// duration (decision O2 of docs/idiomatic-rust-signatures.md): `None`, and
     /// [`Self::refused_time_span_literal`] says why.
     fn coerce_time_span_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         let nullable = self.duration_target(target)?;
-        let ticks = u64::try_from(*self.time_span_literals.get(&value.expr)?).ok()?;
-        let duration = format!(
-            "::core::time::Duration::new({}_u64, {}_u32)",
-            ticks / TICKS_PER_SECOND,
-            ticks % TICKS_PER_SECOND * 100
-        );
+        let ticks = *self.time_span_literals.get(&value.expr)?;
+        if ticks < 0 {
+            return None;
+        }
+        let duration = format!("rt::duration({})", value.expr);
         Some(match nullable {
             true => format!("::core::option::Option::Some({duration})"),
             false => duration,
@@ -3528,13 +3527,11 @@ impl<'a> Emitter<'a> {
     fn method_call_value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed<'a>> {
         let (call, returned) = self.method_call(node, None)?;
         let returned = returned.ok_or_else(|| unsupported(node, "a method call that yields nothing"))?;
-        // A time span literal is remembered with its ticks: for a member that declares a
-        // `Duration` it is written as the duration, and its local is then not read, which
-        // the name of the local states.
-        let literal = time_span_literal(node);
-        let local = self.local_named(if literal.is_some() { "_time_span" } else { "value" });
+        let local = self.local_named("value");
         self.line(format!("let {local} = {call};"));
-        if let Some(ticks) = literal {
+        // A time span literal is remembered with its ticks: a member that declares a
+        // `Duration` takes it only when it is not negative.
+        if let Some(ticks) = time_span_literal(node) {
             self.time_span_literals.insert(local.clone(), ticks);
         }
         Ok(Typed { expr: local, kind: self.kind_of(returned) })

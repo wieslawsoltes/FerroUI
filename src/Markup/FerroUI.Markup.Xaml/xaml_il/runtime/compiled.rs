@@ -1332,6 +1332,14 @@ pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, pos
     }
 }
 
+/// A time span literal of markup as the `Duration` a member declares. The emitter writes
+/// it only for a literal it checked is not negative (a negative one is an error of the
+/// document, decision O2 of docs/idiomatic-rust-signatures.md), so the conversion does not
+/// fail.
+pub fn duration(literal: ferroui_base::animation::SignedDuration) -> std::time::Duration {
+    std::time::Duration::try_from(literal).unwrap_or_default()
+}
+
 /// `value` cast to the type with the handle `target`, then held untyped as the run-time
 /// loader holds the value of a node ([`to_untyped`]): [`cast`] for a target that generated
 /// code names by its handle, not by a Rust type (the element type of a list of the runtime
