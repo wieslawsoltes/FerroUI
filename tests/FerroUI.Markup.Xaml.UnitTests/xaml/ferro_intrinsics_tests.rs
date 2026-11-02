@@ -3,10 +3,12 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use std::time::Duration;
+
 use ferroui_base::animation::SignedDuration;
 use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{Color, IBrush, TextDecorations, TextTrimming};
+use ferroui_base::media::{AcrylicBrush, Color, IBrush, TextDecorations, TextTrimming};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{CornerRadius, Matrix, Point, Ref, RelativePoint, RelativeUnit, Size, Thickness, Vector};
 use ferroui_controls::{GridLength, GridUnitType, WindowTransparencyLevel};
@@ -14,7 +16,8 @@ use ferroui_markup_xaml::{RuntimeXamlDiagnostic, RuntimeXamlDiagnosticSeverity, 
 use xamlx::exceptions::XamlError;
 
 use crate::support::app::xaml_test_base;
-use crate::support::loader::{describe, document_without_uri, parse, try_load_document, uri, xaml_error};
+use crate::support::helpers::object_of;
+use crate::support::loader::{describe, document_without_uri, parse, try_load_document, try_parse, uri, xaml_error};
 use crate::support::xaml::ferro_intrinsics_tests::TestIntrinsicsControl;
 
 #[test]
@@ -146,4 +149,51 @@ fn should_parse_formatted_color_tag() {
     </Color>
 </ResourceDictionary>"#,
     );
+}
+
+// --- the two Rust forms of a time span ----------------------------------------------------
+//
+// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md): a property that declares
+// a `Duration` is a `System.TimeSpan` property, as one that declares a `SignedDuration`.
+// `AcrylicBrush.TintTransitionDuration` is the one of the framework. A negative time span is
+// rejected, never clamped (decision O2). The compiled forms of these tests are in
+// `emitter::differential_tests`.
+
+#[test]
+fn a_time_span_literal_sets_a_duration_property() {
+    let _base = xaml_test_base();
+    let brush = parse::<Ref<AcrylicBrush>>("<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='0:0:1.5'/>");
+    assert_eq!(brush.tint_transition_duration(), Duration::from_millis(1500));
+
+    // The shorthand of seconds, and zero.
+    let brush = parse::<Ref<AcrylicBrush>>("<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='0.25'/>");
+    assert_eq!(brush.tint_transition_duration(), Duration::from_millis(250));
+    let brush = parse::<Ref<AcrylicBrush>>("<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='0:0:0'/>");
+    assert_eq!(brush.tint_transition_duration(), Duration::ZERO);
+}
+
+#[test]
+fn a_negative_time_span_literal_for_a_duration_property_is_an_error() {
+    let _base = xaml_test_base();
+    let error = match try_parse::<Ref<AcrylicBrush>>("<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='-0:0:1'/>") {
+        Ok(_) => panic!("a negative time span is not a duration"),
+        Err(error) => error,
+    };
+    let described = describe(&error);
+    assert!(described.contains("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration."), "{described}");
+}
+
+#[test]
+fn a_time_span_resource_sets_a_duration_property() {
+    let _base = xaml_test_base();
+    let resources = parse::<Ref<ResourceDictionary>>(
+        r#"<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+    <sys:TimeSpan x:Key="Transition">0:0:2</sys:TimeSpan>
+    <AcrylicBrush x:Key="Brush" TintTransitionDuration="{StaticResource Transition}"/>
+</ResourceDictionary>"#,
+    );
+    let brush = object_of::<AcrylicBrush>(&resources.get(&"Brush".into()));
+    assert_eq!(brush.tint_transition_duration(), Duration::from_secs(2));
 }

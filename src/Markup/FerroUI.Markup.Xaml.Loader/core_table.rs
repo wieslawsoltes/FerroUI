@@ -527,6 +527,12 @@ pub fn core_handles() -> Vec<(String, CoreRef)> {
     add("::ferroui_base::animation::TimeSpan", t("System.TimeSpan"));
     add("Option<::ferroui_base::animation::SignedDuration>", nullable("System.TimeSpan"));
     add("Option<::ferroui_base::animation::TimeSpan>", nullable("System.TimeSpan"));
+    // The other Rust form of a time span (C5 of #423), by both of its paths: the compiler
+    // reads the paths as text.
+    for duration in ["::std::time::Duration", "::core::time::Duration"] {
+        add(duration, t("System.TimeSpan"));
+        add(&format!("Option<{duration}>"), nullable("System.TimeSpan"));
+    }
     reference(&mut add, "String", "System.String");
     reference(&mut add, "&'static ::ferroui_base::TypeInfo", "System.Type");
     reference(&mut add, "::ferroui_base::data::core::ValueType", "System.Type");

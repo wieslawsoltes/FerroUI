@@ -610,6 +610,11 @@ fn declarations_are_merged_and_found_across_crates() {
     assert!(system.type_of_model((0, 9)).equals(&*time_span));
     assert!(system.resolve("::ferroui_base::animation::TimeSpan").equals(&*time_span));
     assert_eq!(system.resolve("Option<::ferroui_base::animation::TimeSpan>").full_name(), "System.Nullable`1[System.TimeSpan]");
+    // `Duration`, the other Rust form of a time span (C5 of #423), by both of its paths.
+    for duration in ["::std::time::Duration", "::core::time::Duration"] {
+        assert!(system.resolve(duration).equals(&*time_span), "{duration}");
+        assert_eq!(system.resolve(&format!("Option<{duration}>")).full_name(), "System.Nullable`1[System.TimeSpan]");
+    }
 
     // The handles of the table and of the classes are found by the path a crate exports
     // them by and by the path of the declaring module.
