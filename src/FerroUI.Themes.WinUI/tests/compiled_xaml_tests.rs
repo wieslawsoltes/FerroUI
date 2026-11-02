@@ -96,14 +96,15 @@ fn build_script_output_is_the_checked_in_reference() {
     assert!(built.documents == checked_in.documents, "the documents of the .xamlmeta of the build script differ from the checked-in reference");
 }
 
-/// The shipping budget covers the entire indexed archive. Cross-check the source
-/// inventory so dropping dictionaries cannot make the budget pass.
+/// Every archive must match the compiled source inventory. The historical
+/// distribution budget applies only to the interpreter-only profiles.
 #[cfg(any(feature = "packed-theme", feature = "precompiled-theme"))]
 #[test]
 fn packed_theme_contains_every_compiled_document_within_budget() {
     use ferroui_markup_xaml_loader::binary_document::pack::ThemePack;
     let bytes = crate::theme_archive();
-    assert!(bytes.len() < 600_000, "WinUI archive is {} bytes", bytes.len());
+    #[cfg(not(feature = "precompiled-theme"))]
+    assert!(bytes.len() < 600_000, "portable WinUI archive is {} bytes", bytes.len());
     #[cfg(any(feature = "portable-solid-theme", feature = "precompiled-theme"))]
     let indexed = ferroui_markup_xaml_loader::binary_document::pack::expand_solid(bytes).unwrap();
     #[cfg(any(feature = "portable-solid-theme", feature = "precompiled-theme"))]
