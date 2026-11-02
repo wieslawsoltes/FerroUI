@@ -71,47 +71,51 @@ fn result(
     let app = &shell.catalog.applications()[index];
     let state = shell.clone();
     let open = shell.clone();
-    let p = colors();
-    action(&app.name, move || {
-        select();
-        focus_search(&state);
-    })
-    .on_double_tapped(move |event| {
-        open_app(&open, index);
-        event.set_handled(true);
-    })
-    .automation_properties_help_text("Select to see details. Double-click or press Return to open.")
-    .horizontal_alignment(H::Stretch)
-    .horizontal_content_alignment(H::Stretch)
-    .height(42.0)
-    .padding((8.0, 3.0))
-    .corner_radius(7.0)
-    .background(move || {
-        if selected.get() == Some(index) {
-            p.selected
+    let is_selected = memo(move |_| selected.get() == Some(index));
+    let title = app.name.clone();
+    let label = dynamic(move || {
+        let text = shell_text(&title, 14., Ink::Primary);
+        if is_selected.get() {
+            text.foreground(resource("MacOSSelectionForegroundBrush"))
         } else {
-            "Transparent"
+            text
         }
-    })
-    .border_thickness(0)
-    .child(
-        grid()
-            .column_definitions("34,*")
-            .child(app_icon(shell, app))
+    });
+    grid()
+        .child(
+            border()
+                .corner_radius(7.)
+                .is_hit_test_visible(false)
+                .background(resource("MacOSSelectionBrush"))
+                .is_visible(move || is_selected.get()),
+        )
+        .child(
+            action(&app.name, move || {
+                select();
+                focus_search(&state);
+            })
+            .on_double_tapped(move |event| {
+                open_app(&open, index);
+                event.set_handled(true);
+            })
+            .automation_properties_help_text(
+                "Select to see details. Double-click or press Return to open.",
+            )
+            .horizontal_alignment(H::Stretch)
+            .horizontal_content_alignment(H::Stretch)
+            .height(42.)
+            .padding((8., 3.))
+            .corner_radius(7.)
+            .background("Transparent")
+            .border_thickness(0)
             .child(
-                shell_text(&app.name, 14.0, Ink::Primary)
-                    .foreground(move || {
-                        if selected.get() == Some(index) {
-                            p.on_selected
-                        } else {
-                            p.text
-                        }
-                    })
-                    .grid_column(1)
-                    .margin((8.0, 0.0)),
+                grid()
+                    .column_definitions("34,*")
+                    .child(app_icon(shell, app))
+                    .child(border().grid_column(1).margin((8., 0.)).child(label)),
             ),
-    )
-    .into()
+        )
+        .into()
 }
 
 fn details(
