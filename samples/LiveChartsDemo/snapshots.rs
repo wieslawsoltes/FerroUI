@@ -1064,7 +1064,7 @@ fn colour_nodes(series: &SankeySeries, colours: &[Color]) {
     }
 }
 
-fn labels(series: &SankeySeries, colour: Color, size: f64) {
+fn sankey_labels(series: &SankeySeries, colour: Color, size: f64) {
     series.set_data_labels(true);
     series.set_data_labels_color(Some(colour));
     series.set_data_labels_size(size);
@@ -1092,7 +1092,7 @@ fn sankey_with_labels() -> Ref<Chart> {
         Some(SANKEY_LINK),
     );
     s.set_node_width(16.);
-    labels(&s, BLACK, 16.);
+    sankey_labels(&s, BLACK, 16.);
     sankey_chart(s)
 }
 
@@ -1144,7 +1144,7 @@ fn sankey_funnel() -> Ref<Chart> {
     s.set_node_width(18.);
     s.set_node_padding(14.);
     s.set_node_corner_radius(3.);
-    labels(&s, BLACK, 13.);
+    sankey_labels(&s, BLACK, 13.);
     sankey_chart(s)
 }
 
@@ -1201,7 +1201,7 @@ fn sankey_bipartite_arc_labels() -> Ref<Chart> {
     );
     s.set_layout(SankeyLayoutKind::BipartiteArc);
     s.set_node_width(14.);
-    labels(&s, BLACK, 14.);
+    sankey_labels(&s, BLACK, 14.);
     sankey_chart(s)
 }
 
