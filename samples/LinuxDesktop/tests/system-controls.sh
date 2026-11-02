@@ -82,6 +82,37 @@ press_until() {
     return 1
 }
 capture() { import -window "$window" "$output/$1.png"; }
+# A system-bus write can finish before the corresponding tile is presented.
+# Capture both radio edges. Require a settled frame different from the
+# opposite radio state, so CI cannot publish the preceding state by chance.
+settled_panel() {
+    local dest=$1 opposite=${2:-} delta steady i
+    rm -f "$fixture/previous.png"
+    for ((i=0;i<50;i++)); do
+        import -window "$window" "$fixture/candidate.png"
+        if [[ -f $fixture/previous.png ]]; then
+            steady=$(compare -metric AE "$fixture/previous.png" "$fixture/candidate.png" null: 2>&1 || :)
+            delta=1000000
+            if [[ -n $opposite ]]; then
+                delta=$(compare -metric AE "$opposite" "$fixture/candidate.png" null: 2>&1 || :)
+            fi
+            if awk -v steady="$steady" -v delta="$delta" 'BEGIN {exit !(steady+0 < 80 && delta+0 > 350)}'; then
+                cp "$fixture/candidate.png" "$dest"; return
+            fi
+        fi
+        mv "$fixture/candidate.png" "$fixture/previous.png"
+        sleep .12
+    done
+    cp "$fixture/previous.png" "$output/failed-radio-frame.png"
+    echo "Missing settled radio transition for $dest" >&2; return 1
+}
+bluetooth_cycle() {
+    settled_panel "$fixture/before-radio.png"
+    press_until b bluetooth_is false
+    settled_panel "$fixture/radio-off.png" "$fixture/before-radio.png"
+    press_until b bluetooth_is true
+    settled_panel "$output/$1.png" "$fixture/radio-off.png"
+}
 difference() { compare -metric AE "$output/$1.png" "$output/$2.png" null: 2>&1 || :; }
 changed_from() {
     awk -v pixels="$(difference "$1" "$2")" -v minimum="${3:-10000}" 'BEGIN { exit !(pixels > minimum) }'
@@ -103,8 +134,7 @@ press_until minus volume_is 45
 press_until w wifi_is false
 press_until w wifi_is true
 wait_until grep -q 'Set WirelessEnabled=1' "$output/system-bus.log"
-press_until b bluetooth_is false
-press_until b bluetooth_is true
+bluetooth_cycle quick-settings
 # Discover the native Slider in normal tab order. Optional monitor controls
 # and each profile's spatial layout may change the number of preceding tabs.
 # Only the volume Slider can advance the audio sink by one keyboard step.
@@ -119,7 +149,6 @@ wait_until volume_is 47
 sleep .2; key Left
 wait_until volume_is 46
 sleep .3
-capture quick-settings
 changed_from desktop quick-settings
 key Escape ctrl+shift+c
 sleep .6
@@ -149,9 +178,7 @@ for entry in '2 macos macos-control-center' '3 material material-quick-settings'
     key Escape ctrl+shift+q
     press_until w wifi_is false
     press_until w wifi_is true
-    press_until b bluetooth_is false
-    press_until b bluetooth_is true
-    capture "$frame"
+    bluetooth_cycle "$frame"
 done
 key Escape alt+F4
 wait "${children[-1]}"

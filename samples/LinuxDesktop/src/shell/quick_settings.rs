@@ -372,9 +372,9 @@ fn header(shell: &Rc<Shell>, text: Element) -> El<Grid> {
     )
 }
 
-fn battery(shell: &Rc<Shell>) -> Element {
+fn device_status(shell: &Rc<Shell>) -> Element {
     let values = shell.settings.values;
-    row(6.)
+    let battery = row(6.)
         .is_visible(move || values.with(|s| s.as_ref().is_some_and(|s| s.battery.is_some())))
         .child(glyph(Icon::Battery, 16., colors().text))
         .child(shell_text("", 12., Ink::Secondary).text(move || {
@@ -383,8 +383,23 @@ fn battery(shell: &Rc<Shell>) -> Element {
                     .and_then(|v| v.battery.clone())
                     .unwrap_or_default()
             })
-        }))
-        .into()
+        }));
+    if look().winui().is_some() {
+        let busy = shell.settings.busy;
+        grid()
+            .child(battery)
+            .child(show(
+                move || busy.get() && values.with(Option::is_none),
+                || {
+                    row(6.)
+                        .child(progress_ring().is_active(true).width(16.).height(16.))
+                        .child(shell_text("Reading devices…", 12., Ink::Secondary))
+                },
+            ))
+            .into()
+    } else {
+        battery.into()
+    }
 }
 
 pub(super) fn view(shell: &Rc<Shell>) -> Element {
@@ -476,7 +491,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     grid()
                         .grid_row(2)
                         .column_definitions("*,Auto")
-                        .child(battery(shell))
+                        .child(device_status(shell))
                         .child(tools.grid_column(1)),
                 ),
         )
