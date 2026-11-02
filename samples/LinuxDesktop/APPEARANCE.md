@@ -22,7 +22,7 @@ Pinned and running windows share an app button when the client identifies its in
 
 The Android profile reserves 48 logical pixels for the status strip and 72 for its tablet taskbar. The time opens the calendar, the bell opens notifications and the controls button opens Quick Settings. Swipe up on empty home wallpaper to open all apps, or swipe down to open notifications. Swipe up from the bottom handle and release to show Home, or pause before releasing to open recent windows. Mouse drags work as well as touch and pen. The app grid and recents buttons provide keyboard-accessible alternatives.
 
-On macOS, the **Window** menu lists the session’s windows and offers commands for the focused client. Right-click a Dock app to select one of its windows or change whether the app stays in the Dock. [Window menu above a maximized GTK client](screenshots/macos-window-menu.webp) · [Dock menu for a running app](screenshots/macos-dock-menu.webp)
+On macOS, the **Window** menu lists the session’s windows and offers commands for the focused client. Right-click a Dock app to select one of its windows or change whether the app stays in the Dock. [Window menu with two native clients](screenshots/macos-window-menu.webp) · [Dock menu for a running app](screenshots/macos-dock-menu.webp)
 
 ## Materials in the desktop scene
 
