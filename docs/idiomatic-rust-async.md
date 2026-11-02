@@ -197,12 +197,12 @@ question; each is decided in the step named.
 | # | Finding | Step |
 |---|---|---|
 | F1 | **Lost wake of a dispatcher task polled in a nested loop.** `poll_task` takes the task out of the table while it polls it and clears its `scheduled` flag. If the future pumps the queue during that poll (a synchronous `invoke_local_with_priority` at a priority other than `Send`, `DispatcherOperation::wait`, `push_frame`), and something it awaits completes there, the queued poll runs inside the pump, finds no task and does nothing, and `scheduled` stays set: every later wake is swallowed and the task never resumes. The executor of `ferroui-system` handles the same case (a wake during a poll repolls after it). | A2 fixes it, with a test |
-| F2 | **A panic in a future of `ferroui-system` strands it.** `poll_task` does not catch: the panic leaves through the call that woke the future (often `set_result`), the task stays `Running` in the table with its `polling` flag set, and the awaiters of the same task that were not woken yet never are (the panic leaves `finish` with the rest of its wakers). The dispatcher's executor catches and faults the task. | A1 (the panic faults the task, as on the dispatcher) |
+| F2 | **A panic in a future of `ferroui-system` strands it.** `poll_task` does not catch: the panic leaves through the call that woke the future (often `set_result`), the task stays `Running` in the table with its `polling` flag set, and the awaiters of the same task that were not woken yet never are (the panic leaves `finish` with the rest of its wakers). The dispatcher's executor catches and faults the task. | A1 (the panic faults the task, as on the dispatcher): done |
 | F3 | **Continuations inline or queued.** Section 1.4: the two executors of a dispatcher thread order continuations differently, and neither is the .NET rule. | A2 keeps the dispatcher's rule; A5 decides the rule for the tasks of the reactive libraries on a dispatcher thread |
 | F4 | **Order of cancellation callbacks.** The port runs them in the order of registration; .NET runs them in reverse order. Not recorded in DEVIATIONS. | A4 keeps the order of registration and records it |
 | F5 | **The platform signal runs jobs while processing is disabled** (as upstream: only `run_jobs`, `push_frame` and the pumping waits check the counter). A native modal loop that delivers the signal while a layout pass has disabled processing would run jobs inside it. Pinned by `a_platform_signal_runs_jobs_while_processing_is_disabled`. | Open: an owner decision; not changed without a DEVIATIONS row |
 | F6 | **A dropped `TaskCompletionSource` leaves its awaiters pending for ever** (as in .NET); the D-Bus call queue already resolves such a task as canceled (DEVIATIONS, row of `DBusCallQueue`). Pinned by `a_future_awaiting_a_dropped_completion_source_stays_pending`. | A3: the one-shot channel cancels when its sender is dropped |
-| F7 | **`DispatcherTask` has one observer.** Its result is taken once; a second `await` or `result()` of a clone panics. `Task<T>` of `ferroui-system` is multi-observer (`T: Clone`). | A1: `JoinHandle` (one owner) and `Shared` (several) |
+| F7 | **`DispatcherTask` has one observer.** Its result is taken once; a second `await` or `result()` of a clone panics. `Task<T>` of `ferroui-system` is multi-observer (`T: Clone`). | A1: `JoinHandle` (one owner) and `Shared` (several): done |
 
 ## 2. The ordering the dispatcher guarantees (A0)
 
@@ -434,8 +434,8 @@ where they are large.
 
 | Step | Content | Public API | Risk |
 |---|---|---|---|
-| A0 | This plan; the ordering tests of section 2 | unchanged | none |
-| A1 | The executor core in `ferroui-system` (`task::{spawn_local_on, JoinHandle, JoinError, Shared, Schedule, block_on}`), with its tests; `threading::tasks` (`Task`, `spawn_local`, `block_on`, `run`) on it with today's inline rule; a panic faults the task (F2) | additions | medium: every task of the reactive libraries; their ported tests and G9, G19, G20 guard it |
+| A0 (done, #498) | This plan; the ordering tests of section 2 | unchanged | none |
+| A1 (done) | The executor core in `ferroui-system` (`task::{spawn_local_on, JoinHandle, JoinError, Shared, Schedule, block_on}`), with its tests; `threading::tasks` (`Task`, `spawn_local`, `block_on`, `run`) on it with today's inline rule; a panic faults the task (F2) | additions | medium: every task of the reactive libraries; their ported tests and G9, G19, G20 guard it |
 | A2 | The dispatcher on the core: its schedule per priority, `Dispatcher::spawn_local`, `spawn_local_with_priority` and `spawn`; `DispatcherTask`, `DispatcherTaskScheduler` and `invoke_async_task*` as wrappers over them; `resume`, `yield_now`, `await_with_priority` on the core; the lost wake (F1) fixed, with a test | additions | high: every asynchronous step of the user interface; G1 to G17 unchanged |
 | A3 | `task::oneshot`; the ten local completions move to it, by crate (X11, remote protocol, dialogs, headless, iOS, Android, FreeDesktop, WinUI) | additions; `ferroui-x11`'s public `TaskCompletionSource` deprecated | low per crate; a dropped sender now cancels (F6, a DEVIATIONS row where the copy did not) |
 | A4 | One cancellation type: `CancellationToken` reshaped (section 3.7), `CancellationGuard`, `cancelled()`, `child_token()`, `drop_guard()`; `task::Canceled` for `OperationCanceledError` and `TaskCanceledError`; the local cancellation types replaced; F4 recorded | 0.5: the old names deprecated | medium: 602 uses; registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
@@ -445,7 +445,16 @@ where they are large.
 | A8 | `FerroUI.View`'s async data on the dispatcher, abandoned with `abort` | behaviour: the order of the signal write (a test) | low |
 | A9 | The inventory (`CancellationToken` becomes the target; `Task`, `TaskCompletionSource`, `SynchronizationContext`, `CancellationTokenSource` counted until removed), `upstream-names.toml`, the migration notes, docs/porting/reactive.md section 5.8 and PORTING-GUIDE | | |
 
-Status: A0 (this page and the tests) is open.
+Status: A0 (this page and the tests) is done (#498). A1 is done: the executor core is
+`ferroui_system::task` (`executor.rs`: the task table, the poll loop, the queue of a thread and the
+callbacks that other threads send to it; `join.rs`: `JoinHandle`, `JoinError`; `shared.rs`:
+`Shared`; `schedule.rs`: `Schedule`, `FirstPoll`), with its tests in
+`src/FerroUI.System/tests/executor_tests.rs`. `threading::tasks` runs on it: `spawn_local` spawns
+a task in the queue of the thread whose future completes the `Task` (a panic faults it with a
+`TaskWorkError`, F2), `block_on` is `task::block_on`, `run_pending_wakes` is `task::run_pending`,
+and `set_thread_poster` sets the thread's schedule; `Task`, `TaskCompletionSource` and their
+continuations keep their own state and behaviour, and nothing is deprecated yet (section 4: the
+old types become deprecated wrappers with the steps that replace their uses).
 
 ## 6. Not in scope
 

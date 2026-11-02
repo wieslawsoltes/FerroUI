@@ -1,5 +1,6 @@
 //! `System.Threading.Tasks`: tasks, their completion sources, and the running of futures on the
-//! thread that started them (docs/porting/reactive.md, section 5.8).
+//! thread that started them (docs/porting/reactive.md, section 5.8). The futures run on the executor
+//! of the crate ([`crate::task`]).
 
 pub(crate) mod local_executor;
 mod task;
