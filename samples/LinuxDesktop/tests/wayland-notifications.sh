@@ -11,11 +11,11 @@ exercise_notifications() (
         rm -rf -- "$dir"
     }
     trap cleanup_notice EXIT
-    # Sample at logical scale so the upper-right rectangle is independent of the
+    # Sample at logical scale so the lower-right rectangle above the Windows taskbar is independent of the
     # maximum scale configured elsewhere. Crop separately to isolate each surface.
     sample() {
         grim -s 1 -o "$monitor" "$dir/frame.png" &&
-            convert "$dir/frame.png" -gravity NorthEast -crop 380x166+0+0 +repage "$dir/banner.png" &&
+            convert "$dir/frame.png" -gravity SouthEast -crop 392x164+0+52 +repage "$dir/banner.png" &&
             convert "$dir/frame.png" -crop "$terminal_rect" +repage "$dir/terminal.png"
     }
     changes() {
