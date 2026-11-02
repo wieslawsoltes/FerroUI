@@ -564,7 +564,14 @@ fn append_tangent_arc(path: &mut Vec<PathCommand>, corner: Point, toward: Point,
     append_arc(path, center, radius, start, sweep);
 }
 
-fn append_arc(path: &mut Vec<PathCommand>, center: Point, radius: f64, start: f64, sweep: f64) {
+/// Appends a circular arc from the current point, in radians, as cubics of at most a quarter turn.
+pub(crate) fn append_arc(
+    path: &mut Vec<PathCommand>,
+    center: Point,
+    radius: f64,
+    start: f64,
+    sweep: f64,
+) {
     let segments = (sweep.abs() / FRAC_PI_2).ceil().max(1.0) as usize;
     let delta = sweep / segments as f64;
     for index in 0..segments {

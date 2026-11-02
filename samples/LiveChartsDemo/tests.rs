@@ -141,5 +141,5 @@ fn upstream_snapshot_scenarios_measure_their_data() {
         assert_eq!(scene.hits.is_empty(), cleared, "{}", scenario.name);
         assert!(!scene.primitives.is_empty(), "{}", scenario.name);
     }
-    assert_eq!(all.len(), 60);
+    assert_eq!(all.len(), 74);
 }

@@ -283,6 +283,29 @@ impl HitShape {
         }
     }
 
+    /// The point distances are measured from: the centre of the hover extent, and for an
+    /// annular sector the middle of the sector itself, not the centre of its circle (which is
+    /// outside of a ring).
+    pub fn hover_center(&self) -> Point {
+        match self {
+            Self::AnnularSector {
+                center,
+                inner_radius,
+                outer_radius,
+                start_angle,
+                sweep_angle,
+            } => {
+                let (sin, cos) = (start_angle + sweep_angle * 0.5).to_radians().sin_cos();
+                let radius = (inner_radius + outer_radius) * 0.5;
+                Point::new(center.x + cos * radius, center.y + sin * radius)
+            }
+            _ => {
+                let bounds = self.hover_bounds();
+                Point::new(bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5)
+            }
+        }
+    }
+
     fn contains_hover(&self, point: Point) -> bool {
         match self {
             Self::WithHoverArea { bounds, .. } => Self::Rectangle(*bounds).contains(point),
@@ -421,11 +444,7 @@ impl Scene {
                 | FindingStrategy::ExactMatchTakeClosest
         );
         let distance = |hit: &&HitRegion| {
-            let bounds = hit.shape.hover_bounds();
-            let center = Point::new(
-                bounds.x + bounds.width * 0.5,
-                bounds.y + bounds.height * 0.5,
-            );
+            let center = hit.shape.hover_center();
             match strategy {
                 FindingStrategy::CompareOnlyX | FindingStrategy::CompareOnlyXTakeClosest => {
                     (point.x - center.x).abs()
