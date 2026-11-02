@@ -642,6 +642,21 @@ pub trait Subclassable<T>: ObjectType {
         Self::build_vtable()
     }
 
+    /// Whether a copied parent table contains at least one slot that this class reuses.
+    #[doc(hidden)]
+    const __USES_PARENT_SLOTS: bool = Self::__INHERITS_VTABLE;
+
+    /// Install this class's overrides into an initialized copy of its parent's prefix.
+    /// Handwritten builders can compute the prefix by their usual route.
+    #[doc(hidden)]
+    fn __patch_parent_vtable(table: &mut Self::VTable) {
+        *table = if Self::__INHERITS_VTABLE {
+            Self::__inherit_vtable(table)
+        } else {
+            Self::build_vtable()
+        };
+    }
+
     #[doc(hidden)]
     fn build_vtable() -> Self::VTable;
 }
@@ -1078,6 +1093,11 @@ macro_rules! ferro_class {
         }
     };
 
+    (@thunk $owner:ident, $leaf:ident, $method:ident $(, $arg:ident)*) => {
+        // SAFETY: this table is only attached to objects whose most-derived class is the leaf.
+        |this $(, $arg)*| $leaf::$method(unsafe { $crate::cast_this::<$owner, $leaf>(this) } $(, $arg)*)
+    };
+
     (@common $name:ident : $base:ident) => {
         const _: () = assert!(
             ::std::mem::offset_of!($name, base) == 0,
@@ -1184,6 +1204,13 @@ macro_rules! ferro_class {
                 <$base as $crate::Subclassable<T>>::__inherit_vtable(parent)
             }
 
+            const __USES_PARENT_SLOTS: bool = <$base as $crate::Subclassable<T>>::__USES_PARENT_SLOTS;
+
+            #[inline]
+            fn __patch_parent_vtable(table: &mut Self::VTable) {
+                <$base as $crate::Subclassable<T>>::__patch_parent_vtable(table);
+            }
+
             #[inline]
             fn build_vtable() -> Self::VTable {
                 <$base as $crate::Subclassable<T>>::build_vtable()
@@ -1275,45 +1302,39 @@ macro_rules! ferro_class {
                     }
                 }
 
-                fn build_vtable() -> [<$name VTable>] {
-                    if <$name as $crate::Subclassable<T>>::__INHERITS_VTABLE {
-                        let parent = $crate::parent_vtable::<T, [<$name VTable>]>();
-                        return <$name as $crate::Subclassable<T>>::__inherit_vtable(parent);
-                    }
-                    let base = <$base as $crate::Subclassable<T>>::build_vtable();
-                    // Looking up the parent can initialize its OnceLock. Resolve it
-                    // once for all inherited slots and only if a slot needs it.
-                    let parent = if const { false $(|| $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                const __USES_PARENT_SLOTS: bool = <$base as $crate::Subclassable<T>>::__USES_PARENT_SLOTS
+                    $(|| $crate::__forwards_to_parent::<T, [<$name VTable>]>(
                         <T as $impl_trait>::__OVERRIDES, ::std::stringify!($method),
-                    ))* } {
-                        Some($crate::parent_vtable::<T, [<$name VTable>]>())
-                    } else {
-                        None
-                    };
+                    ))*;
+
+                #[inline]
+                fn __patch_parent_vtable(table: &mut [<$name VTable>]) {
+                    <$base as $crate::Subclassable<T>>::__patch_parent_vtable(&mut table.base);
+                    $(
+                        if !const { $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                            <T as $impl_trait>::__OVERRIDES, ::std::stringify!($method),
+                        ) } {
+                            table.$method = $crate::ferro_class!(@thunk $name, T, $method $(, $arg)*);
+                        }
+                    )*
+                }
+
+                fn build_vtable() -> [<$name VTable>] {
+                    // At an inherited level all slots already exist. Copy once, then
+                    // patch only the known overrides, all the way down to the root.
+                    if const {
+                        <$name as $crate::Subclassable<T>>::__USES_PARENT_SLOTS
+                            && ::std::mem::size_of::<<T::Parent as $crate::ObjectType>::VTable>()
+                                >= ::std::mem::size_of::<[<$name VTable>]>()
+                    } {
+                        let mut table = *$crate::parent_vtable::<T, [<$name VTable>]>();
+                        <$name as $crate::Subclassable<T>>::__patch_parent_vtable(&mut table);
+                        return table;
+                    }
+                    // A newly introduced level owns its slots, as does a fully overridden prefix.
                     [<$name VTable>] {
-                        base,
-                        $(
-                            $method: {
-                                // SAFETY: this table is only attached to objects
-                                // whose most-derived class is `T`.
-                                let own: fn(&$name $(, $arg_ty)*) $(-> $ret)? =
-                                    |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*);
-                                // A member `T` states it does not override is
-                                // the default, which calls this slot of the
-                                // parent table: the slot itself is taken.
-                                let forwards: bool = const {
-                                    $crate::__forwards_to_parent::<T, [<$name VTable>]>(
-                                        <T as $impl_trait>::__OVERRIDES,
-                                        ::std::stringify!($method),
-                                    )
-                                };
-                                if forwards {
-                                    parent.expect("inherited slot has a parent table").$method
-                                } else {
-                                    own
-                                }
-                            },
-                        )*
+                        base: <$base as $crate::Subclassable<T>>::build_vtable(),
+                        $($method: $crate::ferro_class!(@thunk $name, T, $method $(, $arg)*),)*
                     }
                 }
             }

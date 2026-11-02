@@ -167,56 +167,66 @@ impl<T: FerroObjectImpl> Subclassable<T> for FerroObject {
         FerroObjectVTable { type_info: T::TYPE, ..*parent }
     }
 
-    fn build_vtable() -> FerroObjectVTable {
-        if <Self as Subclassable<T>>::__INHERITS_VTABLE {
-            return <Self as Subclassable<T>>::__inherit_vtable(parent_vtable::<T, FerroObjectVTable>());
-        }
-        // SAFETY (all casts): the table is only attached to objects whose
-        // most-derived class is `T`.
-        let mut table = FerroObjectVTable {
-            type_info: T::TYPE,
-            constructed: |this| T::constructed(unsafe { cast_this::<FerroObject, T>(this) }),
-            on_property_changed_core: |this, change| {
-                T::on_property_changed_core(unsafe { cast_this::<FerroObject, T>(this) }, change)
-            },
-            on_property_changed: |this, change| {
-                T::on_property_changed(unsafe { cast_this::<FerroObject, T>(this) }, change)
-            },
-            update_data_validation: |this, property, state, error| {
-                T::update_data_validation(unsafe { cast_this::<FerroObject, T>(this) }, property, state, error)
-            },
-        };
+    const __USES_PARENT_SLOTS: bool = {
+        let forwards = root_forwarded_slots::<T>();
+        forwards[0] || forwards[1] || forwards[2] || forwards[3]
+    };
 
-        // A member `T` states it does not override is the default, which
-        // calls the same slot of the parent table and does nothing else: the
-        // slot itself is taken, so that a call reaches the implementation
-        // without a forwarding function of every class in between. A change
-        // of a property goes through two of these members.
-        let forwards: [bool; 4] = const {
-            let overrides = <T as FerroObjectImpl>::__OVERRIDES;
-            [
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "constructed"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed_core"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "update_data_validation"),
-            ]
-        };
-        if forwards[0] || forwards[1] || forwards[2] || forwards[3] {
-            let parent = parent_vtable::<T, FerroObjectVTable>();
-            if forwards[0] {
-                table.constructed = parent.constructed;
-            }
-            if forwards[1] {
-                table.on_property_changed_core = parent.on_property_changed_core;
-            }
-            if forwards[2] {
-                table.on_property_changed = parent.on_property_changed;
-            }
-            if forwards[3] {
-                table.update_data_validation = parent.update_data_validation;
-            }
+    #[inline]
+    fn __patch_parent_vtable(table: &mut FerroObjectVTable) {
+        let forwards = const { root_forwarded_slots::<T>() };
+        let own = root_vtable::<T>();
+        table.type_info = own.type_info;
+        if !forwards[0] {
+            table.constructed = own.constructed;
         }
-        table
+        if !forwards[1] {
+            table.on_property_changed_core = own.on_property_changed_core;
+        }
+        if !forwards[2] {
+            table.on_property_changed = own.on_property_changed;
+        }
+        if !forwards[3] {
+            table.update_data_validation = own.update_data_validation;
+        }
+    }
+
+    fn build_vtable() -> FerroObjectVTable {
+        if <Self as Subclassable<T>>::__USES_PARENT_SLOTS {
+            let mut table = *parent_vtable::<T, FerroObjectVTable>();
+            <Self as Subclassable<T>>::__patch_parent_vtable(&mut table);
+            table
+        } else {
+            root_vtable::<T>()
+        }
+    }
+}
+
+const fn root_forwarded_slots<T: FerroObjectImpl>() -> [bool; 4] {
+    let overrides = <T as FerroObjectImpl>::__OVERRIDES;
+    [
+        __forwards_to_parent::<T, FerroObjectVTable>(overrides, "constructed"),
+        __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed_core"),
+        __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed"),
+        __forwards_to_parent::<T, FerroObjectVTable>(overrides, "update_data_validation"),
+    ]
+}
+
+#[inline]
+fn root_vtable<T: FerroObjectImpl>() -> FerroObjectVTable {
+    // SAFETY: this table is only attached to objects whose most-derived class is T.
+    FerroObjectVTable {
+        type_info: T::TYPE,
+        constructed: |this| T::constructed(unsafe { cast_this::<FerroObject, T>(this) }),
+        on_property_changed_core: |this, change| {
+            T::on_property_changed_core(unsafe { cast_this::<FerroObject, T>(this) }, change)
+        },
+        on_property_changed: |this, change| {
+            T::on_property_changed(unsafe { cast_this::<FerroObject, T>(this) }, change)
+        },
+        update_data_validation: |this, property, state, error| {
+            T::update_data_validation(unsafe { cast_this::<FerroObject, T>(this) }, property, state, error)
+        },
     }
 }
 
