@@ -40,7 +40,8 @@ pub fn capture_if_asked(window: &Ref<Window>, name: &'static str) {
             std::env::var("FERROUI_SEVEN_GUIS_SHOTS_DELAY_MS").ok().and_then(|ms| ms.parse().ok()).unwrap_or(1500),
         ),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 fn capture(window: &Ref<Window>, file: &Path) {

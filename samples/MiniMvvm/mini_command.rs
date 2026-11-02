@@ -71,7 +71,8 @@ pub fn delay(duration: Duration) -> Delay {
         },
         duration,
         DispatcherPriority::DEFAULT,
-    );
+    )
+    .detach();
     Delay(state)
 }
 

@@ -1047,11 +1047,12 @@ mod app {
 
             // The dispatcher: a timer, and a job from another thread.
             let fired = state.timer_fired.clone();
-            let _ = DispatcherTimer::run_once(
+            DispatcherTimer::run_once(
                 move || fired.set(true),
                 Duration::from_millis(50),
                 DispatcherPriority::NORMAL,
-            );
+            )
+            .detach();
             let (posted, posted_on_main) = (state.posted.clone(), state.posted_on_main.clone());
             std::thread::Builder::new()
                 .name("smoke-poster".to_string())

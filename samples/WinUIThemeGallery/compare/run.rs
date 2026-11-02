@@ -656,5 +656,6 @@ pub fn start(window: Rc<CompareWindow>, out: PathBuf) {
         lines: RefCell::new(Vec::new()),
         failures: RefCell::new(Vec::new()),
     });
-    let _timer = DispatcherTimer::run(move || run.tick(), Duration::from_millis(50), DispatcherPriority::BACKGROUND);
+    let _timer =
+        DispatcherTimer::run(move || run.tick(), Duration::from_millis(50), DispatcherPriority::BACKGROUND).detach();
 }

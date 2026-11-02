@@ -187,7 +187,8 @@ fn create_main_window() -> Ref<Window> {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     window

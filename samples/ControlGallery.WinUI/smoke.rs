@@ -111,7 +111,8 @@ pub fn start(window: Rc<MainWindow>) {
         },
         Duration::from_millis(250),
         DispatcherPriority::BACKGROUND,
-    );
+    )
+    .detach();
 }
 
 /// Counts the frames of the content: each asks for the next.

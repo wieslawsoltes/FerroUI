@@ -127,7 +127,8 @@ pub fn start() -> bool {
         },
         Duration::from_millis(interval),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
     *timer.borrow_mut() = Some(subscription);
     true
 }

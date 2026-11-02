@@ -115,5 +115,6 @@ pub fn run(
         },
         tick,
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }

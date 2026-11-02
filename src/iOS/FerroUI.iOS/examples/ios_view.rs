@@ -413,7 +413,8 @@ mod smoke {
                             move || std::process::exit(code),
                             Duration::from_secs(hold),
                             DispatcherPriority::BACKGROUND,
-                        );
+                        )
+                        .detach();
                         false
                     }
                     _ => std::process::exit(code),
@@ -421,7 +422,8 @@ mod smoke {
             },
             INTERVAL,
             DispatcherPriority::BACKGROUND,
-        );
+        )
+        .detach();
     }
 
     /// One line per attempt: what the display link, the render target and

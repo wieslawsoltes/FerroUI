@@ -635,7 +635,7 @@ impl MaterialSnackbarHost {
             interval,
             DispatcherPriority::NORMAL,
         );
-        *self.lifetime_timer.borrow_mut() = Some(Subscription::new(timer));
+        *self.lifetime_timer.borrow_mut() = Some(timer);
     }
 
     fn pause_lifetime(&self) {

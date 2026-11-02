@@ -99,12 +99,13 @@ impl VisualDebugBehavior {
         AdornerLayer::set_adorned_element(adorner_visual, control);
         adorner_layer.children().add(adorner.clone());
 
-        let _ = DispatcherTimer::run_once(
+        DispatcherTimer::run_once(
             move || {
                 adorner_layer.children().remove(adorner.clone());
             },
             self.duration().to_duration().unwrap_or_default(),
             DispatcherPriority::BACKGROUND,
-        );
+        )
+        .detach();
     }
 }

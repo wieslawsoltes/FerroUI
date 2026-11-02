@@ -146,7 +146,7 @@ impl Future for Delay {
         state.waker = Some(cx.waker().clone());
         if state.timer.is_none() {
             let shared = Rc::downgrade(&this.state);
-            state.timer = Some(Subscription::new(DispatcherTimer::run_once(
+            state.timer = Some(DispatcherTimer::run_once(
                 move || {
                     let Some(shared) = shared.upgrade() else {
                         return;
@@ -162,7 +162,7 @@ impl Future for Delay {
                 },
                 this.duration,
                 DispatcherPriority::BACKGROUND,
-            )));
+            ));
         }
 
         Poll::Pending

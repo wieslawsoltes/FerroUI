@@ -1294,9 +1294,12 @@ fn dispatcher_timer_run_and_run_once() {
         },
         Duration::from_millis(10),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
     let o = once.clone();
-    let _once = DispatcherTimer::run_once(move || o.set(o.get() + 1), Duration::from_millis(25), DispatcherPriority::NORMAL);
+    let _once =
+        DispatcherTimer::run_once(move || o.set(o.get() + 1), Duration::from_millis(25), DispatcherPriority::NORMAL)
+            .detach();
     let c = once.clone();
     let canceled =
         DispatcherTimer::run_once(move || c.set(c.get() + 100), Duration::from_millis(5), DispatcherPriority::NORMAL);
@@ -1513,7 +1516,7 @@ impl<T> Future for Oneshot<T> {
 /// Completes after `duration` of dispatcher time; the stand-in for a timer task.
 fn delay(duration: Duration) -> Oneshot<()> {
     let (sender, receiver) = oneshot();
-    DispatcherTimer::run_once(move || sender.send(()), duration, DispatcherPriority::NORMAL);
+    DispatcherTimer::run_once(move || sender.send(()), duration, DispatcherPriority::NORMAL).detach();
     receiver
 }
 
