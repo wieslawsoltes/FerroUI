@@ -104,6 +104,10 @@ fn packed_theme_contains_every_compiled_document_within_budget() {
     use ferroui_markup_xaml_loader::binary_document::pack::ThemePack;
     let bytes = include_bytes!(concat!(env!("OUT_DIR"), "/winui.fxp"));
     assert!(bytes.len() < 600_000, "WinUI archive is {} bytes", bytes.len());
+    #[cfg(feature = "solid-theme")]
+    let indexed = ferroui_markup_xaml_loader::binary_document::pack::expand_solid(bytes).unwrap();
+    #[cfg(feature = "solid-theme")]
+    let bytes = &indexed;
     let archive = ThemePack::open(bytes).unwrap();
     let expected: Vec<_> = crate::assets::documents().iter()
         .filter(|(name, _)| !crate::assets::is_excluded(name))

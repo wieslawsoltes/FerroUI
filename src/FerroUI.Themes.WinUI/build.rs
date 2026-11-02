@@ -168,7 +168,11 @@ fn compile_theme(mut documents: Vec<(String, String)>, roots: Option<Vec<String>
         ferroui_build::trim_resource_documents(&mut documents, &roots).expect("trim WinUI theme");
     }
     let documents: Vec<_> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
-    let pack = ferroui_markup_xaml_loader::binary_document::pack::compile_documents(&documents)
+    #[cfg(feature = "solid-theme")]
+    use ferroui_markup_xaml_loader::binary_document::pack::compile_solid_documents as encode;
+    #[cfg(not(feature = "solid-theme"))]
+    use ferroui_markup_xaml_loader::binary_document::pack::compile_documents as encode;
+    let pack = encode(&documents)
         .unwrap_or_else(|error| panic!("cannot compile WinUI theme pack: {error}"));
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("winui.fxp");
     if fs::read(&out).ok().as_deref() != Some(&pack) {

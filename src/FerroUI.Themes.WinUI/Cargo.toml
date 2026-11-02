@@ -27,6 +27,8 @@ path = "lib.rs"
 [features]
 # Embed the complete FXP archive and resolve its FXD documents through XamlX on first load.
 packed-theme = ["dep:ferroui-markup-xaml-loader"]
+# Group similar FXD columns across the complete archive and expand the index once.
+solid-theme = ["packed-theme"]
 binary-resources = ["ferroui-markup-xaml/binary-resources"]
 # Original control-theme documents for opt-in designer definition libraries.
 # Normal applications continue to ship only compiled markup.

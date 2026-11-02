@@ -90,9 +90,14 @@ impl StyleReloadTarget {
     /// includes resolve in the candidate archive during preparation.
     #[cfg(feature = "portable-xaml")]
     pub fn replace_packed(&self, bytes: &[u8]) -> Result<(), ReloadError> {
-        use ferroui_markup_xaml_loader::{binary_document::pack::ThemePack, FerroRuntimeXamlLoader};
+        use ferroui_markup_xaml_loader::{binary_document::pack, FerroRuntimeXamlLoader};
         self.slot.replace_if_current(|| false, || {
-            let archive = ThemePack::open(bytes)
+            let indexed;
+            let bytes = if pack::is_solid(bytes) {
+                indexed = pack::expand_solid(bytes).map_err(|error| ReloadError::Failed(error.to_string()))?;
+                indexed.as_slice()
+            } else { bytes };
+            let archive = pack::ThemePack::open(bytes)
                 .map_err(|error| ReloadError::Failed(error.to_string()))?;
             archive.validate().map_err(|error| ReloadError::Failed(error.to_string()))?;
             let uri = ferroui_base::utilities::Uri::absolute(&self.uri)
@@ -346,11 +351,12 @@ mod portable_tests {
         let target = StyleReloadTarget::contribution(
             &container, 0, "ferres://Editor/Views/Main.xaml".into(), Default::default(),
         ).unwrap();
-        let revision = binary_document::pack::compile_documents(&[
+        let docs = [
             ("Views/Main.xaml", r#"<Styles xmlns="https://github.com/ferroui"><StyleInclude Source="../Parts/Child.xaml"/></Styles>"#),
             ("Parts/Child.xaml", r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="Button"/></Styles>"#),
             ("Z/Unrelated.xaml", r#"<Styles xmlns="https://github.com/ferroui"/>"#),
-        ]).unwrap();
+        ];
+        let revision = binary_document::pack::compile_documents(&docs).unwrap();
         // An editor may still have XML for the preceding generation in scope.
         // Members present in the new pack must win as a coherent revision.
         let stale = [(crate::document_key("ferres://Editor/Parts/Child.xaml"), "invalid xml".to_owned())]
@@ -360,10 +366,16 @@ mod portable_tests {
         });
         let accepted = container.get(0);
         assert!(!style_ptr_eq(&initial, &accepted));
+        let mut solid = binary_document::pack::compile_solid_documents(&docs).unwrap();
+        target.replace_packed(&solid).unwrap();
+        let last_good = container.get(0);
+        assert!(!style_ptr_eq(&accepted, &last_good));
+        solid.pop();
+        assert!(target.replace_packed(&solid).is_err());
         let mut corrupt = revision;
         *corrupt.last_mut().unwrap() = 0xff;
         assert!(target.replace_packed(&corrupt).is_err());
-        assert!(style_ptr_eq(&accepted, &container.get(0)));
+        assert!(style_ptr_eq(&last_good, &container.get(0)));
         assert!(style_ptr_eq(&sibling, &container.get(1)));
     }
 }

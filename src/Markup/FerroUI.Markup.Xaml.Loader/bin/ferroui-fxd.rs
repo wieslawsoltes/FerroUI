@@ -9,7 +9,13 @@ use std::{
     process,
 };
 
-const USAGE: &str = "Usage: ferroui-fxd <input.xaml> <output.fxd>\n       ferroui-fxd --pack <source-directory> <output.fxp>";
+const USAGE: &str = "Usage: ferroui-fxd <input.xaml> <output.fxd>\n       ferroui-fxd --pack <source-directory> <output.fxp>\n       ferroui-fxd --pack-solid <source-directory> <output.fxp>";
+
+enum Format {
+    Document,
+    IndexedPack,
+    SolidPack,
+}
 
 fn run() -> Result<(), Box<dyn Error>> {
     let args: Vec<_> = env::args_os().skip(1).collect();
@@ -17,9 +23,10 @@ fn run() -> Result<(), Box<dyn Error>> {
         println!("{USAGE}");
         return Ok(());
     }
-    let (directory, input, output) = match args.as_slice() {
-        [input, output] => (false, input, output),
-        [flag, input, output] if flag == "--pack" => (true, input, output),
+    let (mode, input, output) = match args.as_slice() {
+        [input, output] => (Format::Document, input, output),
+        [flag, input, output] if flag == "--pack" => (Format::IndexedPack, input, output),
+        [flag, input, output] if flag == "--pack-solid" => (Format::SolidPack, input, output),
         _ => return Err(USAGE.into()),
     };
     let input = Path::new(input);
@@ -27,10 +34,10 @@ fn run() -> Result<(), Box<dyn Error>> {
     if output.exists() && input.canonicalize()? == output.canonicalize()? {
         return Err("Input and output name the same file".into());
     }
-    let compiled = if directory {
-        binary_document::pack::compile_directory(input)
-    } else {
-        binary_document::compile(&fs::read_to_string(input)?)
+    let compiled = match mode {
+        Format::Document => binary_document::compile(&fs::read_to_string(input)?),
+        Format::IndexedPack => binary_document::pack::compile_directory(input),
+        Format::SolidPack => binary_document::pack::compile_solid_directory(input),
     }
     .map_err(|e| e.message())?;
     let mut temp_name = output
