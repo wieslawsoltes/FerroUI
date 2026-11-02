@@ -59,9 +59,9 @@ EOF
 # sorts before it alphabetically. Opening the top hit must activate GTK.
 for entry in primary secondary; do
     if [[ $entry == primary ]]; then
-        desktop=org.ferro.SpotlightStudy name="Ferro Color Studio" comment="Inspect a color study"
+        desktop=org.example.SpectralStudio name="Spectral Color Studio" comment="Inspect a color study"
     else
-        desktop=org.ferro.ColorMetadata name="Auxiliary palette" comment="Metadata for Ferro Color Studio"
+        desktop=org.example.ColorMetadata name="Auxiliary palette" comment="Metadata for Spectral Color Studio"
     fi
     cat >"$XDG_DATA_HOME/applications/$desktop.desktop" <<EOF
 [Desktop Entry]
@@ -257,7 +257,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 window = Gtk.Window(title="Colour mixing study")
-window.set_wmclass("org.ferro.SpotlightStudy", "org.ferro.SpotlightStudy")
+window.set_wmclass("org.example.SpectralStudio", "org.example.SpectralStudio")
 window.set_default_size(300, 180)
 window.show_all()
 Gtk.main()
@@ -265,7 +265,7 @@ PYGTK
             spotlight_client=$!
             live=$(await_window '^Colour mixing study$')
             xdotool windowactivate --sync "$shell_window"
-            xdotool type --clearmodifiers --delay 25 'Ferro Color Studio'
+            xdotool type --clearmodifiers --delay 25 'Spectral Color Studio'
             capture macos-spotlight-results macos-applications
             /usr/bin/python3 - "$output" <<'PYPOSITION'
 from pathlib import Path
