@@ -45,6 +45,8 @@ impl Desktop {
             && model.windows.iter().zip(&frame.windows).all(|(a, b)| {
                 u64::from(a.id) == b.id
                     && a.title == b.title
+                    && a.app_id == b.app_id
+                    && a.last_activation == b.last_activation
                     && a.active == b.focused
                     && a.minimized == b.minimized
                     && a.maximized == b.maximized
@@ -78,7 +80,7 @@ impl Desktop {
                     can_fullscreen: true,
                     above: w.above,
                     can_raise: true,
-                    last_activation: u64::from(w.focused),
+                    last_activation: w.last_activation,
                     can_maximize: true,
                     can_snap: true,
                     can_move_workspace: true,

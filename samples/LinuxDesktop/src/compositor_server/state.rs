@@ -64,6 +64,7 @@ pub(super) struct Window {
     pub location: Point<i32, Logical>,
     pub(super) saved: Option<Rectangle<i32, Logical>>,
     pub hidden: bool,
+    last_activation: u64,
     pub fullscreen: bool,
     pub maximized: bool,
     pub above: bool,
@@ -108,6 +109,7 @@ pub(super) struct State {
     visible_since: HashMap<WlSurface, u64>,
     pub(super) dirty: bool,
     serial: u64,
+    activation: u64,
     next: u64,
     start: Instant,
 }
@@ -169,6 +171,7 @@ impl State {
             visible_since: HashMap::new(),
             dirty: false,
             serial: 0,
+            activation: 0,
             next: 1,
             start: Instant::now(),
         })
@@ -297,6 +300,7 @@ impl State {
                 width: geometry.size.w,
                 height: geometry.size.h,
                 focused: self.focused == Some(win.id),
+                last_activation: win.last_activation,
                 minimized: win.hidden,
                 maximized: win.maximized,
                 fullscreen: win.fullscreen,
@@ -539,6 +543,10 @@ impl State {
             let Some(w) = self.windows.iter_mut().find(|w| w.id == id) else {
                 return;
             };
+            if self.focused != Some(id) {
+                self.activation = self.activation.saturating_add(1);
+                w.last_activation = self.activation;
+            }
             w.hidden = false;
             if self.current_workspace != w.workspace {
                 self.hits.clear();
@@ -845,6 +853,7 @@ impl XdgShellHandler for State {
                 location: (32 + 26 * n, area.loc.y + 36 + 26 * n).into(),
                 saved: None,
                 hidden: false,
+                last_activation: 0,
                 fullscreen: false,
                 maximized: false,
                 above: false,

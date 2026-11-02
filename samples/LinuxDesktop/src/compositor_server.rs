@@ -50,6 +50,7 @@ pub struct ClientWindow {
     pub width: i32,
     pub height: i32,
     pub focused: bool,
+    pub last_activation: u64,
     pub minimized: bool,
     pub maximized: bool,
     pub fullscreen: bool,

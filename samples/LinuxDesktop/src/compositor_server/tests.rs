@@ -278,6 +278,7 @@ fn commit_present_and_switch_workspace() {
     assert_eq!(client.released, 1);
     assert_eq!(client.frames, 0);
     let id = shown.windows[0].id;
+    assert!(shown.windows[0].last_activation > 0);
     // Parent uses German layout and holds Shift before the child gained focus.
     // The same physical key then arrives without Shift, without a second map.
     let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
@@ -363,6 +364,7 @@ fn commit_present_and_switch_workspace() {
     });
     queue.roundtrip(&mut client).unwrap();
     assert!(!snapped.windows[0].fullscreen);
+    assert_eq!(snapped.windows[0].last_activation, restored.windows[0].last_activation);
     assert_eq!(client.size, (321, 420));
     server.send(Input::Minimize(id));
     snapshot(&server, &wake, |s| {
@@ -370,7 +372,8 @@ fn commit_present_and_switch_workspace() {
     });
     server.send(Input::Close(id));
     server.send(Input::Activate(id));
-    snapshot(&server, &wake, |s| !s.surfaces.is_empty());
+    let reactivated = snapshot(&server, &wake, |s| !s.surfaces.is_empty());
+    assert!(reactivated.windows[0].last_activation > snapped.windows[0].last_activation);
     queue.roundtrip(&mut client).unwrap();
     assert!(client.closed);
     drop(server);
