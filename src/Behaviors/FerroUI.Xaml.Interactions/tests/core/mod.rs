@@ -14,3 +14,4 @@ mod invoke_command_action_tests;
 mod multi_data_trigger_behavior_tests;
 mod picker_action_base_tests;
 mod picker_behavior_base_tests;
+mod timer_action_tests;

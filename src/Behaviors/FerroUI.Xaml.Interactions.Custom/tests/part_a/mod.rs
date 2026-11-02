@@ -18,3 +18,4 @@ mod execute_command_behavior_base_tests;
 mod focus_next_element_action_tests;
 mod observable_trigger_behavior_tests;
 mod routed_event_trigger_behavior_tests;
+mod timer_behavior_tests;
