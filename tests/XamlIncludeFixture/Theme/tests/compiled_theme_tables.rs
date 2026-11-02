@@ -24,7 +24,8 @@ fn materialize(dictionary: Ref<ResourceDictionary>) -> Vec<(Color, f64)> {
     }
     assert!(dictionary.contains_deferred_key(&"ImportedTemplate".into()));
     let template = dictionary.get(&"ImportedTemplate".into()).expect("imported template");
-    let template = template.downcast_ref::<std::rc::Rc<ferroui_markup_xaml::templates::ControlTemplate>>().unwrap();
+    let template = ferroui_base::metadata::from_markup_value::<std::rc::Rc<dyn ferroui_controls::templates::IControlTemplate>>(&Some(template.clone()))
+        .unwrap_or_else(|| panic!("expected IControlTemplate, found {}", template.type_name()));
     let owner = ferroui_controls::ContentControl::new().upcast();
     let built = template.build(&owner).unwrap();
     assert_eq!(built.result().name().as_deref(), Some("ImportedChild"));
