@@ -33,7 +33,8 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 model.workspace_names.clone(),
                 model.current_workspace,
                 removable,
-                compositor.as_ref()
+                compositor
+                    .as_ref()
                     .filter(|_| layout != Layout::BottomNavigation)
                     .map(|host| host.workspace_outlines()),
             )
@@ -66,15 +67,21 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     .margin((0.0, 0.0, 5.0, 5.0))
                     .max_width(154.0)
                     .child({
-                        let label = shell_text(&title, 12.0, if selected {
-                            colors().on_selected
-                        } else {
-                            colors().text
-                        });
+                        let label = shell_text(
+                            &title,
+                            12.0,
+                            if selected {
+                                colors().on_selected
+                            } else {
+                                colors().text
+                            },
+                        );
                         match maps.as_ref().and_then(|m| m.get(index)) {
-                            Some(rects) => stack_panel().spacing(3.0)
+                            Some(rects) => stack_panel()
+                                .spacing(3.0)
                                 .child(overview::map(rects))
-                                .child(label.horizontal_alignment(H::Center)).into_element(),
+                                .child(label.horizontal_alignment(H::Center))
+                                .into_element(),
                             None => label.into_element(),
                         }
                     }),
@@ -176,15 +183,27 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
             grid()
                 .row_definitions("Auto,Auto,Auto,*,Auto")
                 .child(popup_header(title, subtitle, shell))
-                .child(border().grid_row(1).margin((0.0, 12.0, 0.0, 6.0))
-                    .max_height(100.0).child(scroll_viewer()
-                        .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
-                        .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto).child(tabs)))
+                .child(
+                    border()
+                        .grid_row(1)
+                        .margin((0.0, 12.0, 0.0, 6.0))
+                        .max_height(100.0)
+                        .child(
+                            scroll_viewer()
+                                .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
+                                .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
+                                .child(tabs),
+                        ),
+                )
                 .child(eyebrow("WINDOWS").grid_row(2).margin((0.0, 8.0, 0.0, 6.0)))
-                .child(scroll_viewer().grid_row(3).max_height(350.0)
-                    .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
-                    .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
-                    .child(stack_panel().spacing(5.0).child(empty).child(windows)))
+                .child(
+                    scroll_viewer()
+                        .grid_row(3)
+                        .max_height(350.0)
+                        .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
+                        .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
+                        .child(stack_panel().spacing(5.0).child(empty).child(windows)),
+                )
                 .child(feedback(shell.status).grid_row(4)),
         )
         .into()
@@ -237,58 +256,83 @@ fn client_row(
 ) -> Element {
     let id = client.id;
     let state = shell.clone();
-    let title = client.title.as_str();
+    let title_text = client.title.clone();
+    let title = title_text.as_str();
     let source = shell
         .session
         .as_ref()
         .and_then(|session| session.compositor())
         .and_then(|host| host.window_visual(id));
-    let description = stack_panel()
-        .spacing(2.0)
-        .child(shell_text(title, 14.0, Ink::Primary).font_weight(FontWeight::Medium))
-        .child(shell_text(
-            if client.minimized {
-                "Minimized"
-            } else if client.fullscreen {
-                "Fullscreen"
-            } else if client.maximized {
-                "Maximized"
-            } else if client.active {
-                "Focused"
-            } else {
-                "Open"
-            },
-            11.0,
-            Ink::Secondary,
-        ));
-    let content: Element = if composed {
-        let height = match look().layout() {
-            Layout::Taskbar => 168.0,
-            Layout::MenuBarDock => 204.0,
-            Layout::BottomNavigation => 224.0,
-        };
-        let artwork = source.map(|visual| preview(visual, height)).unwrap_or_else(|| {
-            grid()
-                .height(height)
-                .child(glyph(Icon::Window, 32.0, colors().accent))
-                .into()
-        });
-        stack_panel()
-            .spacing(6.0)
-            .child(
-                border()
-                    .background(colors().surface)
-                    .corner_radius(6)
-                    .clip_to_bounds(true)
-                    .child(artwork),
+    let layout = look().layout();
+    let height = match layout {
+        Layout::Taskbar => 180.0,
+        Layout::MenuBarDock => 212.0,
+        Layout::BottomNavigation => 224.0,
+    };
+    let card_width = source.as_ref().map_or(304.0, |v| {
+        let size = v.size();
+        (height * size.x / size.y.max(1.0) + 12.0).clamp(216.0, 416.0)
+    });
+    let icon = || {
+        shell
+            .catalog
+            .window_index(&client.app_id)
+            .and_then(|index| shell.icons.get(&shell.catalog.applications()[index]))
+            .map_or_else(
+                || glyph(Icon::Window, 16.0, colors().accent),
+                |icon| {
+                    let icon: Rc<dyn ferroui_base::media::IImage> = icon;
+                    image().source(icon).width(18.0).height(18.0).into()
+                },
             )
-            .child(description)
-            .into()
+    };
+    let caption_icon = composed.then(&icon);
+    let content = if composed {
+        source
+            .map(|visual| preview(visual, height))
+            .unwrap_or_else(|| {
+                stack_panel()
+                    .height(height)
+                    .spacing(6.0)
+                    .vertical_alignment(V::Center)
+                    .child(icon())
+                    .child(
+                        shell_text(
+                            if client.minimized {
+                                "Minimized"
+                            } else {
+                                "Window"
+                            },
+                            12.0,
+                            Ink::Secondary,
+                        )
+                        .horizontal_alignment(H::Center),
+                    )
+                    .into()
+            })
     } else {
+        let status = if client.minimized {
+            "Minimized"
+        } else if client.fullscreen {
+            "Fullscreen"
+        } else if client.maximized {
+            "Maximized"
+        } else if client.active {
+            "Focused"
+        } else {
+            "Open"
+        };
         grid()
             .column_definitions("20,*")
-            .child(glyph(Icon::Window, 16.0, colors().accent))
-            .child(description.grid_column(1).margin((8.0, 0.0, 0.0, 0.0)))
+            .child(icon())
+            .child(
+                stack_panel()
+                    .spacing(2.0)
+                    .grid_column(1)
+                    .margin((8.0, 0.0, 0.0, 0.0))
+                    .child(shell_text(title, 14.0, Ink::Primary).font_weight(FontWeight::Medium))
+                    .child(shell_text(status, 11.0, Ink::Secondary)),
+            )
             .into()
     };
     let restore = action(title, move || {
@@ -317,66 +361,97 @@ fn client_row(
             }
         })
     };
+    let more = icon_action(&format!("Arrange or move {title}"), Icon::More, move || {
+        expanded.set((expanded.get_untracked() != Some(id)).then_some(id));
+    });
+    let minimize = command("Minimize", Icon::Minimize, Session::minimize)
+        .is_enabled(client.can_minimize && !client.minimized);
+    let zoom = command(
+        if client.maximized {
+            "Restore size"
+        } else {
+            "Maximize"
+        },
+        if client.maximized {
+            Icon::RestoreWindow
+        } else {
+            Icon::Maximize
+        },
+        Session::toggle_maximized,
+    )
+    .is_enabled(client.can_maximize && !client.fullscreen);
+    let close = command("Close", Icon::Close, Session::close).is_enabled(client.can_close);
     let state = shell.clone();
-    let row_actions = row(2.0)
-        .child(
-            command("Minimize", Icon::Minimize, Session::minimize)
-                .is_enabled(client.can_minimize && !client.minimized),
-        )
-        .child(
-            command(
-                if client.maximized {
-                    "Restore size"
-                } else {
-                    "Maximize"
-                },
-                if client.maximized {
-                    Icon::RestoreWindow
-                } else {
-                    Icon::Maximize
-                },
-                Session::toggle_maximized,
+    let details = show(
+        move || expanded.get() == Some(id),
+        move || arrange_actions(&state, &client, expanded),
+    );
+    if !composed {
+        return border()
+            .background(colors().tile)
+            .corner_radius(9)
+            .padding(4)
+            .child(
+                stack_panel()
+                    .child(
+                        grid().column_definitions("*,Auto").child(restore).child(
+                            row(2.0)
+                                .child(minimize)
+                                .child(zoom)
+                                .child(more)
+                                .child(close)
+                                .grid_column(1),
+                        ),
+                    )
+                    .child(details),
             )
-            .is_enabled(client.can_maximize && !client.fullscreen),
+            .into();
+    }
+    let header = grid()
+        .column_definitions("Auto,*,Auto")
+        .margin((6.0, 2.0))
+        .child(caption_icon.unwrap_or(Element::Empty))
+        .child(
+            shell_text(title, 13.0, Ink::Primary)
+                .font_weight(FontWeight::Medium)
+                .tool_tip_tip(title)
+                .margin((7., 0.))
+                .grid_column(1),
         )
-        .child(icon_action(
-            &format!("Arrange or move {title}"),
-            Icon::More,
-            move || {
-                expanded.set(if expanded.get_untracked() == Some(id) {
-                    None
-                } else {
-                    Some(id)
-                });
-            },
-        ))
-        .child(command("Close", Icon::Close, Session::close).is_enabled(client.can_close));
-    let commands: Element = if composed {
-        stack_panel()
-            .child(restore)
-            .child(row_actions.horizontal_alignment(H::Right))
-            .into()
+        .child(more.width(30.).height(30.).padding(6.).grid_column(2));
+    let activate = restore.min_height(0.).padding(0).border_thickness(0);
+    let body = if layout == Layout::MenuBarDock {
+        stack_panel().child(activate).child(header)
     } else {
-        grid()
-            .column_definitions("*,Auto")
-            .child(restore)
-            .child(row_actions.grid_column(1))
-            .into()
+        stack_panel().child(header).child(activate)
     };
-    let card = border();
-    let card = if composed && look().layout() == Layout::BottomNavigation {
-        let width = shell.metrics().width;
-        card.width(move || (width.get() * 0.76).clamp(156.0, 380.0)).corner_radius(20)
-    } else {
-        card.corner_radius(9)
+    let body = body
+        .child(
+            row(4.0)
+                .horizontal_alignment(H::Right)
+                .child(minimize)
+                .child(zoom)
+                .child(close)
+                .is_visible(move || expanded.get() == Some(id)),
+        )
+        .child(details);
+    let width = shell.metrics().width;
+    let card = match layout {
+        Layout::Taskbar => border()
+            .background(resource("SolidBackgroundFillColorBaseBrush"))
+            .border_brush(resource("CardStrokeColorDefaultBrush"))
+            .border_thickness(1)
+            .max_width(card_width)
+            .corner_radius(8),
+        Layout::MenuBarDock => dock_surface().max_width(card_width).corner_radius(10),
+        Layout::BottomNavigation => bar_surface()
+            .width(move || (width.get() * 0.76).clamp(156.0, 384.0))
+            .corner_radius(20),
     };
-    card.background(colors().tile)
-        .margin(if composed { 4 } else { 0 })
+    card.margin(6)
         .padding(4)
-        .child(stack_panel().child(commands).child(show(
-            move || expanded.get() == Some(id),
-            move || arrange_actions(&state, &client, expanded),
-        )))
+        .clip_to_bounds(true)
+        .child(body)
         .into()
 }
 
