@@ -1127,6 +1127,17 @@ mod imp {
                     if size == SizeCommand::RESTORED || size == SizeCommand::MAXIMIZED {
                         let client_size = client_size_from_l_param(l_param);
                         self.invoke_resized(client_size / self.scaling(), self.resize_reason());
+
+                        // Not from upstream, which renders the frame of the new size in the
+                        // WM_PAINT that follows once the message queue is idle: until then the
+                        // compositor of the desktop shows the window at its new size with the
+                        // frame of the old size in it. The frame is rendered here, before the
+                        // resize returns, and the client area is validated so that WM_PAINT does
+                        // not render it again (issue 476, cooperative resize).
+                        if is_window_visible(self.hwnd()) {
+                            self.invoke_paint(Rect::from_size(client_size / self.scaling()));
+                            validate_client_area(self.hwnd());
+                        }
                     }
 
                     if is_window_visible(self.hwnd()) && !self.shown() {
