@@ -72,3 +72,44 @@ fn canonical_lengths_and_source_positions_are_bounded() {
         assert!(relative(base, delta).is_err());
     }
 }
+
+#[test]
+fn text_factories_share_a_wire_layout_and_large_indices_round_trip() {
+    let keys: Vec<_> = (0..300)
+        .map(|i| format!("SystemControlBrush{i:03}"))
+        .collect();
+    for kind in [Kind::Alias, Kind::StaticBrush, Kind::DynamicBrush] {
+        let rows: Vec<_> = keys
+            .iter()
+            .rev()
+            .map(|key| Resource {
+                key,
+                value: Value::Text("Shared"),
+                line: i32::MAX as u32,
+                column: 0,
+                value_line: 0,
+                value_column: i32::MAX as u32,
+            })
+            .collect();
+        let image = encode(kind, &rows).unwrap();
+        let batch = Batch::decode(&image).unwrap();
+        assert_eq!(batch.kind(), kind);
+        assert_eq!(batch.records().len(), 300);
+        for (actual, expected) in batch.records().zip(rows) {
+            let Payload::Text(target) = actual.payload else {
+                panic!("text operand required")
+            };
+            assert_eq!(actual.key, expected.key);
+            assert_eq!(target.as_ref(), "Shared");
+            assert_eq!(
+                (
+                    actual.line,
+                    actual.column,
+                    actual.value_line,
+                    actual.value_column
+                ),
+                (i32::MAX, 0, 0, i32::MAX)
+            );
+        }
+    }
+}

@@ -17,7 +17,6 @@ import platform
 import shutil
 import statistics
 import subprocess
-import tempfile
 import time
 from pathlib import Path
 
@@ -46,6 +45,23 @@ def positive_int(text):
     return value
 
 
+def measure_launches(executables, rounds):
+    # Rotate each executable through first and last positions so slow drift
+    # during the run does not systematically favor the candidate or baseline.
+    samples = {path: [] for path in executables}
+    for executable in executables:
+        command_output([executable])
+    for index in range(rounds):
+        offset = index % len(executables)
+        for executable in executables[offset:] + executables[:offset]:
+            start = time.perf_counter_ns()
+            output = command_output([executable])
+            elapsed = time.perf_counter_ns() - start
+            create, lookup = map(int, output.split())
+            samples[executable].append({"create_ns": create, "create_and_button_ns": lookup, "process_ns": elapsed})
+    return samples
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=HERE.parents[2])
@@ -53,6 +69,8 @@ def main():
     parser.add_argument("--binary", action="store_true", help="enable the theme's binary-resources feature")
     parser.add_argument("--rebuilds", type=positive_int, default=1, help="number of dependency-warm theme rebuilds")
     parser.add_argument("--launches", type=positive_int, default=15, help="number of measured, fresh-process launches")
+    parser.add_argument("--compare-with", type=Path, action="append", default=[],
+                        help="also time a previous work directory's stripped-probe, interleaved with the new one")
     args = parser.parse_args()
     source = args.source.resolve()
     work = args.work_dir.resolve()
@@ -92,21 +110,17 @@ def main():
     executable = Path(next(m["executable"] for m in messages if m.get("executable") and m["target"]["name"] == PROBE))
     generated = out / "xaml"
     source_bytes = (generated / "compiled_xaml.rs").read_bytes()
-    with tempfile.TemporaryDirectory(dir=work) as folder:
-        stripped = Path(folder) / executable.name
-        shutil.copy2(executable, stripped)
-        subprocess.run(["strip", str(stripped)], check=True)
-        stripped_bytes = stripped.stat().st_size
-        # Warm the OS page cache. Every timed sample still starts a fresh process
-        # and performs actual theme construction and a checked deferred lookup.
-        command_output([stripped])
-        launches = []
-        for _ in range(args.launches):
-            start = time.perf_counter_ns()
-            output = command_output([stripped])
-            elapsed = time.perf_counter_ns() - start
-            create, lookup = map(int, output.split())
-            launches.append({"create_ns": create, "create_and_button_ns": lookup, "process_ns": elapsed})
+    stripped = work / "stripped-probe"
+    shutil.copy2(executable, stripped)
+    subprocess.run(["strip", str(stripped)], check=True)
+    stripped_bytes = stripped.stat().st_size
+    executables = [stripped, *(path.resolve() for path in args.compare_with)]
+    if len(set(executables)) != len(executables):
+        parser.error("each probe must have a distinct path")
+    # Warm the OS page cache first. Each timed sample performs actual theme
+    # construction and a checked deferred lookup in a fresh process.
+    samples = measure_launches(executables, args.launches)
+    launches = samples[stripped]
     result = {
         "revision": command_output(["git", "rev-parse", "HEAD"], source),
         "source_dirty": bool(command_output(["git", "status", "--porcelain", "--untracked-files=no"], source)),
@@ -121,6 +135,8 @@ def main():
         "launches": launches,
         "median": {k: statistics.median(sample[k] for sample in launches) for k in launches[0]},
     }
+    if args.compare_with:
+        result["interleaved_launches"] = {str(path): rows for path, rows in samples.items()}
     report = json.dumps(result, indent=2) + "\n"
     (work / "report.json").write_text(report)
     print(report, end="")
