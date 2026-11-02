@@ -25,6 +25,7 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+binary-resources = ["ferroui-markup-xaml/binary-resources"]
 # Original control-theme documents for opt-in designer definition libraries.
 # Normal applications continue to ship only compiled markup.
 designer-sources = []

@@ -17,7 +17,7 @@
 //! ```
 
 use ferroui_base::StaticType;
-use ferroui_markup_xaml_loader::rust_emitter::{generate_class_file, ClassConstructor, ClassFile, XamlMetadata};
+use ferroui_markup_xaml_loader::rust_emitter::{generate_class_file_binary, BinaryResourceFiles, ClassConstructor, ClassFile, XamlMetadata};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 use super::support::start_application;
@@ -26,25 +26,26 @@ use crate::WinUITheme;
 const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.rs");
 const METADATA_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.xamlmeta");
 
-fn generate() -> ClassFile {
+fn generate(binary: Option<&BinaryResourceFiles>) -> ClassFile {
     let _app = start_application();
     crate::register_types();
     // The emitter reads the documents of the class as the run-time loader does.
     FerroRuntimeXamlLoader::register_class_document(<WinUITheme as StaticType>::TYPE, WinUITheme::DOCUMENT_URI);
     // The constructor is stated: the markup metadata of the theme declares `new()` next to the
     // constructor that takes the service provider, so the compiler would pick `new()`.
-    generate_class_file(
+    generate_class_file_binary(
         <WinUITheme as StaticType>::TYPE,
         Some(ClassConstructor::ServiceProvider("with_service_provider")),
         "::ferroui_themes_winui::compiled_xaml",
         &[],
+        binary,
     )
     .unwrap_or_else(|reasons| panic!("the documents of the theme are not eligible:\n{reasons}"))
 }
 
 #[test]
 fn compiled_xaml_is_up_to_date() {
-    let file = generate();
+    let file = generate(None);
     let metadata = std::fs::read_to_string(METADATA_PATH).expect("compiled_xaml.xamlmeta can be read");
     assert!(
         file.metadata(&[]).to_json() == metadata,
@@ -73,7 +74,7 @@ fn compiled_xaml_is_up_to_date() {
 fn build_script_output_is_the_checked_in_reference() {
     let built = include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"));
     let checked_in = std::fs::read_to_string(PATH).expect("compiled_xaml.rs can be read");
-    if built != checked_in {
+    if !cfg!(feature = "binary-resources") && built != checked_in {
         let line = built
             .lines()
             .zip(checked_in.lines())
@@ -92,10 +93,27 @@ fn build_script_output_is_the_checked_in_reference() {
     assert!(built.documents == checked_in.documents, "the documents of the .xamlmeta of the build script differ from the checked-in reference");
 }
 
+/// Model and runtime hosts must choose the same rows, factory order, source locations,
+/// reload identifiers and payload bytes even with different host-side type tables.
+#[cfg(feature = "binary-resources")]
+#[test]
+fn binary_build_matches_runtime_host() {
+    let binary = BinaryResourceFiles::new("compiled_xaml");
+    let file = generate(Some(&binary));
+    let directory = std::path::Path::new(env!("OUT_DIR")).join("xaml");
+    assert!(file.source == std::fs::read_to_string(directory.join("compiled_xaml.rs")).unwrap());
+    let files = binary.take();
+    assert!(!files.is_empty(), "WinUI should emit binary resource blocks");
+    for (name, expected) in files {
+        let actual = std::fs::read(directory.join(&name)).unwrap();
+        assert!(expected == actual, "FXB payload differs in {name}");
+    }
+}
+
 #[test]
 #[ignore = "writes compiled_xaml.rs and compiled_xaml.xamlmeta; run it to regenerate the checked-in output"]
 fn regenerate_compiled_xaml() {
-    let file = generate();
+    let file = generate(None);
     std::fs::write(PATH, &file.source).expect("compiled_xaml.rs can be written");
     std::fs::write(METADATA_PATH, file.metadata(&[]).to_json()).expect("compiled_xaml.xamlmeta can be written");
 }

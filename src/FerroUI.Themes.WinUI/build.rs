@@ -133,14 +133,23 @@ fn main() {
         })
         .collect();
     let documents: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+    let mut group = ferroui_build::XamlGroup::new("compiled_xaml")
+        .documents(&documents)
+        .binary_resources(cfg!(feature = "binary-resources"))
+        .class_document("WinUITheme.xaml")
+        .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider"));
+    // Cargo tracks this input even for builds that use the full dictionary. WinUITheme's
+    // constructor looks up CompactStyles from Rust, independently of the application's XAML.
+    println!("cargo::rerun-if-env-changed=FERROUI_WINUI_THEME_ROOTS");
+    if let Some(value) = env::var_os("FERROUI_WINUI_THEME_ROOTS") {
+        let value = value.to_str().expect("FERROUI_WINUI_THEME_ROOTS must be UTF-8");
+        let mut roots: Vec<_> = value.split(',').map(str::trim).filter(|s| !s.is_empty()).collect();
+        roots.push("CompactStyles");
+        group = group.resource_roots(&roots);
+    }
     ferroui_build::Build::from_env()
         .type_system(ferroui_build::TypeSystem::Model)
-        .compile_group(
-            ferroui_build::XamlGroup::new("compiled_xaml")
-                .documents(&documents)
-                .class_document("WinUITheme.xaml")
-                .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider")),
-        )
+        .compile_group(group)
         .run();
 
     // Written only when it changed, so that the crate is not rebuilt for nothing.

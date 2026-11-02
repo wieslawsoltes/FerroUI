@@ -157,6 +157,7 @@
 
 pub mod deterministic_id_generator;
 mod diagnostics;
+mod resource_roots;
 // The model, the scanner and the export are the crate the framework crates scan themselves
 // with (`ferroui-build-scan`, which links nothing of the framework); they are exported
 // here under the names they had in this crate.
@@ -182,7 +183,7 @@ pub use ferroui_markup_xaml_loader::rust_emitter::ClassConstructor;
 use crate::xaml_compiler_diagnostics_filter::XamlCompilerDiagnosticsFilter;
 use ferroui_markup_xaml_loader::compiler_extensions::FerroXamlDiagnosticCodes;
 use ferroui_markup_xaml_loader::rust_emitter::{
-    class_document_group, class_of_document, generate_class_file_with, generate_file_with, rust_string_literal, ClassGroup, CompiledMarkupTypeSystem,
+    class_document_group, class_of_document, generate_class_file_with_binary_resources, generate_file_with_binary_resources, BinaryResourceFiles, rust_string_literal, ClassGroup, CompiledMarkupTypeSystem,
     EmitterHost, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 
@@ -197,10 +198,12 @@ pub const XAMLMETA_VARIABLE: &str = "FERROUI_XAMLMETA";
 /// transformers see every document of it, so includes between them are linked, as
 /// upstream compiles the documents of an assembly.
 pub struct XamlGroup {
+    binary_resources: bool,
     module: String,
     documents: Option<Vec<(String, String)>>,
     create_source_info: Option<bool>,
     exported: bool,
+    resource_roots: Option<Vec<String>>,
     class_document: Option<String>,
     constructor: Option<ClassConstructor>,
 }
@@ -228,7 +231,17 @@ impl XamlGroup {
     /// root. Without [`documents`](Self::documents) the group is every `.xaml` file
     /// below the XAML root of the build.
     pub fn new(module: &str) -> Self {
-        Self { module: module.to_string(), documents: None, create_source_info: None, exported: true, class_document: None, constructor: None }
+        Self { binary_resources: false, module: module.to_string(), documents: None, resource_roots: None, create_source_info: None, exported: true, class_document: None, constructor: None }
+    }
+
+    /// Compiles a closed set of resource entries. Roots are simple string keys or the local
+    /// type name of an explicit x:Type key. The compiler follows XAML references transitively
+    /// across the group, keeping all definitions of a live key. Code-created controls and
+    /// keys requested from code, expressions or external markup must be roots too.
+    /// Omitting this option preserves open-ended lookup of the full dictionary.
+    pub fn resource_roots(mut self, roots: &[&str]) -> Self {
+        self.resource_roots = Some(roots.iter().map(|s| s.to_string()).collect());
+        self
     }
 
     /// Makes the group the group of a class of the crate: `name` (its path below the root
@@ -266,6 +279,14 @@ impl XamlGroup {
     /// without the call, as the assembly states it.
     pub fn create_source_info(mut self, value: bool) -> Self {
         self.create_source_info = Some(value);
+        self
+    }
+
+    /// Put homogeneous theme resource runs in individually trimmable FXB files. The
+    /// consuming crate must enable `ferroui-markup-xaml/binary-resources`. Other
+    /// nodes retain their direct, typed Rust calls.
+    pub fn binary_resources(mut self, enabled: bool) -> Self {
+        self.binary_resources = enabled;
         self
     }
 
@@ -666,7 +687,7 @@ impl Build {
                 errors.push(format!("two groups have the module `{}`", group.module));
                 continue;
             }
-            let documents = match &group.documents {
+            let mut documents = match &group.documents {
                 Some(documents) => documents.clone(),
                 None => {
                     let root = self.manifest_dir.join(&self.xaml_root);
@@ -688,10 +709,17 @@ impl Build {
                     documents
                 }
             };
+            if let Some(roots) = &group.resource_roots {
+                if let Err(error) = resource_roots::trim(&mut documents, roots) {
+                    errors.push(format!("XAML resource roots for group '{}': {error}", group.module));
+                    continue;
+                }
+            }
             let borrowed: Vec<(&str, &str)> = documents.iter().map(|(name, xaml)| (name.as_str(), xaml.as_str())).collect();
             let path = xaml_directory.join(format!("{}.rs", group.module));
             let module_path = format!("::{}::{}", self.crate_name, group.module);
 
+            let binary = group.binary_resources.then(|| BinaryResourceFiles::new(&group.module));
             // The group of a class of the crate.
             if let Some(class_document) = &group.class_document {
                 let Some((type_system, models, types)) = &model_host else {
@@ -710,7 +738,7 @@ impl Build {
                     diagnostic_handler: Some(diagnostics.handler()),
                     design_mode: false,
                 };
-                let compiled = class_group(&host, &**models, &root_uri, &borrowed, class_document, group.constructor, &module_path, &options);
+                let compiled = class_group(&host, &**models, &root_uri, &borrowed, class_document, group.constructor, &module_path, &options, binary.as_ref());
                 let reported_errors = diagnostics.report(&mut lines, &mut errors);
                 match compiled {
                     Ok(file) => {
@@ -718,6 +746,7 @@ impl Build {
                         for warning in &file.warnings {
                             diagnostics.warning(FerroXamlDiagnosticCodes::XAML_LOADER_UNREACHABLE, class_document, warning, &mut lines, &mut errors);
                         }
+                        write_binary_files(&xaml_directory, binary.as_ref(), &mut errors);
                         write_if_changed(&path, &file.source, &mut errors);
                         let class_metadata = file.metadata(&[]);
                         if group.exported {
@@ -756,12 +785,12 @@ impl Build {
                         diagnostic_handler: Some(diagnostics.handler()),
                         design_mode: false,
                     };
-                    generate_file_with(&host, &assembly_name, &root_uri, &borrowed, &options)
+                    generate_file_with_binary_resources(&host, &assembly_name, &root_uri, &borrowed, &options, binary.as_ref())
                 }
                 #[cfg(feature = "runtime-host")]
                 None => {
                     let Some(assembly) = self.assembly else { break };
-                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, self.default_compile_bindings, &dependencies)
+                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, self.default_compile_bindings, &dependencies, binary.as_ref())
                 }
                 // Reported before the groups: without the feature no group is compiled
                 // against the run-time type system.
@@ -785,6 +814,7 @@ impl Build {
                     false => errors.push(diagnostics::error(FerroXamlDiagnosticCodes::EMIT_ERROR, name, &reason)),
                 }
             }
+            write_binary_files(&xaml_directory, binary.as_ref(), &mut errors);
             write_if_changed(&path, &file.source, &mut errors);
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
             if group.exported {
@@ -897,6 +927,7 @@ mod runtime_host {
         create_source_info: Option<bool>,
         default_compile_bindings: bool,
         dependencies: &[XamlMetadata],
+        binary: Option<&super::BinaryResourceFiles>,
     ) -> GeneratedFile {
         let mut configuration = RuntimeXamlLoaderConfiguration::new();
         configuration.local_assembly = Some(assembly);
@@ -904,7 +935,7 @@ mod runtime_host {
         if let Some(create_source_info) = create_source_info {
             configuration.set_create_source_info(create_source_info);
         }
-        ferroui_markup_xaml_loader::rust_emitter::generate_file(assembly.name, root_uri, documents, &configuration, dependencies)
+        ferroui_markup_xaml_loader::rust_emitter::generate_file_binary(assembly.name, root_uri, documents, &configuration, dependencies, binary)
     }
 }
 
@@ -939,6 +970,7 @@ fn class_group(
     constructor: Option<ClassConstructor>,
     module_path: &str,
     options: &TransformOptions,
+    binary: Option<&BinaryResourceFiles>,
 ) -> Result<ferroui_markup_xaml_loader::rust_emitter::ClassFile, ClassGroupError> {
     let group = class_document_group(root_uri, documents, class_document).map_err(ClassGroupError::Transform)?;
     let class_name = class_of_document(&group[0].1)
@@ -949,7 +981,7 @@ fn class_group(
             "the type models have no type `{class_name}`, which the document names with `x:Class`: the class is not declared in the sources of the crate, or its declaration is not read"
         ))
     })?;
-    generate_class_file_with(host, &ClassGroup { class, documents: &group, constructor, module_path }, options).map_err(|reasons| {
+    generate_class_file_with_binary_resources(host, &ClassGroup { class, documents: &group, constructor, module_path }, options, binary).map_err(|reasons| {
         match reasons.strip_prefix(CLASS_GROUP_NOT_TRANSFORMED) {
             Some(_) => ClassGroupError::Transform(reasons),
             None => ClassGroupError::Emit(reasons),
@@ -1009,8 +1041,16 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) ->
     Ok(())
 }
 
-/// Writes `text` to `path` unless the file holds it already, so that a build that
-/// changed nothing does not make the compiler run again.
+/// Materialize only the binary leaves referenced by this compilation.
+fn write_binary_files(directory: &Path, files: Option<&BinaryResourceFiles>, errors: &mut Vec<String>) {
+    let Some(files) = files else { return };
+    for (name, bytes) in files.take() {
+        if let Err(error) = ferroui_build_scan::export::write_bytes_if_changed(&directory.join(name), &bytes) {
+            errors.push(error);
+        }
+    }
+}
+
 fn write_if_changed(path: &Path, text: &str, errors: &mut Vec<String>) {
     if let Err(error) = ferroui_build_scan::export::write_if_changed(path, text) {
         errors.push(error);
