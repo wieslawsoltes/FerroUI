@@ -1,0 +1,71 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lc="https://ferroui.dev/livecharts"
+             Header="PolarChart"
+             x:Class="ControlCatalog.Pages.PolarChartPage">
+  <!-- Not from upstream: the polar chart of the LiveCharts2 port (docs/porting/livecharts2.md). -->
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Spacing="16">
+      <TextBlock Classes="h2">Polar lines on angle and radius axes</TextBlock>
+      <WrapPanel Orientation="Horizontal" ItemSpacing="16" LineSpacing="16">
+        <StackPanel Spacing="8" Width="340">
+          <TextBlock Classes="h3">Radar</TextBlock>
+          <lc:PolarChart Height="320" LegendPosition="Bottom">
+            <lc:PolarChart.YAxes>
+              <lc:Axis MinLimit="0" MaxLimit="10" LabelsAngle="-60" />
+            </lc:PolarChart.YAxes>
+            <lc:PolarLineSeries Name="Model A" LineSmoothness="0">
+              <lc:ChartPoint X="0" Y="8" />
+              <lc:ChartPoint X="1" Y="6" />
+              <lc:ChartPoint X="2" Y="7" />
+              <lc:ChartPoint X="3" Y="4" />
+              <lc:ChartPoint X="4" Y="5" />
+              <lc:ChartPoint X="5" Y="9" />
+            </lc:PolarLineSeries>
+            <lc:PolarLineSeries Name="Model B" LineSmoothness="0">
+              <lc:ChartPoint X="0" Y="5" />
+              <lc:ChartPoint X="1" Y="8" />
+              <lc:ChartPoint X="2" Y="4" />
+              <lc:ChartPoint X="3" Y="8" />
+              <lc:ChartPoint X="4" Y="7" />
+              <lc:ChartPoint X="5" Y="6" />
+            </lc:PolarLineSeries>
+          </lc:PolarChart>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="340">
+          <TextBlock Classes="h3">Inner radius and an open line</TextBlock>
+          <lc:PolarChart Height="320" InnerRadius="40">
+            <lc:PolarChart.YAxes>
+              <lc:Axis MaxLimit="20" />
+            </lc:PolarChart.YAxes>
+            <lc:PolarLineSeries Name="Signal" IsClosed="False" GeometrySize="10">
+              <lc:ChartPoint X="0" Y="10" />
+              <lc:ChartPoint X="1" Y="8" />
+              <lc:ChartPoint X="2" Y="12" />
+              <lc:ChartPoint X="3" Y="6" />
+              <lc:ChartPoint X="4" Y="14" />
+              <lc:ChartPoint X="5" Y="4" />
+            </lc:PolarLineSeries>
+          </lc:PolarChart>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="340">
+          <TextBlock Classes="h3">A half circle</TextBlock>
+          <lc:PolarChart Height="320" InitialRotation="-180" MaxAngle="180">
+            <lc:PolarChart.XAxes>
+              <lc:Axis MinLimit="0" MaxLimit="180" />
+            </lc:PolarChart.XAxes>
+            <lc:PolarLineSeries Name="Response" Fill="#00000000" GeometrySize="0">
+              <lc:ChartPoint X="0" Y="2" />
+              <lc:ChartPoint X="30" Y="5" />
+              <lc:ChartPoint X="60" Y="8" />
+              <lc:ChartPoint X="90" Y="9" />
+              <lc:ChartPoint X="120" Y="7" />
+              <lc:ChartPoint X="150" Y="4" />
+              <lc:ChartPoint X="180" Y="3" />
+            </lc:PolarLineSeries>
+          </lc:PolarChart>
+        </StackPanel>
+      </WrapPanel>
+    </StackPanel>
+  </ScrollViewer>
+</ContentPage>

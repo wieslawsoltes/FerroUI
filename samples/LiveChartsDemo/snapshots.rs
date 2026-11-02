@@ -1,5 +1,5 @@
-//! The Cartesian and pie scenarios of LiveCharts2's `tests/SnapshotTests` at the pin, restated
-//! with the native controls. Each scenario keeps the source's chart, series, values, axes and
+//! The Cartesian, pie and polar scenarios of LiveCharts2's `tests/SnapshotTests` at the pin,
+//! restated with the native controls. Each scenario keeps the source's chart, series, values, axes and
 //! size; `livecharts-snapshots` renders them through Vello CPU, and the render job of
 //! `livecharts.yml` keeps the images beside the upstream reference images. The upstream suite
 //! compares SkiaSharp images pixel by pixel, which a native renderer cannot reproduce, so the
@@ -12,11 +12,13 @@ use ferroui_base::media::Color;
 use ferroui_base::{Ref, Size};
 use ferroui_controls_livecharts::{
     Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint, ChartSeries,
-    ColumnSeries, LineSeries, PieChart, PieSeries, PolarLabelsPosition, RangeColumnSeries,
-    RangeLineSeries, RangeRowSeries, RowSeries, ScatterSeries, StackedAreaSeries,
-    StackedColumnSeries, StackedRowSeries, StackedStepAreaSeries, StepLineSeries,
+    ColumnSeries, LineSeries, PieChart, PieSeries, PolarChart, PolarLabelsPosition,
+    PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries, RowSeries, ScatterSeries,
+    StackedAreaSeries, StackedColumnSeries, StackedRowSeries, StackedStepAreaSeries,
+    StepLineSeries,
 };
 use ferroui_livecharts::kernel::Coordinate;
+use ferroui_livecharts::{COTANGENT_ANGLE, TANGENT_ANGLE};
 
 /// One scenario: the name of its upstream reference image (`<Class>_<Test>`), its size and a
 /// builder. `then` runs after a first measure, for the source tests that change data after
@@ -139,6 +141,11 @@ pub fn scenarios() -> Vec<Scenario> {
             build: pie_gauge_tight,
             then: None,
         },
+        scenario("PolarChartTests_Basic", polar_basic),
+        scenario("PolarChartTests_MultipleSeries", polar_multiple),
+        scenario("PolarChartTests_FilledArea", polar_filled),
+        scenario("PolarChartTests_WithInnerRadius", polar_inner_radius),
+        scenario("PolarChartTests_OpenLine", polar_open_line),
     ]
 }
 
@@ -155,6 +162,16 @@ fn cartesian(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
 
 fn pie_chart(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
     let chart = PieChart::new().upcast::<Chart>();
+    for s in series {
+        chart.series().add(s);
+    }
+    chart.set_animations_speed(0.0);
+    chart
+}
+
+/// A polar chart: its X axes are the angle axes, its Y axes the radius axes.
+fn polar_chart(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
+    let chart = PolarChart::new().upcast::<Chart>();
     for s in series {
         chart.series().add(s);
     }
@@ -887,6 +904,75 @@ fn pie_gauge_tight() -> Ref<Chart> {
     chart.set_min_value(0.);
     chart.set_max_value(Some(100.));
     chart
+}
+
+// PolarChartTests.
+
+fn polar_basic() -> Ref<Chart> {
+    let s = values(
+        PolarLineSeries::new(),
+        &[
+            15., 14., 13., 12., 11., 10., 9., 8., 7., 6., 5., 4., 3., 2., 1.,
+        ],
+    );
+    s.set_data_labels(true);
+    s.set_geometry_size(15.);
+    s.set_data_labels_size(8.);
+    s.set_polar_labels_position(PolarLabelsPosition::Middle);
+    s.set_data_labels_rotation(COTANGENT_ANGLE);
+    s.set_polar_closed(true);
+    let chart = polar_chart(vec![s]);
+    chart.y_axes().add(axis(|a| {
+        a.set_labels_angle(-60.);
+        a.set_max_limit(Some(30.));
+    }));
+    chart.x_axes().add(axis(|a| a.set_labels_rotation(TANGENT_ANGLE)));
+    chart
+}
+
+const POLAR_1: [f64; 6] = [10., 8., 12., 6., 14., 4.];
+const POLAR_2: [f64; 6] = [6., 14., 4., 10., 8., 12.];
+const POLAR_3: [f64; 6] = [12., 6., 10., 14., 4., 8.];
+
+fn radius_to_20(chart: Ref<Chart>) -> Ref<Chart> {
+    chart.y_axes().add(axis(|a| a.set_max_limit(Some(20.))));
+    chart
+}
+
+fn polar_multiple() -> Ref<Chart> {
+    radius_to_20(polar_chart(vec![
+        values(PolarLineSeries::new(), &POLAR_1),
+        values(PolarLineSeries::new(), &POLAR_2),
+        values(PolarLineSeries::new(), &POLAR_3),
+    ]))
+}
+
+fn polar_filled() -> Ref<Chart> {
+    let filled = |v: &[f64], fill: Color| {
+        let s = values(PolarLineSeries::new(), v);
+        s.set_fill(Some(fill));
+        s.set_geometry_size(0.);
+        s
+    };
+    radius_to_20(polar_chart(vec![
+        filled(&POLAR_1, Color::from_argb(0x33, 0x64, 0x95, 0xED)),
+        filled(&POLAR_2, Color::from_argb(0x33, 0xF0, 0x80, 0x80)),
+    ]))
+}
+
+fn polar_inner_radius() -> Ref<Chart> {
+    let chart = radius_to_20(polar_chart(vec![values(PolarLineSeries::new(), &POLAR_1)]));
+    chart.set_inner_radius(50.);
+    chart
+}
+
+fn polar_open_line() -> Ref<Chart> {
+    // GeometryFill and GeometryStroke have no native counterpart; the markers take the series
+    // paint.
+    let s = values(PolarLineSeries::new(), &POLAR_1);
+    s.set_polar_closed(false);
+    s.set_geometry_size(12.);
+    radius_to_20(polar_chart(vec![s]))
 }
 
 /// Builds a scenario and measures it at its size, applying its change after a first measure.
