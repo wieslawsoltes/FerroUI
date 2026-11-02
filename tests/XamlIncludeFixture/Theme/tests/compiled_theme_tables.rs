@@ -57,6 +57,15 @@ fn compiled_theme_tables_match_the_interpreter() {
     );
     assert_eq!(expected[4].0, Color::from_uint32(0xff102030));
     assert_eq!(expected[8].1, 0.5);
+    #[cfg(feature = "binary-reload-tests")]
+    {
+        let syntax = ferroui_markup_xaml_loader::binary_document::compile(crate::documents::TABLE_TEST[0].1).unwrap();
+        let value = FerroRuntimeXamlLoader::load_stream(
+            Box::new(std::io::Cursor::new(syntax)), Some(&crate::ASSEMBLY), None, None, false,
+        ).unwrap();
+        let dictionary = ferroui_base::metadata::from_markup_value::<Ref<ResourceDictionary>>(&Some(value)).unwrap();
+        assert_eq!(materialize(dictionary), expected);
+    }
 
     for build in [
         crate::compact_rust::build_compact_xaml,

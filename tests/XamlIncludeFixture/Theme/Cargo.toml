@@ -19,7 +19,7 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
-binary-reload-tests = ["dep:ferroui-hot-reload"]
+binary-reload-tests = ["dep:ferroui-hot-reload", "ferroui-markup-xaml-loader/portable-xaml"]
 
 [dependencies]
 ferroui-hot-reload = { workspace = true, features = ["binary-resources"], optional = true }
