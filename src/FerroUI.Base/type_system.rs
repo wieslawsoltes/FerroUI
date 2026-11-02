@@ -1245,8 +1245,18 @@ macro_rules! ferro_class {
                 $base: $crate::Subclassable<T>,
             {
                 fn build_vtable() -> [<$name VTable>] {
+                    let base = <$base as $crate::Subclassable<T>>::build_vtable();
+                    // Looking up the parent can initialize its OnceLock. Resolve it
+                    // once for all inherited slots and only if a slot needs it.
+                    let parent = if const { false $(|| $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                        <T as $impl_trait>::__OVERRIDES, ::std::stringify!($method),
+                    ))* } {
+                        Some($crate::parent_vtable::<T, [<$name VTable>]>())
+                    } else {
+                        None
+                    };
                     [<$name VTable>] {
-                        base: <$base as $crate::Subclassable<T>>::build_vtable(),
+                        base,
                         $(
                             $method: {
                                 // SAFETY: this table is only attached to objects
@@ -1263,7 +1273,7 @@ macro_rules! ferro_class {
                                     )
                                 };
                                 if forwards {
-                                    $crate::parent_vtable::<T, [<$name VTable>]>().$method
+                                    parent.expect("inherited slot has a parent table").$method
                                 } else {
                                     own
                                 }
