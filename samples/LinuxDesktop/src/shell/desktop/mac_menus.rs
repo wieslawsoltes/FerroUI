@@ -4,15 +4,60 @@ use super::*;
 use crate::session::{ClientWindow, Session, SnapSide};
 use ferroui_controls::{MenuItem, MenuItemToggleType};
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) enum MenuHost {
+    InScene,
+    Native,
+    OpaqueNative,
+}
+
+impl MenuHost {
+    pub(super) fn current() -> Self {
+        use ferroui_base::{FerroLocator, LocatorExtensions};
+        if use_context::<super::super::ManagedDesktopWindow>().is_some() {
+            let platform = FerroLocator::current().get_service::<ferroui_x11::FerroX11Platform>();
+            if platform.is_some_and(|x| !x.globals().is_composition_enabled()) {
+                Self::OpaqueNative
+            } else {
+                Self::Native
+            }
+        } else if use_context::<DesktopBackdrop>().is_some() {
+            Self::InScene
+        } else {
+            // A Wayland panel is a narrow layer surface. Its native popup
+            // can extend beyond the edge reservation.
+            Self::Native
+        }
+    }
+}
+
+pub(super) fn opaque_background(color: &str) -> Rc<dyn ferroui_base::media::IBrush> {
+    use ferroui_base::media::{immutable::ImmutableSolidColorBrush, Color};
+    Rc::new(ImmutableSolidColorBrush::new(
+        Color::parse(color).expect("desktop surface color"),
+    ))
+}
+
 fn submenu() -> El<MenuItem> {
-    let shared = use_context::<DesktopBackdrop>().is_some();
+    let host = MenuHost::current();
+    let surface = colors().surface;
     menu_item().on_template_applied(move |event| {
-        if shared {
-            if let Some(popup) = event
-                .name_scope()
-                .find_as::<ferroui_controls::primitives::Popup>("PART_Popup")
-            {
-                popup.set_should_use_overlay_layer(true);
+        let Some(popup) = event
+            .name_scope()
+            .find_as::<ferroui_controls::primitives::Popup>("PART_Popup")
+        else {
+            return;
+        };
+        popup.set_should_use_overlay_layer(host == MenuHost::InScene);
+        if host == MenuHost::OpaqueNative {
+            // Without an X compositor, transparent pixels around the menu
+            // become the native window's clear color. Remove the shadow
+            // inset and paint a continuous surface to the popup edges.
+            if let Some(frame) = popup.child().and_then(|c| c.downcast::<Border>().ok()) {
+                frame.set_margin(Default::default());
+                frame.set_box_shadow(Default::default());
+                frame.set_corner_radius(Default::default());
+                frame.set_background(Some(opaque_background(surface)));
             }
         }
     })

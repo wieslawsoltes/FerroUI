@@ -410,6 +410,11 @@ fn create(
     state
 }
 
+/// Openbox keeps this desktop window beneath native clients. A popup
+/// anchored to its panels must be a separate, higher X11 window.
+#[derive(Clone, Copy)]
+struct ManagedDesktopWindow;
+
 pub fn view(
     initial: Scene,
     catalog: Rc<ApplicationCatalog>,
@@ -418,6 +423,9 @@ pub fn view(
     managed: bool,
 ) -> Element {
     ferroui_view::provide_context(DesktopBackdrop);
+    if managed && session.as_ref().is_some_and(|s| s.compositor().is_none()) {
+        ferroui_view::provide_context(ManagedDesktopWindow);
+    }
     let state = create(initial, catalog, session, themes, managed);
     root(state, true)
 }
