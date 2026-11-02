@@ -295,33 +295,26 @@ fn untyped_markup_value(boxed: BoxedValue) -> MarkupValue {
 /// Converts an untyped value to the Rust type `T` with the assignability
 /// casts of [`ValueTypes`]. `None` if the value is not assignable to `T`.
 pub fn from_markup_value<T: Clone + 'static>(value: &MarkupValue) -> Option<T> {
-    let target = TypeId::of::<T>();
-    if target == TypeId::of::<Option<BoxedValue>>() {
-        let any: &dyn Any = value;
-        return any.downcast_ref::<T>().cloned();
+    if TypeId::of::<T>() == TypeId::of::<MarkupValue>() {
+        return (value as &dyn Any).downcast_ref().cloned();
     }
-    match value {
-        Some(boxed) => {
-            if let Some(exact) = boxed.downcast_ref::<T>() {
-                return Some(exact.clone());
-            }
-            if target == TypeId::of::<BoxedValue>() {
-                let any: &dyn Any = boxed;
-                return any.downcast_ref::<T>().cloned();
-            }
-            coerce_markup_argument(boxed, ValueType::of::<T>())?.downcast_ref::<T>().cloned()
+    if let Some(boxed) = value {
+        if let Some(exact) = boxed.downcast_ref::<T>() {
+            return Some(exact.clone());
         }
-        None => {
-            let null = ValueTypes::try_convert(None, ValueType::of::<T>())??;
-            null.downcast_ref::<T>().cloned()
+        if TypeId::of::<T>() == TypeId::of::<BoxedValue>() {
+            return (boxed as &dyn Any).downcast_ref().cloned();
         }
     }
+    let coerced = coerce_markup_argument(value, ValueType::of::<T>())?;
+    coerced.downcast_ref::<T>().cloned()
 }
 
-// A generated member invoker needs only the final checked clone specialized for
-// its Rust parameter. Share the registry lookup and runtime-class conversion.
+// The exact-type path in a generated invoker only clones its typed argument.
+// Share null materialization and all registry/class conversions across invokers.
 #[inline(never)]
-fn coerce_markup_argument(value: &BoxedValue, target: ValueType) -> MarkupValue {
+fn coerce_markup_argument(value: &MarkupValue, target: ValueType) -> MarkupValue {
+    let Some(value) = value else { return ValueTypes::try_convert(None, target)? };
     if let Some(cast) = ValueTypes::try_cast(value, target) {
         return Some(cast);
     }

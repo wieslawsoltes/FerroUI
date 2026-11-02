@@ -1363,7 +1363,7 @@ macro_rules! ferro_class_info {
         impl $name {
             #[doc(hidden)]
             pub const __INTERFACES: &'static [$crate::metadata::TypeOf] =
-                &[$(|| $crate::data::core::ValueType::of::<$interface>()),*];
+                &[$($crate::data::core::ValueType::of::<$interface>),*];
 
             #[doc(hidden)]
             pub fn __register_interfaces() {
@@ -1390,8 +1390,8 @@ macro_rules! ferro_class_info {
                         ::std::module_path!(),
                     );
                     markup.handles = &[
-                        || $crate::data::core::ValueType::of::<$crate::Ref<$name>>(),
-                        || $crate::data::core::ValueType::of::<::std::option::Option<$crate::Ref<$name>>>(),
+                        $crate::data::core::ValueType::of::<$crate::Ref<$name>>,
+                        $crate::data::core::ValueType::of::<::std::option::Option<$crate::Ref<$name>>>,
                     ];
                     markup.type_info = ::std::option::Option::Some(|| <$name as $crate::StaticType>::TYPE);
                     markup.interfaces = {
@@ -1400,8 +1400,8 @@ macro_rules! ferro_class_info {
                         <$name>::__INTERFACES
                     };
                     $crate::__ferro_compiler_metadata!(
-                        markup.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
-                        markup.value = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
+                        markup.this = ::std::option::Option::Some($crate::data::core::ValueType::of::<$crate::Ref<$name>>);
+                        markup.value = ::std::option::Option::Some($crate::data::core::ValueType::of::<$crate::Ref<$name>>);
                     );
                     $crate::__ferro_markup_items!(markup, $crate::Ref<$name>; $($body)*);
                     markup
