@@ -114,43 +114,96 @@ impl Sections {
     }
 
     // One role edit can only create, remove or rename a boundary at this row
-    // or the next. Structural edits still rebuild against the new row order.
+    // or the next. Return the first affected label rank.
     fn update_boundary_pair(
         &mut self,
         tx: &mut Transaction<'_>,
         owner: ObjectId,
         source: &Source,
         row: RowId,
-    ) -> Result<bool, Error> {
+    ) -> Result<Option<usize>, Error> {
         let Source::Rows(model) = source else {
-            return Ok(false);
+            return Ok(None);
         };
         let Some(index) = tx.model.models[model].row_index(row) else {
-            return Ok(false);
+            return Ok(None);
         };
         let mut previous = match index.checked_sub(1) {
             Some(i) => self.section_name(tx, owner, source, i)?.to_lowercase(),
             None => String::new(),
         };
-        let mut changed = false;
+        let mut changed = None;
         for i in index..(index + 2).min(source.len(tx.model)) {
             let name = self.section_name(tx, owner, source, i)?;
             let folded = name.to_lowercase();
             let boundary = folded != previous;
             previous = folded;
-            match self.groups.binary_search_by_key(&i, |g| g.0) {
+            let at = match self.groups.binary_search_by_key(&i, |g| g.0) {
                 Ok(at) if !boundary => {
                     Rc::make_mut(&mut self.groups).remove(at);
+                    at
                 }
                 Ok(at) if self.groups[at].1 != name => {
                     Rc::make_mut(&mut self.groups)[at].1 = name;
+                    at
                 }
                 Err(at) if boundary => {
                     Rc::make_mut(&mut self.groups).insert(at, (i, name));
+                    at
                 }
                 _ => continue,
+            };
+            changed.get_or_insert(at);
+        }
+        Ok(changed)
+    }
+
+    /// Replace the boundaries in one edit window. Reading the first retained
+    /// row after the window determines whether its old group now merges with
+    /// the new tail. All later boundaries keep their names and relative order.
+    fn splice(
+        &mut self,
+        tx: &mut Transaction<'_>,
+        owner: ObjectId,
+        source: &Source,
+        range: list_model::RowRange,
+    ) -> Result<Option<usize>, Error> {
+        if self.role.is_empty() {
+            return Ok(None);
+        }
+        let old_end = range.first + range.removed;
+        let new_end = range.first + range.inserted;
+        let lo = self.preceding(range.first);
+        let hi = self.preceding(old_end.saturating_add(1));
+        let mut previous = lo
+            .checked_sub(1)
+            .map(|g| self.groups[g].1.to_lowercase())
+            .unwrap_or_default();
+        let mut replacement = Vec::new();
+        for i in range.first..new_end.saturating_add(1).min(source.len(tx.model)) {
+            let name = self.section_name(tx, owner, source, i)?;
+            let folded = name.to_lowercase();
+            if folded != previous {
+                replacement.push((i, name));
+                previous = folded;
             }
-            changed = true;
+        }
+        let old = &self.groups[lo..hi];
+        let matching = old
+            .iter()
+            .zip(&replacement)
+            .take_while(|(a, b)| a.1 == b.1)
+            .count();
+        let changed =
+            (matching < old.len() || matching < replacement.len()).then_some(lo + matching);
+        if old != replacement || old_end != new_end && hi < self.groups.len() {
+            let groups = Rc::make_mut(&mut self.groups);
+            if old_end != new_end {
+                for (index, _) in &mut groups[hi..] {
+                    *index = *index - old_end + new_end;
+                }
+            }
+            groups.splice(lo..hi, replacement);
         }
         Ok(changed)
     }
@@ -338,6 +391,7 @@ impl Transaction<'_> {
         id: ObjectId,
         state: &mut State,
         dirty: bool,
+        structure: Option<list_model::ModelEdit>,
         edited: Option<repeater::SectionEdit>,
     ) -> Result<bool, Error> {
         let sections = &mut state.sections;
@@ -348,31 +402,44 @@ impl Transaction<'_> {
         let next = factory(self.model, id, "section.delegate")?;
         sections.inline =
             real(self.model, id, "section.labelPositioning") as i32 & 1 != 0 && next.is_some();
+        let range = match structure {
+            Some(list_model::ModelEdit::Rows(range)) if edited.is_none() => Some(range),
+            _ => None,
+        };
         let rebuild = dirty
             || role != sections.role
             || first != sections.first_character
             || next != sections.factory
-            || edited == Some(repeater::SectionEdit::MultipleRows);
+            || edited == Some(repeater::SectionEdit::MultipleRows)
+            || (structure.is_some() && range.is_none());
         if !rebuild {
-            let Some(repeater::SectionEdit::Row(row)) = edited else {
+            let invalid = if let Some(range) = range {
+                sections.splice(self, id, &state.source, range)?
+            } else if let Some(repeater::SectionEdit::Row(row)) = edited {
+                sections.update_boundary_pair(self, id, &state.source, row)?
+            } else {
                 return Ok(false);
             };
-            if !sections.update_boundary_pair(self, id, &state.source, row)? {
-                return Ok(false);
+            if let Some(first) = invalid {
+                let retired = sections.labels.split_off(&first);
+                self.destroy_subtrees(&retired.into_values().collect::<Vec<_>>())?;
+                sections.sizes.truncate(first);
+                if first == 0 {
+                    sections.nominal = None;
+                }
             }
+            return Ok(invalid.is_some() && range.is_none());
         }
         self.destroy_subtrees(&sections.items().collect::<Vec<_>>())?;
         sections.labels.clear();
         sections.nominal = None;
         sections.sizes = Default::default();
-        if rebuild {
-            // Destruction handlers may edit the model. Read the new grouping
-            // after retiring the old delegates, just as on the first layout.
-            sections.role = role;
-            sections.first_character = first;
-            sections.factory = next;
-            sections.rebuild(self, id, &state.source)?;
-        }
+        // Destruction handlers may edit the model. Read the new grouping
+        // after retiring the old delegates, just as on the first layout.
+        sections.role = role;
+        sections.first_character = first;
+        sections.factory = next;
+        sections.rebuild(self, id, &state.source)?;
         Ok(true)
     }
 

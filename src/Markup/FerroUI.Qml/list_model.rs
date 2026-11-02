@@ -5,6 +5,23 @@ use crate::*;
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 
+/// A structural edit replaces one contiguous range. Rows before it keep their
+/// indexes. Later rows shift by the difference in range length. A move
+/// replaces the full interval between its old and new positions.
+#[derive(Clone, Copy)]
+pub(crate) struct RowRange {
+    pub first: usize,
+    pub removed: usize,
+    pub inserted: usize,
+}
+
+#[derive(Clone, Copy)]
+pub(crate) enum ModelEdit {
+    Role(RowId),
+    Rows(RowRange),
+    Reset,
+}
+
 pub(crate) const MODULE: &str = "QtQml.Models";
 const REVISION: &str = "$qml:rows";
 type Roles = BTreeMap<String, Value>;
@@ -436,7 +453,7 @@ impl Transaction<'_> {
         }
         Ok(())
     }
-    fn finish_model_edit(&mut self, id: ObjectId, row: Option<RowId>) -> Result<(), Error> {
+    fn finish_model_edit(&mut self, id: ObjectId, edit: ModelEdit) -> Result<(), Error> {
         let count = self.model.models[&id].len();
         let size = self.model.key(id, "count")?;
         let revision = self.model.key(id, REVISION)?;
@@ -445,7 +462,7 @@ impl Transaction<'_> {
         };
         self.set_value(size, Value::Number(count as f64));
         self.set_value(revision, Value::Number(previous + 1.));
-        self.model_repeaters_changed(id, row)?;
+        self.model_repeaters_changed(id, edit)?;
         self.settle()
     }
     fn model_dict(&self, value: &Value) -> Result<Roles, Error> {
@@ -503,7 +520,7 @@ impl Transaction<'_> {
                     let fields = tx.model_dict(row)?;
                     tx.insert_row(child, index, fields, dynamic)?;
                 }
-                tx.finish_model_edit(child, None)?;
+                tx.finish_model_edit(child, ModelEdit::Reset)?;
                 Ok(child)
             })?;
             *value = Value::Object(child);
@@ -584,7 +601,7 @@ impl Transaction<'_> {
         }
         let dynamic = self.model.get(row.model, "dynamicRoles")? == Value::Bool(true);
         self.update_row(row, BTreeMap::from([(name.to_owned(), value)]), dynamic)?;
-        self.finish_model_edit(row.model, Some(row))
+        self.finish_model_edit(row.model, ModelEdit::Role(row))
     }
     fn remove_rows(&mut self, id: ObjectId, range: Range<usize>) {
         let model = self.model.models.get_mut(&id).unwrap();
@@ -624,7 +641,7 @@ impl Transaction<'_> {
             return Err(Error::new("a binding cannot modify a ListModel"));
         }
         let dynamic = self.model.get(id, "dynamicRoles")? == Value::Bool(true);
-        match (method, args) {
+        let (first, removed, inserted) = match (method, args) {
             ("append", [value]) | ("insert", [_, value]) => {
                 let at = if method == "append" {
                     size
@@ -665,6 +682,7 @@ impl Transaction<'_> {
                 } else {
                     self.insert_row(id, at, self.model_dict(value)?, dynamic)?;
                 }
+                (at, 0, self.model.models[&id].len() - size)
             }
             ("set", [index, value]) => {
                 let at = position(index, size, true)?;
@@ -677,9 +695,10 @@ impl Transaction<'_> {
                         serial: self.model.models[&id].order[at],
                     };
                     self.update_row(row, fields, dynamic)?;
-                    self.finish_model_edit(id, Some(row))?;
+                    self.finish_model_edit(id, ModelEdit::Role(row))?;
                     return Ok(Value::Undefined);
                 }
+                (at, 0, 1)
             }
             ("setProperty", [index, Value::String(name), value]) => {
                 // Qt's fixed-role setProperty cannot replace nested lists. set()
@@ -696,7 +715,10 @@ impl Transaction<'_> {
                 self.write_role(RowId { model: id, serial }, name, value.clone())?;
                 return Ok(Value::Undefined);
             }
-            ("clear", []) => self.remove_rows(id, 0..size),
+            ("clear", []) => {
+                self.remove_rows(id, 0..size);
+                (0, size, 0)
+            }
             ("remove", [index]) | ("remove", [index, _]) => {
                 let start = position(index, size, false)?;
                 let count = args
@@ -707,6 +729,7 @@ impl Transaction<'_> {
                     return Err(Error::new("invalid remove range"));
                 }
                 self.remove_rows(id, start..start + count);
+                (start, count, 0)
             }
             ("move", [from, to, count]) => {
                 let count = index_arg(count)
@@ -720,6 +743,8 @@ impl Transaction<'_> {
                     .unwrap()
                     .move_range(from, to, count);
                 self.model_edits.push((id, Undo::Move { from, to, count }));
+                let length = from.abs_diff(to) + count;
+                (from.min(to), length, length)
             }
             ("sync", []) => return Err(Error::new("ListModel.sync requires WorkerScript")),
             _ => {
@@ -727,8 +752,15 @@ impl Transaction<'_> {
                     "invalid arguments to ListModel.{method}"
                 )))
             }
-        }
-        self.finish_model_edit(id, None)?;
+        };
+        self.finish_model_edit(
+            id,
+            ModelEdit::Rows(RowRange {
+                first,
+                removed,
+                inserted,
+            }),
+        )?;
         Ok(Value::Undefined)
     }
 }

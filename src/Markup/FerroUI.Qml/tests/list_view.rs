@@ -325,3 +325,107 @@ fn first_delegate_captures_untyped_role_names_introduced_by_an_edit() {
     );
     assert_eq!(ui.call(ui.root(), "start", vec![]).unwrap(), Value::Null);
 }
+
+#[test]
+fn model_splices_preserve_prefix_labels_and_match_fresh_section_geometry() {
+    fn make_view(categories: &[&str]) -> Instance {
+        let rows = categories
+            .iter()
+            .map(|category| format!("ListElement {{ category: \"{category}\" }}"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        view(&format!(
+            r#"import QtQuick
+            ListView {{ id: list; width:100; height:400; cacheBuffer:0; currentIndex:-1
+                model:ListModel {{ id: rows; {rows} }}
+                section.property:"category"
+                section.delegate:Item {{ required property string section; property string label:section; height:5 }}
+                delegate:Item {{ required property int index; height:10; property string neighbors: ListView.previousSection + "/" + ListView.section + "/" + ListView.nextSection }}
+                function insertAt(i, name) {{ rows.insert(i,{{category:name}}) }}
+                function removeAt(i, n) {{ rows.remove(i,n) }}
+                function moveRows(i, j, n) {{ rows.move(i,j,n) }}
+                function fail() {{rows.insert(1,{{category:"X"}}); missing()}}
+                function summary() {{ let out=""; for(let i=0;i<count;i++) {{ let d=itemAtIndex(i); out+=d.neighbors+":"+d.y+";" }} return out+contentHeight }}
+            }}"#
+        ))
+    }
+    fn summary(ui: &mut Instance) -> Value {
+        ui.call(ui.root(), "summary", vec![]).unwrap()
+    }
+    let mut rows = vec!["A", "a", "B", "C", "c", "D", ""];
+    let mut ui = make_view(&rows);
+    let initial = summary(&mut ui);
+    let prefix = ui
+        .objects()
+        .find(|&id| ui.get(id, "label") == Ok(Value::String("A".into())))
+        .unwrap();
+    assert!(ui.call(ui.root(), "fail", vec![]).is_err());
+    assert_eq!(summary(&mut ui), initial);
+    let n = |i: usize| Value::Number(i as f64);
+    let string = |s: &str| Value::String(s.into());
+    enum Edit {
+        Insert(usize, &'static str),
+        Remove(usize, usize),
+        Move(usize, usize, usize),
+    }
+    use Edit::*;
+    for edit in [
+        Insert(7, "F"),
+        Remove(7, 1),
+        Insert(3, "b"),
+        Remove(4, 2),
+        Move(2, 4, 2),
+        Move(4, 1, 2),
+        Insert(0, ""),
+        Remove(0, 3),
+    ] {
+        let (name, args) = match edit {
+            Insert(at, value) => {
+                rows.insert(at, value);
+                ("insertAt", vec![n(at), string(value)])
+            }
+            Remove(at, count) => {
+                rows.drain(at..at + count);
+                ("removeAt", vec![n(at), n(count)])
+            }
+            Move(from, to, count) => {
+                let moved = rows.drain(from..from + count).collect::<Vec<_>>();
+                rows.splice(to..to, moved);
+                ("moveRows", vec![n(from), n(to), n(count)])
+            }
+        };
+        ui.call(ui.root(), name, args).unwrap();
+        assert_eq!(summary(&mut ui), summary(&mut make_view(&rows)), "{rows:?}");
+        if rows.first() == Some(&"A") {
+            assert_eq!(ui.get(prefix, "label").unwrap(), string("A"));
+        }
+    }
+}
+
+#[test]
+fn section_destruction_edits_are_reconciled_against_the_final_order() {
+    let mut ui = view(
+        r#"import QtQuick
+        ListView { id:v; width:100; height:300; currentIndex:-1; property bool armed:false; property bool addSecond:true
+            model:ListModel { id:rows; ListElement { g:"A" } ListElement { g:"B" } ListElement { g:"C" } }
+            section.property:"g"
+            section.delegate:Item {required property string section; height:5
+                Component.onDestruction: { if (v.armed) { v.armed=false; rows.insert(0,{g:"D"}); if (v.addSecond) rows.append({g:"E"}) } }
+            }
+            delegate:Item { height:10; property string group:ListView.section }
+            function change() { armed=true; rows.remove(1) }
+            function changeGrouping() { addSecond=false; armed=true; v.section.property="modelData" }
+            function summary() { let text=""; for(let i=0;i<count;i++) text+=itemAtIndex(i).group; return text+"/"+contentHeight }
+        }"#,
+    );
+    ui.call(ui.root(), "change", vec![]).unwrap();
+    assert_eq!(
+        ui.call(ui.root(), "summary", vec![]).unwrap(),
+        Value::String("DACE/60".into())
+    );
+    ui.call(ui.root(), "changeGrouping", vec![]).unwrap();
+    assert_eq!(
+        ui.call(ui.root(), "summary", vec![]).unwrap(),
+        Value::String("DDACE/70".into())
+    );
+}

@@ -39,7 +39,7 @@ fn collections() {
         )
         .unwrap();
     }
-    source.push_str("} }");
+    source.push_str("} function splice(at){ rows.insert(at,{category:\"newGroup\",score:7}); rows.remove(at) } }");
     let doc = parse(&source).unwrap();
     let mut model = Instance::new(&doc, registry.types_mut(), Default::default()).unwrap();
     let view = model.root();
@@ -76,6 +76,15 @@ fn collections() {
             .unwrap();
         black_box(model.drain_changes());
     });
+    for (name, at) in [
+        ("append and remove a tail section in 8k rows", 8000.),
+        ("insert and remove a middle section in 8k rows", 4000.),
+    ] {
+        measure(name, 32, |_| {
+            model.call(view, "splice", vec![Value::Number(at)]).unwrap();
+            black_box(model.drain_changes());
+        });
+    }
     measure("scroll retained 20-row viewport by one pixel", 180, |i| {
         model
             .set(view, "contentY", Value::Number((1000 + i) as f64))

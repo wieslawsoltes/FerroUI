@@ -480,18 +480,24 @@ impl Transaction<'_> {
         let retained = &self.model.dynamic.repeaters[&id];
         let mut state = retained.list.as_deref().expect("registered view").clone();
         let model_changed = self.repeater_changes.list_models.remove(&id) || !state.initialized;
-        let structural = self.repeater_changes.list_structure.remove(&id);
+        let edit = self.repeater_changes.list_structure.remove(&id);
+        let structural = edit.is_some();
+        let changed_from = match edit {
+            Some(list_model::ModelEdit::Rows(range)) => range.first,
+            Some(_) => 0,
+            None => usize::MAX,
+        };
         let factory = match self.model.get(id, "delegate")? {
             Value::Object(o) if self.model.dynamic.templates.contains_key(&o) => Some(o),
             _ => None,
         };
         let reset = model_changed || factory != retained.factory;
         let horizontal = real(self.model, id, "orientation") == 1.;
-        if reset || structural || horizontal != state.horizontal {
+        if reset || horizontal != state.horizontal {
             state.sizes = Default::default();
-            if reset || horizontal != state.horizontal {
-                state.nominal = None;
-            }
+            state.nominal = None;
+        } else if structural {
+            state.sizes.truncate(changed_from);
         }
         if model_changed {
             let model = self.model.get(id, "model")?;
@@ -516,7 +522,10 @@ impl Transaction<'_> {
             current = -1;
         } else if previous_count == 0 && !self.model.is_assigned(id, "currentIndex") {
             current = 0;
-        } else if structural && requested == state.current {
+        } else if structural
+            && requested == state.current
+            && usize::try_from(current).is_ok_and(|i| i >= changed_from)
+        {
             if let (Source::Rows(model), Some(Key::Row(row))) = (&state.source, state.current_row) {
                 current = self.model.models[model]
                     .row_index(row)
@@ -552,7 +561,8 @@ impl Transaction<'_> {
         let sections_changed = self.prepare_sections(
             id,
             &mut state,
-            reset || structural || horizontal != retained_horizontal,
+            reset || horizontal != retained_horizontal,
+            edit,
             edited_section,
         )?;
         let mut offset = axis_position(reversed, real(self.model, id, offset_prop), viewport);
@@ -639,11 +649,11 @@ impl Transaction<'_> {
                     .unwrap_or_else(|| self.model.next_object());
                 let item = if let Some(item) = kept {
                     let moved = !previous.get(&index).is_some_and(|e| e.1 == item);
-                    if structural || moved {
+                    if index >= changed_from || moved {
                         let inputs = self.model.delegate_inputs(id, index, &value, item)?;
                         self.update_delegate(item, inputs)?;
                     }
-                    if sections_changed || moved {
+                    if sections_changed || index.saturating_add(1) >= changed_from || moved {
                         for (name, value) in state.attached_values(id, index, count, selected) {
                             self.list_property(item, &format!("ListView.{name}"), value)?;
                         }

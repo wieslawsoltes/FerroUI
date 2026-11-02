@@ -97,7 +97,7 @@ pub(crate) struct Changes {
     rebound: BTreeMap<ObjectId, RowId>,
     deferred_role_edits: BTreeSet<ObjectId>,
     pub(crate) list_models: BTreeSet<ObjectId>,
-    pub(crate) list_structure: BTreeSet<ObjectId>,
+    pub(crate) list_structure: BTreeMap<ObjectId, list_model::ModelEdit>,
     pub(crate) pending: BTreeSet<ObjectId>,
     pub(crate) busy: BTreeSet<ObjectId>,
     before: BTreeMap<ObjectId, State>,
@@ -536,7 +536,7 @@ impl Transaction<'_> {
     pub(crate) fn model_repeaters_changed(
         &mut self,
         model: ObjectId,
-        edited: Option<RowId>,
+        edit: list_model::ModelEdit,
     ) -> Result<(), Error> {
         let views: Vec<_> = self
             .model
@@ -546,7 +546,7 @@ impl Transaction<'_> {
             .filter_map(|(&id, state)| (state.model == Some(Value::Object(model))).then_some(id))
             .collect();
         for id in views {
-            if let Some(row) = edited {
+            if let list_model::ModelEdit::Role(row) = edit {
                 if !self.repeater_changes.busy.contains(&id)
                     && !self.repeater_changes.pending.contains(&id)
                 {
@@ -562,11 +562,26 @@ impl Transaction<'_> {
                     continue;
                 }
             }
-            if edited.is_some() && !self.model.dynamic.repeaters[&id].is_list_view() {
+            if matches!(edit, list_model::ModelEdit::Role(_))
+                && !self.model.dynamic.repeaters[&id].is_list_view()
+            {
                 self.repeater_changes.deferred_role_edits.insert(id);
             }
             self.repeater_changes.pending.insert(id);
-            self.repeater_changes.list_structure.insert(id);
+            if self.model.dynamic.repeaters[&id].is_list_view() {
+                // While a view is rebuilding, lifecycle callbacks may already be
+                // observing the new order. A later pass must use that final order.
+                let edit = if self.repeater_changes.busy.contains(&id) {
+                    list_model::ModelEdit::Reset
+                } else {
+                    edit
+                };
+                self.repeater_changes
+                    .list_structure
+                    .entry(id)
+                    .and_modify(|pending| *pending = list_model::ModelEdit::Reset)
+                    .or_insert(edit);
+            }
         }
         Ok(())
     }

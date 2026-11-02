@@ -65,6 +65,29 @@ impl Node {
 }
 
 impl Extents {
+    pub fn truncate(&mut self, end: usize) {
+        fn keep(node: &Option<Rc<Node>>, width: usize, end: usize) -> Option<Rc<Node>> {
+            if end == 0 {
+                return None;
+            }
+            let n = node.as_ref()?;
+            if end >= width {
+                return Some(n.clone());
+            }
+            let Node::Branch { left, right, .. } = n.as_ref() else {
+                unreachable!("partial leaf")
+            };
+            let half = width / 2;
+            Node::branch(
+                keep(left, half, end),
+                keep(right, half, end.saturating_sub(half)),
+            )
+        }
+        if end < self.capacity {
+            self.root = keep(&self.root, self.capacity, end);
+        }
+    }
+
     pub fn set(&mut self, index: usize, extent: f64, estimate: f64) {
         self.capacity = self.capacity.max(1);
         while index >= self.capacity {
@@ -148,5 +171,21 @@ mod tests {
         assert_eq!(sizes.before(1_000_001), 12.);
         assert_eq!(saved.get(0), Some(15.));
         assert_eq!(saved.before(1_000_001), 7.);
+    }
+    #[test]
+    fn truncation_retains_only_measurements_before_the_cut_and_preserves_checkpoint() {
+        let mut original = Extents::default();
+        for i in [0, 1, 3, 9, 1000] {
+            original.set(i, 11., 10.);
+        }
+        for cut in [0, 1, 2, 3, 9, 10, 1000, 1001, 1024, 10000] {
+            let mut sizes = original.clone();
+            sizes.truncate(cut);
+            assert_eq!(sizes.before(1001), original.before(cut));
+            for i in [0, 1, 3, 9, 1000] {
+                assert_eq!(sizes.get(i), (i < cut).then_some(11.));
+                assert_eq!(original.get(i), Some(11.));
+            }
+        }
     }
 }
