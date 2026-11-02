@@ -46,6 +46,34 @@ convert -size 64x64 xc:none -fill '#316EC9' -draw 'roundrectangle 1,1 62,62 14,1
 convert -size 64x64 xc:none -fill '#C77F2A' -draw 'roundrectangle 1,1 62,62 14,14' \
   -fill white -draw 'polygon 11,20 26,20 31,25 53,25 51,47 12,47' "$scratch/files.png"
 
+frame_with_cards() {
+  local target=$1 count=$2
+  import -window root "$target"
+  /usr/bin/python3 - "$target" "$count" "${3:-}" <<'PYCOUNT'
+import sys
+from PIL import Image, ImageChops
+im = Image.open(sys.argv[1]).convert("RGB")
+if sys.argv[3]:
+    x, y, w, h = map(int, sys.argv[3].split(","))
+    im = im.crop((x, y, x + w, y + h))
+
+def pixels(rgb):
+    bands = [band.point([255 * (abs(i - value) <= 3) for i in range(256)])
+             for band, value in zip(im.split(), rgb)]
+    return ImageChops.multiply(ImageChops.multiply(*bands[:2]), bands[2])
+
+# One collapsed app icon could also be an earlier, incomplete history. Require
+# the last delivery's contrasting status dot before accepting any capture.
+if pixels((0xa2, 0xe4, 0x53)).histogram()[255] < 4:
+    sys.exit(1)
+mask = pixels((0xb8, 0x3f, 0x69))
+# Each icon occupies one contiguous band of rows. The check mark is
+# surrounded by the colored tile on every row where it occurs.
+occupied = [mask.crop((0, y, im.width, y + 1)).histogram()[255] >= 4 for y in range(im.height)]
+sys.exit(sum(hit and (i == 0 or not occupied[i - 1]) for i, hit in enumerate(occupied)) != int(sys.argv[2]))
+PYCOUNT
+}
+
 notify() {
   local icon desktop
   case ${6:-Build service} in
@@ -79,19 +107,25 @@ id=$(notify 0 'Compiling workspace' 'Compiling the desktop shell' '[]' 0)
 [[ -n $id && $id != 0 ]]
 until_ok toast >/dev/null
 window=$(toast)
-[[ $(notify "$id" 'Build succeeded' 'All targets passed on Linux.' "['open', 'Open build log']" 0) == "$id" ]]
-sleep .3
+[[ $(notify "$id" 'Build succeeded' 'All targets passed on Linux.' "['open', 'Open build log']" 0 'Build service' coverage) == "$id" ]]
 [[ $(toast) == "$window" && $(xdotool getactivewindow) == "$client_window" ]]
 # Xvfb has one 1280-pixel output, sometimes without a RandR primary flag.
-geometry=$(xdotool getwindowgeometry --shell "$window")
-x=$(sed -n 's/^X=//p' <<<"$geometry"); y=$(sed -n 's/^Y=//p' <<<"$geometry")
+# A D-Bus reply precedes drawing. Wait for the replacement's supplied artwork
+# inside its native rectangle before using its action row or publishing the frame.
+updated_banner() {
+  local geometry width height
+  geometry=$(xdotool getwindowgeometry --shell "$window") || return 1
+  x=$(sed -n 's/^X=//p' <<<"$geometry"); y=$(sed -n 's/^Y=//p' <<<"$geometry")
+  width=$(sed -n 's/^WIDTH=//p' <<<"$geometry"); height=$(sed -n 's/^HEIGHT=//p' <<<"$geometry")
+  frame_with_cards "$output/notification-toast.png" 1 "$x,$y,$width,$height"
+}
+until_ok updated_banner
 case "$profile" in
     windows) (( x > 850 && y > 540 && y < 680 ));;
     macos) (( x > 850 && y > 20 && y < 100 ));;
     material) (( x > 380 && x < 500 && y > 20 && y < 100 ));;
 esac || { echo "Unexpected $profile banner position $x,$y" >&2; exit 1; }
 xprop -id "$window" _NET_WM_WINDOW_TYPE | grep -q '_NET_WM_WINDOW_TYPE_NOTIFICATION'
-import -window root "$output/notification-toast.png"
 # Openbox in this fixture has no compositing manager. Transparent rounded
 # corners must expose the underlying output through the X11 bounding region.
 before=$(convert "$scratch/before-banner.png" -format "%[pixel:p{$x,$y}]" info:)
@@ -123,6 +157,7 @@ if call CloseNotification "$expired" >/dev/null 2>&1; then echo 'Expired identif
 recalled=$(notify 0 'Uploading symbols' 'Waiting for the server' '[]' 0)
 call CloseNotification "$recalled" >/dev/null
 until_ok signal_seen "NotificationClosed (uint32 $recalled, uint32 3)"
+until_ok no_toast
 kill "$client"; wait "$client" 2>/dev/null || true; client=
 # Opening the center focuses its first control, Do Not Disturb.
 xdotool windowfocus --sync "$shell_window" key --clearmodifiers ctrl+n
@@ -134,30 +169,9 @@ more1=$(notify 0 'Package archived' 'Artifacts are ready to download.' '[]' 0)
 more2=$(notify 0 'Coverage report' 'All reviewed branches passed.' '[]' 0 'Build service' coverage)
 [[ -n $silent && -n $calendar && -n $files && -n $more1 && -n $more2 ]]
 no_toast
-card_count() {
-  import -window root "$scratch/history.png"
-  /usr/bin/python3 - "$scratch/history.png" "$1" <<'PYCOUNT'
-import sys
-from PIL import Image, ImageChops
-im = Image.open(sys.argv[1]).convert("RGB")
-def pixels(rgb):
-    bands = [band.point([255 * (abs(i - value) <= 3) for i in range(256)])
-             for band, value in zip(im.split(), rgb)]
-    return ImageChops.multiply(ImageChops.multiply(*bands[:2]), bands[2])
 
-# One collapsed app icon could also be an earlier, incomplete history. Require
-# the last delivery's contrasting status dot before accepting any capture.
-if pixels((0xa2, 0xe4, 0x53)).histogram()[255] < 4:
-    sys.exit(1)
-mask = pixels((0xb8, 0x3f, 0x69))
-# Each icon occupies one contiguous band of rows. The check mark is
-# surrounded by the colored tile on every row where it occurs.
-occupied = [mask.crop((0, y, im.width, y + 1)).histogram()[255] >= 4 for y in range(im.height)]
-sys.exit(sum(hit and (i == 0 or not occupied[i - 1]) for i, hit in enumerate(occupied)) != int(sys.argv[2]))
-PYCOUNT
-}
 collapsed=1; if [[ $profile == windows ]]; then collapsed=3; fi
-until_ok card_count "$collapsed"
+until_ok frame_with_cards "$scratch/history.png" "$collapsed"
 cp "$scratch/history.png" "$output/notification-center.png"
 # Move from Do Not Disturb to the first source's disclosure. Its adjacent
 # clear action retires that group and leaves the other two senders active.
@@ -166,7 +180,7 @@ xdotool key --clearmodifiers Tab Tab
 [[ $(notify "$more2" 'Coverage report updated' 'All reviewed branches passed.' '[]' 0 'Build service' coverage) == "$more2" ]]
 sleep .25
 xdotool key --clearmodifiers space
-until_ok card_count 4
+until_ok frame_with_cards "$scratch/history.png" 4
 cp "$scratch/history.png" "$output/notification-expanded.png"
 xdotool key --clearmodifiers Tab space
 until_ok signal_seen "NotificationClosed (uint32 $more2, uint32 2)"
