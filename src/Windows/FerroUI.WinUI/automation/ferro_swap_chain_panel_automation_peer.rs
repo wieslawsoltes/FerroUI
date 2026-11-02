@@ -13,7 +13,7 @@ mod imp {
     use crate::interop::composable::{compose, Composed, ComposedBase};
     use crate::interop::win_rt::{client_origin_on_screen, factory, flag, get_window_from_window_id, new_string};
     use crate::interop::*;
-    use ferroui_base::reactive::IDisposable;
+    use ferroui_base::reactive::Subscription;
     use ferroui_base::{Point as FerroPoint, Rect as FerroRect, Ref};
     use ferroui_controls::automation::peers::{AutomationPeer as FerroPeer, ControlAutomationPeer as FerroControlPeer};
     use ferroui_controls::automation::provider::IEmbeddedRootProvider;
@@ -33,7 +33,7 @@ mod imp {
         embedded_root: RefCell<Option<Rc<dyn IEmbeddedRootProvider>>>,
         embedded_root_peer: RefCell<Option<Ref<FerroPeer>>>,
         /// The subscription to `FocusChanged` of the embedded root.
-        focus_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+        focus_changed: RefCell<Option<Subscription>>,
     }
 
     /// The outer object of the composed peer.
@@ -192,11 +192,11 @@ mod imp {
 
             if let Some(embedded_root) = &embedded_root {
                 let this = self.this.clone();
-                *self.focus_changed.borrow_mut() = Some(embedded_root.focus_changed(Rc::new(move || {
+                *self.focus_changed.borrow_mut() = Some(Subscription::new(embedded_root.focus_changed(Rc::new(move || {
                     if let Some(this) = this.upgrade() {
                         this.on_embedded_focus_changed();
                     }
-                })));
+                }))));
             }
             *self.embedded_root.borrow_mut() = embedded_root;
         }
@@ -220,13 +220,6 @@ mod imp {
         }
     }
 
-    impl Drop for FerroSwapChainPanelAutomationPeer {
-        fn drop(&mut self) {
-            if let Some(focus_changed) = self.focus_changed.borrow_mut().take() {
-                focus_changed.dispose();
-            }
-        }
-    }
 
     macro_rules! base {
         ($self:ident . $method:ident ( $($arg:expr),* )) => {

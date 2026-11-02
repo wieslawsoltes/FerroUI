@@ -9,7 +9,7 @@ use ferroui_base::{
     instantiate,
     interactivity::{InteractiveImpl, RoutingStrategies},
     layout::LayoutableImpl,
-    reactive::{AnonymousObserver, IDisposable},
+    reactive::{AnonymousObserver, SubscribeGuard, Subscription},
     BoxedValue, FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroProperty, Rect, Ref,
     StyledElement, StyledElementImpl, StyledProperty, Visual, VisualImpl, VisualImplExt,
     VisualTreeAttachmentEventArgs,
@@ -23,11 +23,11 @@ use std::{
 #[repr(C)]
 pub struct DockableControl {
     base: Panel,
-    bounds_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
-    data_context_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    bounds_disposable: RefCell<Option<Subscription>>,
+    data_context_disposable: RefCell<Option<Subscription>>,
     current_dockable: RefCell<Option<Rc<dyn IDockable>>>,
-    pressed: RefCell<Option<Rc<dyn IDisposable>>>,
-    moved: RefCell<Option<Rc<dyn IDisposable>>>,
+    pressed: RefCell<Option<Subscription>>,
+    moved: RefCell<Option<Subscription>>,
     interface_handle: RefCell<Weak<DockableControlHandle>>,
 }
 ferro_class!(DockableControl:Panel);
@@ -47,7 +47,7 @@ impl VisualImpl for DockableControl {
         Self::parent_on_attached_to_visual_tree(this, e);
         let owner = this.to_ref();
         let subscription =
-            FerroObject::get_observable(this, StyledElement::data_context_property()).subscribe(
+            FerroObject::get_observable(this, StyledElement::data_context_property()).subscribe_guard(
                 Rc::new(AnonymousObserver::new(move |value: Option<BoxedValue>| {
                     owner.data_context_tracking(value.as_ref())
                 })),
@@ -59,7 +59,7 @@ impl VisualImpl for DockableControl {
             move |_, e| owner.set_pointer_tracking(e),
             RoutingStrategies::TUNNEL,
             false,
-        ).detach();
+        );
         this.pressed.replace(Some(pressed));
         let owner = this.to_ref();
         let moved = this.add_disposable_handler_with(
@@ -67,11 +67,11 @@ impl VisualImpl for DockableControl {
             move |_, e| owner.set_pointer_tracking(e),
             RoutingStrategies::TUNNEL,
             false,
-        ).detach();
+        );
         this.moved.replace(Some(moved));
         let owner = this.to_ref();
         let subscription =
-            FerroObject::get_observable(this, Visual::bounds_property()).subscribe(Rc::new(
+            FerroObject::get_observable(this, Visual::bounds_property()).subscribe_guard(Rc::new(
                 AnonymousObserver::new(move |bounds: Rect| owner.set_bounds_tracking(bounds)),
             ));
         this.bounds_disposable.replace(Some(subscription));
@@ -83,22 +83,10 @@ impl VisualImpl for DockableControl {
             this.un_register(&current);
             this.current_dockable.replace(None);
         }
-        let pressed = this.pressed.borrow().clone();
-        if let Some(pressed) = pressed {
-            pressed.dispose();
-        }
-        let moved = this.moved.borrow().clone();
-        if let Some(moved) = moved {
-            moved.dispose();
-        }
-        let bounds = this.bounds_disposable.borrow().clone();
-        if let Some(bounds) = bounds {
-            bounds.dispose();
-        }
-        let context = this.data_context_disposable.borrow().clone();
-        if let Some(context) = context {
-            context.dispose();
-        }
+        drop(this.pressed.take());
+        drop(this.moved.take());
+        drop(this.bounds_disposable.take());
+        drop(this.data_context_disposable.take());
     }
 }
 impl DockableControl {

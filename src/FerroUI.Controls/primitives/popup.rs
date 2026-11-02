@@ -63,7 +63,7 @@ pub struct Popup {
     /// Deviation (DEVIATIONS.md, Popup): the subscriptions to the render
     /// transforms of the placement target and of its ancestors while the
     /// popup is open (`subscribe_placement_target_transforms`).
-    placement_target_transform_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    placement_target_transform_subscriptions: RefCell<Vec<Subscription>>,
     queued_for_placement_target_move: Cell<bool>,
     /// The rectangle of the placement target in its root when the popup
     /// was last positioned for a change of a render transform.
@@ -1206,27 +1206,25 @@ impl Popup {
         let mut visual = Some(placement_target.clone().upcast::<Visual>());
         while let Some(current) = visual {
             let weak = self.to_ref().downgrade();
-            subscriptions.push(current.property_changed(move |e| {
+            subscriptions.push(Subscription::new(current.property_changed(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.placement_target_ancestor_property_changed(e);
                 }
-            }));
+            })));
             if let Some(mutable_transform) =
                 current.render_transform().as_ref().and_then(|render_transform| render_transform.as_mutable_transform())
             {
                 let weak = self.to_ref().downgrade();
-                subscriptions.push(mutable_transform.changed(Rc::new(move || {
+                subscriptions.push(Subscription::new(mutable_transform.changed(Rc::new(move || {
                     if let Some(this) = weak.upgrade() {
                         this.enqueue_for_placement_target_move();
                     }
-                })));
+                }))));
             }
 
             visual = current.get_visual_parent();
             if !is_current() {
-                for subscription in subscriptions {
-                    subscription.dispose();
-                }
+                drop(subscriptions);
                 return;
             }
         }
@@ -1234,16 +1232,11 @@ impl Popup {
         // already have subscribed its own target while this one was suspended.
         let previous = self.placement_target_transform_subscriptions.replace(subscriptions);
         self.last_placement_target_rect.set(rect);
-        for subscription in previous {
-            subscription.dispose();
-        }
+        drop(previous);
     }
 
     fn unsubscribe_placement_target_transforms(&self) {
-        let subscriptions = std::mem::take(&mut *self.placement_target_transform_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.placement_target_transform_subscriptions.take());
     }
 
     fn placement_target_ancestor_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {

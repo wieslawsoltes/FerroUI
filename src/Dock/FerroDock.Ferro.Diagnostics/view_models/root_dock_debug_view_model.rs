@@ -6,7 +6,7 @@ use ferrodock_model::source_string::ordinal_ignore_case_contains;
 use ferroui_reactiveui::{
     reactive_object, ICommand, IReactiveObject, ReactiveCommand, ReactiveObject,
 };
-use ferroui_system::{collections::object_model::ObservableCollection, IDisposable};
+use ferroui_system::{collections::object_model::ObservableCollection, Subscription};
 use std::{cell::RefCell, rc::Rc};
 /// Local clock contract used by the original event timestamp format.
 pub trait IEventLogClock {
@@ -20,7 +20,7 @@ pub struct RootDockDebugViewModel {
     events_identity: Rc<()>,
     filter: RefCell<Option<String>>,
     clock: Rc<dyn IEventLogClock>,
-    subscriptions: RefCell<Option<Vec<Rc<dyn IDisposable>>>>,
+    subscriptions: RefCell<Option<Vec<Subscription>>>,
     clear: Rc<dyn ICommand>,
 }
 reactive_object!(RootDockDebugViewModel, base);
@@ -94,13 +94,7 @@ impl RootDockDebugViewModel {
     }
     /// Replaces all original factory subscriptions on a DataContext transition.
     pub fn set_factory(self: &Rc<Self>, factory: Option<Rc<dyn IFactory>>) {
-        let previous = self.subscriptions.borrow().clone();
-        if let Some(previous) = previous {
-            for subscription in previous {
-                subscription.dispose();
-            }
-            self.subscriptions.replace(None);
-        }
+        drop(self.subscriptions.take());
         let Some(factory) = factory else {
             return;
         };
@@ -367,7 +361,9 @@ impl RootDockDebugViewModel {
                     .unwrap_or_default()
             ))
         })));
-        self.subscriptions.replace(Some(subscriptions));
+        self.subscriptions.replace(Some(
+            subscriptions.into_iter().map(Subscription::new).collect(),
+        ));
     }
 }
 /// Native enumerable projection; filtered views retain the original captured owner.

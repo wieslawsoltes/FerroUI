@@ -10,7 +10,7 @@ use ferroui_controls::{as_command_source, Button};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::{CommandEventSubscription, CommandParameter, ICommand, ICreatesCommandBinding};
-use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
+use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError, SubscribeGuard, Subscription};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -188,7 +188,7 @@ struct RoutedEventCommandBinding {
     routed_event: RoutedEvent,
     command: Rc<dyn ICommand>,
     handler: Cell<Option<RoutedEventHandlerToken>>,
-    parameter_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    parameter_subscription: RefCell<Option<Subscription>>,
     parameter: RefCell<CommandParameter>,
 }
 
@@ -211,7 +211,7 @@ impl RoutedEventCommandBinding {
         });
         // The parameters and the handler hold the binding, as upstream's delegates do; disposing
         // the binding releases both.
-        let subscription = command_parameter.subscribe(Rc::new(RoutedParameterObserver { binding: binding.clone() }));
+        let subscription = command_parameter.subscribe_guard(Rc::new(RoutedParameterObserver { binding: binding.clone() }));
         *binding.parameter_subscription.borrow_mut() = Some(subscription);
         let handled = binding.clone();
         let interactive: &Interactive = &binding.element;
@@ -245,10 +245,7 @@ impl RoutedEventCommandBinding {
 
 impl IDisposable for RoutedEventCommandBinding {
     fn dispose(&self) {
-        let subscription = self.parameter_subscription.borrow_mut().take();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
+        drop(self.parameter_subscription.take());
         if let Some(token) = self.handler.take() {
             let interactive: &Interactive = &self.element;
             interactive.remove_handler(&self.routed_event, token);
@@ -277,8 +274,8 @@ impl IObserver<CommandParameter> for RoutedParameterObserver {
 /// Executes a command when an event is raised (`HandlerCommandBinding<TEventArgs>`).
 struct HandlerCommandBinding {
     command: Rc<dyn ICommand>,
-    handler: RefCell<Option<Rc<dyn IDisposable>>>,
-    parameter_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    handler: RefCell<Option<Subscription>>,
+    parameter_subscription: RefCell<Option<Subscription>>,
     parameter: RefCell<CommandParameter>,
 }
 
@@ -293,11 +290,11 @@ impl HandlerCommandBinding {
         });
         // The parameters and the handler hold the binding, as upstream's delegates do; disposing
         // the binding releases both.
-        let parameters = command_parameter.subscribe(Rc::new(HandlerParameterObserver { binding: binding.clone() }));
+        let parameters = command_parameter.subscribe_guard(Rc::new(HandlerParameterObserver { binding: binding.clone() }));
         *binding.parameter_subscription.borrow_mut() = Some(parameters);
         let handled = binding.clone();
         let handler = subscription(Rc::new(move || handled.on_event()));
-        *binding.handler.borrow_mut() = Some(handler);
+        *binding.handler.borrow_mut() = Some(Subscription::new(handler));
         binding
     }
 
@@ -313,14 +310,8 @@ impl HandlerCommandBinding {
 
 impl IDisposable for HandlerCommandBinding {
     fn dispose(&self) {
-        let subscription = self.parameter_subscription.borrow_mut().take();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
-        let handler = self.handler.borrow_mut().take();
-        if let Some(handler) = handler {
-            handler.dispose();
-        }
+        drop(self.parameter_subscription.take());
+        drop(self.handler.take());
     }
 }
 

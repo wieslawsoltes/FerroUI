@@ -4,7 +4,7 @@ use super::{TreeNode, TreeNodeCollection, TreeNodeCollectionImpl, TreeNodeKind};
 use crate::diagnostics::controls::TopLevelGroup;
 use crate::diagnostics::views::MainWindow;
 use ferroui_base::collections::{FerroList, FerroListExtensions};
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Subscription};
 use ferroui_base::{FerroObject, Nullable, Ref, StyledElement};
 use ferroui_controls::TopLevel;
 use std::cell::RefCell;
@@ -49,7 +49,7 @@ impl LogicalTreeNode {
 /// children of an element, following them.
 pub struct LogicalTreeNodeCollection {
     control: Ref<StyledElement>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl LogicalTreeNodeCollection {
@@ -61,10 +61,7 @@ impl LogicalTreeNodeCollection {
 impl TreeNodeCollectionImpl for LogicalTreeNodeCollection {
     fn dispose(&self, this: &TreeNodeCollection) {
         this.base_dispose();
-        let subscription = self.subscription.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
+        drop(self.subscription.take());
     }
 
     fn initialize(&self, this: &TreeNodeCollection, nodes: &FerroList<Rc<TreeNode>>) {
@@ -81,7 +78,7 @@ impl TreeNodeCollectionImpl for LogicalTreeNodeCollection {
             move || reset.clear(),
             false,
         );
-        *self.subscription.borrow_mut() = Some(subscription);
+        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 }
 

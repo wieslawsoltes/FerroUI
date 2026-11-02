@@ -7,7 +7,8 @@
 //!
 //! The modules follow the namespaces of .NET where an item ports one of its types; the items of the
 //! namespace `System` are at the root (`IDisposable`, `IObservable<T>`, `IObserver<T>`,
-//! `IProgress<T>`).
+//! `IProgress<T>`), with the guard of a subscription ([`Subscription`]) and the extension that
+//! subscribes with it ([`SubscribeGuard`]).
 //!
 //! - [`component_model`]: `System.ComponentModel` (`INotifyPropertyChanged`).
 //! - [`collections::generic`]: `System.Collections.Generic` (`Dictionary` with the order of
@@ -33,7 +34,7 @@ pub mod threading;
 
 pub use i_disposable::IDisposable;
 pub use subscription::Subscription;
-pub use i_observable::{IObservable, IObserver, ObservableError};
+pub use i_observable::{IObservable, IObserver, ObservableError, SubscribeGuard};
 pub use i_progress::IProgress;
 
 #[cfg(test)]

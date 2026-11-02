@@ -12,7 +12,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{Color, DrawingContext};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -54,7 +54,7 @@ pub struct Chart {
     revision: Cell<u64>,
     measurement: RefCell<Option<Measurement>>,
     native_scene: RefCell<Option<Rc<NativeScene>>>,
-    source_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    source_subscriptions: RefCell<Vec<Subscription>>,
     fallback_x_axes: OnceCell<Axes>,
     fallback_y_axes: OnceCell<Axes>,
     pointer_down: Cell<Option<Point>>,
@@ -426,47 +426,44 @@ impl Chart {
         self.clear_source_subscriptions();
         let mut subscriptions = Vec::new();
         let weak = self.to_ref().downgrade();
-        subscriptions.push(observe_list(&self.series(), move || {
+        subscriptions.push(Subscription::new(observe_list(&self.series(), move || {
             if let Some(this) = weak.upgrade() {
                 this.rebind_sources();
                 this.invalidate_chart();
             }
-        }));
+        })));
         for axes in [self.x_axes(), self.y_axes()] {
             let weak = self.to_ref().downgrade();
-            subscriptions.push(observe_list(&axes, move || {
+            subscriptions.push(Subscription::new(observe_list(&axes, move || {
                 if let Some(this) = weak.upgrade() {
                     this.rebind_sources();
                     this.invalidate_chart();
                 }
-            }));
+            })));
         }
         for axes in [self.effective_x_axes(), self.effective_y_axes()] {
             for axis in axes.to_vec() {
                 let weak = self.to_ref().downgrade();
-                subscriptions.push(axis.property_changed(move |_| {
+                subscriptions.push(Subscription::new(axis.property_changed(move |_| {
                     if let Some(this) = weak.upgrade() {
                         this.invalidate_chart();
                     }
-                }));
+                })));
             }
         }
         for series in self.series().to_vec() {
             let weak = self.to_ref().downgrade();
-            subscriptions.push(series.changed(move || {
+            subscriptions.push(Subscription::new(series.changed(move || {
                 if let Some(this) = weak.upgrade() {
                     this.invalidate_chart();
                 }
-            }));
+            })));
         }
         *self.source_subscriptions.borrow_mut() = subscriptions;
     }
 
     fn clear_source_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.source_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(self.source_subscriptions.take());
     }
 
     /// Measures once per data revision and size. The returned scene is an immutable snapshot.
@@ -1063,9 +1060,7 @@ impl Chart {
 
 impl Drop for Chart {
     fn drop(&mut self) {
-        for subscription in self.source_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(self.source_subscriptions.get_mut()));
         if let Some(timer) = self.animation_timer.get_mut().take() {
             timer.stop();
         }

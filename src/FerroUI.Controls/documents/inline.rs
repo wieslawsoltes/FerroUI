@@ -4,7 +4,7 @@ use ferroui_base::media::text_formatting::{GenericTextRunProperties, TextRun, Te
 use ferroui_base::media::{
     subscribe_invalidated, BaselineAlignment, IBrush, TextDecorationCollection, Typeface,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_property, AttachedProperty, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Size, StyledElementImpl, StyledProperty,
@@ -19,7 +19,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct Inline {
     base: TextElement,
-    decoration_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    decoration_subscriptions: RefCell<Vec<Subscription>>,
 }
 
 ferro_class! {
@@ -62,13 +62,6 @@ impl FerroObjectImpl for Inline {
     }
 }
 
-impl Drop for Inline {
-    fn drop(&mut self) {
-        for subscription in self.decoration_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-    }
-}
 
 impl InlineImpl for Inline {
     fn build_text_run(_this: &Self, _text_runs: &mut Vec<Rc<dyn TextRun>>) {
@@ -126,10 +119,7 @@ impl Inline {
     }
 
     fn refresh_decoration_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.decoration_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(self.decoration_subscriptions.take());
         let Some(decorations) = self.text_decorations() else {
             return;
         };
@@ -140,22 +130,22 @@ impl Inline {
                 inline.refresh_decoration_subscriptions();
                 inline.invalidate_decoration_change();
             }
-        }).detach());
+        }));
         for decoration in decorations.iter() {
             let weak = self.to_ref().downgrade();
-            subscriptions.push(decoration.property_changed(move |_| {
+            subscriptions.push(Subscription::new(decoration.property_changed(move |_| {
                 if let Some(inline) = weak.upgrade() {
                     inline.refresh_decoration_subscriptions();
                     inline.invalidate_decoration_change();
                 }
-            }));
+            })));
             if let Some(dashes) = decoration.stroke_dash_array() {
                 let weak = self.to_ref().downgrade();
                 subscriptions.push(dashes.collection_changed(move |_| {
                     if let Some(inline) = weak.upgrade() {
                         inline.invalidate_decoration_change();
                     }
-                }).detach());
+                }));
             }
             if decoration
                 .stroke()
@@ -172,7 +162,7 @@ impl Inline {
                 }
             });
             if let Some(subscription) = subscribe_invalidated(&decoration.stroke(), changed) {
-                subscriptions.push(subscription);
+                subscriptions.push(Subscription::new(subscription));
             }
         }
         *self.decoration_subscriptions.borrow_mut() = subscriptions;

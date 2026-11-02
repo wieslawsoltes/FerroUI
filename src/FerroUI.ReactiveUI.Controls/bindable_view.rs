@@ -18,7 +18,7 @@ use ferroui_reactiveui::{typed_view_for, IActivatableView, IViewFor, IViewForOf,
 use crate::{register_view_control, value_of_optional_view_model, view_model_of_value, IReactiveViewClass, IViewControl};
 use ferroui_system::component_model::{INotifyPropertyChanged, PropertyPath};
 use ferroui_system::events::Event;
-use ferroui_system::IDisposable;
+use ferroui_system::Subscription;
 use std::any::Any;
 use std::cell::RefCell;
 use std::marker::PhantomData;
@@ -37,7 +37,7 @@ const VIEW_MODEL_PROPERTY: &str = "ViewModel";
 pub struct BindableView<C: IReactiveViewClass, VM: PartialEq + 'static> {
     control: WeakRef<C>,
     property_changed: Event<str>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     _view_model: PhantomData<fn() -> VM>,
 }
 
@@ -61,7 +61,7 @@ impl<C: IReactiveViewClass, VM: PartialEq + 'static> BindableView<C, VM> {
                 view.property_changed.raise(VIEW_MODEL_PROPERTY);
             }
         });
-        *view.subscription.borrow_mut() = Some(subscription);
+        *view.subscription.borrow_mut() = Some(Subscription::new(subscription));
         view
     }
 
@@ -87,13 +87,6 @@ impl<C: IReactiveViewClass, VM: PartialEq + 'static> BindableView<C, VM> {
     }
 }
 
-impl<C: IReactiveViewClass, VM: PartialEq + 'static> Drop for BindableView<C, VM> {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.subscription.borrow_mut().take() {
-            subscription.dispose();
-        }
-    }
-}
 
 impl<C: IReactiveViewClass, VM: PartialEq + 'static> INotifyPropertyChanged for BindableView<C, VM> {
     fn property_changed(&self) -> &Event<str> {

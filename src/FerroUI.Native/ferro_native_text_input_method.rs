@@ -3,7 +3,7 @@ use crate::helpers::{to_frn_rect, ComResultExt};
 use crate::interop::*;
 use crate::native_text_input_options::{NativeTextContentType, NativeTextInputOptions};
 use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions, TextSelection};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::Rect;
 use ferroui_microcom::ComPtr;
 use std::cell::RefCell;
@@ -15,7 +15,7 @@ pub struct FerroNativeTextInputMethod {
     weak_self: Weak<FerroNativeTextInputMethod>,
     client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
     /// The subscriptions to the events of the current client.
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     native_client: RefCell<Option<ComPtr<IFrnTextInputMethodClient>>>,
     input_method: RefCell<Option<ComPtr<IFrnTextInputMethod>>>,
     /// The optional content-hint interface of the native input method (R12 of
@@ -59,7 +59,7 @@ impl FerroNativeTextInputMethod {
         // A hint a connection client left on the view is cleared; nothing is sent otherwise.
         self.content_hint.set_active(false);
         self.send_content_hint();
-        drop(self.native_options.borrow_mut().take());
+        drop(self.native_options.take());
         let input_method = self.input_method.borrow_mut().take();
         drop(input_method);
         let native_client = self.native_client.borrow_mut().take();
@@ -67,10 +67,7 @@ impl FerroNativeTextInputMethod {
     }
 
     fn unsubscribe(&self) {
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.subscriptions.take());
     }
 
     fn on_cursor_rectangle_changed(&self) {
@@ -188,9 +185,9 @@ impl ITextInputMethodImpl for FerroNativeTextInputMethod {
             // a client are released here rather than accumulated.
             self.unsubscribe();
             let subscriptions = vec![
-                client.surrounding_text_changed(self.handler(Self::on_surrounding_text_changed)),
-                client.cursor_rectangle_changed(self.handler(Self::on_cursor_rectangle_changed)),
-                client.selection_changed(self.handler(Self::on_selection_changed)),
+                Subscription::new(client.surrounding_text_changed(self.handler(Self::on_surrounding_text_changed))),
+                Subscription::new(client.cursor_rectangle_changed(self.handler(Self::on_cursor_rectangle_changed))),
+                Subscription::new(client.selection_changed(self.handler(Self::on_selection_changed))),
             ];
             *self.subscriptions.borrow_mut() = subscriptions;
         }
