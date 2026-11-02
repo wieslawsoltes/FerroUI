@@ -142,6 +142,8 @@ read -r tx ty < "$scratch/active-task"
 pointer set "$tx" "$ty"
 task_cards() { capture && pixels d76a3d task-card && pixels "$1" task-card; }
 wait_for task_cards 337757
+wtype -k F8
+wait_for grep -qx 'received F8' "$output/gtk-second.log"
 kill -USR1 "$gtk_second"
 wait_for task_cards 9354ba
 shot taskbar-group
