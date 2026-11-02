@@ -273,3 +273,16 @@ fn a_command_bar_label_on_the_right_is_bounded_by_its_capitals_and_its_baseline(
     assert_eq!(ferroui_base::media::TextLineBounds::Full, TextBlock::new().text_line_bounds());
     window.close();
 }
+
+/// The theme registers its acrylic for the prewarm of the GPU programs
+/// (#437): every effect of the material is in the list the composition
+/// targets prewarm after a frame.
+#[test]
+fn the_theme_registers_its_acrylic_for_the_prewarm_of_the_gpu_programs() {
+    let _app = start_application();
+    let _theme = WinUITheme::new();
+    let names = ferroui_base::rendering::composition::effects::effect_prewarm_names();
+    for name in ferroui_base::media::ACRYLIC_PREWARM_EFFECTS {
+        assert!(names.iter().any(|registered| registered == name), "{name} in {names:?}");
+    }
+}

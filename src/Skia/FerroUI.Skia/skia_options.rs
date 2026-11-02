@@ -21,6 +21,16 @@ pub struct SkiaOptions {
     /// Whether Skia may use stencil buffers. Only an explicit `Some(true)`
     /// enables them; see [`should_avoid_stencil_buffers`](Self::should_avoid_stencil_buffers).
     pub use_stencil_buffers: Option<bool>,
+
+    /// Whether a GPU render target makes the GPU pipelines of the effects
+    /// the themes register (`effects::register_effect_prewarm`, the acrylic
+    /// of the WinUI theme) after the first frame of a window, by drawing them
+    /// once offscreen, rather than when a frame first draws them (#437). On
+    /// Graphite the pipelines are compiled on a thread of their own, from a
+    /// recorder of their own; on Ganesh by the render thread, between two
+    /// frames. `true` by default (docs/porting/gpu-rendering.md, "Pipelines
+    /// made ahead of their first draw").
+    pub prewarm_effect_pipelines: bool,
 }
 
 impl Default for SkiaOptions {
@@ -29,6 +39,7 @@ impl Default for SkiaOptions {
             max_gpu_resource_size_bytes: Some(DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES),
             use_opacity_save_layer: false,
             use_stencil_buffers: None,
+            prewarm_effect_pipelines: true,
         }
     }
 }

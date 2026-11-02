@@ -2361,3 +2361,8 @@ fn legacy_platform_threading_interface_is_adapted() {
     assert_eq!(ticks.get(), 1);
     assert!(!timer.is_enabled());
 }
+
+// The ordering guarantees that phase C4 of #423 keeps (docs/idiomatic-rust-async.md); a child
+// module, so that it uses the simulated implementation and the helpers above.
+#[path = "dispatcher_ordering_tests.rs"]
+mod ordering;
