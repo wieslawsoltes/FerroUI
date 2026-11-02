@@ -7,6 +7,22 @@ fn rejected() -> EditError {
     DocumentError::InvalidFormat("The exact input-method request was not accepted.").into()
 }
 
+/// What an exact edit captured before changing anything: a composition keeps a snapshot of the
+/// whole document, an edit outside one records the blocks it changes (S8).
+enum Visible {
+    Composition(EditorSnapshot),
+    Edit(RecordStart),
+}
+
+impl Visible {
+    fn selection(&self) -> EditorSelection {
+        match self {
+            Self::Composition(snapshot) => snapshot.selection,
+            Self::Edit(start) => start.selection(),
+        }
+    }
+}
+
 impl RichTextEditor {
     /// Captures the committed story without synthesizing an empty replacement.
     /// The exact-composition state also accepts a first legacy preedit update;
@@ -65,10 +81,18 @@ impl RichTextEditor {
         if previous.is_some() && (!composing || previous.as_ref().unwrap().exact.is_none()) {
             return Err(rejected());
         }
-        let visible = self.capture();
-        let before = previous
-            .as_ref()
-            .map_or_else(|| Rc::new(visible.clone()), |old| old.before.clone());
+        let visible = if composing {
+            Visible::Composition(self.capture())
+        } else {
+            // Outside a composition there is no previous one (rejected above).
+            Visible::Edit(self.begin_record(Some(range.clone())))
+        };
+        let visible_length = self.document.text_length();
+        let before = match (&visible, &previous) {
+            (_, Some(old)) => Some(old.before.clone()),
+            (Visible::Composition(visible), None) => Some(Rc::new(visible.clone())),
+            (Visible::Edit(_), None) => None,
+        };
         self.ensure_selection_format(read_checkpoint)?;
         let requested_selection =
             EditorSelection::new(edit.selection.start as usize, edit.selection.end as usize);
@@ -76,7 +100,7 @@ impl RichTextEditor {
         // A pure insertion at the collapsed caret is typing: consecutive exact
         // insertions merge into one undo unit, as RichEdit groups typed input
         // (#243 review, M6). A real range replacement stays its own unit.
-        let caret = visible.selection;
+        let caret = visible.selection();
         let is_typing = !composing
             && caret.is_empty()
             && range.is_empty()
@@ -112,7 +136,7 @@ impl RichTextEditor {
                 if end > range.start {
                     self.document.apply_format(range.start..end, &format)?;
                 }
-                if visible.document.text_length() == 0 || self.document.text_length() == 0 {
+                if visible_length == 0 || self.document.text_length() == 0 {
                     self.document.apply_paragraph_format(
                         0..self.document.text_length(),
                         &self.insertion_defaults(),
@@ -148,8 +172,11 @@ impl RichTextEditor {
                         },
                     )?;
                 }
+                let Some(before) = before.clone() else {
+                    return Err(rejected());
+                };
                 self.history.borrow_mut().composition = Some(Composition {
-                    before: before.clone(),
+                    before,
                     preview_version: self.document.mutation_version(),
                     preview_text,
                     exact: Some(ExactComposition {
@@ -174,7 +201,20 @@ impl RichTextEditor {
             if !matches!(error, EditError::ReentrantEdit) || format_metadata_failure {
                 // An affinity-only read failure owns no new model content. Keep
                 // its newer metadata while restoring the original IME preview.
-                self.restore_composition_state(&visible, previous)?;
+                match visible {
+                    Visible::Composition(visible) => {
+                        self.restore_composition_state(&visible, previous)?;
+                    }
+                    Visible::Edit(start) => {
+                        // An edit outside a composition rolls back the blocks it changed. A
+                        // journal that could not follow the edit leaves the document as it
+                        // is, which a change outside the editor does.
+                        if !self.revert_record(start)? {
+                            self.clear_history();
+                            self.clamp_selection();
+                        }
+                    }
+                }
             } else {
                 self.clear_history();
                 self.clamp_selection();
@@ -196,19 +236,13 @@ impl RichTextEditor {
             self.synchronize();
             return Err(EditError::ReentrantEdit);
         }
-        if composing {
-            self.publish_changed();
-        } else if is_typing {
-            self.record(
-                Rc::try_unwrap(before).unwrap_or_else(|snapshot| (*snapshot).clone()),
-                EditKind::Typing,
-            );
-        } else {
-            self.checkpoint();
-            self.record(
-                Rc::try_unwrap(before).unwrap_or_else(|snapshot| (*snapshot).clone()),
-                EditKind::Programmatic,
-            );
+        match visible {
+            Visible::Edit(start) if is_typing => self.record(start, EditKind::Typing),
+            Visible::Edit(start) => {
+                self.checkpoint();
+                self.record(start, EditKind::Programmatic);
+            }
+            Visible::Composition(_) => self.publish_changed(),
         }
         if self.document.mutation_version() != accepted_version
             || self.document.text() != expected_text
@@ -247,8 +281,13 @@ impl RichTextEditor {
         self.queue_composition_change(RichTextCompositionChange::Finalized {
             text: composition.preview_text,
         });
+        // A composition keeps a snapshot of the whole document (S8).
         self.record(
-            Rc::try_unwrap(composition.before).unwrap_or_else(|snapshot| (*snapshot).clone()),
+            RecordStart::Snapshot {
+                snapshot: Rc::try_unwrap(composition.before)
+                    .unwrap_or_else(|snapshot| (*snapshot).clone()),
+                by_paragraph: false,
+            },
             EditKind::Composition,
         );
         if version != self.document.mutation_version() || self.is_composing() {
