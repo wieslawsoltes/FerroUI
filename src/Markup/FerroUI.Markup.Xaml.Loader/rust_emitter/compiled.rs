@@ -438,13 +438,16 @@ fn root_type_name(root: &std::rc::Rc<dyn xamlx::ast::IXamlAstNode>) -> Option<St
 /// {"file_lines": [first, last], "document": "name.xaml", "line": 3, "position": 7}
 /// ```
 ///
-/// Generated lines are counted from 1. The text is deterministic.
+/// Native resource table initializers map one Rust row to one declaration. For an FXB
+/// batch only the call is Rust code. The payload stores each declaration and evaluation
+/// location for runtime diagnostics. Generated lines are counted from 1.
 pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     use std::fmt::Write as _;
     let mut documents = HashMap::with_capacity(functions.len());
     for (function, name) in functions {
         documents.entry(function.as_str()).or_insert_with(|| (name.as_str(), name.replace(['\r', '\n'], " ")));
     }
+    let mut table_document: Option<&str> = None;
     let mut document = None;
     let mut map = String::from("{\n  \"entries\": [\n");
     let mut first_entry = true;
@@ -460,6 +463,21 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     };
     for (index, text) in source.lines().enumerate() {
         let number = index + 1;
+        if let Some(current) = table_document {
+            if text == "];" {
+                table_document = None;
+            } else if let Some((line, column)) = native_row_position(text) {
+                close(&mut Some((number, line, column)), current, number);
+            }
+            continue;
+        }
+        if let Some((name, _)) = text.strip_prefix("static ").and_then(|s| s.split_once(": &[rt::theme_resources::Row<")) {
+            if let Some((function, _)) = name.rsplit_once("_THEME_ROWS_") {
+                // The emitter creates these symbols from its lowercase function identifier.
+                table_document = documents.get(function.to_ascii_lowercase().as_str()).map(|(doc, _)| *doc);
+            }
+            continue;
+        }
         let build = text.strip_prefix("pub fn ").or_else(|| text.strip_prefix("pub(crate) fn "))
             .and_then(|rest| rest.split_once('(')).map(|(name, _)| name);
         let helper = || {
@@ -495,6 +513,18 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     }
     map.push_str("  ]\n}\n");
     map
+}
+
+// Rows end in the declaration line/column followed by the evaluation line/column.
+// Read from the right so a quoted operand may itself contain commas or escaped quotes.
+fn native_row_position(text: &str) -> Option<(i32, i32)> {
+    let tuple = text.trim_start().strip_prefix('(')?.strip_suffix("),")?;
+    let mut tail = tuple.rsplitn(5, ", ");
+    let _value_column = tail.next()?.parse::<i32>().ok()?;
+    let _value_line = tail.next()?.parse::<i32>().ok()?;
+    let column = tail.next()?.parse().ok()?;
+    let line = tail.next()?.parse().ok()?;
+    Some((line, column))
 }
 
 /// `text` as a JSON string literal.
@@ -1021,6 +1051,25 @@ fn loader_table(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_theme_row_lines_map_to_each_resource_declaration() {
+        let source = r#"static BUILD_FOO_XAML_THEME_ROWS_2: &[rt::theme_resources::Row<&str>] = &[
+    ("a, \"7, 8\"", "target, 2, 4", 17, 3, 20, 5),
+    ("b", "value", 22, 7, 31, 11),
+];
+static OTHER: &[u8] = &[1, 2, 3];
+pub fn build_foo_xaml() {
+    // foo.xaml(41,2) Content (resource)
+    call();
+}
+"#;
+        let map = super::position_map(source, &[("build_foo_xaml".into(), "foo.xaml".into())]);
+        assert_eq!(map.matches("\"file_lines\"").count(), 3);
+        assert!(map.contains(r#""file_lines": [2, 2], "document": "foo.xaml", "line": 17, "position": 3"#));
+        assert!(map.contains(r#""file_lines": [3, 3], "document": "foo.xaml", "line": 22, "position": 7"#));
+        assert!(map.contains(r#""file_lines": [7, 8], "document": "foo.xaml", "line": 41, "position": 2"#));
+    }
+
     use super::*;
 
     /// Not from upstream: `x:ClassModifier` as `XamlCompilerTaskExecutor` reads it.
