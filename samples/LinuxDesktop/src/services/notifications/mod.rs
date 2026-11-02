@@ -253,6 +253,32 @@ impl Service {
     }
 }
 
+/// The notification protocol accepts a local file URI or an icon-theme
+/// name. Do not pass arbitrary GIO remote schemes or serialized GIcons into
+/// the shell's synchronous image resolver.
+fn sender_icon(value: &str) -> String {
+    if value.starts_with('/')
+        || value.starts_with("file:///")
+        || value.starts_with("file://localhost/")
+    {
+        let path = if value.starts_with('/') {
+            value.to_owned()
+        } else {
+            use ferroui_base::utilities::{Uri, UriKind};
+            let Some(uri) = Uri::try_create(value, UriKind::Absolute) else {
+                return String::new();
+            };
+            uri.local_path()
+        };
+        if std::path::Path::new(&path).is_file() {
+            return path;
+        }
+    } else if !value.starts_with('.') && !value.contains(['/', ':']) {
+        return value.to_owned();
+    }
+    String::new()
+}
+
 struct Endpoint(UiThreadHandle<std::rc::Weak<Service>>);
 
 #[zbus::interface(name = "org.freedesktop.Notifications", spawn = false)]
@@ -301,7 +327,7 @@ impl Endpoint {
         let request = Request {
             sender: Sender {
                 name: app_name,
-                icon: app_icon.to_owned(),
+                icon: sender_icon(app_icon),
                 desktop_entry: desktop_entry
                     .strip_suffix(".desktop")
                     .unwrap_or(desktop_entry)
@@ -360,6 +386,30 @@ mod delivery_tests {
     use super::*;
     use ferroui_base::reactive::Disposable;
     use std::time::Duration;
+
+    #[test]
+    fn client_icons_accept_theme_names_and_local_files_only() {
+        assert_eq!(sender_icon("mail-unread-symbolic"), "mail-unread-symbolic");
+        for remote in [
+            "https://example.org/image.png",
+            "sftp://host/icon",
+            "file://remote/path",
+            ". GEmblemedIcon other",
+        ] {
+            assert!(sender_icon(remote).is_empty());
+        }
+        let path =
+            std::env::temp_dir().join(format!("ferro notification icon {}", std::process::id()));
+        std::fs::write(&path, []).unwrap();
+        let path = path.to_str().unwrap();
+        assert_eq!(sender_icon(path), path);
+        assert_eq!(
+            sender_icon(&format!("file://{}", path.replace(' ', "%20"))),
+            path
+        );
+        std::fs::remove_file(path).unwrap();
+        assert!(sender_icon(path).is_empty());
+    }
 
     fn request(timeout_ms: i32) -> Request {
         Request {
