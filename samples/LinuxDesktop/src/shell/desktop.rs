@@ -4,7 +4,7 @@ mod gestures;
 mod motion;
 pub(super) use gestures::drawer_handle;
 
-use super::appearance::{Appearance, ColorMode, Layout, WinUISettings};
+use super::appearance::{Appearance, ColorMode, Layout};
 use super::chrome::*;
 use super::{Scene, Shell, feedback, popup_header, time_text, wallpaper, workspace_name};
 use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
@@ -641,20 +641,36 @@ pub(super) fn popup_frame() -> El<Border> {
     }
 }
 
-fn windows_settings(shell: &Rc<Shell>, settings: WinUISettings) -> Element {
-    let mut modes = wrap_panel().automation_properties_name("Windows color mode");
+fn personalization(shell: &Rc<Shell>, profile: Appearance, current_mode: ColorMode) -> Element {
+    let label = if profile.winui().is_some() {
+        "Windows"
+    } else {
+        profile.name()
+    };
+    let mut modes = wrap_panel().automation_properties_name(format!("{label} color mode"));
     for mode in ColorMode::ALL {
+        if mode == ColorMode::HighContrast && profile.winui().is_none() {
+            continue;
+        }
         let state = shell.clone();
         modes = modes.child(
             radio_button()
-                .group_name("WinUIColorMode")
+                .group_name("DesktopColorMode")
                 .automation_properties_name(mode.label())
                 .content(mode.label())
                 .margin((0.0, 0.0, 12.0, 0.0))
-                .is_checked(Some(mode == settings.mode))
-                .on_click(move |_| state.select_windows(WinUISettings { mode, ..settings })),
+                .is_checked(Some(mode == current_mode))
+                .on_click(move |_| state.select_mode(mode)),
         );
     }
+    let colors = stack_panel()
+        .spacing(4.0)
+        .margin((0.0, 8.0, 0.0, 0.0))
+        .child(shell_text("Color mode", 14.0, Ink::Primary).font_weight(FontWeight::SemiBold))
+        .child(modes);
+    let Some(settings) = profile.winui() else {
+        return colors.into();
+    };
     let state = shell.clone();
     let compact = settings.density == DensityStyle::Compact;
     let toggle = toggle_switch()
@@ -674,12 +690,7 @@ fn windows_settings(shell: &Rc<Shell>, settings: WinUISettings) -> Element {
                 state.select_windows(settings.toggle_density());
             }
         });
-    stack_panel()
-        .spacing(4.0)
-        .margin((0.0, 8.0, 0.0, 0.0))
-        .child(eyebrow("WINDOWS PERSONALIZATION"))
-        .child(shell_text("Color mode", 14.0, Ink::Primary).font_weight(FontWeight::SemiBold))
-        .child(modes)
+    colors
         .child(
             grid()
                 .column_definitions("*,Auto")
@@ -712,7 +723,7 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
             Layout::MenuBarDock => "Menu bar, floating Dock and Spotlight-style search",
             Layout::BottomNavigation => "Status shade, app taskbar and swipe-up app drawer",
         };
-        let color = appearance.palette();
+        let color = state.themes.restored(appearance).palette();
         let name = appearance.name();
         let hint = match (selected, number < 9) {
             (true, true) => format!("Active  ·  {}", number + 1),
@@ -767,8 +778,9 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
             ),
         );
     }
-    if let Some(settings) = state.themes.current().winui() {
-        options = options.child(windows_settings(state, settings));
+    let profile = state.themes.current();
+    if let Some(mode) = profile.color_mode() {
+        options = options.child(personalization(state, profile, mode));
     }
     popup_frame()
         .max_width(530.0)

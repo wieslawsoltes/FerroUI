@@ -165,6 +165,21 @@ xdotool key --clearmodifiers Escape
 
 # Exercise the production settings handler and validate its commit to disk.
 # The three images come from the same process, workspace and launched client.
+# The middle of the top bar contains no clock or controls on either profile.
+panel_luma() {
+    convert "$output/$1.png" -gravity North -crop 128x14+0+6 +repage -colorspace Gray -format '%[fx:mean]' info:
+}
+
+set_color_mode() {
+    local theme=$1 key=$2 expected=$3 file="$XDG_CONFIG_HOME/ferro-desktop/$1-style"
+    xdotool key --clearmodifiers "$key"
+    for ((i=0; i<60; i++)); do
+        [[ "$(cat "$file" 2>/dev/null || true)" == "$expected" ]] && return 0
+        sleep .1
+    done
+    echo "$theme did not save $expected color mode" >&2
+    return 1
+}
 for choice in '2 macos' '3 material' '1 windows'; do
     read -r key theme <<<"$choice"
     xdotool key --clearmodifiers ctrl+comma
@@ -184,6 +199,22 @@ for choice in '2 macos' '3 material' '1 windows'; do
         xdotool key --clearmodifiers ctrl+a BackSpace
         capture "$theme-applications" "$theme"
         dismiss_launcher "$theme" "$theme-applications" "$theme"
+        xdotool key --clearmodifiers ctrl+comma
+        set_color_mode "$theme" l light
+        xdotool key --clearmodifiers Escape
+        capture "$theme-light" "$theme"
+        dark=$(panel_luma "$theme")
+        light=$(panel_luma "$theme-light")
+        awk -v dark="$dark" -v light="$light" 'BEGIN {exit !(light > dark + 0.12)}' || {
+            echo "$theme top panel did not switch to light ($dark to $light)" >&2
+            exit 1
+        }
+        if [[ $theme == material ]]; then
+            xdotool key --clearmodifiers ctrl+comma
+            set_color_mode material d dark
+            xdotool key --clearmodifiers Escape
+            [[ "$(cat "$XDG_CONFIG_HOME/ferro-desktop/macos-style")" == light ]]
+        fi
     fi
     [[ "$(xdotool get_desktop)" == 0 ]]
     [[ "$(xdotool get_desktop_for_window "$viewer")" == 0 ]]
@@ -203,6 +234,21 @@ for ((i=0; i<50; i++)); do
 done
 [[ "$(xdotool get_desktop)" == 1 ]]
 xdotool set_desktop 0 windowactivate --sync "$shell_window" key --clearmodifiers alt+F4
+wait "$shell_pid"
+unset shell_pid
+# A fresh process must restore each profile's independent color choice.
+"$binary" "$@" --theme=macos >>"$output/desktop.log" 2>&1 &
+shell_pid=$!
+shell_window=$(await_window '^Ferro Desktop$')
+xdotool windowsize --sync "$shell_window" 1280 800 windowactivate --sync "$shell_window"
+capture macos-restored windows
+awk -v actual="$(panel_luma macos-restored)" -v light="$(panel_luma macos-light)" \
+    'BEGIN {exit !((actual-light)^2 < 0.01)}'
+xdotool key --clearmodifiers ctrl+comma 3 Escape
+capture material-restored macos-restored
+awk -v actual="$(panel_luma material-restored)" -v dark="$(panel_luma material)" \
+    'BEGIN {exit !((actual-dark)^2 < 0.01)}'
+xdotool key --clearmodifiers alt+F4
 wait "$shell_pid"
 unset shell_pid
 echo "Captured all appearances, activated a native X11 client and switched workspace."

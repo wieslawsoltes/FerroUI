@@ -5,8 +5,8 @@ The default Windows 11 appearance uses FerroUI's compiled WinUI 3 theme. Open **
 | Appearance | Native control theme | Shell composition |
 | --- | --- | --- |
 | Windows 11 | WinUI 3, light by default | Centered taskbar, desktop shortcuts and a Start panel with an application grid |
-| macOS | macOS, dark variant | Top menu bar, floating Dock and a centered application search panel |
-| Material 3 | Material, dark variant with bundled Roboto | Clock home screen, status strip, app taskbar and bottom sheets |
+| macOS | macOS, dark by default | Top menu bar, floating Dock and a centered application search panel |
+| Material 3 | Material, dark by default with bundled Roboto | Clock home screen, status strip, app taskbar and bottom sheets |
 
 A switch replaces the shell application's installed style in its existing style collection and changes its requested theme variant. Shell labels bind to shared theme resources such as `TextFillColorPrimaryBrush` and `ContentControlThemeFontFamily`. The appearance descriptor supplies brushes for the desktop surface, icon tiles and wallpaper. The shell rebuilds its chrome around the existing search query, catalog, workspace state and window-manager connection. In session mode it also updates the reserved screen edges so maximized clients follow the new layout.
 
@@ -24,9 +24,13 @@ The Android profile reserves 48 logical pixels for the status strip and 72 for i
 | --- | --- |
 | Windows 11 | The taskbar uses base acrylic. Flyouts use the WinUI presenter brush and its 32-unit shadow elevation. High Contrast uses the system window and text brushes, the thicker flyout outline and a flat background. |
 | macOS | Menu bar and Dock use the toolbar backdrop brush. Flyouts use a denser menu backdrop. The theme supplies the glass edge and menu shadow. Reduced transparency, increased contrast or inactive theme state selects an opaque surface. |
-| Material 3 | The Garden wallpaper's eucalyptus leaf seeds the dark Material color scheme. Navigation uses the surface container role, and sheets use the high surface container role with the theme's flyout elevation. Opening a sheet draws the scrim role at 32% opacity. |
+| Material 3 | The Garden wallpaper's eucalyptus leaf seeds both light and dark Material color schemes. Navigation uses the surface container role, and sheets use the high surface container role with the theme's flyout elevation. Opening a sheet draws the scrim role at 32% opacity. |
 
 In the FerroUI compositor, wallpaper, client buffers and chrome share the scene. Backdrop brushes sample the content underneath as it changes. Windowed previews can sample their wallpaper. Independent Wayland layer surfaces and separate notification windows use solid theme brushes because client pixels belong to another render target. The acrylic effect graph also observes FerroUI's platform transparency and energy-saving policy.
+
+## Profile color modes
+
+The appearance chooser offers **Light** and **Dark** for macOS and Material. With the chooser focused, press **L** or **D**. Each profile keeps its own selection in `macos-style` or `material-style` beside the `appearance` file. Switching away and returning, including after restarting the shell, restores that profile's choice. Both default to dark. A color change updates the existing control theme, shell palette and managed window decorations together.
 
 ## Windows personalization
 

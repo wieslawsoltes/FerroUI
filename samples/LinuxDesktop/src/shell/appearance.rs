@@ -1,9 +1,9 @@
 //! Shell appearances pair desktop geometry with a real FerroUI control theme.
 //! A descriptor owns its factory and reserved screen edges. The host and the
 //! settings picker both consume this registry.
+use ferroui_base::Ref;
 use ferroui_base::media::Color;
 use ferroui_base::styling::{IStyle, ThemeVariant};
-use ferroui_base::Ref;
 use ferroui_controls::Application;
 use ferroui_themes_winui::{DensityStyle, WinUITheme};
 use std::cell::{Cell, RefCell};
@@ -127,31 +127,21 @@ impl WinUISettings {
         };
         words.next().is_none().then_some(Self { mode, density })
     }
-
-    fn preferred() -> Self {
-        crate::services::preferences::config_path("windows-style")
-            .ok()
-            .and_then(|p| fs::read_to_string(p).ok())
-            .and_then(|s| Self::decode(&s))
-            .unwrap_or_default()
-    }
-
-    fn save(self) -> io::Result<()> {
-        let path = crate::services::preferences::config_path("windows-style")?;
-        let density = if self.density == DensityStyle::Compact {
-            "compact"
-        } else {
-            "normal"
-        };
-        crate::services::preferences::replace(
-            &path,
-            format!("{} {density}\n", self.mode.id()).as_bytes(),
-        )
-    }
 }
 
 #[derive(Clone, Copy)]
-pub struct Appearance(&'static Descriptor, Option<WinUISettings>);
+enum Personalization {
+    Fixed,
+    Windows(WinUISettings),
+    LightDark {
+        mode: ColorMode,
+        light: &'static Palette,
+        preference: &'static str,
+    },
+}
+
+#[derive(Clone, Copy)]
+pub struct Appearance(&'static Descriptor, Personalization);
 
 #[allow(non_upper_case_globals)]
 impl Appearance {
@@ -205,7 +195,25 @@ impl Appearance {
         tint: |c| c,
         style: || ferroui_themes_macos::MacOSTheme::new().as_style(),
         variant: ThemeVariant::dark,
-    });
+    })
+    .with_light_palette(
+        "macos-style",
+        &Palette {
+            text: "#1D1D1F",
+            muted: "#515056",
+            accent: "#005DC1",
+            edge: "#B8B8BD",
+            surface: "#F5F5F7",
+            tile: "#E9E9ED",
+            selected: "#CFE4FC",
+            on_selected: "#052F5D",
+            radius: 19,
+            bar: "#EEF5F5F7",
+            bar_edge: "#B8FFFFFF",
+            bar_ink: "#1D1D1F",
+            dock_tiles: ["#635BA4", "#1775A0", "#805F80"],
+        },
+    );
     pub const Material: Self = Self::new(&Descriptor {
         id: "material",
         name: "Material 3",
@@ -233,23 +241,149 @@ impl Appearance {
 
             let theme = MaterialTheme::new();
             // The Garden wallpaper's eucalyptus leaf supplies the Android tonal palette.
-            let scheme = MaterialColorScheme::from_seed(Color::from_rgb(0x5c, 0x95, 0x7d), true);
-            theme.set_color_scheme(ThemeVariant::dark(), &scheme);
+            let seed = Color::from_rgb(0x5c, 0x95, 0x7d);
+            for (variant, dark) in [(ThemeVariant::light(), false), (ThemeVariant::dark(), true)] {
+                theme.set_color_scheme(variant, &MaterialColorScheme::from_seed(seed, dark));
+            }
             theme.as_style()
         },
         variant: ThemeVariant::dark,
-    });
+    })
+    .with_light_palette(
+        "material-style",
+        &Palette {
+            text: "#17211B",
+            muted: "#435047",
+            accent: "#276348",
+            edge: "#ADBDAF",
+            surface: "#F4FAF3",
+            tile: "#E4EFE4",
+            selected: "#CBEBD4",
+            on_selected: "#133526",
+            radius: 28,
+            bar: "#EDF4EC",
+            bar_edge: "#C2CEC4",
+            bar_ink: "#27372D",
+            dock_tiles: ["#385D48", "#526557", "#546960"],
+        },
+    );
     pub const ALL: &'static [Self] = &[Self::Windows, Self::MacOS, Self::Material];
 
     pub const fn new(descriptor: &'static Descriptor) -> Self {
-        Self(descriptor, None)
+        Self(descriptor, Personalization::Fixed)
     }
     const fn with_winui(self, settings: WinUISettings) -> Self {
-        Self(self.0, Some(settings))
+        Self(self.0, Personalization::Windows(settings))
     }
 
-    pub fn winui(self) -> Option<WinUISettings> {
-        self.1
+    /// Adds a light palette to a dark-by-default descriptor. The preference filename
+    /// is owned by the descriptor so independently registered profiles can persist it.
+    pub const fn with_light_palette(
+        self,
+        preference: &'static str,
+        light: &'static Palette,
+    ) -> Self {
+        Self(
+            self.0,
+            Personalization::LightDark {
+                mode: ColorMode::Dark,
+                light,
+                preference,
+            },
+        )
+    }
+
+    pub const fn winui(self) -> Option<WinUISettings> {
+        match self.1 {
+            Personalization::Windows(settings) => Some(settings),
+            _ => None,
+        }
+    }
+
+    pub fn color_mode(self) -> Option<ColorMode> {
+        match self.1 {
+            Personalization::Fixed => None,
+            Personalization::Windows(settings) => Some(settings.mode),
+            Personalization::LightDark { mode, .. } => Some(mode),
+        }
+    }
+
+    pub fn same_profile(self, other: Self) -> bool {
+        self.id() == other.id()
+    }
+
+    fn with_mode(self, mode: ColorMode) -> Option<Self> {
+        match self.1 {
+            Personalization::Windows(settings) => {
+                Some(self.with_winui(WinUISettings { mode, ..settings }))
+            }
+            Personalization::LightDark {
+                light, preference, ..
+            } if mode != ColorMode::HighContrast => Some(Self(
+                self.0,
+                Personalization::LightDark {
+                    mode,
+                    light,
+                    preference,
+                },
+            )),
+            _ => None,
+        }
+    }
+
+    fn settings_file(self) -> Option<&'static str> {
+        match self.1 {
+            Personalization::Fixed => None,
+            Personalization::Windows(_) => Some("windows-style"),
+            Personalization::LightDark { preference, .. } => Some(preference),
+        }
+    }
+
+    fn restore(self, contents: &str) -> Self {
+        match self.1 {
+            Personalization::Windows(_) => {
+                WinUISettings::decode(contents).map(|s| self.with_winui(s))
+            }
+            Personalization::LightDark { .. } => match contents.trim() {
+                "light" => self.with_mode(ColorMode::Light),
+                "dark" => self.with_mode(ColorMode::Dark),
+                _ => None,
+            },
+            Personalization::Fixed => None,
+        }
+        .unwrap_or(self)
+    }
+
+    fn saved(self) -> Self {
+        self.settings_file()
+            .and_then(|name| crate::services::preferences::config_path(name).ok())
+            .and_then(|path| fs::read_to_string(path).ok())
+            .map_or(self, |s| self.restore(&s))
+    }
+
+    fn save_settings(self) -> io::Result<()> {
+        let (name, contents) = match self.1 {
+            Personalization::Windows(settings) => (
+                "windows-style",
+                format!(
+                    "{} {}\n",
+                    settings.mode.id(),
+                    if settings.density == DensityStyle::Compact {
+                        "compact"
+                    } else {
+                        "normal"
+                    }
+                ),
+            ),
+            Personalization::LightDark {
+                mode, preference, ..
+            } => (preference, format!("{}\n", mode.id())),
+            Personalization::Fixed => return Ok(()),
+        };
+        crate::services::preferences::replace(
+            &crate::services::preferences::config_path(name)?,
+            contents.as_bytes(),
+        )
     }
 
     pub const fn descriptor(self) -> &'static Descriptor {
@@ -280,7 +414,12 @@ impl Appearance {
     pub const fn palette(self) -> Palette {
         let base = self.descriptor().palette;
         match self.1 {
-            Some(WinUISettings {
+            Personalization::LightDark {
+                mode: ColorMode::Light,
+                light,
+                ..
+            } => *light,
+            Personalization::Windows(WinUISettings {
                 mode: ColorMode::Dark,
                 ..
             }) => Palette {
@@ -298,7 +437,7 @@ impl Appearance {
                 dock_tiles: ["#60CDFF", "#A7CAEB", "#D0D9E1"],
                 ..base
             },
-            Some(WinUISettings {
+            Personalization::Windows(WinUISettings {
                 mode: ColorMode::HighContrast,
                 ..
             }) => Palette {
@@ -345,7 +484,9 @@ impl Appearance {
 
 impl PartialEq for Appearance {
     fn eq(&self, other: &Self) -> bool {
-        self.id() == other.id() && self.1 == other.1
+        self.same_profile(*other)
+            && self.color_mode() == other.color_mode()
+            && self.winui() == other.winui()
     }
 }
 impl Eq for Appearance {}
@@ -359,17 +500,13 @@ pub struct ThemeController {
     app: Ref<Application>,
     current: Cell<Appearance>,
     installed: RefCell<Rc<dyn IStyle>>,
-    windows: Cell<WinUISettings>,
+    profiles: RefCell<Vec<Appearance>>,
 }
 
 impl ThemeController {
     pub fn install(app: &Ref<Application>, appearance: Appearance) -> Rc<Self> {
-        let windows = WinUISettings::preferred();
-        let appearance = if appearance.winui().is_some() {
-            appearance.with_winui(windows)
-        } else {
-            appearance
-        };
+        let profiles: Vec<_> = Appearance::ALL.iter().map(|p| p.saved()).collect();
+        let appearance = Appearance::find(&profiles, appearance.id()).unwrap_or(appearance);
         let style = (appearance.0.style)();
         Self::configure(app, appearance, &style);
         app.styles().add(style.clone());
@@ -377,7 +514,7 @@ impl ThemeController {
             app: app.clone(),
             current: Cell::new(appearance),
             installed: RefCell::new(style),
-            windows: Cell::new(windows),
+            profiles: RefCell::new(profiles),
         })
     }
 
@@ -393,6 +530,8 @@ impl ThemeController {
                 .expect("Windows appearance installs WinUITheme");
             theme.set_density_style(options.density);
             options.mode.variant()
+        } else if let Some(mode) = appearance.color_mode() {
+            mode.variant()
         } else {
             (appearance.0.variant)()
         };
@@ -418,22 +557,38 @@ impl ThemeController {
         self.current.set(appearance);
     }
 
+    pub fn restored(&self, appearance: Appearance) -> Appearance {
+        Appearance::find(&self.profiles.borrow(), appearance.id()).unwrap_or(appearance)
+    }
+
     pub fn select(&self, appearance: Appearance) -> io::Result<()> {
-        let appearance = if appearance.winui().is_some() {
-            appearance.with_winui(self.windows.get())
-        } else {
-            appearance
-        };
-        self.apply(appearance);
+        self.apply(self.restored(appearance));
         save_preference(&preference_path()?, appearance)
+    }
+
+    fn personalize(&self, appearance: Appearance) -> io::Result<()> {
+        if let Some(entry) = self
+            .profiles
+            .borrow_mut()
+            .iter_mut()
+            .find(|p| p.same_profile(appearance))
+        {
+            *entry = appearance;
+        }
+        self.apply(appearance);
+        appearance.save_settings()
+    }
+
+    pub fn set_mode(&self, mode: ColorMode) -> io::Result<()> {
+        self.current()
+            .with_mode(mode)
+            .map_or(Ok(()), |p| self.personalize(p))
     }
 
     pub fn set_windows(&self, settings: WinUISettings) -> io::Result<()> {
         let current = self.current();
         if current.winui().is_some() {
-            self.windows.set(settings);
-            self.apply(current.with_winui(settings));
-            settings.save()?;
+            self.personalize(current.with_winui(settings))?;
         }
         Ok(())
     }
@@ -494,6 +649,40 @@ mod tests {
         }
         assert!(Appearance::MacOS.winui().is_none());
         assert!(Appearance::Material.winui().is_none());
+    }
+
+    #[test]
+    fn independent_color_preferences_restore_modes_palettes_and_profile_identity() {
+        for profile in [Appearance::MacOS, Appearance::Material] {
+            let light = profile.restore("light\n");
+            assert_eq!(profile.color_mode(), Some(ColorMode::Dark));
+            assert_eq!(light.color_mode(), Some(ColorMode::Light));
+            assert!(profile.same_profile(light));
+            assert_ne!(profile, light);
+            assert_ne!(profile.palette().bar_ink, light.palette().bar_ink);
+            assert_eq!(profile.insets(), light.insets());
+            assert_eq!(profile, light.restore("dark\n"));
+            assert!(profile.with_mode(ColorMode::HighContrast).is_none());
+            for malformed in ["", "dark compact", "high-contrast"] {
+                assert_eq!(profile, profile.restore(malformed));
+            }
+        }
+        assert_ne!(
+            Appearance::MacOS.settings_file(),
+            Appearance::Material.settings_file()
+        );
+        let saved = [
+            Appearance::MacOS.restore("light"),
+            Appearance::Material.restore("dark"),
+        ];
+        assert_eq!(
+            Appearance::find(&saved, "macos").unwrap().color_mode(),
+            Some(ColorMode::Light)
+        );
+        assert_eq!(
+            Appearance::find(&saved, "material").unwrap().color_mode(),
+            Some(ColorMode::Dark)
+        );
     }
 
     #[test]

@@ -106,6 +106,10 @@ impl Shell {
         self.finish_appearance(self.themes.select(appearance));
     }
 
+    fn select_mode(&self, mode: ColorMode) {
+        self.finish_appearance(self.themes.set_mode(mode));
+    }
+
     fn select_windows(&self, settings: WinUISettings) {
         self.finish_appearance(self.themes.set_windows(settings));
     }
@@ -438,14 +442,20 @@ fn shortcut(shell: &Rc<Shell>, event: &ferroui_base::input::KeyEventArgs) {
                 && modifiers.is_empty()
                 && matches!(key, Key::L | Key::D | Key::H | Key::C) =>
         {
-            if let Some(mut settings) = shell.appearance.get_untracked().winui() {
+            let profile = shell.appearance.get_untracked();
+            if profile.color_mode().is_some() {
                 match key {
-                    Key::L => settings.mode = ColorMode::Light,
-                    Key::D => settings.mode = ColorMode::Dark,
-                    Key::H => settings.mode = ColorMode::HighContrast,
-                    _ => settings = settings.toggle_density(),
+                    Key::L => shell.select_mode(ColorMode::Light),
+                    Key::D => shell.select_mode(ColorMode::Dark),
+                    Key::H if profile.winui().is_some() => {
+                        shell.select_mode(ColorMode::HighContrast)
+                    }
+                    Key::C => match profile.winui() {
+                        Some(settings) => shell.select_windows(settings.toggle_density()),
+                        None => return,
+                    },
+                    _ => return,
                 }
-                shell.select_windows(settings);
                 event.set_handled(true);
             }
         }
@@ -632,12 +642,12 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
                 )
                 .child(dynamic(move || {
                     let profile = appearance.get();
-                    let scrim = if profile == Appearance::Material {
+                    let scrim = if profile.same_profile(Appearance::Material) {
                         border()
                             .background(resource("MaterialScrimBrush"))
                             .opacity(0.32)
                             .is_visible(move || current.get() != Scene::Desktop)
-                    } else if profile.winui().is_some() || profile == Appearance::MacOS {
+                    } else if profile.winui().is_some() || profile.same_profile(Appearance::MacOS) {
                         // Start, Control Center, calendar and notification flyouts float
                         // directly above the scene. Only the task overview dims it.
                         let contrast = profile
