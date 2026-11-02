@@ -497,10 +497,52 @@ crate::ferro_properties! { impl AcrylicBrush {
     );
 } }
 
+/// The names under which [`AcrylicBrush::register_effect_prewarm`] registers
+/// the effects of the material: the in-app material, and the same with the
+/// cross-fade to and from the fallback colour.
+pub const ACRYLIC_PREWARM_EFFECTS: [&str; 2] = ["AcrylicBrush", "AcrylicBrush.FadeInOut"];
+
 impl AcrylicBrush {
     /// Creates the class data.
     pub fn construct() -> Self {
+        Self::register_effect_prewarm();
         Self { base: XamlCompositionBrushBase::construct(), state: RefCell::new(AcrylicState::default()) }
+    }
+
+    /// Registers the effects of the in-app material for the prewarm of the
+    /// GPU programs (`effects::register_effect_prewarm`, #437), under
+    /// [`ACRYLIC_PREWARM_EFFECTS`]: the translucent material over the
+    /// backdrop (the blur, the luminosity and colour blends, the noise), and
+    /// the same cross-faded with the fallback colour (the cross-fade of a
+    /// change of the material policy). The opaque material and the window
+    /// acrylic are fills and the noise, which these draw too. The colours
+    /// are those of `AcrylicInAppFillColorDefaultBrush` of the dark theme:
+    /// the programs depend on the blends and the layers, not on the
+    /// colours.
+    ///
+    /// A theme that draws acrylic calls it when it is created, so that the
+    /// programs are made after the first frame of a window rather than when
+    /// a flyout or a pane first shows the material; creating a brush calls
+    /// it too. Calls after the first do nothing.
+    pub fn register_effect_prewarm() {
+        static REGISTERED: std::sync::Once = std::sync::Once::new();
+        REGISTERED.call_once(|| {
+            let tint = Color::from_argb(38, 0x2c, 0x2c, 0x2c);
+            let luminosity = luminosity_color(tint, Some(0.96));
+            let fallback = Color::from_rgb(0x2c, 0x2c, 0x2c);
+            for (name, cross_fade) in ACRYLIC_PREWARM_EFFECTS.into_iter().zip([false, true]) {
+                let (effect, animatable) = acrylic_effect_with_source(
+                    false,
+                    cross_fade,
+                    AcrylicBrushBackgroundSource::Backdrop,
+                    tint,
+                    luminosity,
+                    fallback,
+                );
+                let registered = crate::rendering::composition::effects::register_effect_prewarm(name, effect, &animatable);
+                debug_assert!(registered.is_ok(), "the acrylic effect {name} does not load: {registered:?}");
+            }
+        });
     }
 
     pub fn new() -> Ref<Self> {
@@ -786,6 +828,15 @@ mod tests {
         assert_eq!(brush.tint_opacity(), 1.0);
         brush.set_tint_luminosity_opacity(Some(-1.0));
         assert_eq!(brush.tint_luminosity_opacity(), Some(0.0));
+    }
+
+    #[test]
+    fn the_material_is_registered_for_the_prewarm_of_the_gpu_programs() {
+        let _brush = AcrylicBrush::new();
+        let names = crate::rendering::composition::effects::effect_prewarm_names();
+        for name in ACRYLIC_PREWARM_EFFECTS {
+            assert!(names.iter().any(|registered| registered == name), "{name} in {names:?}");
+        }
     }
 
     #[test]

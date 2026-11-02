@@ -246,7 +246,7 @@ pub(crate) mod xaml_light;
 pub use acrylic_background_source::AcrylicBackgroundSource;
 pub use acrylic_brush::{
     acrylic_effect, acrylic_effect_with_source, AcrylicBrushBackgroundSource, luminosity_color, tint_opacity_modifier, AcrylicBrush, ACRYLIC_BLUR_AMOUNT, ACRYLIC_FALLBACK_CROSS_FADE,
-    ACRYLIC_NOISE_OPACITY,
+    ACRYLIC_NOISE_OPACITY, ACRYLIC_PREWARM_EFFECTS,
 };
 pub use material_policy::{MaterialPolicy, NOISE_ASSET_PNG};
 pub use background_sizing::BackgroundSizing;
