@@ -120,7 +120,7 @@ A pinned CPU ran 51 iterations in rotating order using release-optimized Rust 1.
 
 ### Solid FXP distribution
 
-The version 2 envelope stores the complete document group in one zlib stream. The WinUI crate selects it with the `solid-theme` feature. The CLI writes the same format with `ferroui-fxd --pack-solid <source-directory> <output.fxp>`. Use `--pack` or the `packed-theme` feature for independent per-document compression. Both encodings retain the original document paths, ordered child lists, generic arguments, markup extension flags, lexical scopes and line information.
+The version 2 envelope stores the complete document group in one zlib stream. The WinUI crate produces it with `solid-theme` for typed startup or `portable-solid-theme` for interpreter-only loading. The CLI writes the same format with `ferroui-fxd --pack-solid <source-directory> <output.fxp>`. Use `--pack` or the `packed-theme` feature for independent per-document compression. Both encodings retain the original document paths, ordered child lists, generic arguments, markup extension flags, lexical scopes and line information.
 
 | Field | Representation |
 | --- | --- |

@@ -27,8 +27,10 @@ path = "lib.rs"
 [features]
 # Embed the complete FXP archive and resolve its FXD documents through XamlX on first load.
 packed-theme = ["dep:ferroui-markup-xaml-loader", "ferroui-build/portable-xaml"]
-# Group similar FXD columns across the complete archive and expand the index once.
-solid-theme = ["packed-theme"]
+# Ship the full solid revision with prelinked typed execution on the startup path.
+solid-theme = ["precompiled-theme"]
+# Interpreter-only solid archive distribution: decompress and transform on first use.
+portable-solid-theme = ["packed-theme"]
 binary-resources = ["ferroui-markup-xaml/binary-resources"]
 # Resolve all semantics during the build. Run typed FXB/native code on startup and
 # expose the matching solid FXP revision to reload and designer consumers on demand.

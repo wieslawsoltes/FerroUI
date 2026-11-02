@@ -175,9 +175,9 @@ fn compile_theme(mut documents: Vec<(String, String)>, roots: Option<Vec<String>
 
 #[cfg(any(feature = "precompiled-theme", feature = "packed-theme"))]
 fn write_archive(documents: &[(&str, &str)]) {
-    #[cfg(any(feature = "solid-theme", feature = "precompiled-theme"))]
+    #[cfg(any(feature = "portable-solid-theme", feature = "precompiled-theme"))]
     use ferroui_build::compile_solid_archive as encode;
-    #[cfg(not(any(feature = "solid-theme", feature = "precompiled-theme")))]
+    #[cfg(not(any(feature = "portable-solid-theme", feature = "precompiled-theme")))]
     use ferroui_build::compile_archive as encode;
     let pack = encode(documents)
         .unwrap_or_else(|error| panic!("cannot compile WinUI theme pack: {error}"));

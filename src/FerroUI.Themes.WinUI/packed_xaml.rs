@@ -21,7 +21,7 @@ fn load(path: &str, root: Option<BoxedValue>, parent: Parent) -> Result<BoxedVal
     static ARCHIVE: OnceLock<Result<ThemePack<'static>, String>> = OnceLock::new();
     let archive = ARCHIVE.get_or_init(|| {
         let bytes = crate::theme_archive();
-        #[cfg(feature = "solid-theme")]
+        #[cfg(feature = "portable-solid-theme")]
         let bytes = {
             use ferroui_markup_xaml_loader::binary_document::pack::expand_solid;
             static EXPANDED: OnceLock<Vec<u8>> = OnceLock::new();

@@ -104,9 +104,9 @@ fn packed_theme_contains_every_compiled_document_within_budget() {
     use ferroui_markup_xaml_loader::binary_document::pack::ThemePack;
     let bytes = crate::theme_archive();
     assert!(bytes.len() < 600_000, "WinUI archive is {} bytes", bytes.len());
-    #[cfg(any(feature = "solid-theme", feature = "precompiled-theme"))]
+    #[cfg(any(feature = "portable-solid-theme", feature = "precompiled-theme"))]
     let indexed = ferroui_markup_xaml_loader::binary_document::pack::expand_solid(bytes).unwrap();
-    #[cfg(any(feature = "solid-theme", feature = "precompiled-theme"))]
+    #[cfg(any(feature = "portable-solid-theme", feature = "precompiled-theme"))]
     let bytes = &indexed;
     let archive = ThemePack::open(bytes).unwrap();
     let expected: Vec<_> = crate::assets::documents().iter()

@@ -3,7 +3,7 @@
   "rustc": "1.99.0",
   "revision": "Prepare immutable portable XAML execution plans once per revision",
   "mode": "Same opt-level=3 release probe for both arms with the original solid WinUI archive (245385 bytes, 169 documents). A compatibility adapter at the class-document registry linked these routines against the existing PR release dependency artifacts. Fresh process per arm, pinned to one allowed CPU; warm filesystem cache. Timings are in-process, from setup or activation through the first successful Button resource lookup. Setup includes type registration, solid expansion, index open and, for prepare, the first semantic transform. Other builds were active on the host.",
-  "reproduction": "cargo build --release -p ferroui-themes-winui --features solid-theme --example packed_activation; run target/release/examples/packed_activation with load or prepare in separate processes",
+  "reproduction": "cargo build --release -p ferroui-themes-winui --features portable-solid-theme --example packed_activation; run target/release/examples/packed_activation with load or prepare in separate processes",
   "units": "ns",
   "sample_order": [
     "load",
