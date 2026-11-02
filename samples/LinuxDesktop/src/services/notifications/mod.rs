@@ -264,11 +264,11 @@ fn sender_icon(value: &str) -> String {
         let path = if value.starts_with('/') {
             value.to_owned()
         } else {
-            use ferroui_base::utilities::{Uri, UriKind};
+            use ferroui_base::utilities::{Uri, UriExtensions, UriKind};
             let Some(uri) = Uri::try_create(value, UriKind::Absolute) else {
                 return String::new();
             };
-            uri.local_path()
+            UriExtensions::unescape_data_string(uri.absolute_path())
         };
         if std::path::Path::new(&path).is_file() {
             return path;
@@ -405,6 +405,10 @@ mod delivery_tests {
         assert_eq!(sender_icon(path), path);
         assert_eq!(
             sender_icon(&format!("file://{}", path.replace(' ', "%20"))),
+            path
+        );
+        assert_eq!(
+            sender_icon(&format!("file://localhost{}", path.replace(' ', "%20"))),
             path
         );
         std::fs::remove_file(path).unwrap();
