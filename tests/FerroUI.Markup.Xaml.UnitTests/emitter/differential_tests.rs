@@ -94,6 +94,50 @@ fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
     ), "the fused resource factory must retain its scoped namespace provider");
 }
 
+/// Not from upstream (C5 of #423, decision O2 of docs/idiomatic-rust-signatures.md): the
+/// compiled form of the test of `xaml::ferro_intrinsics_tests`. A time span literal for a
+/// property that declares a `Duration` (`AcrylicBrush.TintTransitionDuration`) is written as
+/// the duration, a constant; the run-time loader sets the same value.
+#[test]
+fn a_time_span_literal_sets_a_duration_property() {
+    let _app = xaml_test_base();
+    let document = ("acrylic_brush_duration.xaml", "<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='0:0:1.5'/>");
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    assert!(
+        generated.source.contains("tint_transition_duration_property(), ::core::time::Duration::new(1_u64, 500000000_u32));"),
+        "{}",
+        generated.source
+    );
+
+    let loaded = try_load(document.1).expect("the brush loads");
+    let brush = ValueTypes::as_object(&*loaded).and_then(|object| object.cast::<ferroui_base::media::AcrylicBrush>()).expect("a brush");
+    assert_eq!(brush.tint_transition_duration(), std::time::Duration::from_millis(1500));
+}
+
+/// Not from upstream (C5 of #423, decision O2): a negative time span literal for a property
+/// that declares a `Duration` is an error of the compiler, which names the property and the
+/// time span, and a load error of the run-time loader.
+#[test]
+fn a_negative_time_span_literal_for_a_duration_property_is_an_error() {
+    let _app = xaml_test_base();
+    let document = ("acrylic_brush_negative_duration.xaml", "<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='-0:0:1'/>");
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+    assert!(
+        reason.contains("TintTransitionDuration: the time span -00:00:01 is negative, and a `Duration` cannot be negative"),
+        "{reason}"
+    );
+    assert!(!generated.source.contains("tint_transition_duration_property()"), "{}", generated.source);
+
+    let error = match try_load(document.1) {
+        Ok(_) => panic!("a negative time span is not a duration"),
+        Err(error) => error,
+    };
+    let described = describe(&error);
+    assert!(described.contains("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration."), "{described}");
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")

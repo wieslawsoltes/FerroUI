@@ -102,6 +102,9 @@ pub enum Known {
     /// `Rc<FerroList<Option<BoxedValue>>>`: the shared list of the items of a
     /// [`RuntimeList`](Known::RuntimeList), which a collection handle is cast from.
     ListItems,
+    /// `std::time::Duration`: the Rust form of a time span that is not negative, which a
+    /// time span literal is written as for a member that declares it.
+    Duration,
 }
 
 /// The Rust type that holds a value of a type of the type system (its handle).
