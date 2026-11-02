@@ -299,9 +299,9 @@ ferroui_base::ferro_properties! { impl Track {
 
 impl Track {
     fn static_constructor() {
-        Self::thumb_property().changed().add_class_handler::<Track>(|x, e| x.thumb_changed(e));
-        Self::increase_button_property().changed().add_class_handler::<Track>(|x, e| x.button_changed(e));
-        Self::decrease_button_property().changed().add_class_handler::<Track>(|x, e| x.button_changed(e));
+        Self::thumb_property().changed().add_class_handler::<Track>(|x, e| x.thumb_changed(e)).detach();
+        Self::increase_button_property().changed().add_class_handler::<Track>(|x, e| x.button_changed(e)).detach();
+        Self::decrease_button_property().changed().add_class_handler::<Track>(|x, e| x.button_changed(e)).detach();
         Layoutable::affects_arrange::<Track>(&[
             Self::is_direction_reversed_property().as_property(),
             Self::minimum_property().as_property(),

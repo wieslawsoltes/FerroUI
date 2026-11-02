@@ -24,17 +24,17 @@ ferro_properties! {
     impl Translation {
         pub fn key_property() -> AttachedProperty<Option<String>> {
             let property = FerroProperty::register_attached::<Translation, FerroObject, _>("Key", None);
-            let _ = property.changed().subscribe(Self::changed);
+            property.changed().subscribe(Self::changed).detach();
             property
         }
         pub fn fallback_value_property() -> AttachedProperty<Option<BoxedValue>> {
             let property = FerroProperty::register_attached::<Translation, FerroObject, _>("FallbackValue", None);
-            let _ = property.changed().subscribe(Self::changed);
+            property.changed().subscribe(Self::changed).detach();
             property
         }
         pub fn string_format_property() -> AttachedProperty<Option<String>> {
             let property = FerroProperty::register_attached::<Translation, FerroObject, _>("StringFormat", None);
-            let _ = property.changed().subscribe(Self::changed);
+            property.changed().subscribe(Self::changed).detach();
             property
         }
         pub fn culture_property() -> AttachedProperty<Option<String>> {
@@ -43,21 +43,21 @@ ferro_properties! {
                     value.as_ref().is_none_or(|name| Culture::parse(name).is_ok())
                 }),
             );
-            let _ = property.changed().subscribe(Self::culture_changed);
+            property.changed().subscribe(Self::culture_changed).detach();
             property
         }
         pub fn auto_flow_direction_property() -> AttachedProperty<bool> {
             let property = FerroProperty::register_attached_with::<Translation, Visual, _>(
                 "AutoFlowDirection", StyledPropertyOptions::new(false).inherits(true),
             );
-            let _ = property.changed().subscribe(Self::changed);
+            property.changed().subscribe(Self::changed).detach();
             property
         }
         pub fn source_property() -> AttachedProperty<Option<TranslationBindingSource>> {
             let property = FerroProperty::register_attached_with::<Translation, FerroObject, _>(
                 "Source", StyledPropertyOptions::new(None).inherits(true),
             );
-            let _ = property.changed().subscribe(Self::changed);
+            property.changed().subscribe(Self::changed).detach();
             property
         }
         /// Last failure of attached-property evaluation, cleared after a successful refresh.

@@ -26,7 +26,7 @@ ferro_properties! {
                 None,
             );
             // The static constructor of the reference: `BehaviorsProperty.Changed.Subscribe(..)`.
-            let _ = property.changed().subscribe(Interaction::behaviors_changed);
+            property.changed().subscribe(Interaction::behaviors_changed).detach();
             property
         }
     }

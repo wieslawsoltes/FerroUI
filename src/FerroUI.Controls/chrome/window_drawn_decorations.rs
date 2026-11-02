@@ -214,26 +214,31 @@ ferroui_base::ferro_properties! { impl WindowDrawnDecorations {
 
 impl WindowDrawnDecorations {
     fn static_constructor() {
-        let _ = Self::template_property()
+        Self::template_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.invalidate_template());
-        let _ = Self::enabled_parts_property().changed().add_class_handler::<WindowDrawnDecorations>(|x, _| {
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.invalidate_template())
+            .detach();
+        Self::enabled_parts_property().changed().add_class_handler::<WindowDrawnDecorations>(|x, _| {
             x.update_enabled_parts_pseudo_classes();
             x.update_effective_geometry();
-        });
+        }).detach();
 
-        let _ = Self::title_bar_decorations_property()
+        Self::title_bar_decorations_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_title_bar_decorations_pseudo_classes());
-        let _ = Self::default_title_bar_height_property()
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_title_bar_decorations_pseudo_classes())
+            .detach();
+        Self::default_title_bar_height_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry());
-        let _ = Self::default_frame_thickness_property()
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry())
+            .detach();
+        Self::default_frame_thickness_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry());
-        let _ = Self::default_shadow_thickness_property()
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry())
+            .detach();
+        Self::default_shadow_thickness_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry());
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry())
+            .detach();
     }
 
     /// Field initialisation only.

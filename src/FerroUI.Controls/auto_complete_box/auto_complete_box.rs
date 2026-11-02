@@ -937,32 +937,41 @@ impl AutoCompleteBox {
 
         Self::minimum_populate_delay_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_minimum_populate_delay_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_minimum_populate_delay_changed(e))
+            .detach();
         Self::is_drop_down_open_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_is_drop_down_open_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_is_drop_down_open_changed(e))
+            .detach();
         Self::selected_item_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_selected_item_property_changed(e));
-        Self::text_property().changed().add_class_handler::<AutoCompleteBox>(|x, e| x.on_text_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_selected_item_property_changed(e))
+            .detach();
+        Self::text_property().changed().add_class_handler::<AutoCompleteBox>(|x, e| x.on_text_property_changed(e)).detach();
         Self::search_text_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_search_text_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_search_text_property_changed(e))
+            .detach();
         Self::filter_mode_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_filter_mode_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_filter_mode_property_changed(e))
+            .detach();
         Self::item_filter_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_item_filter_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_item_filter_property_changed(e))
+            .detach();
         Self::items_source_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_items_source_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_items_source_property_changed(e))
+            .detach();
         Self::item_template_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_item_template_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_item_template_property_changed(e))
+            .detach();
         InputElement::is_enabled_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_control_is_enabled_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_control_is_enabled_changed(e))
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

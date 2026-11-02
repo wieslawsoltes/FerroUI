@@ -33,7 +33,7 @@ ferro_properties! {
 
 impl WaylandProperties {
     fn static_constructor() {
-        Self::app_id_property().changed().add_class_handler::<TopLevel>(Self::on_app_id_changed);
+        Self::app_id_property().changed().add_class_handler::<TopLevel>(Self::on_app_id_changed).detach();
     }
 
     /// Sets the value of the `AppId` attached property of the specified window.

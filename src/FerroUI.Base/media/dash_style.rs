@@ -58,8 +58,8 @@ crate::ferro_properties! { impl DashStyle {
 
 impl DashStyle {
     fn static_constructor() {
-        Self::dashes_property().changed().add_class_handler::<DashStyle>(|x, _| x.raise_invalidated());
-        Self::offset_property().changed().add_class_handler::<DashStyle>(|x, _| x.raise_invalidated());
+        Self::dashes_property().changed().add_class_handler::<DashStyle>(|x, _| x.raise_invalidated()).detach();
+        Self::offset_property().changed().add_class_handler::<DashStyle>(|x, _| x.raise_invalidated()).detach();
     }
 
     /// Creates the class data.

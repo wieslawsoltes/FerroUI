@@ -166,7 +166,7 @@ impl TrayIcon {
             } else {
                 panic!("TrayIcon.Icons must be set on the Application.");
             }
-        });
+        }).detach();
 
         let _ = Dispatcher::ui_thread().shutdown_started(|_| Self::shutdown_started());
     }

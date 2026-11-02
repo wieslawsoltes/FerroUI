@@ -349,7 +349,7 @@ impl TemplatedControlImpl for ProgressBar {
                 }
             })
         });
-        *this.track_size_changed_listener.borrow_mut() = listener.map(Subscription::new);
+        *this.track_size_changed_listener.borrow_mut() = listener;
 
         this.update_indicator();
     }

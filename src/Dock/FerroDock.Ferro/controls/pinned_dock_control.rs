@@ -120,16 +120,20 @@ impl PinnedDockControl {
     fn static_constructor() {
         Self::pinned_dock_alignment_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
         Self::pinned_dock_display_mode_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.on_display_mode_changed());
+            .add_class_handler::<Self>(|this, _| this.on_display_mode_changed())
+            .detach();
         Self::minimum_pinned_width_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
         Self::minimum_pinned_height_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
     }
     /// Constructs all original fields for native inheritance.
     pub fn construct() -> Self {

@@ -355,10 +355,10 @@ ferroui_base::ferro_properties! { impl Popup {
 
 impl Popup {
     fn static_constructor() {
-        Self::child_property().changed().add_class_handler::<Popup>(|x, e| x.child_changed(e));
-        Self::is_open_property().changed().add_class_handler::<Popup>(|x, e| x.is_open_changed(e));
+        Self::child_property().changed().add_class_handler::<Popup>(|x, e| x.child_changed(e)).detach();
+        Self::is_open_property().changed().add_class_handler::<Popup>(|x, e| x.is_open_changed(e)).detach();
         // WinUI: the `Shadow` of a popup is cast by its child (`NeedsDropShadowVisual`).
-        Visual::shadow_property().changed().add_class_handler::<Popup>(|x, _| x.update_child_theme_shadow());
+        Visual::shadow_property().changed().add_class_handler::<Popup>(|x, _| x.update_child_theme_shadow()).detach();
     }
 
     /// Hands the `Shadow` of the popup to its child, which casts it (with the elevation of the

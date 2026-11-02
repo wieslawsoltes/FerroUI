@@ -782,9 +782,9 @@ impl Visual {
             Self::effect_property().as_property(),
             Self::has_mirror_transform_property().as_property(),
         ]);
-        Self::render_transform_property().changed().subscribe(Self::render_transform_changed);
-        Self::clip_to_bounds_property().changed().subscribe(|_| bump_geometry_version());
-        Self::render_transform_origin_property().changed().subscribe(|_| bump_geometry_version());
+        Self::render_transform_property().changed().subscribe(Self::render_transform_changed).detach();
+        Self::clip_to_bounds_property().changed().subscribe(|_| bump_geometry_version()).detach();
+        Self::render_transform_origin_property().changed().subscribe(|_| bump_geometry_version()).detach();
         Self::z_index_property().changed().subscribe(|e| {
             let Some(sender) = e.sender().downcast_ref::<Visual>() else { return };
             let parent = sender.visual_parent();
@@ -799,7 +799,7 @@ impl Visual {
                     source.renderer().recalculate_children(parent);
                 }
             }
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`crate::FerroObject::construct`].
@@ -1417,14 +1417,14 @@ impl Visual {
                         visual.update_affects_render_subscription(e);
                         visual.invalidate_visual();
                     }
-                });
+                }).detach();
             } else {
                 property.changed().subscribe(|e| {
                     if let Some(sender) = e.sender().downcast_ref::<T>() {
                         let visual: &Visual = sender.upcast();
                         visual.invalidate_visual();
                     }
-                });
+                }).detach();
             }
         }
     }

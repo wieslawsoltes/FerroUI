@@ -115,7 +115,7 @@ ferroui_base::ferro_properties! { impl AdornerLayer {
         pub fn adorned_element_property() -> AttachedProperty<Option<ElementRef<Visual>>> {
             ValueTypes::register_element_ref::<Visual>();
             let property = FerroProperty::register_attached::<AdornerLayer, Visual, _>("AdornedElement", None);
-            property.changed().subscribe(Self::adorned_element_changed);
+            property.changed().subscribe(Self::adorned_element_changed).detach();
             property
         }
     );
@@ -124,7 +124,7 @@ ferroui_base::ferro_properties! { impl AdornerLayer {
         /// Allows for controlling clipping of the adorner.
         pub fn is_clip_enabled_property() -> AttachedProperty<bool> {
             let property = FerroProperty::register_attached::<AdornerLayer, Visual, _>("IsClipEnabled", true);
-            property.changed().subscribe(Self::adorner_is_clip_enabled_changed);
+            property.changed().subscribe(Self::adorner_is_clip_enabled_changed).detach();
             property
         }
     );
@@ -133,7 +133,7 @@ ferroui_base::ferro_properties! { impl AdornerLayer {
         /// Allows for getting and setting of the adorner for control.
         pub fn adorner_property() -> AttachedProperty<Option<Ref<Control>>> {
             let property = FerroProperty::register_attached::<AdornerLayer, Visual, _>("Adorner", None);
-            property.changed().subscribe(Self::adorner_changed);
+            property.changed().subscribe(Self::adorner_changed).detach();
             property
         }
     );

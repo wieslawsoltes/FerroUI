@@ -163,7 +163,7 @@ impl Spinner {
         Self::valid_spin_direction_property().changed().add_class_handler::<Spinner>(|spinner, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<ValidSpinDirections>();
             spinner.on_valid_spin_direction_changed(old_value, new_value);
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

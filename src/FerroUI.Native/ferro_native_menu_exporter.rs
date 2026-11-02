@@ -7,7 +7,7 @@ use crate::helpers::ComResultExt;
 use crate::interop::*;
 use crate::mac_os_native_menu_commands::MacOSNativeMenuCommands;
 use ferroui_base::input::{Key, KeyGesture, KeyModifiers};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
 use ferroui_controls::platform::{INativeMenuExporter, ITopLevelNativeMenuExporter};
@@ -36,7 +36,7 @@ pub struct FerroNativeMenuExporter {
     native_menu: RefCell<Option<Rc<FrnMenu>>>,
     application_commands: Option<ComPtr<IFrnApplicationCommands>>,
     /// The subscription to the dock menu of the application.
-    dock_menu_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    dock_menu_subscription: RefCell<Option<Subscription>>,
 }
 
 fn mac_options() -> MacOSPlatformOptions {

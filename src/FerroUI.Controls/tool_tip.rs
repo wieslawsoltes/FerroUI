@@ -195,7 +195,7 @@ impl ToolTip {
     /// Initializes static members of the [`ToolTip`] class.
     fn static_constructor() {
         // The subscription lives as long as the property.
-        let _ = Self::is_open_property().changed().subscribe(Self::is_open_changed);
+        Self::is_open_property().changed().subscribe(Self::is_open_changed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
