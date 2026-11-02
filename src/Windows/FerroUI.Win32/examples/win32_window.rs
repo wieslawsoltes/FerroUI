@@ -262,7 +262,7 @@ mod windows {
         IPlatformRenderInterface, IPlatformRenderInterfaceContext, IRenderTarget, RenderTargetSceneInfo,
     };
     use ferroui_base::rendering::composition::CompositionTransparencyLevel;
-    use ferroui_base::threading::{CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
+    use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTimer};
     use ferroui_base::{
         FerroLocator, LocatorExtensions, Matrix, PixelPoint, PixelSize, Point, Rect, Ref, RelativePoint, RelativeUnit,
         RoundedRect, Size,
@@ -2370,7 +2370,7 @@ mod windows {
             return ExitCode::FAILURE;
         }
         let report = &state.report;
-        let loop_cancellation = CancellationTokenSource::new();
+        let loop_cancellation = CancellationToken::new();
 
         let handle = window.handle();
         let hwnd = handle.as_ref().map_or(0, |handle| handle.handle());
@@ -2606,7 +2606,7 @@ mod windows {
         });
 
         println!("Entering main loop");
-        Dispatcher::ui_thread().main_loop(&loop_cancellation.token());
+        Dispatcher::ui_thread().main_loop(&loop_cancellation);
         println!("Main loop exited");
 
         let (frames, closed) = (state.frames.get(), state.closed.get());

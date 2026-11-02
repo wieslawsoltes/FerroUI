@@ -255,7 +255,7 @@ mod imp {
 
     impl IControlledDispatcherImpl for EpollDispatcherImpl {
         fn run_loop(&self, cancellation_token: CancellationToken) {
-            while !cancellation_token.is_cancellation_requested() {
+            while !cancellation_token.is_cancelled() {
                 let now = self.clock.elapsed();
                 if self.next_timer.get().is_some_and(|next_timer| now > next_timer) {
                     self.timer.raise();
@@ -312,7 +312,7 @@ mod imp {
         // Not from the reference, which has no tests for this file. They
         // run the loop on a real event poll, on Linux only.
         use super::*;
-        use ferroui_base::threading::CancellationTokenSource;
+        use ferroui_base::threading::CancellationToken;
         use std::cell::RefCell;
         use std::collections::VecDeque;
 
@@ -340,7 +340,7 @@ mod imp {
             let events = input.events.clone();
             let dispatcher = EpollDispatcherImpl::new(Box::new(input));
             let log = Rc::new(RefCell::new(Vec::<&'static str>::new()));
-            let cts = Arc::new(CancellationTokenSource::new());
+            let cts = CancellationToken::new();
 
             {
                 let log = log.clone();
@@ -376,7 +376,7 @@ mod imp {
             assert!(dispatcher.has_pending_input());
 
             let started = Instant::now();
-            dispatcher.run_loop(cts.token());
+            dispatcher.run_loop(cts.clone());
 
             assert_eq!(*log.borrow(), ["signaled", "input", "timer", "background"]);
             assert!(started.elapsed() >= Duration::from_millis(25), "the timer was raised early");
@@ -387,7 +387,7 @@ mod imp {
         #[test]
         fn a_cancelled_token_ends_a_waiting_loop_when_the_loop_is_woken() {
             let dispatcher = EpollDispatcherImpl::new(Box::new(Input::default()));
-            let cts = Arc::new(CancellationTokenSource::new());
+            let cts = CancellationToken::new();
             let handle = dispatcher.signal_handle();
             let worker = {
                 let cts = cts.clone();
@@ -397,7 +397,7 @@ mod imp {
                     handle.signal();
                 })
             };
-            dispatcher.run_loop(cts.token());
+            dispatcher.run_loop(cts.clone());
             worker.join().unwrap();
             assert!(dispatcher.current_thread_is_loop_thread());
         }
