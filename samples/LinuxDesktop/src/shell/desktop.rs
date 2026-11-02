@@ -1,7 +1,9 @@
 //! Platform-specific desktop composition; scenes use the same session, catalog and input model.
+mod apps;
+
 use super::appearance::{Appearance, ColorMode, Layout, WinUISettings};
 use super::chrome::*;
-use super::{feedback, popup_header, time_text, wallpaper, workspace_name, Scene, Shell};
+use super::{Scene, Shell, feedback, popup_header, time_text, wallpaper, workspace_name};
 use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
 use ferroui_base::media::FontWeight;
 use ferroui_controls::{Border, Button};
@@ -35,6 +37,7 @@ pub(super) fn panel(
         (Layout::Taskbar, false) => taskbar(state, clock),
         (Layout::MenuBarDock, true) => menubar(state, clock),
         (Layout::MenuBarDock, false) => dock(state),
+        (Layout::BottomNavigation, true) => material_status(state, clock),
         (Layout::BottomNavigation, false) => navigation(state),
         _ => Element::Empty,
     }
@@ -98,67 +101,6 @@ fn focus_home(
             }
         }
     }
-}
-
-/// The compact area shows the leading clients on this workspace; the overview
-/// always contains the full list. Keyed entries survive unrelated X events.
-fn running_clients(state: &Rc<Shell>) -> Element {
-    let snapshot = state.snapshot;
-    let state = state.clone();
-    for_each(
-        move || {
-            snapshot.with(|s| {
-                s.windows
-                    .iter()
-                    .filter(|w| w.workspace.is_none_or(|i| i == s.current_workspace))
-                    .take(3)
-                    .cloned()
-                    .collect::<Vec<_>>()
-            })
-        },
-        |window| window.id,
-        move |window| {
-            let shell = state.clone();
-            let id = window.id;
-            let title = if window.title.is_empty() {
-                "Window"
-            } else {
-                &window.title
-            };
-            let initial = title
-                .trim()
-                .chars()
-                .next()
-                .unwrap_or('•')
-                .to_uppercase()
-                .to_string();
-            action(title, move || {
-                if let Some(session) = &shell.session {
-                    session.activate(id);
-                }
-            })
-            .width(34.0)
-            .height(36.0)
-            .padding(2)
-            .corner_radius(7)
-            .child(
-                stack_panel()
-                    .spacing(2.0)
-                    .child(shell_text(&initial, 13.0, Ink::Primary).horizontal_alignment(H::Center))
-                    .child(
-                        border()
-                            .width(if window.active { 13.0 } else { 5.0 })
-                            .height(2.0)
-                            .corner_radius(1)
-                            .background(if window.active {
-                                colors().accent
-                            } else {
-                                colors().muted
-                            }),
-                    ),
-            )
-        },
-    )
 }
 
 fn date(t: OffsetDateTime) -> String {
@@ -252,7 +194,7 @@ fn windows_icons(state: &Rc<Shell>) -> Element {
 fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
     let snapshot = state.snapshot;
     let width = state.metrics().width;
-    let compact = memo(move |_| width.get() < 760.0);
+    let compact = memo(move |_| width.get() < 900.0);
     let start = command(state, Scene::Applications, "Open applications")
         .name("Start")
         .node_ref(state.desktop_focus)
@@ -288,12 +230,22 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         );
     let tray = row(2.0)
         .horizontal_alignment(H::Right)
-        .child(status_button(
-            state,
-            Scene::QuickSettings,
-            "Quick settings",
-            Icon::Settings,
-        ))
+        .child(
+            command(
+                state,
+                Scene::QuickSettings,
+                "Network and sound quick settings",
+            )
+            .background("Transparent")
+            .border_thickness(0)
+            .height(36)
+            .padding((8.0, 0.0))
+            .child(
+                row(6.0)
+                    .child(glyph(Icon::Network, 15.0, colors().bar_ink))
+                    .child(glyph(Icon::Sound, 16.0, colors().bar_ink)),
+            ),
+        )
         .child(notification_button(state))
         .child(
             command(state, Scene::Calendar, "Open calendar")
@@ -322,22 +274,8 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .border_thickness(0)
                 .child(glyph(Icon::Appearance, 19.0, colors().dock_tiles[2])),
         )
-        .child(super::launcher::pinned_shortcuts(state))
-        .child(
-            row(3.0)
-                .is_visible(move || !compact.get())
-                .child(running_clients(state)),
-        );
-    let panel = if look().winui().is_some() {
-        border()
-            .background(resource("SolidBackgroundFillColorBaseBrush"))
-            .border_brush(resource("CardStrokeColorDefaultBrush"))
-    } else {
-        border()
-            .background(colors().bar)
-            .border_brush(colors().bar_edge)
-    };
-    panel
+        .child(apps::strip(state, Layout::Taskbar));
+    bar_surface()
         .border_thickness((0.0, 1.0, 0.0, 0.0))
         .child(
             grid()
@@ -360,6 +298,25 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
 }
 
 fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
+    let snapshot = state.snapshot;
+    let catalog = state.catalog.clone();
+    let active_name = memo(move |_| {
+        snapshot.with(|s| {
+            let Some(window) = s.windows.iter().find(|w| w.active) else {
+                return "Desktop".to_owned();
+            };
+            if let Some(index) = catalog.window_index(&window.app_id) {
+                return catalog.applications()[index].name.clone();
+            }
+            window
+                .app_id
+                .rsplit('.')
+                .next()
+                .filter(|s| !s.is_empty())
+                .unwrap_or(&window.title)
+                .to_owned()
+        })
+    });
     let width = state.metrics().width;
     let compact = memo(move |_| width.get() < 550.0);
     let menu = |scene, title: &'static str| {
@@ -371,8 +328,7 @@ fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
             .child(shell_text(title, 12.0, Ink::Primary))
     };
 
-    border()
-        .background(colors().bar)
+    bar_surface()
         .child(
             grid()
                 .column_definitions("*,Auto")
@@ -386,13 +342,18 @@ fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                                 .padding((4.0, 0.0))
                                 .background("Transparent")
                                 .border_thickness(0)
+                                .child(glyph(Icon::Mark, 16.0, colors().bar_ink)),
+                        )
+                        .child(
+                            command(state, Scene::Workspaces, "Active application and windows")
+                                .max_width(move || if compact.get() { 95.0 } else { 160.0 })
+                                .background("Transparent")
+                                .border_thickness(0)
+                                .padding((6.0, 0.0))
                                 .child(
-                                    row(6.0)
-                                        .child(glyph(Icon::Mark, 15.0, colors().bar_ink))
-                                        .child(
-                                            shell_text("Ferro", 13.0, colors().bar_ink)
-                                                .font_weight(FontWeight::Bold),
-                                        ),
+                                    shell_text("", 13.0, colors().bar_ink)
+                                        .font_weight(FontWeight::Bold)
+                                        .text(move || active_name.get()),
                                 ),
                         )
                         .child(menu(Scene::Applications, "Applications"))
@@ -402,6 +363,15 @@ fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .child(
                     row(2.0)
                         .grid_column(1)
+                        .child(
+                            status_button(
+                                state,
+                                Scene::Applications,
+                                "Search applications",
+                                Icon::Search,
+                            )
+                            .is_visible(move || !compact.get()),
+                        )
                         .child(status_button(
                             state,
                             Scene::QuickSettings,
@@ -415,10 +385,20 @@ fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                                 .padding((5.0, 0.0))
                                 .border_thickness(0)
                                 .background("Transparent")
-                                .child(
-                                    shell_text("", 12.0, colors().bar_ink)
-                                        .text(move || time_text(clock.get())),
-                                ),
+                                .child(shell_text("", 12.0, colors().bar_ink).text(move || {
+                                    let t = clock.get();
+                                    if compact.get() {
+                                        time_text(t)
+                                    } else {
+                                        format!(
+                                            "{:.3} {:.3} {}  {}",
+                                            t.weekday().to_string(),
+                                            t.month().to_string(),
+                                            t.day(),
+                                            time_text(t)
+                                        )
+                                    }
+                                })),
                         ),
                 ),
         )
@@ -426,8 +406,9 @@ fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
 }
 
 fn dock(state: &Rc<Shell>) -> Element {
-    let width = state.metrics().width;
-    let compact = memo(move |_| width.get() < 550.0);
+    let metrics = state.metrics();
+    let snapshot = state.snapshot;
+    let pins = state.favorites;
     let dock_tile = |scene, title: &'static str, icon, fill: &'static str| {
         command(state, scene, title)
             .width(45.0)
@@ -439,14 +420,12 @@ fn dock(state: &Rc<Shell>) -> Element {
             .border_brush(colors().bar_edge)
             .child(glyph(icon, 22.0, "#FFFFFF"))
     };
-    border()
+    dock_surface()
         .vertical_alignment(V::Center)
         .horizontal_alignment(H::Center)
         .corner_radius(19)
-        .border_brush(colors().bar_edge)
         .border_thickness(1)
-        .padding(5)
-        .background(colors().bar)
+        .padding((8.0, 4.0))
         .child(
             row(7.0)
                 .child(dock_tile(
@@ -467,110 +446,210 @@ fn dock(state: &Rc<Shell>) -> Element {
                     Icon::Appearance,
                     colors().dock_tiles[2],
                 ))
-                .child(super::launcher::pinned_shortcuts(state))
                 .child(
-                    row(3.0)
-                        .is_visible(move || !compact.get())
-                        .child(running_clients(state)),
+                    border()
+                        .width(1)
+                        .height(31)
+                        .background(colors().bar_edge)
+                        .is_visible(move || {
+                            (metrics.pins.get() > 0 && pins.with(|p| !p.is_empty()))
+                                || (metrics.width.get() >= 760.0
+                                    && snapshot.with(|s| {
+                                        s.windows.iter().any(|w| {
+                                            w.workspace.is_none_or(|i| i == s.current_workspace)
+                                        })
+                                    }))
+                        }),
+                )
+                .child(apps::strip(state, Layout::MenuBarDock)),
+        )
+        .into()
+}
+
+/// The recognizer owns capture once the swipe passes the threshold. Native
+/// client surfaces and command buttons keep the pointer streams begun on them.
+fn swipe_area(state: &Rc<Shell>, up: Scene, down: Option<Scene>) -> El<Border> {
+    use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
+    let shell = state.clone();
+    let previous = std::cell::Cell::new(None);
+    border()
+        .background("Transparent")
+        .with(|area| {
+            let swipe = SwipeGestureRecognizer::new();
+            swipe.set_can_vertically_swipe(true);
+            swipe.set_is_mouse_enabled(true);
+            swipe.set_threshold(40.0);
+            area.gesture_recognizers().add(swipe);
+        })
+        .on_swipe_gesture(move |event| {
+            if previous.get() == Some(event.id()) {
+                return;
+            }
+            let dy = event.delta().y;
+            // Positive deltas move toward the top edge.
+            let destination = if dy > 0.0 {
+                Some(up)
+            } else if dy < 0.0 {
+                down
+            } else {
+                None
+            };
+            if let Some(destination) = destination {
+                previous.set(Some(event.id()));
+                shell.open(destination);
+                event.set_handled(true);
+            }
+        })
+}
+
+fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
+    let (top, bottom) = look().insets();
+    grid()
+        .child(swipe_area(
+            state,
+            Scene::Applications,
+            Some(Scene::Notifications),
+        ))
+        .child(
+            stack_panel()
+                .margin((32.0, top + 22.0, 24.0, 0.0))
+                .horizontal_alignment(H::Left)
+                .vertical_alignment(V::Top)
+                .child(
+                    command(state, Scene::Calendar, "Open calendar")
+                        .class("text")
+                        .padding(0)
+                        .horizontal_alignment(H::Left)
+                        .background("Transparent")
+                        .border_thickness(0)
+                        .child(shell_text("", 17.0, "#D4E7D9").text(move || {
+                            let t = clock.get();
+                            format!("{}, {} {}", t.weekday(), t.month(), t.day())
+                        })),
+                )
+                .child(
+                    shell_text("", 76.0, "#E1F9E7")
+                        .font_weight(FontWeight::Light)
+                        .letter_spacing(-3.0)
+                        .text(move || time_text(clock.get())),
+                ),
+        )
+        .child(
+            command(state, Scene::Applications, "Search installed applications")
+                .horizontal_alignment(H::Stretch)
+                .max_width(410.0)
+                .margin((20.0, 0.0, 20.0, bottom + 16.0))
+                .vertical_alignment(V::Bottom)
+                .height(56)
+                .corner_radius(28)
+                .padding((20.0, 0.0))
+                .horizontal_content_alignment(H::Stretch)
+                .child(
+                    row(12.0)
+                        .child(glyph(Icon::Search, 21.0, colors().bar_ink))
+                        .child(shell_text("Search apps", 15.0, colors().bar_ink)),
                 ),
         )
         .into()
 }
 
-fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
-    stack_panel()
-        .margin((34.0, 32.0))
-        .horizontal_alignment(H::Left)
-        .vertical_alignment(V::Top)
+fn material_status(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
+    let status = |scene, label| {
+        command(state, scene, label)
+            .theme(resource("MaterialIconButton"))
+            .width(48)
+            .height(48)
+            .padding(0)
+    };
+    let counter = state.clone();
+    bar_surface()
         .child(
-            command(state, Scene::Calendar, "Open calendar")
-                .class("text")
-                .padding(0)
-                .horizontal_alignment(H::Left)
-                .background("Transparent")
-                .border_thickness(0)
-                .child(shell_text("", 17.0, "#D4E7D9").text(move || {
-                    let t = clock.get();
-                    format!("{}, {} {}", t.weekday(), t.month(), t.day())
-                })),
+            grid()
+                .column_definitions("*,Auto")
+                .margin((10.0, 0.0))
+                .child(
+                    row(4.0)
+                        .child(
+                            command(state, Scene::Calendar, "Date and time")
+                                .class("text")
+                                .background("Transparent")
+                                .padding((8.0, 0.0))
+                                .child(
+                                    shell_text("", 15.0, colors().bar_ink)
+                                        .font_weight(FontWeight::Medium)
+                                        .text(move || time_text(clock.get())),
+                                ),
+                        )
+                        .child(status(Scene::Notifications, "Notifications").child(glyph(
+                            Icon::Bell,
+                            17.0,
+                            colors().bar_ink,
+                        )))
+                        .child(shell_text("", 12.0, colors().bar_ink).text(move || {
+                            let count = counter.notifications.count();
+                            if count == 0 {
+                                String::new()
+                            } else {
+                                count.to_string()
+                            }
+                        })),
+                )
+                .child(
+                    status(Scene::QuickSettings, "Quick settings")
+                        .grid_column(1)
+                        .child(glyph(Icon::Settings, 20.0, colors().bar_ink)),
+                ),
         )
-        .child(
-            shell_text("", 76.0, "#E1F9E7")
-                .font_weight(FontWeight::Light)
-                .letter_spacing(-3.0)
-                .text(move || time_text(clock.get())),
-        )
-        .child(row(2.0).child(super::launcher::pinned_shortcuts(state)))
         .into()
 }
 
 fn navigation(state: &Rc<Shell>) -> Element {
-    let scene = state.scene;
-    let tab = |destination, name: &'static str, icon, col| {
-        let shell = state.clone();
-        action(name, move || {
-            if destination == Scene::Desktop {
-                shell.dismiss();
-            } else {
-                shell.open(destination);
-            }
-        })
-        .class("text")
-        .grid_column(col)
-        .horizontal_alignment(H::Stretch)
-        .height(54.0)
-        .min_width(42.0)
-        .padding((1.0, 0.0))
-        .child(
-            stack_panel()
-                .spacing(2.0)
-                .child(
-                    grid()
-                        .width(50.0)
-                        .height(25.0)
-                        .child(
-                            border()
-                                .corner_radius(14)
-                                .background(colors().selected)
-                                .is_visible(move || scene.get() == destination),
-                        )
-                        .child(glyph(icon, 16.0, colors().bar_ink)),
-                )
-                .child(
-                    shell_text(name, 11.0, colors().bar_ink)
-                        .horizontal_alignment(H::Center)
-                        .font_weight(FontWeight::Medium),
-                ),
-        )
+    let button = |scene, label, icon| {
+        command(state, scene, label)
+            .theme(resource("MaterialIconButton"))
+            .width(48)
+            .height(48)
+            .padding(0)
+            .child(glyph(icon, 24.0, colors().bar_ink))
     };
-    border()
-        .background(colors().bar)
-        .padding((12.0, 3.0))
+    bar_surface()
         .child(
             grid()
-                .row_definitions("*,6")
+                .row_definitions("*,12")
+                .margin((6.0, 2.0))
                 .child(
-                    grid()
-                        .max_width(550.0)
-                        .column_definitions("*,*,*,*,*,*")
+                    row(4.0)
+                        .horizontal_alignment(H::Center)
                         .child(
-                            tab(Scene::Desktop, "Home", Icon::Mark, 0)
+                            button(Scene::Applications, "All apps", Icon::Applications)
                                 .node_ref(state.desktop_focus)
                                 .on_loaded(focus_home(state)),
                         )
-                        .child(tab(Scene::Applications, "Apps", Icon::Applications, 1))
-                        .child(tab(Scene::Workspaces, "Overview", Icon::Workspaces, 2))
-                        .child(tab(Scene::Notifications, "Inbox", Icon::Bell, 3))
-                        .child(tab(Scene::QuickSettings, "Controls", Icon::Settings, 4))
-                        .child(tab(Scene::Appearance, "Style", Icon::Appearance, 5)),
+                        .child(apps::strip(state, Layout::BottomNavigation))
+                        .child(button(
+                            Scene::Workspaces,
+                            "Recent windows",
+                            Icon::Workspaces,
+                        ))
+                        .child(button(
+                            Scene::Appearance,
+                            "Wallpaper and style",
+                            Icon::Appearance,
+                        )),
                 )
                 .child(
-                    border()
+                    swipe_area(state, Scene::Workspaces, None)
                         .grid_row(1)
-                        .width(82.0)
-                        .height(3.0)
-                        .corner_radius(2)
-                        .background(colors().bar_ink),
+                        .child(
+                            border()
+                                .width(108)
+                                .height(4)
+                                .vertical_alignment(V::Center)
+                                .horizontal_alignment(H::Center)
+                                .corner_radius(2)
+                                .background(colors().bar_ink)
+                                .is_hit_test_visible(false),
+                        ),
                 ),
         )
         .into()
@@ -683,7 +762,7 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
         let description = match appearance.layout() {
             Layout::Taskbar => "Centered taskbar and Start menu",
             Layout::MenuBarDock => "Menu bar, floating Dock and Spotlight-style search",
-            Layout::BottomNavigation => "Touch navigation and bottom sheets",
+            Layout::BottomNavigation => "Status shade, app taskbar and swipe-up app drawer",
         };
         let color = appearance.palette();
         let name = appearance.name();

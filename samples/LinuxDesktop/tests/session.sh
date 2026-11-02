@@ -67,3 +67,28 @@ for choice in '1 windows' '2 macos' '3 material'; do
     sleep .4
     import -window root -depth 8 "$output/$theme.png"
 done
+
+# Drive the Material recognizer through the actual window manager. The client at
+# +225+220 remains open; begin each drag on uncovered wallpaper or the handle.
+await_scene() {
+    local current=
+    for ((i=0; i<60; i++)); do
+        current=$("$FERRO_DESKTOP_BINARY" --current-scene 2>/dev/null || :)
+        [[ $current == "$1" ]] && return
+        sleep .1
+    done
+    echo "Material gesture expected $1; observed $current" >&2
+    return 1
+}
+read -r width height < <(xdotool getdisplaygeometry)
+for gesture in apps shade recents; do
+    case $gesture in
+        apps) x=$((width - 150)); y=$((height / 2)); dy=-100; expected=applications ;;
+        shade) x=$((width - 150)); y=$((height / 2)); dy=100; expected=notifications ;;
+        recents) x=$((width / 2)); y=$((height - 8)); dy=-100; expected=workspaces ;;
+    esac
+    xdotool mousemove "$x" "$y" mousedown 1 sleep .08 mousemove "$x" "$((y+dy/2))" sleep .08 mousemove "$x" "$((y+dy))" mouseup 1
+    await_scene "$expected"
+    xdotool key --clearmodifiers Escape
+    await_scene desktop
+done

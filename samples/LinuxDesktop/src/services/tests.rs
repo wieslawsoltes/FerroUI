@@ -24,6 +24,28 @@ fn launcher_search_matches_words_across_the_entry() {
     assert_eq!(catalog.search_indices(" ").len(), 2);
 }
 
+#[test]
+fn window_ids_resolve_the_exact_desktop_entry_before_the_x11_fallback() {
+    let catalog = ApplicationCatalog::from_applications(
+        ["org.example.Editor.desktop", "editor.desktop"]
+            .into_iter()
+            .map(|id| DesktopApplication::new(id.into(), id.into(), String::new(), String::new()))
+            .collect(),
+    );
+    for id in ["org.example.Editor", "org.example.Editor.desktop"] {
+        assert_eq!(
+            catalog.window_index(id),
+            catalog.index_of("org.example.Editor.desktop")
+        );
+    }
+    assert_eq!(
+        catalog.window_index("Editor"),
+        catalog.index_of("editor.desktop")
+    );
+    assert_eq!(catalog.window_index(""), None);
+    assert_eq!(catalog.window_index("Missing"), None);
+}
+
 #[cfg(target_os = "linux")]
 #[test]
 fn xdg_precedence_visibility_and_launch() {

@@ -78,15 +78,14 @@ impl ApplicationCatalog {
 
     /// Wayland uses the desktop file's basename. X11 resource classes often
     /// capitalize a lowercase desktop file ID. Prefer the case-sensitive match.
-    pub fn for_window(&self, app_id: &str) -> Option<&DesktopApplication> {
+    pub fn window_index(&self, app_id: &str) -> Option<usize> {
         if app_id.is_empty() {
             return None;
         }
         let id = app_id.strip_suffix(".desktop").unwrap_or(app_id);
         let desktop_id = format!("{id}.desktop");
-        let index = self.index_of(&desktop_id)
-            .or_else(|| self.index_of(&desktop_id.to_ascii_lowercase()))?;
-        Some(&self.applications[index])
+        self.index_of(&desktop_id)
+            .or_else(|| self.index_of(&desktop_id.to_ascii_lowercase()))
     }
 
     pub fn unavailable_reason(&self) -> Option<&str> {

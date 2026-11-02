@@ -209,7 +209,7 @@ impl Appearance {
     pub const Material: Self = Self::new(&Descriptor {
         id: "material",
         name: "Material 3",
-        insets: (0.0, 72.0),
+        insets: (48.0, 72.0),
         layout: Layout::BottomNavigation,
         wallpaper: Wallpaper::Garden,
         palette: Palette {
