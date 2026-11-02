@@ -1,6 +1,7 @@
 //! QML language service over open editor buffers. Analysis uses the production
 //! frontend without loading components, executing JavaScript, or fetching imports.
 mod model;
+mod references;
 mod workspace;
 use crate::lsp::{decode, integer, text, uri};
 use crate::{require, LanguageError, LineIndex, Range, Result, TextChange};
@@ -336,7 +337,7 @@ impl QmlService {
                 });
             }
         } else {
-            let Some(target) = model.target(owner, name, at) else {
+            let Some(target) = model.target(buffer.index.source(), owner, name, at) else {
                 return Ok(Value::Null);
             };
             match target {

@@ -1,6 +1,6 @@
 //! An index of authored declarations and exact property reads. Object handles are
 //! local to one parse, which keeps scopes isolated across edits and documents.
-use ferroui_qml_compiler::editor::{script_references, ScriptReference};
+use super::references::ReferenceIndex;
 use ferroui_qml_compiler::{
     editor::member_name_span, Binding, Document, Expr, Member, MemberKind as M, Object, SourceSpan,
     Stmt,
@@ -33,8 +33,7 @@ pub(crate) struct Node {
     parent: Parent,
     pub declarations: BTreeMap<String, (String, SourceSpan)>,
     pub id: Option<(String, SourceSpan)>,
-    reads: Vec<ScriptReference>,
-    indexed_reads: bool,
+    references: ReferenceIndex,
 }
 
 pub(crate) struct Model {
@@ -116,7 +115,7 @@ impl Model {
 
     /// Resolve the token to a QML receiver. Declarations and assignment names
     /// have an explicit receiver; free script identifiers may also use the root.
-    pub fn target(&self, owner: usize, name: &str, at: usize) -> Option<Target> {
+    pub fn target(&self, source: &str, owner: usize, name: &str, at: usize) -> Option<Target> {
         let node = &self.nodes[owner];
         let contains = |s: SourceSpan| s.start <= at && at < s.end;
         if node
@@ -136,7 +135,7 @@ impl Model {
                 lexical: false,
             });
         }
-        let read = node.read(at, name)?;
+        let read = node.references.at(source, at, name)?;
         if let Some(receiver) = &read.receiver {
             Some(Target::Member {
                 owner: self.receiver(owner, receiver)?,
@@ -156,39 +155,6 @@ impl Model {
 impl Node {
     fn id_key(&self) -> (usize, &str) {
         (self.scope, self.id.as_ref().expect("indexed ID").0.as_str())
-    }
-
-    fn index_reads(&mut self) {
-        // Small declarations are cheaper to scan. Leave overlapping fallback
-        // spans in AST order to retain their original lookup precedence.
-        if self.reads.len() <= 16 {
-            return;
-        }
-        if !self
-            .reads
-            .windows(2)
-            .all(|w| w[0].span.end <= w[1].span.start)
-        {
-            // Some AST visitors report an assignment's left side after its
-            // value. Check for overlapping fallback spans before reordering.
-            let mut spans: Vec<_> = self.reads.iter().map(|r| r.span).collect();
-            spans.sort_unstable_by_key(|s| s.start);
-            if spans.windows(2).any(|w| w[0].end > w[1].start) {
-                return;
-            }
-            self.reads.sort_unstable_by_key(|r| r.span.start);
-        }
-        self.indexed_reads = true;
-    }
-
-    fn read(&self, at: usize, name: &str) -> Option<&ScriptReference> {
-        let matches = |r: &ScriptReference| r.span.start <= at && at < r.span.end && r.name == name;
-        if !self.indexed_reads {
-            return self.reads.iter().find(|r| matches(r));
-        }
-        let after = self.reads.partition_point(|r| r.span.start <= at);
-        let r = &self.reads[after.checked_sub(1)?];
-        matches(r).then_some(r)
     }
 }
 
@@ -214,12 +180,11 @@ fn object(
         scope,
         parent,
         declarations: BTreeMap::new(),
-        reads: Vec::new(),
-        indexed_reads: false,
+        references: ReferenceIndex::default(),
         id: None,
     });
     let children = members(source, &obj.members, index, nodes);
-    nodes[index].index_reads();
+    nodes[index].references.finish();
     Symbol {
         name: nodes[index].id.as_ref().map_or_else(
             || obj.type_name.clone(),
@@ -254,7 +219,7 @@ fn members(source: &str, list: &[Member], owner: usize, nodes: &mut Vec<Node>) -
                     .map(|o| object(source, o, Parent::Object(owner), Some(scope), nodes)),
             ),
             Some(Binding::Expr(Expr::JavaScript(script))) => {
-                nodes[owner].reads.extend(script_references(script, &[]));
+                nodes[owner].references.script(script, &[]);
             }
             Some(Binding::Script(stmts)) => collect_body(&mut nodes[owner], stmts, &[]),
             _ => {}
@@ -290,11 +255,7 @@ fn members(source: &str, list: &[Member], owner: usize, nodes: &mut Vec<Node>) -
             M::Handler { name, .. } => (name, "handler", 24),
             M::Binding { name, .. } => {
                 if !name.contains('.') {
-                    nodes[owner].reads.push(ScriptReference {
-                        span: selection,
-                        name: name.clone(),
-                        receiver: Some("this".into()),
-                    });
+                    nodes[owner].references.assignment(name, selection);
                 }
                 (name, "binding", 7)
             }
@@ -350,7 +311,7 @@ fn members(source: &str, list: &[Member], owner: usize, nodes: &mut Vec<Node>) -
 fn collect_body(node: &mut Node, stmts: &[Stmt], params: &[&str]) {
     for stmt in stmts {
         if let Stmt::JavaScript(script) = stmt {
-            node.reads.extend(script_references(script, params));
+            node.references.script(script, params);
         }
     }
 }

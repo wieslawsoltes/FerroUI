@@ -78,28 +78,135 @@ pub struct ScriptReference {
     pub name: String,
 }
 
+/// An authored JavaScript fragment, sufficient to analyze references later without
+/// retaining the executable text, module graph or complete component IR.
+#[derive(Clone, Copy)]
+pub struct ScriptFragment {
+    span: SourceSpan,
+    form: FragmentForm,
+}
+
+#[derive(Clone, Copy)]
+enum FragmentForm {
+    Body,
+    Expression,
+    Name,
+    Member(usize),
+}
+
+impl ScriptFragment {
+    pub fn new(script: &crate::JavaScript) -> Self {
+        let expression = script.form == crate::ScriptForm::Expression
+            || (script.form == crate::ScriptForm::HandlerBody
+                && script
+                    .executable
+                    .as_deref()
+                    .is_some_and(|s| s.starts_with("return (")));
+        let form = if !expression {
+            FragmentForm::Body
+        } else {
+            // Only reuse exact spellings recognized by the ECMAScript parser.
+            // Whitespace, escaping, comments and parentheses use the resolver.
+            match script
+                .property_read
+                .as_ref()
+                .map(|read| (read.receiver.as_deref(), read.property.as_str()))
+            {
+                Some((None, name)) if name == script.source => FragmentForm::Name,
+                Some((Some(receiver), name))
+                    if script
+                        .source
+                        .strip_prefix(receiver)
+                        .and_then(|tail| tail.strip_prefix('.'))
+                        == Some(name) =>
+                {
+                    FragmentForm::Member(receiver.len())
+                }
+                _ => FragmentForm::Expression,
+            }
+        };
+        Self {
+            span: script.span,
+            form,
+        }
+    }
+
+    pub fn span(self) -> SourceSpan {
+        self.span
+    }
+
+    /// Resolve references in the document bytes used to create this fragment.
+    pub fn references(self, document: &str, parameters: &[&str]) -> Vec<ScriptReference> {
+        document
+            .get(self.span.start..self.span.end)
+            .map_or_else(Vec::new, |source| references(self, source, parameters))
+    }
+}
+
 /// Locate QML candidates after resolving JavaScript lexical declarations and
 /// arguments. Index authored bytes rather than lowered or generated JavaScript.
 pub fn script_references(script: &crate::JavaScript, parameters: &[&str]) -> Vec<ScriptReference> {
+    references(ScriptFragment::new(script), &script.source, parameters)
+}
+
+fn references(fragment: ScriptFragment, source: &str, parameters: &[&str]) -> Vec<ScriptReference> {
     use swc_common::{Globals, Mark, GLOBALS};
     use swc_ecma_ast::{Pass, Program};
     use swc_ecma_transforms_base::resolver;
     use swc_ecma_visit::VisitWith;
 
+    if fragment.span.end.checked_sub(fragment.span.start) != Some(source.len()) {
+        return Vec::new();
+    }
+    if parameters.is_empty() {
+        let span = fragment.span;
+        match fragment.form {
+            FragmentForm::Name => {
+                return vec![ScriptReference {
+                    span,
+                    name: source.into(),
+                    receiver: None,
+                }]
+            }
+            FragmentForm::Member(dot) => {
+                if let Some((owner, member)) =
+                    source.split_once('.').filter(|(id, _)| id.len() == dot)
+                {
+                    let end = span.start + dot;
+                    let mut reads = Vec::with_capacity(2);
+                    if owner != "this" {
+                        reads.push(ScriptReference {
+                            span: SourceSpan {
+                                start: span.start,
+                                end,
+                            },
+                            name: owner.into(),
+                            receiver: None,
+                        });
+                    }
+                    reads.push(ScriptReference {
+                        span: SourceSpan {
+                            start: end + 1,
+                            end: span.end,
+                        },
+                        name: member.into(),
+                        receiver: Some(owner.into()),
+                    });
+                    return reads;
+                }
+            }
+            _ => {}
+        }
+    }
+    let expression = !matches!(fragment.form, FragmentForm::Body);
     let prefix = format!("(({}) => {{\n", parameters.join(","));
-    let expression = script.form == crate::ScriptForm::Expression
-        || (script.form == crate::ScriptForm::HandlerBody
-            && script
-                .executable
-                .as_deref()
-                .is_some_and(|s| s.starts_with("return (")));
     let prefix = if expression {
         format!("{prefix}return (")
     } else {
         prefix
     };
     let suffix = if expression { "\n);\n});" } else { "\n});" };
-    let input = format!("{prefix}{}{suffix}", script.source);
+    let input = format!("{prefix}{source}{suffix}");
     GLOBALS.set(&Globals::new(), || {
         let Some(program) = crate::javascript::parser(&input, 0, false)
             .ok()
@@ -113,7 +220,7 @@ pub fn script_references(script: &crate::JavaScript, parameters: &[&str]) -> Vec
         let mut references = References {
             mark,
             prefix: prefix.len(),
-            source: script.span,
+            source: fragment.span,
             dynamic_this: 0,
             found: Vec::new(),
         };
@@ -132,15 +239,19 @@ struct References {
 impl References {
     fn record(&mut self, span: swc_common::Span, receiver: Option<&str>, name: &str) {
         let range = crate::javascript::span(span);
-        if range.start >= self.prefix
-            && range.end <= self.prefix + self.source.end - self.source.start
-        {
+        let Some(offset) = range.start.checked_sub(self.prefix) else {
+            return;
+        };
+        let Some(start) = self.source.start.checked_add(offset) else {
+            return;
+        };
+        let Some(end) = start.checked_add(range.end - range.start) else {
+            return;
+        };
+        if end <= self.source.end {
             self.found.push(ScriptReference {
-                span: SourceSpan {
-                    start: self.source.start + (range.start - self.prefix),
-                    end: self.source.start + (range.end - self.prefix),
-                },
-                receiver: receiver.map(String::from),
+                span: SourceSpan { start, end },
+                receiver: receiver.map(str::to_owned),
                 name: name.into(),
             });
         }

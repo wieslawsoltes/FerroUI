@@ -96,7 +96,8 @@ def measure(server, properties, iterations, siblings=0):
                     "uri": uri, "languageId": "qml", "text": source, "version": 1}})
                 assert receive()["params"]["diagnostics"] == []
                 timings["sibling_open"] = round((time.perf_counter_ns() - start) / 1e6, 3)
-                # Keep the first semantic query (which constructs the model lazily) separate.
+                # Report model construction on first hover and reference resolution
+                # on first navigation into the method separately from warm lookups.
                 def query_at(line, column, method):
                     return request("textDocument/" + method, {
                         "textDocument": {"uri": uri}, "position": {"line": line, "character": column}})
@@ -117,6 +118,8 @@ def measure(server, properties, iterations, siblings=0):
                             assert result["uri"] == uri and result["range"]["start"]["line"] == target + 2, result
                     if label == "sibling_hover":
                         timings["sibling_first_hover"] = round(samples[0], 3)
+                    elif label == "method_definition":
+                        timings["method_first_definition"] = round(samples[0], 3)
                     timings[label] = round(statistics.median(samples[1:]), 3)
             request("shutdown", None)
             send("exit", None)
