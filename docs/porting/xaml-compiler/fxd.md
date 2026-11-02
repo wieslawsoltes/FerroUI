@@ -134,3 +134,5 @@ The version 2 envelope stores the complete document group in one zlib stream. Th
 Counts and section lengths inside the stream use unsigned LEB128. The decoder bounds the declared, inflated and reconstructed sizes, validates references and consumes the entire compressed stream. Expansion produces an indexed version 1 archive containing stored columnar FXD documents. The WinUI adapter retains this expanded image once per process. Reloading a mounted contribution validates every candidate document and resolves its relative includes against the candidate before publication.
 
 On the complete 169-document WinUI input, `--pack-solid` produces 245,385 bytes and `--pack` produces 432,438 bytes. Both outputs preserve the same canonical XamlX graphs. These are serialized theme sizes. The application benchmark in [compiled-theme-performance.md](../../compiled-theme-performance.md) accounts separately for native code, metadata, unwind tables and the runtime loader.
+
+The byte-level specification defines the directory record, all twelve data streams, how to reconstruct each opcode row, and the expansion limits. [FXP v2 wire layout](fxp-solid.md)
