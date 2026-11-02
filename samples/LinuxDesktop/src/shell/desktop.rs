@@ -21,6 +21,9 @@ pub(super) fn background(
     clock: Signal<OffsetDateTime>,
     appearance: Appearance,
 ) -> Element {
+    if state.switching_profile.get() {
+        return Element::Empty;
+    }
     let composed = state.session.as_ref().is_some_and(|s| s.compositor().is_some());
     grid()
         .child(wallpaper::wallpaper(appearance, composed))
@@ -38,6 +41,9 @@ pub(super) fn panel(
     appearance: Appearance,
     top: bool,
 ) -> Element {
+    if state.switching_profile.get() {
+        return Element::Empty;
+    }
     match (appearance.layout(), top) {
         (Layout::Taskbar, false) => taskbar(state, clock),
         (Layout::MenuBarDock, true) => menubar(state, clock),

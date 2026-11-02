@@ -61,6 +61,7 @@ struct Shell {
     shortcut_origin: std::cell::Cell<Option<crate::session::ShortcutOrigin>>,
     // First use mounts the launcher. Keep its template, layout and search input until the theme changes.
     cached_launcher: Signal<Option<Appearance>>,
+    switching_profile: Signal<bool>,
     search_box: std::cell::RefCell<Option<ferroui_base::WeakRef<ferroui_controls::TextBox>>>,
 }
 
@@ -105,7 +106,23 @@ impl Shell {
     }
 
     fn select_appearance(&self, appearance: Appearance) {
-        self.finish_appearance(self.themes.select(appearance));
+        if self.appearance.get_untracked().same_profile(appearance) {
+            self.finish_appearance(self.themes.select(appearance));
+            return;
+        }
+        // Global style replacement walks attached controls synchronously. The
+        // outgoing panels, open sheet and cached launcher all belong to the old
+        // profile and would otherwise be restyled just before being discarded.
+        // Keep the output windows, native client plane, model and input seat.
+        batch(|| {
+            self.switching_profile.set(true);
+            self.cached_launcher.set_if_changed(None);
+        });
+        let result = self.themes.select(appearance);
+        batch(|| {
+            self.finish_appearance(result);
+            self.switching_profile.set(false);
+        });
     }
 
     fn select_mode(&self, mode: ColorMode) {
@@ -325,6 +342,7 @@ fn create(
         owner: Owner::current().expect("desktop view must be mounted in a FerroUI owner"),
         desktop_focus: NodeRef::new(),
         shortcut_origin: Default::default(),
+        switching_profile: signal(false),
         cached_launcher: signal(
             (initial == Scene::Applications).then_some(appearance.get_untracked()),
         ),
@@ -694,13 +712,16 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
                         None => Element::Empty,
                     }
                 }))
-                .child(dynamic(move || match (current.get(), appearance.get()) {
+                .child(dynamic(move || {
+                    if overlays.switching_profile.get() { return Element::Empty; }
+                    match (current.get(), appearance.get()) {
                     (Scene::QuickSettings, _) => quick_settings::view(&overlays),
                     (Scene::Calendar, _) => quick_settings::calendar_view(&overlays),
                     (Scene::Notifications, _) => notifications::view(&overlays),
                     (Scene::Appearance, _) => desktop::picker(&overlays),
                     (Scene::Workspaces, _) => workspaces::view(&overlays),
                     _ => Element::Empty,
+                    }
                 })),
         )
         .child(banner)
