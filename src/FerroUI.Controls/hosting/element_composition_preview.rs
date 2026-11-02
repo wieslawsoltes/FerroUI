@@ -10,7 +10,7 @@ use crate::{ScrollViewer, TopLevel};
 use ferroui_base::input::{InputElement, PointerEventArgs};
 use ferroui_base::interactivity::{Interactive, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::numerics::{Matrix4x4, Vector3};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::rendering::composition::animations::ICompositionAnimationBase;
 use ferroui_base::rendering::composition::{CompositionPropertySet, CompositionVisual, Compositor, ElementComposition};
 use ferroui_base::{Vector, Visual, WeakRef};
@@ -178,7 +178,7 @@ struct PointerTracker {
     set: Weak<CompositionPropertySet>,
     /// The window and the handler on it.
     hooked: RefCell<Option<(WeakRef<TopLevel>, RoutedEventHandlerToken)>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl PointerTracker {
@@ -197,7 +197,7 @@ impl PointerTracker {
             let tracker = tracker.clone();
             element.detached_from_visual_tree(move |_| tracker.unhook())
         };
-        tracker.subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
+        tracker.subscriptions.borrow_mut().extend([attached, detached]);
         tracker.hook();
     }
 
@@ -207,9 +207,7 @@ impl PointerTracker {
             return false;
         }
         self.unhook();
-        for subscription in self.subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
         true
     }
 

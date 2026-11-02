@@ -8,7 +8,7 @@ use super::item_collection_transition::{
 use super::item_collection_transition_provider::ItemCollectionTransitionProvider;
 use ferroui_controls::Control;
 use ferroui_base::collections::NotifyCollectionChangedAction;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{Rect, Ref};
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
@@ -18,7 +18,7 @@ use std::rc::{Rc, Weak};
 /// current layout cycle and returns removed elements when their transition ends.
 pub struct TransitionManager {
     provider: RefCell<Option<Ref<ItemCollectionTransitionProvider>>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     recycle: Rc<dyn Fn(Ref<Control>)>,
     triggers: Cell<Triggers>,
     provider_change: Cell<u64>,
@@ -49,10 +49,7 @@ impl TransitionManager {
         if !self.clear_previous_provider_transitions(change) {
             return;
         }
-        let old = self.subscription.borrow_mut().take();
-        if let Some(old) = old {
-            old.dispose();
-        }
+        drop(self.subscription.borrow_mut().take());
         *self.provider.borrow_mut() = provider.clone();
         if let Some(provider) = provider {
             let weak = Rc::downgrade(self);
@@ -61,7 +58,7 @@ impl TransitionManager {
                     this.on_transition_completed(&args.transition());
                 }
             });
-            *self.subscription.borrow_mut() = Some(subscription);
+            *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
     fn clear_previous_provider_transitions(&self, change: u64) -> bool {
@@ -246,12 +243,5 @@ impl TransitionManager {
     }
     pub fn on_owner_arranged(&self) {
         self.triggers.set(Triggers::empty());
-    }
-}
-impl Drop for TransitionManager {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.subscription.get_mut().take() {
-            subscription.dispose();
-        }
     }
 }

@@ -3,7 +3,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, Layoutable, LayoutableImpl};
 use ferroui_base::media::{ExperimentalAcrylicMaterial, ImmutableExperimentalAcrylicMaterial};
-use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
+use ferroui_base::reactive::{ObservableExt, Subscription};
 use ferroui_base::rendering::composition::{
     CompositionDrawListVisual, CompositionExperimentalAcrylicVisual, Compositor,
 };
@@ -26,7 +26,7 @@ use ferroui_base::{
 #[repr(C)]
 pub struct ExperimentalAcrylicBorder {
     base: Decorator,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     material_subscription: RefCell<Option<Subscription>>,
 }
 
@@ -59,7 +59,7 @@ impl VisualImpl for ExperimentalAcrylicBorder {
             let object: &FerroObject = &tl;
             let subscription =
                 FerroObjectExtensions::get_observable(object, TopLevel::actual_transparency_level_property())
-                    .subscribe_fn(move |x| {
+                    .subscribe_fn_guard(move |x| {
                         let (Some(tl), Some(this)) = (weak_tl.upgrade(), weak_this.upgrade()) else {
                             return;
                         };
@@ -91,10 +91,7 @@ impl VisualImpl for ExperimentalAcrylicBorder {
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
         this.update_material_subscription();
-        let subscription = this.subscription.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
+        drop(this.subscription.take());
     }
 
     fn create_composition_visual(this: &Self, compositor: &Rc<Compositor>) -> CompositionDrawListVisual {

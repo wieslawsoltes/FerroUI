@@ -16,7 +16,7 @@ use super::dbus::proxies::{OrgA11yAtspiSocketProxy, OrgA11yBusProxy};
 use super::dbus::types::AtSpiObjectReference;
 use super::handlers::at_spi_event_object_handler::AtSpiEventObjectHandler;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
 use ferroui_controls::automation::peers::AutomationPeer;
@@ -39,8 +39,8 @@ pub struct AtSpiServer {
     cache_handler: RefCell<Option<Rc<AtSpiCacheHandler>>>,
     app_root_event_handler: RefCell<Option<Rc<AtSpiEventObjectHandler>>>,
     registry_tracker: RefCell<Option<Rc<AtSpiRegistryEventTracker>>>,
-    app_root_registration: RefCell<Option<Rc<dyn IDisposable>>>,
-    cache_registration: RefCell<Option<Rc<dyn IDisposable>>>,
+    app_root_registration: RefCell<Option<Subscription>>,
+    cache_registration: RefCell<Option<Subscription>>,
     /// An embed call is in flight (`_embedTask`).
     embed_in_flight: Cell<bool>,
     is_embedded: Cell<bool>,
@@ -440,7 +440,7 @@ impl AtSpiServer {
         *self.app_root_event_handler.borrow_mut() = Some(event_handler.clone());
 
         let targets: Vec<Rc<dyn DBusInterface>> = vec![accessible_handler, application_handler, event_handler];
-        *self.app_root_registration.borrow_mut() = Some(connection.register_objects(ROOT_PATH, targets));
+        *self.app_root_registration.borrow_mut() = Some(Subscription::new(connection.register_objects(ROOT_PATH, targets)));
     }
 
     fn register_cache_path(&self) {
@@ -454,7 +454,7 @@ impl AtSpiServer {
         }
 
         let targets: Vec<Rc<dyn DBusInterface>> = vec![cache_handler];
-        *self.cache_registration.borrow_mut() = Some(connection.register_objects(CACHE_PATH, targets));
+        *self.cache_registration.borrow_mut() = Some(Subscription::new(connection.register_objects(CACHE_PATH, targets)));
     }
 
     async fn get_accessibility_bus_address_async() -> String {

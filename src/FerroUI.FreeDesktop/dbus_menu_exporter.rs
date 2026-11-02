@@ -13,7 +13,7 @@ use crate::ui_thread_object::UiThreadHandle;
 use ferroui_base::collections::CollectionChangedHandler;
 use ferroui_base::input::KeyModifiers;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
 use ferroui_controls::platform::{INativeMenuExporter, IPlatformIconLoader, ITopLevelNativeMenuExporter};
@@ -174,7 +174,7 @@ pub struct DBusMenuExporterImpl {
     items_to_ids: RefCell<HashMap<Ref<NativeMenuItemBase>, i32>>,
     /// The subscriptions to the property changes of the items that have
     /// an identifier.
-    item_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    item_subscriptions: RefCell<Vec<Subscription>>,
     /// The menus of items whose collection of items is listened to.
     menus: RefCell<Vec<(Ref<NativeMenu>, u64)>>,
     xid: u32,
@@ -304,10 +304,7 @@ impl DBusMenuExporterImpl {
      */
     fn do_layout_reset(&self) {
         self.reset_queued.set(false);
-        let subscriptions = std::mem::take(&mut *self.item_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.item_subscriptions.borrow_mut()));
         let menus = std::mem::take(&mut *self.menus.borrow_mut());
         for (menu, token) in menus {
             menu.items().remove_collection_changed(token);
@@ -390,7 +387,7 @@ impl DBusMenuExporterImpl {
                 this.queue_reset();
             }
         });
-        self.item_subscriptions.borrow_mut().push(subscription);
+        self.item_subscriptions.borrow_mut().push(Subscription::new(subscription));
         self.ensure_subscribed(menu_of(item));
         id
     }

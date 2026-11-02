@@ -1,4 +1,4 @@
-use crate::reactive::{IDisposable, IObservable, IObserver, LightweightObservable, LightweightObservableBase};
+use crate::reactive::{IDisposable, IObservable, IObserver, LightweightObservable, LightweightObservableBase, Subscription};
 use crate::{Ref, TypeInfo, Visual, WeakRef};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -31,7 +31,7 @@ struct VisualTracker {
     relative_to: WeakRef<Visual>,
     ancestor_level: usize,
     ancestor_type: Option<&'static TypeInfo>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl VisualTracker {
@@ -82,14 +82,11 @@ impl LightweightObservable<Option<Ref<Visual>>> for VisualTracker {
                 this.attached_detached();
             }
         });
-        self.subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
+        self.subscriptions.borrow_mut().extend([attached, detached]);
     }
 
     fn deinitialize(&self) {
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
     }
 
     fn subscribed(&self, observer: &Rc<dyn IObserver<Option<Ref<Visual>>>>, _first: bool) {

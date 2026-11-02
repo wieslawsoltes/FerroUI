@@ -9,7 +9,7 @@
 //! `FerroAutomationPeerElement`, in the module `uikit`) answers every
 //! question of the accessibility protocol from its wrapper.
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{PixelPoint, PixelRect, Point, Rect, Ref};
 use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer};
 use ferroui_controls::automation::provider::{
@@ -239,7 +239,7 @@ pub(crate) struct AutomationPeerWrapper {
     children_map: RefCell<HashMap<usize, (Ref<AutomationPeer>, Rc<AutomationPeerWrapper>)>>,
     is_container: bool,
     /// The handlers on the events of the peer.
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 
     // What the element answers with.
     accessibility_identifier: RefCell<Option<String>>,
@@ -309,13 +309,13 @@ impl AutomationPeerWrapper {
             if let Some(this) = weak.upgrade() {
                 this.update_children();
             }
-        }).detach();
+        });
         let weak = Rc::downgrade(&this);
         let property_changed = peer.property_changed(move |e| {
             if let Some(this) = weak.upgrade() {
                 this.update_properties(&[e.property()]);
             }
-        }).detach();
+        });
         *this.subscriptions.borrow_mut() = vec![children_changed, property_changed];
 
         this
@@ -631,10 +631,7 @@ impl AutomationPeerWrapper {
     /// Removes the handlers of the wrapper and of its children from
     /// their peers.
     pub(crate) fn dispose(&self) {
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
 
         let children: Vec<Rc<AutomationPeerWrapper>> =
             self.children_map.borrow_mut().drain().map(|(_, (_, wrapper))| wrapper).collect();

@@ -22,7 +22,7 @@ use crate::window_impl_base::get;
 use ferroui_base::input::raw::{RawKeyEventArgs, RawKeyEventType, RawTextInputEventArgs};
 use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions, TextSelection};
 use ferroui_base::input::{InputScopeNameValue, Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Rect;
 use std::cell::{Cell, RefCell};
@@ -34,7 +34,7 @@ pub(crate) struct WaylandTextInputMethod {
     client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
     /// The subscriptions to the events of the client (the reference adds and removes
     /// handlers).
-    client_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    client_subscriptions: RefCell<Vec<Subscription>>,
     has_preedit: Cell<bool>,
     /// The options that were set last. The framework sets the options of the focused element
     /// before it sets the client, and the worker forgets the state of a surface when its
@@ -149,9 +149,7 @@ impl WaylandTextInputMethod {
     }
 
     fn unsubscribe_client(&self) {
-        for subscription in self.client_subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.client_subscriptions.borrow_mut()));
     }
 }
 
@@ -196,8 +194,8 @@ impl ITextInputMethodImpl for WaylandTextInputMethod {
                 }
             });
             let mut subscriptions = self.client_subscriptions.borrow_mut();
-            subscriptions.push(client.surrounding_text_changed(on_changed.clone()));
-            subscriptions.push(client.selection_changed(on_changed));
+            subscriptions.push(Subscription::new(client.surrounding_text_changed(on_changed.clone())));
+            subscriptions.push(Subscription::new(client.selection_changed(on_changed)));
             drop(subscriptions);
             self.push_surrounding();
         }

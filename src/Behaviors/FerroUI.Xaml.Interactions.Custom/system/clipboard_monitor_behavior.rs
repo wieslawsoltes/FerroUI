@@ -2,7 +2,7 @@
 
 use ferroui_base::input::platform::ClipboardExtensions;
 use ferroui_base::input::DataFormat;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -32,7 +32,7 @@ pub struct ClipboardMonitorBehavior {
     // not declared to markup.
     content_changed: HandlerList<dyn Fn()>,
     // The subscriptions of the attached to and detached from visual tree events of the control.
-    tree_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    tree_subscriptions: RefCell<Vec<Subscription>>,
 }
 
 ferro_class!(ClipboardMonitorBehavior: StyledElementBehaviorOfT);
@@ -75,7 +75,7 @@ ferroui_base::ferro_overrides! {
                         behavior.stop_monitoring();
                     }
                 });
-                this.tree_subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
+                this.tree_subscriptions.borrow_mut().extend([attached, detached]);
 
                 // If already attached to visual tree, start monitoring.
                 if associated_object.is_loaded() {
@@ -85,10 +85,7 @@ ferroui_base::ferro_overrides! {
         }
 
         fn on_detaching(this: &Self) {
-            let subscriptions = std::mem::take(&mut *this.tree_subscriptions.borrow_mut());
-            for subscription in subscriptions {
-                subscription.dispose();
-            }
+            drop(std::mem::take(&mut *this.tree_subscriptions.borrow_mut()));
             this.stop_monitoring();
             Self::parent_on_detaching(this);
         }

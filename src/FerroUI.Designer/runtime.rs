@@ -2,7 +2,7 @@ use ferroui_base::animation::{IClock, PlayState, TimeSpan};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::reactive::{Disposable, IObservable, IObserver};
+use ferroui_base::reactive::{Disposable, IObservable, IObserver, Subscription};
 use ferroui_base::{BoxedValue, FerroObject, Rect, Ref, StyledElement, Visual, WeakRef};
 use ferroui_controls::{ContentControl, Control};
 use ferroui_designer_animation::Sample;
@@ -60,7 +60,7 @@ pub(crate) struct RuntimePreview {
     pub notices: Vec<String>,
     objects: BTreeMap<NodeId, WeakRef<Visual>>,
     reverse_objects: BTreeMap<u64, NodeId>,
-    animation_values: Vec<Rc<dyn IDisposable>>,
+    animation_values: Vec<Subscription>,
     #[cfg(debug_assertions)]
     reload_driver: Option<ReloadDriver>,
 }
@@ -876,16 +876,14 @@ impl RuntimePreview {
             if let Some(guard) =
                 object.set_value_untyped(property, value.as_any(), BindingPriority::Animation)
             {
-                self.animation_values.push(guard);
+                self.animation_values.push(Subscription::new(guard));
             }
         }
         Ok(())
     }
 
     pub fn clear_animation(&mut self) {
-        for guard in self.animation_values.drain(..) {
-            guard.dispose();
-        }
+        self.animation_values.clear();
     }
 }
 

@@ -4,11 +4,10 @@
 use crate::DesignerSession;
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::InputElement;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{Ref, Visual, WeakRef};
 use ferroui_designer_core::{Ast, NodeId, NodeKind};
 use std::collections::{BTreeMap, BTreeSet};
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// Source-row presentation. Direct flags can be changed on this row; inherited flags
@@ -78,17 +77,19 @@ pub struct LayerEditSnapshot {
 /// without releasing another presentation owner's suppression.
 struct LayerVisualMask {
     visual: WeakRef<Visual>,
-    hit_test: Option<Rc<dyn IDisposable>>,
+    hit_test: Option<Subscription>,
 }
 impl LayerVisualMask {
     fn new(visual: &Ref<Visual>) -> Self {
         visual.add_render_suppression_request();
         let hit_test = visual.cast::<InputElement>().and_then(|input| {
-            input.set_value_with_priority(
-                InputElement::is_hit_test_visible_property(),
-                false,
-                BindingPriority::Animation,
-            )
+            input
+                .set_value_with_priority(
+                    InputElement::is_hit_test_visible_property(),
+                    false,
+                    BindingPriority::Animation,
+                )
+                .map(Subscription::new)
         });
         Self {
             visual: visual.downgrade(),
@@ -101,9 +102,7 @@ impl Drop for LayerVisualMask {
         if let Some(visual) = self.visual.upgrade() {
             visual.remove_render_suppression_request();
         }
-        if let Some(binding) = self.hit_test.take() {
-            binding.dispose();
-        }
+        drop(self.hit_test.take());
     }
 }
 

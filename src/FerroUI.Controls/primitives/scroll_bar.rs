@@ -13,7 +13,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::{LayoutableImpl, Orientation};
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -70,7 +70,7 @@ pub struct ScrollBar {
     timer: RefCell<Option<Rc<DispatcherTimer>>>,
     timer_action: Cell<Option<DelayedAction>>,
     is_expanded: Cell<bool>,
-    owner_subscriptions: RefCell<Option<Vec<Rc<dyn IDisposable>>>>,
+    owner_subscriptions: RefCell<Option<Vec<Subscription>>>,
     owner: RefCell<Option<WeakRef<ScrollViewer>>>,
     is_dragging: Cell<bool>,
     last_right_click_position: Cell<Point>,
@@ -497,12 +497,7 @@ impl ScrollBar {
     }
 
     fn dispose_owner_subscriptions(&self) {
-        let subscriptions = self.owner_subscriptions.borrow_mut().take();
-        if let Some(subscriptions) = subscriptions {
-            for subscription in subscriptions {
-                subscription.dispose();
-            }
-        }
+        drop(self.owner_subscriptions.borrow_mut().take());
     }
 
     /// Tries to attach to the templated parent if it is a [`ScrollViewer`]
@@ -546,63 +541,63 @@ impl ScrollBar {
 
         let priority = BindingPriority::Template;
         let source: &FerroObject = &owner;
-        let mut subscriptions: Vec<Rc<dyn IDisposable>> = Vec::new();
+        let mut subscriptions: Vec<Subscription> = Vec::new();
 
         if !self.is_set(RangeBase::maximum_property().as_property()) {
-            subscriptions.push(self.bind_typed(
+            subscriptions.push(Subscription::new(self.bind_typed(
                 RangeBase::maximum_property(),
                 FerroObjectExtensions::get_observable_with(source, ScrollViewer::scroll_bar_maximum_property(), extract_vector.clone()),
                 priority,
-            ));
+            )));
         }
         if !self.is_set(RangeBase::value_property().as_property()) {
-            subscriptions.push(self.bind_typed(
+            subscriptions.push(Subscription::new(self.bind_typed(
                 RangeBase::value_property(),
                 FerroObjectExtensions::get_observable_with(source, ScrollViewer::offset_property(), extract_vector),
                 priority,
-            ));
+            )));
         }
         if !self.is_set(ScrollViewer::is_deferred_scrolling_enabled_property().as_property()) {
-            subscriptions.push(self.bind_typed(
+            subscriptions.push(Subscription::new(self.bind_typed(
                 ScrollViewer::is_deferred_scrolling_enabled_property(),
                 FerroObjectExtensions::get_observable(source, ScrollViewer::is_deferred_scrolling_enabled_property()),
                 priority,
-            ));
+            )));
         }
         if !self.is_set(Self::viewport_size_property().as_property()) {
-            subscriptions.push(self.bind_typed(
+            subscriptions.push(Subscription::new(self.bind_typed(
                 Self::viewport_size_property(),
                 FerroObjectExtensions::get_observable_with(source, ScrollViewer::viewport_property(), extract_size.clone()),
                 priority,
-            ));
+            )));
         }
         if !self.is_set(Self::visibility_property().as_property()) {
-            subscriptions.push(self.bind_typed(
+            subscriptions.push(Subscription::new(self.bind_typed(
                 Self::visibility_property(),
                 FerroObjectExtensions::get_observable(source, visibility_source),
                 priority,
-            ));
+            )));
         }
         if !self.is_set(Self::allow_auto_hide_property().as_property()) {
-            subscriptions.push(self.bind_typed(
+            subscriptions.push(Subscription::new(self.bind_typed(
                 Self::allow_auto_hide_property(),
                 FerroObjectExtensions::get_observable(source, ScrollViewer::allow_auto_hide_property()),
                 priority,
-            ));
+            )));
         }
         if !self.is_set(RangeBase::large_change_property().as_property()) {
-            subscriptions.push(self.bind_typed(
+            subscriptions.push(Subscription::new(self.bind_typed(
                 RangeBase::large_change_property(),
                 FerroObjectExtensions::get_observable_with(source, ScrollViewer::large_change_property(), extract_size.clone()),
                 priority,
-            ));
+            )));
         }
         if !self.is_set(RangeBase::small_change_property().as_property()) {
-            subscriptions.push(self.bind_typed(
+            subscriptions.push(Subscription::new(self.bind_typed(
                 RangeBase::small_change_property(),
                 FerroObjectExtensions::get_observable_with(source, ScrollViewer::small_change_property(), extract_size),
                 priority,
-            ));
+            )));
         }
 
         *self.owner.borrow_mut() = Some(owner.downgrade());

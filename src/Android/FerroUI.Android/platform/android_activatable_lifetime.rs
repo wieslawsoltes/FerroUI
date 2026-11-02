@@ -1,5 +1,5 @@
 use crate::i_ferro_activity::IFerroActivity;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_controls::application_lifetimes::{
     ActivatableLifetimeBase, ActivatedEventArgs, ActivationKind, IActivatableLifetime,
 };
@@ -11,15 +11,12 @@ pub struct AndroidActivatableLifetime {
     base: Rc<ActivatableLifetimeBase>,
     main_activity: RefCell<Option<Rc<dyn IFerroActivity>>>,
     intend_activity: RefCell<Option<Rc<dyn IFerroActivity>>>,
-    main_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    intend_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    main_subscriptions: RefCell<Vec<Subscription>>,
+    intend_subscriptions: RefCell<Vec<Subscription>>,
 }
 
-fn dispose_all(subscriptions: &RefCell<Vec<Rc<dyn IDisposable>>>) {
-    let subscriptions = std::mem::take(&mut *subscriptions.borrow_mut());
-    for subscription in subscriptions {
-        subscription.dispose();
-    }
+fn dispose_all(subscriptions: &RefCell<Vec<Subscription>>) {
+    drop(std::mem::take(&mut *subscriptions.borrow_mut()));
 }
 
 fn is_intend_activation(kind: ActivationKind) -> bool {
@@ -56,7 +53,7 @@ impl AndroidActivatableLifetime {
                     base.on_activated(e.clone());
                 }
             }));
-            self.intend_subscriptions.borrow_mut().push(subscription);
+            self.intend_subscriptions.borrow_mut().push(Subscription::new(subscription));
         }
     }
 
@@ -80,7 +77,9 @@ impl AndroidActivatableLifetime {
             let base = self.base.clone();
             let deactivated =
                 main_activity.deactivated(Rc::new(move |e: &ActivatedEventArgs| base.on_deactivated(e.clone())));
-            self.main_subscriptions.borrow_mut().extend([activated, deactivated]);
+            self.main_subscriptions
+                .borrow_mut()
+                .extend([Subscription::new(activated), Subscription::new(deactivated)]);
         }
     }
 }

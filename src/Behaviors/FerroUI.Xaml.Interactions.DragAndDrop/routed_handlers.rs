@@ -6,14 +6,13 @@
 //! with it.
 
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEvent, RoutingStrategies};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use std::cell::RefCell;
-use std::rc::Rc;
 
 /// The handlers a behavior added, removed together by [`clear`](Self::clear).
 #[derive(Default)]
 pub(crate) struct RoutedHandlers {
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl RoutedHandlers {
@@ -32,18 +31,15 @@ impl RoutedHandlers {
     ) {
         let token = element.add_handler_with(routed_event, handler, routes, handled_events_too);
         let element = element.to_ref().downgrade();
-        self.subscriptions.borrow_mut().push(Disposable::create(move || {
+        self.subscriptions.borrow_mut().push(Subscription::new(Disposable::create(move || {
             if let Some(element) = element.upgrade() {
                 element.remove_handler(routed_event, token);
             }
-        }));
+        })));
     }
 
     /// `element.RemoveHandler(..)` of every handler added.
     pub(crate) fn clear(&self) {
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
     }
 }

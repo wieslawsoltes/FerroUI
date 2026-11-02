@@ -62,7 +62,7 @@ pub struct TopLevel {
     access_key_handler: RefCell<Option<Rc<dyn IAccessKeyHandler>>>,
     keyboard_navigation_handler: RefCell<Option<Rc<dyn IKeyboardNavigationHandler>>>,
     global_styles: RefCell<Option<Rc<dyn IGlobalStyles>>>,
-    global_styles_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    global_styles_subscriptions: RefCell<Vec<Subscription>>,
     application_theme_host: RefCell<Option<Rc<dyn IThemeVariantHost>>>,
     application_theme_subscription: RefCell<Option<Subscription>>,
     back_gesture_subscription: RefCell<Option<Subscription>>,
@@ -203,9 +203,7 @@ impl TopLevelImpl for TopLevel {
         }
         this.scaling.set(1.0);
 
-        for subscription in this.global_styles_subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *this.global_styles_subscriptions.borrow_mut()));
         if let Some(subscription) = this.application_theme_subscription.borrow_mut().take() {
             subscription.dispose();
         }
@@ -673,7 +671,9 @@ impl TopLevel {
                     }
                 }
             }));
-            self.global_styles_subscriptions.borrow_mut().extend([added, removed]);
+            self.global_styles_subscriptions
+                .borrow_mut()
+                .extend([Subscription::new(added), Subscription::new(removed)]);
         }
 
         let application_theme_host = self.application_theme_host.borrow().clone();

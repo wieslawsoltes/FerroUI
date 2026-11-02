@@ -3,7 +3,7 @@
 use crate::controls::SelectionOverlayAdorner;
 use ferrodock_model::core::{DockableControlMap, DockableObjectMap, IDockable, IFactory};
 use ferroui_base::{
-    data::core::ValueTypes, reactive::IDisposable, AnyValue, BoxedValue, Point, Rect, Ref,
+    data::core::ValueTypes, reactive::Subscription, AnyValue, BoxedValue, Point, Rect, Ref,
     StyledElement,
 };
 use ferroui_controls::{primitives::AdornerLayer, Control};
@@ -13,7 +13,7 @@ pub(crate) struct SelectionOverlayHelper {
     adorner: RefCell<Option<Ref<SelectionOverlayAdorner>>>,
     root: RefCell<Option<Ref<Control>>>,
     target: RefCell<Option<Ref<Control>>>,
-    layout_updated: RefCell<Option<Rc<dyn IDisposable>>>,
+    layout_updated: RefCell<Option<Subscription>>,
 }
 impl SelectionOverlayHelper {
     pub(crate) fn new() -> Rc<Self> {
@@ -40,7 +40,7 @@ impl SelectionOverlayHelper {
         layer.children().add(adorner.upcast::<Control>());
         let owner = self.clone();
         self.layout_updated
-            .replace(Some(root.layout_updated(move || owner.on_layout_updated()).detach()));
+            .replace(Some(root.layout_updated(move || owner.on_layout_updated())));
     }
     pub(crate) fn remove_overlay(&self) {
         let root = self.root.borrow().clone();
@@ -63,11 +63,7 @@ impl SelectionOverlayHelper {
             .borrow()
             .clone()
             .expect("Object reference not set to an instance of an object.");
-        let subscription = self.layout_updated.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
-        self.layout_updated.replace(None);
+        drop(self.layout_updated.take());
         self.root.replace(None);
         self.adorner.replace(None);
         self.target.replace(None);

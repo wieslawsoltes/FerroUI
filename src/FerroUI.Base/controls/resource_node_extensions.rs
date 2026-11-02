@@ -107,7 +107,7 @@ struct ResourceObservable {
     observers: RefCell<Vec<(u64, ResourceObserver)>>,
     next_id: Cell<u64>,
     owner_changed_subscription: RefCell<Option<Subscription>>,
-    host_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    host_subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl ResourceObservable {
@@ -174,15 +174,19 @@ impl ResourceObservable {
 
         let Some(this) = self.this.upgrade() else { return };
         let observable = this.clone();
-        subscriptions.push(host.resources_changed(Rc::new(move |_: &ResourcesChangedEventArgs| {
-            observable.publish_next();
-        })));
+        subscriptions.push(Subscription::new(host.resources_changed(Rc::new(
+            move |_: &ResourcesChangedEventArgs| {
+                observable.publish_next();
+            },
+        ))));
 
         if self.override_theme_variant.is_none() {
             if let Some(theme_host) = host.as_theme_variant_host() {
-                subscriptions.push(theme_host.actual_theme_variant_changed(Rc::new(move || {
-                    this.publish_next();
-                })));
+                subscriptions.push(Subscription::new(theme_host.actual_theme_variant_changed(Rc::new(
+                    move || {
+                        this.publish_next();
+                    },
+                ))));
             }
         }
 
@@ -190,10 +194,7 @@ impl ResourceObservable {
     }
 
     fn unsubscribe_host(&self) {
-        let subscriptions = std::mem::take(&mut *self.host_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.host_subscriptions.borrow_mut()));
     }
 
     fn publish_next(&self) {

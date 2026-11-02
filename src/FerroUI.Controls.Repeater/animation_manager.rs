@@ -10,7 +10,7 @@ use ferroui_base::animation::{
 };
 use ferroui_base::data::BindingPriority;
 use ferroui_base::media::MatrixTransform;
-use ferroui_base::reactive::{IDisposable, IObserver, LightweightSubject};
+use ferroui_base::reactive::{IObserver, LightweightSubject, Subscription};
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::CancellationTokenSource;
 use ferroui_base::{
@@ -196,20 +196,20 @@ impl AnimationManager {
             Some(state.transform.clone().into()),
             BindingPriority::Animation,
         ) {
-            values.push(value);
+            values.push(Subscription::new(value));
         }
         if let Some(value) = element.set_value_with_priority(
             Visual::render_transform_origin_property(),
             RelativePoint::TOP_LEFT,
             BindingPriority::Animation,
         ) {
-            values.push(value);
+            values.push(Subscription::new(value));
         }
-        values.push(element.bind(
+        values.push(Subscription::new(element.bind(
             Visual::opacity_property(),
             state.opacity.clone(),
             BindingPriority::Animation,
-        ));
+        )));
         *state.values.borrow_mut() = values;
         state.render(0.0);
         let weak_state = Rc::downgrade(&state);
@@ -270,7 +270,7 @@ struct RunningTransition {
     original_opacity: f64,
     transform: Ref<MatrixTransform>,
     opacity: Rc<LightweightSubject<f64>>,
-    values: RefCell<Vec<Rc<dyn IDisposable>>>,
+    values: RefCell<Vec<Subscription>>,
     cancellation: CancellationTokenSource,
     progress: Rc<ItemCollectionTransitionProgress>,
     finished: Cell<bool>,
@@ -296,10 +296,7 @@ impl RunningTransition {
             return;
         }
         self.cancellation.cancel();
-        let values = self.values.borrow_mut().drain(..).collect::<Vec<_>>();
-        for value in values {
-            value.dispose();
-        }
+        drop(std::mem::take(&mut *self.values.borrow_mut()));
         self.progress.complete();
     }
 }

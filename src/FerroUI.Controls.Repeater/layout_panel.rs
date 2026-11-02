@@ -8,7 +8,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
 use ferroui_base::media::{BackgroundSizing, BoxShadows, DrawingContext, IBrush};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate,
     BoxedValue, CornerRadius, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty,
@@ -24,7 +24,7 @@ pub struct LayoutPanel {
     context: OnceCell<Ref<NonVirtualizingLayoutContext>>,
     effective_layout: RefCell<Option<Ref<Layout>>>,
     layout_state: RefCell<Option<BoxedValue>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     border_renderer: RefCell<BorderRenderHelper>,
 }
 ferro_class!(LayoutPanel: Panel);
@@ -143,7 +143,7 @@ impl LayoutPanel {
             // the context; a replacement must initialize with its own state.
             self.set_layout_state(None);
         }
-        for subscription in std::mem::take(&mut *self.subscriptions.borrow_mut()) { subscription.dispose(); }
+        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
         let layout = self.layout();
         *self.effective_layout.borrow_mut() = layout.clone();
         if let Some(layout) = layout {
@@ -152,14 +152,9 @@ impl LayoutPanel {
             let measure = layout.measure_invalidated(move || { if let Some(owner) = weak.upgrade() { owner.invalidate_measure(); } });
             let weak = self.to_ref().downgrade();
             let arrange = layout.arrange_invalidated(move || { if let Some(owner) = weak.upgrade() { owner.invalidate_arrange(); } });
-            self.subscriptions.borrow_mut().extend([measure, arrange]);
+            self.subscriptions.borrow_mut().extend([Subscription::new(measure), Subscription::new(arrange)]);
         }
         self.invalidate_measure();
-    }
-}
-impl Drop for LayoutPanel {
-    fn drop(&mut self) {
-        for subscription in self.subscriptions.get_mut().drain(..) { subscription.dispose(); }
     }
 }
 

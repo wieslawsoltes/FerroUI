@@ -6,7 +6,7 @@ use super::{Change, ChangeSet, IExtendedList, ListChangeReason};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::subjects::{BehaviorSubject, Subject, SubjectBase};
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
+use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -49,7 +49,7 @@ struct Inner<T> {
     reader_writer: ReaderWriter<T>,
     is_edit_in_progress: RefCell<Option<Rc<BehaviorSubject<bool>>>>,
     edit_level: Cell<usize>,
-    loader: RefCell<Option<Rc<dyn IDisposable>>>,
+    loader: RefCell<Option<Subscription>>,
     disposed: Cell<bool>,
 }
 
@@ -103,7 +103,7 @@ impl<T: Clone + PartialEq + 'static> SourceList<T> {
                     inner.on_completed();
                 }
             })
-            .subscribe_all(
+            .subscribe_all_guard(
                 move |changes: C| {
                     if let Some(inner) = next.upgrade() {
                         let changes = inner.reader_writer.write_changes(changes.change_set());
@@ -309,10 +309,7 @@ impl<T: Clone + PartialEq + 'static> IDisposable for SourceList<T> {
         if self.inner.disposed.replace(true) {
             return;
         }
-        let loader = self.inner.loader.borrow_mut().take();
-        if let Some(loader) = loader {
-            loader.dispose();
-        }
+        drop(self.inner.loader.borrow_mut().take());
         self.inner.on_completed();
         let count = self.inner.count_changed.borrow().clone();
         if let Some(subject) = count {

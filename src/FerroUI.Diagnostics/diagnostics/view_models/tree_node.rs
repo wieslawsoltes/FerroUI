@@ -4,7 +4,7 @@ use super::{TreeNodeCollection, ViewModelBase};
 use ferroui_base::collections::NotifyCollectionChangedEventArgs;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged, ModelTypes};
 use ferroui_base::media::FontWeight;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::{ferro_markup_type, FerroObject, Ref, StyledElement};
 use ferroui_controls::primitives::{OverlayPopupHost, PopupRoot};
 use ferroui_controls::{ContextMenu, TopLevel};
@@ -31,7 +31,7 @@ pub enum TreeNodeKind {
 /// tree view, and its children.
 pub struct TreeNode {
     base: ViewModelBase,
-    classes_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    classes_subscription: RefCell<Option<Subscription>>,
     classes: RefCell<String>,
     is_expanded: Cell<bool>,
     font_weight: FontWeight,
@@ -117,9 +117,9 @@ impl TreeNode {
         update();
 
         let token = classes.add_collection_changed(Rc::new(move |_: &NotifyCollectionChangedEventArgs<'_, String>| update()));
-        *self.classes_subscription.borrow_mut() = Some(Disposable::create(move || {
+        *self.classes_subscription.borrow_mut() = Some(Subscription::new(Disposable::create(move || {
             classes.remove_collection_changed(token);
-        }));
+        })));
     }
 
     /// `IsRoot`: whether the object is the root of a tree of its own (a top
@@ -214,10 +214,7 @@ impl TreeNode {
     /// `Dispose()`: ends the subscription to the classes and disposes the
     /// children.
     pub fn dispose(&self) {
-        let classes_subscription = self.classes_subscription.borrow().clone();
-        if let Some(classes_subscription) = classes_subscription {
-            classes_subscription.dispose();
-        }
+        drop(self.classes_subscription.borrow_mut().take());
         self.children.dispose();
     }
 }

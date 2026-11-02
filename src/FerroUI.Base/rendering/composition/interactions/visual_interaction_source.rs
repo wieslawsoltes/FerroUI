@@ -8,7 +8,7 @@ use crate::input::{
 };
 use crate::interactivity::Interactive;
 use crate::numerics::Vector3;
-use crate::reactive::{IDisposable, Subscription};
+use crate::reactive::Subscription;
 use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor};
 use crate::{Point, Ref, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -132,7 +132,7 @@ enum Rail {
 /// A drag in progress, after `TryRedirectForManipulation`.
 struct Manipulation {
     pointer: Option<Rc<dyn IPointer>>,
-    subscriptions: Vec<Rc<dyn IDisposable>>,
+    subscriptions: Vec<Subscription>,
     trackers: Vec<Rc<InteractionTracker>>,
     start: Point,
     last: Point,
@@ -465,7 +465,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ).detach());
+        ));
         let weak = self.this.clone();
         subscriptions.push(element.add_disposable_handler_with(
             InputElement::pointer_released_event(),
@@ -480,7 +480,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ).detach());
+        ));
         let weak = self.this.clone();
         subscriptions.push(element.add_disposable_handler_with(
             InputElement::pointer_capture_lost_event(),
@@ -496,7 +496,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ).detach());
+        ));
 
         self.begin_manipulation(point.position, Some(pointer), subscriptions);
         true
@@ -508,7 +508,7 @@ impl VisualInteractionSource {
         &self,
         position: Point,
         pointer: Option<Rc<dyn IPointer>>,
-        subscriptions: Vec<Rc<dyn IDisposable>>,
+        subscriptions: Vec<Subscription>,
     ) {
         let trackers = self.live_trackers();
         *self.manipulation.borrow_mut() = Some(Manipulation {
@@ -580,9 +580,7 @@ impl VisualInteractionSource {
             None => Vector3::ZERO,
         };
         let Some(manipulation) = self.manipulation.borrow_mut().take() else { return };
-        for subscription in &manipulation.subscriptions {
-            subscription.dispose();
-        }
+        drop(manipulation.subscriptions);
         drop(manipulation.pointer);
         self.position_velocity.set(Vector3::ZERO);
         for tracker in manipulation.trackers {
@@ -732,10 +730,6 @@ impl Drop for VisualInteractionSource {
         if let Some(subscription) = self.wheel_subscription.get_mut().take() {
             subscription.dispose();
         }
-        if let Some(manipulation) = self.manipulation.get_mut().take() {
-            for subscription in &manipulation.subscriptions {
-                subscription.dispose();
-            }
-        }
+        drop(self.manipulation.get_mut().take());
     }
 }

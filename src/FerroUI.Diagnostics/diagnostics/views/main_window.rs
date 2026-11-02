@@ -47,7 +47,7 @@ fn flyout_popup_host_provider(flyout: Option<Ref<FlyoutBase>>) -> Option<Rc<dyn 
 #[repr(C)]
 pub struct MainWindow {
     base: Window,
-    input_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    input_subscription: RefCell<Option<Subscription>>,
     /// The frozen popups, with the subscriptions of their `Closing` events.
     frozen_popup_states: RefCell<Vec<(Ref<Popup>, Subscription)>>,
     root: RefCell<Option<Ref<FerroObject>>>,
@@ -83,10 +83,7 @@ impl StyledElementImpl for MainWindow {
 impl TopLevelImpl for MainWindow {
     fn on_closed(this: &Self) {
         Self::parent_on_closed(this);
-        let input_subscription = this.input_subscription.borrow().clone();
-        if let Some(input_subscription) = input_subscription {
-            input_subscription.dispose();
-        }
+        drop(this.input_subscription.borrow_mut().take());
 
         let frozen_popup_states: Vec<_> = this.frozen_popup_states.borrow_mut().drain(..).collect();
         for (_, closing_subscription) in frozen_popup_states {
@@ -165,7 +162,7 @@ impl MainWindow {
 
         let weak = this.downgrade();
         let input_subscription = InputManager::instance().map(|input_manager| {
-            input_manager.process().subscribe_fn(move |x| {
+            input_manager.process().subscribe_fn_guard(move |x| {
                 let Some(this) = weak.upgrade() else {
                     return;
                 };

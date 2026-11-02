@@ -64,7 +64,7 @@ mod imp {
     };
     use ferroui_base::input::{IInputDevice, IInputRoot, IKeyboardDevice, Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-    use ferroui_base::reactive::IDisposable;
+    use ferroui_base::reactive::Subscription;
     use ferroui_base::{Matrix, Rect as FerroRect, Ref, Visual};
     use ferroui_microcom::{ComPtr, HResult};
     use ferroui_win32::win_rt::HStringInterop;
@@ -87,7 +87,7 @@ mod imp {
         input_options: CoreTextInputOptions,
         client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
         /// The subscriptions to the events of the client.
-        client_events: RefCell<Vec<Rc<dyn IDisposable>>>,
+        client_events: RefCell<Vec<Subscription>>,
         has_focus: Cell<bool>,
         is_composing: Cell<bool>,
 
@@ -576,10 +576,7 @@ mod imp {
                     return;
                 }
             }
-            let subscriptions = std::mem::take(&mut *self.client_events.borrow_mut());
-            for subscription in subscriptions {
-                subscription.dispose();
-            }
+            drop(std::mem::take(&mut *self.client_events.borrow_mut()));
             if generation != self.client_generation.get() {
                 return;
             }
@@ -629,7 +626,8 @@ mod imp {
                 selection_subscription.dispose();
                 return;
             }
-            *self.client_events.borrow_mut() = vec![text_subscription, selection_subscription];
+            *self.client_events.borrow_mut() =
+                vec![Subscription::new(text_subscription), Subscription::new(selection_subscription)];
 
             let ctx = self.get_or_create_context();
             if generation != self.client_generation.get() {

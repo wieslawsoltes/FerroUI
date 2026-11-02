@@ -88,8 +88,8 @@ struct AncestorPropertyChangesSubscription {
     visual: WeakRef<Visual>,
     include_clip: bool,
     changed: Rc<dyn Fn()>,
-    attachment_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    attachment_subscriptions: RefCell<Vec<Subscription>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     is_disposed: Cell<bool>,
 }
 
@@ -112,7 +112,7 @@ impl AncestorPropertyChangesSubscription {
             let this = this.clone();
             visual.detached_from_visual_tree(move |_| this.on_detached_from_visual_tree())
         };
-        this.attachment_subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
+        this.attachment_subscriptions.borrow_mut().extend([attached, detached]);
 
         if visual.is_attached_to_visual_tree() {
             Self::subscribe_to_ancestors(&this);
@@ -130,16 +130,13 @@ impl AncestorPropertyChangesSubscription {
         while let Some(visual) = current {
             let handler = this.clone();
             let subscription = visual.property_changed(move |e| handler.on_property_changed(e));
-            this.subscriptions.borrow_mut().push(subscription);
+            this.subscriptions.borrow_mut().push(Subscription::new(subscription));
             current = visual.visual_parent();
         }
     }
 
     fn unsubscribe_from_ancestors(&self) {
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
     }
 
     fn on_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
@@ -184,9 +181,6 @@ impl IDisposable for AncestorPropertyChangesSubscription {
         }
 
         self.unsubscribe_from_ancestors();
-        let subscriptions = std::mem::take(&mut *self.attachment_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.attachment_subscriptions.borrow_mut()));
     }
 }

@@ -26,7 +26,7 @@ use ferroui_base::media::{
     FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextLineBounds,
     TextTrimming, TextWrapping,
 };
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, instantiate, DirectProperty, ElementRef, FerroObject, FerroObjectImpl,
@@ -87,8 +87,8 @@ pub struct RichTextBlock {
     reported_trimmed: Cell<bool>,
     reported_baseline: Cell<f64>,
     highlighters: TextHighlighterCollection,
-    view_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    default_highlight_brush_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    view_subscriptions: RefCell<Vec<Subscription>>,
+    default_highlight_brush_subscriptions: RefCell<Vec<Subscription>>,
     /// Set by an editable presenter derived from this view: its editor owns the
     /// context requests and the context-menu event.
     delegates_context_requests: Cell<bool>,
@@ -1125,7 +1125,7 @@ impl RichTextBlock {
                 this.invalidate_document_layout();
             }
         });
-        *self.view_subscriptions.borrow_mut() = vec![highlighters.detach(), resources.detach(), theme.detach()];
+        *self.view_subscriptions.borrow_mut() = vec![highlighters, resources, theme];
         self.refresh_default_highlight_brush_subscriptions();
     }
 
@@ -1156,10 +1156,7 @@ impl RichTextBlock {
     }
 
     fn refresh_default_highlight_brush_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.default_highlight_brush_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.default_highlight_brush_subscriptions.borrow_mut()));
         let mut subscriptions = Vec::new();
         for foreground in [true, false] {
             let brush = self.default_highlight_brush(foreground);
@@ -1170,7 +1167,7 @@ impl RichTextBlock {
                 }
             });
             if let Some(subscription) = subscribe_invalidated(&brush, handler) {
-                subscriptions.push(subscription);
+                subscriptions.push(Subscription::new(subscription));
             }
         }
         *self.default_highlight_brush_subscriptions.borrow_mut() = subscriptions;
@@ -1951,16 +1948,8 @@ impl Drop for RichTextBlock {
         if let Some(subscription) = self.font_features_subscription.get_mut().take() {
             subscription.dispose();
         }
-        for subscription in self.view_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-        for subscription in self
-            .default_highlight_brush_subscriptions
-            .get_mut()
-            .drain(..)
-        {
-            subscription.dispose();
-        }
+        drop(std::mem::take(self.view_subscriptions.get_mut()));
+        drop(std::mem::take(self.default_highlight_brush_subscriptions.get_mut()));
         if let Some(subscription) = self.document_subscription.get_mut().take() {
             subscription.dispose();
         }

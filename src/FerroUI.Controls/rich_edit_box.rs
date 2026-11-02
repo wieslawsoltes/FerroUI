@@ -319,7 +319,7 @@ pub struct RichEditBox {
     header_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     description_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     placeholder_presenter: RefCell<Option<Ref<TextBlock>>>,
-    selection_brush_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    selection_brush_subscriptions: RefCell<Vec<Subscription>>,
     context_flyout_closed_subscription: RefCell<Option<Subscription>>,
     flyout_focus_subscription: RefCell<Option<Subscription>>,
     context_menu_request_generation: Cell<u64>,
@@ -1288,10 +1288,7 @@ impl RichEditBox {
         })
     }
     fn refresh_selection_brush_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.selection_brush_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.selection_brush_subscriptions.borrow_mut()));
         let mut subscriptions = Vec::new();
         for brush in [
             self.selection_highlight_color(),
@@ -1306,7 +1303,7 @@ impl RichEditBox {
                     }
                 }),
             ) {
-                subscriptions.push(subscription);
+                subscriptions.push(Subscription::new(subscription));
             }
         }
         *self.selection_brush_subscriptions.borrow_mut() = subscriptions;

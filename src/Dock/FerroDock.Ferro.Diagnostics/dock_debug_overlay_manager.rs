@@ -2,7 +2,10 @@
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use crate::helpers::debug_overlay_helper::DebugOverlayHelper;
 use ferrodock_ferro::controls::DockControl;
-use ferroui_base::{reactive::IDisposable, Ref, Visual};
+use ferroui_base::{
+    reactive::{IDisposable, Subscription},
+    Ref, Visual,
+};
 use ferroui_controls::{Control, TopLevel};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
@@ -10,7 +13,7 @@ pub(crate) struct DockDebugOverlayManager {
     top_level: Ref<TopLevel>,
     helpers: RefCell<HashMap<Ref<DockControl>, Rc<DebugOverlayHelper>>>,
     dock_subscriptions: RefCell<HashMap<Ref<DockControl>, Rc<dyn IDisposable>>>,
-    root_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    root_subscription: RefCell<Option<Subscription>>,
 }
 impl DockDebugOverlayManager {
     pub(crate) fn new(top_level: Ref<TopLevel>) -> Rc<Self> {
@@ -24,7 +27,7 @@ impl DockDebugOverlayManager {
         let owner = this.clone();
         this.root_subscription.replace(Some(
             this.top_level
-                .layout_updated(move || owner.on_root_layout_updated()).detach(),
+                .layout_updated(move || owner.on_root_layout_updated()),
         ));
         this
     }
@@ -91,10 +94,7 @@ impl DockDebugOverlayManager {
 }
 impl IDisposable for DockDebugOverlayManager {
     fn dispose(&self) {
-        let subscription = self.root_subscription.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
+        drop(self.root_subscription.take());
         let pairs: Vec<_> = self
             .helpers
             .borrow()

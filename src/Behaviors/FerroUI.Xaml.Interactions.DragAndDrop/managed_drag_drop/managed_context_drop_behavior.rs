@@ -5,7 +5,7 @@ use crate::values::boxed_object;
 use crate::{IDropHandler, ManagedDragDropService};
 use ferroui_base::input::{DataTransfer, DragDrop, DragEventArgs, IDataTransfer, KeyModifiers};
 use ferroui_base::interactivity::{Interactive, RoutedEvent, RoutedEventArgs};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty,
     PixelPoint, Point, Ref, StaticType, StyledElementImpl, StyledProperty, Visual, WeakRef,
@@ -462,7 +462,7 @@ impl ManagedContextDropBehavior {
 /// The subscription of a behavior to the events of the service; it holds the behavior weakly and
 /// is disposed when the behavior is detached (or dropped).
 struct DragDropServiceSubscription {
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl DragDropServiceSubscription {
@@ -472,37 +472,34 @@ impl DragDropServiceSubscription {
         let started: WeakRef<ManagedContextDropBehavior> = owner.downgrade();
         let moved = started.clone();
         let ended = started.clone();
-        let subscriptions = vec![
-            service.drag_started(move || {
-                if let Some(owner) = started.upgrade() {
-                    owner.on_drag_started();
-                }
-            }),
-            service.drag_moved(move || {
-                if let Some(owner) = moved.upgrade() {
-                    owner.on_drag_moved();
-                }
-            }),
-            service.drag_ended(move || {
-                if let Some(owner) = ended.upgrade() {
-                    owner.on_drag_ended();
-                }
-            }),
+        let subscriptions: Vec<Subscription> = vec![
+            service
+                .drag_started(move || {
+                    if let Some(owner) = started.upgrade() {
+                        owner.on_drag_started();
+                    }
+                })
+                .into(),
+            service
+                .drag_moved(move || {
+                    if let Some(owner) = moved.upgrade() {
+                        owner.on_drag_moved();
+                    }
+                })
+                .into(),
+            service
+                .drag_ended(move || {
+                    if let Some(owner) = ended.upgrade() {
+                        owner.on_drag_ended();
+                    }
+                })
+                .into(),
         ];
 
         Self { subscriptions: RefCell::new(subscriptions) }
     }
 
     fn dispose(&self) {
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
-    }
-}
-
-impl Drop for DragDropServiceSubscription {
-    fn drop(&mut self) {
-        self.dispose();
+        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
     }
 }

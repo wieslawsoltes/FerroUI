@@ -8,7 +8,7 @@ use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::subjects::{BehaviorSubject, Subject, SubjectBase};
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_system::collections::generic::Dictionary;
-use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
+use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use std::cell::{Cell, RefCell};
 use std::hash::Hash;
 use std::rc::{Rc, Weak};
@@ -101,7 +101,7 @@ struct Inner<T, K> {
     edit_level: Cell<usize>,
     current_version: Cell<u64>,
     current_delivery_version: Cell<u64>,
-    loader: RefCell<Option<Rc<dyn IDisposable>>>,
+    loader: RefCell<Option<Subscription>>,
     disposed: Cell<bool>,
 }
 
@@ -154,7 +154,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ObservableCache<T, K> {
         let cache = Self::create(None);
         let inner = Rc::downgrade(&cache.inner);
         let (error_target, completed_target) = (inner.clone(), inner.clone());
-        let loader = source.change_sets().subscribe_all(
+        let loader = source.change_sets().subscribe_all_guard(
             move |change_set| {
                 if let Some(inner) = inner.upgrade() {
                     let notifications = inner.notifications.acquire();
@@ -621,10 +621,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IDisposable for Observa
         if self.inner.disposed.replace(true) {
             return;
         }
-        let loader = self.inner.loader.borrow_mut().take();
-        if let Some(loader) = loader {
-            loader.dispose();
-        }
+        drop(self.inner.loader.borrow_mut().take());
         self.inner.notify_completed();
     }
 }

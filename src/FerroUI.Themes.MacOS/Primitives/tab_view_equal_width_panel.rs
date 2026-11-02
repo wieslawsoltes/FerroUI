@@ -16,7 +16,7 @@
 use ferroui_base::input::{INavigableContainer, InputElement, InputElementImpl, NavigationDirection};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property, instantiate, FerroObject,
     FerroObjectExtensions, FerroObjectImpl, FerroProperty, Rect, Ref, Size, StyledElementImpl, StyledProperty,
@@ -62,7 +62,7 @@ pub struct TabViewEqualWidthPanel {
     /// viewer (and not with a width).
     viewport_widths: Cell<Option<ViewportWidths>>,
     /// The subscription to the viewport of the scroll content presenter around the panel.
-    viewport_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    viewport_subscription: RefCell<Option<Subscription>>,
 }
 
 /// The widths the viewport of a scroll viewer offers the children of the panel.
@@ -345,7 +345,7 @@ impl TabViewEqualWidthPanel {
         let weak = self.to_ref().downgrade();
         let object: &FerroObject = &presenter;
         let subscription = FerroObjectExtensions::get_observable(object, ScrollContentPresenter::viewport_property())
-            .subscribe_fn(move |_| {
+            .subscribe_fn_guard(move |_| {
                 let Some(this) = weak.upgrade() else { return };
                 let changed = match (this.viewport_widths.get(), this.viewport_widths_for_items()) {
                     (Some(used), Some(current)) => !used.same(&current),

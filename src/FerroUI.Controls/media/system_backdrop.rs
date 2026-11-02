@@ -8,7 +8,7 @@ use ferroui_base::media::{
     BrushImpl, IBrush, XamlCompositionBrushBase, XamlCompositionBrushBaseImpl,
 };
 use ferroui_base::platform::{ColorContrastPreference, IPlatformSettings};
-use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::system_backdrops::{
     DesktopAcrylicController, ICompositionSupportsSystemBackdrop, MicaController, MicaKind, PlatformSystemBackdrop,
     SystemBackdropConfiguration, SystemBackdropController, SystemBackdropSupport, SystemBackdropTheme,
@@ -265,7 +265,7 @@ impl ElementSystemBackdrop {
 struct PerTargetConfiguration {
     target: Rc<dyn ICompositionSupportsSystemBackdrop>,
     configuration: Rc<SystemBackdropConfiguration>,
-    subscriptions: Vec<Rc<dyn IDisposable>>,
+    subscriptions: Vec<Subscription>,
 }
 
 /// The base of the system backdrops of the object model (WinUI
@@ -342,7 +342,7 @@ impl SystemBackdropImpl for SystemBackdrop {
         let window = activation_window(xaml_root);
         configuration.set_is_input_active(window.as_ref().is_none_or(|window| window.is_active()));
 
-        let mut subscriptions: Vec<Rc<dyn IDisposable>> = Vec::new();
+        let mut subscriptions: Vec<Subscription> = Vec::new();
         let notify = {
             let backdrop = this.to_ref().downgrade();
             let target = Rc::downgrade(connected_target);
@@ -362,15 +362,15 @@ impl SystemBackdropImpl for SystemBackdrop {
                     configuration.set_theme(theme_of(&root));
                     notify();
                 }
-            }).detach());
+            }));
         }
         if let Some(settings) = FerroLocator::current().get_service::<dyn IPlatformSettings>() {
             let configuration = configuration.clone();
             let notify = notify.clone();
-            subscriptions.push(settings.color_values_changed(Rc::new(move |values| {
+            subscriptions.push(Subscription::new(settings.color_values_changed(Rc::new(move |values| {
                 configuration.set_is_high_contrast(values.contrast_preference() == ColorContrastPreference::High);
                 notify();
-            })));
+            }))));
         }
         if let Some(window) = window {
             for active in [true, false] {
@@ -381,7 +381,7 @@ impl SystemBackdropImpl for SystemBackdrop {
                     notify();
                 };
                 let subscription = if active { window.activated(handler) } else { window.deactivated(handler) };
-                subscriptions.push(subscription.detach());
+                subscriptions.push(subscription);
             }
         }
         this.configurations.borrow_mut().push(PerTargetConfiguration {
@@ -397,11 +397,7 @@ impl SystemBackdropImpl for SystemBackdrop {
             let index = configurations.iter().position(|entry| same_target(&entry.target, disconnected_target));
             index.map(|index| configurations.remove(index))
         };
-        if let Some(entry) = removed {
-            for subscription in entry.subscriptions {
-                subscription.dispose();
-            }
-        }
+        drop(removed);
     }
 
     fn on_default_system_backdrop_configuration_changed(

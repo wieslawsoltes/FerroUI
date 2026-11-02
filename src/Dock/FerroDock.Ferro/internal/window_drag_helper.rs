@@ -10,7 +10,7 @@ use ferroui_base::{
     BoxedValue, Point, Ref,
 };
 use ferroui_controls::{Control, TopLevel, Window};
-use ferroui_system::IDisposable;
+use ferroui_system::{IDisposable, Subscription};
 use std::{
     cell::{Cell, RefCell},
     rc::{Rc, Weak},
@@ -34,7 +34,7 @@ pub struct WindowDragHelper {
     drag_window: RefCell<Option<Ref<Window>>>,
     // Source declares this removal slot but does not install a position handler.
     position_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    disposables: RefCell<Option<Vec<Rc<dyn IDisposable>>>>,
+    disposables: RefCell<Option<Vec<Subscription>>>,
     released_event_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 impl WindowDragHelper {
@@ -90,17 +90,12 @@ impl WindowDragHelper {
             false,
         ).detach();
         let moved = RetainedSubscription::retain(self.owner.clone().upcast(), moved);
-        self.disposables.replace(Some(vec![pressed, moved]));
+        self.disposables
+            .replace(Some(vec![Subscription::new(pressed), Subscription::new(moved)]));
     }
     /// Explicitly removes the source subscriptions and cancels an in-progress move.
     pub fn detach(&self) {
-        let disposables = self.disposables.borrow().clone();
-        if let Some(disposables) = disposables {
-            for disposable in disposables {
-                disposable.dispose();
-            }
-            self.disposables.replace(None);
-        }
+        drop(self.disposables.take());
         self.cancel_drag();
     }
     fn drag_window(&self) -> Option<Ref<Window>> {

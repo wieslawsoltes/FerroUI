@@ -4,7 +4,7 @@
 use super::{text_input::TextInputContentType, InputScopeNameValue};
 use crate::collections::FerroList;
 use crate::metadata::IAddChild;
-use crate::reactive::{Disposable, IDisposable, Subscription};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::{FormatError, HandlerList};
 use crate::{
     ferro_class, instantiate, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref,
@@ -67,7 +67,7 @@ pub struct InputScope {
     base: FerroObject,
     names: FerroList<Ref<InputScopeName>>,
     collection_subscription: Cell<Option<u64>>,
-    item_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    item_subscriptions: RefCell<Vec<Subscription>>,
     changed: Rc<HandlerList<dyn Fn()>>,
 }
 ferro_class!(InputScope: FerroObject);
@@ -158,10 +158,7 @@ impl InputScope {
         Rc::new(InputScopeAddChild(this))
     }
     fn refresh_item_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.item_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut *self.item_subscriptions.borrow_mut()));
         let mut subscriptions = Vec::new();
         let mut seen = HashSet::new();
         for name in self.names.snapshot().iter() {
@@ -169,13 +166,13 @@ impl InputScope {
                 continue;
             }
             let weak = self.to_ref().downgrade();
-            subscriptions.push(name.property_changed(move |change| {
+            subscriptions.push(Subscription::new(name.property_changed(move |change| {
                 if change.property() == InputScopeName::name_value_property().as_property() {
                     if let Some(this) = weak.upgrade() {
                         this.invalidate();
                     }
                 }
-            }));
+            })));
         }
         *self.item_subscriptions.borrow_mut() = subscriptions;
     }
@@ -190,9 +187,6 @@ impl Drop for InputScope {
     fn drop(&mut self) {
         if let Some(token) = self.collection_subscription.take() {
             self.names.remove_collection_changed(token);
-        }
-        for subscription in self.item_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
         }
     }
 }
