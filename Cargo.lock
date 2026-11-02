@@ -1428,6 +1428,7 @@ dependencies = [
  "ferroui-controls-livecharts",
  "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
+ "ferroui-designer",
  "ferroui-desktop",
  "ferroui-devtools",
  "ferroui-diagnostics",
