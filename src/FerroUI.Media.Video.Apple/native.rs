@@ -156,3 +156,10 @@ impl Drop for Seek {
         }
     }
 }
+#[cfg(feature = "native-lifetime-tests")]
+pub fn live_sessions() -> u64 {
+    extern "C" {
+        fn ferroui_portable_player_live_owners() -> u64;
+    }
+    unsafe { ferroui_portable_player_live_owners() }
+}

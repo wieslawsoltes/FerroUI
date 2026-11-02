@@ -25,7 +25,16 @@ mod camera;
 #[cfg(all(windows, feature = "synthetic-camera"))]
 #[path = "lifecycle_stress.rs"]
 mod lifecycle_stress;
-#[cfg(all(windows, feature = "native-pixel-tests"))]
+#[cfg(all(target_os = "macos", feature = "native-pixel-tests"))]
+#[path = "macos_diagnostics.rs"]
+mod macos_diagnostics;
+#[cfg(all(target_os = "macos", feature = "macos-verification"))]
+#[path = "macos_lifecycle.rs"]
+mod macos_lifecycle;
+#[cfg(all(target_os = "macos", feature = "native-pixel-tests"))]
+#[path = "macos_transport.rs"]
+mod macos_transport;
+#[cfg(all(any(windows, target_os = "macos"), feature = "native-pixel-tests"))]
 #[path = "native_pixels.rs"]
 mod native_pixels;
 #[path = "providers.rs"]
@@ -36,7 +45,7 @@ mod renderer;
 #[cfg(not(target_os = "macos"))]
 #[path = "native_renderer.rs"]
 mod renderer;
-#[cfg(all(windows, feature = "native-pixel-tests"))]
+#[cfg(all(any(windows, target_os = "macos"), feature = "native-pixel-tests"))]
 #[path = "video_pixels.rs"]
 mod video_pixels;
 #[repr(C)]
@@ -84,6 +93,10 @@ impl ApplicationImpl for App {
             view.set_are_transport_controls_enabled(true);
             view.set_stretch(Stretch::Uniform);
             let window = Window::new();
+            #[cfg(target_os = "macos")]
+            if std::env::args().any(|a| a == "--video-pixel-smoke") {
+                window.set_window_decorations(ferroui_controls::WindowDecorations::None);
+            }
             window.set_title(Some("FerroUI shared-texture media".into()));
             window.set_width(800.);
             window.set_height(500.);
@@ -169,6 +182,15 @@ impl ApplicationImpl for App {
                                 providers::importer(),
                             ))
                         })));
+                        #[cfg(all(target_os = "macos", feature = "macos-verification"))]
+                        if std::env::args().any(|a| a.starts_with("--macos-lifecycle-cycles=")) {
+                            if let (Some(window), Some(root)) =
+                                (weak_window.upgrade(), weak_root.upgrade())
+                            {
+                                macos_lifecycle::run(window, root, view, source, budget).await;
+                            }
+                            return;
+                        }
                         #[cfg(all(windows, feature = "synthetic-camera"))]
                         if std::env::args().any(|a| a.starts_with("--lifecycle-stress-cycles=")) {
                             if let Some(window) = weak_window.upgrade() {
@@ -199,11 +221,21 @@ impl ApplicationImpl for App {
                         println!(
                             "OPENED native_platform_provider shared_texture=true decode=unknown"
                         );
+                        #[cfg(all(target_os = "macos", feature = "native-pixel-tests"))]
+                        if std::env::args().any(|a| a == "--macos-transport-smoke") {
+                            if let Some(window) = weak_window.upgrade() {
+                                macos_transport::run(window, view).await;
+                            }
+                            return;
+                        }
                         if let (Some(root), Some(player)) =
                             (weak_root.upgrade(), view.media_player())
                         {
                             let host = renderer::install(&root, player.frames(), &*interop);
-                            #[cfg(all(windows, feature = "native-pixel-tests"))]
+                            #[cfg(all(
+                                any(windows, target_os = "macos"),
+                                feature = "native-pixel-tests"
+                            ))]
                             if std::env::args().any(|a| a == "--video-pixel-smoke") {
                                 if let Some(window) = weak_window.upgrade() {
                                     video_pixels::run(window, view.clone(), host, budget).await;
@@ -223,7 +255,8 @@ impl ApplicationImpl for App {
                 },
                 Duration::from_millis(50),
                 DispatcherPriority::NORMAL,
-            ).detach();
+            )
+            .detach();
             lifetime.set_main_window(Some(window));
         }
         Self::parent_on_framework_initialization_completed(this);
@@ -518,6 +551,30 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
     ).detach();
 }
 pub fn run() -> std::process::ExitCode {
+    #[cfg(not(all(target_os = "macos", feature = "native-pixel-tests")))]
+    if std::env::args().any(|a| a == "--macos-transport-smoke") {
+        eprintln!("Mac transport verification requires macOS and --features macos-verification");
+        return std::process::ExitCode::FAILURE;
+    }
+    if std::env::args().any(|a| a == "--macos-leak-control")
+        && !std::env::args().any(|a| a.starts_with("--macos-lifecycle-cycles="))
+    {
+        eprintln!("Mac retained-memory negative control requires a lifecycle run");
+        return std::process::ExitCode::FAILURE;
+    }
+    #[cfg(not(all(target_os = "macos", feature = "macos-verification")))]
+    if std::env::args()
+        .any(|a| a.starts_with("--macos-lifecycle-cycles=") || a == "--macos-leak-control")
+    {
+        eprintln!("Mac lifecycle verification requires macOS and --features macos-verification");
+        return std::process::ExitCode::FAILURE;
+    }
+    if std::env::args().any(|a| a.starts_with("--macos-lifecycle-cycles="))
+        && !std::env::args().any(|a| a == "--renderer")
+    {
+        eprintln!("Mac lifecycle verification requires --renderer");
+        return std::process::ExitCode::FAILURE;
+    }
     if std::env::args().any(|a| a.starts_with("--lifecycle-stress-cycles="))
         && !std::env::args().any(|a| a == "--synthetic-camera")
     {
@@ -555,9 +612,9 @@ pub fn run() -> std::process::ExitCode {
         eprintln!("Camera stress requires --camera --synthetic-camera --camera-smoke --camera-recovery-smoke --renderer");
         return std::process::ExitCode::FAILURE;
     }
-    #[cfg(not(all(windows, feature = "native-pixel-tests")))]
+    #[cfg(not(all(any(windows, target_os = "macos"), feature = "native-pixel-tests")))]
     if std::env::args().any(|a| a == "--video-pixel-smoke") {
-        eprintln!("Video pixel smoke requires Windows and --features native-pixel-tests");
+        eprintln!("Video pixel smoke requires Windows or macOS and --features native-pixel-tests");
         return std::process::ExitCode::FAILURE;
     }
     #[cfg(not(all(windows, feature = "synthetic-camera")))]

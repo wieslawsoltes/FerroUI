@@ -248,3 +248,8 @@ impl NativeMediaSession for AppleSession {
         }
     }
 }
+/// Development-only ownership probe; counts AVFoundation bridge owners, not OS decoder pools.
+#[cfg(feature = "native-lifetime-tests")]
+pub fn native_live_sessions() -> u64 {
+    native::live_sessions()
+}

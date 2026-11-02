@@ -1,6 +1,18 @@
 fn main() {
     println!("cargo:rerun-if-changed=Info.plist");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos") {
+        println!("cargo:rerun-if-changed=macos_diagnostics.m");
+        if std::env::var_os("CARGO_FEATURE_NATIVE_PIXEL_TESTS").is_some() {
+            cc::Build::new()
+                .file("macos_diagnostics.m")
+                .flag("-fobjc-arc")
+                .flag("-fblocks")
+                .compile("portable_media_macos_diagnostics");
+            println!("cargo:rustc-link-arg=-Wl,-weak_framework,ScreenCaptureKit");
+            for framework in ["CoreGraphics", "AppKit", "CoreVideo"] {
+                println!("cargo:rustc-link-lib=framework={framework}");
+            }
+        }
         println!("cargo:rerun-if-changed=../PortableMedia.Mobile/plane.m");
         cc::Build::new()
             .file("../PortableMedia.Mobile/plane.m")

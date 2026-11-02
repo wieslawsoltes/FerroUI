@@ -6,7 +6,9 @@ use ferroui_base::{
 };
 use ferroui_controls::Window;
 use ferroui_media::{MediaError, MediaErrorKind};
+#[cfg(windows)]
 use ferroui_media_opengl::NativeGlFrameProducer;
+#[cfg(windows)]
 use ferroui_opengl::SharedFrameTexture;
 use image::RgbaImage;
 use std::{
@@ -14,13 +16,21 @@ use std::{
     time::{Duration, Instant},
 };
 #[path = "camera_presented.rs"]
+#[cfg(windows)]
 mod os;
+#[cfg(target_os = "macos")]
+pub use super::macos_diagnostics::{presented, read_texture};
+#[cfg(target_os = "macos")]
+use ferroui_media_apple::poll_native;
+#[cfg(windows)]
+use ferroui_media_windows::poll_native;
+#[cfg(windows)]
 pub use os::capture as presented;
 pub async fn wait<T: 'static>(
     mut check: impl FnMut() -> Result<Option<T>, String> + 'static,
 ) -> Result<T, String> {
     let started = Instant::now();
-    ferroui_media_windows::poll_native(move || match check() {
+    poll_native(move || match check() {
         Ok(Some(v)) => Poll::Ready(Ok(v)),
         Err(e) => Poll::Ready(Err(MediaError::new(MediaErrorKind::NativeFailure, e))),
         Ok(None) if started.elapsed() > Duration::from_secs(10) => Poll::Ready(Err(
@@ -35,6 +45,7 @@ pub async fn settle() -> Result<(), String> {
     let start = Instant::now();
     wait(move || Ok((start.elapsed() > Duration::from_millis(100)).then_some(()))).await
 }
+#[cfg(windows)]
 pub async fn read_texture(
     producer: &NativeGlFrameProducer,
     frame: FrameLease,

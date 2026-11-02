@@ -1,4 +1,6 @@
 //! Independent MP4 fixture orientation, crop and presented-pixel acceptance.
+#[cfg(target_os = "macos")]
+use super::macos_diagnostics::MetalFrameReader as NativeFrameReader;
 use super::native_pixels::{composition, presented, read_texture, settle, wait};
 use super::*;
 use ferroui_base::{
@@ -7,9 +9,23 @@ use ferroui_base::{
     Point, Visual,
 };
 use ferroui_media_controls::{RendererHost, TexturePresenter};
-use ferroui_media_opengl::NativeGlFrameProducer;
+#[cfg(windows)]
+use ferroui_media_opengl::NativeGlFrameProducer as NativeFrameReader;
 use image::RgbaImage;
 use std::cell::Cell;
+async fn capture_presented(
+    window: &Ref<Window>,
+    counters: &FrameTransferCounters,
+) -> Result<RgbaImage, String> {
+    #[cfg(windows)]
+    {
+        presented(window, counters)
+    }
+    #[cfg(target_os = "macos")]
+    {
+        presented(window, counters).await
+    }
+}
 fn expected(u: f64, v: f64, orientation: u32, crop: bool) -> [u8; 3] {
     // Independent inverse of rotation followed by output-space reflection.
     let u = if orientation >= 4 { 1. - u } else { u };
@@ -62,7 +78,7 @@ fn check(
             }
         });
         if (0..3).any(|c| actual[c].abs_diff(expected[c]) > 30) {
-            return Err(format!("Video pixels ({u},{v}) {actual:?}, expected {expected:?} orientation={orientation} crop={crop}"));
+            return Err(format!("Video pixels ({u},{v}) {actual:?}, expected {expected:?} orientation={orientation} crop={crop} projection={projection} bounds={:?} point={p:?} image={}x{} scale={}",control.bounds(),image.width(),image.height(),window.render_scaling()));
         }
     }
     Ok(())
@@ -233,8 +249,8 @@ async fn exercise(
         .try_get_composition_gpu_interop()
         .await
         .ok_or("No diagnostic interop")?;
-    let producer = NativeGlFrameProducer::from_interop(&*interop, budget.clone())
-        .map_err(|e| e.to_string())?;
+    let producer =
+        NativeFrameReader::from_interop(&*interop, budget.clone()).map_err(|e| e.to_string())?;
     let raw = read_texture(&producer, output).await?;
     for (u, v) in [(0.2, 0.2), (0.8, 0.2), (0.2, 0.8), (0.8, 0.8)] {
         let w = 1. + 0.35 * u + 0.15 * v;
@@ -242,6 +258,8 @@ async fn exercise(
             (1. + (1.4 * u - 0.25 * v - 0.55) / w) / 2.,
             (1. + (-1.35 * v + 0.7) / w) / 2.,
         );
+        #[cfg(target_os = "macos")]
+        let y = 1. - y;
         let actual = raw.get_pixel(
             (x * raw.width() as f64) as u32,
             (y * raw.height() as f64) as u32,
@@ -293,7 +311,7 @@ async fn exercise(
         crop,
         true,
     )?;
-    let shown = presented(&window, &budget.counters())?;
+    let shown = capture_presented(&window, &budget.counters()).await?;
     check(
         &shown,
         &window,
@@ -377,7 +395,7 @@ async fn exercise(
         crop,
         false,
     )?;
-    let shown = presented(&window, &budget.counters())?;
+    let shown = capture_presented(&window, &budget.counters()).await?;
     check(
         &shown,
         &window,
@@ -554,7 +572,7 @@ async fn exercise(
                 crop,
                 false,
             )?;
-            let shown = presented(&window, &budget.counters())?;
+            let shown = capture_presented(&window, &budget.counters()).await?;
             check(
                 &shown,
                 &window,

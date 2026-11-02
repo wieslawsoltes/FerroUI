@@ -642,6 +642,10 @@ required evidence. [Windows camera privacy](https://learn.microsoft.com/en-us/wi
 
 ### 9.2 macOS
 
+The selected macOS media profile is Metal/Skia Graphite only. Native macOS
+OpenGL/CGL media presentation is outside this profile and is not a release
+requirement. Existing GL bridge observations below remain historical evidence.
+
 **Video and camera.** Use AVFoundation for playback/capture and native timing,
 retain the native pixel-buffer/storage owner, and make compatible Metal texture
 views of that storage through CoreVideo. Playback frame selection follows the
@@ -908,7 +912,7 @@ even when a narrower lifecycle comparison passes.
 | Profile | New implementation acceptance needed; current evidence is only a starting point |
 | --- | --- |
 | Windows | Native GPU video and camera, device/privacy/hotplug, shared resource synchronization, 2D/3D texture reuse, bounded QR analysis, separate fallback checks and actual native input/accessibility |
-| macOS | Default native renderer plus admitted GL interop, physical camera/permission/photo/QR, actual audio, same-device constraints, pending GPU read retirement and oldest declared OS |
+| macOS | Metal/Skia Graphite media, physical camera/permission/photo/QR, actual audio, same-device constraints, pending GPU read retirement and oldest declared OS; native OpenGL/CGL media is outside the selected profile |
 | iOS | Device camera/photo/QR/torch where present, playback/audio, rotation/suspension/re-entry, declared minimum OS version and negotiated capture formats, native GPU resources and actual device packaging; simulator results labeled separately |
 | Android | Minimum supported API and current API, representative physical GPUs, CameraX/decoder/QR lifetimes, renderer compatibility, surface/activity recreation and active media/camera on an actual 16 KiB kernel |
 | Linux | Native video pipeline and codecs, direct and chosen portal camera profiles, DMA-BUF/modifier/synchronization combinations, QR, device removal and actual compositor/window/backend behavior |

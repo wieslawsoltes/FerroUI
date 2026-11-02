@@ -302,8 +302,9 @@ controls are reported unavailable. Context loss quarantines unfinished reads;
 automatic recovery and a broader browser/device matrix remain unverified.
 
 Windows and Linux provider source and desktop routing are now present. Their
-Rust bindings cross-check on the Mac; native C/C++ compilation, packaging and
-runtime behavior remain unverified. See [NATIVE-DESKTOP-PROFILES.md](NATIVE-DESKTOP-PROFILES.md).
+receiving-host native builds and selected Windows runtime checks are recorded in
+[NATIVE-DESKTOP-PROFILES.md](NATIVE-DESKTOP-PROFILES.md). The exercised WSL display
+lacks DMA-BUF import; positive Linux GPU/camera acceptance remains open.
 Android Media3 playback, CameraX capture, bundled offline ML Kit QR and GLES
 renderer output have run together on a 16 KiB emulator. Apple playback, Vision
 QR and Metal renderer output have run on macOS and the iOS simulator. Apple
@@ -313,6 +314,14 @@ native latest-frame slot in addition to the admitted frame budget; native pool
 and driver allocations have not been profiled. One native still request is
 allowed across generations, with a 64 MiB encoded-output limit. Canceled native
 still work retains its slot until AVFoundation's final callback.
+
+The macOS media profile is Metal/Skia Graphite only. Fresh independent window
+pixels for all 16 orientation/crop cases, native transport accessibility/input,
+300 lifecycle cycles / 600 resets and a signed development bundle are recorded
+in [MACOS-VERIFICATION.md](MACOS-VERIFICATION.md). The workspace pins a source
+hotfix for Graphite Metal ownership; source builds require Ninja and Xcode tools.
+The verification note distinguishes development packaging and measured bounds
+from physical-camera, minimum-OS, distribution and full-performance acceptance.
 
 CameraPreview, RendererHost and client-owned Metal/GLES plane examples are
 implemented. Owned native sessions and renderers have opt-in context recovery

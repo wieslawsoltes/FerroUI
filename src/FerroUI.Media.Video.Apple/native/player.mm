@@ -3,6 +3,10 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#ifdef FERROUI_VIDEO_LIFETIME_TESTS
+#include <atomic>
+static std::atomic<uint64_t> FerroPlayerOwners{0};
+#endif
 
 @interface FerroPortablePlayer : NSObject
 @property(nonatomic,strong) AVPlayer *player;
@@ -17,6 +21,9 @@
 - (void)close;
 @end
 @implementation FerroPortablePlayer
+#ifdef FERROUI_VIDEO_LIFETIME_TESTS
+- (instancetype)init { self=[super init]; if(self) FerroPlayerOwners.fetch_add(1); return self; }
+#endif
 - (void)close {
     if (_endedObserver) [[NSNotificationCenter defaultCenter] removeObserver:_endedObserver];
     _endedObserver=nil;
@@ -25,7 +32,12 @@
     if (_output) [_item removeOutput:_output];
     _output=nil;_item=nil;_player=nil;_geometryTrack=nil;
 }
-- (void)dealloc { [self close]; }
+- (void)dealloc {
+    [self close];
+#ifdef FERROUI_VIDEO_LIFETIME_TESTS
+    FerroPlayerOwners.fetch_sub(1);
+#endif
+}
 @end
 @interface FerroPortableSeek : NSObject
 @property(nonatomic) int result;
@@ -34,6 +46,9 @@
 @implementation FerroPortableSeek
 @end
 extern "C" {
+#ifdef FERROUI_VIDEO_LIFETIME_TESTS
+uint64_t ferroui_portable_player_live_owners() { return FerroPlayerOwners.load(); }
+#endif
 struct FerroPortableState {double position,duration;uint32_t width,height;int32_t state,seekable;};
 void *ferroui_portable_player_create(const char *source) {
     @autoreleasepool {

@@ -9,6 +9,7 @@ publish = false
 [features]
 memory-audit = ["synthetic-camera"]
 native-pixel-tests = ["image/png", "dep:ferroui-skia", "dep:skia-safe"]
+macos-verification = ["native-pixel-tests", "ferroui-media-video-apple/native-lifetime-tests"]
 synthetic-camera = ["ferroui-media-camera-windows/synthetic-camera", "dep:ferroui-media-camera-controls", "native-pixel-tests"]
 [[bin]]
 name = "portable-media"
@@ -26,6 +27,8 @@ ferroui-desktop.workspace = true
 ferroui-themes-fluent.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
+ferroui-skia = {workspace=true,optional=true}
+skia-safe = {workspace=true,optional=true}
 ferroui-media-metal.workspace = true
 ferroui-media-apple.workspace = true
 ferroui-media-video-apple = {workspace=true,features=["controls"]}

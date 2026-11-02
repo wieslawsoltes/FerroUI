@@ -23,3 +23,5 @@ fn main() -> std::process::ExitCode {
 }
 #[cfg(all(windows, feature = "memory-audit"))]
 mod memory_audit;
+#[cfg(all(target_os = "macos", feature = "macos-verification"))]
+mod macos_allocations;

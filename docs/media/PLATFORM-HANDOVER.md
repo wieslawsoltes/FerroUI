@@ -1,5 +1,11 @@
 # Portable media: platform-agent handover
 
+Current integration branch: `codex/portable-media-desktop`.
+The original coordinator branch/worktree below describe the historical handoff.
+[MACOS-VERIFICATION.md](MACOS-VERIFICATION.md) records the Metal-only Mac profile,
+native presentation/input/packaging checks, measured lifecycle work, dependency
+ownership fix and remaining physical/release gates.
+
 This handover is explicitly requested for agents working on the native Windows
 and Linux machines. It records the current code, evidence and integration work.
 The original implementation plan remains in chat. This is **not** a declaration
