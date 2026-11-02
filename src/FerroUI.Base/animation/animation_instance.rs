@@ -6,8 +6,7 @@ use crate::animation::{
 };
 use crate::data::BindingPriority;
 use crate::reactive::{
-    IDisposable, IObservable, IObserver, ObservableError, SingleSubscriberObservableBase,
-    Subscription,
+    IDisposable, IObservable, IObserver, ObservableError, SingleSubscriberObservableBase, Subscription,
 };
 use crate::{Ref, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -50,18 +49,12 @@ pub(crate) struct AnimationInstance<A: Animator> {
     clock: RefCell<Option<Rc<Clock>>>,
     ease_func: RefCell<Easing>,
     neutral_value: RefCell<A::Value>,
+    fill_mode: Cell<FillMode>,
     is_first_frame: Cell<bool>,
     preview_complete: Cell<bool>,
+    is_in_first_initial_delay: Cell<bool>,
     last_interp_value: RefCell<A::Value>,
     initial_kf_value: RefCell<A::Value>,
-    timeline: AnimationTimeline,
-    should_pause_on_invisible: bool,
-}
-
-/// Clock and iteration state shared by all animator value types.
-struct AnimationTimeline {
-    fill_mode: Cell<FillMode>,
-    is_in_first_initial_delay: Cell<bool>,
     iteration_count: Cell<Option<i64>>,
     initial_delay: Cell<TimeSpan>,
     iteration_delay: Cell<TimeSpan>,
@@ -75,20 +68,54 @@ struct AnimationTimeline {
     time_moves_backwards: Cell<bool>,
     time_of_last_change: Cell<TimeSpan>,
     anim_time_of_last_change: Cell<f64>,
+    should_pause_on_invisible: bool,
 }
 
-enum FrameAction {
-    Wait,
-    InitialFill,
-    Sample(f64),
-    Complete,
+/// Holds the instance strongly: a running animation stays alive until it
+/// completes or is disposed, whether or not its subscription is kept.
+struct StepObserver<A: Animator>(Rc<AnimationInstance<A>>);
+
+impl<A: Animator> IObserver<TimeSpan> for StepObserver<A> {
+    fn on_next(&self, value: TimeSpan) {
+        self.0.step(value);
+    }
 }
 
-impl AnimationTimeline {
-    fn new() -> Self {
-        Self {
+impl<A: Animator> AnimationInstance<A> {
+    /// Creates the instance. Panics when a setting of the animation is
+    /// invalid.
+    pub(crate) fn new(
+        animation: Ref<Animation>,
+        control: &Ref<Animatable>,
+        animator: Rc<A>,
+        base_clock: Rc<dyn IClock>,
+        on_complete: Option<Rc<dyn Fn()>>,
+        should_pause_on_invisible: bool,
+        visual_target: Option<&Ref<Visual>>,
+    ) -> Rc<Self> {
+        let ease_func = animation.easing();
+        let instance = Rc::new_cyclic(|this| Self {
+            this: this.clone(),
+            core: SingleSubscriberObservableBase::new(),
+            animator,
+            animation,
+            target_control: control.downgrade(),
+            visual_target: visual_target.map(Ref::downgrade),
+            on_complete_action: on_complete,
+            timer_sub: RefCell::new(None),
+            property_changed_sub: RefCell::new(None),
+            visibility_changed_sub: RefCell::new(None),
+            detached_sub: RefCell::new(None),
+            base_clock,
+            clock: RefCell::new(None),
+            ease_func: RefCell::new(ease_func),
+            neutral_value: RefCell::new(A::Value::default()),
             fill_mode: Cell::new(FillMode::None),
+            is_first_frame: Cell::new(true),
+            preview_complete: Cell::new(false),
             is_in_first_initial_delay: Cell::new(true),
+            last_interp_value: RefCell::new(A::Value::default()),
+            initial_kf_value: RefCell::new(A::Value::default()),
             iteration_count: Cell::new(None),
             initial_delay: Cell::new(TimeSpan::ZERO),
             iteration_delay: Cell::new(TimeSpan::ZERO),
@@ -102,15 +129,17 @@ impl AnimationTimeline {
             time_moves_backwards: Cell::new(false),
             time_of_last_change: Cell::new(TimeSpan::ZERO),
             anim_time_of_last_change: Cell::new(0.0),
+            should_pause_on_invisible,
+        });
+        if let Err(error) = instance.fetch_properties() {
+            panic!("{error}");
         }
+        instance
     }
 
-    fn fetch_properties(
-        &self,
-        animation: &Animation,
-        ease_func: &RefCell<Easing>,
-    ) -> Result<(), AnimationError> {
-        *ease_func.borrow_mut() = animation.easing();
+    fn fetch_properties(&self) -> Result<(), AnimationError> {
+        let animation = &self.animation;
+        *self.ease_func.borrow_mut() = animation.easing();
 
         self.speed_ratio_prev.set(self.speed_ratio.get());
         self.speed_ratio.set(animation.speed_ratio());
@@ -164,269 +193,6 @@ impl AnimationTimeline {
         self.playback_direction.set(animation.playback_direction());
         self.fill_mode.set(animation.fill_mode());
         Ok(())
-    }
-
-    fn is_iteration_reversed(
-        is_alternating_playback_direction: bool,
-        iteration_index: Option<i64>,
-    ) -> bool {
-        if is_alternating_playback_direction {
-            // An unknown index (an infinite animation) compares unequal to
-            // zero.
-            iteration_index.is_none_or(|index| (index & 1) != 0)
-        } else {
-            false
-        }
-    }
-
-    fn is_anim_time_going_backwards(&self) -> bool {
-        matches!(
-            self.playback_direction.get(),
-            PlaybackDirection::Reverse | PlaybackDirection::AlternateReverse
-        )
-    }
-
-    fn is_alternating_playback_direction(&self) -> bool {
-        matches!(
-            self.playback_direction.get(),
-            PlaybackDirection::Alternate | PlaybackDirection::AlternateReverse
-        )
-    }
-
-    /// Handles all possible cases of applying the initial delay and
-    /// clamping. Returns whether the time is inside the delay.
-    fn apply_initial_delay(&self, anim_time: &mut i64) -> bool {
-        let delay = self.initial_delay.get().ticks() / PRECISION_IN_TICKS;
-        if self.iteration_count.get().is_some() {
-            *anim_time -= delay;
-            if *anim_time <= 0 {
-                if *anim_time < -delay {
-                    *anim_time = -delay;
-                }
-                return true;
-            }
-        } else {
-            // Determine the interval of initial delay.
-            let low = -delay;
-            let high = 0;
-
-            // Handle all 3 location cases based on above interval.
-            if *anim_time < low {
-                *anim_time += delay;
-                if *anim_time > 0 {
-                    *anim_time = 0;
-                    return true;
-                }
-            } else if *anim_time > high {
-                *anim_time -= delay;
-                if *anim_time < 0 {
-                    *anim_time = 0;
-                    return true;
-                }
-            } else {
-                *anim_time = 0;
-                return true;
-            }
-        }
-        false
-    }
-
-    fn apply_limited_clamp(&self, anim_time: &mut f64) {
-        if self.time_moves_backwards.get() {
-            if *anim_time > 0.0 {
-                *anim_time = 0.0;
-            }
-        } else if *anim_time < 0.0 {
-            *anim_time = 0.0;
-        }
-    }
-
-    fn advance(
-        &self,
-        time: TimeSpan,
-        animation: &Animation,
-        ease_func: &RefCell<Easing>,
-    ) -> Result<FrameAction, AnimationError> {
-        self.fetch_properties(animation, ease_func)?;
-
-        if self.speed_ratio.get() != self.speed_ratio_prev.get()
-            || self.playback_direction.get() != self.playback_direction_prev.get()
-        {
-            // Remember the time when speed changed.
-            // All we can know is that it changed some time between current and prev frame.
-            // We assume that this happened exactly at prev frame.
-            self.time_of_last_change.set(self.time_prev.get());
-            self.anim_time_of_last_change.set(self.anim_time_prev.get());
-        }
-
-        let is_anim_time_going_backwards = self.is_anim_time_going_backwards();
-
-        // Combine SpeedRatio and PlaybackDirection into a single signed speed ratio.
-        let speed_ratio = if is_anim_time_going_backwards {
-            -self.speed_ratio.get()
-        } else {
-            self.speed_ratio.get()
-        };
-
-        // Calculate animation time. That's time that has passed inside
-        // the animation since its beginning.
-        let time_since_last_change = time - self.time_of_last_change.get();
-        let anim_time_since_last_change =
-            time_since_last_change.ticks() as f64 * speed_ratio / PRECISION_IN_TICKS as f64;
-        let mut anim_time_exact = self.anim_time_of_last_change.get() + anim_time_since_last_change;
-
-        let iteration_count = self.iteration_count.get();
-        if iteration_count.is_some() {
-            // Make sure animation time is inside a valid interval.
-            self.apply_limited_clamp(&mut anim_time_exact);
-        }
-
-        self.time_prev.set(time);
-        self.anim_time_prev.set(anim_time_exact);
-        let anim_time = anim_time_exact as i64;
-
-        // Get animation time oriented in the direction of time. Animation running in
-        // same direction as it was on first frame will always increase this variable.
-        let mut anim_time_positive = if self.time_moves_backwards.get() {
-            -anim_time
-        } else {
-            anim_time
-        };
-
-        if self.initial_delay.get() > TimeSpan::ZERO {
-            let is_currently_inside_delay = self.apply_initial_delay(&mut anim_time_positive);
-            if is_currently_inside_delay {
-                return Ok(
-                    if self.is_in_first_initial_delay.get()
-                        && !matches!(self.fill_mode.get(), FillMode::Backward | FillMode::Both)
-                    {
-                        FrameAction::Wait
-                    } else {
-                        FrameAction::InitialFill
-                    },
-                );
-            }
-            self.is_in_first_initial_delay.set(false);
-        }
-
-        let iter_duration = self.duration.get().ticks() / PRECISION_IN_TICKS;
-        let iter_delay = self.iteration_delay.get().ticks() / PRECISION_IN_TICKS;
-        let iter_duration_total = iter_duration + iter_delay;
-
-        // An iteration with no duration can't be interpolated, no matter how long the
-        // delay between iterations is: end the animation and snap to its final value.
-        if iter_duration <= 0 {
-            return Ok(FrameAction::Complete);
-        }
-
-        // Calculate current iteration info.
-        let mut iter_index = anim_time_positive / iter_duration_total;
-        let mut iter_time = anim_time_positive % iter_duration_total;
-
-        let mut playback_reversed = anim_time_positive < 0;
-
-        if playback_reversed {
-            // Animation time is behind the starting point of animation.
-
-            // First negative iteration has index -1, first positive iteration has index 0.
-            iter_index -= 1;
-
-            // Move iteration delay to the front of iteration, which is (when moving
-            // backwards through animation time) effectively at the end of iteration.
-            iter_time = -iter_time;
-        }
-
-        playback_reversed ^= self.time_moves_backwards.get()
-            ^ Self::is_iteration_reversed(
-                self.is_alternating_playback_direction(),
-                Some(iter_index),
-            );
-
-        let iters_until_end = iteration_count.map(|count| count - iter_index);
-
-        // End animation when limit is reached.
-        if iters_until_end.is_some_and(|iters| iters <= 0) {
-            return Ok(FrameAction::Complete);
-        }
-
-        if iter_time > iter_duration && iter_time <= iter_duration_total && iter_delay > 0 {
-            // The last iteration's trailing delay should be skipped.
-            if iters_until_end.is_some_and(|iters| iters <= 1) {
-                return Ok(FrameAction::Complete);
-            }
-
-            Ok(FrameAction::Sample(if playback_reversed {
-                0.0
-            } else {
-                1.0
-            }))
-        } else if iter_time <= iter_duration {
-            // Ease and interpolate.
-            let mut normalized = iter_time as f64 / iter_duration as f64;
-            if playback_reversed {
-                normalized = 1.0 - normalized;
-            }
-
-            Ok(FrameAction::Sample(normalized))
-        } else {
-            Ok(FrameAction::Wait)
-        }
-    }
-}
-
-/// Holds the instance strongly: a running animation stays alive until it
-/// completes or is disposed, whether or not its subscription is kept.
-struct StepObserver<A: Animator>(Rc<AnimationInstance<A>>);
-
-impl<A: Animator> IObserver<TimeSpan> for StepObserver<A> {
-    fn on_next(&self, value: TimeSpan) {
-        self.0.step(value);
-    }
-}
-
-impl<A: Animator> AnimationInstance<A> {
-    /// Creates the instance. Panics when a setting of the animation is
-    /// invalid.
-    pub(crate) fn new(
-        animation: Ref<Animation>,
-        control: &Ref<Animatable>,
-        animator: Rc<A>,
-        base_clock: Rc<dyn IClock>,
-        on_complete: Option<Rc<dyn Fn()>>,
-        should_pause_on_invisible: bool,
-        visual_target: Option<&Ref<Visual>>,
-    ) -> Rc<Self> {
-        let ease_func = animation.easing();
-        let instance = Rc::new_cyclic(|this| Self {
-            this: this.clone(),
-            core: SingleSubscriberObservableBase::new(),
-            animator,
-            animation,
-            target_control: control.downgrade(),
-            visual_target: visual_target.map(Ref::downgrade),
-            on_complete_action: on_complete,
-            timer_sub: RefCell::new(None),
-            property_changed_sub: RefCell::new(None),
-            visibility_changed_sub: RefCell::new(None),
-            detached_sub: RefCell::new(None),
-            base_clock,
-            clock: RefCell::new(None),
-            ease_func: RefCell::new(ease_func),
-            neutral_value: RefCell::new(A::Value::default()),
-            is_first_frame: Cell::new(true),
-            preview_complete: Cell::new(false),
-            last_interp_value: RefCell::new(A::Value::default()),
-            initial_kf_value: RefCell::new(A::Value::default()),
-            timeline: AnimationTimeline::new(),
-            should_pause_on_invisible,
-        });
-        if let Err(error) = instance
-            .timeline
-            .fetch_properties(&instance.animation, &instance.ease_func)
-        {
-            panic!("{error}");
-        }
-        instance
     }
 
     fn unsubscribed(&self) {
@@ -549,10 +315,7 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     fn can_apply_final_fill(&self) -> bool {
-        matches!(
-            self.timeline.fill_mode.get(),
-            FillMode::Forward | FillMode::Both
-        )
+        matches!(self.fill_mode.get(), FillMode::Forward | FillMode::Both)
     }
 
     fn apply_final_fill(&self, interpolated_value: A::Value) {
@@ -571,14 +334,12 @@ impl<A: Animator> AnimationInstance<A> {
             // final fill, and the filled value has to be snapped to the last
             // value that the animation would reach if it was left running in
             // its current state.
-            let is_iteration_reversed = AnimationTimeline::is_iteration_reversed(
-                self.timeline.is_alternating_playback_direction(),
-                self.timeline.iteration_count.get().map(|count| count + 1),
+            let is_iteration_reversed = Self::is_iteration_reversed(
+                self.is_alternating_playback_direction(),
+                self.iteration_count.get().map(|count| count + 1),
             );
-            let value = self.find_edge_value(
-                self.timeline.is_anim_time_going_backwards(),
-                is_iteration_reversed,
-            );
+            let value =
+                self.find_edge_value(self.is_anim_time_going_backwards(), is_iteration_reversed);
             *self.last_interp_value.borrow_mut() = value;
         }
 
@@ -599,6 +360,23 @@ impl<A: Animator> AnimationInstance<A> {
         self.core.publish_completed(|| self.unsubscribed());
     }
 
+    fn do_initial_delay(&self) {
+        if self.is_in_first_initial_delay.get()
+            && !matches!(self.fill_mode.get(), FillMode::Backward | FillMode::Both)
+        {
+            return;
+        }
+
+        let value = self.initial_kf_value.borrow().clone();
+        self.core.publish_next(value);
+    }
+
+    fn do_iteration_delay(&self, is_iteration_reversed: bool) {
+        let value = self.find_edge_value(false, is_iteration_reversed);
+        *self.last_interp_value.borrow_mut() = value.clone();
+        self.core.publish_next(value);
+    }
+
     fn do_play_states(&self) {
         let clock_stopped = self
             .clock
@@ -612,7 +390,7 @@ impl<A: Animator> AnimationInstance<A> {
         if self.is_first_frame.get() {
             // In first frame of animation we determine the expected direction of time.
             let direction = self.animation.playback_direction();
-            self.timeline.time_moves_backwards.set(matches!(
+            self.time_moves_backwards.set(matches!(
                 direction,
                 PlaybackDirection::Reverse | PlaybackDirection::AlternateReverse
             ));
@@ -620,7 +398,7 @@ impl<A: Animator> AnimationInstance<A> {
             let base = self.animator.base();
             let count = base.count();
             assert!(count != 0, "Sequence contains no elements");
-            let initial_key_frame = if self.timeline.time_moves_backwards.get() {
+            let initial_key_frame = if self.time_moves_backwards.get() {
                 base.get(count - 1)
             } else {
                 base.get(0)
@@ -631,6 +409,19 @@ impl<A: Animator> AnimationInstance<A> {
             *self.initial_kf_value.borrow_mut() = initial_value;
 
             self.is_first_frame.set(false);
+        }
+    }
+
+    fn is_iteration_reversed(
+        is_alternating_playback_direction: bool,
+        iteration_index: Option<i64>,
+    ) -> bool {
+        if is_alternating_playback_direction {
+            // An unknown index (an infinite animation) compares unequal to
+            // zero.
+            iteration_index.is_none_or(|index| (index & 1) != 0)
+        } else {
+            false
         }
     }
 
@@ -655,27 +446,189 @@ impl<A: Animator> AnimationInstance<A> {
         interpolation_handler(&*self.animator, eased_time, &neutral_value)
     }
 
+    fn is_anim_time_going_backwards(&self) -> bool {
+        matches!(
+            self.playback_direction.get(),
+            PlaybackDirection::Reverse | PlaybackDirection::AlternateReverse
+        )
+    }
+
+    fn is_alternating_playback_direction(&self) -> bool {
+        matches!(
+            self.playback_direction.get(),
+            PlaybackDirection::Alternate | PlaybackDirection::AlternateReverse
+        )
+    }
+
+    /// Handles all possible cases of applying the initial delay and
+    /// clamping. Returns whether the time is inside the delay.
+    fn apply_initial_delay(&self, anim_time: &mut i64) -> bool {
+        let delay = self.initial_delay.get().ticks() / PRECISION_IN_TICKS;
+        if self.iteration_count.get().is_some() {
+            *anim_time -= delay;
+            if *anim_time <= 0 {
+                if *anim_time < -delay {
+                    *anim_time = -delay;
+                }
+                return true;
+            }
+        } else {
+            // Determine the interval of initial delay.
+            let low = -delay;
+            let high = 0;
+
+            // Handle all 3 location cases based on above interval.
+            if *anim_time < low {
+                *anim_time += delay;
+                if *anim_time > 0 {
+                    *anim_time = 0;
+                    return true;
+                }
+            } else if *anim_time > high {
+                *anim_time -= delay;
+                if *anim_time < 0 {
+                    *anim_time = 0;
+                    return true;
+                }
+            } else {
+                *anim_time = 0;
+                return true;
+            }
+        }
+        false
+    }
+
+    fn apply_limited_clamp(&self, anim_time: &mut f64) {
+        if self.time_moves_backwards.get() {
+            if *anim_time > 0.0 {
+                *anim_time = 0.0;
+            }
+        } else if *anim_time < 0.0 {
+            *anim_time = 0.0;
+        }
+    }
+
     fn internal_step(&self, time: TimeSpan) -> Result<(), AnimationError> {
         self.do_play_states();
         if self.preview_complete.get() {
             return Ok(());
         }
 
-        match self
-            .timeline
-            .advance(time, &self.animation, &self.ease_func)?
+        self.fetch_properties()?;
+
+        if self.speed_ratio.get() != self.speed_ratio_prev.get()
+            || self.playback_direction.get() != self.playback_direction_prev.get()
         {
-            FrameAction::InitialFill => {
-                let value = self.initial_kf_value.borrow().clone();
-                self.core.publish_next(value);
+            // Remember the time when speed changed.
+            // All we can know is that it changed some time between current and prev frame.
+            // We assume that this happened exactly at prev frame.
+            self.time_of_last_change.set(self.time_prev.get());
+            self.anim_time_of_last_change.set(self.anim_time_prev.get());
+        }
+
+        let is_anim_time_going_backwards = self.is_anim_time_going_backwards();
+
+        // Combine SpeedRatio and PlaybackDirection into a single signed speed ratio.
+        let speed_ratio = if is_anim_time_going_backwards {
+            -self.speed_ratio.get()
+        } else {
+            self.speed_ratio.get()
+        };
+
+        // Calculate animation time. That's time that has passed inside
+        // the animation since its beginning.
+        let time_since_last_change = time - self.time_of_last_change.get();
+        let anim_time_since_last_change =
+            time_since_last_change.ticks() as f64 * speed_ratio / PRECISION_IN_TICKS as f64;
+        let mut anim_time_exact = self.anim_time_of_last_change.get() + anim_time_since_last_change;
+
+        let iteration_count = self.iteration_count.get();
+        if iteration_count.is_some() {
+            // Make sure animation time is inside a valid interval.
+            self.apply_limited_clamp(&mut anim_time_exact);
+        }
+
+        self.time_prev.set(time);
+        self.anim_time_prev.set(anim_time_exact);
+        let anim_time = anim_time_exact as i64;
+
+        // Get animation time oriented in the direction of time. Animation running in
+        // same direction as it was on first frame will always increase this variable.
+        let mut anim_time_positive = if self.time_moves_backwards.get() {
+            -anim_time
+        } else {
+            anim_time
+        };
+
+        if self.initial_delay.get() > TimeSpan::ZERO {
+            let is_currently_inside_delay = self.apply_initial_delay(&mut anim_time_positive);
+            if is_currently_inside_delay {
+                self.do_initial_delay();
+                return Ok(());
             }
-            FrameAction::Sample(normalized) => {
-                let value = self.interpolate(normalized);
-                *self.last_interp_value.borrow_mut() = value.clone();
-                self.core.publish_next(value);
+            self.is_in_first_initial_delay.set(false);
+        }
+
+        let iter_duration = self.duration.get().ticks() / PRECISION_IN_TICKS;
+        let iter_delay = self.iteration_delay.get().ticks() / PRECISION_IN_TICKS;
+        let iter_duration_total = iter_duration + iter_delay;
+
+        // An iteration with no duration can't be interpolated, no matter how long the
+        // delay between iterations is: end the animation and snap to its final value.
+        if iter_duration <= 0 {
+            self.do_complete(false);
+            return Ok(());
+        }
+
+        // Calculate current iteration info.
+        let mut iter_index = anim_time_positive / iter_duration_total;
+        let mut iter_time = anim_time_positive % iter_duration_total;
+
+        let mut playback_reversed = anim_time_positive < 0;
+
+        if playback_reversed {
+            // Animation time is behind the starting point of animation.
+
+            // First negative iteration has index -1, first positive iteration has index 0.
+            iter_index -= 1;
+
+            // Move iteration delay to the front of iteration, which is (when moving
+            // backwards through animation time) effectively at the end of iteration.
+            iter_time = -iter_time;
+        }
+
+        playback_reversed ^= self.time_moves_backwards.get()
+            ^ Self::is_iteration_reversed(
+                self.is_alternating_playback_direction(),
+                Some(iter_index),
+            );
+
+        let iters_until_end = iteration_count.map(|count| count - iter_index);
+
+        // End animation when limit is reached.
+        if iters_until_end.is_some_and(|iters| iters <= 0) {
+            self.do_complete(false);
+            return Ok(());
+        }
+
+        if iter_time > iter_duration && iter_time <= iter_duration_total && iter_delay > 0 {
+            // The last iteration's trailing delay should be skipped.
+            if iters_until_end.is_some_and(|iters| iters <= 1) {
+                self.do_complete(false);
+                return Ok(());
             }
-            FrameAction::Complete => self.do_complete(false),
-            FrameAction::Wait => {}
+
+            self.do_iteration_delay(playback_reversed);
+        } else if iter_time <= iter_duration {
+            // Ease and interpolate.
+            let mut normalized = iter_time as f64 / iter_duration as f64;
+            if playback_reversed {
+                normalized = 1.0 - normalized;
+            }
+
+            let value = self.interpolate(normalized);
+            *self.last_interp_value.borrow_mut() = value.clone();
+            self.core.publish_next(value);
         }
         Ok(())
     }
