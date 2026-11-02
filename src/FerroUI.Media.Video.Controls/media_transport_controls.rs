@@ -33,6 +33,45 @@ pub struct MediaTransportControls {
     status: RefCell<Option<Ref<TextBlock>>>,
     updating: Cell<bool>,
 }
+
+#[cfg(test)]
+mod option_tests {
+    use super::*;
+    use ferroui_controls::testing::{TestServices, UnitTestApplication};
+    use ferroui_media_video::{MediaPlayerProvider, MediaSource, NativeMediaSession};
+    struct Unopened;
+    impl MediaPlayerProvider for Unopened {
+        fn open(
+            &self,
+            _: MediaSource,
+            _: u64,
+            _: u64,
+            _: ferroui_base::rendering::composition::frames::PresentationPolicy,
+        ) -> MediaFuture<Rc<dyn NativeMediaSession>> {
+            panic!("idle option synchronization must not open media")
+        }
+    }
+    #[test]
+    fn idle_transport_tracks_programmatic_options_without_native_polling() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let player = MediaPlayer::new(Rc::new(Unopened));
+        let transport = MediaTransportControls::new();
+        transport.set_media_player(Some(&player));
+        let mut options = player.options();
+        options.volume = 0.4;
+        options.muted = true;
+        player.set_options(options).unwrap();
+        assert_eq!(transport.volume.borrow().as_ref().unwrap().value(), 0.4);
+        assert_eq!(
+            AutomationProperties::get_name(transport.mute.borrow().as_ref().unwrap()),
+            Some("Unmute".into())
+        );
+        let mut invalid = player.options();
+        invalid.volume = f64::NAN;
+        assert!(player.set_options(invalid).is_err());
+        assert_eq!(transport.volume.borrow().as_ref().unwrap().value(), 0.4);
+    }
+}
 ferro_class!(MediaTransportControls:StackPanel);
 ferro_class_info!(MediaTransportControls {
     new: MediaTransportControls::new

@@ -62,6 +62,7 @@ impl Default for MediaPlaybackSession {
 }
 #[derive(Clone, Debug)]
 pub enum MediaPlayerEvent {
+    OptionsChanged(MediaPlayerOptions),
     IntentChanged(PlaybackIntent),
     Opened,
     StateChanged(MediaPlaybackSession),
@@ -262,7 +263,12 @@ impl MediaPlayer {
         if let Some(native) = native {
             native.set_audio(options.volume, options.muted)?;
         }
-        *self.0.options.borrow_mut() = options;
+        *self.0.options.borrow_mut() = options.clone();
+        // Audio/loop policy can change while paused with no polling timer.
+        // Presentation must observe accepted options immediately, too.
+        self.0
+            .events
+            .emit(&MediaPlayerEvent::OptionsChanged(options));
         Ok(())
     }
     fn next_command(&self) -> u64 {
