@@ -48,7 +48,7 @@ LLD assigns each input section to its supplying crate. Shared framework code, li
 python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-native --lld-link-map
 python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-fxb --binary --lld-link-map
 python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-solid \
-    --solid --size-optimize-theme --lld-link-map --max-theme-bytes 599999
+    --portable-solid --size-optimize-theme --lld-link-map --max-theme-bytes 599999
 ```
 
 The size setting belongs in the root manifest of a downstream Cargo consumer.
@@ -56,7 +56,7 @@ The size setting belongs in the root manifest of a downstream Cargo consumer.
 ```toml
 [dependencies.ferroui-themes-winui]
 path = "FerroUI/src/FerroUI.Themes.WinUI"
-features = ["solid-theme"]
+features = ["portable-solid-theme"]
 
 [profile.release.package.ferroui-themes-winui]
 opt-level = "z"

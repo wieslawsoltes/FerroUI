@@ -209,7 +209,7 @@ jobs:
       - name: Check portable XAML codecs, complete WinUI inventory and compiled entry points
         run: |
           cargo test --locked --lib -p ferroui-markup-xaml-loader --features portable-xaml binary_document::
-          for mode in solid-theme precompiled-theme; do
+          for mode in portable-solid-theme solid-theme; do
             cargo test --locked --lib -p ferroui-themes-winui --features "$mode" -- \
               tests::compiled_xaml_tests::packed_theme_contains_every_compiled_document_within_budget \
               tests::compiled_xaml_tests::replacement_archive_initializes_compact_density_from_its_own_revision \

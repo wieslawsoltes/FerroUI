@@ -21,6 +21,7 @@ import shutil
 import statistics
 import subprocess
 import time
+import tomllib
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -134,7 +135,8 @@ def main():
     parser.add_argument("--work-dir", type=Path, required=True, help="dedicated directory for the consumer, target and results")
     backend = parser.add_mutually_exclusive_group()
     backend.add_argument("--packed", action="store_true", help="embed the complete FXP theme archive")
-    backend.add_argument("--solid", action="store_true", help="embed the solid-compressed complete FXP archive")
+    backend.add_argument("--solid", action="store_true", help="use the shipping solid-theme feature of the source revision")
+    backend.add_argument("--portable-solid", action="store_true", help="interpret the solid archive using the runtime loader")
     backend.add_argument("--precompiled", action="store_true",
                          help="execute typed FXB and retain its editable solid FXP archive")
     parser.add_argument("--compact-app", action="store_true",
@@ -155,15 +157,20 @@ def main():
     parser.add_argument("--compare-archive", type=Path, action="append", default=[],
                         help="also launch the precompiled consumer with an FXP file on disk")
     args = parser.parse_args()
-    if args.compare_archive and not args.precompiled:
-        parser.error("--compare-archive requires --precompiled")
+    source = args.source.resolve()
+    with (source / "src/FerroUI.Themes.WinUI/Cargo.toml").open("rb") as stream:
+        theme_features = tomllib.load(stream)["features"]
+    # Older revisions used solid-theme for the compact interpreter.
+    separate_portable = "portable-solid-theme" in theme_features
+    precompiled = args.precompiled or (args.solid and separate_portable)
+    if args.compare_archive and not precompiled:
+        parser.error("--compare-archive requires a precompiled solid theme")
     if args.max_theme_bytes and not args.lld_link_map:
         parser.error("--max-theme-bytes requires --lld-link-map")
     if args.compact_app and args.lld_link_map:
         parser.error("cross-crate LTO cannot attribute all optimized code to its input archives")
     if args.rebuilds < 0:
         parser.error("--rebuilds must be zero or positive")
-    source = args.source.resolve()
     work = args.work_dir.resolve()
     target = work / "target"
     work.mkdir(parents=True, exist_ok=True)
@@ -184,7 +191,7 @@ def main():
         manifest += f'{name} = {{ path = {json.dumps(str(path))} }}\n'
     # The archive-enabled consumer can also load a changed pack from disk. Keep its
     # complete runtime interpreter in the measured executable, including with LTO.
-    if args.precompiled:
+    if precompiled:
         markup = source / "src/Markup"
         manifest += f'ferroui-markup-xaml = {{ path = {json.dumps(str(markup / "FerroUI.Markup.Xaml"))} }}\n'
         loader = json.dumps(str(markup / "FerroUI.Markup.Xaml.Loader"))
@@ -200,12 +207,16 @@ def main():
     shutil.copyfile(source / "Cargo.lock", package / "Cargo.lock")
     # Stripping is a separate measured copy for both release profiles.
     env = {**os.environ, "CARGO_TARGET_DIR": str(target), "CARGO_INCREMENTAL": "0", "CARGO_PROFILE_RELEASE_LTO": "thin" if args.compact_app else "false"}
-    packed = args.packed or args.solid
+    packed = args.packed or args.portable_solid or (args.solid and not precompiled)
     features = []
-    if args.precompiled:
-        features = [f"{THEME}/precompiled-theme", "retain-archive"]
+    if precompiled:
+        feature = "solid-theme" if args.solid else "precompiled-theme"
+        features = [f"{THEME}/{feature}", "retain-archive"]
+    elif args.packed:
+        features = [f"{THEME}/packed-theme"]
     elif packed:
-        features = [f"{THEME}/solid-theme" if args.solid else f"{THEME}/packed-theme"]
+        feature = "portable-solid-theme" if separate_portable else "solid-theme"
+        features = [f"{THEME}/{feature}"]
     elif args.binary:
         features = [f"{THEME}/binary-resources"]
     cargo_args = ["--features", ",".join(features)] if features else []
@@ -266,13 +277,13 @@ def main():
         "source_dirty": bool(command_output(["git", "status", "--porcelain", "--untracked-files=no"], source)),
         "rustc": command_output(["rustc", "-vV"]), "cargo": command_output(["cargo", "-V"]),
         "platform": platform.platform(), "jobs": env.get("CARGO_BUILD_JOBS", "cargo default"),
-        "packed_theme": packed, "solid_theme": args.solid, "size_optimized_theme": args.size_optimize_theme,
-        "precompiled_theme": args.precompiled, "compact_app": args.compact_app,
+        "packed_theme": packed, "solid_theme": args.solid or args.portable_solid or precompiled, "size_optimized_theme": args.size_optimize_theme,
+        "precompiled_theme": precompiled, "compact_app": args.compact_app,
         "linked_allocations": allocations,
         "theme_allocated_sections": sections, "theme_allocated_bytes": sum(sections.values()) if sections else None,
-        "fxp_bytes": (out / "winui.fxp").stat().st_size if packed or args.precompiled else 0,
+        "fxp_bytes": (out / "winui.fxp").stat().st_size if packed or precompiled else 0,
         "generated_registration_rust_bytes": (generated / "mod.rs").stat().st_size,
-        "binary_resources": args.binary or args.precompiled, "resource_roots": env.get("FERROUI_WINUI_THEME_ROOTS"),
+        "binary_resources": args.binary or precompiled, "resource_roots": env.get("FERROUI_WINUI_THEME_ROOTS"),
         "profile": "release, opt-level=s, ThinLTO, 16 CGUs, incremental off" if args.compact_app else "release, LTO off, incremental off",
         "initial_target_empty": target_was_empty,
         "initial_build_seconds": first_build, "theme_rebuild_seconds": rebuilds,
