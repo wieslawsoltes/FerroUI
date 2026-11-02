@@ -683,31 +683,6 @@ pub fn get_type<S: IXamlTypeSystem + ?Sized>(
         .ok_or_else(|| XamlError::type_system_exception(format!("Unable to resolve type {type_}")))
 }
 
-/// Resolve a statically sized group in declaration order. Lookups stop on the first
-/// error. Filling from the back preserves the reverse destruction of initialized
-/// locals if a host returns an error or unwinds during lookup.
-pub fn get_types<const N: usize>(
-    names: [&str; N],
-    mut lookup: impl FnMut(&str) -> XamlResult<Rc<dyn IXamlType>>,
-) -> XamlResult<[Rc<dyn IXamlType>; N]> {
-    let mut slots = [const { None }; N];
-    fill_type_group(&names, &mut slots, &mut lookup)?;
-    slots.reverse();
-    Ok(slots.map(|slot| slot.expect("every type was resolved")))
-}
-
-#[inline(never)]
-fn fill_type_group(
-    names: &[&str],
-    slots: &mut [Option<Rc<dyn IXamlType>>],
-    lookup: &mut dyn FnMut(&str) -> XamlResult<Rc<dyn IXamlType>>,
-) -> XamlResult<()> {
-    for (name, slot) in names.iter().zip(slots.iter_mut().rev()) {
-        *slot = Some(lookup(name)?);
-    }
-    Ok(())
-}
-
 fn params_match(
     actual: &[Rc<dyn IXamlType>],
     wanted: &[Rc<dyn IXamlType>],

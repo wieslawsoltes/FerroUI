@@ -374,25 +374,3 @@ fn locals_pool_reuses_released_locals() {
     assert!(reused.local().is_err());
     assert_eq!(id(&pool.get_local(&int32)), 1);
 }
-
-#[test]
-fn required_type_group_resolves_in_order_and_releases_partial_results() {
-    let host = TestHost::new();
-    let object = host.ts.get("System.Object");
-    let before = Rc::strong_count(&object);
-    let mut calls = Vec::new();
-    let result = get_types(["System.Object", "Missing.First", "Missing.Second"], |name| {
-        calls.push(name.to_owned());
-        get_type(&*host.ts, name)
-    });
-    assert!(matches!(result, Err(error) if error.to_string().contains("Missing.First")));
-    assert_eq!(calls, ["System.Object", "Missing.First"]);
-    assert_eq!(Rc::strong_count(&object), before);
-
-    let [string, first, second] =
-        get_types(["System.String", "System.Object", "System.Object"], |name| get_type(&*host.ts, name)).unwrap();
-    assert!(Rc::ptr_eq(&string, &host.ts.get("System.String")));
-    assert!(Rc::ptr_eq(&first, &object));
-    assert!(Rc::ptr_eq(&second, &object));
-    assert!(get_types::<0>([], |_| panic!("empty group performed a lookup")).unwrap().is_empty());
-}
