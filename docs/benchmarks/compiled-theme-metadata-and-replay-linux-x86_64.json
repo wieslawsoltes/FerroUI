@@ -1,0 +1,1306 @@
+{
+  "title": "Linked markup descriptors, native factory bodies and a resolved setter replay experiment",
+  "source_revision": "ff5ea13a23e3a659d46a38854ab9909d100976eb",
+  "target": "x86_64-unknown-linux-gnu",
+  "source_generated_sha256": "7a275ec948d0fe868b72a18c236a785a48281934cf37de9096e49fb0dd807f05",
+  "generated_source_bytes": 4921299,
+  "external_archive_bytes": 296347,
+  "fxb_file_count": 894,
+  "fxb_total_payload_bytes": 180091,
+  "runtime_scope": "169 source documents; full editable WinUI, opaque external archives, structural interpreter fallback, unwind enabled. Source matches the ordinary Fat and profiled z runs.",
+  "interpretation": [
+    "Markup records are discovered by the named 352-byte ::MARKUP statics and dereferenced using actual target rustc field offsets. Header and member array bytes count live static ranges. Empty slices are included in headers. The eight member arrays exclude registered-property attributes, enum/type strings, parameter type arrays, generic descriptions and other indirect storage.",
+    "A code target shared across multiple member slots is counted once in each indicated class and once in the union. Direct invoker bytes also have other callers and can include inlined member bodies. Value-type/typed-binding callbacks and static metadata are counted separately. These are reachability observations rather than bytes that every possible refactoring will remove.",
+    "Generated factory classes are based on the actual emitted function source. Each distinct address among native functions in the compiled_xaml namespace is counted once. A folded address may also have aliases in other namespaces, so this census can differ from whole-executable exclusive categories. Do not add it to totals from the whole-program attribution report."
+  ],
+  "unprofiled_compact_fat": {
+    "bytes": 29194408,
+    "sha256": "06ead3da02b02dd4e83534c0b5a0ad5cfc0c82c404119e027ad54484eb711a11",
+    "text_bytes": 20307877,
+    "text_sha256": "93c41bc9d471d55c6ccc8e8d78e93f385032c92ea43bb103afac483e2d4c9b18",
+    "fxb_block_ids": 894,
+    "all_block_id_text_bytes": 63382,
+    "catalog": {
+      "source": "sampled descriptors whose symbol ends ::MARKUP and size is 352",
+      "roots": 874,
+      "header_bytes": 307648,
+      "empty_slice_header_count": {
+        "constructors": 644,
+        "properties": 633,
+        "static_properties": 858,
+        "methods": 728,
+        "fields": 827,
+        "indexers": 869,
+        "events": 833,
+        "enum_members": 664
+      },
+      "member_entries": {
+        "static_properties": 321,
+        "fields": 145,
+        "properties": 674,
+        "enum_members": 1647,
+        "constructors": 317,
+        "events": 83,
+        "methods": 425,
+        "indexers": 5
+      },
+      "member_table_physical_bytes": {
+        "static_properties": 20544,
+        "fields": 6960,
+        "properties": 43136,
+        "enum_members": 79056,
+        "constructors": 12680,
+        "events": 3320,
+        "methods": 30600,
+        "indexers": 280
+      },
+      "all_member_table_physical_bytes": 196576,
+      "invokers": {
+        "parse": {
+          "functions": 57,
+          "known_text_bytes": 37564,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "enum_from_value": {
+          "functions": 210,
+          "known_text_bytes": 10270,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "enum_to_value": {
+          "functions": 210,
+          "known_text_bytes": 14328,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "notify_property_changed": {
+          "functions": 4,
+          "known_text_bytes": 552,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "static_properties": {
+          "functions": 317,
+          "known_text_bytes": 28221,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "fields": {
+          "functions": 138,
+          "known_text_bytes": 10228,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "properties": {
+          "functions": 959,
+          "known_text_bytes": 327694,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "enum_members": {
+          "functions": 1618,
+          "known_text_bytes": 31737,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "constructors": {
+          "functions": 317,
+          "known_text_bytes": 69191,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "events": {
+          "functions": 83,
+          "known_text_bytes": 74577,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "methods": {
+          "functions": 420,
+          "known_text_bytes": 214167,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "indexers": {
+          "functions": 5,
+          "known_text_bytes": 2912,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "unique": {
+          "functions": 4332,
+          "known_text_bytes": 819690,
+          "missing_n": 0,
+          "missing_examples": []
+        }
+      },
+      "type_operands": {
+        "nullable": {
+          "functions": 245,
+          "known_text_bytes": 8085,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "base": {
+          "functions": 36,
+          "known_text_bytes": 1188,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "handles": {
+          "functions": 1430,
+          "known_text_bytes": 47190,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "static_properties": {
+          "functions": 17,
+          "known_text_bytes": 561,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "fields": {
+          "functions": 57,
+          "known_text_bytes": 1881,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "interfaces": {
+          "functions": 62,
+          "known_text_bytes": 2046,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "properties": {
+          "functions": 305,
+          "known_text_bytes": 100963,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "constructors": {
+          "functions": 62,
+          "known_text_bytes": 2046,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "events": {
+          "functions": 35,
+          "known_text_bytes": 1155,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "methods": {
+          "functions": 135,
+          "known_text_bytes": 4455,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "indexers": {
+          "functions": 5,
+          "known_text_bytes": 165,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "unique": {
+          "functions": 1894,
+          "known_text_bytes": 153400,
+          "missing_n": 0,
+          "missing_examples": []
+        }
+      },
+      "unique_direct_code": {
+        "all": {
+          "functions": 6226,
+          "known_text_bytes": 973090,
+          "missing_n": 0,
+          "missing_examples": []
+        }
+      }
+    },
+    "factory_groups": {
+      "visual tree factory": {
+        "physical_bodies": 201,
+        "text": 1077526,
+        "largest": [
+          [
+            "build_controls_winuicontrols_xaml_deferred_336",
+            50360
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_293",
+            34456
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_271",
+            30340
+          ]
+        ]
+      },
+      "style/theme factory": {
+        "physical_bodies": 206,
+        "text": 800169,
+        "largest": [
+          [
+            "build_controls_winuicontrols_xaml_deferred_300",
+            33377
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_160",
+            30865
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_337",
+            29410
+          ]
+        ]
+      },
+      "merged dictionary installation": {
+        "physical_bodies": 7,
+        "text": 153569,
+        "largest": [
+          [
+            "populate_winuitheme_xaml_part_0",
+            26627
+          ],
+          [
+            "populate_winuitheme_xaml_part_2",
+            26389
+          ],
+          [
+            "populate_winuitheme_xaml_part_4",
+            26344
+          ]
+        ]
+      },
+      "root theme catalog installation": {
+        "physical_bodies": 1,
+        "text": 47228,
+        "largest": [
+          [
+            "build_controls_winuicontrols_xaml",
+            47228
+          ]
+        ]
+      },
+      "other deferred body": {
+        "physical_bodies": 51,
+        "text": 40042,
+        "largest": [
+          [
+            "populate_winuitheme_xaml_deferred_0",
+            3727
+          ],
+          [
+            "__populate_winuitheme_xaml_factory_shape_379",
+            2769
+          ],
+          [
+            "__populate_winuitheme_xaml_factory_shape_321",
+            2765
+          ]
+        ]
+      },
+      "unmapped native name": {
+        "physical_bodies": 204,
+        "text": 28760,
+        "largest": [
+          [
+            "__build_controls_winuicontrols_xaml_bindings::g191",
+            325
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_bindings::g80",
+            300
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_bindings::g71",
+            294
+          ]
+        ]
+      },
+      "shape operand thunk": {
+        "physical_bodies": 351,
+        "text": 19088,
+        "largest": [
+          [
+            "build_controls_winuicontrols_xaml_deferred_471",
+            94
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_399",
+            94
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_384",
+            94
+          ]
+        ]
+      },
+      "closed template property thunk": {
+        "physical_bodies": 88,
+        "text": 15359,
+        "largest": [
+          [
+            "__build_controls_winuicontrols_xaml_template_setter_56",
+            240
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_template_setter_105",
+            240
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_template_setter_58",
+            235
+          ]
+        ]
+      },
+      "selector builder": {
+        "physical_bodies": 51,
+        "text": 8056,
+        "largest": [
+          [
+            "__build_controls_winuicontrols_xaml_selector_shape_22",
+            283
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_selector_shape_24",
+            271
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_selector_shape_4_add_style",
+            238
+          ]
+        ]
+      },
+      "others": {
+        "physical_bodies": 2,
+        "text": 7547,
+        "largest": [
+          [
+            "populate_winuitheme_xaml",
+            7407
+          ],
+          [
+            "try_load",
+            140
+          ]
+        ]
+      },
+      "style property import": {
+        "physical_bodies": 26,
+        "text": 2206,
+        "largest": [
+          [
+            "__build_controls_winuicontrols_xaml_style_property_14",
+            161
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_style_property_19",
+            155
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_style_property_20",
+            155
+          ]
+        ]
+      }
+    }
+  },
+  "profiled_compact_z": {
+    "bytes": 28324712,
+    "sha256": "459ea34851eb89e3556a9539da29b3bcbc7fa5a8af34ee2c2291f393dae85f21",
+    "text_bytes": 18592421,
+    "text_sha256": "10812e881721c06e01d9cb708994f4db9f537c33e4c8904ab610d56963c25398",
+    "fxb_block_ids": 894,
+    "all_block_id_text_bytes": 63382,
+    "catalog": {
+      "source": "sampled descriptors whose symbol ends ::MARKUP and size is 352",
+      "roots": 874,
+      "header_bytes": 307648,
+      "empty_slice_header_count": {
+        "constructors": 644,
+        "properties": 633,
+        "static_properties": 858,
+        "methods": 728,
+        "fields": 827,
+        "indexers": 869,
+        "events": 833,
+        "enum_members": 664
+      },
+      "member_entries": {
+        "enum_members": 1647,
+        "properties": 674,
+        "constructors": 317,
+        "fields": 145,
+        "events": 83,
+        "methods": 425,
+        "static_properties": 321,
+        "indexers": 5
+      },
+      "member_table_physical_bytes": {
+        "enum_members": 79056,
+        "properties": 43136,
+        "constructors": 12680,
+        "fields": 6960,
+        "events": 3320,
+        "methods": 30600,
+        "static_properties": 20544,
+        "indexers": 280
+      },
+      "all_member_table_physical_bytes": 196576,
+      "invokers": {
+        "parse": {
+          "functions": 57,
+          "known_text_bytes": 29735,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "enum_from_value": {
+          "functions": 210,
+          "known_text_bytes": 9920,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "enum_to_value": {
+          "functions": 210,
+          "known_text_bytes": 13910,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "notify_property_changed": {
+          "functions": 4,
+          "known_text_bytes": 560,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "enum_members": {
+          "functions": 1618,
+          "known_text_bytes": 29569,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "properties": {
+          "functions": 959,
+          "known_text_bytes": 301088,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "constructors": {
+          "functions": 317,
+          "known_text_bytes": 61703,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "fields": {
+          "functions": 138,
+          "known_text_bytes": 7383,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "events": {
+          "functions": 83,
+          "known_text_bytes": 59618,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "methods": {
+          "functions": 420,
+          "known_text_bytes": 210738,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "static_properties": {
+          "functions": 317,
+          "known_text_bytes": 19962,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "indexers": {
+          "functions": 5,
+          "known_text_bytes": 2535,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "unique": {
+          "functions": 4332,
+          "known_text_bytes": 745103,
+          "missing_n": 0,
+          "missing_examples": []
+        }
+      },
+      "type_operands": {
+        "nullable": {
+          "functions": 245,
+          "known_text_bytes": 8085,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "base": {
+          "functions": 36,
+          "known_text_bytes": 1188,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "handles": {
+          "functions": 1430,
+          "known_text_bytes": 47190,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "properties": {
+          "functions": 305,
+          "known_text_bytes": 74890,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "constructors": {
+          "functions": 62,
+          "known_text_bytes": 2046,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "fields": {
+          "functions": 57,
+          "known_text_bytes": 1881,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "events": {
+          "functions": 35,
+          "known_text_bytes": 1155,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "interfaces": {
+          "functions": 62,
+          "known_text_bytes": 2046,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "methods": {
+          "functions": 135,
+          "known_text_bytes": 4455,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "static_properties": {
+          "functions": 17,
+          "known_text_bytes": 561,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "indexers": {
+          "functions": 5,
+          "known_text_bytes": 165,
+          "missing_n": 0,
+          "missing_examples": []
+        },
+        "unique": {
+          "functions": 1894,
+          "known_text_bytes": 127327,
+          "missing_n": 0,
+          "missing_examples": []
+        }
+      },
+      "unique_direct_code": {
+        "all": {
+          "functions": 6226,
+          "known_text_bytes": 872430,
+          "missing_n": 0,
+          "missing_examples": []
+        }
+      }
+    },
+    "factory_groups": {
+      "visual tree factory": {
+        "physical_bodies": 201,
+        "text": 997726,
+        "largest": [
+          [
+            "build_controls_winuicontrols_xaml_deferred_336",
+            49529
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_293",
+            32042
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_271",
+            31016
+          ]
+        ]
+      },
+      "style/theme factory": {
+        "physical_bodies": 206,
+        "text": 644736,
+        "largest": [
+          [
+            "build_controls_winuicontrols_xaml_deferred_300",
+            30535
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_160",
+            28585
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_337",
+            27373
+          ]
+        ]
+      },
+      "merged dictionary installation": {
+        "physical_bodies": 7,
+        "text": 155505,
+        "largest": [
+          [
+            "populate_winuitheme_xaml_part_0",
+            26913
+          ],
+          [
+            "populate_winuitheme_xaml_part_4",
+            26700
+          ],
+          [
+            "populate_winuitheme_xaml_part_2",
+            26630
+          ]
+        ]
+      },
+      "root theme catalog installation": {
+        "physical_bodies": 1,
+        "text": 45306,
+        "largest": [
+          [
+            "build_controls_winuicontrols_xaml",
+            45306
+          ]
+        ]
+      },
+      "other deferred body": {
+        "physical_bodies": 51,
+        "text": 24773,
+        "largest": [
+          [
+            "populate_winuitheme_xaml_deferred_0",
+            3202
+          ],
+          [
+            "__populate_winuitheme_xaml_factory_shape_321",
+            1640
+          ],
+          [
+            "__populate_winuitheme_xaml_factory_shape_379",
+            1493
+          ]
+        ]
+      },
+      "shape operand thunk": {
+        "physical_bodies": 351,
+        "text": 17551,
+        "largest": [
+          [
+            "build_controls_winuicontrols_xaml_deferred_471",
+            92
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_399",
+            92
+          ],
+          [
+            "build_controls_winuicontrols_xaml_deferred_384",
+            92
+          ]
+        ]
+      },
+      "unmapped native name": {
+        "physical_bodies": 204,
+        "text": 14932,
+        "largest": [
+          [
+            "__build_controls_winuicontrols_xaml_bindings::g191",
+            206
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_bindings::g215",
+            174
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_bindings::g199",
+            148
+          ]
+        ]
+      },
+      "others": {
+        "physical_bodies": 2,
+        "text": 7418,
+        "largest": [
+          [
+            "populate_winuitheme_xaml",
+            7304
+          ],
+          [
+            "try_load",
+            114
+          ]
+        ]
+      },
+      "selector builder": {
+        "physical_bodies": 51,
+        "text": 6915,
+        "largest": [
+          [
+            "__build_controls_winuicontrols_xaml_selector_shape_4_add_style",
+            236
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_selector_shape_18_add_style",
+            230
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_selector_shape_2_add_style",
+            225
+          ]
+        ]
+      },
+      "closed template property thunk": {
+        "physical_bodies": 88,
+        "text": 5132,
+        "largest": [
+          [
+            "__build_controls_winuicontrols_xaml_template_setter_47",
+            152
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_template_setter_9",
+            129
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_template_setter_99",
+            129
+          ]
+        ]
+      },
+      "style property import": {
+        "physical_bodies": 26,
+        "text": 405,
+        "largest": [
+          [
+            "__build_controls_winuicontrols_xaml_style_property_18",
+            105
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_style_property_10",
+            12
+          ],
+          [
+            "__build_controls_winuicontrols_xaml_style_property_22",
+            12
+          ]
+        ]
+      }
+    },
+    "symbolized_section_identity": {
+      ".text": {
+        "vaddr": 7822176,
+        "bytes": 18592421,
+        "sha256": "10812e881721c06e01d9cb708994f4db9f537c33e4c8904ab610d56963c25398"
+      },
+      ".rodata": {
+        "vaddr": 1069328,
+        "bytes": 1722967,
+        "sha256": "16cb37dbaef00c7b0fa0adb3fd539b353c4d37bb3e483e17bb041e67e428b467"
+      },
+      ".data.rel.ro": {
+        "vaddr": 26421560,
+        "bytes": 1711288,
+        "sha256": "7883d6e60f674f9ad9da06d6217c16c20cb958da1e1aca51014614277260146a"
+      },
+      ".relr.dyn": {
+        "vaddr": 7640,
+        "bytes": 27240,
+        "sha256": "cada29d8c872da4c44c9b7e0ddfdbcd250d3a363ba45efcb3d2a21ebe110f879"
+      },
+      ".rela.dyn": {
+        "vaddr": 5240,
+        "bytes": 2400,
+        "sha256": "562a4a06e26dd3ddd13fefb290abc00f8f75913b9ed4ae5f94530f0009bda2a0"
+      },
+      ".eh_frame": {
+        "vaddr": 3437232,
+        "bytes": 4380844,
+        "sha256": "6cdbac4083cfebc1dd327708b410a7275c40444d1c1a72e64b8f353ef8271c2a"
+      },
+      ".eh_frame_hdr": {
+        "vaddr": 2792296,
+        "bytes": 644932,
+        "sha256": "753b411af88a9f2d4e93e9c50ddeee41b6ab32834ac154d3b93c37ba41237b50"
+      },
+      ".gcc_except_table": {
+        "vaddr": 34928,
+        "bytes": 1034400,
+        "sha256": "3b9270733f14bfdb796c7eb2a01a2bece60e44b50643b904726c6ff15eaa7f6a"
+      }
+    }
+  },
+  "setter_program_experiment": {
+    "input": "Consecutive noncapturing literal or dynamic resource setter operations emitted for the same StyleBase. Each run has at least three operations. Names are alpha-renamed only for the receiver. Value constructors taking the XAML context are evaluated at their original position. Other operations terminate a run.",
+    "source_operations": {
+      "property": 3387,
+      "to_object": 1758,
+      "push_parent": 1416,
+      "to_value": 1194,
+      "add_setter": 1029,
+      "cast": 1004,
+      "binary_resources::Block::new": 894,
+      "pop_parent_and_end_init": 843,
+      "set_and_register_name": 805,
+      "add_dynamic_resource_setter_with_parent": 747,
+      "style_program::attach": 679,
+      "property_value": 589,
+      "provide_static_resource": 583,
+      "class_handle": 561,
+      "bind_dynamic_resource": 556,
+      "invoked": 493,
+      "deferred_context": 459,
+      "bind_template_rows": 373,
+      "bind_or_set_priority": 331,
+      "defer": 330,
+      "new_setter_with_parent": 319,
+      "add_setter_value_with_parent": 319,
+      "bind": 305,
+      "boxed": 304,
+      "provide_value": 289,
+      "end_init": 275,
+      "markup_handle": 267,
+      "apply_template_binding": 266,
+      "string_object": 241,
+      "binary_resources::aliases": 228,
+      "clr_property_info": 201,
+      "binary_resources::thicknesses": 198,
+      "new_setter": 158,
+      "add_setter_value": 158,
+      "setter_value_property": 157,
+      "bind_or_set_null": 152,
+      "binary_resources::doubles": 137,
+      "exact": 127,
+      "style_program::begin": 123,
+      "style_program::finish_dynamic": 110,
+      "binary_resources::literal_brushes": 102,
+      "cast_checked": 97,
+      "binary_resources::dynamic_brushes": 93,
+      "provide_value_invoked": 75,
+      "class_markup": 62,
+      "binary_resources::deferred_factories": 56,
+      "add_deferred_resource": 42,
+      "binary_resources::static_brushes": 33,
+      "binary_resources::colors": 29,
+      "set_local_value": 26,
+      "push_namespace_scope": 20,
+      "setter_value": 19,
+      "binary_resources::corner_radii": 18,
+      "instance": 10,
+      "is_instance": 6,
+      "populate_context": 3,
+      "complete_root_name_scope": 3,
+      "service_provider": 2,
+      "uri_equals": 1
+    },
+    "runs": 208,
+    "rows": 1177,
+    "dynamic_rows": 589,
+    "literal_rows": 588,
+    "distinct_getters": 96,
+    "stored_getters_across_runs": 1177,
+    "distinct_literal_expressions": 89,
+    "distinct_dynamic_keys": 318,
+    "encodings": {
+      "direct": "One native function per run with original setter calls, original typed property getters and value constructors.",
+      "program": "Each run owns 2-byte instructions and three independent slices of typed property getters, lazy value constructors and dynamic keys.",
+      "slots": "Each distinct (operation, getter, operand expression) has a shared Rust function. Each run retains the ordered slice of only the functions it uses."
+    },
+    "object_files": {
+      "direct": {
+        "file_bytes": 516984,
+        "allocated_file_sections": {
+          "text": 59038,
+          "gcc_except_table": 236,
+          "rodata": 10661,
+          "data": 2904,
+          "eh_frame": 22288
+        },
+        "sum_allocated_file_bytes": 95127,
+        "sha256": "5d91a5c5db566c67fa949cf3c5e44a6aff1721627e2aecc462d0ed8f7b8d4e1e"
+      },
+      "program": {
+        "file_bytes": 790000,
+        "allocated_file_sections": {
+          "text": 21097,
+          "gcc_except_table": 152,
+          "rodata": 12125,
+          "data": 38208,
+          "eh_frame": 15736
+        },
+        "sum_allocated_file_bytes": 87318,
+        "sha256": "036b65b81a34b0eb5c4fcab4b97016e3feaf4fb42f83b3f209fc326264451a4e"
+      },
+      "slots": {
+        "file_bytes": 687240,
+        "allocated_file_sections": {
+          "text": 42936,
+          "gcc_except_table": 148,
+          "rodata": 10669,
+          "data": 11744,
+          "eh_frame": 33552
+        },
+        "sum_allocated_file_bytes": 99049,
+        "sha256": "4fac24bf9790d69d0258034e3e00fb3bcf14fcc55a305e0fd787b7caa286dde4"
+      }
+    },
+    "shared_objects": {
+      "direct": {
+        "file_bytes": 206216,
+        "allocated_file_sections": {
+          ".dynsym": 14544,
+          ".gnu.hash": 1656,
+          ".hash": 4856,
+          ".dynstr": 71893,
+          ".rela.dyn": 12120,
+          ".relr.dyn": 56,
+          ".rela.plt": 48,
+          ".gcc_except_table": 236,
+          ".rodata": 10434,
+          ".eh_frame": 22252,
+          ".text": 59024,
+          ".plt": 48,
+          ".data.rel.ro": 2896,
+          ".dynamic": 288,
+          ".got": 3680,
+          ".data": 8,
+          ".got.plt": 40
+        },
+        "sha256": "98c35b6b2afe518fd067c6593dedc4715ec1d2d788980c6440e9410fc08aa3df"
+      },
+      "program": {
+        "file_bytes": 197032,
+        "allocated_file_sections": {
+          ".dynsym": 14568,
+          ".gnu.hash": 1656,
+          ".hash": 4864,
+          ".dynstr": 71949,
+          ".rela.dyn": 12144,
+          ".relr.dyn": 584,
+          ".rela.plt": 48,
+          ".gcc_except_table": 152,
+          ".rodata": 12116,
+          ".eh_frame": 15700,
+          ".text": 21083,
+          ".plt": 48,
+          ".data.rel.ro": 35960,
+          ".dynamic": 288,
+          ".got": 3688,
+          ".data": 8,
+          ".got.plt": 40
+        },
+        "sha256": "87ccb699778e0a7f3f43f7183f86f59833db266fcb365da66cc0a7e58d55e3be"
+      },
+      "slots": {
+        "file_bytes": 210272,
+        "allocated_file_sections": {
+          ".dynsym": 14544,
+          ".gnu.hash": 1656,
+          ".hash": 4856,
+          ".dynstr": 71893,
+          ".rela.dyn": 12120,
+          ".relr.dyn": 200,
+          ".rela.plt": 48,
+          ".gcc_except_table": 148,
+          ".rodata": 10436,
+          ".eh_frame": 33516,
+          ".text": 42922,
+          ".plt": 48,
+          ".data.rel.ro": 11736,
+          ".dynamic": 288,
+          ".got": 3680,
+          ".data": 8,
+          ".got.plt": 40
+        },
+        "sha256": "c2133a1aa2763034ab074b43af8acea9919948070151e64be9e48a53bba9d3e0"
+      }
+    },
+    "checks": "The extractor decodes every 2-byte instruction using that run\u2019s three import tables, and expands every function-slot sequence, then checks that all 1,177 operations match the original getter, operand and order.",
+    "limits": "The fixture compiles callable code against actual optimized framework rlibs. DSO sizes include code/data, unwind, exports, dynamic imports and relocations. It isolates this compiler design and does not measure a complete release executable, host activation, failures, or runtime performance. None of these prototype setters ships in the PR."
+  },
+  "xamlx_group_lookup_fixture": {
+    "description": "Separate executable constructs XamlTypeWellKnownTypes 60 times per process against the actual XamlX FakeTypeSystem. Compare the same full fields, generic Action/Func arities, public constructor and LLVM/LTO settings. This measures named lookup only; static and dynamic theme setter probes are independent.",
+    "before_stripped_bytes": 410616,
+    "after_stripped_bytes": 391328,
+    "build": "XamlX rlib with testing feature, opt-level=z, 8 CGUs and embedded bitcode. Fixture Cargo-equivalent final -Oz, FatLTO, one CGU, LLD safe ICF, RELR, unwinding and symbol stripping. No PGO on the fixture.",
+    "paired_processes": 51,
+    "metric": "Within-process elapsed wall nanoseconds per construction. Alternating order on CPU 6; three warmup pairs omitted. Median paired ratio, interval from 3,000 paired bootstrap resamples, seed 486.",
+    "ratio": 0.9976950096851899,
+    "ci95": [
+      0.9865045179393909,
+      1.033817544904984
+    ],
+    "ns_per_construction": {
+      "before": [
+        259094.45,
+        258339.98333333334,
+        208444.05,
+        238608.81666666668,
+        240078.31666666668,
+        253184.51666666666,
+        239185.66666666666,
+        257171.5,
+        259853.71666666667,
+        225474.71666666667,
+        247246.25,
+        231909.91666666666,
+        202388.43333333332,
+        287878.48333333334,
+        347205.65,
+        236288.55,
+        273483.0333333333,
+        218058.75,
+        247405.23333333334,
+        233608.25,
+        241910.85,
+        282802.65,
+        269494.48333333334,
+        224053.11666666667,
+        268948.8333333333,
+        269252.2833333333,
+        258693.16666666666,
+        235378.55,
+        211924.35,
+        248053.11666666667,
+        259168.71666666667,
+        253112.25,
+        253273.65,
+        250301.1,
+        247677.88333333333,
+        248884.85,
+        248768.33333333334,
+        195873.3,
+        186515.11666666667,
+        203181.58333333334,
+        229433.56666666668,
+        246626.48333333334,
+        248069.3,
+        260105.1,
+        243456.96666666667,
+        296945.23333333334,
+        244813.31666666668,
+        298531.0833333333,
+        198171.35,
+        209881.83333333334,
+        194246.88333333333
+      ],
+      "after": [
+        257612.75,
+        255868.41666666666,
+        248028.25,
+        242371.03333333333,
+        248485.23333333334,
+        273012.1,
+        229296.21666666667,
+        358342.6,
+        224610.28333333333,
+        263045.36666666664,
+        241784.18333333332,
+        229789.93333333332,
+        216420.75,
+        283355.3,
+        272476.9666666667,
+        260462.7,
+        244322.41666666666,
+        283476.9,
+        246834.96666666667,
+        249076.11666666667,
+        236440.28333333333,
+        277782.0833333333,
+        219609.7,
+        221871.9,
+        225947.73333333334,
+        249216.48333333334,
+        411218.2833333333,
+        384352.98333333334,
+        256396.61666666667,
+        221205.75,
+        213940.41666666666,
+        249548.58333333334,
+        249855.6,
+        253232.26666666666,
+        252870.38333333333,
+        252867.06666666668,
+        248477.9,
+        230135.76666666666,
+        192822.6,
+        235814.51666666666,
+        231652.18333333332,
+        223670.8,
+        258748.91666666666,
+        245240.78333333333,
+        241289.76666666666,
+        244455.61666666667,
+        243003.65,
+        242780.5,
+        229793.43333333332,
+        229236.11666666667,
+        205844.2
+      ]
+    },
+    "xamlx_tests": 107,
+    "extra_coverage": "Verified first-error cutoff, retained-reference counts after lookup errors and panics, an empty group, ordered fields, and repeated handles.",
+    "workload_source": "use std::hint::black_box;\nuse xamlx::testing::FakeTypeSystem;\nuse xamlx::type_system::{IXamlTypeSystem, XamlTypeWellKnownTypes};\nfn main() {\n    let ts = FakeTypeSystem::new();\n    let iters:usize=std::env::args().nth(1).unwrap_or_else(|| \"100\".into()).parse().unwrap();\n    let t=std::time::Instant::now();\n    for _ in 0..iters {\n        let result=XamlTypeWellKnownTypes::new(black_box(&*ts)).unwrap();\n        assert!(result.object.equals(&*ts.find_type(\"System.Object\").unwrap()));\n        black_box(result);\n    }\n    println!(\"{}\",t.elapsed().as_nanos());\n}\n",
+    "error_case_source": "use std::rc::Rc;\nuse std::cell::RefCell;\nuse xamlx::testing::FakeTypeSystem;\nuse xamlx::type_system::{get_type, get_types};\nfn main() {\n    let ts=FakeTypeSystem::new();\n    let object=get_type(&*ts,\"System.Object\").unwrap();\n    let before=Rc::strong_count(&object);\n    let trace=RefCell::new(Vec::new());\n    let err=get_types([\"System.Object\", \"Absent.First\",\"Absent.Second\"], |name| {\n        trace.borrow_mut().push(name.to_owned());\n        get_type(&*ts,name)\n    });\n    assert!(err.is_err());\n    assert_eq!(trace.borrow().as_slice(), [\"System.Object\",\"Absent.First\"]);\n    assert_eq!(before,Rc::strong_count(&object));\n    std::panic::set_hook(Box::new(|_|{}));\n    let outcome=std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {\n        get_types([\"System.Object\",\"Panic\",\"Absent.Second\"], |name| {\n            if name==\"Panic\"{panic!(\"inside host lookup\")}\n            get_type(&*ts,name)\n        })\n    }));\n    assert!(outcome.is_err());assert_eq!(before,Rc::strong_count(&object));\n    assert!(get_types::<0>([],|_|panic!(\"empty group\")).unwrap().is_empty());\n    let [a,b,c]=get_types([\"System.String\",\"System.Object\",\"System.Object\"],|name|get_type(&*ts,name)).unwrap();\n    assert!(a.equals(&*get_type(&*ts,\"System.String\").unwrap()));\n    assert!(Rc::ptr_eq(&b,&object)&&Rc::ptr_eq(&c,&object));\n    println!(\"Error short-circuit, refcount on error and panic, zero length, input order and repeated handles verified.\");\n}\n"
+  },
+  "candidate_architecture": {
+    "compiler_input": "Lower after XamlX type, overload, static-resource and name-scope resolution, before emitting native Rust. Resource roots and their typed imports stay independent. Generate whole resource-dependency groups together only when the compiler can prove their reachability is identical.",
+    "program_storage": "Share an import dictionary for the complete enclosing deferred factory. Refer to typed constructors, setters, child factory entry points and dynamic keys by local bounded operand indices. Keep names, namespace scope and delta-encoded source position in the executable program. Distinct imports are typed Rust function pointers, evaluated lazily in the original order.",
+    "execution": "Keep measured hot templates on the direct Rust path while comparing a pre-resolved program for cold templates. A frame must hold the original concrete boxed/reference form of each local and destroy completed locals in reverse construction order on ordinary completion, XAML errors and panic. Preserve first-use property registration, BeginInit/EndInit/parent-stack ordering, source diagnostic locations, and the generation captured by every deferred factory.",
+    "external_edits": "The existing v1/v2/v3 external FXP front end and arbitrary changed-tree XamlX resolver remain reachable. Compile changed trees to the same operation semantics only after differential tests cover overloads, namespaces, captured parents, typed binding order and failure points. An edit replacing a constructor or child type must use the new operation graph.",
+    "release_gate": "Measure the complete stripped executable after GC and ICF. Include .data.rel.ro, .rodata, relocations, .gcc_except_table and unwind indexes. Run held-out templates, peak RSS, rendered first frame, embedded/edited startup and failed construction paths. Exclude the isolated DSO savings from a production size budget."
+  },
+  "reproduction": {
+    "requirements": "Python 3.11+, GNU readelf/nm, x86-64 GNU/Linux, rustc and LLD. Match the production rustc, features and target rlibs. Supply stripped and symbolized links at identical allocated addresses. Rust struct layout can change with toolchain or features.",
+    "extract_files": "from pathlib import Path\nimport json\nsrc=json.loads(Path(\"docs/benchmarks/compiled-theme-metadata-and-replay-linux-x86_64.json\").read_text())\nfor name, code in src[\"reproduction\"][\"files\"].items(): Path(name).write_text(code)\n",
+    "steps": [
+      "Build the PGO executable using profile_winui.py per docs/compiled-theme-performance.md and keep its generated compiled_xaml.rs, target dependency search paths and exact target rlib for each of ferroui_base, ferroui_controls, ferroui_markup_xaml and ferroui_themes_winui. Use the matched unstripped link procedure in scripts/themes/bench/attribute_codegen.py.",
+      "Run nm -n -S -C --defined-only <unstripped-ELF> | gzip > symbols.nm.gz. Check .text, .rodata, .data.rel.ro and relative relocations have the same addresses and bytes in both links.",
+      "Invoke rustc --edition=2021 -Copt-level=z layout.rs --extern ferroui_base=<actual-base-rlib> -L dependency=<target-deps> -L dependency=<host-deps> -o layout; run ./layout > layout.txt. Run python3 catalog.py symbols.nm.gz <stripped-ELF> census.json layout.txt and python3 classify.py <compiled_xaml.rs> symbols.nm.gz > factories.json.",
+      "Run python3 emit.py <compiled_xaml.rs> work. The same extracted operations, grouped only within one receiver, are written as direct.rs, program.rs and slots.rs. Compare corpus hashes if running on the measured revision.",
+      "For each variant use rustc --crate-name style_row_probe --edition=2021 --crate-type=lib --emit=obj -Copt-level=z -Ccodegen-units=1 -Cpanic=unwind -Cllvm-args=--addrsig <variant>.rs -o <variant>.o with the four --extern entries and two -L dependency paths above. The fixture compilation used the optimized target rlibs without enabling profile-use on the fixture itself.",
+      "Link each using ld.lld -shared --gc-sections --icf=safe -z pack-relative-relocs --strip-all -soname rows <variant>.o -o <variant>.so. Run readelf -SW and stat on both objects and DSOs. The DSOs intentionally leave framework imports external. File paths, symbol names and tool versions can change absolute bytes."
+    ],
+    "files": {
+      "layout.rs": "use ferroui_base::metadata::*;\nmacro_rules! record {\n    ($ty:ty,$($field:ident),*) => {{\n       print!(\"{} {}\",stringify!($ty),std::mem::size_of::<$ty>());\n       $(print!(\" {}={}\", stringify!($field),std::mem::offset_of!($ty,$field));)*\n       println!();\n    }}\n}\nfn main() {\n    record!(MarkupType,name,constructors,properties,static_properties,methods,fields,indexers,events,enum_members,handles,interfaces,attributes,parse,nullable,base,enum_from_value,enum_to_value,notify_property_changed);\n    record!(MarkupConstructor,parameters,parameter_info,invoke);\n    record!(MarkupProperty,name,type_,get,set,typed_path_element,attributes);\n    record!(MarkupMethod,name,parameters,return_type,invoke,attributes);\n    record!(MarkupIndexer,parameters,type_,get,set,attributes);\n    record!(MarkupField,name,type_,get,attributes);\n    record!(MarkupEvent,name,arguments,add);\n    record!(MarkupEnumMember,name,get);\n    record!(MarkupAttribute,);\n    record!(MarkupParameter,attributes);\n}\n",
+      "catalog.py": "from pathlib import Path\nimport gzip,re,sys,struct,json,collections\nd=Path(sys.argv[4]).parent\nm,binary,out=map(Path,sys.argv[1:4]);f=binary.read_bytes()\nu16=lambda o:struct.unpack_from('<H',f,o)[0];u64=lambda o:struct.unpack_from('<Q',f,o)[0]\nsegs=[];ps,ns=u16(54),u16(56);tab=u64(32)\nfor i in range(ns):\n off=tab+ps*i;t,flags,fo,va,_,fs,ms,_=struct.unpack_from('<IIQQQQQQ',f,off)\n if t==1:segs.append((va,va+fs,fo-va))\ndef offset(addr):\n for lo,hi,off in segs:\n  if lo<=addr<hi:return off+addr\n raise ValueError(hex(addr))\ndef ptr(addr):return u64(offset(addr))\nsymbols={};headers=set()\nfor l in (gzip.open(m,'rt') if m.suffix=='.gz' else m.open()):\n t=l.strip().split(maxsplit=3)\n if len(t)!=4:continue\n addr,n,k,name=int(t[0],16),int(t[1],16),t[2],t[3]\n if k.lower()=='t':symbols[addr]=max(n,symbols.get(addr,0))\n if k.lower() in ('d','r') and n==352 and name.endswith('::MARKUP'):headers.add(addr)\nlayout={}; sizes={}\nfor l in Path(sys.argv[4]).read_text().splitlines():\n k,n,*fields=l.split();sizes[k]=int(n);layout[k]={a:int(b) for s in fields for a,b in [s.split('=')]}\narrays={'constructors':('MarkupConstructor',['invoke'],[],['parameters']),'properties':('MarkupProperty',['get','set'],['type_','typed_path_element'],[]),'static_properties':('MarkupProperty',['get','set'],['type_','typed_path_element'],[]),'methods':('MarkupMethod',['invoke'],['return_type'],['parameters']),'fields':('MarkupField',['get'],['type_'],[]),'indexers':('MarkupIndexer',['get','set'],['type_'],['parameters']),'events':('MarkupEvent',['add'],[],['arguments']),'enum_members':('MarkupEnumMember',['get'],[],[])}\n\nst=collections.defaultdict(set); vt=collections.defaultdict(set);counts=collections.Counter();empty=collections.Counter();spans=collections.defaultdict(set)\nfor addr in headers:\n for k in ['parse','enum_from_value','enum_to_value','notify_property_changed']:st[k].add(ptr(addr+layout['MarkupType'][k]))\n for k in ['nullable','base']:vt[k].add(ptr(addr+layout['MarkupType'][k]))\n for k in ['handles','interfaces']:\n  b=ptr(addr+layout['MarkupType'][k]);n=ptr(addr+layout['MarkupType'][k]+8);assert n<300\n  for j in range(n):vt[k].add(ptr(b+8*j))\n for k,(cl,ops,ty,seq) in arrays.items():\n  root=ptr(addr+layout['MarkupType'][k]);n=ptr(addr+layout['MarkupType'][k]+8);assert n<10000\n  if n==0:empty[k]+=1;continue\n  counts[k]+=n;spans[k].add((root,n*sizes[cl]))\n  for j in range(n):\n   o=root+j*sizes[cl]\n   for op in ops:st[k].add(ptr(o+layout[cl][op]))\n   for typ in ty:vt[k].add(ptr(o+layout[cl][typ]))\n   for param in seq:\n    start=ptr(o+layout[cl][param]); count=ptr(o+layout[cl][param]+8)\n    assert count<50\n    for i in range(count):vt[k].add(ptr(start+8*i))\ndef metrics(g):\n out={}\n for k,vals in g.items():\n  vals=vals-{0};missing=[hex(v) for v in vals if not v in symbols];out[k]={'functions':len(vals),'known_text_bytes':sum(symbols.get(v,0) for v in vals),'missing_n':len(missing),'missing_examples':missing[:3]}\n return out\ndef union(l):\n total=0;last=0\n for a,b in sorted((a,a+n) for a,n in l):\n  total+=max(0,b-max(a,last));last=max(last,b)\n return total\nwhole=set().union(*spans.values());ops=set().union(*st.values());types=set().union(*vt.values())\nrec={'source':'sampled descriptors whose symbol ends ::MARKUP and size is 352','roots':len(headers),'header_bytes':len(headers)*352,'empty_slice_header_count':dict(empty),'member_entries':dict(counts),'member_table_physical_bytes':{k:union(v) for k,v in spans.items()},'all_member_table_physical_bytes':union(whole),'invokers':metrics({**st,'unique':ops}),'type_operands':metrics({**vt,'unique':types}),'unique_direct_code':metrics({'all':ops|types})}\nout.write_text(json.dumps(rec,indent=2));print({k:v for k,v in rec.items() if k not in ('invokers','type_operands')});print('invokers',rec['invokers']['unique'],'type_ops',rec['type_operands']['unique'])\n",
+      "classify.py": "\"\"\"Attribute emitted WinUI code to the compiled XAML document/factory bodies.\"\"\"\nfrom pathlib import Path\nfrom collections import Counter,defaultdict\nimport gzip,re,subprocess,json,sys\nsrc=Path(sys.argv[1]).read_text()\np=Path(sys.argv[2])\nlines=gzip.open(p,'rt') if p.suffix=='.gz' else p.open()\nargs=[str(p)]\nfpat=re.compile(r'^(?:pub(?:\\(crate\\))? )?fn (\\w+)\\(',re.M)\nfun={}; roots=Counter(); data=defaultdict(list); ops=Counter()\nfor m in fpat.finditer(src):\n stop=src.find('\\n}',m.end()); f=src[m.start():stop]; name=m[1]\n key='others'\n if name.startswith('populate_') and '_part_' in name:key='merged dictionary installation'\n elif 'selector_shape' in name:key='selector builder'\n elif 'template_setter' in name:key='closed template property thunk'\n elif 'style_property' in name:key='style property import'\n elif 'rt::deferred_context' in f:\n  if 'ControlTheme::new()' in f:key='style/theme factory'\n  elif '.begin_init();' in f:key='visual tree factory'\n  else:key='other deferred body'\n elif 'factory_shape_' in f and 'fn __' not in f:key='shape operand thunk'\n elif name=='build_controls_winuicontrols_xaml':key='root theme catalog installation'\n fun[name]=(key,f)\nseen=set(); syms=[]\nfor line in lines:\n t=line.strip().split(None,3)\n if len(t)!=4 or t[2].lower()!='t':continue\n name=t[3];prefix='ferroui_themes_winui::compiled_xaml::'\n if not name.startswith(prefix):continue\n name=name[len(prefix):];adr=int(t[0],16);sz=int(t[1],16)\n if adr in seen:continue\n seen.add(adr);k,code=fun.get(name,('unmapped native name',''))\n data[k].append((name,sz));syms.append((adr,sz,k,name))\nfor line in src.splitlines():\n if not line.startswith('    ') or line.strip().startswith('//'):continue\n for m in re.finditer(r'rt::(\\w+(?:::\\w+)*)\\(',line):ops[m[1]]+=1\nreport={'input':str(args or 'non-PGO compact Fat'), 'emitted_functions':len(fun), 'groups':{k:{'physical_bodies':len(v),'text':sum(s for n,s in v),'largest':sorted(v,key=lambda t:-t[1])[:3]} for k,v in sorted(data.items(),key=lambda t:-sum(s for _,s in t[1]))},'operations':dict(ops.most_common(85))}\nprint(json.dumps(report,indent=2))\n",
+      "emit.py": "from pathlib import Path\nfrom collections import Counter\nimport re,json,itertools,sys\nsrc=Path(sys.argv[1]).read_text()\nd=Path(sys.argv[2]); d.mkdir(parents=True,exist_ok=True)\npt={\n'd':re.compile(r'^rt::add_dynamic_resource_setter_with_parent\\(&context, (\\w+)\\.upcast_ref::<__t::StyleBase>\\(\\), (rt::property\\(.*?\\)), (\"(?:[^\"\\\\]|\\\\.)*\")\\);$'),\n'v':re.compile(r'^rt::add_setter\\((\\w+)\\.upcast_ref::<__t::StyleBase>\\(\\), (rt::property\\(.*?\\)), (rt::to_object\\(.*\\))\\);$')}\nruns=[];run=[];prev=''\nfor ll in src.splitlines():\n l=ll.strip()\n if l.startswith('//') or not l:continue\n kw,r,p,v='','','',''\n for k,pat in pt.items():\n  if m:=pat.fullmatch(l):\n   kw=k;r,p,v=m.groups()\n   # Admit only closed value expressions. Current generator emits literals, enum variants and direct constructors.\n   if re.search(r'\\b[a-z][a-z0-9]+(?:_[a-z0-9]+)*_\\d+\\b',v):kw=''\n   break\n if not kw or r!=prev:\n  if len(run)>=3:runs.append(run)\n  run=[]\n if kw:run.append((kw,p,v));prev=r\nprint('blocks',len(runs),'rows',sum(map(len,runs)),Counter(k for row in runs for k,p,v in row))\n# The carrier has the actual property handles, value constructors, context and style of the complete generated code.\nhead='''#![allow(dead_code,unused_imports)]\nuse ferroui_markup_xaml::xaml_il::runtime::compiled as rt;\nuse ferroui_markup_xaml::xaml_il::runtime::XamlIlContext;\nuse ferroui_base::{Ref,FerroProperty,metadata::MarkupValue,styling::StyleBase};\nuse std::rc::Rc;\n'''\nimports=src[src.index('mod __t {'):];imports=imports[:imports.index('\\n}')+2]\nimports=imports.replace('use crate::','use ferroui_themes_winui::')\n# Pass the extracted direct calls unmodified apart from the common StyleBase receiver.\ndef oldunit(i,rows):\n s=f'#[no_mangle]\\n#[inline(never)]\\npub fn unit_{i}(context:&Rc<XamlIlContext>, style:&Ref<StyleBase>) {{\\n'\n for k,p,v in rows:\n  if k=='d':s+=f' rt::add_dynamic_resource_setter_with_parent(context,style,{p},{v});\\n'\n  else:s+=f' rt::add_setter(style,{p},{v});\\n'\n return s+'}\\n'\n(d/'direct.rs').write_text(head+imports+'\\n'+''.join(oldunit(i,r) for i,r in enumerate(runs)))\nh=head+imports+'''\ntype Prop=fn()->&'static FerroProperty;\ntype Val=fn(&Rc<XamlIlContext>)->MarkupValue;\nstruct Program{ props:&'static[Prop], vals:&'static[Val], keys:&'static[&'static str], code:&'static[[u8;2]] }\n#[inline(never)]\nfn replay(context:&Rc<XamlIlContext>, style:&Ref<StyleBase>,p:&Program) {\n  for &[a,b] in p.code {\n    let prop=p.props[a as usize]();\n    if b&0x80!=0 { rt::add_dynamic_resource_setter_with_parent(context,style,prop,p.keys[(b&127)as usize]); }\n    else { rt::add_setter(style,prop,p.vals[b as usize](context)); }\n  }\n}\n'''\ncol=[{'pool':set(),'n':0} for _ in range(3)]\nfor i,run in enumerate(runs):\n ps=list(dict.fromkeys(p for k,p,v in run));vs=list(dict.fromkeys(v for k,p,v in run if k=='v'));ks=list(dict.fromkeys(v for k,p,v in run if k=='d'));assert max(map(len,(ps,vs,ks)))<128\n for j,v in enumerate((ps,vs,ks)):col[j]['pool'].update(v);col[j]['n']+=len(v)\n code=[(ps.index(p),128+ks.index(v) if k=='d' else vs.index(v)) for k,p,v in run]\n assert [('d' if tag&128 else 'v',ps[a],ks[tag&127] if tag&128 else vs[tag]) for a,tag in code]==run\n h+=f'#[no_mangle]\\n#[inline(never)]\\npub fn unit_{i}(context:&Rc<XamlIlContext>, style:&Ref<StyleBase>) {{\\n'\n h+='static ROWS:Program=Program{ props:&['+','.join('||'+p for p in ps)+'], vals:&['+','.join('|context|'+v for v in vs)+'],keys:&['+','.join(ks)+'],code:&['+','.join(f'[{a},{b}]' for a,b in code)+']};replay(context,style,&ROWS);}\\n'\n(d/'program.rs').write_text(h)\n(d/'spec.json').write_text(json.dumps({'rows':sum(map(len,runs)),'blocks':len(runs),'imports':[(len(j['pool']),j['n']) for j in col], 'all':runs},separators=(',',':')))\n\nrows=json.loads((d/'spec.json').read_text())['all'];h=(d/'direct.rs').read_text().split('#[no_mangle]')[0];h+='''type Op=fn(&Rc<XamlIlContext>,&Ref<StyleBase>);\n#[inline(never)]\nfn replay(context:&Rc<XamlIlContext>,style:&Ref<StyleBase>,ops:&[Op]) {\n    for f in ops { f(context,style); }\n}\n'''\nix={}\nfor i,row in enumerate(rows):\n ids=[]\n for k,p,v in row:\n  key=k,p,v\n  if key not in ix:\n   n=ix[key]=len(ix);fn='rt::add_dynamic_resource_setter_with_parent(context,style,' if k=='d' else 'rt::add_setter(style,'\n   h+=f'fn step_{n}(context:&Rc<XamlIlContext>,style:&Ref<StyleBase>) {{ {fn}{p},{v}); }}\\n'\n  ids.append(ix[key])\n assert [list(ix)[n] for n in ids]==[tuple(x) for x in row]\n h+=f'#[no_mangle]\\n#[inline(never)]\\npub fn unit_{i}(context:&Rc<XamlIlContext>,style:&Ref<StyleBase>){{replay(context,style,&['+','.join('step_'+str(x) for x in ids)+']);}\\n'\n(d/'slots.rs').write_text(h)\n"
+    }
+  },
+  "xamlx_method_predicate_fixture": {
+    "description": "Second isolated two-class fixture with 12 methods per class. Each iteration performs a single-result predicate scan alternating an early hit and a miss, then an all-results static-method scan over both classes. Both implementations verify identical counts and ordering follows the existing traversal. Two predicates represent the small-fixture case; production uses additional predicates.",
+    "before_bytes": 381496,
+    "after_bytes": 382536,
+    "iterations_per_process": 6000,
+    "measured_pairs": 51,
+    "time_metric": "Elapsed wall nanoseconds per iteration; same pinned interleaving and bootstrap as the group lookup fixture.",
+    "paired_ratio": 0.9983851090735263,
+    "ci95": [
+      0.9203115283868797,
+      1.0863387594210028
+    ],
+    "times": {
+      "before": [
+        889.5003333333333,
+        1499.9851666666666,
+        852.0883333333334,
+        1424.4461666666666,
+        1380.1891666666668,
+        777.7586666666666,
+        885.0186666666667,
+        950.3235,
+        930.3423333333334,
+        784.4868333333334,
+        794.9623333333333,
+        661.3183333333334,
+        739.8943333333333,
+        658.6026666666667,
+        640.1736666666667,
+        648.4208333333333,
+        1008.2523333333334,
+        658.02,
+        641.6275,
+        684.0801666666666,
+        725.0231666666666,
+        569.3175,
+        614.3106666666666,
+        719.6095,
+        649.1336666666666,
+        662.3348333333333,
+        674.4076666666666,
+        679.4666666666667,
+        1090.1033333333332,
+        606.1851666666666,
+        1223.2948333333334,
+        751.2795,
+        668.4388333333334,
+        617.8441666666666,
+        632.706,
+        762.668,
+        848.7268333333334,
+        824.1671666666666,
+        662.1378333333333,
+        607.7208333333333,
+        757.0363333333333,
+        706.3848333333333,
+        642.7491666666666,
+        713.0815,
+        571.1551666666667,
+        695.3068333333333,
+        705.482,
+        712.9596666666666,
+        643.4836666666666,
+        728.3006666666666,
+        644.455
+      ],
+      "after": [
+        1074.5026666666668,
+        869.288,
+        788.6746666666667,
+        1207.4883333333332,
+        743.725,
+        921.5441666666667,
+        780.4675,
+        825.2505,
+        641.0618333333333,
+        1453.0285,
+        731.613,
+        794.9556666666666,
+        983.3456666666667,
+        659.434,
+        758.4685,
+        658.5276666666666,
+        897.0363333333333,
+        706.7338333333333,
+        591.8523333333334,
+        592.1061666666667,
+        723.8523333333334,
+        618.4716666666667,
+        646.0691666666667,
+        713.0915,
+        595.269,
+        770.2491666666666,
+        616.3985,
+        613.1371666666666,
+        955.2808333333334,
+        683.6795,
+        834.0975,
+        858.1106666666667,
+        825.3906666666667,
+        934.8455,
+        621.396,
+        640.9415,
+        721.4171666666666,
+        719.0701666666666,
+        1071.6183333333333,
+        728.4858333333333,
+        720.5708333333333,
+        565.9658333333333,
+        693.5208333333334,
+        673.8785,
+        789.353,
+        611.7285,
+        941.2443333333333,
+        836.3051666666667,
+        853.145,
+        809.5723333333333,
+        660.5971666666667
+      ]
+    },
+    "workload_source": "use std::hint::black_box;\nuse std::rc::Rc;\nuse xamlx::testing::FakeTypeSystem;\nuse xamlx::type_system::IXamlType;\nfn main(){\n let ts=FakeTypeSystem::new();\n let asm=ts.define_assembly(\"View\");\n let parent=asm.define_class(\"View\",\"Parent\");\n let kid=asm.define_class(\"View\",\"Child\"); kid.set_base_type(parent.clone());\n let tvoid=ts.get(\"System.Void\");\n for owner in [&parent,&kid] {\n    for i in 0..12 {owner.add_method(&format!(\"method{i}\"),tvoid.clone(),vec![],i%3==0);}\n }\n let kid:Rc<dyn IXamlType>=kid;\n let rounds=std::env::args().nth(1).unwrap().parse::<usize>().unwrap();\n let mut hits=0;\n let start=std::time::Instant::now();\n for i in 0..rounds {\n    hits+=usize::from(kid.find_method(|m|m.name()==black_box(if i%2==0 {\"method1\"} else {\"_\"})).is_some());\n    hits+=kid.find_methods(|m|m.is_static()).len();\n }\n let nanos=start.elapsed().as_nanos(); assert_eq!(hits,rounds*8+rounds.div_ceil(2)); println!(\"{nanos}\");\n}\n"
+  }
+}
