@@ -720,14 +720,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        if priority == BindingPriority::LocalValue {
-            let observer = LocalValueBindingObserver::new(self, property);
-            self.values.install_local_observer(property, observer.clone());
-            observer.start_untyped(source);
-            observer
-        } else {
-            self.values.add_boxed_frame_binding(self, property, source, priority)
-        }
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_untyped, BindingSource::untyped,
+        )
     }
 
     /// Coerces the specified property.

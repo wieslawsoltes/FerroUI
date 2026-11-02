@@ -210,7 +210,7 @@ pub(crate) trait PropertyRoutes {
         o: &FerroObject,
         frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn crate::property_store::BoxedFrameBinding>;
+    ) -> Rc<dyn IValueEntry>;
 }
 
 type ChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);

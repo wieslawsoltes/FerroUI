@@ -231,7 +231,7 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         _o: &FerroObject,
         _frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         _source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn crate::property_store::BoxedFrameBinding> {
+    ) -> Rc<dyn IValueEntry> {
         panic!("direct properties have no value entries");
     }
 }

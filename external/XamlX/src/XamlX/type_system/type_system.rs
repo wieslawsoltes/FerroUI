@@ -753,16 +753,6 @@ impl dyn IXamlType {
         &self,
         criteria: impl Fn(&dyn IXamlMethod) -> bool,
     ) -> Vec<Rc<dyn IXamlMethod>> {
-        self.find_methods_matching(&criteria)
-    }
-
-    // The hierarchy walk is identical for every caller. Borrow its predicate
-    // for this call so each binding or transformer emits only its criteria.
-    #[inline(never)]
-    fn find_methods_matching(
-        &self,
-        criteria: &dyn Fn(&dyn IXamlMethod) -> bool,
-    ) -> Vec<Rc<dyn IXamlMethod>> {
         let mut rv = Vec::new();
         rv.extend(self.methods().into_iter().filter(|m| criteria(&**m)));
         let mut t = self.base_type();
@@ -790,14 +780,6 @@ impl dyn IXamlType {
     pub fn find_method(
         &self,
         criteria: impl Fn(&dyn IXamlMethod) -> bool,
-    ) -> Option<Rc<dyn IXamlMethod>> {
-        self.find_method_matching(&criteria)
-    }
-
-    #[inline(never)]
-    fn find_method_matching(
-        &self,
-        criteria: &dyn Fn(&dyn IXamlMethod) -> bool,
     ) -> Option<Rc<dyn IXamlMethod>> {
         if let Some(m) = self.methods().into_iter().find(|m| criteria(&**m)) {
             return Some(m);

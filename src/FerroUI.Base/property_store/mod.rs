@@ -10,7 +10,7 @@ mod value_entry;
 mod value_frame;
 mod value_store;
 
-pub(crate) use binding_entry::{BindingEntry, BindingSource, BoxedFrameBinding};
+pub(crate) use binding_entry::{BindingEntry, BindingSource};
 pub(crate) use effective_value::{EffectiveValue, EffectiveValueDyn};
 pub(crate) use frame_priority::{FramePriority, FrameType};
 pub use immediate_value_frame::ImmediateValueFrame;

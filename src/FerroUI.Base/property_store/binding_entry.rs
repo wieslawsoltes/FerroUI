@@ -139,13 +139,6 @@ impl Drop for BindingEntryState {
     }
 }
 
-/// Construction and insertion into a frame can be shared for boxed observable
-/// sources. The entry still subscribes and receives values with its typed
-/// observer, including after synchronous completion or resubscription.
-pub(crate) trait BoxedFrameBinding: IValueEntry + IDisposable {
-    fn start_publishing(&self);
-}
-
 /// A value entry in a value frame whose value is produced by an observable.
 pub(crate) struct BindingEntry<T: PropertyValue> {
     // Drop the subscription before any of the objects its callbacks can use.
@@ -286,12 +279,6 @@ impl<T: PropertyValue> IValueEntry for BindingEntry<T> {
 
     fn unsubscribe(&self) {
         self.state.unsubscribe();
-    }
-}
-
-impl<T: PropertyValue> BoxedFrameBinding for BindingEntry<T> {
-    fn start_publishing(&self) {
-        self.start();
     }
 }
 

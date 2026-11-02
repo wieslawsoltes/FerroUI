@@ -815,7 +815,7 @@ impl<T: ObjectType> Ref<T> {
     /// Whether two handles refer to the same object.
     #[inline]
     pub fn ptr_eq<U: ObjectType>(&self, other: &Ref<U>) -> bool {
-        Rc::ptr_eq(&self.ptr, &other.ptr)
+        std::ptr::addr_eq(Rc::as_ptr(&self.ptr), Rc::as_ptr(&other.ptr))
     }
 
     /// The number of handles to the object, the number of weak handles to it and its address:
@@ -934,7 +934,7 @@ impl<T: ObjectType> WeakRef<T> {
     /// Whether two weak references point at the same object, alive or not.
     #[inline]
     pub fn ptr_eq<U: ObjectType>(&self, other: &WeakRef<U>) -> bool {
-        Weak::ptr_eq(&self.ptr, &other.ptr)
+        std::ptr::addr_eq(self.ptr.as_ptr(), other.ptr.as_ptr())
     }
 
     #[inline]
