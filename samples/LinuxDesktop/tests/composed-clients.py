@@ -7,7 +7,8 @@ def gtk_client():
     import gi
     gi.require_version("Gtk", "3.0")
     gi.require_version("Gdk", "3.0")
-    from gi.repository import Gdk, Gtk
+    import signal
+    from gi.repository import Gdk, GLib, Gtk
 
     window = Gtk.Window(title="Project notes")
     window.set_default_size(630, 400)
@@ -17,7 +18,14 @@ def gtk_client():
     window.set_titlebar(header)
 
     css = Gtk.CssProvider()
-    css.load_from_data(b"#note-tag {background-color: #d76a3d; color: white; padding: 16px;}")
+    def swatch(color):
+        css.load_from_data(("#note-tag {background-color: " + color
+                            + "; color: white; padding: 16px;}").encode())
+        return GLib.SOURCE_REMOVE
+
+    swatch("#d76a3d")
+    # Update behind the overview without transferring keyboard focus to GTK.
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, swatch, "#9354ba")
     Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css,
                                            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
     column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14, margin=22)
@@ -110,11 +118,12 @@ def probe(path, color, test):
         # counterparts must both lie inside the overview card, in its thumbnail
         # column, not in the client windows behind it.
         width, height = im.size
-        area = im.crop((width // 2 - 278, height // 2 - 125,
-                        width // 2 - 140, height // 2 + 205))
+        area = im.crop((width // 2 - 280, 0, width // 2 - 120, height - 52))
         colors = area.getcolors(area.width * area.height)
-        return all(sum(n for n, rgb in colors if all(abs(a-b) <= 4 for a, b in zip(rgb, target))) >= 35
-                   for target in [(0xd7, 0x6a, 0x3d), (0x39, 0x7a, 0xbb)])
+        gtk = (0x93, 0x54, 0xba) if test == "updated" else (0xd7, 0x6a, 0x3d)
+        return all(sum(n for n, rgb in colors
+                       if all(abs(a - b) <= 4 for a, b in zip(rgb, target))) >= 35
+                   for target in [gtk, (0x39, 0x7a, 0xbb)])
     if color == "picker":
         # The middle of the Appearance panel contains rows with opaque
         # themed surfaces. Wait for the new theme to paint before capturing.

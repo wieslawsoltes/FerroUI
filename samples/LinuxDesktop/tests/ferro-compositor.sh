@@ -135,6 +135,8 @@ scene_is() { [[ $("$binary" --platform=wayland --current-scene 2>/dev/null) == "
 "$binary" --platform=wayland --show=workspaces
 wait_for scene_is workspaces
 wait_for has_color preview
+kill -USR1 "$gtk"
+wait_for has_color preview updated
 shot live-overview
 wtype -k Escape
 wait_for scene_is desktop
