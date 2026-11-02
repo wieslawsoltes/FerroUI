@@ -105,6 +105,28 @@ impl TextInputMethodClient for TextBoxTextInputMethodClient {
         self.presenter().map(Ref::upcast)
     }
 
+    fn input_options(
+        &self,
+        focused_element: &Ref<InputElement>,
+        mut options: ferroui_base::input::text_input::TextInputOptions,
+    ) -> ferroui_base::input::text_input::TextInputOptions {
+        use ferroui_base::input::text_input::TextInputContentType;
+        let parent = focused_element.cast::<TextBox>().or_else(|| self.parent());
+        if parent.as_ref().is_some_and(|parent| parent.password_char() != '\0') {
+            options.content_type = match options.content_type {
+                TextInputContentType::Digits | TextInputContentType::Number | TextInputContentType::Pin => TextInputContentType::Pin,
+                _ => TextInputContentType::Password,
+            };
+            options.is_sensitive = true;
+            options.multiline = false;
+            options.show_suggestions = Some(false);
+            options.uppercase = false;
+            options.lowercase = false;
+            options.auto_capitalization = false;
+        }
+        options
+    }
+
     fn surrounding_text(&self) -> String {
         let Some(parent) = self.parent() else {
             return String::new();

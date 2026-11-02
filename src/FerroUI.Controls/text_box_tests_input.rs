@@ -291,3 +291,77 @@ fn selection_operation_coercion_and_reentrant_observers_preserve_the_latest_rang
     field.set_text(Some("x"));
     assert_eq!(*observed.borrow(), [(1, 1)]);
 }
+
+#[test]
+fn native_password_options_keep_attached_scope_and_hide_revealed_input() {
+    use ferroui_base::input::text_input::{TextInputContentType, TextInputMethodClientRequestedEventArgs, TextInputOptions};
+    let _scope = test_scope();
+    for (kind, expected) in [(TextInputContentType::Normal, TextInputContentType::Password),
+        (TextInputContentType::Digits, TextInputContentType::Pin)] {
+        let field = TextBox::new();
+        TextInputOptions::set_content_type(&field, kind);
+        TextInputOptions::set_is_sensitive(&field, false);
+        field.set_password_char('●');
+        assert!(TextInputOptions::get_is_sensitive(&field));
+        TextInputOptions::set_is_sensitive(&field, false);
+        let request = TextInputMethodClientRequestedEventArgs::new();
+        request.set_routed_event(Some(InputElement::text_input_method_client_requested_event()));
+        field.raise_event(&request);
+        let client = request.client().unwrap();
+        for reveal in [false, true] {
+            field.set_reveal_password(reveal);
+            let owner = field.clone().upcast();
+            let options = client.input_options(&owner, TextInputOptions::from_styled_element(&owner));
+            assert_eq!(options.content_type, expected);
+            assert!(options.is_sensitive);
+            assert_eq!(options.show_suggestions, Some(false));
+            assert!(!options.multiline && !options.auto_capitalization && !options.uppercase && !options.lowercase);
+            assert_eq!(TextInputOptions::get_content_type(&field), kind);
+        }
+        field.set_password_char('\0');
+        assert!(!TextInputOptions::get_is_sensitive(&field));
+    }
+}
+
+#[test]
+fn native_password_privacy_handles_reentrant_mask_removal() {
+    use ferroui_base::{FerroObject, FerroObjectExtensions, input::text_input::TextInputOptions, reactive::ObservableExt};
+    let _scope = test_scope();
+    let field = TextBox::new();
+    let weak = field.downgrade();
+    let once = Rc::new(Cell::new(false));
+    let changed = once.clone();
+    let object: &FerroObject = &field;
+    let _token = FerroObjectExtensions::get_observable(object, TextInputOptions::is_sensitive_property())
+        .subscribe_fn(move |private| {
+            if private && !changed.replace(true) { weak.upgrade().unwrap().set_password_char('\0'); }
+        });
+    field.set_password_char('●');
+    assert!(once.get());
+    assert_eq!(field.password_char(), '\0');
+    assert!(!TextInputOptions::get_is_sensitive(&field));
+}
+
+#[test]
+fn native_password_automation_redacts_retained_providers_and_value_events() {
+    use crate::automation::{ValuePatternIdentifiers, peers::{ControlAutomationPeer, TextBoxAutomationPeer}, provider::IValueProvider};
+    let _scope = test_scope();
+    let field = TextBox::new();
+    let peer = ControlAutomationPeer::create_peer_for_element(&field);
+    let retained = peer.get_provider::<dyn IValueProvider>().unwrap();
+    let events = Rc::new(Cell::new(0));
+    let counted = events.clone();
+    let _token = peer.property_changed(move |change| {
+        if std::ptr::eq(change.property(), ValuePatternIdentifiers::value_property()) { counted.set(counted.get() + 1); }
+    });
+    field.set_password_char('●');
+    field.set_text(Some("synthetic fixture"));
+    field.set_reveal_password(true);
+    assert!(peer.get_provider::<dyn IValueProvider>().is_none());
+    assert_eq!(retained.value(), None);
+    assert_eq!(peer.cast::<TextBoxAutomationPeer>().unwrap().value(), None);
+    assert!(peer.get_children().is_empty());
+    assert_eq!(events.get(), 0);
+    field.set_password_char('\0');
+    assert_eq!(retained.value().as_deref(), Some("synthetic fixture"));
+}
