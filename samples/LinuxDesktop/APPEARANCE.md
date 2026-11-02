@@ -30,6 +30,10 @@ Spotlight opens as a single search field. Typing unfolds the results beneath it.
 
 Use **↓** or the Applications button to browse the catalog from an empty field. **⌘1** and **Ctrl+1** select Applications. The arrow and page keys navigate results while the field retains text input. Click a result to inspect its description, desktop ID, category, available actions and matching windows. **Return** or a double-click activates its most recently focused window, or launches it through GIO if it has no windows. Choose a window by title to switch directly to it. If the desktop entry provides Quick Actions, **Tab** from the search field focuses its first action and **Return** runs it.
 
+| Spotlight search field | OpenSCAD result and its open document window |
+| --- | --- |
+| ![Compact Spotlight field](screenshots/macos-spotlight-field.webp) | ![Installed OpenSCAD app with its Orbital bracket document window](screenshots/macos-launcher.webp) |
+
 ## Materials in the desktop scene
 
 | Appearance | Panel and flyout materials in a shared render target |
