@@ -185,7 +185,7 @@ sets uniforms from the parameters. Three kinds of effects cover Effector's set:
    `GraphicsEffect` graph (the WinUI vocabulary FerroUI already has: Gaussian blur, colour matrix,
    saturation, tint, invert, grayscale, blends, composites, opacity, arithmetic composite) with the
    content as the source parameter `content` and the effect's parameter names as animatable
-   properties: a provided method of `CustomEffect` returning the description, loaded once per
+   properties: a provided associated function of `CustomEffect` (`graph()`, decision 4) returning the description, loaded once per
    type into an `EffectGraph` (the same loader and checks as `CompositionEffectFactory`) and
    registered for the prewarm. The render walk paints the graph around the content the way
    `LayerVisual.Effect` does (the composed content bound to the source parameter), with the
@@ -233,14 +233,15 @@ texture the scene paints with. So the plan, stated as it is:
   texture, read by the pass into another pooled texture the outer scene paints with. That step is
   shared with the colour matrix and pixel operations of the composition effects and is a
   prerequisite of E5.
-- **WebGL2** has no wgpu device: the WGSL is translated to GLSL ES 3.0 by naga (`glsl-out`) once
-  per program, or the effect gives GLSL ES as a third source. Which one is an open question
-  (section 6); until then a shader effect on WebGL2 is a gap recorded in gpu-rendering.md.
+- **WebGL2** has no wgpu device: the WGSL is translated to GLSL ES 3.0 by naga (`glsl-out`) at
+  build time, by a helper of `ferroui-build`, and the description embeds both (decision 2); the
+  browser module carries no naga.
 - **The CPU renderer** of Vello and Skia's raster surfaces are the reference: Skia raster runs the
-  SkSL on the CPU; Vello's CPU mode draws the content unchanged unless the effect provides a CPU
-  reference (a function over premultiplied RGBA, as `PixelOperation::apply_to_premultiplied_rgba8`
+  SkSL on the CPU; every effect FerroUI ships provides a CPU reference (decision 3), and Vello's CPU
+  mode draws the content unchanged only for an application's effect without one. The CPU
+  reference is a function over premultiplied RGBA (as `PixelOperation::apply_to_premultiplied_rgba8`
   is for the pixel operations), which the render tests compare the GPU output with.
-- **Not chosen now: a shared effect IR.** One small language (an expression tree built in Rust,
+- **Not chosen: a shared effect IR** (decision 1). One small language (an expression tree built in Rust,
   emitting SkSL, WGSL and GLSL ES) would make a shader portable by construction, at the cost of
   expressiveness and a code generator to maintain. Two sources with one checked convention is the
   smaller step and keeps every program readable in its own language; the IR stays an option if the
@@ -307,7 +308,7 @@ Each step is one pull request from main.
 | E2 | Graph effects (section 3.3, kind 1): the description hook of `CustomEffect`, loaded once per type into an `EffectGraph`, painted around the content by the render walk with the parameters as animatable members, registered for the prewarm; the colour effects of the sample set as graphs | addition | medium: the walk gains a second way to draw `Visual.Effect`; the graph painter is shared with the effect brushes |
 | E3 | Convolution and the Vello colour layers: a `ConvolveMatrixEffect` node (Skia: a matrix convolution image filter; Vello: a WGSL pass), and Vello step 2 of gpu-rendering.md ("layers with an effect": the content into a pooled device texture, a pass into another) for the colour matrix nodes, so the graph effects are GPU on Vello's GPU and hybrid modes | addition | high: the Vello pass reads the content of a layer, a new route in the scene |
 | E4 | Runtime shader effects on Skia (section 3.4): the shader description (SkSL source, the uniform convention, children, blend mode, overlay or content-sampling), compiled once per thread by `runtime_effects.rs`, drawn as a runtime-shader image filter of a save layer; the shader samples | addition | medium: SkSL errors surface at the first draw (logged once, then the no-op) |
-| E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 (naga to GLSL ES, or a third source: section 6); the CPU reference hook | addition | high: depends on E3; WebGL2 may stay a recorded gap |
+| E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3) | addition | high: depends on E3 |
 | E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
 | E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples | addition | medium: event ordering and capture |
 | E8 | Samples and catalog pages (section 3.7) | none (samples) | low |
@@ -326,17 +327,16 @@ custom effect yet.
   section 5.3): a later optimization of the shared graph painter, for the composition effects and
   the graph effects alike.
 
-## 6. Open questions for the owner
+## 6. Decisions
 
-1. **The shader source of Vello.** Two sources per shader effect (SkSL and WGSL, one checked
-   uniform convention) as proposed, or a shared IR that generates both (section 3.4)?
-2. **WebGL2.** Translate the WGSL with naga at runtime (a dependency of the browser build, and its
-   size), ship a GLSL ES source as well, or record shader effects as a WebGL2 gap until the WebGL2
-   renderer can paint with framebuffer textures (gpu-rendering.md, route step 3)?
-3. **Vello's CPU mode.** Is "content unchanged unless the effect gives a CPU reference" acceptable
-   for the CPU renderer, or must every shipped effect have a CPU reference?
-4. **Where graph effects are declared.** A provided method of `CustomEffect` returning a
-   `GraphicsEffect` (section 3.3), or a separate trait implemented next to the type, so that a
-   value type can stay free of the composition vocabulary?
-5. **Neutral values.** FerroUI asks the type for its neutral value (`CustomEffect::neutral`) where
-   Effector uses the default instance. Keep the difference?
+Decided on 2026-11-02 (the owner asked for the decisions to be made on the merits).
+
+| # | Question | Decision | Why |
+|---|---|---|---|
+| 1 | The shader source of Vello: two sources or a shared IR | **Two sources**: SkSL for Skia and WGSL for Vello, with the one uniform convention of section 3.4, each checked when it is compiled (SkSL by `runtime_effects.rs`, WGSL by naga) against the parameters of the type. Every shader effect that ships in FerroUI (the library and the samples) has a render test that draws it on Skia and on Vello and compares both with its CPU reference (decision 3), so the two programs cannot drift apart unnoticed | Each program stays readable and debuggable in the language of its backend, and Skia's SkSL and Vello's WGSL are the languages their tools report errors in. An IR would limit what an effect can express, add a code generator to maintain, and still need both backends tested. The test against one reference is what makes two sources safe |
+| 2 | WebGL2 (Vello's hybrid renderer in the browser has no wgpu device) | **GLSL ES 3.0 generated from the WGSL at build time**, by naga on the build host: a helper of `ferroui-build` (the build dependency an application with compiled markup already has, and the effect crates of FerroUI) translates the WGSL of an effect into GLSL ES in `OUT_DIR`, and the description embeds both. The author writes no third source, and the browser module carries no naga | One authored program per backend family, and no translator in the browser build, whose size #441 is reducing. A third hand-written source would be a third program to keep in step. Skia in the browser (WebGL2 through Ganesh) compiles SkSL itself, so only Vello's WebGL2 path needs this |
+| 3 | Vello's CPU mode | **Every effect that ships in FerroUI has a CPU reference** (a function over premultiplied RGBA, as `PixelOperation::apply_to_premultiplied_rgba8`): it is what Vello's CPU mode draws and what the render tests compare the GPU output of both backends with. An application's own effect may leave it out; then Vello's CPU mode draws the content unchanged and reports it once (the no-op of E1) | The CPU path is the reference and the fallback (gpu-rendering.md): without a reference there is nothing to validate the GPU output against, and the rule that every rendering feature is validated on Skia and Vello applies to what FerroUI ships. Requiring it of every application effect would block effects whose authors only target the GPU |
+| 4 | Where graph effects (and shader effects) are declared | **Provided associated functions of `CustomEffect`**: `fn graph() -> Option<GraphicsEffect>` and, in E4, `fn shader() -> Option<ShaderEffectDescription>`, both type-level (no `self`; read once per type) and `None` by default | The registry finds the description through the trait the type already implements, so no second registration per type is needed; a separate trait would need one, because Rust has no specialization to detect it. The composition vocabulary is in `ferroui-base`, the crate of `CustomEffect`, so the provided function adds no dependency |
+| 5 | Neutral values | **Keep asking the type** (`CustomEffect::neutral`), as E1 does, and record the difference in DEVIATIONS (Animation) | A default instance is not in general an effect without a visible result (a tint's default strength is 0.55), so a transition from no effect that starts at the default would jump; a type without a neutral value switches at half way, as a value that cannot be interpolated does |
+
+With these, no step waits on a decision: E2 declares graph effects by decision 4, E4 and E5 follow decisions 1 to 3.
