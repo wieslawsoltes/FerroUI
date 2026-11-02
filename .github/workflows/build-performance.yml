@@ -212,6 +212,7 @@ jobs:
           for mode in portable-solid-theme solid-theme; do
             cargo test --locked --lib -p ferroui-themes-winui --features "$mode" -- \
               tests::compiled_xaml_tests::packed_theme_contains_every_compiled_document_within_budget \
+              tests::compiled_xaml_tests::compiled_archive_dispatch_requires_the_exact_revision_and_load_configuration \
               tests::compiled_xaml_tests::replacement_archive_initializes_compact_density_from_its_own_revision \
               tests::winui_theme_tests::exported_dictionary_builders_load_their_own_resources \
               tests::control_templates::button --exact --test-threads=1
