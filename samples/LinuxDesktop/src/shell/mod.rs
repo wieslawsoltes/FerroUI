@@ -55,6 +55,7 @@ struct Shell {
     status: Signal<String>,
     launching: Signal<bool>,
     recent_apps: Signal<Vec<usize>>,
+    suggest_home_apps: Signal<bool>,
     owner: Owner,
     clicked_output: std::cell::RefCell<Option<String>>,
     desktop_focus: NodeRef<ferroui_controls::Button>,
@@ -350,6 +351,12 @@ fn create(
         status: signal(initial_status),
         launching: signal(false),
         recent_apps: signal(Vec::new()),
+        suggest_home_apps: signal(
+            crate::services::preferences::config_path("material-home-suggestions")
+                .ok()
+                .and_then(|path| std::fs::read_to_string(path).ok())
+                .is_none_or(|setting| setting.trim() != "off"),
+        ),
         clicked_output: Default::default(),
         owner: Owner::current().expect("desktop view must be mounted in a FerroUI owner"),
         desktop_focus: NodeRef::new(),

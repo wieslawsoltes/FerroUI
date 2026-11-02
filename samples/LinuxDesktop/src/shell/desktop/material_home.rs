@@ -59,6 +59,7 @@ pub(super) fn hotseat(shell: &Rc<Shell>) -> Element {
     let catalog = shell.catalog.clone();
     let pins = shell.favorites;
     let recent = shell.recent_apps;
+    let suggest = shell.suggest_home_apps;
     let state = shell.clone();
     let (_, bottom) = look().insets();
     row(0.0)
@@ -69,7 +70,11 @@ pub(super) fn hotseat(shell: &Rc<Shell>) -> Element {
         .child(for_each(
             move || {
                 pins.with(|pins| {
-                    recent.with(|recent| shortcuts(&catalog, pins, recent, slots.get()))
+                    if suggest.get() {
+                        recent.with(|recent| shortcuts(&catalog, pins, recent, slots.get()))
+                    } else {
+                        shortcuts(&catalog, pins, &[], slots.get())
+                    }
                 })
             },
             |item| item.index,
@@ -124,6 +129,13 @@ fn shortcut_button(shell: &Rc<Shell>, shortcut: Shortcut) -> El<Button> {
     })
 }
 
+fn item(name: &str, invoke: impl Fn() + 'static) -> ferroui_base::Ref<MenuItem> {
+    let action = MenuItem::new();
+    action.set_header(Some(Rc::new(name.to_owned())));
+    action.add_handler(MenuItem::click_event(), move |_, _| invoke());
+    action
+}
+
 fn shortcut_menu(shell: &Rc<Shell>, shortcut: Shortcut) -> ferroui_base::Ref<MenuFlyout> {
     let index = shortcut.index;
     let app = &shell.catalog.applications()[index];
@@ -131,12 +143,6 @@ fn shortcut_menu(shell: &Rc<Shell>, shortcut: Shortcut) -> ferroui_base::Ref<Men
     super::popup_host::configure_menu(&menu, 8.0);
     menu.set_placement(PlacementMode::Top);
     let items = menu.items();
-    fn item(name: &str, invoke: impl Fn() + 'static) -> ferroui_base::Ref<MenuItem> {
-        let action = MenuItem::new();
-        action.set_header(Some(Rc::new(name.to_owned())));
-        action.add_handler(MenuItem::click_event(), move |_, _| invoke());
-        action
-    }
     for action in &app.actions {
         let id = action.id.clone();
         let state = shell.clone();
@@ -157,4 +163,39 @@ fn shortcut_menu(shell: &Rc<Shell>, shortcut: Shortcut) -> ferroui_base::Ref<Men
         super::super::launcher::toggle_pin(&state, index)
     }))));
     menu
+}
+
+/// The wallpaper retains its swipe recognizer. Holding still requests a
+/// native context menu, moving past the platform slop cancels that hold.
+pub(super) fn wallpaper(shell: &Rc<Shell>) -> El<Border> {
+    let menu = MenuFlyout::new();
+    super::popup_host::configure_menu(&menu, 8.0);
+    let state = shell.clone();
+    menu.items()
+        .add(Some(Control::boxed(item("Wallpaper & style", move || {
+            state.open(Scene::Appearance)
+        }))));
+    let state = shell.clone();
+    let toggle = item("Suggest apps on Home", move || {
+        let enabled = !state.suggest_home_apps.get_untracked();
+        let saved = crate::services::preferences::config_path("material-home-suggestions")
+            .and_then(|path| {
+                crate::services::preferences::replace(&path, if enabled { b"on" } else { b"off" })
+            });
+        match saved {
+            Ok(()) => state.suggest_home_apps.set(enabled),
+            Err(error) => state
+                .status
+                .set(format!("Could not save Home suggestions. {error}")),
+        }
+    });
+    toggle.set_toggle_type(ferroui_controls::MenuItemToggleType::CheckBox);
+    menu.items().add(Some(Control::boxed(&toggle)));
+    let enabled = shell.suggest_home_apps;
+    menu.opening(move |_| toggle.set_is_checked(enabled.get_untracked()))
+        .detach();
+    super::gestures::home_wallpaper(shell).with(move |area| {
+        InputElement::set_is_hold_with_mouse_enabled(area, true);
+        area.set_context_flyout(&menu);
+    })
 }

@@ -435,7 +435,7 @@ fn dock(state: &Rc<Shell>) -> Element {
 fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
     let (top, bottom) = look().insets();
     grid()
-        .child(gestures::home_wallpaper(state))
+        .child(material_home::wallpaper(state))
         .child(
             stack_panel()
                 .margin((32.0, top + 22.0, 24.0, 0.0))

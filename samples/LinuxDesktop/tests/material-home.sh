@@ -114,10 +114,26 @@ key Return
 until_ok test -f "$fixture/default"
 until_ok find_note
 cp "$fixture/frame.png" "$out/material-suggested.png"
+# The canvas menu changes only the Android prediction row. Pins and recent
+# launches survive toggling suggestions off and on.
+suggestions_are() { [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/material-home-suggestions" 2>/dev/null) == "$1" ]]; }
+toggle_suggestions() {
+    capture "$fixture/frame.png"
+    xdotool mousemove --window "$win" 188 376 click 3
+    until_ok menu_visible
+    key End Return
+    until_ok suggestions_are "$1"
+}
+toggle_suggestions off
+until_ok pins_are '["studio.desktop"]'
+note_absent() { ! note_location >/dev/null; }
+until_ok note_absent
+toggle_suggestions on
+until_ok find_note
 open_menu right
 until_ok menu_visible
 key End Return
 until_ok pins_are '["studio.desktop","leaves.desktop"]'
 key Escape alt+F4
 wait "$shell"; shell=
-echo 'Verified Material home app actions, hold without launch, recent suggestions and persistent pin changes.'
+echo 'Verified Material home app actions, hold without launch, opt-in/out of app suggestions and persistent pin changes.'
