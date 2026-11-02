@@ -313,6 +313,20 @@ fn insert_cast(key: (TypeId, TypeId), cast: ConvertFn) {
     });
 }
 
+// A cast reads the same borrowed value from either an owned box or an untyped
+// property call. Keep a single typed thunk and share the box adapter across
+// every registered pair, including casts which capture caller state.
+#[inline(never)]
+fn insert_borrowed_cast(key: (TypeId, TypeId), cast: AnyConvertFn) {
+    let borrowed = cast.clone();
+    let boxed: ConvertFn = Rc::new(move |value| borrowed(value.as_any()));
+    with_registry(|r| {
+        r.conversions.insert(key, boxed.clone());
+        r.casts.insert(key, boxed);
+        r.any_conversions.insert(key, cast);
+    });
+}
+
 fn insert_conversion(key: (TypeId, TypeId), convert: ConvertFn) {
     with_registry(|r| {
         r.conversions.insert(key, convert);
@@ -404,18 +418,9 @@ impl ValueTypes {
     /// `TTo` (the same value, seen as a wider type), as opposed to values
     /// that can merely be converted to it. A cast is also a conversion.
     pub fn register_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
-        let cast = Rc::new(cast);
-        let boxed = cast.clone();
-        let convert: ConvertFn =
-            Rc::new(move |v: &BoxedValue| v.downcast_ref::<TFrom>().map(|v| Rc::new(boxed(v)) as BoxedValue));
-        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert);
-        // The same cast for a value that is only borrowed: the untyped
-        // property routes are handed `&dyn Any` (see `try_convert_implicit`).
-        let convert_any: AnyConvertFn =
-            Rc::new(move |v: &dyn std::any::Any| v.downcast_ref::<TFrom>().map(|v| Rc::new(cast(v)) as BoxedValue));
-        with_registry(|r| {
-            r.any_conversions.insert((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert_any);
-        });
+        let convert: AnyConvertFn =
+            Rc::new(move |value| value.downcast_ref::<TFrom>().map(|v| Rc::new(cast(v)) as BoxedValue));
+        insert_borrowed_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert);
     }
 
     /// States that the Rust type `TFrom` dereferences to `TTo`: `&TFrom`

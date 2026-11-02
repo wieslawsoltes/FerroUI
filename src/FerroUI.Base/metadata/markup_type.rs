@@ -309,25 +309,26 @@ pub fn from_markup_value<T: Clone + 'static>(value: &MarkupValue) -> Option<T> {
                 let any: &dyn Any = boxed;
                 return any.downcast_ref::<T>().cloned();
             }
-            if let Some(cast) = ValueTypes::try_cast(boxed, ValueType::of::<T>()) {
-                return cast.downcast_ref::<T>().cloned();
-            }
-            // A handle of a base class whose object is an instance of the class `T` names:
-            // an untyped call checks its arguments against the run-time class of the object
-            // (a binding reads a member of the class of the element it found through a
-            // handle of `Control` or of the root class).
-            let object = ValueTypes::as_object(&**boxed)?;
-            let cast = match ValueTypes::from_object(target, object.clone()) {
-                Some(cast) => cast,
-                None => ValueTypes::try_convert_registered(&(Rc::new(object) as BoxedValue), ValueType::of::<T>())?,
-            };
-            cast.downcast_ref::<T>().cloned()
+            coerce_markup_argument(boxed, ValueType::of::<T>())?.downcast_ref::<T>().cloned()
         }
         None => {
             let null = ValueTypes::try_convert(None, ValueType::of::<T>())??;
             null.downcast_ref::<T>().cloned()
         }
     }
+}
+
+// A generated member invoker needs only the final checked clone specialized for
+// its Rust parameter. Share the registry lookup and runtime-class conversion.
+#[inline(never)]
+fn coerce_markup_argument(value: &BoxedValue, target: ValueType) -> MarkupValue {
+    if let Some(cast) = ValueTypes::try_cast(value, target) {
+        return Some(cast);
+    }
+    // A base handle can carry an instance of the class the parameter names.
+    let object = ValueTypes::as_object(&**value)?;
+    ValueTypes::from_object(target.id(), object.clone())
+        .or_else(|| ValueTypes::try_convert_registered(&(Rc::new(object) as BoxedValue), target))
 }
 
 /// Maps the error of a fallible member to [`MarkupInvokeError::Failed`]; see
