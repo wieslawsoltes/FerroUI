@@ -6,7 +6,7 @@ use ferroui_base::controls::{ResourceDictionary, ResourceValue};
 use ferroui_base::media::{Color, Colors, IBrush};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_controls::UserControl;
-use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument};
 
 use crate::support::app::xaml_test_base;
 use crate::support::helpers::{assert_throws_xaml_diagnostic, assert_value_is_type, value_of};
@@ -70,6 +70,51 @@ fn merge_resource_include_works_with_single_resource(create_source_info: bool) {
 
     let merged_resource = solid_color(&resources.get(&"brush2".into()));
     assert_eq!(Colors::RED, merged_resource);
+}
+
+fn merge_only(path: &str, source: &str) -> RuntimeXamlLoaderDocument {
+    document(path, &format!(
+        "<ResourceDictionary xmlns='https://github.com/ferroui'>
+           <ResourceDictionary.MergedDictionaries>
+             <MergeResourceInclude Source='{source}'/>
+           </ResourceDictionary.MergedDictionaries>
+         </ResourceDictionary>"
+    ))
+}
+
+#[test]
+fn dictionaries_with_only_a_merge_include_inline_transitive_resources() {
+    let _base = xaml_test_base();
+    for root_first in [true, false] {
+        let root = merge_only("ferres://Tests/Root.xaml", "Dir/Child.xaml");
+        let child = merge_only("ferres://Tests/Dir/Child.xaml", "Leaf.xaml");
+        let leaf = document(
+            "ferres://Tests/Dir/Leaf.xaml",
+            "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+               <SolidColorBrush x:Key='Brush'>Red</SolidColorBrush>
+             </ResourceDictionary>",
+        );
+        let (docs, root_index) = if root_first {
+            (vec![root, child, leaf], 0)
+        } else {
+            (vec![leaf, child, root], 2)
+        };
+        let loaded = load_group(docs, None);
+        let root = assert_value_is_type::<ResourceDictionary>(&loaded[root_index]);
+        assert!(root.merged_dictionaries().is_empty());
+        assert_eq!(Colors::RED, solid_color(&root.get(&"Brush".into())));
+    }
+}
+
+#[test]
+fn cyclic_merge_only_dictionaries_report_the_offending_uri() {
+    let _base = xaml_test_base();
+    let docs = vec![
+        merge_only("ferres://Tests/A.xaml", "B.xaml"),
+        merge_only("ferres://Tests/B.xaml", "A.xaml"),
+    ];
+    let error = try_load_group(docs, None).err().expect("a merge cycle must fail the group");
+    assert!(describe(&error).contains("Cyclic MergeResourceInclude of 'ferres://Tests/A.xaml'"));
 }
 
 #[test]

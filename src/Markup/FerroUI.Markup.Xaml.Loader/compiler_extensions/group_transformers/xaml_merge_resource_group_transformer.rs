@@ -189,6 +189,16 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
         context: &AstGroupTransformationContext,
         node: Rc<dyn IXamlAstNode>,
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
+        Self::merge(context, node, &mut Vec::new())
+    }
+}
+
+impl XamlMergeResourceGroupTransformer {
+    fn merge(
+        context: &AstGroupTransformationContext,
+        node: Rc<dyn IXamlAstNode>,
+        ancestors: &mut Vec<*const XamlObjectInitializationNode>,
+    ) -> XamlResult<Rc<dyn IXamlAstNode>> {
         let ferro_types = context.try_get_ferro_types()?;
         let resource_dictionary_type = ferro_types.resource_dictionary.clone();
         let Some(resource_dictionary_node) = node.cast::<XamlObjectInitializationNode>() else {
@@ -201,11 +211,20 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
         {
             return Ok(node);
         }
-        let Some(resource_dictionary_manipulation) = resource_dictionary_node
-            .manipulation()
-            .cast::<XamlManipulationGroupNode>()
-        else {
-            return Ok(node);
+        let operation = resource_dictionary_node.manipulation();
+        let resource_dictionary_manipulation = match operation.cast::<XamlManipulationGroupNode>() {
+            Some(group) => group,
+            None => {
+                // XamlX flattens a one-element group. A dictionary may consist
+                // solely of an include, including at each level of an include chain.
+                let Some(assignment) = operation.cast::<XamlPropertyAssignmentNode>() else {
+                    return Ok(node);
+                };
+                if assignment.property.name() != "MergedDictionaries" {
+                    return Ok(node);
+                }
+                XamlManipulationGroupNode::new(&*resource_dictionary_node, Some(vec![operation]))
+            }
         };
 
         let merge_resource_include_type = ferro_types.merge_resource_include.clone();
@@ -251,6 +270,9 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
             return Ok(node);
         }
 
+        // Publish the normalized group after recognizing a merge. Other passes may
+        // revisit it after an error; a consumed include must not be diagnosed twice.
+        *resource_dictionary_node.manipulation.borrow_mut() = resource_dictionary_manipulation.clone();
         let mut manipulation_group: Vec<Rc<dyn IXamlAstManipulationNode>> = Vec::new();
         // The includes that stay run-time includes (`XamlRuntimeIncludeFallback`).
         let mut runtime_includes: Vec<Rc<dyn IXamlAstManipulationNode>> = Vec::new();
@@ -351,6 +373,23 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 );
             }
 
+            // The input group can list consumers before their dependencies. Resolve
+            // each included root in its own URI scope before copying its operations.
+            let target = Rc::as_ptr(&single_root_object);
+            if target == Rc::as_ptr(&resource_dictionary_node) || ancestors.contains(&target) {
+                return context.report_transform_error(
+                    &format!("Cyclic MergeResourceInclude of '{original_asset_path}'."),
+                    Some(&**source_node),
+                    node,
+                );
+            }
+            let previous = context.current_document();
+            context.set_current_document(Some(target_document.clone()));
+            ancestors.push(Rc::as_ptr(&resource_dictionary_node));
+            let result = Self::merge(context, single_root_object.as_node(), ancestors);
+            ancestors.pop();
+            context.set_current_document(previous);
+            result?;
             manipulation_group.push(single_root_object.manipulation());
             if target_document.usage() == XamlDocumentUsage::Unknown {
                 target_document.set_usage(XamlDocumentUsage::Merged);
