@@ -267,6 +267,30 @@ PYGTK
             xdotool windowactivate --sync "$shell_window"
             xdotool type --clearmodifiers --delay 25 'Ferro Color Studio'
             capture macos-spotlight-results macos-applications
+            /usr/bin/python3 - "$output" <<'PYPOSITION'
+from pathlib import Path
+import sys
+from PIL import Image, ImageChops
+root = Path(sys.argv[1])
+desktop = Image.open(root / "macos.png").convert("RGB")
+w, h = desktop.size
+def panel_bounds(name):
+    frame = Image.open(root / (name + ".png")).convert("RGB")
+    # Ignore the independent clock, Dock and desktop edges. A control or
+    # window occupying only a few scattered pixels cannot satisfy a row.
+    area = (w // 4, h // 8, 3 * w // 4, 7 * h // 8)
+    delta = ImageChops.difference(desktop, frame).crop(area)
+    r, g, b = delta.split()
+    mask = ImageChops.lighter(ImageChops.lighter(r, g), b).point(lambda v: 255 if v > 18 else 0)
+    rows = [y for y in range(mask.height)
+            if mask.crop((0, y, mask.width, y + 1)).histogram()[255] > w // 6]
+    assert rows, name
+    return min(rows), max(rows)
+compact = panel_bounds("macos-applications")
+expanded = panel_bounds("macos-spotlight-results")
+assert compact[1] - compact[0] < 115, compact
+assert abs(compact[0] - expanded[0]) < 6 and expanded[1] - compact[1] > 100, (compact, expanded)
+PYPOSITION
             xdotool key --clearmodifiers Return
             for ((i=0; i<70; i++)); do
                 [[ $(xdotool getactivewindow 2>/dev/null || :) == "$live" ]] && break

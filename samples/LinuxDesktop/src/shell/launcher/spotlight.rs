@@ -506,6 +506,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         .is_visible(move || scene.get() == Scene::Applications)
         .child(
             crate::shell::desktop::popup_frame()
+                .is_visible(move || scene.get() == Scene::Applications)
                 .grid_row(1)
                 .margin((10., 0., 10., 8.))
                 .vertical_alignment(V::Top)
