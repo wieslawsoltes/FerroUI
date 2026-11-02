@@ -1,0 +1,2632 @@
+{
+  "title": "Whole-graph profile-guided WinUI release comparison",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+  "target": "x86_64-unknown-linux-gnu",
+  "source": {
+    "runtime_revision": "ff5ea13a23e3a659d46a38854ab9909d100976eb",
+    "runtime_tree": "8261ba72534f6230cdf0ca9e4180bb9aca6aaa06",
+    "main_merge": "8aa7ca2b7c1a87bff38034c3535bba4ea9b936da",
+    "matched_main_revision": "df3e12ad721fb8877699ea1f5ff157e22b45e9a7"
+  },
+  "workload": {
+    "consumer": "scripts/themes/bench/winui.rs",
+    "shipping_consumer_sha256": "8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269",
+    "winui_xaml_sources": 169,
+    "runtime_features": {
+      "ferroui_base": ["markup-functions"],
+      "ferroui_controls": [],
+      "ferroui_markup_xaml": ["binary-resources","runtime-populate"],
+      "ferroui_markup_xaml_loader": ["default","portable-xaml","runtime"],
+      "ferroui_themes_winui": ["binary-resources","precompiled-theme","solid-theme"]
+    },
+    "retained_external_fxp_bytes": 296347,
+    "retained_external_fxp_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+  },
+  "size_target": {
+    "revision": "df3e12ad721fb8877699ea1f5ff157e22b45e9a7",
+    "ordinary_bytes": 54577848,
+    "ordinary_sha256": "9e37447e98f55a9daab7ea93521f7977a7ba2c19afdeb4b6d749ed4d998505e7",
+    "target_bytes": 27288924
+  },
+  "reference_report": "compiled-theme-whole-program-linux-x86_64.json",
+  "comparison_binaries": {
+    "main_fat": {
+      "bytes": 38600504,
+      "cies": 2,
+      "fdes": 85764,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2448,
+        ".gnu.version": 204,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1333,
+        ".rela.dyn": 2400,
+        ".relr.dyn": 29200,
+        ".rela.plt": 48,
+        ".gcc_except_table": 1153684,
+        ".rodata": 1141679,
+        ".eh_frame_hdr": 686124,
+        ".eh_frame": 4519564,
+        ".text": 29024725,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2768,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1835032,
+        ".dynamic": 496,
+        ".got": 912,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195752
+      },
+      "sha256": "67e3bc647924c8f6b595418cb1941c2604b016ebea32e760394e9cc7cb470b74"
+    },
+    "selected_fat": {
+      "bytes": 29194408,
+      "cies": 2,
+      "fdes": 74323,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2448,
+        ".gnu.version": 204,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1333,
+        ".rela.dyn": 2400,
+        ".relr.dyn": 26640,
+        ".rela.plt": 48,
+        ".gcc_except_table": 989872,
+        ".rodata": 1719384,
+        ".eh_frame_hdr": 594596,
+        ".eh_frame": 3671764,
+        ".text": 20307877,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2736,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1673648,
+        ".dynamic": 496,
+        ".got": 928,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195888
+      },
+      "sha256": "06ead3da02b02dd4e83534c0b5a0ad5cfc0c82c404119e027ad54484eb711a11"
+    }
+  },
+  "arms": {
+    "main_shipping": "The property-only fixture built against original main with its release ThinLTO settings.",
+    "main_fat": "Original main, compact FatLTO s.",
+    "final_fat": "Merged runtime, compact FatLTO s, unprofiled. The application startup and memory tables call this same arm selected_fat.",
+    "final_pgo": "Merged runtime, compact FatLTO using the profile and opt level identified by its parent cohort. The application tables call this arm pgo."
+  },
+  "recipe": {
+    "entry_point": "scripts/themes/bench/profile_winui.py",
+    "required_tools": ["Rust with matching LLVM llvm-profdata, LLD and a GNU/Linux x86-64 runtime with DT_RELR support","Python 3.11 or newer"],
+    "commands": ["work=$(mktemp -d)","python3 scripts/themes/bench/measure.py --source \"$PWD\" --work-dir \"$work/reference\" --solid --compact-app --fat-app-link --linux-safe-icf --linux-packed-relocations --rebuilds 0","python3 scripts/themes/bench/profile_winui.py --source \"$PWD\" --consumer \"$work/reference/consumer\" --work-dir \"$work\" --use-opt-level s --use-opt-level z"],
+    "scope": "This recipe regenerates the training data and stripped shipping executables. Host tools and proc macros are built separately from the explicitly targeted instrumented dependencies."
+  },
+  "cargo_settings": {
+    "common": ["--target x86_64-unknown-linux-gnu","--release","--locked","--features ferroui-themes-winui/solid-theme,retain-archive","--bin winui-theme-probe"],
+    "panic": "unwind",
+    "train": {
+      "target_opt_level": "s",
+      "codegen_units": 16,
+      "lto": "thin",
+      "rustflags": ["-Cprofile-generate=PROFILE_DIRECTORY","-Cllvm-args=--addrsig"]
+    },
+    "use": {
+      "dependencies_codegen_units": 16,
+      "final_codegen_units": 1,
+      "final_lto": "fat",
+      "target_opt_level": "s or z, for every target dependency and final crate",
+      "rustflags": ["-Cprofile-use=PROFILE","-Cllvm-args=--addrsig"],
+      "final_link": ["-Clink-arg=-fuse-ld=lld","-Clink-arg=-Wl,--icf=safe","-Clink-arg=-Wl,-z,pack-relative-relocs","-Cstrip=symbols"]
+    }
+  },
+  "training": {
+    "scenarios": ["embedded default","Button, NavigationView and ScrollViewer template activation","11 public property workloads","external FXP scalar edit","full changed archive fallback"],
+    "external_training_archives_sha256": {
+      "scalar_v3": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f",
+      "full_changed_fallback": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+    },
+    "invocations": {
+      "embedded": 3,
+      "templates": 3,
+      "property": 3,
+      "external_scalar": 3,
+      "full_changed_fallback": 1
+    },
+    "consumer_source_sha256": {
+      "template_work.rs": "e87b8996bb9fe489453699dce2c65f421ef78d15bd0a611e99e62c0f65a82474",
+      "property_work.rs": "9e04adc991cf9342de2fb0846fa03ac72e372b2937b0e01a2e5d7b86d3e57970",
+      "main.rs": "d9c9306b8de920a2b6fc72b9db9409937cf343b3c547b0e3fcd75badcfc54bcd"
+    },
+    "coverage_method": "Count unique covered Rust v0 definitions by the first crate root in each symbol from llvm-profdata show --all-functions --counts --covered.",
+    "executed_rooted_definitions": {
+      "ferroui_base": 10665,
+      "ferroui_controls": 3794,
+      "ferroui_markup_xaml": 381,
+      "ferroui_markup_xaml_loader": 890,
+      "ferroui_themes_winui": 215,
+      "winui_theme_probe": 34
+    },
+    "instrumented_application": {
+      "bytes": 101067616,
+      "sha256": "e7d42f069bc0709d96660135dc18ce285c80999c3b7333d955951293f172b4d8"
+    },
+    "merged_profile": {
+      "bytes": 93383424,
+      "sha256": "558545eb183f3892affee0b55cab5b0b4dac8396ddac612675683afa091b5965"
+    }
+  },
+  "profile_use": {
+    "s": {
+      "profile_use_evidence": {
+        "method": "Matching LLVM opt -passes=print-profile-summary on the first object module of each named target rlib before final FatLTO. Counts are per sampled module.",
+        "modules": {
+          "ferroui_base": {
+            "object": "ferroui_base-24f352f9e1623d88.ferroui_base.427616c0118b47b-cgu.00.rcgu.o",
+            "hot_entries_in_sample": 43,
+            "cold_entries_in_sample": 12840
+          },
+          "ferroui_controls": {
+            "object": "ferroui_controls-5ae5e073e77d5a1e.ferroui_controls.5c375cc9cae04c21-cgu.00.rcgu.o",
+            "hot_entries_in_sample": 1,
+            "cold_entries_in_sample": 13821
+          },
+          "ferroui_themes_winui": {
+            "object": "ferroui_themes_winui-2fc1215977f7d4ab.ferroui_themes_winui.339f39cf5da6ef31-cgu.00.rcgu.o",
+            "hot_entries_in_sample": 2,
+            "cold_entries_in_sample": 3467
+          },
+          "ferroui_markup_xaml_loader": {
+            "object": "ferroui_markup_xaml_loader-f980d456bd8adf78.ferroui_markup_xaml_loader.81f9846b5ab12f4c-cgu.00.rcgu.o",
+            "hot_entries_in_sample": 94,
+            "cold_entries_in_sample": 584
+          }
+        }
+      },
+      "profile_hash_mismatches": {
+        "source": "Cargo profile-use build diagnostics, including any replayed dependency diagnostics. One row per reported function control-flow hash mismatch.",
+        "occurrences": 1,
+        "occurrences_by_crate": {
+          "winui_theme_probe": 1
+        },
+        "occurrences_with_positive_discard_bound_by_crate": {
+          "winui_theme_probe": 1
+        },
+        "highest_reported_single_function_discard_upper_bound": 293
+      },
+      "build_cost": {
+        "scope": "The profiled dependency artifacts were already staged. This is the dependency-warm shipping Cargo build including the final FatLTO compile and link.",
+        "wall_seconds": 327.446226850996,
+        "peak_rss_kib": 4636536,
+        "cpu_seconds": 327.002477
+      },
+      "application": {
+        "bytes": 30152576,
+        "cies": 2,
+        "fdes": 95134,
+        "allocated_file_sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2448,
+          ".gnu.version": 204,
+          ".gnu.version_r": 384,
+          ".gnu.hash": 28,
+          ".dynstr": 1333,
+          ".rela.dyn": 2400,
+          ".relr.dyn": 27144,
+          ".rela.plt": 48,
+          ".gcc_except_table": 984664,
+          ".rodata": 1721176,
+          ".eh_frame_hdr": 761084,
+          ".eh_frame": 4649508,
+          ".text": 20093157,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 2736,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 1705224,
+          ".dynamic": 496,
+          ".got": 928,
+          ".got.plt": 40,
+          ".tm_clone_table": 0,
+          ".data": 195888
+        },
+        "sha256": "f2d2558bc9acdfbd9f494ab91eed03f62b1530d75a56da1f44baf0eee9a3b76b",
+        "verified_elf_flags": ["PIE","GNU_RELRO","BIND_NOW","DT_RELR"]
+      },
+      "byte_comparisons": {
+        "above_half_target_bytes": 2863652,
+        "change_vs_selected_non_pgo_fat_bytes": 958168,
+        "reduction_vs_original_ordinary_percent": 44.753087,
+        "reduction_vs_original_compact_fat_percent": 21.885538,
+        "unwind_and_exception_bytes": 6395256
+      },
+      "archive_checks": {
+        "typed_values": "Normal and compact ControlContentThemeFontSize values read by the shipping probe.",
+        "cases": {
+          "embedded": {
+            "normal": 14,
+            "compact": 14
+          },
+          "v3-installed": {
+            "normal": 14,
+            "compact": 14,
+            "external_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+          },
+          "v3-scalar": {
+            "normal": 14,
+            "compact": 17,
+            "external_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+          },
+          "v2-scalar": {
+            "normal": 14,
+            "compact": 17,
+            "external_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+          },
+          "v1-scalar": {
+            "normal": 14,
+            "compact": 17,
+            "external_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+          },
+          "v3-structural": {
+            "normal": 14,
+            "compact": 29,
+            "external_sha256": "f258743cc9601170e31fc45f84b55f5fcb869273e61d4ccf061f8a7efd9123b9"
+          },
+          "full-fallback": {
+            "normal": 19,
+            "compact": 17,
+            "external_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+          },
+          "installed-v3-current": {
+            "normal": 14,
+            "compact": 14,
+            "external_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+          }
+        }
+      },
+      "public_property_tests": {
+        "passed": 299,
+        "failed": 0,
+        "ignored": 0,
+        "method": "Public Base property tests linked against the same profile-use Base rlib with the final property fixture flags, then run serially."
+      },
+      "panic_unwind_checks": ["caught typed panic payload","nested destructor order","property store usable after unwinding"],
+      "startup": {
+        "condition": "81 rotating fresh warm processes to typed Button; 31 additional processes per binary after verified executable-page eviction. Same CPU for all participants.",
+        "warm": {
+          "main_fat": {
+            "n": 81,
+            "median_ms": 15.990349,
+            "p95_ms": 16.931857,
+            "raw_ns": [16225363,24681226,16825299,15705527,16787482,16931857,16589180,16830286,15901145,16013431,15319155,16004387,19328995,16145635,20107314,16705101,15644806,16052839,16123183,16203961,16067128,15973942,16173096,16036805,20589225,15726279,15879175,15919194,16107342,15369331,14843924,16410561,15620523,15990349,16358553,16426505,16096796,16294539,16236043,16065911,12883455,15070609,15901137,15694432,15250565,14791336,15477201,14862381,14376963,16466123,15828660,16044839,16080092,12855563,12617692,14916141,15673691,16189784,15634362,15799968,15145971,15727050,15933205,16414677,16407276,16164427,16011581,13448821,15652199,15757044,16155073,16128093,15820919,13277557,15653131,15567133,16343211,16094393,15845275,15271636,15035457]
+          },
+          "selected_fat": {
+            "n": 81,
+            "median_ms": 10.595871,
+            "p95_ms": 12.024972,
+            "raw_ns": [10564507,16686494,12614082,10507382,10702340,12024972,11229447,11179914,10684052,10660668,10434384,12243055,10964907,11390456,11432227,11043773,10649882,10133941,10098868,9988625,10723241,10603494,10521203,10785522,11516351,10445376,10640346,11057884,11102601,10551375,9939420,10034430,10586887,11026128,11236549,10517575,10513359,10190091,11080808,10532617,10537344,10922224,10603663,10550254,10311100,10405980,10390527,10438669,12554798,10133407,10659605,10661559,10404588,9519139,10818330,9912290,10580889,10860172,10248808,10604053,10523214,9585987,10627668,10603232,10439921,10409936,10489835,10460972,10610874,10610132,10428363,10667887,10178344,10620177,9960361,10781385,10499108,10571715,10595871,10779463,10557855]
+          },
+          "pgo": {
+            "n": 81,
+            "median_ms": 8.856534,
+            "p95_ms": 10.067953,
+            "raw_ns": [10067953,9890701,9489378,9049469,8570723,9069470,9143239,9088257,9208005,9225700,9197699,7872192,9294792,8968710,9050492,9149348,9015750,8856534,8213727,8851208,9016000,8852098,8969130,10627850,10184746,8846414,7966792,8959621,9343148,8989415,8850279,10640287,8968795,9450787,9260546,9270511,7923398,9047621,9215931,8880944,8820946,6597187,8681630,8716351,8972330,8699967,8744443,8813966,9300656,8602192,8631005,8687959,8817221,9078216,11023473,7589915,8945230,8857570,8757732,8832994,8469926,7775920,8732405,8782159,8602744,9303990,8565248,8264824,8465651,8786585,8764202,8965429,8910419,8288258,8307026,8679947,8787346,9084746,8812283,8739205,8781297]
+          }
+        },
+        "ratios": {
+          "pgo_over_main_fat": [0.5575816047823321,0.5517113826407902,0.563994613112076],
+          "pgo_over_selected_fat": [0.8348284065610826,0.8281315444520388,0.8431849368490281]
+        },
+        "page_evicted": {
+          "main_fat": {
+            "n": 31,
+            "median_ms": 26.371673,
+            "p95_ms": 29.772187,
+            "raw_ns": [29368716,26468436,33861871,24946064,27896678,26584258,26371673,29327835,27291939,29772187,26227190,26198887,23985413,25528476,26720608,27901250,26183649,29140266,26183218,25677911,26451729,27466537,26823347,28793115,24780571,25775220,22472533,25905918,23781200,25245929,23977756]
+          },
+          "selected_fat": {
+            "n": 31,
+            "median_ms": 19.831084,
+            "p95_ms": 23.352898,
+            "raw_ns": [19948959,23352898,21181572,20692899,20502172,20981576,20075867,21495771,19533479,19831084,17576089,20799072,19298517,19003495,19555467,17509256,18646277,23698007,17378310,19767278,17078508,22354213,22064601,23159017,17820233,21368938,16985320,16986943,18391237,20238735,19626721]
+          },
+          "pgo": {
+            "n": 31,
+            "median_ms": 19.014898,
+            "p95_ms": 23.088212,
+            "raw_ns": [18017417,23870538,16003414,17314067,20124543,19691638,19014898,17445356,16295546,17245325,18358522,19283900,19843844,17404846,18459546,21625303,19462294,23088212,21966621,17823102,21072996,19521385,20314937,16637077,19200271,18948514,22100528,17385587,17974746,19102918,18016203]
+          }
+        },
+        "archives": {
+          "scalar-v3": {
+            "pgo": {
+              "n": 21,
+              "median_ms": 11.292534,
+              "p95_ms": 15.885856,
+              "raw_ns": [11197775,12836754,11216143,15885856,12774303,11478569,11605137,11397059,10963898,10863771,10941587,10874518,10893304,11292534,13590658,10503270,10102087,16328220,14322769,9573607,13419234]
+            },
+            "selected_fat": {
+              "n": 21,
+              "median_ms": 12.798548,
+              "p95_ms": 16.683219,
+              "raw_ns": [13411608,18728094,16683219,13843601,13520634,14268498,14548572,13373467,13004303,12677529,12798548,12311710,12661651,11462556,12460048,11938278,12506528,11563995,12365859,11461534,15065285]
+            }
+          },
+          "structural-v3": {
+            "pgo": {
+              "n": 21,
+              "median_ms": 9.61733,
+              "p95_ms": 10.93753,
+              "raw_ns": [10937530,11472680,9334865,9617330,9446179,9701405,9494029,9653585,9628567,9815053,9509742,9528299,9387823,9781563,9509362,10903991,10789491,8768308,9053568,9529220,10155996]
+            },
+            "selected_fat": {
+              "n": 21,
+              "median_ms": 11.178637,
+              "p95_ms": 13.227683,
+              "raw_ns": [14971527,11406804,11183243,11178637,11358562,11029527,11143344,11083706,11150556,11076966,11145297,11056436,11295818,10987295,11613589,11252996,11770190,10683495,10796482,13227683,11416016]
+            }
+          },
+          "full-fallback": {
+            "pgo": {
+              "n": 9,
+              "median_ms": 1325.733007,
+              "p95_ms": 1563.58253,
+              "raw_ns": [1325733007,1267090005,1257402269,1275055845,1312742096,1416310767,1536668078,1440479311,1563582530]
+            },
+            "selected_fat": {
+              "n": 9,
+              "median_ms": 1564.376935,
+              "p95_ms": 1979.159322,
+              "raw_ns": [1438861937,1563109762,1564376935,1540573463,1496899810,1713895897,1979159322,1883263813,1882707422]
+            }
+          }
+        },
+        "end_point": "spawn through the first verified typed Button resource. Rendering and first paint were not measured.",
+        "cpu_affinity": 7,
+        "warm_ratio_order": ["median of paired ratios","95% bootstrap lower bound","95% bootstrap upper bound"]
+      },
+      "resident": {
+        "workload": "Complete process lifetime including theme teardown after first verified typed Button lookup. Linux wait4, warm filesystem.",
+        "unit": "KiB",
+        "rotating_processes_per_arm": 31,
+        "peak_resident_kib": {
+          "main_fat": {
+            "median": 22348,
+            "p95": 22568,
+            "samples": [22232,22320,22568,22448,22292,22264,22428,22072,22392,22168,22248,22432,22232,22216,22568,22432,22496,22340,22664,22440,22188,22444,22424,22440,22348,22500,22348,22276,22136,22392,22348]
+          },
+          "selected_fat": {
+            "median": 18976,
+            "p95": 19220,
+            "samples": [19248,18600,18548,19200,18808,19028,18836,19012,19140,18656,19128,18976,19220,19048,18548,19080,18548,18548,18776,19044,19196,18804,18988,19080,18720,18612,18960,18984,18928,18984,18548]
+          },
+          "pgo": {
+            "median": 17008,
+            "p95": 17276,
+            "samples": [16024,17272,16976,16580,17276,17184,16580,16940,17132,16656,17020,16620,17020,16556,17248,17132,16728,17004,17340,17132,16900,16904,17148,16696,16748,17008,17120,17128,17044,17000,17224]
+          }
+        }
+      },
+      "public_property_cpu": {
+        "method": {
+          "platform": "Linux x86-64",
+          "cpu_affinity": 8,
+          "clock": "CLOCK_THREAD_CPUTIME_ID",
+          "workload": "11 public i32 property operations on four concrete host types, panic=unwind",
+          "warmup_blocks": 3,
+          "measured_blocks": 72,
+          "measured_processes": 576,
+          "round_seed": 640679,
+          "design": "Every 24 measured blocks exercise all permutations of four arms in seeded shuffled order. Each permutation is followed immediately by its reverse, with the same workload rotation for all eight fresh processes. The three initial warmup blocks are retained separately and excluded from statistics.",
+          "confidence": "95% percentile bootstrap (4000 resamples) of the median within-block CPU ratio. Each arm contributes its mean of two CPU ns/op observations in that block.",
+          "profile_use_fixture_rustc_options": ["-Copt-level=s","-Ccodegen-units=1","-Cpanic=unwind","-Clto=fat","-Cstrip=symbols","-Cllvm-args=--addrsig","-Clink-arg=-fuse-ld=lld","-Clink-arg=-Wl,--icf=safe","-Clink-arg=-Wl,-z,pack-relative-relocs","-Cprofile-use=PROFILE"],
+          "training_overlap": "The trainer exercised these same eleven public operations. Measurement uses separately linked fixtures and fresh processes. These results characterize this workload distribution."
+        },
+        "workload_source": "compiled-theme-binding-dispatch-linux-x86_64.json#/property/property_workload_source",
+        "workload_sha256": "2758bd8c66978d414e74ff0a2dad52442ecf0d5d03a22d77df6d4381acf11b70",
+        "fixture_binaries": {
+          "main_shipping": {
+            "bytes": 13001304,
+            "sha256": "a096152279026b540817d8adffe2d6751b6293524f3c8b5d170fcb41c42fb833"
+          },
+          "main_fat": {
+            "bytes": 11366632,
+            "sha256": "abbcc5a626c3cd0f7b2fa78c0da23f108d787da4e6d40589725ee51d094fe48a"
+          },
+          "final_fat": {
+            "bytes": 8852056,
+            "sha256": "ad72925373064183843221b6fcfbb43f7dd74abbdca59b3cae9c8e9b1fd3a934"
+          },
+          "final_pgo": {
+            "bytes": 9220176,
+            "sha256": "66466ace17aed88867fd52d13c3e0b9ff7a5655c96f5795b74984f0481214c00"
+          }
+        },
+        "all_checksums_match": true,
+        "paired_ratio_order": ["median","95% bootstrap lower bound","95% bootstrap upper bound"],
+        "summary": {
+          "metadata_default": {
+            "cpu_ns_per_op": {
+              "main_shipping": 4.37564625,
+              "main_fat": 4.81975625,
+              "final_fat": 4.0481212499999994,
+              "final_pgo": 4.3109625000000005
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.9178635321288159,0.885483893982392,0.938011977742951],
+              "pgo_vs_main_fat": [0.8673495957229337,0.8439055124486633,0.9000188418100175],
+              "pgo_vs_final_fat": [1.0022184282100175,0.971432975286411,1.045800480217598],
+              "final_fat_vs_main_fat": [0.8489877529820091,0.805583744961935,0.8783456843994575]
+            }
+          },
+          "metadata_scoped": {
+            "cpu_ns_per_op": {
+              "main_shipping": 4.9457825,
+              "main_fat": 5.4750049999999995,
+              "final_fat": 4.3922825,
+              "final_pgo": 5.04647875
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [1.0112956088287375,0.9650549119154621,1.0362267137753793],
+              "pgo_vs_main_fat": [0.948199759660576,0.9189861181809929,0.9591074439612314],
+              "pgo_vs_final_fat": [1.1043186725296956,1.0712173472483353,1.129230559944966],
+              "final_fat_vs_main_fat": [0.8545952381950566,0.8338902445322504,0.8834375653653527]
+            }
+          },
+          "metadata_cached_override": {
+            "cpu_ns_per_op": {
+              "main_shipping": 5.391870000000001,
+              "main_fat": 5.69214125,
+              "final_fat": 4.5868850000000005,
+              "final_pgo": 5.0227575
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.9110565191154973,0.8658475330515323,0.9482001620008451],
+              "pgo_vs_main_fat": [0.8883478848050581,0.8485708267938593,0.9203096093738243],
+              "pgo_vs_final_fat": [1.0885109102123982,1.0565024234875575,1.130464219287917],
+              "final_fat_vs_main_fat": [0.8210596410694155,0.7904329667047005,0.8355087113891684]
+            }
+          },
+          "get_plain": {
+            "cpu_ns_per_op": {
+              "main_shipping": 4.89518125,
+              "main_fat": 5.655436249999999,
+              "final_fat": 4.5141525,
+              "final_pgo": 4.61977
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.9062525527163046,0.8649214283363447,0.9498277221261576],
+              "pgo_vs_main_fat": [0.8140761757486596,0.8040194690189015,0.8294211403232714],
+              "pgo_vs_final_fat": [0.999140367950653,0.9762634631476742,1.0478532496061774],
+              "final_fat_vs_main_fat": [0.8107409749095149,0.7924625152092878,0.8385841963568182]
+            }
+          },
+          "get_derived_default": {
+            "cpu_ns_per_op": {
+              "main_shipping": 9.82168375,
+              "main_fat": 11.02501,
+              "final_fat": 8.674463750000001,
+              "final_pgo": 8.5136875
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.8325883332449096,0.8131981829968803,0.8496081773118365],
+              "pgo_vs_main_fat": [0.766678441053748,0.749425102998847,0.7780388212948113],
+              "pgo_vs_final_fat": [0.9713844117666928,0.9402394746650793,1.0055841678208963],
+              "final_fat_vs_main_fat": [0.7816007734196994,0.7595368342795852,0.8004523671261323]
+            }
+          },
+          "get_mixed_hosts": {
+            "cpu_ns_per_op": {
+              "main_shipping": 11.6511025,
+              "main_fat": 12.3933075,
+              "final_fat": 9.39633875,
+              "final_pgo": 9.30455125
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.8047100664348137,0.7860809715659247,0.8236783405689416],
+              "pgo_vs_main_fat": [0.7594790010499901,0.7408011317396307,0.7847228516694451],
+              "pgo_vs_final_fat": [1.0031548058068624,0.9854167510874992,1.0360527061459763],
+              "final_fat_vs_main_fat": [0.7593332071566028,0.7387053770828884,0.7709934517394978]
+            }
+          },
+          "get_effective_local": {
+            "cpu_ns_per_op": {
+              "main_shipping": 5.2116125,
+              "main_fat": 5.8858925,
+              "final_fat": 4.99292625,
+              "final_pgo": 5.0236600000000005
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.996300672401591,0.9542146335377755,1.0261362724747878],
+              "pgo_vs_main_fat": [0.8981540455521957,0.8743816113188443,0.9224455349607638],
+              "pgo_vs_final_fat": [1.02910821019154,1.0050960788763312,1.0465597473656487],
+              "final_fat_vs_main_fat": [0.8575758257633737,0.830025070028712,0.8870232337828852]
+            }
+          },
+          "mixed_75read_25write": {
+            "cpu_ns_per_op": {
+              "main_shipping": 20.46908125,
+              "main_fat": 18.709006249999998,
+              "final_fat": 16.781121249999998,
+              "final_pgo": 14.366242499999998
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.6684125967108794,0.6557005875438588,0.6810410365544765],
+              "pgo_vs_main_fat": [0.7552109429792417,0.7400321683205863,0.7670047859536896],
+              "pgo_vs_final_fat": [0.8064473799701215,0.7703337009392038,0.8324623288585271],
+              "final_fat_vs_main_fat": [0.9508046798160901,0.913198566769822,0.9696483194979252]
+            }
+          },
+          "style_set_read_dispose": {
+            "cpu_ns_per_op": {
+              "main_shipping": 251.55,
+              "main_fat": 210.22705000000002,
+              "final_fat": 204.248025,
+              "final_pgo": 145.5123125
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.571163867694843,0.5596437471896825,0.5831506339076811],
+              "pgo_vs_main_fat": [0.7089106190788752,0.6993344767534182,0.7343703848842833],
+              "pgo_vs_final_fat": [0.6982956759387737,0.6763294521225715,0.7167419301626679],
+              "final_fat_vs_main_fat": [1.021874385713332,0.9954728121502472,1.0401570626509975]
+            }
+          },
+          "style_binding_emit_read": {
+            "cpu_ns_per_op": {
+              "main_shipping": 95.9897875,
+              "main_fat": 94.56465,
+              "final_fat": 98.3417625,
+              "final_pgo": 63.7278
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.617437888564307,0.6062080013071933,0.6355340784681276],
+              "pgo_vs_main_fat": [0.6604394085150964,0.6490364202803249,0.6744981591975721],
+              "pgo_vs_final_fat": [0.6417209154168799,0.6200618850123043,0.6557744168960452],
+              "final_fat_vs_main_fat": [1.020207505176524,1.0103481733378414,1.058315733510363]
+            }
+          },
+          "coerce_scoped_local": {
+            "cpu_ns_per_op": {
+              "main_shipping": 17.298475000000003,
+              "main_fat": 17.1635125,
+              "final_fat": 13.6736,
+              "final_pgo": 14.062675
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.7889922093606453,0.7723356998982771,0.8181726099664286],
+              "pgo_vs_main_fat": [0.8230830971171723,0.7813066930840796,0.8574538686012658],
+              "pgo_vs_final_fat": [0.9729380860361592,0.9459725050014787,1.0394682369018668],
+              "final_fat_vs_main_fat": [0.8139113598906814,0.7956776010966081,0.8724213968017573]
+            }
+          }
+        },
+        "layout": "Blocks are in collection order and include the initial warmups. Each row starts with the arm and gives one process's total thread CPU nanoseconds for each lane in workload_order. Divide by that lane's operation count. Each arm occurs twice per block.",
+        "workload_order": ["metadata_default","metadata_scoped","metadata_cached_override","get_plain","get_derived_default","get_mixed_hosts","get_effective_local","mixed_75read_25write","style_set_read_dispose","style_binding_emit_read","coerce_scoped_local"],
+        "operations_and_checksum_by_lane": {
+          "metadata_default": [200000,3400000],
+          "metadata_scoped": [200000,3400000],
+          "metadata_cached_override": [200000,5800000],
+          "get_plain": [200000,3400000],
+          "get_derived_default": [200000,5800000],
+          "get_mixed_hosts": [200000,5425000],
+          "get_effective_local": [200000,20325000],
+          "mixed_75read_25write": [200000,29693725],
+          "style_set_read_dispose": [20000,10679440],
+          "style_binding_emit_read": [20000,10099440],
+          "coerce_scoped_local": [20000,140000]
+        },
+        "thread_cpu_ns_by_block": [
+          [
+            ["main_fat",1293413,1488634,1498559,1521253,2652094,2902917,1406532,4893008,5554851,2645945,436169],
+            ["final_pgo",807071,989952,1052115,1259373,1676033,1720188,880640,2826544,2920834,1646689,234729],
+            ["main_shipping",989732,1058895,1529054,1020528,3085158,2169556,1041289,3825790,5129119,1965383,375118],
+            ["final_fat",653823,809964,855012,1096882,1955899,2102727,1351860,4998444,6686135,2536963,366846],
+            ["final_fat",1138222,1299583,1235047,1256900,2110479,2309725,1289708,4837605,6808927,2485386,408007],
+            ["main_shipping",1297289,1504196,1598467,1482565,2706395,4025617,1440683,5680839,7501026,2959903,397031],
+            ["final_pgo",1016762,1376007,1194116,1300394,2134184,2280792,1293584,3548648,4171645,1648983,370281],
+            ["main_fat",1331631,1596574,1503346,1568834,2935526,3275692,1439360,4844595,6104530,2577203,405352]
+          ],
+          [
+            ["main_shipping",1195789,1534562,1500902,1586289,2751312,2879032,1358180,5495403,8245354,2788597,416088],
+            ["final_pgo",1031794,1286122,1191272,1273063,2206622,2270457,1307715,3538033,4291543,1533130,361858],
+            ["final_fat",1102369,1303068,1300234,1307054,2200944,2332419,1243169,4831406,6202104,2449363,336070],
+            ["main_fat",1340514,1589644,1624787,1624957,2677873,2870669,1437538,5041057,5448593,2531946,424291],
+            ["main_fat",1296579,1559359,1556705,1586770,2722399,2854826,1422636,5083731,5540501,2503543,423680],
+            ["final_fat",1094188,1352232,1279343,1229639,2171570,2284238,1237090,4908841,6151318,2494340,382429],
+            ["final_pgo",1098825,1313964,1190812,1235928,2099533,2381342,1330488,3661856,3996254,1731135,342769],
+            ["main_shipping",1223820,1578608,2085332,1411790,3046031,2989736,1374514,5441283,7597650,2667468,464501]
+          ],
+          [
+            ["main_shipping",1269658,1330629,1628573,1482004,2711203,2930599,1347043,5472970,7810236,2806984,1688932],
+            ["main_fat",1215398,1448835,1531558,1668411,2846164,2867615,1430147,4878836,5792946,2477745,429539],
+            ["final_fat",1032256,1299343,1218442,1274375,2138711,2307312,1311010,4815382,5978091,2775378,369229],
+            ["final_pgo",1029602,1395215,1108118,1158964,2181644,2485767,1323879,3727884,3878258,1645837,319806],
+            ["final_pgo",870494,1149280,1222688,1602502,2724542,4895130,1866176,6391135,3536761,1675952,425093],
+            ["final_fat",761102,940219,2161946,1092975,2184429,2222005,885607,4654392,4693231,2139812,293227],
+            ["main_fat",898987,1028920,996573,1047327,2052763,2783180,1277490,3026421,3866981,1581202,288118],
+            ["main_shipping",1043212,995941,902723,1089701,1770103,2410635,1048849,4009283,5287394,1655903,343841]
+          ],
+          [
+            ["main_fat",1133516,1021990,1153555,1112064,2328653,2743060,1450637,4070364,4837024,2230116,488967],
+            ["final_fat",1018044,1491478,1417218,899048,1645848,2241414,1551028,4599611,4367806,2204909,242320],
+            ["main_shipping",777858,955922,1116481,903644,2317867,2392939,981920,4552891,5155497,2306170,281058],
+            ["final_pgo",866379,1023833,1595563,899228,1936831,2361372,1710033,2691473,2722970,1325942,229801],
+            ["final_pgo",666150,1208166,1050272,884966,2050931,1775170,931115,2519727,2802529,1254697,382509],
+            ["main_shipping",963994,1213856,1972644,1285482,2870430,2452993,1513210,4869171,5167916,2629901,810125],
+            ["final_fat",678690,869763,1072915,906588,1941447,1880357,1477157,4520093,4359313,1975458,412464],
+            ["main_fat",740842,955021,1242728,934430,2254643,2168345,938046,3989834,4680801,1709923,331403]
+          ],
+          [
+            ["final_fat",742294,877565,888612,1078084,1714230,1991742,854601,3543821,3884357,1861638,239286],
+            ["main_fat",1208668,1417799,1472039,1515774,2438316,2599626,1232774,5360263,5712957,2432388,427205],
+            ["main_shipping",1226975,1495925,1529284,1487182,2606036,2781237,1331630,5499890,7448297,2715789,453805],
+            ["final_pgo",1056402,1463036,1243189,1303098,2279390,2414461,1229138,3616840,3923625,1560040,317853],
+            ["final_pgo",1126555,1346543,1301986,1307805,2220162,2585966,1351599,3674846,3878668,1718686,352374],
+            ["main_shipping",1129680,1446281,1528924,1450568,2588640,2739724,1258863,5282156,6028466,2639736,403219],
+            ["main_fat",1216789,1512870,1619339,1475935,2739595,3053202,1449946,4866468,5607070,2550053,412563],
+            ["final_fat",1097102,1239283,1252943,1251772,2217508,2231409,1260315,4745969,6351437,2499126,351272]
+          ],
+          [
+            ["main_shipping",1200616,1431629,1559330,1410948,2634839,2900153,1348135,5509023,7457312,2817581,422699],
+            ["final_pgo",1051304,2372518,1192694,1217220,2099903,2289576,1238892,3590249,4025518,1626199,352564],
+            ["final_fat",1112885,1224652,1084073,1183651,1898584,2343696,1285582,4984804,6169275,2391948,371252],
+            ["main_fat",1117202,1391159,1512190,1517206,2767586,2694457,1355336,4292675,4833209,2273021,379374],
+            ["main_fat",1239854,1474584,1532149,1460072,2746185,2902928,1435665,4890975,5604586,2513619,396069],
+            ["final_fat",1048189,1254857,1195538,1195999,2083359,2151681,1175628,4403830,6100624,2470825,390150],
+            ["final_pgo",1096881,1361185,1195638,1428535,2142977,2290727,1219354,3582138,3618522,1563827,362319],
+            ["main_shipping",1118183,1315556,1471208,1308026,2421062,2947183,1428745,5886495,7405395,2570523,368027]
+          ],
+          [
+            ["main_fat",1196360,1569795,1541963,1488564,2946422,3425646,2708448,4342028,5114086,2587799,394126],
+            ["main_shipping",1176049,1559019,1609964,1428745,2626306,2893093,1279463,5551827,7299486,2776570,407135],
+            ["final_pgo",1045445,1304160,1178183,1229679,2111901,2304457,1268687,3575698,4037225,1566119,358593],
+            ["final_fat",1060207,1272483,1183610,1192754,2136347,2313630,1276008,4868641,6150799,2519728,351072],
+            ["final_fat",1067137,1224762,1286713,1217140,2116758,2354933,1253795,4744657,6196135,2556933,346426],
+            ["final_pgo",1031734,1263709,1176570,1199324,2119322,2270137,1251311,3822676,4019117,1594291,328028],
+            ["main_shipping",1204842,1380323,1578277,1430999,2600538,2799644,1350879,5563214,7372756,2683591,518592],
+            ["main_fat",1207425,1558008,1457467,1510857,2752834,2879252,1473001,4767210,5538978,2419348,389159]
+          ],
+          [
+            ["main_fat",1006337,1036382,963984,1050872,1997601,2433309,1016772,4762223,4231163,1990611,270021],
+            ["final_fat",690247,762244,952547,962523,1440913,1772306,833090,2962146,3908183,2526468,306045],
+            ["final_pgo",856384,919027,950383,824426,1482685,1667169,852037,2767656,2641258,1221337,244964],
+            ["main_shipping",735994,867851,931025,946207,1893015,2163829,914030,4253246,4718468,1676994,493393],
+            ["main_shipping",806720,895872,1109740,1164267,2024121,2085782,861701,3557551,4471511,1817093,330963],
+            ["final_pgo",910344,884205,1011104,854140,1632908,1915539,1168809,2431076,2530314,1017694,253007],
+            ["final_fat",930935,763035,894871,817616,1996930,2302890,1523956,3208142,3903927,1889830,239146],
+            ["main_fat",1270289,1220055,1068069,1025845,2372118,2697872,1187536,3691140,4770595,2493609,339946]
+          ],
+          [
+            ["main_fat",925491,942932,1253935,1289587,2320121,4677577,1019155,3150966,4490809,1610686,302320],
+            ["main_shipping",742455,815964,934661,797256,1704985,2117109,911165,3474237,5137821,1645506,306796],
+            ["final_fat",670407,737247,891365,1035139,1486822,1784875,952146,3013152,3779301,2077019,238425],
+            ["final_pgo",677337,812608,1103461,873790,1576094,2078482,922862,2568149,2470845,1005125,233518],
+            ["final_pgo",694362,942682,948551,754122,1441724,1592209,856645,2646316,3279137,1171422,231644],
+            ["final_fat",947550,913138,959037,791427,1880958,1753939,1163430,3817177,3754213,1930231,244463],
+            ["main_shipping",857535,859298,927509,948090,2194243,2229436,1042490,4211544,4910684,1745726,391983],
+            ["main_fat",881631,909723,1002100,997944,2183708,2682159,982381,3452885,3270304,1853106,269972]
+          ],
+          [
+            ["final_pgo",724247,804877,958026,902492,1456867,1682733,965486,2537705,2863398,1021679,232316],
+            ["final_fat",666862,847039,1024113,991334,1700879,1682112,1097092,3246579,3785170,1575443,243072],
+            ["main_shipping",836824,883584,1045295,809414,1705938,1994486,856143,3594447,4521215,2220442,347176],
+            ["main_fat",794903,955010,1032716,1122159,2467059,2285780,989071,3773262,3390923,1534382,421346],
+            ["main_fat",990183,996742,1187656,922522,2081385,2600608,962932,3098438,4046618,1468363,282400],
+            ["main_shipping",791427,942091,961741,850866,1649263,1973285,991275,3506575,4591900,1779827,323000],
+            ["final_fat",684658,789765,759209,751338,1479551,1829791,830726,3016506,3892870,1605207,257363],
+            ["final_pgo",794111,824516,1084104,806580,1513161,1599620,851236,2280742,2405037,1008900,233237]
+          ],
+          [
+            ["final_pgo",704788,814411,1050612,905938,1796191,2057169,1028590,2623792,2806934,1029211,235450],
+            ["main_shipping",1049059,1328266,991073,833049,1988307,2218860,919958,3646885,5228316,1778054,286256],
+            ["final_fat",859228,720431,1387354,1096772,2268484,1834058,1195137,4474456,5810101,1938964,287317],
+            ["main_fat",796485,838207,1094298,1139114,3127642,2927143,1437968,4864616,5673669,2512547,650858],
+            ["main_fat",1238021,1509025,1541762,1578498,2792723,2982125,1442656,4921690,5649592,2528501,396509],
+            ["final_fat",1094398,1234306,1224311,1198483,2127164,2291569,1235678,4783675,6900763,2513529,410891],
+            ["main_shipping",1239363,1483597,1528493,1352441,2624874,2859342,1373804,5554141,7409901,2677293,416549],
+            ["final_pgo",1014970,1322937,1254115,1286714,2386339,2422864,1276258,3652031,4409318,1671656,332895]
+          ],
+          [
+            ["main_shipping",1346613,1399492,1520782,1445009,2566738,2897860,1352752,5262947,7063115,2769319,376259],
+            ["main_fat",1057103,1325672,1249678,1270820,2382744,2721057,1434915,4644117,5443716,2475652,430500],
+            ["final_pgo",1046106,1349077,1145694,1207426,2098942,2251680,1245282,3604731,3909204,1596645,324483],
+            ["final_fat",1063763,1303639,1203130,1202198,2163638,2318218,1264932,4775182,6239770,2469603,459393],
+            ["final_fat",760021,963834,866098,876223,1648492,1984642,896363,3437913,4105947,1698045,252826],
+            ["final_pgo",835713,1208137,1068760,1297380,1723713,2387250,1394724,2895527,3020222,1095760,224163],
+            ["main_fat",1174917,1020698,1154998,1077052,2153093,2343556,1454463,4348488,4803084,2161895,389870],
+            ["main_shipping",1097552,1345211,1411700,1254175,2422152,2687317,1280254,4934088,6543472,2351618,425302]
+          ],
+          [
+            ["final_fat",1046226,1345611,1186104,1188087,2123679,2409854,1273755,4722504,6203807,2451156,418763],
+            ["main_shipping",1192794,1475965,1512069,1393903,2612205,2841405,1307715,5514452,7383131,2708428,506994],
+            ["main_fat",1194377,1498108,1483186,1426602,2727306,3185979,1426011,4836524,5488803,2513999,424521],
+            ["final_pgo",1010803,1258582,1120075,1192664,2022238,2230708,1293123,3524191,3931276,1524988,342029],
+            ["final_pgo",1101388,1262368,1123972,1165173,2022047,2278829,1338861,3664119,3800973,1506270,346325],
+            ["main_fat",1125414,1575353,1613620,1658346,2833675,2963418,1412761,4891004,5783522,2523283,398963],
+            ["main_shipping",1220205,1480732,1239995,1192363,2245530,2511976,1197611,4563598,6794766,2660457,431923],
+            ["final_fat",1118974,1315617,1175478,1207005,2117960,2273141,1250551,4773079,6077199,2480870,344673]
+          ],
+          [
+            ["final_fat",796574,727562,1234646,1237100,2224909,2316115,1274726,5106094,5467672,1751345,256101],
+            ["final_pgo",651840,807771,837375,742484,1444879,1526009,861812,2250998,2395373,988821,243822],
+            ["main_fat",781182,864065,897826,938966,1794970,2056919,922722,3041984,3324084,1475676,273106],
+            ["main_shipping",750256,807180,927970,793671,1652898,1959184,850165,3538733,4218574,1638238,296571],
+            ["main_shipping",750686,812318,938586,813220,1903381,2010820,943874,3416761,4056644,1624536,301498],
+            ["main_fat",774482,842182,1004474,926287,1797593,2193853,978726,3007052,3313328,1485179,269091],
+            ["final_pgo",747011,832779,856303,838487,1437728,1650424,849093,2312059,2839272,2391908,233026],
+            ["final_fat",681884,734833,819879,857035,1483587,1886956,819308,3267379,3696268,1743784,238725]
+          ],
+          [
+            ["final_fat",754712,888852,848803,779158,1453522,1542785,842614,3450732,3874122,1746318,243072],
+            ["main_shipping",753300,881230,1177210,843375,1693389,2482743,925306,3730127,4457109,1931513,319235],
+            ["final_pgo",728884,818398,1033547,818598,1513942,1713829,929843,2568010,2586236,1128188,373986],
+            ["main_fat",847791,823725,1005260,1107387,2003749,2518286,979536,3003568,3522519,1603675,270161],
+            ["main_fat",1244350,1533141,1514052,1152985,2433660,2444816,1764434,4177272,5039410,2593317,403070],
+            ["final_pgo",1118784,1279373,1176200,1237641,2088536,2333230,1328085,3665030,4077655,1617195,352955],
+            ["main_shipping",1218002,1503305,1545748,1390178,2599826,2846813,1340854,5657314,7421047,2813555,497921],
+            ["final_fat",1046407,1205853,1246314,1251602,2118921,2290807,1248547,4773730,5978903,2519407,344232]
+          ],
+          [
+            ["main_fat",1329988,1490566,1481984,1432741,3088653,3023647,1551859,4997102,5634339,2641148,423710],
+            ["final_pgo",888181,1210430,993798,1026406,1837843,2175285,1245743,3069705,3189784,1372142,293477],
+            ["main_shipping",1222408,1455014,1492259,1439812,2619957,2848126,1334364,5616463,7350112,2696640,397611],
+            ["final_fat",1076360,1245853,1224051,1301035,2121055,2343977,1239624,4783545,6208974,2530975,376830],
+            ["final_fat",1080107,1376677,1195808,1275247,2130449,2324488,1282888,4775232,6549521,2496453,352895],
+            ["main_shipping",886168,955091,1384239,1073046,1918183,2734027,1005035,4282389,5173655,1811955,346636],
+            ["final_pgo",925316,1106085,1128298,1154758,1986394,1935519,1576114,2905501,2585124,1340223,306856],
+            ["main_fat",824467,988641,1191041,1172554,2211730,2455813,1263400,4365744,4657828,1748931,339936]
+          ],
+          [
+            ["final_pgo",1058144,1203420,1195629,1146825,1871573,2358898,1259343,3532554,4235430,1620941,362409],
+            ["final_fat",907580,1063802,1104623,1142389,1973725,2182887,1098284,3926309,4617418,2054395,330081],
+            ["main_fat",1235177,1549334,1592279,1564757,2797541,2947454,1483046,4804506,5516835,2432408,424952],
+            ["main_shipping",1154107,1365231,1437268,1398681,2562722,2938610,1312232,5486540,6627077,2450644,436439],
+            ["main_shipping",1228667,1430828,1573410,1435636,2658264,2862277,1340224,5593379,7678640,2772844,446804],
+            ["main_fat",1299973,1475785,1609333,1650935,2789870,3134882,1748090,4938065,5652927,2447160,400826],
+            ["final_fat",1128008,1274085,1206224,1276468,2099633,2292810,1281266,4817144,6267772,2534890,347507],
+            ["final_pgo",1051764,1285922,1212333,1225783,2120805,2287032,1228026,3588257,4101300,1618637,347167]
+          ],
+          [
+            ["main_shipping",1248036,1405380,1499650,1434013,2659226,2773385,1369387,5668451,7437181,2651654,439834],
+            ["final_fat",1053867,1305902,1160676,1228998,2173763,2259681,1215798,4699750,6150287,2463203,340466],
+            ["final_pgo",1133576,1341015,1191092,1146675,2098351,2176337,1342206,3728355,3889915,1678968,332885],
+            ["main_fat",1085013,1254336,1253714,1322197,2552446,2781306,1457257,3920280,4290001,1976820,385383],
+            ["main_fat",1210541,1641191,1524777,1471168,2814796,2944519,1435605,4750265,5459119,2482002,389259],
+            ["final_pgo",1029821,1295257,1166535,1279844,2089758,2383545,1271681,3551502,4009664,1581502,371151],
+            ["final_fat",786059,822093,1072014,791337,1534953,1645448,1346293,3932659,3891448,1708631,239046],
+            ["main_shipping",840250,1057473,1046687,1051624,3166319,2964299,908912,3861373,4401196,1693569,401737]
+          ],
+          [
+            ["final_pgo",652160,794461,865948,822623,1556395,1738475,948601,2707486,2930368,1309638,230964],
+            ["main_fat",760291,821572,1057503,967309,2685794,2107804,990283,3485294,3550561,1631666,1390569],
+            ["main_shipping",878086,812989,985856,790596,1747099,2395523,962311,5331670,6695990,1948198,280477],
+            ["final_fat",646822,736936,1031114,822483,1755170,1598377,843825,2852523,3583660,1657145,278034],
+            ["final_fat",674933,738629,754122,750637,1639559,1595183,825038,3461018,3526095,1620920,249821],
+            ["main_shipping",786039,930685,1167787,992827,1690124,2020825,872327,3545743,4076253,1642183,280758],
+            ["main_fat",898516,843655,957054,894110,1795150,2077640,1185994,3439215,3768094,1607020,271033],
+            ["final_pgo",1061809,1306292,1124102,1213034,2072132,2322855,1248678,3564252,3992638,1542575,356180]
+          ],
+          [
+            ["main_shipping",1197381,1447203,1550045,1483627,2543593,2881696,1295888,5398790,7257103,2668489,443199],
+            ["final_fat",1044824,1268246,1157101,1126836,2094916,2271179,1214085,4920928,6024941,2483373,341187],
+            ["main_fat",1203199,1494232,1446351,1505219,2639135,2997197,1506761,4713481,5350979,2441000,384733],
+            ["final_pgo",1029942,1291841,1143701,1355997,2171289,2516563,1310189,3799621,3999889,1585949,345234],
+            ["final_pgo",978876,1194446,1074628,1139084,1911143,2233922,1160627,3156715,3940731,1474714,316380],
+            ["main_fat",1034799,1258291,1319442,1287455,2475332,2750371,1412131,4361587,4269079,2009710,361317],
+            ["final_fat",728995,803666,985155,906007,1990480,1744124,826880,3205668,5969212,2038922,242490],
+            ["main_shipping",748303,1061909,1034068,1174197,1957652,2307993,1018685,4049112,4234418,1802941,331343]
+          ],
+          [
+            ["main_shipping",846869,988069,997844,897615,1775721,2146282,917634,4196562,4949151,1859405,285355],
+            ["final_pgo",836965,1287875,945286,902532,1463787,1698926,991125,3254220,3495309,1151873,422428],
+            ["main_fat",1045004,1071934,992115,1261226,1925584,2816298,1008200,3710539,4471180,1881428,335750],
+            ["final_fat",782715,804847,1153295,941951,1891253,2129307,1003051,3882424,6579215,1924462,307838],
+            ["final_fat",941390,1097913,876774,839700,1643354,2181725,926147,4061590,5302993,2002719,394297],
+            ["main_fat",1729742,1151813,1441895,923614,2419890,2585215,1049351,3508298,3446786,2285430,269501],
+            ["final_pgo",757857,944565,1212133,902212,1717545,1833036,891956,2556342,3025420,1240465,330101],
+            ["main_shipping",871987,1116561,904495,850705,1761250,2367451,1187046,4003284,4285483,2066483,331173]
+          ],
+          [
+            ["final_pgo",744267,1151703,984294,810224,1752156,1719347,1083362,2738994,2674047,1163881,339766],
+            ["main_shipping",794432,807911,935111,1113897,2095557,2274643,957915,3966490,5924972,2150188,281719],
+            ["main_fat",910104,825638,934711,1046987,2158771,2441912,999216,3792520,3548848,1663985,375668],
+            ["final_fat",667623,962902,830575,894541,1595643,2025483,1008430,2997809,3827904,2330196,239306],
+            ["final_fat",1004444,816024,863714,879789,1601131,1830692,890795,4609475,5027257,4976591,239356],
+            ["main_fat",886659,1119184,1089591,1265031,2616732,2292790,1121097,4038606,3916955,2084881,268700],
+            ["main_shipping",868171,867761,1052755,833169,1656734,1959635,854921,3684069,4541926,1957381,357191],
+            ["final_pgo",844856,836785,1009381,778878,1671516,1826116,849073,2740385,2522181,988520,226116]
+          ],
+          [
+            ["final_pgo",782494,868341,1154627,743887,1528833,1583765,849674,2355693,2498336,1054809,233117],
+            ["main_fat",980749,1103992,1923581,922092,1882240,2440690,960799,3247961,3489851,1458279,280587],
+            ["final_fat",650688,1166435,899037,936903,1781360,1597556,886798,3129966,3511163,1825896,252175],
+            ["main_shipping",1040327,1187436,1259393,1242348,2214504,2491696,1215888,4834280,6459578,2153172,371372],
+            ["main_shipping",1001048,1267245,1249068,1225883,2228314,2665794,1204011,4556217,5753277,2111891,370141],
+            ["final_fat",1025585,1059325,1015701,1027548,1819005,2035827,1130722,3850937,4656055,2149557,398433],
+            ["main_fat",1023242,1253455,1308106,1249057,2357846,2461752,1284330,3927361,4427255,1986975,384181],
+            ["final_pgo",903304,1149810,990503,1022131,1744205,2027996,1148408,3540325,3749086,1421104,294108]
+          ],
+          [
+            ["main_fat",1228287,1322677,1247505,1248196,2342965,2474390,1323659,3941882,5218341,2404225,408808],
+            ["final_pgo",904646,1229068,1176260,1235508,1784365,2026424,1097893,2993813,3181221,1364209,292104],
+            ["final_fat",646531,1164252,857846,779760,1511898,1533791,849533,2833093,3449080,1582383,258154],
+            ["main_shipping",751999,853809,899888,797537,1632648,1939474,848011,3380689,4142481,1640991,284012],
+            ["main_shipping",849223,809854,903314,794652,1858384,2045762,923784,3499185,4360766,1878093,284132],
+            ["final_fat",664258,763265,754612,832829,1483437,1536986,841241,3191587,3460336,1642583,239436],
+            ["final_pgo",949052,814311,879658,787051,1415426,1660540,857666,2260041,2468271,988811,225125],
+            ["main_fat",809775,985736,934740,1000718,1907166,2454000,1352992,3568448,3706383,1674071,303201]
+          ],
+          [
+            ["final_fat",668374,812960,808443,884576,1617586,1564356,933408,3155262,3427849,1648071,238996],
+            ["main_fat",788462,953758,1034429,905687,1856000,2215165,1012766,3436702,3351765,1480371,317723],
+            ["final_pgo",652871,921560,878297,754582,1414925,1557156,938145,2290376,2467860,1056361,291784],
+            ["main_shipping",736535,954570,1046807,804105,1691375,1947997,953818,3878798,4685899,1819756,331643],
+            ["main_shipping",773290,801282,1041519,889142,1971242,2727747,990173,3908604,4259915,1637155,289260],
+            ["final_pgo",688724,896884,1122519,757156,1552930,1665758,889643,2378227,2686636,1034759,230693],
+            ["main_fat",1304791,925857,922262,1223519,2729990,2170147,940729,3195403,3536069,1758766,590298],
+            ["final_fat",760732,756946,753651,1022672,1667851,1839556,1059015,3305136,4227868,1828098,297001]
+          ],
+          [
+            ["final_fat",919738,1064554,1038835,921230,1726177,1623364,840991,4303872,4733500,2125611,309491],
+            ["final_pgo",895892,1169290,1004383,1016392,1781639,2031682,1129941,3013171,3195783,1337900,296000],
+            ["main_shipping",1069071,1200656,1304761,1192243,2271759,2594199,1226604,4569266,5747408,2121244,370191],
+            ["main_fat",1020268,1328496,1252963,1290680,2282004,2506488,1286744,3892810,4442717,2016830,365253],
+            ["main_fat",1026026,1257470,1271040,1258321,2327031,2457145,1272844,4124163,4653522,1996009,391252],
+            ["main_shipping",999126,1241817,1235348,1195688,2200923,2535872,1259744,4950603,5786246,2204178,374948],
+            ["final_pgo",896894,1145063,994479,1025635,1935048,2228384,1109160,3000913,3205978,1361175,290782],
+            ["final_fat",932657,1142660,1015600,1020868,1795480,2179933,1336117,3910366,4614504,2068697,306366]
+          ],
+          [
+            ["main_shipping",991314,1181658,1266664,1263228,2293842,2782890,1266213,4482837,5732696,2114986,371693],
+            ["main_fat",1043301,1377358,1480663,1466702,2314542,2515001,1290899,3911698,4280897,1985783,359986],
+            ["final_fat",664088,760591,755323,763235,1810543,2015197,1138062,3864257,4101329,1597596,238255],
+            ["final_pgo",654313,825688,950153,775764,1416937,1611387,887500,2443313,2589832,1062059,250032],
+            ["final_pgo",769665,860250,890785,1101077,1410588,2727346,863405,2311928,2479588,1209298,232105],
+            ["final_fat",988520,1171032,1486361,1027979,2256226,2342034,1094788,3933231,5112584,2494620,310442],
+            ["main_fat",1060858,1276529,1357409,1287856,2349444,2454801,1279994,4050885,4913127,2040756,391302],
+            ["main_shipping",994930,1373483,1286163,1252503,2257949,2463074,1243930,5063811,5808649,2171069,396760]
+          ],
+          [
+            ["final_pgo",876333,1200315,1004494,1026236,1817994,2186772,1269669,3143535,3209594,1348837,292895],
+            ["main_fat",1022811,1255687,1270059,1298912,2295845,2450585,1367544,4292935,4344731,2036929,386926],
+            ["final_fat",706240,761733,761983,753791,1471038,2161845,1133245,3852420,4655239,1900577,239496],
+            ["main_shipping",1077152,905487,940019,812488,1807598,2173212,886588,3584801,4389388,1729322,345523],
+            ["main_shipping",996672,854261,965446,1029772,1753888,2263126,969742,3506435,4190002,1736653,280838],
+            ["final_fat",840880,754372,824647,900810,1498649,1560430,829154,3140211,3431444,1967467,238464],
+            ["main_fat",785769,900940,1027619,1034679,1941267,2291498,1217410,3091298,3795655,1848960,266877],
+            ["final_pgo",753821,933238,839598,824686,1700049,1931663,1229589,3027142,3053522,1184091,290692]
+          ],
+          [
+            ["main_fat",884315,1039497,1017573,937424,2190959,2033314,1151403,3464222,3804369,1753218,324693],
+            ["final_pgo",875462,1152705,1023493,1015060,1751545,2085622,1137231,2982486,3327008,1391109,296291],
+            ["final_fat",916112,1066966,1035611,1026106,1893877,1999164,1126366,3974511,4876213,2088617,317042],
+            ["main_shipping",972155,1245112,1286844,1232883,2272450,2541370,1197762,4705869,5910391,2263397,377502],
+            ["main_shipping",1018615,1240715,1238211,1254967,2270457,2511705,1261145,4498771,5728921,2206251,374316],
+            ["final_fat",930544,1060207,989031,1041148,1763693,2122948,1096420,3879630,4671328,2072262,308809],
+            ["final_pgo",865777,1190250,986727,1013407,1731295,2057119,1122009,3022225,3171247,1337489,291033],
+            ["main_fat",1024263,1455865,1235983,1054689,1958483,2216116,1323028,3923345,4390881,1974517,360556]
+          ],
+          [
+            ["main_shipping",1132384,938957,932006,868532,3884097,4377261,896383,3750789,4221258,1921308,769184],
+            ["final_pgo",694323,1074047,880369,765719,1611777,1668972,1097093,2672685,2762639,1056782,232766],
+            ["main_fat",856034,975220,962892,1059025,2238169,2423124,1022071,4639791,3747844,2005432,267919],
+            ["final_fat",816054,768382,861551,834622,1644906,1657546,1160926,3138167,4012098,2145301,241369],
+            ["final_fat",839238,756244,766600,865718,1521903,1566500,831777,3229503,3666253,1858635,239657],
+            ["main_fat",826670,834070,982160,981239,2138651,3133351,1229749,3556390,4194859,1756092,328949],
+            ["final_pgo",717306,944985,1047748,918215,1695742,1725636,871857,2499267,2801787,1088469,262771],
+            ["main_shipping",867460,864747,903163,827761,1972514,2351768,1003974,3854984,4823404,1804234,337231]
+          ],
+          [
+            ["main_fat",1153395,1224100,1305792,1309648,2373791,2576432,1263840,3664059,3929675,2099218,362188],
+            ["final_fat",1088499,1172794,1213425,1715622,1935939,1979064,1097512,4275840,5837983,2484566,253347],
+            ["main_shipping",984895,1220527,1516927,1232523,2495521,2514320,1223470,4544057,5723953,2177478,369260],
+            ["final_pgo",941300,1182108,1011555,1073647,1804543,2018682,1153015,2990247,3145739,1310389,313165],
+            ["final_pgo",867230,1196630,1038795,1054067,1732506,2102788,1133916,2989086,3168352,1388825,315669],
+            ["main_shipping",989772,1250260,1271301,1266633,2203187,2600208,1197722,4674592,5988266,2206801,396610],
+            ["final_fat",921680,1058204,969692,1028861,1902360,1982949,1203600,3845348,4640101,2007876,327848],
+            ["main_fat",1106866,1256058,1290290,1284641,2275585,2633206,1287065,3892760,4316470,1968247,368107]
+          ],
+          [
+            ["final_pgo",882663,1155359,997063,1051123,1754570,2070189,1099726,3009486,3169665,1417459,305234],
+            ["final_fat",829113,968671,1013367,949572,1810883,1978783,842774,3318546,3681726,2118151,239746],
+            ["main_fat",800902,846028,906087,905407,2114465,2474130,1103631,3385395,4078456,1591898,266666],
+            ["main_shipping",831427,1017213,1102850,959778,2239380,2214885,980157,3961772,4518200,2061386,284563],
+            ["main_shipping",920459,877795,903654,795403,1663193,2126282,1107568,4187929,4657127,1733058,342249],
+            ["main_fat",740551,1042180,935070,1146565,2122066,2260392,935862,4630196,3567676,1465840,285595],
+            ["final_fat",664739,740682,931735,751648,1515785,1566961,821161,2981394,3873682,1617837,242490],
+            ["final_pgo",849083,902402,1040979,989722,1695241,1868099,875982,2460650,2614629,1099886,318433]
+          ],
+          [
+            ["final_pgo",735664,931365,872107,775003,1616284,1654771,852028,2516043,2518565,1036131,256912],
+            ["main_fat",766921,980248,1457467,1007248,2087996,2183188,924435,3971768,3943986,1738856,270612],
+            ["main_shipping",755784,916914,1030873,1035671,1766667,2037250,858857,4209431,4319254,1638617,282230],
+            ["final_fat",700211,748323,765889,851136,1638087,1621822,842454,2847966,3753703,1600320,384532],
+            ["final_fat",707082,797045,886468,947028,1775721,1839265,1069851,2886603,3785299,1836101,450790],
+            ["main_shipping",755233,875152,1018975,792899,1635973,1980616,852177,3454689,4262449,1974897,280607],
+            ["main_fat",810386,823836,892748,908601,2071041,2192021,942833,2894806,3268861,1508954,346305],
+            ["final_pgo",683938,907209,921230,779669,1420293,1600360,952176,2254223,2505536,988731,295299]
+          ],
+          [
+            ["main_fat",793600,835493,945437,906589,1817053,2064832,1202538,4850985,3627205,2356635,267698],
+            ["main_shipping",875923,1052556,965637,1221236,3032330,2830550,1109610,4700671,5901157,2652175,285164],
+            ["final_fat",2375774,931215,838879,873349,1794128,1846526,1038264,3121622,3718771,1648742,361698],
+            ["final_pgo",736105,821572,839619,755514,1473371,1543296,926068,2374321,3021654,1146586,232736],
+            ["final_pgo",948982,798097,929222,800851,1732777,1598357,849753,2408202,2389995,1086415,224233],
+            ["final_fat",755524,740782,781382,826820,1674190,1627892,918146,3329121,3969274,1980635,254629],
+            ["main_shipping",828122,939447,1088379,973217,2133864,2260182,977944,4292829,6144168,2234253,403220],
+            ["main_fat",1024454,1281626,1246184,1261697,2326079,2471064,1316548,4214228,4330310,2000966,360946]
+          ],
+          [
+            ["main_shipping",959647,1292743,1258212,1228037,2249796,2644764,1217901,4660242,5726457,2126884,376790],
+            ["main_fat",1037293,1285772,1287575,1325291,2330566,2490174,1305212,3894773,4316400,2131491,374406],
+            ["final_fat",910614,1163281,991555,1072876,1772416,2004101,1089090,3935783,4817054,2098331,311864],
+            ["final_pgo",888601,1163050,988540,1039577,1753418,2060274,1099246,2986111,3296603,1349687,357732],
+            ["final_pgo",871506,1141618,1012456,1014539,1771455,2035828,1091944,3003187,3244585,1371539,291483],
+            ["final_fat",909363,1153876,973168,1038034,1801109,1975438,1152323,4084335,4661203,2023449,352174],
+            ["main_fat",909022,1258231,1250029,1328736,2270256,2628299,1275006,3913911,4333676,2028998,362860],
+            ["main_shipping",887811,836334,997282,820441,1973185,2604193,930694,3901602,5721209,1729522,318704]
+          ],
+          [
+            ["final_fat",891015,1007178,854131,850725,1766497,1925474,1038905,3152229,3735876,1969749,275930],
+            ["final_pgo",1468985,1005435,928591,836805,1796351,1969248,1022010,2987073,6410174,2344623,227098],
+            ["main_shipping",1026577,821331,1078615,858747,1934968,2607528,1056651,3920010,4500013,1974146,280627],
+            ["main_fat",1080227,886508,1322547,1054819,2997788,2527259,1090172,3485774,3783047,1909420,270432],
+            ["main_fat",1073366,1079946,1027068,972597,2164539,2278729,1425450,4271834,4537959,2559846,417400],
+            ["main_shipping",843054,818307,1020118,775503,2223227,2402434,1105595,4230141,5571286,1699157,358503],
+            ["final_pgo",845408,874150,964064,847050,1973555,1687250,1185803,2523944,2963207,992776,222982],
+            ["final_fat",706821,875192,870885,793940,1562824,1908449,1255448,3529409,3779170,2181354,242270]
+          ],
+          [
+            ["final_fat",683427,816534,756205,758669,1678787,1987806,905116,3367068,3523831,2109628,238184],
+            ["final_pgo",1078914,1227165,1204141,896093,1580851,1732707,1710093,5564330,3054043,1267265,279556],
+            ["main_fat",1019196,1205994,1250210,1179825,2182877,2769510,1456586,6334962,4425943,2019123,362119],
+            ["main_shipping",987959,1247175,1430808,1196790,2280572,2595881,1206915,4879968,5763833,2171320,393044],
+            ["main_shipping",998465,1181888,1288607,1252132,2279270,2511355,1241947,4564780,5852655,2206071,384472],
+            ["main_fat",1048159,1326282,1263169,1274145,2297988,2499418,1323268,3931387,4336128,2003951,365994],
+            ["final_pgo",867621,1175848,988710,1093326,1761791,2120174,1092876,3013882,3161812,1333874,315629],
+            ["final_fat",967038,1233515,1170561,1028100,1792466,2006834,1091904,3851529,4648793,2100314,332024]
+          ],
+          [
+            ["main_shipping",959607,1221707,1546330,1418069,2557434,2506648,1241407,4543898,5817483,2130569,392644],
+            ["final_fat",747221,789464,768463,836254,1825715,1993385,1147637,3848654,5547275,1695902,239827],
+            ["main_fat",796425,1515824,1505299,1467974,3176334,3423441,967468,3588247,3471262,1494403,272445],
+            ["final_pgo",1917892,861972,835472,831447,2266771,2024251,1280665,3200310,3750388,1430378,247929],
+            ["final_pgo",884866,879488,903123,893779,2284277,1644356,995019,2492838,3310534,1195558,235290],
+            ["main_fat",774662,1110031,961681,893299,2003721,2444546,972937,3079530,3813963,1851664,361908],
+            ["final_fat",976131,941020,2299309,1366503,1626640,1533651,888792,2849448,6784501,2681047,244053],
+            ["main_shipping",1275277,1069891,1394254,1207285,1939504,2124359,887159,4219846,6290747,2721147,285114]
+          ],
+          [
+            ["main_fat",781322,897715,1031544,1061279,2073594,3205608,1417979,5324198,4953998,1738786,324883],
+            ["final_pgo",950424,1174997,990823,1055409,1734940,2904220,1311501,3527156,3234881,1406532,291804],
+            ["main_shipping",899507,969392,1080927,864156,1786156,2534039,1047899,5172403,4986987,1803453,322379],
+            ["final_fat",792559,1736893,845057,988170,1747479,1937362,1056482,3005440,3995983,2064370,456930],
+            ["final_fat",1232983,856143,803185,862453,1643163,1759597,904055,3351815,4646591,1875790,238425],
+            ["main_shipping",829233,855943,914130,788773,1652608,2377556,871045,3752190,5486920,1659648,286196],
+            ["final_pgo",799159,820951,877826,915803,1463747,1785977,898075,2789449,2621810,1079105,233367],
+            ["main_fat",1030002,882632,908731,934089,1904823,2307662,962722,3089605,3479525,1605789,433144]
+          ],
+          [
+            ["main_fat",852197,828042,1092575,963023,1919915,2149016,1182909,3043757,3924167,1777023,296501],
+            ["final_fat",691138,784367,857426,767712,1531939,1773217,848472,2865212,3656568,1827758,241520],
+            ["final_pgo",670487,822614,995280,1107136,1458829,1681240,889042,4528245,6412277,2183918,264974],
+            ["main_shipping",754402,783255,909422,798107,1822040,1959985,890895,3673895,4228189,1617556,295059],
+            ["main_shipping",941661,888061,906899,801462,1794439,2024251,912387,3954722,4608816,1900396,341268],
+            ["final_pgo",687692,801111,875162,829955,1536035,1587011,945957,2334061,2446008,1109751,236483],
+            ["final_fat",652160,741493,786510,763986,1632107,1686959,930133,3508358,4044205,1743613,346705],
+            ["main_fat",780681,828692,911586,948440,1862791,2016359,1049772,3192358,3421189,1596784,308589]
+          ],
+          [
+            ["final_fat",758818,758699,786820,1057439,2127244,2132141,1133436,2964660,3733022,1819406,238815],
+            ["main_shipping",1001690,1245472,1317400,1250149,2241674,2520299,1221737,4585581,6607027,2819364,397731],
+            ["final_pgo",1040367,1205693,993557,1027118,1789261,2036830,1155879,3017147,3394859,1593831,344943],
+            ["main_fat",1064694,1226314,1286133,1317519,2436584,2492808,1292312,3942854,4357461,2076057,402368],
+            ["main_fat",1046276,1256319,1445240,1288085,2346640,2476643,1373663,4065356,4297491,2007515,360105],
+            ["final_pgo",874441,1169940,989341,1032856,1749162,2054066,1094208,2965701,3175073,1387624,291854],
+            ["main_shipping",752199,807972,950333,776264,1653359,1945894,859999,4577979,4872487,1659088,286637],
+            ["final_fat",657478,723005,763705,770095,1488153,1589754,841081,2821266,3411484,1633680,242220]
+          ],
+          [
+            ["final_pgo",684709,805278,981250,771668,1430488,1689603,849384,2306650,2726074,1046476,234469],
+            ["main_shipping",756315,797016,992716,824386,1689633,2102567,904265,3429111,4506593,1989629,313526],
+            ["final_fat",661383,735023,773330,872648,1475655,1549986,869844,2808387,3479305,1595262,240518],
+            ["main_fat",753451,910354,1056862,987969,1788290,2386510,994730,3332947,3543260,1561803,281028],
+            ["main_fat",791577,844076,894180,1164843,2041587,2344758,1040387,3122213,3731790,1878814,313477],
+            ["final_fat",679560,754422,761753,933038,1572949,1937642,832608,3254761,3884207,1670375,241229],
+            ["main_shipping",1094618,1285222,1300865,1223790,2232511,2542571,1271481,4410080,5128758,2139171,396039],
+            ["final_pgo",654564,873440,1022220,777877,1828680,1652658,928461,2613016,2503514,1094618,265716]
+          ],
+          [
+            ["main_shipping",739720,928461,887220,798277,2004692,2233262,904265,3503120,4562586,1845695,332715],
+            ["main_fat",743646,825708,890504,1131433,1974697,2141726,1084623,3273409,3880351,1470167,292215],
+            ["final_pgo",782083,820901,949642,775293,1582143,1676163,922632,2426730,2804691,1043672,227839],
+            ["final_fat",728954,731529,777356,881351,1730413,1587471,868892,2898711,3350634,1828450,255040],
+            ["final_fat",848642,750486,1012065,785349,1501783,1662403,840720,3065760,3860993,1795972,243031],
+            ["final_pgo",658399,955301,947940,776725,1431439,1548973,913329,2384446,2465847,1077993,348438],
+            ["main_fat",737638,808483,985856,1304871,2413700,2374793,1125604,3193169,3428670,1666548,300987],
+            ["main_shipping",759911,782053,898876,794802,1652969,1948247,850545,3378185,4847109,1632598,293546]
+          ],
+          [
+            ["main_fat",1159444,823184,892217,1071293,1819836,2056999,925046,2962867,3404734,1595103,267899],
+            ["main_shipping",758668,954630,920189,910474,1913235,2283787,871636,4657036,4282499,1728010,283442],
+            ["final_pgo",797115,993838,1036501,807691,1467102,1742061,956663,2354382,2839634,1202549,277894],
+            ["final_fat",690447,870024,826729,915322,2290477,2191069,1095689,3854342,4066908,1754299,239937],
+            ["final_fat",834160,739270,755854,1028260,1546140,1910262,999055,3322442,4140388,2013375,292625],
+            ["final_pgo",689446,825758,1083502,755945,1643234,1854628,891496,2481911,2609611,1039076,370511],
+            ["main_shipping",740832,974399,1178923,1170080,1853838,2207613,1155789,3626464,4765387,1893687,346175],
+            ["main_fat",1129650,935040,1108509,1623183,2189526,3542619,1010012,3393828,4156693,3065870,267928]
+          ],
+          [
+            ["final_fat",687602,718659,1324570,775634,1510267,1582684,840560,2913784,3857447,2123308,339966],
+            ["main_fat",783005,1016732,1051744,931556,1867097,2239821,1292422,3123906,3655907,1729833,270823],
+            ["main_shipping",1007338,998985,1162839,943283,1877792,2052242,993418,3765350,4699089,1899505,411242],
+            ["final_pgo",780711,877745,857986,845147,1427183,1573631,849293,2666195,2668268,1213385,306085],
+            ["final_pgo",771467,1077142,1988668,789574,1497817,1569273,938065,2370385,2460259,1027569,233548],
+            ["main_shipping",735614,815552,900820,820030,1890452,2046483,926147,3853020,4670657,1738806,290152],
+            ["main_fat",775583,882152,895692,1042030,1923450,2235916,995050,3413307,3731029,1603996,281820],
+            ["final_fat",683927,722414,755754,766911,1708160,1610546,926658,3119169,4116453,1865915,252516]
+          ],
+          [
+            ["final_pgo",689696,1069601,1141859,930524,1838074,1939815,1244181,2696040,2794536,1101518,287738],
+            ["final_fat",714723,859478,807851,894921,1573680,1654871,928481,3535178,3680594,1850112,271604],
+            ["main_shipping",794602,947409,1716132,1015711,1819136,2469222,1400263,3842375,4495546,1937291,532271],
+            ["main_fat",953177,934360,1185563,891306,1833217,2323576,1184141,3660414,3609990,1555504,299415],
+            ["main_fat",923093,860389,929413,1150190,2366870,2592646,1124743,3462840,4024686,1763944,267278],
+            ["main_shipping",856684,842362,909042,922622,1774158,2209446,941420,4109202,5111423,2084790,309570],
+            ["final_fat",846219,989882,763806,764827,1540741,2232831,944064,3299307,3712812,1694960,247889],
+            ["final_pgo",684538,1442636,1046216,914370,1560971,1686429,1052526,3147382,2909508,1399582,436650]
+          ],
+          [
+            ["main_shipping",868712,994029,982552,863705,1785445,2651954,1027088,3514757,4708914,1943200,349019],
+            ["final_fat",911686,1135108,1684946,1214206,1868969,2115947,880269,3287560,3851193,2384837,321468],
+            ["final_pgo",974259,1225552,996672,1079796,1795831,2125682,1142049,3021123,3137336,1409767,312655],
+            ["main_fat",1186154,1380824,1311330,1255246,2306761,2469894,1290169,3978938,4849322,2524825,428347],
+            ["main_fat",1143450,1224351,1308726,1264171,2287802,2445928,1300374,3989013,4821131,2532066,420526],
+            ["final_pgo",1047538,1183470,1049160,1022200,1718967,2041576,1092585,2963337,3196024,1435736,314017],
+            ["final_fat",664798,723696,1027087,1037833,1879325,1629143,1050662,2949417,3368780,1636995,255500],
+            ["main_shipping",806609,806570,920369,857355,1720378,1956130,912908,3736768,4451070,1762492,293366]
+          ],
+          [
+            ["final_fat",667353,734172,810926,770226,1454774,1536094,834872,2833193,3333538,1607691,239115],
+            ["main_shipping",764837,802784,904595,821582,1660700,1959564,884495,3653494,4372433,1639078,282770],
+            ["main_fat",801542,842403,897465,911165,2287762,2135926,941099,2988545,3336472,1453862,265305],
+            ["final_pgo",671760,797406,826989,990473,1546230,1592168,856044,2278399,2400620,1017934,229241],
+            ["final_pgo",673672,811296,836364,802884,1470697,1612318,865207,2266311,2477676,1029261,245716],
+            ["main_fat",740992,839268,897024,910885,1813928,2041877,945437,3001725,3362701,1511939,285334],
+            ["main_shipping",744357,899678,931165,819860,1623014,2374391,954590,3445885,4404040,1726878,301658],
+            ["final_fat",646942,756926,762875,797546,1471098,1711936,836665,2924550,3484232,1591387,267158]
+          ],
+          [
+            ["final_fat",658589,763525,760121,757227,1475535,1557947,1010033,2987584,3449642,1635222,238374],
+            ["main_fat",809243,819208,891847,885577,2162336,2093023,936904,2950539,3327729,1556064,267518],
+            ["final_pgo",693702,879047,854051,784968,1425650,1527342,941911,2264097,2374872,1116020,231544],
+            ["main_shipping",788173,962632,935521,795123,1692257,1983070,893328,3878579,4761081,1795360,379094],
+            ["main_shipping",837034,794501,914920,1068338,1928558,2157318,963233,3660825,9470896,1670605,348949],
+            ["final_pgo",700572,800441,902622,753340,1439862,1558839,850085,2327222,2509402,1257620,227949],
+            ["main_fat",1015370,882764,1178203,1094198,1844203,2053685,958786,3269302,3382161,2065892,268139],
+            ["final_fat",679410,740061,748142,762043,1563916,1607431,919618,3036246,3465965,1732988,238294]
+          ],
+          [
+            ["main_shipping",780721,829684,899357,832198,1715862,2198610,1067838,3643579,4608184,1886306,281339],
+            ["final_pgo",667443,815353,1014259,740872,1529735,1556044,873170,2330716,2408042,988120,232937],
+            ["final_fat",660683,758639,750957,842794,1662683,1597756,852017,2852993,3417903,1937592,243402],
+            ["main_fat",823174,845227,978515,993898,2110168,2270046,962000,3214922,3731450,1500643,407616],
+            ["main_fat",1041299,1316989,1368696,1282247,2396414,2767647,1395526,3939700,4334417,2016069,360466],
+            ["final_fat",982080,1130592,1036311,1022441,1903090,1983019,1145304,3873802,4628144,2028828,316301],
+            ["final_pgo",867260,1159325,991685,1086015,1746838,3301820,1096040,3092800,3195743,1337480,291443],
+            ["main_shipping",967910,1240194,1242478,1240866,2219341,2498306,1257791,4558110,5841308,2209727,393905]
+          ],
+          [
+            ["final_pgo",924255,1152024,991644,1021119,1772276,2061055,1102740,2994504,3265467,1448724,315460],
+            ["main_shipping",958315,1267305,1249719,1252383,2298809,2506017,1199344,5025555,5777372,2142517,393685],
+            ["main_fat",875562,935422,1090802,1068670,2350415,2400019,1289798,3795630,3602669,1657776,429228],
+            ["final_fat",713721,799039,893109,805168,1627120,1918313,919688,3007563,3714484,1672027,238395],
+            ["final_fat",643908,840880,789474,773220,2473704,1535995,1104854,3458885,4687141,1585728,269811],
+            ["main_fat",1026277,1423007,1256379,1286924,2314162,2526057,1328807,3661245,5780227,2759453,363671],
+            ["main_shipping",998625,1281225,1235077,1259303,2249766,2520719,1249028,4508566,5741920,2159151,396019],
+            ["final_pgo",896353,1184732,993888,1031304,1806467,2052863,1107677,3043487,3288832,1346973,291022]
+          ],
+          [
+            ["main_shipping",1035990,1243039,1265012,1279793,2196827,2593597,1214797,4606192,5815549,2129728,396159],
+            ["final_pgo",851927,876323,978916,865227,1713900,1610765,840570,2472808,3058929,1126005,230924],
+            ["main_fat",902943,959627,1094503,963834,1948689,2188905,941981,3044408,3470802,1716734,388738],
+            ["final_fat",680983,737026,845307,797015,1619959,1616814,904996,3752331,4272274,2066007,249171],
+            ["final_fat",927429,762414,892297,848431,1460963,1856020,850876,2855647,3560295,1661511,243793],
+            ["main_fat",743316,1029601,921851,973277,2047765,2263066,990873,3844137,3644520,1520992,284203],
+            ["final_pgo",669145,1006417,856173,819249,1450036,1618007,1121328,3354699,2635359,1009532,244474],
+            ["main_shipping",808743,853079,896213,836455,2104280,2019944,1402967,3768004,4237152,2342664,282481]
+          ],
+          [
+            ["main_fat",742074,818577,944715,898758,1954867,2238369,1019567,3210786,5586699,1813007,349700],
+            ["main_shipping",771247,858356,906108,779800,1635653,2410746,1104954,3961562,4655535,1743113,349119],
+            ["final_fat",659261,833399,765789,751898,1819677,1545719,1011604,3247751,3498614,1683764,238735],
+            ["final_pgo",848982,941039,1088509,867320,1508544,1902349,968801,2255795,2880694,1094999,234619],
+            ["final_pgo",665310,810085,1017913,993157,1515454,1652508,930364,2529702,2449323,996412,232055],
+            ["final_fat",661214,725769,768674,898396,1612628,1513681,905267,2828988,3503991,1619719,238494],
+            ["main_shipping",821722,800190,900289,860880,1695542,2026805,921500,4213857,4136092,1632729,283091],
+            ["main_fat",899929,840750,897075,1043061,1965924,2291137,923334,3519464,3878418,1750944,311192]
+          ],
+          [
+            ["final_fat",685109,808833,902683,925597,1557466,1744175,869092,3321480,3834232,1657505,258284],
+            ["main_shipping",813079,855783,927369,778158,1758225,2200462,1027007,3553214,4258834,1812877,346275],
+            ["final_pgo",737207,847681,882673,843685,1411139,1673249,1194026,2380751,2403975,1010113,243963],
+            ["main_fat",829113,819348,884726,949192,1851895,2077640,977273,3138658,3681665,1599809,352744],
+            ["main_fat",885087,984474,1029792,1014650,1997461,2126213,988750,3276974,3688786,1680840,303151],
+            ["final_pgo",672450,903253,1011645,756355,1463507,1553531,853148,2239461,2392809,1109010,250763],
+            ["main_shipping",737227,812599,902642,1190921,1932694,2053213,844767,3406657,4136822,1727859,280888],
+            ["final_fat",748073,772579,817576,867930,1605318,1589785,830696,2808447,3662638,1849110,251343]
+          ],
+          [
+            ["main_fat",823495,920369,892367,908001,1850913,2280051,1037724,3088173,3525885,1579389,269581],
+            ["final_fat",959988,1093837,790727,841722,1684275,1793127,968120,3070567,3532013,1720188,238805],
+            ["main_shipping",784717,868892,976172,818978,1957362,1950390,927149,4020761,4796093,1733598,283822],
+            ["final_pgo",696786,829654,994299,770286,1419131,1637406,871516,2279801,2792012,1086426,231324],
+            ["final_pgo",703126,872588,857366,852388,1417299,1624636,1032676,2495691,2628610,1143450,233057],
+            ["main_shipping",737156,825588,903524,1019687,1990641,2184810,871206,3491634,4759149,1804414,315148],
+            ["final_fat",830075,1188197,781142,828302,1693869,1528303,1117882,3162083,3801465,1688452,242320],
+            ["main_fat",846960,904085,1262848,1155739,1895970,2280552,931265,3537000,3511423,1640510,268790]
+          ],
+          [
+            ["final_pgo",706711,902653,862913,765799,1418970,1610576,1021970,2786314,2729911,1079085,235250],
+            ["main_fat",766621,828953,979647,903594,2058563,2169036,922392,3062675,3413847,1634281,301899],
+            ["final_fat",710727,757437,769034,768172,1464298,1552899,840210,3114302,3460737,2049348,238865],
+            ["main_shipping",740751,798808,967579,812348,2148425,2202686,837296,3401779,4648564,1690425,284203],
+            ["main_shipping",774592,2676440,948090,1008991,2374962,2548721,1062210,4704137,6203892,2488871,420245],
+            ["final_fat",946097,1138423,1231612,1308286,2258630,2313210,1248066,4467414,5213434,1982619,367176],
+            ["main_fat",1000608,827911,895702,1100307,1929250,2410756,940969,3456611,4225255,1592098,351553],
+            ["final_pgo",1325722,1107938,973438,767472,1918433,1611426,939778,2502983,2644463,1123340,233247]
+          ],
+          [
+            ["main_fat",1135730,1169459,997684,1054088,2412528,2526673,1478850,4343771,4876282,2236816,384862],
+            ["main_shipping",751168,1406873,1409846,1314395,2024221,2409053,877185,3636619,4386214,1634171,280447],
+            ["final_pgo",688825,813650,951946,878356,1503076,1693951,836313,2403174,2545977,992586,226778],
+            ["final_fat",678639,738318,799379,748924,1465619,1533731,927099,2816178,3592393,1643484,243843],
+            ["final_fat",649676,765919,885106,807451,1562865,1612948,865477,2960814,3448159,2095146,287328],
+            ["final_pgo",972737,807171,1263810,1032586,1664005,1738115,861681,2805653,2422042,1023773,223803],
+            ["main_shipping",836183,943343,904685,806920,1772727,2112542,909463,3726583,4555815,1667089,290521],
+            ["main_fat",829334,821301,868702,917675,2019083,2277738,1013528,3636409,3814043,1470166,378313]
+          ],
+          [
+            ["final_fat",682585,761302,877775,904295,1617345,1624807,814271,2943438,3457002,1670164,240638],
+            ["main_shipping",958846,832258,1158142,1001870,1919154,2535811,912427,3680133,4488857,1858354,375368],
+            ["main_fat",1076421,1055360,1259483,1260745,2806595,3005350,1060477,4159556,4213376,1922259,300447],
+            ["final_pgo",1068830,1351981,1255658,1409587,2307122,2489383,1341705,3825089,4214809,1745325,364392],
+            ["final_pgo",1106005,1385290,1298942,1487893,2237608,2601449,1343167,3892269,4164814,1640980,335559],
+            ["main_fat",1279583,1452410,1562925,1651967,2929107,2891741,1504227,4638129,5238722,2392488,403260],
+            ["main_shipping",1277661,1472300,1532299,1459140,2460980,2808817,1446682,5363938,6834374,2594960,469338],
+            ["final_fat",927049,1179524,1154026,1217071,2083119,2288243,1261436,4497449,5452590,2432739,331072]
+          ],
+          [
+            ["final_pgo",1031554,1289958,1206073,1335927,2100925,2348122,1292613,3680004,3982953,1578959,349620],
+            ["final_fat",1040137,1257600,1170751,1249188,2107504,2348543,1256970,4629185,5705737,2661568,353256],
+            ["main_fat",1171312,1353223,1519630,1520842,2894826,2900894,1419932,4630958,5318450,2352068,477019],
+            ["main_shipping",1277981,1515554,1539200,1458249,2560328,2809038,1388055,5687249,6981854,3032950,513975],
+            ["main_shipping",1232614,1467562,1554031,1466661,2757872,3056045,1419271,5598877,7048574,2714337,492182],
+            ["main_fat",1186966,1405049,1399842,1615212,2833204,3033482,1528083,4710416,5343997,2262665,381798],
+            ["final_fat",1027388,1268006,1120927,1129250,1945423,2186933,1238271,4447325,6039143,2312670,336892],
+            ["final_pgo",994219,1263860,1180435,1184882,2031422,2236156,1269978,3318616,3570500,1542384,344212]
+          ],
+          [
+            ["final_pgo",1057873,1445610,1147216,1276279,2214704,2333401,1288776,3674625,3871628,1579369,323521],
+            ["main_fat",1424418,1500913,1478779,1556265,2704873,2920293,1450868,4682365,5271511,2431677,397181],
+            ["main_shipping",1206855,1501864,1521764,1501993,2660778,2861466,1369848,5392139,6914154,2652025,430190],
+            ["final_fat",1081318,1348216,1250720,1237851,2092692,2311127,1235568,4613902,5720288,2379188,403670],
+            ["final_fat",1073427,1393342,1195859,1269207,2171620,2313040,1212834,4328938,6038231,2475072,380225],
+            ["main_shipping",1221267,1350298,1500742,1420803,2654348,2874195,1340494,5402875,7636248,2688869,417772],
+            ["main_fat",1191643,1584717,1475855,1516685,2758603,2903198,1446251,4674563,5344098,2425698,428537],
+            ["final_pgo",1094087,1317970,1137311,1198723,2121525,2292260,1238382,3630590,3945689,1585297,321618]
+          ],
+          [
+            ["final_fat",659992,720922,769695,768583,1494602,1856221,861271,2821486,3353677,1610605,241048],
+            ["final_pgo",656977,814792,838878,755194,1432050,1574472,839268,2274483,2407832,1010473,235060],
+            ["main_shipping",753361,781272,987229,887661,1682713,2065362,869804,3467787,4311032,1614030,296832],
+            ["main_fat",875011,909763,994058,1203490,2004381,2075056,934760,2938230,3295302,1577937,266777],
+            ["main_fat",863003,951665,1031904,995581,2072773,2358938,1124733,3586083,3690559,1726258,269430],
+            ["main_shipping",831617,784677,893078,792689,1756232,1943110,931335,3378175,4117934,1784013,312855],
+            ["final_pgo",669606,805568,1169108,848081,1459571,1774659,976062,2535602,2990828,1184442,232385],
+            ["final_fat",742554,751838,992115,1003282,1602994,1625007,879337,3436681,4165796,1796963,256681]
+          ],
+          [
+            ["main_shipping",753440,983443,1260174,902623,1858164,2164549,837325,3641436,4413134,1724605,282801],
+            ["main_fat",946328,891966,895171,909693,1923832,3605823,1038234,3220870,3706353,1582664,269461],
+            ["final_fat",667273,882042,879858,796915,1658236,1721530,829634,3004238,3453556,1613701,238515],
+            ["final_pgo",1189689,981049,927120,894571,1477427,1556295,957544,2326120,2605736,1072285,311954],
+            ["final_pgo",758428,898937,928511,838737,1508213,1763823,955632,2703591,2986753,1868969,232826],
+            ["final_fat",658639,852858,762374,803645,1438710,1634110,928241,3315381,3761474,1606209,253797],
+            ["main_fat",878727,914620,990574,987208,1996390,2179993,1183430,3699442,4733431,1583495,341749],
+            ["main_shipping",829033,829805,1190200,1348346,1937602,2284378,915912,6048916,4667402,1730575,515507]
+          ],
+          [
+            ["final_pgo",1143671,1365752,1160877,1262157,2056479,2320120,1202489,3775325,3973830,1584897,322450],
+            ["final_fat",1076751,1376827,1209579,1199615,2124089,2218470,1210470,4718368,6200693,2472528,338263],
+            ["main_shipping",1216860,1489846,1501644,1470978,2607638,2820285,1336757,5368234,7129073,3364274,414867],
+            ["main_fat",1314074,1471178,1493711,1461944,2694287,2886503,1461604,4657147,5374814,2567599,390351],
+            ["main_fat",1193886,1541983,1481534,1506811,2763810,2881184,1608362,4736685,5433791,2462232,431091],
+            ["main_shipping",1217862,1488935,1474794,1450287,2595991,2743170,1419582,5417497,7125768,2583653,443209],
+            ["final_fat",936503,1094268,991494,1083601,1900617,2310947,1211572,4579672,5021108,2234153,315340],
+            ["final_pgo",961791,1268837,1096180,1130431,1961026,2221644,1231571,3327139,3627375,1527132,312264]
+          ],
+          [
+            ["main_fat",1163260,1367915,1565729,1412070,2579046,2747516,1381594,4357541,4995200,2196888,426714],
+            ["final_pgo",959147,1151278,918596,858277,1615193,1670985,910835,3890927,3610880,1423837,328429],
+            ["main_shipping",1305071,862864,1012506,968711,1739126,2591424,858327,3717299,4220688,1647340,314137],
+            ["final_fat",727723,824927,802123,763646,1619699,1873552,914390,3119540,3735305,1582553,238445],
+            ["final_fat",744998,866288,856143,834411,1999924,1798565,890465,3092850,3656939,2047245,266786],
+            ["main_shipping",972476,900941,984324,955752,2120093,2347922,975600,3932008,5324950,2022157,289491],
+            ["final_pgo",816915,922822,960499,965847,1638296,2077490,980308,3342170,2786174,1187677,233608],
+            ["main_fat",929883,1216760,1036271,1042511,2150378,2627638,946267,3084317,4349489,1709382,320637]
+          ],
+          [
+            ["final_pgo",666821,814431,895101,925466,1617966,2535591,964334,2899483,3081734,1040047,247097],
+            ["main_shipping",974730,957855,1084884,870304,2162166,2306811,900630,3697359,4456398,1942860,282239],
+            ["final_fat",849112,749705,795293,856073,1505349,1693098,827360,2981003,4024596,1860277,244103],
+            ["main_fat",738859,820080,909513,878046,2166142,2361613,939728,3166079,3871237,1479821,301629],
+            ["main_fat",1067248,1348145,1058524,1241547,2210608,2383715,975801,3530711,4750435,1760729,273146],
+            ["final_fat",698289,871357,842002,823625,1584667,1871303,933378,3096676,4499372,2006715,298915],
+            ["main_shipping",735614,1063682,1138504,1069941,2054726,2153653,895402,3742165,4812828,1879917,282400],
+            ["final_pgo",750877,948521,1217531,817205,1992423,2015838,1027578,2794346,2954575,1434413,232876]
+          ],
+          [
+            ["final_fat",1826637,1274416,1130270,1198923,2040885,2159502,1240104,4362468,5532558,2336305,281578],
+            ["main_fat",1116671,1341204,1418680,1355385,2431017,2636471,1385441,4513804,5268186,2307792,408828],
+            ["final_pgo",1038344,1304229,1117342,1149029,2142417,2525136,1338972,3463461,3730839,1514312,317453],
+            ["main_shipping",1155529,1290880,1440572,1369998,2531586,2716400,1387263,5190990,7037026,2878442,399604],
+            ["main_shipping",1077112,1308856,1561202,1316879,2443425,2651204,1295547,4981549,6513056,2447590,390430],
+            ["final_pgo",1055900,1320444,1139885,1159675,1973255,2227643,1231742,3389752,3613184,1537196,311343],
+            ["main_fat",1129640,1414874,1416511,1062871,1934488,2458967,1093126,3762246,3945178,1986134,413135],
+            ["final_fat",717377,754482,761613,794282,1445801,1612479,927159,3113460,3740263,1877923,309571]
+          ],
+          [
+            ["main_shipping",851106,798869,1036972,809504,1654591,2166041,873680,4109442,4726390,1668231,285114],
+            ["final_fat",881911,846219,845537,891867,1548323,1551378,931705,2924289,3557161,1624696,275660],
+            ["main_fat",786209,1011044,941540,924635,1824103,2062927,940339,3074253,3966169,1705547,385073],
+            ["final_pgo",679370,804867,857345,743906,1693909,1697334,862062,2449483,2523113,999136,232806],
+            ["final_pgo",786720,871427,890495,759870,1521663,1746037,1032095,2626366,2823930,1074609,234068],
+            ["main_fat",968771,1024774,917775,908731,1872856,2396274,1029080,3566474,4122812,1721190,271294],
+            ["final_fat",651328,747772,835513,857064,1571818,1704966,834741,2850990,3574827,1945062,238324],
+            ["main_shipping",794972,872207,996863,968931,1781049,2959662,1022411,3664811,4748973,1634231,292906]
+          ],
+          [
+            ["main_fat",908762,829363,972937,1071403,1787468,2439007,928021,3129434,4029374,1569365,266607],
+            ["final_fat",645620,949773,901671,862523,1479761,1662864,1022621,3137687,3899500,1654400,249260],
+            ["final_pgo",790205,840580,873619,750827,1796492,1843232,1110461,2905801,2587778,1570175,228791],
+            ["main_shipping",1043352,901241,1285863,956142,1891263,2298078,928180,3914281,4182721,1707128,286506],
+            ["main_shipping",895301,1083111,917274,957254,2470385,2202225,1113757,3475990,4664527,2065062,707552],
+            ["final_pgo",971595,1409947,1212914,1147497,2020155,2124279,1246744,3249933,3542519,1446011,447946],
+            ["final_fat",974920,1256659,1091603,1142489,1974777,2160694,1240035,4251433,5491488,2238399,328128],
+            ["main_fat",1173576,1382416,1452390,1403097,2506158,2756350,1423167,4481856,4941289,2234283,402860]
+          ],
+          [
+            ["main_fat",1219554,1439221,1448114,1502865,2711704,2931991,1441614,4737526,5527401,2444166,403340],
+            ["final_pgo",1158253,1318251,1087848,1135519,1992103,2214964,1197161,3446386,3791630,1599889,329750],
+            ["final_fat",668344,720882,1095149,1108038,1971782,2177649,1179945,4387074,5613479,1936099,238445],
+            ["main_shipping",736306,796535,931655,804116,1762230,1971682,868492,3440897,4139197,1630125,339976],
+            ["main_shipping",1126065,805848,985676,876403,1722952,1957130,854681,3533114,4084906,1635292,293486],
+            ["final_fat",659801,723586,774071,801061,1457818,1595403,870775,3124347,3674616,1616154,239056],
+            ["final_pgo",750686,820741,841191,877626,1419802,1547862,878957,2352779,2572497,990704,233227],
+            ["main_fat",774843,948851,1034128,1028249,2569742,2497885,1084092,3509410,3480186,1648231,295069]
+          ],
+          [
+            ["main_shipping",1123271,1063923,1123321,878266,2331127,2163548,999066,4643707,5933886,1869761,442278],
+            ["final_pgo",1489135,1193655,1327795,743807,1629213,1885033,959777,2727967,2670572,1519470,342609],
+            ["final_fat",923233,892407,846248,886359,1900587,2190749,1036853,3491563,4147509,1793968,277733],
+            ["main_fat",947730,1339482,1175479,1011835,2207704,2698203,1053798,3481658,3729828,1715653,271604],
+            ["main_fat",916053,943693,935101,991074,2083208,2253341,962211,3164666,3498593,1709192,267768],
+            ["final_fat",935251,809775,845868,853730,1740218,1626859,881801,2853294,4050664,1916530,248450],
+            ["final_pgo",694433,805117,1011284,799069,1614812,2046293,982641,2595370,2594169,1045826,233367],
+            ["main_shipping",959547,908351,1036532,891787,1785516,2152351,998255,3877727,4800620,1921428,288489]
+          ],
+          [
+            ["final_fat",762975,925737,1045315,1141708,1578277,1592518,883765,3082565,4130844,1873025,297602],
+            ["final_pgo",700001,1082109,849613,887600,2055357,1587220,919357,2399809,2544233,1004143,231745],
+            ["main_fat",942642,960669,1133777,2778533,1936320,2176527,1077082,3404884,4133128,1584307,267798],
+            ["main_shipping",772168,873499,1025596,814932,1931693,2287512,940849,3627805,4308098,1957131,282600],
+            ["main_shipping",778919,837405,881010,788914,1711045,2122106,855823,3792340,4841651,1692808,379054],
+            ["main_fat",966848,1005555,927790,943163,1807569,2230708,945026,3257335,3642127,1564296,267698],
+            ["final_pgo",668524,791477,1118884,777366,1459350,1544547,1212374,2690642,2884759,1145624,231234],
+            ["final_fat",660493,786860,776775,764337,1611087,1618227,811797,3384093,3591422,1714409,242701]
+          ],
+          [
+            ["final_fat",689536,721914,761943,870836,1692097,1615863,1039015,3117727,3899549,1620610,238485],
+            ["main_fat",796194,850815,994138,1185293,2028698,2316806,1183440,3524892,4547533,1614972,323181],
+            ["main_shipping",811307,829234,1334675,809744,1869220,1978392,922251,3499574,4825987,1987796,282770],
+            ["final_pgo",804607,833800,837715,762114,1471499,1578918,915512,2593027,2521310,1386292,303952],
+            ["final_pgo",875082,933168,959207,779830,1550125,1531298,936102,2678013,2773665,1143220,225456],
+            ["main_shipping",859028,792890,987679,864015,1657125,2121796,990613,3744389,5088258,1770253,316781],
+            ["main_fat",934590,820860,938055,937284,1891864,2997438,1093837,3587576,4188049,1637786,271274],
+            ["final_fat",774602,821331,826870,807712,1588603,1832816,983233,3315641,3663329,1785815,249090]
+          ],
+          [
+            ["final_pgo",693381,890495,845377,835883,1413122,1655873,965856,2384867,2545275,1429677,232255],
+            ["main_shipping",823735,884475,1062760,1048240,2060354,2263937,958635,3687103,4546913,1811734,280848],
+            ["main_fat",792598,840090,893078,1120597,2086183,2140103,1107057,3137727,3617991,1617505,281929],
+            ["final_fat",745739,765278,866699,2241018,3472044,2583443,842303,2973232,3390623,1607611,238955],
+            ["final_fat",1097522,1399582,1223771,1252834,2203567,2340301,999557,6426619,8213716,2600878,365584],
+            ["main_fat",1274826,1491969,1605938,1524667,2815397,2981805,1559760,4883023,5672086,2530705,410971],
+            ["main_shipping",821652,802434,899027,844886,1753748,2226141,1205062,3563159,4366824,1817964,302470],
+            ["final_pgo",736095,856494,862423,759490,1468714,2039293,1002140,2838632,3129544,1058644,286876]
+          ],
+          [
+            ["main_shipping",776314,805828,958346,905316,2063849,3060196,1898945,3615588,4537409,1715731,376570],
+            ["main_fat",1121178,1343979,1329196,1370529,2433780,2574390,1478529,4884786,4753550,2124389,374237],
+            ["final_pgo",1056772,1243590,1212513,1242187,1955168,1725847,859979,3608447,4038176,1700950,324262],
+            ["final_fat",645350,739761,812158,795203,1449055,1566259,824516,2875166,3380878,1577035,251273],
+            ["final_fat",681133,738238,848623,751718,1678727,1688922,833850,2827926,3445033,1662984,254548],
+            ["final_pgo",672240,802203,839028,757998,1538769,1642743,914541,2477866,2548661,1015911,245055],
+            ["main_fat",936123,886389,915782,893448,1840186,2144990,975903,3040322,3631091,1547252,308579],
+            ["main_shipping",768723,797196,918666,775864,1690704,2017220,904855,3547737,4257483,1738095,280928]
+          ],
+          [
+            ["main_shipping",760241,822894,896273,790786,1976820,2029048,943924,3764328,4068792,1647260,281548],
+            ["final_fat",662606,722044,956102,900149,2989116,2291488,1018305,3196404,3773523,1765896,248930],
+            ["final_pgo",671428,793330,823524,803045,1733267,1742522,926689,2241223,2487750,974099,223703],
+            ["main_fat",813691,843494,960188,974079,1812476,2118732,989492,3130806,3485004,1743924,440956],
+            ["main_fat",818117,862153,907770,977825,1953316,2179492,1076601,3116616,3692062,1601632,267879],
+            ["final_pgo",660192,822363,859569,810215,1716232,1894198,881131,2351557,2454551,1082280,272025],
+            ["final_fat",737297,721234,829203,796525,1730754,1862490,833379,3149234,3539625,1670865,327878],
+            ["main_shipping",748964,806741,924065,894600,1882751,2029879,1072605,3396522,4093138,1644396,283942]
+          ]
+        ]
+      }
+    },
+    "z": {
+      "profile_use_evidence": {
+        "method": "Matching LLVM opt -passes=print-profile-summary on the first object module of each named target rlib before final FatLTO. Counts are per sampled module.",
+        "modules": {
+          "ferroui_base": {
+            "object": "ferroui_base-f9c3e1eab5d91ee2.ferroui_base.427616c0118b47b-cgu.00.rcgu.o",
+            "hot_entries_in_sample": 47,
+            "cold_entries_in_sample": 12160
+          },
+          "ferroui_controls": {
+            "object": "ferroui_controls-fcf9ba12413235e6.ferroui_controls.5c375cc9cae04c21-cgu.00.rcgu.o",
+            "hot_entries_in_sample": 2,
+            "cold_entries_in_sample": 12817
+          },
+          "ferroui_themes_winui": {
+            "object": "ferroui_themes_winui-82c5c8d346b68509.ferroui_themes_winui.339f39cf5da6ef31-cgu.00.rcgu.o",
+            "hot_entries_in_sample": 2,
+            "cold_entries_in_sample": 3281
+          },
+          "ferroui_markup_xaml_loader": {
+            "object": "ferroui_markup_xaml_loader-7370739bfa40e16a.ferroui_markup_xaml_loader.81f9846b5ab12f4c-cgu.00.rcgu.o",
+            "hot_entries_in_sample": 102,
+            "cold_entries_in_sample": 565
+          }
+        }
+      },
+      "profile_hash_mismatches": {
+        "source": "Cargo profile-use build diagnostics, including any replayed dependency diagnostics. One row per reported function control-flow hash mismatch.",
+        "occurrences": 3791,
+        "occurrences_by_crate": {
+          "ferroui_base": 1388,
+          "ferroui_controls": 1890,
+          "ferroui_dialogs": 52,
+          "ferroui_markup": 5,
+          "ferroui_markup_xaml": 61,
+          "ferroui_markup_xaml_loader": 220,
+          "ferroui_remote_protocol": 43,
+          "ferroui_system": 11,
+          "ferroui_themes_winui": 44,
+          "ferroui_xaml_binary": 1,
+          "winui_theme_probe": 1,
+          "xamlx": 75
+        },
+        "occurrences_with_positive_discard_bound_by_crate": {
+          "ferroui_base": 270,
+          "ferroui_controls": 452,
+          "ferroui_markup": 1,
+          "ferroui_markup_xaml": 24,
+          "ferroui_markup_xaml_loader": 139,
+          "ferroui_themes_winui": 6,
+          "ferroui_xaml_binary": 1,
+          "winui_theme_probe": 1,
+          "xamlx": 47
+        },
+        "highest_reported_single_function_discard_upper_bound": 14175231
+      },
+      "build_cost": {
+        "scope": "Cargo profile-use target build at z, including changed target dependencies and the final FatLTO compile and link. The elapsed time is not directly comparable with the dependency-warm s measurement.",
+        "wall_seconds": 686.5718164540012,
+        "cpu_seconds": 683.931813,
+        "peak_rss_kib": 4573268
+      },
+      "application": {
+        "bytes": 28324712,
+        "cies": 2,
+        "fdes": 80615,
+        "allocated_file_sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2448,
+          ".gnu.version": 204,
+          ".gnu.version_r": 384,
+          ".gnu.hash": 28,
+          ".dynstr": 1333,
+          ".rela.dyn": 2400,
+          ".relr.dyn": 27240,
+          ".rela.plt": 48,
+          ".gcc_except_table": 1034400,
+          ".rodata": 1722967,
+          ".eh_frame_hdr": 644932,
+          ".eh_frame": 4380844,
+          ".text": 18592421,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 2736,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 1711288,
+          ".dynamic": 496,
+          ".got": 936,
+          ".got.plt": 40,
+          ".tm_clone_table": 0,
+          ".data": 195888
+        },
+        "sha256": "459ea34851eb89e3556a9539da29b3bcbc7fa5a8af34ee2c2291f393dae85f21",
+        "verified_elf_flags": ["PIE","GNU_RELRO","BIND_NOW","DT_RELR"]
+      },
+      "byte_comparisons": {
+        "above_half_target_bytes": 1035788,
+        "change_vs_selected_non_pgo_fat_bytes": -869696,
+        "reduction_vs_original_ordinary_percent": 48.102182,
+        "reduction_vs_original_compact_fat_percent": 26.620875,
+        "unwind_and_exception_bytes": 6060176
+      },
+      "archive_checks": {
+        "typed_values": "Normal and compact ControlContentThemeFontSize values read by the shipping probe.",
+        "cases": {
+          "embedded": {
+            "normal": 14,
+            "compact": 14
+          },
+          "v3-installed": {
+            "normal": 14,
+            "compact": 14,
+            "external_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+          },
+          "v3-scalar": {
+            "normal": 14,
+            "compact": 17,
+            "external_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+          },
+          "v2-scalar": {
+            "normal": 14,
+            "compact": 17,
+            "external_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+          },
+          "v1-scalar": {
+            "normal": 14,
+            "compact": 17,
+            "external_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+          },
+          "v3-structural": {
+            "normal": 14,
+            "compact": 29,
+            "external_sha256": "f258743cc9601170e31fc45f84b55f5fcb869273e61d4ccf061f8a7efd9123b9"
+          },
+          "full-fallback": {
+            "normal": 19,
+            "compact": 17,
+            "external_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+          },
+          "installed-v3-current": {
+            "normal": 14,
+            "compact": 14,
+            "external_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+          }
+        }
+      },
+      "public_property_tests": {
+        "passed": 299,
+        "failed": 0,
+        "ignored": 0,
+        "method": "Public Base property tests linked against the same profile-use Base rlib with the final property fixture flags, then run serially."
+      },
+      "panic_unwind_checks": ["caught typed panic payload","nested destructor order","property store usable after unwinding"],
+      "startup": {
+        "condition": "81 rotating fresh warm processes to typed Button; 31 additional processes per binary after verified executable-page eviction. Same CPU for all participants.",
+        "warm": {
+          "main_fat": {
+            "n": 81,
+            "median_ms": 11.820919,
+            "p95_ms": 16.124288,
+            "raw_ns": [12826980,12814160,11991548,13192928,16124288,14712668,15692061,11820919,14559348,12099701,16316337,15744108,14659601,11858584,12816459,12867524,17365146,17229576,15743812,13956953,15934364,15840624,11669144,11810254,10783267,12176284,11105472,11673822,12177145,12231995,12577065,12190523,11073324,12468824,11947867,11502428,11011383,15514153,15016228,15015407,10848722,11724896,11810723,11124640,10640936,11479264,11951201,11044031,12791301,11725937,11389040,12347676,10894960,12427488,15814005,16097654,18083628,15963777,11222404,10672932,10384446,10461600,10985484,11058773,10468131,10384026,10557212,10522791,12427945,10326590,10288605,10563512,10195878,10782054,11059524,10499527,10424045,10895181,10228196,10168919,10134017]
+          },
+          "selected_fat": {
+            "n": 81,
+            "median_ms": 8.257776,
+            "p95_ms": 10.695868,
+            "raw_ns": [9245562,8567884,8521856,10491239,10814514,10358582,10832018,8289073,9565366,8939161,10647375,9671163,8107164,7810355,8722281,9847984,9000923,10284669,10034300,10541884,10534808,10589661,7319129,8753988,8161313,7894329,8149345,7728113,7442261,8682543,8262543,7916581,7876012,10242338,8257776,7999704,8942787,10211470,9904337,10593304,7501298,8553362,9731908,10271109,7972334,7419908,7661174,7498925,8021797,9098246,7334042,8029930,8050078,10695868,10633995,10513386,10520336,10735785,10534378,7318179,7569510,7370625,7798447,7812017,6984145,7167526,7412978,7461730,7501650,7094408,7135578,7091414,7097373,7878795,8276443,7139944,7392788,7607166,7377085,6860893,12956054]
+          },
+          "pgo": {
+            "n": 81,
+            "median_ms": 7.20432,
+            "p95_ms": 10.966557,
+            "raw_ns": [8633270,7987198,7231415,11548845,9566215,9037626,7531104,7901490,7576439,10085927,9430127,9414053,7375362,7204320,7338228,9706296,8146832,13718931,9009586,9312764,11158038,6532026,7112815,7196157,6810719,7139493,7827359,7481320,6855374,7645251,7407691,7763477,6993859,7182417,6709889,6998936,7470844,20887519,8882379,9166639,6602712,6797660,8987503,9295238,6873361,6972999,6516564,6710740,7619613,7402984,6943045,6996883,6626697,7535560,10966557,9204325,9441464,9177475,9265715,6702650,6457076,6428715,7789335,6633697,6235148,6246054,6826642,6729970,6872460,6394964,6276080,6257742,6525938,6797770,6520871,6308948,6202009,7044774,6583293,6154259,6238463]
+          }
+        },
+        "ratios": {
+          "pgo_over_main_fat": [0.6093143297341446,0.6030426597133247,0.6218026459957517],
+          "pgo_over_selected_fat": [0.892397606913842,0.8795692541125826,0.9019315895911538]
+        },
+        "page_evicted": {
+          "main_fat": {
+            "n": 31,
+            "median_ms": 24.86739,
+            "p95_ms": 32.524405,
+            "raw_ns": [31020304,23399890,28608082,32524405,25648210,36742404,25408440,22112168,23059537,24395900,22402215,25891188,23471765,27149633,23388385,24874851,28144373,24309558,24727058,26787445,25551919,23859099,24388581,25597367,23189559,26438375,24198314,24867390,21135527,22245561,25714458]
+          },
+          "selected_fat": {
+            "n": 31,
+            "median_ms": 17.617933,
+            "p95_ms": 23.110226,
+            "raw_ns": [23964548,18201511,18125245,18110907,17557230,19101010,23110226,17315793,18766817,18913013,18256693,16867602,15721229,15709551,16879416,16725664,18832819,18412840,17309710,17617933,17617979,20498124,17215026,16901603,16682290,16673767,17949158,16414331,16408762,17208432,19131049]
+          },
+          "pgo": {
+            "n": 31,
+            "median_ms": 16.298174,
+            "p95_ms": 19.350424,
+            "raw_ns": [19350424,15589423,14171619,16521610,17643918,18060539,17098493,15827426,16552297,18487714,17794345,14726489,16095481,16222293,19828315,16289701,16874142,16166104,16430319,15715375,16906911,17483665,16776783,16733876,15575791,15946385,15995438,16291469,15143007,14546645,16298174]
+          }
+        },
+        "archives": {
+          "scalar-v3": {
+            "pgo": {
+              "n": 21,
+              "median_ms": 9.539245,
+              "p95_ms": 11.503629,
+              "raw_ns": [11423191,11503629,11282104,10524107,9144584,9413520,9604281,12136843,9857183,9597121,9038047,9590751,9142781,9539245,9510643,9239554,9201127,9457024,9180257,9223851,9675866]
+            },
+            "selected_fat": {
+              "n": 21,
+              "median_ms": 10.376158,
+              "p95_ms": 12.344209,
+              "raw_ns": [12344209,12242309,12505387,12325120,9960837,9630490,10478640,10190626,10448366,9870933,10020505,9821011,10477438,10182353,10412282,10100853,10430849,9952114,10484779,9981457,10376158]
+            }
+          },
+          "structural-v3": {
+            "pgo": {
+              "n": 21,
+              "median_ms": 8.176457,
+              "p95_ms": 8.835418,
+              "raw_ns": [8084802,8186663,7872670,8475458,8156458,8135797,7815335,8204769,7935332,8176457,8546492,8155397,8129779,8245610,7986337,9108311,8311397,8835418,8188705,8208794,8081678]
+            },
+            "selected_fat": {
+              "n": 21,
+              "median_ms": 9.160898,
+              "p95_ms": 10.522685,
+              "raw_ns": [8876308,9011948,8910299,8760357,8793667,8596316,9280355,9160898,9353882,8968716,10001987,9347663,9161338,8984998,9291330,11212390,9250720,8587683,9224122,8918941,10522685]
+            }
+          },
+          "full-fallback": {
+            "pgo": {
+              "n": 9,
+              "median_ms": 1520.222938,
+              "p95_ms": 1665.562586,
+              "raw_ns": [1596011168,1411863663,1614393245,1402095386,1457928444,1574056101,1480898590,1520222938,1665562586]
+            },
+            "selected_fat": {
+              "n": 9,
+              "median_ms": 1697.415829,
+              "p95_ms": 1915.226395,
+              "raw_ns": [1697415829,1598863125,1647496409,1455182976,1707524027,1749752777,1635221667,1770485604,1915226395]
+            }
+          }
+        },
+        "end_point": "spawn through the first verified typed Button resource. Rendering and first paint were not measured.",
+        "cpu_affinity": 7,
+        "warm_ratio_order": ["median of paired ratios","95% bootstrap lower bound","95% bootstrap upper bound"]
+      },
+      "resident": {
+        "workload": "Complete process lifetime including theme teardown after first verified typed Button lookup. Linux wait4, warm filesystem.",
+        "unit": "KiB",
+        "rotating_processes_per_arm": 31,
+        "peak_resident_kib": {
+          "main_fat": {
+            "median": 22352,
+            "p95": 22532,
+            "samples": [21760,22476,22372,22296,21756,22124,22256,22388,22276,22372,22108,22416,22416,22356,21756,22428,22532,22364,22364,22352,22416,22532,22256,22280,22212,22152,22552,22296,22184,22416,22352]
+          },
+          "selected_fat": {
+            "median": 18892,
+            "p95": 19200,
+            "samples": [18804,18988,19200,19344,19068,18708,19060,18680,19072,18680,19132,18724,18680,19124,18860,18892,18544,18660,18744,18800,18972,19040,18716,19096,18744,19028,19184,18928,19064,18544,18724]
+          },
+          "pgo": {
+            "median": 16832,
+            "p95": 17164,
+            "samples": [17016,17136,16664,16644,17092,17056,16660,16876,16772,16840,17096,16660,17032,16752,16672,16776,17164,16660,16616,16832,17208,16564,16876,16644,16628,16916,17056,17116,17108,16424,16552]
+          }
+        }
+      },
+      "public_property_cpu": {
+        "method": {
+          "platform": "Linux x86-64",
+          "cpu_affinity": 8,
+          "clock": "CLOCK_THREAD_CPUTIME_ID",
+          "workload": "11 public i32 property operations on four concrete host types, panic=unwind",
+          "warmup_blocks": 3,
+          "measured_blocks": 72,
+          "measured_processes": 576,
+          "round_seed": 640679,
+          "design": "Every 24 measured blocks exercise all permutations of four arms in seeded shuffled order. Each permutation is followed immediately by its reverse, with the same workload rotation for all eight fresh processes. The three initial warmup blocks are retained separately and excluded from statistics.",
+          "confidence": "95% percentile bootstrap (4000 resamples) of the median within-block CPU ratio. Each arm contributes its mean of two CPU ns/op observations in that block.",
+          "profile_use_fixture_rustc_options": ["-Copt-level=z","-Ccodegen-units=1","-Cpanic=unwind","-Clto=fat","-Cstrip=symbols","-Cllvm-args=--addrsig","-Clink-arg=-fuse-ld=lld","-Clink-arg=-Wl,--icf=safe","-Clink-arg=-Wl,-z,pack-relative-relocs","-Cprofile-use=PROFILE"],
+          "training_overlap": "The trainer exercised these same eleven public operations. Measurement uses separately linked fixtures and fresh processes. These results characterize this workload distribution."
+        },
+        "workload_source": "compiled-theme-binding-dispatch-linux-x86_64.json#/property/property_workload_source",
+        "workload_sha256": "2758bd8c66978d414e74ff0a2dad52442ecf0d5d03a22d77df6d4381acf11b70",
+        "fixture_binaries": {
+          "main_shipping": {
+            "bytes": 13001304,
+            "sha256": "a096152279026b540817d8adffe2d6751b6293524f3c8b5d170fcb41c42fb833"
+          },
+          "main_fat": {
+            "bytes": 11366632,
+            "sha256": "abbcc5a626c3cd0f7b2fa78c0da23f108d787da4e6d40589725ee51d094fe48a"
+          },
+          "final_fat": {
+            "bytes": 8852056,
+            "sha256": "ad72925373064183843221b6fcfbb43f7dd74abbdca59b3cae9c8e9b1fd3a934"
+          },
+          "final_pgo": {
+            "bytes": 8695648,
+            "sha256": "fa1a1e667c2b344f861e1bf18dbd1a0093cc68ea2f38361a4a51e2cccc4d02e7"
+          }
+        },
+        "all_checksums_match": true,
+        "paired_ratio_order": ["median","95% bootstrap lower bound","95% bootstrap upper bound"],
+        "summary": {
+          "metadata_default": {
+            "cpu_ns_per_op": {
+              "main_shipping": 4.93045875,
+              "main_fat": 5.13917,
+              "final_fat": 4.40933375,
+              "final_pgo": 4.61316125
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.9078272032909089,0.8894693310602473,0.9636509287808631],
+              "pgo_vs_main_fat": [0.90348946129415,0.8577951210856983,0.93412213959119],
+              "pgo_vs_final_fat": [1.0319530519799027,0.9816785795493662,1.077732780848365],
+              "final_fat_vs_main_fat": [0.8732056040199605,0.8222029497169786,0.8958373290412985]
+            }
+          },
+          "metadata_scoped": {
+            "cpu_ns_per_op": {
+              "main_shipping": 5.777795,
+              "main_fat": 5.65384625,
+              "final_fat": 5.08287375,
+              "final_pgo": 5.876239999999999
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [1.0083127030321446,0.9846866227637564,1.0483880625503361],
+              "pgo_vs_main_fat": [1.0246513966239483,0.9847629931383877,1.070364312780581],
+              "pgo_vs_final_fat": [1.1336058870843775,1.0719256537292692,1.1896305630767847],
+              "final_fat_vs_main_fat": [0.8756883414843809,0.8599106038394713,0.9385883158177359]
+            }
+          },
+          "metadata_cached_override": {
+            "cpu_ns_per_op": {
+              "main_shipping": 6.19403625,
+              "main_fat": 6.1096125,
+              "final_fat": 4.918828749999999,
+              "final_pgo": 5.372238749999999
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.8615078701480594,0.8230874138220474,0.9164194572894011],
+              "pgo_vs_main_fat": [0.8771275117244698,0.8267754546781112,0.9309518924819423],
+              "pgo_vs_final_fat": [1.0764538664781307,1.037062824196107,1.1192872441718649],
+              "final_fat_vs_main_fat": [0.8023222627997175,0.7767145672185267,0.83720668009517]
+            }
+          },
+          "get_plain": {
+            "cpu_ns_per_op": {
+              "main_shipping": 5.67385,
+              "main_fat": 6.236875,
+              "final_fat": 5.12444625,
+              "final_pgo": 5.1028737500000005
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.8914403457277398,0.869755261360182,0.9103644026363893],
+              "pgo_vs_main_fat": [0.8127509037951242,0.7552678278767969,0.850799807839786],
+              "pgo_vs_final_fat": [0.9761002313942775,0.9359122660492415,0.9989230409111443],
+              "final_fat_vs_main_fat": [0.8191517907013598,0.8008695066416631,0.8476350840392797]
+            }
+          },
+          "get_derived_default": {
+            "cpu_ns_per_op": {
+              "main_shipping": 11.05813375,
+              "main_fat": 11.84355125,
+              "final_fat": 9.479949999999999,
+              "final_pgo": 9.10461625
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.8267132103143942,0.7887960974787859,0.8499001681262133],
+              "pgo_vs_main_fat": [0.7623555329961456,0.7354719595327439,0.794552318436141],
+              "pgo_vs_final_fat": [0.9623078481307819,0.9317708926052471,0.9779201992598682],
+              "final_fat_vs_main_fat": [0.7849366354863334,0.7648843507035639,0.8155065165512784]
+            }
+          },
+          "get_mixed_hosts": {
+            "cpu_ns_per_op": {
+              "main_shipping": 12.61033125,
+              "main_fat": 13.071917500000001,
+              "final_fat": 9.86424625,
+              "final_pgo": 9.66715375
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.7863600504222663,0.763009741823943,0.797128629391778],
+              "pgo_vs_main_fat": [0.7415552830160467,0.7033798840384778,0.7795369124257884],
+              "pgo_vs_final_fat": [0.9858003828243596,0.9636994009671008,1.033306436570149],
+              "final_fat_vs_main_fat": [0.740896332790536,0.7120837387358545,0.7764273487098965]
+            }
+          },
+          "get_effective_local": {
+            "cpu_ns_per_op": {
+              "main_shipping": 5.6907775,
+              "main_fat": 6.12944,
+              "final_fat": 5.35802,
+              "final_pgo": 5.346605
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.9368524517689498,0.9150938702486519,0.9867867357282079],
+              "pgo_vs_main_fat": [0.8801404882326924,0.8560700375031509,0.9088339187797754],
+              "pgo_vs_final_fat": [0.9921663523411448,0.9643638385499531,1.0331080008076596],
+              "final_fat_vs_main_fat": [0.8760583120776757,0.8439986509692428,0.9090639889908116]
+            }
+          },
+          "mixed_75read_25write": {
+            "cpu_ns_per_op": {
+              "main_shipping": 22.51125625,
+              "main_fat": 19.77736625,
+              "final_fat": 19.13213125,
+              "final_pgo": 16.06797375
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.699662331569729,0.6810305252578692,0.7221752606951396],
+              "pgo_vs_main_fat": [0.8118901319627934,0.7872799916116803,0.8381911395404607],
+              "pgo_vs_final_fat": [0.8265694614487471,0.8066672462548131,0.8669858243901591],
+              "final_fat_vs_main_fat": [0.9873612913175023,0.9494222426344237,1.012851066461125]
+            }
+          },
+          "style_set_read_dispose": {
+            "cpu_ns_per_op": {
+              "main_shipping": 289.7522,
+              "main_fat": 222.5869375,
+              "final_fat": 231.61145,
+              "final_pgo": 181.94635
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.6360095675439785,0.6075600179582303,0.6628969912625513],
+              "pgo_vs_main_fat": [0.8147606502111657,0.7886755161787473,0.8547787733323347],
+              "pgo_vs_final_fat": [0.7684564670408778,0.7518235282599427,0.8109066472277662],
+              "final_fat_vs_main_fat": [1.0660290495620068,1.0096716727904271,1.1023935523908974]
+            }
+          },
+          "style_binding_emit_read": {
+            "cpu_ns_per_op": {
+              "main_shipping": 111.00235,
+              "main_fat": 100.1307875,
+              "final_fat": 102.11452499999999,
+              "final_pgo": 69.20294999999999
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.6337612919052349,0.608329930708407,0.6494400684027571],
+              "pgo_vs_main_fat": [0.6970047310489818,0.6744633698069131,0.726986144173626],
+              "pgo_vs_final_fat": [0.6629777322935608,0.644020975725265,0.6835554337085072],
+              "final_fat_vs_main_fat": [1.0361877646175557,1.0174978898694071,1.097045350147035]
+            }
+          },
+          "coerce_scoped_local": {
+            "cpu_ns_per_op": {
+              "main_shipping": 18.514425000000003,
+              "main_fat": 17.2645625,
+              "final_fat": 16.2216125,
+              "final_pgo": 15.1175875
+            },
+            "paired_ratios": {
+              "pgo_vs_main_shipping": [0.8003337067989905,0.7753771506403776,0.827867660345509],
+              "pgo_vs_main_fat": [0.8515348848308508,0.816439042037081,0.8825055472190171],
+              "pgo_vs_final_fat": [0.920158088671061,0.8902309364139354,0.9573105931647126],
+              "final_fat_vs_main_fat": [0.8870071546525589,0.8632329473923113,0.9347600452503289]
+            }
+          }
+        },
+        "layout": "Blocks are in collection order and include the initial warmups. Each row starts with the arm and gives one process's total thread CPU nanoseconds for each lane in workload_order. Divide by that lane's operation count. Each arm occurs twice per block.",
+        "workload_order": ["metadata_default","metadata_scoped","metadata_cached_override","get_plain","get_derived_default","get_mixed_hosts","get_effective_local","mixed_75read_25write","style_set_read_dispose","style_binding_emit_read","coerce_scoped_local"],
+        "operations_and_checksum_by_lane": {
+          "metadata_default": [200000,3400000],
+          "metadata_scoped": [200000,3400000],
+          "metadata_cached_override": [200000,5800000],
+          "get_plain": [200000,3400000],
+          "get_derived_default": [200000,5800000],
+          "get_mixed_hosts": [200000,5425000],
+          "get_effective_local": [200000,20325000],
+          "mixed_75read_25write": [200000,29693725],
+          "style_set_read_dispose": [20000,10679440],
+          "style_binding_emit_read": [20000,10099440],
+          "coerce_scoped_local": [20000,140000]
+        },
+        "thread_cpu_ns_by_block": [
+          [
+            ["main_fat",2854285,1554561,1569724,1600261,2835668,2957158,1493791,4995590,5681681,2411106,413035],
+            ["final_pgo",1159204,1457277,1284179,1306192,2020746,2210307,1317499,3887943,4444870,1695652,292886],
+            ["main_shipping",1233705,1696323,1672177,2078381,2745253,2894565,1384600,5564005,7821703,3044107,473284],
+            ["final_fat",1093056,1310649,1246474,1223410,2167855,2335603,1281927,5068389,5957841,2670071,377121],
+            ["final_fat",1084633,1253825,1210591,1133295,2182766,2407471,1300364,4815622,5916971,2699455,409780],
+            ["main_shipping",1374805,1484207,1479030,1502986,2715549,2996046,1433292,5506099,7691359,2764272,424382],
+            ["final_pgo",1034668,1537497,1239895,1308756,2151550,2331077,1206595,3803737,4316289,1781319,339485],
+            ["main_fat",1265162,1563175,1545289,1613850,2913513,2927514,1463016,4938736,5749171,2489192,395419]
+          ],
+          [
+            ["main_shipping",1294476,1526851,1565759,1444387,2628910,2837601,1372912,5764574,7107461,2884000,455958],
+            ["final_pgo",1085635,1478078,1270990,1248747,2028266,2371848,1279403,3986539,4253206,1797734,321878],
+            ["final_fat",1058074,1371661,1240375,1276869,2158340,2301122,1198132,4802593,6890479,2399078,418272],
+            ["main_fat",1287976,1497207,1583746,1582754,2935536,3080251,1396416,5074908,5461093,2576601,421046],
+            ["main_fat",1309467,1474663,1516145,1515724,2842147,2989146,1496607,4788863,6040224,2683360,421967],
+            ["final_fat",1118093,1327494,1250100,1186194,2263266,2424566,1279704,4770335,6732754,2650372,380336],
+            ["final_pgo",687553,1006657,998816,739610,1454463,1557336,829914,2483263,2786324,1016282,298003],
+            ["main_shipping",1317359,1020758,912958,818818,1643364,2029107,3612693,7004378,7459575,2855507,448096]
+          ],
+          [
+            ["main_shipping",1302848,1391510,1624777,1448244,2640668,2950659,1398821,5419160,7647314,2637112,466304],
+            ["main_fat",1197912,1394083,1531438,1623836,2796330,2930229,1503926,4859547,6020124,2523783,417450],
+            ["final_fat",1104613,1296238,1241256,1329277,2188645,2276846,1304030,4744827,6764091,2501812,384022],
+            ["final_pgo",1129890,1441925,4293095,1331450,4190503,5205382,1286604,4785658,4527103,1668422,393325],
+            ["final_pgo",1134066,1527532,1198522,1283659,2106443,2256546,1261627,3974301,4238164,1683475,317602],
+            ["final_fat",1102900,1318701,1190731,3000452,2366440,2286331,1305752,4937393,6231518,2564203,379104],
+            ["main_fat",1192774,1463176,1541102,1569054,2677271,2787386,1547942,5004012,5638917,2557995,403831],
+            ["main_shipping",1344259,1401714,1474983,1461744,2660447,2843179,1387534,5729301,7314368,2669791,449058]
+          ],
+          [
+            ["main_fat",1177351,1492279,1475895,1531638,2747466,3324294,1582674,4999756,5782540,2741458,532412],
+            ["final_fat",1104863,1232373,1192103,1352832,2297858,2380861,1260564,4672880,6815727,2671063,376130],
+            ["main_shipping",1184582,1385351,1600511,1407274,2767696,2929757,1396206,5442595,7975803,2823380,424992],
+            ["final_pgo",1207175,6196010,1181327,1291070,2104811,2227193,1242898,3904037,4670126,1758606,353796],
+            ["final_pgo",794762,869493,853169,839859,1415876,1518999,836955,2782098,2752644,1073576,234909],
+            ["main_shipping",936453,921490,1013027,1054578,1959575,2135877,1012546,4375078,4987468,1966164,282511],
+            ["final_fat",672100,736386,955711,777226,1480632,1545229,845407,2957409,4063184,1692067,238364],
+            ["main_fat",761773,840420,935912,912197,1843862,2303336,1211412,3485083,3364895,1496716,275219]
+          ],
+          [
+            ["final_fat",714643,768724,764778,760491,1497377,1899115,839359,2838902,3569098,1607061,276772],
+            ["main_fat",1132935,969732,2082788,1563886,1932244,2132632,1400222,3678541,3945659,1607721,303381],
+            ["main_shipping",1255407,1495204,1506280,1425830,2572316,2782989,1339292,5576895,7335450,2615430,439724],
+            ["final_pgo",1076912,1363137,1176951,1180025,2135186,2328573,1250911,6817069,4366193,1684736,375318],
+            ["final_pgo",1135208,1393613,1202349,1268366,1981126,2275124,1265101,3850327,4307747,1690334,316961],
+            ["main_shipping",1362667,1463257,1610055,1376286,2661748,2994153,1295116,5538197,7383972,3654775,414326],
+            ["main_fat",1238091,1454263,1489625,1462826,2791942,2985661,1552609,4848611,5442876,2435313,387757],
+            ["final_fat",1050092,1346232,1286424,1345260,2062257,2358558,1318040,4399633,6232029,2708909,336590]
+          ],
+          [
+            ["main_shipping",1025775,1244861,1269609,1378781,2665023,3040662,1407964,5500261,7100140,2296095,419874],
+            ["final_pgo",1096041,1367975,1185182,1249849,2041025,2204118,1185262,3712081,4266756,1726027,313747],
+            ["final_fat",1070312,1208858,1194787,1206574,2064621,2251048,1283859,4822412,6269895,2595441,377341],
+            ["main_fat",1216950,1412091,1573400,1472089,2658924,2908115,1417819,4799328,5561201,2542842,427676],
+            ["main_fat",1207356,1475054,1510036,1548814,2716982,2904390,1443126,4787040,5552538,2617693,430740],
+            ["final_fat",1050392,1273324,1215498,1234847,2107545,2300291,1223640,4788652,6305468,2515922,346305],
+            ["final_pgo",771848,991004,1095079,865908,1872555,1981717,1126435,2633818,3548919,1530456,252886],
+            ["main_shipping",783896,1114648,1225353,1079285,1970000,2293201,1651647,4008091,5618497,2638073,314578]
+          ],
+          [
+            ["main_fat",973943,1450297,1499350,1513762,2733666,3003908,1069370,3580175,4701673,1797193,299626],
+            ["main_shipping",1135980,1426862,1542504,1456356,2672745,2851061,1270159,5204991,7204485,2700166,414306],
+            ["final_pgo",1170010,1486191,1312102,1286122,2284367,2288153,1354465,3828704,4407465,1730064,369570],
+            ["final_fat",975581,1267526,1136681,1099466,1903892,2021958,1311341,4364461,5712256,2278670,318003],
+            ["final_fat",1033657,1228207,1200936,1095610,2046754,2173442,1307815,4524269,5775871,2447591,330852],
+            ["final_pgo",1092084,1330408,1291812,1278461,2138180,2241985,1230690,4237562,4266856,1754599,317522],
+            ["main_shipping",1195028,1452470,1532740,1392300,2651884,2839453,1343978,5507271,7427527,2727537,408798],
+            ["main_fat",1172354,1431889,1576013,1495754,2694548,2966302,1500902,4746459,5485268,2479668,533113]
+          ],
+          [
+            ["main_fat",1327214,1457598,1500823,1501514,2672885,2994544,1467732,4851976,5595192,2491356,396169],
+            ["final_fat",1052316,1306122,1208798,1261366,2139913,2214303,1319522,4761692,6007175,2514089,340436],
+            ["final_pgo",1155348,1333523,1188838,1272563,1992463,2195305,1194967,3726833,4229300,1642122,315960],
+            ["main_shipping",1179394,1393382,1520071,1408294,2598916,2821447,1304741,5473090,7259357,2692894,399143],
+            ["main_shipping",1192374,1401434,1542394,1801380,2591835,2971029,1438860,5426892,7226128,2821958,430981],
+            ["final_pgo",1083982,1452340,1238522,1329978,2101035,2205551,1171122,3876105,4414946,1686468,309000],
+            ["final_fat",1053646,1335947,1162349,1221397,2185060,2351658,1241496,3869546,5039866,2414912,347968],
+            ["main_fat",1268907,1490827,1515624,1427533,2785783,2958920,1456887,4809534,5508913,2529311,387196]
+          ],
+          [
+            ["main_fat",1206515,1471209,1579539,1501523,2768097,3031418,1462055,4912296,5696723,2521631,396130],
+            ["main_shipping",1167446,1427903,1512489,1415655,2614388,2907144,1359241,5197000,7138076,2665494,413535],
+            ["final_fat",1053967,1318181,1181948,1187246,2151219,2255304,1338110,4839848,6127824,2504134,342640],
+            ["final_pgo",1207336,1490386,1526230,1309087,2254463,2146742,1240165,3714565,4384110,1849791,325714],
+            ["final_pgo",1029181,1329778,1038916,1070682,1722913,1959495,1157862,3661817,3998086,1576034,317282],
+            ["final_fat",707002,750776,763676,752449,1478919,1688922,880901,3275001,5517921,1976630,296371],
+            ["main_shipping",902092,964755,1469345,1398209,2640858,2872632,1327475,5513851,4457399,1829451,282260],
+            ["main_fat",1178653,1479110,1523006,1442185,2829519,2892141,1465029,4761402,5503676,2515642,392764]
+          ],
+          [
+            ["final_pgo",1055761,1380743,1208047,1245463,2018372,2191910,1294846,3687895,4367216,1628142,313977],
+            ["final_fat",1150922,1304270,1182259,1218202,2090489,2336895,1240975,4892476,6334762,2504725,376139],
+            ["main_shipping",1237981,1593029,1554212,1473571,2641609,2878592,1323208,5457207,7711071,2726615,406134],
+            ["main_fat",1327284,1357169,1603865,1463807,2716370,2974424,1488764,4900429,5497816,2563853,655051],
+            ["main_fat",1222619,1544888,1424008,1622403,2832032,3199959,1558799,4982100,5882188,2588248,415228],
+            ["main_shipping",1182328,1441724,1524698,1229749,2229667,2501060,1235828,4778778,7163434,2434972,407215],
+            ["final_fat",1072776,1228568,1200836,1266434,2097259,2294393,1228648,4840278,6317176,2408452,381267],
+            ["final_pgo",1113376,1360013,1317439,1216830,2023770,2176898,1236439,4110844,4416289,1696383,351323]
+          ],
+          [
+            ["final_pgo",1061920,1378640,1275398,1251591,2087776,2223557,1264711,3835154,4338853,1689623,342459],
+            ["main_shipping",1292703,1482505,1612759,1400843,2696080,2809098,1374955,5075770,4895692,1787169,414156],
+            ["final_fat",776825,865507,844716,801722,1717003,1791485,1018074,3179619,3714425,1833697,251915],
+            ["main_fat",855362,956712,914149,911886,2229325,2585565,1008920,3785991,4193036,1949249,275329],
+            ["main_fat",738178,1224832,923103,985406,2599977,2360250,1016411,3151226,3458222,1537957,412574],
+            ["final_fat",850304,749034,753441,980688,1576144,1774078,983663,4142821,5412160,2675719,403240],
+            ["main_shipping",760892,882894,914290,815913,2202917,2167423,938876,3485485,4169311,1715382,281098],
+            ["final_pgo",784727,963383,913558,815694,1462275,1618908,880411,2549102,3021244,1022851,238765]
+          ],
+          [
+            ["main_shipping",779099,812658,1159665,1064123,1903161,3005319,1118653,6414370,4796204,1772367,366485],
+            ["main_fat",1167867,845287,897765,906509,3249453,2644143,1124953,3238146,3558843,1683524,280057],
+            ["final_pgo",930734,1280595,1057333,1096982,1698897,2076709,1190871,3592823,4277412,1705607,318494],
+            ["final_fat",1119635,1303559,1209729,1176579,2086774,2284237,1236068,4757967,6040604,2490064,340386],
+            ["final_fat",1051634,1289578,1166115,1191993,2122537,2277318,1244030,4913398,6244258,2430195,381216],
+            ["final_pgo",1112125,1356017,1172904,1258692,2028457,2321613,1197491,3640614,4171234,1648682,341608],
+            ["main_fat",1200676,1458409,1504828,1433412,2738873,2897149,1339453,4383270,4983893,2268805,409970],
+            ["main_shipping",1169600,1395555,1471609,1337920,2544925,2778192,1295727,5621380,7154260,2608028,285004]
+          ],
+          [
+            ["final_fat",850054,778198,1020247,887600,1559830,1662803,828813,3134512,3835734,1813957,239626],
+            ["main_shipping",772379,828242,911266,907120,2191809,2279961,1158233,4348267,5295646,2016269,616366],
+            ["main_fat",788563,1043572,930103,974229,2103027,2127775,977424,3074162,3446065,1596565,269501],
+            ["final_pgo",843013,870014,846799,818878,1643334,1673108,956663,2689751,2906233,1189369,331453],
+            ["final_pgo",672891,894831,865717,1012947,1510497,1609714,918587,2774146,3125549,1049191,235330],
+            ["main_fat",3259322,1222568,3178978,1853016,5949108,8073887,1404088,4565851,4829332,5153213,393755],
+            ["main_shipping",914740,964945,943133,969031,2236106,13069809,2127731,6539245,7115663,3374098,285695],
+            ["final_fat",728844,1173656,959377,1146415,4828321,1666739,1134767,4689506,4100289,1838895,474375]
+          ],
+          [
+            ["final_fat",872297,1382025,1082660,1014008,1558589,1611787,868863,3077377,4300606,1931382,298774],
+            ["final_pgo",708924,1043311,969833,889884,1792336,2370395,1256829,2962747,3143215,1297269,234449],
+            ["main_fat",1021920,830045,1161828,1160406,2219962,2312859,1937578,3632563,5775049,1713248,337973],
+            ["main_shipping",859839,1204060,1299723,2929968,1783542,2137008,899177,3833401,4653211,1782330,397331],
+            ["main_shipping",752549,1169809,1040338,926227,1830242,3064127,926128,7251465,4716174,1887958,280316],
+            ["main_fat",927600,918206,988861,1145575,2107665,2580007,1000908,3533015,3844579,1505579,281258],
+            ["final_pgo",810505,852568,889232,937735,1638507,1727860,7875613,2545947,3252838,1029241,290983],
+            ["final_fat",758979,841061,774532,768393,1600801,1527401,834381,3252958,3971177,1958373,362890]
+          ],
+          [
+            ["final_fat",889614,1834969,913018,1099806,1746337,1975769,1131062,4799018,5202858,3481158,341288],
+            ["main_shipping",956553,926008,969282,924735,2256185,2573788,2074526,3969074,4985274,3110065,508997],
+            ["final_pgo",697598,2080274,950965,757136,1480391,3233329,1053286,3172969,2882417,1098644,237663],
+            ["main_fat",769575,1011565,970954,939207,2133052,3379296,1142549,5334604,4030404,1554362,310031],
+            ["main_fat",928211,975270,933678,1010483,3583800,2500288,1027929,3242542,4114049,2783871,267277],
+            ["final_pgo",727132,1634841,1106465,2643497,2447370,2272261,1426932,4074009,5774704,2823970,310542],
+            ["main_shipping",889173,2033845,942121,841732,1642713,2010059,896333,3480487,4442928,1853046,282430],
+            ["final_fat",2358638,787731,810446,887499,1499140,1661951,880510,4419373,3984536,2029118,307586]
+          ],
+          [
+            ["main_fat",830104,803876,1348966,1053296,1973305,2146222,952016,3209322,4382368,2118551,517500],
+            ["final_pgo",1664045,891446,1209859,794011,1965844,1609874,1122700,3051739,3743718,2152451,242190],
+            ["main_shipping",903003,950984,1042941,878917,2130839,3539654,867119,3942954,4738017,2151851,292715],
+            ["final_fat",779450,889103,790616,836894,2631584,1587111,1506570,3404363,4445822,1721530,286716],
+            ["final_fat",703467,873289,783866,792669,1487923,2332149,953808,4177484,5904041,1757074,276051],
+            ["main_shipping",1008249,1978032,1383077,1195968,1836652,2539678,906247,5061818,7224721,1673268,1162900],
+            ["final_pgo",903915,1681261,1037893,731117,1660389,1974292,862834,2625625,3448029,1130652,236211],
+            ["main_fat",987038,917154,1116551,978015,2293481,2523784,1333964,3673123,3853712,1880386,269391]
+          ],
+          [
+            ["final_pgo",956642,2110910,1312081,743686,1821990,1955738,855262,3104206,3292427,1720870,316862],
+            ["final_fat",976392,908010,1474964,2234893,1948508,2210127,1056631,5410186,4374727,1956560,240808],
+            ["main_fat",882262,1025175,1124212,1180767,1961838,3863356,941921,10625443,4696375,1649043,359284],
+            ["main_shipping",736645,875382,967799,794572,1964401,2125962,1089020,4733891,5548301,2147894,315670],
+            ["main_shipping",755093,1217160,943193,933158,2330867,2363596,1083983,3901142,4598309,2189676,280777],
+            ["main_fat",898026,901300,1095830,1196109,2194053,2921956,1060628,3887843,5029119,1809011,335860],
+            ["final_fat",648134,1116942,1529845,921040,1748530,3759252,840621,4936913,6549912,2091321,289430],
+            ["final_pgo",2763140,956022,1799952,1375455,2909327,3781248,4843504,7376352,7449740,1048390,248610]
+          ],
+          [
+            ["main_shipping",1019446,6378817,1116691,1242699,1933556,2160563,1458509,4703015,9982697,2256807,332074],
+            ["final_fat",1159094,815182,893689,925196,1954557,1845856,1223059,3487377,5221566,1788460,238315],
+            ["final_pgo",1013057,1024825,976332,898717,1909120,2067835,895372,3374148,3891527,1388335,367096],
+            ["main_fat",834020,822433,1478610,1047648,2549682,2948986,1078735,3953991,4391432,1764685,335128],
+            ["main_fat",789194,844376,965836,915382,2880149,2440750,1230119,4386013,4207948,1745847,327568],
+            ["final_pgo",766731,1111333,1147797,730827,3481187,1598728,953167,2400190,4201939,1359262,241419],
+            ["final_fat",739710,1020027,1107947,827961,1616644,1715302,958275,3197696,3992337,1780879,237974],
+            ["main_shipping",754262,6912262,3940291,817877,4857990,2739074,950644,3776336,4279534,4875761,318413]
+          ],
+          [
+            ["final_pgo",1009532,1307495,1005625,1207176,4171314,1902670,1062190,3731330,4865397,1682102,280508],
+            ["main_fat",983813,1606289,1007699,1203860,2346660,3003817,1427974,4203843,4712740,2283886,292946],
+            ["main_shipping",888311,919818,1228878,809685,3905574,2067175,956733,3460648,4689735,1827568,347647],
+            ["final_fat",701233,800179,1148658,776254,1476436,1629604,850946,3417543,3829636,1894748,243332],
+            ["final_fat",702916,857986,753511,849974,1550376,1784934,1042551,3134131,4035722,1812285,238795],
+            ["main_shipping",886929,865327,1367745,811897,2267813,2518115,1160316,4315950,11861796,1982389,312415],
+            ["main_fat",854571,1109751,994479,2417732,2057971,2459949,1021639,3293097,4424450,1765957,271414],
+            ["final_pgo",757516,1023873,933338,792870,1656184,1838124,843915,2865712,3329912,1192403,264314]
+          ],
+          [
+            ["main_shipping",768343,860350,997514,935612,1954156,2326279,1354665,3748945,4539231,1668091,359845],
+            ["final_fat",792339,912867,983803,1077803,1606740,1731275,873749,3237966,3874402,1882099,238295],
+            ["main_fat",807802,947869,952056,946267,2152582,2925621,1057743,3643719,3751740,2080575,269541],
+            ["final_pgo",837565,905427,1523075,749605,4994689,5829761,835954,6774316,3451173,1080577,233447],
+            ["final_pgo",659341,903082,867029,2760726,4564969,1502775,4156597,2433960,8092737,3912408,268920],
+            ["main_fat",1221566,1417869,1491188,1459430,2521911,2773175,1458679,4521305,5261676,2348874,394436],
+            ["final_fat",1032636,1305611,1123161,1159875,1997271,2165942,1238302,4539221,6054385,2376965,339635],
+            ["main_shipping",1207666,1455045,1455294,1348716,2498356,2740427,1291681,5191451,7060000,2618264,414437]
+          ],
+          [
+            ["main_shipping",1156660,1475915,1435735,1452220,2496854,2741958,1312663,5360133,7039750,2577544,412594],
+            ["final_pgo",1032686,1356137,1127186,1229438,1988457,3481518,1228267,3900741,4040089,1561282,334267],
+            ["main_fat",1162910,1504067,1509375,1420382,2724933,2789789,1395896,4576968,5325180,2415243,391923],
+            ["final_fat",1065866,1204091,1171633,1352301,2077330,2322324,1183611,4543147,5950230,2379849,340297],
+            ["final_fat",1022320,1230520,1219323,1158303,2008277,2237548,1231191,6055326,6237998,2369274,405703],
+            ["main_fat",1171432,1498819,1408685,1513151,2564233,2783480,1403808,4660061,5346152,2426098,435126],
+            ["final_pgo",1111533,1371719,1151753,1242097,1944082,2210567,1190671,4148550,4083223,1609404,323943],
+            ["main_shipping",1253795,1436506,1459220,1388576,2488641,2743089,1290749,5334535,7547916,2617363,410731]
+          ],
+          [
+            ["final_pgo",1197572,1474303,1223370,1326573,2114114,2203267,1188358,3971898,4455968,1818374,337041],
+            ["main_shipping",1316047,1563875,1686167,1460242,2356154,2696340,1388605,5739647,7346307,3023918,461045],
+            ["main_fat",1286985,1512449,1599319,1644285,2742940,2854115,1471138,4835473,4573953,2175465,416930],
+            ["final_fat",7056005,836654,1314750,853609,2830349,1886306,1276649,10850604,4144904,1645356,252456],
+            ["final_fat",678189,744086,852518,754942,1515183,1593129,999325,3140411,4130013,1705877,241099],
+            ["main_fat",794932,978195,1200275,1034819,2265039,2083248,1058685,3181221,3820382,1578447,268389],
+            ["main_shipping",1112925,918196,1105143,813519,1871784,2027456,1178313,4035221,4607392,1726848,362649],
+            ["final_pgo",704819,1030894,867580,741954,1496576,1695682,826650,2599726,4102011,1312742,253587]
+          ],
+          [
+            ["final_pgo",747992,1049632,2208774,750706,1569204,1519971,846378,2440099,3163916,1420272,233337],
+            ["main_fat",1038845,1008309,1365091,1331340,2272539,2524826,1096441,3679562,3933831,1786598,266155],
+            ["final_fat",913498,1015620,953668,1215087,1935920,2267322,1086145,3889695,7176293,1884322,240097],
+            ["main_shipping",795814,4501686,928210,3625081,1687720,11905437,1686669,4461866,5500591,2135697,412824],
+            ["main_shipping",1055430,1482835,1114698,1276428,2348853,3220850,946778,4187348,18908372,2352439,343671],
+            ["final_fat",816945,772910,1562344,815744,2029789,1737514,972937,3156404,3905909,1739907,242080],
+            ["main_fat",877364,1048700,916083,1161938,2500249,2340911,995020,3307820,4296951,1752506,270722],
+            ["final_pgo",1035961,1209178,1002611,945916,1434183,1842019,1029381,3247700,3473105,1130141,237343]
+          ],
+          [
+            ["main_fat",1081709,869994,1129520,1214967,2139092,2367572,1146625,3446015,4322028,1826055,379304],
+            ["final_pgo",751888,1571177,1049671,770746,2634659,1875990,1239825,3310404,3126200,1124231,285565],
+            ["final_fat",921290,1687490,835803,794332,5784732,2081115,823705,3732001,3655267,1741951,289280],
+            ["main_shipping",1028980,1010713,1601122,1040137,2102577,2809298,1126245,4504009,4750876,1938743,393295],
+            ["main_shipping",928972,855702,1027758,879227,2124620,2243508,978335,3793261,5202198,1745196,352144],
+            ["final_fat",929303,909833,1082741,1020959,1679958,1631146,879839,3450943,3720303,2235825,409369],
+            ["final_pgo",927029,1021799,1393062,815363,2447019,2167924,2019243,2678623,3129525,1140636,264734],
+            ["main_fat",977954,1044483,1001951,1210981,2504085,2846453,1171242,3460867,3422280,2240182,432784]
+          ],
+          [
+            ["final_fat",699760,821632,947219,902092,1648001,1645578,958515,3313138,3946630,1869771,247588],
+            ["main_fat",887010,996782,1230420,1114358,2332840,2768818,1103552,3838890,4963242,1841349,269661],
+            ["final_pgo",1041559,1066445,1532349,1027018,1746708,1870793,899878,2863178,3647544,1297820,363500],
+            ["main_shipping",997983,1179625,1267696,1065374,2022878,2659857,993587,4212626,4497219,2604604,410440],
+            ["main_shipping",1103361,1063982,1096611,943814,1831284,2422062,1134277,4029213,4376710,1789692,400386],
+            ["final_pgo",831998,1104362,978866,1239974,1910752,2009669,933027,2571444,3410934,1141267,280087],
+            ["main_fat",814952,1013847,1112765,1011615,2037531,2831241,931095,3209353,3795075,1784724,331322],
+            ["final_fat",693501,1179564,1054328,892026,1466241,1595213,1087157,4482277,4751818,1917853,366154]
+          ],
+          [
+            ["final_fat",660563,740161,858707,1047708,1773427,1884182,859449,3467917,3523370,1643025,248589],
+            ["final_pgo",705159,955141,916323,723907,1706619,1569454,980017,2662681,3670429,1216228,258975],
+            ["main_shipping",781322,794591,1126866,919077,1638987,2135907,913108,3516311,4404672,1711506,280638],
+            ["main_fat",814512,923973,981620,1096091,2014076,2343816,1021369,3509720,3569950,1525579,296782],
+            ["main_fat",823885,954009,935631,907470,2275645,2145702,1141768,3105459,3556810,1779846,267908],
+            ["main_shipping",1007970,946858,1206655,844215,1626980,2338849,856183,3999710,5272882,1668532,283301],
+            ["final_pgo",720371,1262297,1018865,1063943,2472288,1930291,962911,3580195,4010374,1328606,354287],
+            ["final_fat",742114,770295,1352472,1646414,2433619,2184510,1152454,3400267,4552301,2423815,338424]
+          ],
+          [
+            ["main_shipping",1243439,1131814,1675552,1832235,1851713,4604969,1271932,5666347,7838768,2709049,472434],
+            ["main_fat",1289418,1078194,974009,1204471,2322355,2243287,1046987,4943462,3814723,1669043,302370],
+            ["final_fat",826119,831516,784096,755264,1693679,1841870,1023923,3305747,4120348,1823241,296381],
+            ["final_pgo",740762,1359421,1174537,861762,1752257,1993545,1297219,2958931,2903298,1297400,262981],
+            ["final_pgo",958295,900760,883925,741432,1760268,1524718,869253,2580077,3154082,1248326,223302],
+            ["final_fat",768453,747001,762905,841071,1579239,1616865,897034,3123505,4184493,1858154,249961],
+            ["main_fat",764377,1009481,1215318,1187937,2580508,2636552,1070552,3782035,3945107,1579269,325825],
+            ["main_shipping",995230,943273,984795,811838,2207723,2667647,1071574,3445925,4509417,1893376,352093]
+          ],
+          [
+            ["final_pgo",690327,928571,930494,722735,1396497,1773858,926958,2582771,2916988,1200946,239527],
+            ["main_fat",814832,879378,1023753,953808,1872715,2248704,1016212,3212919,3257905,1484928,384823],
+            ["final_fat",1132024,763956,802353,978415,1468744,1690695,845147,3105689,3927051,1932194,243813],
+            ["main_shipping",765388,849563,1050663,868111,1683274,2270698,866819,3430032,4026949,1628151,280217],
+            ["main_shipping",881251,1144302,1126996,1120676,3584561,2105892,1138213,3678781,5569978,1963510,284343],
+            ["final_fat",777296,962883,1131863,3738591,1985984,2128926,873529,3779312,6411546,2453819,376350],
+            ["main_fat",831877,963603,1071434,981099,1935909,2351527,1013578,3287099,3654304,1653128,361057],
+            ["final_pgo",984204,1108970,1045825,710076,1678376,1958974,917784,2839173,3376473,1257360,323592]
+          ],
+          [
+            ["main_fat",943294,832318,1055880,1146916,1951252,2673587,1010533,3436080,3739322,1780589,267308],
+            ["final_pgo",900619,1223640,1506460,857856,1817332,1890993,957254,2844636,3450211,1352281,233538],
+            ["final_fat",757756,1027538,932697,878587,1632998,1688852,1299652,4562906,5968376,2397055,345163],
+            ["main_shipping",744668,792369,967860,961009,2522532,2385689,868611,3957836,4207108,1836462,356020],
+            ["main_shipping",882542,904696,1014188,806329,1871773,2334291,1330569,4287346,4185996,1727679,288118],
+            ["final_fat",719690,768092,913468,946037,1600350,1871844,871958,3112510,3768495,2108967,355258],
+            ["final_pgo",776405,951325,968110,818026,1515314,1907107,980138,2993463,3083526,1250130,239476],
+            ["main_fat",892227,902673,980608,896103,2828427,2249306,928431,3212277,4887770,1665097,362209]
+          ],
+          [
+            ["main_shipping",791307,969973,969822,1041469,2070980,2467489,951415,3464473,4192766,1829942,306456],
+            ["final_pgo",658739,978575,901120,831457,1560882,2189015,862613,3047372,4250522,1107307,263832],
+            ["main_fat",1144673,805378,1177862,1067638,2172111,2637012,1008991,3278275,3670840,1671876,268028],
+            ["final_fat",668364,958195,769174,797686,1659148,1830192,1502254,3201752,3941722,1719207,274899],
+            ["final_fat",807841,1159785,1056120,992136,1794048,1947477,911816,3190775,4047861,2050319,627293],
+            ["main_fat",1990190,846479,921090,1129530,2170679,2278710,1017964,3469560,4109071,1680890,271374],
+            ["final_pgo",718789,936953,890946,718369,1906225,1653890,885337,2609341,2730992,1029101,238775],
+            ["main_shipping",765408,851857,1060507,889493,1890331,2533749,1112385,3704470,4345584,1603996,391613]
+          ],
+          [
+            ["main_fat",1456816,1477727,1420332,1501503,2609290,2853444,1392381,4833740,6095646,2544725,420696],
+            ["final_fat",1026537,1301726,1168137,1188858,2045252,2295705,1237220,4562366,5863741,2430644,375559],
+            ["main_shipping",1509355,1399431,2346680,1201047,3045229,3190314,1424138,5260695,5719555,1957862,551050],
+            ["final_pgo",1168478,1202009,1307855,838417,2029699,2248204,1313213,4240838,3406517,1095630,351212],
+            ["final_pgo",757496,1157291,965936,743796,1425660,2242526,1255258,3181992,3265287,1218131,260858],
+            ["main_shipping",988100,944935,980839,1084343,1987116,2473018,1140035,3547686,6208455,1880387,283611],
+            ["final_fat",805327,1211582,1076401,965776,1891985,2258720,858037,3875544,4655605,1884233,249571],
+            ["main_fat",888171,885206,1118063,1114298,2142206,2479598,1001149,3608868,3906390,1871213,291174]
+          ],
+          [
+            ["final_pgo",1311341,1043592,1133826,834842,1803082,1979944,1240084,3254730,3879681,1364450,402950],
+            ["final_fat",647353,751999,767231,1536466,2141144,1843973,1103482,12159654,5890192,2040786,442799],
+            ["main_fat",928040,1035650,964335,1026096,2068886,2368112,1071704,3616328,4054340,1668491,574334],
+            ["main_shipping",752800,814041,1151403,852858,1999695,2612215,936193,4312564,5169248,1810143,280147],
+            ["main_shipping",776024,938335,1169029,1057503,2189877,2601289,838026,4062582,5203319,1713037,376991],
+            ["main_fat",988941,998335,1136871,918386,1885454,2298969,913288,3510660,3408239,1643354,439774],
+            ["final_fat",712099,1217550,821392,859658,1557817,1936280,813720,3218337,3988602,1612509,243412],
+            ["final_pgo",886679,969662,948401,878656,1603074,4613983,2065773,3685692,3129895,7717408,238024]
+          ],
+          [
+            ["final_pgo",785448,1085535,1184632,710186,1565198,1993454,889783,2730842,4116883,1575484,301188],
+            ["main_fat",1089721,1197621,1357299,1284621,2025813,2392949,988300,3305837,3762345,1677245,287197],
+            ["main_shipping",770296,994779,965366,1176140,1981607,5135889,900810,10345207,7893881,6307712,492482],
+            ["final_fat",808783,1032896,830385,1155909,1910662,1993545,952917,3334499,4705038,2201594,422377],
+            ["final_fat",738719,1068228,765679,927721,2811261,2012723,1017884,4040889,3914943,2928745,289720],
+            ["main_shipping",2891080,1187656,1043502,1220666,3487957,6001656,2409563,8604849,8360043,1816472,537690],
+            ["main_fat",1070883,991835,935060,1609424,2678193,2510875,1016161,3667575,3437383,1526240,574485],
+            ["final_pgo",1136560,1524547,1206155,1331069,2154104,2225641,1231962,3984095,4456508,1752055,314458]
+          ],
+          [
+            ["main_fat",1118233,1134917,1086507,928661,2143558,2832843,1103471,3308892,3547086,1471048,281759],
+            ["main_shipping",826139,1051003,984414,902753,1733227,2059673,865116,3938616,4734802,1847047,345404],
+            ["final_fat",723136,944445,1221998,849003,2527209,1869241,878005,3245682,6501540,2643502,355258],
+            ["final_pgo",1121117,1491068,1209549,1333013,2093213,2241774,1233955,3956295,4462307,1779137,329410],
+            ["final_pgo",681964,1082300,869373,786800,1599168,1611487,939628,5913806,6441070,1685497,404271],
+            ["final_fat",1110131,1344500,1274215,1204892,2159602,2329044,1320594,4925045,6544233,2548250,407166],
+            ["main_shipping",1320794,1586349,1573761,1484448,2793074,2990408,1420163,5727339,7460527,2795448,408818],
+            ["main_fat",1232884,1627531,1479260,1531308,2728308,2950139,1526390,4912296,5782270,2659716,394787]
+          ],
+          [
+            ["main_shipping",755303,814642,902994,811727,1678487,1980255,854911,4208219,4121951,1632248,286626],
+            ["main_fat",1237681,821051,913137,902683,1795541,2634910,1015069,2974754,3677088,1562544,272545],
+            ["final_fat",676276,1063132,849804,890424,1492931,1533851,978355,3032230,3717409,1650495,240608],
+            ["final_pgo",739210,928170,918746,746730,1436406,1481644,814472,2356846,2651424,1106676,245225],
+            ["final_pgo",770428,870445,864576,733871,1474283,1514122,897906,2611594,2992731,1041950,291072],
+            ["final_fat",646922,874261,748563,750817,1526230,1603565,839989,2889097,3789878,1609083,253697],
+            ["main_fat",739370,810065,1012637,934900,1901097,2041947,1212073,2953593,3498874,1583305,281188],
+            ["main_shipping",737407,1011032,969562,844006,1894687,2179692,928561,3959088,5744983,1746368,286507]
+          ],
+          [
+            ["final_fat",665660,802884,922623,842793,1779978,1777433,905377,3004869,3684771,1958173,241229],
+            ["final_pgo",1214616,886309,1058023,1010153,1875049,1546020,964745,2562321,2967583,1191782,299776],
+            ["main_shipping",970674,906418,922351,997223,1952774,2049989,869774,3737509,4487314,1712978,309951],
+            ["main_fat",813049,1077562,1017783,892978,1848059,2196387,1009241,3095064,3828875,1602644,328589],
+            ["main_fat",737036,906638,900319,1072785,2361853,2377817,1019286,3509049,3832900,1647650,299705],
+            ["main_shipping",756204,1032856,1135238,817997,1861378,2111770,981570,3961042,4447236,1760649,284163],
+            ["final_pgo",811858,987168,887941,872408,1402546,1582854,967349,2372399,3224706,1164692,334978],
+            ["final_fat",676716,794943,769525,790015,1626799,1612248,1159935,3150355,4087850,1966314,239476]
+          ],
+          [
+            ["final_fat",821852,828853,982291,899067,1564027,1943841,862062,2956718,3610460,1738606,505282],
+            ["final_pgo",798637,1155809,934130,1300725,1646408,1691777,1234687,2675299,3074813,1079976,233147],
+            ["main_fat",794171,2964729,930875,945507,1952024,2172041,2489944,5149991,6256395,2612266,284093],
+            ["main_shipping",988731,977464,955792,1304940,1747639,2123559,923434,3741345,4482727,1682943,563778],
+            ["main_shipping",815984,1415625,1118764,776124,1642633,2090319,871978,3615628,4432823,1910482,331884],
+            ["main_fat",1233415,850424,1075369,1047969,2014816,3378044,1227205,28495260,3732691,1688040,368108],
+            ["final_pgo",908211,1289508,1079616,762103,1529485,1631697,845287,2926042,4098175,1492440,294829],
+            ["final_fat",913739,1060748,1044022,1052085,1786957,2066474,1162930,3991907,4798296,2044652,311013]
+          ],
+          [
+            ["main_shipping",961850,1220676,1245292,1262097,2223788,2529002,1196029,4558209,5875119,2135697,419243],
+            ["final_fat",886999,1235608,976823,1022631,1809421,2015177,1135919,3906671,4661283,2131030,307708],
+            ["main_fat",1030593,1249088,1292553,1300154,2391357,2481410,1326253,3996043,4313034,2057531,361818],
+            ["final_pgo",940739,1301837,1148178,1153095,1756582,2038021,1118333,3107872,3528378,1412050,299755],
+            ["final_pgo",903143,1266724,1165333,1099305,1678737,1984682,1179875,3140951,3557171,1411018,293797],
+            ["main_fat",1156750,1185233,1317260,1369006,2432488,2514319,1262218,3937667,4370230,2157780,365183],
+            ["final_fat",1075320,1309718,1349807,1116270,2122707,2005583,1103612,4164283,5228417,2231219,316521],
+            ["main_shipping",784537,1072224,2977249,1300214,3749177,2509182,1055931,4160808,5276018,2669771,295600]
+          ],
+          [
+            ["main_fat",1022591,1289167,1286052,1309778,2352759,2531865,1266433,4106829,4701652,1999424,382910],
+            ["final_pgo",977163,1282647,1111593,1064213,1751796,2026885,1109259,3127491,3560436,1495645,290472],
+            ["main_shipping",1003673,1247546,1318431,1195778,2218990,2521571,1202508,4516627,5851443,2258419,374898],
+            ["final_fat",891686,1084412,1004834,1053927,1813327,1961197,1144281,3890316,4750224,2029739,340987],
+            ["final_fat",935081,1062220,1062150,1026406,1812015,1999935,1101057,4064054,5013697,2072583,306156],
+            ["main_shipping",1000358,1347644,1248667,1333253,2204919,2716400,1369887,5351960,5812556,2176177,372083],
+            ["final_pgo",948721,1282617,1034849,1068819,1743914,2054816,1236079,3355300,3619633,1422987,317983],
+            ["main_fat",1034950,1291681,1366333,1294415,2397896,2466619,1287254,3998327,4377680,2015277,361128]
+          ],
+          [
+            ["main_fat",1014409,1256289,1315697,1284501,2393440,2454570,1359763,3964126,4343580,2029148,390310],
+            ["final_fat",940910,1056341,966707,1018394,1799126,1994197,1102530,4178414,4681593,2016850,315880],
+            ["final_pgo",897916,1264380,1080898,1137081,1695562,1989769,1200665,3091959,3587345,1454873,343932],
+            ["main_shipping",996502,1192484,1267556,1278592,2211319,2915827,1226274,4569497,5792616,2113374,442258],
+            ["main_shipping",968590,1223019,1320153,1243109,2256116,2778442,1267576,4609296,5792085,2139392,371482],
+            ["final_pgo",897455,1260655,1032766,1094619,1693208,2034516,1119856,3174141,3524832,1468435,290472],
+            ["final_fat",916012,1054648,963032,1127157,1789011,2099383,1099826,3909294,4633420,2092082,309871],
+            ["main_fat",1021379,1208427,1240856,1295947,2399659,2513759,1267575,3915283,4296050,2015608,361107]
+          ],
+          [
+            ["final_fat",913889,1115369,969251,1076121,1846977,2022879,1175528,4069173,4673000,2022628,305134],
+            ["main_shipping",1004984,1268747,1002101,860019,1627020,1979554,854390,4946817,5778064,2140805,375989],
+            ["final_pgo",1198893,1446121,1176610,1375806,2175565,2274062,1208678,2735268,4233567,1707150,303992],
+            ["main_fat",1235027,1487843,1537377,1500461,2650452,2867915,1445350,4907589,5757443,2632945,392083],
+            ["main_fat",1242678,1445430,1571136,1594261,2795217,2841296,1428755,4906718,5942459,2530784,440335],
+            ["final_pgo",1090121,1394614,1180656,1274555,2063329,2273712,1255848,3884478,4289690,1748221,328939],
+            ["main_shipping",1315587,1551378,1510978,1476426,2665825,2810600,1390789,6134584,7610470,2841887,413976],
+            ["final_fat",1094739,1287215,1241245,1212183,2308994,2364417,1309989,4839648,6592625,2584824,397742]
+          ],
+          [
+            ["final_pgo",1125514,1400333,1166295,1402977,2064461,2190108,1729242,4283782,4606771,1918583,455718],
+            ["main_shipping",1271511,1469296,1589795,1492049,2772563,3006282,1280014,5521382,7448889,2801637,504850],
+            ["final_fat",1095409,1417037,1147096,1201697,2170308,2317457,1206124,4862962,6343715,2544284,361098],
+            ["main_fat",1252483,1555444,1525399,1652067,3006111,3034192,1570416,5036611,5906665,2734877,428057],
+            ["main_fat",1227676,1559599,1503847,1501764,2762589,2870660,1406902,4921880,5804092,2546257,429769],
+            ["final_fat",1134307,1269708,1187657,1323599,2175005,2293832,1276248,4897003,6522832,2710160,357402],
+            ["main_shipping",1277140,1522464,1575152,1448153,2756119,3010767,1414173,6036318,7741404,2942456,521026],
+            ["final_pgo",726440,879168,946038,719380,1425821,1524377,815313,2364757,2712103,1116601,249751]
+          ],
+          [
+            ["main_shipping",783646,806790,907480,800851,1701441,1956940,885157,3477191,4054650,1636344,280317],
+            ["main_fat",755684,829594,911526,884646,1792195,2218179,1007068,2967173,3707014,1553571,275570],
+            ["final_pgo",883925,1006757,882773,763916,1404459,1608542,819759,2633287,3689157,1062420,318754],
+            ["final_fat",666441,738809,920209,1859886,1607781,1534753,861872,3037377,4797796,1616104,241889],
+            ["final_fat",677447,718859,782794,773050,2553137,1640450,4267987,7100064,3856416,1734920,290962],
+            ["final_pgo",758959,1012897,935212,825387,1647600,1764164,956402,2528030,2971049,1107577,294168],
+            ["main_fat",972457,966408,1322768,1647520,2696470,2889117,1446871,4967939,5863591,1550246,376800],
+            ["main_shipping",1511719,1531808,1555714,1503316,2670892,2833594,1512660,6213311,7795695,2932612,601274]
+          ],
+          [
+            ["main_fat",1310068,1551708,1509375,1606960,2748628,2831992,1482986,4868100,5685826,2599396,392253],
+            ["main_shipping",1270690,1464048,1576263,1493231,2582681,2804892,1366392,5610235,7676949,2884491,427096],
+            ["final_pgo",1167527,1440783,1152535,1322156,2109137,2188796,1282868,3986289,4313135,1730695,336681],
+            ["final_fat",1127807,1431749,1166986,1286804,2252691,2285278,1225292,4898707,6574027,2620177,357992],
+            ["final_fat",1106246,1320154,1255357,1231671,1962038,1590636,826710,2908116,3539514,1586370,431482],
+            ["final_pgo",671799,948601,854641,724708,1415025,1546420,849294,2356615,2680257,1014639,239847],
+            ["main_shipping",850765,779700,915772,788352,2259420,1928519,852317,3393998,4162021,1611667,302219],
+            ["main_fat",781222,819469,919268,899688,1797313,2189126,956182,2942476,3371265,1460102,270432]
+          ],
+          [
+            ["final_fat",759079,1068269,864256,946818,1573621,1608773,847831,4442307,3658812,1932394,264634],
+            ["main_fat",767551,1013347,1014569,926989,1819957,2287822,933428,3174631,3361049,1482565,288579],
+            ["main_shipping",792358,907850,1190120,812288,1793538,2165130,913089,5550736,7645731,2880404,496689],
+            ["final_pgo",1155949,1452791,1204051,1325201,2138370,2180012,1259433,3906320,4405172,1723123,434085],
+            ["final_pgo",1183801,1441624,1200736,1360534,2101666,2291268,1251441,3940141,4381497,1768380,350141],
+            ["main_shipping",1291831,1634140,1590987,1551638,2706165,2839944,1354254,5731985,7645722,2878161,463489],
+            ["main_fat",1240695,1595573,1527883,1638788,2659587,2868586,1409226,4969661,5743232,2639546,425082],
+            ["final_fat",1104853,1419311,1173035,1281687,2173082,2338398,1235708,4868500,6575500,2598094,408057]
+          ],
+          [
+            ["final_pgo",1155869,1467773,1214957,1282117,2130629,2242485,1235197,3937136,4479463,1726217,320276],
+            ["final_fat",1109571,1371100,1188979,1231692,2191750,2324968,1338240,4884415,6864319,2574099,396209],
+            ["main_shipping",1321115,1471678,1617486,1475825,2759404,2911540,1413773,5698586,7687804,2890188,425474],
+            ["main_fat",1271381,1690995,1552489,1534733,2823249,2979091,1465439,4902131,5756451,2640938,411722],
+            ["main_fat",742224,1610906,1541502,1552760,2727657,2889758,1422996,4966596,5775309,1474624,323551],
+            ["main_shipping",811086,942942,962552,806059,2974204,2262335,951315,3574677,4429979,1731605,283672],
+            ["final_fat",721503,737467,748734,864486,1691646,1721861,831036,3211045,3529970,1775691,238405],
+            ["final_pgo",679941,892507,915952,742935,1408075,1548604,840320,2415292,2669751,1075139,236611]
+          ],
+          [
+            ["main_shipping",1403818,1327535,898516,889533,1823833,2152431,1007158,3489460,5235877,3915588,284143],
+            ["final_fat",998365,815433,853370,1280164,1950621,2023219,1204051,3572193,4231314,2162787,302359],
+            ["final_pgo",950043,1067028,1024464,1016181,2180363,2012363,1048810,2897650,4116794,1193896,336911],
+            ["main_fat",1111313,1224071,1132084,2106262,2594910,3035815,1567190,3419886,3742847,1734129,280537],
+            ["main_fat",1018204,820861,1052005,1069910,3670620,2376975,1223850,3099831,3727464,1640660,268029],
+            ["final_pgo",956462,1080407,865327,1267936,1580260,2139633,974970,3184266,3954652,1207125,431922],
+            ["final_fat",1099736,1070522,816244,1264050,1564156,1665398,834451,3850627,4272284,1897212,379814],
+            ["main_shipping",810695,913899,1291891,1241717,2202565,2235184,914400,3969534,5307073,1981357,281909]
+          ],
+          [
+            ["final_fat",743966,801793,901551,1162940,1839246,2196757,2330792,5883991,7346497,2110689,332895],
+            ["main_shipping",984024,997684,1547512,939788,2074626,2395282,1239994,4178594,4990393,2000956,308459],
+            ["main_fat",842963,1071804,1057122,1030122,2345589,2830770,1195398,4051856,4545540,1830893,329239],
+            ["final_pgo",818648,959207,1090502,1050152,3059511,1732787,1060558,3888493,3232868,1279623,355148],
+            ["final_pgo",828112,1002681,951395,1015420,1832916,1876481,890514,2897028,2836910,1044694,235421],
+            ["main_fat",912707,1008841,964945,1304129,2501521,2262435,1200946,3086130,3489590,1630925,310692],
+            ["main_shipping",911146,1384509,1473101,867951,1943440,2481521,884305,3671101,5006176,1934447,391072],
+            ["final_fat",1199113,1152814,791337,981981,2018026,2053544,998375,4043765,4570047,2406680,333736]
+          ],
+          [
+            ["final_fat",849493,853320,834591,1059676,2374542,1586879,1114677,4050645,4188240,1872815,238204],
+            ["main_fat",878606,961661,1014769,1101508,2131360,2671253,1456847,3298686,4623867,1989058,268329],
+            ["final_pgo",700402,976813,1198352,1089040,1648732,1833537,1149830,3252667,3307840,1115018,595936],
+            ["main_shipping",768563,879659,1185253,1036001,2459138,2297227,930975,4126688,4316139,1882209,529598],
+            ["main_shipping",993999,1096801,1040497,780170,1963460,2347141,1033316,3729618,5273644,2194914,283331],
+            ["final_pgo",695254,965857,1089580,871937,1529455,2075597,1040989,2703181,2944860,1312532,233347],
+            ["main_fat",835012,1128678,962441,1195929,2271738,3318761,1339332,3600224,4486513,1645016,455057],
+            ["final_fat",650588,1130581,753771,1078534,2286330,2160985,1095360,3450411,4467595,2426479,249061]
+          ],
+          [
+            ["main_shipping",1076291,1084723,1124533,807791,2250467,2966612,1151432,4347537,5354164,2303506,283061],
+            ["final_pgo",1047077,894600,1044904,869303,1691025,1675822,1008631,3290344,4539251,1079265,257343],
+            ["final_fat",772749,950783,905387,825117,1802842,1709593,1117352,3373818,4029243,2205109,372504],
+            ["main_fat",925266,1118623,1248678,1190109,2335323,2686205,1057083,3401490,4078746,1586309,442418],
+            ["main_fat",765859,1027889,1734980,1306113,2140434,2552156,1099835,3421549,4295108,2098471,320487],
+            ["final_fat",726921,920308,1028961,918997,1847167,2393830,1098333,3666714,4253566,1608493,486634],
+            ["final_pgo",878947,1092054,1054619,996693,1868899,2016178,983763,3379446,3769312,1235908,463670],
+            ["main_shipping",892067,1136580,1320624,932086,2779644,2829799,1311771,4249660,4835291,2129848,290532]
+          ],
+          [
+            ["final_pgo",803515,880360,860440,767622,1550116,1818975,872718,2840925,3156264,1029891,239416],
+            ["main_shipping",979146,870525,901161,940980,1944663,2167054,1318612,4124194,4403300,1861148,402268],
+            ["main_fat",1316708,967699,1374244,1515364,3277925,3519926,1071894,3538703,3634856,1938012,270502],
+            ["final_fat",643938,797006,832087,1108629,2510254,2803970,1185874,3584161,4745749,1666669,439944],
+            ["final_fat",867981,867800,1340293,988620,2151160,2764493,856604,3317023,4237092,2073825,336601],
+            ["main_fat",1181998,1300384,1746548,2474805,3088414,3040672,1564858,5161666,5708441,2413189,373796],
+            ["main_shipping",821111,1003973,1231892,1340143,2925110,2174764,924445,7053491,7461267,1972023,316010],
+            ["final_pgo",1117522,1478609,1182910,1283279,2128796,2351006,1487232,3872911,4458843,1706738,318583]
+          ],
+          [
+            ["main_shipping",1329046,1466922,1602273,1624556,2742048,2877970,1410198,5789320,8154519,2742128,482298],
+            ["final_pgo",1184611,1435995,1197120,1330478,2093524,2343706,1230821,3997446,4433014,1700339,356860],
+            ["main_fat",1246424,1515324,1549144,1628462,2858932,2947334,1509996,4918676,5754498,2584754,470861],
+            ["final_fat",1150031,1443007,1219244,1305832,2204289,2324207,1357139,4824566,6017650,2615590,377712],
+            ["final_fat",1198913,1341966,1271422,1316648,2274653,2488872,1274515,4835812,6231017,2555892,397871],
+            ["main_fat",1245322,1632658,1521453,1681480,2739174,2906303,1535914,4981489,5717413,2647228,432393],
+            ["final_pgo",1176781,1461003,1194857,1340083,2138291,2238670,1204762,3974011,4412503,1712828,329090],
+            ["main_shipping",1294024,1545799,1675572,1490758,2720646,2886303,1427903,5614912,7518463,2938150,458051]
+          ],
+          [
+            ["main_fat",1273203,1604406,1603455,1568262,2816839,2920083,1466621,4785628,5824583,2585936,413746],
+            ["main_shipping",763636,814361,907920,843835,1742051,2067955,916243,3704990,4293345,1821138,285535],
+            ["final_fat",672820,871767,777186,829423,2058612,1963380,956533,3163806,3592853,2239130,345924],
+            ["final_pgo",678158,971946,862883,706010,1424328,1936229,869153,2924579,2803160,1069861,275389],
+            ["final_pgo",1970902,1270219,1160787,888111,2290116,1510717,898717,4494624,3003087,1886506,237753],
+            ["final_fat",1053988,1259433,1138293,1159094,2048808,2208175,1224641,4517438,6005052,2573978,365854],
+            ["main_shipping",1214186,1521403,1489637,1368135,2509762,2846343,1287195,5367984,7189923,2636401,409099],
+            ["main_fat",1193415,1503296,1477428,1495344,2528471,2792013,1418028,5029591,5403116,2334171,389119]
+          ],
+          [
+            ["final_fat",1061860,1297850,1165764,1251151,1998071,2331449,1365351,4570137,5847407,2418077,426384],
+            ["main_shipping",1131072,1326312,1440473,1454494,2488852,2748137,1306313,5469075,7239708,2597183,434456],
+            ["final_pgo",1040828,1387744,1155779,1180686,2048126,2164870,1200195,3594967,4082492,1594572,316701],
+            ["main_fat",1194256,1449346,1441413,1452760,2569452,2768197,1380423,4569036,5410127,2369685,472282],
+            ["main_fat",1201127,1334655,1439631,1425841,2555921,2770571,1383427,4604948,5268436,2366811,386876],
+            ["final_pgo",1039976,1463566,1133416,1182699,2024251,2241003,1205043,3913501,6266661,1696683,318684],
+            ["main_shipping",1256438,1434864,1445411,1348135,2455542,2803029,1274756,5211431,7078407,2596972,407516],
+            ["final_fat",1077693,1233274,1186504,1179945,1987216,2229536,1185844,4510989,5924572,2384006,348609]
+          ],
+          [
+            ["main_fat",1177150,1395926,1421995,1422235,2530614,2714778,1504127,4522737,5248646,2357516,426364],
+            ["final_fat",842763,747281,763135,811247,1703794,1536295,841091,2973343,3486816,1652257,238936],
+            ["main_shipping",1896511,992145,1249598,819889,2250236,2365068,1462706,5371519,7272035,2639024,374578],
+            ["final_pgo",1058054,1410508,1161728,1203860,2029709,2177529,1227005,3659123,4108972,1614001,314618],
+            ["final_pgo",1085184,1438880,1576075,1203470,2612966,2569342,1196490,3766473,4209000,1693438,353656],
+            ["main_shipping",1172865,1487082,1439911,1414013,2575231,3059661,1339892,5777052,7349530,2983397,405833],
+            ["final_fat",1181107,1321386,1202829,915827,1555193,1739426,1116070,3195853,4335188,2016929,380345],
+            ["main_fat",915692,1311401,923604,1225733,2251569,2139852,1025344,3005210,5347574,2673116,554725]
+          ],
+          [
+            ["final_pgo",973077,1210390,1164763,1182519,1591777,1568903,846129,2416044,3005670,1265061,238134],
+            ["main_fat",783826,1228608,1220105,1067679,2012743,2500900,976403,3064607,3957656,1741009,282210],
+            ["final_fat",3309602,1247054,1157652,5262808,12565158,3117938,1457518,4484830,3481579,1919275,239025],
+            ["main_shipping",768032,780972,904245,855232,1896070,2651744,1144602,4684857,5733076,2798001,612481],
+            ["main_shipping",830204,1192765,925747,924024,2103860,2195566,982872,3488228,5480932,1978703,281378],
+            ["final_fat",980689,822453,992446,915432,1599539,1816451,1287886,3839551,4177103,1815159,240037],
+            ["main_fat",1013718,961189,1044314,1109611,2055097,2328954,1233184,3317644,4768802,1636133,270943],
+            ["final_pgo",704788,944415,1186945,853590,2128135,1627871,851376,2469693,6613015,6600667,236001]
+          ],
+          [
+            ["main_fat",965937,855372,13982366,970363,3761564,8145705,11008634,4808156,7083645,1566049,294087],
+            ["main_shipping",946728,1177561,1212654,1151783,2386219,2325920,1239393,4175170,4626982,2198110,280778],
+            ["final_pgo",688284,1266063,1061008,792859,2073865,1848950,878707,3289267,3435419,1558729,385433],
+            ["final_fat",756325,1022101,852899,888681,2333390,1957742,986277,3165108,5117411,2161875,473424],
+            ["final_fat",3326372,1019246,1019676,1156981,1981697,1954617,1147377,3699333,4038997,2122196,310622],
+            ["final_pgo",841632,1500612,1090341,1661426,1439831,1520102,804887,17135175,9882308,1057063,244233],
+            ["main_shipping",1060287,1171593,1596895,1008810,2231519,3185577,1223100,5675071,5008839,1748911,384962],
+            ["main_fat",1178563,1087397,1330359,1035800,2009218,2340791,937224,3293148,3587856,1838745,332905]
+          ],
+          [
+            ["final_fat",827891,746080,785979,895111,2244158,2318398,1276549,3648681,3842255,1938613,486974],
+            ["main_shipping",848853,1238111,1024924,1020237,1860888,2315764,872708,4220367,4606661,2334192,285705],
+            ["main_fat",933588,1072065,1108709,1016002,2283145,2560308,1268156,3459686,4169311,1658546,269000],
+            ["final_pgo",987298,1264350,1038705,815423,1745265,1546491,1113246,6891710,10886572,4142121,447976],
+            ["final_pgo",1252363,1443392,1375045,861882,2552742,2440409,1709343,3977937,3417152,1679597,455928],
+            ["main_fat",1039025,1134257,1377369,1779416,2940143,2493629,1041268,4293355,3704029,1787399,391973],
+            ["main_shipping",1133736,918976,1148138,935802,2315474,2359970,907259,3965048,5724454,2294783,347537],
+            ["final_fat",707813,831567,793740,826438,1760008,2141264,1115059,3922844,3743899,1792646,316000]
+          ],
+          [
+            ["final_pgo",834641,1139345,1331531,840520,1455014,2165000,890805,2823409,3476731,1190791,238545],
+            ["final_fat",661204,735424,922452,991395,1540792,1786877,951265,3318325,3847623,1914608,238344],
+            ["main_fat",822614,948121,1142689,3909635,3287479,4920643,1000037,4141960,4169020,1817572,267879],
+            ["main_shipping",1110622,1084593,1219124,1236550,2292579,2436284,978535,4397871,4880038,1956470,283932],
+            ["main_shipping",836284,805769,933579,1076522,1709402,2184049,881141,3645091,4953067,2274934,380726],
+            ["main_fat",911696,1001259,1081679,1048549,1907357,2482522,974580,3163985,3481368,1505139,269401],
+            ["final_fat",717267,742474,790195,810015,8580142,8207567,868601,17544203,11645646,2027466,238735],
+            ["final_pgo",838908,1002782,968500,767291,1571598,1627060,1152694,2649631,2967905,1083111,237974]
+          ],
+          [
+            ["final_pgo",656877,1203410,844546,886549,1834899,1522916,889043,2489002,2820666,1029982,247719],
+            ["main_fat",983483,949672,1120707,1081679,1906827,2843970,1006698,4001962,4252755,1618697,268830],
+            ["main_shipping",920018,783896,927059,857516,2034816,2270216,1143491,4554103,4681873,1796452,360486],
+            ["final_fat",711468,743236,748754,769575,1577897,1744685,882993,3211155,3808104,1691096,385333],
+            ["final_fat",800611,1159605,1190821,1183029,1696994,1550006,833500,3268461,4465277,1909059,276941],
+            ["main_shipping",1244291,1378740,1525559,1434754,2020926,2035788,1015521,5105303,6924689,2496083,401988],
+            ["main_fat",1199584,1535243,1545248,1484748,2767266,2980022,1464127,4804005,5453832,2429674,394567],
+            ["final_pgo",658519,1078955,1054639,768954,1977791,2201664,1236850,3338275,2810431,1199434,346695]
+          ],
+          [
+            ["final_fat",1074729,1364269,1146836,1244050,2133874,1806808,1324921,4911945,5852264,2516303,381377],
+            ["final_pgo",1090091,1383658,1264401,1255528,2006454,2278318,1223270,3761745,4302469,1670084,370892],
+            ["main_shipping",1176299,1511428,1506371,1419411,2624683,2844881,1379031,5506100,7282601,2658294,439874],
+            ["main_fat",1287936,1578108,1474784,1476626,2703671,2907194,1453432,4803474,5491718,2544254,426154],
+            ["main_fat",1252693,1509285,1503627,1468845,2706305,2918090,1482745,4734852,5460301,2481701,389059],
+            ["main_shipping",1176840,1519420,1469996,1453411,2541129,2832483,1355747,5482174,7270153,2779514,436570],
+            ["final_pgo",1074088,1471158,1172875,1242378,2041006,2248675,1210310,3721866,4188309,1690454,311593],
+            ["final_fat",1095229,1342697,1180135,1192283,2058471,2259821,1257951,4677777,6091610,2414922,374267]
+          ],
+          [
+            ["main_shipping",1251892,1396457,1470166,1420513,2601819,2820434,1401554,5461383,7311244,2661789,450210],
+            ["main_fat",1351430,1486721,1538018,1506190,2778003,3038049,1468123,4740140,5564897,2519418,406624],
+            ["final_fat",1131423,1242128,1138784,1259072,2108296,2257608,1219934,4625199,6077880,2449784,349499],
+            ["final_pgo",1178592,1483417,1124382,739109,1402146,1515985,1207526,3730449,4337851,1720758,327226],
+            ["final_pgo",810665,889313,844076,736666,1533141,1532769,885497,2412958,3179739,1527071,278314],
+            ["final_fat",753871,745529,830315,767902,1521934,1542454,900199,3077056,3719302,1572699,283521],
+            ["main_fat",778117,828522,1455304,913739,2154624,2181124,918286,3403042,3639964,1582773,326576],
+            ["main_shipping",953438,930454,989662,915662,1905995,2339790,928852,4179296,5708890,2339179,461867]
+          ],
+          [
+            ["final_pgo",817105,945226,1236369,877344,1764264,1666960,906648,3013902,3324896,1134678,235660],
+            ["final_fat",696466,1057163,850194,938055,1795831,1901388,901931,2947173,3964396,1935960,244694],
+            ["main_shipping",738899,963493,1334185,793120,1989229,2099783,1014949,4326875,4707922,2375373,317923],
+            ["main_fat",922632,963432,1291301,1312121,1923702,2306591,977224,3590320,4422438,1588172,270232],
+            ["main_fat",983272,1162118,1115840,1032376,2244999,2801096,1721170,3565292,3707975,1486221,267819],
+            ["main_shipping",1070842,1239504,1410196,1291160,2395032,2737352,1418640,10160362,6723029,2359900,472142],
+            ["final_fat",964635,1126355,1092404,1121347,1969159,2167544,1209158,4380635,5604887,2311969,326946],
+            ["final_pgo",973118,1283159,1138854,1163700,1928529,2061095,1157051,3456221,3911938,1589243,300788]
+          ],
+          [
+            ["main_fat",1169248,1352121,1418760,1443988,2520879,2831571,1340904,4400325,5045644,2221905,369079],
+            ["final_pgo",1004614,1375025,1133786,1183010,1939194,2089928,1219964,3518142,3949234,1647491,301899],
+            ["main_shipping",1082130,1389336,1402687,1323388,2466188,2839974,1264370,5128588,6860794,2486929,388587],
+            ["final_fat",1003282,1236960,1151052,1185463,2112943,2328223,1222468,4318743,5577997,2187062,341528],
+            ["final_fat",671258,755343,748573,769925,1461995,1562655,825989,2932962,3552003,1643314,242220],
+            ["main_shipping",751077,798748,914991,788563,1629193,1979934,849573,3588968,4014911,1686679,281769],
+            ["final_pgo",725158,986908,999226,749905,1536305,1487863,858867,2493709,2922667,1337510,238385],
+            ["main_fat",858567,904816,923464,1197691,2128005,2670322,996341,2981013,4422027,1539841,332615]
+          ],
+          [
+            ["final_pgo",660773,870645,881010,717767,1493942,2477825,832978,2626576,2978370,1128188,271855],
+            ["main_shipping",816464,806639,908662,776134,1803202,2017040,1003213,3751509,4881460,1722542,381597],
+            ["final_fat",961380,847711,870815,964064,1919465,2016219,1339563,3372936,4467474,1992464,251394],
+            ["main_fat",1412881,1152914,1077373,1133706,2256376,2694257,1030783,3775636,3951567,1786677,293086],
+            ["main_fat",829804,1056501,1125874,1143581,2091130,2362064,1001690,3333608,4102882,2887905,279526],
+            ["final_fat",858407,727251,813399,997464,1581132,1955889,853019,3196875,3561497,1869501,471641],
+            ["main_shipping",948911,1011905,1355166,916723,1750894,2398788,873880,4488125,4434296,2612756,283341],
+            ["final_pgo",665470,1015320,1363448,822544,1531168,2150429,1097162,3143916,3517772,1443717,324393]
+          ],
+          [
+            ["final_fat",714072,903374,1424639,850205,1907787,2029128,1462174,3035514,3695708,1960185,310692],
+            ["main_fat",740692,1204346,918627,994890,2028698,2140053,1075710,3029025,3402970,1639678,316150],
+            ["final_pgo",1066407,947339,1065836,956382,1631186,1878083,1665497,3153471,3129525,1059235,260648],
+            ["main_shipping",736796,1108289,1009401,789806,1886656,2378397,1025465,3666033,4433414,1744745,359255],
+            ["main_shipping",818817,810165,931786,813680,1790613,1965173,1003432,3554016,4505331,1761961,285575],
+            ["final_pgo",718869,855032,863414,783896,1446592,1909259,855752,2410476,2775297,1015250,422929],
+            ["main_fat",830816,843885,1102770,939006,2238189,2272069,1025986,3601827,3336132,1706508,267398],
+            ["final_fat",865127,888001,896914,1021900,1807398,1860246,882492,3273739,4699760,1767940,456970]
+          ],
+          [
+            ["main_shipping",800731,916603,1135999,852227,1804444,2342003,971335,4444941,4833690,1641351,283231],
+            ["final_fat",648034,785618,781202,789264,1483586,1690995,981400,3269904,3835104,1946785,493264],
+            ["main_fat",1005595,863855,950584,944866,1951432,2306330,1067888,3560585,4072246,1670234,316942],
+            ["final_pgo",754051,995270,1013207,1025074,1520471,2094495,892848,3030667,3202273,1479320,237534],
+            ["final_pgo",773250,1173395,1052886,787792,1418580,1997661,1293423,2434200,3093040,1091102,234318],
+            ["main_fat",1146926,1002971,946588,960709,2394792,2538114,1019096,3600635,3656929,1659257,284103],
+            ["final_fat",658269,739630,839228,1028260,1575964,1618767,915802,3408260,3931758,1699077,238715],
+            ["main_shipping",758037,782263,983322,844446,1688992,2021206,923523,3804227,4435989,2368703,283902]
+          ],
+          [
+            ["main_fat",833490,1050052,1105424,1294396,2180052,2459968,1125003,3195793,3700764,1580741,272235],
+            ["final_fat",677367,788293,895682,876714,1750433,1616464,955211,2919381,3507006,1742521,240188],
+            ["final_pgo",671258,880820,877866,924655,1491158,1545979,881371,2357586,2703801,1014459,237884],
+            ["main_shipping",1591047,1267666,1735932,1219574,3035224,3406215,1025114,4565681,4544629,1716393,287658],
+            ["main_shipping",811877,873499,881170,776034,1636314,2128065,870545,3856786,4721973,1885855,472744],
+            ["final_pgo",784797,1046887,972136,789664,1570666,1719066,881541,2498616,3033902,1072235,238114],
+            ["final_fat",806960,879017,877545,893959,1596234,1534592,1070031,2957538,3863266,1755751,319586],
+            ["main_fat",864165,906007,930675,975420,1905724,2315985,1612077,3140390,4046088,1636664,268519]
+          ],
+          [
+            ["main_fat",871164,825648,1018124,1050303,2076138,2280452,927340,3419245,3804818,1608923,268049],
+            ["final_pgo",775233,885707,860370,925216,1790553,1498588,816855,2476173,3095183,1152123,317832],
+            ["final_fat",645690,720651,807141,877204,1741861,1656544,1042270,3214461,3706653,2052492,238665],
+            ["main_shipping",823996,985948,921411,856564,1756652,2645084,1034018,3661946,4713150,1839396,340327],
+            ["main_shipping",781212,944205,1063942,806219,1664085,2536412,1090572,3401019,4846228,1786987,286065],
+            ["final_fat",664168,939938,837606,1083752,1608933,1717304,913819,3052981,3982664,2153793,238574],
+            ["final_pgo",2085331,856183,1063632,929232,1587080,1826787,967649,2848877,3552323,1192724,286035],
+            ["main_fat",739500,806609,1048580,1049882,2005803,2456825,1042170,3436511,3708005,1712217,504220]
+          ],
+          [
+            ["main_shipping",750436,1010363,1054128,997113,1814198,1938624,868572,4232646,4489347,1675142,280908],
+            ["final_pgo",866910,969742,1052376,882172,2078130,1905474,1340234,2683502,4021847,1216780,236221],
+            ["final_fat",1036261,1414314,1166455,887290,1830383,1791514,1035210,3795546,5407518,2378397,367737],
+            ["main_fat",1133486,1417489,1463548,1542003,2660066,2863950,1388155,4666800,5426631,2293521,447386],
+            ["main_fat",1110652,1448294,1345351,1449306,2539417,2755207,1496075,4785527,5477016,2276726,377611],
+            ["final_fat",1037914,1304019,1083452,1094107,2024290,2165901,1216269,4431731,5496214,2342664,368608],
+            ["final_pgo",997774,1289157,1197010,1198002,1964152,2224809,1304500,4045157,4292134,1550196,383911],
+            ["main_shipping",1120376,1397858,1393803,1305551,2345298,2637032,1282007,5079815,6657842,2431787,420065]
+          ],
+          [
+            ["final_fat",1009522,1178152,1147537,1179083,1951573,2119062,1225963,4346385,5487091,2312800,351713],
+            ["final_pgo",794101,943333,1081408,1016382,1923852,2075077,1138262,2444716,2950979,1029070,233287],
+            ["main_fat",964555,999126,1070232,1326654,2048347,2394471,1421173,3440267,3795755,1825465,271825],
+            ["main_shipping",839449,1015010,929562,1079596,1792566,1960946,858197,3387067,4585991,1987326,284192],
+            ["main_shipping",833039,809194,1303349,845547,1837222,2158189,933268,3829866,4687902,1752486,281819],
+            ["main_fat",768273,883183,1758395,1088710,1866436,3680063,1329928,3700354,3750548,1636704,273877],
+            ["final_pgo",871406,1168318,1009802,812589,1803872,1598748,870765,3045199,3218076,1340233,335919],
+            ["final_fat",690117,741173,750155,771668,1853897,2021277,1108408,3057007,3610551,1717614,248460]
+          ],
+          [
+            ["final_fat",774071,1751015,945055,877435,1507522,1822170,962212,3257996,3695226,1856291,238966],
+            ["main_fat",2008988,842584,4346425,1047047,2065812,2537834,1235968,4911154,4157233,1778755,2183502],
+            ["main_shipping",1145985,1355927,1388385,1310820,2412679,2717953,1281907,5021229,6383314,2493689,392805],
+            ["final_pgo",1016031,1369987,1138263,1158102,1982478,2056568,1226364,3470943,3767724,1548363,308619],
+            ["final_pgo",999356,1307605,1130542,1213815,1899685,2072462,1170311,3531843,3901252,1565980,333195],
+            ["main_shipping",1095469,1386041,1527312,1364790,2482522,2768258,1262798,4958354,6372978,2409253,389590],
+            ["main_fat",1143621,1376297,1356097,1480573,2401913,2645675,1363939,4303290,4814651,2232771,372925],
+            ["final_fat",988661,1154077,1088499,1141267,1891954,2087966,1152063,4274787,5261165,2197107,347487]
+          ],
+          [
+            ["final_pgo",1120417,1497697,1123912,1229749,2036108,2228054,1507472,3566415,3914121,1578597,368228],
+            ["main_shipping",1309087,1283599,1426622,1353513,2491506,2135255,1374504,5135778,6718813,2760676,514194],
+            ["main_fat",887640,835433,1000769,948460,1887688,2312229,946798,3601507,3581928,1468534,324132],
+            ["final_fat",1082980,1475945,1149890,1224170,2169937,2251950,1224722,4154078,4009609,2571404,379885],
+            ["final_fat",1247496,1361605,1319753,1304791,2119352,2283356,1328646,4910172,6257666,2561420,423700],
+            ["main_fat",1232743,1525148,1636314,1525690,2823639,2985240,1463227,4645840,5253143,2448151,401678],
+            ["main_shipping",1195017,1393222,1494552,1410739,2576352,3056075,1359512,5447832,6298027,2429663,444101],
+            ["final_pgo",1106706,1416968,1210681,1226714,1988238,2266512,1327905,3640695,4415497,2775368,347277]
+          ],
+          [
+            ["main_shipping",1227806,1354545,1527281,1388345,2671834,2925923,1420813,5228487,7058298,2790711,410520],
+            ["main_fat",1212203,1438910,1519801,1474734,2607458,2786515,1442576,4561124,5052985,2330577,426163],
+            ["final_pgo",1040057,1188347,882723,734852,1450808,1534462,838327,3665952,4069523,1573781,359214],
+            ["final_fat",677918,826009,795022,801292,1467363,1631597,855222,3245257,3514447,1655923,252155],
+            ["final_fat",678089,733311,777737,786940,1492029,1537237,850655,2879913,3603389,1708862,243782],
+            ["final_pgo",723576,950534,900890,743776,1438359,1539550,944715,2647988,3143165,1163571,255670],
+            ["main_fat",966398,848782,930634,925096,2034175,2173743,937844,3327059,3609068,1800518,267007],
+            ["main_shipping",763475,800340,1001570,876974,1749102,1967957,910024,3567576,4228529,1654881,306796]
+          ],
+          [
+            ["main_shipping",796805,821211,899748,859448,1951632,2214193,872878,3921513,4688964,1988527,455508],
+            ["final_fat",779389,1038074,788994,860480,1462415,1526000,860610,3098298,3722266,1584347,238305],
+            ["final_pgo",925537,1117813,1182500,716787,2028918,1880477,1265512,2615591,3271386,1001580,233327],
+            ["main_fat",811487,869393,1027348,955191,2058612,2621369,944945,4740200,6145470,1621272,267328],
+            ["main_fat",1153385,1606730,1981236,2479137,1995338,2492117,934460,3321320,3412315,1655522,271845],
+            ["final_pgo",658289,943022,1003312,707182,1437738,1614311,804677,4800610,3006211,1225173,243713],
+            ["final_fat",718638,1761000,1397298,1243770,2388543,2261814,1292152,3059520,3692962,2096769,274177],
+            ["main_shipping",1041960,1010523,928641,857104,1864283,2248133,870244,4478451,4219736,1998082,280207]
+          ]
+        ]
+      }
+    }
+  },
+  "separate_experiment": {
+    "additional_final_flag": "-Cllvm-args=--enable-machine-outliner=conservative-pgo",
+    "target_opt_level": "s",
+    "outcome": "The compiler guard stopped the final FatLTO build before it produced a shipping executable.",
+    "shared_cgroup_anonymous_bytes_at_stop": 8019382272
+  }
+}

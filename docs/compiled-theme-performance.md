@@ -2,6 +2,46 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
+## Whole-graph profile-guided release
+
+The size target for this full editable WinUI application is **27,288,924 bytes**, half the 54,577,848-byte original shipping main at `df3e12ad`. All candidate builds use the same runtime source at `ff5ea13a`, all 169 WinUI documents, the external FXP loader and the interpreter for structural edits.
+
+| Final release on x86-64 GNU/Linux | Stripped bytes | Reduction from original shipping main | Bytes over target |
+|---|---:|---:|---:|
+| Original main, compact FatLTO | 38,600,504 | 29.27% | 11,311,580 |
+| Editable, compact FatLTO | 29,194,408 | 46.51% | 1,905,484 |
+| Editable, compact FatLTO with PGO, `opt-level=s` | 30,152,576 | 44.75% | 2,863,652 |
+| Editable, compact FatLTO with PGO, `opt-level=z` | **28,324,712** | **48.10%** | **1,035,788** |
+
+With profile-guided optimization (PGO) at `s`, machine code shrank by 214,720 bytes, while unwind and exception tables grew by 1,139,024 bytes. The executable gained 958,168 bytes overall. Switching the whole target graph to `z` produced the smallest executable, 869,696 bytes below the previous compact FatLTO build and 26.62% smaller than compact FatLTO main. The `z` binary contains 18,592,421 bytes of machine code and 6,060,176 bytes of unwind and exception data.
+
+Each timing trial rotated the PGO candidate and both unprofiled controls through 81 fresh processes per build. Times end at the first typed Button lookup, before window creation. Each cell gives the median / p95. Compare builds within a row.
+
+| Trial | PGO | Same source, compact FatLTO | Original main, compact FatLTO |
+|---|---:|---:|---:|
+| `opt-level=s` | 8.86 / 10.07 ms | 10.60 / 12.02 ms | 15.99 / 16.93 ms |
+| `opt-level=z` | 7.20 / 10.97 ms | 8.26 / 10.70 ms | 11.82 / 16.12 ms |
+
+After executable-page eviction, the `z` trial medians were 16.30 ms with PGO, 17.62 ms on the same source without PGO and 24.87 ms on compact FatLTO main (31 processes each).
+
+All eleven property workloads were faster at `s` than on unprofiled compact FatLTO main. At `z`, ten were faster, including style install/read/dispose (18.5% less thread CPU time), style binding emission/read (30.3% less) and mixed reads/writes (18.8% less). Scoped metadata lookup measured 2.5% slower, with a paired 95% interval from 1.5% faster to 7.0% slower. Against the original compact ThinLTO property fixture, ten improved and the interval for scoped metadata also included equality. Against the already-optimized unprofiled candidate, `z` took 13.4% longer for scoped metadata lookup and 7.6% longer for cached override lookup. All workload checksums matched in 72 paired blocks per trial.
+
+Both PGO builds passed all 299 public property API tests, an unwinding test covering the panic payload, nested destructor order and store reuse, and all eight archive checks including externally edited FXP v1/v2/v3. In the `z` trial the median scalar edit, structural edit and full fallback took 9.54 ms, 8.18 ms and 1.52 s, compared with 10.38 ms, 9.16 ms and 1.70 s on the unprofiled candidate.
+
+Training ran the embedded startup probe, Button, NavigationView and ScrollViewer template activation, eleven property workloads, a scalar FXP edit and a changed archive requiring the interpreter. The merged profile contained executed definitions from Base (10,665), Controls (3,794), XAML markup (381), the XAML loader (890) and WinUI (215). The shipping builds restore the original application entry point and apply that profile to the target dependencies and final FatLTO application. Reusing the `s` training profile at `z` produced 3,791 control-flow hash mismatch diagnostics. LLVM discarded the corresponding counts. Inspection confirmed applied hot and cold counts in Base, Controls, the XAML loader and WinUI at both settings. Both builds retain panic unwinding, PIE, full RELRO, eager binding and packed relocations.
+
+To rebuild from the repository root, use Python 3.11+, native x86-64 GNU/Linux, LLD, a RELR-capable loader (glibc 2.36+) and a matching `llvm-profdata` (`rustup component add llvm-tools-preview`). The driver records coverage and writes a stripped executable for each optimization level.
+
+```sh
+work=$(mktemp -d)
+python3 scripts/themes/bench/measure.py --source "$PWD" --work-dir "$work/reference" \
+  --solid --compact-app --fat-app-link --linux-safe-icf --linux-packed-relocations --rebuilds 0
+python3 scripts/themes/bench/profile_winui.py --source "$PWD" --consumer "$work/reference/consumer" \
+  --work-dir "$work" --use-opt-level s --use-opt-level z
+```
+
+[PGO inputs, ELF sections, compatibility checks, startup and property samples](benchmarks/compiled-theme-pgo-linux-x86_64.json)
+
 ## Whole-program release after syncing main
 
 At `ff5ea13a`, the complete editable WinUI executable on x86-64 GNU/Linux is **29,194,408 bytes** under compact FatLTO. The comparison keeps the original shipping main at `df3e12ad` as the fixed 54,577,848-byte reference. The candidate is **46.51% smaller** and is **1,905,484 bytes above** the 27,288,924-byte target. With compact FatLTO on both revisions, the reduction is **24.37%**. The PR includes the runtime changes from main through `8aa7ca2b`.
