@@ -279,7 +279,7 @@ mod windows {
         ITextInputMethodImpl, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
     };
     use ferroui_win32::interop::unmanaged_methods::{
-        get_active_window, get_caret_pos, get_keyboard_layout, imm_get_candidate_window, imm_get_composition_string,
+        get_active_window, get_caret_pos, get_keyboard_layout, gui_thread_caret, imm_get_candidate_window, imm_get_composition_string,
         imm_get_context, imm_get_open_status, imm_is_ime, imm_notify_ime, imm_release_context, imm_set_composition_string,
         post_message, send_message, WindowsMessage,
     };
@@ -673,7 +673,9 @@ mod windows {
         /// Where the caret of the system has to be once the input method
         /// was given the rectangle of the text cursor, in pixels; `None`
         /// when the window was not the active one.
-        caret_expected: Cell<Option<(i32, i32)>>,
+        /// Where the caret of the system is expected: the top left corner
+        /// of the text cursor and its height, in pixels of the client area.
+        caret_expected: Cell<Option<(i32, i32, i32)>>,
     }
 
     /// A text input client that records the preedit text an input method
@@ -738,15 +740,29 @@ mod windows {
         report.check("input context", himc != 0, format!("ImmGetContext of the window: {himc:#x}"));
 
         // The rectangle of the text cursor went to the caret of the system
-        // (its lower right corner) and to the candidate window.
+        // (its place and its height, #430) and to the candidate window.
         match state.caret_expected.get() {
-            Some(expected) => {
+            Some((x, y, height)) => {
                 let caret = get_caret_pos();
                 report.check(
                     "caret of the system",
-                    caret == Some(expected),
-                    format!("at {caret:?}; the text cursor ends at {expected:?} (pixels of the client area)"),
+                    caret == Some((x, y)),
+                    format!("at {caret:?}; the text cursor starts at {:?} (pixels of the client area)", (x, y)),
                 );
+                match gui_thread_caret(hwnd) {
+                    Some((owner, rect, shown)) => {
+                        report.check(
+                            "caret of the system: owner and size",
+                            owner == hwnd && rect.top == y && rect.bottom - rect.top == height && rect.right > rect.left,
+                            format!(
+                                "GetGUIThreadInfo: window {owner:#x} (this one {hwnd:#x}), ({}, {})-({}, {}); the text cursor is {height} pixels high",
+                                rect.left, rect.top, rect.right, rect.bottom
+                            ),
+                        );
+                        report.info("caret of the system: shown", format!("GUI_CARETBLINKING {shown}"));
+                    }
+                    None => report.check("caret of the system: owner and size", false, "GetGUIThreadInfo reports no caret"),
+                }
                 let candidate = imm_get_candidate_window(himc, 0);
                 report.info(
                     "candidate window",
@@ -1393,8 +1409,10 @@ mod windows {
                     if get_active_window() == hwnd {
                         let rect = client.cursor_rectangle();
                         input_method.set_cursor_rect(rect);
-                        let bottom_right = rect.bottom_right();
-                        state.caret_expected.set(Some(((bottom_right.x * scaling) as i32, (bottom_right.y * scaling) as i32)));
+                        let (top_left, bottom_right) = (rect.top_left(), rect.bottom_right());
+                        let (x, y) = ((top_left.x * scaling) as i32, (top_left.y * scaling) as i32);
+                        let height = (bottom_right.y * scaling) as i32 - y;
+                        state.caret_expected.set(Some((x, y, height)));
                     }
                 }
                 Step::Next

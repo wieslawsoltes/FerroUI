@@ -23,7 +23,8 @@ use ferroui_base::{
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_livecharts::{
     AxisScale, CartesianChartEngine, CartesianOptions, ChartError, HitRegion, PieChartEngine,
-    PieOptions, PolarChartEngine, PolarOptions, PolarScale, Scene,
+    PieOptions, PolarChartEngine, PolarOptions, PolarScale, SankeyChartEngine, SankeyOptions,
+    Scene, TreemapChartEngine, TreemapOptions,
 };
 use std::{
     cell::{Cell, OnceCell, RefCell},
@@ -452,12 +453,37 @@ impl Chart {
             }
         }
         for series in self.series().to_vec() {
+            // A Sankey or treemap series also observes its nodes and links; replacing one of its
+            // collections, or changing a list or a tree, makes the subscriptions again.
+            let holds_nodes =
+                series.is::<crate::SankeySeries>() || series.is::<crate::TreemapSeries>();
             let weak = self.to_ref().downgrade();
             subscriptions.push(Subscription::new(series.changed(move || {
                 if let Some(this) = weak.upgrade() {
+                    if holds_nodes {
+                        this.rebind_sources();
+                    }
                     this.invalidate_chart();
                 }
             })));
+            if holds_nodes {
+                let changed = self.to_ref().downgrade();
+                let restructured = self.to_ref().downgrade();
+                subscriptions.extend(crate::node_models::observe_nodes(
+                    &series,
+                    Rc::new(move || {
+                        if let Some(this) = changed.upgrade() {
+                            this.invalidate_chart();
+                        }
+                    }),
+                    Rc::new(move || {
+                        if let Some(this) = restructured.upgrade() {
+                            this.rebind_sources();
+                            this.invalidate_chart();
+                        }
+                    }),
+                ));
+            }
         }
         *self.source_subscriptions.borrow_mut() = subscriptions;
     }
@@ -573,6 +599,45 @@ impl Chart {
                     measured.radius_scales,
                 )
             }
+            // The Sankey and treemap charts have no axes; their series hold nodes and links.
+            ChartKind::Sankey => {
+                let sankey = models
+                    .iter()
+                    .zip(&series)
+                    .map(|(model, s)| crate::node_models::sankey_series(model, s.clone()))
+                    .collect::<Result<Vec<_>, _>>()?;
+                (
+                    SankeyChartEngine::measure_with_labels(
+                        size,
+                        &sankey,
+                        &SankeyOptions {
+                            draw_margin: margin,
+                        },
+                        crate::decorations::text_size,
+                    )?,
+                    Vec::new(),
+                    Vec::new(),
+                )
+            }
+            ChartKind::Treemap => {
+                let treemap = models
+                    .iter()
+                    .zip(&series)
+                    .map(|(model, s)| crate::node_models::treemap_series(model, s.clone()))
+                    .collect::<Result<Vec<_>, _>>()?;
+                (
+                    TreemapChartEngine::measure_with_labels(
+                        size,
+                        &treemap,
+                        &TreemapOptions {
+                            draw_margin: margin,
+                        },
+                        crate::decorations::text_size,
+                    )?,
+                    Vec::new(),
+                    Vec::new(),
+                )
+            }
         };
         crate::decorations::decorate(
             &mut scene,
@@ -599,6 +664,11 @@ impl Chart {
                         (model.entity_id(), point.entity_id()),
                     );
                 }
+                crate::node_models::insert_entity_keys(
+                    series_index,
+                    model,
+                    &mut scene.entity_keys,
+                );
             }
             for primitive in &mut scene.primitives {
                 primitive.entity_key = primitive

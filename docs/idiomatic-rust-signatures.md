@@ -285,9 +285,9 @@ step named, and the ones marked O are owner decisions (section 3.9).
 | `NegativeTimeSpanError` | `NegativeDurationError` | `#[deprecated]` alias |
 | `ferroui_base::utilities::Uri`, `UriKind`, `UriFormatError` | `url::Url`, `UriRef`, `url::ParseError` | the old types remain `#[deprecated]`, with the C2 conversions and new ones to and from `UriRef` |
 | `ferroui_base::utilities::CultureInfo` | `icu_locale_core::Locale` | remains `#[deprecated]`, with the C2 conversions |
-| `DateTime`, `DateTimeOffset` at an instant | `std::time::SystemTime` | the types remain (calendar values, O4); the C2 conversions |
+| `DateTime`, `DateTimeOffset` at an instant | `std::time::SystemTime` | the types remain with their names (calendar values, O4); the C2 conversions |
 | `Guid` of `ferroui-splat` and `ferroui-remote-protocol` | `uuid::Uuid` | remain `#[deprecated]`, with the `From`/`Into` of C1 (their methods differ from `Uuid`'s, so not an alias) |
-| `Dictionary` in a public signature | `HashMap` or `IndexMap` | the signature changes; the type itself per O6 |
+| `Dictionary` in a public signature | `HashMap` or `IndexMap` | the signature changes; the port becomes `SlotOrderMap` (O6) |
 
 An old type that is replaced by an alias is deprecated in the step that renames it, together with
 every use in the workspace (T1, as C3a did for the error types). An old type that remains as a type
@@ -337,7 +337,7 @@ Which type each signature takes:
 
 This is the split section 2.1 prescribes: the signed type only where a negative span is part of
 the contract. Since `TimeSpan` is an alias of `SignedDuration`, the first two kinds compile
-unchanged for users (with a deprecation warning); only the third changes a type (O1).
+unchanged for users (with a deprecation warning); only the third changes a type (O1: decided, they change).
 
 ### 3.3 `DateTime`, `DateTimeOffset`
 
@@ -351,7 +351,7 @@ calendar, the kinds and the .NET text formats, and no new crate.
   (`UNIX_EPOCH` plus a `Duration`); nothing reads `SystemTime::now()` there.
 - **Calendar values keep `DateTime` and `DateTimeOffset`**: the calendar, the date pickers, the
   chart axis, the Material date picker. Their markup (`System.DateTime`, the invariant text, the
-  bindings to `Day` and `Month`) does not change. Whether the Rust names stay is O4.
+  bindings to `Day` and `Month`) does not change. The Rust names stay (O4).
 - The BSON `DateTime` of the remote protocol is a wire type (section 3.7) and gains
   `From`/`TryFrom` `SystemTime`.
 
@@ -365,17 +365,16 @@ calendar, the kinds and the .NET text formats, and no new crate.
   `set_current_locale()` (in `ferroui_base::utilities`) replace `CultureInfo::current_culture` and
   `set_current_culture`; who sets it does not change (F8).
 - **Formatting** (converters, bindings, `StringFormat`, `MaskedTextBox`, the TreeDataGrid columns)
-  is O3. The proposal: the parameters take `&Locale`; `NumberFormatInfo` and `DateTimeFormatInfo`
-  stay as the conventions the .NET format strings of markup need, looked up by locale
-  (`NumberFormatInfo::for_locale(&Locale)`, `ICultureDataProvider` keyed by `Locale`); the attached
-  conventions of `with_number_format` and `with_date_time_format` become an explicit
-  `NumberFormatInfo` or `DateTimeFormatInfo` argument where a caller needs one (as
-  `NumericUpDown::NumberFormat` already is). Filling the conventions from ICU4X data
+  keeps `CultureInfo` as its parameter (O3), reshaped on ICU4X: a `CultureInfo` is made from a
+  `Locale` (`CultureInfo::from_locale`) and gives it (`locale()`), its name and LCID derive from the
+  locale, and it carries the `NumberFormatInfo` and `DateTimeFormatInfo` that the .NET format
+  strings of markup need, the attached ones of `with_number_format` and `with_date_time_format`
+  included. `ICultureDataProvider` is keyed by `Locale`. Filling the conventions from ICU4X data
   (`icu_decimal`, `icu_datetime`) changes formatted texts and is not part of C5.
 
-The trait change of `IValueConverter` and `IMultiValueConverter` reaches every converter of every
-application (F6): `culture: &CultureInfo` becomes `culture: &Locale`, and a converter that formats
-calls `NumberFormatInfo::for_locale(culture)`.
+`IValueConverter`, `IMultiValueConverter` and `TypeConverter` keep `culture: &CultureInfo` (F6:
+a trait parameter has no deprecated form, and `&Locale` would break every converter of every
+application without a change of behaviour).
 
 ### 3.5 `Uri`: `url::Url` and `UriRef`
 
@@ -405,7 +404,7 @@ impl fmt::Display for UriRef { .. }  // the URL's text, or the relative text as 
 ```
 
 The schemes of the framework (`ferres://`, `fonts:`, `resm:`) keep their text (C2). Equality of
-`UriRef`, and the keys of the maps that compare URIs, are O5.
+`UriRef`, and the keys of the maps that compare URIs, follow O5: `Url` equality, and an explicit key without the fragment where the .NET rule is needed.
 
 ### 3.6 `Guid`
 
@@ -427,7 +426,7 @@ The schemes of the framework (`ferres://`, `fonts:`, `resm:`) keep their text (C
   type, and the step says why.
 - The markup types of the dock's locator maps keep the name ``System.Collections.Generic.Dictionary`2``.
 - The BSON `Dictionary` and `DateTime` of the remote protocol are wire types (F14): the document is
-  ordered by the wire, which a `HashMap` would lose. Their names are O6.
+  ordered by the wire, which a `HashMap` would lose. They keep their names (O6).
 
 ### 3.8 Async types, disposal handles and error types
 
@@ -442,16 +441,19 @@ The schemes of the framework (`ferres://`, `fonts:`, `resm:`) keep their text (C
   closure aliases of `ActionLogger` of `ferroui-splat`) are the kept and deprecated cases of
   section 7.2 of [idiomatic-rust.md](idiomatic-rust.md).
 
-### 3.9 Owner decisions
+### 3.9 Decisions
 
-| # | Decision | Proposal |
-|---|---|---|
-| O1 | Whether the timer properties change to `Duration` (section 3.2), or every `TimeSpan` property keeps the signed type and only functions change | Change them: it is the rule of section 2.1, the timers already take `Duration` (F1), and markup and bindings keep working after T2 |
-| O2 | What a negative span does on a `Duration` property: from markup text, and from a binding or a resource | A negative literal is a markup error (at compile time, and a load error in the run-time loader), as for `Notification.Expiration`; the cast of a binding or resource value saturates at zero, which is what most of these properties do today. `DebounceAction` and `DelayAction`, which skip a negative span, then run at once: a DEVIATIONS row with a test |
-| O3 | The formatting parameter of converters, bindings and `StringFormat` (section 3.4) | `&Locale`, with the .NET conventions looked up by locale; the alternative is to keep `CultureInfo` as the formatting type in 0.5 (counted in the baseline) and change only the identity positions |
-| O4 | The Rust names of the calendar types `DateTime` and `DateTimeOffset` | Keep them, recorded in the baseline as deliberate declarations: they are the markup types `System.DateTime` and `System.DateTimeOffset`, and the calendar API of the controls is .NET-shaped |
-| O5 | Equality of `UriRef` and of the keys of URI maps (F10), and the type of `HyperlinkButton::NavigateUri` | Equality as `Url` (with the fragment); the maps that need the .NET rule key by the URL without its fragment. `NavigateUri` takes `UriRef`, so that markup that loads today still loads |
-| O6 | The names of the `Dictionary` port of `ferroui-system` (once no public signature uses it) and of the BSON `Dictionary` and `DateTime` | Rename the port to a name that states its order (for example `SlotOrderMap`); keep the BSON names, which belong to the wire format of the ported serializer, as deliberate declarations |
+Decided on 2026-11-02 (the owner asked for the decisions to be made on the merits). Each row
+states the question, the decision and why.
+
+| # | Question | Decision | Why |
+|---|---|---|---|
+| O1 | Do the timer properties change to `Duration` (section 3.2), or does every `TimeSpan` property keep the signed type? | **They change**, in T3, after T2. The animation and calendar positions keep `SignedDuration` | Section 2.1 allows the signed type only where a negative span is part of the contract (F2); a timer interval has no negative meaning, every timer already takes `Duration` and the properties convert at the timer (F1, 22 `to_duration()` calls). After T2 markup, styles and bindings set them as before (`x:TimeSpan`, `"0:0:0.5"`) |
+| O2 | What does a negative span do on a `Duration` property? | **It is rejected, never clamped silently.** A negative literal is a markup error: at compile time, and a load error of the run-time loader, as `Notification.Expiration` already is. A negative `SignedDuration` that reaches the property through a binding, a resource or a style setter fails its conversion: T2 adds a fallible cast to `ValueTypes` (beside the infallible `register_cast`), the binding reports a conversion error as for any value it cannot convert, and the property keeps its value (the fallback rules of the binding apply). Code cannot pass a negative value at all | Upstream rejects a negative interval (`DebounceAction`, `DelayAction`, `TimerTrigger`: an `ArgumentOutOfRangeException` from the setter), and a .NET binding catches that and reports it. A clamp to zero would turn a debounce into an immediate run without a word; a reported conversion error is the nearest Rust form of the upstream contract. No DEVIATIONS row: the behaviour of a negative interval stays "rejected" |
+| O3 | What is the formatting parameter of converters, bindings and `StringFormat` (section 3.4)? | **`CultureInfo` stays the formatting parameter in 0.5**, reshaped on ICU4X: it is made from and gives a `Locale` (`CultureInfo::from_locale`, `locale()`; the name and the LCID derive from it), and it carries the number and date conventions that the .NET format strings of markup need (the attached ones of `with_number_format` and `with_date_time_format` included). `IValueConverter`, `IMultiValueConverter` and `TypeConverter` keep `&CultureInfo`. The identity positions take `Locale` (L1). `CultureInfo` is a deliberate declaration of the inventory baseline | `Locale` cannot hold the conventions (F7): a look-up by locale would lose the attached conventions that `MaskedTextProvider` and the theme galleries use, and an extra conventions argument on every converter is a second break for the same function. A trait parameter has no deprecated form (F6), so `&Locale` would break every converter of every application in 0.5 and gain no behaviour. What makes the type idiomatic is its identity (`Locale`) and its construction, which L1 and L2 change; the formatting engine stays the port's until ICU4X formatting replaces it, which changes formatted texts and is not part of C5 |
+| O4 | Do the calendar types keep the Rust names `DateTime` and `DateTimeOffset`? | **They keep them**, as deliberate declarations of the baseline. Instants take `SystemTime` (D1) | They are the markup types `System.DateTime` and `System.DateTimeOffset` and the calendar API of the controls; a calendar value is not an instant (F15) and std has no calendar type. A new name would add a migration without a change of meaning |
+| O5 | Equality of `UriRef` and of the keys of URI maps (F10); the type of `HyperlinkButton::NavigateUri` | **`UriRef` compares as `Url` does, with the fragment.** A map that needs the .NET rule keys by the URL without its fragment, explicitly (a helper `UriRef::without_fragment`), each one named in the step that moves it; `FontFamilyKey` is the known one. **`NavigateUri` takes `UriRef`** | Equality that agrees with `url::Url` is what a Rust reader expects, and an explicit key states the .NET rule where it matters instead of hiding it in `PartialEq`. A relative `NavigateUri` loads from markup today, and `UriRef` keeps it loading |
+| O6 | The names of the `Dictionary` port of `ferroui-system` and of the BSON `Dictionary` and `DateTime` | **The port becomes `SlotOrderMap`** (the order of .NET's slots and free list), once X1 has left no public signature with it; `Dictionary` remains one release as a deprecated alias. **The BSON types keep their names** inside the remote protocol's serializer module, as deliberate declarations | A name that states the order says why the type exists beside `HashMap` and `IndexMap` (F13). The BSON types belong to the wire format of a ported serializer (F14) and are not the infrastructure types of section 2.1 |
 
 ## 4. Steps
 
@@ -463,21 +465,21 @@ on purpose with a DEVIATIONS row.
 |---|---|---|---|---|
 | S0 | This plan | unchanged | none | |
 | T1 | `SignedDuration` (section 3.2); `TimeSpan` and `NegativeTimeSpanError` deprecated aliases, the .NET-named methods deprecated; every use in the workspace renamed; `ferro_markup_type!(struct SignedDuration as "TimeSpan")`; both paths in the core table (F4) | 0.5: old names deprecated, the same type | low: mechanical, about 1500 uses | the tests of `time_span.rs` (`from_seconds_rounds_to_ticks`, `parse_accepts_the_invariant_formats`, `custom_formats_match_net`, `display_round_trips`, the C2 conversion tests); `ferro_xaml_il_language_parse_intrinsics_tests::time_span`; `converters_tests::time_span_type_converter_accepts_seconds_and_time_spans`; the build-scan test of `Animation.Duration` (`FerroUI.Build.Scan/scanner/tests.rs:1288`); the animation tests (`animatable_tests`, `transitions_tests`, `animation_iteration_tests`, `page_transition_tests`); new: `the_deprecated_time_span_path_is_a_system_time_span` |
-| T2 | `Duration` in markup and bindings: a second handle of `System.TimeSpan` in the run-time type system, the core table and the compiled literal (`FromTicks` for a `Duration` target, the negative case per O2), `TimeSpanTypeConverter`, the casts between `SignedDuration` and `Duration`, `StringFormat` and the ordering; `AcrylicBrush.TintTransitionDuration` becomes settable from markup (F3) | additions | medium: the markup compiler | new: `a_time_span_literal_sets_a_duration_property` (compiled and run-time loader), `a_negative_time_span_literal_for_a_duration_property_is_an_error`, `a_time_span_resource_sets_a_duration_property`, `a_binding_casts_between_signed_duration_and_duration`, `string_format_formats_a_duration_as_a_time_span`; `rust_types_without_metadata_are_opaque` takes another opaque type |
+| T2 | `Duration` in markup and bindings: a second handle of `System.TimeSpan` in the run-time type system, the core table and the compiled literal (`FromTicks` for a `Duration` target, the negative case per O2), `TimeSpanTypeConverter`, the casts between `SignedDuration` and `Duration` (a fallible cast for a negative span, O2), `StringFormat` and the ordering; `AcrylicBrush.TintTransitionDuration` becomes settable from markup (F3) | additions | medium: the markup compiler | new: `a_time_span_literal_sets_a_duration_property` (compiled and run-time loader), `a_negative_time_span_literal_for_a_duration_property_is_an_error`, `a_time_span_resource_sets_a_duration_property`, `a_binding_casts_between_signed_duration_and_duration`, `a_negative_span_from_a_binding_is_a_conversion_error_and_keeps_the_value`, `string_format_formats_a_duration_as_a_time_span`; `rust_types_without_metadata_are_opaque` takes another opaque type |
 | T3 | The timer properties and functions to `Duration` (section 3.2), by area: T3a the controls (caret blink, `ScrollBar`, `AutoCompleteBox`, the connected animations), T3b the behaviors (eight properties, `SelectionIndicatorAnimation`), T3c the dock (deferred content, `DelayedUniformTabPanel::ExpansionDelay`) | 0.5: property value types | medium: markup of the themes and samples (section 1.5); typed callers listed by the compiler | `text_presenter_tests`, `rich_edit_box_tests`, `auto_complete_box_tests` (T3a); `action_logical_tree_lifetime_tests` (T3b; the eight behaviors have no timing tests yet, so T3b writes them first, on main, before it changes a type); `delayed_uniform_tab_panel_tests` and the `control_tests` of the deferred content control (T3c); the compiled markup of every theme; new per area: a test of a negative value of each property (O2) |
 | U1 | `UriRef` (section 3.5) with its tests; `System.Uri` gets `Url`, `UriRef` and their `Option` forms as handles (run-time core types, core table, `FerroUriTypeConverter`, the compiled intrinsic, `Known::OptionUri`), and the conversions between them and `Uri` | additions | medium | the tests of `uri.rs` (`absolute_and_relative`, `combine_resolves_against_base`, `equality_ignores_scheme_case`, the C2 conversion tests); `ferro_xaml_il_language_parse_intrinsics_tests::uri`; the `FerroUriTypeConverter` tests; new: `uri_ref_resolves_like_uri_combine` (`ferres://`, `fonts:`, `resm:`, `file://`, dot segments, a leading `/`), `uri_ref_equality` (per O5) |
 | U2 | Markup loading: base URIs `Url`, sources `UriRef` (section 3.5); the two `IUriContext` traits; hot reload and the designer move with it | 0.5 | medium to high: document identity (F11) | `includes_tests` of `ferroui-markup-xaml`; the include tests of `tests/FerroUI.Markup.Xaml.UnitTests` (`resource_include_tests`, `style_include_tests`, `merge_resource_include_tests`) and of `tests/XamlIncludeFixture`; `ferro_xaml_il_compiler_tests`; the tests of `ferroui-hot-reload` (`tests.rs` and the tests of `include_tracking.rs`); `preview_stages_tests`, `workspace_navigation_file_tests` and `workspace_stage_files_tests` of the designer |
 | U3 | Assets and fonts: `IAssetLoader`, `AssetLoader`, `FontFamily`, `FontFamilyKey`, `FontSourceIdentifier`, `CompositeFontFamilyKey`, `EmbeddedFontCollection`, `FontManager`, `IFontCollection::key`, `uri_extensions` | 0.5 | medium: font keys compared on hot paths | `font_collection_tests` of `ferroui-base`, Skia and Vello; `embedded_font_collection_tests` and `font_manager_tests` of Vello, `custom_font_manager_impl` of Skia; `simple_theme_graph_tests` of the dock (assets of a theme) |
 | U4 | Platform edges: `ILauncher`, `IStorageItem::path`, `IStorageProvider`, the storage helpers, `ProtocolActivatedEventArgs`, `HyperlinkButton::NavigateUri` (O5), the designer transports; by platform crate (Android, iOS, browser, macOS, Win32) | 0.5: trait methods implemented in 6 crates | medium: file URLs on the browser (F12) | `storage_tests` of `ferroui-base`, `storage_misc_tests` of the controls, `managed_storage_provider_tests` of the dialogs; new: `a_file_uri_converts_to_a_path_on_every_target`, and a `HyperlinkButton` test of a relative and an absolute `NavigateUri` (none exists) |
 | L1 | `Locale` in the identity positions (section 3.4): text and fonts, the `Language` properties; `System.Globalization.CultureInfo` gets `Locale` as a handle; `current_locale` and `set_current_locale` | 0.5: traits of the font backends | medium: font fallback by language | the C2 tests of `culture_info.rs`; `glyph_typeface_tests`; the tests of `font_fallback_script_hints.rs`; `font_collection_determinism_tests` and `text_shaper_tests` of Vello; `imm32_rich_text_tests` of Win32 |
-| L2 | The formatting positions per O3: `IValueConverter`, `IMultiValueConverter`, `TypeConverter`, `ConverterCulture`, the composite format, `try_convert_with_culture`, the colour formats, `MaskedTextBox`, `MaskedTextProvider`, the Material date picker, the TreeDataGrid columns, `ICultureDataProvider` by `Locale`; by crate | 0.5: every converter (49 files in 13 crates, and the applications) | high: the text of every formatted value | `number_format_net_tests`, `date_time_net_tests`, `composite_format_tests`; the culture tests of `value_type.rs` (`comma_culture`, `:2192`); `binding_tests_converters` of `ferroui-markup`, `binding_tests` and `compiled_binding_extension_tests` of `tests/FerroUI.Markup.Xaml.UnitTests`; `masked_text_box_tests`, `numeric_up_down_tests` |
+| L2 | `CultureInfo` on ICU4X per O3: made from and giving a `Locale`, its name and LCID from the locale, `ICultureDataProvider` keyed by `Locale`, `ConverterCulture` parsed into a `Locale`; the converter traits keep `&CultureInfo` | 0.5: additions and the constructors of `CultureInfo`; no trait change | medium: the text of every formatted value is guarded by the tests | `number_format_net_tests`, `date_time_net_tests`, `composite_format_tests`; the culture tests of `value_type.rs` (`comma_culture`, `:2192`); `binding_tests_converters` of `ferroui-markup`, `binding_tests` and `compiled_binding_extension_tests` of `tests/FerroUI.Markup.Xaml.UnitTests`; `masked_text_box_tests`, `numeric_up_down_tests` |
 | D1 | Instants to `SystemTime` (section 3.3); the BSON `DateTime` conversions; the calendar types recorded per O4 | 0.5 | low; `SystemTime` before 1970 on the browser | the tests of `date_time_tests.rs` (C2) and `date_time_net_tests.rs`; `storage_tests`; `metsys_bson_tests`; new: `the_browser_runtime_platform_reports_utc_now_as_a_system_time` |
 | G1 | `uuid::Uuid` in the public signatures of `ferroui-splat` and `ferroui-remote-protocol` (section 3.6); their `Guid` deprecated; the microcom `Guid` kept | 0.5 | low | `remote_protocol_tests` and `metsys_bson_tests` of the remote protocol (the byte layout); `guid_tests` of Splat; the GUID tests of `ferroui-microcom` (`guid.rs`) |
 | X1 | `HashMap` or `IndexMap` in the DynamicData and dock signatures (section 3.7), chosen by the order test of C1; the port per O6 | 0.5 | medium: the order of DynamicData change sets | the cache suites of `tests/FerroUI.DynamicData.Tests`; `factory_base_tests`, `core_options_tests` and `production_factory_tests` of the dock; `factory_locator_sdk_tests` of `tests/Dock/FerroDock.Markup.Tests` (the locator maps in markup) |
-| Z | The inventory baseline (the deliberate declarations of O4 and O6, the microcom `Guid`), `upstream-names.toml`, the migration tables, PORTING-GUIDE section Types; the samples and templates (C6 checks the application repositories) | | | `python3 scripts/idioms/inventory.py --check` |
+| Z | The inventory baseline (the deliberate declarations of O3, O4 and O6 (`CultureInfo`, `DateTime`, `DateTimeOffset`, the BSON types), the microcom `Guid`), `upstream-names.toml`, the migration tables, PORTING-GUIDE section Types; the samples and templates (C6 checks the application repositories) | | | `python3 scripts/idioms/inventory.py --check` |
 
 Order: T1 first (one rename, no behaviour), then T2 before T3 (markup before any property moves),
-U1 before U2 to U4, L1 before L2 (and O3 before L2), D1, G1 and X1 at any time.
+U1 before U2 to U4, L1 before L2, D1, G1 and X1 at any time. The decisions of section 3.9 are made, so no step waits for one.
 
 Status: S0 (this page) is merged (#506). T1 is done: the port type is `SignedDuration` and its error `NegativeDurationError`, every use in the workspace renamed (code only; the markup name `System.TimeSpan`, the .NET messages and the comments that name the .NET type stay), `TimeSpan` and `NegativeTimeSpanError` deprecated aliases, both Rust paths in the core table of the markup compiler, the time editor of the designer found by either name. The enum variants named `TimeSpan` (`FormatArg`, `KeyFrameTimingMode`, the editor kinds of the designer) keep their names. The .NET-named methods (`from_seconds`, `total_seconds`, ...) and the `Duration`-shaped ones are not part of T1: they move with T2, where the markup and the bindings learn `Duration`.
 

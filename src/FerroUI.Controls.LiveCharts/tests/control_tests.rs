@@ -316,3 +316,227 @@ fn polar_chart_takes_the_source_defaults_and_loads_from_markup() {
     let scale = chart.polar_scale(0, 0).unwrap().unwrap();
     assert!((scale.radius.max - 20.0).abs() < 1e-9);
 }
+
+/// The A, B to X, Y graph of the Sankey hit tests: the nodes and the series that holds them.
+fn sankey_fixture() -> (Ref<SankeySeries>, Vec<Ref<SankeyNode>>) {
+    let nodes: Vec<_> = ["A", "B", "X", "Y"]
+        .into_iter()
+        .map(SankeyNode::with_name)
+        .collect();
+    let series = SankeySeries::new();
+    series.set_nodes(SankeyNodes::from_items(nodes.iter().cloned()));
+    series.set_links(SankeyLinks::from_items([
+        SankeyLink::with_nodes(&nodes[0], &nodes[2], 4.0),
+        SankeyLink::with_nodes(&nodes[0], &nodes[3], 2.0),
+        SankeyLink::with_nodes(&nodes[1], &nodes[3], 6.0),
+    ]));
+    (series, nodes)
+}
+
+#[test]
+fn sankey_chart_takes_the_source_defaults_and_observes_its_nodes_and_links() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let chart = SankeyChart::new();
+    assert_eq!(chart.chart_kind(), ChartKind::Sankey);
+    chart.set_animations_speed(0.0);
+    // The defaults of CoreSankeySeries.
+    let defaults = SankeySeries::new();
+    assert_eq!(defaults.kind(), SeriesKind::Sankey);
+    assert_eq!(defaults.node_width(), 12.0);
+    assert_eq!(defaults.node_padding(), 8.0);
+    assert_eq!(defaults.layout_iterations(), 32);
+    assert_eq!(defaults.arc_span_degrees(), 150.0);
+    assert_eq!(defaults.node_label_position(), SankeyLabelPosition::Auto);
+    assert_eq!(defaults.layout(), SankeyLayoutKind::Vertical);
+    // Each series owns its collections.
+    assert!(!defaults.nodes().ptr_eq(&SankeySeries::new().nodes()));
+    let (series, nodes) = sankey_fixture();
+    series.set_node_width(24.0);
+    chart.series().add(series.clone().upcast());
+    let size = Size::new(1000.0, 1000.0);
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(scene.hits.len(), 4);
+    let a = scene.hits.iter().find(|h| h.id.point == 0).unwrap();
+    assert_eq!(a.label, "A: 6");
+    assert_eq!(chart.find_points(a.center).len(), 1);
+    // A node, a link and the collections are observed.
+    let revision = chart.revision();
+    nodes[0].set_name("Alpha".into());
+    assert!(chart.revision() > revision);
+    let revision = chart.revision();
+    series.links().get(0).set_weight(10.0);
+    assert!(chart.revision() > revision);
+    let late = SankeyNode::with_name("Z");
+    series.nodes().add(late.clone());
+    series
+        .links()
+        .add(SankeyLink::with_nodes(&nodes[1], &late, 1.0));
+    let revision = chart.revision();
+    late.set_name("Zeta".into());
+    assert!(chart.revision() > revision);
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(scene.hits.len(), 5);
+    assert!(scene.hits.iter().any(|h| h.label == "Alpha: 12"));
+    // Replaced collections stop notifying.
+    let old = series.nodes();
+    series.set_nodes(SankeyNodes::new());
+    let revision = chart.revision();
+    old.add(SankeyNode::with_name("detached"));
+    nodes[0].set_name("detached".into());
+    assert_eq!(chart.revision(), revision);
+    assert!(chart.scene(size).unwrap().hits.is_empty());
+    // The bipartite arc layout, and a series of another kind, which the chart rejects.
+    let (arc, _) = sankey_fixture();
+    arc.set_layout(SankeyLayoutKind::BipartiteArc);
+    chart.series().set(0, arc.upcast());
+    assert!(matches!(
+        chart.scene(size).unwrap().hits[0].shape,
+        ferroui_livecharts::HitShape::AnnularSector { .. }
+    ));
+    chart.series().add(line().upcast());
+    assert!(chart.scene(size).is_err());
+}
+
+#[test]
+fn treemap_chart_loads_nested_nodes_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    assert_eq!(TreemapSeries::new().padding(), 2.0);
+    assert_eq!(TreemapSeries::new().kind(), SeriesKind::Treemap);
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:TreemapChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:TreemapSeries Name="Population" Padding="4" Fill="#FF608ADA" Stroke="#FFFFFFFF">
+            <lc:TreemapSeries.Nodes>
+              <lc:TreemapNode Name="Asia">
+                <lc:TreemapNode.Children>
+                  <lc:TreemapNodes>
+                    <lc:TreemapNode Name="China" Value="1400" />
+                    <lc:TreemapNode Name="India" Value="1300" />
+                    <lc:TreemapNode Name="Japan" Value="125" />
+                    <lc:TreemapNode Name="Indonesia" Value="270" />
+                  </lc:TreemapNodes>
+                </lc:TreemapNode.Children>
+              </lc:TreemapNode>
+              <lc:TreemapNode Name="Europe">
+                <lc:TreemapNode.Children>
+                  <lc:TreemapNodes>
+                    <lc:TreemapNode Name="Germany" Value="83" />
+                    <lc:TreemapNode Name="France" Value="67" />
+                    <lc:TreemapNode Name="Italy" Value="60" />
+                    <lc:TreemapNode Name="Spain" Value="46" />
+                  </lc:TreemapNodes>
+                </lc:TreemapNode.Children>
+              </lc:TreemapNode>
+            </lc:TreemapSeries.Nodes>
+          </lc:TreemapSeries>
+        </lc:TreemapChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<TreemapChart>>(&Some(loaded)).unwrap();
+    assert_eq!(chart.chart_kind(), ChartKind::Treemap);
+    chart.set_animations_speed(0.0);
+    let series = chart.series().get(0).cast::<TreemapSeries>().unwrap();
+    assert_eq!(series.padding(), 4.0);
+    let asia = series.nodes().get(0);
+    assert_eq!(asia.children().map(|c| c.count()), Some(4));
+    assert!(asia.children().unwrap().get(0).children().is_none());
+    let scene = chart.scene(Size::new(600.0, 600.0)).unwrap();
+    // SnapshotTests/TreemapSeriesTests.HoverTooltip: China is the top-left leaf.
+    let hits = chart.find_points(ferroui_base::Point::new(150.0, 150.0));
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].label, "China: 1400");
+    assert_eq!(scene.hits.len(), 8);
+    // A leaf value and a new child are observed through the tree.
+    let revision = chart.revision();
+    asia.children().unwrap().get(0).set_numeric_value(10.0);
+    assert!(chart.revision() > revision);
+    let revision = chart.revision();
+    let europe = series.nodes().get(1);
+    europe
+        .children()
+        .unwrap()
+        .add(TreemapNode::with_value(10.0, "Portugal"));
+    assert!(chart.revision() > revision);
+    assert_eq!(chart.scene(Size::new(600.0, 600.0)).unwrap().hits.len(), 9);
+}
+
+/// Weak handles of the given objects: each reports whether its object is still alive.
+fn alive<T: ferroui_base::ObjectType>(objects: &[Ref<T>]) -> Vec<Box<dyn Fn() -> bool>> {
+    objects
+        .iter()
+        .map(|object| {
+            let weak = object.downgrade();
+            Box::new(move || weak.upgrade().is_some()) as Box<dyn Fn() -> bool>
+        })
+        .collect()
+}
+
+/// Port of _MemoryTests.SankeySeries_Releases_Vertical and SankeySeries_Releases_BipartiteArc:
+/// after a draw, an emptied series and a second draw, no node or link survives.
+#[test]
+fn sankey_series_release_their_nodes_and_links() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const COUNT: usize = 20;
+    for layout in [SankeyLayoutKind::Vertical, SankeyLayoutKind::BipartiteArc] {
+        let chart = SankeyChart::new();
+        chart.set_animations_speed(0.0);
+        let series = SankeySeries::new();
+        series.set_layout(layout);
+        chart.series().add(series.clone().upcast());
+        let size = Size::new(300.0, 200.0);
+        let survivors = {
+            let nodes: Vec<_> = (0..COUNT)
+                .map(|i| SankeyNode::with_name(format!("N{i}")))
+                .collect();
+            let links: Vec<_> = (0..COUNT / 2)
+                .map(|i| SankeyLink::with_nodes(&nodes[i], &nodes[COUNT / 2 + i], (i + 1) as f64))
+                .collect();
+            let mut survivors = alive(&nodes);
+            survivors.extend(alive(&links));
+            series.set_nodes(SankeyNodes::from_items(nodes));
+            series.set_links(SankeyLinks::from_items(links));
+            assert_eq!(chart.scene(size).unwrap().hits.len(), COUNT);
+            series.set_nodes(SankeyNodes::new());
+            series.set_links(SankeyLinks::new());
+            assert!(chart.scene(size).unwrap().hits.is_empty());
+            survivors
+        };
+        assert!(survivors.iter().all(|alive| !alive()), "{layout:?}");
+    }
+}
+
+/// Port of _MemoryTests.TreemapSeries_Releases and TreemapSeries_Releases_Hierarchical.
+#[test]
+fn treemap_series_release_their_nodes() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const COUNT: usize = 20;
+    for hierarchical in [false, true] {
+        let chart = TreemapChart::new();
+        chart.set_animations_speed(0.0);
+        let series = TreemapSeries::new();
+        chart.series().add(series.clone().upcast());
+        let size = Size::new(300.0, 200.0);
+        let survivors = {
+            let mut nodes: Vec<_> = (0..COUNT)
+                .map(|i| TreemapNode::with_value((i + 1) as f64, format!("N{i}")))
+                .collect();
+            let roots = if hierarchical {
+                let root =
+                    TreemapNode::with_children("Root", TreemapNodes::from_items(nodes.clone()));
+                nodes.push(root.clone());
+                vec![root]
+            } else {
+                nodes.clone()
+            };
+            let survivors = alive(&nodes);
+            series.set_nodes(TreemapNodes::from_items(roots));
+            assert_eq!(chart.scene(size).unwrap().hits.len(), COUNT);
+            series.set_nodes(TreemapNodes::new());
+            assert!(chart.scene(size).unwrap().hits.is_empty());
+            survivors
+        };
+        assert!(survivors.iter().all(|alive| !alive()), "{hierarchical}");
+    }
+}
