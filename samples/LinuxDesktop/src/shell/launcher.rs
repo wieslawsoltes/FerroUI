@@ -539,7 +539,7 @@ fn search_editor(
     size: f64,
     focused: Signal<bool>,
     changed: impl Fn() + 'static,
-    key: impl Fn(&ferroui_base::input::KeyEventArgs) + 'static,
+    key: impl Fn(&ferroui_base::input::KeyEventArgs) + Clone + 'static,
 ) -> El<ferroui_controls::TextBox> {
     let state = shell.clone();
     let field = NodeRef::<ferroui_controls::TextBox>::new();
@@ -571,6 +571,7 @@ fn search_editor(
             let weak = input.downgrade();
             state.search_box.replace(Some(weak.clone()));
             let event = ferroui_base::input::InputElement::key_down_event();
+            let key = key.clone();
             let token = input.add_handler_with(
                 event,
                 move |_, e| {
