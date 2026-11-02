@@ -43,6 +43,34 @@ struct Encoder {
     ids: HashMap<usize, u32>,
     expansions: Vec<Expansion>,
     records: Vec<u8>,
+    columns: Option<Columns>,
+}
+
+// In a theme, source sites, opcodes and operand sequences each repeat at
+// different intervals. Keep each independently compressible without dropping
+// diagnostics or changing the ordering or identity of nodes.
+#[derive(Default)]
+struct Columns {
+    tags: Vec<u8>,
+    lines: Vec<u8>,
+    positions: Vec<u8>,
+    scopes: Vec<u8>,
+    last_line: i32,
+}
+
+impl Columns {
+    fn push(&mut self, tag: u8, line: i32, pos: u32, scope: u32) {
+        let delta = line - self.last_line;
+        self.last_line = line;
+        self.tags.push(tag);
+        put(&mut self.lines, ((delta << 1) ^ (delta >> 31)) as u32);
+        put(&mut self.positions, pos);
+        put(&mut self.scopes, scope);
+    }
+
+    fn byte_len(&self) -> usize {
+        self.tags.len() + self.lines.len() + self.positions.len() + self.scopes.len()
+    }
 }
 
 impl Encoder {
@@ -196,7 +224,7 @@ impl Encoder {
                                 break;
                             }
                             Some(_) if !child.is::<XamlAstXmlTypeReference>() => {
-                                return Err(invalid("shared mutable occurrence"))
+                                return Err(invalid("shared mutable occurrence"));
                             }
                             Some(_) => {}
                         }
@@ -211,15 +239,19 @@ impl Encoder {
                 let ptr = Rc::as_ptr(&frame.node) as *const () as usize;
                 self.ids.insert(ptr, id);
                 let scope = self.scope(&frame.node)?;
-                self.records.push(frame.tag);
-                for v in [frame.node.line(), frame.node.position()] {
-                    put(
-                        &mut self.records,
-                        v.try_into()
-                            .map_err(|_| invalid("negative source position"))?,
-                    );
+                let line = frame.node.line();
+                let pos = u32::try_from(frame.node.position())
+                    .map_err(|_| invalid("negative source position"))?;
+                let unsigned_line =
+                    u32::try_from(line).map_err(|_| invalid("negative source line"))?;
+                if let Some(columns) = &mut self.columns {
+                    columns.push(frame.tag, line, pos, scope);
+                } else {
+                    self.records.push(frame.tag);
+                    for v in [unsigned_line, pos, scope] {
+                        put(&mut self.records, v);
+                    }
                 }
-                put(&mut self.records, scope);
                 for field in frame.fields {
                     let v = match field {
                         Field::Uint(v) => v,
@@ -232,7 +264,10 @@ impl Encoder {
                     put(&mut self.records, v);
                 }
                 self.expansions.push(expansion);
-                if self.records.len() + self.scope_pool.len() + self.string_pool.len()
+                if self.records.len()
+                    + self.scope_pool.len()
+                    + self.string_pool.len()
+                    + self.columns.as_ref().map_or(0, Columns::byte_len)
                     > MAX_DOCUMENT_BYTES
                 {
                     return Err(invalid("image too large"));
@@ -245,21 +280,28 @@ impl Encoder {
 
 /// Encode syntax returned by the XML parser. Transformed CLR nodes are rejected.
 pub fn encode(document: &XamlDocument) -> XamlResult<Vec<u8>> {
-    use flate2::{Compress, Compression, FlushCompress, Status};
-    let mut stored = encode_stored(document)?;
+    compress(encode_stored(document)?, flate2::Compression::fast())
+}
+
+pub(super) fn encode_columnar(document: &XamlDocument) -> XamlResult<Vec<u8>> {
+    compress(write_syntax(document, true)?, flate2::Compression::best())
+}
+
+fn compress(mut stored: Vec<u8>, level: flate2::Compression) -> XamlResult<Vec<u8>> {
+    use flate2::{Compress, FlushCompress, Status};
     // Reserve only the byte budget at which storing the compressed image pays off.
     // Incompressible input fills this buffer and immediately takes the stored path.
     if stored.len() >= 1024 {
         let payload = &stored[6..];
         let budget = stored.len() - stored.len() / 8 - 11;
         let mut compressed = Vec::with_capacity(budget);
-        let status = Compress::new(Compression::fast(), true)
+        let status = Compress::new(level, true)
             .compress_vec(payload, &mut compressed, FlushCompress::Finish)
             .map_err(|_| invalid("compression failed"))?;
         if status == Status::StreamEnd && compressed.len() <= budget {
             let size = count(payload.len())?;
-            stored.truncate(5);
-            stored.push(1);
+            stored.truncate(6);
+            stored[5] |= 1;
             stored.extend_from_slice(&size.to_le_bytes());
             stored.extend(compressed);
         }
@@ -269,31 +311,49 @@ pub fn encode(document: &XamlDocument) -> XamlResult<Vec<u8>> {
 
 /// Encode an uncompressed FXD document for in-memory transfer or outer compression.
 pub fn encode_stored(document: &XamlDocument) -> XamlResult<Vec<u8>> {
+    write_syntax(document, false)
+}
+
+fn write_syntax(document: &XamlDocument, columnar: bool) -> XamlResult<Vec<u8>> {
     let root = document.root()?;
     if !root.is::<XamlAstObjectNode>() {
         return Err(invalid("root is not an object"));
     }
-    let mut enc = Encoder::default();
+    let mut enc = Encoder {
+        columns: columnar.then(Columns::default),
+        ..Encoder::default()
+    };
     let name = enc.optional(document.document.as_deref())?;
     let aliases = enc.aliases(&document.namespace_aliases)?;
     enc.graph(root)?;
     let mut header = MAGIC.to_vec();
-    header.extend([VERSION, 0]);
+    header.extend([VERSION, if columnar { 2 } else { 0 }]);
     put(&mut header, count(enc.strings.len())?);
     let mut meta = Vec::new();
     put(&mut meta, name);
     meta.extend(aliases);
     put(&mut meta, count(enc.scopes.len())?);
-    let mut count_bytes = Vec::new();
-    put(&mut count_bytes, count(enc.ids.len())?);
-    let sections = [
-        header,
-        enc.string_pool,
-        meta,
-        enc.scope_pool,
-        count_bytes,
-        enc.records,
-    ];
+    put(&mut enc.scope_pool, count(enc.ids.len())?);
+    let mut sections = vec![header, enc.string_pool, meta, enc.scope_pool];
+    if let Some(columns) = enc.columns {
+        // One tag per node. Only the three varint lanes need explicit lengths.
+        let mut lengths = Vec::new();
+        for n in [
+            columns.lines.len(),
+            columns.positions.len(),
+            columns.scopes.len(),
+        ] {
+            put(&mut lengths, count(n)?);
+        }
+        sections.extend([
+            lengths,
+            columns.tags,
+            columns.lines,
+            columns.positions,
+            columns.scopes,
+        ]);
+    }
+    sections.push(enc.records);
     let size: usize = sections.iter().map(Vec::len).sum();
     if size > MAX_DOCUMENT_BYTES {
         return Err(invalid("image too large"));

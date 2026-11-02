@@ -18,6 +18,24 @@ struct Reader<'a> {
     expansion: Expansion,
 }
 
+fn read_uint(input: &mut &[u8]) -> XamlResult<u32> {
+    let mut v = 0;
+    for shift in (0..32).step_by(7) {
+        let (&b, rest) = input
+            .split_first()
+            .ok_or_else(|| invalid("truncated integer"))?;
+        *input = rest;
+        if (shift == 28 && b > 15) || (shift > 0 && b == 0) {
+            return Err(invalid("invalid unsigned integer"));
+        }
+        v |= u32::from(b & 127) << shift;
+        if b < 128 {
+            return Ok(v);
+        }
+    }
+    Err(invalid("integer overflow"))
+}
+
 impl<'a> Reader<'a> {
     fn take(&mut self, n: usize) -> XamlResult<&'a [u8]> {
         let (value, rest) = self
@@ -29,18 +47,7 @@ impl<'a> Reader<'a> {
     }
 
     fn uint(&mut self) -> XamlResult<u32> {
-        let mut v = 0;
-        for shift in (0..32).step_by(7) {
-            let b = self.take(1)?[0];
-            if (shift == 28 && b > 15) || (shift > 0 && b == 0) {
-                return Err(invalid("invalid unsigned integer"));
-            }
-            v |= u32::from(b & 127) << shift;
-            if b < 128 {
-                return Ok(v);
-            }
-        }
-        Err(invalid("integer overflow"))
+        read_uint(&mut self.input)
     }
 
     fn count(&mut self, min_bytes: usize) -> XamlResult<usize> {
@@ -129,11 +136,14 @@ impl<'a> Reader<'a> {
         (0..n).map(|_| self.reference()).collect()
     }
 
-    fn record(&mut self) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        let tag = self.take(1)?[0];
-        let line = i32::try_from(self.uint()?).map_err(|_| invalid("source line overflow"))?;
-        let pos = i32::try_from(self.uint()?).map_err(|_| invalid("source column overflow"))?;
-        let scope = match self.uint()? {
+    fn record(
+        &mut self,
+        tag: u8,
+        line: i32,
+        pos: i32,
+        scope: u32,
+    ) -> XamlResult<Rc<dyn IXamlAstNode>> {
+        let scope = match scope {
             0 => None,
             n => Some(
                 self.scopes
@@ -197,23 +207,59 @@ impl<'a> Reader<'a> {
     }
 }
 
+struct Columns<'a> {
+    tags: &'a [u8],
+    lines: &'a [u8],
+    positions: &'a [u8],
+    scopes: &'a [u8],
+    last_line: i32,
+}
+
+impl<'a> Columns<'a> {
+    fn read(r: &mut Reader<'a>, count: usize) -> XamlResult<Self> {
+        let lines = r.uint()? as usize;
+        let positions = r.uint()? as usize;
+        let scopes = r.uint()? as usize;
+        Ok(Self {
+            tags: r.take(count)?,
+            lines: r.take(lines)?,
+            positions: r.take(positions)?,
+            scopes: r.take(scopes)?,
+            last_line: 0,
+        })
+    }
+
+    fn next(&mut self, i: usize) -> XamlResult<(u8, i32, i32, u32)> {
+        let n = read_uint(&mut self.lines)?;
+        let delta = ((n >> 1) as i32) ^ -((n & 1) as i32);
+        self.last_line = self
+            .last_line
+            .checked_add(delta)
+            .filter(|&v| v >= 0)
+            .ok_or_else(|| invalid("source line overflow"))?;
+        let pos = i32::try_from(read_uint(&mut self.positions)?)
+            .map_err(|_| invalid("source column overflow"))?;
+        Ok((
+            self.tags[i],
+            self.last_line,
+            pos,
+            read_uint(&mut self.scopes)?,
+        ))
+    }
+
+    fn exhausted(&self) -> bool {
+        self.lines.is_empty() && self.positions.is_empty() && self.scopes.is_empty()
+    }
+}
+
 /// Decode and validate a complete syntax graph. No framework types are accessed or
 /// application constructors called until the caller transforms the returned document.
 pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
-    if bytes.len() > MAX_DOCUMENT_BYTES || !is_binary(bytes) || bytes.get(4) != Some(&VERSION) {
-        return Err(invalid("unexpected signature, version or length"));
-    }
+    let size = expanded_size(bytes)? - 6;
     let expanded;
-    let payload = match bytes.get(5) {
-        Some(0) => &bytes[6..],
-        Some(1) => {
-            let size = bytes
-                .get(6..10)
-                .ok_or_else(|| invalid("truncated compression header"))?;
-            let size = u32::from_le_bytes(size.try_into().unwrap()) as usize;
-            if size > MAX_DOCUMENT_BYTES - 6 {
-                return Err(invalid("expanded image exceeds limit"));
-            }
+    let payload = match bytes[5] & 1 {
+        0 => &bytes[6..],
+        _ => {
             let data = &bytes[10..];
             let mut buffer = vec![0; size];
             let mut z = flate2::Decompress::new(true);
@@ -229,7 +275,6 @@ pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
             expanded = buffer;
             &expanded
         }
-        _ => return Err(invalid("unknown compression mode")),
     };
     let mut r = Reader {
         input: payload,
@@ -256,15 +301,31 @@ pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
         r.scopes.push(XamlNamespaceScope::new(None, aliases));
     }
     let nodes = r.count(5)?;
+    let mut columns = (bytes[5] >= 2)
+        .then(|| Columns::read(&mut r, nodes))
+        .transpose()?;
     r.nodes.reserve(nodes);
-    for _ in 0..nodes {
+    for i in 0..nodes {
         r.expansion = Expansion::LEAF;
-        let node = r.record()?;
+        let (tag, line, pos, scope) = if let Some(columns) = &mut columns {
+            columns.next(i)?
+        } else {
+            (
+                r.take(1)?[0],
+                i32::try_from(r.uint()?).map_err(|_| invalid("source line overflow"))?,
+                i32::try_from(r.uint()?).map_err(|_| invalid("source column overflow"))?,
+                r.uint()?,
+            )
+        };
+        let node = r.record(tag, line, pos, scope)?;
         r.nodes.push(Entry {
             node,
             expansion: r.expansion,
             used: false,
         });
+    }
+    if columns.as_ref().is_some_and(|c| !c.exhausted()) {
+        return Err(invalid("trailing bytes in source columns"));
     }
     let root = r.nodes.pop().ok_or_else(|| invalid("missing root"))?.node;
     if !r.input.is_empty() || !root.is::<XamlAstObjectNode>() || r.nodes.iter().any(|n| !n.used) {

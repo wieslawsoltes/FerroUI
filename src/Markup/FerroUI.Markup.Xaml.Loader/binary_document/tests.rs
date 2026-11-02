@@ -9,7 +9,7 @@ const COMPLEX: &str = r#"<r:View xmlns:r="urn:root" xmlns:x="http://schemas.micr
 fn theme_fixture() -> String {
     use std::fmt::Write;
     let mut xaml = String::from(
-        "<Styles xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Styles.Resources>"
+        "<Styles xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Styles.Resources>",
     );
     for row in 0..24 {
         writeln!(
@@ -208,4 +208,89 @@ fn stored_and_compressed_images_round_trip_near_the_xml_nesting_limit() {
         .unwrap()
         .join()
         .unwrap();
+}
+
+#[test]
+fn archive_replays_packed_syntax_and_borrows_independent_images() {
+    use super::pack::{compile_documents, ThemePack};
+
+    let theme = theme_fixture();
+    let docs = [
+        ("Themes/Many.xaml", theme.as_str()),
+        ("Nested.xaml", COMPLEX),
+    ];
+    let image = compile_documents(&docs).unwrap();
+    assert_eq!(compile_documents(&[docs[1], docs[0]]).unwrap(), image);
+    let pack = ThemePack::open(&image).unwrap();
+    assert_eq!(
+        pack.paths().collect::<Vec<_>>(),
+        ["Nested.xaml", "Themes/Many.xaml"]
+    );
+    assert!(pack.contains("Themes/Many.xaml"));
+    assert!(pack.document("Themes/Missing.xaml").is_err());
+    pack.validate().unwrap();
+    for &(path, xml) in &docs {
+        let packed = pack.document(path).unwrap();
+        let expected =
+            crate::compiler_extensions::FerroXamlIlCompiler::parse_source_syntax(xml).unwrap();
+        assert_eq!(
+            encode_stored(&decode(packed).unwrap()).unwrap(),
+            encode_stored(&expected).unwrap()
+        );
+    }
+    let mut damaged = image.clone();
+    *damaged.last_mut().unwrap() ^= 0xff;
+    let pack = ThemePack::open(&damaged).unwrap();
+    assert!(decode(pack.document("Nested.xaml").unwrap()).is_ok());
+    assert!(pack.validate().is_err());
+}
+
+#[test]
+fn archive_rejects_invalid_paths_ranges_and_expansion_before_materializing() {
+    use super::pack::{compile_documents, ThemePack};
+    let xaml = "<A xmlns='urn:a'/>";
+    for path in ["/Absolute.xaml", "../escape", "a/./b", "a//b", "a\\b", ""] {
+        assert!(compile_documents(&[(path, xaml)]).is_err());
+    }
+    assert!(compile_documents(&[("a", xaml), ("a", xaml)]).is_err());
+    let image = compile_documents(&[("a", xaml), ("b", xaml)]).unwrap();
+    for i in 0..image.len() {
+        assert!(ThemePack::open(&image[..i]).is_err());
+    }
+    let mut bad = image.clone();
+    bad[22] = b'a'; // duplicate second path in directory
+    assert!(ThemePack::open(&bad).is_err());
+    let mut bad = image.clone();
+    bad[16..20].copy_from_slice(&u32::MAX.to_le_bytes()); // first image range
+    assert!(ThemePack::open(&bad).is_err());
+    let mut bad = image;
+    bad.push(0);
+    assert!(ThemePack::open(&bad).is_err());
+}
+
+#[test]
+fn corrupt_columnar_syntax_never_overreads_adjacent_lanes() {
+    let syntax =
+        crate::compiler_extensions::FerroXamlIlCompiler::parse_source_syntax("<A xmlns='urn:a'/>")
+            .unwrap();
+    let image = super::encode::encode_columnar(&syntax).unwrap();
+    assert_eq!(image[5], 2);
+    // All truncated variants and any trailing operand bytes must be rejected.
+    for end in 0..image.len() {
+        assert!(decode(&image[..end]).is_err());
+    }
+    let mut trailing = image.clone();
+    trailing.push(0);
+    assert!(decode(&trailing).is_err());
+    // Every byte can be hostile. An accepted mutation must still produce a
+    // bounded syntax graph that the canonical encoder can serialize.
+    for i in 6..image.len() {
+        for byte in [0, 1, 0x80, 0xff] {
+            let mut mutated = image.clone();
+            mutated[i] = byte;
+            if let Ok(graph) = decode(&mutated) {
+                encode_stored(&graph).unwrap();
+            }
+        }
+    }
 }

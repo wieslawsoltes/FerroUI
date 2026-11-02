@@ -6,6 +6,7 @@ use xamlx::exceptions::{XamlError, XamlResult};
 
 mod decode;
 mod encode;
+pub mod pack;
 
 pub use decode::decode;
 pub use encode::{encode, encode_stored};
@@ -58,6 +59,27 @@ fn invalid(detail: &str) -> XamlError {
 /// receive a binary-format diagnostic instead of being interpreted as XML.
 pub fn is_binary(bytes: &[u8]) -> bool {
     bytes.starts_with(MAGIC)
+}
+
+/// Inspect just the envelope, before reserving decompression or AST storage.
+fn expanded_size(bytes: &[u8]) -> XamlResult<usize> {
+    if bytes.len() > MAX_DOCUMENT_BYTES || !is_binary(bytes) || bytes.get(4) != Some(&VERSION) {
+        return Err(invalid("unexpected signature, version or length"));
+    }
+    match bytes.get(5) {
+        Some(0 | 2) => Ok(bytes.len()),
+        Some(1 | 3) => {
+            let size = bytes
+                .get(6..10)
+                .ok_or_else(|| invalid("truncated compression header"))?;
+            let size = u32::from_le_bytes(size.try_into().unwrap()) as usize;
+            if size > MAX_DOCUMENT_BYTES - 6 {
+                return Err(invalid("expanded image exceeds limit"));
+            }
+            Ok(size + 6)
+        }
+        _ => Err(invalid("unknown compression mode")),
+    }
 }
 
 /// Compile markup to portable syntax without resolving a framework or application type.

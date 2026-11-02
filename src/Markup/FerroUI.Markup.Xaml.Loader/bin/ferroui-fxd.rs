@@ -9,7 +9,7 @@ use std::{
     process,
 };
 
-const USAGE: &str = "Usage: ferroui-fxd <input.xaml> <output.fxd>";
+const USAGE: &str = "Usage: ferroui-fxd <input.xaml> <output.fxd>\n       ferroui-fxd --pack <source-directory> <output.fxp>";
 
 fn run() -> Result<(), Box<dyn Error>> {
     let args: Vec<_> = env::args_os().skip(1).collect();
@@ -17,16 +17,22 @@ fn run() -> Result<(), Box<dyn Error>> {
         println!("{USAGE}");
         return Ok(());
     }
-    let [input, output] = args.as_slice() else {
-        return Err(USAGE.into());
+    let (directory, input, output) = match args.as_slice() {
+        [input, output] => (false, input, output),
+        [flag, input, output] if flag == "--pack" => (true, input, output),
+        _ => return Err(USAGE.into()),
     };
     let input = Path::new(input);
     let output = Path::new(output);
     if output.exists() && input.canonicalize()? == output.canonicalize()? {
         return Err("Input and output name the same file".into());
     }
-    let xml = fs::read_to_string(input)?;
-    let compiled = binary_document::compile(&xml).map_err(|e| e.message())?;
+    let compiled = if directory {
+        binary_document::pack::compile_directory(input)
+    } else {
+        binary_document::compile(&fs::read_to_string(input)?)
+    }
+    .map_err(|e| e.message())?;
     let mut temp_name = output
         .file_name()
         .ok_or("Output must name a file")?
