@@ -1,19 +1,28 @@
-//! A non-composited X server treats client alpha as opaque. Clip only the
-//! native toast's bounding region there so the wallpaper remains visible
-//! around rounded corners. A compositing manager uses the usual alpha path.
-use super::*;
-use ferroui_controls::TopLevel;
+//! Clip native popup and toast windows to rounded bounds on non-composited
+//! X11 desktops. A compositing manager uses the ordinary alpha channel.
+use ferroui_base::reactive::{Disposable, Subscription};
+use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
+use ferroui_controls::{primitives::Popup, TopLevel};
+use ferroui_x11::xlib::{self, XID};
+use ferroui_x11::FerroX11Platform;
+use std::{cell::RefCell, rc::Rc};
 
-pub(super) fn attach(window: &Ref<Window>, radius: f64) {
-    let Some(platform) = FerroLocator::current().get_service::<FerroX11Platform>() else {
-        return;
-    };
+pub(super) fn track_popup(popup: &Popup, radius: f64) {
+    // The popup owns this handler. Releasing its host drops all corresponding
+    // root/scale/manager subscriptions, even if the menu is opened repeatedly.
+    let current = RefCell::new(None);
+    let _ = popup.popup_host_changed(move |host| {
+        let root = host.and_then(|h| h.as_popup_root());
+        current.replace(root.and_then(|w| track(&w.upcast::<TopLevel>(), radius)));
+    });
+}
+
+pub(super) fn track(window: &Ref<TopLevel>, radius: f64) -> Option<Subscription> {
+    let platform = FerroLocator::current().get_service::<FerroX11Platform>()?;
     if !platform.info().has_x_fixes() {
-        return;
+        return None;
     }
-    let Some(handle) = window.try_get_platform_handle() else {
-        return;
-    };
+    let handle = window.try_get_platform_handle()?;
     let xid = handle.handle() as XID;
     let display = platform.info().display();
     let weak = window.downgrade();
@@ -44,11 +53,11 @@ pub(super) fn attach(window: &Ref<Window>, radius: f64) {
     let scaled = window.scaling_changed(move || scaling());
     let globals = platform.globals().clone();
     let token = globals.composition_changed.subscribe(move |()| apply());
-    on_cleanup(move || {
+    Some(Subscription::new(Disposable::create(move || {
         resized.dispose();
         scaled.dispose();
         globals.composition_changed.unsubscribe(token);
-    });
+    })))
 }
 
 fn rounded_region(width: i16, height: i16, radius: i16) -> Vec<xlib::XRectangle> {

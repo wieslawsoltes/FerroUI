@@ -6,6 +6,7 @@ mod desktop;
 use appearance::{Appearance, ColorMode, ThemeController, WinUISettings};
 mod launcher;
 mod notifications;
+mod x11_outline;
 mod quick_settings;
 mod wallpaper;
 pub mod wayland;

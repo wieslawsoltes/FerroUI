@@ -244,6 +244,9 @@ fn dock_menu(shell: &Rc<Shell>, entry: &Entry) -> ferroui_base::Ref<ferroui_cont
     menu.popup()
         .set_should_use_overlay_layer(host == super::mac_menus::MenuHost::InScene);
     menu.set_placement(PlacementMode::Top);
+    if host == super::mac_menus::MenuHost::OpaqueNative {
+        super::super::x11_outline::track_popup(&menu.popup(), 10.0);
+    }
     let app = entry.app;
     let native_id = entry.native_id.clone();
     let window_id = entry.windows.first().map(|w| w.id);

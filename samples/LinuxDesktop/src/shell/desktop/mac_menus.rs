@@ -50,6 +50,7 @@ fn submenu() -> El<MenuItem> {
         };
         popup.set_should_use_overlay_layer(host == MenuHost::InScene);
         if host == MenuHost::OpaqueNative {
+            super::super::x11_outline::track_popup(&popup, 10.0);
             // Without an X compositor, transparent pixels around the menu
             // become the native window's clear color. Remove the shadow
             // inset and paint a continuous surface to the popup edges.

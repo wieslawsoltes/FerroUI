@@ -3,7 +3,7 @@
 //! allocated until the first notification arrives.
 mod cards;
 mod center;
-mod x11_outline;
+use super::x11_outline;
 
 use super::appearance::{Appearance, Layout};
 use super::chrome::*;
@@ -196,7 +196,8 @@ impl Banner {
         let content = owner.with(|| {
             ferroui_view::provide_context(shell.appearance);
             if !self.wayland {
-                x11_outline::attach(&self.window, f64::from(colors().radius));
+                let outline = x11_outline::track(&self.window.clone().upcast(), f64::from(colors().radius));
+                on_cleanup(move || drop(outline));
             }
             shell_panel()
                 .padding(4)
