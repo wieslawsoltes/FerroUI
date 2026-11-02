@@ -244,8 +244,17 @@ xdotool windowsize --sync "$shell_window" 1280 800 windowactivate --sync "$shell
 capture macos-restored windows
 awk -v actual="$(panel_luma macos-restored)" -v light="$(panel_luma macos-light)" \
     'BEGIN {exit !((actual-light)^2 < 0.01)}'
-xdotool key --clearmodifiers ctrl+comma 3 Escape
-capture material-restored macos-restored
+xdotool key --clearmodifiers ctrl+comma
+capture macos-restored-picker macos-restored
+xdotool key --clearmodifiers 3
+for ((i=0; i<60; i++)); do
+    [[ "$(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance")" == material ]] && break
+    sleep .1
+done
+[[ "$(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance")" == material ]]
+capture material-restored-picker macos-restored-picker
+xdotool key --clearmodifiers Escape
+capture material-restored material-restored-picker
 awk -v actual="$(panel_luma material-restored)" -v dark="$(panel_luma material)" \
     'BEGIN {exit !((actual-dark)^2 < 0.01)}'
 xdotool key --clearmodifiers alt+F4
