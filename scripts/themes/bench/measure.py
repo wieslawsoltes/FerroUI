@@ -11,6 +11,7 @@ python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-after
 python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-binary --binary
 """
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -86,7 +87,7 @@ def measure_launches(executables, rounds):
             elapsed = time.perf_counter_ns() - start
             create, lookup = map(int, output.split())
             samples[executable].append({
-                "create_ns": create, "create_and_button_ns": lookup,
+                "create_ns": create, "button_lookup_ns": lookup - create, "create_and_button_ns": lookup,
                 "process_ready_ns": ready, "process_ns": elapsed,
             })
     return samples
@@ -139,6 +140,7 @@ def main():
         duration, messages = build(["--locked", *cargo_args], package, env)
         rebuilds.append(duration)
     artifact = next(m for m in messages if m["reason"] == "compiler-artifact" and m["target"]["name"] == "ferroui_themes_winui")
+    rlib = next(Path(name) for name in artifact["filenames"] if name.endswith(".rlib"))
     out = Path(next(m["out_dir"] for m in messages if m["reason"] == "build-script-executed" and m["package_id"] == artifact["package_id"]))
     executable = Path(next(m["executable"] for m in messages if m.get("executable") and m["target"]["name"] == PROBE))
     generated = out / "xaml"
@@ -166,7 +168,8 @@ def main():
         "profile": "release, LTO off, incremental off", "initial_target_empty": target_was_empty,
         "initial_build_seconds": first_build, "theme_rebuild_seconds": rebuilds,
         "initial_cargo_units": initial_units, "last_cargo_units": cargo_timings(target),
-        "generated_rust_bytes": len(source_bytes),
+        "generated_rust_bytes": len(source_bytes), "generated_rust_sha256": hashlib.sha256(source_bytes).hexdigest(),
+        "theme_rlib_bytes": rlib.stat().st_size, "fxb_blocks": len(referenced),
         "fxb_bytes": sum((generated / name.decode("ascii")).stat().st_size for name in referenced),
         "stripped_executable_bytes": stripped_bytes,
         "launches": launches,
