@@ -312,3 +312,80 @@ fn objects_report_the_dispatcher_of_their_thread() {
     assert!(Arc::ptr_eq(object.dispatcher(), &dispatcher));
     assert!(Arc::ptr_eq(FerroObject::new().dispatcher(), &replacement));
 }
+
+// Native borrowed reads are deliberately separate from the cloning property getter.
+mod borrowed_values {
+    use super::*;
+
+    #[derive(PartialEq)]
+    struct Counted {
+        clones: Rc<Cell<usize>>,
+        text: String,
+    }
+    impl Clone for Counted {
+        fn clone(&self) -> Self {
+            self.clones.set(self.clones.get() + 1);
+            Self { clones: self.clones.clone(), text: self.text.clone() }
+        }
+    }
+    ferro_property!(fn counted_property() -> StyledProperty<Counted> {
+        FerroProperty::register::<Class1, _>("BorrowedCounted", Counted {
+            clones: Rc::new(Cell::new(0)), text: String::new(),
+        })
+    });
+
+    #[test]
+    fn borrowed_reads_do_not_clone_payloads_and_allow_other_property_access() {
+        let object = Class1::new();
+        let clones = Rc::new(Cell::new(0));
+        object.set_value(counted_property(), Counted { clones: clones.clone(), text: "😀".repeat(8192) });
+        clones.set(0);
+        for _ in 0..64 { std::hint::black_box(object.get_value(counted_property())); }
+        assert_eq!(clones.get(), 64);
+        clones.set(0);
+        for _ in 0..64 {
+            let bytes = object.with_value(counted_property(), |value| {
+                object.set_value(Class1::foo_property(), "other property".into());
+                value.text.len()
+            });
+            assert_eq!(bytes, 32768);
+        }
+        assert_eq!(clones.get(), 0);
+    }
+
+    #[test]
+    fn borrowed_reads_follow_default_style_current_local_clear_and_inheritance() {
+        let parent = Class1::new();
+        let object = Class1::new();
+        object.set_inheritance_parent(&parent);
+        let property = Class1::baz_property();
+        let read = || object.with_value(property, |value| value.clone());
+        assert_eq!(read(), object.get_value(property));
+        parent.set_value(property, "inherited".into());
+        assert_eq!(read(), "inherited");
+        let style = object.set_value_with_priority(property, "style".into(), BindingPriority::Style).unwrap();
+        assert_eq!(read(), "style");
+        object.set_current_value(property, "current".into());
+        assert_eq!(read(), "current");
+        object.set_value(property, "local".into());
+        assert_eq!(read(), "local");
+        object.clear_value(property);
+        assert_eq!(read(), "style");
+        style.dispose();
+        assert_eq!(read(), "inherited");
+        parent.clear_value(property);
+        assert_eq!(read(), "bazdefault");
+    }
+
+    #[test]
+    fn same_value_mutation_panics_and_releases_the_read_borrow() {
+        let object = Class1::new();
+        object.set_value(Class1::foo_property(), "initial".into());
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            object.with_value(Class1::foo_property(), |_| object.set_value(Class1::foo_property(), "nested".into()));
+        }));
+        assert!(result.is_err());
+        object.set_value(Class1::foo_property(), "after".into());
+        assert_eq!(object.with_value(Class1::foo_property(), String::len), 5);
+    }
+}
