@@ -132,6 +132,12 @@ wait_for has_color 397abb
 wait_for has_color d76a3d
 shot clients
 scene_is() { [[ $("$binary" --platform=wayland --current-scene 2>/dev/null) == "$1" ]]; }
+"$binary" --platform=wayland --show=workspaces
+wait_for scene_is workspaces
+wait_for has_color preview
+shot live-overview
+wtype -k Escape
+wait_for scene_is desktop
 "$binary" --platform=wayland --show=settings
 wait_for scene_is settings
 open_picker() {

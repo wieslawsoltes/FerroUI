@@ -95,6 +95,10 @@ impl Desktop {
     pub fn element(&self) -> Element {
         self.scene.element()
     }
+    pub fn window_visual(&self, window: u32) -> Option<Rc<ferroui_base::rendering::composition::CompositionVisual>> {
+        self.scene.window_visual(window)
+    }
+
     pub fn client_has_focus(&self) -> bool {
         self.scene.has_keyboard_focus()
     }

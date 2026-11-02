@@ -105,6 +105,16 @@ def probe(path, color, test):
     im = Image.open(path).convert("RGB")
     # The opaque, unfiltered widget interiors survive both the client and
     # compositor color conversion. Permit minor driver rounding differences.
+    if color == "preview":
+        # The independent clients have large flat-color swatches. Their scaled
+        # counterparts must both lie inside the overview card, in its thumbnail
+        # column, not in the client windows behind it.
+        width, height = im.size
+        area = im.crop((width // 2 - 278, height // 2 - 125,
+                        width // 2 - 140, height // 2 + 205))
+        colors = area.getcolors(area.width * area.height)
+        return all(sum(n for n, rgb in colors if all(abs(a-b) <= 4 for a, b in zip(rgb, target))) >= 35
+                   for target in [(0xd7, 0x6a, 0x3d), (0x39, 0x7a, 0xbb)])
     if color == "picker":
         # The middle of the Appearance panel contains rows with opaque
         # themed surfaces. Wait for the new theme to paint before capturing.

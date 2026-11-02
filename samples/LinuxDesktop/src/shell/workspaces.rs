@@ -1,6 +1,8 @@
 //! Workspace navigation and client actions are requests to the window manager.
 //! Property notifications drive the authoritative workspace and client list.
+use super::appearance::Layout;
 use super::chrome::*;
+use ferroui_base::rendering::composition::{CompositionStretch, CompositionVisual, ElementComposition};
 use super::{feedback, popup_header, Shell};
 use crate::session::{ClientWindow, Session, SnapSide};
 use ferroui_base::layout::HorizontalAlignment as H;
@@ -143,6 +145,11 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
             |w| w.id as usize,
             move |client| client_row(&window_shell, client, expanded),
         ));
+    let (title, subtitle) = match look().layout() {
+        Layout::Taskbar => ("Task View", "VIRTUAL DESKTOPS"),
+        Layout::MenuBarDock => ("Mission Control", "SPACES"),
+        Layout::BottomNavigation => ("Recents", "WORKSPACES"),
+    };
     super::desktop::popup_frame()
         .max_width(600.0)
         .max_height(690.0)
@@ -150,7 +157,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         .child(
             grid()
                 .row_definitions("Auto,Auto,Auto,*,Auto")
-                .child(popup_header("Workspaces", "WINDOW OVERVIEW", shell))
+                .child(popup_header(title, subtitle, shell))
                 .child(
                     border()
                         .grid_row(1)
@@ -177,10 +184,45 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         .into()
 }
 
+/// A second view of the client's retained subtree. The shared drawing surfaces
+/// receive a single upload per buffer even with the overview on screen.
+fn preview(source: Rc<CompositionVisual>) -> Element {
+    let host = NodeRef::<ferroui_controls::Border>::new();
+    border()
+        .width(96.0).height(60.0)
+        .is_hit_test_visible(false)
+        .node_ref(host)
+        .on_loaded(move |_| {
+            let Some(control) = host.get_untracked() else { return };
+            let Some(visual) = ElementComposition::get_element_visual(&*control) else { return };
+            let c = visual.compositor();
+            if !Rc::ptr_eq(c, source.compositor()) { return; }
+            let surface = c.create_visual_surface();
+            surface.set_source_visual(Some(source.clone()));
+            let brush = c.create_surface_brush_with_surface(surface);
+            brush.set_stretch(CompositionStretch::Uniform);
+            brush.set_horizontal_alignment_ratio(0.5);
+            brush.set_vertical_alignment_ratio(0.5);
+            let sprite = c.create_sprite_visual();
+            sprite.set_size(ferroui_base::Vector::new(96., 60.));
+            sprite.set_brush(Some((*brush).clone()));
+            ElementComposition::set_element_child_visual(&*control, Some((*sprite).clone()));
+        })
+        .on_unloaded(move |_| {
+            if let Some(control) = host.get_untracked() {
+                ElementComposition::set_element_child_visual(&*control, None);
+            }
+        })
+        .into()
+}
+
 fn client_row(shell: &Rc<Shell>, client: ClientWindow, expanded: Signal<Option<u32>>) -> Element {
     let id = client.id;
     let state = shell.clone();
     let title = client.title.as_str();
+    let source = shell.session.as_ref().and_then(|s| s.compositor()).and_then(|host| host.window_visual(id));
+    let columns = if source.is_some() { "96,*" } else { "20,*" };
+    let artwork = source.map(preview).unwrap_or_else(|| glyph(Icon::Window, 16.0, colors().accent).into());
     let restore = action(title, move || {
         if let Some(session) = &state.session {
             state.dismiss();
@@ -195,8 +237,8 @@ fn client_row(shell: &Rc<Shell>, client: ClientWindow, expanded: Signal<Option<u
     .background("Transparent")
     .child(
         grid()
-            .column_definitions("20,*")
-            .child(glyph(Icon::Window, 16.0, colors().accent))
+            .column_definitions(columns)
+            .child(artwork)
             .child(
                 stack_panel()
                     .grid_column(1)

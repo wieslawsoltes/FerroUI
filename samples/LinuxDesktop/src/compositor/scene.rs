@@ -12,8 +12,8 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
 use ferroui_base::rendering::composition::{
-    CompositionDrawingSurface, CompositionSurfaceVisual, CompositionVisual, Compositor,
-    ElementComposition,
+    CompositionDrawingSurface, CompositionSurfaceVisual, CompositionVisual,
+    CompositionVisualCollection, Compositor, ElementComposition,
 };
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, FerroObjectImplExt,
@@ -53,6 +53,17 @@ impl ClientScene {
         self.0.clone().into_element()
     }
 
+    pub fn window_visual(&self, window: u32) -> Option<Rc<CompositionVisual>> {
+        let tree = self.0.visuals.borrow();
+        Some(
+            tree.as_ref()?
+                .windows
+                .get(&u64::from(window))?
+                .visual
+                .clone(),
+        )
+    }
+
     pub fn refresh(&self, scene: &Scene) {
         self.0.apply_scene(scene);
     }
@@ -86,8 +97,87 @@ impl Drop for Layer {
 struct VisualTree {
     compositor: Rc<Compositor>,
     root: Rc<CompositionVisual>,
-    layers: HashMap<u64, Layer>,
+    windows: HashMap<u64, WindowVisual>,
     serial: Option<u64>,
+}
+
+// Keeping the xdg window as a subtree lets a visual surface sample just that
+// window even when another client occludes it on the physical output.
+struct WindowVisual {
+    visual: Rc<CompositionVisual>,
+    layers: HashMap<u64, Layer>,
+    seen_in: u64,
+}
+
+fn order_child(
+    children: &CompositionVisualCollection,
+    index: usize,
+    visual: &Rc<CompositionVisual>,
+) {
+    if index >= children.count() || !Rc::ptr_eq(&children.get(index), visual) {
+        children.remove(visual);
+        children.insert(index, visual.clone());
+    }
+}
+
+impl WindowVisual {
+    fn update(
+        &mut self,
+        compositor: &Rc<Compositor>,
+        bounds: Rect,
+        surfaces: &[crate::compositor_server::Surface],
+        serial: u64,
+    ) {
+        self.visual
+            .set_offset(Vector3D::new(bounds.x, bounds.y, 0.));
+        self.visual
+            .set_size(Vector::new(bounds.width, bounds.height));
+        self.seen_in = serial;
+        let children = self.visual.children();
+        for (index, s) in surfaces.iter().enumerate() {
+            let layer = self.layers.entry(s.id).or_insert_with(|| {
+                let surface = compositor.create_drawing_surface();
+                let visual = compositor.create_surface_visual();
+                visual.set_surface(Some((*surface).clone()));
+                Layer {
+                    visual,
+                    surface,
+                    revision: None,
+                    seen_in: serial,
+                }
+            });
+            layer.seen_in = serial;
+            if layer.revision != Some(s.pixels.revision) {
+                let p = &s.pixels;
+                let bitmap = Bitmap::from_pixels(
+                    PixelFormat::BGRA8888,
+                    AlphaFormat::Premul,
+                    &p.bytes,
+                    PixelSize::new(p.width, p.height),
+                    Vector::new(96., 96.),
+                    p.width * 4,
+                );
+                drop(layer.surface.update_with_bitmap(&bitmap));
+                layer.revision = Some(p.revision);
+            }
+            layer.visual.set_offset(Vector3D::new(
+                f64::from(s.x) - bounds.x,
+                f64::from(s.y) - bounds.y,
+                0.,
+            ));
+            layer
+                .visual
+                .set_size(Vector::new(s.width.into(), s.height.into()));
+            order_child(&children, index, &layer.visual);
+        }
+        self.layers.retain(|_, layer| {
+            if layer.seen_in == serial {
+                return true;
+            }
+            children.remove(&layer.visual);
+            false
+        });
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -135,7 +225,7 @@ impl VisualImpl for ClientPlane {
             *this.visuals.borrow_mut() = Some(VisualTree {
                 compositor,
                 root,
-                layers: HashMap::new(),
+                windows: HashMap::new(),
                 serial: None,
             });
             this.size.set((0, 0));
@@ -196,68 +286,47 @@ impl ClientPlane {
         if tree.serial == Some(scene.serial) {
             return;
         }
+        let mut windows = self.windows.borrow_mut();
+        windows.clear();
+        windows.extend(scene.windows.iter().map(|w| {
+            (
+                w.id,
+                Rect::new(w.x.into(), w.y.into(), w.width.into(), w.height.into()),
+            )
+        }));
         let children = tree.root.children();
         let mut regions = self.hit_regions.borrow_mut();
         regions.clear();
-        for (index, s) in scene.surfaces.iter().enumerate() {
-            let layer = tree.layers.entry(s.id).or_insert_with(|| {
-                let surface = tree.compositor.create_drawing_surface();
-                let visual = tree.compositor.create_surface_visual();
-                visual.set_surface(Some((*surface).clone()));
-                Layer {
-                    visual,
-                    surface,
-                    revision: None,
-                    seen_in: scene.serial,
-                }
+        // The protocol snapshot emits one contiguous, bottom-to-top group per
+        // toplevel, including its synchronized children and xdg popups.
+        for (index, surfaces) in scene
+            .surfaces
+            .chunk_by(|a, b| a.window == b.window)
+            .enumerate()
+        {
+            let id = surfaces[0].window;
+            let window = tree.windows.entry(id).or_insert_with(|| WindowVisual {
+                visual: tree.compositor.create_container_visual(),
+                layers: HashMap::new(),
+                seen_in: scene.serial,
             });
-            layer.seen_in = scene.serial;
-            if layer.revision != Some(s.pixels.revision) {
-                let p = &s.pixels;
-                let bitmap = Bitmap::from_pixels(
-                    PixelFormat::BGRA8888,
-                    AlphaFormat::Premul,
-                    &p.bytes,
-                    PixelSize::new(p.width, p.height),
-                    Vector::new(96., 96.),
-                    p.width * 4,
-                );
-                drop(layer.surface.update_with_bitmap(&bitmap));
-                layer.revision = Some(p.revision);
-            }
-            layer
-                .visual
-                .set_offset(Vector3D::new(s.x.into(), s.y.into(), 0.));
-            layer
-                .visual
-                .set_size(Vector::new(s.width.into(), s.height.into()));
-            if index >= children.count() || !Rc::ptr_eq(&children.get(index), &layer.visual) {
-                children.remove(&layer.visual);
-                children.insert(index, (*layer.visual).clone());
-            }
-            regions.push((
-                s.window,
-                Rect::new(s.x.into(), s.y.into(), s.width.into(), s.height.into()),
-            ));
+            window.update(&tree.compositor, windows[&id], surfaces, scene.serial);
+            order_child(&children, index, &window.visual);
+            regions.extend(surfaces.iter().map(|s| {
+                (
+                    id,
+                    Rect::new(s.x.into(), s.y.into(), s.width.into(), s.height.into()),
+                )
+            }));
         }
-        drop(regions);
-        // One sweep over retained layers, including on pixel-only updates.
-        // The visible prefix already follows the server's new stacking order.
-        tree.layers.retain(|_, layer| {
-            if layer.seen_in == scene.serial {
+        tree.windows.retain(|_, w| {
+            if w.seen_in == scene.serial {
                 return true;
             }
-            children.remove(&layer.visual);
+            children.remove(&w.visual);
             false
         });
-        let mut windows = self.windows.borrow_mut();
-        windows.clear();
-        for w in &scene.windows {
-            windows.insert(
-                w.id,
-                Rect::new(w.x.into(), w.y.into(), w.width.into(), w.height.into()),
-            );
-        }
+        drop(regions);
         drop(windows);
         let focused = scene
             .windows
