@@ -90,17 +90,17 @@ Generated nested styles share linear selector builders and call-site property ge
 
 Both backends name the required factory directly. The closed-world pass removes unused theme factories before rustc sees them. WinUI construction also calls the markup and dialogs registration APIs. The controls registration path calls `TypeInfo::register_all(TYPES)`, and runtime casts use registered nullable forms, handles and interface conversions. Those existing registries can retain control and dialog implementations independently of whether a theme factory survives. Applications which use open-ended resource lookup should use the full dictionary.
 
-## Initial generated Rust in the built-in themes
+## Generated Rust in the built-in themes
 
-These counts are bytes of the full native output of the model-host compiler. All five theme crates passed `cargo check`. Each row compares the same theme on both revisions.
+The model host generated the full native theme in each configuration. Cargo checked all five crates and the generated Rust matched the four tracked reference files byte for byte. Percentages compare the current generator with the original main baseline.
 
-| Theme | Baseline Rust bytes | Compact Rust bytes | Reduction |
-| --- | ---: | ---: | ---: |
-| WinUI | 14,421,918 | 9,234,385 | 36.0% |
-| macOS | 13,033,763 | 8,320,752 | 36.2% |
-| Fluent | 5,670,771 | 4,242,612 | 25.2% |
-| Simple | 3,219,915 | 3,088,372 | 4.1% |
-| Material | 15,910,704 | 10,353,001 | 34.9% |
+| Theme | Original Rust bytes | Previous PR head bytes | Current Rust bytes | Total reduction |
+| --- | ---: | ---: | ---: | ---: |
+| WinUI | 14,421,918 | 9,234,385 | 7,903,409 | 45.2% |
+| macOS | 13,033,763 | 8,320,752 | 7,123,236 | 45.3% |
+| Fluent | 5,670,771 | 4,242,612 | 3,809,295 | 32.8% |
+| Simple | 3,219,915 | 3,088,372 | 2,855,051 | 11.3% |
+| Material | 15,910,704 | 10,353,001 | 9,207,472 | 42.1% |
 
 The initial native implementation folded 3,598 static aliases, 738 literal brushes, 711 dynamic-color brushes and 338 static-color brushes. The remaining 792 deferred factories use direct typed construction. The FXB build of the same dictionary emitted 456 blocks with 5,385 records. Validating, expanding and dropping all 175,024 encoded bytes took 415 µs median and 538 µs at p95 across 101 passes over the Cargo-produced blocks with their bytes resident in memory.
 
