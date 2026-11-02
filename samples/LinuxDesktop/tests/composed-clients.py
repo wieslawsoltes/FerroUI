@@ -113,6 +113,12 @@ def probe(path, color, test):
     im = Image.open(path).convert("RGB")
     # The opaque, unfiltered widget interiors survive both the client and
     # compositor color conversion. Permit minor driver rounding differences.
+    if color == "wallpaper":
+        # Upper-right wallpaper stays exposed beside both independent clients.
+        r, g, b = im.getpixel((im.width - 30, im.height // 8))
+        if test == "macos":
+            return r > b + 35 and r > g + 30
+        return test == "material" and g > r + 18 and g > b + 8
     if color == "preview":
         # The independent clients have large flat-color swatches. Their scaled
         # colors must survive in the bright previews inside the centered Task

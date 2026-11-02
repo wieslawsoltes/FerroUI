@@ -31,6 +31,12 @@ The shell launcher uses a GIO launch context with the child display. Directly sp
 
 The input seat targets the topmost eligible client surface, including its popups and subsurfaces. On a native Wayland host, the seat receives the parent’s current XKB map, layout group, modifier state and evdev codes. The X11-hosted preview uses the default evdev layout. Child applications exchange clipboard selections over the private display. Use **Alt+primary drag** to move and **Alt+secondary drag** to resize a client. The task overview exposes activate, close, minimize, maximize, restore, snap, fullscreen and workspace operations. **Super+1–9** switches to an existing workspace and **Super+Shift+1–9** moves the focused client. **Super+Left/Right**, **Super+Up/Down** and **Super+F** control snap, maximize/minimize and fullscreen. A windowed host may reserve system shortcuts. Its shell controls provide the same operations. With a child focused, its own shortcuts, including Ctrl+W, go to that application.
 
+The same GTK and Qt windows stayed mapped as the compositor switched from macOS to Material. Qt then received keyboard input and repainted its color swatch.
+
+| macOS | Material |
+| --- | --- |
+| [![GTK and Qt windows above the macOS landscape and Dock](screenshots/compositor-macos-clients.webp)](screenshots/compositor-macos-clients.webp) | [![The same GTK and Qt windows above the Material garden and taskbar](screenshots/compositor-material-clients.webp)](screenshots/compositor-material-clients.webp) |
+
 ## WinUI appearance
 
 Open Appearance in the Windows profile to select Light, Dark, High Contrast or Compact density. The shell installs FerroUI’s compiled WinUI theme, including all 95 control dictionaries merged by [WinUIControls.xaml](../../src/FerroUI.Themes.WinUI/Controls/WinUIControls.xaml) in this revision. Controls resolve semantic brushes, flyout materials and elevation from the active resources. Microsoft’s Windows App SDK hosts the Windows-specific WinUI runtime and interop APIs. Linux uses the FerroUI implementations. macOS and Material remain independent profiles. GTK and Qt clients draw their content and client-side decorations with their own toolkits. See [appearance profiles and extension points](APPEARANCE.md).

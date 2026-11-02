@@ -157,6 +157,24 @@ wtype -k l
 wait_for grep -sqx 'light normal' "$XDG_CONFIG_HOME/ferro-desktop/windows-style"
 wtype -s 60 -k Escape -s 60
 wait_for scene_is desktop
+# Verify the new wallpaper and both live client swatches in the same frame.
+# The existing Qt process receives the keyboard and repaints below.
+profile_clients_visible() {
+    capture && pixels wallpaper "$1" && pixels 9354ba present && pixels 397abb present
+}
+for entry in '2 macos' '3 material'; do
+    read -r key profile <<<"$entry"
+    "$binary" --platform=wayland --show=settings
+    wait_for scene_is settings
+    wait_for open_picker
+    wtype -k "$key"
+    wait_for grep -sqx "$profile" "$XDG_CONFIG_HOME/ferro-desktop/appearance"
+    wtype -k Escape
+    wait_for scene_is desktop
+    wait_for profile_clients_visible "$profile"
+    kill -0 "$gtk" "$qt" && only_host || fail "Lost an independent client on $profile"
+    shot "$profile-clients"
+done
 # Weston ships a real synchronized wl_subsurface client. Omit its optional
 # EGL triangle so the test works on wl_shm-only displays.
 inner_client WAYLAND_DEBUG=client weston-subsurfaces --no-triangle --red-mode=1 >"$output/subsurfaces.log" 2>&1 & child=$!
