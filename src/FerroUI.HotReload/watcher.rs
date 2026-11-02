@@ -90,7 +90,7 @@ impl<T: Clone + Eq + Send + 'static> FileWatcher<T> {
         interval: Duration,
         baseline: Option<BTreeMap<String, T>>,
         directories: Vec<WatchDirectory>,
-        read: impl Fn(&PathBuf) -> Result<T, String> + Send + 'static,
+        mut read: impl FnMut(&PathBuf) -> Result<T, String> + Send + 'static,
     ) -> Self {
         let stop = Arc::new(AtomicBool::new(false));
         let worker_stop = stop.clone();

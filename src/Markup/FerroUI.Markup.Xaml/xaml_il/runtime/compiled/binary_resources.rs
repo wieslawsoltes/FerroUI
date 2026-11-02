@@ -6,6 +6,10 @@ use ferroui_base::{controls::ResourceDictionary, Ref};
 use ferroui_xaml_binary::Payload;
 pub use ferroui_xaml_binary::{fingerprint, Batch, Kind, MAX_BLOCK_BYTES};
 use std::rc::Rc;
+#[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+use std::rc::Rc as BatchOwner;
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+use std::sync::Arc as BatchOwner;
 
 /// An individually linkable compiled block. The stable identifier is used by reload
 /// clients; the module-qualified name disambiguates identical class names across crates.
@@ -19,13 +23,13 @@ impl Block {
         Self { id, bytes }
     }
 
-    fn decode(&self, expected: Kind) -> Result<Rc<Batch>, XamlLoadError> {
+    fn decode(&self, expected: Kind) -> Result<BatchOwner<Batch>, XamlLoadError> {
         #[cfg(all(feature = "hot-reload", debug_assertions))]
         if let Some(batch) = reload::get(self.id) {
             return checked(self.id, expected, batch);
         }
         let batch = Batch::decode(self.bytes).map_err(|e| error(self.id, e))?;
-        checked(self.id, expected, Rc::new(batch))
+        checked(self.id, expected, BatchOwner::new(batch))
     }
 }
 
@@ -35,7 +39,11 @@ fn error(id: &str, message: impl std::fmt::Display) -> XamlLoadError {
     ))
 }
 
-fn checked(id: &str, expected: Kind, batch: Rc<Batch>) -> Result<Rc<Batch>, XamlLoadError> {
+fn checked(
+    id: &str,
+    expected: Kind,
+    batch: BatchOwner<Batch>,
+) -> Result<BatchOwner<Batch>, XamlLoadError> {
     if batch.kind() == expected {
         Ok(batch)
     } else {
@@ -89,7 +97,7 @@ pub mod reload {
 
     #[derive(Default, Clone)]
     pub struct Snapshot {
-        blocks: BTreeMap<String, Rc<Batch>>,
+        blocks: BTreeMap<String, BatchOwner<Batch>>,
     }
 
     ferroui_base::ferro_thread_local! {
@@ -119,8 +127,10 @@ pub mod reload {
             expected: Kind,
             batch: Batch,
         ) -> Result<(), XamlLoadError> {
-            self.blocks
-                .insert(id.to_owned(), checked(id, expected, Rc::new(batch))?);
+            self.blocks.insert(
+                id.to_owned(),
+                checked(id, expected, BatchOwner::new(batch))?,
+            );
             Ok(())
         }
 
@@ -148,7 +158,7 @@ pub mod reload {
         build()
     }
 
-    pub(super) fn get(id: &str) -> Option<Rc<Batch>> {
+    pub(super) fn get(id: &str) -> Option<BatchOwner<Batch>> {
         ACTIVE.with(|slot| slot.borrow().as_ref()?.blocks.get(id).cloned())
     }
 }

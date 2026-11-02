@@ -5,15 +5,12 @@ use ferroui_base::{
     Ref,
 };
 use ferroui_markup_xaml::xaml_il::runtime::compiled::binary_resources::{
-    fingerprint, reload::Snapshot, Kind, MAX_BLOCK_BYTES,
+    fingerprint, reload::Snapshot, Batch, Kind, MAX_BLOCK_BYTES,
 };
 use std::{
     collections::BTreeMap, fs::File, io::Read, path::Path, rc::Rc, sync::Arc, time::Duration,
 };
 
-// An FXB identity always has the form module/filename. The sentinel sorts before
-// every real leaf, so an obsolete call graph wins over dangling-file diagnostics.
-const MANIFEST: &str = "";
 fn failure(message: impl ToString) -> ReloadError {
     ReloadError::Failed(message.to_string())
 }
@@ -86,12 +83,101 @@ impl Manifest {
     }
 }
 
-/// Watches the specified FXB files with the normal two-read debounce. Pump on the UI
-/// thread, where style owners and the constructed theme live. All files in a stable
-/// revision must validate before the existing contribution is replaced.
-pub struct BinaryThemeWatcher {
-    files: FileWatcher<Arc<[u8]>>,
+struct Generation {
+    manifest: Vec<u8>,
+    blocks: BTreeMap<String, (Kind, u64)>,
+    snapshot: Result<Snapshot, ReloadError>,
+}
+
+// Verified content fingerprints bind the complete decoded snapshot to these bytes.
+impl PartialEq for Generation {
+    fn eq(&self, other: &Self) -> bool {
+        self.manifest == other.manifest
+    }
+}
+impl Eq for Generation {}
+
+struct GenerationReader {
     baseline: Manifest,
+    previous: Option<Arc<Generation>>,
+}
+
+impl GenerationReader {
+    fn read(
+        &mut self,
+        manifest: Vec<u8>,
+        mut leaf: impl FnMut(&str) -> Result<Vec<u8>, String>,
+    ) -> Result<Arc<Generation>, String> {
+        if let Some(previous) = &self.previous {
+            if previous.manifest == manifest {
+                return Ok(previous.clone());
+            }
+        }
+        let generation = Manifest::parse(&manifest).map_err(|e| format!("{e:?}"))?;
+        let snapshot = if self.baseline.compatible(&generation) {
+            let previous = self
+                .previous
+                .as_deref()
+                .and_then(|p| p.snapshot.as_ref().ok().map(|s| (s, &p.blocks)));
+            let mut snapshot = previous.map(|(s, _)| s.clone()).unwrap_or_default();
+            for (name, &(kind, hash)) in &generation.blocks {
+                if previous.is_some_and(|(_, blocks)| blocks.get(name) == Some(&(kind, hash))) {
+                    continue;
+                }
+                let bytes = leaf(name)?;
+                if fingerprint(&bytes) != hash {
+                    return Err(format!(
+                        "{name} does not match the published FXB generation"
+                    ));
+                }
+                let batch = Batch::decode(&bytes).map_err(|e| format!("{name}: {e}"))?;
+                snapshot
+                    .replace_decoded(&format!("{}/{}", generation.module, name), kind, batch)
+                    .map_err(|e| e.to_string())?;
+            }
+            Ok(snapshot)
+        } else {
+            Err(ReloadError::RestartRequired(
+                "FXB caller or block table changed; rebuild and restart the native caller".into(),
+            ))
+        };
+        let candidate = Arc::new(Generation {
+            manifest,
+            blocks: generation.blocks,
+            snapshot,
+        });
+        self.previous = Some(candidate.clone());
+        Ok(candidate)
+    }
+}
+
+fn read_in_directory(directory: &Path, path: &Path) -> Result<Vec<u8>, String> {
+    let canonical = path
+        .canonicalize()
+        .map_err(|e| format!("{}: {e}", path.display()))?;
+    if canonical.parent() != Some(directory) || !canonical.is_file() {
+        return Err(format!(
+            "FXB file escapes manifest directory or is not regular: {}",
+            path.display()
+        ));
+    }
+    let mut bytes = Vec::new();
+    File::open(&canonical)
+        .and_then(|file| {
+            file.take(MAX_BLOCK_BYTES as u64 + 1)
+                .read_to_end(&mut bytes)
+        })
+        .map_err(|e| format!("{}: {e}", path.display()))?;
+    if bytes.len() > MAX_BLOCK_BYTES {
+        return Err(format!("{} exceeds FXB size limit", path.display()));
+    }
+    Ok(bytes)
+}
+
+/// Polls only the manifest when idle. A new generation is read, checked and decoded
+/// on the watcher thread; the UI thread reconstructs and replaces the owned style.
+pub struct BinaryThemeWatcher {
+    files: FileWatcher<Arc<Generation>>,
     slot: StyleSlot,
 }
 
@@ -113,51 +199,27 @@ impl BinaryThemeWatcher {
             .canonicalize()
             .map_err(failure)?;
         let baseline = Manifest::parse(embedded.as_bytes())?;
-        let mut paths: BTreeMap<_, _> = baseline
-            .blocks
-            .keys()
-            .map(|name| (name.clone(), directory.join(name)))
-            .collect();
-        paths.insert(
-            MANIFEST.into(),
-            directory.join(
-                path.file_name()
-                    .ok_or_else(|| failure("Missing FXB manifest filename"))?,
-            ),
+        let manifest = directory.join(
+            path.file_name()
+                .ok_or_else(|| failure("Missing FXB manifest filename"))?,
         );
+        let mut reader = GenerationReader {
+            baseline,
+            previous: None,
+        };
         let files = FileWatcher::poll_files(
-            paths,
+            BTreeMap::from([(String::new(), manifest)]),
             interval,
             Some(BTreeMap::new()),
             Vec::new(),
             move |path| {
-                let canonical = path
-                    .canonicalize()
-                    .map_err(|e| format!("{}: {e}", path.display()))?;
-                if canonical.parent() != Some(directory.as_path()) || !canonical.is_file() {
-                    return Err(format!(
-                        "FXB file escapes manifest directory or is not regular: {}",
-                        path.display()
-                    ));
-                }
-                let mut bytes = Vec::new();
-                File::open(&canonical)
-                    .and_then(|file| {
-                        file.take(MAX_BLOCK_BYTES as u64 + 1)
-                            .read_to_end(&mut bytes)
-                    })
-                    .map_err(|error| format!("{}: {error}", path.display()))?;
-                if bytes.len() > MAX_BLOCK_BYTES {
-                    return Err(format!("{} exceeds FXB size limit", path.display()));
-                }
-                Ok(Arc::from(bytes))
+                let image = read_in_directory(&directory, path)?;
+                reader.read(image, |name| {
+                    read_in_directory(&directory, &directory.join(name))
+                })
             },
         );
-        Ok(Self {
-            files,
-            baseline,
-            slot,
-        })
+        Ok(Self { files, slot })
     }
 
     /// Apply the newest stable revision. The callback constructs a fresh native theme.
@@ -174,38 +236,21 @@ impl BinaryThemeWatcher {
 
     fn apply(
         &self,
-        batch: FileBatch<Arc<[u8]>>,
+        batch: FileBatch<Arc<Generation>>,
         build: impl FnOnce() -> Result<Rc<dyn IStyle>, ReloadError>,
     ) -> Result<bool, ReloadError> {
         let stale = || batch.revision.as_ref().is_some_and(|rev| !rev.is_current());
         if stale() {
             return Ok(false);
         }
-        let mut files = batch.files.into_iter();
-        let head = files
+        let candidate = batch
+            .files
+            .into_iter()
             .next()
-            .filter(|f| f.uri == MANIFEST)
-            .ok_or_else(|| failure("Missing FXB generation manifest"))?;
-        let generation = Manifest::parse(&head.contents.map_err(ReloadError::Failed)?)?;
-        if !self.baseline.compatible(&generation) {
-            return Err(ReloadError::RestartRequired(
-                "FXB caller or block table changed; rebuild and restart the native caller".into(),
-            ));
-        }
-        let mut snapshot = Snapshot::default();
-        for file in files {
-            let data = file.contents.map_err(ReloadError::Failed)?;
-            let (kind, hash) = generation.blocks[&file.uri];
-            if fingerprint(&data) != hash {
-                return Err(failure(format!(
-                    "{} does not match the published FXB generation",
-                    file.uri
-                )));
-            }
-            snapshot
-                .replace(&format!("{}/{}", generation.module, file.uri), kind, &data)
-                .map_err(|e| failure(e.to_string()))?;
-        }
+            .ok_or_else(|| failure("Missing FXB generation"))?
+            .contents
+            .map_err(ReloadError::Failed)?;
+        let snapshot = candidate.snapshot.clone()?;
         let mut change = catch_reload(|| self.slot.prepare(|| Rc::new(snapshot).run(build)))?;
         if stale() {
             return Ok(false);
@@ -288,6 +333,45 @@ mod tests {
     }
 
     #[test]
+    fn idle_polls_read_no_leaves_and_a_one_block_edit_reads_only_that_block() {
+        let blocks: BTreeMap<_, _> = (0..456)
+            .map(|i| {
+                (
+                    format!("block-{i}.fxb"),
+                    (2, format!("{:016x}", fingerprint(BLUE))),
+                )
+            })
+            .collect();
+        let manifest = serde_json::json!({"version": 1, "module":"fixture", "caller":"1234567890abcdef", "blocks":blocks}).to_string().into_bytes();
+        let mut reader = GenerationReader {
+            baseline: Manifest::parse(&manifest).unwrap(),
+            previous: None,
+        };
+        let mut reads = 0;
+        for _ in 0..10 {
+            reader
+                .read(manifest.clone(), |_| {
+                    reads += 1;
+                    Ok(BLUE.to_vec())
+                })
+                .unwrap();
+        }
+        assert_eq!(reads, 456);
+        let mut edited = BLUE.to_vec();
+        edited[12..16].copy_from_slice(&0xff00ff00u32.to_le_bytes());
+        let mut next: serde_json::Value = serde_json::from_slice(&manifest).unwrap();
+        next["blocks"]["block-17.fxb"][1] = format!("{:016x}", fingerprint(&edited)).into();
+        reader
+            .read(next.to_string().into_bytes(), |name| {
+                assert_eq!(name, "block-17.fxb");
+                reads += 1;
+                Ok(edited.clone())
+            })
+            .unwrap();
+        assert_eq!(reads, 457);
+    }
+
+    #[test]
     fn file_edit_replaces_the_mounted_contribution_and_rejects_an_invalid_save() {
         let _scope = Dispatcher::unit_test_scope();
         ferroui_markup_xaml::register_types();
@@ -328,12 +412,15 @@ mod tests {
         // Two individually valid files from different generations must never reach the owner.
         assert!(matches!(pump(&mut watcher), Err(ReloadError::Failed(_))));
         assert!(style_ptr_eq(&container.get(0), &original));
-        std::fs::write(&other, red).unwrap();
+        std::fs::write(&other, &red).unwrap();
         pump(&mut watcher).unwrap();
         assert_eq!(color(&container), Color::from_uint32(0xff00ff00));
         let accepted = container.get(0);
 
         std::fs::write(&path, &green[..5]).unwrap();
+        // Publishing only an incomplete leaf is staging, not a new generation.
+        // Commit its fingerprint here to exercise rejection of the corrupt generation.
+        std::fs::write(&manifest, image(&green[..5], &red)).unwrap();
         assert!(matches!(pump(&mut watcher), Err(ReloadError::Failed(_))));
         assert!(style_ptr_eq(&container.get(0), &accepted));
 
