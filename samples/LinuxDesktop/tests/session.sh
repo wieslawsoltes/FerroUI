@@ -81,13 +81,29 @@ await_scene() {
     return 1
 }
 read -r width height < <(xdotool getdisplaygeometry)
-for gesture in apps shade recents; do
+for gesture in apps shade recents home; do
     case $gesture in
         apps) x=$((width - 150)); y=$((height / 2)); dy=-100; expected=applications ;;
         shade) x=$((width - 150)); y=$((height / 2)); dy=100; expected=notifications ;;
-        recents) x=$((width / 2)); y=$((height - 8)); dy=-100; expected=workspaces ;;
+        recents|home) x=$((width / 2)); y=$((height - 8)); dy=-100; expected=workspaces ;;
     esac
-    xdotool mousemove "$x" "$y" mousedown 1 sleep .08 mousemove "$x" "$((y+dy/2))" sleep .08 mousemove "$x" "$((y+dy))" mouseup 1
+    drag=(mousemove "$x" "$y" mousedown 1 sleep .08 mousemove "$x" "$((y+dy/2))" sleep .08 mousemove "$x" "$((y+dy))")
+    if [[ $gesture == recents ]]; then
+        xdotool "${drag[@]}"
+        await_scene workspaces
+        xdotool mouseup 1
+    else
+        xdotool "${drag[@]}" mouseup 1
+    fi
+    if [[ $gesture == home ]]; then
+        for ((i=0; i<60; i++)); do
+            xprop -id "$client" _NET_WM_STATE | grep -q _NET_WM_STATE_HIDDEN && break
+            sleep .1
+        done
+        xprop -id "$client" _NET_WM_STATE | grep -q _NET_WM_STATE_HIDDEN
+        await_scene desktop
+        continue
+    fi
     await_scene "$expected"
     xdotool key --clearmodifiers Escape
     await_scene desktop

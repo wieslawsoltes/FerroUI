@@ -16,7 +16,7 @@ The setting persists as an appearance ID in `$XDG_CONFIG_HOME/ferro-desktop/appe
 
 Pinned and running windows share an app button when the client identifies its installed desktop entry. The shell reads xdg-shell app IDs, Sway client metadata and X11 resource classes. Selecting a pin launches the application if it has no window on this workspace. Selecting a running app activates its window, and repeated clicks cycle its windows. A click on a single active, minimizable Windows taskbar button minimizes it. The macOS Dock marks running apps with a dot, and its menu bar shows the focused application alongside Spotlight, Control Center and the clock.
 
-The Android profile reserves 48 logical pixels for the status strip and 72 for its tablet taskbar. The time opens the calendar, the bell opens notifications and the controls button opens Quick Settings. Swipe up on empty home wallpaper to open all apps, swipe down to open notifications or swipe up from the bottom handle for recent windows. Mouse drags work as well as touch and pen. The app grid and recents buttons provide keyboard-accessible alternatives.
+The Android profile reserves 48 logical pixels for the status strip and 72 for its tablet taskbar. The time opens the calendar, the bell opens notifications and the controls button opens Quick Settings. Swipe up on empty home wallpaper to open all apps, or swipe down to open notifications. Swipe up from the bottom handle and release to show Home, or pause before releasing to open recent windows. Mouse drags work as well as touch and pen. The app grid and recents buttons provide keyboard-accessible alternatives.
 
 ## Materials in the desktop scene
 

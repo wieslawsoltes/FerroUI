@@ -1,5 +1,7 @@
 //! Platform-specific desktop composition; scenes use the same session, catalog and input model.
 mod apps;
+mod gestures;
+pub(super) use gestures::drawer_handle;
 
 use super::appearance::{Appearance, ColorMode, Layout, WinUISettings};
 use super::chrome::*;
@@ -466,50 +468,10 @@ fn dock(state: &Rc<Shell>) -> Element {
         .into()
 }
 
-/// The recognizer owns capture once the swipe passes the threshold. Native
-/// client surfaces and command buttons keep the pointer streams begun on them.
-fn swipe_area(state: &Rc<Shell>, up: Scene, down: Option<Scene>) -> El<Border> {
-    use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
-    let shell = state.clone();
-    let previous = std::cell::Cell::new(None);
-    border()
-        .background("Transparent")
-        .with(|area| {
-            let swipe = SwipeGestureRecognizer::new();
-            swipe.set_can_vertically_swipe(true);
-            swipe.set_is_mouse_enabled(true);
-            swipe.set_threshold(40.0);
-            area.gesture_recognizers().add(swipe);
-        })
-        .on_swipe_gesture(move |event| {
-            if previous.get() == Some(event.id()) {
-                return;
-            }
-            let dy = event.delta().y;
-            // Positive deltas move toward the top edge.
-            let destination = if dy > 0.0 {
-                Some(up)
-            } else if dy < 0.0 {
-                down
-            } else {
-                None
-            };
-            if let Some(destination) = destination {
-                previous.set(Some(event.id()));
-                shell.open(destination);
-                event.set_handled(true);
-            }
-        })
-}
-
 fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
     let (top, bottom) = look().insets();
     grid()
-        .child(swipe_area(
-            state,
-            Scene::Applications,
-            Some(Scene::Notifications),
-        ))
+        .child(gestures::home_wallpaper(state))
         .child(
             stack_panel()
                 .margin((32.0, top + 22.0, 24.0, 0.0))
@@ -638,18 +600,16 @@ fn navigation(state: &Rc<Shell>) -> Element {
                         )),
                 )
                 .child(
-                    swipe_area(state, Scene::Workspaces, None)
-                        .grid_row(1)
-                        .child(
-                            border()
-                                .width(108)
-                                .height(4)
-                                .vertical_alignment(V::Center)
-                                .horizontal_alignment(H::Center)
-                                .corner_radius(2)
-                                .background(colors().bar_ink)
-                                .is_hit_test_visible(false),
-                        ),
+                    gestures::navigation_handle(state).grid_row(1).child(
+                        border()
+                            .width(108)
+                            .height(4)
+                            .vertical_alignment(V::Center)
+                            .horizontal_alignment(H::Center)
+                            .corner_radius(2)
+                            .background(colors().bar_ink)
+                            .is_hit_test_visible(false),
+                    ),
                 ),
         )
         .into()
