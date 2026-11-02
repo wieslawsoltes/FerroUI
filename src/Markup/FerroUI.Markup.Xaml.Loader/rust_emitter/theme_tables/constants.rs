@@ -78,16 +78,18 @@ impl ThemeTables {
     pub fn constant(
         &mut self,
         dictionary: &str,
+        args: &[String],
         prelude: &[String],
         call: &str,
         line: i32,
         column: i32,
     ) -> Option<String> {
-        let args = call.strip_prefix(&format!(
-            "rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast({dictionary}.clone(), {line}, {column})?, rt::string_object("
-        ))?.strip_suffix(&format!(")), {line}, {column})?"))?;
-        let (key, operand) = args.split_once("), rt::to_object(")?;
-        let key = text_literal(key)?;
+        let [receiver, key, value] = args else { return None };
+        if *receiver != format!("&rt::cast({dictionary}.clone(), {line}, {column})?") {
+            return None;
+        }
+        let key = text_literal(key.strip_prefix("rt::string_object(")?.strip_suffix(')')?)?;
+        let operand = value.strip_prefix("rt::to_object(")?.strip_suffix(')')?;
         let constant = Constant::recognize(operand, prelude)?;
         let direct = match prelude {
             [bound] => format!("{}\n{call};", bound.trim_start()),

@@ -2561,13 +2561,19 @@ impl<'a> Emitter<'a> {
         if !setter.emit_source_info {
             let local = value.expr.clone();
             let literal_dictionary = match dictionary.kind {
-                Kind::Class(class) if class.rust_path().is_some_and(|p| p.trim_start_matches("::") == "ferroui_base::controls::ResourceDictionary") => Some(dictionary.expr.clone()),
+                Kind::Class(class) if class.rust_path().is_some_and(|path|
+                    path.trim_start_matches("::") == "ferroui_base::controls::ResourceDictionary"
+                ) => Some(dictionary.expr.clone()),
                 _ => None,
             };
-            let call = self.declared_call(node, &adder, &[dictionary, key, value])?;
-            if let Some(site) = literal_dictionary.as_deref().and_then(|dict| self.theme_tables.constant(
-                dict, &self.lines[value_start..], &call, node.line(), node.position(),
-            )) {
+            let (function, args, fallible) = self.declared_call_parts(node, &adder, &[dictionary, key, value])?;
+            let call = invoked(format!("{function}({})", args.join(", ")), fallible, node);
+            let site = match literal_dictionary {
+                Some(dict) if fallible && function == "<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0" =>
+                    self.theme_tables.constant(&dict, &args, &self.lines[value_start..], &call, node.line(), node.position()),
+                _ => None,
+            };
+            if let Some(site) = site {
                 self.lines.truncate(value_start);
                 self.line(site);
                 return Ok(());
