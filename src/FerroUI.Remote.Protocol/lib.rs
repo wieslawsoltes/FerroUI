@@ -16,6 +16,9 @@
 //!
 //! The library is a leaf, as the upstream project is: it uses nothing of the
 //! framework, so that a tool that only talks the protocol can use it alone.
+//! It uses `ferroui-system`, the port of the parts of the runtime library the
+//! framework shares (the one-shot channel behind [`Task`]), which has no
+//! dependency on the framework either.
 
 pub mod metsys_bson;
 

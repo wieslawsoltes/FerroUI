@@ -24,6 +24,7 @@ testing = []
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-harfbuzz.workspace = true
+ferroui-system.workspace = true
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

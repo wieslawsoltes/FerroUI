@@ -35,12 +35,19 @@
 //! [`Shared`] (from [`JoinHandle::shared`]) is the outcome of a task for several observers, with
 //! synchronous continuations ([`Shared::on_finished`]) that run before the awaiting futures are
 //! woken.
+//!
+//! [`oneshot`] is a value sent once to the code that awaits it (the port of
+//! `TaskCompletionSource`), from any thread; a sender dropped without sending ends the receiver
+//! with [`Canceled`].
 
+mod canceled;
 pub(crate) mod executor;
 mod join;
+pub mod oneshot;
 mod schedule;
 mod shared;
 
+pub use canceled::Canceled;
 pub use executor::{block_on, poll_now, run_pending, set_thread_schedule, spawn_local, spawn_local_on, spawn_on, try_id};
 pub use join::{AbortHandle, Id, JoinError, JoinHandle};
 pub use schedule::{FirstPoll, Schedule};
