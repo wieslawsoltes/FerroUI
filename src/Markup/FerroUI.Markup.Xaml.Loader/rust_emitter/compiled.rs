@@ -443,9 +443,10 @@ fn root_type_name(root: &std::rc::Rc<dyn xamlx::ast::IXamlAstNode>) -> Option<St
 /// Generated lines are counted from 1. The text is deterministic.
 pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     use std::fmt::Write as _;
-    let documents: HashMap<_, _> = functions.iter().map(|(function, name)| {
-        (function.as_str(), (name.as_str(), name.replace(['\r', '\n'], " ")))
-    }).collect();
+    let mut documents = HashMap::with_capacity(functions.len());
+    for (function, name) in functions {
+        documents.entry(function.as_str()).or_insert_with(|| (name.as_str(), name.replace(['\r', '\n'], " ")));
+    }
     let mut document = None;
     let mut map = String::from("{\n  \"entries\": [\n");
     let mut first_entry = true;
