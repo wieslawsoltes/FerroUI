@@ -47,6 +47,47 @@ pub trait IRuntimeXamlLoader {
 pub type CompiledXamlLoader =
     fn(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadError>;
 
+/// A closed, prelinked class document and the complete portable image it was
+/// compiled from. A host explicitly offers this descriptor when installing an
+/// archive. Its loader must execute the revision represented by `bytes`.
+#[derive(Clone, Copy)]
+pub struct CompiledArchiveRoot {
+    pub bytes: &'static [u8],
+    pub uri: &'static str,
+    pub assembly: &'static MarkupAssembly,
+    pub class: &'static TypeInfo,
+    pub create_source_info: bool,
+    pub use_compiled_bindings_by_default: bool,
+    pub load: CompiledXamlLoader,
+}
+
+impl CompiledArchiveRoot {
+    /// Execute a byte-identical revision in its compiled configuration. Return
+    /// `None` when the caller should resolve the supplied portable program.
+    pub fn try_load(
+        &self, bytes: &[u8], uri: &Uri, configuration: &RuntimeXamlLoaderConfiguration,
+        parent: Option<&Rc<dyn IServiceProvider>>,
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
+        if configuration.design_mode || configuration.diagnostic_handler.is_some()
+            || configuration.create_source_info() != self.create_source_info
+            || configuration.use_compiled_bindings_by_default != self.use_compiled_bindings_by_default
+            || !configuration.local_assembly.is_some_and(|assembly| std::ptr::eq(assembly, self.assembly))
+            || !uri.is_absolute_uri()
+            || !Uri::absolute(self.uri).is_ok_and(|expected| expected.absolute_uri() == uri.absolute_uri())
+            || bytes != self.bytes
+            || FerroXamlLoader::populate_override(self.class).is_some()
+        {
+            return Ok(None);
+        }
+        #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
+        if crate::xaml_il::runtime::compiled::binary_resources::reload::capture().is_some() {
+            // The active FXB snapshot can supersede the linked revision.
+            return Ok(None);
+        }
+        (self.load)(parent, self.uri)
+    }
+}
+
 fn compiled_loaders() -> &'static RwLock<HashMap<String, CompiledXamlLoader>> {
     static LOADERS: OnceLock<RwLock<HashMap<String, CompiledXamlLoader>>> = OnceLock::new();
     LOADERS.get_or_init(Default::default)

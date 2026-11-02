@@ -63,6 +63,19 @@ pub fn theme_archive() -> &'static [u8] {
     include_bytes!(concat!(env!("OUT_DIR"), "/winui.fxp"))
 }
 
+/// Offers the installed execution plan to a portable archive loader or style
+/// reload target. A changed revision still goes through ordinary XamlX resolution.
+#[cfg(feature = "precompiled-theme")]
+pub fn compiled_archive_root() -> ferroui_markup_xaml::CompiledArchiveRoot {
+    let mut configuration = ferroui_markup_xaml::RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&ASSEMBLY);
+    ferroui_markup_xaml::CompiledArchiveRoot {
+        bytes: theme_archive(), uri: WinUITheme::DOCUMENT_URI, class: WinUITheme::TYPE,
+        assembly: &ASSEMBLY, create_source_info: configuration.create_source_info(),
+        use_compiled_bindings_by_default: false, load: compiled_xaml::try_load,
+    }
+}
+
 pub use assets::{excluded_documents, ExcludedDocument};
 #[cfg(feature = "designer-sources")]
 pub use designer_sources::designer_documents;

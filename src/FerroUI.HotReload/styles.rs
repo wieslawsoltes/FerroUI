@@ -40,6 +40,8 @@ pub struct StyleReloadTarget {
     uri: String,
     dependencies: Vec<String>,
     configuration: RuntimeXamlLoaderConfiguration,
+    #[cfg(feature = "portable-xaml")]
+    compiled_archive: Option<ferroui_markup_xaml::CompiledArchiveRoot>,
 }
 impl StyleReloadTarget {
     /// Declares resources/styles outside the document's inline includes, such as
@@ -64,6 +66,8 @@ impl StyleReloadTarget {
             uri: crate::document_key(&uri),
             dependencies: Vec::new(),
             configuration,
+            #[cfg(feature = "portable-xaml")]
+            compiled_archive: None,
         })
     }
     /// Replace this mounted contribution with a complete FXD document on the UI thread.
@@ -83,6 +87,14 @@ impl StyleReloadTarget {
             Rc::<dyn IStyle>::from_xaml_object(&candidate).ok_or_else(|| ReloadError::Failed("Expected style".into()))
         })?;
         Ok(())
+    }
+
+    /// Offer the closed AOT program for the installed revision. Exact bytes, URI,
+    /// transform options and absence of applicable overrides are checked on each load.
+    #[cfg(feature = "portable-xaml")]
+    pub fn with_compiled_archive(mut self, root: ferroui_markup_xaml::CompiledArchiveRoot) -> Self {
+        self.compiled_archive = Some(root);
+        self
     }
 
     /// Resolve a complete FXP revision without changing the installed contribution.
@@ -110,7 +122,18 @@ impl StyleReloadTarget {
     /// Validate every archive member and replace the contribution atomically.
     #[cfg(feature = "portable-xaml")]
     pub fn replace_packed(&self, bytes: &[u8]) -> Result<(), ReloadError> {
-        self.slot.replace_if_current(|| false, || self.prepare_packed(bytes)?.build())?;
+        self.slot.replace_if_current(|| false, || {
+            if let Some(root) = self.compiled_archive {
+                let uri = ferroui_base::utilities::Uri::absolute(&self.uri)
+                    .map_err(|error| ReloadError::Failed(error.to_string()))?;
+                if let Some(value) = root.try_load(bytes, &uri, &self.configuration, None)
+                    .map_err(|error| ReloadError::Failed(error.to_string()))? {
+                    return Rc::<dyn IStyle>::from_xaml_object(&value)
+                        .ok_or_else(|| ReloadError::Failed("Expected style".into()));
+                }
+            }
+            self.prepare_packed(bytes)?.build()
+        })?;
         Ok(())
     }
 

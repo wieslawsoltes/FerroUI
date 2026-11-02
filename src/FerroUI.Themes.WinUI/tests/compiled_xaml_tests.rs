@@ -117,6 +117,31 @@ fn packed_theme_contains_every_compiled_document_within_budget() {
     archive.validate().unwrap();
 }
 
+#[cfg(feature = "precompiled-theme")]
+#[test]
+fn compiled_archive_dispatch_requires_the_exact_revision_and_load_configuration() {
+    use ferroui_base::{metadata::from_markup_value, utilities::Uri, Ref};
+    use ferroui_markup_xaml::{RuntimeXamlDiagnosticSeverity, RuntimeXamlLoaderConfiguration};
+
+    let _app = start_application();
+    crate::register_types();
+    let linked = crate::compiled_archive_root();
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&crate::ASSEMBLY);
+    let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();
+    let bytes = crate::theme_archive().to_vec();
+    let theme = linked.try_load(&bytes, &uri, &configuration, None).unwrap().unwrap();
+    assert!(from_markup_value::<Ref<WinUITheme>>(&Some(theme)).is_some());
+
+    let mut changed = bytes.clone();
+    *changed.last_mut().unwrap() ^= 1;
+    assert!(linked.try_load(&changed, &uri, &configuration, None).unwrap().is_none());
+    let fragment = Uri::absolute(&format!("{}#designer", WinUITheme::DOCUMENT_URI)).unwrap();
+    assert!(linked.try_load(&bytes, &fragment, &configuration, None).unwrap().is_none());
+    configuration.diagnostic_handler = Some(std::rc::Rc::new(|_| RuntimeXamlDiagnosticSeverity::Warning));
+    assert!(linked.try_load(&bytes, &uri, &configuration, None).unwrap().is_none());
+}
+
 /// Model and runtime hosts must choose the same rows, factory order, source locations,
 /// reload identifiers and payload bytes even with different host-side type tables.
 #[cfg(all(feature = "binary-resources", any(feature = "precompiled-theme", not(feature = "packed-theme"))))]
