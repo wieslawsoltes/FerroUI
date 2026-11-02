@@ -2,7 +2,30 @@
 
 XamlX resolves types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
-## WinUI release measurements
+## Shared styles, scalar tables and local factory imports
+
+The following comparison starts at PR #496’s previous head, with the first four resource factories already batched. The release consumer resolves Button from WinUI. It uses one Cargo job, rustc 1.99.0, opt-level 3, no cross-crate LTO and no incremental compilation. The full and candidate rooted configurations were rebuilt. For the two prior rooted configurations, the existing release probes and original Cargo timings were retained after verifying their generated Rust and embedded leaves byte for byte against a fresh generation at the starting head. All eight startup medians come from the same 25 interleaved fresh-process launches per mode with a warm page cache.
+
+| Dictionary/backend | Generated Rust B | FXB B | Stripped app B | Theme text B | XAML build script s | WinUI rustc s | Spawn to Button ms |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Prior full native | 9,234,385 | 0 | 69,286,928 | 5,918,159 | 22.50 | 179.89 | 16.281 |
+| Current full native | 7,903,409 | 0 | 68,233,648 | 4,657,569 | 25.22 | 168.68 | 15.518 |
+| Prior full FXB | 8,753,658 | 175,024 | 69,004,736 | 5,938,160 | 23.37 | 171.69 | 15.729 |
+| Current full FXB | 7,289,507 | 236,219 | 67,923,400 | 4,691,965 | 25.34 | 160.16 | 14.910 |
+| Prior Button roots, native | 1,223,669 | 0 | 60,142,304 | 807,470 | 3.47 | 50.95 | 8.553 |
+| Current Button roots, native | 1,007,677 | 0 | 59,983,472 | 596,956 | 4.25 | 51.23 | 7.200 |
+| Prior Button roots, FXB | 1,165,828 | 22,362 | 60,118,328 | 810,131 | 4.24 | 54.23 | 8.063 |
+| Current Button roots, FXB | 933,574 | 31,016 | 59,959,912 | 603,835 | 4.60 | 50.68 | 7.501 |
+
+Full native output lost 1,330,976 bytes of Rust and 1,053,280 bytes from the linked application. The text symbols attributed to the generated module fell 21.3%. The full FXB application lost 1,081,336 bytes while gaining 1,969 wire records. Those records represent 411 deferred builder references, 470 colors, 489 doubles, 565 thicknesses and 34 corner radii. Framework code and data outside the generated module account for most of the linked application. Single-sample Cargo unit times include other work on the host. [Raw measurements and per-launch data](benchmarks/compiled-theme-dedup-linux-x86_64.json)
+
+Both full builds contained a dictionary registration for each of `DefaultButtonStyle` and `DefaultDatePickerStyle`. Both Button-rooted builds retained one Button registration and zero DatePicker registrations. We counted the native builder rows and decoded the key fields of every FXB leaf the compiled module referenced. The stripped executables also contained the literal DatePicker key only in the full builds. Button resolved by type in every launch. The framework’s open-ended reflection registry can still retain the DatePicker type independently of its theme resource.
+
+The build-script numbers in the table precede a later XamlX traversal optimization. Against identical inputs, four reversed-order, standalone build-script runs measured 30.91 s before and 18.35 s after on average (40.6% less wall time). Both the generated Rust and the exported type metadata had identical SHA-256 hashes. [Host measurement and input fingerprints](benchmarks/compiled-theme-host-namespace.json)
+
+On an identical 456-leaf input, alternating 501 in-memory validation, expansion and drop passes per decoder measured 509 µs for the starting decoder and 349 µs for the candidate (median). The current full FXB resource set has 894 leaves and 7,354 records. A complete decode and drop of that larger set took 684 µs median over 101 passes.
+
+## Initial WinUI release measurements
 
 The same consumer constructed WinUI and resolved its first deferred Button theme in each configuration. This Linux x86-64 run used rustc 1.99.0, opt-level 3, one Cargo job, no incremental compilation and no cross-crate LTO. Startup is the median of 21 fresh processes per mode, interleaved with a warm OS page cache. MB uses decimal units.
 
@@ -41,11 +64,15 @@ The build script retains the compact-density dictionary that the WinUI construct
 
 The closed-world pass runs before merged dictionaries expand. It indexes simple keyed entries and explicit type keys, follows references across the group, and keeps every declaration of a live name across scopes and theme variants. A local type name shared by several namespaces conservatively retains them all. It preserves unknown key expressions, unkeyed entries and whole retained templates. It also preserves named objects observable in the outer namescope. Removed spans retain line breaks and UTF-16 columns for XamlX diagnostics. An unknown requested root fails the build when the group can be analyzed. DTD-bearing markup takes the full compilation path so XamlX can apply its own XML rules.
 
-The native emitter recognizes four deferred operations. They create a static resource alias, a literal-color brush, a brush bound to a dynamic color resource, or a brush initialized from a static color resource. A function body needs at least eight eligible additions to use tables. Within it, a change of dictionary, factory or lexical scope ends the current run. Batching preserves insertion order and source positions. A different property, constructor, sharedness, or unrecognized operation takes its original typed path. The binary backend replaces the operands of those same operations with versioned records. The wire format and reload API are described in the [FXB specification](porting/xaml-compiler/fxb.md).
+The compiler recognizes deferred aliases, literal brushes, dynamic-resource brushes and static-resource brushes. It also batches eager colors, doubles, thicknesses and corner radii. Other string-keyed deferred XAML bodies can use run-local references to their typed builders. A singleton imported builder retains its direct call. The caller names exactly the builders in its run. It never enumerates an assembly to resolve an import at run time.
+
+The native configuration leaves small functions with fewer than eight eligible additions on their original typed path. Both representations preserve dictionary insertion order. Changes of dictionary, incompatible operations and executable statements end a run. Source positions travel with the operands. FXB uses versioned records for the supported operations. [FXB specification and reload API](porting/xaml-compiler/fxb.md)
+
+Generated nested styles share linear selector builders and call-site property getter thunks. Each selector application creates a new instance. Property getters execute as each setter is added, preserving the timing of metadata registration. In the full WinUI module, 1,623 calls use 27 selector shapes and 838 style attachments use the shared dynamic-setter loop. Checked template-priority assignments share an out-of-line runtime implementation.
 
 Both backends name the required factory directly. The closed-world pass removes unused theme factories before rustc sees them. WinUI construction also calls the markup and dialogs registration APIs. The controls registration path calls `TypeInfo::register_all(TYPES)`, and runtime casts use registered nullable forms, handles and interface conversions. Those existing registries can retain control and dialog implementations independently of whether a theme factory survives. Applications which use open-ended resource lookup should use the full dictionary.
 
-## Generated Rust in the built-in themes
+## Initial generated Rust in the built-in themes
 
 These counts are bytes of the full native output of the model-host compiler. All five theme crates passed `cargo check`. Each row compares the same theme on both revisions.
 
@@ -57,7 +84,7 @@ These counts are bytes of the full native output of the model-host compiler. All
 | Simple | 3,219,915 | 3,088,372 | 4.1% |
 | Material | 15,910,704 | 10,353,001 | 34.9% |
 
-WinUI folded 3,598 static aliases, 738 literal brushes, 711 dynamic-color brushes and 338 static-color brushes. The remaining 792 deferred factories use direct typed construction. The FXB build of the same dictionary emitted 456 blocks with 5,385 records. Validating, expanding and dropping all 175,024 encoded bytes took 415 µs median and 538 µs at p95 across 101 passes over the Cargo-produced blocks with their bytes resident in memory.
+The initial native implementation folded 3,598 static aliases, 738 literal brushes, 711 dynamic-color brushes and 338 static-color brushes. The remaining 792 deferred factories use direct typed construction. The FXB build of the same dictionary emitted 456 blocks with 5,385 records. Validating, expanding and dropping all 175,024 encoded bytes took 415 µs median and 538 µs at p95 across 101 passes over the Cargo-produced blocks with their bytes resident in memory.
 
 ## Machine code attributable to the full WinUI theme
 
