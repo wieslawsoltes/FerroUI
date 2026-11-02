@@ -66,7 +66,8 @@ mod host {
             },
             Duration::from_millis(250),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
         let _timer = DispatcherTimer::run_once(
             || {
                 println!("SANDBOX FINISHED");
@@ -74,6 +75,7 @@ mod host {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 }

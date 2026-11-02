@@ -42,7 +42,8 @@ async fn delay() {
         },
         Duration::from_millis(3),
         DispatcherPriority::BACKGROUND,
-    );
+    )
+    .detach();
     std::future::poll_fn(move |cx| {
         if ready.get() {
             std::task::Poll::Ready(())

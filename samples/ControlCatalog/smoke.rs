@@ -97,7 +97,8 @@ pub fn show_pages(headers: Vec<String>, interval: Duration, shown: impl Fn(usize
         },
         interval,
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
     *timer.borrow_mut() = Some(subscription);
 }
 
@@ -124,6 +125,7 @@ pub fn show_every_page(interval: Duration) {
         },
         interval,
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
     *timer.borrow_mut() = Some(subscription);
 }

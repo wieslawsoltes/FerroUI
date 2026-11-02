@@ -897,7 +897,7 @@ impl DefaultMenuInteractionHandler {
     }
 
     fn default_delay_run(action: Box<dyn Fn()>, time_span: Duration) {
-        DispatcherTimer::run_once(action, time_span, DispatcherPriority::default());
+        DispatcherTimer::run_once(action, time_span, DispatcherPriority::default()).detach();
     }
 
     fn add_menu_item_to_radio_group(manager: &RadioButtonGroupManager, element: &dyn IMenuElement) {

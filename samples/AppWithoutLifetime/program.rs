@@ -56,6 +56,7 @@ fn smoke_run(main_window: &Ref<MainWindow>) {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 }

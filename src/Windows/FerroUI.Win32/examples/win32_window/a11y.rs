@@ -215,7 +215,12 @@ fn create_main_window() -> Ref<Window> {
         }
         // The client starts once the window was laid out and shown.
         let clicks = clicks.clone();
-        let _timer = DispatcherTimer::run_once(move || start_client(clicks.clone()), Duration::from_millis(500), DispatcherPriority::NORMAL);
+        let _timer = DispatcherTimer::run_once(
+            move || start_client(clicks.clone()),
+            Duration::from_millis(500),
+            DispatcherPriority::NORMAL,
+        )
+        .detach();
     });
     window.closed(|| println!("-- accessibility: the window is closed"));
     window

@@ -31,7 +31,7 @@ struct PreviewEnvironmentInvalidation {
     update_depth: Cell<usize>,
     pending: Cell<bool>,
     queued: Cell<bool>,
-    retry: RefCell<Option<Rc<dyn ferroui_base::reactive::IDisposable>>>,
+    retry: RefCell<Option<ferroui_base::reactive::Subscription>>,
 }
 
 impl PreviewEnvironmentInvalidation {

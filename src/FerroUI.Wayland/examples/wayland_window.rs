@@ -1416,7 +1416,8 @@ mod app {
                 },
                 duration,
                 DispatcherPriority::BACKGROUND,
-            );
+            )
+            .detach();
             std::future::poll_fn(move |cx| {
                 let _keep = &timer;
                 let mut state = state.borrow_mut();
@@ -3443,7 +3444,8 @@ mod app {
                 return;
             }
 
-            let _watchdog = DispatcherTimer::run_once(
+            // The timer lives until the process ends.
+            DispatcherTimer::run_once(
                 move || {
                     if !closed.get() {
                         println!("  [FAILED] close: the window did not close after the compositor asked it to");
@@ -3453,9 +3455,8 @@ mod app {
                 },
                 CLOSE_TIMEOUT,
                 DispatcherPriority::BACKGROUND,
-            );
-            // The timer lives until the process ends.
-            std::mem::forget(_watchdog);
+            )
+            .detach();
         }
     }
 }

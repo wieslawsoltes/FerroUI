@@ -82,7 +82,7 @@ impl<T> Future for Oneshot<T> {
 /// task (`Task.Delay`).
 fn delay(duration: Duration) -> Oneshot<()> {
     let (sender, receiver) = oneshot();
-    DispatcherTimer::run_once(move || sender.send(()), duration, DispatcherPriority::NORMAL);
+    DispatcherTimer::run_once(move || sender.send(()), duration, DispatcherPriority::NORMAL).detach();
     receiver
 }
 

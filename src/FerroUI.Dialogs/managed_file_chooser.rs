@@ -104,7 +104,8 @@ impl StyledElementImpl for ManagedFileChooser {
             },
             Duration::from_millis(100),
             DispatcherPriority::DEFAULT,
-        );
+        )
+        .detach();
     }
 }
 

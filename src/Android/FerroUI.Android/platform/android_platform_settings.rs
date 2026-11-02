@@ -185,7 +185,8 @@ impl AndroidPlatformSettings {
         // The context might still have the old values at this point because they haven't been processed yet.
         // Postpone the update 100ms arbitrarily. Not an ideal solution, but sufficient.
         let settings = self.clone();
-        DispatcherTimer::run_once(move || settings.update(), Duration::from_millis(100), DispatcherPriority::NORMAL);
+        DispatcherTimer::run_once(move || settings.update(), Duration::from_millis(100), DispatcherPriority::NORMAL)
+            .detach();
     }
 
     #[cfg(not(target_os = "android"))]

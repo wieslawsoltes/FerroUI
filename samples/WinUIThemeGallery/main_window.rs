@@ -216,6 +216,7 @@ impl MainWindow {
             },
             Duration::from_millis(100),
             DispatcherPriority::BACKGROUND,
-        );
+        )
+        .detach();
     }
 }

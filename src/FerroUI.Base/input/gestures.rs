@@ -222,7 +222,7 @@ impl Gestures {
                     settings.hold_wait_duration(),
                     DispatcherPriority::default(),
                 );
-                let previous = data.hold_timer.replace(Some(Subscription::new(timer)));
+                let previous = data.hold_timer.replace(Some(timer));
                 if let Some(previous) = previous {
                     previous.dispose();
                 }
