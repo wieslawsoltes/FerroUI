@@ -1,6 +1,7 @@
 //! Platform-specific desktop composition; scenes use the same session, catalog and input model.
 mod apps;
 mod gestures;
+mod mac_menus;
 mod motion;
 pub(super) use gestures::drawer_handle;
 
@@ -307,68 +308,14 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
 }
 
 fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
-    let snapshot = state.snapshot;
-    let catalog = state.catalog.clone();
-    let active_name = memo(move |_| {
-        snapshot.with(|s| {
-            let Some(window) = s.windows.iter().find(|w| w.active) else {
-                return "Desktop".to_owned();
-            };
-            if let Some(index) = catalog.window_index(&window.app_id) {
-                return catalog.applications()[index].name.clone();
-            }
-            window
-                .app_id
-                .rsplit('.')
-                .next()
-                .filter(|s| !s.is_empty())
-                .unwrap_or(&window.title)
-                .to_owned()
-        })
-    });
     let width = state.metrics().width;
     let compact = memo(move |_| width.get() < 680.0);
-    let menu = |scene, title: &'static str| {
-        command(state, scene, title)
-            .is_visible(move || !compact.get())
-            .background("Transparent")
-            .border_thickness(0)
-            .padding((7.0, 0.0))
-            .child(shell_text(title, 12.0, Ink::Primary))
-    };
-
     bar_surface()
         .child(
             grid()
                 .column_definitions("*,Auto")
                 .margin((12.0, 0.0))
-                .child(
-                    row(1.0)
-                        .child(
-                            command(state, Scene::Applications, "Open applications")
-                                .node_ref(state.desktop_focus)
-                                .on_loaded(focus_home(state))
-                                .padding((4.0, 0.0))
-                                .background("Transparent")
-                                .border_thickness(0)
-                                .child(glyph(Icon::Mark, 16.0, colors().bar_ink)),
-                        )
-                        .child(
-                            command(state, Scene::Workspaces, "Active application and windows")
-                                .max_width(move || if compact.get() { 95.0 } else { 160.0 })
-                                .background("Transparent")
-                                .border_thickness(0)
-                                .padding((6.0, 0.0))
-                                .child(
-                                    shell_text("", 13.0, colors().bar_ink)
-                                        .font_weight(FontWeight::Bold)
-                                        .text(move || active_name.get()),
-                                ),
-                        )
-                        .child(menu(Scene::Applications, "Applications"))
-                        .child(menu(Scene::Workspaces, "Window"))
-                        .child(menu(Scene::Appearance, "Appearance")),
-                )
+                .child(mac_menus::bar(state))
                 .child(
                     row(2.0)
                         .grid_column(1)
@@ -416,7 +363,15 @@ fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
 
 fn dock(state: &Rc<Shell>) -> Element {
     let dock_tile = |scene, title: &'static str, icon, fill: &'static str| {
-        command(state, scene, title)
+        let button = command(state, scene, title);
+        let button = if scene == Scene::Applications {
+            button.node_ref(state.desktop_focus).on_loaded(focus_home(state))
+        } else {
+            button
+        };
+        button
+            .tool_tip_tip(title)
+            .tool_tip_placement(ferroui_controls::PlacementMode::Top)
             .width(45.0)
             .height(45.0)
             .padding(7)

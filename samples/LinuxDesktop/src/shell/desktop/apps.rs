@@ -16,6 +16,7 @@ struct Entry {
     app: Option<usize>,
     label: String,
     native_id: String,
+    pinned: bool,
     windows: Vec<Window>,
 }
 
@@ -72,6 +73,7 @@ fn entries(
         .map(|app| Entry {
             app: Some(app),
             native_id: String::new(),
+            pinned: true,
             label: catalog.applications()[app].name.clone(),
             windows: Vec::new(),
         })
@@ -97,6 +99,7 @@ fn entries(
             items.push(Entry {
                 app,
                 native_id: w.app_id.clone(),
+                pinned: false,
                 label: label.to_owned(),
                 windows: Vec::new(),
             });
@@ -124,9 +127,22 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
         pins.with(|pins| model.with(|model| entries(&catalog, pins, model, capacity.get())))
     });
     let buttons = for_each(
-        move || items.get(),
-        Entry::key,
-        move |item| {
+        move || {
+            items.with(|items| {
+                items
+                    .iter()
+                    .enumerate()
+                    .map(|(i, entry)| {
+                        let separator = layout == Layout::MenuBarDock
+                            && !entry.pinned
+                            && (i == 0 || items[i - 1].pinned);
+                        (separator, entry.clone())
+                    })
+                    .collect::<Vec<_>>()
+            })
+        },
+        |(_, entry)| entry.key(),
+        move |(separator, item)| {
             let running = !item.windows.is_empty();
             let active = item.windows.iter().any(|w| w.active);
             let label = match item.windows.len() {
@@ -158,7 +174,8 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
                 Layout::MenuBarDock => (4, 4),
                 _ => (6, 3),
             };
-            action(&label, move || item.invoke(&state, layout))
+            let dock_menu = (layout == Layout::MenuBarDock).then(|| dock_menu(&shell, &item));
+            let button = action(&label, move || item.invoke(&state, layout))
                 .width(width)
                 .min_width(width)
                 .height(if layout == Layout::Taskbar { 40 } else { 48 })
@@ -188,23 +205,106 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
                                 colors().muted
                             }),
                     ),
-                )
+                );
+            if let Some(menu) = dock_menu {
+                let button = button
+                    .tool_tip_placement(ferroui_controls::PlacementMode::Top)
+                    .with(move |b| b.set_context_menu(Some(menu.clone())));
+                if separator {
+                    row(7.0)
+                        .child(border().width(1).height(31).background(colors().bar_edge))
+                        .child(button)
+                        .into_element()
+                } else {
+                    button.into_element()
+                }
+            } else {
+                button.into_element()
+            }
         },
     );
-    if layout == Layout::MenuBarDock {
-        row(7.0)
-            .child(
-                border()
-                    .width(1)
-                    .height(31)
-                    .background(colors().bar_edge)
-                    .is_visible(move || items.with(|items| !items.is_empty())),
-            )
-            .child(buttons)
-            .into()
-    } else {
-        buttons
+    buttons
+}
+
+fn dock_menu(shell: &Rc<Shell>, entry: &Entry) -> ferroui_base::Ref<ferroui_controls::ContextMenu> {
+    use ferroui_controls::{
+        ContextMenu, Control, MenuItem, MenuItemToggleType, PlacementMode, Separator,
+    };
+
+    fn item(label: &str, invoke: impl Fn() + 'static) -> ferroui_base::Ref<MenuItem> {
+        let item = MenuItem::new();
+        item.set_header(Some(Rc::new(label.to_owned())));
+        item.add_handler(MenuItem::click_event(), move |_, _| invoke());
+        item
     }
+
+    let menu = ContextMenu::new();
+    menu.set_placement(PlacementMode::Top);
+    let app = entry.app;
+    let native_id = entry.native_id.clone();
+    let window_id = entry.windows.first().map(|w| w.id);
+    let shell = Rc::downgrade(shell);
+    let weak = menu.downgrade();
+    let opening = menu.opening(move |_| {
+        let (Some(menu), Some(shell)) = (weak.upgrade(), shell.upgrade()) else {
+            return;
+        };
+        let items = menu.items();
+        items.clear();
+        let windows = shell.snapshot.with_untracked(|s| {
+            s.windows
+                .iter()
+                .filter(|w| w.workspace.is_none_or(|i| i == s.current_workspace))
+                .filter(|w| match app {
+                    Some(id) => shell.catalog.window_index(&w.app_id) == Some(id),
+                    None if !native_id.is_empty() => w.app_id == native_id,
+                    None => Some(w.id) == window_id,
+                })
+                .cloned()
+                .collect::<Vec<_>>()
+        });
+        for w in &windows {
+            let id = w.id;
+            let session = shell.session.clone();
+            let title = if w.title.is_empty() {
+                "Untitled Window"
+            } else {
+                w.title.as_str()
+            };
+            let action = item(title, move || {
+                if let Some(s) = &session {
+                    s.activate(id);
+                }
+            });
+            action.set_toggle_type(MenuItemToggleType::Radio);
+            action.set_is_checked(w.active);
+            items.add(Some(Control::boxed(action)));
+        }
+        if let Some(index) = app {
+            if !windows.is_empty() {
+                items.add(Some(Control::boxed(Separator::new())));
+            } else {
+                let state = shell.clone();
+                items.add(Some(Control::boxed(item("Open", move || {
+                    state.launch(&state.catalog.applications()[index])
+                }))));
+            }
+            let state = shell.clone();
+            let pin = item("Keep in Dock", move || {
+                super::super::launcher::toggle_pin(&state, index)
+            });
+            pin.set_toggle_type(MenuItemToggleType::CheckBox);
+            pin.set_is_checked(
+                shell
+                    .favorites
+                    .with_untracked(|ids| ids.contains(&shell.catalog.applications()[index].id)),
+            );
+            pin.set_is_enabled(!shell.pin_editing.get_untracked());
+            items.add(Some(Control::boxed(pin)));
+        }
+    });
+    on_cleanup(move || drop(opening));
+    menu
 }
 
 #[cfg(test)]

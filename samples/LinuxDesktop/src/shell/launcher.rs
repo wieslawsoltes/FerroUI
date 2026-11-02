@@ -495,7 +495,7 @@ fn mutate_pin(shell: &Rc<Shell>, index: usize, edit: Edit) {
     });
 }
 
-fn toggle_pin(shell: &Rc<Shell>, index: usize) {
+pub(super) fn toggle_pin(shell: &Rc<Shell>, index: usize) {
     let id = &shell.catalog.applications()[index].id;
     let pinned = shell.favorites.with_untracked(|pins| pins.contains(id));
     mutate_pin(shell, index, if pinned { Edit::Unpin } else { Edit::Pin });
