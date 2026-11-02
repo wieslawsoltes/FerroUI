@@ -861,6 +861,14 @@ pub fn generate_class_file_with_binary_resources(
             if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
                 functions.insert_value(build, &function_name, root_class);
                 has_build[index] = true;
+                if binary.is_some() && !crate::back_end::may_include(&document.1)
+                    && root_type_name(&transformed.root).as_deref() == Some("FerroUI.Controls.ResourceDictionary")
+                {
+                    let inlined = transformed.configuration.get_extra::<crate::compiler_extensions::group_transformers::InlinedDocuments>();
+                    if let Some(uri) = transformed.base_uri.as_ref().filter(|uri| inlined.is_ok_and(|set| !set.0.borrow().contains(*uri))) {
+                        functions.editable_dictionaries.insert(function_name.clone(), (document.0.clone(), uri.clone()));
+                    }
+                }
             }
         }
         names.push(function_name);
@@ -894,16 +902,6 @@ pub fn generate_class_file_with_binary_resources(
             }
         };
         let populate = (index == 0).then_some(class);
-        if index != 0 && binary.is_some() && !crate::back_end::may_include(&document.1)
-            && root_type_name(&transformed.root).as_deref() == Some("FerroUI.Controls.ResourceDictionary")
-        {
-            if let Some(uri) = &transformed.base_uri {
-                let inlined = transformed.configuration.get_extra::<crate::compiler_extensions::group_transformers::InlinedDocuments>();
-                if inlined.is_ok_and(|set| !set.0.borrow().contains(uri)) {
-                    functions.editable_dictionaries.insert(function_name.clone(), (document.0.clone(), uri.clone()));
-                }
-            }
-        }
         let _ = types.take_unanswered();
         match emit_function(
             types,
@@ -989,8 +987,10 @@ pub fn generate_class_file_with_binary_resources(
     if let Some(binary) = binary {
         binary.declare_manifest(&mut source);
         source.push_str("\n/// Complete native call boundaries for isolated resource dictionaries.\npub const ARCHIVE_DICTIONARIES: &[(&str, &str)] = &[\n");
-        for (path, uri) in functions.editable_dictionaries.values() {
-            source.push_str(&format!("    ({}, {}),\n", super::rust_string_literal(path), super::rust_string_literal(uri)));
+        for (index, name) in names.iter().enumerate() {
+            if let Some((path, uri)) = functions.editable_dictionaries.get(name).filter(|_| scheduled[index]) {
+                source.push_str(&format!("    ({}, {}),\n", rust_string_literal(path), rust_string_literal(uri)));
+            }
         }
         source.push_str("];\n");
     }

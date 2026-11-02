@@ -117,3 +117,18 @@ pub fn with_revision<R>(
 ) -> R {
     run()
 }
+
+
+/// Only compiler-linked calls within the group consult the active revision.
+/// Direct calls to a public document builder retain their ordinary semantics.
+#[inline]
+pub fn build_dictionary(
+    uri: &str,
+    provider: Option<Provider>,
+    native: fn(Option<Provider>) -> Result<Ref<ResourceDictionary>, XamlLoadError>,
+) -> Result<Ref<ResourceDictionary>, XamlLoadError> {
+    match dictionary(uri, provider.as_ref()) {
+        Some(edited) => edited,
+        None => native(provider),
+    }
+}

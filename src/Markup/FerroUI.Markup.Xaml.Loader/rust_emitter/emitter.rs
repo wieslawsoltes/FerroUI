@@ -3575,7 +3575,11 @@ impl<'a> Emitter<'a> {
                 .coerce(&service_provider, self.types.known(Known::OptionServiceProvider))
                 .ok_or_else(|| unsupported(node, "the service provider of a build method that is not one"))?;
             let handle = handle.ok_or_else(|| unsupported(node, "the root of the document has no handle"))?;
-            return Ok((format!("{function}({service_provider})?"), Some(handle)));
+            let call = match self.documents.editable_dictionaries.get(&function) {
+                Some((_, uri)) => format!("::ferroui_markup_xaml::archive_includes::build_dictionary({}, {service_provider}, {function})?", rust_string_literal(uri)),
+                None => format!("{function}({service_provider})?"),
+            };
+            return Ok((call, Some(handle)));
         }
         if let Some(compiled) = method.as_any().downcast_ref::<CompiledDocumentBuildMethod>() {
             // `Build:<path>(serviceProvider)` of a compiled document of another crate: its
@@ -4282,9 +4286,6 @@ pub fn emit_function<'a>(
         None => source.push_str(&format!(
             ") -> ::core::result::Result<{root_type}, ::ferroui_markup_xaml::XamlLoadError> {{\n"
         )),
-    }
-    if let Some((_, uri)) = documents.editable_dictionaries.get(function_name) {
-        source.push_str(&format!("    if let ::core::option::Option::Some(value) = ::ferroui_markup_xaml::archive_includes::dictionary({}, service_provider.as_ref()) {{ return value; }}\n", rust_string_literal(uri)));
     }
     let mut local_types = std::mem::take(&mut emitter.local_types);
     local_types.insert("context".to_string(), "::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>".to_string());
