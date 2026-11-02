@@ -447,7 +447,7 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     for (function, name) in functions {
         documents.entry(function.as_str()).or_insert_with(|| (name.as_str(), name.replace(['\r', '\n'], " ")));
     }
-    let mut table_document: Option<&str> = None;
+    let mut table_document: Option<(&str, bool)> = None;
     let mut document = None;
     let mut map = String::from("{\n  \"entries\": [\n");
     let mut first_entry = true;
@@ -463,20 +463,30 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     };
     for (index, text) in source.lines().enumerate() {
         let number = index + 1;
-        if let Some(current) = table_document {
+        if let Some((current, value_position)) = table_document {
             if text == "];" {
                 table_document = None;
-            } else if let Some((line, column)) = native_row_position(text) {
+            } else if let Some((line, column)) = native_row_position(text, value_position) {
                 close(&mut Some((number, line, column)), current, number);
             }
             continue;
         }
-        if let Some((name, _)) = text.strip_prefix("static ").and_then(|s| s.split_once(": &[rt::theme_resources::Row<")) {
-            if let Some((function, _)) = name.rsplit_once("_THEME_ROWS_") {
-                // The emitter creates these symbols from its lowercase function identifier.
-                table_document = documents.get(function.to_ascii_lowercase().as_str()).map(|(doc, _)| *doc);
+        if let Some((name, row_type)) = text.strip_prefix("static ").and_then(|s| s.split_once(": &[rt::theme_resources::")) {
+            // Intrinsic factories carry two positions; immediate values and imported
+            // factories carry their declaration only. The binary import vector has no rows.
+            let table = if row_type.starts_with("Row<") {
+                name.rsplit_once("_THEME_ROWS_").map(|(function, _)| (function, true))
+            } else if row_type.starts_with("ConstantRow<") {
+                name.rsplit_once("_THEME_CONSTANTS_").map(|(function, _)| (function, false))
+            } else if row_type.starts_with("FactoryRow]") {
+                name.rsplit_once("_THEME_FACTORIES_").map(|(function, _)| (function, false))
+            } else {
+                None
+            };
+            if let Some((function, value_position)) = table {
+                table_document = documents.get(function.to_ascii_lowercase().as_str()).map(|(doc, _)| (*doc, value_position));
+                continue;
             }
-            continue;
         }
         let build = text.strip_prefix("pub fn ").or_else(|| text.strip_prefix("pub(crate) fn "))
             .and_then(|rest| rest.split_once('(')).map(|(name, _)| name);
@@ -517,11 +527,13 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
 
 // Rows end in the declaration line/column followed by the evaluation line/column.
 // Read from the right so a quoted operand may itself contain commas or escaped quotes.
-fn native_row_position(text: &str) -> Option<(i32, i32)> {
+fn native_row_position(text: &str, value_position: bool) -> Option<(i32, i32)> {
     let tuple = text.trim_start().strip_prefix('(')?.strip_suffix("),")?;
     let mut tail = tuple.rsplitn(5, ", ");
-    let _value_column = tail.next()?.parse::<i32>().ok()?;
-    let _value_line = tail.next()?.parse::<i32>().ok()?;
+    if value_position {
+        tail.next()?.parse::<i32>().ok()?;
+        tail.next()?.parse::<i32>().ok()?;
+    }
     let column = tail.next()?.parse().ok()?;
     let line = tail.next()?.parse().ok()?;
     Some((line, column))
@@ -1072,9 +1084,17 @@ pub fn build_foo_xaml() {
     // foo.xaml(41,2) Content (resource)
     call();
 }
+static BUILD_FOO_XAML_THEME_CONSTANTS_3: &[rt::theme_resources::ConstantRow<[u64; 4]>] = &[
+    ("a, 1", [0, 1, 2, 3], 59, 31),
+];
+static BUILD_FOO_XAML_THEME_FACTORIES_4: &[rt::theme_resources::FactoryRow] = &[
+    ("x, 2", closure, 99, 32),
+];
 "#;
         let map = super::position_map(source, &[("build_foo_xaml".into(), "foo.xaml".into())]);
-        assert_eq!(map.matches("\"file_lines\"").count(), 3);
+        assert_eq!(map.matches("\"file_lines\"").count(), 5);
+        assert!(map.contains(r#""file_lines": [11, 11], "document": "foo.xaml", "line": 59, "position": 31"#));
+        assert!(map.contains(r#""file_lines": [14, 14], "document": "foo.xaml", "line": 99, "position": 32"#));
         assert!(map.contains(r#""file_lines": [2, 2], "document": "foo.xaml", "line": 17, "position": 3"#));
         assert!(map.contains(r#""file_lines": [3, 3], "document": "foo.xaml", "line": 22, "position": 7"#));
         assert!(map.contains(r#""file_lines": [7, 8], "document": "foo.xaml", "line": 41, "position": 2"#));
