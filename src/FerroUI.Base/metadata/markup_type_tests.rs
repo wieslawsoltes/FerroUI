@@ -383,6 +383,50 @@ fn flags_enumerations_list_their_bits() {
     assert_eq!((bubble.get)().downcast_ref::<MetaRoutes>(), Some(&MetaRoutes::BUBBLE));
 }
 
+// A declaration marker is not the native value represented by its metadata.
+mod represented_nullable_value {
+    use super::*;
+
+    #[derive(Clone, PartialEq)]
+    struct NativeValue(i32);
+    struct ExplicitMarker;
+    struct HandleMarker;
+    struct PrecedenceMarker;
+
+    ferro_markup_type!(struct NativeValue { namespace: "Tests.NullableValue" });
+    ferro_markup_type!(struct ExplicitMarker {
+        namespace: "Tests.NullableExplicit",
+        this: NativeValue,
+    });
+    ferro_markup_type!(struct HandleMarker {
+        namespace: "Tests.NullableHandle",
+        handles: [NativeValue, Option<NativeValue>],
+    });
+    ferro_markup_type!(struct PrecedenceMarker {
+        namespace: "Tests.NullablePrecedence",
+        handles: [i32],
+        this: NativeValue,
+    });
+
+    #[test]
+    fn nullable_matches_the_selected_native_value() {
+        for markup in [NativeValue::MARKUP, ExplicitMarker::MARKUP, HandleMarker::MARKUP, PrecedenceMarker::MARKUP] {
+            assert_eq!((markup.nullable.unwrap())(), ValueType::of::<Option<NativeValue>>(), "{}", markup.name);
+            crate::__ferro_compiler_metadata! {
+                assert_eq!((markup.value.unwrap())(), ValueType::of::<NativeValue>());
+            }
+        }
+    }
+
+    #[test]
+    fn registration_finds_the_optional_native_value_not_the_marker() {
+        MarkupType::register(ExplicitMarker::MARKUP);
+        let found = MarkupType::find_by_nullable_handle(std::any::TypeId::of::<Option<NativeValue>>()).unwrap();
+        assert!(std::ptr::eq(found, ExplicitMarker::MARKUP));
+        assert!(MarkupType::find_by_nullable_handle(std::any::TypeId::of::<Option<ExplicitMarker>>()).is_none());
+    }
+}
+
 // Registration.
 
 #[test]

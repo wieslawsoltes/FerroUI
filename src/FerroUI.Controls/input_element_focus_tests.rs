@@ -1312,3 +1312,29 @@ fn focus_should_not_be_restored_to_detached_control() {
     assert!(keyboard_focused_element().is_none());
     assert!(window.focus_manager().get_focused_element().is_none());
 }
+
+#[test]
+fn pointer_focus_policy_preserves_explicit_focus_and_inherits_to_new_children() {
+    let _app = UnitTestApplication::start(real_focus());
+    let editor = button("editor");
+    let parent = StackPanel::new();
+    parent.set_allow_focus_on_interaction(false);
+    let child = button("new child");
+    parent.children().add(child.clone());
+    let root_panel = stack_panel(&[&editor, &parent]);
+    let _root = TestRoot::with_child(root_panel);
+    assert!(editor.focus());
+    assert!(!child.focus_with(NavigationMethod::Pointer, KeyModifiers::NONE));
+    assert_eq!(keyboard_focused_element(), Some(editor.clone().upcast()));
+    assert!(child.focus(), "explicit focus stays available");
+    assert!(editor.focus());
+    child.set_allow_focus_on_interaction(true);
+    assert!(child.focus_with(NavigationMethod::Pointer, KeyModifiers::NONE));
+    child.clear_value(InputElement::allow_focus_on_interaction_property());
+    assert!(!child.allow_focus_on_interaction());
+    assert!(editor.focus());
+    // The lower-level keyboard entry point follows the same policy.
+    KeyboardDevice::instance().unwrap().set_focused_element(
+        Some(&child.clone().upcast()), NavigationMethod::Pointer, KeyModifiers::NONE);
+    assert_eq!(keyboard_focused_element(), Some(editor.upcast()));
+}
