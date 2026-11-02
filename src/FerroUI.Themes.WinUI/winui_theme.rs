@@ -101,8 +101,12 @@ impl WinUITheme {
         HIGH_CONTRAST.with(Clone::clone)
     }
 
-    /// Field initialisation; see [`Styles::construct`].
+    /// Field initialisation; see [`Styles::construct`]. Registers the
+    /// acrylic of the theme for the prewarm of the GPU programs, made after
+    /// the first frame of a window rather than when a pane, a flyout or a
+    /// menu first shows the material (#437).
     pub fn construct() -> Self {
+        ferroui_base::media::AcrylicBrush::register_effect_prewarm();
         Self { base: Styles::construct(), compact_styles: OnceCell::new(), density_style: Cell::new(DensityStyle::Normal) }
     }
 

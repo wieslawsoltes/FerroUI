@@ -139,6 +139,21 @@ pub trait IRenderTarget {
         PlatformRenderTargetState::READY
     }
 
+    /// Makes the GPU programs of what `paint` draws before a frame needs
+    /// them (#437; `effects::register_effect_prewarm`): `paint` draws, once,
+    /// with a drawing context of the kind the frames of the target draw
+    /// with, onto an offscreen surface of `scene_info.size` pixels of the
+    /// kind the frames draw the scene onto, which is never shown. Returns
+    /// whether the target prewarmed; `paint` is not called otherwise.
+    ///
+    /// The compositor calls it between two frames. The default does
+    /// nothing: a target that draws with the processor, or whose GPU
+    /// programs are made up front, has nothing to prewarm.
+    fn prewarm(&self, scene_info: &RenderTargetSceneInfo, paint: &mut dyn FnMut(&mut dyn IDrawingContextImpl)) -> bool {
+        let _ = (scene_info, paint);
+        false
+    }
+
     /// Releases the render target.
     fn dispose(&self);
 }
