@@ -63,16 +63,39 @@ def make_archives(source, run, packer):
     return outputs
 
 
+def prepare_training_sources(source, pkg, original):
+    property_report = source / "docs/benchmarks/compiled-theme-binding-dispatch-linux-x86_64.json"
+    prop = json.loads(property_report.read_text())["property"]["property_workload_source"]
+    if prop.count("fn main(){") != 1:
+        raise ValueError("unexpected property benchmark entry point")
+    (pkg / "property_work.rs").write_text(prop.replace("fn main(){", "pub fn run(){", 1))
+    shutil.copyfile(HERE / "pgo_templates.rs", pkg / "template_work.rs")
+    if original.count("fn main() {") != 1:
+        raise ValueError("unexpected benchmark entry point")
+    entry = """mod property_work;
+mod template_work;
+fn main() {
+    match std::env::var("FERROUI_PGO_TRAIN").as_deref() {
+        Ok("property") => return property_work::run(),
+        Ok("templates") => return template_work::run(),
+        _ => {}
+    }"""
+    (pkg / "main.rs").write_text(original.replace("fn main() {", entry))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--consumer", type=Path, required=True)
     parser.add_argument("--source", type=Path, default=Path.cwd(), help="repository root (default: current directory)")
     parser.add_argument("--work-dir", type=Path, required=True)
     parser.add_argument("--llvm-profdata", type=Path)
+    parser.add_argument("--use-profile", type=Path, help="apply an existing merged LLVM profile for a fixed-input comparison")
     parser.add_argument("--use-opt-level", choices=("s", "z"), action="append",
                         help="target optimization for the profile-use build (default: s); repeat to compare both")
     parser.add_argument("--packer", type=Path, help="reuse a ferroui-fxd built from this source")
     args = parser.parse_args()
+    if args.use_profile and not args.use_profile.is_file():
+        parser.error(f"missing merged LLVM profile: {args.use_profile}")
     source = args.source.resolve()
     rustc = dict(line.split(": ", 1) for line in subprocess.check_output(
         ["rustc", "-vV"], text=True).splitlines() if ": " in line)
@@ -133,26 +156,7 @@ def main():
                        env={**env, "CARGO_ENCODED_RUSTFLAGS": encoded})
         return target / host / "release" / PROBE
 
-    property_report = source / "docs/benchmarks/compiled-theme-binding-dispatch-linux-x86_64.json"
-    prop = json.loads(property_report.read_text())["property"]["property_workload_source"]
-    if prop.count("fn main(){") != 1:
-        raise ValueError("unexpected property benchmark entry point")
-    (pkg / "property_work.rs").write_text(prop.replace("fn main(){", "pub fn run(){", 1))
-    shutil.copyfile(HERE / "pgo_templates.rs", pkg / "template_work.rs")
-    if original.count("fn main() {") != 1:
-        raise ValueError("unexpected benchmark entry point")
-    entry = """mod property_work;
-mod template_work;
-fn main() {
-    match std::env::var("FERROUI_PGO_TRAIN").as_deref() {
-        Ok("property") => return property_work::run(),
-        Ok("templates") => return template_work::run(),
-        _ => {}
-    }"""
-    (pkg / "main.rs").write_text(original.replace("fn main() {", entry))
-    binary = build(f"-Cprofile-generate={raw}", [])
-
-    def exercise(lane, *arguments, expected=None):
+    def exercise(binary, lane, *arguments, expected=None):
         settings = {**env, "FERROUI_PGO_TRAIN": lane, "LLVM_PROFILE_FILE": str(raw / f"{lane}-%m-%p.profraw")}
         if expected:
             normal, compact = expected
@@ -160,18 +164,23 @@ fn main() {
             settings["FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE"] = str(compact)
         subprocess.run([binary, *arguments], check=True, env=settings)
 
-    for round_index in range(3):
-        exercise("startup")
-        exercise("templates")
-        exercise("property", str(round_index))
-        exercise("edit", scalar, expected=(14, 17))
-    exercise("structure", structure, expected=(19, 17))
     merged = run / "combined.profdata"
-    # Keep zero-count records: absence and proven cold execution are different optimizer inputs.
-    for lane in ("startup", "templates", "property", "edit", "structure"):
-        if not any(f.stat().st_size for f in raw.glob(f"{lane}-*.profraw")):
-            raise RuntimeError(f"No raw profile from {lane}")
-    subprocess.run([profdata, "merge", *sorted(raw.glob("*.profraw")), "-o", merged], env=tool_env, check=True)
+    if args.use_profile:
+        shutil.copyfile(args.use_profile, merged)
+    else:
+        prepare_training_sources(source, pkg, original)
+        binary = build(f"-Cprofile-generate={raw}", [])
+        for round_index in range(3):
+            exercise(binary, "startup")
+            exercise(binary, "templates")
+            exercise(binary, "property", str(round_index))
+            exercise(binary, "edit", scalar, expected=(14, 17))
+        exercise(binary, "structure", structure, expected=(19, 17))
+        # Keep zero-count records: absence and proven cold execution are different optimizer inputs.
+        for lane in ("startup", "templates", "property", "edit", "structure"):
+            if not any(f.stat().st_size for f in raw.glob(f"{lane}-*.profraw")):
+                raise RuntimeError(f"No raw profile from {lane}")
+        subprocess.run([profdata, "merge", *sorted(raw.glob("*.profraw")), "-o", merged], env=tool_env, check=True)
     with merged.open("rb") as stream:
         profile = run / (hashlib.file_digest(stream, "sha256").hexdigest() + ".profdata")
     merged.rename(profile)
@@ -185,9 +194,9 @@ fn main() {
     results = {}
     for level in dict.fromkeys(args.use_opt_level or ["s"]):
         binary = build(f"-Cprofile-use={profile}", ["-Clto=fat", "-Ccodegen-units=1"], target_opt=level)
-        exercise("shipping")
-        exercise("shipping-edit", scalar, expected=(14, 17))
-        exercise("shipping-structure", structure, expected=(19, 17))
+        exercise(binary, "shipping")
+        exercise(binary, "shipping-edit", scalar, expected=(14, 17))
+        exercise(binary, "shipping-structure", structure, expected=(19, 17))
         image = run / f"ProfiledWinUI-{level}"
         shutil.copy2(binary, image)
         with image.open("rb") as stream:
