@@ -60,7 +60,12 @@ fn effect_text(effect: &dyn IEffect) -> String {
     } else if let Some(shadow) = effect.as_drop_shadow_effect() {
         format!("drop-shadow({} {} {})", shadow.offset_x(), shadow.offset_y(), shadow.blur_radius())
     } else if let Some(custom) = effect.as_custom_effect() {
-        custom.to_string()
+        // A runtime shader effect (#455, E4) is marked as one.
+        if custom.has_shader() {
+            format!("shader {custom}")
+        } else {
+            custom.to_string()
+        }
     } else {
         "effect".to_string()
     }
@@ -85,7 +90,8 @@ pub struct MockDrawingContextImpl {
     /// Whether explicit isolated group pushes are accepted. Off by default.
     pub supports_compositing_layers: bool,
     /// Whether pushed effects are recorded with the effect
-    /// (`PushEffect <clip> blur(<radius>)`). Off by default.
+    /// (`PushEffect <clip> blur(<radius>)`; a custom effect by its effect
+    /// string, after `shader ` for a runtime shader effect). Off by default.
     pub log_effects: bool,
     /// Whether the context reports acrylic support
     /// (`DrawRectangleWithMaterial <tint> <rect>`). Off by default.

@@ -1,10 +1,14 @@
 //! Bitmap effects applied to visuals and drawings: the built-in blur and
-//! drop shadow, and custom effects (#455, docs/porting/custom-effects.md).
+//! drop shadow, and custom effects (#455, docs/porting/custom-effects.md):
+//! effect graphs and runtime shaders.
 
 mod blur_effect;
 mod custom_effect;
 pub(crate) mod custom_effect_graph;
 mod custom_effect_registry;
+mod custom_effect_shader;
+#[cfg(test)]
+mod custom_effect_shader_tests;
 #[cfg(test)]
 mod custom_effect_tests;
 mod drop_shadow_effect;
@@ -23,6 +27,10 @@ pub use custom_effect::{
     CustomEffect, CustomEffectClass, EffectParameterValue, ImmutableCustomEffect, CUSTOM_EFFECT_CONTENT,
 };
 pub use custom_effect_registry::{CustomEffectRegistrationError, CustomEffectRegistry};
+pub use custom_effect_shader::{
+    shader_uniform_name, shader_uniform_name_matches, ShaderEffectDescription, ShaderEffectMode, ShaderEffectPadding,
+    ShaderUniformType, ShaderUniformValue, SHADER_LAYER_SCALE, SHADER_LAYER_SIZE,
+};
 pub use drop_shadow_effect::{DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase};
 pub use effect::Effect;
 pub use effect_extensions::EffectExtensions;

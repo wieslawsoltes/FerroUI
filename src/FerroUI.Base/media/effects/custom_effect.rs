@@ -14,12 +14,19 @@
 //! An effect whose type describes itself as an effect graph
 //! ([`CustomEffect::graph`], step E2) is drawn by the render walk as that
 //! graph around the content of its visual, with the shared painter of the
-//! composition effects, on every backend. What a backend draws for another
-//! custom effect is the business of that backend's factory for the effect
-//! (steps E4 and later of the plan). A backend without one draws the content
-//! unchanged and reports it once ([`ImmutableCustomEffect::report_unhandled`]).
+//! composition effects, on every backend. An effect whose type describes
+//! itself as a runtime shader ([`CustomEffect::shader`], step E4) is drawn by
+//! each backend with its program around the content (Skia from E4 on, Vello
+//! from E5 on). What a backend draws for another custom effect is the
+//! business of that backend's factory for the effect. A backend without one
+//! draws the content unchanged and reports it once
+//! ([`ImmutableCustomEffect::report_unhandled`]).
 
 use super::custom_effect_graph::{load_custom_effect_graph, CustomEffectGraph};
+use super::custom_effect_shader::{
+    load_custom_effect_shader, visit_shader_uniforms, ShaderEffectDescription, ShaderEffectPadding, ShaderUniformType,
+    ShaderUniformValue,
+};
 use super::{IEffect, IImmutableEffect};
 use crate::animation::animators::{ColorAnimator, DoubleAnimator};
 use crate::logging::{LogEventLevel, Logger};
@@ -478,6 +485,29 @@ pub trait CustomEffect: Clone + PartialEq + Default + fmt::Debug + Send + Sync +
         let _ = (pixels, width, height, scale);
         false
     }
+
+    /// The effect as a runtime shader (#455, E4, decision 4 of the plan): an
+    /// SkSL program for Skia and a WGSL program for Vello, with the uniform
+    /// convention of [`ShaderEffectDescription`] (the size and the scale of
+    /// the layer, then the parameters in the order of
+    /// [`for_each_parameter`](Self::for_each_parameter)), and whether the
+    /// program samples the content or is an overlay. `None` (the default) for
+    /// an effect without a shader.
+    ///
+    /// The description is read once per type, like the
+    /// [`graph`](Self::graph); a frame only sets the uniforms from the
+    /// parameters of the snapshot. A program that does not compile, or whose
+    /// uniforms are not those of the convention, is reported once by the
+    /// backend, which then draws the content unchanged.
+    ///
+    /// **Precedence.** A type with both a graph and a shader is drawn as its
+    /// graph: the shader is not read (and the type is drawn as an effect
+    /// without a graph when the graph does not load). Every backend draws a
+    /// graph; a shader needs a backend that runs programs (Skia from E4 on,
+    /// Vello from E5 on).
+    fn shader() -> Option<ShaderEffectDescription> {
+        None
+    }
 }
 
 /// The type-erased form of a [`CustomEffect`], what an
@@ -496,6 +526,7 @@ pub(crate) trait AnyCustomEffect: fmt::Debug + Send + Sync + 'static {
     fn graph_of_type(&self) -> Option<Result<Arc<CustomEffectGraph>, CompositionEffectFactoryError>>;
     fn visit_graph_values(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue));
     fn value_cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool;
+    fn shader_of_type(&self) -> Option<Arc<ShaderEffectDescription>>;
 }
 
 impl<T: CustomEffect> AnyCustomEffect for T {
@@ -538,6 +569,10 @@ impl<T: CustomEffect> AnyCustomEffect for T {
 
     fn value_cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool {
         CustomEffect::cpu_reference(self, pixels, width, height, scale)
+    }
+
+    fn shader_of_type(&self) -> Option<Arc<ShaderEffectDescription>> {
+        load_custom_effect_shader::<T>()
     }
 }
 
@@ -584,11 +619,22 @@ impl ImmutableCustomEffect {
 
     /// How far the output of the effect extends beyond the bounds of its
     /// content ([`CustomEffect::padding`]): each side at least zero, a value
-    /// that is not finite read as zero.
+    /// that is not finite read as zero. A shader effect whose padding is
+    /// [`ShaderEffectPadding::SampleRadius`] adds its sample radius to each
+    /// side.
     pub fn padding(&self) -> Thickness {
         let side = |value: f64| if value.is_finite() { value.max(0.0) } else { 0.0 };
         let padding = self.value.value_padding();
-        Thickness::new(side(padding.left), side(padding.top), side(padding.right), side(padding.bottom))
+        let extra = match self.shader() {
+            Some(shader) if shader.padding == ShaderEffectPadding::SampleRadius => side(shader.sample_radius),
+            _ => 0.0,
+        };
+        Thickness::new(
+            side(padding.left) + extra,
+            side(padding.top) + extra,
+            side(padding.right) + extra,
+            side(padding.bottom) + extra,
+        )
     }
 
     /// Calls `f` with the name and value of each parameter
@@ -667,6 +713,47 @@ impl ImmutableCustomEffect {
     /// ([`CustomEffect::cpu_reference`]); returns whether the effect has one.
     pub fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool {
         self.value.value_cpu_reference(pixels, width, height, scale)
+    }
+
+    /// The runtime shader of the type of the effect, read once per type
+    /// ([`CustomEffect::shader`]); `None` when the type has none, or has a
+    /// graph, which takes precedence.
+    pub fn shader(&self) -> Option<Arc<ShaderEffectDescription>> {
+        self.value.shader_of_type()
+    }
+
+    /// Whether the type of the effect is a runtime shader effect
+    /// ([`shader`](Self::shader)).
+    pub fn has_shader(&self) -> bool {
+        self.shader().is_some()
+    }
+
+    /// Calls `f` with the name and the value of each uniform of the shader of
+    /// the effect by the convention of [`ShaderEffectDescription`]:
+    /// `layer_size` (the area of the effect in device pixels), `layer_scale`
+    /// (device pixels per device independent pixel), then the parameters in
+    /// order (text skipped), named as
+    /// [`CustomEffect::for_each_parameter`] names them. Without allocating:
+    /// what a backend calls each frame to fill the uniforms of the program.
+    pub fn for_each_shader_uniform(
+        &self,
+        layer_size: [f32; 2],
+        layer_scale: f32,
+        f: &mut dyn FnMut(&'static str, ShaderUniformValue),
+    ) {
+        visit_shader_uniforms(self, layer_size, layer_scale, f)
+    }
+
+    /// The uniforms a program of the shader of this effect's type declares by
+    /// the convention, in order: their names (a parameter's with every `-`
+    /// written `_`) and types. What a backend checks a compiled program
+    /// against, once.
+    pub fn shader_uniform_layout(&self) -> Vec<(String, ShaderUniformType)> {
+        let mut layout = Vec::new();
+        self.for_each_shader_uniform([0.0; 2], 1.0, &mut |name, value| {
+            layout.push((super::shader_uniform_name(name), value.ty()));
+        });
+        layout
     }
 
     /// Reports that `backend` has no factory for this effect, so that it

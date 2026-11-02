@@ -1,10 +1,13 @@
-//! The custom effects FerroUI ships (#455, E2; not from upstream): the
-//! colour effects of Effector's sample set (tint, grayscale, sepia,
-//! saturation, brightness and contrast, invert) and its glow, as values of
-//! [`CustomEffect`] that describe themselves as effect graphs
-//! ([`CustomEffect::graph`]), so that every backend draws them on the GPU
-//! with the painter of the composition effects
-//! (docs/porting/custom-effects.md).
+//! The custom effects FerroUI ships (#455, E2 and E4; not from upstream):
+//!
+//! - the colour effects of Effector's sample set (tint, grayscale, sepia,
+//!   saturation, brightness and contrast, invert) and its glow, as values of
+//!   [`CustomEffect`] that describe themselves as effect graphs
+//!   ([`CustomEffect::graph`]), so that every backend draws them on the GPU
+//!   with the painter of the composition effects;
+//! - its pixelation, scan lines and spotlight as runtime shader effects
+//!   ([`CustomEffect::shader`]): SkSL drawn by Skia on every surface, WGSL
+//!   for Vello (drawn from step E5 on) (docs/porting/custom-effects.md).
 //!
 //! They are registered with [`CustomEffectRegistry`] the first time the
 //! registry is used ([`register_library_effects`]), so that effect strings
@@ -29,6 +32,10 @@ use crate::rendering::composition::effects::{
 use crate::Thickness;
 use std::sync::Once;
 
+mod shaders;
+
+pub use shaders::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+
 /// Registers the effects of this module with [`CustomEffectRegistry`], once
 /// per process. The registry calls it the first time it is used; a name an
 /// application registered before keeps the application's effect.
@@ -42,6 +49,9 @@ pub fn register_library_effects() {
         let _ = CustomEffectRegistry::register::<BrightnessContrastEffect>();
         let _ = CustomEffectRegistry::register::<InvertEffect>();
         let _ = CustomEffectRegistry::register::<GlowEffect>();
+        let _ = CustomEffectRegistry::register::<PixelateEffect>();
+        let _ = CustomEffectRegistry::register::<ScanlineShaderEffect>();
+        let _ = CustomEffectRegistry::register::<SpotlightShaderEffect>();
     });
 }
 
