@@ -109,8 +109,8 @@ def startup_comparison(samples, reference, case):
             "ratio": candidate / baseline, "passed": candidate <= baseline}
 
 
-def lld_allocations(link_map, executable):
-    """Read allocated ELF output sizes and each archive's allocated input sections."""
+def elf_sections(executable):
+    """File and memory sizes of the allocated sections in an ELF image."""
     report = command_output(["readelf", "-SW", str(executable)])
     sections = {}
     for name, kind, size, flags in re.findall(
@@ -118,6 +118,12 @@ def lld_allocations(link_map, executable):
     ):
         if "A" in flags:
             sections[name] = {"allocated_bytes": int(size, 16), "file_bytes": 0 if kind == "NOBITS" else int(size, 16)}
+    return sections
+
+
+def lld_allocations(link_map, executable):
+    """Attribute allocated input sections to the archive that supplied them."""
+    sections = elf_sections(executable)
     by_archive = {}
     output = None
     archive_name = re.compile(r"(?:^|/)([^/(]+\.(?:rlib|a))\(")
@@ -153,6 +159,10 @@ def main():
     backend.add_argument("--binary", action="store_true", help="enable the theme's binary-resources feature")
     parser.add_argument("--linux-packed-relocations", action="store_true",
                         help="use DT_RELR for the final Linux ELF (requires a compatible dynamic loader)")
+    parser.add_argument("--linux-safe-icf", action="store_true",
+                        help="emit address-significance metadata during ThinLTO and fold identical ELF sections with LLD")
+    parser.add_argument("--max-executable-bytes", type=positive_int,
+                        help="require the complete stripped application to fit this many bytes")
     parser.add_argument("--size-optimize-theme", action="store_true",
                         help="compile just the WinUI crate with opt-level=z and one codegen unit")
     parser.add_argument("--lld-link-map", action="store_true",
@@ -188,6 +198,8 @@ def main():
         parser.error("--max-theme-bytes requires --lld-link-map")
     if args.compact_app and args.lld_link_map:
         parser.error("cross-crate LTO cannot attribute all optimized code to its input archives")
+    if args.linux_safe_icf and (platform.system() != "Linux" or not args.compact_app):
+        parser.error("--linux-safe-icf requires --compact-app on a native Linux ELF target")
     if args.linux_packed_relocations and platform.system() != "Linux":
         parser.error("--linux-packed-relocations requires a Linux ELF target")
     if args.rebuilds < 0:
@@ -246,6 +258,8 @@ def main():
         features = [f"{THEME}/binary-resources"]
     cargo_args = ["--features", ",".join(features)] if features else []
     link_args = ["-Clink-arg=-Wl,-z,pack-relative-relocs"] if args.linux_packed_relocations else []
+    if args.linux_safe_icf:
+        link_args.extend(["-Cllvm-args=--addrsig", "-Clink-arg=-fuse-ld=lld", "-Clink-arg=-Wl,--icf=safe"])
     first_build, messages = build(cargo_args, package, env, link_args)
     initial_units = cargo_timings(target)
     rebuilds = []
@@ -308,7 +322,8 @@ def main():
         "platform": platform.platform(), "jobs": env.get("CARGO_BUILD_JOBS", "cargo default"),
         "packed_theme": packed, "solid_theme": args.solid or args.portable_solid or precompiled, "size_optimized_theme": args.size_optimize_theme,
         "precompiled_theme": precompiled, "compact_app": args.compact_app,
-        "linux_packed_relocations": args.linux_packed_relocations,
+        "linux_packed_relocations": args.linux_packed_relocations, "linux_safe_icf": args.linux_safe_icf,
+        "elf_sections": elf_sections(stripped) if platform.system() == "Linux" and shutil.which("readelf") else None,
         "linked_allocations": allocations,
         "theme_allocated_sections": sections, "theme_allocated_bytes": sum(sections.values()) if sections else None,
         "fxp_bytes": (out / "winui.fxp").stat().st_size if packed or precompiled else 0,
@@ -340,6 +355,8 @@ def main():
         if failures:
             reference_ms = result["startup_comparison"]["baseline_median_ns"] / 1e6
             raise SystemExit(f"median startup exceeded {reference_ms:.3f} ms: " + ", ".join(failures))
+    if args.max_executable_bytes and stripped_bytes > args.max_executable_bytes:
+        raise SystemExit(f"stripped application is {stripped_bytes} bytes; limit {args.max_executable_bytes}")
     if args.max_theme_bytes and result["theme_allocated_bytes"] > args.max_theme_bytes:
         raise SystemExit(f"WinUI contributed {result['theme_allocated_bytes']} bytes; limit {args.max_theme_bytes}")
 

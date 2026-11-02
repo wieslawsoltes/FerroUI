@@ -2,6 +2,27 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
+## Building a smaller Linux application
+
+For an x86-64 GNU/Linux distribution targeting glibc 2.36 or newer, use the compact Cargo configuration with the shipping profile. Run this command from the repository root.
+
+```sh
+cargo --config .cargo/compact-linux-x86_64.toml build \
+  --profile compact-release --target x86_64-unknown-linux-gnu \
+  -p hello-world --bin hello-world
+```
+
+The application still uses Rust panic unwinding. LLVM emits an address-significance table for the linker. LLD's safe identical-code folding can then share byte-equivalent functions and exception data while honoring significant addresses. The ELF loader reads a bitmap for relative relocations. The explicit target keeps build-time XAML tools on the host configuration. [LLVM address-significance tables](https://llvm.org/docs/Extensions.html#sht-llvm-addrsig-section-address-significance-table) · [glibc 2.36 release notes](https://lists.gnu.org/archive/html/info-gnu/2022-08/msg00000.html)
+
+For older GNU/Linux loaders, use safe folding with ordinary relocations. With ThinLTO, the backend that emits the final Rust code runs during the application link. This invocation reuses the dependency build.
+
+```sh
+cargo rustc --profile compact-release -p hello-world --bin hello-world -- \
+  -Cllvm-args=--addrsig -Clink-arg=-fuse-ld=lld -Clink-arg=-Wl,--icf=safe
+```
+
+The WinUI benchmark accepts `--compact-app --linux-safe-icf` and independently `--linux-packed-relocations`. Its `--max-executable-bytes` option checks the stripped application including its full runtime. Linux reports include the allocated ELF sections and their file sizes.
+
 ## Full WinUI on Linux x86-64, 2 November 2026
 
 The startup marker is flushed after the first freshly constructed theme returns the correct typed Button `ControlTheme`. The release consumer uses size optimization, ThinLTO, 16 codegen units and normal unwinding. The ordinary editable consumer links the external interpreter. A separate run enables compiler-produced operand updates while retaining that interpreter. This opt-in costs 46,152 additional executable bytes with the ordinary ELF link. Both executable size and startup below include the framework. These measurements cover theme readiness before rendering a window.

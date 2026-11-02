@@ -1,0 +1,10 @@
+# Opt-in distribution settings for x86-64 GNU/Linux with glibc 2.36 or newer.
+# Use with --profile compact-release and --target x86_64-unknown-linux-gnu.
+# The explicit target keeps these settings off host-side XAML build tools.
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+  "-Cllvm-args=--addrsig",
+  "-Clink-arg=-fuse-ld=lld",
+  "-Clink-arg=-Wl,--icf=safe",
+  "-Clink-arg=-Wl,-z,pack-relative-relocs",
+]
