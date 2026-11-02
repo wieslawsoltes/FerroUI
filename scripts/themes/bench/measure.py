@@ -171,8 +171,13 @@ def main():
     )
     for name, path in deps.items():
         manifest += f'{name} = {{ path = {json.dumps(str(path))} }}\n'
-    # Forward only features used by this consumer. Older source revisions may have
-    # no archive API, and Cargo validates forwarded dependency features eagerly.
+    # The archive-enabled consumer can also load a changed pack from disk. Keep its
+    # complete runtime interpreter in the measured executable, including with LTO.
+    if args.precompiled:
+        markup = source / "src/Markup"
+        manifest += f'ferroui-markup-xaml = {{ path = {json.dumps(str(markup / "FerroUI.Markup.Xaml"))} }}\n'
+        loader = json.dumps(str(markup / "FerroUI.Markup.Xaml.Loader"))
+        manifest += f'ferroui-markup-xaml-loader = {{ path = {loader}, features = ["runtime", "portable-xaml"] }}\n'
     manifest += '\n[features]\nretain-archive = []\n'
     if args.compact_app:
         manifest += '\n[profile.release]\nopt-level = "s"\ncodegen-units = 16\n'
