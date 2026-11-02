@@ -8,7 +8,7 @@ use crate::{
     Border, Button, Control, GridLength, Panel, SplitView, SplitViewDisplayMode, SplitViewPanePlacement, TopLevel,
     Window,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::input::{
     InputElement, IPointer, Key, KeyEventArgs, KeyModifiers, MouseButton, Pointer, PointerPointProperties,
     PointerReleasedEventArgs, PointerType,
@@ -24,12 +24,12 @@ use std::rc::Rc;
 
 /// The global clock of a test: never pulses.
 struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

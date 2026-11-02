@@ -1,6 +1,6 @@
 use crate::animation::easings::Easing;
 use crate::animation::{
-    Animation, Cue, FillMode, IPageTransition, IProgressPageTransition, KeyFrame, PageTransitionItem, TimeSpan,
+    Animation, Cue, FillMode, IPageTransition, IProgressPageTransition, KeyFrame, PageTransitionItem, SignedDuration,
 };
 use crate::animation::i_page_transition::{start_async, when_all};
 use crate::media::{ITransform, TranslateTransform};
@@ -22,7 +22,7 @@ pub enum SlideAxis {
 /// Transitions between two pages by sliding them horizontally or
 /// vertically.
 pub struct PageSlide {
-    duration: Cell<TimeSpan>,
+    duration: Cell<SignedDuration>,
     orientation: Cell<SlideAxis>,
     slide_in_easing: RefCell<Easing>,
     slide_out_easing: RefCell<Easing>,
@@ -38,11 +38,11 @@ impl Default for PageSlide {
 impl PageSlide {
     /// Creates a horizontal slide with a zero duration.
     pub fn new() -> Self {
-        Self::with_duration(TimeSpan::ZERO, SlideAxis::Horizontal)
+        Self::with_duration(SignedDuration::ZERO, SlideAxis::Horizontal)
     }
 
     /// Creates a slide with the given duration and axis.
-    pub fn with_duration(duration: TimeSpan, orientation: SlideAxis) -> Self {
+    pub fn with_duration(duration: SignedDuration, orientation: SlideAxis) -> Self {
         Self {
             duration: Cell::new(duration),
             orientation: Cell::new(orientation),
@@ -53,11 +53,11 @@ impl PageSlide {
     }
 
     /// The duration of the animation.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.duration.get()
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.duration.set(value)
     }
 

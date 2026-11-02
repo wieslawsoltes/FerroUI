@@ -7,7 +7,7 @@ use super::{
     CalendarWeekRule, CultureInfo, DateTime, DateTimeKind, DateTimeOffset, DateTimeStyles, DayOfWeek,
     GregorianCalendar, IsoWeek, TestCultureDataProvider,
 };
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use std::rc::Rc;
 
 /// The cultures of the tables, with the test culture data registered, the
@@ -160,7 +160,7 @@ fn date_time_offset_formatting_matches() {
     let cultures = cultures();
     let mut mismatches = Vec::new();
     for &(culture, ticks, offset_minutes, format, expected) in net::FORMAT_OFFSET {
-        let offset = TimeSpan::from_ticks(offset_minutes as i64 * TimeSpan::TICKS_PER_MINUTE);
+        let offset = SignedDuration::from_ticks(offset_minutes as i64 * SignedDuration::TICKS_PER_MINUTE);
         let value = DateTimeOffset::from_ticks(ticks, offset);
         let actual = value.try_to_string_format(format, &cultures[culture as usize]).ok();
         if actual.as_deref() != expected {
@@ -303,13 +303,13 @@ fn time_span_formatting_matches() {
     let mut mismatches = Vec::new();
     for &(culture, ticks, format, expected) in net::TIME_SPAN_FORMAT {
         // The decimal separator of every recorded culture is `.`, so no row depends on the culture.
-        let actual = TimeSpan::from_ticks(ticks).try_to_string_format(format).ok();
+        let actual = SignedDuration::from_ticks(ticks).try_to_string_format(format).ok();
         if actual.as_deref() != expected {
             mismatches.push(format!("{:?} {ticks} {format:?}: {actual:?}, .NET {expected:?}", net::CULTURES[culture as usize]));
         }
     }
     for &(ticks, days, hours, minutes, seconds, milliseconds, total_hours) in net::TIME_SPAN_PARTS {
-        let value = TimeSpan::from_ticks(ticks);
+        let value = SignedDuration::from_ticks(ticks);
         let actual = (value.days(), value.hours(), value.minutes(), value.seconds(), value.milliseconds(), value.total_hours());
         if actual != (days, hours, minutes, seconds, milliseconds, total_hours) {
             mismatches.push(format!("{ticks}: components {actual:?}"));

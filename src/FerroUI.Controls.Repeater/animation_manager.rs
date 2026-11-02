@@ -6,7 +6,7 @@ use super::item_collection_transition_progress::ItemCollectionTransitionProgress
 use ferroui_controls::Control;
 use ferroui_base::animation::easings::{Easing, SplineEasing};
 use ferroui_base::animation::{
-    Animatable, Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, TimeSpan,
+    Animatable, Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, SignedDuration,
 };
 use ferroui_base::data::BindingPriority;
 use ferroui_base::media::MatrixTransform;
@@ -219,7 +219,7 @@ impl AnimationManager {
             }
         }));
         let animation = Animation::new();
-        animation.set_duration(TimeSpan::from_milliseconds(timeline.duration()));
+        animation.set_duration(SignedDuration::from_milliseconds(timeline.duration()));
         animation.set_fill_mode(FillMode::Both);
         animation.children().add(KeyFrame::with_cue(
             Cue::new(0.0),

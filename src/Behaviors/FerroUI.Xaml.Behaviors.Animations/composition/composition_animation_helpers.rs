@@ -4,7 +4,7 @@
 //! structs of the reference's helper class are types of this module; Rust has no nested types.
 
 use crate::argument_out_of_range::throw_if_less_than;
-use ferroui_base::animation::{PlaybackDirection, TimeSpan};
+use ferroui_base::animation::{PlaybackDirection, SignedDuration};
 use ferroui_base::numerics::{Vector2, Vector3};
 use ferroui_base::rendering::composition::animations::{
     AnimationIterationBehavior, ICompositionAnimation, KeyFrameAnimation,
@@ -112,7 +112,7 @@ impl CompositionAnimationHelpers {
     pub(crate) fn start_vector3_animation(
         visual: &CompositionVisual,
         property_name: &str,
-        duration: TimeSpan,
+        duration: SignedDuration,
         key_frames: &[Vector3KeyFrame],
     ) {
         let Some(last) = key_frames.last() else {
@@ -120,7 +120,7 @@ impl CompositionAnimationHelpers {
         };
 
         Self::validate_duration(duration);
-        if duration == TimeSpan::ZERO {
+        if duration == SignedDuration::ZERO {
             Self::set_vector3_value(visual, property_name, last.value());
             return;
         }
@@ -144,7 +144,7 @@ impl CompositionAnimationHelpers {
     pub(crate) fn start_offset_animation(
         element: &Control,
         visual: &CompositionVisual,
-        duration: TimeSpan,
+        duration: SignedDuration,
         key_frames: &[Vector3KeyFrame],
     ) {
         let Some(last) = key_frames.last() else {
@@ -153,7 +153,7 @@ impl CompositionAnimationHelpers {
 
         let layout_offset = Self::get_layout_offset(element);
         Self::validate_duration(duration);
-        if duration == TimeSpan::ZERO {
+        if duration == SignedDuration::ZERO {
             visual.set_offset((layout_offset + last.value()).into());
             return;
         }
@@ -191,7 +191,7 @@ impl CompositionAnimationHelpers {
     pub(crate) fn start_scalar_animation(
         visual: &CompositionVisual,
         property_name: &str,
-        duration: TimeSpan,
+        duration: SignedDuration,
         key_frames: &[ScalarKeyFrame],
     ) {
         let Some(last) = key_frames.last() else {
@@ -199,7 +199,7 @@ impl CompositionAnimationHelpers {
         };
 
         Self::validate_duration(duration);
-        if duration == TimeSpan::ZERO {
+        if duration == SignedDuration::ZERO {
             Self::set_scalar_value(visual, property_name, last.value());
             return;
         }
@@ -235,8 +235,8 @@ impl CompositionAnimationHelpers {
     }
 
     #[track_caller]
-    fn validate_duration(duration: TimeSpan) {
-        throw_if_less_than(duration, TimeSpan::ZERO, "duration");
+    fn validate_duration(duration: SignedDuration) {
+        throw_if_less_than(duration, SignedDuration::ZERO, "duration");
     }
 
     /// Configures a key-frame animation to play once, forwards, over `duration`, and starts it
@@ -245,7 +245,7 @@ impl CompositionAnimationHelpers {
     /// The reference takes any composition animation and configures it when it is a key-frame
     /// animation; every animation it is given is one, which the type of the parameter states
     /// here.
-    fn configure_and_start_animation<A>(visual: &CompositionVisual, property_name: &str, duration: TimeSpan, animation: &A)
+    fn configure_and_start_animation<A>(visual: &CompositionVisual, property_name: &str, duration: SignedDuration, animation: &A)
     where
         A: ICompositionAnimation + Deref<Target = KeyFrameAnimation>,
     {
@@ -260,6 +260,6 @@ impl CompositionAnimationHelpers {
 }
 
 /// The duration of a composition animation for an animation time that is not negative.
-pub(crate) fn to_duration(duration: TimeSpan) -> Duration {
+pub(crate) fn to_duration(duration: SignedDuration) -> Duration {
     duration.to_duration().unwrap_or_default()
 }

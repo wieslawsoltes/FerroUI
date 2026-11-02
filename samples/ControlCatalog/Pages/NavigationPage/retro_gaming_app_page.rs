@@ -7,7 +7,7 @@ use super::{
 };
 use crate::markup::xaml_class;
 use crate::pages::navigation_demo_helper::{boxed_text, parse_color, parse_geometry};
-use ferroui_base::animation::{PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs};
@@ -268,7 +268,7 @@ impl RetroGamingAppPage {
         tp.set_background(solid(bg_color()));
         tp.set_tab_placement(TabPlacement::Bottom);
         tp.set_page_transition(Some(Rc::new(PageSlide::with_duration(
-            TimeSpan::from_milliseconds(250.0),
+            SignedDuration::from_milliseconds(250.0),
             SlideAxis::Horizontal,
         ))));
         tp.resources().set("TabItemHeaderFontSize", Some(Rc::new(12.0_f64)));

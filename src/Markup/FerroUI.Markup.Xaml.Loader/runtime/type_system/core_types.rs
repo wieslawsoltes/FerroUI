@@ -11,7 +11,7 @@
 
 use std::rc::Rc;
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupDelegate, MarkupInvokeError, MarkupValue};
 use ferroui_base::reactive::IDisposable;
@@ -211,7 +211,7 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
         "System.UInt64" => handles![u64],
         "System.Single" => handles![f32],
         "System.Double" => handles![f64],
-        "System.TimeSpan" => handles![TimeSpan],
+        "System.TimeSpan" => handles![SignedDuration],
         "System.String" => handles![String, Option<String>],
         "System.Type" => handles![
             RuntimeTypeValue,
@@ -247,7 +247,7 @@ fn invoker_of(full_name: &str, member: &CoreMember) -> RuntimeInvoker {
     match (full_name, member) {
         ("System.TimeSpan", CoreMember::Method { name, .. }) if name == "Parse" => dynamic(|arguments| {
             let text = argument::<String>(arguments, 0)?;
-            TimeSpan::parse(&text).map(boxed).map_err(|e| MarkupInvokeError::Failed(e.to_string()))
+            SignedDuration::parse(&text).map(boxed).map_err(|e| MarkupInvokeError::Failed(e.to_string()))
         }),
         // `string.Length`: the number of UTF-16 code units.
         ("System.String", CoreMember::Property { name, .. }) if name == "Length" => dynamic(|arguments| {
@@ -314,7 +314,7 @@ pub(crate) fn define_core_types(system: &Rc<RuntimeTypeSystem>) {
     map_nullable("System.UInt64", ValueType::of::<Option<u64>>());
     map_nullable("System.Single", ValueType::of::<Option<f32>>());
     map_nullable("System.Double", ValueType::of::<Option<f64>>());
-    map_nullable("System.TimeSpan", ValueType::of::<Option<TimeSpan>>());
+    map_nullable("System.TimeSpan", ValueType::of::<Option<SignedDuration>>());
 
     // Arrays of the element types the compiler produces constants of: a member
     // that declares `Vec<T>` takes an array of `T` (see `values`).

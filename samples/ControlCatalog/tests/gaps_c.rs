@@ -138,7 +138,7 @@ fn gap_c310_time_span_property_from_text() {
         "<AutoCompleteBox {XMLNS} MinimumPopulateDelay='00:00:01'/>"
     ))))
     .expect("an auto complete box");
-    assert_eq!(auto_complete_box.minimum_populate_delay(), ferroui_base::animation::TimeSpan::from_seconds(1.0));
+    assert_eq!(auto_complete_box.minimum_populate_delay(), ferroui_base::animation::SignedDuration::from_seconds(1.0));
 }
 
 #[test]

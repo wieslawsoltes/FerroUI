@@ -1,6 +1,6 @@
 //! The real native color flyout must paint under the workspace's WinUI host theme.
 use super::*;
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::media::imaging::{PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
@@ -17,11 +17,11 @@ use ferroui_harfbuzz::HarfBuzzTextShaper;
 use ferroui_vello::{VelloOptions, VelloPlatform, VelloRenderingMode};
 
 struct ColorRenderClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for ColorRenderClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for ColorRenderClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -121,7 +121,7 @@ fn native_color_flyout_renders_spectrum_and_alpha_under_winui_chrome() {
     editor.flyout().show_at(&editor.swatch_button());
     for tick in 0..6 {
         Dispatcher::ui_thread().run_jobs(None);
-        clock.subject.on_next(TimeSpan::from_seconds(tick as f64));
+        clock.subject.on_next(SignedDuration::from_seconds(tick as f64));
         window.update_layout();
     }
     assert!(editor.flyout().is_open());

@@ -86335,7 +86335,7 @@ fn build_controls_winuicontrols_xaml_deferred_50(
     // Controls/WinUIControls.xaml(71,22) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(71,22) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 71, 22)?);
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
@@ -90371,7 +90371,7 @@ fn build_controls_winuicontrols_xaml_deferred_86(
     // Controls/WinUIControls.xaml(78,16) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::presenters::ContentPresenter::background_property())));
     // Controls/WinUIControls.xaml(78,16) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(solid_color_brush_transition_0.clone(), 78, 16)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -90540,7 +90540,7 @@ fn build_controls_winuicontrols_xaml_deferred_88(
     // Controls/WinUIControls.xaml(156,16) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::presenters::ContentPresenter::background_property())));
     // Controls/WinUIControls.xaml(156,16) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(solid_color_brush_transition_0.clone(), 156, 16)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -91069,7 +91069,7 @@ fn build_controls_winuicontrols_xaml_deferred_95(
     // Controls/WinUIControls.xaml(68,16) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::presenters::ContentPresenter::background_property())));
     // Controls/WinUIControls.xaml(68,16) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(solid_color_brush_transition_0.clone(), 68, 16)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -91623,7 +91623,7 @@ fn build_controls_winuicontrols_xaml_deferred_99(
     // Controls/WinUIControls.xaml(73,16) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::presenters::ContentPresenter::background_property())));
     // Controls/WinUIControls.xaml(73,16) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(solid_color_brush_transition_0.clone(), 73, 16)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -93004,7 +93004,7 @@ fn build_controls_winuicontrols_xaml_deferred_112(
     // Controls/WinUIControls.xaml(69,16) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::presenters::ContentPresenter::background_property())));
     // Controls/WinUIControls.xaml(69,16) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(solid_color_brush_transition_0.clone(), 69, 16)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -94936,7 +94936,7 @@ fn build_controls_winuicontrols_xaml_deferred_120(
     // Controls/WinUIControls.xaml(94,22) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(94,22) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2500000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2500000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(94,22) Easing
     let value_1 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 94, 77)?;
@@ -94948,7 +94948,7 @@ fn build_controls_winuicontrols_xaml_deferred_120(
     // Controls/WinUIControls.xaml(95,22) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(95,22) Duration
-    let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2500000_i64);
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2500000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_2));
     // Controls/WinUIControls.xaml(95,22) Easing
     let value_3 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 95, 78)?;
@@ -94998,7 +94998,7 @@ fn build_controls_winuicontrols_xaml_deferred_120(
     // Controls/WinUIControls.xaml(111,22) Property
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(111,22) Duration
-    let value_4 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_4));
     // Controls/WinUIControls.xaml(111,22) Easing
     let value_5 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 111, 77)?;
@@ -95010,7 +95010,7 @@ fn build_controls_winuicontrols_xaml_deferred_120(
     // Controls/WinUIControls.xaml(112,22) Property
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(112,22) Duration
-    let value_6 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_6 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_6));
     // Controls/WinUIControls.xaml(112,22) Easing
     let value_7 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 112, 78)?;
@@ -95853,7 +95853,7 @@ fn build_controls_winuicontrols_xaml_deferred_134(
     // Controls/WinUIControls.xaml(206,16) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(206,16) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 206, 16)?);
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
@@ -95953,7 +95953,7 @@ fn build_controls_winuicontrols_xaml_deferred_136(
     // Controls/WinUIControls.xaml(231,16) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(231,16) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 231, 16)?);
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
@@ -96002,12 +96002,12 @@ fn build_controls_winuicontrols_xaml_deferred_137(
     // Controls/WinUIControls.xaml(252,6) Content
     let setter_7 = rt::new_setter(rt::property(::ferroui_controls::primitives::ScrollBar::show_delay_property()));
     // Controls/WinUIControls.xaml(252,6) Value
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(4000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(4000000_i64);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&value_0)));
     // Controls/WinUIControls.xaml(253,6) Content
     let setter_8 = rt::new_setter(rt::property(::ferroui_controls::primitives::ScrollBar::hide_delay_property()));
     // Controls/WinUIControls.xaml(253,6) Value
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(5000000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(5000000_i64);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&value_1)));
     // Controls/WinUIControls.xaml(255,6) Content
     // Controls/WinUIControls.xaml(255,6) Style
@@ -96320,7 +96320,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     // Controls/WinUIControls.xaml(274,24) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(274,24) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 274, 24)?);
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -96400,7 +96400,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     // Controls/WinUIControls.xaml(290,24) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(290,24) Duration
-    let value_4 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_4));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_1.clone(), 290, 24)?);
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
@@ -96558,7 +96558,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     // Controls/WinUIControls.xaml(326,26) Property
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(326,26) Duration
-    let value_10 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_10 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_10));
     // Controls/WinUIControls.xaml(326,26) Easing
     let value_11 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 326, 81)?;
@@ -96570,7 +96570,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     // Controls/WinUIControls.xaml(327,26) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/WinUIControls.xaml(327,26) Duration
-    let value_12 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_12 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_12));
     // Controls/WinUIControls.xaml(327,26) Easing
     let value_13 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 327, 104)?;
@@ -96655,7 +96655,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     // Controls/WinUIControls.xaml(344,24) Property
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(344,24) Duration
-    let value_17 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_17 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_17));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_3, rt::cast(double_transition_3.clone(), 344, 24)?);
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
@@ -96765,7 +96765,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     // Controls/WinUIControls.xaml(375,24) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(375,24) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 375, 24)?);
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
@@ -96845,7 +96845,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     // Controls/WinUIControls.xaml(391,24) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(391,24) Duration
-    let value_4 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_4));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_1.clone(), 391, 24)?);
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
@@ -97000,7 +97000,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     // Controls/WinUIControls.xaml(426,26) Property
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(426,26) Duration
-    let value_10 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_10 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_10));
     // Controls/WinUIControls.xaml(426,26) Easing
     let value_11 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 426, 82)?;
@@ -97012,7 +97012,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     // Controls/WinUIControls.xaml(427,26) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/WinUIControls.xaml(427,26) Duration
-    let value_12 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_12 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_12));
     // Controls/WinUIControls.xaml(427,26) Easing
     let value_13 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 427, 104)?;
@@ -97097,7 +97097,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     // Controls/WinUIControls.xaml(444,24) Property
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(444,24) Duration
-    let value_17 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_17 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_17));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_3, rt::cast(double_transition_3.clone(), 444, 24)?);
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
@@ -97396,7 +97396,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     // Controls/WinUIControls.xaml(114,20) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(114,20) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 114, 20)?);
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
@@ -97435,7 +97435,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     // Controls/WinUIControls.xaml(126,20) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(126,20) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_1.clone(), 126, 20)?);
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
@@ -97471,7 +97471,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     // Controls/WinUIControls.xaml(137,20) Property
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(137,20) Duration
-    let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_2));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_2, rt::cast(double_transition_2.clone(), 137, 20)?);
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
@@ -99264,7 +99264,7 @@ fn build_controls_winuicontrols_xaml_deferred_156(
     // Controls/WinUIControls.xaml(53,10) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(53,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2500000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2500000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 53, 10)?);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&transitions_0)));
@@ -99755,7 +99755,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let value_0 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 199, 20)?;
     animation_0.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(199,10) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_1));
     // Controls/WinUIControls.xaml(200,12) Children
     let children_collection_0 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
@@ -99763,7 +99763,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let key_frame_0 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_0.clone()));
     // Controls/WinUIControls.xaml(200,12) KeyTime
-    let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_0, ::core::clone::Clone::clone(&value_2));
     // Controls/WinUIControls.xaml(201,14) Setters
     let setters_collection_0 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_0);
@@ -99788,7 +99788,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let value_3 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 203, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_1, ::core::option::Option::Some(::core::clone::Clone::clone(&value_3)));
     // Controls/WinUIControls.xaml(203,12) KeyTime
-    let value_4 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(15000000_i64);
+    let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(15000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_1, ::core::clone::Clone::clone(&value_4));
     // Controls/WinUIControls.xaml(204,14) Setters
     let setters_collection_1 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_1);
@@ -99810,7 +99810,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let key_frame_2 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_2.clone()));
     // Controls/WinUIControls.xaml(206,12) KeyTime
-    let value_5 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_5 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_2, ::core::clone::Clone::clone(&value_5));
     // Controls/WinUIControls.xaml(207,14) Setters
     let setters_collection_2 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_2);
@@ -99851,7 +99851,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let value_6 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 214, 20)?;
     animation_1.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_6));
     // Controls/WinUIControls.xaml(214,10) Duration
-    let value_7 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_7 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_1.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_7));
     // Controls/WinUIControls.xaml(215,12) Children
     let children_collection_3 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_1);
@@ -99859,7 +99859,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let key_frame_3 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_3.clone()));
     // Controls/WinUIControls.xaml(215,12) KeyTime
-    let value_8 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_8 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_3, ::core::clone::Clone::clone(&value_8));
     // Controls/WinUIControls.xaml(216,14) Setters
     let setters_collection_3 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_3);
@@ -99881,7 +99881,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let key_frame_4 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_4.clone()));
     // Controls/WinUIControls.xaml(218,12) KeyTime
-    let value_9 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(7500000_i64);
+    let value_9 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_4, ::core::clone::Clone::clone(&value_9));
     // Controls/WinUIControls.xaml(219,14) Setters
     let setters_collection_4 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_4);
@@ -99906,7 +99906,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let value_10 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 221, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_5, ::core::option::Option::Some(::core::clone::Clone::clone(&value_10)));
     // Controls/WinUIControls.xaml(221,12) KeyTime
-    let value_11 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_11 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_5, ::core::clone::Clone::clone(&value_11));
     // Controls/WinUIControls.xaml(222,14) Setters
     let setters_collection_5 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_5);
@@ -99947,7 +99947,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let value_12 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 229, 20)?;
     animation_2.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_12));
     // Controls/WinUIControls.xaml(229,10) Duration
-    let value_13 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_13 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_2.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_13));
     // Controls/WinUIControls.xaml(230,12) Children
     let children_collection_6 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_2);
@@ -99955,7 +99955,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let key_frame_6 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_6.clone()));
     // Controls/WinUIControls.xaml(230,12) KeyTime
-    let value_14 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_14 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_6, ::core::clone::Clone::clone(&value_14));
     // Controls/WinUIControls.xaml(231,14) Setters
     let setters_collection_6 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_6);
@@ -99980,7 +99980,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let value_15 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 233, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_7, ::core::option::Option::Some(::core::clone::Clone::clone(&value_15)));
     // Controls/WinUIControls.xaml(233,12) KeyTime
-    let value_16 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(15000000_i64);
+    let value_16 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(15000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_7, ::core::clone::Clone::clone(&value_16));
     // Controls/WinUIControls.xaml(234,14) Setters
     let setters_collection_7 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_7);
@@ -100002,7 +100002,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let key_frame_8 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_8.clone()));
     // Controls/WinUIControls.xaml(236,12) KeyTime
-    let value_17 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_17 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_8, ::core::clone::Clone::clone(&value_17));
     // Controls/WinUIControls.xaml(237,14) Setters
     let setters_collection_8 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_8);
@@ -100043,7 +100043,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let value_18 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 244, 20)?;
     animation_3.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_18));
     // Controls/WinUIControls.xaml(244,10) Duration
-    let value_19 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_19 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_3.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_19));
     // Controls/WinUIControls.xaml(245,12) Children
     let children_collection_9 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_3);
@@ -100051,7 +100051,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let key_frame_9 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_9.clone()));
     // Controls/WinUIControls.xaml(245,12) KeyTime
-    let value_20 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_20 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_9, ::core::clone::Clone::clone(&value_20));
     // Controls/WinUIControls.xaml(246,14) Setters
     let setters_collection_9 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_9);
@@ -100073,7 +100073,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let key_frame_10 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_10.clone()));
     // Controls/WinUIControls.xaml(248,12) KeyTime
-    let value_21 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(7500000_i64);
+    let value_21 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_10, ::core::clone::Clone::clone(&value_21));
     // Controls/WinUIControls.xaml(249,14) Setters
     let setters_collection_10 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_10);
@@ -100098,7 +100098,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     let value_22 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 251, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_11, ::core::option::Option::Some(::core::clone::Clone::clone(&value_22)));
     // Controls/WinUIControls.xaml(251,12) KeyTime
-    let value_23 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(20000000_i64);
+    let value_23 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_11, ::core::clone::Clone::clone(&value_23));
     // Controls/WinUIControls.xaml(252,14) Setters
     let setters_collection_11 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_11);
@@ -109388,7 +109388,7 @@ fn build_controls_winuicontrols_xaml_deferred_234(
     // Controls/WinUIControls.xaml(212,10) Animation
     let animation_0 = ::ferroui_base::animation::Animation::new();
     // Controls/WinUIControls.xaml(212,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(212,10) FillMode
     animation_0.set_direct_value(::ferroui_base::animation::Animation::fill_mode_property(), ::ferroui_base::animation::FillMode::Forward);
@@ -109450,7 +109450,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     // Controls/WinUIControls.xaml(116,16) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(116,16) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 116, 16)?);
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
@@ -111405,7 +111405,7 @@ fn build_controls_winuicontrols_xaml_deferred_258(
     // Controls/WinUIControls.xaml(97,20) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(97,20) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 97, 20)?);
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
@@ -111444,7 +111444,7 @@ fn build_controls_winuicontrols_xaml_deferred_258(
     // Controls/WinUIControls.xaml(109,20) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(109,20) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_1.clone(), 109, 20)?);
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
@@ -111480,7 +111480,7 @@ fn build_controls_winuicontrols_xaml_deferred_258(
     // Controls/WinUIControls.xaml(120,20) Property
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(120,20) Duration
-    let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_2));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_2, rt::cast(double_transition_2.clone(), 120, 20)?);
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
@@ -113893,7 +113893,7 @@ fn build_controls_winuicontrols_xaml_deferred_275(
     // Controls/WinUIControls.xaml(520,10) Animation
     let animation_0 = ::ferroui_base::animation::Animation::new();
     // Controls/WinUIControls.xaml(520,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(520,10) FillMode
     animation_0.set_direct_value(::ferroui_base::animation::Animation::fill_mode_property(), ::ferroui_base::animation::FillMode::Forward);
@@ -113935,7 +113935,7 @@ fn build_controls_winuicontrols_xaml_deferred_275(
     // Controls/WinUIControls.xaml(528,10) Animation
     let animation_1 = ::ferroui_base::animation::Animation::new();
     // Controls/WinUIControls.xaml(528,10) Duration
-    let value_3 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2500000_i64);
+    let value_3 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2500000_i64);
     animation_1.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_3));
     // Controls/WinUIControls.xaml(528,10) Easing
     let value_4 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 528, 40)?;
@@ -115002,7 +115002,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     // Controls/WinUIControls.xaml(124,20) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/WinUIControls.xaml(124,20) Duration
-    let value_4 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_4));
     // Controls/WinUIControls.xaml(124,20) Easing
     let value_5 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 124, 98)?;
@@ -115014,7 +115014,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     // Controls/WinUIControls.xaml(125,20) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(125,20) Duration
-    let value_6 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_6 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_6));
     // Controls/WinUIControls.xaml(125,20) Easing
     let value_7 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 125, 77)?;
@@ -117449,7 +117449,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(350,12) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(350,12) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(350,12) Easing
     let value_1 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.0,0.35,0.15,1.0")), 350, 65)?;
@@ -117461,7 +117461,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(351,12) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(351,12) Duration
-    let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2000000_i64);
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_2));
     // Controls/WinUIControls.xaml(351,12) Easing
     let value_3 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.0,0.35,0.15,1.0")), 351, 66)?;
@@ -117497,7 +117497,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(358,12) Property
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(358,12) Duration
-    let value_4 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_4));
     // Controls/WinUIControls.xaml(358,12) Easing
     let value_5 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.0,0.35,0.15,1.0")), 358, 65)?;
@@ -117509,7 +117509,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(359,12) Property
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(359,12) Duration
-    let value_6 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
+    let value_6 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_6));
     // Controls/WinUIControls.xaml(359,12) Easing
     let value_7 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.0,0.35,0.15,1.0")), 359, 66)?;
@@ -117545,7 +117545,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(367,12) Property
     double_transition_4.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(367,12) Duration
-    let value_8 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(3500000_i64);
+    let value_8 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(3500000_i64);
     double_transition_4.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_8));
     // Controls/WinUIControls.xaml(367,12) Easing
     let value_9 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.1,0.9,0.2,1.0")), 367, 66)?;
@@ -117557,7 +117557,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(368,12) Property
     double_transition_5.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(368,12) Duration
-    let value_10 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(3500000_i64);
+    let value_10 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(3500000_i64);
     double_transition_5.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_10));
     // Controls/WinUIControls.xaml(368,12) Easing
     let value_11 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.1,0.9,0.2,1.0")), 368, 67)?;
@@ -117593,7 +117593,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(375,12) Property
     double_transition_6.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(375,12) Duration
-    let value_12 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1200000_i64);
+    let value_12 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1200000_i64);
     double_transition_6.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_12));
     // Controls/WinUIControls.xaml(375,12) Easing
     let value_13 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.1,0.9,0.2,1.0")), 375, 66)?;
@@ -117605,7 +117605,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(376,12) Property
     double_transition_7.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(376,12) Duration
-    let value_14 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1200000_i64);
+    let value_14 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1200000_i64);
     double_transition_7.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_14));
     // Controls/WinUIControls.xaml(376,12) Easing
     let value_15 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.1,0.9,0.2,1.0")), 376, 67)?;
@@ -117632,7 +117632,7 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(387,12) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
     // Controls/WinUIControls.xaml(387,12) Duration
-    let value_16 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1500000_i64);
+    let value_16 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1500000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_16));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_4, rt::cast(solid_color_brush_transition_0.clone(), 387, 12)?);
     rt::add_setter_value(style_32.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_44, rt::to_object(::core::clone::Clone::clone(&transitions_4)));
@@ -117665,10 +117665,10 @@ fn build_controls_winuicontrols_xaml_deferred_300(
     // Controls/WinUIControls.xaml(398,12) Property
     solid_color_brush_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
     // Controls/WinUIControls.xaml(398,12) Delay
-    let value_17 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1200000_i64);
+    let value_17 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1200000_i64);
     solid_color_brush_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::delay_property(), ::core::clone::Clone::clone(&value_17));
     // Controls/WinUIControls.xaml(398,12) Duration
-    let value_18 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_18 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     solid_color_brush_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_18));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_5, rt::cast(solid_color_brush_transition_1.clone(), 398, 12)?);
     rt::add_setter_value(style_33.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_45, rt::to_object(::core::clone::Clone::clone(&transitions_5)));
@@ -119994,7 +119994,7 @@ fn build_controls_winuicontrols_xaml_deferred_318(
     // Controls/WinUIControls.xaml(160,10) Value
     let page_slide_0 = ::ferroui_base::animation::PageSlide::__markup_new_0();
     // Controls/WinUIControls.xaml(160,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(3000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(3000000_i64);
     ::ferroui_base::animation::PageSlide::__markup_set_Duration(&page_slide_0, ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(160,10) Orientation
     ::ferroui_base::animation::PageSlide::__markup_set_Orientation(&page_slide_0, ::ferroui_base::animation::SlideAxis::Horizontal);
@@ -120028,7 +120028,7 @@ fn build_controls_winuicontrols_xaml_deferred_318(
     // Controls/WinUIControls.xaml(172,10) Value
     let page_slide_1 = ::ferroui_base::animation::PageSlide::__markup_new_0();
     // Controls/WinUIControls.xaml(172,10) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2500000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2500000_i64);
     ::ferroui_base::animation::PageSlide::__markup_set_Duration(&page_slide_1, ::core::clone::Clone::clone(&value_1));
     // Controls/WinUIControls.xaml(172,10) Orientation
     ::ferroui_base::animation::PageSlide::__markup_set_Orientation(&page_slide_1, ::ferroui_base::animation::SlideAxis::Vertical);
@@ -127246,7 +127246,7 @@ fn build_controls_winuicontrols_xaml_deferred_349(
     // Controls/WinUIControls.xaml(141,18) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
     // Controls/WinUIControls.xaml(141,18) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(solid_color_brush_transition_0.clone(), 141, 18)?);
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
@@ -128926,7 +128926,7 @@ fn build_controls_winuicontrols_xaml_deferred_354(
     // Controls/WinUIControls.xaml(349,18) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
     // Controls/WinUIControls.xaml(349,18) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(solid_color_brush_transition_0.clone(), 349, 18)?);
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
@@ -130639,7 +130639,7 @@ fn build_controls_winuicontrols_xaml_deferred_371(
     // Controls/WinUIControls.xaml(72,16) Property
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
     // Controls/WinUIControls.xaml(72,16) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     solid_color_brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(solid_color_brush_transition_0.clone(), 72, 16)?);
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
@@ -133275,7 +133275,7 @@ fn build_controls_winuicontrols_xaml_deferred_386(
     // Controls/WinUIControls.xaml(75,10) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Canvas::left_property())));
     // Controls/WinUIControls.xaml(75,10) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(3670000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(3670000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(75,10) Easing
     let value_1 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.1,0.9,0.2,1")), 75, 71)?;
@@ -133963,7 +133963,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(119,22) Property
     brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
     // Controls/WinUIControls.xaml(119,22) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(brush_transition_0.clone(), 119, 22)?);
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
@@ -134089,7 +134089,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(154,22) Property
     brush_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::shapes::Shape::fill_property())));
     // Controls/WinUIControls.xaml(154,22) Duration
-    let value_4 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     brush_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_4));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(brush_transition_1.clone(), 154, 22)?);
     // Controls/WinUIControls.xaml(155,22) Content
@@ -134098,7 +134098,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(155,22) Property
     brush_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::shapes::Shape::stroke_property())));
     // Controls/WinUIControls.xaml(155,22) Duration
-    let value_5 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_5 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     brush_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_5));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(brush_transition_2.clone(), 155, 22)?);
     // Controls/WinUIControls.xaml(156,22) Content
@@ -134107,7 +134107,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(156,22) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(156,22) Duration
-    let value_6 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_6 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_6));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_0.clone(), 156, 22)?);
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
@@ -134156,7 +134156,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(172,22) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(172,22) Duration
-    let value_7 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_7 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_7));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_2, rt::cast(double_transition_1.clone(), 172, 22)?);
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
@@ -134247,7 +134247,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(195,26) Property
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(195,26) Duration
-    let value_8 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_8 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_8));
     // Controls/WinUIControls.xaml(195,26) Easing
     let value_9 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 195, 81)?;
@@ -134259,7 +134259,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(196,26) Property
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(196,26) Duration
-    let value_10 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_10 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_3.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_10));
     // Controls/WinUIControls.xaml(196,26) Easing
     let value_11 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 196, 82)?;
@@ -134271,7 +134271,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(197,26) Property
     double_transition_4.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(197,26) Duration
-    let value_12 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_12 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_4.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_12));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_3, rt::cast(double_transition_4.clone(), 197, 26)?);
     let priority_59 = ::ferroui_base::data::BindingPriority::Template;
@@ -134319,7 +134319,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(212,26) Property
     double_transition_5.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
     // Controls/WinUIControls.xaml(212,26) Duration
-    let value_13 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_13 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_5.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_13));
     // Controls/WinUIControls.xaml(212,26) Easing
     let value_14 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 212, 81)?;
@@ -134331,7 +134331,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(213,26) Property
     double_transition_6.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::height_property())));
     // Controls/WinUIControls.xaml(213,26) Duration
-    let value_15 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_15 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_6.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_15));
     // Controls/WinUIControls.xaml(213,26) Easing
     let value_16 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 213, 82)?;
@@ -134343,7 +134343,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     // Controls/WinUIControls.xaml(214,26) Property
     double_transition_7.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // Controls/WinUIControls.xaml(214,26) Duration
-    let value_17 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
+    let value_17 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(830000_i64);
     double_transition_7.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_17));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_4, rt::cast(double_transition_7.clone(), 214, 26)?);
     let priority_67 = ::ferroui_base::data::BindingPriority::Template;
@@ -134513,7 +134513,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     // Controls/WinUIControls.xaml(78,18) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/WinUIControls.xaml(78,18) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2500000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2500000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     // Controls/WinUIControls.xaml(78,18) Easing
     let value_2 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 78, 96)?;
@@ -144978,7 +144978,7 @@ fn build_controls_winuicontrols_xaml_deferred_472(
     // Controls/WinUIControls.xaml(215,18) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/WinUIControls.xaml(215,18) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(215,18) Easing
     let value_1 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 215, 96)?;
@@ -146075,7 +146075,7 @@ fn build_controls_winuicontrols_xaml_deferred_482(
     // Controls/WinUIControls.xaml(88,20) Property
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::render_transform_property())));
     // Controls/WinUIControls.xaml(88,20) Duration
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1670000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1670000_i64);
     transform_operations_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
     // Controls/WinUIControls.xaml(88,20) Easing
     let value_2 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0,0,0,1")), 88, 98)?;

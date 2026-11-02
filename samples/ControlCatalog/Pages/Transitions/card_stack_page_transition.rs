@@ -2,7 +2,7 @@
 
 use ferroui_base::animation::{
     Animation, AnimationTask, Cue, IPageTransition, IProgressPageTransition, KeyFrame, PageSlide, PageTransitionItem,
-    SlideAxis, TimeSpan,
+    SlideAxis, SignedDuration,
 };
 use ferroui_base::media::{ITransform, RotateTransform, ScaleTransform, TransformGroup, TranslateTransform};
 use ferroui_base::styling::Setter;
@@ -69,7 +69,7 @@ impl CardStackPageTransition {
 
     /// `new CardStackPageTransition(duration, orientation)`: `duration` is the duration of
     /// the animation and `orientation` the axis on which the animation occurs.
-    pub fn with_duration(duration: TimeSpan, orientation: SlideAxis) -> Self {
+    pub fn with_duration(duration: SignedDuration, orientation: SlideAxis) -> Self {
         Self::from_slide(PageSlide::with_duration(duration, orientation))
     }
 
@@ -529,8 +529,8 @@ mod tests {
         assert_eq!(0.0, transition.back_card_offset());
         assert_eq!(SlideAxis::Horizontal, transition.page_slide().orientation());
 
-        let transition = CardStackPageTransition::with_duration(TimeSpan::from_seconds(0.5), SlideAxis::Vertical);
-        assert_eq!(TimeSpan::from_seconds(0.5), transition.page_slide().duration());
+        let transition = CardStackPageTransition::with_duration(SignedDuration::from_seconds(0.5), SlideAxis::Vertical);
+        assert_eq!(SignedDuration::from_seconds(0.5), transition.page_slide().duration());
         assert_eq!(SlideAxis::Vertical, transition.page_slide().orientation());
     }
 

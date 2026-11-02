@@ -157,7 +157,7 @@ crate::ferro_rust_paths! {
         crate::animation::PlaybackDirection,
         crate::animation::Rotate3DTransition,
         crate::animation::SlideAxis,
-        crate::animation::TimeSpan,
+        crate::animation::SignedDuration,
         crate::animation::Transitions,
         crate::animation::easings::BackEaseIn,
         crate::animation::easings::BackEaseInOut,

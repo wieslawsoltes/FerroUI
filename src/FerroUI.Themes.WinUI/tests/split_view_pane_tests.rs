@@ -5,7 +5,7 @@
 //! transitions of the template are stepped with the global clock of the test.
 
 use super::support::*;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::IBrush;
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::primitives::TemplatedControl;
@@ -69,7 +69,7 @@ impl Steps {
     fn to(&mut self, ms: f64) {
         assert!(ms >= self.now);
         self.now = ms;
-        self.clock.pulse(TimeSpan::from_milliseconds(ms));
+        self.clock.pulse(SignedDuration::from_milliseconds(ms));
         self.window.update_layout();
     }
 

@@ -1,6 +1,6 @@
 //! Port of `ViewModels/PlatformSettingsViewModel.cs`.
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::ferro_markup_type;
 use ferroui_base::input::PointerType;
@@ -134,7 +134,7 @@ impl PlatformSettingsViewModel {
     pub fn hold_wait_duration(&self) -> String {
         self.settings().map_or_else(
             || NOT_AVAILABLE.to_string(),
-            |settings| TimeSpan::from(settings.hold_wait_duration()).to_string(),
+            |settings| SignedDuration::from(settings.hold_wait_duration()).to_string(),
         )
     }
 
@@ -165,14 +165,14 @@ impl PlatformSettingsViewModel {
     pub fn double_tap_time_touch(&self) -> String {
         self.settings().map_or_else(
             || NOT_AVAILABLE.to_string(),
-            |settings| TimeSpan::from(settings.get_double_tap_time(PointerType::Touch)).to_string(),
+            |settings| SignedDuration::from(settings.get_double_tap_time(PointerType::Touch)).to_string(),
         )
     }
 
     pub fn double_tap_time_mouse(&self) -> String {
         self.settings().map_or_else(
             || NOT_AVAILABLE.to_string(),
-            |settings| TimeSpan::from(settings.get_double_tap_time(PointerType::Mouse)).to_string(),
+            |settings| SignedDuration::from(settings.get_double_tap_time(PointerType::Mouse)).to_string(),
         )
     }
 }

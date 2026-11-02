@@ -4,7 +4,7 @@ use crate::browser_app_builder::BrowserPlatformOptions;
 use crate::interop::completion_helper::PromiseError;
 use crate::interop::storage_helper::{self, StorageItemProperties};
 use crate::interop::{ferro_module, non_null, JsObject};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::file_io::{DecodeResult, StorageBookmarkHelper, StorageProviderHelpers};
 use ferroui_base::platform::storage::{
@@ -452,7 +452,7 @@ impl JsStorageItem {
 }
 
 fn from_unix_time_milliseconds(milliseconds: i64) -> DateTimeOffset {
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(milliseconds * 10_000))
+    DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks(milliseconds * 10_000))
 }
 
 macro_rules! impl_js_storage_item {

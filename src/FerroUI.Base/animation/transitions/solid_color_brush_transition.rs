@@ -1,6 +1,6 @@
 use crate::animation::animators::ISolidColorBrushAnimator;
 use crate::animation::easings::{Easing, LinearEasing};
-use crate::animation::{AnimatorTransitionObservable, TimeSpan, Transition, TransitionBase, TransitionObservableBase};
+use crate::animation::{AnimatorTransitionObservable, SignedDuration, Transition, TransitionBase, TransitionObservableBase};
 use crate::ferro_transition_class;
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::{Color, IBrush};
@@ -53,7 +53,7 @@ impl Transition<Brush> for SolidColorBrushTransition {
 
         // The progress stays 0 during the delay and is above 0 (1 for no duration) afterwards; the
         // linear easing keeps an easing that returns 0 past the start from holding the old brush.
-        let immediate = this.delay() == TimeSpan::ZERO;
+        let immediate = this.delay() == SignedDuration::ZERO;
         TransitionObservableBase::new(progress, Easing::new(LinearEasing::new()), move |progress| {
             if immediate || progress > 0.0 {
                 new_value.clone()

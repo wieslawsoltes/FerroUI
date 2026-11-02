@@ -6,7 +6,7 @@ use super::transitions::{
 };
 use crate::markup::{user_control_class, xaml_class};
 use crate::pages::navigation_demo_helper::NavigationDemoHelper;
-use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEventArgs};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::primitives::RangeBaseValueChangedEventArgs;
@@ -154,7 +154,7 @@ impl NavigationPageTransitionsPage {
         let Some(demo_nav) = self.demo_nav() else {
             return;
         };
-        let duration = TimeSpan::from_milliseconds(self.duration_slider().value());
+        let duration = SignedDuration::from_milliseconds(self.duration_slider().value());
         let transition: Option<Rc<dyn IPageTransition>> = match self.transition_combo().selected_index() {
             1 => Some(Rc::new(PageSlide::with_duration(duration, SlideAxis::Horizontal))),
             3 => Some(Rc::new(ParallaxSlideTransition::with_duration(duration))),

@@ -2,7 +2,7 @@ use crate::presenters::ScrollContentPresenter;
 use crate::primitives::{register_logical_scrollable, ILogicalScrollable};
 use crate::utils::TimeUtils;
 use crate::{Control, ControlImpl, Controls, ListBoxItem, Panel, PanelImpl};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::{
     IScrollable, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, NavigationDirection, ScrollGestureEndedEventArgs,
     TappedEventArgs,
@@ -810,9 +810,9 @@ impl DateTimePickerPanel {
                 let format_date = self.format_date();
                 DateTime::new(format_date.year(), format_date.month(), value).to_string_with(&self.item_format())
             }
-            DateTimePickerPanelType::Hour => TimeSpan::from_hms(value, 0, 0).to_string_format(&self.item_format()),
-            DateTimePickerPanelType::Minute => TimeSpan::from_hms(0, value, 0).to_string_format(&self.item_format()),
-            DateTimePickerPanelType::Second => TimeSpan::from_hms(0, 0, value).to_string_format(&self.item_format()),
+            DateTimePickerPanelType::Hour => SignedDuration::from_hms(value, 0, 0).to_string_format(&self.item_format()),
+            DateTimePickerPanelType::Minute => SignedDuration::from_hms(0, value, 0).to_string_format(&self.item_format()),
+            DateTimePickerPanelType::Second => SignedDuration::from_hms(0, 0, value).to_string_format(&self.item_format()),
             DateTimePickerPanelType::TimePeriod => {
                 if value == self.minimum_value() {
                     TimeUtils::get_am_designator()

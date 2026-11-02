@@ -4,7 +4,7 @@
 use super::{FerroFlixDetailView, FerroFlixHomeView, FerroFlixSearchView};
 use crate::markup::xaml_class;
 use crate::pages::navigation_demo_helper::{parse_color, parse_geometry};
-use ferroui_base::animation::{PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, Orientation, VerticalAlignment};
@@ -116,7 +116,7 @@ impl FerroFlixAppPage {
         let detail_nav = this.detail_nav.borrow().clone();
         if let Some(detail_nav) = detail_nav {
             detail_nav.set_modal_transition(Some(Rc::new(PageSlide::with_duration(
-                TimeSpan::from_milliseconds(300.0),
+                SignedDuration::from_milliseconds(300.0),
                 SlideAxis::Vertical,
             ))));
 

@@ -4,7 +4,7 @@ use crate::{
     DeferredContentPresentationTimeline as Timeline, DeferredContentPresenter as Presenter,
     DeferredContentScheduling as Scheduling, IDeferredContentPresentation,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{BoxedValue, Ref, Size};
 use ferroui_controls::presenters::ContentPresenter;
@@ -61,7 +61,7 @@ impl Manual {
         let t = Settings::default_timeline();
         assert_eq!(t.pending_count(), 0);
         t.set_auto_schedule(false);
-        t.set_reveal_duration(TimeSpan::ZERO);
+        t.set_reveal_duration(SignedDuration::ZERO);
         Self(t)
     }
 }
@@ -70,7 +70,7 @@ impl Drop for Manual {
         self.0.set_auto_schedule(true);
         self.0.set_max_presentations_per_pass(8);
         self.0
-            .set_reveal_duration(TimeSpan::from_milliseconds(90.0));
+            .set_reveal_duration(SignedDuration::from_milliseconds(90.0));
     }
 }
 struct Scene(Ref<Window>);
@@ -330,13 +330,13 @@ fn inherited_scope_order_delay_and_independent_timelines_use_source_rules() {
         let a = Timeline::new();
         a.set_auto_schedule(false);
         a.set_max_presentations_per_pass(1);
-        a.set_reveal_duration(TimeSpan::ZERO);
+        a.set_reveal_duration(SignedDuration::ZERO);
         let b = Timeline::new();
         b.set_auto_schedule(false);
-        b.set_reveal_duration(TimeSpan::ZERO);
+        b.set_reveal_duration(SignedDuration::ZERO);
         Scheduling::set_timeline(&scope, Some(a.clone()));
         Scheduling::set_order(&scope, 5);
-        Scheduling::set_delay(&scope, TimeSpan::from_ticks(-1));
+        Scheduling::set_delay(&scope, SignedDuration::from_ticks(-1));
         scope.children().add(first.clone().upcast::<Control>());
         scope.children().add(second.clone().upcast::<Control>());
         let template = CountingTemplate::new();
@@ -347,7 +347,7 @@ fn inherited_scope_order_delay_and_independent_timelines_use_source_rules() {
         Scheduling::set_order(&second, -1);
         let scene = Scene::new(scope.clone().upcast());
         assert_eq!(Scheduling::get_order(&first), 5);
-        assert_eq!(Scheduling::get_delay(&first), TimeSpan::from_ticks(-1));
+        assert_eq!(Scheduling::get_delay(&first), SignedDuration::from_ticks(-1));
         assert_eq!(a.pending_count(), 2);
         scene.drain(&a);
         assert!(first.presenter().unwrap().child().is_none());
@@ -417,7 +417,7 @@ fn reveal_skips_first_materialization_reuses_own_transition_and_preserves_user_t
         let manual = Manual::new();
         manual
             .0
-            .set_reveal_duration(TimeSpan::from_milliseconds(90.0));
+            .set_reveal_duration(SignedDuration::from_milliseconds(90.0));
         let template = CountingTemplate::new();
         let host = Host::new();
         host.set_content_template(Some(template));
@@ -437,28 +437,28 @@ fn reveal_skips_first_materialization_reuses_own_transition_and_preserves_user_t
             .unwrap()
             .cast::<DoubleTransition>()
             .unwrap();
-        assert_eq!(transition.duration(), TimeSpan::from_milliseconds(90.0));
+        assert_eq!(transition.duration(), SignedDuration::from_milliseconds(90.0));
         assert_eq!(
             transition.property(),
             Some(Visual::opacity_property().as_property())
         );
         manual
             .0
-            .set_reveal_duration(TimeSpan::from_milliseconds(120.0));
+            .set_reveal_duration(SignedDuration::from_milliseconds(120.0));
         host.set_content(Some(boxed("Third")));
         manual.0.flush_pending_batch_for_testing();
         assert_eq!(transitions.count(), 1);
-        assert_eq!(transition.duration(), TimeSpan::from_milliseconds(120.0));
+        assert_eq!(transition.duration(), SignedDuration::from_milliseconds(120.0));
         let user = DoubleTransition::with_property(
             Visual::opacity_property().as_property(),
-            TimeSpan::from_milliseconds(700.0),
+            SignedDuration::from_milliseconds(700.0),
         );
         let user_list = Transitions::from_items([user.clone().into()]);
         presenter.set_transitions(Some(user_list.clone()));
         host.set_content(Some(boxed("Fourth")));
         manual.0.flush_pending_batch_for_testing();
         assert_eq!(user_list.count(), 1);
-        assert_eq!(user.duration(), TimeSpan::from_milliseconds(700.0));
+        assert_eq!(user.duration(), SignedDuration::from_milliseconds(700.0));
         assert!(presenter.transitions().unwrap().ptr_eq(&user_list));
         scene.drain(&manual.0);
     });
@@ -497,21 +497,21 @@ fn inherited_template_scope_is_used_unless_an_explicit_null_timeline_is_set() {
         let t = Timeline::new();
         t.set_auto_schedule(false);
         Scheduling::set_timeline(&parent, Some(t.clone()));
-        Scheduling::set_delay(&parent, TimeSpan::from_milliseconds(50.0));
+        Scheduling::set_delay(&parent, SignedDuration::from_milliseconds(50.0));
         Scheduling::set_order(&parent, -7);
         let presenter = Presenter::new();
         presenter.set_templated_parent(Some(parent.clone().upcast()));
         assert!(Rc::ptr_eq(&resolve_timeline(&presenter), &t));
-        assert_eq!(resolve_delay(&presenter), TimeSpan::from_milliseconds(50.0));
+        assert_eq!(resolve_delay(&presenter), SignedDuration::from_milliseconds(50.0));
         assert_eq!(resolve_order(&presenter), -7);
         Scheduling::set_timeline(&presenter, None);
         assert!(Rc::ptr_eq(
             &resolve_timeline(&presenter),
             &Settings::default_timeline()
         ));
-        Scheduling::set_delay(&presenter, TimeSpan::ZERO);
+        Scheduling::set_delay(&presenter, SignedDuration::ZERO);
         Scheduling::set_order(&presenter, 0);
-        assert_eq!(resolve_delay(&presenter), TimeSpan::ZERO);
+        assert_eq!(resolve_delay(&presenter), SignedDuration::ZERO);
         assert_eq!(resolve_order(&presenter), 0);
     });
 }
@@ -561,8 +561,8 @@ fn items_control_presenters_use_scoped_time_budget_and_native_containers() {
         let t = Timeline::new();
         t.set_auto_schedule(false);
         t.set_budget_mode(Mode::RealizationTime);
-        t.set_max_realization_time_per_pass(TimeSpan::from_milliseconds(10.0));
-        t.set_reveal_duration(TimeSpan::ZERO);
+        t.set_max_realization_time_per_pass(SignedDuration::from_milliseconds(10.0));
+        t.set_reveal_duration(SignedDuration::ZERO);
         let templates = Rc::new(vec![
             CountingTemplate::new(),
             CountingTemplate::new(),
@@ -617,7 +617,7 @@ fn original_reveal_updates_content_and_completes_on_native_render_ticks() {
                 let manual = Manual::new();
                 manual
                     .0
-                    .set_reveal_duration(TimeSpan::from_milliseconds(50.0));
+                    .set_reveal_duration(SignedDuration::from_milliseconds(50.0));
                 let host = Host::new();
                 host.set_content_template(Some(CountingTemplate::new()));
                 host.set_content(Some(boxed("First")));

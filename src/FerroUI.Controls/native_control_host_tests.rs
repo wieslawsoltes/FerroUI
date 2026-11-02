@@ -14,7 +14,7 @@ use crate::storage_misc_tests::{TestAttachment, TestNativeControlHostImpl};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};
 use crate::{Border, Button, Control, NativeControlHost, Panel, Window};
-use ferroui_base::animation::{IGlobalClock, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{ITransform, MediaContext, TranslateTransform};
 use ferroui_base::threading::{Dispatcher, DispatcherTask};
@@ -98,7 +98,7 @@ fn shell() -> Shell {
 
     let nav = NavigationPage::new();
     let transition: Rc<dyn IPageTransition> =
-        Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(60.0), SlideAxis::Horizontal));
+        Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(60.0), SlideAxis::Horizontal));
     nav.set_page_transition(Some(transition));
     nav.set_template(Some(navigation_page_template()));
     window.set_content(Some(Control::boxed(nav.clone())));

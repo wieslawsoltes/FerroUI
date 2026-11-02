@@ -1236,7 +1236,7 @@ impl TopLevel {
     }
 
     /// Enqueues a callback to be called on the next animation tick.
-    pub fn request_animation_frame(&self, action: impl FnOnce(ferroui_base::animation::TimeSpan) + 'static) {
+    pub fn request_animation_frame(&self, action: impl FnOnce(ferroui_base::animation::SignedDuration) + 'static) {
         Dispatcher::ui_thread().verify_access();
         MediaContext::instance().request_animation_frame(action);
     }

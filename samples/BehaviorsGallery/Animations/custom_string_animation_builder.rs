@@ -2,7 +2,7 @@
 
 use super::custom_string_animator::CustomStringAnimator;
 use ferroui_base::animation::{
-    Animation, Cue, IAnimationSetter, ICustomAnimator, IterationCount, KeyFrame, TimeSpan,
+    Animation, Cue, IAnimationSetter, ICustomAnimator, IterationCount, KeyFrame, SignedDuration,
 };
 use ferroui_base::styling::Setter;
 use ferroui_base::Ref;
@@ -38,7 +38,7 @@ impl IAnimationBuilder for CustomStringAnimationBuilder {
     /// `Build(Control)`.
     fn build(&self, _control: &Control) -> Option<Ref<Animation>> {
         let animation = Animation::new();
-        animation.set_duration(TimeSpan::from_seconds(1.0));
+        animation.set_duration(SignedDuration::from_seconds(1.0));
         animation.set_iteration_count(IterationCount::INFINITE);
         animation
             .children()

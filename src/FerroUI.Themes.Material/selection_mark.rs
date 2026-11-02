@@ -16,7 +16,7 @@
 use crate::motion::{
     animations_enabled, MaterialMotionRole, MaterialMotionScheme, MaterialSpringState,
 };
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -204,7 +204,7 @@ impl MaterialSelectionMark {
         self.last_tick.set(None);
         let weak = self.to_ref().downgrade();
         *self.clock_subscription.borrow_mut() = Some(Subscription::new(clock.subscribe(Rc::new(
-            AnonymousObserver::new(move |time: TimeSpan| {
+            AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     if !animations_enabled(this.reduced_motion()) {
                         this.retarget();

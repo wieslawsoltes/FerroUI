@@ -1,4 +1,4 @@
-use crate::animation::{ClockBase, IClock, IGlobalClock, PlayState, TimeSpan};
+use crate::animation::{ClockBase, IClock, IGlobalClock, PlayState, SignedDuration};
 use crate::reactive::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use crate::{FerroLocator, LocatorExtensions};
 use std::cell::RefCell;
@@ -18,8 +18,8 @@ pub struct Clock {
 
 struct ParentObserver(Rc<Clock>);
 
-impl IObserver<TimeSpan> for ParentObserver {
-    fn on_next(&self, value: TimeSpan) {
+impl IObserver<SignedDuration> for ParentObserver {
+    fn on_next(&self, value: SignedDuration) {
         let clock = &self.0;
         clock.base.pulse(value, || clock.stop());
     }
@@ -58,8 +58,8 @@ impl Clock {
     }
 }
 
-impl IObservable<TimeSpan> for Clock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for Clock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.base.subscribe(observer)
     }
 }

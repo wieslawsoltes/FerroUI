@@ -706,11 +706,11 @@ fn native_resize_cancels_on_escape_capture_loss_zoom_reflow_and_card_retirement(
 #[test]
 #[cfg(feature = "render-smoke")]
 fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_graph() {
-    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
     use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver};
     struct ThemeClock;
-    impl IObservable<TimeSpan> for ThemeClock {
-        fn subscribe(&self, _: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+    impl IObservable<SignedDuration> for ThemeClock {
+        fn subscribe(&self, _: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
             Disposable::empty()
         }
     }

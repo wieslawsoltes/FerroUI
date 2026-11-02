@@ -15543,7 +15543,7 @@ fn populate_macostheme_xaml_part_33(
     ::core::mem::drop(namespace_scope_14);
     let namespace_scope_15 = rt::push_namespace_scope(&context, POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_3);
     // MacOSTheme.xaml(12,52) Content (resource)
-    let value_634 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(12000000_i64);
+    let value_634 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(12000000_i64);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 12, 52)?, rt::string_object("MacOSProgressPulseDuration"), rt::to_object(::core::clone::Clone::clone(&value_634))), 12, 52)?;
     // MacOSTheme.xaml(47,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficLightGlyphBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5467, 47, 4)?;
@@ -84281,12 +84281,12 @@ fn build_controls_macoscontrols_xaml_deferred_142(
     // Controls/MacOSControls.xaml(141,6) Content
     let setter_7 = rt::new_setter(rt::property(::ferroui_controls::primitives::ScrollBar::show_delay_property()));
     // Controls/MacOSControls.xaml(141,6) Value
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(0_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&value_0)));
     // Controls/MacOSControls.xaml(142,6) Content
     let setter_8 = rt::new_setter(rt::property(::ferroui_controls::primitives::ScrollBar::hide_delay_property()));
     // Controls/MacOSControls.xaml(142,6) Value
-    let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(7000000_i64);
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7000000_i64);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&value_1)));
     // Controls/MacOSControls.xaml(143,6) Content
     // Controls/MacOSControls.xaml(143,6) Style
@@ -88013,7 +88013,7 @@ fn build_controls_macoscontrols_xaml_deferred_166(
         rt::unset_value(animation_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::Animation::duration_property());
     } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         rt::bind(animation_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::Animation::duration_property(), value_1.clone(), 117, 46)?;
-    } else if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    } else if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::animation::SignedDuration as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), rt::exact(value_1.clone(), "FerroUI.Animation.Animation.set_Duration", 0, 117, 46)?);
     } else {
         return ::core::result::Result::Err(rt::no_setter("Duration", &value_1, 117, 46));

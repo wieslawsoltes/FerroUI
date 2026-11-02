@@ -1,6 +1,6 @@
 //! Port of `Core/DelayedLoadTrigger.cs`.
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::DispatcherTimer;
 use ferroui_base::{
@@ -28,8 +28,8 @@ ferroui_base::ferro_impl_classes!(DelayedLoadTrigger: FerroObjectImpl, StyledEle
 ferro_properties! {
     impl DelayedLoadTrigger {
         /// Identifies the `Delay` property.
-        pub fn delay_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<DelayedLoadTrigger, _>("Delay", TimeSpan::from_milliseconds(500.0))
+        pub fn delay_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<DelayedLoadTrigger, _>("Delay", SignedDuration::from_milliseconds(500.0))
         }
     }
 }
@@ -69,11 +69,11 @@ impl DelayedLoadTrigger {
     }
 
     /// Gets or sets the delay before actions are executed.
-    pub fn delay(&self) -> TimeSpan {
+    pub fn delay(&self) -> SignedDuration {
         self.get_value(Self::delay_property())
     }
 
-    pub fn set_delay(&self, value: TimeSpan) {
+    pub fn set_delay(&self, value: SignedDuration) {
         self.set_value(Self::delay_property(), value)
     }
 

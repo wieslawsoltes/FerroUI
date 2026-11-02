@@ -2,7 +2,7 @@
 //! selection. Popups use the actual WinUI templates inside the headless overlay host.
 use super::*;
 use crate::{LayoutMatch, PreviewStatus};
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::imaging::{PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::media::{Color, IBrush};
@@ -22,12 +22,12 @@ use ferroui_vello::{VelloOptions, VelloPlatform, VelloRenderingMode};
 use std::path::Path;
 
 struct RenderClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
     now: Cell<f64>,
 }
-impl IObservable<TimeSpan> for RenderClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for RenderClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -47,7 +47,7 @@ fn settle(window: &Window, clock: &RenderClock) {
         clock.now.set(clock.now.get() + 1.0);
         clock
             .subject
-            .on_next(TimeSpan::from_seconds(clock.now.get()));
+            .on_next(SignedDuration::from_seconds(clock.now.get()));
         window.update_layout();
     }
 }

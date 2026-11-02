@@ -153,7 +153,7 @@ impl PropertyEditorMetadata {
                         .map(|_| ())
                 })
                 .map_err(|error| error.to_string()),
-            PropertyEditorKind::TimeSpan => ferroui_base::animation::TimeSpan::parse(value)
+            PropertyEditorKind::TimeSpan => ferroui_base::animation::SignedDuration::parse(value)
                 .map(|_| ())
                 .map_err(|error| error.to_string()),
             PropertyEditorKind::Duration => PropertyValueShape::Duration

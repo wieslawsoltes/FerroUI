@@ -18,7 +18,7 @@ use super::{
 use crate::templates::{FuncControlTemplate, FuncDataTemplate, FuncTemplateNameScopeExtensions, IDataTemplate};
 use crate::test_support::{test_scope, TestRoot};
 use crate::{Border, Control, PathIcon, TabControl};
-use ferroui_base::animation::{CrossFade, IPageTransition, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, SignedDuration};
 use ferroui_base::collections::{NotifyCollectionChangedAction, SharedNotifyCollectionChangedEventArgs};
 use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
 use ferroui_base::media::{EllipseGeometry, FlowDirection};
@@ -171,7 +171,7 @@ fn page_template_can_be_set_to_null() {
 #[test]
 fn page_transition_round_trips() {
     let _scope = test_scope();
-    let transition: Rc<dyn IPageTransition> = Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(200.0)));
+    let transition: Rc<dyn IPageTransition> = Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(200.0)));
     let tp = TabbedPage::new();
     tp.set_page_transition(Some(transition.clone()));
     assert!(tp.page_transition().is_some_and(|actual| Rc::ptr_eq(&actual, &transition)));

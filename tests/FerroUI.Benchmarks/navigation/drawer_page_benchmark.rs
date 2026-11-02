@@ -6,7 +6,7 @@
 
 use crate::harness::Registry;
 use crate::test_root::TestRoot;
-use ferroui_base::animation::{ClockBase, IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{ClockBase, IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver};
 use ferroui_base::styling::{IStyle, Styles};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
@@ -28,13 +28,13 @@ impl MockGlobalClock {
     }
 
     #[allow(dead_code)]
-    fn pulse(&self, system_time: TimeSpan) {
+    fn pulse(&self, system_time: SignedDuration) {
         self.base.pulse(system_time, || {});
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.base.subscribe(observer)
     }
 }

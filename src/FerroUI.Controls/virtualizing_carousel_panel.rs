@@ -7,7 +7,7 @@ use crate::{
 };
 use ferroui_base::animation::easings::{Easing, QuadraticEaseOut, SineEaseOut};
 use ferroui_base::animation::{
-    Animation, Cue, FillMode, IPageTransition, KeyFrame, PageTransitionItem, SlideAxis, TimeSpan,
+    Animation, Cue, FillMode, IPageTransition, KeyFrame, PageTransitionItem, SlideAxis, SignedDuration,
 };
 use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
@@ -1372,7 +1372,7 @@ impl VirtualizingCarouselPanel {
         self.animate_viewport_offset_async(
             current_offset,
             target_offset,
-            TimeSpan::from_seconds(MAX_COMPLETION_DURATION),
+            SignedDuration::from_seconds(MAX_COMPLETION_DURATION),
             QuadraticEaseOut::new().into(),
             |this| {
                 this.reset_viewport_transition_state();
@@ -1769,7 +1769,7 @@ impl VirtualizingCarouselPanel {
         self.animate_viewport_offset_async(
             current_offset,
             end_offset,
-            TimeSpan::from_seconds(duration_seconds),
+            SignedDuration::from_seconds(duration_seconds),
             easing,
             move |this| {
                 this.total_delta.set(0.0);
@@ -1800,7 +1800,7 @@ impl VirtualizingCarouselPanel {
         property: &'static StyledProperty<f64>,
         from: f64,
         to: f64,
-        duration: TimeSpan,
+        duration: SignedDuration,
         easing: Easing,
     ) -> Ref<Animation> {
         let animation = Animation::new();
@@ -1816,7 +1816,7 @@ impl VirtualizingCarouselPanel {
         &self,
         from_offset: f64,
         to_offset: f64,
-        duration: TimeSpan,
+        duration: SignedDuration,
         easing: Easing,
         on_completed: impl FnOnce(&Self) + 'static,
     ) {
@@ -1925,7 +1925,7 @@ impl VirtualizingCarouselPanel {
             Self::completion_progress_property(),
             current_progress,
             completion_end_progress,
-            TimeSpan::from_seconds(duration_seconds),
+            SignedDuration::from_seconds(duration_seconds),
             easing,
         );
 
