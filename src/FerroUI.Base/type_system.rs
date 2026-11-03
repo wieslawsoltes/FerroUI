@@ -1415,6 +1415,14 @@ macro_rules! ferro_class_info {
         $cast
     };
 
+    (@register_interface $name:ident, $interface:ty) => {
+        $crate::data::core::ValueTypes::__register_interface_default::<$name, $interface>();
+    };
+
+    (@register_interface $name:ident, $interface:ty => $cast:expr) => {
+        $crate::data::core::ValueTypes::register_interface::<$name, $interface>($cast);
+    };
+
     (@interfaces $name:ident [$($interface:ty $(=> $cast:expr)?),* $(,)?]) => {
         impl $name {
             #[doc(hidden)]
@@ -1424,9 +1432,7 @@ macro_rules! ferro_class_info {
             #[doc(hidden)]
             pub fn __register_interfaces() {
                 $(
-                    $crate::data::core::ValueTypes::register_interface::<$name, $interface>(
-                        $crate::ferro_class_info!(@cast $($cast)?),
-                    );
+                    $crate::ferro_class_info!(@register_interface $name, $interface $(=> $cast)?);
                 )*
             }
         }

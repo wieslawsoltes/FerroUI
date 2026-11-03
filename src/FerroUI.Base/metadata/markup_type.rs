@@ -1095,10 +1095,18 @@ impl MarkupType {
     /// The crate that declares `H` also registers the casts between `H` and the handles
     /// of the type ([`ValueTypes::register_cast`]). A handle that is already known keeps
     /// its type.
+    #[inline]
     pub fn register_handle<H: 'static>(type_: &'static MarkupType) {
+        Self::register_handle_id(type_, TypeId::of::<H>());
+    }
+
+    // Synchronization and registry insertion do not depend on the Rust handle
+    // representation. The public generic facade supplies only its identity.
+    #[inline(never)]
+    fn register_handle_id(type_: &'static MarkupType, handle: TypeId) {
         let mut registry = registry().write().unwrap_or_else(|e| e.into_inner());
         registry.insert(type_);
-        registry.by_handle.entry(TypeId::of::<H>()).or_insert(type_);
+        registry.by_handle.entry(handle).or_insert(type_);
     }
 
     /// Finds a registered type by namespace and name.

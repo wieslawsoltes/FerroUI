@@ -278,6 +278,7 @@ impl BindingTarget {
         }
     }
 
+    #[inline(always)]
     fn owner(&self) -> Option<crate::Ref<FerroObject>> {
         self.owner.borrow().as_ref().and_then(WeakRef::upgrade)
     }
@@ -328,6 +329,7 @@ impl BindingTarget {
         );
     }
 
+    #[inline(always)]
     fn publish(&self, sink: SinkRef, this: Rc<dyn BindingExpressionBase>) {
         struct Restore<'a>(&'a Cell<bool>, bool);
         impl Drop for Restore<'_> {

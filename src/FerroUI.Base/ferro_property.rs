@@ -547,15 +547,28 @@ impl FerroProperty {
     }
 
     /// Registers a styled property.
+    #[inline]
     pub fn register_with<TOwner: ObjectType, TValue: PropertyValue>(
+        name: &str,
+        options: StyledPropertyOptions<TValue>,
+    ) -> &'static StyledProperty<TValue> {
+        Self::register_with_core(TOwner::TYPE, name, options)
+    }
+
+    // Ownership is descriptor data. Only the value's metadata, validation and
+    // coercion specialize this installation path; every owner of that value
+    // type shares it without changing the typed read/write implementation.
+    #[inline(never)]
+    fn register_with_core<TValue: PropertyValue>(
+        owner_type: &'static TypeInfo,
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static StyledProperty<TValue> {
         let assign_binding = options.assign_binding;
         let (metadata, inherits, validate, notifying) = options.into_parts();
-        let result = StyledProperty::create(name, TOwner::TYPE, TOwner::TYPE, metadata, inherits, validate, notifying, false);
+        let result = StyledProperty::create(name, owner_type, owner_type, metadata, inherits, validate, notifying, false);
         result.set_assign_binding(assign_binding);
-        FerroPropertyRegistry::instance().register(TOwner::TYPE, result);
+        FerroPropertyRegistry::instance().register(owner_type, result);
         result
     }
 
@@ -571,18 +584,29 @@ impl FerroProperty {
     }
 
     /// Registers an attached property.
+    #[inline]
     pub fn register_attached_with<TOwner: StaticType, THost: ObjectType, TValue: PropertyValue>(
+        name: &str,
+        options: StyledPropertyOptions<TValue>,
+    ) -> &'static AttachedProperty<TValue> {
+        Self::register_attached_with_core(TOwner::TYPE, THost::TYPE, name, options)
+    }
+
+    #[inline(never)]
+    fn register_attached_with_core<TValue: PropertyValue>(
+        owner_type: &'static TypeInfo,
+        host_type: &'static TypeInfo,
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static AttachedProperty<TValue> {
         let assign_binding = options.assign_binding;
         let (metadata, inherits, validate, notifying) = options.into_parts();
-        let result = AttachedProperty::create(name, TOwner::TYPE, THost::TYPE, metadata, inherits, validate, notifying);
+        let result = AttachedProperty::create(name, owner_type, host_type, metadata, inherits, validate, notifying);
         result.set_assign_binding(assign_binding);
-        result.host_type.set(Some(THost::TYPE));
+        result.host_type.set(Some(host_type));
         let registry = FerroPropertyRegistry::instance();
-        registry.register(TOwner::TYPE, result);
-        registry.register_attached(THost::TYPE, result);
+        registry.register(owner_type, result);
+        registry.register_attached(host_type, result);
         result
     }
 

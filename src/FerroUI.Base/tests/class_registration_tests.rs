@@ -738,3 +738,112 @@ fn upcast_handles_share_allocation_identity_and_hash_across_owners() {
     assert!(first_weak.ptr_eq(&base_weak));
     assert!(!second_weak.ptr_eq(&base_weak));
 }
+
+// A default interface declaration has no runtime closure environment. A class
+// can still replace it with an explicit projection, and vice versa.
+test_class!(RegStaticProjectionBase: FerroObject);
+test_class!(RegStaticProjectionDerived: RegStaticProjectionBase);
+test_class!(RegStaticProjectionSibling: RegStaticProjectionBase);
+ferro_class_info!(RegStaticProjectionBase { interfaces: [RegProjectionHandle] });
+ferro_class_info!(RegStaticProjectionDerived { interfaces: [RegProjectionHandle] });
+
+#[derive(Clone, PartialEq)]
+pub struct RegProjectionHandle {
+    object: Ref<FerroObject>,
+    route: &'static str,
+}
+
+impl From<Ref<RegStaticProjectionBase>> for RegProjectionHandle {
+    fn from(object: Ref<RegStaticProjectionBase>) -> Self {
+        Self { object: object.upcast(), route: "base" }
+    }
+}
+
+impl From<Ref<RegStaticProjectionDerived>> for RegProjectionHandle {
+    fn from(object: Ref<RegStaticProjectionDerived>) -> Self {
+        Self { object: object.upcast(), route: "derived" }
+    }
+}
+
+fn interface_projection(object: &BoxedValue) -> RegProjectionHandle {
+    ValueTypes::try_cast(object, ValueType::of::<RegProjectionHandle>())
+        .expect("registered projection")
+        .downcast_ref::<RegProjectionHandle>()
+        .expect("exact interface payload")
+        .clone()
+}
+
+#[test]
+fn static_interface_entries_preserve_most_derived_selection_and_replacement() {
+    let derived = RegStaticProjectionDerived::new();
+    let sibling = RegStaticProjectionSibling::new();
+    // A base-typed box still resolves by the object's actual class.
+    let boxed: BoxedValue = Rc::new(derived.clone().upcast::<RegStaticProjectionBase>());
+    let other: BoxedValue = Rc::new(sibling.clone());
+    assert_eq!(interface_projection(&boxed).route, "derived");
+    assert_eq!(interface_projection(&other).route, "base");
+    assert!(interface_projection(&boxed).object.ptr_eq(&derived.clone().upcast::<FerroObject>()));
+
+    // Updating a less-derived entry cannot shadow an existing derived entry.
+    ValueTypes::register_interface::<RegStaticProjectionBase, RegProjectionHandle>(|object| {
+        RegProjectionHandle { object: object.upcast(), route: "base override" }
+    });
+    assert_eq!(interface_projection(&boxed).route, "derived");
+    assert_eq!(interface_projection(&other).route, "base override");
+
+    // Repeated registrations replace the same class slot in either direction.
+    ValueTypes::register_interface::<RegStaticProjectionDerived, RegProjectionHandle>(|object| {
+        RegProjectionHandle { object: object.upcast(), route: "derived override" }
+    });
+    assert_eq!(interface_projection(&boxed).route, "derived override");
+    for _ in 0..2 {
+        RegStaticProjectionDerived::__register_interfaces();
+        assert_eq!(interface_projection(&boxed).route, "derived");
+    }
+    let nullable = ValueTypes::try_cast(&boxed, ValueType::of::<Option<RegProjectionHandle>>()).unwrap();
+    let nullable = nullable.downcast_ref::<Option<RegProjectionHandle>>().unwrap().as_ref().unwrap();
+    assert_eq!(nullable.route, "derived");
+    assert!(nullable.object.ptr_eq(&derived.clone().upcast::<FerroObject>()));
+    assert!(ValueTypes::is_assignable(ValueType::of::<Ref<RegStaticProjectionDerived>>(), ValueType::of::<Option<RegProjectionHandle>>()));
+    let null = ValueTypes::try_convert(None, ValueType::of::<Option<RegProjectionHandle>>()).unwrap().unwrap();
+    assert!(null.downcast_ref::<Option<RegProjectionHandle>>().unwrap().is_none());
+    let unrelated: BoxedValue = Rc::new(RegBase::new());
+    assert!(ValueTypes::try_cast(&unrelated, ValueType::of::<RegProjectionHandle>()).is_none());
+}
+
+crate::ferro_thread_local! {
+    static EXPLICIT_PROJECTION_CALLS: Cell<usize> = const { Cell::new(0) };
+    static EXPLICIT_PROJECTION_ALTERNATE: Cell<bool> = const { Cell::new(false) };
+}
+
+test_class!(RegExplicitProjection: RegStaticProjectionBase);
+ferro_class_info!(RegExplicitProjection {
+    interfaces: [RegProjectionHandle => {
+        EXPLICIT_PROJECTION_CALLS.set(EXPLICIT_PROJECTION_CALLS.get() + 1);
+        if EXPLICIT_PROJECTION_ALTERNATE.get() {
+            |object| RegProjectionHandle { object: Ref::<RegExplicitProjection>::upcast(object), route: "alternate" }
+        } else {
+            |object| RegProjectionHandle { object: Ref::<RegExplicitProjection>::upcast(object), route: "original" }
+        }
+    }]
+});
+
+#[test]
+fn explicit_interface_expression_is_evaluated_once_per_registration() {
+    let object = RegExplicitProjection::new();
+    let boxed: BoxedValue = Rc::new(object.clone());
+    assert_eq!(interface_projection(&boxed).route, "original");
+    assert_eq!(EXPLICIT_PROJECTION_CALLS.get(), 1);
+    EXPLICIT_PROJECTION_ALTERNATE.set(true);
+    let second = RegExplicitProjection::new();
+    for current in [&boxed, &(Rc::new(second) as BoxedValue)] {
+        assert_eq!(interface_projection(current).route, "original");
+        assert_eq!(EXPLICIT_PROJECTION_CALLS.get(), 1);
+    }
+    // The chosen function pointer remains captured by its registration until
+    // explicitly replaced; changing its selection input does not change it.
+    RegExplicitProjection::__register_interfaces();
+    assert_eq!(EXPLICIT_PROJECTION_CALLS.get(), 2);
+    assert_eq!(interface_projection(&boxed).route, "alternate");
+    assert_eq!(EXPLICIT_PROJECTION_CALLS.get(), 2);
+}

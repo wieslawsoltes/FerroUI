@@ -121,6 +121,7 @@ impl Hasher for IdHasher {
             self.0 = self.0.rotate_left(8) ^ u64::from(b);
         }
     }
+    #[inline(always)]
     fn write_u64(&mut self, i: u64) {
         self.0 = self.0.rotate_left(32) ^ i;
     }
@@ -130,13 +131,27 @@ type IdMap<K, V> = HashMap<K, V, BuildHasherDefault<IdHasher>>;
 
 // Built-in facts use plain function pointers. Public registrations can also
 // carry state or consume the owning box to preserve reference identity.
-#[derive(Clone)]
 enum ConvertFn {
     Borrowed(BorrowedConversion),
     StaticBox(fn(&BoxedValue) -> Option<BoxedValue>),
     Boxed(Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>),
     FromRoot(FromObjectFn),
     Number(fn(&dyn std::any::Any, bool) -> Option<BoxedValue>, bool),
+}
+
+// Keep this small ownership snapshot inline on conversion paths. Size-focused
+// PGO can outline a derived clone into an extra call and temporary copy.
+impl Clone for ConvertFn {
+    #[inline(always)]
+    fn clone(&self) -> Self {
+        match self {
+            Self::Borrowed(f) => Self::Borrowed(f.clone()),
+            Self::StaticBox(f) => Self::StaticBox(*f),
+            Self::Boxed(f) => Self::Boxed(Rc::clone(f)),
+            Self::FromRoot(f) => Self::FromRoot(*f),
+            Self::Number(f, nullable) => Self::Number(*f, *nullable),
+        }
+    }
 }
 
 impl ConvertFn {
@@ -219,7 +234,24 @@ type UnwrapFn = fn(&dyn AnyValue) -> Option<BoxedValue>;
 type NullFn = fn() -> BoxedValue;
 type ObjectFn = fn(&dyn AnyValue) -> Option<Ref<FerroObject>>;
 type FromObjectFn = fn(&Ref<FerroObject>) -> Option<BoxedValue>;
-type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
+// Default declarations use a statically known projection and need no owned
+// closure. Explicit registrations retain their independently replaceable
+// callback. Both variants are cloned out of the registry before user code runs.
+#[derive(Clone)]
+enum InterfaceFn {
+    Static(fn(&Ref<FerroObject>) -> Option<BoxedValue>),
+    Dynamic(Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>),
+}
+
+impl InterfaceFn {
+    #[inline]
+    fn apply(&self, object: &Ref<FerroObject>) -> Option<BoxedValue> {
+        match self {
+            Self::Static(convert) => convert(object),
+            Self::Dynamic(convert) => convert(object),
+        }
+    }
+}
 type ReferenceIdentityFn = Rc<dyn Fn(&dyn AnyValue) -> Option<*const ()>>;
 type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
 type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
@@ -760,9 +792,28 @@ impl ValueTypes {
     /// this when the class is initialised. When several classes of a chain
     /// register the same interface, the most derived one converts.
     pub fn register_interface<T: ObjectType, I: PropertyValue>(cast: fn(Ref<T>) -> I) {
-        let convert: InterfaceFn =
-            Rc::new(move |o: &Ref<FerroObject>| o.cast::<T>().map(|o| Rc::new(cast(o)) as BoxedValue));
+        let convert = InterfaceFn::Dynamic(
+            Rc::new(move |o: &Ref<FerroObject>| o.cast::<T>().map(|o| Rc::new(cast(o)) as BoxedValue)),
+        );
         insert_interface(TypeId::of::<I>(), T::TYPE, convert);
+        Self::register_nullable::<I>();
+    }
+
+    /// Installs the statically known conversion of a default interface
+    /// declaration. Explicit `I => expression` declarations use the public
+    /// registration API so the expression still runs at registration time.
+    #[doc(hidden)]
+    pub fn __register_interface_default<T: ObjectType, I: PropertyValue>()
+    where
+        Ref<T>: Into<I>,
+    {
+        fn convert<T: ObjectType, I: PropertyValue>(object: &Ref<FerroObject>) -> Option<BoxedValue>
+        where
+            Ref<T>: Into<I>,
+        {
+            Some(Rc::new(Into::<I>::into(object.cast::<T>()?)))
+        }
+        insert_interface(TypeId::of::<I>(), T::TYPE, InterfaceFn::Static(convert::<T, I>));
         Self::register_nullable::<I>();
     }
 
@@ -783,7 +834,7 @@ impl ValueTypes {
             };
             (r.interface_cast(inner.id(), class).cloned(), r.cast(&(inner.id(), target)).cloned())
         });
-        let value = cast?(object)?;
+        let value = cast?.apply(object)?;
         match wrap {
             Some(wrap) => wrap.apply(&value),
             None if value_type_id(&*value) == target => Some(value),
