@@ -451,6 +451,9 @@ gif = { version = "=0.14.2", default-features = false, features = ["std"] }
 vello_gpu = { version = "=0.3.0", default-features = false, features = ["std", "text"] }
 vello = { version = "=0.11.0", default-features = false, features = ["wgpu"] }
 wgpu = { version = "=30.0.1", default-features = false, features = ["std", "wgsl", "metal"] }
+# The shader translator of `wgpu`, at its version: `ferroui-build` translates the WGSL of the runtime
+# shader effects to GLSL ES 3.0 for WebGL2 at build time (its features `wgsl-in` and `glsl-out`).
+naga = { version = "=30.0.1", default-features = false }
 # The version of the `wasm-bindgen` command-line tool on PATH has to be this exact version.
 wasm-bindgen = "=0.2.129"
 # The bindings of the WebGL2 renderer of `vello_gpu`, at the versions that belong to that release

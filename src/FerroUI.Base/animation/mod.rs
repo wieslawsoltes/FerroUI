@@ -11,7 +11,6 @@ mod animation_task;
 mod animator_driven_transition;
 mod animator_key_frame;
 mod animator_transition_observable;
-mod cancellation;
 mod clock;
 mod clock_base;
 mod composite_page_transition;

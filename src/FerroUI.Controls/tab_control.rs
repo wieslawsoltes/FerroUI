@@ -21,7 +21,7 @@ use ferroui_base::layout::{HorizontalAlignment, Layoutable, LayoutableImpl, Layo
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
 use ferroui_base::threading::{
-    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext,
+    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask,
 };
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, DirectProperty, FerroObject,
@@ -643,9 +643,8 @@ impl TabControl {
         cts: Rc<CancellationToken>,
     ) {
         let this = self.to_ref().downgrade();
-        let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-            FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-        });
+        let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+        let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
 
         // The transition is started before the first await, as part of the
         // call.
@@ -653,7 +652,7 @@ impl TabControl {
         let to_visual: Ref<Visual> = to.upcast();
         let task = transition.start(Some(&from_visual), Some(&to_visual), forward, (*cts).clone());
 
-        let _ = context.to_task_scheduler().start_local(async move {
+        let _ = scheduler.start_local(async move {
             match (TransitionOutcomeFuture { task }).await {
                 TransitionOutcome::Canceled => return,
                 TransitionOutcome::Faulted => {

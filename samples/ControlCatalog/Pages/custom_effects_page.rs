@@ -1,10 +1,10 @@
-//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 to E4; not from
+//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 to E5; not from
 //! upstream; `docs/porting/custom-effects.md`): the custom effects FerroUI ships
 //! (`ferroui_base::media::effects::library`), each set as `Visual.Effect` on the same sample
 //! content, with a slider for each of its numbers and the effect string markup writes for it.
 //! The colour effects and the glow are effect graphs, pixelate, scan lines and spotlight runtime
-//! shaders (SkSL on Skia; Vello draws their content unchanged until step E5), all drawn by the
-//! backend on the GPU; a slider changes only the values of the members or the uniforms.
+//! shaders (SkSL on Skia, WGSL on Vello; Vello's CPU mode draws their CPU references), all drawn by
+//! the backend on the GPU; a slider changes only the values of the members or the uniforms.
 
 use super::winui_composition_page::{brush, section, text};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -157,7 +157,7 @@ pub(super) fn custom_effects_section() -> Ref<StackPanel> {
     ));
     section(
         "Custom effects",
-        "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The colour effects, the glow, sharpen and edge detect describe themselves as effect graphs: colour matrices, convolutions and a drop shadow drawn by the backend on the GPU. Pixelate, scan lines and spotlight are runtime shaders: an SkSL program Skia compiles once and draws around the content on the GPU (Vello draws them from a WGSL program in a later step). A slider changes only the values of the members or the uniforms.",
+        "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The colour effects, the glow, sharpen and edge detect describe themselves as effect graphs: colour matrices, convolutions and a drop shadow drawn by the backend on the GPU. Pixelate, scan lines and spotlight are runtime shaders: an SkSL program Skia compiles once and a WGSL program Vello compiles once, each drawn around the content on the GPU (Vello's CPU mode draws the CPU reference of the effect). A slider changes only the values of the members or the uniforms.",
         &tiles.upcast(),
     )
 }

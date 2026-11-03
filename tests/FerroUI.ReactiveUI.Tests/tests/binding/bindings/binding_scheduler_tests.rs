@@ -2,6 +2,10 @@
 //!
 //! "Another thread" is a call while the stub invoker answers that the calling thread has no
 //! access. The invokers are registered per thread, and each test runs on a thread of its own.
+//!
+//! `BindingSchedulers::use_synchronization_context` and `SynchronizationContext` are deprecated
+//! since 0.5.0 (step A5 of phase C4 of #423); these tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use crate::tests::binding::test_models::{ManualObservable, RecordingObserver, RecordingSynchronizationContext, StubViewThreadInvoker};
 use ferroui_reactiveui::*;

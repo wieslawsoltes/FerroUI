@@ -9,4 +9,7 @@ pub use cancellation_token::{CancellationGuard, CancellationToken, DropGuard, Wa
 pub use cancellation_token::{
     CancellationTokenRegistration, CancellationTokenSource, LocalCancellationTokenRegistration,
 };
-pub use synchronization_context::{current_synchronization_context, set_synchronization_context, SynchronizationContext};
+#[allow(deprecated)]
+pub use synchronization_context::{
+    context_schedule, current_synchronization_context, set_synchronization_context, SynchronizationContext,
+};

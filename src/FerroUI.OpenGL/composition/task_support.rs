@@ -5,7 +5,7 @@
 //! ([`ServerJobTask`]) is awaited through [`ServerJobTaskFuture`].
 
 use ferroui_base::rendering::composition::ServerJobTask;
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask};
 use std::error::Error;
 use std::future::Future;
 use std::pin::Pin;
@@ -19,10 +19,9 @@ use std::task::{Context, Poll};
 /// # Panics
 /// Panics when called from a thread other than the dispatcher thread.
 pub(crate) fn start<T: 'static>(future: impl Future<Output = T> + 'static) -> DispatcherTask<T> {
-    let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-        FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-    });
-    context.to_task_scheduler().start_local(future)
+    let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+    let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
+    scheduler.start_local(future)
 }
 
 /// `await task` for a job of the compositor: completes when the job has run, with the error

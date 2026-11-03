@@ -6,9 +6,11 @@
 //! thread. A future is polled when it is spawned, and again whenever it is woken: at once on its
 //! own thread, or right after the poll that runs when the wake comes from inside it. A wake from
 //! another thread goes into the queue of the task's thread and through that thread's poster, which
-//! runs [`run_pending_wakes`] there; the dispatcher of the user interface is the poster of its
-//! thread. A panic of a future faults its task with a [`TaskWorkError`] that holds the message of
-//! the panic.
+//! runs [`run_pending_wakes`] there; the dispatcher of the user interface is the poster (the
+//! schedule) of its thread. A future spawned in a job of a dispatcher takes the dispatcher at the
+//! priority of the job instead ([`crate::task::spawn_local`]): a wake in a job of the same
+//! priority polls it at once, any other wake queues a job at that priority. A panic of a future
+//! faults its task with a [`TaskWorkError`] that holds the message of the panic.
 
 use super::task::Task;
 use crate::task::Canceled;

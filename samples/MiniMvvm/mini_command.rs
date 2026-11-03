@@ -3,9 +3,7 @@
 use ferroui_base::input::ICommand;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::threading::{
-    Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTimer, FerroSynchronizationContext,
-};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTimer};
 use ferroui_base::BoxedValue;
 use std::cell::{Cell, RefCell};
 use std::future::Future;
@@ -24,10 +22,9 @@ use std::time::Duration;
 /// # Panics
 /// Panics when called from a thread other than the dispatcher thread.
 pub fn start_async<T: 'static>(future: impl Future<Output = T> + 'static) -> DispatcherTask<T> {
-    let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-        FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-    });
-    context.to_task_scheduler().start_local(future)
+    let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+    let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
+    scheduler.start_local(future)
 }
 
 /// The state of a [`Delay`]: whether its time has passed, and who waits.

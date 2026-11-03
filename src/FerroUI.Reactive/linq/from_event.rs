@@ -15,8 +15,10 @@
 //!
 //! The overloads without a scheduler add and remove the handler on the scheduler of upstream's
 //! `GetSchedulerForCurrentContext`, taken when the sequence is made: a
-//! [`SynchronizationContextScheduler`] of the current `SynchronizationContext` of the thread that
-//! runs its work at once when that context is current, else the immediate scheduler.
+//! [`SynchronizationContextScheduler`] of the current schedule of the thread (its
+//! `SynchronizationContext.Current`: `ferroui_system::task::current_schedule`, in a dispatcher job
+//! the dispatcher at the priority of the job) that runs its work at once when that schedule is
+//! current, else the immediate scheduler.
 //!
 //! The overloads of upstream that make the delegate of the event from the handler through
 //! reflection (`FromEvent<TDelegate, TEventArgs>(Action<TDelegate>, Action<TDelegate>)`) are not
@@ -51,11 +53,11 @@ pub(crate) fn classic_add_handler<D: 'static, K: 'static>(add: impl Fn(D) -> K +
 }
 
 /// The scheduler of the overloads without one (`GetSchedulerForCurrentContext`): that of the
-/// current synchronization context of the thread, which does not post when the context is current
+/// current schedule of the thread, which does not post when the schedule is current
 /// (`alwaysPost: false`), else the immediate scheduler (`ConstantTimeOperations`).
 pub(crate) fn scheduler_for_current_context() -> Rc<dyn IScheduler> {
-    match ferroui_system::threading::current_synchronization_context() {
-        Some(context) => SynchronizationContextScheduler::with_always_post(context, false),
+    match ferroui_system::task::current_schedule() {
+        Some(schedule) => SynchronizationContextScheduler::with_schedule_and_always_post(schedule, false),
         None => SchedulerDefaults::constant_time_operations(),
     }
 }

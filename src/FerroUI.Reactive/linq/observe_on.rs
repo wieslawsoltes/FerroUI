@@ -11,20 +11,21 @@
 //! disposal (`OperationStarted`, `OperationCompleted`).
 //!
 //! Deviation (DEVIATIONS.md, Reactive): the notifications are not `Send`, so they are posted with
-//! [`SynchronizationContext::post_local`](ferroui_system::threading::SynchronizationContext::post_local):
+//! `post_local` ([`Schedule::schedule_local`](ferroui_system::task::Schedule::schedule_local)):
 //! the source notifies on the thread of the context, and each notification reaches the observer
 //! when the context runs the work it was posted, later on that thread. Upstream posts from the
 //! thread of the source, which may be any thread.
+//!
+//! The context is a schedule of `ferroui-system` (`observe_on_schedule`); the form that takes a
+//! `SynchronizationContext` (`observe_on_context`) is deprecated since 0.5.0.
 
-use crate::concurrency::IScheduler;
+use crate::concurrency::{IScheduler, PostTarget};
 use crate::disposables::{Disposable, MultipleAssignmentDisposableValue, SingleAssignmentDisposable};
 use crate::internal::{subscribe_sink, OperatorSink, Sink};
-use ferroui_system::threading::SynchronizationContext;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::{Rc, Weak};
-use std::sync::Arc;
 
 /// The sink of `ObserveOn` (`ObserveOnObserverNew<T>`).
 struct ObserveOnSink<T> {
@@ -180,7 +181,7 @@ pub(crate) fn observe_on<T: 'static>(source: Rc<dyn IObservable<T>>, scheduler: 
 struct ObserveOnContextSink<T> {
     this: Weak<ObserveOnContextSink<T>>,
     sink: Sink<T>,
-    context: Arc<dyn SynchronizationContext>,
+    context: PostTarget,
     /// Whether the operation of the subscription has been completed (`Dispose(bool)` runs once).
     operation_completed: Cell<bool>,
 }
@@ -240,7 +241,7 @@ impl<T: 'static> IDisposable for ObserveOnContextSink<T> {
 /// The observable of `ObserveOn(SynchronizationContext)` (`ObserveOn<TSource>.Context`).
 struct ObserveOnContextObservable<T> {
     source: Rc<dyn IObservable<T>>,
-    context: Arc<dyn SynchronizationContext>,
+    context: PostTarget,
 }
 
 impl<T: 'static> IObservable<T> for ObserveOnContextObservable<T> {
@@ -262,10 +263,7 @@ impl<T: 'static> IObservable<T> for ObserveOnContextObservable<T> {
     }
 }
 
-pub(crate) fn observe_on_context<T: 'static>(
-    source: Rc<dyn IObservable<T>>,
-    context: Arc<dyn SynchronizationContext>,
-) -> Rc<dyn IObservable<T>> {
+pub(crate) fn observe_on_context<T: 'static>(source: Rc<dyn IObservable<T>>, context: PostTarget) -> Rc<dyn IObservable<T>> {
     Rc::new(ObserveOnContextObservable { source, context })
 }
 
@@ -280,13 +278,25 @@ macro_rules! observe_on_methods {
             crate::linq::observe_on::observe_on(self.observable(), scheduler)
         }
 
+        /// Delivers the notifications of the sequence through `schedule`, each posted to it in
+        /// order with `schedule_local` (`ObserveOn(SynchronizationContext)`; a dispatcher's
+        /// `task_schedule(priority)`). The sequence notifies on the thread of the schedule.
+        fn observe_on_schedule(
+            &self,
+            schedule: std::sync::Arc<dyn ferroui_system::task::Schedule>,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
+            crate::linq::observe_on::observe_on_context(self.observable(), crate::concurrency::PostTarget::Schedule(schedule))
+        }
+
         /// Delivers the notifications of the sequence through `context`, each posted to it in order
         /// (`ObserveOn(SynchronizationContext)`). The sequence notifies on the thread of the context.
+        #[deprecated(since = "0.5.0", note = "use `observe_on_schedule` with a `ferroui_system::task::Schedule`")]
+        #[allow(deprecated)]
         fn observe_on_context(
             &self,
             context: std::sync::Arc<dyn ferroui_system::threading::SynchronizationContext>,
         ) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
-            crate::linq::observe_on::observe_on_context(self.observable(), context)
+            crate::linq::observe_on::observe_on_context(self.observable(), crate::concurrency::PostTarget::Context(context))
         }
     };
 }

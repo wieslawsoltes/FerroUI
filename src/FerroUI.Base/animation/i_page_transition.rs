@@ -1,6 +1,6 @@
 use crate::animation::AnimationTask;
 use crate::threading::{
-    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext,
+    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
 };
 use std::future::Future;
 use crate::{Ref, Visual};
@@ -49,19 +49,20 @@ impl PartialEq for dyn IPageTransition {
     }
 }
 
-/// The synchronization context that asynchronous code started on the calling
-/// thread continues in: the current one, or the dispatcher's context for
-/// [`DispatcherPriority::NORMAL`] when the thread has none.
-pub(crate) fn continuation_context() -> std::sync::Arc<FerroSynchronizationContext> {
-    FerroSynchronizationContext::current().unwrap_or_else(|| {
-        FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-    })
+/// Where asynchronous code started on the calling thread continues: the
+/// dispatcher of the thread at the priority of the running job
+/// ([`Dispatcher::current_priority`]), or at [`DispatcherPriority::NORMAL`]
+/// outside of a job.
+pub(crate) fn continuation_scheduler() -> DispatcherTaskScheduler {
+    let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+    Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority)
 }
 
 /// Runs the body of an asynchronous page transition: synchronously up to its
-/// first pending await, then resumed through the synchronization context.
+/// first pending await, then resumed by the dispatcher at the priority it
+/// started at.
 pub(crate) fn start_async(future: impl Future<Output = ()> + 'static) -> DispatcherTask<()> {
-    continuation_context().to_task_scheduler().start_local(future)
+    continuation_scheduler().start_local(future)
 }
 
 /// Awaits the animations of a page transition. A failure to run one of them

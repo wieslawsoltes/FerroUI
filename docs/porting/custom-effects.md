@@ -343,9 +343,8 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   does not match, or has children is reported once (an error in the log area `Skia`) and the
   content drawn unchanged; nothing panics. This works on raster, Ganesh and Graphite surfaces and
   in pictures.
-- *Vello* draws a shader effect as E1 draws an effect without a factory until E5: the content
-  unchanged in a layer without a filter, reported once. Its CPU mode does not run the CPU
-  reference yet (E5, with the route of E3).
+- *Vello* draws a shader effect from E5 on (below); until then it drew it as E1 draws an effect
+  without a factory.
 - *The library* (`media::effects::library`, E4): `pixelate` (`PixelateEffect`, content-sampling:
   each cell of `cell-size` device independent pixels, clamped to 0..64 and at least one device
   pixel, shows the pixel at its centre; sample radius 64), `scanline` (`ScanlineShaderEffect`, an
@@ -354,6 +353,61 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   fading from (`center-x`, `center-y`) to `radius`), Effector's pixelation, scan line and spotlight
   shaders with the clamps of its factories, each with its SkSL, its WGSL and its CPU reference, and
   a neutral value that leaves the content unchanged.
+
+**Shader effects on Vello as built (E5).**
+
+- *The module of the pass.* `ShaderEffectDescription::wgsl_module` (in `ferroui-base`, so that
+  Vello and `ferroui-build` wrap the program the same way) is the WGSL of the description followed
+  by what the pass adds: `@group(0) @binding(0) var<uniform> uniforms: Uniforms;` (the block of the
+  convention, whose type is the program's `struct Uniforms`), `@binding(1)` the uniforms of the pass
+  (`ferroui_pass.area`: the device pixel of the area at the top left texel of the textures, and the
+  width and height of the part of the area they hold), `@binding(2)` the content
+  (`ferroui_content`, a `texture_2d<f32>` read with `textureLoad`, no sampler), for a
+  content-sampling program `fn sample_content(coord)` (the texel under `coord`, transparent beyond
+  the area: Skia samples the child of a runtime shader image filter at texel centres with nearest
+  sampling), the vertex stage of the layer passes and a fragment stage that calls `effect` at the
+  centre of each pixel of the area. An overlay's output, clamped to 0..1, is composed over the
+  content in the pass with the blend mode of the description: every mode of `BitmapBlendingMode`
+  (the Porter-Duff operators and the modes Skia writes in premultiplied form, among them source
+  over and `Screen`, which the library uses, written so; the other separable and the non-separable
+  modes of the Compositing and Blending specification on colours that are not premultiplied,
+  composed source over), so no mode falls back. The names the pass adds start with `ferroui_`
+  (`FerroUi`), but `uniforms`, `sample_content`, `vs_main` and `fs_main`; the binding numbers and
+  the entry points are the constants `SHADER_WGSL_*`.
+- *The check.* The module is checked once per thread and type, at the first push of the type
+  (`gpu/effect_passes.rs`, `check_shader_module`): parsed and validated by naga 30 (the one of wgpu,
+  through `wgpu::naga`, without optional capabilities, so that any device takes what it takes), its
+  block `uniforms` compared with `ImmutableCustomEffect::shader_uniform_layout` (the number of
+  members, their names, order and types; no array or struct), and a description with children
+  refused (E6). The offsets of the members, and the size of the block, come from naga's layout of
+  the struct, so the bytes of a frame are written where WGSL's layout puts them. A module that fails
+  is reported once (an error in the log area `Vello`) and the effect drawn as an effect without a
+  factory: its content unchanged, and nothing drawn on the processor.
+- *The pass.* On the route of E3 (hybrid and GPU modes): the drawing context records the content
+  into a scene of the device over the area of the effect (its bounds under the transform, rounded
+  out to whole device pixels as Skia's layer is, cut to the scene; the content outside the area is
+  not drawn, as Skia clips the layer), with full opacity, renders it into a texture of the pool, and
+  the pass of the type writes another texture of the pool, which the scene the effect was pushed in
+  paints over the part of the area on it, composed with the opacity in effect. `layer_size` is the
+  size of the whole area and the coordinates of the program are those of the area, also where it
+  reaches beyond the target; `layer_scale` is the mean of the lengths of the axes of the transform.
+  The pipeline is compiled once per device and type, the block and the uniforms of the pass written
+  for each pass into the buffers of the pipeline, the bind groups kept by the identity of the
+  content texture; steady frames allocate no texture. Under a rotation the area is the bounding box
+  of the rotated bounds, in device pixels, where Skia scales the area to the lengths of the axes
+  and rotates the result: a program whose output depends on the direction of the axes differs.
+- *The CPU mode* (and a shader effect inside a scene of the CPU renderer, and WebGL2 until step 3
+  of the Vello route) draws the CPU reference (decision 3): the content is recorded into a scene of
+  the CPU renderer over the whole area (cut to the scene above 2^24 pixels), rendered, the
+  reference applied to its pixels at `layer_scale`, and the result drawn as an image with the
+  opacity in effect. An effect without a reference (an application's) draws its content unchanged
+  and is reported once (`report_unhandled`).
+- *WebGL2.* `ferroui-build` translates the module to GLSL ES 3.0 at build time with naga
+  (`ferroui_build::shader_effects`: `translate_shader_effect_module`, `shader_effect_glsl::<T>()`,
+  `write_shader_effect_glsl::<T>()`, which writes `$OUT_DIR/shader_effects/<name>.vert.glsl` and
+  `.frag.glsl`, with the names naga gives the uniform blocks and the texture by their WGSL
+  bindings). The browser renderer does not draw these programs yet: its sink has no device textures
+  (step 3 of the route in gpu-rendering.md), so WebGL2 draws the CPU reference.
 
 ### 3.5 Input routing for interactive effects
 
@@ -424,8 +478,18 @@ ported as the reference set.
   (`composition_custom_effect_tests.rs`); each library shader effect drawn on Skia raster at 96
   and 192 DPI and on Graphite against its CPU reference, a neutral value and the area of the
   effect, and a program that does not compile, does not match or has children drawing the content
-  unchanged, reported once (`tests.rs`, `gpu/metal/tests.rs`); Vello drawing a shader effect
-  unchanged until E5 (`effect_tests.rs`).
+  unchanged, reported once (`tests.rs`, `gpu/metal/tests.rs`).
+- E5: the WGSL module of the pass (`custom_effect_shader_tests.rs`); the modules of the library
+  checked by naga with the offsets of WGSL's layout, the checks of a module against the convention,
+  every blend mode of an overlay valid WGSL (without a device), each library shader effect drawn by
+  its pass in the hybrid and GPU modes at scales 1 and 2 and over an area that reaches beyond the
+  target against its CPU reference without a layer drawn on the processor, a module that does not
+  parse or does not match drawing the content unchanged, reported once, and steady frames
+  allocating no texture (`gpu/effect_pass_tests.rs`); the CPU mode drawing each library shader
+  effect as its CPU reference at 96 and 192 DPI, inside its area and with the opacity in effect, and
+  an application's effect without a reference unchanged, reported once (`effect_tests.rs`); the
+  GLSL ES of the library's modules from `ferroui-build` (a smoke check of each stage) and the files
+  it writes (`shader_effects.rs`).
 - Later steps: per effect and backend, the GPU output against the CPU reference
   (`tests/FerroUI.RenderTests`, `tests/FerroUI.RenderBackends.Comparison`); the steady-state test
   (no new texture or program over frames that change only parameters, with the allocation
@@ -443,7 +507,7 @@ Each step is one pull request from main.
 | E2 | Graph effects (section 3.3, kind 1): the description hook of `CustomEffect`, loaded once per type into an `EffectGraph`, painted around the content by the render walk with the parameters as animatable members, registered for the prewarm; the colour effects of the sample set as graphs. **Done**: `graph`, `for_each_graph_value`, `cpu_reference`, the library of section 3.3, the catalog page "Custom effects" | addition | medium: the walk gains a second way to draw `Visual.Effect`; the graph painter is shared with the effect brushes |
 | E3 | Convolution and the Vello colour layers: a `ConvolveMatrixEffect` node (Skia: a matrix convolution image filter; Vello: a WGSL pass), and Vello step 2 of gpu-rendering.md ("layers with an effect": the content into a pooled device texture, a pass into another) for the colour matrix nodes, so the graph effects are GPU on Vello's GPU and hybrid modes. **Done**: `ConvolveMatrix`, `push_convolve_matrix_layer`, the node, sharpen and edge detect; the route for the colour matrix, convolution, light multiply, pixel operation and luminance layers; WebGL2 keeps the CPU path (route step 3) | addition | high: the Vello pass reads the content of a layer, a new route in the scene |
 | E4 | Runtime shader effects on Skia (section 3.4): the shader description (SkSL source, the uniform convention, children, blend mode, overlay or content-sampling), compiled once per thread by `runtime_effects.rs`, drawn as a runtime-shader image filter of a save layer; the shader samples. **Done**: `shader`, `ShaderEffectDescription`, the uniform convention, the Skia programs, pixelate, scan lines and spotlight in the library and on the catalog page "Custom effects" (section 3.4, "Shader effects as built") | addition | medium: SkSL errors surface at the first draw (logged once, then the no-op) |
-| E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3) | addition | high: depends on E3 |
+| E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3). **Done**: `ShaderEffectDescription::wgsl_module`, the pass of the hybrid and GPU modes, the CPU reference in the CPU mode, `ferroui_build::shader_effects` (the GLSL ES, not drawn by the browser yet) (section 3.4, "Shader effects on Vello as built") | addition | high: depends on E3 |
 | E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
 | E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples | addition | medium: event ordering and capture |
 | E8 | Samples and catalog pages (section 3.7) | none (samples) | low |
@@ -470,8 +534,16 @@ on every surface (a runtime shader image filter of a save layer for a content-sa
 overlay drawn into the layer), compiled once per thread and type, its uniforms checked once against
 the convention of section 3.4 and set from the snapshot each frame (section 3.4, "Shader effects as
 built"); pixelate, scan lines and spotlight ship as such effects with SkSL, WGSL and CPU
-references, and the render tests hold Skia raster and Graphite to those references. Vello draws a
-shader effect's content unchanged, reported once, until E5 draws its WGSL.
+references, and the render tests hold Skia raster and Graphite to those references.
+
+E5 is done: Vello's hybrid and GPU modes draw a shader effect with its WGSL, wrapped into the module
+of a pass (`ShaderEffectDescription::wgsl_module`), checked by naga against the convention once per
+type and compiled once per device and type, on the route of E3: the content a texture of the pool,
+the pass writing another the scene paints with, the uniforms written per frame; a module that fails
+is reported once and draws the content unchanged. The CPU mode draws the CPU reference. The render
+tests hold the three library shader effects to their references in every mode. `ferroui-build`
+translates the module to GLSL ES 3.0 at build time for WebGL2 (decision 2), which keeps the CPU
+reference until step 3 of the Vello route gives its renderer device textures.
 
 ## 5. Not in scope
 
