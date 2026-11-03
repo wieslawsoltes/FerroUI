@@ -29,6 +29,8 @@ ferroui-base.workspace = true
 # of the template binding tests, and the test of a content control with delayed bindings. The controls
 # are not built on this crate.
 ferroui-controls = { workspace = true, features = ["testing"] }
+# The binding tests of the Rust forms of `System.Uri` (C5 of #423) name `url::Url`.
+url = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
