@@ -7,20 +7,30 @@
 //! observers, with the contract it had before the executor moved: clones,
 //! blocking waits on other threads, a panic of the future raised again to
 //! whoever observes it, a result taken once.
+//!
+//! Deprecated since 0.5.0 (step A6 of phase C4 of #423,
+//! docs/idiomatic-rust-async.md, section 4): the dispatcher gives the
+//! `JoinHandle` of `ferroui_system::task` ([`Dispatcher::spawn_local`],
+//! [`Dispatcher::spawn`], [`Dispatcher::start_local`]), whose outcome is a
+//! value also when the future panicked (`JoinError::Panicked`). `From`
+//! converts either handle into the other.
+#![allow(deprecated)]
 
 use std::any::{Any, TypeId};
+use std::cell::Cell;
 use std::fmt;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
 use std::pin::Pin;
+use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
 use std::task::{Context, Poll, Waker};
 
 use super::dispatcher_operation::{next_operation_id, DispatcherException};
 use super::Dispatcher;
-use ferroui_system::task::Canceled;
+use ferroui_system::task::{AbortHandle, Canceled, JoinError, JoinHandle};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TaskStatus {
@@ -177,6 +187,18 @@ impl Drop for TaskCompletion {
 /// dispatcher shut down, or the operation that was going to start it was
 /// aborted). A panic raised by the future is re-raised to whoever observes
 /// the outcome.
+///
+/// Deprecated: the dispatcher gives a [`JoinHandle`]
+/// ([`Dispatcher::spawn_local`], [`spawn`](Dispatcher::spawn),
+/// [`start_local`](Dispatcher::start_local) and their `_with_priority`
+/// forms), a future of `Result<T, JoinError>` with one owner: a panic of the
+/// future is [`JoinError::Panicked`], a value, where this handle raises it
+/// again; `JoinHandle::shared` gives several observers. `From` converts a
+/// [`DispatcherTask`] into a [`JoinHandle`] and back.
+#[deprecated(
+    since = "0.5.0",
+    note = "use the `JoinHandle` of `Dispatcher::spawn_local`, `spawn` or `start_local` (a panic of the future is `JoinError::Panicked`, a value); `From` converts"
+)]
 pub struct DispatcherTask<T = ()> {
     shared: Arc<TaskShared>,
     _result: PhantomData<fn() -> T>,
@@ -292,6 +314,11 @@ pub(crate) struct TaskStart<T> {
 }
 
 impl<T: 'static> TaskStart<T> {
+    /// Completes the task with `value`.
+    fn complete(self, value: T) {
+        (self.complete)(&self.completion.0, value);
+    }
+
     /// The future of the task: runs `future`, writes its output to the task,
     /// and faults the task with a panic of the future.
     pub(crate) fn body<F: Future<Output = T> + 'static>(self, future: F) -> TaskBody<F> {
@@ -381,4 +408,76 @@ pub(crate) fn new_local_task<T: 'static>(dispatcher: &Arc<Dispatcher>) -> (Dispa
         }
     };
     (task, TaskStart { completion: TaskCompletion(shared), complete })
+}
+
+/// The deprecated handle of the task of a [`JoinHandle`], for the code that
+/// still takes a [`DispatcherTask`] (the deprecated `..._task` variants of the
+/// asynchronous members of the controls).
+///
+/// The outcome is forwarded by a task of the dispatcher of the calling
+/// thread, at the priority of the running job
+/// ([`DispatcherPriority::DEFAULT`](super::DispatcherPriority::DEFAULT)
+/// outside of one), polled for the first time inside this call: the
+/// [`DispatcherTask`] of a task that has ended is complete when this returns,
+/// and the one of a task that ends later completes in the job that the end
+/// of the task queues. A panic of the task ([`JoinError::Panicked`]) faults
+/// the [`DispatcherTask`], which raises it again when observed; an aborted
+/// task cancels it. The result stays on the dispatcher thread.
+impl<T: 'static> From<JoinHandle<T>> for DispatcherTask<T> {
+    fn from(handle: JoinHandle<T>) -> Self {
+        let dispatcher = Dispatcher::current_dispatcher();
+        let (task, start) = new_local_task::<T>(&dispatcher);
+        let forward = async move {
+            match handle.await {
+                Ok(value) => start.complete(value),
+                Err(JoinError::Panicked(payload)) => start.completion.fail(payload),
+                // Dropped without an outcome, `start` cancels the task.
+                Err(JoinError::Canceled) => drop(start),
+            }
+        };
+        drop(dispatcher.start_local_with_priority(forward, dispatcher.current_job_priority()));
+        task
+    }
+}
+
+/// The [`JoinHandle`] of a deprecated [`DispatcherTask`]: a task of the
+/// dispatcher of the [`DispatcherTask`], at the priority of the running job
+/// ([`DispatcherPriority::DEFAULT`](super::DispatcherPriority::DEFAULT)
+/// outside of one), that awaits it, polled for the first time inside this
+/// call. The output of the future is the output of the handle; a panic that
+/// the [`DispatcherTask`] raises again is [`JoinError::Panicked`]; a canceled
+/// [`DispatcherTask`] aborts the handle's task, whose outcome is
+/// [`JoinError::Canceled`].
+///
+/// # Panics
+/// When called from a thread other than the thread of the dispatcher of the
+/// task.
+impl<T: 'static> From<DispatcherTask<T>> for JoinHandle<T> {
+    fn from(task: DispatcherTask<T>) -> Self {
+        let dispatcher = task.dispatcher().clone();
+        // The abort handle of the forwarding task, set once it is spawned; a cancellation seen
+        // in its first poll, before that, is remembered and aborts it right after.
+        let own: Rc<Cell<Option<AbortHandle>>> = Rc::default();
+        let canceled_early = Rc::new(Cell::new(false));
+        let (slot, early) = (own.clone(), canceled_early.clone());
+        let forward = async move {
+            match task.await {
+                Ok(value) => value,
+                Err(Canceled) => {
+                    match slot.take() {
+                        Some(abort) => abort.abort(),
+                        None => early.set(true),
+                    }
+                    std::future::pending::<T>().await
+                }
+            }
+        };
+        let handle = dispatcher.start_local_with_priority(forward, dispatcher.current_job_priority());
+        if canceled_early.get() {
+            handle.abort();
+        } else {
+            own.set(Some(handle.abort_handle()));
+        }
+        handle
+    }
 }

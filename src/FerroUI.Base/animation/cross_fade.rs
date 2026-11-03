@@ -4,7 +4,8 @@ use crate::animation::{
 };
 use crate::animation::i_page_transition::{start_async, when_all};
 use crate::styling::Setter;
-use crate::threading::{CancellationToken, DispatcherTask};
+use crate::threading::CancellationToken;
+use ferroui_system::task::JoinHandle;
 use crate::{Ref, Visual};
 
 const SIDE_PEEK_OPACITY: f64 = 0.72;
@@ -94,7 +95,7 @@ impl CrossFade {
         from: Option<&Ref<Visual>>,
         to: Option<&Ref<Visual>>,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let fade_out_animation = self.fade_out_animation.clone();
         let fade_in_animation = self.fade_in_animation.clone();
         let from = from.cloned();
@@ -176,7 +177,7 @@ impl IPageTransition for CrossFade {
         to: Option<&Ref<Visual>>,
         _forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         self.start_cross_fade(from, to, cancellation_token)
     }
 

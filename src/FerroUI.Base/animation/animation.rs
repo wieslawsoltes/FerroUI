@@ -1,5 +1,5 @@
 use crate::animation::easings::Easing;
-use crate::animation::i_page_transition::continuation_scheduler;
+use crate::animation::i_page_transition::continuation_priority;
 use crate::animation::key_frame::KeyFrameTimingMode;
 use crate::animation::{
     Animatable, AnimationError, AnimationTask, AnimatorFactory, AnimatorKeyFrame, Cue, FillMode,
@@ -9,7 +9,7 @@ use crate::data::{BindingMode, BindingPriority};
 use crate::reactive::{
     CompositeDisposable, Disposable, IDisposable, IObservable, Observable, SerialDisposable,
 };
-use crate::threading::CancellationToken;
+use crate::threading::{CancellationToken, Dispatcher};
 use crate::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, DirectProperty,
     DirectPropertyMetadata, FerroObject, FerroObjectImpl, FerroProperty, Ref, Visual, WeakRef,
@@ -332,10 +332,10 @@ impl Animation {
             // in a job of the dispatcher at the priority that is current now.
             let remaining = Rc::new(Cell::new(animators.len()));
             let schedule_on_complete = on_complete.map(|on_complete| {
-                let scheduler = continuation_scheduler();
+                let (dispatcher, priority) = (Dispatcher::current_dispatcher(), continuation_priority());
                 Rc::new(move || {
                     let on_complete = on_complete.clone();
-                    scheduler.dispatcher().post_local(move || on_complete(), scheduler.priority());
+                    dispatcher.post_local(move || on_complete(), priority);
                 })
             });
 
