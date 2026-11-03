@@ -5,6 +5,8 @@
 //! At the edges the type converts from and to [`url::Url`]: every `Url` is an
 //! absolute [`Uri`] (`From`), and an absolute `Uri` is a `Url` when the URL
 //! parser accepts its text (`TryFrom`); a relative reference is not a `Url`.
+//! It converts to and from [`UriRef`](super::UriRef), the reference of the
+//! same text, which can be relative (`uri_ref.rs`).
 
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -47,7 +49,10 @@ pub struct Uri {
     scheme_length: usize,
 }
 
-fn scheme_length(s: &str) -> Option<usize> {
+/// The length of the scheme of `s` (the text before its first `:`), when it
+/// has one: two characters or more (a single letter followed by `:` is a drive
+/// letter), the first a letter, the others letters, digits, `+`, `-` and `.`.
+pub(super) fn scheme_length(s: &str) -> Option<usize> {
     let colon = s.find(':')?;
     let scheme = &s[..colon];
     let mut chars = scheme.chars();
@@ -96,20 +101,14 @@ impl Uri {
     /// The absolute URI of `uri_string`, whose scheme is its first
     /// `length` bytes (followed by `:`).
     fn absolute_with_scheme_length(uri_string: &str, length: usize) -> Uri {
-        let mut canonical = String::with_capacity(uri_string.len());
-        canonical.push_str(&uri_string[..length].to_ascii_lowercase());
-        let rest = &uri_string[length..];
-        // The authority (host) is case-insensitive and canonically lower case.
-        match rest.strip_prefix("://") {
-            Some(after) => {
-                let authority_length = after.find(['/', '?', '#']).unwrap_or(after.len());
-                canonical.push_str("://");
-                canonical.push_str(&after[..authority_length].to_ascii_lowercase());
-                canonical.push_str(&after[authority_length..]);
-            }
-            None => canonical.push_str(rest),
-        }
+        let canonical = canonical_text(uri_string, length);
         Uri { original: Rc::from(uri_string), absolute: Some(Rc::from(canonical)), scheme_length: length }
+    }
+
+    /// The relative reference of `text`, as written, whatever the text is:
+    /// what a [`UriRef::Relative`](super::UriRef::Relative) converts to.
+    pub(super) fn relative_reference(text: &str) -> Uri {
+        Uri { original: Rc::from(text), absolute: None, scheme_length: 0 }
     }
 
     /// Resolves `relative` against the absolute `base` (C# `new Uri(Uri, Uri)`).
@@ -281,7 +280,30 @@ impl Uri {
     }
 }
 
-fn remove_dot_segments(path: &str) -> String {
+/// The canonical text of the absolute URI `uri_string`, whose scheme is its
+/// first `length` bytes (followed by `:`): the scheme and the authority in
+/// lower case, the rest as written.
+pub(super) fn canonical_text(uri_string: &str, length: usize) -> String {
+    let mut canonical = String::with_capacity(uri_string.len());
+    canonical.push_str(&uri_string[..length].to_ascii_lowercase());
+    let rest = &uri_string[length..];
+    // The authority (host) is case-insensitive and canonically lower case.
+    match rest.strip_prefix("://") {
+        Some(after) => {
+            let authority_length = after.find(['/', '?', '#']).unwrap_or(after.len());
+            canonical.push_str("://");
+            canonical.push_str(&after[..authority_length].to_ascii_lowercase());
+            canonical.push_str(&after[authority_length..]);
+        }
+        None => canonical.push_str(rest),
+    }
+    canonical
+}
+
+/// The path without its dot segments, as [`Uri::combine`] removes them: `.`
+/// and empty segments go, `..` removes the segment before it (nothing above
+/// the root), and a path that ends in `/`, `/.` or `/..` keeps a final `/`.
+pub(super) fn remove_dot_segments(path: &str) -> String {
     let mut output: Vec<&str> = Vec::new();
     let absolute = path.starts_with('/');
     let trailing_slash = path.ends_with('/') || path.ends_with("/.") || path.ends_with("/..");
