@@ -8,6 +8,7 @@ pub use default_feature_usage_tracking::{
     DefaultFeatureUsageTrackingManager, DefaultFeatureUsageTrackingSession,
     FuncFeatureUsageTrackingManager,
 };
+#[allow(deprecated)]
 pub use guid::Guid;
 
 use crate::service_location::{AppLocator, ReadonlyDependencyResolverExt};
