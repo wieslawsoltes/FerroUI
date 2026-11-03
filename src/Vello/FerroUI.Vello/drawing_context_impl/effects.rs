@@ -30,14 +30,23 @@
 //! the content is rendered by the CPU renderer and changed on the processor
 //! (the reference).
 //!
+//! A custom effect whose type is a runtime shader (#455, E5) takes the same
+//! route in the hybrid and GPU modes: its content is recorded into a scene of
+//! the device over the area of the effect and rendered into a texture of the
+//! pool, and the pass of its WGSL (`gpu/effect_passes.rs`, checked by naga
+//! once per type, compiled once per device and type) writes the result the
+//! scene paints with. In the CPU mode, and inside a scene of the CPU
+//! renderer, the content is rendered by the CPU renderer and the CPU
+//! reference of the effect applied to it (decision 3 of the plan).
+//!
 //! [`VelloSceneFilterCapabilities`]: crate::scene::VelloSceneFilterCapabilities
 
 use super::box_shadows::blur_radius_to_sigma;
 use super::{DrawingContextImpl, SavedKind};
 use crate::helpers::pixel_format_helper::to_image;
-use crate::scene::{IVelloSceneSink, VelloCpuSceneSink, VelloSceneFilter};
+use crate::scene::{IVelloSceneSink, VelloCpuSceneSink, VelloSceneBrush, VelloSceneFilter, VelloSceneImage};
 use crate::vello_extensions::rect_path;
-use ferroui_base::media::effects::IEffect;
+use ferroui_base::media::effects::{IEffect, ImmutableCustomEffect};
 use ferroui_base::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
 use ferroui_base::platform::{
     IDrawingContextImpl, IDrawingContextImplWithEffects, LightingParameters, MultiplyLayerFactors, PixelOperation,
@@ -123,7 +132,32 @@ pub(super) struct EffectFrame {
     /// matrix pass when `device` is set, on the processor otherwise.
     luminance_to_alpha: bool,
     device: Option<DeviceLayer>,
+    /// The content is drawn through a runtime shader effect when the effect
+    /// ends: by its pass on the device when `device` is set, by its CPU
+    /// reference otherwise.
+    shader: Option<ShaderEffectFrame>,
 }
+
+/// A runtime shader effect that is pushed (#455, E5).
+struct ShaderEffectFrame {
+    effect: ImmutableCustomEffect,
+    /// The area of the effect in the pixels of the scene it was pushed in,
+    /// in whole pixels (it may reach beyond that scene).
+    #[cfg_attr(not(feature = "hybrid"), allow(dead_code))]
+    area: kurbo::Rect,
+    /// The size of the area (`layer_size`).
+    #[cfg_attr(not(feature = "hybrid"), allow(dead_code))]
+    size: [f32; 2],
+    /// Device pixels per device independent pixel (`layer_scale`).
+    scale: f32,
+    /// The opacity in effect when the effect was pushed: the content is
+    /// drawn with full opacity and the result composed with it.
+    inherited_opacity: f64,
+}
+
+/// The largest area, in pixels, whose content the CPU reference of a shader
+/// effect is applied to as a whole; a larger area is cut to the scene.
+const MAX_REFERENCE_PIXELS: f64 = 16_777_216.0;
 
 /// The scene of the context while an effect is recorded into another.
 pub(super) struct OuterScene {
@@ -167,11 +201,13 @@ impl DrawingContextImpl {
             });
         }
 
-        // A custom effect (#455) has no factory in this backend yet: its
-        // content is drawn unchanged, in a layer without a filter. A runtime
-        // shader effect (E4) too, until its WGSL program is drawn (E5).
+        // A custom effect (#455) without a graph or a shader: its content is
+        // drawn unchanged, in a layer without a filter. A shader effect whose
+        // module failed was reported by `gpu/effect_passes.rs` already.
         if let Some(custom) = effect.as_custom_effect() {
-            custom.report_unhandled("Vello");
+            if !custom.has_shader() {
+                custom.report_unhandled("Vello");
+            }
         }
 
         None
@@ -264,6 +300,11 @@ impl DrawingContextImpl {
         let position = self.sink_origin - outer.origin;
         let area = outer.area;
         let mut scene = self.leave_scene(outer);
+
+        if let Some(shader) = frame.shader {
+            self.end_shader_effect(scene, position, frame.device, shader);
+            return;
+        }
 
         if frame.luminance_to_alpha {
             if let Some(layer) = frame.device {
@@ -415,6 +456,215 @@ impl DrawingContextImpl {
     }
 }
 
+/// The runtime shader effects (#455, E5).
+impl DrawingContextImpl {
+    /// The area of a shader effect pushed over `clip_rect` (the whole scene
+    /// of the context without one) in the pixels of that scene, rounded out
+    /// to whole pixels as Skia's layer of the effect is, and the device pixels
+    /// per device independent pixel (the mean of the lengths of the two axes
+    /// of the transform); `None` for an empty area or a transform that
+    /// collapses it. Under a rotation the area is the bounding box of the
+    /// rotated bounds, in device pixels (Skia scales the area to the lengths
+    /// of the axes and rotates the result).
+    fn shader_effect_area(&mut self, clip_rect: Option<Rect>) -> Option<(kurbo::Rect, f32)> {
+        let transform = self.device_transform();
+        let [a, b, c, d, _, _] = transform.as_coeffs();
+        let scale = ((a.hypot(b) + c.hypot(d)) / 2.0) as f32;
+        let area = match clip_rect {
+            Some(clip_rect) => (transform * rect_path(clip_rect)).bounding_box().expand(),
+            None => {
+                let (width, height) = (f64::from(self.scene().width()), f64::from(self.scene().height()));
+                kurbo::Rect::new(0.0, 0.0, width, height)
+            }
+        };
+        let finite = [area.x0, area.y0, area.x1, area.y1].iter().all(|value| value.is_finite());
+        (finite && area.width() >= 1.0 && area.height() >= 1.0 && scale > 0.0 && scale.is_finite())
+            .then_some((area, scale))
+    }
+
+    /// Pushes the shader effect `effect` over `clip_rect`: its content is
+    /// recorded into a scene of its own over the area of the effect (cut to
+    /// it, as Skia clips the layer of the effect), drawn with full opacity,
+    /// and drawn through the effect when it is popped
+    /// ([`end_shader_effect`](Self::end_shader_effect)). In the hybrid and
+    /// GPU modes the scene is a scene of the device and the effect its pass;
+    /// in the CPU mode and inside a scene of the CPU renderer the scene is
+    /// one of the CPU renderer and the effect its CPU reference. `false`,
+    /// pushing nothing, for an empty area or, on the device, a module that
+    /// failed (reported once): the effect is then drawn as an effect without
+    /// a factory.
+    fn push_shader_effect(&mut self, clip_rect: Option<Rect>, effect: &ImmutableCustomEffect) -> bool {
+        let Some((area, scale)) = self.shader_effect_area(clip_rect) else {
+            return false;
+        };
+        // The scene to draw into: what the target held is under the effect.
+        let (width, height) = (f64::from(self.sink().width()), f64::from(self.sink().height()));
+        let visible = area.intersect(kurbo::Rect::new(0.0, 0.0, width, height));
+        if visible.width() < 1.0 || visible.height() < 1.0 {
+            // Nothing of the area is on the scene, and nothing of the content
+            // outside it is drawn.
+            self.sink().push_layer(BlendMode::default(), 0.0);
+            self.effect_stack.push(EffectFrame {
+                cropped: false,
+                outer: None,
+                luminance_to_alpha: false,
+                device: None,
+                shader: None,
+            });
+            self.save(SavedKind::Effect);
+            return true;
+        }
+        let shader = ShaderEffectFrame {
+            effect: effect.clone(),
+            area,
+            size: [area.width() as f32, area.height() as f32],
+            scale,
+            inherited_opacity: self.current_opacity,
+        };
+
+        #[cfg(feature = "hybrid")]
+        if let Some(device) = self.layer_device() {
+            if crate::gpu::effect_passes::shader_module(effect).is_none() {
+                return false;
+            }
+            let (visible_width, visible_height) = (visible.width() as u32, visible.height() as u32);
+            let (scene_width, scene_height) =
+                crate::gpu::effect_passes::pooled_size(&device, visible_width, visible_height);
+            let limit = u32::from(u16::MAX);
+            let layer = DeviceLayer {
+                device,
+                x: visible.x0,
+                y: visible.y0,
+                width: visible_width,
+                height: visible_height,
+                scene_width: scene_width.min(limit) as u16,
+                scene_height: scene_height.min(limit) as u16,
+                // The result covers the area in whole pixels.
+                bounds: None,
+            };
+            let outer = self.enter_device_scene(&layer);
+            self.begin_shader_content(outer, Some(layer), shader);
+            return true;
+        }
+
+        // The content of the area as a whole when it is not too large, so
+        // that the reference sees the area the program sees.
+        let fits = area.width() <= f64::from(u16::MAX)
+            && area.height() <= f64::from(u16::MAX)
+            && area.width() * area.height() <= MAX_REFERENCE_PIXELS;
+        let outer = self.begin_cpu_area_scene(if fits { area } else { visible });
+        self.begin_shader_content(outer, None, shader);
+        true
+    }
+
+    /// Pushes the frame of a shader effect whose content is recorded into
+    /// the scene that replaced `outer`.
+    fn begin_shader_content(&mut self, outer: OuterScene, device: Option<DeviceLayer>, shader: ShaderEffectFrame) {
+        self.sink().push_layer(BlendMode::default(), 1.0);
+        self.effect_stack.push(EffectFrame {
+            cropped: false,
+            outer: Some(outer),
+            luminance_to_alpha: false,
+            device,
+            shader: Some(shader),
+        });
+        self.save(SavedKind::Effect);
+        self.current_opacity = 1.0;
+    }
+
+    /// Replaces the scene of the context by one of the CPU renderer over
+    /// `area` (whole pixels of the scene of the context, which it may reach
+    /// beyond), and returns the scene that was replaced.
+    fn begin_cpu_area_scene(&mut self, area: kurbo::Rect) -> OuterScene {
+        let size = (area.width() as u16, area.height() as u16);
+        let scene: Box<dyn IVelloSceneSink> = Box::new(VelloCpuSceneSink::single_threaded(size.0, size.1));
+        let sink = match self.sink.replace(scene) {
+            Some(sink) => sink,
+            None => panic!("The drawing context has been disposed"),
+        };
+        let outer = OuterScene { sink, origin: self.sink_origin, open_clips: self.open_clips, area: size };
+        self.sink_origin += Vec2::new(area.x0, area.y0);
+        self.open_clips = 0;
+        outer
+    }
+
+    /// Ends a shader effect: its content `scene`, whose top left pixel is at
+    /// `position` of the scene the effect was pushed in, drawn through the
+    /// pass of the effect on the device of `device`, or through its CPU
+    /// reference; the result composed with the opacity in effect when the
+    /// effect was pushed. An effect without a CPU reference (an
+    /// application's) draws its content unchanged in the CPU mode, reported
+    /// once.
+    fn end_shader_effect(
+        &mut self,
+        mut scene: Box<dyn IVelloSceneSink>,
+        position: Vec2,
+        device: Option<DeviceLayer>,
+        shader: ShaderEffectFrame,
+    ) {
+        self.current_opacity = shader.inherited_opacity;
+        // As a bitmap of the result would be drawn: with the opacity in effect.
+        let alpha = ((255.0 * self.current_opacity) as u8) as f32 / 255.0;
+        if let Some(layer) = device {
+            #[cfg(feature = "hybrid")]
+            {
+                self.end_device_shader_effect(scene, layer, &shader, alpha);
+                return;
+            }
+            #[cfg(not(feature = "hybrid"))]
+            match layer {}
+        }
+
+        note_cpu_layer();
+        let (width, height) = (scene.width(), scene.height());
+        crate::perf::count(crate::perf::Phase::EffectAsImage, u64::from(width) * u64::from(height) * 4);
+        let mut rgba = vec![0u8; width as usize * height as usize * 4];
+        scene.render_to_pixels(&mut rgba);
+        if !shader.effect.cpu_reference(&mut rgba, width as usize, height as usize, f64::from(shader.scale)) {
+            // An application's effect without a reference: the content
+            // unchanged (the pixels are as they were drawn).
+            shader.effect.report_unhandled("Vello");
+        }
+        let brush = VelloSceneBrush::Image(VelloSceneImage {
+            image: to_image(rgba, PixelSize::new(width as i32, height as i32)),
+            x_extend: peniko::Extend::Pad,
+            y_extend: peniko::Extend::Pad,
+            quality: peniko::ImageQuality::Low,
+            alpha,
+        });
+        self.draw_brush_at_pixels(brush, position.x, position.y, f64::from(width), f64::from(height));
+    }
+
+    /// Ends a shader effect drawn on the device: the content rendered into a
+    /// texture of the pool, the pass of the effect, and its result painted
+    /// over the part of the area on the scene, one texel per pixel; the
+    /// content unchanged should the pass fail.
+    #[cfg(feature = "hybrid")]
+    fn end_device_shader_effect(
+        &mut self,
+        scene: Box<dyn IVelloSceneSink>,
+        layer: DeviceLayer,
+        shader: &ShaderEffectFrame,
+        alpha: f32,
+    ) {
+        use crate::gpu::effect_passes::{self, LayerArea, ShaderArea};
+        let Some(content) = Self::render_device_scene(scene, &layer) else {
+            return;
+        };
+        let area = LayerArea { width: layer.width, height: layer.height };
+        let shader_area = ShaderArea {
+            origin: [(layer.x - shader.area.x0) as f32, (layer.y - shader.area.y0) as f32],
+            size: shader.size,
+            scale: shader.scale,
+        };
+        let result = effect_passes::shader_effect_texture(&layer.device, &content, area, &shader.effect, shader_area);
+        // The content is the pool's again once the pass that reads it is
+        // submitted.
+        let texture = result.unwrap_or(content);
+        self.paint_device_layer(&layer, texture, alpha, BlendMode::default());
+    }
+}
+
 impl IDrawingContextImplWithEffects for DrawingContextImpl {
     fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
         // The luminance mask is computed from the pixels of the content: on
@@ -430,6 +680,7 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
                     outer: Some(outer),
                     luminance_to_alpha: true,
                     device: Some(layer),
+                    shader: None,
                 });
                 self.save(SavedKind::Effect);
                 if let Some(rect) = clip_rect {
@@ -444,6 +695,7 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
                 outer: Some(outer),
                 luminance_to_alpha: true,
                 device: None,
+                shader: None,
             });
             self.save(SavedKind::Effect);
             if let Some(rect) = clip_rect {
@@ -451,10 +703,22 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
             }
             return;
         }
+        // A runtime shader effect (#455, E5).
+        if let Some(custom) = effect.as_custom_effect() {
+            if custom.has_shader() && self.push_shader_effect(clip_rect, custom) {
+                return;
+            }
+        }
         let Some(filter) = self.create_effect(effect) else {
             // An effect that changes nothing is a layer.
             self.sink().push_layer(BlendMode::default(), 1.0);
-            self.effect_stack.push(EffectFrame { cropped: false, outer: None, luminance_to_alpha: false, device: None });
+            self.effect_stack.push(EffectFrame {
+                cropped: false,
+                outer: None,
+                luminance_to_alpha: false,
+                device: None,
+                shader: None,
+            });
             self.save(SavedKind::Effect);
             return;
         };
@@ -464,7 +728,13 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
 
         let transform = self.device_transform();
         self.sink().push_filter_layer(&filter, transform);
-        self.effect_stack.push(EffectFrame { cropped: clip_rect.is_some(), outer, luminance_to_alpha: false, device: None });
+        self.effect_stack.push(EffectFrame {
+            cropped: clip_rect.is_some(),
+            outer,
+            luminance_to_alpha: false,
+            device: None,
+            shader: None,
+        });
         self.save(SavedKind::Effect);
 
         // The clip rectangle bounds the layer of the effect: Skia draws no
