@@ -1688,8 +1688,10 @@ impl AutoCompleteBox {
         // Started the way an asynchronous method is called: it runs up to
         // its first pending await before this returns.
         let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-        let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
-        drop(scheduler.start_local(Self::populate_async(self.to_ref(), populator, search_text, token)));
+        drop(Dispatcher::current_dispatcher().start_local_with_priority(
+            Self::populate_async(self.to_ref(), populator, search_text, token),
+            priority,
+        ));
 
         true
     }

@@ -16,7 +16,8 @@ use crate::{
     Button, Canvas, Control, Panel, TransitionCompletedEventArgs, TransitioningContentControl,
 };
 use ferroui_base::animation::IPageTransition;
-use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{BoxedValue, Ref, StaticType, StyledElement, Visual};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -117,8 +118,8 @@ struct TaskGate {
 }
 
 impl TaskGate {
-    fn task(self: &Rc<Self>) -> DispatcherTask<()> {
-        Dispatcher::current_dispatcher().to_task_scheduler().start_local(TaskGateFuture(self.clone()))
+    fn task(self: &Rc<Self>) -> JoinHandle<()> {
+        Dispatcher::current_dispatcher().start_local(TaskGateFuture(self.clone()))
     }
 
     /// Sets the result; false if it was set already.
@@ -215,7 +216,7 @@ impl IPageTransition for TestTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let state = &self.state;
         state.start_count.set(state.start_count.get() + 1);
         let started = state.started.borrow().clone();

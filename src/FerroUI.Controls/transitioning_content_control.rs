@@ -9,7 +9,8 @@ use ferroui_base::interactivity::{
     Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies,
 };
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
-use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size, StyledElementImpl,
@@ -94,23 +95,27 @@ impl LayoutableImpl for TransitioningContentControl {
                 // pass.
                 let this = this.to_ref();
                 let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-                let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
-                drop(scheduler.start_local(async move {
-                    if task.is_completed() {
-                        YieldOnce(false).await;
-                    }
-                    let ran_to_completion = TransitionEnd { task }.await;
+                drop(Dispatcher::current_dispatcher().start_local_with_priority(
+                    async move {
+                        if task.is_finished() {
+                            YieldOnce(false).await;
+                        }
+                        // A transition that failed or was aborted did not run to completion; its
+                        // failure is not raised again.
+                        let ran_to_completion = task.await.is_ok();
 
-                    this.on_transition_completed(&TransitionCompletedEventArgs::new(
-                        from_content,
-                        to_content,
-                        ran_to_completion && !cancel.is_cancelled(),
-                    ));
+                        this.on_transition_completed(&TransitionCompletedEventArgs::new(
+                            from_content,
+                            to_content,
+                            ran_to_completion && !cancel.is_cancelled(),
+                        ));
 
-                    if !cancel.is_cancelled() {
-                        this.hide_old_presenter();
-                    }
-                }));
+                        if !cancel.is_cancelled() {
+                            this.hide_old_presenter();
+                        }
+                    },
+                    priority,
+                ));
             }
 
             this.should_animate.set(false);
@@ -134,27 +139,6 @@ impl ContentControlImpl for TransitioningContentControl {
         }
 
         false
-    }
-}
-
-/// Waits for a page transition to end; the result tells whether it ran to
-/// completion. The failure of a transition is not re-raised.
-struct TransitionEnd {
-    task: DispatcherTask<()>,
-}
-
-impl Future for TransitionEnd {
-    type Output = bool;
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<bool> {
-        if self.task.is_faulted() {
-            return Poll::Ready(false);
-        }
-
-        match Pin::new(&mut self.task).poll(cx) {
-            Poll::Ready(result) => Poll::Ready(result.is_ok()),
-            Poll::Pending => Poll::Pending,
-        }
     }
 }
 
@@ -195,7 +179,7 @@ impl IPageTransition for ImmutableCrossFade {
         to: Option<&Ref<Visual>>,
         _forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         self.inner.start_cross_fade(from, to, cancellation_token)
     }
 }
