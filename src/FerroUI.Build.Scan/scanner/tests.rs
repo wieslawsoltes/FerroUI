@@ -1566,7 +1566,7 @@ fn nullable_batch_descriptors_are_read_and_unread_entries_are_counted() {
     }).collect();
     assert_eq!(registrations, [
         ("nullable", vec!["i64"]),
-        ("nullable", vec!["::std::rc::Rc<dyn ::nullable_registration::IServiceProvider>"]),
+        ("nullable", vec!["::std::rc::Rc<dyn ::nullable_registration::TestProvider>"]),
         ("nullable", vec!["::std::rc::Rc<::nullable_registration::Model>"]),
         ("nullable", vec!["String"]),
         ("nullable", vec!["u8"]),

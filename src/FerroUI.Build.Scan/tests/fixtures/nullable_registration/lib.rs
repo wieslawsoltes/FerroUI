@@ -2,7 +2,7 @@
 use ferroui_base::data::core::{NullableRegistration, ValueTypes};
 use std::rc::Rc;
 
-pub trait IServiceProvider {}
+pub trait TestProvider {}
 pub struct Model;
 
 // Named tables carry the same type information as inline const arrays. The
@@ -13,7 +13,7 @@ fn register() {
     use crate::Model as LocalModel;
     ValueTypes::register_nullable_types(NAMED);
     ValueTypes::register_nullable_types(&const { [
-        NullableRegistration::of::<Rc<dyn IServiceProvider>>(),
+        NullableRegistration::of::<Rc<dyn TestProvider>>(),
         ferroui_base::data::core::NullableRegistration::of::<Rc<LocalModel>>(),
     ] });
     ValueTypes::register_nullable::<String>();
