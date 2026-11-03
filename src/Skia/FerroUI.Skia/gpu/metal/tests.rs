@@ -1517,7 +1517,8 @@ fn a_graphite_render_target_prewarms_off_its_frames() {
 #[test]
 fn graphite_draws_the_library_effects_as_their_cpu_references() {
     use ferroui_base::media::effects::library::{
-        BrightnessContrastEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect, SepiaEffect, TintEffect,
+        BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+        SepiaEffect, SharpenEffect, TintEffect,
     };
     use ferroui_base::media::effects::ImmutableCustomEffect;
     use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
@@ -1562,6 +1563,9 @@ fn graphite_draws_the_library_effects_as_their_cpu_references() {
         (ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }), 3),
         (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 3),
         (ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 3.0, intensity: 0.8 }), 14),
+        // The convolutions of E3: Skia's matrix convolution on the GPU.
+        (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), 4),
+        (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), 4),
     ];
     for (effect, largest) in effects {
         let plain = GraphiteTarget::new(&device);

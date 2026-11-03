@@ -512,6 +512,55 @@ impl<'a> EffectGraphPainter<'a> {
         }
     }
 
+    /// The current convolution of a convolution node; `None` when it has no
+    /// kernel the drawing contexts take (the loader checks its size).
+    #[allow(clippy::too_many_arguments)]
+    fn convolution(
+        &self,
+        kernel_width: u32,
+        kernel_height: u32,
+        kernel: &[EffectScalar],
+        divisor: &EffectScalar,
+        bias: &EffectScalar,
+        clamp_edges: bool,
+        preserve_alpha: bool,
+    ) -> Option<crate::media::ConvolveMatrix> {
+        let elements: Vec<f32> = kernel.iter().map(|element| self.scalar(element) as f32).collect();
+        let mut convolution = crate::media::ConvolveMatrix::new(kernel_width, kernel_height, &elements)?;
+        convolution.divisor = self.scalar(divisor) as f32;
+        convolution.bias = self.scalar(bias) as f32;
+        convolution.clamp_edges = clamp_edges;
+        convolution.preserve_alpha = preserve_alpha;
+        Some(convolution)
+    }
+
+    /// Pushes a convolution layer when the canvas has the layers and the
+    /// node has a kernel; returns whether it did.
+    fn push_convolution(
+        canvas: &mut dyn IDrawingContextImpl,
+        rect: Rect,
+        convolution: Option<&crate::media::ConvolveMatrix>,
+    ) -> bool {
+        let Some(convolution) = convolution else { return false };
+        match canvas.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => {
+                layers.push_convolve_matrix_layer(rect, convolution);
+                true
+            }
+            // Deviation (winui-composition.md): without the layers of the
+            // drawing context the source is drawn unchanged.
+            None => false,
+        }
+    }
+
+    fn pop_convolution(canvas: &mut dyn IDrawingContextImpl, pushed: bool) {
+        if pushed {
+            if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
+                layers.pop_convolve_matrix_layer();
+            }
+        }
+    }
+
     /// Paints `node` over `rect`.
     fn paint_node(&self, node: &EffectNode, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
         match &node.kind {
@@ -630,6 +679,29 @@ impl<'a> EffectGraphPainter<'a> {
                 Self::pop_blur(canvas, blurred);
             }
             EffectNodeKind::Pixels { op, sources } => self.paint_pixels(op, sources, canvas, rect),
+            EffectNodeKind::ConvolveMatrix {
+                kernel_width,
+                kernel_height,
+                kernel,
+                divisor,
+                bias,
+                clamp_edges,
+                preserve_alpha,
+                source,
+            } => {
+                let convolution = self.convolution(
+                    *kernel_width,
+                    *kernel_height,
+                    kernel,
+                    divisor,
+                    bias,
+                    *clamp_edges,
+                    *preserve_alpha,
+                );
+                let pushed = Self::push_convolution(canvas, rect, convolution.as_ref());
+                self.paint_node(source, canvas, rect);
+                Self::pop_convolution(canvas, pushed);
+            }
             EffectNodeKind::SceneLighting { ambient, diffuse, specular, shine } => {
                 let material = crate::rendering::composition::server::LightingMaterial {
                     ambient: self.scalar(ambient),
@@ -932,6 +1004,35 @@ impl<'a> EffectGraphPainter<'a> {
             }
             EffectNodeKind::Border { source, .. } => {
                 self.paint_around_layer(source, rest, canvas, rect, phase);
+            }
+            EffectNodeKind::ConvolveMatrix {
+                kernel_width,
+                kernel_height,
+                kernel,
+                divisor,
+                bias,
+                clamp_edges,
+                preserve_alpha,
+                source,
+            } => {
+                // The kernel has the size the loader checked: the answer of
+                // the push is the same on both sides of the layer.
+                let convolution = self.convolution(
+                    *kernel_width,
+                    *kernel_height,
+                    kernel,
+                    divisor,
+                    bias,
+                    *clamp_edges,
+                    *preserve_alpha,
+                );
+                if before {
+                    Self::push_convolution(canvas, rect, convolution.as_ref());
+                    self.paint_around_layer(source, rest, canvas, rect, phase);
+                } else {
+                    self.paint_around_layer(source, rest, canvas, rect, phase);
+                    Self::pop_convolution(canvas, has_layers && convolution.is_some());
+                }
             }
             EffectNodeKind::Shadow { amount, color, source } => {
                 let radius = self.blur_radius(amount);

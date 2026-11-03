@@ -2580,17 +2580,19 @@ mod bitmaps {
     }
 }
 
-/// The custom effects FerroUI ships drawn as their graphs (#455, E2) in the
-/// CPU mode: `push_custom_effect_graph` around a scene of opaque and
+/// The custom effects FerroUI ships drawn as their graphs (#455, E2 and E3)
+/// in the CPU mode: `push_custom_effect_graph` around a scene of opaque and
 /// translucent colours, compared with the CPU reference of each effect
 /// applied to the same scene drawn plain (the same scene and tolerances as
 /// the tests of `ferroui-skia`).
 mod custom_effect_graphs {
     use super::*;
     use ferroui_base::media::effects::library::{
-        BrightnessContrastEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect, SepiaEffect, TintEffect,
+        BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+        SepiaEffect, SharpenEffect, TintEffect,
     };
     use ferroui_base::media::effects::ImmutableCustomEffect;
+    use ferroui_base::media::ConvolveMatrix;
     use ferroui_base::platform::AlphaFormat;
     use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
 
@@ -2673,5 +2675,58 @@ mod custom_effect_graphs {
     fn the_glow_matches_its_cpu_reference() {
         let glow = GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.8 };
         assert_matches_reference(ImmutableCustomEffect::new(glow), 12);
+    }
+
+    #[test]
+    fn the_image_effects_match_their_cpu_references() {
+        assert_matches_reference(ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), 2);
+        assert_matches_reference(ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), 2);
+    }
+
+    /// The convolution layer of the CPU mode (the CPU reference applied to
+    /// the content drawn by the CPU renderer) against `ConvolveMatrix`'s
+    /// reference applied to the plain scene inside `bounds` (whole pixels:
+    /// x, y, width, height); nothing is kept outside them.
+    fn assert_convolution_matches_reference(convolution: ConvolveMatrix, bounds: (usize, usize, usize, usize)) {
+        let size = SIZE as usize;
+        let plain = Target::new();
+        plain.draw(scene);
+        let plain = pixels(&plain);
+        let (x0, y0, width, height) = bounds;
+        let mut area = Vec::with_capacity(width * height * 4);
+        for y in y0..y0 + height {
+            area.extend_from_slice(&plain[(y * size + x0) * 4..(y * size + x0 + width) * 4]);
+        }
+        convolution.apply_to_premultiplied_rgba8(&mut area, width, height);
+        let mut expected = vec![0u8; plain.len()];
+        for y in 0..height {
+            let at = ((y0 + y) * size + x0) * 4;
+            expected[at..at + width * 4].copy_from_slice(&area[y * width * 4..(y + 1) * width * 4]);
+        }
+
+        let target = Target::new();
+        target.draw(|context| {
+            let rect = Rect::new(x0 as f64, y0 as f64, width as f64, height as f64);
+            let layers = context.as_drawing_context_impl_with_layer_effects().expect("layer effects");
+            layers.push_convolve_matrix_layer(rect, &convolution);
+            scene(context);
+            let layers = context.as_drawing_context_impl_with_layer_effects().expect("layer effects");
+            layers.pop_convolve_matrix_layer();
+        });
+        let actual = pixels(&target);
+        let (most, mean) = difference(&expected, &actual);
+        assert!(most <= 2 && mean <= 0.5, "{convolution:?}: largest difference {most}, mean {mean}");
+    }
+
+    #[test]
+    fn the_convolution_layer_matches_its_cpu_reference() {
+        let mut shifted = ConvolveMatrix::new(3, 3, &[1.0, 2.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 0.5]).unwrap();
+        shifted.divisor = 3.5;
+        shifted.bias = 0.05;
+        assert_convolution_matches_reference(shifted, (0, 0, SIZE as usize, SIZE as usize));
+        let mut hard = ConvolveMatrix::new(2, 3, &[0.5, 0.0, 0.0, 1.0, -0.25, 0.75]).unwrap();
+        hard.clamp_edges = true;
+        hard.preserve_alpha = true;
+        assert_convolution_matches_reference(hard, (25, 28, 40, 30));
     }
 }

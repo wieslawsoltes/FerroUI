@@ -8,7 +8,7 @@
 //! opacity, a cross-fade of two sources, composites in every mode but
 //! `MaskInvert`, a colour fill, blends, colour matrices (saturation, tint,
 //! invert, grayscale, sepia, linear transfer, luminance to alpha), an arithmetic composite with a
-//! colour, an alpha mask, a border that tiles a surface and scene lighting
+//! colour, an alpha mask, a border that tiles a surface, a matrix convolution and scene lighting
 //! (winui-materials.md). A graph with another effect or mode loads with the
 //! status `Other`, and its brushes draw nothing.
 
@@ -33,7 +33,7 @@ pub(crate) use effect_graph::{
 pub use graphics_effects::{
     AlphaMaskEffect, ArithmeticCompositeEffect, BlendEffect, BlendEffectMode, BorderEffect, CanvasComposite,
     CanvasEdgeBehavior, ColorMatrixEffect, ColorSourceEffect, CompositeEffect, CompositionEffectSourceParameter,
-    CrossFadeEffect, EffectBorderMode, EffectOptimization, GaussianBlurEffect, GraphicsEffect, GraphicsEffectSource,
-    GrayscaleEffect, InvertEffect, LinearTransferEffect, LuminanceToAlphaEffect, OpacityEffect, SaturationEffect,
-    SceneLightingEffect, SepiaEffect, ShadowEffect, TintEffect,
+    ConvolveMatrixEffect, CrossFadeEffect, EffectBorderMode, EffectOptimization, GaussianBlurEffect, GraphicsEffect,
+    GraphicsEffectSource, GrayscaleEffect, InvertEffect, LinearTransferEffect, LuminanceToAlphaEffect, OpacityEffect,
+    SaturationEffect, SceneLightingEffect, SepiaEffect, ShadowEffect, TintEffect,
 };
