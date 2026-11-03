@@ -252,6 +252,106 @@ impl<TSource: 'static, TValue: PropertyValue> IPropertyInfo for TypedClrProperty
     }
 }
 
+/// Target-side state shared by all typed binding expressions.
+struct BindingTarget {
+    property: Cell<Option<&'static FerroProperty>>,
+    priority: Cell<BindingPriority>,
+    casts_value: Cell<bool>,
+    writing_value: Cell<bool>,
+    sink: RefCell<Option<SinkRef>>,
+    frame: RefCell<Option<Weak<ImmediateValueFrame>>>,
+    owner: RefCell<Option<WeakRef<FerroObject>>>,
+}
+
+impl BindingTarget {
+    fn new(priority: BindingPriority) -> Self {
+        Self {
+            property: Cell::new(None),
+            priority: Cell::new(priority),
+            casts_value: Cell::new(false),
+            writing_value: Cell::new(false),
+            sink: RefCell::new(None),
+            frame: RefCell::new(None),
+            owner: RefCell::new(None),
+        }
+    }
+
+    fn owner(&self) -> Option<crate::Ref<FerroObject>> {
+        self.owner.borrow().as_ref().and_then(WeakRef::upgrade)
+    }
+
+    fn attach(
+        &self,
+        value_type: ValueType,
+        sink: SinkRef,
+        frame: Option<Weak<ImmediateValueFrame>>,
+        target: &FerroObject,
+        target_property: &'static FerroProperty,
+        priority: BindingPriority,
+    ) {
+        if self.sink.borrow().is_some() {
+            panic!("TypedBindingExpression was already attached.");
+        }
+        if !target.is::<StyledElement>() {
+            panic!("TypedBindingExpression may only target StyledElements");
+        }
+        if self.property.get().is_some_and(|p| p.id() != target_property.id()) {
+            panic!("TypedBindingExpression was already attached to a different property.");
+        }
+        let target_type = property_value_type(target_property);
+        if !ValueTypes::is_assignable(value_type, target_type) {
+            panic!(
+                "TypedBindingExpression of type '{}' cannot be bound to a property of type '{}'.",
+                value_type.name(),
+                target_property.property_type_name()
+            );
+        }
+        self.sink.replace(Some(sink));
+        self.frame.replace(frame);
+        self.owner.replace(Some(target.to_weak()));
+        self.property.set(Some(target_property));
+        self.casts_value.set(target_type != value_type);
+        self.priority.set(priority);
+    }
+
+    fn log(&self, description: &str, error: &str) {
+        let Some(log) = Logger::try_get(LogEventLevel::Warning, LogArea::BINDING) else { return };
+        let Some(target) = self.owner() else { return };
+        let property = self.property.get().map_or("(unknown)", |p| p.name());
+        let target: &FerroObject = &target;
+        log.log_with_values(
+            Some(target as &dyn Any),
+            "An error occurred binding {Property} to {Expression}: {Message}",
+            &[&property, &description, &error],
+        );
+    }
+
+    fn publish(&self, sink: SinkRef, this: Rc<dyn BindingExpressionBase>) {
+        struct Restore<'a>(&'a Cell<bool>, bool);
+        impl Drop for Restore<'_> {
+            fn drop(&mut self) {
+                self.0.set(self.1);
+            }
+        }
+        let _restore = Restore(&self.writing_value, self.writing_value.replace(true));
+        sink.on_changed(&this, true, false);
+    }
+
+    fn complete(
+        &self,
+        sink: Option<SinkRef>,
+        this: Option<Rc<dyn BindingExpressionBase>>,
+        frame: Option<Weak<ImmediateValueFrame>>,
+    ) {
+        if let (Some(sink), Some(this)) = (sink, this) {
+            sink.on_completed(&this);
+        }
+        if let (Some(frame), Some(property)) = (frame.and_then(|f| f.upgrade()), self.property.get()) {
+            frame.on_entry_disposed(property);
+        }
+    }
+}
+
 /// A binding expression for the common case of a compiled binding: a single
 /// plain property read from the data context of the target element, whose
 /// type is assignable to the type of the target property. When the two types
@@ -263,23 +363,15 @@ pub struct TypedBindingExpression<TSource: PartialEq + 'static, TValue: Property
     property_info: Rc<TypedClrPropertyInfo<TSource, TValue>>,
     mode: BindingMode,
     default_priority: BindingPriority,
-    priority: Cell<BindingPriority>,
-    target_property: Cell<Option<&'static FerroProperty>>,
-    /// Whether the type of the target property differs from `TValue`: values
-    /// are then cast between the two types.
-    casts_value: Cell<bool>,
     is_running: Cell<bool>,
     produce_value: Cell<bool>,
-    writing_value_to_target: Cell<bool>,
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     reload_paused: Cell<bool>,
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     reload_pending: Cell<bool>,
-    sink: RefCell<Option<SinkRef>>,
-    frame: RefCell<Option<Weak<ImmediateValueFrame>>>,
+    target: BindingTarget,
     source: RefCell<Option<Weak<TSource>>>,
     source_token: Cell<Option<u64>>,
-    target: RefCell<Option<WeakRef<FerroObject>>>,
     target_subscription: RefCell<Option<Subscription>>,
     source_value: RefCell<Option<TValue>>,
     should_update_one_time_binding_target: Cell<bool>,
@@ -297,21 +389,15 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
             property_info,
             mode,
             default_priority,
-            priority: Cell::new(default_priority),
-            target_property: Cell::new(None),
-            casts_value: Cell::new(false),
+            target: BindingTarget::new(default_priority),
             is_running: Cell::new(false),
             produce_value: Cell::new(true),
-            writing_value_to_target: Cell::new(false),
             #[cfg(all(debug_assertions, feature = "hot-reload"))]
             reload_paused: Cell::new(false),
             #[cfg(all(debug_assertions, feature = "hot-reload"))]
             reload_pending: Cell::new(false),
-            sink: RefCell::new(None),
-            frame: RefCell::new(None),
             source: RefCell::new(None),
             source_token: Cell::new(None),
-            target: RefCell::new(None),
             target_subscription: RefCell::new(None),
             source_value: RefCell::new(None),
             should_update_one_time_binding_target: Cell::new(mode == BindingMode::OneTime),
@@ -327,24 +413,8 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
         self.source.borrow().as_ref().and_then(Weak::upgrade)
     }
 
-    fn try_get_target(&self) -> Option<crate::Ref<FerroObject>> {
-        self.target.borrow().as_ref().and_then(WeakRef::upgrade)
-    }
-
-    fn log(&self, error: &str) {
-        let Some(log) = Logger::try_get(LogEventLevel::Warning, LogArea::BINDING) else { return };
-        let Some(target) = self.try_get_target() else { return };
-        let property = self.target_property.get().map_or("(unknown)", |p| p.name());
-        let target: &FerroObject = &target;
-        log.log_with_values(
-            Some(target as &dyn Any),
-            "An error occurred binding {Property} to {Expression}: {Message}",
-            &[&property, &self.description(), &error],
-        );
-    }
-
     fn start_core(&self) {
-        let (Some(target), Some(_)) = (self.try_get_target(), self.target_property.get()) else { return };
+        let (Some(target), Some(_)) = (self.target.owner(), self.target.property.get()) else { return };
         let weak = self.this.clone();
         let subscription = target.property_changed(move |e| {
             if let Some(this) = weak.upgrade() {
@@ -361,7 +431,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
         if let Some(s) = subscription {
             s.dispose();
         }
-        if self.try_get_target().is_some() {
+        if self.target.owner().is_some() {
             self.update_source(None);
         } else {
             self.unsubscribe_source();
@@ -389,7 +459,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
             })
         });
         if let (Some(d), None) = (&data_context, &source) {
-            self.log(&format!(
+            self.target.log(self.description(), &format!(
                 "Could not convert DataContext of type '{}' to '{}'.",
                 d.type_name(),
                 std::any::type_name::<TSource>()
@@ -432,7 +502,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
         if self.reload_paused.get() {
             return;
         }
-        if self.target_property.get().is_some() && self.try_get_target().is_some() {
+        if self.target.property.get().is_some() && self.target.owner().is_some() {
             if let Some(source) = self.try_get_source() {
                 self.property_info.set_on(&source, value);
             }
@@ -451,7 +521,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
                     // Getter failures must not escape into the source's
                     // change notification, so log the error and clear the
                     // value, as the untyped binding path does.
-                    self.log(&format!("Error getting '{}': {}", self.property_info.name(), e));
+                    self.target.log(self.description(), &format!("Error getting '{}': {}", self.property_info.name(), e));
                     None
                 }
             },
@@ -488,31 +558,24 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
         // Flag that the source value is being pushed to the target so that
         // the resulting change notification isn't echoed straight back to the
         // source in two-way mode.
-        let sink = self.sink.borrow().clone();
+        let sink = self.target.sink.borrow().clone();
         let (Some(sink), Some(this)) = (sink, self.this.upgrade()) else { return };
         let this: Rc<dyn BindingExpressionBase> = this;
-        struct Restore<'a>(&'a Cell<bool>, bool);
-        impl Drop for Restore<'_> {
-            fn drop(&mut self) {
-                self.0.set(self.1);
-            }
-        }
-        let _restore = Restore(&self.writing_value_to_target, self.writing_value_to_target.replace(true));
-        sink.on_changed(&this, true, false);
+        self.target.publish(sink, this);
     }
 
     fn on_target_property_changed(&self, e: &crate::FerroPropertyChangedEventArgs<'_>) {
         if e.property().id() == StyledElement::data_context_property().id() {
             let data_context =
-                self.try_get_target().and_then(|t| t.downcast_ref::<StyledElement>().and_then(|e| e.data_context()));
+                self.target.owner().and_then(|t| t.downcast_ref::<StyledElement>().and_then(|e| e.data_context()));
             self.update_source(data_context);
-        } else if self.target_property.get().is_some_and(|p| p.id() == e.property().id()) {
+        } else if self.target.property.get().is_some_and(|p| p.id() == e.property().id()) {
             // Don't write back to the source if this change is the binding
             // pushing the source value to the target.
-            if !self.writing_value_to_target.get()
+            if !self.target.writing_value.get()
                 && matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource)
             {
-                let value = if self.casts_value.get() {
+                let value = if self.target.casts_value.get() {
                     self.try_get_target_value()
                 } else {
                     e.new_value().downcast_ref::<TValue>().cloned()
@@ -525,13 +588,13 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
     }
 
     fn try_get_target_value(&self) -> Option<TValue> {
-        let (Some(property), Some(target)) = (self.target_property.get(), self.try_get_target()) else {
+        let (Some(property), Some(target)) = (self.target.property.get(), self.target.owner()) else {
             return None;
         };
         // Only reached when the source changes in one-way-to-source mode, or
         // when the target changes and its type differs from the source type.
         let value = target.get_value_untyped(property);
-        if self.casts_value.get() {
+        if self.target.casts_value.get() {
             ValueTypes::try_cast(&value, ValueType::of::<TValue>())?.downcast_ref::<TValue>().cloned()
         } else {
             value.downcast_ref::<TValue>().cloned()
@@ -541,28 +604,23 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
 
 impl<TSource: PartialEq + 'static, TValue: PropertyValue> IDisposable for TypedBindingExpression<TSource, TValue> {
     fn dispose(&self) {
-        if self.sink.borrow().is_none() {
+        if self.target.sink.borrow().is_none() {
             return;
         }
         // Clear the sink before stopping so that the unsubscribe doesn't push
         // a final value to a value store that is about to clear this entry.
-        let sink = self.sink.borrow_mut().take();
-        let frame = self.frame.borrow_mut().take();
+        let sink = self.target.sink.borrow_mut().take();
+        let frame = self.target.frame.borrow_mut().take();
         self.stop_core();
         self.is_running.set(false);
-        if let (Some(sink), Some(this)) = (sink, self.this.upgrade()) {
-            let this: Rc<dyn BindingExpressionBase> = this;
-            sink.on_completed(&this);
-        }
-        if let (Some(frame), Some(property)) = (frame.and_then(|f| f.upgrade()), self.target_property.get()) {
-            frame.on_entry_disposed(property);
-        }
+        let this = self.this.upgrade().map(|this| this as Rc<dyn BindingExpressionBase>);
+        self.target.complete(sink, this, frame);
     }
 }
 
 impl<TSource: PartialEq + 'static, TValue: PropertyValue> IValueEntry for TypedBindingExpression<TSource, TValue> {
     fn property(&self) -> &'static FerroProperty {
-        self.target_property.get().expect("The binding expression is not attached.")
+        self.target.property.get().expect("The binding expression is not attached.")
     }
 
     fn has_value(&self) -> bool {
@@ -574,7 +632,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> IValueEntry for TypedB
         BindingExpressionBase::start(self, false);
         // A value that has to be cast to the type of the target property is
         // read through `get_value_boxed`.
-        if self.casts_value.get() {
+        if self.target.casts_value.get() {
             return false;
         }
         match (out.downcast_mut::<Option<TValue>>(), &*self.source_value.borrow()) {
@@ -591,9 +649,9 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> IValueEntry for TypedB
         // A boolean is boxed as its cached box, so that reading it into an
         // untyped target property does not allocate per read.
         let value = self.source_value.borrow().as_ref().map(BooleanBoxes::box_value)?;
-        match self.target_property.get() {
+        match self.target.property.get() {
             // The store requires a value of exactly the target property type.
-            Some(property) if self.casts_value.get() => ValueTypes::try_cast(&value, property_value_type(property)),
+            Some(property) if self.target.casts_value.get() => ValueTypes::try_cast(&value, property_value_type(property)),
             _ => Some(value),
         }
     }
@@ -621,11 +679,11 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingExpressionBase
     for TypedBindingExpression<TSource, TValue>
 {
     fn priority(&self) -> BindingPriority {
-        self.priority.get()
+        self.target.priority.get()
     }
 
     fn target_property(&self) -> Option<&'static FerroProperty> {
-        self.target_property.get()
+        self.target.property.get()
     }
 
     fn default_priority(&self) -> BindingPriority {
@@ -671,29 +729,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingExpressionBase
         target_property: &'static FerroProperty,
         priority: BindingPriority,
     ) {
-        if self.sink.borrow().is_some() {
-            panic!("TypedBindingExpression was already attached.");
-        }
-        if !target.is::<StyledElement>() {
-            panic!("TypedBindingExpression may only target StyledElements");
-        }
-        if self.target_property.get().is_some_and(|p| p.id() != target_property.id()) {
-            panic!("TypedBindingExpression was already attached to a different property.");
-        }
-        let target_type = property_value_type(target_property);
-        if !ValueTypes::is_assignable(ValueType::of::<TValue>(), target_type) {
-            panic!(
-                "TypedBindingExpression of type '{}' cannot be bound to a property of type '{}'.",
-                std::any::type_name::<TValue>(),
-                target_property.property_type_name()
-            );
-        }
-        self.sink.replace(Some(sink));
-        self.frame.replace(frame);
-        self.target.replace(Some(target.to_weak()));
-        self.target_property.set(Some(target_property));
-        self.casts_value.set(target_type != ValueType::of::<TValue>());
-        self.priority.set(priority);
+        self.target.attach(ValueType::of::<TValue>(), sink, frame, target, target_property, priority);
     }
 
     fn start(&self, produce_value: bool) {
