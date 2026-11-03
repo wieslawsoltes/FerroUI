@@ -12,10 +12,7 @@ use std::time::Duration;
 
 use super::dispatcher::DispatcherLocal;
 use super::dispatcher_priority_queue::NOT_QUEUED;
-use super::{
-    CancellationToken, Dispatcher, DispatcherFrame, DispatcherPriority, DispatcherTimer,
-    FerroSynchronizationContext,
-};
+use super::{CancellationToken, Dispatcher, DispatcherFrame, DispatcherPriority, DispatcherTimer};
 use ferroui_system::task::Canceled;
 use crate::reactive::{Disposable, IDisposable};
 
@@ -335,7 +332,7 @@ impl OperationCore {
         let outcome = catch_unwind(AssertUnwindSafe(|| {
             // The current context tells asynchronous code started by the
             // callback to continue at the priority of this operation.
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(&self.dispatcher, self.priority());
+            let _restore = self.dispatcher.enter_job(self.priority());
             self.invoke_core(local.as_deref())
         }));
 

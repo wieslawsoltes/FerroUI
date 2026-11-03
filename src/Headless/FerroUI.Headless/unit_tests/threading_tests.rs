@@ -7,7 +7,7 @@
 
 use super::test_application::{ferro_fact, ferro_theory};
 use super::{delay, oneshot};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer, FerroSynchronizationContext};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use std::time::Duration;
 
 fn validate_test_context() {}
@@ -27,7 +27,8 @@ ferro_fact!(
 );
 
 async fn dispatcher_timer_works_on_the_same_thread(interval: u64) {
-    assert!(FerroSynchronizationContext::current().is_some());
+    // The synchronization context of the original: the priority the code continues at.
+    assert!(Dispatcher::current_priority().is_some());
     validate_test_context();
     let current_thread = std::thread::current().id();
 

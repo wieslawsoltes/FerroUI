@@ -35,7 +35,7 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
 use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{
-    CancellationToken, Canceled, Dispatcher, DispatcherPriority, DispatcherTimer, FerroSynchronizationContext,
+    CancellationToken, Canceled, Dispatcher, DispatcherPriority, DispatcherTimer,
 };
 use ferroui_base::utilities::{CancelEventArgs, HandlerList, StringComparison};
 use ferroui_base::{
@@ -1687,10 +1687,9 @@ impl AutoCompleteBox {
 
         // Started the way an asynchronous method is called: it runs up to
         // its first pending await before this returns.
-        let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-            FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-        });
-        drop(context.to_task_scheduler().start_local(Self::populate_async(self.to_ref(), populator, search_text, token)));
+        let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+        let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
+        drop(scheduler.start_local(Self::populate_async(self.to_ref(), populator, search_text, token)));
 
         true
     }

@@ -2,7 +2,7 @@ use super::IStreamPlugin;
 use crate::data::core::WeakValue;
 use crate::data::{BindingError, BindingErrorType, BindingNotification};
 use crate::reactive::{IObservable, LightweightSubject, Observable};
-use crate::threading::{Dispatcher, DispatcherPriority, FerroSynchronizationContext};
+use crate::threading::{Dispatcher, DispatcherPriority};
 use crate::{BoxedValue, PropertyValue};
 use std::cell::RefCell;
 use std::future::Future;
@@ -228,10 +228,11 @@ impl TaskStreamPlugin {
         }
 
         // The continuation runs where the current synchronization context
-        // posts to: a job of this thread's dispatcher.
+        // of the original posts to: a job of this thread's dispatcher, at the
+        // priority of the running job (Normal outside of one).
         let subject = LightweightSubject::<Option<BoxedValue>>::new();
         let dispatcher = Dispatcher::current_dispatcher();
-        let priority = FerroSynchronizationContext::current().map_or(DispatcherPriority::NORMAL, |c| c.priority());
+        let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
         let completed = task.clone();
         let observer = subject.clone();
         task.continue_with(move || {

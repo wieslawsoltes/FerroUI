@@ -28,14 +28,13 @@
 use crate::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
 use ferroui_base::media::FontManager;
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, FerroSynchronizationContext, UnitTestDispatcherScope};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, UnitTestDispatcherScope};
 use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, FerroLocator, FerroObjectImpl, LocatorExtensions, Ref};
 use ferroui_controls::{AppBuilder, Application, ApplicationImpl, IToolTipService, NewApplication};
 use ferroui_themes_simple::SimpleTheme;
 use std::cell::RefCell;
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
 use std::rc::Rc;
-use std::sync::Arc;
 
 #[repr(C)]
 pub(crate) struct HeadlessUnitTestApplication {
@@ -59,7 +58,7 @@ impl HeadlessUnitTestApplication {
     pub(crate) fn start(options: Option<FerroHeadlessPlatformOptions>) -> Scope {
         let dispatcher = Dispatcher::unit_test_scope();
         let scope = FerroLocator::enter_scope();
-        let old_context = FerroSynchronizationContext::current();
+        let old_priority = Dispatcher::current_priority();
 
         if let Err(ex) = catch_unwind(AssertUnwindSafe(|| {
             Dispatcher::reset_before_unit_tests();
@@ -77,11 +76,11 @@ impl HeadlessUnitTestApplication {
             resume_unwind(ex);
         }
 
-        Scope { state: RefCell::new(Some((scope, old_context, dispatcher))) }
+        Scope { state: RefCell::new(Some((scope, old_priority, dispatcher))) }
     }
 }
 
-type ScopeState = (Rc<dyn IDisposable>, Option<Arc<FerroSynchronizationContext>>, UnitTestDispatcherScope);
+type ScopeState = (Rc<dyn IDisposable>, Option<DispatcherPriority>, UnitTestDispatcherScope);
 
 pub(crate) struct Scope {
     state: RefCell<Option<ScopeState>>,
@@ -96,7 +95,7 @@ impl Scope {
     }
 
     pub(crate) fn dispose(&self) {
-        let Some((locator_scope, old_context, dispatcher)) = self.state.borrow_mut().take() else { return };
+        let Some((locator_scope, old_priority, dispatcher)) = self.state.borrow_mut().take() else { return };
 
         // Do not run more user code while a failed test unwinds.
         if !std::thread::panicking() {
@@ -120,7 +119,7 @@ impl Scope {
         }
         locator_scope.dispose();
         Dispatcher::reset_before_unit_tests();
-        FerroSynchronizationContext::set_current(old_context);
+        Dispatcher::set_current_priority(old_priority);
         drop(dispatcher);
     }
 }

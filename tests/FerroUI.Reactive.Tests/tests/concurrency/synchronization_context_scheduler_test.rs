@@ -7,6 +7,10 @@
 //! flag once the scheduling has returned. `DontPost_Same` and `AlwaysPost_Same` start a thread to
 //! set the context as current there, as upstream does; the scheduler and its work stay on that
 //! thread.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt, SynchronizationContextScheduler};
 use ferroui_reactive::disposables::Disposable;

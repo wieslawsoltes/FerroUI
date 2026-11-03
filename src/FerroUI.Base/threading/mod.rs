@@ -43,7 +43,9 @@ pub use dispatcher_priority::{DispatcherPriority, DispatcherPriorityOutOfRangeEr
 pub use dispatcher_invoke::DispatcherInvokeError;
 pub use dispatcher_priority_awaitable::{DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable};
 pub use dispatcher_task::DispatcherTask;
-pub use ferro_synchronization_context::{DispatcherTaskScheduler, FerroSynchronizationContext, RestoreContext};
+pub use ferro_synchronization_context::DispatcherTaskScheduler;
+#[allow(deprecated)]
+pub use ferro_synchronization_context::{FerroSynchronizationContext, RestoreContext};
 mod thread_safe_object_pool;
 pub use thread_safe_object_pool::ThreadSafeObjectPool;
 pub use dispatcher_thread_storage::UnitTestDispatcherScope;

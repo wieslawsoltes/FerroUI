@@ -9,6 +9,9 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactiveui::IViewThreadInvoker;
+// The synchronization context of `ferroui-system` is deprecated since 0.5.0: the test of the
+// deprecated `install_on_ui_thread` uses it.
+#[allow(deprecated)]
 use ferroui_system::threading::{current_synchronization_context, set_synchronization_context};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -134,6 +137,20 @@ fn a_new_scheduler_posts_at_background_priority() {
 }
 
 #[test]
+fn the_dispatcher_of_the_user_interface_thread_is_its_schedule_without_an_installation() {
+    let _app = start_app();
+    // The dispatcher of the thread is made on its first use, and is the schedule of the thread
+    // from then on.
+    let _dispatcher = Dispatcher::ui_thread();
+    assert!(ferroui_system::task::thread_schedule().is_some());
+
+    crate::ferro_scheduler::prepare_ui_thread();
+    assert!(Dispatcher::current_priority().is_some());
+    assert!(ferroui_system::task::current_schedule().is_some());
+}
+
+#[test]
+#[allow(deprecated)]
 fn install_on_ui_thread_sets_the_synchronization_context_of_the_thread() {
     let _app = start_app();
     set_synchronization_context(None);

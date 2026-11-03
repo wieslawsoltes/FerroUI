@@ -3,12 +3,15 @@
 
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt};
 use ferroui_reactiveui::RxSchedulers;
-use ferroui_system::threading::{current_synchronization_context, SynchronizationContext};
+use ferroui_system::task::{current_schedule, is_current_schedule, Schedule};
 use std::rc::Rc;
 use std::sync::Arc;
 
+/// Where a service runs its notifications: the schedule it was given or that was current where it
+/// was made (the synchronization context of the reference: in a dispatcher job the dispatcher at
+/// the priority of the job), else the Rx main-thread scheduler.
 pub(crate) struct ServiceDispatcher {
-    context: Option<Arc<dyn SynchronizationContext>>,
+    schedule: Option<Arc<dyn Schedule>>,
     scheduler: Rc<dyn IScheduler>,
 }
 
@@ -34,27 +37,25 @@ impl ServiceDispatcher {
     }
 
     pub(crate) fn new(
-        context: Option<Arc<dyn SynchronizationContext>>,
+        schedule: Option<Arc<dyn Schedule>>,
         scheduler: Option<Rc<dyn IScheduler>>,
     ) -> Self {
         Self {
-            context: context.or_else(current_synchronization_context),
+            schedule: schedule.or_else(current_schedule),
             scheduler: scheduler.unwrap_or_else(RxSchedulers::main_thread_scheduler),
         }
     }
 
     pub(crate) fn check_access(&self) -> bool {
-        self.context
-            .as_ref()
-            .is_some_and(<dyn SynchronizationContext>::is_current)
+        self.schedule.as_ref().is_some_and(is_current_schedule)
     }
 
     pub(crate) fn post(&self, action: impl FnOnce() + 'static) {
-        if let Some(context) = &self.context {
+        if let Some(schedule) = &self.schedule {
             if self.check_access() {
                 action();
             } else {
-                context.post_local(Box::new(action));
+                schedule.schedule_local(Box::new(action));
             }
         } else {
             let _ = self.scheduler.schedule_action(action);
@@ -66,41 +67,38 @@ impl ServiceDispatcher {
 mod tests {
     use super::*;
     use ferroui_reactive::concurrency::HistoricalScheduler;
-    use ferroui_system::threading::set_synchronization_context;
+    use ferroui_system::task::set_current_schedule;
     use std::cell::Cell;
     use std::sync::atomic::{AtomicUsize, Ordering};
 
+    /// A schedule (the synchronization context of the reference) that runs its work at once,
+    /// counting the posts.
     #[derive(Default)]
     struct InlineContext {
         posts: AtomicUsize,
     }
-    impl SynchronizationContext for InlineContext {
-        fn post(&self, work: Box<dyn FnOnce() + Send>) {
+    impl Schedule for InlineContext {
+        fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
             work();
         }
-        fn send(&self, work: Box<dyn FnOnce() + Send>) {
-            work();
-        }
-        fn post_local(&self, work: Box<dyn FnOnce()>) {
+        fn schedule_local(&self, work: Box<dyn FnOnce()>) {
             self.posts.fetch_add(1, Ordering::Relaxed);
-            work();
-        }
-        fn send_local(&self, work: Box<dyn FnOnce()>) {
             work();
         }
     }
 
-    struct ContextScope(Option<Arc<dyn SynchronizationContext>>);
+    /// Makes a schedule the current one of the thread, and the previous one again when dropped.
+    struct ContextScope(Option<Option<Arc<dyn Schedule>>>);
     impl ContextScope {
-        fn new(context: Option<Arc<dyn SynchronizationContext>>) -> Self {
-            let scope = Self(current_synchronization_context());
-            set_synchronization_context(context);
-            scope
+        fn new(schedule: Option<Arc<dyn Schedule>>) -> Self {
+            Self(Some(set_current_schedule(schedule)))
         }
     }
     impl Drop for ContextScope {
         fn drop(&mut self) {
-            set_synchronization_context(self.0.take());
+            if let Some(previous) = self.0.take() {
+                drop(set_current_schedule(previous));
+            }
         }
     }
 

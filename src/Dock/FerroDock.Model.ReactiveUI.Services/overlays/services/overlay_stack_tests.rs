@@ -265,25 +265,20 @@ fn host_adapter_retains_all_six_actual_service_instances() {
 
 #[test]
 fn same_context_closes_and_cancels_directly_and_posting_failure_faults_show_task() {
-    use ferroui_system::threading::{set_synchronization_context, SynchronizationContext};
+    use ferroui_system::task::{set_current_schedule, Schedule};
     use std::sync::Arc;
+    // The synchronization contexts of the reference are schedules.
     struct Context;
-    impl SynchronizationContext for Context {
-        fn post(&self, work: Box<dyn FnOnce() + Send>) {
+    impl Schedule for Context {
+        fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
             work();
         }
-        fn send(&self, work: Box<dyn FnOnce() + Send>) {
-            work();
-        }
-        fn post_local(&self, work: Box<dyn FnOnce()>) {
-            work();
-        }
-        fn send_local(&self, work: Box<dyn FnOnce()>) {
+        fn schedule_local(&self, work: Box<dyn FnOnce()>) {
             work();
         }
     }
     let _environment = Environment::new();
-    set_synchronization_context(Some(Arc::new(Context)));
+    drop(set_current_schedule(Some(Arc::new(Context))));
     let confirmations = DockConfirmationService::new(None, None);
     let task = confirmations.confirm_async_default("t".into(), "m".into());
     confirmations.cancel_all();
@@ -293,18 +288,12 @@ fn same_context_closes_and_cancels_directly_and_posting_failure_faults_show_task
     dialogs.cancel_all();
     assert_eq!(task.result().unwrap(), 0);
     struct Throwing;
-    impl SynchronizationContext for Throwing {
-        fn post(&self, _work: Box<dyn FnOnce() + Send>) {
+    impl Schedule for Throwing {
+        fn schedule(&self, _work: Box<dyn FnOnce() + Send>) {
             panic!("post failed");
         }
-        fn send(&self, _work: Box<dyn FnOnce() + Send>) {
-            panic!("send failed");
-        }
-        fn post_local(&self, _work: Box<dyn FnOnce()>) {
+        fn schedule_local(&self, _work: Box<dyn FnOnce()>) {
             panic!("post failed");
-        }
-        fn send_local(&self, _work: Box<dyn FnOnce()>) {
-            panic!("send failed");
         }
     }
     let dialogs = DockDialogService::new(None, Some(Arc::new(Throwing)));

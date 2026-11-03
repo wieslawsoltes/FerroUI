@@ -7,7 +7,7 @@ use std::thread::{self, ThreadId};
 use super::dispatcher::current_thread_id;
 
 use super::dispatcher::DispatcherLocal;
-use super::{Dispatcher, DispatcherOperationStatus, DispatcherPriority, FerroSynchronizationContext, IDispatcherImpl};
+use super::{Dispatcher, DispatcherOperationStatus, DispatcherPriority, IDispatcherImpl};
 
 struct GlobalState {
     ui_thread: Option<Arc<Dispatcher>>,
@@ -186,7 +186,7 @@ impl Dispatcher {
             current.0.abandon();
         }
         let local = CURRENT_THREAD_LOCAL.try_with(|slot| slot.borrow_mut().take()).ok().flatten();
-        FerroSynchronizationContext::set_current(None);
+        Dispatcher::clear_current_priority();
         let _ = UI_THREAD_CACHE.try_with(|cache| *cache.borrow_mut() = (0, None));
         let ui_thread = {
             let mut global = global();
