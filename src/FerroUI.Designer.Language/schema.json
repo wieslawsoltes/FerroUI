@@ -3791,8 +3791,8 @@
     "properties": {
       "DefaultDuration": {
         "name": "DefaultDuration",
-        "type_name": "SignedDuration",
-        "documentation": "ConnectedAnimationService.DefaultDuration: SignedDuration",
+        "type_name": "Duration",
+        "documentation": "ConnectedAnimationService.DefaultDuration: Duration",
         "values": []
       },
       "DefaultEasingFunction": {
