@@ -1,0 +1,1345 @@
+{
+  "schema": "ferroui-static-weak-root-diagnostic-audit-v1",
+  "status": "diagnostic_native_and_timing_complete_static_root_source_selected_for_fresh_validation",
+  "scope": "Read-only audit of an isolated Base-only diagnostic compiled against the retained stage4 profile. No downstream FerroUI crate has been recompiled against changed generic source; this is not final application or matched-profile acceptance.",
+  "trial_result": {
+    "path": "/tmp/ferro-run/static-weak-root-trial/result.json",
+    "sha256": "60e6df675a7c192e8faa7cb292c1be9238c1bbe45cb8f52a5945a2df81119850",
+    "target_compiler_returncode": 0,
+    "host_compiler_returncode": 0,
+    "cargo_returncode": 101,
+    "cargo_scope": "The wrapper permits Base compilation and intentionally blocks every downstream crate. Cargo exit101 is expected if Base succeeds and downstream exit83 is recorded."
+  },
+  "source": {
+    "before_sha256": "9d581166d51d0bf7a9a84d9b1a68fb558c00459d5546ae88ae3df89e9ecfb427",
+    "trial_sha256": "d6550b20e448ac9b46b40b8f5fb0b7654e872446fe5adbffca476d2b51ee6f39",
+    "patch": "/tmp/ferro-run/static-weak-root-trial/change.patch",
+    "patch_sha256": "ccdd9107aa7a5e9cc06d6c58b53ef6ab300f5ed738656dc480fa5dc860625cae",
+    "saved_before": "/tmp/ferro-run/static-weak-root-trial/value_type-before.rs",
+    "saved_after": "/tmp/ferro-run/static-weak-root-trial/value_type-after.rs",
+    "restoration_checks": {
+      "root_restored_stage4": true,
+      "measurement_restored_stage4": true,
+      "saved_trial_source_exact": true,
+      "saved_before_source_exact": true,
+      "saved_patch_exact": true
+    }
+  },
+  "graph": {
+    "baseline": "/tmp/ferro-run/stage4-graph",
+    "trial": "/tmp/ferro-run/static-weak-root-trial/graph",
+    "shared_unchanged_inode_count": 53,
+    "different_inode_artifacts": [
+      "libferroui_base-59aaffbecfa5583b.rlib"
+    ],
+    "expected_only_base_changed": true,
+    "note": "All 53 unchanged artifacts are the same inode/size as the frozen stage4 graph; no large dependency rehash is needed to establish byte identity. Base identity is separately hashed by the optimized-IR audit.",
+    "directory_file_count": 55,
+    "artifact_count": 54,
+    "manifest_changed_artifact_keys": [
+      "libferroui_base-59aaffbecfa5583b.rlib"
+    ],
+    "manifest_file": "hashes.json (separate changed provenance file; not a graph artifact)"
+  },
+  "optimized_base": {
+    "path": "/tmp/ferro-run/static-weak-root-trial/graph/libferroui_base-59aaffbecfa5583b.rlib",
+    "sha256": "e892ce4a095f4573d56ed507edabaec1134eda5f10040c683ba44fbcbb5c220f",
+    "matches_result_sha256": true,
+    "compiler_record": "/tmp/ferro-run/static-weak-root-trial/compiler.json",
+    "compiler_record_sha256": "046fb5684cdc01e609b157f1636371fe0582463022521b3981f5db343bbd3fea",
+    "profile": "/tmp/ferro-run/ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329.profdata",
+    "profile_sha256": "ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329"
+  },
+  "root_profile": {
+    "previous_cgu": "14",
+    "current_cgu": "04",
+    "definitions_present": 81,
+    "previous_definitions": 81,
+    "same_accepted_profile_count": 0,
+    "notify_previous_profile": [
+      "!{!\"function_entry_count\", i64 14164}"
+    ],
+    "notify_current_profile": [],
+    "previous_root_promotions": [
+      "%13 = icmp eq ptr %12, @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "%21 = icmp eq ptr %20, @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_"
+    ],
+    "current_promotions": [],
+    "current_notify_definition": "define internal fastcc void @_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #3 personality ptr @rust_eh_personality !guid !40350 {",
+    "current_helper_calls": [
+      "%22 = tail call fastcc noundef zeroext i1 @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8is_emptyB2b_(ptr noundef nonnull align 8 %21) #45, !noalias !40370",
+      "%24 = tail call fastcc noundef ptr @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8snapshotB2b_(ptr noundef nonnull align 8 %21) #45, !noalias !40370",
+      "%86 = call fastcc noundef zeroext i1 @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8is_emptyB2b_(ptr noundef nonnull align 8 %85) #45",
+      "%88 = call fastcc noundef ptr @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8snapshotB2b_(ptr noundef nonnull align 8 %85) #45"
+    ],
+    "interpretation": "All 81 current root-vtable definitions lose their accepted metadata when the module identity moves from 14 to 04. notify loses entry 14,164 and both promoted root targets. The two selected public i32 observer definitions still retain their existing zero-count metadata."
+  },
+  "conversion_profiles": [
+    {
+      "symbol": "_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+      "definition": "define internal fastcc noundef align 8 ptr @_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(32) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #12 personality ptr @rust_eh_personality !prof !4616 !guid !4617 !PGOFuncName !4618 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 48}"
+      ],
+      "pgo_name": [
+        "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.11;_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_\"}"
+      ],
+      "attributes": [
+        "{ inlinehint minsize nofree norecurse nosync nounwind nonlazybind optsize memory(read, inaccessiblemem: readwrite, target_mem: none) uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+      ],
+      "lines": 91,
+      "clone_calls": [],
+      "prior_accepted_profile": [
+        "!{!\"function_entry_count\", i64 48}"
+      ],
+      "prior_member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o"
+    },
+    {
+      "symbol": "_RINvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type13with_registryINtNtCsevLNFiNqfJP_4core6option6OptionNtB2_9ConvertFnENCNvMsb_B2_NtB2_10ValueTypes22try_convert_registered0EB8_",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+      "definition": "define void @_RINvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type13with_registryINtNtCsevLNFiNqfJP_4core6option6OptionNtB2_9ConvertFnENCNvMsb_B2_NtB2_10ValueTypes22try_convert_registered0EB8_(ptr dead_on_unwind noalias nofree noundef writable sret([24 x i8]) align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) %1) unnamed_addr #10 personality ptr @rust_eh_personality !prof !16787 !guid !16788 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 257}"
+      ],
+      "pgo_name": [],
+      "attributes": [
+        "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+      ],
+      "lines": 78,
+      "clone_calls": [],
+      "prior_accepted_profile": [
+        "!{!\"function_entry_count\", i64 257}"
+      ],
+      "prior_member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o"
+    },
+    {
+      "symbol": "_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+      "definition": "define internal fastcc { ptr, ptr } @_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %1) unnamed_addr #13 !prof !36761 !guid !36762 !PGOFuncName !36763 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 12889}"
+      ],
+      "pgo_name": [
+        "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.11;_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply\"}"
+      ],
+      "attributes": [
+        "{ inlinehint minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+      ],
+      "lines": 156,
+      "clone_calls": [],
+      "prior_accepted_profile": [
+        "!{!\"function_entry_count\", i64 12889}"
+      ],
+      "prior_member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o"
+    },
+    {
+      "symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+      "definition": "define { ptr, ptr } @_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered(ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(16) %0, ptr noalias nofree noundef readonly align 8 captures(none) dead_on_return dereferenceable(32) %1) unnamed_addr #10 personality ptr @rust_eh_personality !prof !16787 !guid !40417 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 257}"
+      ],
+      "pgo_name": [],
+      "attributes": [
+        "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+      ],
+      "lines": 72,
+      "clone_calls": [],
+      "prior_accepted_profile": [
+        "!{!\"function_entry_count\", i64 257}"
+      ],
+      "prior_member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o"
+    },
+    {
+      "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0E0bEB1Z_",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.13.rcgu.o",
+      "definition": "define noundef zeroext i1 @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0E0bEB1Z_(ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %0) unnamed_addr #3 personality ptr @rust_eh_personality !prof !6020 !guid !6021 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 257}"
+      ],
+      "pgo_name": [],
+      "attributes": [
+        "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+      ],
+      "lines": 26,
+      "clone_calls": [],
+      "prior_accepted_profile": [
+        "!{!\"function_entry_count\", i64 257}"
+      ],
+      "prior_member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o"
+    },
+    {
+      "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es0_0B3s_EB1Z_",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.13.rcgu.o",
+      "definition": "define void @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es0_0B3s_EB1Z_(ptr dead_on_unwind noalias nofree noundef writable writeonly sret([24 x i8]) align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %1, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) %2) unnamed_addr #3 personality ptr @rust_eh_personality !prof !6020 !guid !6035 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 257}"
+      ],
+      "pgo_name": [],
+      "attributes": [
+        "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+      ],
+      "lines": 155,
+      "clone_calls": [],
+      "prior_accepted_profile": [
+        "!{!\"function_entry_count\", i64 257}"
+      ],
+      "prior_member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o"
+    },
+    {
+      "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es_0uEB1Z_",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.13.rcgu.o",
+      "definition": "define void @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es_0uEB1Z_(ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %0) unnamed_addr #1 personality ptr @rust_eh_personality !prof !1111 !guid !6108 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 0}"
+      ],
+      "pgo_name": [],
+      "attributes": [
+        "{ cold minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+      ],
+      "lines": 85,
+      "clone_calls": [],
+      "prior_accepted_profile": [
+        "!{!\"function_entry_count\", i64 0}"
+      ],
+      "prior_member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o"
+    },
+    {
+      "symbol": "_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.13.rcgu.o",
+      "definition": "define internal fastcc noundef align 8 ptr @_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %1) unnamed_addr #0 personality ptr @rust_eh_personality !guid !14854 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "attributes": [
+        "{ inlinehint minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+      ],
+      "lines": 75,
+      "clone_calls": [],
+      "prior_accepted_profile": [
+        "!{!\"function_entry_count\", i64 48}"
+      ],
+      "prior_member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o"
+    }
+  ],
+  "hash": {
+    "symbol": "_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_",
+    "name": "BuildHasherDefault<IdHasher>::hash_one",
+    "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+    "definition": "define noundef i64 @_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_(ptr noalias nofree noundef nonnull readonly captures(none) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #20 personality ptr @rust_eh_personality !prof !23606 !guid !23607 {",
+    "function_profile": [
+      "!{!\"function_entry_count\", i64 115042}"
+    ],
+    "pgo_name": [],
+    "promoted_target_compares": [],
+    "non_llvm_calls": [],
+    "lines": 9,
+    "full_ir": "define noundef i64 @_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_(ptr noalias nofree noundef nonnull readonly captures(none) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #20 personality ptr @rust_eh_personality !prof !23606 !guid !23607 {\n  %3 = getelementptr inbounds nuw i8, ptr %1, i64 8\n  %4 = load i64, ptr %3, align 1, !alias.scope !23608, !noalias !23613\n  %5 = getelementptr inbounds nuw i8, ptr %1, i64 24\n  %6 = load i64, ptr %5, align 1, !alias.scope !23619, !noalias !23622\n  %7 = tail call noundef i64 @llvm.fshl.i64(i64 %4, i64 %4, i64 32)\n  %8 = xor i64 %7, %6\n  ret i64 %8\n}",
+    "calls_write_u64": false,
+    "stack_allocations": 0
+  },
+  "clone_boundary": {
+    "selected_conversion_bodies": 8,
+    "clone_calls": [],
+    "outlined_selected_clone_definitions": [],
+    "interpretation": "No outer ConvertFn or nested BorrowedConversion clone call reappears in the eight selected pre-LTO conversion/get/wrapper bodies."
+  },
+  "descriptor_and_leaves": {
+    "descriptor_ir": "@anon.857840a068bcf9029e0b5f3b1d0541d5.1138 = private unnamed_addr constant <{ ptr, ptr, ptr, ptr, ptr, ptr, ptr, ptr, ptr, ptr }> <{ ptr @_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref7elementNtNtNtBe_5input13input_element12InputElementEBe_, ptr @_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtNtNtBe_5input13input_element12InputElementEBe_, ptr @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2C_3any3AnyEL_EE9call_onceBj_, ptr @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceBj_, ptr @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2F_3any3AnyEL_EE9call_onceBj_, ptr @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2F_3any3AnyEL_EE9call_onceBj_, ptr @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s2_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2F_3any3AnyEL_EE9call_onceBj_, ptr @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s3_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2F_3any3AnyEL_EE9call_onceBj_, ptr @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s4_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2F_3any3AnyEL_EE9call_onceBj_, ptr @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s5_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2F_3any3AnyEL_EE9call_onceBj_ }>, align 8, !guid !1139",
+    "descriptor_pointer_count": 10,
+    "concrete_leaf_example": "InputElement: the available Base instantiation. Fixture Target is downstream generic code and requires the later fixture object.",
+    "leaves": [
+      {
+        "symbol": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2C_3any3AnyEL_EE9call_onceBj_",
+        "kind": "from_root",
+        "member": "cgu11",
+        "definition": "define internal { ptr, ptr } @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2C_3any3AnyEL_EE9call_onceBj_(ptr noundef nonnull %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #13 personality ptr @rust_eh_personality !guid !59377 {",
+        "accepted_profile": [],
+        "calls": [
+          "call void %6(ptr noalias nofree noundef nonnull sret([16 x i8]) align 8 captures(address) dereferenceable(16) %3, ptr noundef nonnull %0) #74, !noalias !59384, !inline_history !59385",
+          "%10 = call fastcc { ptr, ptr } @_RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtNtNtB8_5input13input_element12InputElementEB8_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %0) #74, !noalias !59378",
+          "%16 = invoke { ptr, ptr } @_RNvMsg_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9downgradeCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %4)",
+          "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %4) #78",
+          "%27 = invoke noundef nonnull ptr @_RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtNtNtBI_5input13input_element12InputElementEE3newBI_(ptr noundef nonnull %25, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %26)",
+          "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %4) #78, !noalias !59378",
+          "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #76, !noalias !59378"
+        ],
+        "calls_metadata_reference_helper": false,
+        "ir": "define internal { ptr, ptr } @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2C_3any3AnyEL_EE9call_onceBj_(ptr noundef nonnull %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #13 personality ptr @rust_eh_personality !guid !59377 {\n  %3 = alloca [16 x i8], align 8\n  %4 = alloca [16 x i8], align 8\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !59378)\n  call void @llvm.lifetime.start.p0(ptr nonnull %4), !noalias !59378\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !59381)\n  call void @llvm.lifetime.start.p0(ptr nonnull %3), !noalias !59384\n  %5 = getelementptr inbounds nuw i8, ptr %1, i64 24\n  %6 = load ptr, ptr %5, align 8, !invariant.load !3272, !alias.scope !59384, !nonnull !3272\n  call void %6(ptr noalias nofree noundef nonnull sret([16 x i8]) align 8 captures(address) dereferenceable(16) %3, ptr noundef nonnull %0) #74, !noalias !59384, !inline_history !59385\n  %7 = load i128, ptr %3, align 8, !noalias !59384, !noundef !3272\n  %8 = icmp eq i128 %7, -55049670262664703634902407983580331722\n  call void @llvm.lifetime.end.p0(ptr nonnull %3), !noalias !59384\n  br i1 %8, label %9, label %37\n\n9:                                                ; preds = %2\n  %10 = call fastcc { ptr, ptr } @_RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtNtNtB8_5input13input_element12InputElementEB8_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %0) #74, !noalias !59378\n  %11 = extractvalue { ptr, ptr } %10, 0\n  %12 = icmp eq ptr %11, null\n  br i1 %12, label %37, label %13\n\n13:                                               ; preds = %9\n  %14 = extractvalue { ptr, ptr } %10, 1\n  call void @llvm.assume(i1 true) [ \"nonnull\"(ptr %14) ]\n  store ptr %11, ptr %4, align 8, !noalias !59378\n  %15 = getelementptr inbounds nuw i8, ptr %4, i64 8\n  store ptr %14, ptr %15, align 8, !noalias !59378\n  %16 = invoke { ptr, ptr } @_RNvMsg_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9downgradeCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %4)\n          to label %24 unwind label %17, !noalias !59378\n\n17:                                               ; preds = %24, %13\n  %18 = landingpad { ptr, i32 }\n          cleanup\n  call void @llvm.experimental.noalias.scope.decl(metadata !59386)\n  call void @llvm.experimental.noalias.scope.decl(metadata !59389)\n  call void @llvm.experimental.noalias.scope.decl(metadata !59392)\n  %19 = load ptr, ptr %4, align 8, !alias.scope !59395, !noalias !59378, !nonnull !3272, !noundef !3272\n  %20 = load i64, ptr %19, align 8, !noalias !59396, !noundef !3272\n  %21 = add i64 %20, -1\n  store i64 %21, ptr %19, align 8, !noalias !59396\n  %22 = icmp eq i64 %21, 0\n  br i1 %22, label %23, label %36\n\n23:                                               ; preds = %17\n  invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %4) #78\n          to label %36 unwind label %34, !noalias !59378\n\n24:                                               ; preds = %13\n  %25 = extractvalue { ptr, ptr } %16, 0\n  %26 = extractvalue { ptr, ptr } %16, 1\n  %27 = invoke noundef nonnull ptr @_RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtNtNtBI_5input13input_element12InputElementEE3newBI_(ptr noundef nonnull %25, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %26)\n          to label %28 unwind label %17, !noalias !59378\n\n28:                                               ; preds = %24\n  call void @llvm.experimental.noalias.scope.decl(metadata !59397)\n  call void @llvm.experimental.noalias.scope.decl(metadata !59400)\n  call void @llvm.experimental.noalias.scope.decl(metadata !59403)\n  %29 = load ptr, ptr %4, align 8, !alias.scope !59406, !noalias !59378, !nonnull !3272, !noundef !3272\n  %30 = load i64, ptr %29, align 8, !noalias !59407, !noundef !3272\n  %31 = add i64 %30, -1\n  store i64 %31, ptr %29, align 8, !noalias !59407\n  %32 = icmp eq i64 %31, 0\n  br i1 %32, label %33, label %37\n\n33:                                               ; preds = %28\n  call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %4) #78, !noalias !59378\n  br label %37\n\n34:                                               ; preds = %23\n  %35 = landingpad { ptr, i32 }\n          filter [0 x ptr] zeroinitializer\n  call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #76, !noalias !59378\n  unreachable\n\n36:                                               ; preds = %23, %17\n  resume { ptr, i32 } %18\n\n37:                                               ; preds = %33, %28, %9, %2\n  %38 = phi ptr [ %27, %28 ], [ %27, %33 ], [ null, %9 ], [ null, %2 ]\n  call void @llvm.lifetime.end.p0(ptr nonnull %4), !noalias !59378\n  %39 = insertvalue { ptr, ptr } poison, ptr %38, 0\n  %40 = insertvalue { ptr, ptr } %39, ptr @anon.857840a068bcf9029e0b5f3b1d0541d5.1868, 1\n  ret { ptr, ptr } %40\n}"
+      },
+      {
+        "symbol": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceBj_",
+        "kind": "from_root_to_nullable",
+        "member": "cgu11",
+        "definition": "define internal { ptr, ptr } @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceBj_(ptr noundef nonnull %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #13 personality ptr @rust_eh_personality !annotation !4420 !guid !59495 {",
+        "accepted_profile": [],
+        "calls": [
+          "call void %6(ptr noalias nofree noundef nonnull sret([16 x i8]) align 8 captures(address) dereferenceable(16) %3, ptr noundef nonnull %0) #74, !noalias !59502, !inline_history !59503",
+          "%10 = call fastcc { ptr, ptr } @_RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtNtNtB8_5input13input_element12InputElementEB8_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %0) #74, !noalias !59496",
+          "%16 = invoke { ptr, ptr } @_RNvMsg_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9downgradeCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %4)",
+          "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %4) #78",
+          "%27 = invoke noundef nonnull ptr @_RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCsevLNFiNqfJP_4core6option6OptionINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtNtNtB1k_5input13input_element12InputElementEEE3newB1k_(ptr noundef %25, ptr %26)",
+          "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %4) #78, !noalias !59496",
+          "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #76, !noalias !59496"
+        ],
+        "calls_metadata_reference_helper": false,
+        "ir": "define internal { ptr, ptr } @_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceBj_(ptr noundef nonnull %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #13 personality ptr @rust_eh_personality !annotation !4420 !guid !59495 {\n  %3 = alloca [16 x i8], align 8\n  %4 = alloca [16 x i8], align 8\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !59496)\n  call void @llvm.lifetime.start.p0(ptr nonnull %4), !noalias !59496\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !59499)\n  call void @llvm.lifetime.start.p0(ptr nonnull %3), !noalias !59502\n  %5 = getelementptr inbounds nuw i8, ptr %1, i64 24\n  %6 = load ptr, ptr %5, align 8, !invariant.load !3272, !alias.scope !59502, !nonnull !3272\n  call void %6(ptr noalias nofree noundef nonnull sret([16 x i8]) align 8 captures(address) dereferenceable(16) %3, ptr noundef nonnull %0) #74, !noalias !59502, !inline_history !59503\n  %7 = load i128, ptr %3, align 8, !noalias !59502, !noundef !3272\n  %8 = icmp eq i128 %7, -55049670262664703634902407983580331722\n  call void @llvm.lifetime.end.p0(ptr nonnull %3), !noalias !59502\n  br i1 %8, label %9, label %37\n\n9:                                                ; preds = %2\n  %10 = call fastcc { ptr, ptr } @_RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtNtNtB8_5input13input_element12InputElementEB8_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %0) #74, !noalias !59496\n  %11 = extractvalue { ptr, ptr } %10, 0\n  %12 = icmp eq ptr %11, null\n  br i1 %12, label %37, label %13\n\n13:                                               ; preds = %9\n  %14 = extractvalue { ptr, ptr } %10, 1\n  call void @llvm.assume(i1 true) [ \"nonnull\"(ptr %14) ]\n  store ptr %11, ptr %4, align 8, !noalias !59496\n  %15 = getelementptr inbounds nuw i8, ptr %4, i64 8\n  store ptr %14, ptr %15, align 8, !noalias !59496\n  %16 = invoke { ptr, ptr } @_RNvMsg_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9downgradeCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %4)\n          to label %24 unwind label %17, !noalias !59496\n\n17:                                               ; preds = %24, %13\n  %18 = landingpad { ptr, i32 }\n          cleanup\n  call void @llvm.experimental.noalias.scope.decl(metadata !59504)\n  call void @llvm.experimental.noalias.scope.decl(metadata !59507)\n  call void @llvm.experimental.noalias.scope.decl(metadata !59510)\n  %19 = load ptr, ptr %4, align 8, !alias.scope !59513, !noalias !59496, !nonnull !3272, !noundef !3272\n  %20 = load i64, ptr %19, align 8, !noalias !59514, !noundef !3272\n  %21 = add i64 %20, -1\n  store i64 %21, ptr %19, align 8, !noalias !59514\n  %22 = icmp eq i64 %21, 0\n  br i1 %22, label %23, label %36\n\n23:                                               ; preds = %17\n  invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %4) #78\n          to label %36 unwind label %34, !noalias !59496\n\n24:                                               ; preds = %13\n  %25 = extractvalue { ptr, ptr } %16, 0\n  %26 = extractvalue { ptr, ptr } %16, 1\n  %27 = invoke noundef nonnull ptr @_RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCsevLNFiNqfJP_4core6option6OptionINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtNtNtB1k_5input13input_element12InputElementEEE3newB1k_(ptr noundef %25, ptr %26)\n          to label %28 unwind label %17, !noalias !59496\n\n28:                                               ; preds = %24\n  call void @llvm.experimental.noalias.scope.decl(metadata !59515)\n  call void @llvm.experimental.noalias.scope.decl(metadata !59518)\n  call void @llvm.experimental.noalias.scope.decl(metadata !59521)\n  %29 = load ptr, ptr %4, align 8, !alias.scope !59524, !noalias !59496, !nonnull !3272, !noundef !3272\n  %30 = load i64, ptr %29, align 8, !noalias !59525, !noundef !3272\n  %31 = add i64 %30, -1\n  store i64 %31, ptr %29, align 8, !noalias !59525\n  %32 = icmp eq i64 %31, 0\n  br i1 %32, label %33, label %37\n\n33:                                               ; preds = %28\n  call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %4) #78, !noalias !59496\n  br label %37\n\n34:                                               ; preds = %23\n  %35 = landingpad { ptr, i32 }\n          filter [0 x ptr] zeroinitializer\n  call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #76, !noalias !59496\n  unreachable\n\n36:                                               ; preds = %23, %17\n  resume { ptr, i32 } %18\n\n37:                                               ; preds = %33, %28, %9, %2\n  %38 = phi ptr [ %27, %28 ], [ %27, %33 ], [ null, %9 ], [ null, %2 ]\n  call void @llvm.lifetime.end.p0(ptr nonnull %4), !noalias !59496\n  %39 = insertvalue { ptr, ptr } poison, ptr %38, 0\n  %40 = insertvalue { ptr, ptr } %39, ptr @anon.857840a068bcf9029e0b5f3b1d0541d5.1802, 1\n  ret { ptr, ptr } %40\n}"
+      }
+    ]
+  },
+  "exact_retained_profile_queries": [
+    {
+      "name": "current_notify_exact_key",
+      "query": "ferroui_base.aa5a9f3f002932e2-cgu.04;_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed",
+      "records": [],
+      "shown": 0,
+      "raw_output": "/tmp/ferro496-conversion-audit/static-weak-root/current_notify_exact_key-profile.txt",
+      "raw_output_sha256": "702b76892816400f79ff837b05a9d1c86dfaf052b00778e324635d6dbef35c4e"
+    },
+    {
+      "name": "from_root",
+      "query": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2C_3any3AnyEL_EE9call_onceBj_",
+      "records": [],
+      "shown": 0,
+      "raw_output": "/tmp/ferro496-conversion-audit/static-weak-root/from_root-profile.txt",
+      "raw_output_sha256": "702b76892816400f79ff837b05a9d1c86dfaf052b00778e324635d6dbef35c4e"
+    },
+    {
+      "name": "from_root_to_nullable",
+      "query": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceBj_",
+      "records": [
+        {
+          "key": "ferroui_base.aa5a9f3f002932e2-cgu.11;_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceBj_",
+          "cfg_hash": "0x02f30c12042b0f02"
+        }
+      ],
+      "shown": 1,
+      "raw_output": "/tmp/ferro496-conversion-audit/static-weak-root/from_root_to_nullable-profile.txt",
+      "raw_output_sha256": "2f6d7b02345c83bf1f80fcaf21d456db005db5590a280cb6141e4bee4274baf8"
+    }
+  ],
+  "selected_profile_warning": {
+    "symbol": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceBj_",
+    "matching_log_records": [
+      "warning: ferroui_base.aa5a9f3f002932e2-cgu.11: function control flow change detected (hash mismatch) _RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtNtNtBj_5input13input_element12InputElementE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceBj_ Hash = 376260593525410666 up to 0 count discarded"
+    ]
+  },
+  "conclusions": [
+    "The conversion core keeps accepted profile metadata: public conversion 257, apply 12,889, primary get 48; wrappers 257/257/0. The second internal get moves CGU15 to 13 and loses its previous 569 metadata. The exact duplicate-symbol headers are retained above.",
+    "The pair-key hash retains accepted 115,042 metadata and remains two loads, rotate32 and XOR with no non-LLVM calls or stack allocations.",
+    "The concrete InputElement descriptor contains 10 function pointers (80 bytes under the target 64-bit layout). Both new concrete root leaves perform the Any type check and class cast directly, with no call to register_element_ref::reference. The downstream fixture Target instantiation will be checked after its link.",
+    "The nonnullable root leaf has no exact profile record. The nullable leaf reuses an earlier closure-position symbol, but its CFG differs: the compiler explicitly reports a hash mismatch discarding up to 0 count. Neither new leaf receives accepted !prof metadata.",
+    "Root-vtable profile continuity is broken. A successful microbenchmark under this retained profile would remain diagnostic and would not establish the existing whole-app notification/startup performance gates."
+  ],
+  "final_native": {
+    "binary": "/tmp/ferro-run/static-weak-root-trial/registration/candidate-registration",
+    "binary_sha256": "bab53f371a3bea3e3b42d81f8a2f29ca724fd264fab7670f50122bd775cdba03",
+    "binary_bytes": 3757552,
+    "native_object": "/tmp/ferro-run/static-weak-root-trial/registration/001-candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+    "native_object_sha256": "5731d8d8776deedd8d254b082e6c61a1c1dac13f7731b5a4575e0f3ee601a470",
+    "native_object_bytes": 17757976,
+    "fixture_manifest": "/tmp/ferro-run/static-weak-root-trial/registration/candidate-registration.json",
+    "fixture_manifest_sha256": "55f7056b046c2facd9c8c4500798203f56eb7147cb9eded71e045428b3359a7b",
+    "capture_manifest": "/tmp/ferro-run/static-weak-root-trial/registration/original-link.json",
+    "capture_manifest_sha256": "588c3f7df44e8247af09c47c2d59c45c66a259c480944def3c6e303268013ab6",
+    "source_sha256": "849d1bc8eb3ea07e94ac54a97fa79fda8a131d04ad9dac6bf09f7658856cec51",
+    "base_sha256": "e892ce4a095f4573d56ed507edabaec1134eda5f10040c683ba44fbcbb5c220f",
+    "profile_sha256": "ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329",
+    "identity_checks": {
+      "binary_matches_manifest": true,
+      "native_matches_capture": true,
+      "fixture_capture_matches_original_record": true,
+      "link_output_matches_binary": true,
+      "base_matches_audited_trial": true,
+      "profile_matches_retained_stage4": true,
+      "profile_argument_matches_identity": true,
+      "extern_argument_matches_trial_base": true,
+      "fixture_source_matches_recorded_and_previous_fixture": true,
+      "source_snapshot_matches_trial_base_provenance": true,
+      "frozen_graph_hashes_match_fixture": true
+    },
+    "code_checks": {
+      "two_root_leaves_present": true,
+      "each_leaf_has_any_downcast_and_direct_class_cast": true,
+      "metadata_reference_helper_not_called": true,
+      "two_lookups_fold_hash_without_calls": true,
+      "public_apis_reach_audited_lookups": true,
+      "no_outlined_pair_hash": true,
+      "no_outer_or_nested_clone_symbols": true,
+      "no_outer_or_nested_clone_relocations": true,
+      "one_80_byte_descriptor_has_both_root_leaves": true,
+      "both_routes_still_set_conversion_borrowed_static": true
+    },
+    "passed": true,
+    "functions": [
+      {
+        "symbol": "_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_",
+        "section": ".text._RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_",
+        "kind": "metadata_reference",
+        "bytes": 122,
+        "calls": [
+          "f:      \tcallq\t0x14 <_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_+0x14>",
+          "2b:      \tcallq\t0x30 <_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_+0x30>",
+          "3e:      \tcallq\t0x43 <_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_+0x43>",
+          "68:      \tcallq\t0x6d <_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_+0x6d>",
+          "70:      \tcallq\t0x75 <_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_+0x75>",
+          "75:      \tcallq\t0x7a <_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_+0x7a>"
+        ],
+        "relocations": [
+          "0000000000000010:  R_X86_64_PLT32\t.text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4",
+          "000000000000002c:  R_X86_64_PLT32\t.text._RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetEE3newB1B_-0x4",
+          "000000000000003f:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4",
+          "000000000000004b:  R_X86_64_PC32\t.data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.0-0x4",
+          "0000000000000069:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4",
+          "0000000000000071:  R_X86_64_PLT32\t_Unwind_Resume-0x4",
+          "0000000000000076:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+        ]
+      },
+      {
+        "symbol": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_",
+        "section": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_",
+        "kind": "root_leaf",
+        "bytes": 169,
+        "calls": [
+          "18:      \tcallq\t*0x18(%rax)",
+          "3a:      \tcallq\t0x3f <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x3f>",
+          "56:      \tcallq\t0x5b <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x5b>",
+          "69:      \tcallq\t0x6e <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x6e>",
+          "97:      \tcallq\t0x9c <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x9c>",
+          "9f:      \tcallq\t0xa4 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0xa4>",
+          "a4:      \tcallq\t0xa9 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0xa9>"
+        ],
+        "relocations": [
+          "0000000000000024:  R_X86_64_PC32\t.LCPI727_0-0x4",
+          "000000000000003b:  R_X86_64_PLT32\t.text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4",
+          "0000000000000057:  R_X86_64_PLT32\t.text._RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetEE3newB1B_-0x4",
+          "000000000000006a:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4",
+          "0000000000000076:  R_X86_64_PC32\t.data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.0-0x4",
+          "0000000000000098:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4",
+          "00000000000000a0:  R_X86_64_PLT32\t_Unwind_Resume-0x4",
+          "00000000000000a5:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+        ],
+        "calls_metadata_reference_helper": false,
+        "class_cast_relocations": [
+          "000000000000003b:  R_X86_64_PLT32\t.text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4"
+        ],
+        "any_type_id_indirect_calls": [
+          "18:      \tcallq\t*0x18(%rax)"
+        ],
+        "type_id_equality_check": [
+          "20:      \tpcmpeqb\t(%rip), %xmm0           # 0x28 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x28>",
+          "28:      \tpmovmskb\t%xmm0, %eax"
+        ],
+        "disassembly": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_:\n\n0000000000000000 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_>:\n       0:      \tpushq\t%r15\n       2:      \tpushq\t%r14\n       4:      \tpushq\t%rbx\n       5:      \tsubq\t$0x10, %rsp\n       9:      \tmovq\t%rsi, %rax\n       c:      \tmovq\t%rdi, %rbx\n       f:      \tmovq\t%rsp, %r14\n      12:      \tmovq\t%r14, %rdi\n      15:      \tmovq\t%rbx, %rsi\n      18:      \tcallq\t*0x18(%rax)\n      1b:      \tmovdqa\t(%r14), %xmm0\n      20:      \tpcmpeqb\t(%rip), %xmm0           # 0x28 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x28>\n\t\t0000000000000024:  R_X86_64_PC32\t.LCPI727_0-0x4\n      28:      \tpmovmskb\t%xmm0, %eax\n      2c:      \tcmpl\t$0xffff, %eax           # imm = 0xFFFF\n      31:      \tjne\t0x70 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x70>\n      33:      \tmovq\t(%rbx), %rdi\n      36:      \tmovq\t0x8(%rbx), %rsi\n      3a:      \tcallq\t0x3f <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x3f>\n\t\t000000000000003b:  R_X86_64_PLT32\t.text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4\n      3f:      \ttestq\t%rax, %rax\n      42:      \tje\t0x70 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x70>\n      44:      \tmovq\t%rax, %r14\n      47:      \tincq\t0x8(%rax)\n      4b:      \tje\t0x87 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x87>\n      4d:      \tmovq\t%rdx, %rbx\n      50:      \tmovq\t%r14, %rdi\n      53:      \tmovq\t%rdx, %rsi\n      56:      \tcallq\t0x5b <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x5b>\n\t\t0000000000000057:  R_X86_64_PLT32\t.text._RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetEE3newB1B_-0x4\n      5b:      \tmovq\t%rax, %r15\n      5e:      \tdecq\t(%r14)\n      61:      \tjne\t0x73 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x73>\n      63:      \tmovq\t%r14, %rdi\n      66:      \tmovq\t%rbx, %rsi\n      69:      \tcallq\t0x6e <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x6e>\n\t\t000000000000006a:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4\n      6e:      \tjmp\t0x73 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x73>\n      70:      \txorl\t%r15d, %r15d\n      73:      \tleaq\t(%rip), %rdx            # 0x7a <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x7a>\n\t\t0000000000000076:  R_X86_64_PC32\t.data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.0-0x4\n      7a:      \tmovq\t%r15, %rax\n      7d:      \taddq\t$0x10, %rsp\n      81:      \tpopq\t%rbx\n      82:      \tpopq\t%r14\n      84:      \tpopq\t%r15\n      86:      \tretq\n      87:      \tud2\n      89:      \tmovq\t%rax, %r15\n      8c:      \tdecq\t(%r14)\n      8f:      \tjne\t0x9c <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x9c>\n      91:      \tmovq\t%r14, %rdi\n      94:      \tmovq\t%rbx, %rsi\n      97:      \tcallq\t0x9c <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0x9c>\n\t\t0000000000000098:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4\n      9c:      \tmovq\t%r15, %rdi\n      9f:      \tcallq\t0xa4 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0xa4>\n\t\t00000000000000a0:  R_X86_64_PLT32\t_Unwind_Resume-0x4\n      a4:      \tcallq\t0xa9 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_+0xa9>\n\t\t00000000000000a5:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4\n\n"
+      },
+      {
+        "symbol": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_",
+        "section": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_",
+        "kind": "root_leaf",
+        "bytes": 169,
+        "calls": [
+          "18:      \tcallq\t*0x18(%rax)",
+          "3a:      \tcallq\t0x3f <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x3f>",
+          "56:      \tcallq\t0x5b <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x5b>",
+          "69:      \tcallq\t0x6e <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x6e>",
+          "97:      \tcallq\t0x9c <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x9c>",
+          "9f:      \tcallq\t0xa4 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0xa4>",
+          "a4:      \tcallq\t0xa9 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0xa9>"
+        ],
+        "relocations": [
+          "0000000000000024:  R_X86_64_PC32\t.LCPI734_0-0x4",
+          "000000000000003b:  R_X86_64_PLT32\t.text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4",
+          "0000000000000057:  R_X86_64_PLT32\t.text._RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCsevLNFiNqfJP_4core6option6OptionINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetEEE3newB2d_-0x4",
+          "000000000000006a:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4",
+          "0000000000000076:  R_X86_64_PC32\t.data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.221-0x4",
+          "0000000000000098:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4",
+          "00000000000000a0:  R_X86_64_PLT32\t_Unwind_Resume-0x4",
+          "00000000000000a5:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+        ],
+        "calls_metadata_reference_helper": false,
+        "class_cast_relocations": [
+          "000000000000003b:  R_X86_64_PLT32\t.text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4"
+        ],
+        "any_type_id_indirect_calls": [
+          "18:      \tcallq\t*0x18(%rax)"
+        ],
+        "type_id_equality_check": [
+          "20:      \tpcmpeqb\t(%rip), %xmm0           # 0x28 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x28>",
+          "28:      \tpmovmskb\t%xmm0, %eax"
+        ],
+        "disassembly": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_:\n\n0000000000000000 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_>:\n       0:      \tpushq\t%r15\n       2:      \tpushq\t%r14\n       4:      \tpushq\t%rbx\n       5:      \tsubq\t$0x10, %rsp\n       9:      \tmovq\t%rsi, %rax\n       c:      \tmovq\t%rdi, %rbx\n       f:      \tmovq\t%rsp, %r14\n      12:      \tmovq\t%r14, %rdi\n      15:      \tmovq\t%rbx, %rsi\n      18:      \tcallq\t*0x18(%rax)\n      1b:      \tmovdqa\t(%r14), %xmm0\n      20:      \tpcmpeqb\t(%rip), %xmm0           # 0x28 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x28>\n\t\t0000000000000024:  R_X86_64_PC32\t.LCPI734_0-0x4\n      28:      \tpmovmskb\t%xmm0, %eax\n      2c:      \tcmpl\t$0xffff, %eax           # imm = 0xFFFF\n      31:      \tjne\t0x70 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x70>\n      33:      \tmovq\t(%rbx), %rdi\n      36:      \tmovq\t0x8(%rbx), %rsi\n      3a:      \tcallq\t0x3f <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x3f>\n\t\t000000000000003b:  R_X86_64_PLT32\t.text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4\n      3f:      \ttestq\t%rax, %rax\n      42:      \tje\t0x70 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x70>\n      44:      \tmovq\t%rax, %r14\n      47:      \tincq\t0x8(%rax)\n      4b:      \tje\t0x87 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x87>\n      4d:      \tmovq\t%rdx, %rbx\n      50:      \tmovq\t%r14, %rdi\n      53:      \tmovq\t%rdx, %rsi\n      56:      \tcallq\t0x5b <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x5b>\n\t\t0000000000000057:  R_X86_64_PLT32\t.text._RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCsevLNFiNqfJP_4core6option6OptionINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetEEE3newB2d_-0x4\n      5b:      \tmovq\t%rax, %r15\n      5e:      \tdecq\t(%r14)\n      61:      \tjne\t0x73 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x73>\n      63:      \tmovq\t%r14, %rdi\n      66:      \tmovq\t%rbx, %rsi\n      69:      \tcallq\t0x6e <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x6e>\n\t\t000000000000006a:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4\n      6e:      \tjmp\t0x73 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x73>\n      70:      \txorl\t%r15d, %r15d\n      73:      \tleaq\t(%rip), %rdx            # 0x7a <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x7a>\n\t\t0000000000000076:  R_X86_64_PC32\t.data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.221-0x4\n      7a:      \tmovq\t%r15, %rax\n      7d:      \taddq\t$0x10, %rsp\n      81:      \tpopq\t%rbx\n      82:      \tpopq\t%r14\n      84:      \tpopq\t%r15\n      86:      \tretq\n      87:      \tud2\n      89:      \tmovq\t%rax, %r15\n      8c:      \tdecq\t(%r14)\n      8f:      \tjne\t0x9c <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x9c>\n      91:      \tmovq\t%r14, %rdi\n      94:      \tmovq\t%rbx, %rsi\n      97:      \tcallq\t0x9c <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0x9c>\n\t\t0000000000000098:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4\n      9c:      \tmovq\t%r15, %rdi\n      9f:      \tcallq\t0xa4 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0xa4>\n\t\t00000000000000a0:  R_X86_64_PLT32\t_Unwind_Resume-0x4\n      a4:      \tcallq\t0xa9 <_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_+0xa9>\n\t\t00000000000000a5:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4\n\n"
+      },
+      {
+        "symbol": "_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+        "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+        "kind": "lookup",
+        "bytes": 249,
+        "calls": [],
+        "relocations": [],
+        "rotate32": [
+          "f:      \trolq\t$0x20, %rcx"
+        ],
+        "xor": [
+          "13:      \txorq\t0x18(%rsi), %rcx"
+        ]
+      },
+      {
+        "symbol": "_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+        "section": ".text.hot._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+        "kind": "apply",
+        "bytes": 303,
+        "calls": [
+          "39:      \tcallq\t*0x20(%rcx)",
+          "5f:      \tcallq\t*0x28(%r8)",
+          "73:      \tcallq\t*0x10(%rbx)",
+          "96:      \tcallq\t*0x20(%rcx)",
+          "a5:      \tcallq\t*0x18(%rdx)",
+          "c3:      \tcallq\t*%r15",
+          "cb:      \tcallq\t*0x8(%rbx)",
+          "eb:      \tcallq\t*0x28(%rcx)",
+          "111:      \tcallq\t*0x20(%rcx)",
+          "120:      \tcallq\t*%r14"
+        ],
+        "relocations": [
+          "0000000000000012:  R_X86_64_PC32\t.rodata.hot._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4",
+          "00000000000000b1:  R_X86_64_PC32\t.LCPI10106_0-0x4"
+        ]
+      },
+      {
+        "symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "section": ".text._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "kind": "public",
+        "bytes": 918,
+        "calls": [
+          "30:      \tcallq\t*0x20(%rcx)",
+          "41:      \tcallq\t*0x18(%rdx)",
+          "4e:      \tcallq\t0x53 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x53>",
+          "81:      \tcallq\t0x86 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x86>",
+          "96:      \tcallq\t0x9b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x9b>",
+          "d2:      \tcallq\t0xd7 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0xd7>",
+          "122:      \tcallq\t0x127 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x127>",
+          "132:      \tcallq\t0x137 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x137>",
+          "155:      \tcallq\t0x15a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x15a>",
+          "15a:      \tcallq\t0x15f <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x15f>",
+          "23f:      \tcallq\t0x244 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x244>",
+          "256:      \tcallq\t0x25b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x25b>",
+          "263:      \tcallq\t0x268 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x268>",
+          "289:      \tcallq\t*(%r14,%rax)",
+          "299:      \tcallq\t0x29e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x29e>",
+          "2a1:      \tcallq\t0x2a6 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2a6>",
+          "2b2:      \tcallq\t0x2b7 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2b7>",
+          "2c8:      \tcallq\t0x2cd <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2cd>",
+          "324:      \tcallq\t0x329 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x329>",
+          "335:      \tcallq\t0x33a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x33a>",
+          "359:      \tcallq\t0x35e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x35e>",
+          "368:      \tcallq\t0x36d <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x36d>",
+          "36f:      \tcallq\t0x374 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x374>",
+          "37d:      \tcallq\t0x382 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x382>",
+          "38a:      \tcallq\t0x38f <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x38f>",
+          "391:      \tcallq\t0x396 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x396>"
+        ],
+        "relocations": [
+          "000000000000004f:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4",
+          "000000000000007d:  R_X86_64_PC32\t.text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type14GLOBAL_APPLIED0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1t_6option6OptionQIB28_INtNtB1t_4cell4CelljEEEEE9call_onceBe_-0x4",
+          "0000000000000082:  R_X86_64_PLT32\t.text.hot._RNvMs3_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell4CelljEE3getCseCMZVCq70TC_12ferroui_base-0x4",
+          "0000000000000089:  R_X86_64_PC32\t.bss._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type10GLOBAL_LEN.0-0x4",
+          "0000000000000097:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4",
+          "00000000000000d3:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.28466-0x4",
+          "00000000000000f8:  R_X86_64_PC32\t.rodata._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered-0x4",
+          "0000000000000123:  R_X86_64_PLT32\t.text.hot._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4",
+          "0000000000000133:  R_X86_64_PLT32\t.text.hot._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_-0x4",
+          "0000000000000151:  R_X86_64_PC32\t.data.rel.ro..Lanon.757a79aaf7c0cdba98c7d4800c577d46.301-0x4",
+          "0000000000000156:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell30panic_already_mutably_borrowed-0x4",
+          "000000000000015b:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4",
+          "000000000000016e:  R_X86_64_PC32\t.data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3+0xc",
+          "000000000000017a:  R_X86_64_PC32\t.data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3-0x4",
+          "0000000000000240:  R_X86_64_PLT32\t.text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4",
+          "0000000000000257:  R_X86_64_PLT32\t.text.unlikely._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type17register_defaults-0x4",
+          "0000000000000264:  R_X86_64_PLT32\t.text._RNvMs4_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtCs1C1lLj4PWSY_5alloc3vec3VecFEuEEE4takeCseCMZVCq70TC_12ferroui_base-0x4",
+          "0000000000000295:  R_X86_64_PC32\t.data.rel.ro..Lanon.501ae5ec37329a2343b65d07557dab83.1-0x4",
+          "000000000000029a:  R_X86_64_PLT32\t.text.unlikely._RNvNtNtCsgHYyB3hU8Ec_3std6thread5local18panic_access_error-0x4",
+          "00000000000002a2:  R_X86_64_PLT32\t.text.hot._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12apply_global-0x4",
+          "00000000000002ae:  R_X86_64_PC32\t.data.rel.ro..Lanon.757a79aaf7c0cdba98c7d4800c577d46.302-0x4",
+          "00000000000002b3:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4",
+          "00000000000002ba:  R_X86_64_PC32\t.rodata..Lanon.757a79aaf7c0cdba98c7d4800c577d46.303-0x4",
+          "00000000000002c1:  R_X86_64_PC32\t.data.rel.ro..Lanon.757a79aaf7c0cdba98c7d4800c577d46.304-0x4",
+          "00000000000002c9:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core6option13expect_failed-0x4",
+          "0000000000000325:  R_X86_64_PLT32\t.text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4",
+          "0000000000000331:  R_X86_64_PC32\t.data.rel.ro..Lanon.757a79aaf7c0cdba98c7d4800c577d46.305-0x4",
+          "0000000000000336:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4",
+          "000000000000035a:  R_X86_64_PLT32\t.text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4",
+          "0000000000000369:  R_X86_64_PLT32\t.text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4",
+          "0000000000000370:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4",
+          "000000000000037e:  R_X86_64_PLT32\t_Unwind_Resume-0x4",
+          "000000000000038b:  R_X86_64_PLT32\t.text.hot._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_-0x4",
+          "0000000000000392:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+        ]
+      },
+      {
+        "symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property",
+        "section": ".text.unlikely._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property",
+        "kind": "public",
+        "bytes": 894,
+        "calls": [
+          "28:      \tcallq\t*0x18(%rbx)",
+          "35:      \tcallq\t0x3a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x3a>",
+          "68:      \tcallq\t0x6d <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x6d>",
+          "7d:      \tcallq\t0x82 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x82>",
+          "b9:      \tcallq\t0xbe <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0xbe>",
+          "ef:      \tcallq\t0xf4 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0xf4>",
+          "14c:      \tcallq\t*0x28(%r15)",
+          "162:      \tcallq\t0x167 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x167>",
+          "185:      \tcallq\t*%r15",
+          "193:      \tcallq\t0x198 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x198>",
+          "271:      \tcallq\t0x276 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x276>",
+          "286:      \tcallq\t0x28b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x28b>",
+          "291:      \tcallq\t0x296 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x296>",
+          "2b1:      \tcallq\t*(%r15,%rax)",
+          "2c0:      \tcallq\t0x2c5 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x2c5>",
+          "2d1:      \tcallq\t0x2d6 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x2d6>",
+          "2d9:      \tcallq\t0x2de <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x2de>",
+          "2ea:      \tcallq\t0x2ef <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x2ef>",
+          "300:      \tcallq\t0x305 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x305>",
+          "30e:      \tcallq\t0x313 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x313>",
+          "31c:      \tcallq\t0x321 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x321>",
+          "330:      \tcallq\t0x335 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x335>",
+          "337:      \tcallq\t0x33c <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x33c>",
+          "357:      \tcallq\t0x35c <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x35c>",
+          "364:      \tcallq\t0x369 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x369>",
+          "36b:      \tcallq\t0x370 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x370>",
+          "379:      \tcallq\t0x37e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x37e>"
+        ],
+        "relocations": [
+          "0000000000000036:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4",
+          "0000000000000064:  R_X86_64_PC32\t.text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type14GLOBAL_APPLIED0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1t_6option6OptionQIB28_INtNtB1t_4cell4CelljEEEEE9call_onceBe_-0x4",
+          "0000000000000069:  R_X86_64_PLT32\t.text.hot._RNvMs3_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell4CelljEE3getCseCMZVCq70TC_12ferroui_base-0x4",
+          "0000000000000070:  R_X86_64_PC32\t.bss._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type10GLOBAL_LEN.0-0x4",
+          "000000000000007e:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4",
+          "00000000000000ba:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.28466-0x4",
+          "00000000000000f0:  R_X86_64_PLT32\t.text._RNvMs1_NtCsevLNFiNqfJP_4core6optionINtB5_6OptionRNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type18BorrowedConversionE6clonedBT_-0x4",
+          "0000000000000163:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4",
+          "0000000000000194:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4",
+          "00000000000001a7:  R_X86_64_PC32\t.data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3+0xc",
+          "00000000000001b3:  R_X86_64_PC32\t.data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3-0x4",
+          "0000000000000272:  R_X86_64_PLT32\t.text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4",
+          "0000000000000287:  R_X86_64_PLT32\t.text.unlikely._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type17register_defaults-0x4",
+          "0000000000000292:  R_X86_64_PLT32\t.text._RNvMs4_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtCs1C1lLj4PWSY_5alloc3vec3VecFEuEEE4takeCseCMZVCq70TC_12ferroui_base-0x4",
+          "00000000000002c1:  R_X86_64_PLT32\t.text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4",
+          "00000000000002cd:  R_X86_64_PC32\t.data.rel.ro..Lanon.757a79aaf7c0cdba98c7d4800c577d46.301-0x4",
+          "00000000000002d2:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell30panic_already_mutably_borrowed-0x4",
+          "00000000000002da:  R_X86_64_PLT32\t.text.hot._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12apply_global-0x4",
+          "00000000000002e6:  R_X86_64_PC32\t.data.rel.ro..Lanon.757a79aaf7c0cdba98c7d4800c577d46.302-0x4",
+          "00000000000002eb:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4",
+          "00000000000002f2:  R_X86_64_PC32\t.rodata..Lanon.757a79aaf7c0cdba98c7d4800c577d46.303-0x4",
+          "00000000000002f9:  R_X86_64_PC32\t.data.rel.ro..Lanon.757a79aaf7c0cdba98c7d4800c577d46.304-0x4",
+          "0000000000000301:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core6option13expect_failed-0x4",
+          "000000000000030a:  R_X86_64_PC32\t.data.rel.ro..Lanon.757a79aaf7c0cdba98c7d4800c577d46.305-0x4",
+          "000000000000030f:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4",
+          "0000000000000318:  R_X86_64_PC32\t.data.rel.ro..Lanon.501ae5ec37329a2343b65d07557dab83.1-0x4",
+          "000000000000031d:  R_X86_64_PLT32\t.text.unlikely._RNvNtNtCsgHYyB3hU8Ec_3std6thread5local18panic_access_error-0x4",
+          "0000000000000331:  R_X86_64_PLT32\t.text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4",
+          "0000000000000338:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4",
+          "0000000000000358:  R_X86_64_PLT32\t.text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4",
+          "0000000000000365:  R_X86_64_PLT32\t.text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4",
+          "000000000000036c:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4",
+          "000000000000037a:  R_X86_64_PLT32\t_Unwind_Resume-0x4"
+        ]
+      },
+      {
+        "symbol": "_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.28466",
+        "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.28466",
+        "kind": "lookup",
+        "bytes": 251,
+        "calls": [],
+        "relocations": [],
+        "rotate32": [
+          "21:      \trolq\t$0x20, %r9"
+        ],
+        "xor": [
+          "25:      \txorq\t%r8, %r9",
+          "8b:      \txorq\t%rdx, %r15",
+          "92:      \txorq\t%rcx, %r12",
+          "9e:      \txorq\t%rsi, %r15",
+          "a5:      \txorq\t%r8, %r14"
+        ]
+      }
+    ],
+    "clone_symbols": [],
+    "pair_hash_symbols": [],
+    "descriptor": {
+      "section": ".data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.120",
+      "bytes": 80,
+      "leaf_relocations": [
+        {
+          "offset": 16,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_"
+        },
+        {
+          "offset": 24,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_"
+        }
+      ],
+      "all_relocations": [
+        {
+          "offset": 0,
+          "type": 1,
+          "target": ".text._RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref7elementNtCsjdsPGE2mFyg_18registration_probe6TargetEB1P_",
+          "addend": 0,
+          "weak_root_leaf": null
+        },
+        {
+          "offset": 8,
+          "type": 1,
+          "target": ".text._RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_",
+          "addend": 0,
+          "weak_root_leaf": null
+        },
+        {
+          "offset": 16,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2B_3any3AnyEL_EE9call_onceB1M_"
+        },
+        {
+          "offset": 24,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": "_RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2D_3any3AnyEL_EE9call_onceB1M_"
+        },
+        {
+          "offset": 32,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": null
+        },
+        {
+          "offset": 40,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": null
+        },
+        {
+          "offset": 48,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s2_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": null
+        },
+        {
+          "offset": 56,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s3_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": null
+        },
+        {
+          "offset": 64,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s4_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": null
+        },
+        {
+          "offset": 72,
+          "type": 1,
+          "target": ".text._RNvYNCNKINvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtBd_10ValueTypes20register_element_refNtCsjdsPGE2mFyg_18registration_probe6TargetE0s5_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRDNtNtB2E_3any3AnyEL_EE9call_onceB1M_",
+          "addend": 0,
+          "weak_root_leaf": null
+        }
+      ]
+    },
+    "source_registration_statements": [
+      "r.set_conversion((root, element), ConvertFn::Borrowed(BorrowedConversion::Static(ops.from_root)));",
+      "r.set_conversion((root, nullable_element), ConvertFn::Borrowed(BorrowedConversion::Static(ops.from_root_to_nullable)));"
+    ],
+    "callback_boundary": {
+      "stage4": "FromRoot: shared apply performs AnyValue::as_any and the Any downcast, then calls reference<Target>(&Ref<FerroObject>), whose body casts the class and boxes the weak result.",
+      "trial": "Borrowed(Static): shared apply performs AnyValue::as_any and invokes the concrete fn(&dyn Any). That leaf performs the Any downcast and class cast directly before boxing. It never calls the separate metadata reference helper.",
+      "metadata_callback": "The original 122-byte metadata reference helper remains in the descriptor at offset 8; the two new static root callbacks occupy offsets 16 and 24 in the 80-byte native descriptor.",
+      "ownership": "The trial uses plain static function pointers and no Rc callback adapter. It does not introduce an owning root-handle clone before the class check. Failure exits before result boxing.",
+      "size_observation": "The two selected Target callback bodies are 169 bytes each; the shared apply body is 303 bytes. These are exact diagnostic native function sizes, not a predicted whole-application size delta."
+    },
+    "scope": "Diagnostic only: this Base uses retained stage4 PGO but moves root handlers to CGU04, losing all 81 accepted root-vtable counts and notification promotions. Some conversion-local profiles also drift. No final performance acceptance follows from native correctness; quiet paired timings are separate."
+  },
+  "reproduction": {
+    "tools": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin",
+    "steps": [
+      "Compare graph filename sets and unchanged inode identities; compare the small hashes.json manifests. Only the Base artifact differs; hashes.json is provenance, not a dependency artifact.",
+      "Hash both restored source files and saved before/after snapshots. Inspect recorded compiler argv/profile and immutable Base hash.",
+      "Locate actual members with llvm-nm --print-file-name; extract selected bitcode with llvm-ar p and llvm-dis. Read current !prof/!PGOFuncName, promoted targets, and direct root leaf bodies.",
+      "Run llvm-profdata show --counts --function=<exact current key> on the retained profile for the recorded queries; inspect the selected compiler CFG mismatch warning."
+    ]
+  },
+  "final_verdict": "The static weak-root trial has the intended native callback boundary and exact artifact identities. Short and longer rejected-boxed intervals include parity, while the short borrowed map-miss lane remains flagged. Retained-profile root/local drift prevents final performance acceptance. The reviewed source was selected for fresh stage5 training and whole-graph validation.",
+  "diagnostic_timing": {
+    "short_cohort": {
+      "path": "/tmp/ferro-run/static-weak-root-trial/registration/comparison-cpu6.json",
+      "sha256": "5bd0b7c5e909d45460c44475a0dd01e3c951ceac741ddb08ab6d911d4821110a",
+      "method": "Eight lanes; two warmups and alternating fresh processes; rotated lanes; pinned CPU; thread CPU ns/op.",
+      "experiment_note": "Isolated recovery trial using the passed profile; final acceptance requires retraining annotated source.",
+      "cpu": 6,
+      "pairs": 31,
+      "warmups": 2,
+      "lane_iterations": {
+        "register_element": 5000,
+        "property_registration": 500,
+        "boxed_live": 500000,
+        "borrowed_live": 500000,
+        "boxed_wrong": 500000,
+        "borrowed_wrong": 500000,
+        "boxed_expired": 500000,
+        "borrowed_expired": 500000
+      },
+      "checksums": {
+        "boxed_live": 500000,
+        "borrowed_live": 500000,
+        "boxed_wrong": 500000,
+        "borrowed_wrong": 500000,
+        "boxed_expired": 500000,
+        "borrowed_expired": 500000,
+        "register_element": 40000,
+        "property_registration": 7998000
+      },
+      "comparisons": {
+        "register_element": {
+          "thread_cpu_ns_per_operation": {
+            "reference_median": 462.623525,
+            "candidate_median": 256.110175,
+            "candidate_reference_ratio": {
+              "median": 0.5560399051481577,
+              "bootstrap_95_percent": [
+                0.5466975311463592,
+                0.5652107965007065
+              ]
+            }
+          },
+          "wall_ns_per_operation": {
+            "reference_median": 463.052975,
+            "candidate_median": 256.163525,
+            "candidate_reference_ratio": {
+              "median": 0.5585688656897194,
+              "bootstrap_95_percent": [
+                0.5466010840759754,
+                0.5662839028076089
+              ]
+            }
+          }
+        },
+        "property_registration": {
+          "thread_cpu_ns_per_operation": {
+            "reference_median": 352.40525,
+            "candidate_median": 343.11425,
+            "candidate_reference_ratio": {
+              "median": 1.020347396128174,
+              "bootstrap_95_percent": [
+                0.9576487003663121,
+                1.0484662576687116
+              ]
+            }
+          },
+          "wall_ns_per_operation": {
+            "reference_median": 352.7935,
+            "candidate_median": 344.41825,
+            "candidate_reference_ratio": {
+              "median": 1.0184722538887891,
+              "bootstrap_95_percent": [
+                0.9575711386465033,
+                1.0496151350341711
+              ]
+            }
+          }
+        },
+        "boxed_live": {
+          "thread_cpu_ns_per_operation": {
+            "reference_median": 40.689022,
+            "candidate_median": 48.599172,
+            "candidate_reference_ratio": {
+              "median": 1.0046477765163002,
+              "bootstrap_95_percent": [
+                0.9921204662730365,
+                1.032029265618003
+              ]
+            }
+          },
+          "wall_ns_per_operation": {
+            "reference_median": 42.436794,
+            "candidate_median": 48.66777,
+            "candidate_reference_ratio": {
+              "median": 1.0056969647140388,
+              "bootstrap_95_percent": [
+                0.9881799269881208,
+                1.0296793790748193
+              ]
+            }
+          }
+        },
+        "borrowed_live": {
+          "thread_cpu_ns_per_operation": {
+            "reference_median": 39.18528,
+            "candidate_median": 36.805122,
+            "candidate_reference_ratio": {
+              "median": 0.964386389907011,
+              "bootstrap_95_percent": [
+                0.9456000293115371,
+                0.993086368064303
+              ]
+            }
+          },
+          "wall_ns_per_operation": {
+            "reference_median": 41.264954,
+            "candidate_median": 36.846474,
+            "candidate_reference_ratio": {
+              "median": 0.9640506822848153,
+              "bootstrap_95_percent": [
+                0.9386964012332927,
+                0.9921709983002421
+              ]
+            }
+          }
+        },
+        "boxed_wrong": {
+          "thread_cpu_ns_per_operation": {
+            "reference_median": 33.05055,
+            "candidate_median": 32.004278,
+            "candidate_reference_ratio": {
+              "median": 1.012523338907806,
+              "bootstrap_95_percent": [
+                0.9865875721553237,
+                1.0510240644467999
+              ]
+            }
+          },
+          "wall_ns_per_operation": {
+            "reference_median": 33.288022,
+            "candidate_median": 32.841074,
+            "candidate_reference_ratio": {
+              "median": 1.0124362819024866,
+              "bootstrap_95_percent": [
+                0.9851103407894447,
+                1.0385161744324112
+              ]
+            }
+          }
+        },
+        "borrowed_wrong": {
+          "thread_cpu_ns_per_operation": {
+            "reference_median": 15.587804,
+            "candidate_median": 14.850522,
+            "candidate_reference_ratio": {
+              "median": 1.081941081602913,
+              "bootstrap_95_percent": [
+                1.0439992836328504,
+                1.100192939030105
+              ]
+            }
+          },
+          "wall_ns_per_operation": {
+            "reference_median": 16.021678,
+            "candidate_median": 15.438504,
+            "candidate_reference_ratio": {
+              "median": 1.0831605220020915,
+              "bootstrap_95_percent": [
+                1.043516311102284,
+                1.0998958324849804
+              ]
+            }
+          }
+        },
+        "boxed_expired": {
+          "thread_cpu_ns_per_operation": {
+            "reference_median": 31.033956,
+            "candidate_median": 28.41938,
+            "candidate_reference_ratio": {
+              "median": 0.974209916356551,
+              "bootstrap_95_percent": [
+                0.9361349520519288,
+                0.9914896593832602
+              ]
+            }
+          },
+          "wall_ns_per_operation": {
+            "reference_median": 31.605982,
+            "candidate_median": 28.424798,
+            "candidate_reference_ratio": {
+              "median": 0.9706493676144142,
+              "bootstrap_95_percent": [
+                0.9260002321613754,
+                0.9911608708331178
+              ]
+            }
+          }
+        },
+        "borrowed_expired": {
+          "thread_cpu_ns_per_operation": {
+            "reference_median": 42.249374,
+            "candidate_median": 35.18081,
+            "candidate_reference_ratio": {
+              "median": 0.9605813504383555,
+              "bootstrap_95_percent": [
+                0.9545382519662333,
+                0.9821235208902412
+              ]
+            }
+          },
+          "wall_ns_per_operation": {
+            "reference_median": 42.32482,
+            "candidate_median": 36.053654,
+            "candidate_reference_ratio": {
+              "median": 0.9621805599611366,
+              "bootstrap_95_percent": [
+                0.9557602864058513,
+                0.9945161988780081
+              ]
+            }
+          }
+        }
+      },
+      "reference_binary": "/tmp/ferro-run/registration-stage2/reference-registration",
+      "reference_binary_sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d",
+      "candidate_binary_sha256": "bab53f371a3bea3e3b42d81f8a2f29ca724fd264fab7670f50122bd775cdba03",
+      "reference_manifest_sha256": "8c58cfa5e74832973fd4fe009e876745adf466028fe6e82f5f84713305674d25",
+      "identity_checks": {
+        "candidate_binary_matches_native_audit": true,
+        "candidate_base_matches_native_audit": true,
+        "candidate_profile_matches_inherited_stage4": true,
+        "reference_manifest_matches_recorded_hash": true
+      }
+    },
+    "long_balanced_control_cohorts": [
+      {
+        "path": "/tmp/ferro-run/static-weak-root-trial/registration/longer-diagnostic-6.json",
+        "sha256": "0346d6be69879fbebad1ba0a148545d34b5d9718d9c2e78a9d52117c64894527",
+        "method": "Focused follow-up to the stage4 rejected-boxed signal. Existing unmodified binaries, three warmup blocks, two lanes, five million operations per process, all six orders of candidate/reference/same-image reference control, alternating lane order. Same-image control runs the exact reference executable as a separate fresh process. This supplements rather than replaces the original rotated short-process cohorts. No profile training or source change.",
+        "source": {
+          "path": "/tmp/ferro496-conversion-recovery/boxed-rejection-check.py",
+          "sha256": "162ca3d99693a7cf306e3eeb0f227db32ec9d7f23f5c8feddf410f8b16ae9271"
+        },
+        "manifest": {
+          "path": "/tmp/ferro-run/static-weak-root-trial/registration/long-inputs.json",
+          "sha256": "dc7daef53965319ee48a8345b16f06b9983766097869b3d95c2e5e10c40a3369"
+        },
+        "cpu": 6,
+        "blocks": 31,
+        "iterations": 5000000,
+        "artifacts": {
+          "reference": {
+            "path": "/tmp/ferro-run/registration-stage4/reference-registration",
+            "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d"
+          },
+          "candidate": {
+            "path": "/tmp/ferro-run/static-weak-root-trial/registration/candidate-registration",
+            "sha256": "bab53f371a3bea3e3b42d81f8a2f29ca724fd264fab7670f50122bd775cdba03"
+          },
+          "reference_control": {
+            "path": "/tmp/ferro-run/registration-stage4/reference-registration",
+            "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d"
+          }
+        },
+        "comparisons": {
+          "boxed_wrong": {
+            "thread_cpu_ns": {
+              "medians_ns_per_operation": {
+                "reference": 32.8156688,
+                "candidate": 34.2233984,
+                "reference_control": 35.3393568
+              },
+              "candidate_reference": {
+                "median": 1.035276526353928,
+                "bootstrap_95_percent": [
+                  0.9696546060606546,
+                  1.0641899621495097
+                ]
+              },
+              "candidate_reference_control": {
+                "median": 1.0125785575100472,
+                "bootstrap_95_percent": [
+                  0.9726492111299379,
+                  1.0354034780421235
+                ]
+              },
+              "same_image_control_reference": {
+                "median": 1.0147977531319226,
+                "bootstrap_95_percent": [
+                  0.9736791782793283,
+                  1.1057468804697106
+                ]
+              }
+            },
+            "wall_ns": {
+              "medians_ns_per_operation": {
+                "reference": 32.840075,
+                "candidate": 34.246992,
+                "reference_control": 35.5921412
+              },
+              "candidate_reference": {
+                "median": 1.0353330823188476,
+                "bootstrap_95_percent": [
+                  0.968893050843903,
+                  1.064259042182284
+                ]
+              },
+              "candidate_reference_control": {
+                "median": 1.0021248626522858,
+                "bootstrap_95_percent": [
+                  0.9583819715410076,
+                  1.0355842123641659
+                ]
+              },
+              "same_image_control_reference": {
+                "median": 1.020357444949118,
+                "bootstrap_95_percent": [
+                  0.9785196508126183,
+                  1.1343902967858892
+                ]
+              }
+            }
+          },
+          "boxed_live": {
+            "thread_cpu_ns": {
+              "medians_ns_per_operation": {
+                "reference": 46.637098,
+                "candidate": 46.4086986,
+                "reference_control": 48.0545538
+              },
+              "candidate_reference": {
+                "median": 0.9938455332252889,
+                "bootstrap_95_percent": [
+                  0.9335333581804848,
+                  1.0392129462016746
+                ]
+              },
+              "candidate_reference_control": {
+                "median": 0.9532246527191947,
+                "bootstrap_95_percent": [
+                  0.8910495670951819,
+                  1.008776664023198
+                ]
+              },
+              "same_image_control_reference": {
+                "median": 1.0286438238319495,
+                "bootstrap_95_percent": [
+                  0.9809211265651868,
+                  1.078420325439055
+                ]
+              }
+            },
+            "wall_ns": {
+              "medians_ns_per_operation": {
+                "reference": 48.6861652,
+                "candidate": 46.4330024,
+                "reference_control": 48.9128246
+              },
+              "candidate_reference": {
+                "median": 0.9634109042915614,
+                "bootstrap_95_percent": [
+                  0.9284512963783411,
+                  1.0292928434073974
+                ]
+              },
+              "candidate_reference_control": {
+                "median": 0.9531271505228854,
+                "bootstrap_95_percent": [
+                  0.8910465457465827,
+                  1.0098965501192976
+                ]
+              },
+              "same_image_control_reference": {
+                "median": 0.9999220437499126,
+                "bootstrap_95_percent": [
+                  0.9693987724221399,
+                  1.0496389199716214
+                ]
+              }
+            }
+          }
+        },
+        "identity_checks": {
+          "candidate_binary_matches_native_audit": true,
+          "same_image_control_is_exact_reference": true,
+          "input_manifest_matches_recorded_hash": true,
+          "runner_matches_recorded_hash": true,
+          "reference_matches_short_cohort": true
+        }
+      },
+      {
+        "path": "/tmp/ferro-run/static-weak-root-trial/registration/longer-diagnostic-7.json",
+        "sha256": "f3b8ad79356941203a0a8e9850698d975586665092f895d88f83fc0cf9fa9dae",
+        "method": "Focused follow-up to the stage4 rejected-boxed signal. Existing unmodified binaries, three warmup blocks, two lanes, five million operations per process, all six orders of candidate/reference/same-image reference control, alternating lane order. Same-image control runs the exact reference executable as a separate fresh process. This supplements rather than replaces the original rotated short-process cohorts. No profile training or source change.",
+        "source": {
+          "path": "/tmp/ferro496-conversion-recovery/boxed-rejection-check.py",
+          "sha256": "162ca3d99693a7cf306e3eeb0f227db32ec9d7f23f5c8feddf410f8b16ae9271"
+        },
+        "manifest": {
+          "path": "/tmp/ferro-run/static-weak-root-trial/registration/long-inputs.json",
+          "sha256": "dc7daef53965319ee48a8345b16f06b9983766097869b3d95c2e5e10c40a3369"
+        },
+        "cpu": 7,
+        "blocks": 31,
+        "iterations": 5000000,
+        "artifacts": {
+          "reference": {
+            "path": "/tmp/ferro-run/registration-stage4/reference-registration",
+            "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d"
+          },
+          "candidate": {
+            "path": "/tmp/ferro-run/static-weak-root-trial/registration/candidate-registration",
+            "sha256": "bab53f371a3bea3e3b42d81f8a2f29ca724fd264fab7670f50122bd775cdba03"
+          },
+          "reference_control": {
+            "path": "/tmp/ferro-run/registration-stage4/reference-registration",
+            "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d"
+          }
+        },
+        "comparisons": {
+          "boxed_wrong": {
+            "thread_cpu_ns": {
+              "medians_ns_per_operation": {
+                "reference": 33.7742348,
+                "candidate": 34.4751146,
+                "reference_control": 34.6441952
+              },
+              "candidate_reference": {
+                "median": 1.0166697446397934,
+                "bootstrap_95_percent": [
+                  0.9365617415442365,
+                  1.0697583395087162
+                ]
+              },
+              "candidate_reference_control": {
+                "median": 1.0124742390085033,
+                "bootstrap_95_percent": [
+                  0.9696842514253737,
+                  1.024253971712953
+                ]
+              },
+              "same_image_control_reference": {
+                "median": 1.038661155280327,
+                "bootstrap_95_percent": [
+                  0.9532316469814267,
+                  1.0815970720116765
+                ]
+              }
+            },
+            "wall_ns": {
+              "medians_ns_per_operation": {
+                "reference": 33.7751672,
+                "candidate": 34.4772294,
+                "reference_control": 34.6495834
+              },
+              "candidate_reference": {
+                "median": 1.016507087803828,
+                "bootstrap_95_percent": [
+                  0.936499986193689,
+                  1.0697909010392832
+                ]
+              },
+              "candidate_reference_control": {
+                "median": 1.0073121111123857,
+                "bootstrap_95_percent": [
+                  0.9108733361607411,
+                  1.02637499730959
+                ]
+              },
+              "same_image_control_reference": {
+                "median": 1.05119924834085,
+                "bootstrap_95_percent": [
+                  0.9493364078548114,
+                  1.1159697484266307
+                ]
+              }
+            }
+          },
+          "boxed_live": {
+            "thread_cpu_ns": {
+              "medians_ns_per_operation": {
+                "reference": 48.8308024,
+                "candidate": 43.3538526,
+                "reference_control": 46.0371636
+              },
+              "candidate_reference": {
+                "median": 0.9641781816449995,
+                "bootstrap_95_percent": [
+                  0.8824333956083994,
+                  1.0017632860229098
+                ]
+              },
+              "candidate_reference_control": {
+                "median": 1.0075435091346199,
+                "bootstrap_95_percent": [
+                  0.9243877218989469,
+                  1.076627013054191
+                ]
+              },
+              "same_image_control_reference": {
+                "median": 0.9780321050851344,
+                "bootstrap_95_percent": [
+                  0.9148541846393562,
+                  1.0369033358530626
+                ]
+              }
+            },
+            "wall_ns": {
+              "medians_ns_per_operation": {
+                "reference": 49.0673758,
+                "candidate": 43.3896296,
+                "reference_control": 47.0596112
+              },
+              "candidate_reference": {
+                "median": 0.9610400830640552,
+                "bootstrap_95_percent": [
+                  0.8794100937344379,
+                  1.0025025907860163
+                ]
+              },
+              "candidate_reference_control": {
+                "median": 0.9777730902670657,
+                "bootstrap_95_percent": [
+                  0.9210785472881111,
+                  1.0550559498364815
+                ]
+              },
+              "same_image_control_reference": {
+                "median": 0.9887195807099508,
+                "bootstrap_95_percent": [
+                  0.9148197988390673,
+                  1.0397540156506477
+                ]
+              }
+            }
+          }
+        },
+        "identity_checks": {
+          "candidate_binary_matches_native_audit": true,
+          "same_image_control_is_exact_reference": true,
+          "input_manifest_matches_recorded_hash": true,
+          "runner_matches_recorded_hash": true,
+          "reference_matches_short_cohort": true
+        }
+      }
+    ],
+    "interpretation": [
+      "The short boxed_wrong interval includes parity: ratio 1.01252, 95% interval 0.98659\u20131.05102. Boxed_live also includes parity.",
+      "The longer balanced-control boxed_wrong intervals include parity on both pins: CPU6 ratio 1.03528 [0.96965,1.06419], CPU7 ratio 1.01667 [0.93656,1.06976]. The exact same-image control is preserved in both cohorts. These results support proceeding to matched-profile validation; they do not prove exact equivalence or final acceptance.",
+      "The short borrowed_wrong lane remains flagged: ratio 1.08194, 95% interval 1.04400\u20131.10019. Its bool-to-target map-miss source route is unchanged by this patch, but the diagnostic loses a secondary-get profile. The audit does not attribute any quantitative part of the slowdown to that profile loss.",
+      "All timing results use the inherited stage4 profile and the Base-only diagnostic graph. Root-vtable/local profile drift remains as recorded. Fresh original-workload training and full-graph validation are required before accepting application performance.",
+      "Source selection for stage5 is an implementation decision, not a declaration that the stage5 or whole-application performance gates have passed."
+    ]
+  },
+  "stage5_source_selection": {
+    "selected_source_sha256": "d6550b20e448ac9b46b40b8f5fb0b7654e872446fe5adbffca476d2b51ee6f39",
+    "expected_trial_source_sha256": "d6550b20e448ac9b46b40b8f5fb0b7654e872446fe5adbffca476d2b51ee6f39",
+    "source_matches_reviewed_trial": true,
+    "checkpoint": "98e06075",
+    "scope": "Root promoted the reviewed source after diagnostic measurements; performance is not accepted. Earlier source-restoration checks describe the prior isolated build boundary and are retained as historical observations."
+  }
+}
