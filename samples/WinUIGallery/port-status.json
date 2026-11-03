@@ -3558,6 +3558,312 @@
         }
       ]
     },
+    "InkCanvas": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/InkCanvas.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/ink_samples.rs",
+        "src/FerroUI.Controls.Inking/ink_canvas.rs",
+        "src/FerroUI.Controls.Inking/ink_presenter.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_canvas_page_loads_three_examples_on_native_ink_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_drawing_options_set_devices_attributes_enabled_state_and_clear"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_toolbar_options_show_hide_and_select_tools_both_ways"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_toolbar_clear_button_erases_the_strokes_of_its_canvas"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_strokes_save_clear_and_restore_keep_the_source_messages"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_page_releases_its_controls_with_the_page"
+        }
+      ],
+      "notes": "All three source examples use the native InkCanvas, InkPresenter and InkToolbar of ferroui-controls-inking with the handlers of InkCanvasPage.xaml.cs in Rust: input devices, ink colour, stroke width, inking enabled and clear; the toolbar's available tools, active tool in both directions, button flyout placement and clear; save, clear and restore with the source's status messages. Header is composed with a label, IsOn maps to IsChecked, TargetInkCanvas (x:Bind of an element) is set in Rust, and the saved strokes are the bytes of InkStrokeContainer::save in memory instead of SaveAsync into an InMemoryRandomAccessStream. Tests drive the presenter with ink pointer input; routed pointer input of a window, the toolbar's WinUI styles (Themes/WinUI.xaml of the crate), rendering and screen-reader acceptance are not established by them.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/InkCanvas/InkCanvasDrawing.txt",
+          "source_sha256": "62c55fb9eefd8ff0842d27b81803505fee14c8035dc129370771f8b62d17f7c6",
+          "status": "ported",
+          "notes": "The pen, mouse and touch options set InkPresenter.InputDeviceTypes; the colour and width options update the default drawing attributes (CopyDefaultDrawingAttributes/UpdateDefaultDrawingAttributes); the toggle sets IsInputEnabled; Clear drawing clears the stroke container. The substitutions of the source code view stay in the catalog viewer.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_canvas_page_loads_three_examples_on_native_ink_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_drawing_options_set_devices_attributes_enabled_state_and_clear"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/InkCanvas/InkCanvasToolbar.txt",
+          "source_sha256": "19f67d3f79f8aa0e0ede2108623658bfd2e2a8f5f899e5bdf11e481c3ac2b69f",
+          "status": "ported",
+          "notes": "An InkToolbar with InitialControls None and the four source buttons targets its canvas. The show options hide and show the pencil, highlighter and eraser (falling back to the ballpoint pen), the active-tool option selects the tool and follows ActiveToolChanged, the placement option sets ButtonFlyoutPlacement, and Clear drawing clears the canvas, with the source's reentrancy guard. The toolbar draws with its WinUI styles only where the application includes Themes/WinUI.xaml of ferroui-controls-inking.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_canvas_page_loads_three_examples_on_native_ink_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_toolbar_options_show_hide_and_select_tools_both_ways"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_toolbar_clear_button_erases_the_strokes_of_its_canvas"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/InkCanvas/InkCanvasStrokes.txt",
+          "source_sha256": "ab3f91f48f0e7d0c62fe696b58c25a7c278cc7e13c8731b1629178968c545d44",
+          "status": "ported",
+          "notes": "Save, clear and restore keep the source's stroke count, restore enabling and status messages; StrokesCollected and StrokesErased update the count. InkStrokeContainer::save and load (the portable ink format of the crate, synchronously in memory) replace SaveAsync and LoadAsync with an InMemoryRandomAccessStream.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_canvas_page_loads_three_examples_on_native_ink_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_strokes_save_clear_and_restore_keep_the_source_messages"
+            }
+          ]
+        }
+      ]
+    },
+    "Chart": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/Chart.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/chart_samples.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs",
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_page_loads_seven_examples_with_the_source_data"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_legend_toggle_hides_and_shows_the_legend"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_bar_orientation_and_category_sort_reorder_the_series"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_axis_options_change_grid_lines_visibility_and_tick_labels"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_styled_series_check_boxes_hide_and_show_each_series"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_lines_and_markers_options_change_dash_thickness_markers_and_labels"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_time_axis_follows_the_interval_and_the_label_format"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_live_series_adds_samples_and_keeps_the_eight_most_recent"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_page_releases_its_charts_with_the_page"
+        }
+      ],
+      "notes": "The seven examples of the source (Microsoft.UI.Xaml.Controls.Charts) map onto the native CartesianChart of ferroui-controls-livecharts with the data and the option handlers of ChartPage.xaml.cs in Rust: Chart is CartesianChart, CategoryAxis/LinearAxis are Axis (labels from the source arrays), LineSeries/AreaSeries/BarSeries are LineSeries/AreaSeries/ColumnSeries (RowSeries when horizontal), ShowLegend is LegendPosition, ShowDataMarkers is GeometrySize, StrokeDashStyle is a dash array, and the DateTimeAxis is an axis over the days of its range with day labels and the ticks of the interval type. Not available in the native chart, and recorded per example: LegendTitle, tick marks and axis line/tick brushes, marker shapes and per-point label and marker overrides, a marker brush apart from the area fill. Rendering parity with WinUI and screen-reader acceptance are not established.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/Chart/BasicLineChart.txt",
+          "source_sha256": "8328b26e6daa21d15cfe584804e0d643c54eb4db65e78e64396d3715954e9349",
+          "status": "partial",
+          "notes": "A line series of the six profits over the month labels with the legend toggle (LegendPosition Top or Hidden). The legend has no title (LegendTitle \"Profit\"): the native legend lists the series names only.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_legend_toggle_hides_and_shows_the_legend"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/BarChart.txt",
+          "source_sha256": "0aa9d3780598f719ba132e8b21b807f9e52971bb4a9c4255179efbe78ab48cff",
+          "status": "ported",
+          "notes": "A column series of units sold per region. Orientation switches the series between column and row (the categories move to the vertical axis); SortKey (data order or value) and SortOrder reorder the points and the category labels, which the source's CategoryAxis sorts itself.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_bar_orientation_and_category_sort_reorder_the_series"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/AxisOptions.txt",
+          "source_sha256": "cc82af92deecf5b80e09fe2e89c95c512b1012be132c441e18a62ebf3a3eff30",
+          "status": "partial",
+          "notes": "Grid lines None/Major/Minor set the separator lines of the visitors axis (Minor adds the separators at every 10), the axes toggle sets IsVisible of both axes and the tick-labels toggle hides their labels with a transparent label colour. Missing: tick marks (the ShowTickMarks option is not shown) and the AxisLineBrush, TickBrush and GridLineMinorBrush of the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_axis_options_change_grid_lines_visibility_and_tick_labels"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/StyledSeries.txt",
+          "source_sha256": "5bde81e505e6572ac59598f5684221a86ef8b5a173934cd03642759e87b9803e",
+          "status": "partial",
+          "notes": "The forecast area, the actual columns with data labels and the dashed target line with the source colours and thickness; the three check boxes set IsVisible of each series. Missing: the Diamond marker shape and a DataMarkerBrush apart from the fill (the markers are circles in the stroke colour).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_styled_series_check_boxes_hide_and_show_each_series"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/LinesAndMarkers.txt",
+          "source_sha256": "775655a12115e6476c906a089dd6bddfff53ede61f5582825959fab166a0ea12",
+          "status": "partial",
+          "notes": "The daily visits line with markers and data labels; dash style (in multiples of the thickness), thickness, data markers and data labels options. Missing: marker shapes (the Marker shape option is not shown) and the Peak label and marker overrides of HighlightPeakVisits (DataLabelOverrides and DataMarkerOverrides).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_lines_and_markers_options_change_dash_thickness_markers_and_labels"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/TimeSeries.txt",
+          "source_sha256": "bdf4d9d288383a24a90e489d2ca55bff66e4b181860bee5c582de5746263b7ad",
+          "status": "ported",
+          "notes": "CreateTimeSeriesChart in Rust: the temperature area over a date axis from 2026-07-27 to 2026-09-07 (an axis over its 42 days, labelled per day). Tick interval Auto/Day/Week/Month sets the separators (the chart's own step, every day, every week, the first day of each month); the label formats month day, month.abbreviated day and shortdate are formatted in en-US.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_time_axis_follows_the_interval_and_the_label_format"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/LiveObservableSeries.txt",
+          "source_sha256": "0d838fd0dc8a0556d01569daca719be32aa36236e3cf51c3edce5c9b6edc953f",
+          "status": "ported",
+          "notes": "Add sample appends the next incoming response time, keeps the eight most recent values and updates the series (the chart redraws) and the summary text, as the source's ResponseTimes and LiveSeriesSummary do.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_live_series_adds_samples_and_keeps_the_eight_most_recent"
+            }
+          ]
+        }
+      ]
+    },
     "ItemsView": {
       "status": "pending",
       "implementation": [],

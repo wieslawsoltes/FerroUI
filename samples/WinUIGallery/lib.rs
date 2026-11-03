@@ -9,6 +9,7 @@
 mod assets;
 mod assets_data;
 mod cat_data;
+mod chart_samples;
 mod color_picker_samples;
 mod connected_animation_samples;
 pub mod catalog;
@@ -19,6 +20,7 @@ pub mod examples;
 mod feedback_samples;
 mod frame_sample;
 pub mod gallery;
+mod ink_samples;
 mod input_samples;
 mod materials_samples;
 mod media_samples;
@@ -68,3 +70,9 @@ mod text_samples_tests;
 
 #[cfg(test)]
 mod repeater_samples_tests;
+
+#[cfg(test)]
+mod ink_samples_tests;
+
+#[cfg(test)]
+mod chart_samples_tests;
