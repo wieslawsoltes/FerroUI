@@ -2870,6 +2870,207 @@
           ]
         }
       ]
+    },
+    "SystemBackdrops": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/SystemBackdrops.xaml",
+        "samples/WinUIGallery/Pages/SystemBackdropsWindow.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/window_samples.rs",
+        "src/FerroUI.Controls/media/system_backdrop.rs",
+        "src/FerroUI.Base/rendering/composition/system_backdrops.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "system_backdrops_page_opens_the_built_in_backdrop_window_and_switches_its_backdrop"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "controller_windows_drive_mica_and_desktop_acrylic_controllers_with_a_configuration"
+        }
+      ],
+      "notes": "The three \"Show window\" buttons open the source's sample windows (SampleBuiltInSystemBackdropsWindow and SampleSystemBackdropsWindow with its AllowedBackdrops) as native windows extended into the title bar: Window.SystemBackdrop with MicaBackdrop (Base, BaseAlt) and DesktopAcrylicBackdrop, and MicaController and DesktopAcrylicController (Base, Thin) on the window as their target, with a SystemBackdropConfiguration that follows activation, the theme of the window and high contrast. SetBackdrop resets the previous backdrop and falls back as the C# does where IsSupported is false (Mica is drawn on Windows 11 and macOS, desktop acrylic also where the platform blurs a transparent window); the theme box sets the window's theme and SetNoneBackdropBackground its background. The C# window adds its Activated, Closed and ActualThemeChanged handlers again for every backdrop it sets; they are added once. UIHelper.AnnounceActionForAccessibility is a polite live region, the ComboBox headers are composed labels, the badge logo image of the custom title bar is not shown and TitleBarHelper.ApplySystemThemeToCaptionButtons is left to the decorations of the window, which follow its theme. The platform's drawing of the materials is verified on the hosts, not by these tests.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/SystemBackdrops/SystemBackdropsBackdropTypes.txt",
+          "source_sha256": "912cdd12c3ff0d4f8217ec25df90955f028a3265db433fec65057427935b9e73",
+          "status": "ported",
+          "notes": "The built-in window: MicaBackdrop, MicaBackdrop Kind=BaseAlt, DesktopAcrylicBackdrop and none, with the fallbacks of SetBackdrop.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "system_backdrops_page_opens_the_built_in_backdrop_window_and_switches_its_backdrop"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/SystemBackdrops/SystemBackdropsMicacontroller.txt",
+          "source_sha256": "cfc75563f9a29dbd800d3c1982a841a26a5f9f045fe3e7ff46165d2ee6dd2d32",
+          "status": "ported",
+          "notes": "MicaController (Base, BaseAlt) with AddSystemBackdropTarget on the window and SetSystemBackdropConfiguration; disposed when another backdrop is set and when the window closes.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "controller_windows_drive_mica_and_desktop_acrylic_controllers_with_a_configuration"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/SystemBackdrops/SystemBackdropsDesktopacryliccontroller.txt",
+          "source_sha256": "9afc470b36cb2cef5207652a3741e6ea7a75c66e330f036694afd16c40c90391",
+          "status": "ported",
+          "notes": "DesktopAcrylicController (Base, Thin) with the same configuration.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "controller_windows_drive_mica_and_desktop_acrylic_controllers_with_a_configuration"
+            }
+          ]
+        }
+      ],
+      "source_support": [
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml",
+          "sha256": "2df97c21298982aa66acd10137965a407d3bcad9e1003d40cd6bd616b0b5435d"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml.cs",
+          "sha256": "fe344ba4b7c9c0e4c581cc4b4dbb0a8c96e4df47dfcb02c7bee603dd5f78f821"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml",
+          "sha256": "cd2c191924450d4e7060c19c58995b175607e9dc8711eda3a30a0d40d20307af"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml.cs",
+          "sha256": "93c8eb8058e8ba8203cba723f9f47c447325fe3322b47ef68e3c1a8273677e08"
+        }
+      ]
+    },
+    "TitleBar": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/TitleBar.xaml",
+        "samples/WinUIGallery/Pages/TitleBarDragRegionsWindow.xaml",
+        "samples/WinUIGallery/Pages/TitleBarWindow.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/window_samples.rs",
+        "samples/WinUIGallery/navigation_view_samples.rs",
+        "src/FerroUI.Controls/title_bar.rs",
+        "src/FerroUI.Themes.WinUI/Controls/TitleBar.xaml"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "title_bar_configuration_binds_title_subtitle_and_button_visibility_to_the_options"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "title_bar_drag_regions_window_sets_is_drag_region_and_toggles_dynamic_content"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back"
+        }
+      ],
+      "notes": "All three source examples use the native TitleBar. The configuration example binds Title, Subtitle, IsBackButtonVisible and IsPaneToggleButtonVisible to the options (ElementName and x:Bind become ordinary Bindings; IsOn is IsChecked of the ToggleSwitch; Header is a composed label). The two \"Show window\" buttons open the source's sample windows, extended into a tall title bar with Mica: TitleBar.IsDragRegion of the status badge (unset, true, false), its Click, the extra button and RecomputeDragRegions; and the end-to-end window with the back button bound to Frame.CanGoBack, BackRequested, PaneToggleRequested and NavigationView navigation over the gallery's sample pages. ImageIconSource is a PathIconSource and PersonPicture a composed circle with the initials, since FerroUI has neither (G2). TitleBar_LayoutUpdated (TitleBarHelper.ApplySystemThemeToCaptionButtons) is left to the decorations of the window; the link of the intro to the AppWindowTitleBar page is text. Dragging the window is verified on the hosts, not by these tests.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/TitleBar/TitlebarConfiguration.txt",
+          "source_sha256": "c0b91f868871b26f4d983e619e82506a4306f19f3df1c44d6a1e69203d239b7d",
+          "status": "ported",
+          "notes": "Title, subtitle and the two button visibilities bound to the options; the icon, the search box and the initials in the bar.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "title_bar_configuration_binds_title_subtitle_and_button_visibility_to_the_options"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/TitleBar/TitlebarDragRegions.txt",
+          "source_sha256": "7376ee388527d8d1509cd8193f73eb19cd95d7b6c7ab39fafcae67cc2ddc1ed0",
+          "status": "ported",
+          "notes": "TitleBarDragRegionsWindow: SetIsDragRegion and ClearValue of the badge, the badge's Click, the extra button inserted and removed, RecomputeDragRegions.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "title_bar_drag_regions_window_sets_is_drag_region_and_toggles_dynamic_content"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/TitleBar/EndEndTitlebarSample.txt",
+          "source_sha256": "6de73238f9e6e0d61a8afcae95abb647ccc2227e3e14b1d2b350cd331186b2af",
+          "status": "ported",
+          "notes": "TitleBarWindow: the NavigationView selection navigates the frame and sets the header; the back button follows CanGoBack; BackRequested goes back and PaneToggleRequested opens and closes the pane.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back"
+            }
+          ]
+        }
+      ],
+      "source_support": [
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml",
+          "sha256": "5a0b13bc13af4b0f6aceda565bcbe7216add1bc9449f4606850250bad60a70ac"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml.cs",
+          "sha256": "627a72b65f70019739702f3a503be31c1e7c1988b3434b61e35d913cd1d7a297"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml",
+          "sha256": "3d4712c21d6698f044d0bb55463c6cdc56a6b58a977e30d7d0acf023f259abf1"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml.cs",
+          "sha256": "5efa8c95799f15187d1baa24b8eec0e11a78bb866b00cd0fb7955c9f16be5cdb"
+        }
+      ]
+    },
+    "SystemBackdropElement": {
+      "status": "pending",
+      "implementation": [],
+      "tests": [],
+      "notes": "G1 (#418) found no SystemBackdropElement on main: the system backdrop of an element exists only inside the framework (ElementSystemBackdrop of the menu flyout presenter, crate-private). The catalog has no sample definition for the page; the element is G2 work.",
+      "examples": []
     }
   }
 }
