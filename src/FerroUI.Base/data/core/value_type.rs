@@ -482,6 +482,52 @@ fn install_reference(object: ValueType, handle: TypeId, nullable: TypeId, ops: &
     });
 }
 
+// A weak element reference has the same registration policy for every class.
+// Only projection, boxing and weak-handle operations depend on the class.
+// Keep those leaves as static functions instead of allocating an Rc<dyn Fn>
+// and its invocation/destruction adapters for each built-in conversion.
+struct ElementReferenceOperations {
+    as_object: ObjectFn,
+    from_object: FromObjectFn,
+    from_nullable_object: FromObjectFn,
+    from_handle: fn(&dyn std::any::Any) -> Option<BoxedValue>,
+    from_handle_to_nullable: fn(&dyn std::any::Any) -> Option<BoxedValue>,
+    from_nullable_handle: fn(&dyn std::any::Any) -> Option<BoxedValue>,
+    to_handle: fn(&dyn std::any::Any) -> Option<BoxedValue>,
+    to_nullable_handle: fn(&dyn std::any::Any) -> Option<BoxedValue>,
+    nullable_to_nullable_handle: fn(&dyn std::any::Any) -> Option<BoxedValue>,
+}
+
+#[inline(never)]
+fn install_element_reference(
+    element: TypeId,
+    nullable_element: TypeId,
+    handle: TypeId,
+    nullable_handle: TypeId,
+    _class: &'static TypeInfo,
+    ops: &ElementReferenceOperations,
+) {
+    with_registry(|r| {
+        r.element_ref_objects.insert(element, (ops.as_object, ops.from_object));
+        #[cfg(feature = "compiler-metadata")]
+        {
+            r.element_refs.insert(element, (_class, false));
+            r.element_refs.insert(nullable_element, (_class, true));
+        }
+        r.set_cast((handle, element), ConvertFn::Borrowed(BorrowedConversion::Static(ops.from_handle)));
+        r.set_cast((handle, nullable_element), ConvertFn::Borrowed(BorrowedConversion::Static(ops.from_handle_to_nullable)));
+        r.set_cast((nullable_handle, nullable_element), ConvertFn::Borrowed(BorrowedConversion::Static(ops.from_nullable_handle)));
+        let root = TypeId::of::<Ref<FerroObject>>();
+        // For T = FerroObject these keys overlap the casts above. Retain the
+        // separate assignability/borrowed views just as public registration does.
+        r.set_conversion((root, element), ConvertFn::FromRoot(ops.from_object));
+        r.set_conversion((root, nullable_element), ConvertFn::FromRoot(ops.from_nullable_object));
+        r.set_conversion((element, handle), ConvertFn::Borrowed(BorrowedConversion::Static(ops.to_handle)));
+        r.set_cast((element, nullable_handle), ConvertFn::Borrowed(BorrowedConversion::Static(ops.to_nullable_handle)));
+        r.set_cast((nullable_element, nullable_handle), ConvertFn::Borrowed(BorrowedConversion::Static(ops.nullable_to_nullable_handle)));
+    });
+}
+
 fn insert_interface(interface: TypeId, class: &'static TypeInfo, convert: InterfaceFn) {
     with_registry(|r| {
         let entries = r.interfaces.entry(interface).or_default();
@@ -652,26 +698,32 @@ impl ValueTypes {
         fn reference<T: ObjectType>(object: &Ref<FerroObject>) -> Option<BoxedValue> {
             object.cast::<T>().map(|element| Rc::new(ElementRef::of(&element)) as BoxedValue)
         }
-        with_registry(|r| {
-            r.element_ref_objects.insert(TypeId::of::<ElementRef<T>>(), (element::<T>, reference::<T>));
-        });
-        #[cfg(feature = "compiler-metadata")]
-        with_registry(|r| {
-            r.element_refs.insert(TypeId::of::<ElementRef<T>>(), (T::TYPE, false));
-            r.element_refs.insert(TypeId::of::<Option<ElementRef<T>>>(), (T::TYPE, true));
-        });
-        Self::register_cast::<Ref<T>, ElementRef<T>>(|o| ElementRef::of(o));
-        Self::register_cast::<Ref<T>, Option<ElementRef<T>>>(|o| Some(ElementRef::of(o)));
-        Self::register_cast::<Option<Ref<T>>, Option<ElementRef<T>>>(|o| ElementRef::from_nullable(o.clone()));
-        Self::register_conversion::<Ref<FerroObject>, ElementRef<T>>(|o| o.cast::<T>().map(|o| ElementRef::of(&o)));
-        Self::register_conversion::<Ref<FerroObject>, Option<ElementRef<T>>>(|o| {
-            o.cast::<T>().map(|o| Some(ElementRef::of(&o)))
-        });
-        Self::register_conversion::<ElementRef<T>, Ref<T>>(|e| e.get());
-        Self::register_cast::<ElementRef<T>, Option<Ref<T>>>(|e| e.get());
-        Self::register_cast::<Option<ElementRef<T>>, Option<Ref<T>>>(|e| ElementRef::resolve(e));
-
-
+        install_element_reference(
+            TypeId::of::<ElementRef<T>>(),
+            TypeId::of::<Option<ElementRef<T>>>(),
+            TypeId::of::<Ref<T>>(),
+            TypeId::of::<Option<Ref<T>>>(),
+            T::TYPE,
+            &const { ElementReferenceOperations {
+                as_object: element::<T>,
+                from_object: reference::<T>,
+                from_nullable_object: |object| {
+                    Some(Rc::new(Some(ElementRef::of(&object.cast::<T>()?))))
+                },
+                from_handle: |value| Some(Rc::new(ElementRef::of(value.downcast_ref::<Ref<T>>()?))),
+                from_handle_to_nullable: |value| {
+                    Some(Rc::new(Some(ElementRef::of(value.downcast_ref::<Ref<T>>()?))))
+                },
+                from_nullable_handle: |value| {
+                    Some(Rc::new(ElementRef::from_nullable(value.downcast_ref::<Option<Ref<T>>>()?.clone())))
+                },
+                to_handle: |value| Some(Rc::new(value.downcast_ref::<ElementRef<T>>()?.get()?)),
+                to_nullable_handle: |value| Some(Rc::new(value.downcast_ref::<ElementRef<T>>()?.get())),
+                nullable_to_nullable_handle: |value| {
+                    Some(Rc::new(ElementRef::resolve(value.downcast_ref::<Option<ElementRef<T>>>()?)))
+                },
+            } },
+        );
     }
 
     /// Converts a borrowed untyped value to the value type `target` of a

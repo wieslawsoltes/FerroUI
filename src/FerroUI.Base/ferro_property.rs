@@ -301,11 +301,25 @@ impl FerroProperty {
         init: FerroPropertyInit,
         notifying: Option<NotifyingCallback>,
     ) -> Self {
+        Self::new_core(name, owner_type, init, notifying, TypeId::of::<T>(), std::any::type_name::<T>())
+    }
+
+    // Identity, allocation and notification setup are independent of the value
+    // type. Keep one copy while preserving the original typed property facade.
+    #[inline(never)]
+    fn new_core(
+        name: &str,
+        owner_type: &'static TypeInfo,
+        init: FerroPropertyInit,
+        notifying: Option<NotifyingCallback>,
+        property_type: TypeId,
+        property_type_name: &'static str,
+    ) -> Self {
         assert!(!name.contains('.'), "'name' may not contain periods.");
         Self {
             name: name.into(),
-            property_type: TypeId::of::<T>(),
-            property_type_name: std::any::type_name::<T>(),
+            property_type,
+            property_type_name,
             owner_type,
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
             inherits: init.inherits,
