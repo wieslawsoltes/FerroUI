@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Ferro Desktop (X11)
+Comment=FerroUI desktop shell with Openbox window management
+Exec=ferro-desktop-session
+TryExec=ferro-desktop-session
+Type=Application
+DesktopNames=FerroDesktop

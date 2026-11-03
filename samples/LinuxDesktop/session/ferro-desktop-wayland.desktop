@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Ferro Desktop (Wayland)
+Comment=FerroUI desktop with native Wayland composition
+Exec=ferro-desktop-wayland
+TryExec=ferro-desktop-wayland
+Type=Application
+DesktopNames=FerroDesktop;sway;

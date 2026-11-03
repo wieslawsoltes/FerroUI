@@ -5,7 +5,7 @@
 //! test prints why it does nothing and passes; with
 //! `FERROUI_VULKAN_TEST_REQUIRE=1` it fails instead (the CI job with a
 //! software implementation sets it).
-#![cfg(ferro_skia_vulkan)]
+#![cfg(any(ferro_skia_vulkan, ferro_skia_graphite_vulkan))]
 
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
@@ -167,6 +167,8 @@ fn skia_draws_a_frame_into_the_image_of_a_vulkan_session_and_presents_it() {
 
         // The frame is read back from the device before it is presented.
         let gr_context = session.gr_context();
+        #[cfg(ferro_skia_graphite_vulkan)]
+        assert_eq!(gr_context.backend(), ferroui_skia::gpu::SkiaGpuBackend::Graphite);
         gr_context.flush();
         let image = gr_context.snapshot_to_raster(&mut surface).expect("the image of the frame");
         let pixels = image.peek_pixels().expect("a raster image");
@@ -177,8 +179,8 @@ fn skia_draws_a_frame_into_the_image_of_a_vulkan_session_and_presents_it() {
         session.dispose();
     }
 
-    // An offscreen surface of the Ganesh context of the GPU draws and reads back as well.
-    let scoped = gpu.try_get_gr_context().expect("the Ganesh context");
+    // An offscreen surface of the GPU context of the GPU draws and reads back as well.
+    let scoped = gpu.try_get_gr_context().expect("the GPU context");
     let info = skia_safe::ImageInfo::new_n32_premul((32, 32), None);
     let mut offscreen = scoped
         .value()

@@ -58,14 +58,10 @@ impl ServerCompositionDrawingSurface {
     /// The counted reference to the content of the surface.
     pub fn bitmap_ref(&self) -> Option<RefCounted<crate::platform::SharedBitmapImpl>> {
         // Failsafe to avoid consuming an image imported with a different context
-        let current = self.current_context();
-        let same = self
-            .created_with_context
-            .borrow()
-            .as_ref()
-            .is_some_and(|context| std::ptr::addr_eq(Rc::as_ptr(context), Rc::as_ptr(&current)));
-        if !same {
-            return None;
+        if let Some(context) = self.created_with_context.borrow().as_ref() {
+            if !Rc::ptr_eq(context, &self.current_context()) {
+                return None;
+            }
         }
         self.bitmap.borrow().as_ref().map(|bitmap| bitmap.clone_ref())
     }
@@ -86,20 +82,22 @@ impl ServerCompositionDrawingSurface {
     }
 
     fn update(&self, new_image: std::sync::Arc<crate::platform::SharedBitmapImpl>, context: Rc<dyn IPlatformRenderInterfaceContext>) {
+        let item = new_image.clone();
+        self.set_bitmap(RefCountable::create(new_image, move || item.dispose()), Some(context));
+    }
+
+    pub(crate) fn set_bitmap(
+        &self,
+        bitmap: RefCounted<crate::platform::SharedBitmapImpl>,
+        context: Option<Rc<dyn IPlatformRenderInterfaceContext>>,
+    ) {
+        // Disposals precede server jobs in a batch. Dropping the incoming
+        // counted reference also releases an upload queued for a removed visual.
         if self.disposed.get() {
-            // Batches are processed with disposals before server jobs, so an update job
-            // can be processed after this surface was disposed in the same batch.
-            // Dispose the snapshot here on the render thread (context is current)
-            // instead of orphaning it.
-            new_image.dispose();
             return;
         }
-        if let Some(bitmap) = self.bitmap.borrow_mut().take() {
-            bitmap.dispose();
-        }
-        let item = new_image.clone();
-        *self.bitmap.borrow_mut() = Some(RefCountable::create(new_image, move || item.dispose()));
-        *self.created_with_context.borrow_mut() = Some(context);
+        *self.bitmap.borrow_mut() = Some(bitmap);
+        *self.created_with_context.borrow_mut() = context;
         self.changed.invoke();
     }
 

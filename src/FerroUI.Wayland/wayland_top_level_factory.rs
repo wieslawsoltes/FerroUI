@@ -23,6 +23,10 @@ impl WaylandTopLevelFactory {
         Self { client, keyboard }
     }
 
+    pub(crate) fn create_layer_window(&self, role: crate::layer_shell::LayerRole) -> Result<Rc<WindowImpl>, String> {
+        WindowImpl::try_new(self.client.clone(), self.keyboard.clone(), Some(role))
+    }
+
     pub fn client(&self) -> &Rc<WaylandWorkerClient> {
         &self.client
     }

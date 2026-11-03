@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Ferro Desktop (FerroUI Compositor)
+Comment=Compose native Wayland clients and the desktop in one FerroUI scene
+Exec=ferro-desktop-wayland --ferro
+TryExec=ferro-desktop-wayland
+Type=Application
+DesktopNames=FerroDesktop;sway;

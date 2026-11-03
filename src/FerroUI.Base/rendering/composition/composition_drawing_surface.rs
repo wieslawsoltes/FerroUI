@@ -75,6 +75,18 @@ impl CompositionDrawingSurface {
         )
     }
 
+    /// Replaces the displayed image with an immutable bitmap snapshot. The
+    /// server retains the backing bitmap, so the caller can drop its handle
+    /// immediately. This shares the same surface and invalidation path as GPU
+    /// imports, without decoding or allocating another composition visual.
+    pub fn update_with_bitmap(&self, bitmap: &crate::media::imaging::Bitmap) -> ServerJobTask<()> {
+        let image = bitmap.platform_impl().clone_ref();
+        self.invoke(move |_, surface| {
+            surface.set_bitmap(image, None);
+            Ok(())
+        })
+    }
+
     /// Updates the surface contents using an imported memory image using a keyed mutex as the means of synchronization
     ///
     /// `acquire_index` is the mutex key to wait for before accessing the

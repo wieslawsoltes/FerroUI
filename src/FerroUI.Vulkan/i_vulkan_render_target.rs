@@ -14,6 +14,13 @@ pub trait IVulkanRenderTarget: IPlatformRenderSurfaceRenderTarget {
     /// Panics when the image to render to cannot be created.
     fn begin_draw(&self) -> Rc<dyn IVulkanRenderSession>;
 
+    /// Starts a frame with its negotiated size and scale. Window systems with
+    /// asynchronous configuration can defer drawing until a configure arrives.
+    fn try_begin_draw(&self, _scene: &ferroui_base::platform::RenderTargetSceneInfo)
+        -> Result<Rc<dyn IVulkanRenderSession>, ferroui_base::platform::RenderTargetError> {
+        Ok(self.begin_draw())
+    }
+
     /// Releases the render target.
     fn dispose(&self);
 }

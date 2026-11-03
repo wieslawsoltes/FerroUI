@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Run a dedicated login session. Do not take over an existing window manager.
+set -eu
+
+case ${1:-} in
+    --show=applications|--show=workspaces|--show=settings|--show=notifications)
+        exec env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET "${FERRO_DESKTOP_BINARY:-ferro-desktop}" --platform=x11 "$1" ;;
+esac
+if [[ ${1:-} == --ready ]]; then
+    printf 'ready\n' > "${FERRO_DESKTOP_READY_PIPE:?}"
+    exit 0
+fi
+if [[ -z ${DISPLAY:-} ]]; then
+    echo 'Ferro Desktop needs an X server. Select the Ferro Desktop X11 login session.' >&2
+    exit 1
+fi
+if [[ -z ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
+    exec dbus-run-session -- "$0" "$@"
+fi
+here=$(cd -- "$(dirname -- "$0")" && pwd)
+export PATH="$here:$PATH"
+export XDG_CURRENT_DESKTOP=FerroDesktop XDG_SESSION_DESKTOP=ferro-desktop XDG_SESSION_TYPE=x11
+# Some display managers retain WAYLAND_DISPLAY when switching session types.
+unset WAYLAND_DISPLAY WAYLAND_SOCKET
+config=${XDG_CONFIG_HOME:-$HOME/.config}/ferro-desktop/openbox.xml
+if [[ ! -r $config ]]; then
+    config=$here/../share/ferro-desktop/openbox.xml
+    [[ -r $config ]] || config=$here/openbox.xml
+fi
+binary=${FERRO_DESKTOP_BINARY:-ferro-desktop}
+for command in openbox "$binary"; do
+    command -v "$command" >/dev/null || { echo "Ferro Desktop could not find $command" >&2; exit 1; }
+done
+state=$(mktemp -d -- "${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/ferro-desktop.XXXXXXXX")
+export FERRO_DESKTOP_READY_PIPE=$state/ready
+mkfifo -- "$FERRO_DESKTOP_READY_PIPE"
+wm_pid= shell_pid=
+cleanup() {
+    [[ -z $shell_pid ]] || kill "$shell_pid" 2>/dev/null || :
+    [[ -z $wm_pid ]] || kill "$wm_pid" 2>/dev/null || :
+    wait || :
+    # This directory is created exclusively by mktemp for this login.
+    rm -rf -- "$state"
+}
+trap cleanup EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT HUP
+# Openbox runs --startup only after it owns the root window. If another WM owns the
+# display or the shell exits, wait -n tears down the other half without replacing it.
+cp -- "$config" "$state/base.xml"
+cp -- "$config" "$state/openbox.xml"
+mkdir -p -- "$state/data/themes"
+# Only Openbox searches the session-local generated window decorations. Other clients
+# retain the full original XDG environment, including their own themes and icon paths.
+XDG_DATA_DIRS="$state/data:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}" \
+    openbox --sm-disable --config-file "$state/openbox.xml" --startup 'ferro-desktop-session --ready' &
+wm_pid=$!
+(
+    read -r _ < "$FERRO_DESKTOP_READY_PIPE"
+    unset FERRO_DESKTOP_READY_PIPE
+    export FERRO_DESKTOP_SESSION_DIR=$state
+    exec "$binary" --session --platform=x11
+) &
+shell_pid=$!
+wait -n "$wm_pid" "$shell_pid"

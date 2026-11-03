@@ -9,7 +9,7 @@ use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, SignedDurati
 use ferroui_base::animation::DoubleTransition;
 use ferroui_base::animation::easings::Easing;
 use ferroui_base::controls::{ResourceKey, ResourceValue};
-use ferroui_base::media::{AcrylicBackgroundSource, BoxShadows, Color, ExperimentalAcrylicMaterial, SolidColorBrush};
+use ferroui_base::media::{AcrylicBackgroundSource, AcrylicBrush, BoxShadows, Color, ExperimentalAcrylicMaterial, SolidColorBrush};
 use ferroui_base::metadata::{from_markup_value, into_markup_value};
 use ferroui_base::styling::{Styles, ThemeVariant};
 use ferroui_base::{CornerRadius, Rect, Thickness, Visual};
@@ -175,16 +175,28 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
             };
             return Some(solid(Color::from_uint32(value)));
         }
-        "MacOSRegularGlassMaterial" | "MacOSSidebarGlassMaterial" | "MacOSMenuGlassMaterial" | "MacOSToolbarGlassMaterial" | "MacOSClearGlassMaterial" => {
+        "MacOSRegularGlassMaterial" | "MacOSSidebarGlassMaterial" | "MacOSMenuGlassMaterial" | "MacOSToolbarGlassMaterial" | "MacOSClearGlassMaterial"
+        | "MacOSMenuBackdropBrush" | "MacOSToolbarBackdropBrush" => {
             let opaque = theme.effective_reduce_transparency() || contrast || !active;
             let (light_tint, dark_tint, material_opacity) = match name {
                 "MacOSSidebarGlassMaterial" => (0.72, 0.78, 0.70),
-                "MacOSMenuGlassMaterial" => (0.86, 0.88, 0.72),
-                "MacOSToolbarGlassMaterial" => (0.62, 0.70, 0.58),
+                "MacOSMenuGlassMaterial" | "MacOSMenuBackdropBrush" => (0.86, 0.88, 0.72),
+                "MacOSToolbarGlassMaterial" | "MacOSToolbarBackdropBrush" => (0.62, 0.70, 0.58),
                 "MacOSClearGlassMaterial" => (0.10, 0.10, 0.18),
                 _ => (0.68, 0.74, 0.62),
             };
             let tint = Color::from_uint32(if dark { 0xFF2C2C2E } else { 0xFFF5F5F7 });
+            // Ordinary Borders in a shared composition scene can sample actual pixels behind
+            // them. Detached windows use the host material above their platform backdrop.
+            if matches!(name, "MacOSMenuBackdropBrush" | "MacOSToolbarBackdropBrush") {
+                if opaque { return Some(solid(tint)); }
+                let brush = AcrylicBrush::new();
+                brush.set_fallback_color(tint);
+                brush.set_tint_color(tint);
+                brush.set_tint_opacity(if dark { dark_tint } else { light_tint });
+                brush.set_tint_luminosity_opacity(Some(material_opacity));
+                return Some(into_markup_value(brush));
+            }
             // Each surface owns its material: ExperimentalAcrylicBorder adjusts
             // platform transparency compensation per host, so sharing one mutable
             // material across windows would let one host alter another's surface.

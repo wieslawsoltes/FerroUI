@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# Exercise actual X11 clients, keyboard shortcuts, and WM decoration changes on a private display.
+# Optionally capture all three appearances: session.sh capture path/to/ferro-desktop output-directory
+set -euo pipefail
+here=$(cd -- "$(dirname -- "$0")" && pwd)
+case ${1:-test} in
+    --session)
+        [[ -n ${FERRO_DESKTOP_SESSION_DIR:-} && -n ${FERRO_TEST_PRIVATE_DISPLAY:-} && $DISPLAY == "$FERRO_TEST_PRIVATE_DISPLAY" ]]
+        if [[ ${FERRO_DESKTOP_BENCHMARK_TITLES:-0} == 1 ]]; then
+            exec "$here/../build.sh" test --profile dev -- --ignored window_title_traffic --nocapture
+        fi
+        "$here/../build.sh" test --profile dev -- --ignored real_client_lifecycle
+        exec "$here/../build.sh" test --profile dev -- --ignored running_openbox_redecorates_the_same_native_client
+        ;;
+    test) mode=test ;;
+    benchmark) export FERRO_DESKTOP_BENCHMARK_TITLES=1; mode=test ;;
+    capture)
+        mode=capture
+        [[ $# == 3 ]] || { echo "Usage: $0 capture /path/to/ferro-desktop output-directory" >&2; exit 2; }
+        export FERRO_DESKTOP_BINARY
+        FERRO_DESKTOP_BINARY=$(realpath "$2")
+        mkdir -p -- "$3"; output=$(realpath "$3")
+        ;;
+    *) echo "Usage: $0 [test | benchmark | capture /path/to/ferro-desktop output-directory]" >&2; exit 2 ;;
+esac
+if [[ -z ${FERRO_TEST_PRIVATE_DISPLAY:-} || ${DISPLAY:-} != "$FERRO_TEST_PRIVATE_DISPLAY" ]]; then
+    exec env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' dbus-run-session -- \
+        bash -c 'export FERRO_TEST_PRIVATE_DISPLAY=$DISPLAY; exec "$@"' bash "$here/session.sh" "$@"
+fi
+scratch=$(mktemp -d)
+export XDG_RUNTIME_DIR="$scratch/runtime" XDG_CONFIG_HOME="$scratch/config" XDG_CACHE_HOME="$scratch/cache"
+mkdir -m 700 "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
+supervisor= viewer=
+cleanup() {
+    [[ -z $viewer ]] || kill "$viewer" 2>/dev/null || :
+    [[ -z $supervisor ]] || kill "$supervisor" 2>/dev/null || :
+    wait || :
+    rm -rf -- "$scratch"
+}
+trap cleanup EXIT
+if [[ $mode == test ]]; then
+    FERRO_DESKTOP_BINARY="$here/session.sh" "$here/../session/ferro-desktop-session"
+    exit
+fi
+"$here/../session/ferro-desktop-session" >"$output/session.log" 2>&1 &
+supervisor=$!
+timeout 30s xdotool search --sync --onlyvisible --name '^Ferro Desktop$' >/dev/null
+python3 "$here/julia.py" > "$scratch/study.ppm"
+display -immutable -title 'Julia study  ·  ImageMagick' -geometry +220+215 "$scratch/study.ppm" &
+viewer=$!
+client=$(timeout 15s xdotool search --sync --onlyvisible --name 'Julia study' | head -1)
+xdotool windowactivate --sync "$client" windowmove "$client" 225 220 mousemove 1100 750
+await_scene() {
+    local current=
+    for ((i=0; i<60; i++)); do
+        current=$("$FERRO_DESKTOP_BINARY" --current-scene 2>/dev/null || :)
+        [[ $current == "$1" ]] && return
+        sleep .1
+    done
+    echo "Expected shell scene $1; observed $current" >&2
+    return 1
+}
+read -r width height < <(xdotool getdisplaygeometry)
+
+# The WM can decorate its client and publish the new scene before Graphite
+# presents the shell. Check a wallpaper sample outside the client and any sheet.
+# Downsample a vertical strip to the right of the client for a cheap, stable
+# presentation probe which includes the chooser on both the Mac and Android.
+capture_profile() {
+    local theme=$1 destination=$2 previous=${3:-} expected r g b changed
+    local frame="$scratch/frame.png" probe="$scratch/probe.png" prior="$scratch/prior.png"
+    case $theme in
+        windows) expected='b > r+.08' ;;
+        macos) expected='r > b+.08' ;;
+        material) expected='g > r+.06' ;;
+    esac
+    rm -f "$prior"
+    for ((i=0; i<50; i++)); do
+        import -window root -depth 8 "$frame"
+        read -r r g b < <(convert "$frame" -resize '100x100!' -format '%[fx:p{93,10}.r] %[fx:p{93,10}.g] %[fx:p{93,10}.b]\n' info:)
+        if ! awk -v r="$r" -v g="$g" -v b="$b" "BEGIN {exit !($expected)}"; then sleep .1; continue; fi
+        convert "$frame" -crop "120x${height}+$((width*59/100))+0" +repage -resize '40x240!' "$probe"
+        if [[ -f $prior ]] && compare -metric AE "$prior" "$probe" null: 2>/dev/null; then
+            if [[ -n $previous ]]; then
+                changed=$(compare -metric AE "$previous" "$probe" null: 2>&1 || :)
+                if ! awk -v n="$changed" 'BEGIN {exit !(n+0 > 160)}'; then sleep .1; continue; fi
+            fi
+            cp "$frame" "$destination"
+            cp "$probe" "$scratch/captured-strip.png"
+            return
+        fi
+        cp "$probe" "$prior"
+        sleep .1
+    done
+    cp "$frame" "$output/failed-$theme.png"
+    echo "Timed out waiting for the $theme shell to present $destination" >&2
+    return 1
+}
+await_scene desktop
+capture_profile windows "$output/windows.png"
+for choice in '2 macos' '3 material'; do
+    read -r key theme <<< "$choice"
+    xdotool key --clearmodifiers super+space
+    await_scene applications
+    xdotool key --clearmodifiers ctrl+comma
+    await_scene appearance
+    xdotool key --clearmodifiers "$key"
+    for ((i=0; i<60; i++)); do
+        [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance" 2>/dev/null || :) == "$theme" ]] && break
+        sleep .1
+    done
+    [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance") == "$theme" ]]
+    capture_profile "$theme" "$scratch/chooser.png"
+    cp "$scratch/captured-strip.png" "$scratch/chooser-strip.png"
+    xdotool key --clearmodifiers Escape
+    await_scene desktop
+    xdotool windowactivate --sync "$client"
+    capture_profile "$theme" "$output/$theme.png" "$scratch/chooser-strip.png"
+done
+
+# Drive the Material recognizers through the actual window manager. The client
+# at +225+220 remains open; begin each drag on free wallpaper or the handle.
+for gesture in apps shade recents home; do
+    case $gesture in
+        apps) x=$((width - 150)); y=$((height / 2)); dy=-100; expected=applications ;;
+        shade) x=$((width - 150)); y=$((height / 2)); dy=100; expected=notifications ;;
+        recents|home) x=$((width / 2)); y=$((height - 8)); dy=-100; expected=workspaces ;;
+    esac
+    drag=(mousemove "$x" "$y" mousedown 1 sleep .08 mousemove "$x" "$((y+dy/2))" sleep .08 mousemove "$x" "$((y+dy))")
+    if [[ $gesture == recents ]]; then
+        xdotool "${drag[@]}"
+        await_scene workspaces
+        xdotool mouseup 1
+    else
+        xdotool "${drag[@]}" mouseup 1
+    fi
+    if [[ $gesture == home ]]; then
+        for ((i=0; i<60; i++)); do
+            xprop -id "$client" _NET_WM_STATE | grep -q _NET_WM_STATE_HIDDEN && break
+            sleep .1
+        done
+        xprop -id "$client" _NET_WM_STATE | grep -q _NET_WM_STATE_HIDDEN
+        await_scene desktop
+        continue
+    fi
+    await_scene "$expected"
+    xdotool key --clearmodifiers Escape
+    await_scene desktop
+done

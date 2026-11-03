@@ -1,0 +1,561 @@
+//! Workspace navigation and client actions are requests to the window manager.
+//! Property notifications drive the authoritative workspace and client list.
+mod overview;
+
+use super::appearance::Layout;
+use super::chrome::*;
+use super::{feedback, popup_header, Shell};
+use crate::session::{ClientWindow, Session, SnapSide};
+use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
+use ferroui_base::media::FontWeight;
+use ferroui_base::rendering::composition::{
+    CompositionStretch, CompositionVisual, ElementComposition,
+};
+use ferroui_controls::primitives::ScrollBarVisibility;
+use ferroui_view::prelude::*;
+use std::rc::Rc;
+
+pub(super) fn view(shell: &Rc<Shell>) -> Element {
+    let snapshot = shell.snapshot;
+    let compositor = shell.session.as_ref().and_then(|s| s.compositor()).cloned();
+    let composed = compositor.is_some();
+    let layout = look().layout();
+    let picker_shell = shell.clone();
+    let window_shell = shell.clone();
+    // Keep keyboard focus on workspace buttons when an unrelated client changes its title.
+    let session = shell.session.clone();
+    let tab_state = memo(move |_| {
+        snapshot.with(|model| {
+            let removable = session
+                .as_ref()
+                .is_some_and(|s| s.can_remove_empty_last_workspace(model));
+            (
+                model.workspace_names.clone(),
+                model.current_workspace,
+                removable,
+                compositor
+                    .as_ref()
+                    .filter(|_| layout != Layout::BottomNavigation)
+                    .map(|host| host.workspace_outlines()),
+            )
+        })
+    });
+    let tabs = dynamic(move || {
+        tab_state.with(|(names, current, removable, maps)| {
+            let mut choices = wrap_panel();
+            for (index, name) in names.iter().enumerate() {
+                let selected = index == *current;
+                let state = picker_shell.clone();
+                let title = if name.trim().is_empty() {
+                    format!("Workspace {}", index + 1)
+                } else {
+                    name.clone()
+                };
+                choices = choices.child(
+                    action(&format!("Switch to {title}"), move || {
+                        if let Some(session) = &state.session {
+                            if !session.switch_workspace(index) {
+                                state.status.set("Could not switch workspace".into());
+                            }
+                        }
+                    })
+                    .background(if selected {
+                        colors().selected
+                    } else {
+                        colors().tile
+                    })
+                    .margin((0.0, 0.0, 5.0, 5.0))
+                    .max_width(154.0)
+                    .child({
+                        let label = shell_text(
+                            &title,
+                            12.0,
+                            if selected {
+                                colors().on_selected
+                            } else {
+                                colors().text
+                            },
+                        );
+                        match maps.as_ref().and_then(|m| m.get(index)) {
+                            Some(rects) => stack_panel()
+                                .spacing(3.0)
+                                .child(overview::map(rects))
+                                .child(label.horizontal_alignment(H::Center))
+                                .into_element(),
+                            None => label.into_element(),
+                        }
+                    }),
+                );
+            }
+            let state = picker_shell.clone();
+            let add = action("Add workspace", move || {
+                if !state.session.as_ref().is_some_and(|s| s.add_workspace()) {
+                    state.status.set("Could not add workspace".into());
+                }
+            })
+            .margin((0.0, 0.0, 5.0, 5.0))
+            .is_enabled(picker_shell.session.is_some() && names.len() < 256)
+            .child(shell_text("+", 14.0, Ink::Primary));
+            let state = picker_shell.clone();
+            let remove = action("Remove empty last workspace", move || {
+                if !state
+                    .session
+                    .as_ref()
+                    .is_some_and(|s| s.remove_empty_last_workspace())
+                {
+                    state.status.set(
+                        "The last workspace is in use or the manager declined the request".into(),
+                    );
+                }
+            })
+            .margin((0.0, 0.0, 5.0, 5.0))
+            .is_enabled(*removable)
+            .child(shell_text("−", 14.0, Ink::Primary));
+            choices.child(add).child(remove)
+        })
+    });
+    let expanded = signal(None::<u32>);
+    let empty_shell = shell.clone();
+
+    let empty = show(
+        move || {
+            snapshot.with(|model| {
+                !model
+                    .windows
+                    .iter()
+                    .any(|w| w.workspace.is_none_or(|ws| ws == model.current_workspace))
+            })
+        },
+        move || {
+            let text = if empty_shell.session.is_none() {
+                "Window management is unavailable in this host."
+            } else {
+                "Applications opened here will appear in this workspace."
+            };
+            border()
+                .padding(18)
+                .corner_radius(10)
+                .background(colors().tile)
+                .child(
+                    stack_panel()
+                        .spacing(6.0)
+                        .child(
+                            shell_text("No windows", 17.0, Ink::Primary)
+                                .font_weight(FontWeight::Medium),
+                        )
+                        .child(
+                            shell_text(text, 12.0, Ink::Secondary)
+                                .text_wrapping(ferroui_base::media::TextWrapping::Wrap),
+                        ),
+                )
+        },
+    );
+    let windows = for_each(
+        move || {
+            snapshot.with(|model| {
+                let mut windows: Vec<_> = model
+                    .windows
+                    .iter()
+                    .filter(|w| w.workspace.is_none_or(|ws| ws == model.current_workspace))
+                    .cloned()
+                    .collect();
+                // Stable sorting preserves mapping order among windows not yet activated.
+                windows.sort_by_key(|w| std::cmp::Reverse(w.last_activation));
+                windows
+            })
+        },
+        |w| w.id as usize,
+        move |client| client_row(&window_shell, client, expanded, composed),
+    );
+    let (title, subtitle) = match layout {
+        Layout::Taskbar => ("Task View", "VIRTUAL DESKTOPS"),
+        Layout::MenuBarDock => ("Mission Control", "SPACES"),
+        Layout::BottomNavigation => ("Recents", "WORKSPACES"),
+    };
+    if composed {
+        return overview::stage(shell, layout, title, tabs, empty, windows);
+    }
+    super::desktop::popup_frame()
+        .max_width(600.0)
+        .max_height(690.0)
+        .padding(22)
+        .child(
+            grid()
+                .row_definitions("Auto,Auto,Auto,*,Auto")
+                .child(popup_header(title, subtitle, shell))
+                .child(
+                    border()
+                        .grid_row(1)
+                        .margin((0.0, 12.0, 0.0, 6.0))
+                        .max_height(100.0)
+                        .child(
+                            scroll_viewer()
+                                .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
+                                .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
+                                .child(tabs),
+                        ),
+                )
+                .child(eyebrow("WINDOWS").grid_row(2).margin((0.0, 8.0, 0.0, 6.0)))
+                .child(
+                    scroll_viewer()
+                        .grid_row(3)
+                        .max_height(350.0)
+                        .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
+                        .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
+                        .child(stack_panel().spacing(5.0).child(empty).child(windows)),
+                )
+                .child(feedback(shell.status).grid_row(4)),
+        )
+        .into()
+}
+
+/// A second view of the client's retained subtree. The shared drawing surfaces
+/// receive a single upload per buffer even with the overview on screen.
+pub(super) fn preview(source: Rc<CompositionVisual>, height: f64) -> Element {
+    let host = NodeRef::<ferroui_controls::Border>::new();
+    border()
+        .horizontal_alignment(H::Stretch)
+        .height(height)
+        .is_hit_test_visible(false)
+        .node_ref(host)
+        .on_loaded(move |_| {
+            let Some(control) = host.get_untracked() else {
+                return;
+            };
+            let Some(visual) = ElementComposition::get_element_visual(&control) else {
+                return;
+            };
+            let compositor = visual.compositor();
+            if !Rc::ptr_eq(compositor, source.compositor()) {
+                return;
+            }
+            let surface = compositor.create_visual_surface();
+            surface.set_source_visual(Some(source.clone()));
+            let brush = compositor.create_surface_brush_with_surface(surface);
+            brush.set_stretch(CompositionStretch::Uniform);
+            brush.set_horizontal_alignment_ratio(0.5);
+            brush.set_vertical_alignment_ratio(0.5);
+            let sprite = compositor.create_sprite_visual();
+            sprite.set_relative_size_adjustment(ferroui_base::Vector::new(1., 1.));
+            sprite.set_brush(Some((*brush).clone()));
+            ElementComposition::set_element_child_visual(&control, Some((*sprite).clone()));
+        })
+        .on_unloaded(move |_| {
+            if let Some(control) = host.get_untracked() {
+                ElementComposition::set_element_child_visual(&control, None);
+            }
+        })
+        .into()
+}
+
+fn client_row(
+    shell: &Rc<Shell>,
+    client: ClientWindow,
+    expanded: Signal<Option<u32>>,
+    composed: bool,
+) -> Element {
+    let id = client.id;
+    let state = shell.clone();
+    let title_text = client.title.clone();
+    let title = title_text.as_str();
+    let source = shell
+        .session
+        .as_ref()
+        .and_then(|session| session.compositor())
+        .and_then(|host| host.window_visual(id));
+    let layout = look().layout();
+    let height = match layout {
+        Layout::Taskbar => 180.0,
+        Layout::MenuBarDock => 212.0,
+        Layout::BottomNavigation => 224.0,
+    };
+    let card_width = source.as_ref().map_or(304.0, |v| {
+        let size = v.size();
+        (height * size.x / size.y.max(1.0) + 12.0).clamp(216.0, 416.0)
+    });
+    let icon = || {
+        shell
+            .catalog
+            .window_index(&client.app_id)
+            .and_then(|index| shell.icons.get(&shell.catalog.applications()[index]))
+            .map_or_else(
+                || glyph(Icon::Window, 16.0, colors().accent),
+                |icon| {
+                    let icon: Rc<dyn ferroui_base::media::IImage> = icon;
+                    image().source(icon).width(18.0).height(18.0).into()
+                },
+            )
+    };
+    let caption_icon = composed.then(&icon);
+    let content = if composed {
+        source
+            .map(|visual| preview(visual, height))
+            .unwrap_or_else(|| {
+                stack_panel()
+                    .height(height)
+                    .spacing(6.0)
+                    .vertical_alignment(V::Center)
+                    .child(icon())
+                    .child(
+                        shell_text(
+                            if client.minimized {
+                                "Minimized"
+                            } else {
+                                "Window"
+                            },
+                            12.0,
+                            Ink::Secondary,
+                        )
+                        .horizontal_alignment(H::Center),
+                    )
+                    .into()
+            })
+    } else {
+        let status = if client.minimized {
+            "Minimized"
+        } else if client.fullscreen {
+            "Fullscreen"
+        } else if client.maximized {
+            "Maximized"
+        } else if client.active {
+            "Focused"
+        } else {
+            "Open"
+        };
+        grid()
+            .column_definitions("20,*")
+            .child(icon())
+            .child(
+                stack_panel()
+                    .spacing(2.0)
+                    .grid_column(1)
+                    .margin((8.0, 0.0, 0.0, 0.0))
+                    .child(shell_text(title, 14.0, Ink::Primary).font_weight(FontWeight::Medium))
+                    .child(shell_text(status, 11.0, Ink::Secondary)),
+            )
+            .into()
+    };
+    let restore = action(title, move || {
+        if let Some(session) = &state.session {
+            state.dismiss();
+            if !session.activate(id) {
+                state.open(super::Scene::Workspaces);
+                state.status.set("Could not activate window".into());
+            }
+        }
+    })
+    .horizontal_alignment(H::Stretch)
+    .horizontal_content_alignment(H::Stretch)
+    .background("Transparent")
+    .child(content);
+    let command = |name: &str, icon, operation: fn(&Session, u32) -> bool| {
+        let state = shell.clone();
+        let label = name.to_owned();
+        icon_action(&format!("{name}: {title}"), icon, move || {
+            if state
+                .session
+                .as_ref()
+                .is_some_and(|session| !operation(session, id))
+            {
+                state.status.set(format!("{label} request failed"));
+            }
+        })
+    };
+    let more = icon_action(&format!("Arrange or move {title}"), Icon::More, move || {
+        expanded.set((expanded.get_untracked() != Some(id)).then_some(id));
+    });
+    let minimize = command("Minimize", Icon::Minimize, Session::minimize)
+        .is_enabled(client.can_minimize && !client.minimized);
+    let zoom = command(
+        if client.maximized {
+            "Restore size"
+        } else {
+            "Maximize"
+        },
+        if client.maximized {
+            Icon::RestoreWindow
+        } else {
+            Icon::Maximize
+        },
+        Session::toggle_maximized,
+    )
+    .is_enabled(client.can_maximize && !client.fullscreen);
+    let close = command("Close", Icon::Close, Session::close).is_enabled(client.can_close);
+    let state = shell.clone();
+    let details = show(
+        move || expanded.get() == Some(id),
+        move || arrange_actions(&state, &client, expanded),
+    );
+    if !composed {
+        return border()
+            .background(colors().tile)
+            .corner_radius(9)
+            .padding(4)
+            .child(
+                stack_panel()
+                    .child(
+                        grid().column_definitions("*,Auto").child(restore).child(
+                            row(2.0)
+                                .child(minimize)
+                                .child(zoom)
+                                .child(more)
+                                .child(close)
+                                .grid_column(1),
+                        ),
+                    )
+                    .child(details),
+            )
+            .into();
+    }
+    let header = grid()
+        .column_definitions("Auto,*,Auto")
+        .margin((6.0, 2.0))
+        .child(caption_icon.unwrap_or(Element::Empty))
+        .child(
+            shell_text(title, 13.0, Ink::Primary)
+                .font_weight(FontWeight::Medium)
+                .tool_tip_tip(title)
+                .margin((7., 0.))
+                .grid_column(1),
+        )
+        .child(more.width(30.).height(30.).padding(6.).grid_column(2));
+    let activate = restore.min_height(0.).padding(0).border_thickness(0);
+    let body = if layout == Layout::MenuBarDock {
+        stack_panel().child(activate).child(header)
+    } else {
+        stack_panel().child(header).child(activate)
+    };
+    let body = body
+        .child(
+            row(4.0)
+                .horizontal_alignment(H::Right)
+                .child(minimize)
+                .child(zoom)
+                .child(close)
+                .is_visible(move || expanded.get() == Some(id)),
+        )
+        .child(details);
+    let width = shell.metrics().width;
+    let card = match layout {
+        Layout::Taskbar => border()
+            .background(resource("SolidBackgroundFillColorBaseBrush"))
+            .border_brush(resource("CardStrokeColorDefaultBrush"))
+            .border_thickness(1)
+            .max_width(card_width)
+            .corner_radius(8),
+        Layout::MenuBarDock => dock_surface().max_width(card_width).corner_radius(10),
+        Layout::BottomNavigation => bar_surface()
+            .width(move || (width.get() * 0.76).clamp(156.0, 384.0))
+            .corner_radius(20),
+    };
+    card.margin(6)
+        .padding(4)
+        .clip_to_bounds(true)
+        .child(body)
+        .into()
+}
+
+fn arrange_actions(
+    shell: &Rc<Shell>,
+    client: &ClientWindow,
+    expanded: Signal<Option<u32>>,
+) -> Element {
+    let id = client.id;
+    let mut sides = wrap_panel();
+    for (label, side) in [
+        ("Snap left", SnapSide::Left),
+        ("Snap right", SnapSide::Right),
+    ] {
+        let state = shell.clone();
+        sides = sides.child(
+            action(label, move || {
+                if let Some(session) = &state.session {
+                    if session.snap(id, side) {
+                        state.dismiss();
+                        session.activate(id);
+                    } else {
+                        state.status.set("Could not arrange this window".into());
+                    }
+                }
+            })
+            .margin((0.0, 0.0, 5.0, 0.0))
+            .is_enabled(client.can_snap && !client.fullscreen)
+            .child(shell_text(label, 12.0, Ink::Primary)),
+        );
+    }
+    for (label, allowed, operation) in [
+        (
+            if client.fullscreen {
+                "Exit fullscreen"
+            } else {
+                "Fullscreen"
+            },
+            client.can_fullscreen,
+            Session::toggle_fullscreen as fn(&Session, u32) -> bool,
+        ),
+        (
+            if client.above {
+                "Disable always on top"
+            } else {
+                "Always on top"
+            },
+            client.can_raise,
+            Session::toggle_above as fn(&Session, u32) -> bool,
+        ),
+    ] {
+        let state = shell.clone();
+        sides = sides.child(
+            action(label, move || {
+                if state.session.as_ref().is_some_and(|s| operation(s, id)) {
+                    expanded.set(None);
+                } else {
+                    state.status.set(format!("{label} request failed"));
+                }
+            })
+            .margin((0.0, 0.0, 5.0, 0.0))
+            .is_enabled(allowed)
+            .child(shell_text(label, 12.0, Ink::Primary)),
+        );
+    }
+    let mut actions = stack_panel()
+        .spacing(5.0)
+        .margin((8.0, 6.0, 8.0, 8.0))
+        .child(sides);
+    if client.can_move_workspace {
+        let state = shell.clone();
+        let snapshot = shell.snapshot;
+        let current = client.workspace;
+        actions = actions
+            .child(eyebrow("MOVE TO WORKSPACE"))
+            .child(dynamic(move || {
+                snapshot.with(|model| {
+                    let mut choices = wrap_panel();
+                    for (index, name) in model.workspace_names.iter().enumerate() {
+                        let shell = state.clone();
+                        choices = choices.child(
+                            action(&format!("Move window to {name}"), move || {
+                                if shell
+                                    .session
+                                    .as_ref()
+                                    .is_some_and(|session| session.move_to_workspace(id, index))
+                                {
+                                    expanded.set(None);
+                                } else {
+                                    shell.status.set("Could not move window".into());
+                                }
+                            })
+                            .margin((0.0, 0.0, 5.0, 3.0))
+                            .is_enabled(Some(index) != current)
+                            .child(shell_text(
+                                name,
+                                12.0,
+                                Ink::Primary,
+                            )),
+                        );
+                    }
+                    choices
+                })
+            }));
+    }
+    actions.into()
+}

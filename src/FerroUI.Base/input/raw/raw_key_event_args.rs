@@ -1,3 +1,4 @@
+use std::any::Any;
 use super::raw_input_event_args::raw_input_event_args;
 use super::RawInputEventArgs;
 use crate::input::{IInputDevice, IInputRoot, Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
@@ -20,11 +21,22 @@ pub struct RawKeyEventArgs {
     physical_key: Cell<PhysicalKey>,
     key_device_type: Cell<KeyDeviceType>,
     key_symbol: RefCell<Option<String>>,
+    platform_input_event_cookie: Option<Rc<dyn Any>>,
 }
 
 raw_input_event_args!(RawKeyEventArgs: RawInputEventArgs);
 
 impl RawKeyEventArgs {
+    /// Native data captured for this specific event, if supplied by the input backend.
+    pub fn platform_input_event_cookie(&self) -> Option<&Rc<dyn Any>> {
+        self.platform_input_event_cookie.as_ref()
+    }
+
+    pub fn with_platform_input_event_cookie(mut self, value: Option<Rc<dyn Any>>) -> Self {
+        self.platform_input_event_cookie = value;
+        self
+    }
+
     /// Creates raw key event args.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
@@ -46,6 +58,7 @@ impl RawKeyEventArgs {
             physical_key: Cell::new(physical_key),
             key_device_type: Cell::new(key_device_type),
             key_symbol: RefCell::new(key_symbol),
+            platform_input_event_cookie: None,
         }
     }
 

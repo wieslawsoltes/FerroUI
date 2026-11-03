@@ -25,4 +25,4 @@ pub(crate) use vulkan_image::{VulkanImage, VulkanImageBase};
 pub(crate) use vulkan_instance::VulkanInstance;
 pub(crate) use vulkan_khr_surface::VulkanKhrSurface;
 pub(crate) use vulkan_memory_helper::VulkanMemoryHelper;
-pub(crate) use vulkan_semaphore::{VulkanSemaphore, VulkanSemaphorePair};
+pub(crate) use vulkan_semaphore::VulkanSemaphore;

@@ -361,7 +361,10 @@ impl Sink {
         }
         if let Some(key_args) = args.downcast_ref::<RawKeyEventArgs>() {
             if key_args.type_() == RawKeyEventType::KeyDown {
-                if let Some(text) = key_args.key_symbol() {
+                // XKB supplies control symbols for keys such as Backspace and
+                // Escape. They remain available to key handlers but an unhandled
+                // editing key (e.g. Backspace in an empty box) inserts no text.
+                if let Some(text) = key_args.key_symbol().filter(|text| !text.chars().any(char::is_control)) {
                     parent.base().raise_input(Rc::new(RawTextInputEventArgs::new(
                         parent.base().keyboard(),
                         args.timestamp(),

@@ -167,6 +167,7 @@ impl WaylandWorkerClient {
     fn render_surfaces(&self, id: WSurfaceId) -> Vec<Arc<dyn IPlatformRenderSurface>> {
         let graphics = self.worker.platform_graphics().clone();
         vec![
+            Arc::new(super::transient::rendering::wayland_vulkan::WaylandVulkanSurface(id)),
             Arc::new(WaylandEglWsiSurface::new(id, graphics.clone())),
             Arc::new(WaylandEglDmaBufSurface::new(id, graphics)),
             Arc::new(WaylandFramebuffer::new(WaylandRenderSurfaceTarget::Surface(id))),
@@ -177,12 +178,19 @@ impl WaylandWorkerClient {
     /// accessors needed to drive it. The underlying top-level
     /// is worker-thread state and is intentionally not exposed.
     pub fn create_top_level_handle(&self, sink: WXdgTopLevelEventSinkProxy) -> WaylandSurfaceCreateResult<WXdgTopLevelProxy> {
+        self.create_window_handle(sink, None)
+    }
+
+    pub(crate) fn create_window_handle(&self, sink: WXdgTopLevelEventSinkProxy, role: Option<crate::layer_shell::LayerRole>)
+        -> WaylandSurfaceCreateResult<WXdgTopLevelProxy> {
         let id = WSurfaceId::new();
         let (basic_init_sender, basic_init_completed) = channel();
         let worker_handle = self.worker.clone();
         // The constructor of a surface of the reference posts its registration out of band.
         self.post_oob(move |worker| {
-            worker.register_top_level(WXdgTopLevel::new(id, worker_handle, sink, basic_init_sender));
+            let mut window = WXdgTopLevel::new(id, worker_handle, sink, basic_init_sender);
+            window.set_initial_layer_role(role);
+            worker.register_top_level(window);
         });
 
         // Render surfaces matching the platform graphics: the surfaces of EGL, of which the

@@ -1,20 +1,25 @@
-use super::{VulkanSkiaExternalObjectsFeature, VulkanSkiaRenderTarget};
-use crate::gpu::ganesh::GaneshGrContext;
+#[cfg(ferro_skia_vulkan)]
+use super::VulkanSkiaExternalObjectsFeature;
+use super::{VulkanGrContext, VulkanSkiaRenderTarget};
 use crate::gpu::{
     ISkiaGpu, ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, ISkiaSurface, ScopedGrContext,
 };
+#[cfg(ferro_skia_vulkan)]
 use crate::skia_options::SkiaOptions;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
-use ferroui_base::platform::{
-    IExternalObjectsRenderInterfaceContextFeature, IOptionalFeatureProvider, IPlatformGraphicsContext,
-};
+#[cfg(ferro_skia_vulkan)]
+use ferroui_base::platform::IExternalObjectsRenderInterfaceContextFeature;
+use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::PixelSize;
+#[cfg(ferro_skia_vulkan)]
+use ferroui_vulkan::IVulkanContextExternalObjectsFeature;
 use ferroui_vulkan::{
-    try_get_vulkan_khr_surface, try_get_vulkan_render_target_surface, IVulkanContextExternalObjectsFeature,
-    IVulkanKhrSurfacePlatformSurfaceFactory, IVulkanPlatformGraphicsContext, VulkanError,
+    try_get_vulkan_khr_surface, try_get_vulkan_render_target_surface, IVulkanKhrSurfacePlatformSurfaceFactory,
+    IVulkanPlatformGraphicsContext, VulkanError,
 };
 use skia_safe::gpu::vk::{BackendContext, GetProcOf, Version};
+#[cfg(ferro_skia_vulkan)]
 use skia_safe::gpu::{direct_contexts, ContextOptions};
 use std::any::{Any, TypeId};
 use std::ffi::{c_void, CStr};
@@ -22,11 +27,12 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 /// A Skia GPU that renders with the device of a Vulkan graphics context
-/// through Ganesh.
+/// through the GPU backend selected for this build.
 pub struct VulkanSkiaGpu {
+    #[cfg(ferro_skia_vulkan)]
     external_objects: Option<Rc<VulkanSkiaExternalObjectsFeature>>,
+    gr_context: Rc<VulkanGrContext>,
     vulkan: Rc<dyn IVulkanPlatformGraphicsContext>,
-    gr_context: Rc<GaneshGrContext>,
 }
 
 impl VulkanSkiaGpu {
@@ -75,6 +81,10 @@ impl VulkanSkiaGpu {
                 }
             };
 
+            let instance_extensions = instance.enabled_extensions();
+            let device_extensions = device.enabled_extensions();
+            let instance_names: Vec<_> = instance_extensions.iter().map(String::as_str).collect();
+            let device_names: Vec<_> = device_extensions.iter().map(String::as_str).collect();
             // SAFETY: the handles are those of the device of the context,
             // which outlives the Skia context: the GPU holds the context and
             // releases Skia's first.
@@ -83,7 +93,10 @@ impl VulkanSkiaGpu {
                     device.instance().handle() as usize as _,
                     device.physical_device_handle() as usize as _,
                     device.handle() as usize as _,
-                    (device.main_queue_handle() as usize as _, device.graphics_queue_family_index() as usize),
+                    (
+                        device.main_queue_handle() as usize as _,
+                        device.graphics_queue_family_index() as usize,
+                    ),
                     &get_proc,
                     // The version Skia validates the entry points for. Without one Skia takes the
                     // version of the loader, and a driver hands out the entry points of the
@@ -91,29 +104,56 @@ impl VulkanSkiaGpu {
                     // graphics ask for by default and the least Skia accepts.
                     Some(Version::new(1, 1, 0)),
                 )
+                .with_extensions(&instance_names, &device_names)
                 .build()
             };
 
-            let avoid_stencil_buffers = SkiaOptions::should_avoid_stencil_buffers(use_stencil_buffers);
-            let mut options = ContextOptions::default();
-            options.avoid_stencil_buffers = avoid_stencil_buffers;
-            let gr_context = direct_contexts::make_vulkan(&ctx, &options).map(GaneshGrContext::new);
+            #[cfg(ferro_skia_vulkan)]
+            let gr_context = {
+                let mut options = ContextOptions::default();
+                options.avoid_stencil_buffers = SkiaOptions::should_avoid_stencil_buffers(use_stencil_buffers);
+                direct_contexts::make_vulkan(&ctx, &options).map(VulkanGrContext::new)
+            };
+            #[cfg(ferro_skia_graphite_vulkan)]
+            let gr_context = {
+                use skia_safe::gpu::graphite::{vk::context_factory, ContextOptions};
+                use skia_safe::wrapper::ValueWrapper;
+                let _ = use_stencil_buffers;
+                let mut options = ContextOptions::default();
+                if let Some(budget) = max_resource_bytes.and_then(|bytes| usize::try_from(bytes).ok()) {
+                    ValueWrapper::inner_mut(&mut options).fGpuBudgetInBytes = budget;
+                }
+                context_factory::make_vulkan(&ctx, &options).and_then(VulkanGrContext::new)
+            };
             current.dispose();
-            let gr_context = gr_context.unwrap_or_else(|| {
-                panic!("{}", VulkanError::new("Unable to create GrContext from IVulkanDevice"))
-            });
+            let gr_context = gr_context
+                .unwrap_or_else(|| panic!("{}", VulkanError::new("Unable to create GrContext from IVulkanDevice")));
+            #[cfg(ferro_skia_vulkan)]
             if let Some(max_resource_bytes) = max_resource_bytes {
                 gr_context.set_resource_cache_limit(max_resource_bytes);
             }
             Rc::new(gr_context)
         };
 
+        #[cfg(ferro_skia_vulkan)]
         let features: &dyn IOptionalFeatureProvider = &*vulkan;
-        let external_objects = features.try_get::<dyn IVulkanContextExternalObjectsFeature>().map(|external_objects| {
-            Rc::new(VulkanSkiaExternalObjectsFeature::new(gr_context.clone(), vulkan.clone(), external_objects))
-        });
+        #[cfg(ferro_skia_vulkan)]
+        let external_objects = features
+            .try_get::<dyn IVulkanContextExternalObjectsFeature>()
+            .map(|external_objects| {
+                Rc::new(VulkanSkiaExternalObjectsFeature::new(
+                    gr_context.clone(),
+                    vulkan.clone(),
+                    external_objects,
+                ))
+            });
 
-        Rc::new(Self { external_objects, vulkan, gr_context })
+        Rc::new(Self {
+            #[cfg(ferro_skia_vulkan)]
+            external_objects,
+            vulkan,
+            gr_context,
+        })
     }
 
     /// The Vulkan context the GPU renders with.
@@ -121,8 +161,8 @@ impl VulkanSkiaGpu {
         &self.vulkan
     }
 
-    /// The Ganesh context of the GPU.
-    pub fn gr_context(&self) -> Rc<GaneshGrContext> {
+    /// The Skia GPU context.
+    pub fn gr_context(&self) -> Rc<VulkanGrContext> {
         self.gr_context.clone()
     }
 
@@ -134,6 +174,9 @@ impl VulkanSkiaGpu {
 
 impl IOptionalFeatureProvider for VulkanSkiaGpu {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        #[cfg(ferro_skia_graphite_vulkan)]
+        let _ = feature_type;
+        #[cfg(ferro_skia_vulkan)]
         if feature_type == TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
             let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects.clone()?;
             return Some(Rc::new(feature));
@@ -152,16 +195,15 @@ impl IPlatformGraphicsContext for VulkanSkiaGpu {
     }
 
     fn dispose(&self) {
-        if self.vulkan.is_lost() {
-            self.gr_context.dispose(false);
-        } else {
-            // Releasing resources does vkQueueWaitIdle and destroys API objects,
-            // both of which require external synchronization, i. e. the device lock
-            let current = self.vulkan.ensure_current();
-            self.gr_context.dispose(true);
+        // Destruction of device resources needs the queue lock unless the device is lost.
+        let current = (!self.vulkan.is_lost()).then(|| self.vulkan.ensure_current());
+        #[cfg(ferro_skia_vulkan)]
+        self.gr_context.dispose(current.is_some());
+        #[cfg(ferro_skia_graphite_vulkan)]
+        self.gr_context.dispose();
+        if let Some(current) = current {
             current.dispose();
         }
-
         self.vulkan.dispose();
     }
 
@@ -180,7 +222,11 @@ impl ISkiaGpu for VulkanSkiaGpu {
         surfaces: &[Arc<dyn IPlatformRenderSurface>],
     ) -> Option<Rc<dyn ISkiaGpuRenderTarget>> {
         let target = self.vulkan.create_render_target(surfaces);
-        Some(Rc::new(VulkanSkiaRenderTarget::new(self.gr_context.clone(), self.vulkan.clone(), target)))
+        Some(Rc::new(VulkanSkiaRenderTarget::new(
+            self.gr_context.clone(),
+            self.vulkan.clone(),
+            target,
+        )))
     }
 
     fn is_ready_to_create_render_target(&self, surfaces: &[Arc<dyn IPlatformRenderSurface>]) -> bool {
@@ -188,7 +234,9 @@ impl ISkiaGpu for VulkanSkiaGpu {
         for surface in surfaces {
             if try_get_vulkan_khr_surface(&**surface).is_some()
                 || try_get_vulkan_render_target_surface(&**surface).is_some()
-                || factory.as_ref().is_some_and(|factory| factory.can_render_to_surface(&*self.vulkan, surface))
+                || factory
+                    .as_ref()
+                    .is_some_and(|factory| factory.can_render_to_surface(&*self.vulkan, surface))
             {
                 return surface.is_ready();
             }

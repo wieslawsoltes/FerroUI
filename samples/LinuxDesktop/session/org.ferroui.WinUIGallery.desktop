@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=FerroUI WinUI Gallery
+Comment=Explore WinUI controls and examples in FerroUI ControlCatalog
+Icon=applications-development
+TryExec=control-catalog-desktop
+Exec=env FERROUI_CATALOG_THEME=winui FERROUI_CATALOG_WAYLAND=software control-catalog-desktop
+Terminal=false
+Categories=Development;GUIDesigner;
+Keywords=FerroUI;WinUI;controls;gallery;

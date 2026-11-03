@@ -30,7 +30,7 @@ use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, PlatformThemeVariant};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
-use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Size, Thickness};
+use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, PixelSize, Point, Rect, Size, Thickness};
 use ferroui_controls::platform::{
     IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, IWaylandOptionsToplevelImplFeature, IWindowBaseImpl,
     IWindowIconImpl, IWindowImpl, PlatformRequestedDrawnDecoration,
@@ -50,6 +50,7 @@ use wayland_protocols::xdg::shell::client::xdg_toplevel::ResizeEdge;
 type SharedSurfaces = Arc<Mutex<Vec<Arc<dyn IPlatformRenderSurface>>>>;
 
 pub struct WindowImpl {
+    pub(crate) layer_role: RefCell<Option<crate::layer_shell::LayerRole>>,
     this: Weak<WindowImpl>,
     base: WindowBaseImpl,
     current_sink: RefCell<Option<Rc<WindowImplSink>>>,
@@ -61,6 +62,7 @@ pub struct WindowImpl {
     can_resize: Cell<bool>,
     restore_bounds: Cell<Size>,
     shadow_extents: Cell<Thickness>,
+    constrained_geometry: Cell<PixelSize>,
     min_size: Cell<Option<Size>>,
     max_size: Cell<Option<Size>>,
     // Sticky-CSD latch on the UI side. Set true the first time the
@@ -94,6 +96,14 @@ pub(crate) struct ConfigureOutcome {
     pub client_size: Option<Size>,
 }
 
+/// A positive configured dimension names the window geometry, excluding CSD shadows.
+pub(crate) fn configured_client_size(geometry: PixelSize, fallback: Size, shadows: Thickness) -> Size {
+    Size::new(
+        if geometry.width > 0 { f64::from(geometry.width) + shadows.left + shadows.right } else { fallback.width },
+        if geometry.height > 0 { f64::from(geometry.height) + shadows.top + shadows.bottom } else { fallback.height },
+    )
+}
+
 /// Works out what a configure changes (the computation of `ApplyConfigureBatch`).
 pub(crate) fn evaluate_configure(
     batch: &XdgConfigureBatch,
@@ -121,11 +131,8 @@ pub(crate) fn evaluate_configure(
     // Resize: configure size is window geometry (excluding shadows).
     // Add shadow extents to get full surface size for the UI thread.
     let mut new_client_size = None;
-    if batch.size.width > 0 && batch.size.height > 0 {
-        let size = Size::new(
-            f64::from(batch.size.width) + shadow_extents.left + shadow_extents.right,
-            f64::from(batch.size.height) + shadow_extents.top + shadow_extents.bottom,
-        );
+    if batch.size.width > 0 || batch.size.height > 0 {
+        let size = configured_client_size(batch.size, client_size, shadow_extents);
         if size != client_size {
             new_client_size = Some(size);
         }
@@ -190,7 +197,13 @@ impl WindowImpl {
     /// A window with its top-level on the compositor: the constructor waits for the first
     /// configure of the compositor.
     pub fn new(client: Rc<WaylandWorkerClient>, keyboard: Rc<KeyboardDevice>) -> Rc<Self> {
+        Self::try_new(client, keyboard, None).unwrap_or_else(|error| crate::FerroWaylandError::new(error).throw())
+    }
+
+    pub(crate) fn try_new(client: Rc<WaylandWorkerClient>, keyboard: Rc<KeyboardDevice>,
+        role: Option<crate::layer_shell::LayerRole>) -> Result<Rc<Self>, String> {
         let window = Rc::new_cyclic(|this| Self {
+            layer_role: RefCell::new(role),
             this: this.clone(),
             base: WindowBaseImpl::new(client, keyboard),
             current_sink: RefCell::new(None),
@@ -202,6 +215,7 @@ impl WindowImpl {
             can_resize: Cell::new(true),
             restore_bounds: Cell::new(Size::default()),
             shadow_extents: Cell::new(Thickness::default()),
+            constrained_geometry: Cell::new(PixelSize::default()),
             min_size: Cell::new(None),
             max_size: Cell::new(None),
             csd_sticky: Cell::new(false),
@@ -218,9 +232,24 @@ impl WindowImpl {
             extend_client_area_to_decorations_changed: RefCell::new(None),
             drawn_decorations_request_changed: RefCell::new(None),
         });
-        let sink = WindowImplSink::new(&window, false);
+        let sink = WindowImplSink::new(&window, false)?;
         *window.current_sink.borrow_mut() = Some(sink);
-        window
+        Ok(window)
+    }
+
+    pub(crate) fn configure_layer(&self, config: crate::layer_shell::LayerConfig) -> Result<(), String> {
+        let mut role = self.layer_role.borrow_mut();
+        let role = role.as_mut().ok_or("This window has an xdg role")?;
+        if role.config == config { return Ok(()); }
+        if let Some(proxy) = self.surface_proxy() {
+            let id = proxy.id();
+            self.base.client().invoke_oob(move |worker| {
+                worker.state.top_levels.get_mut(&id).ok_or("The layer surface has closed".to_string())?
+                    .configure_layer(config)
+            }).recv().map_err(|_| "The Wayland worker stopped")??;
+        }
+        role.config = config;
+        Ok(())
     }
 
     /// The state the window shares with a popup of the backend.
@@ -284,6 +313,11 @@ impl WindowImpl {
             self.shadow_extents.get(),
         );
         self.restore_bounds.set(outcome.restore_bounds);
+        // The client may choose unconstrained dimensions. A compositor-enforced size
+        // must survive application Width/Height, including the first Show layout.
+        let constrained = self.layer_role.borrow().is_some()
+            || matches!(outcome.window_state, WindowState::Maximized | WindowState::FullScreen);
+        self.constrained_geometry.set(if constrained { batch.size } else { PixelSize::default() });
 
         if old_window_state != outcome.window_state {
             self.window_state.set(outcome.window_state);
@@ -292,16 +326,8 @@ impl WindowImpl {
             }
         }
 
-        // Activation
-        let was_activated = self.is_activated.replace(outcome.is_activated);
-        if outcome.is_activated && !was_activated {
-            if let Some(activated) = get(&self.base.activated) {
-                activated();
-            }
-        } else if !outcome.is_activated && was_activated {
-            if let Some(deactivated) = get(&self.base.deactivated) {
-                deactivated();
-            }
+        if self.layer_role.borrow().is_none() {
+            self.update_activation(outcome.is_activated);
         }
 
         if let Some(new_client_size) = outcome.client_size {
@@ -309,6 +335,19 @@ impl WindowImpl {
             if let Some(resized) = get(&self.base.resized) {
                 resized(new_client_size, WindowResizeReason::Layout);
             }
+        }
+    }
+
+    fn update_activation(&self, active: bool) {
+        if self.is_activated.replace(active) == active { return; }
+        if let Some(notify) = get(if active { &self.base.activated } else { &self.base.deactivated }) {
+            notify();
+        }
+    }
+
+    pub(crate) fn layer_keyboard_focus(&self, active: bool) {
+        if self.layer_role.borrow().is_some() {
+            self.update_activation(active);
         }
     }
 
@@ -704,8 +743,17 @@ impl IWindowBaseImpl for WindowImpl {
         if self.current_sink.borrow().is_none() {
             // TODO: Re-apply window state
             if let Some(this) = self.this.upgrade() {
-                let sink = WindowImplSink::new(&this, true);
-                *self.current_sink.borrow_mut() = Some(sink);
+                match WindowImplSink::new(&this, true) {
+                    Ok(sink) => *self.current_sink.borrow_mut() = Some(sink),
+                    Err(_) if self.layer_role.borrow().is_some() => {
+                        // A named output may disappear while this window is hidden. The framework
+                        // is still inside show_core; deliver Closed after it finishes mapping.
+                        use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+                        Dispatcher::ui_thread().post_local(move || this.dispose(), DispatcherPriority::NORMAL);
+                        return;
+                    }
+                    Err(error) => crate::FerroWaylandError::new(error).throw(),
+                }
             }
         }
 
@@ -714,6 +762,7 @@ impl IWindowBaseImpl for WindowImpl {
 
     fn hide(&self) {
         self.dispose_sink();
+        self.layer_keyboard_focus(false);
     }
 
     // Not supported by Wayland: a top-level is the origin of the "screen" space.
@@ -883,7 +932,7 @@ impl IWindowImpl for WindowImpl {
     }
 
     fn needs_managed_decorations(&self) -> bool {
-        self.server_reported_mode.get() == DecorationMode::ClientSide
+        self.layer_role.borrow().is_none() && self.server_reported_mode.get() == DecorationMode::ClientSide
     }
 
     fn requested_drawn_decorations(&self) -> PlatformRequestedDrawnDecoration {
@@ -952,7 +1001,10 @@ impl IWindowImpl for WindowImpl {
         }
         let _depth = Depth(&self.resize_stack_depth);
 
-        // Size is just a number, the actual resizing is done by the compositor when submitting a frame
+        // Window.show applies its preferred size before this call. Report the actual
+        // size back even if it equals the previous platform value, so layout and
+        // rendering agree with the compositor before we ack and attach a buffer.
+        let client_size = configured_client_size(self.constrained_geometry.get(), client_size, self.shadow_extents.get());
         self.base.set_client_size(client_size);
         if let Some(resized) = get(&self.base.resized) {
             resized(client_size, reason);
@@ -990,10 +1042,18 @@ impl IWindowImpl for WindowImpl {
 mod tests {
     // Not from the reference, which has no tests for this file.
     use super::*;
-    use ferroui_base::PixelSize;
 
     fn batch(width: i32, height: i32, states: XdgToplevelStates) -> XdgConfigureBatch {
         XdgConfigureBatch { size: PixelSize::new(width, height), states, ..Default::default() }
+    }
+
+    #[test]
+    fn partial_geometry_keeps_only_the_unconstrained_axis_at_the_preferred_size() {
+        let preferred = Size::new(1280.0, 800.0);
+        let shadows = Thickness::new(3.0, 4.0, 5.0, 6.0);
+        assert_eq!(configured_client_size(PixelSize::new(960, 0), preferred, shadows), Size::new(968.0, 800.0));
+        assert_eq!(configured_client_size(PixelSize::new(0, 640), preferred, shadows), Size::new(1280.0, 650.0));
+        assert_eq!(configured_client_size(PixelSize::default(), preferred, shadows), preferred);
     }
 
     #[test]

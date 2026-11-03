@@ -20,6 +20,7 @@ ferroui-controls.workspace = true
 ferroui-dialogs.workspace = true
 ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
+ferroui-vulkan.workspace = true
 # The source files the reference compiles into both Linux backends (the grouping of raw input, the
 # icon loader, the dispatcher over the main loop of GLib) live in the X11 crate.
 ferroui-x11.workspace = true
@@ -31,7 +32,6 @@ bitflags.workspace = true
 ferroui-harfbuzz = { workspace = true, optional = true }
 ferroui-skia = { workspace = true, optional = true }
 ferroui-themes-simple = { workspace = true, optional = true }
-wayland-protocols-wlr = { workspace = true, optional = true }
 wayland-protocols-misc = { workspace = true, optional = true }
 
 # The protocol runs over libwayland-client, which is opened at run time together with
@@ -42,6 +42,7 @@ wayland-protocols-misc = { workspace = true, optional = true }
 wayland-client.workspace = true
 wayland-backend.workspace = true
 wayland-protocols.workspace = true
+wayland-protocols-wlr.workspace = true
 wayland-cursor.workspace = true
 wayland-egl.workspace = true
 xkbcommon-dl.workspace = true
@@ -61,7 +62,7 @@ example = [
 # built for Linux on another system: `cargo check -p ferroui-wayland --features example-check
 # --target x86_64-unknown-linux-gnu --example wayland_window` type-checks the example from there.
 # An example built with this feature alone does not run.
-example-check = ["dep:wayland-protocols-wlr", "dep:wayland-protocols-misc"]
+example-check = ["dep:wayland-protocols-misc"]
 
 [[example]]
 name = "wayland_window"

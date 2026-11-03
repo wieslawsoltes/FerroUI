@@ -6,13 +6,16 @@
 
 #[cfg(any(ferro_skia_ganesh_gl, ferro_skia_vulkan))]
 pub mod ganesh;
-#[cfg(all(target_vendor = "apple", not(ferro_skia_apple_ganesh)))]
+#[cfg(any(ferro_skia_graphite_vulkan, all(target_vendor = "apple", not(ferro_skia_apple_ganesh))))]
 pub mod graphite;
 #[cfg(target_vendor = "apple")]
 pub mod metal;
 pub mod open_gl;
-#[cfg(ferro_skia_vulkan)]
+#[cfg(any(ferro_skia_vulkan, ferro_skia_graphite_vulkan))]
 pub mod vulkan;
+
+/// Whether Vulkan frames are rendered by the Graphite recorder in this build.
+pub const GRAPHITE_VULKAN: bool = cfg!(ferro_skia_graphite_vulkan);
 
 mod i_skia_gpu;
 mod i_skia_gpu_render_session;

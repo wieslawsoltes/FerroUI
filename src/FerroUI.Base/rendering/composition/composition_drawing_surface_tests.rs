@@ -144,6 +144,31 @@ fn import(services: &TestCompositor, feature: &Rc<FakeExternalObjectsFeature>) -
 }
 
 #[test]
+fn bitmap_updates_retain_the_displayed_snapshot_until_replaced_or_disposed() {
+    use crate::media::imaging::Bitmap;
+    use std::sync::{atomic::Ordering, Arc};
+
+    let services = TestCompositor::new();
+    let surface = services.compositor.create_drawing_surface();
+    let first = Arc::new(TrackingBitmapImpl::default());
+    let next = Arc::new(TrackingBitmapImpl::default());
+    let update = surface.update_with_bitmap(&Bitmap::from_impl(first.clone()));
+    services.run_jobs();
+    assert!(update.is_completed_successfully());
+    assert!(!first.is_disposed.load(Ordering::SeqCst));
+
+    let update = surface.update_with_bitmap(&Bitmap::from_impl(next.clone()));
+    services.run_jobs();
+    assert!(update.is_completed_successfully());
+    assert!(first.is_disposed.load(Ordering::SeqCst));
+    assert!(!next.is_disposed.load(Ordering::SeqCst));
+
+    surface.dispose();
+    services.run_jobs();
+    assert!(next.is_disposed.load(Ordering::SeqCst));
+}
+
+#[test]
 fn update_processed_after_dispose_should_dispose_snapshot_instead_of_orphaning_it() {
     // A commit batch is processed on the render thread in serialization order:
     // the dispose list is written (and therefore processed) BEFORE queued server

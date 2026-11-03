@@ -30,6 +30,18 @@ use std::sync::Arc;
 /// a request that needs the serial of the event.
 pub type PlatformInputEventCookie = Arc<dyn Any + Send + Sync>;
 
+/// Translated key and optional native payload from one seat event.
+#[derive(Clone)]
+pub struct KeyboardInput {
+    pub timestamp: u64,
+    pub pressed: bool,
+    pub key: Key,
+    pub modifiers: RawInputModifiers,
+    pub physical_key: PhysicalKey,
+    pub symbol: Option<String>,
+    pub native: Option<crate::WaylandKeyEvent>,
+}
+
 /// UI-thread sink for worker→UI events common to all surface kinds.
 pub trait IWSurfaceEventSink {
     fn on_pointer_enter(&self, timestamp: u64, serial: u32, position: Point);
@@ -52,6 +64,14 @@ pub trait IWSurfaceEventSink {
     fn on_touch_cancel(&self, touch_id: i32, position: Point);
     fn on_key_down(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>);
     fn on_key_up(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>);
+    fn on_key(&self, e: KeyboardInput) {
+        if e.pressed {
+            self.on_key_down(e.timestamp, e.key, e.modifiers, e.physical_key, e.symbol)
+        } else {
+            self.on_key_up(e.timestamp, e.key, e.modifiers, e.physical_key, e.symbol)
+        }
+    }
+    fn on_keyboard_enter(&self) {}
     fn on_keyboard_leave(&self);
     fn on_key_repeat_info(&self, rate: i32, delay: i32);
 
@@ -87,6 +107,8 @@ pub trait IWSurfaceEventSink {
 pub trait IWXdgTopLevelEventSink: IWSurfaceEventSink {
     fn on_configure(&self, batch: Arc<XdgConfigureBatch>);
     fn on_close(&self);
+    /// The compositor has permanently removed a layer surface (e.g. output hot-unplug).
+    fn on_layer_closed(&self) { self.on_close(); }
     fn on_decoration_mode_changed(&self, mode: DecorationMode);
 }
 
@@ -194,6 +216,14 @@ impl WSurfaceEventSinkProxy {
         self.target.post(move |sink| sink.on_key_up(timestamp, key, modifiers, physical_key, key_symbol));
     }
 
+    pub(crate) fn on_key(&self, event: KeyboardInput) {
+        self.target.post(move |sink| sink.on_key(event));
+    }
+
+    pub fn on_keyboard_enter(&self) {
+        self.target.post(|sink| sink.on_keyboard_enter());
+    }
+
     pub fn on_keyboard_leave(&self) {
         self.target.post(|sink| sink.on_keyboard_leave());
     }
@@ -263,6 +293,10 @@ impl WXdgTopLevelEventSinkProxy {
 
     pub fn on_configure(&self, batch: Arc<XdgConfigureBatch>) {
         self.target.post(move |sink| sink.on_configure(batch));
+    }
+
+    pub fn on_layer_closed(&self) {
+        self.target.post(|sink| sink.on_layer_closed());
     }
 
     pub fn on_close(&self) {

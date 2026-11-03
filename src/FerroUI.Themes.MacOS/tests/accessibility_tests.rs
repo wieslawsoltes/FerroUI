@@ -6,7 +6,7 @@ use crate::{ControlSize, MacOSTheme};
 use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, SignedDuration, TransitionBase};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::input::{platform::PlatformHotkeyConfiguration, PointerType};
-use ferroui_base::media::{AcrylicBackgroundSource, Color, ExperimentalAcrylicMaterial};
+use ferroui_base::media::{AcrylicBackgroundSource, AcrylicBrush, Color, ExperimentalAcrylicMaterial};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::platform::{ColorContrastPreference, DefaultPlatformSettings, IPlatformSettings, PlatformColorValues};
@@ -178,6 +178,37 @@ fn inactive_windows_suppress_backdrop_vibrancy_for_all_glass_roles() {
             let material = resource::<Ref<ExperimentalAcrylicMaterial>>(&theme, key, &variant);
             assert_eq!(AcrylicBackgroundSource::Digger, material.background_source(), "{key}");
         }
+    }
+}
+
+#[test]
+fn composed_menu_and_toolbar_follow_live_accessibility_and_activation() {
+    let _app = start_application();
+    let theme = installed_theme();
+    let variant = ThemeVariant::dark();
+    for key in ["MacOSMenuBackdropBrush", "MacOSToolbarBackdropBrush"] {
+        let value = load_text(&format!("<Border xmlns='https://github.com/ferroui' Background='{{DynamicResource {key}}}' />"));
+        let border = from_markup_value::<Ref<Border>>(&Some(value)).expect("glass panel");
+        let window = Window::new();
+        window.set_requested_theme_variant(Some(variant.clone()));
+        window.set_content(Some(Control::boxed(&border)));
+        window.show();
+        let solid = || border.background().expect("a material brush").as_solid_color_brush().is_some();
+        let brush = resource::<Ref<AcrylicBrush>>(&theme, key, &variant);
+        assert_eq!(brush.fallback_color().a, 255);
+        assert!(!solid());
+        theme.set_reduce_transparency(true);
+        assert!(solid());
+        theme.set_reduce_transparency(false);
+        assert!(!solid());
+        theme.set_window_active(false);
+        assert!(solid());
+        theme.set_window_active(true);
+        theme.set_increase_contrast(true);
+        assert!(solid());
+        theme.set_increase_contrast(false);
+        assert!(!solid());
+        window.close();
     }
 }
 
