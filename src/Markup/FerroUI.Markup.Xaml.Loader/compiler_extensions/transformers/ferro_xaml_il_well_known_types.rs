@@ -217,6 +217,11 @@ impl InteractivityWellKnownTypes {
 impl FerroXamlIlWellKnownTypes {
     pub fn new(type_system: &Rc<dyn IXamlTypeSystem>) -> XamlResult<Self> {
         let get = |name: &str| type_system.get_type(name);
+        macro_rules! resolve_types {
+            ($($field:ident: $name:literal),+ $(,)?) => {
+                let [$($field),+] = xamlx::type_system::get_types(&**type_system, &[$($name),+])?;
+            };
+        }
 
         let runtime_helpers = get("FerroUI.Markup.Xaml.XamlIl.Runtime.XamlIlRuntimeHelpers")?;
 
@@ -237,28 +242,25 @@ impl FerroXamlIlWellKnownTypes {
                 && parameters[0].name() == "StyledProperty`1"
                 && parameters[2].equals(&*binding_priority)
         })?;
-        let binding_base = get("FerroUI.Data.BindingBase")?;
-        let binding_expression_base = get("FerroUI.Data.BindingExpressionBase")?;
-        let multi_binding = get("FerroUI.Data.MultiBinding")?;
-        let i_disposable = get("System.IDisposable")?;
-        let i_command = get("System.Windows.Input.ICommand")?;
-        let transitions = get("FerroUI.Animation.Transitions")?;
-        let assign_binding_attribute = get("FerroUI.Data.AssignBindingAttribute")?;
-        let depends_on_attribute = get("FerroUI.Metadata.DependsOnAttribute")?;
-        let data_type_attribute = get("FerroUI.Metadata.DataTypeAttribute")?;
-        let inherit_data_type_from_items_attribute =
-            get("FerroUI.Metadata.InheritDataTypeFromItemsAttribute")?;
-        let inherit_data_type_from_attribute =
-            get("FerroUI.Metadata.InheritDataTypeFromAttribute")?;
-        let markup_extension_option_attribute =
-            get("FerroUI.Metadata.MarkupExtensionOptionAttribute")?;
-        let markup_extension_default_option_attribute =
-            get("FerroUI.Metadata.MarkupExtensionDefaultOptionAttribute")?;
-        let control_template_scope_attribute =
-            get("FerroUI.Metadata.ControlTemplateScopeAttribute")?;
-        let ferro_list_attribute = get("FerroUI.Metadata.FerroListAttribute")?;
-        let ferro_list = get("FerroUI.Collections.FerroList`1")?;
-        let on_extension_type = get("FerroUI.Markup.Xaml.MarkupExtensions.On")?;
+        resolve_types! {
+            binding_base: "FerroUI.Data.BindingBase",
+            binding_expression_base: "FerroUI.Data.BindingExpressionBase",
+            multi_binding: "FerroUI.Data.MultiBinding",
+            i_disposable: "System.IDisposable",
+            i_command: "System.Windows.Input.ICommand",
+            transitions: "FerroUI.Animation.Transitions",
+            assign_binding_attribute: "FerroUI.Data.AssignBindingAttribute",
+            depends_on_attribute: "FerroUI.Metadata.DependsOnAttribute",
+            data_type_attribute: "FerroUI.Metadata.DataTypeAttribute",
+            inherit_data_type_from_items_attribute: "FerroUI.Metadata.InheritDataTypeFromItemsAttribute",
+            inherit_data_type_from_attribute: "FerroUI.Metadata.InheritDataTypeFromAttribute",
+            markup_extension_option_attribute: "FerroUI.Metadata.MarkupExtensionOptionAttribute",
+            markup_extension_default_option_attribute: "FerroUI.Metadata.MarkupExtensionDefaultOptionAttribute",
+            control_template_scope_attribute: "FerroUI.Metadata.ControlTemplateScopeAttribute",
+            ferro_list_attribute: "FerroUI.Metadata.FerroListAttribute",
+            ferro_list: "FerroUI.Collections.FerroList`1",
+            on_extension_type: "FerroUI.Markup.Xaml.MarkupExtensions.On",
+        }
         let ferro_object_bind_method = ferro_object.get_method_by_name(
             "Bind",
             &*binding_expression_base,
@@ -307,68 +309,66 @@ impl FerroXamlIlWellKnownTypes {
                 binding_priority.clone(),
             ],
         )?;
-        let i_property_info = get("FerroUI.Data.Core.IPropertyInfo")?;
-        let clr_property_info = get("FerroUI.Data.Core.ClrPropertyInfo")?;
-        let i_property_info_t = get("FerroUI.Data.Core.IPropertyInfo`2")?;
-        let clr_property_info_t = get("FerroUI.Data.Core.ClrPropertyInfo`2")?;
-        let i_property_accessor = get("FerroUI.Data.Core.Plugins.IPropertyAccessor")?;
-        let property_info_accessor_factory = get(
-            "FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindings.PropertyInfoAccessorFactory",
-        )?;
-        let compiled_binding = get("FerroUI.Data.CompiledBinding")?;
-        let compiled_binding_path_builder = get("FerroUI.Data.CompiledBindingPathBuilder")?;
-        let compiled_binding_path = get("FerroUI.Data.CompiledBindingPath")?;
-        let compiled_binding_extension =
-            get("FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindingExtension")?;
-        let resolve_by_name_extension =
-            get("FerroUI.Markup.Xaml.MarkupExtensions.ResolveByNameExtension")?;
-        let data_template = get("FerroUI.Markup.Xaml.Templates.DataTemplate")?;
-        let i_data_template = get("FerroUI.Controls.Templates.IDataTemplate")?;
-        let control = get("FerroUI.Controls.Control")?;
-        let content_control = get("FerroUI.Controls.ContentControl")?;
+        resolve_types! {
+            i_property_info: "FerroUI.Data.Core.IPropertyInfo",
+            clr_property_info: "FerroUI.Data.Core.ClrPropertyInfo",
+            i_property_info_t: "FerroUI.Data.Core.IPropertyInfo`2",
+            clr_property_info_t: "FerroUI.Data.Core.ClrPropertyInfo`2",
+            i_property_accessor: "FerroUI.Data.Core.Plugins.IPropertyAccessor",
+            property_info_accessor_factory: "FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindings.PropertyInfoAccessorFactory",
+            compiled_binding: "FerroUI.Data.CompiledBinding",
+            compiled_binding_path_builder: "FerroUI.Data.CompiledBindingPathBuilder",
+            compiled_binding_path: "FerroUI.Data.CompiledBindingPath",
+            compiled_binding_extension: "FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindingExtension",
+            resolve_by_name_extension: "FerroUI.Markup.Xaml.MarkupExtensions.ResolveByNameExtension",
+            data_template: "FerroUI.Markup.Xaml.Templates.DataTemplate",
+            i_data_template: "FerroUI.Controls.Templates.IDataTemplate",
+            control: "FerroUI.Controls.Control",
+            content_control: "FerroUI.Controls.ContentControl",
+        }
         let i_template_of_control = get("FerroUI.Controls.ITemplate`1")?
             .make_generic_type(std::slice::from_ref(&control))?;
-        let items_control = get("FerroUI.Controls.ItemsControl")?;
-        let reflection_binding_extension =
-            get("FerroUI.Markup.Xaml.MarkupExtensions.ReflectionBindingExtension")?;
-        let relative_source = get("FerroUI.Data.RelativeSource")?;
-        let u_int = get("System.UInt32")?;
-        let int = get("System.Int32")?;
-        let long = get("System.Int64")?;
-        let uri = get("System.Uri")?;
-        let task_of_t = get("System.Threading.Tasks.Task`1")?;
-        let i_dictionary_t = get("System.Collections.Generic.IDictionary`2")?;
-        let weak_reference_of_t = get("System.WeakReference`1")?;
-        let i_observable_of_t = get("System.IObservable`1")?;
-        let font_family = get("FerroUI.Media.FontFamily")?;
+        resolve_types! {
+            items_control: "FerroUI.Controls.ItemsControl",
+            reflection_binding_extension: "FerroUI.Markup.Xaml.MarkupExtensions.ReflectionBindingExtension",
+            relative_source: "FerroUI.Data.RelativeSource",
+            u_int: "System.UInt32",
+            int: "System.Int32",
+            long: "System.Int64",
+            uri: "System.Uri",
+            task_of_t: "System.Threading.Tasks.Task`1",
+            i_dictionary_t: "System.Collections.Generic.IDictionary`2",
+            weak_reference_of_t: "System.WeakReference`1",
+            i_observable_of_t: "System.IObservable`1",
+            font_family: "FerroUI.Media.FontFamily",
+        }
         let font_family_constructor_uri_name =
             font_family.get_constructor(Some(&[uri.clone(), xaml_il_types.string.clone()]))?;
         let theme_variant = get("FerroUI.Styling.ThemeVariant")?;
         let window_transparency_level = get("FerroUI.Controls.WindowTransparencyLevel")?;
 
-        let get_numeric_type_info = |name: &str,
-                                     component_type: &Rc<dyn IXamlType>,
-                                     component_count: usize|
-         -> XamlResult<(Rc<dyn IXamlType>, Rc<dyn IXamlConstructor>)> {
+        fn numeric_type_info<const N: usize>(
+            type_system: &dyn IXamlTypeSystem,
+            name: &str,
+            component_type: &Rc<dyn IXamlType>,
+        ) -> XamlResult<(Rc<dyn IXamlType>, Rc<dyn IXamlConstructor>)> {
             let type_ = type_system.get_type(name)?;
-            let arguments: Vec<Rc<dyn IXamlType>> =
-                (0..component_count).map(|_| component_type.clone()).collect();
+            let arguments: [_; N] = std::array::from_fn(|_| component_type.clone());
             let ctor = type_.get_constructor(Some(&arguments))?;
-
             Ok((type_, ctor))
-        };
+        }
 
         let double = &xaml_il_types.double;
         let (thickness, thickness_full_constructor) =
-            get_numeric_type_info("FerroUI.Thickness", double, 4)?;
-        let (point, point_full_constructor) = get_numeric_type_info("FerroUI.Point", double, 2)?;
+            numeric_type_info::<4>(&**type_system, "FerroUI.Thickness", double)?;
+        let (point, point_full_constructor) = numeric_type_info::<2>(&**type_system, "FerroUI.Point", double)?;
         let (vector, vector_full_constructor) =
-            get_numeric_type_info("FerroUI.Vector", double, 2)?;
-        let (size, size_full_constructor) = get_numeric_type_info("FerroUI.Size", double, 2)?;
+            numeric_type_info::<2>(&**type_system, "FerroUI.Vector", double)?;
+        let (size, size_full_constructor) = numeric_type_info::<2>(&**type_system, "FerroUI.Size", double)?;
         let (matrix, matrix_full_constructor) =
-            get_numeric_type_info("FerroUI.Matrix", double, 6)?;
+            numeric_type_info::<6>(&**type_system, "FerroUI.Matrix", double)?;
         let (corner_radius, corner_radius_full_constructor) =
-            get_numeric_type_info("FerroUI.CornerRadius", double, 4)?;
+            numeric_type_info::<4>(&**type_system, "FerroUI.CornerRadius", double)?;
 
         let relative_unit = get("FerroUI.RelativeUnit")?;
         let relative_point = get("FerroUI.RelativePoint")?;
@@ -414,18 +414,20 @@ impl FerroXamlIlWellKnownTypes {
         let immutable_solid_color_brush = get("FerroUI.Media.Immutable.ImmutableSolidColorBrush")?;
         let immutable_solid_color_brush_constructor_color =
             immutable_solid_color_brush.get_constructor(Some(std::slice::from_ref(&u_int)))?;
-        let type_utilities = get("FerroUI.Utilities.TypeUtilities")?;
-        let text_decoration_collection = get("FerroUI.Media.TextDecorationCollection")?;
-        let text_decorations = get("FerroUI.Media.TextDecorations")?;
-        let text_trimming = get("FerroUI.Media.TextTrimming")?;
-        let setter_base = get("FerroUI.Styling.SetterBase")?;
-        let setter = get("FerroUI.Styling.Setter")?;
-        let i_style = get("FerroUI.Styling.IStyle")?;
-        let style_include = get("FerroUI.Markup.Xaml.Styling.StyleInclude")?;
-        let resource_include = get("FerroUI.Markup.Xaml.Styling.ResourceInclude")?;
-        let merge_resource_include = get("FerroUI.Markup.Xaml.Styling.MergeResourceInclude")?;
-        let i_resource_dictionary = get("FerroUI.Controls.IResourceDictionary")?;
-        let resource_dictionary = get("FerroUI.Controls.ResourceDictionary")?;
+        resolve_types! {
+            type_utilities: "FerroUI.Utilities.TypeUtilities",
+            text_decoration_collection: "FerroUI.Media.TextDecorationCollection",
+            text_decorations: "FerroUI.Media.TextDecorations",
+            text_trimming: "FerroUI.Media.TextTrimming",
+            setter_base: "FerroUI.Styling.SetterBase",
+            setter: "FerroUI.Styling.Setter",
+            i_style: "FerroUI.Styling.IStyle",
+            style_include: "FerroUI.Markup.Xaml.Styling.StyleInclude",
+            resource_include: "FerroUI.Markup.Xaml.Styling.ResourceInclude",
+            merge_resource_include: "FerroUI.Markup.Xaml.Styling.MergeResourceInclude",
+            i_resource_dictionary: "FerroUI.Controls.IResourceDictionary",
+            resource_dictionary: "FerroUI.Controls.ResourceDictionary",
+        }
         let resource_dictionary_deferred_add = resource_dictionary.get_method_by_name(
             "AddDeferred",
             &*xaml_il_types.void,
@@ -457,15 +459,17 @@ impl FerroXamlIlWellKnownTypes {
         let uri_kind = get("System.UriKind")?;
         let uri_constructor =
             uri.get_constructor(Some(&[xaml_il_types.string.clone(), uri_kind.clone()]))?;
-        let style = get("FerroUI.Styling.Style")?;
-        let container = get("FerroUI.Styling.ContainerQuery")?;
-        let styles = get("FerroUI.Styling.Styles")?;
-        let style_queries = get("FerroUI.Styling.StyleQueries")?;
-        let selectors = get("FerroUI.Styling.Selectors")?;
-        let control_theme = get("FerroUI.Styling.ControlTheme")?;
-        let control_template = get("FerroUI.Markup.Xaml.Templates.ControlTemplate")?;
-        let i_read_only_list_of_t = get("System.Collections.Generic.IReadOnlyList`1")?;
-        let event_handler_t = get("System.EventHandler`1")?;
+        resolve_types! {
+            style: "FerroUI.Styling.Style",
+            container: "FerroUI.Styling.ContainerQuery",
+            styles: "FerroUI.Styling.Styles",
+            style_queries: "FerroUI.Styling.StyleQueries",
+            selectors: "FerroUI.Styling.Selectors",
+            control_theme: "FerroUI.Styling.ControlTheme",
+            control_template: "FerroUI.Markup.Xaml.Templates.ControlTemplate",
+            i_read_only_list_of_t: "System.Collections.Generic.IReadOnlyList`1",
+            event_handler_t: "System.EventHandler`1",
+        }
         let interactivity = InteractivityWellKnownTypes::new(type_system, &xaml_il_types)?;
 
         let get_class_property = get("FerroUI.StyledElementExtensions")?.get_method_by_name(

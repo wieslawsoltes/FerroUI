@@ -109,6 +109,23 @@ fn generic_types_substitute_members() {
 }
 
 #[test]
+fn required_type_groups_preserve_identity_and_report_the_first_missing_name() {
+    let host = TestHost::new();
+    let names = ["System.String", "System.Int32", "System.String"];
+    let [first, second, repeated] = get_types(&*host.ts, &names).expect("known types");
+    assert!(Rc::ptr_eq(&first, &host.ts.get(names[0])));
+    assert!(Rc::ptr_eq(&second, &host.ts.get(names[1])));
+    assert!(Rc::ptr_eq(&first, &repeated));
+
+    // A failed group releases the handles it already acquired.
+    let refs = Rc::strong_count(&first);
+    let missing = ["System.String", "Missing.First", "Missing.Second"];
+    let error = get_types(&*host.ts, &missing).err().expect("missing type");
+    assert_eq!(error.message(), "Unable to resolve type Missing.First");
+    assert_eq!(Rc::strong_count(&first), refs);
+}
+
+#[test]
 fn method_and_constructor_lookup() {
     let host = TestHost::new();
     let string = host.ts.get("System.String");

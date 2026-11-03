@@ -683,6 +683,28 @@ pub fn get_type<S: IXamlTypeSystem + ?Sized>(
         .ok_or_else(|| XamlError::type_system_exception(format!("Unable to resolve type {type_}")))
 }
 
+/// Resolves an ordered group of required types. Stops at the first missing type.
+pub fn get_types<S: IXamlTypeSystem + ?Sized, const N: usize>(
+    system: &S,
+    names: &[&str; N],
+) -> XamlResult<[Rc<dyn IXamlType>; N]> {
+    fn fill<S: IXamlTypeSystem + ?Sized>(
+        system: &S,
+        names: &[&str],
+        slots: &mut [Option<Rc<dyn IXamlType>>],
+    ) -> XamlResult<()> {
+        // Named locals drop in reverse lookup order on failure or unwinding.
+        for (&name, slot) in names.iter().zip(slots.iter_mut().rev()) {
+            *slot = Some(get_type(system, name)?);
+        }
+        Ok(())
+    }
+    let mut resolved = [const { None }; N];
+    fill(system, names, &mut resolved)?;
+    resolved.reverse();
+    Ok(resolved.map(|ty| ty.expect("every required type was resolved")))
+}
+
 fn params_match(
     actual: &[Rc<dyn IXamlType>],
     wanted: &[Rc<dyn IXamlType>],
