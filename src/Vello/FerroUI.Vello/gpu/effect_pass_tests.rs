@@ -560,12 +560,13 @@ use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, Immutable
 use ferroui_base::media::imaging::BitmapBlendingMode;
 
 /// The shader effects of the library at values that are not neutral, with
-/// the largest difference to their CPU references they are held to (those of
-/// the tests of `ferroui-skia`).
+/// the largest difference to their CPU references they are held to (the
+/// layer passes are held to 2 levels; the spotlight to 3, as in the tests of
+/// `ferroui-skia`).
 fn library_shader_effects() -> Vec<(ImmutableCustomEffect, u8)> {
     vec![
-        (ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), 1),
-        (ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }), 1),
+        (ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), 2),
+        (ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }), 2),
         (
             ImmutableCustomEffect::new(SpotlightShaderEffect {
                 center_x: 0.4,

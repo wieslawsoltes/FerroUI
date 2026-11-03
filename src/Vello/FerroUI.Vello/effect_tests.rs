@@ -738,9 +738,6 @@ mod effects {
         assert!(!effect.report_unhandled("Vello"));
     }
 
-    /// A runtime shader effect (#455, E4) is drawn as an effect without a
-    /// factory until its WGSL program is drawn (E5): its content unchanged,
-    /// reported once.
     #[test]
     fn effect_with_clip_rect_draws_through_a_bounded_layer() {
         let target = Target::new();
