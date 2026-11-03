@@ -1,19 +1,25 @@
-//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 to E5; not from
+//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 to E6; not from
 //! upstream; `docs/porting/custom-effects.md`): the custom effects FerroUI ships
 //! (`ferroui_base::media::effects::library`), each set as `Visual.Effect` on the same sample
 //! content, with a slider for each of its numbers and the effect string markup writes for it.
 //! The colour effects and the glow are effect graphs, pixelate, scan lines and spotlight runtime
 //! shaders (SkSL on Skia, WGSL on Vello; Vello's CPU mode draws their CPU references), all drawn by
-//! the backend on the GPU; a slider changes only the values of the members or the uniforms.
+//! the backend on the GPU; a slider changes only the values of the members or the uniforms. The
+//! page transitions sample photographs of the catalog's assets as images (E6), uploaded once by
+//! the backend; their images are set from code (an effect string cannot name an image).
 
 use super::winui_composition_page::{brush, section, text};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::effects::library::{
-    BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, PixelateEffect,
-    SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect, SpotlightShaderEffect, TintEffect,
+    BrightnessContrastEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect,
+    MaskTransitionEffect, PixelateEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
+    SpotlightShaderEffect, TintEffect,
 };
-use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect};
+use ferroui_base::media::effects::{CustomEffect, EffectImage, EffectParameterValue, ImmutableCustomEffect};
+use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{Color, FontWeight};
+use ferroui_base::platform::AssetLoader;
+use ferroui_base::utilities::Uri;
 use ferroui_base::{CornerRadius, Ref, Thickness};
 use ferroui_controls::{Border, Slider, StackPanel, TextBlock, WrapPanel};
 use std::cell::RefCell;
@@ -58,6 +64,17 @@ fn sample() -> Ref<Border> {
     sample.set_horizontal_alignment(HorizontalAlignment::Left);
     sample.set_child(content);
     sample
+}
+
+/// The image of the asset at `uri` as the handle of an effect image: the bitmap decoded once
+/// (the handle holds it); the empty image, which the transitions draw transparent, when it does
+/// not load.
+fn asset_image(uri: &str) -> EffectImage {
+    let bitmap = Uri::absolute(uri)
+        .ok()
+        .and_then(|uri| AssetLoader::open(&uri, None).ok())
+        .and_then(|mut stream| Bitmap::from_stream(&mut stream).ok());
+    bitmap.map(|bitmap| EffectImage::new(&bitmap)).unwrap_or_default()
 }
 
 /// A slider with its name and value above it; `changed` gets the new value.
@@ -155,9 +172,28 @@ pub(super) fn custom_effects_section() -> Ref<StackPanel> {
         SpotlightShaderEffect { strength: 0.8, ..SpotlightShaderEffect::default() },
         &[("center-x", 0.0, 1.0), ("center-y", 0.0, 1.0), ("radius", 0.05, 1.0), ("strength", 0.0, 1.0)],
     ));
+    // The page transitions: two photographs as the pages, a third one's luminance as the pattern
+    // of the dissolve and the mask of the reveal.
+    let arch = asset_image("ferres://ControlCatalog/Assets/delicate-arch-896885_640.jpg");
+    let deer = asset_image("ferres://ControlCatalog/Assets/hirsch-899118_640.jpg");
+    let leaf = asset_image("ferres://ControlCatalog/Assets/maple-leaf-888807_640.jpg");
+    tiles.children().add(effect_tile(
+        DissolveTransitionEffect {
+            from_page: arch,
+            to_page: deer.clone(),
+            pattern: leaf.clone(),
+            progress: 0.5,
+            ..DissolveTransitionEffect::default()
+        },
+        &[("progress", 0.0, 1.0), ("center-x", 0.0, 1.0), ("center-y", 0.0, 1.0)],
+    ));
+    tiles.children().add(effect_tile(
+        MaskTransitionEffect { to_page: deer, mask: leaf, progress: 0.5, softness: 0.15 },
+        &[("progress", 0.0, 1.0), ("softness", 0.001, 1.0)],
+    ));
     section(
         "Custom effects",
-        "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The colour effects, the glow, sharpen and edge detect describe themselves as effect graphs: colour matrices, convolutions and a drop shadow drawn by the backend on the GPU. Pixelate, scan lines and spotlight are runtime shaders: an SkSL program Skia compiles once and a WGSL program Vello compiles once, each drawn around the content on the GPU (Vello's CPU mode draws the CPU reference of the effect). A slider changes only the values of the members or the uniforms.",
+        "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The colour effects, the glow, sharpen and edge detect describe themselves as effect graphs: colour matrices, convolutions and a drop shadow drawn by the backend on the GPU. Pixelate, scan lines and spotlight are runtime shaders: an SkSL program Skia compiles once and a WGSL program Vello compiles once, each drawn around the content on the GPU (Vello's CPU mode draws the CPU reference of the effect). The dissolve and mask transitions are runtime shaders that sample images, here photographs set from code: each backend uploads an image once into a texture and binds it as a child of the program. A slider changes only the values of the members or the uniforms.",
         &tiles.upcast(),
     )
 }
