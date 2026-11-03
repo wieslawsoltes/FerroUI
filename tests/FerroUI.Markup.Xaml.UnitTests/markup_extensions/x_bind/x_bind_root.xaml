@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            Tag="construction value" Grid.Column="2">
+  <TextBlock x:Name="initial" Text="{x:Bind Tag}" />
+  <TextBlock x:Name="mirror" Text="{x:Bind Tag, Mode=OneWay}" />
+  <TextBox x:Name="editor" Text="{x:Bind Tag, Mode=TwoWay}" />
+  <TextBox x:Name="live" Text="{x:Bind Tag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+  <TextBlock x:Name="named" Text="{x:Bind editor.Text, Mode=OneWay}" />
+  <TextBlock x:Name="attached" Tag="{x:Bind (Grid.Column)}" />
+</StackPanel>
