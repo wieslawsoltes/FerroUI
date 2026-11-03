@@ -49,7 +49,11 @@ use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use uuid::Uuid;
+
 use crate::error::Error;
+use crate::guid::uuid_from_byte_array;
+#[allow(deprecated)]
 use crate::guid::Guid;
 
 use self::configuration::BsonConfiguration;
@@ -717,7 +721,7 @@ pub enum Value {
     String(String),
     Double(f64),
     Single(f32),
-    Guid(Guid),
+    Guid(Uuid),
     Regex(Regex),
     DateTime(DateTime),
     ByteArray(Vec<u8>),
@@ -823,7 +827,7 @@ pub enum ValueRef<'a> {
     String(&'a str),
     Double(f64),
     Single(f32),
-    Guid(Guid),
+    Guid(Uuid),
     Regex(&'a Regex),
     DateTime(DateTime),
     ByteArray(&'a [u8]),
@@ -890,11 +894,29 @@ bson_simple_value!(bool, Boolean, "Boolean", |v| ValueRef::Boolean(*v), Boolean)
 bson_simple_value!(String, String, "String", |v| ValueRef::String(v), String);
 bson_simple_value!(f64, Double, "Double", |v| ValueRef::Double(*v), Double);
 bson_simple_value!(f32, Single, "Single", |v| ValueRef::Single(*v), Single);
-bson_simple_value!(Guid, Guid, "Guid", |v| ValueRef::Guid(*v), Guid);
+bson_simple_value!(Uuid, Guid, "Guid", |v| ValueRef::Guid(*v), Guid);
 bson_simple_value!(Regex, Regex, "Regex", |v| ValueRef::Regex(v), Regex);
 bson_simple_value!(DateTime, DateTime, "DateTime", |v| ValueRef::DateTime(*v), DateTime);
 bson_simple_value!(Vec<u8>, ByteArray, "Byte[]", |v| ValueRef::ByteArray(v), ByteArray);
 bson_simple_value!(ObjectId, ObjectId, "ObjectId", |v| ValueRef::ObjectId(v), ObjectId);
+
+/// A property of the deprecated port type `Guid`: the same element as a
+/// [`Uuid`], until the type is removed after 0.5.
+#[allow(deprecated)]
+impl BsonValue for Guid {
+    const TYPE: Type = Type::Guid;
+
+    fn as_value(&self) -> ValueRef<'_> {
+        ValueRef::Guid(Uuid::from(*self))
+    }
+
+    fn from_value(value: Value) -> Result<Self, Error> {
+        match value {
+            Value::Guid(value) => Ok(Guid::from(value)),
+            other => Err(invalid_cast(&other, "Guid")),
+        }
+    }
+}
 
 impl BsonValue for ScopedCode {
     const TYPE: Type = Type::ScopedCode;
@@ -1214,7 +1236,7 @@ impl Serializer {
                 self.written(9 + length);
             }
             ValueRef::Guid(guid) => {
-                let bytes = guid.to_byte_array();
+                let bytes = guid.to_bytes_le();
                 self.writer.extend_from_slice(&(bytes.len() as i32).to_le_bytes());
                 self.writer.push(3);
                 self.writer.extend_from_slice(&bytes);
@@ -2185,7 +2207,7 @@ impl<'r, 'a> Deserializer<'r, 'a> {
             return Ok(Value::ByteArray(self.reader.read_bytes(count)?));
         }
         if sub_type == 3 {
-            return Ok(Value::Guid(Guid::from_byte_array(&self.reader.read_bytes(length)?)?));
+            return Ok(Value::Guid(uuid_from_byte_array(&self.reader.read_bytes(length)?)?));
         }
         Err(BsonError::with_message(format!("No support for binary type: {}", sub_type)).into())
     }

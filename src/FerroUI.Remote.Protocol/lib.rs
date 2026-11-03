@@ -79,6 +79,7 @@ pub use bson_tcp_transport::BsonTcpTransport;
 pub use default_message_type_resolver::DefaultMessageTypeResolver;
 pub use error::Error;
 pub use ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
+#[allow(deprecated)]
 pub use guid::Guid;
 pub use i_message_type_resolver::IMessageTypeResolver;
 pub use i_transport::{
@@ -89,3 +90,9 @@ pub use task::{Task, TaskCompletionSource};
 pub use tcp_transport_base::{DisposableServer, DisposeCallback, TcpTransportBase};
 pub use transport_connection_wrapper::TransportConnectionWrapper;
 pub use transport_messages::HtmlTransportStartedMessage;
+/// The identifier type of the protocol: the identifiers of the message
+/// classes ([`FerroRemoteMessageGuidAttribute`], the `GUID` of each message)
+/// and of the resolver ([`IMessageTypeResolver`]), and the `Guid` values of
+/// the serializer, written in the byte order of `System.Guid`
+/// ([`Uuid::to_bytes_le`]).
+pub use uuid::Uuid;
