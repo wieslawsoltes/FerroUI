@@ -462,6 +462,38 @@ fn tier_c_scores_the_declared_culture_above_the_alphabetical_order() {
     assert_eq!(family_of(&requested), "Beta CJK");
 }
 
+/// Not from upstream (C5 of #423): the fallback is keyed by the locale of the text, and gives
+/// each locale the family its culture gave: the one that declares the code page of the script
+/// the locale implies, by its language and region or by its explicit script.
+#[test]
+fn the_fallback_of_a_locale_is_the_family_of_its_script() {
+    use crate::media::fonts::FontCodePageCoverage;
+
+    let _scope = TestFontScope::start();
+
+    let family = |name: &str, coverage: FontCodePageCoverage| {
+        TestFontBuilder::new(name).codepoints(&[(0x4E00, 0x4E2D)]).code_page_coverage(coverage)
+    };
+    let collection = build_collection(&[
+        family("A Japanese", FontCodePageCoverage::JapaneseJis),
+        family("B Korean", FontCodePageCoverage::KoreanWansung),
+        family("C Simplified", FontCodePageCoverage::ChineseSimplified),
+        family("D Traditional", FontCodePageCoverage::ChineseTraditional),
+    ]);
+
+    for (tag, expected) in [
+        ("ja-JP", "A Japanese"),
+        ("ko-KR", "B Korean"),
+        ("zh-CN", "C Simplified"),
+        ("zh-Hans", "C Simplified"),
+        ("zh-TW", "D Traditional"),
+        ("zh-Hant-HK", "D Traditional"),
+    ] {
+        let matched = match_character(&*collection, CJK_ICHI, None, Some(&culture(tag))).unwrap();
+        assert_eq!(family_of(&matched), expected, "{tag}");
+    }
+}
+
 #[test]
 fn tier_d_platform_fallback_is_invoked_when_cache_sweep_has_no_covering_family() {
     let _scope = TestFontScope::start();

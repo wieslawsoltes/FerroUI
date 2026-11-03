@@ -728,6 +728,33 @@ fn supported_unicode_range_follows_the_character_map() {
     assert!(!range.is_in_range(0x4E2D));
 }
 
+/// Not from upstream (C5 of #423): the family names are keyed by the locale of the Windows
+/// language identifier of their records, the key the font fallback looks a locale up by; an
+/// identifier whose culture name is no language tag (`es-ES_tradnl`) is the invariant
+/// culture's, the unknown locale `und`, as an identifier that is not known is.
+#[test]
+fn family_names_are_keyed_by_the_locale_of_the_language_identifier() {
+    let typeface = GlyphTypeface::new(
+        TestFontBuilder::new("Test Gothic")
+            .localized_family_name(0x0411, "Japanese")
+            .localized_family_name(0x0804, "Chinese")
+            .localized_family_name(0x040A, "Spanish")
+            .build(),
+        FontSimulations::None,
+    )
+    .unwrap();
+
+    let name = |tag: &str| {
+        let locale = if tag.is_empty() { Locale::UNKNOWN } else { Locale::try_from_str(tag).unwrap() };
+        typeface.family_names().get(&locale).cloned()
+    };
+    assert_eq!(name("en-US").as_deref(), Some("Test Gothic"));
+    assert_eq!(name("ja-JP").as_deref(), Some("Japanese"));
+    assert_eq!(name("zh-CN").as_deref(), Some("Chinese"));
+    assert_eq!(name("").as_deref(), Some("Spanish"));
+    assert_eq!(name("es-ES"), None);
+}
+
 #[test]
 fn declared_coverage_and_scripts_are_read_from_the_font() {
     let japanese = GlyphTypeface::new(
