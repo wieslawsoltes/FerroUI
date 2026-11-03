@@ -15,7 +15,7 @@ use crate::media::{
     Typeface, UnicodeRange,
 };
 use crate::platform::{IAssetLoader, IFontManagerImpl};
-use crate::utilities::{CultureInfo, Uri};
+use crate::utilities::{Locale, Uri};
 use crate::{FerroLocator, LocatorExtensions};
 
 const ARABIC_ALEF: i32 = 0x0627;
@@ -27,8 +27,8 @@ fn uri(text: &str) -> Uri {
     Uri::absolute(text).unwrap()
 }
 
-fn culture(name: &str) -> CultureInfo {
-    CultureInfo::get_culture_info(name)
+fn culture(name: &str) -> Locale {
+    Locale::try_from_str(name).unwrap()
 }
 
 // ── harness ──
@@ -136,7 +136,7 @@ impl FontCollectionBaseImpl for RecordingFontCollection {
         _codepoint: i32,
         _key: FontCollectionKey,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         this.platform_call_count.set(this.platform_call_count.get() + 1);
         this.platform_fallback_result.borrow().clone()
@@ -185,7 +185,7 @@ impl FontCollectionBaseImpl for KeyedFallbackCollection {
         codepoint: i32,
         key: FontCollectionKey,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         if codepoint != this.covered_codepoint {
             return None;
@@ -249,7 +249,7 @@ impl FontCollectionBaseImpl for CustomizableFontCollection {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         for fallback in &this.fallbacks {
             if fallback.unicode_range.is_in_range(codepoint) {
@@ -317,7 +317,7 @@ fn match_character(
     collection: &dyn IFontCollection,
     codepoint: i32,
     family_name: Option<&str>,
-    culture: Option<&CultureInfo>,
+    culture: Option<&Locale>,
 ) -> Option<Typeface> {
     collection.try_match_character(
         codepoint,

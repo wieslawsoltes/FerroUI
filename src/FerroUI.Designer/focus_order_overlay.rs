@@ -4,7 +4,7 @@ use ferroui_base::media::{
     BoxShadows, DrawingContext, FlowDirection, FormattedText, IBrush, IPen, Pen, SolidColorBrush,
     Typeface,
 };
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::{Point, Rect};
 use std::rc::Rc;
 
@@ -78,7 +78,7 @@ pub(crate) fn render_focus_order(
             );
             let text = FormattedText::new(
                 &value,
-                CultureInfo::current_culture(),
+                current_locale(),
                 FlowDirection::LeftToRight,
                 Typeface::default(),
                 10.0 * scale,

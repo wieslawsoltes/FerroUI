@@ -19,7 +19,7 @@ use ferroui_base::media::{
     IPlatformTypeface, Typeface, UnicodeRange,
 };
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
-use ferroui_base::utilities::{CultureInfo, Uri, UriKind};
+use ferroui_base::utilities::{Locale, Uri, UriKind};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::testing::UnitTestApplication;
 use std::cell::Cell;
@@ -162,7 +162,7 @@ impl FontCollectionBaseImpl for CustomizableFontCollection {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         if let Some(fallbacks) = &this.fallbacks {
             for fallback in fallbacks {
@@ -417,7 +417,7 @@ impl IFontManagerImpl for AliasFontManagerImpl {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         self.inner.try_match_character(codepoint, font_style, font_weight, font_stretch, family_name, culture)
     }

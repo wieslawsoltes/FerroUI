@@ -12,7 +12,7 @@ use ferroui_base::media::fonts::{
 };
 use ferroui_base::media::{FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface};
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
-use ferroui_base::utilities::{CultureInfo, Uri, UriKind};
+use ferroui_base::utilities::{locale, Locale, Uri, UriKind};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::cell::{Cell, RefCell};
@@ -81,7 +81,7 @@ fn tier_b_subsequent_calls_return_the_same_family() {
             FontWeight::Normal,
             FontStretch::Normal,
             None,
-            Some(&CultureInfo::get_culture_info("ar-SA")),
+            Some(&locale!("ar-SA")),
         )
         .expect("a match");
 
@@ -93,7 +93,7 @@ fn tier_b_subsequent_calls_return_the_same_family() {
                 FontWeight::Normal,
                 FontStretch::Normal,
                 None,
-                Some(&CultureInfo::get_culture_info("ar-SA")),
+                Some(&locale!("ar-SA")),
             )
             .expect("a match");
 
@@ -148,7 +148,7 @@ fn tier_c_prefers_culture_matched_family_over_alphabetical_order() {
             FontWeight::Normal,
             FontStretch::Normal,
             None,
-            Some(&CultureInfo::get_culture_info("ar-SA")),
+            Some(&locale!("ar-SA")),
         )
         .expect("a match");
 
@@ -177,7 +177,7 @@ fn tier_d_platform_fallback_is_invoked_when_cache_sweep_has_no_covering_family()
             FontWeight::Normal,
             FontStretch::Normal,
             None,
-            Some(&CultureInfo::get_culture_info("ja-JP")),
+            Some(&locale!("ja-JP")),
         )
         .expect("a match");
 
@@ -200,7 +200,7 @@ fn tier_d_platform_fallback_is_invoked_at_most_once_per_script_culture_pair() {
             FontWeight::Normal,
             FontStretch::Normal,
             None,
-            Some(&CultureInfo::get_culture_info("ja-JP")),
+            Some(&locale!("ja-JP")),
         );
     }
 
@@ -221,7 +221,7 @@ fn tier_d_negative_platform_result_is_cached_per_script_culture() {
         FontWeight::Normal,
         FontStretch::Normal,
         None,
-        Some(&CultureInfo::get_culture_info("ja-JP")),
+        Some(&locale!("ja-JP")),
     );
 
     collection.try_match_character(
@@ -230,7 +230,7 @@ fn tier_d_negative_platform_result_is_cached_per_script_culture() {
         FontWeight::Normal,
         FontStretch::Normal,
         None,
-        Some(&CultureInfo::get_culture_info("ko-KR")),
+        Some(&locale!("ko-KR")),
     );
 
     collection.try_match_character(
@@ -239,7 +239,7 @@ fn tier_d_negative_platform_result_is_cached_per_script_culture() {
         FontWeight::Normal,
         FontStretch::Normal,
         None,
-        Some(&CultureInfo::get_culture_info("ja-JP")),
+        Some(&locale!("ja-JP")),
     );
 
     // ja-JP: 1 call + cached. ko-KR: 1 call. ja-JP again: cached. Total 2.
@@ -294,7 +294,7 @@ fn tier_d_positive_script_cache_does_not_block_platform_for_a_codepoint_the_buck
     assert!(mi_sans.character_to_glyph_map().try_get_glyph(HUA).is_some());
     collection.set_platform_fallback_result(Some(mi_sans));
 
-    let zh = CultureInfo::get_culture_info("zh-CN");
+    let zh = locale!("zh-CN");
 
     // 中 resolves from the loaded cache (Tier C) and writes the (Han, zh-CN) bucket. The platform
     // is not consulted for it.
@@ -365,7 +365,7 @@ fn fallback_resolves_the_requested_typeface_not_a_cached_neighbour() {
 
         let first_face = &faces[&first];
         let second_face = &faces[&second];
-        let culture = CultureInfo::get_culture_info("he-IL");
+        let culture = locale!("he-IL");
 
         // First face: resolved via the platform (Tier D) and pins the bucket to the family.
         assert!(
@@ -629,7 +629,7 @@ impl FontCollectionBaseImpl for RecordingFontCollection {
         _codepoint: i32,
         _key: FontCollectionKey,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         this.platform_call_count.set(this.platform_call_count.get() + 1);
 
@@ -677,7 +677,7 @@ impl FontCollectionBaseImpl for KeyedFallbackCollection {
         codepoint: i32,
         key: FontCollectionKey,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         if codepoint != this.covered_codepoint {
             return None;

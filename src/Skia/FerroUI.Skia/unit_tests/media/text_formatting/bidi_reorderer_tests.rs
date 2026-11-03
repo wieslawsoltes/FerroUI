@@ -9,7 +9,7 @@ use ferroui_base::media::text_formatting::{
     TextShaperOptions,
 };
 use ferroui_base::media::{FlowDirection, Typeface};
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{current_locale, ReadOnlyMemory};
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::rc::Rc;
 
@@ -47,7 +47,7 @@ fn should_map_logical_runs_to_visual_run_index() {
                     Typeface::default_typeface().glyph_typeface(),
                     10.0,
                     level,
-                    Some(CultureInfo::current_culture()),
+                    Some(current_locale()),
                     0.0,
                     0.0,
                     None,

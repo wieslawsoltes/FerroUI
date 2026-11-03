@@ -4,7 +4,7 @@ use crate::media::text_formatting::GenericTextRunProperties;
 use crate::media::{
     BaselineAlignment, FontFamily, FontFallbackMapping, FontFeatureCollection, GlyphTypeface, IBrush, TextDecorationCollection, Typeface,
 };
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 
 /// Properties that can change from one run to the next, such as typeface or
 /// foreground brush.
@@ -46,7 +46,7 @@ pub trait TextRunProperties: 'static {
     fn background_brush(&self) -> Option<&Rc<dyn IBrush>>;
 
     /// Run text culture.
-    fn culture_info(&self) -> Option<&CultureInfo>;
+    fn culture_info(&self) -> Option<&Locale>;
 
     /// Optional features of used font.
     fn font_features(&self) -> Option<&FontFeatureCollection> {

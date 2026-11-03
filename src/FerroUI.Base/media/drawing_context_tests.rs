@@ -663,7 +663,7 @@ fn render_target_bitmap_renders_a_visual_and_disposes_the_platform_context() {
 
 // --- text, text options, acrylic through the drawing context ----------------
 
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 use crate::media::text_formatting::testing::{utf16, TextTestScope};
 use crate::media::text_formatting::{TextLayout, TextLayoutOptions};
 use crate::media::{
@@ -679,7 +679,7 @@ fn black() -> Rc<dyn IBrush> {
 fn formatted(text: &str) -> FormattedText {
     FormattedText::new(
         text,
-        CultureInfo::invariant_culture(),
+        Locale::UNKNOWN,
         FlowDirection::LeftToRight,
         Typeface::default_typeface(),
         12.0,
