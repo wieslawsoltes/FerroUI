@@ -397,7 +397,7 @@ fn assert_function_behavior(root: Ref<XBindPage>) {
     assert_eq!(text(&parts.static_member).as_deref(), Some("prefix"));
     assert_eq!(text(&parts.index).as_deref(), Some("item 1"));
     assert_eq!(text(&parts.key).as_deref(), Some("value of second key"));
-    assert_eq!(text(&parts.interface_member).as_deref(), Some("named grace"));
+    assert_eq!(text(&parts.interface_member).as_deref(), Some("named Grace"));
 
     // A OneWay function is called again when an argument path changes; OneTime is not.
     root.set_title("Grace");
