@@ -7,7 +7,7 @@ use super::d3d11::{
     D3D11_BIND_SHADER_RESOURCE, D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX, D3D11_TEXTURE2D_DESC, D3D11_USAGE_DEFAULT,
     DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC,
 };
-use crate::task_support::{present_status, start, ServerJobTaskFuture};
+use crate::task_support::{join, present_status, start, ServerJobTaskFuture};
 use ferroui_base::platform::{
     KnownPlatformGraphicsExternalImageHandleTypes, PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
     PlatformHandle,
@@ -17,13 +17,13 @@ use ferroui_base::rendering::composition::{
     CompositionDrawingSurface, ICompositionGpuInterop, ICompositionImportedGpuImage, ServerJobTask,
 };
 use ferroui_base::rendering::{ISwapchainImage, SwapchainBase, SwapchainImageFactory, SwapchainImagePresentStatus};
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use ferroui_microcom::{ComPtr, IUnknown};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-type Disposals = Rc<RefCell<Vec<DispatcherTask<()>>>>;
+type Disposals = Rc<RefCell<Vec<JoinHandle<()>>>>;
 
 pub struct D3D11Swapchain {
     base: SwapchainBase<D3D11SwapchainImage>,
@@ -53,12 +53,12 @@ impl D3D11Swapchain {
     }
 
     /// Releases the textures once the compositor is done with them.
-    pub fn dispose_async(&self) -> DispatcherTask<()> {
+    pub fn dispose_async(&self) -> JoinHandle<()> {
         self.base.dispose();
         let disposals = std::mem::take(&mut *self.disposals.borrow_mut());
         start(async move {
             for disposal in disposals {
-                let _ = disposal.await;
+                let _ = join(disposal).await;
             }
         })
     }
@@ -153,7 +153,7 @@ impl D3D11SwapchainImage {
         })
     }
 
-    fn dispose_async(&self) -> DispatcherTask<()> {
+    fn dispose_async(&self) -> JoinHandle<()> {
         let last_present = self.last_present.borrow().clone();
         let render_target_view = self.render_target_view.clone();
         let mutex = self.mutex.clone();

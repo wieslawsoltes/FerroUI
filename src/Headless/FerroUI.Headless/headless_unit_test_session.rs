@@ -351,15 +351,12 @@ impl HeadlessUnitTestSession {
                 // future has run to its end, has panicked or was dropped.
                 let future = action();
                 let guard = cts.clone().drop_guard();
-                let task = Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+                let mut task = Dispatcher::ui_thread().start_local(async move {
                     let _guard = guard;
                     future.await
                 });
-                if task.is_completed() {
-                    return match task.result() {
-                        Ok(result) => Some(result),
-                        Err(canceled) => std::panic::panic_any(canceled),
-                    };
+                if task.is_finished() {
+                    return Some(result_of(&mut task));
                 }
 
                 if cts.is_cancelled() {
@@ -373,10 +370,7 @@ impl HeadlessUnitTestSession {
                     };
                     Dispatcher::ui_thread().push_frame(&frame);
                     inner_cts.dispose();
-                    match task.result() {
-                        Ok(result) => Some(result),
-                        Err(canceled) => std::panic::panic_any(canceled),
-                    }
+                    Some(result_of(&mut task))
                 }
             })) {
                 Ok(value) => result = value,
@@ -663,5 +657,18 @@ impl IDisposable for Cleanup {
         if let Some(action) = action {
             action();
         }
+    }
+}
+
+/// The output of the task of a test, which has ended: a panic of its future is raised again, and a
+/// cancellation is raised as [`Canceled`], as the outcome of the task was before it became a
+/// `JoinHandle`.
+fn result_of<T>(task: &mut ferroui_system::task::JoinHandle<T>) -> T {
+    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    match std::pin::Pin::new(task).poll(&mut context) {
+        std::task::Poll::Ready(Ok(result)) => result,
+        std::task::Poll::Ready(Err(ferroui_system::task::JoinError::Panicked(payload))) => resume_unwind(payload),
+        std::task::Poll::Ready(Err(ferroui_system::task::JoinError::Canceled)) => std::panic::panic_any(Canceled),
+        std::task::Poll::Pending => panic!("Synchronous wait is only supported on non-UI threads"),
     }
 }

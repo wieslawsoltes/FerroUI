@@ -1280,7 +1280,7 @@ mod imp {
             let this = self.this.clone();
             // `async void` of the reference: the task runs on the dispatcher
             // of the UI thread up to its first await before this returns.
-            Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+            Dispatcher::ui_thread().start_local(async move {
                 let previous = this.upgrade().and_then(|panel| panel.active_drag.borrow_mut().take());
                 if let Some(previous) = previous {
                     previous.dispose();
@@ -1455,7 +1455,7 @@ mod imp {
                 return;
             };
             let this = self.this.clone();
-            Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+            Dispatcher::ui_thread().start_local(async move {
                 if let Err(error) = Self::populate_data_package_async(package, outgoing_drag_data).await {
                     let panel = this.upgrade();
                     warn(panel.as_deref(), &format!("Populating outgoing DataPackage threw: {error}"));

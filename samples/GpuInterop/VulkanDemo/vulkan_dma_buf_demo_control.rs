@@ -9,12 +9,12 @@ use super::vulkan_context::VulkanContext;
 use super::vulkan_demo_control::VulkanResources;
 use super::vulkan_dma_buf_swapchain::VulkanDmaBufSwapchain;
 use crate::drawing_surface_demo_base::{DrawingSurfaceDemoBase, DrawingSurfaceDemoBaseImpl};
-use crate::task_support::start;
+use crate::task_support::{join, start};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::rendering::composition::{CompositionDrawingSurface, Compositor, ICompositionGpuInterop};
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, PixelSize, Ref, StyledElementImpl,
     VisualImpl,
@@ -24,13 +24,13 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 impl VulkanResources<VulkanDmaBufSwapchain> {
-    fn dispose_async(self) -> DispatcherTask<()> {
+    fn dispose_async(self) -> JoinHandle<()> {
         self.context.pool().free_used_command_buffers();
         self.content.borrow_mut().dispose();
         let swapchain_disposal = self.swapchain.dispose_async();
         let context = self.context;
         start(async move {
-            let _ = swapchain_disposal.await;
+            let _ = join(swapchain_disposal).await;
             context.dispose();
         })
     }

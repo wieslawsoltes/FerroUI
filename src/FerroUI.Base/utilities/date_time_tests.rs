@@ -48,7 +48,8 @@ fn year_first() -> CultureInfo {
 }
 
 fn pin_now(utc: DateTime, offset_hours: i64) {
-    DateTime::set_utc_now_provider(Some(Rc::new(move || utc.specify_kind(DateTimeKind::Utc))));
+    let instant = std::time::SystemTime::try_from(utc.specify_kind(DateTimeKind::Utc)).unwrap();
+    DateTime::set_utc_now_provider(Some(Rc::new(move || instant)));
     TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new(move |_| {
         SignedDuration::from_ticks(offset_hours * SignedDuration::TICKS_PER_HOUR)
     })));
@@ -223,6 +224,37 @@ fn now_can_be_pinned() {
     TimeZoneInfo::set_local_utc_offset_provider(None);
     assert!(DateTime::utc_now() > DateTime::new(2024, 1, 1));
     assert_eq!(DateTimeOffset::now().offset(), SignedDuration::ZERO);
+}
+
+#[test]
+fn the_clock_and_the_local_offset_are_instants() {
+    use std::time::{Duration, SystemTime};
+
+    // 2024-06-01T10:00:00Z.
+    let instant = SystemTime::UNIX_EPOCH + Duration::from_secs(1_717_236_000);
+    DateTime::set_utc_now_provider(Some(Rc::new(move || instant)));
+    let asked = Rc::new(std::cell::Cell::new(None));
+    TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new({
+        let asked = asked.clone();
+        move |at: SystemTime| {
+            asked.set(Some(at));
+            SignedDuration::from_hours(2.0)
+        }
+    })));
+    assert_eq!(super::system_time_now(), instant);
+    assert_eq!(DateTime::utc_now(), DateTime::new_with_time(2024, 6, 1, 10, 0, 0));
+    assert_eq!(DateTime::now(), DateTime::new_with_time(2024, 6, 1, 12, 0, 0));
+    assert_eq!(asked.get(), Some(instant));
+
+    // An instant after the years of DateTime is its largest value.
+    let late = SystemTime::UNIX_EPOCH + Duration::from_secs(400_000_000_000);
+    DateTime::set_utc_now_provider(Some(Rc::new(move || late)));
+    assert_eq!(super::system_time_now(), late);
+    assert_eq!(DateTime::utc_now(), DateTime::MAX_VALUE);
+    assert_eq!(DateTime::utc_now().kind(), DateTimeKind::Utc);
+
+    DateTime::set_utc_now_provider(None);
+    TimeZoneInfo::set_local_utc_offset_provider(None);
 }
 
 #[test]

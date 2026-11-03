@@ -15,7 +15,7 @@
 use ferroui_remote_protocol::designer::{StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use ferroui_remote_protocol::viewport::{ClientSupportedPixelFormatsMessage, ClientViewportAllocatedMessage, PixelFormat};
 use ferroui_remote_protocol::{
-    message_handler, BsonTcpTransport, Guid, IFerroRemoteTransportConnection, Message, TcpTransportBase,
+    message_handler, BsonTcpTransport, IFerroRemoteTransportConnection, Message, TcpTransportBase,
 };
 use std::io::Read;
 use std::net::{IpAddr, Ipv4Addr};
@@ -26,8 +26,8 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 /// `Guid.NewGuid()`: a random identifier of version four.
-fn new_guid() -> Guid {
-    Guid::from(uuid::Uuid::new_v4())
+fn new_guid() -> uuid::Uuid {
+    uuid::Uuid::new_v4()
 }
 
 /// The root of the repository.
@@ -81,7 +81,7 @@ fn designer_in_win32_mode_should_provide_valid_hwnd(
                 if let Some(start) = msg.downcast_ref::<StartDesignerSessionMessage>() {
                     assert_eq!(
                         session_id,
-                        Guid::parse(start.session_id.as_deref().unwrap_or_default()).expect("the session")
+                        uuid::Uuid::parse_str(start.session_id.as_deref().unwrap_or_default()).expect("the session")
                     );
                     if method == "ferroui-remote" {
                         let _ = conn.send(Arc::new(ClientSupportedPixelFormatsMessage {

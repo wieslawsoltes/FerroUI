@@ -95,10 +95,12 @@ impl DragLeaveEventTriggerView {
         let pending = DragDrop::do_drag_drop_async(e, data, DragDropEffects::COPY);
         // The rest of the `async void` method runs on the dispatcher of the thread.
         let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-        let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
-        drop(scheduler.start_local(async move {
-            let _ = pending.await;
-        }));
+        drop(Dispatcher::current_dispatcher().start_local_with_priority(
+            async move {
+                let _ = pending.await;
+            },
+            priority,
+        ));
     }
 }
 

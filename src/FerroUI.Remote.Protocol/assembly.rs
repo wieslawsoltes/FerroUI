@@ -72,10 +72,11 @@ mod tests {
     use std::collections::HashSet;
     use std::sync::Arc;
 
+    use uuid::Uuid;
+
     use super::*;
     use crate::default_message_type_resolver::DefaultMessageTypeResolver;
     use crate::design_messages::ExceptionDetails;
-    use crate::guid::Guid;
     use crate::i_message_type_resolver::IMessageTypeResolver;
     use crate::input_messages::{InputEventMessageBase, InputModifiers, MouseButton, PointerEventMessageBase};
     use crate::key::Key;
@@ -188,9 +189,9 @@ mod tests {
                 .iter()
                 .find(|t| t.class.name == *name)
                 .unwrap_or_else(|| panic!("{} is not in the table", name));
-            assert_eq!(exported.attribute.unwrap().guid(), Guid::parse(guid).unwrap(), "{}", name);
+            assert_eq!(exported.attribute.unwrap().guid(), Uuid::parse_str(guid).unwrap(), "{}", name);
         }
-        let guids: HashSet<Guid> = ASSEMBLY.exported_types.iter().map(|t| t.attribute.unwrap().guid()).collect();
+        let guids: HashSet<Uuid> = ASSEMBLY.exported_types.iter().map(|t| t.attribute.unwrap().guid()).collect();
         assert_eq!(guids.len(), UPSTREAM_MESSAGES.len());
     }
 
@@ -198,14 +199,14 @@ mod tests {
     fn the_resolver_maps_every_identifier_to_its_class_and_back() {
         let resolver = DefaultMessageTypeResolver::new(&[]);
         for (name, guid) in UPSTREAM_MESSAGES {
-            let guid = Guid::parse(guid).unwrap();
+            let guid = Uuid::parse_str(guid).unwrap();
             let class = resolver.get_by_guid(guid).unwrap();
             assert_eq!(class.name, *name);
             assert_eq!(resolver.get_guid(class).unwrap(), guid);
         }
-        assert!(matches!(resolver.get_by_guid(Guid::EMPTY), Err(crate::Error::KeyNotFound(_))));
+        assert!(matches!(resolver.get_by_guid(Uuid::nil()), Err(crate::Error::KeyNotFound(_))));
         assert!(matches!(resolver.get_guid(ExceptionDetails::CLASS), Err(crate::Error::KeyNotFound(_))));
-        assert_eq!(MeasureViewportMessage::GUID, Guid::parse("6E3C5310-E2B1-4C3D-8688-01183AA48C5B").unwrap());
+        assert_eq!(MeasureViewportMessage::GUID, Uuid::parse_str("6E3C5310-E2B1-4C3D-8688-01183AA48C5B").unwrap());
     }
 
     #[test]

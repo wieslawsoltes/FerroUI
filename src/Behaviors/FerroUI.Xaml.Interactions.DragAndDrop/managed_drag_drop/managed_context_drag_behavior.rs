@@ -568,7 +568,7 @@ impl ManagedContextDragBehavior {
             // `async void` of the reference: the drag runs as a task of the dispatcher, started
             // now.
             let this = self.to_ref();
-            drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+            drop(Dispatcher::ui_thread().start_local(async move {
                 Self::start_internal_drag_async(this.clone(), trigger_event, context).await;
                 *this.trigger_event.borrow_mut() = None;
             }));

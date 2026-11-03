@@ -76,13 +76,16 @@ impl TaskValue {
     {
         let task = Self(TaskShared::new(TaskStatus::Running));
         let shared = task.0.clone();
-        drop(Dispatcher::current_dispatcher().invoke_async_task_local(move || async move {
-            let status = match future.await {
-                Ok(value) => TaskStatus::RanToCompletion(value),
-                Err(error) => TaskStatus::Faulted(error),
-            };
-            shared.try_complete(status);
-        }));
+        drop(Dispatcher::current_dispatcher().spawn_local_with_priority(
+            async move {
+                let status = match future.await {
+                    Ok(value) => TaskStatus::RanToCompletion(value),
+                    Err(error) => TaskStatus::Faulted(error),
+                };
+                shared.try_complete(status);
+            },
+            DispatcherPriority::DEFAULT,
+        ));
         task
     }
 

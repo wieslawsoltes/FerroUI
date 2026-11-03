@@ -20,21 +20,17 @@ use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::{HorizontalAlignment, Layoutable, LayoutableImpl, LayoutableImplExt, VerticalAlignment};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
-use ferroui_base::threading::{
-    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask,
-};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, DirectProperty, FerroObject,
     FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
     Size, StaticType, StyledElement, StyledElementImpl, StyledProperty, Visual, VisualImpl,
     VisualImplExt, VisualTreeAttachmentEventArgs,
 };
+use ferroui_system::task::{JoinError, JoinHandle};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
-use std::future::Future;
-use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll};
 
 /// A tab control that displays a tab strip along with the content of the
 /// selected tab.
@@ -644,7 +640,6 @@ impl TabControl {
     ) {
         let this = self.to_ref().downgrade();
         let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-        let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
 
         // The transition is started before the first await, as part of the
         // call.
@@ -652,38 +647,41 @@ impl TabControl {
         let to_visual: Ref<Visual> = to.upcast();
         let task = transition.start(Some(&from_visual), Some(&to_visual), forward, (*cts).clone());
 
-        let _ = scheduler.start_local(async move {
-            match (TransitionOutcomeFuture { task }).await {
-                TransitionOutcome::Canceled => return,
-                TransitionOutcome::Faulted => {
-                    if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::CONTROL) {
-                        let source = this.upgrade();
-                        logger.log(
-                            source.as_ref().map(|source| source as &dyn Any),
-                            "Tab transition threw an unhandled exception.",
-                        );
+        let _ = Dispatcher::current_dispatcher().start_local_with_priority(
+            async move {
+                match transition_outcome(task).await {
+                    TransitionOutcome::Canceled => return,
+                    TransitionOutcome::Faulted => {
+                        if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::CONTROL) {
+                            let source = this.upgrade();
+                            logger.log(
+                                source.as_ref().map(|source| source as &dyn Any),
+                                "Tab transition threw an unhandled exception.",
+                            );
+                        }
                     }
+                    TransitionOutcome::Completed => {}
                 }
-                TransitionOutcome::Completed => {}
-            }
 
-            if cts.is_cancelled() {
-                return;
-            }
+                if cts.is_cancelled() {
+                    return;
+                }
 
-            from.set_is_visible(false);
-            from.set_content(None);
-            from.set_content_template(None);
-            from.set_data_context(None);
-            from.set_render_transform(None);
-            from.set_opacity(1.0);
+                from.set_is_visible(false);
+                from.set_content(None);
+                from.set_content_template(None);
+                from.set_data_context(None);
+                from.set_render_transform(None);
+                from.set_opacity(1.0);
 
-            if let Some(this) = this.upgrade() {
-                let content_part = this.content_part.take();
-                let content_presenter2 = this.content_presenter2.replace(content_part);
-                *this.content_part.borrow_mut() = content_presenter2;
-            }
-        });
+                if let Some(this) = this.upgrade() {
+                    let content_part = this.content_part.take();
+                    let content_presenter2 = this.content_presenter2.replace(content_part);
+                    *this.content_part.borrow_mut() = content_presenter2;
+                }
+            },
+            priority,
+        );
     }
 
     fn set_control_content(
@@ -780,23 +778,11 @@ enum TransitionOutcome {
     Faulted,
 }
 
-/// Waits for a page transition without re-raising its failure.
-struct TransitionOutcomeFuture {
-    task: DispatcherTask<()>,
-}
-
-impl Future for TransitionOutcomeFuture {
-    type Output = TransitionOutcome;
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<TransitionOutcome> {
-        if self.task.is_faulted() {
-            return Poll::Ready(TransitionOutcome::Faulted);
-        }
-
-        match Pin::new(&mut self.task).poll(cx) {
-            Poll::Ready(Ok(())) => Poll::Ready(TransitionOutcome::Completed),
-            Poll::Ready(Err(_)) => Poll::Ready(TransitionOutcome::Canceled),
-            Poll::Pending => Poll::Pending,
-        }
+/// Waits for a page transition: its failure is an outcome, not raised again.
+async fn transition_outcome(task: JoinHandle<()>) -> TransitionOutcome {
+    match task.await {
+        Ok(()) => TransitionOutcome::Completed,
+        Err(JoinError::Canceled) => TransitionOutcome::Canceled,
+        Err(JoinError::Panicked(_)) => TransitionOutcome::Faulted,
     }
 }

@@ -5,7 +5,7 @@
 use super::*;
 use crate::i_portal_parent_lease::TrivialPortalParentLease;
 use crate::test_support::{emit_from_service, log, pump_until, scope, Log, TestConnections};
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use std::cell::{Cell, RefCell};
 use std::sync::{Arc, Mutex};
 use zbus::zvariant::Structure;
@@ -131,9 +131,12 @@ fn fixture(version: u32, results: Vec<(String, OwnedValue)>) -> Fixture {
 fn wait<T: 'static>(future: impl std::future::Future<Output = T> + 'static) -> T {
     let result = Rc::new(RefCell::new(None));
     let sink = result.clone();
-    drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-        *sink.borrow_mut() = Some(future.await);
-    }));
+    drop(Dispatcher::ui_thread().spawn_local_with_priority(
+        async move {
+            *sink.borrow_mut() = Some(future.await);
+        },
+        DispatcherPriority::DEFAULT,
+    ));
     pump_until(|| result.borrow().is_some());
     let value = result.borrow_mut().take().unwrap();
     value

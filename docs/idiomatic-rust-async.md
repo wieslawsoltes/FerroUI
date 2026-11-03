@@ -442,7 +442,8 @@ where they are large.
 | A4a (done) | One cancellation type: `CancellationToken` reshaped (section 3.7), `CancellationGuard` (`register_guarded`, `register_local_guarded`), `cancelled()`, `child_token()`, `drop_guard()`; `CancellationTokenSource` over it; `OperationCanceledError` and `TaskCanceledError` convert to and from `task::Canceled`; F4 recorded | additions | low: the old API keeps working and is not deprecated yet |
 | A4b (done) | The uses move, by crate (602: `ferroui-reactive`, `ferroui-base`, `ferroui-dynamic-data`, dock, `ferroui-controls`, ...); the local cancellation types replaced: `LocalCancellationRegistration` of `ferroui-base::animation` (`register_local_guarded`), `CancellationFlag` and `Cancelled` of `ferroui-freedesktop` (`cancelled()`), `AiCancellationToken` of ProTranslate, `LoopCancellation` of `ferroui-native` and `CancelOnDrop` of `ferroui-headless` (`drop_guard()`); `register` gives the guard; then the old names deprecated and the `upstream-names.toml` rows | 0.5: the old names deprecated | medium: registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
 | A5 (done) | `SynchronizationContext` to the thread's schedule: `set_thread_schedule`, `Dispatcher::current_priority`, `FerroScheduler::install_on_ui_thread`, the Rx forms that capture a context, the dock services; the rule for the tasks of the reactive libraries on a dispatcher thread decided (F3) and its order tested | 0.5: the trait, `FerroSynchronizationContext` and `RestoreContext` deprecated | high where F3 changes an order; the Rx, ReactiveUI and dock tests guard it |
-| A6 | The asynchronous public APIs of the controls and platforms return `JoinHandle` or `impl Future` (navigation, dialogs, the behaviors' `TaskHandle`, the callers of `invoke_async_task*` and `to_task_scheduler`), by area | 0.5 | medium: callers visited; deprecated `..._task` variants where needed |
+| A6 (done) | The asynchronous public APIs of the controls and platforms return `JoinHandle` or `impl Future` (navigation, dialogs, the behaviors' `TaskHandle`, the callers of `invoke_async_task*` and `to_task_scheduler`), by area | 0.5: `DispatcherTask`, `DispatcherTaskScheduler`, `invoke_async_task*`, `to_task_scheduler*` deprecated | medium: callers visited; deprecated `..._task` variants where needed |
+| A7 | The `Task` forms of Rx, DynamicData and ReactiveUI on futures and `Shared<T>` (section 3.8) | 0.5 (names kept) | medium: the ported upstream tests drive them through completion sources |
 | A7 (done) | The `Task` forms of Rx, DynamicData and ReactiveUI on futures and `Shared<T>` (section 3.8) | 0.5 (names kept); `Task`, `TaskCompletionSource` and the executor functions of `threading::tasks` deprecated | medium: the ported upstream tests drive them through completion sources |
 | A8 | `FerroUI.View`'s async data on the dispatcher, abandoned with `abort` | behaviour: the order of the signal write (a test) | low |
 | A9 | The inventory (`CancellationToken` becomes the target; `Task`, `TaskCompletionSource`, `SynchronizationContext`, `CancellationTokenSource` counted until removed), `upstream-names.toml`, the migration notes, docs/porting/reactive.md section 5.8 and PORTING-GUIDE | | |
@@ -647,6 +648,57 @@ Schedule>>`. The local cancellation registration of the animations is
 `CancellationToken::register_local`; a cancellation from another thread runs its action in a job
 at `Default`, where it was posted at `Send`. `threading::tasks::{set_thread_poster, ThreadPoster,
 run_pending_wakes}` stay, not deprecated, until the `Task` forms move (A7).
+
+A6 is done: the asynchronous public APIs give a `JoinHandle` (re-exported, with `JoinError` and
+`AbortHandle`, by `ferroui_base::threading`), and `DispatcherTask`, `DispatcherTaskScheduler`,
+`invoke_async_task*`, `to_task_scheduler*` (with `FerroSynchronizationContext::to_task_scheduler`)
+are `#[deprecated(since = "0.5.0")]`, with their behaviour. `Dispatcher::start_local` and
+`start_local_with_priority` are public: the first poll inside the call (`FirstPoll::Now`), what
+`DispatcherTaskScheduler::start_local` did. `From` converts a `DispatcherTask` into a `JoinHandle` (a
+task of its dispatcher that awaits it: the panic that it raises again is `Panicked`, a cancellation
+aborts the task) and a `JoinHandle` into a `DispatcherTask` (a task of the dispatcher of the calling
+thread, polled at once, that forwards the outcome: complete at once when the task has ended, one job
+after it otherwise; a panic faults it and is raised again when observed). The uses moved, by area:
+
+- `ferroui-base`: `IPageTransition::start`, `CrossFade` (`start_cross_fade`), `PageSlide`,
+  `Rotate3DTransition` and `CompositePageTransition` give a `JoinHandle`; a composite fails with the
+  panic of a member (`resume_unwind`), as the `await` of a `DispatcherTask` raised it; the task stream
+  plugin spawns with `spawn_local_with_priority` at `Default`.
+- `ferroui-controls`: `NavigationPage` (the push, pop, replace and modal members and their
+  `_with_transition` and `_with_parameter` forms), `INavigation` and `PageNavigationExtensions`,
+  `Window::show_dialog` and `show_dialog_typed` give a `JoinHandle`, and keep their old form as
+  deprecated `..._task` variants (`push_async_task`, `show_dialog_task`, `push_async_of_task`, ...)
+  that convert the handle; `TopLevel::request_platform_inhibition` gives a `JoinHandle` (no variant:
+  no application uses it). `NavigationPage`, `TabControl`, `TransitioningContentControl`,
+  `VirtualizingCarouselPanel` and `Expander` read a failed transition from `JoinError::Panicked`;
+  `TextBox::paste` raises the panic of its paste again in the clipboard operation.
+- The behaviors: `TaskHandle` shares a `JoinHandle` (`from_handle`, `From`, `abort`; `from_task`
+  deprecated, `task()` gone) and is a future of `Result<T, JoinError>`; every clone that awaits a
+  failed task gets `Panicked`, and a task without a value gives `()` to every awaiter. `AsyncActionGroup`
+  raises the panic of an action's task again, so a failed action fails the group as before.
+- The platforms (FreeDesktop, X11, Wayland, the dialogs, the native menus, the browser, WinUI, the
+  headless session), `ferroui-opengl` (`dispose_async` of the composition context and texture give a
+  `JoinHandle`; a disposal that awaits another raises its panic again, `task_support::join`), the
+  designer, the diagnostics, the color picker, TreeDataGrid, the Material theme, the samples and the
+  render and benchmark tests.
+
+The rule of the replacements keeps every order: `invoke_async_task_local(move || future)` is
+`spawn_local_with_priority(future, DispatcherPriority::DEFAULT)` (its first poll is the job in which
+the callback ran), `to_task_scheduler().start_local(future)` is `start_local(future)` (the priority
+of the current job) and `to_task_scheduler_with_priority(p).start_local(future)` is
+`start_local_with_priority(future, p)`. What changed is where a panic goes: it is the outcome of the
+handle, a value, where a `DispatcherTask` raised it again in whoever observed it; the code of the
+workspace that relied on that raises it explicitly (the composite transition, the paste, the action
+group, the OpenGL disposals), and the rest observed it as a failure that it logged or ignored. A
+deprecated `..._task` variant completes one dispatcher job after its navigation when the navigation
+does not end inside the call. Nothing in the workspace uses a deprecated item but the tests of the
+deprecated items (the dispatcher tests and the ordering suite, under `#[allow(deprecated)]`, unchanged)
+and the deprecated variants themselves. The tests: `start_local`, the two conversions, the page
+transitions (an abort, a failing member of a composite), the navigation (the result, an abort, a
+failure, the `_task` variants), the dialogs (a failed cast, an abort, the `_task` variants), the
+inhibition request (an abort) and `TaskHandle` (the result, a panic for every awaiter, an abort,
+`from_task`). The `upstream-names.toml` rows map `System.Threading.Tasks.Task` and the asynchronous
+`InvokeAsync`.
 
 A7 is done: the tasks of the reactive libraries are `Shared<Result<T, ObservableError>>`. `Shared`
 gained what a task that code ends by hand needs (`shared.rs`): `Shared::channel()` gives a `Shared`

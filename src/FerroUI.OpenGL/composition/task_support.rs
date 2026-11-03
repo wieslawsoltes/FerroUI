@@ -5,7 +5,7 @@
 //! ([`ServerJobTask`]) is awaited through [`ServerJobTaskFuture`].
 
 use ferroui_base::rendering::composition::ServerJobTask;
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, JoinError, JoinHandle};
 use std::error::Error;
 use std::future::Future;
 use std::pin::Pin;
@@ -14,14 +14,24 @@ use std::task::{Context, Poll};
 
 /// Starts an asynchronous method on the current thread: the future runs up to its first
 /// pending await right away, as an `async` method of the original does when it is called,
-/// and is resumed by the dispatcher. The returned task is the `Task` of the method.
+/// and is resumed by the dispatcher. The handle of the task is the `Task` of the method.
 ///
 /// # Panics
 /// Panics when called from a thread other than the dispatcher thread.
-pub(crate) fn start<T: 'static>(future: impl Future<Output = T> + 'static) -> DispatcherTask<T> {
+pub(crate) fn start<T: 'static>(future: impl Future<Output = T> + 'static) -> JoinHandle<T> {
     let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-    let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
-    scheduler.start_local(future)
+    Dispatcher::current_dispatcher().start_local_with_priority(future, priority)
+}
+
+/// `await task` of the original for the handle of a task: its output, `None` when it was
+/// canceled; its panic, which the handle gives as a value, is raised again, so that a failed
+/// step fails the method that awaits it.
+pub(crate) async fn join<T>(task: JoinHandle<T>) -> Option<T> {
+    match task.await {
+        Ok(output) => Some(output),
+        Err(JoinError::Panicked(payload)) => std::panic::resume_unwind(payload),
+        Err(JoinError::Canceled) => None,
+    }
 }
 
 /// `await task` for a job of the compositor: completes when the job has run, with the error

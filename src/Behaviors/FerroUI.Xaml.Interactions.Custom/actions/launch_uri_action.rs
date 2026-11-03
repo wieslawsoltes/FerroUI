@@ -48,7 +48,7 @@ impl StyledElementActionImpl for LaunchUriAction {
         if let Some(top_level) = visual.and_then(|visual| TopLevel::get_top_level(Some(&*visual))) {
             // Fire and forget
             let launch = top_level.launcher().launch_uri_async(&uri);
-            drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+            drop(Dispatcher::ui_thread().start_local(async move {
                 let _ = launch.await;
             }));
             return Some(Rc::new(true));
