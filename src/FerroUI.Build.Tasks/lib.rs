@@ -160,12 +160,14 @@
 //! the browser, which has no WGSL compiler (decision 2 of
 //! docs/porting/custom-effects.md): [`write_shader_effect_glsl`] writes
 //! `$OUT_DIR/shader_effects/<name>.vert.glsl` and `.frag.glsl` from a build
-//! script.
+//! script. It is behind the feature `shader-effects`, so that a build script
+//! that only compiles markup does not build the translator.
 
 #![forbid(unsafe_code)]
 
 pub mod deterministic_id_generator;
 mod diagnostics;
+#[cfg(feature = "shader-effects")]
 pub mod shader_effects;
 // The model, the scanner and the export are the crate the framework crates scan themselves
 // with (`ferroui-build-scan`, which links nothing of the framework); they are exported
@@ -173,6 +175,7 @@ pub mod shader_effects;
 pub use ferroui_build_scan::{call_forms, export, model, model_set, scanner};
 pub mod type_system;
 pub mod xaml_compiler_diagnostics_filter;
+#[cfg(feature = "shader-effects")]
 pub use shader_effects::{
     shader_effect_glsl, translate_shader_effect_module, write_shader_effect_glsl, write_shader_effect_glsl_to,
     ShaderEffectGlsl, ShaderEffectGlslError, ShaderEffectGlslFiles,
