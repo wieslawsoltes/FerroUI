@@ -3065,6 +3065,247 @@
         }
       ]
     },
+    "RichEditBox": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/RichEditBox.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/text_samples.rs",
+        "src/FerroUI.Controls/rich_edit_box.rs",
+        "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_box_page_loads_five_examples_and_records_the_unavailable_math_mode"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_simple_editor_accepts_typing_and_backspace"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_formatting_buttons_toggle_bold_and_italic_on_the_selection"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_color_buttons_color_the_selection_and_the_text_that_follows"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_find_box_highlights_every_match_and_clears_them_when_it_loses_focus"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_file_buttons_report_a_missing_storage_service_or_picker"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_custom_menu_adds_share_only_when_it_opens_for_rebcustom"
+        }
+      ],
+      "notes": "The simple editor, the custom context menu command and the formatting editor use the native RichEditBox and its text object model: bold and italic toggles, font colors from the Rectangle of the clicked button with the TextChanged rule for new text, find with FindText highlighting and its focus handlers, and RTF open/save through the storage provider of the window. The context menu is the MenuFlyout of the WinUI theme (no CommandBarFlyout or touch SelectionFlyout); Share is a MenuItem in place of StandardUICommand. The two math examples need the math mode of the Windows RichEdit control and are recorded as not applicable, with their explanation and a diagnostic on the page. Segoe glyphs of the toolbar, exact visuals and host accessibility remain pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/SimpleTextEditorRicheditbox.txt",
+          "source_sha256": "bec138808bdc335bd37b8a763e8ba96b4e00bbdc289778682f22e5fe5200ba11",
+          "status": "ported",
+          "notes": "A native RichEditBox with the source automation name; typing, deletion and the theme's context menu are the control's own.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_box_page_loads_five_examples_and_records_the_unavailable_math_mode"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_simple_editor_accepts_typing_and_backspace"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/CustomizingRicheditboxCommandbarflyoutAdding.txt",
+          "source_sha256": "722086b74594b9b3a56662d07ee39504402510b7a99bae86c842aeb3e01202ae",
+          "status": "partial",
+          "notes": "Menu_Opening is ported to the Opening event of the box's context menu (subscribed while the box has one, the Loaded/Unloaded pair): the Share command is added when the menu opens for REBCustom, once rather than at every opening, and removed when the shared menu of the theme opens for another editor. The menu is a MenuFlyout, not a CommandBarFlyout, and Share is a MenuItem with the label of StandardUICommandKind.Share and no icon or action. The SelectionFlyout half is missing: FerroUI has no selection flyout (CommandBarFlyout is phase G2).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_custom_menu_adds_share_only_when_it_opens_for_rebcustom"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/CustomEditorRicheditbox.txt",
+          "source_sha256": "b28bd6cfc0b052f4084880dab39556c26e58d05ff08836bf6e89203b1595cea8",
+          "status": "ported",
+          "notes": "All handlers are ported: BoldButton/ItalicButton toggle the selection, ColorButton takes the color of the Rectangle in the clicked button, closes the flyout, focuses the editor and becomes the color of new text (Editor_TextChanged); FindBoxHighlightMatches/FindBoxRemoveHighlights use FindText with the system highlight colors on GotFocus, LostFocus and text changes, and Editor_GotFocus clears the highlight background. Open/Save use the storage provider of the window (an .rtf filter, the documents folder, import_rtf/export_rtf) in place of the Windows App SDK pickers; a failure is reported in a text block below the editor instead of a MessageDialog. VariableSizedWrapGrid is a three-column UniformGrid.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_formatting_buttons_toggle_bold_and_italic_on_the_selection"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_color_buttons_color_the_selection_and_the_text_that_follows"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_find_box_highlights_every_match_and_clears_them_when_it_loses_focus"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_file_buttons_report_a_missing_storage_service_or_picker"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/RichEditBoxMath.txt",
+          "source_sha256": "fc8ddedc97b382ffe31f59ae5ccf7636fb2b7ca2782bd048369567566a55c3f7",
+          "status": "not-applicable",
+          "reason": "TextDocument.SetMathMode(RichEditMathMode.MathOnly) is the math engine of the Windows RichEdit control (msftedit), a Windows-only API; the FerroUI editor has no math mode.",
+          "notes": "The page keeps the explanation and an editor without math mode, with a visible diagnostic.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_box_page_loads_five_examples_and_records_the_unavailable_math_mode"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/WorkingMathmlRicheditbox.txt",
+          "source_sha256": "e53f8c75a92d15b1cc136ebfc09e46e6267ebcc6853a3c3f49f410b441a224d6",
+          "status": "not-applicable",
+          "reason": "ITextDocument.SetMathML and GetMathML need the math mode of the Windows RichEdit control (msftedit), a Windows-only API.",
+          "notes": "The page keeps the explanation, the editor, the MathML code view with its empty-content text and a disabled Set sample formula button, with a visible diagnostic.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_box_page_loads_five_examples_and_records_the_unavailable_math_mode"
+            }
+          ]
+        }
+      ]
+    },
+    "RichTextBlock": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/RichTextBlock.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/text_samples.rs",
+        "src/FerroUI.Controls/rich_text_block.rs",
+        "src/FerroUI.Controls/rich_text_block_overflow.rs",
+        "src/FerroUI.Controls/documents/text_highlighter.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_text_block_page_loads_four_examples_with_source_text_and_selection_highlight"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_text_block_overflow_flows_into_two_linked_containers"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_text_block_highlight_follows_the_chosen_color_over_the_source_range"
+        }
+      ],
+      "notes": "All four examples use the native RichTextBlock: paragraphs with formatted runs and a hyperlink, SelectionHighlightColor, OverflowContentTarget through two RichTextBlockOverflow columns, and a TextHighlighter whose color follows the ComboBox selection over the source range 28+11. x:Bind of the overflow targets is an element-name Binding; mixed text content is written as explicit Runs; the ComboBox header is composed. Exact text layout, fonts and host accessibility remain pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/RichTextBlock/SimpleRichtextblock.txt",
+          "source_sha256": "d2a34e472564b826c2d7a0db96de62a762c7ced9cfe8d8537c1141bf909a6d1b",
+          "status": "ported",
+          "notes": "A native RichTextBlock with the source paragraph.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_text_block_page_loads_four_examples_with_source_text_and_selection_highlight"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichTextBlock/RichtextblockCustomSelectionHighlight.txt",
+          "source_sha256": "bd6f43253589b9f00b720f029ab23ccb4dc8a01d5f17bdfce8d4299be5736dfa",
+          "status": "ported",
+          "notes": "SelectionHighlightColor Green over the source paragraphs, with the bold italic run and the hyperlink; selection is the control's own.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_text_block_page_loads_four_examples_with_source_text_and_selection_highlight"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichTextBlock/RichtextblockOverflow.txt",
+          "source_sha256": "337d399379381a17001168d867916b513dc1d728486854b719f82b058d0041b0",
+          "status": "ported",
+          "notes": "The justified RichTextBlock flows into two linked RichTextBlockOverflow columns; x:Bind becomes {Binding #name}.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_text_block_overflow_flows_into_two_linked_containers"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichTextBlock/RichtextblockCustomTexthighlighting.txt",
+          "source_sha256": "0daaf2f973798b55743afadc4da30e35befed94d19355c466e063f512a23bc22",
+          "status": "ported",
+          "notes": "HighlightColorCombobox_SelectionChanged in Rust: the color named by the selected item replaces the TextHighlighter of characters 28 to 39; the initially selected Yellow item applies on load as in the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_text_block_highlight_follows_the_chosen_color_over_the_source_range"
+            }
+          ]
+        }
+      ]
+    },
     "SystemBackdropElement": {
       "status": "pending",
       "implementation": [],

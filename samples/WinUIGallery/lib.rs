@@ -26,6 +26,7 @@ pub mod navigation;
 mod navigation_view_samples;
 mod platform_samples;
 mod sizing_sample;
+mod text_samples;
 mod window_samples;
 
 #[cfg(any(feature = "desktop", feature = "capture"))]
@@ -60,3 +61,6 @@ mod materials_samples_tests;
 
 #[cfg(test)]
 mod window_samples_tests;
+
+#[cfg(test)]
+mod text_samples_tests;
