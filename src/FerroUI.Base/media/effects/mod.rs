@@ -29,7 +29,8 @@ pub use custom_effect::{
 pub use custom_effect_registry::{CustomEffectRegistrationError, CustomEffectRegistry};
 pub use custom_effect_shader::{
     shader_uniform_name, shader_uniform_name_matches, ShaderEffectDescription, ShaderEffectMode, ShaderEffectPadding,
-    ShaderUniformType, ShaderUniformValue, SHADER_LAYER_SCALE, SHADER_LAYER_SIZE,
+    ShaderUniformType, ShaderUniformValue, SHADER_LAYER_SCALE, SHADER_LAYER_SIZE, SHADER_WGSL_CONTENT_BINDING,
+    SHADER_WGSL_FRAGMENT_ENTRY, SHADER_WGSL_PASS_BINDING, SHADER_WGSL_UNIFORMS_BINDING, SHADER_WGSL_VERTEX_ENTRY,
 };
 pub use drop_shadow_effect::{DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase};
 pub use effect::Effect;
