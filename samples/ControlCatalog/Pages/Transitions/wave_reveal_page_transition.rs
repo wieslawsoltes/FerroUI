@@ -4,7 +4,7 @@ use ferroui_base::animation::easings::{CubicEaseOut, Easing};
 use ferroui_base::animation::{IPageTransition, IProgressPageTransition, PageSlide, PageTransitionItem, SlideAxis, SignedDuration};
 use ferroui_base::media::{Geometry, RectangleGeometry, StreamGeometry};
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, JoinHandle};
 use ferroui_base::{Point, Rect, Ref, Size, Visual};
 use mini_mvvm::{delay, start_async};
 use std::cell::{Cell, RefCell};
@@ -324,7 +324,7 @@ impl IPageTransition for WaveRevealPageTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let wave = self.wave();
         let duration = self.base.duration();
         let slide_in_easing = self.base.slide_in_easing();
