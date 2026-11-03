@@ -183,7 +183,7 @@ impl InputElementImpl for TestRoot {
     }
 }
 
-impl FerroObjectImpl for TestRoot {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TestRoot {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let source = TestSource::new(this.to_ref().downgrade());
@@ -193,7 +193,7 @@ impl FerroObjectImpl for TestRoot {
         KeyboardNavigation::set_tab_navigation(this, KeyboardNavigationMode::Cycle);
         this.set_presentation_source_for_root_visual(Some(source));
     }
-}
+} }
 
 /// A layout pass queued on the dispatcher must not outlive the root: the
 /// layout manager is disposed with it.
@@ -205,17 +205,17 @@ impl Drop for TestRoot {
     }
 }
 
-impl StyledElementImpl for TestRoot {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for TestRoot {
     fn is_logical_root(_this: &Self) -> bool {
         true
     }
-}
+} }
 
-impl LayoutableImpl for TestRoot {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TestRoot {
     fn measure_override(this: &Self, _available_size: Size) -> Size {
         Self::parent_measure_override(this, this.client_size())
     }
-}
+} }
 
 impl TestRoot {
     /// Field initialisation, for classes that derive from the test root.

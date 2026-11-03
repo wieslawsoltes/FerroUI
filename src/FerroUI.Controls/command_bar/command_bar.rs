@@ -305,7 +305,7 @@ ferro_class_info!(CommandBar {
 
 ferro_impl_classes!(CommandBar: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for CommandBar {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for CommandBar {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -402,9 +402,9 @@ impl FerroObjectImpl for CommandBar {
             this.request_dynamic_overflow_update();
         }
     }
-}
+} }
 
-impl VisualImpl for CommandBar {
+ferroui_base::ferro_overrides! { impl VisualImpl for CommandBar {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.rebuild_secondary_command_visibility_subscriptions();
@@ -414,9 +414,9 @@ impl VisualImpl for CommandBar {
         this.secondary_command_visibility_subscriptions.clear();
         Self::parent_on_detached_from_visual_tree(this, e);
     }
-}
+} }
 
-impl LayoutableImpl for CommandBar {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for CommandBar {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let new_constraint = if available_size.width.is_finite() { available_size.width } else { f64::INFINITY };
 
@@ -427,9 +427,9 @@ impl LayoutableImpl for CommandBar {
 
         Self::parent_measure_override(this, available_size)
     }
-}
+} }
 
-impl TemplatedControlImpl for CommandBar {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for CommandBar {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -534,7 +534,7 @@ impl TemplatedControlImpl for CommandBar {
         this.update_sticky_behavior();
         this.request_dynamic_overflow_update();
     }
-}
+} }
 
 ferro_properties! {
     impl CommandBar {

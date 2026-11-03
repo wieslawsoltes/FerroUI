@@ -34,7 +34,7 @@ crate::ferro_class_info!(Styles {
     interfaces: [Rc<dyn IStyle>, Rc<dyn IResourceProvider>],
 });
 
-impl FerroObjectImpl for Styles {
+crate::ferro_overrides! { impl FerroObjectImpl for Styles {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -56,7 +56,7 @@ impl FerroObjectImpl for Styles {
             }
         })));
     }
-}
+} }
 
 impl Styles {
     /// Creates the class data; see [`FerroObject::construct`].

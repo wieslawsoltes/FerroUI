@@ -38,7 +38,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for Carousel {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Carousel {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -65,9 +65,9 @@ impl FerroObjectImpl for Carousel {
             this.sync_scroll_offset();
         }
     }
-}
+} }
 
-impl InputElementImpl for Carousel {
+ferroui_base::ferro_overrides! { impl InputElementImpl for Carousel {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
@@ -111,9 +111,9 @@ impl InputElementImpl for Carousel {
             _ => {}
         }
     }
-}
+} }
 
-impl LayoutableImpl for Carousel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Carousel {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let result = Self::parent_arrange_override(this, final_size);
 
@@ -121,9 +121,9 @@ impl LayoutableImpl for Carousel {
 
         result
     }
-}
+} }
 
-impl TemplatedControlImpl for Carousel {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for Carousel {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -142,7 +142,7 @@ impl TemplatedControlImpl for Carousel {
             panel.refresh_gesture_recognizer();
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Carousel {
     ferro_property!(

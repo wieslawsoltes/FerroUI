@@ -15,12 +15,12 @@ pub struct PolyLineSegment {
 ferro_class!(PolyLineSegment: PathSegment);
 crate::ferro_class_info!(PolyLineSegment { new: PolyLineSegment::new });
 
-impl FerroObjectImpl for PolyLineSegment {
+crate::ferro_overrides! { impl FerroObjectImpl for PolyLineSegment {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_points(Points::new());
     }
-}
+} }
 
 impl PathSegmentImpl for PolyLineSegment {
     fn apply_to(this: &Self, ctx: &mut dyn IGeometryContext) {

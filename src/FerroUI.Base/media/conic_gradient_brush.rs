@@ -20,7 +20,7 @@ ferro_class!(ConicGradientBrush: GradientBrush);
 crate::ferro_class_info!(ConicGradientBrush { new: ConicGradientBrush::new });
 ferro_impl_classes!(ConicGradientBrush: FerroObjectImpl);
 
-impl BrushImpl for ConicGradientBrush {
+crate::ferro_overrides! { impl BrushImpl for ConicGradientBrush {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {
         Some(|c| ServerCompositionSimpleConicGradientBrush::new(c))
     }
@@ -29,7 +29,7 @@ impl BrushImpl for ConicGradientBrush {
         Self::parent_serialize_changes(this, c, writer);
         ServerCompositionSimpleConicGradientBrushProps::serialize_all_changes(writer, this.angle(), this.center());
     }
-}
+} }
 
 impl GradientBrushImpl for ConicGradientBrush {
     fn to_immutable(this: &Self) -> Rc<dyn IImmutableBrush> {

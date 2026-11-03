@@ -20,7 +20,7 @@ ferro_impl_classes!(Decorator: StyledElementImpl, VisualImpl, InteractiveImpl, I
 
 ferroui_base::ferro_impl_classes!(Decorator: FerroObjectImpl);
 
-impl LayoutableImpl for Decorator {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Decorator {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let child = this.child();
         LayoutHelper::measure_child(child.as_deref().map(|c| -> &Layoutable { c }), available_size, this.padding())
@@ -30,7 +30,7 @@ impl LayoutableImpl for Decorator {
         let child = this.child();
         LayoutHelper::arrange_child(child.as_deref().map(|c| -> &Layoutable { c }), final_size, this.padding())
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Decorator {
     ferro_property!(

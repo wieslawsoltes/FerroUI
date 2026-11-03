@@ -25,9 +25,9 @@ fn not_implemented() -> ! {
     panic!("The method or operation is not implemented.")
 }
 
-impl FerroObjectImpl for InteropAutomationPeer {}
+ferroui_base::ferro_impl_classes!(InteropAutomationPeer: FerroObjectImpl);
 
-impl AutomationPeerImpl for InteropAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for InteropAutomationPeer {
     fn bring_into_view_core(_this: &Self) {
         not_implemented()
     }
@@ -112,7 +112,7 @@ impl AutomationPeerImpl for InteropAutomationPeer {
         *this.parent.borrow_mut() = parent.map(|parent| parent.downgrade());
         true
     }
-}
+} }
 
 impl InteropAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

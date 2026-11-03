@@ -34,7 +34,7 @@ ferro_class! {
 
 crate::ferro_class_info!(ResourceProvider { interfaces: [Rc<dyn IResourceProvider>] });
 
-impl FerroObjectImpl for ResourceProvider {}
+crate::ferro_impl_classes!(ResourceProvider: FerroObjectImpl);
 
 impl ResourceProviderImpl for ResourceProvider {
     fn has_resources(_this: &Self) -> bool {

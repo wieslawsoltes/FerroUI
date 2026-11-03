@@ -73,7 +73,7 @@ ferro_impl_classes!(RadioButtons:
     SelectingItemsControlImpl, HeaderedSelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for RadioButtons {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RadioButtons {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_wrap_focus(false);
@@ -112,15 +112,15 @@ impl FerroObjectImpl for RadioButtons {
             }
         }
     }
-}
+} }
 
-impl ControlImpl for RadioButtons {
+ferroui_base::ferro_overrides! { impl ControlImpl for RadioButtons {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         RadioButtonsAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl InputElementImpl for RadioButtons {
+ferroui_base::ferro_overrides! { impl InputElementImpl for RadioButtons {
     fn on_got_focus(this: &Self, args: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, args);
         // The selection follows the focus when it moves within the group by the keyboard, not
@@ -137,9 +137,9 @@ impl InputElementImpl for RadioButtons {
             }
         }
     }
-}
+} }
 
-impl ItemsControlImpl for RadioButtons {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for RadioButtons {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -190,7 +190,7 @@ impl ItemsControlImpl for RadioButtons {
         }
         this.update_automation_positions();
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RadioButtons {
     ferro_property!(

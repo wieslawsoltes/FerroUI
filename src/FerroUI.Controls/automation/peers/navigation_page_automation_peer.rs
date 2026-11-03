@@ -14,10 +14,9 @@ pub struct NavigationPageAutomationPeer {
 ferro_class!(NavigationPageAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(NavigationPageAutomationPeer {});
 
-impl FerroObjectImpl for NavigationPageAutomationPeer {}
-impl ControlAutomationPeerImpl for NavigationPageAutomationPeer {}
+ferroui_base::ferro_impl_classes!(NavigationPageAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for NavigationPageAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for NavigationPageAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Pane
     }
@@ -39,7 +38,7 @@ impl AutomationPeerImpl for NavigationPageAutomationPeer {
 
         result
     }
-}
+} }
 
 impl NavigationPageAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -61,15 +61,15 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl ControlImpl for TreeView {
+ferroui_base::ferro_overrides! { impl ControlImpl for TreeView {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::TreeViewAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferroui_base::ferro_impl_classes!(TreeView: FerroObjectImpl);
 
-impl InputElementImpl for TreeView {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TreeView {
     fn as_custom_keyboard_navigation(this: &Self) -> Option<&dyn ICustomKeyboardNavigation> {
         Some(this)
     }
@@ -112,9 +112,9 @@ impl InputElementImpl for TreeView {
             }
         }
     }
-}
+} }
 
-impl ItemsControlImpl for TreeView {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for TreeView {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -173,7 +173,7 @@ impl ItemsControlImpl for TreeView {
             _ => {}
         }
     }
-}
+} }
 
 impl TreeViewImpl for TreeView {
     fn should_trigger_selection(_this: &Self, selectable: &Visual, event_args: &PointerEventArgs) -> bool {

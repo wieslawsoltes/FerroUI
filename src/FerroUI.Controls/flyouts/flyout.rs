@@ -24,7 +24,7 @@ ferro_class!(Flyout: PopupFlyoutBase);
 ferroui_base::ferro_class_info!(Flyout { new: Flyout::new });
 ferro_impl_classes!(Flyout: FerroObjectImpl, FlyoutBaseImpl);
 
-impl PopupFlyoutBaseImpl for Flyout {
+ferroui_base::ferro_overrides! { impl PopupFlyoutBaseImpl for Flyout {
     fn create_presenter(this: &Self) -> Ref<Control> {
         let presenter = FlyoutPresenter::new();
         presenter.bind_indexer(
@@ -51,7 +51,7 @@ impl PopupFlyoutBaseImpl for Flyout {
 
         Self::parent_on_opening(this, args);
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Flyout {
     ferro_property!(

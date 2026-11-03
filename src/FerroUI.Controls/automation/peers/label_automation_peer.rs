@@ -14,10 +14,9 @@ pub struct LabelAutomationPeer {
 ferro_class!(LabelAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(LabelAutomationPeer {});
 
-impl FerroObjectImpl for LabelAutomationPeer {}
-impl ControlAutomationPeerImpl for LabelAutomationPeer {}
+ferroui_base::ferro_impl_classes!(LabelAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for LabelAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for LabelAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "Text".to_owned()
     }
@@ -40,7 +39,7 @@ impl AutomationPeerImpl for LabelAutomationPeer {
             _ => Self::parent_get_name_core(this),
         }
     }
-}
+} }
 
 impl LabelAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

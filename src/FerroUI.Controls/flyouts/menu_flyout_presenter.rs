@@ -33,16 +33,16 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for MenuFlyoutPresenter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for MenuFlyoutPresenter {
     fn on_property_changed(this: &Self, change: &ferroui_base::FerroPropertyChangedEventArgs<'_>) {
         <Self as ferroui_base::FerroObjectImplExt>::parent_on_property_changed(this, change);
         if change.property() == Self::system_backdrop_property().as_property() && this.is_attached_to_visual_tree() {
             this.element_backdrop.connect(this, this.system_backdrop());
         }
     }
-}
+} }
 
-impl VisualImpl for MenuFlyoutPresenter {
+ferroui_base::ferro_overrides! { impl VisualImpl for MenuFlyoutPresenter {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.element_backdrop.connect(this, this.system_backdrop());
@@ -59,7 +59,7 @@ impl VisualImpl for MenuFlyoutPresenter {
             }
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl MenuFlyoutPresenter {
     ferro_property!(
@@ -70,7 +70,7 @@ ferroui_base::ferro_properties! { impl MenuFlyoutPresenter {
     );
 } }
 
-impl MenuBaseImpl for MenuFlyoutPresenter {
+ferroui_base::ferro_overrides! { impl MenuBaseImpl for MenuFlyoutPresenter {
     fn close(this: &Self) {
         // The default menu interaction handler calls this
         let host = this.find_logical_ancestor_of_type::<Popup>(false);
@@ -83,7 +83,7 @@ impl MenuBaseImpl for MenuFlyoutPresenter {
     fn open(_this: &Self) {
         panic!("Use MenuFlyout.ShowAt(Control) instead");
     }
-}
+} }
 
 impl MenuFlyoutPresenter {
     /// Creates the class data of a presenter that uses the default menu

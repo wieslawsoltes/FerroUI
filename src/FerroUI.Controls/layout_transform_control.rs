@@ -50,7 +50,7 @@ ferro_impl_classes!(LayoutTransformControl: StyledElementImpl, InteractiveImpl, 
 
 ferroui_base::ferro_impl_classes!(LayoutTransformControl: FerroObjectImpl);
 
-impl VisualImpl for LayoutTransformControl {
+ferroui_base::ferro_overrides! { impl VisualImpl for LayoutTransformControl {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.subscribe_layout_transform(this.layout_transform());
@@ -61,9 +61,9 @@ impl VisualImpl for LayoutTransformControl {
         Self::parent_on_detached_from_visual_tree(this, e);
         this.unsubscribe_layout_transform();
     }
-}
+} }
 
-impl LayoutableImpl for LayoutTransformControl {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for LayoutTransformControl {
     /// Provides the behaviour for the "arrange" pass of layout.
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let (Some(transform_root), Some(_)) = (this.transform_root(), this.layout_transform()) else {
@@ -136,7 +136,7 @@ impl LayoutableImpl for LayoutTransformControl {
         // Return result to allocate enough space for the transformation
         Size::new(transformed_desired_rect.width, transformed_desired_rect.height)
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl LayoutTransformControl {
     ferro_property!(

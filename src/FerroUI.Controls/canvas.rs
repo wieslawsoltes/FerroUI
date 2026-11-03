@@ -29,7 +29,7 @@ ferro_impl_classes!(Canvas: StyledElementImpl, VisualImpl, InteractiveImpl, Inpu
 
 ferroui_base::ferro_impl_classes!(Canvas: FerroObjectImpl);
 
-impl LayoutableImpl for Canvas {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Canvas {
     fn measure_override(this: &Self, _available_size: Size) -> Size {
         let available_size = Size::new(f64::INFINITY, f64::INFINITY);
 
@@ -47,7 +47,7 @@ impl LayoutableImpl for Canvas {
 
         final_size
     }
-}
+} }
 
 impl CanvasImpl for Canvas {
     fn arrange_child(_this: &Self, child: &Ref<Control>, final_size: Size) {

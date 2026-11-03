@@ -34,7 +34,7 @@ ferro_impl_classes!(
     PanelImpl
 );
 
-impl LayoutableImpl for TableViewCellsPresenter {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TableViewCellsPresenter {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let Some(columns) = this.row().and_then(|row| row.columns()) else { return Size::default() };
 
@@ -67,7 +67,7 @@ impl LayoutableImpl for TableViewCellsPresenter {
 
         TableViewLayoutHelper::arrange_row(&columns, &this.children(), final_size, 0.0)
     }
-}
+} }
 
 impl TableViewCellsPresenter {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

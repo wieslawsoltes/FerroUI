@@ -34,7 +34,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(RelativePanel: FerroObjectImpl);
 
-impl LayoutableImpl for RelativePanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for RelativePanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         // The graph is taken out of its cell for the duration of the pass:
         // measuring children runs arbitrary code.
@@ -102,7 +102,7 @@ impl LayoutableImpl for RelativePanel {
         }
         arrange_size
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RelativePanel, also [
     RelativePanel::above_property,

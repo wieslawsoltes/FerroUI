@@ -31,17 +31,15 @@ ferroui_base::ferro_class_info!(ComboBoxAutomationPeer {
     ]
 });
 
-impl FerroObjectImpl for ComboBoxAutomationPeer {}
-impl ControlAutomationPeerImpl for ComboBoxAutomationPeer {}
-impl ItemsControlAutomationPeerImpl for ComboBoxAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ComboBoxAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl, ItemsControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ComboBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ComboBoxAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::ComboBox
     }
-}
+} }
 
-impl SelectingItemsControlAutomationPeerImpl for ComboBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl SelectingItemsControlAutomationPeerImpl for ComboBoxAutomationPeer {
     fn get_selection_core(this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {
         if this.expand_collapse_state() == ExpandCollapseState::Expanded {
             return Self::parent_get_selection_core(this);
@@ -96,7 +94,7 @@ impl SelectingItemsControlAutomationPeerImpl for ComboBoxAutomationPeer {
             this.raise_property_changed_event(ValuePatternIdentifiers::value_property(), None, None);
         }
     }
-}
+} }
 
 impl IExpandCollapseProvider for ProviderAdapter<ComboBoxAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
@@ -230,9 +228,9 @@ pub(crate) struct UnrealizedSelectionPeer {
 ferro_class!(UnrealizedSelectionPeer: UnrealizedElementAutomationPeer);
 ferroui_base::ferro_class_info!(UnrealizedSelectionPeer {});
 
-impl FerroObjectImpl for UnrealizedSelectionPeer {}
+ferroui_base::ferro_impl_classes!(UnrealizedSelectionPeer: FerroObjectImpl);
 
-impl AutomationPeerImpl for UnrealizedSelectionPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for UnrealizedSelectionPeer {
     fn get_accelerator_key_core(_this: &Self) -> Option<String> {
         None
     }
@@ -289,7 +287,7 @@ impl AutomationPeerImpl for UnrealizedSelectionPeer {
 
         item.map(|item| ValueTypes::to_display_string(Some(&item)))
     }
-}
+} }
 
 impl UnrealizedSelectionPeer {
     fn new(owner: &ComboBoxAutomationPeer) -> Ref<Self> {

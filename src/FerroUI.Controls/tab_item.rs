@@ -36,13 +36,13 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl ControlImpl for TabItem {
+ferroui_base::ferro_overrides! { impl ControlImpl for TabItem {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ListItemAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for TabItem {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TabItem {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.property() == TemplatedControl::foreground_property().as_property()
@@ -51,9 +51,9 @@ impl FerroObjectImpl for TabItem {
             this.update_icon_foreground();
         }
     }
-}
+} }
 
-impl InputElementImpl for TabItem {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TabItem {
     fn on_access_key(this: &Self, e: &dyn IRoutedEventArgs) {
         this.focus();
         this.set_current_value(Self::is_selected_property(), true);
@@ -74,7 +74,7 @@ impl InputElementImpl for TabItem {
         Self::parent_on_pointer_released(this, e);
         this.update_selection_from_event(e);
     }
-}
+} }
 
 impl ISelectable for TabItem {
     fn is_selected(&self) -> bool {

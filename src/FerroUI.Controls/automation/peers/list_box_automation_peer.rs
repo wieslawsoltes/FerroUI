@@ -14,11 +14,7 @@ pub struct ListBoxAutomationPeer {
 ferro_class!(ListBoxAutomationPeer: SelectingItemsControlAutomationPeer);
 ferroui_base::ferro_class_info!(ListBoxAutomationPeer {});
 
-impl FerroObjectImpl for ListBoxAutomationPeer {}
-impl AutomationPeerImpl for ListBoxAutomationPeer {}
-impl ControlAutomationPeerImpl for ListBoxAutomationPeer {}
-impl ItemsControlAutomationPeerImpl for ListBoxAutomationPeer {}
-impl SelectingItemsControlAutomationPeerImpl for ListBoxAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ListBoxAutomationPeer: FerroObjectImpl, AutomationPeerImpl, ControlAutomationPeerImpl, ItemsControlAutomationPeerImpl, SelectingItemsControlAutomationPeerImpl);
 
 impl ListBoxAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

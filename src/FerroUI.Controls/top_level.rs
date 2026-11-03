@@ -115,7 +115,7 @@ ferro_class! {
 
 ferro_impl_classes!(TopLevel: LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, ContentControlImpl);
 
-impl FerroObjectImpl for TopLevel {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TopLevel {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.initialize();
@@ -137,9 +137,9 @@ impl FerroObjectImpl for TopLevel {
             }
         }
     }
-}
+} }
 
-impl StyledElementImpl for TopLevel {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for TopLevel {
     fn is_logical_root(_this: &Self) -> bool {
         true
     }
@@ -153,9 +153,9 @@ impl StyledElementImpl for TopLevel {
     fn is_theme_variant_root(this: &Self) -> bool {
         this.application_theme_host.borrow().is_none()
     }
-}
+} }
 
-impl VisualImpl for TopLevel {
+ferroui_base::ferro_overrides! { impl VisualImpl for TopLevel {
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
     }
@@ -163,9 +163,9 @@ impl VisualImpl for TopLevel {
     fn invalidate_mirror_transform(_this: &Self) {
         // Do nothing because TopLevel shouldn't apply MirrorTransform on himself.
     }
-}
+} }
 
-impl TemplatedControlImpl for TopLevel {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TopLevel {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -179,7 +179,7 @@ impl TemplatedControlImpl for TopLevel {
         *this.transparency_fallback_border.borrow_mut() = e.name_scope().find_as::<Border>("PART_TransparencyFallback");
         this.handle_transparency_level_changed(platform_impl.transparency_level());
     }
-}
+} }
 
 impl TopLevelImpl for TopLevel {
     fn handle_closed(this: &Self) {

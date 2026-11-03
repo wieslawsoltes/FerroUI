@@ -36,7 +36,7 @@ ferro_impl_classes!(
     PanelImpl
 );
 
-impl StyledElementImpl for TableViewColumnHeadersPresenter {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for TableViewColumnHeadersPresenter {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_logical_tree(this, e);
 
@@ -96,9 +96,9 @@ impl StyledElementImpl for TableViewColumnHeadersPresenter {
 
         Self::parent_on_detached_from_logical_tree(this, e);
     }
-}
+} }
 
-impl LayoutableImpl for TableViewColumnHeadersPresenter {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TableViewColumnHeadersPresenter {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let Some(table_view) = this.table_view() else { return Size::default() };
 
@@ -136,7 +136,7 @@ impl LayoutableImpl for TableViewColumnHeadersPresenter {
             .unwrap_or(0.0);
         TableViewLayoutHelper::arrange_row(&columns, &this.children(), final_size, -offset)
     }
-}
+} }
 
 impl TableViewColumnHeadersPresenter {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -114,14 +114,14 @@ pub struct StateTrigger {
 ferro_class!(StateTrigger: StateTriggerBase);
 ferro_class_info!(StateTrigger { new: StateTrigger::new, markup: { namespace: "FerroUI.Controls" } });
 
-impl FerroObjectImpl for StateTrigger {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for StateTrigger {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.property() == Self::is_active_property().as_property() {
             this.set_active(this.is_active());
         }
     }
-}
+} }
 
 ferro_properties! { impl StateTrigger {
     /// Defines the `IsActive` property: whether the trigger is active. Default `false`.
@@ -163,7 +163,7 @@ pub struct AdaptiveTrigger {
 ferro_class!(AdaptiveTrigger: StateTriggerBase);
 ferro_class_info!(AdaptiveTrigger { new: AdaptiveTrigger::new, markup: { namespace: "FerroUI.Controls" } });
 
-impl FerroObjectImpl for AdaptiveTrigger {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for AdaptiveTrigger {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.property() == Self::min_window_width_property().as_property()
@@ -172,7 +172,7 @@ impl FerroObjectImpl for AdaptiveTrigger {
             this.owner_changed();
         }
     }
-}
+} }
 
 ferro_properties! { impl AdaptiveTrigger {
     /// Defines the `MinWindowWidth` property: the smallest window width at which the trigger

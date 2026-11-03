@@ -61,7 +61,7 @@ impl LayerWrapper {
 
 const POPOVER_TRIGGER_ZONE_HEIGHT: f64 = 1.0;
 
-impl InputElementImpl for TopLevelHost {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TopLevelHost {
     fn on_pointer_moved(this: &Self, e: &PointerEventArgs) {
         Self::parent_on_pointer_moved(this, e);
 
@@ -82,7 +82,7 @@ impl InputElementImpl for TopLevelHost {
             }
         }
     }
-}
+} }
 
 impl TopLevelHost {
     /// The current drawn decorations instance, if active.

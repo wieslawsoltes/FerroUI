@@ -40,13 +40,13 @@ ferro_impl_classes!(
     MenuBaseImpl
 );
 
-impl StyledElementImpl for NativeMenuBarPresenter {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for NativeMenuBarPresenter {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         Menu::TYPE
     }
-}
+} }
 
-impl ItemsControlImpl for NativeMenuBarPresenter {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for NativeMenuBarPresenter {
     fn create_container_for_item_override(
         this: &Self,
         item: &Option<BoxedValue>,
@@ -56,7 +56,7 @@ impl ItemsControlImpl for NativeMenuBarPresenter {
         Self::create_container_for_native_item(item, index, recycle_key)
             .unwrap_or_else(|| Self::parent_create_container_for_item_override(this, item, index, recycle_key))
     }
-}
+} }
 
 /// The container of an item of a native menu that is shown as a managed
 /// menu: a separator, or a menu item bound to the native item; `None` for
@@ -197,13 +197,13 @@ ferro_impl_classes!(
     MenuItemImpl
 );
 
-impl StyledElementImpl for NativeMenuItemPresenter {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for NativeMenuItemPresenter {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         MenuItem::TYPE
     }
-}
+} }
 
-impl ItemsControlImpl for NativeMenuItemPresenter {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for NativeMenuItemPresenter {
     fn create_container_for_item_override(
         this: &Self,
         item: &Option<BoxedValue>,
@@ -213,7 +213,7 @@ impl ItemsControlImpl for NativeMenuItemPresenter {
         NativeMenuBarPresenter::create_container_for_native_item(item, index, recycle_key)
             .unwrap_or_else(|| Self::parent_create_container_for_item_override(this, item, index, recycle_key))
     }
-}
+} }
 
 impl NativeMenuItemPresenter {
     fn new() -> Ref<Self> {

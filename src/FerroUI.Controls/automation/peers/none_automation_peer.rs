@@ -14,10 +14,9 @@ pub struct NoneAutomationPeer {
 ferro_class!(NoneAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(NoneAutomationPeer {});
 
-impl FerroObjectImpl for NoneAutomationPeer {}
-impl ControlAutomationPeerImpl for NoneAutomationPeer {}
+ferroui_base::ferro_impl_classes!(NoneAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for NoneAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for NoneAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::None
     }
@@ -29,7 +28,7 @@ impl AutomationPeerImpl for NoneAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         false
     }
-}
+} }
 
 impl NoneAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

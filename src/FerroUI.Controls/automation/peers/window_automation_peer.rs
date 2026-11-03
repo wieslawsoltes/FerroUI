@@ -18,7 +18,7 @@ pub struct WindowAutomationPeer {
 ferro_class!(WindowAutomationPeer: WindowBaseAutomationPeer);
 ferroui_base::ferro_class_info!(WindowAutomationPeer {});
 
-impl FerroObjectImpl for WindowAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for WindowAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -43,9 +43,9 @@ impl FerroObjectImpl for WindowAutomationPeer {
         });
         *this.closed_subscription.borrow_mut() = Some(subscription);
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for WindowAutomationPeer {
+ferroui_base::ferro_overrides! { impl ControlAutomationPeerImpl for WindowAutomationPeer {
     fn get_children_core(this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {
         let base_children = Self::parent_get_children_core(this);
         let overlay_peer = this.owner().top_level_host().get_or_create_decorations_overlays_peer();
@@ -58,13 +58,13 @@ impl ControlAutomationPeerImpl for WindowAutomationPeer {
         }
         Some(rv)
     }
-}
+} }
 
-impl AutomationPeerImpl for WindowAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for WindowAutomationPeer {
     fn get_name_core(this: &Self) -> Option<String> {
         this.owner().title()
     }
-}
+} }
 
 impl WindowAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

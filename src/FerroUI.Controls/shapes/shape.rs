@@ -55,7 +55,7 @@ impl ShapeImpl for Shape {
     }
 }
 
-impl FerroObjectImpl for Shape {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Shape {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -98,9 +98,9 @@ impl FerroObjectImpl for Shape {
             this.invalidate_visual();
         }
     }
-}
+} }
 
-impl VisualImpl for Shape {
+ferroui_base::ferro_overrides! { impl VisualImpl for Shape {
     fn render(this: &Self, context: &mut DrawingContext) {
         let geometry = this.rendered_geometry();
 
@@ -133,9 +133,9 @@ impl VisualImpl for Shape {
             this.unsubscribe_from_geometry();
         }
     }
-}
+} }
 
-impl LayoutableImpl for Shape {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Shape {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let Some(defining_geometry) = this.defining_geometry() else {
             return Size::default();
@@ -162,7 +162,7 @@ impl LayoutableImpl for Shape {
 
         Size::default()
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Shape {
     ferro_property!(

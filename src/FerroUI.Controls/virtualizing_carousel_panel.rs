@@ -109,7 +109,7 @@ ferro_class!(VirtualizingCarouselPanel: VirtualizingPanel);
 ferroui_base::ferro_class_info!(VirtualizingCarouselPanel { new: VirtualizingCarouselPanel::new });
 ferro_impl_classes!(VirtualizingCarouselPanel: StyledElementImpl, InteractiveImpl, ControlImpl, PanelImpl);
 
-impl FerroObjectImpl for VirtualizingCarouselPanel {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for VirtualizingCarouselPanel {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -159,9 +159,9 @@ impl FerroObjectImpl for VirtualizingCarouselPanel {
             }
         }
     }
-}
+} }
 
-impl VisualImpl for VirtualizingCarouselPanel {
+ferroui_base::ferro_overrides! { impl VisualImpl for VirtualizingCarouselPanel {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.refresh_gesture_recognizer();
@@ -171,9 +171,9 @@ impl VisualImpl for VirtualizingCarouselPanel {
         Self::parent_on_detached_from_visual_tree(this, e);
         this.teardown_gesture_recognizer();
     }
-}
+} }
 
-impl LayoutableImpl for VirtualizingCarouselPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for VirtualizingCarouselPanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         if this.uses_viewport_fraction_layout() {
             return this.measure_viewport_fraction_override(available_size);
@@ -211,13 +211,13 @@ impl LayoutableImpl for VirtualizingCarouselPanel {
 
         result
     }
-}
+} }
 
-impl InputElementImpl for VirtualizingCarouselPanel {
+ferroui_base::ferro_overrides! { impl InputElementImpl for VirtualizingCarouselPanel {
     fn as_scrollable(this: &Self) -> Option<&dyn IScrollable> {
         Some(this)
     }
-}
+} }
 
 impl VirtualizingPanelImpl for VirtualizingCarouselPanel {
     fn on_items_control_changed(this: &Self, old_value: Option<&Ref<ItemsControl>>) {

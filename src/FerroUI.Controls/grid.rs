@@ -295,7 +295,7 @@ ferro_impl_classes!(Grid: StyledElementImpl, VisualImpl, InteractiveImpl, InputE
 
 ferroui_base::ferro_impl_classes!(Grid: FerroObjectImpl);
 
-impl LayoutableImpl for Grid {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Grid {
     /// Content measurement.
     fn measure_override(this: &Self, constraint: Size) -> Size {
         let grid_desired_size;
@@ -663,14 +663,14 @@ impl LayoutableImpl for Grid {
 
         arrange_size
     }
-}
+} }
 
-impl PanelImpl for Grid {
+ferroui_base::ferro_overrides! { impl PanelImpl for Grid {
     fn children_changed(this: &Self, e: &NotifyCollectionChangedEventArgs<'_, Ref<Control>>) {
         this.set_cells_structure_dirty(true);
         Self::parent_children_changed(this, e);
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Grid {
     ferro_property!(
@@ -2791,7 +2791,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl VisualImpl for GridLinesRenderer {
+ferroui_base::ferro_overrides! { impl VisualImpl for GridLinesRenderer {
     fn render(this: &Self, drawing_context: &mut ferroui_base::media::DrawingContext) {
         let Some(grid) = this.get_visual_parent_of_type::<Grid>() else { return };
 
@@ -2835,7 +2835,7 @@ impl VisualImpl for GridLinesRenderer {
             }
         }
     }
-}
+} }
 
 impl GridLinesRenderer {
     pub(crate) fn new() -> Ref<Self> {

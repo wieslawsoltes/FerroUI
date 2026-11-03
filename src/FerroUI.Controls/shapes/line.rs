@@ -28,11 +28,11 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(Line: FerroObjectImpl);
 
-impl ShapeImpl for Line {
+ferroui_base::ferro_overrides! { impl ShapeImpl for Line {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         Some(LineGeometry::with_points(this.start_point(), this.end_point()).upcast())
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Line {
     ferro_property!(

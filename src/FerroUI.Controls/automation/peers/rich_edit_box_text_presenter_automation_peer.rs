@@ -14,13 +14,12 @@ pub struct RichEditBoxTextPresenterAutomationPeer {
 ferro_class!(RichEditBoxTextPresenterAutomationPeer: NoneAutomationPeer);
 ferroui_base::ferro_class_info!(RichEditBoxTextPresenterAutomationPeer {});
 
-impl FerroObjectImpl for RichEditBoxTextPresenterAutomationPeer {}
-impl AutomationPeerImpl for RichEditBoxTextPresenterAutomationPeer {}
-impl ControlAutomationPeerImpl for RichEditBoxTextPresenterAutomationPeer {
+ferroui_base::ferro_impl_classes!(RichEditBoxTextPresenterAutomationPeer: FerroObjectImpl, AutomationPeerImpl);
+ferroui_base::ferro_overrides! { impl ControlAutomationPeerImpl for RichEditBoxTextPresenterAutomationPeer {
     fn get_children_core(_this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {
         None
     }
-}
+} }
 
 impl RichEditBoxTextPresenterAutomationPeer {
     pub fn construct(owner: &Control) -> Self {

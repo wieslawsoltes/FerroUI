@@ -36,7 +36,7 @@ ferroui_base::ferro_class_info!(RadioButtonsPanel { new: RadioButtonsPanel::new 
 ferro_impl_classes!(RadioButtonsPanel: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl, PanelImpl);
 ferroui_base::ferro_impl_classes!(RadioButtonsPanel: FerroObjectImpl);
 
-impl LayoutableImpl for RadioButtonsPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for RadioButtonsPanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let children = this.children().snapshot();
         if children.is_empty() {
@@ -85,7 +85,7 @@ impl LayoutableImpl for RadioButtonsPanel {
         }
         final_size
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RadioButtonsPanel {
     ferro_property!(

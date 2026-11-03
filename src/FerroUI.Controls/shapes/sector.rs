@@ -31,7 +31,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(Sector: FerroObjectImpl);
 
-impl ShapeImpl for Sector {
+ferroui_base::ferro_overrides! { impl ShapeImpl for Sector {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         let rect = Rect::from_size(this.bounds().size());
         let deflated_rect = rect.deflate(this.stroke_thickness() * 0.5);
@@ -69,7 +69,7 @@ impl ShapeImpl for Sector {
 
         Some(stream_geometry.upcast())
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Sector {
     ferro_property!(

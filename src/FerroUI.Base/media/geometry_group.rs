@@ -17,7 +17,7 @@ pub struct GeometryGroup {
 ferro_class!(GeometryGroup: Geometry);
 crate::ferro_class_info!(GeometryGroup { new: GeometryGroup::new });
 
-impl FerroObjectImpl for GeometryGroup {
+crate::ferro_overrides! { impl FerroObjectImpl for GeometryGroup {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.children_or_panic().set_parent(Some(&this.to_ref()));
@@ -31,7 +31,7 @@ impl FerroObjectImpl for GeometryGroup {
             _ => {}
         }
     }
-}
+} }
 
 impl GeometryImpl for GeometryGroup {
     fn clone_geometry(this: &Self) -> Ref<Geometry> {

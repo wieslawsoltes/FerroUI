@@ -53,7 +53,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for PageNavigationHost {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for PageNavigationHost {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -77,15 +77,15 @@ impl FerroObjectImpl for PageNavigationHost {
             }
         }
     }
-}
+} }
 
-impl StyledElementImpl for PageNavigationHost {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for PageNavigationHost {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <ContentControl as StaticType>::TYPE
     }
-}
+} }
 
-impl VisualImpl for PageNavigationHost {
+ferroui_base::ferro_overrides! { impl VisualImpl for PageNavigationHost {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -133,9 +133,9 @@ impl VisualImpl for PageNavigationHost {
             this.remove_content_presenter_property_changed();
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for PageNavigationHost {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for PageNavigationHost {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -147,7 +147,7 @@ impl TemplatedControlImpl for PageNavigationHost {
 
         this.attach_content_presenter();
     }
-}
+} }
 
 ferro_properties! {
     impl PageNavigationHost {

@@ -39,16 +39,16 @@ pub struct VisualBrush {
 ferro_class!(VisualBrush: TileBrush);
 crate::ferro_class_info!(VisualBrush { new: VisualBrush::new });
 
-impl FerroObjectImpl for VisualBrush {
+crate::ferro_overrides! { impl FerroObjectImpl for VisualBrush {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         // We are supposed to be only calling this when content is actually changed,
         // but instead we are calling this on brush property change for backwards compatibility
         this.invalidate_content();
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl BrushImpl for VisualBrush {
+crate::ferro_overrides! { impl BrushImpl for VisualBrush {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {
         Some(|c| ServerCompositionSimpleContentBrush::new(c))
     }
@@ -98,7 +98,7 @@ impl BrushImpl for VisualBrush {
 
         CompositionRenderDataSceneBrushContentProperties::serialize(writer, content);
     }
-}
+} }
 
 fn is_compositor(key: &Weak<Compositor>, c: &Compositor) -> bool {
     std::ptr::eq(key.as_ptr(), c)

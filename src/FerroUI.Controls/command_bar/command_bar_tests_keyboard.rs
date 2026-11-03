@@ -133,7 +133,7 @@ ferro_impl_classes!(
     ButtonImpl
 );
 
-impl FerroObjectImpl for VisibilityChangingCommandBarButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for VisibilityChangingCommandBarButton {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -145,7 +145,7 @@ impl FerroObjectImpl for VisibilityChangingCommandBarButton {
             this.set_current_value(Visual::is_visible_property(), false);
         }
     }
-}
+} }
 
 impl VisibilityChangingCommandBarButton {
     fn new() -> Ref<Self> {

@@ -17,7 +17,7 @@ pub struct Style {
 ferro_class!(Style: StyleBase);
 crate::ferro_class_info!(Style { new: Style::new });
 
-impl FerroObjectImpl for Style {}
+crate::ferro_impl_classes!(Style: FerroObjectImpl);
 
 impl StyleBaseImpl for Style {
     fn set_parent(this: &Self, parent: Option<&Ref<StyleBase>>) {

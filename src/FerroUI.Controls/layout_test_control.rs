@@ -39,7 +39,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl LayoutableImpl for LayoutTestControl {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for LayoutTestControl {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         this.measured.set(true);
 
@@ -73,7 +73,7 @@ impl LayoutableImpl for LayoutTestControl {
             None => Self::parent_arrange_override(this, final_size),
         }
     }
-}
+} }
 
 impl LayoutTestControl {
     pub fn new() -> Ref<Self> {
@@ -144,7 +144,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl LayoutableImpl for LayoutTestRoot {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for LayoutTestRoot {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         this.measured.set(true);
 
@@ -164,7 +164,7 @@ impl LayoutableImpl for LayoutTestRoot {
             None => Self::parent_arrange_override(this, final_size),
         }
     }
-}
+} }
 
 impl LayoutTestRoot {
     pub fn new() -> Ref<Self> {

@@ -67,7 +67,7 @@ ferro_class! {
 
 crate::ferro_impl_classes!(XamlCompositionBrushBase: FerroObjectImpl);
 
-impl BrushImpl for XamlCompositionBrushBase {
+crate::ferro_overrides! { impl BrushImpl for XamlCompositionBrushBase {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {
         Some(|c| ServerXamlCompositionBrush::new(c))
     }
@@ -112,7 +112,7 @@ impl BrushImpl for XamlCompositionBrushBase {
             needs_transparent_window: state.needs_transparent_window,
         }));
     }
-}
+} }
 
 impl XamlCompositionBrushBaseImpl for XamlCompositionBrushBase {
     fn on_connected(_this: &Self) {}

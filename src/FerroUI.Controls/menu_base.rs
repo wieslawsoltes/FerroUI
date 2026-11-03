@@ -51,7 +51,7 @@ ferro_impl_classes!(
 
 impl IFocusScope for MenuBase {}
 
-impl VisualImpl for MenuBase {
+ferroui_base::ferro_overrides! { impl VisualImpl for MenuBase {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.interaction_handler.attach(&this.to_ref());
@@ -61,9 +61,9 @@ impl VisualImpl for MenuBase {
         Self::parent_on_detached_from_visual_tree(this, e);
         this.interaction_handler.detach(&this.to_ref());
     }
-}
+} }
 
-impl InputElementImpl for MenuBase {
+ferroui_base::ferro_overrides! { impl InputElementImpl for MenuBase {
     fn is_focus_scope(_this: &Self) -> bool {
         true
     }
@@ -71,9 +71,9 @@ impl InputElementImpl for MenuBase {
     fn on_key_down(_this: &Self, _e: &KeyEventArgs) {
         // Don't handle here: let the interaction handler handle it.
     }
-}
+} }
 
-impl ItemsControlImpl for MenuBase {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for MenuBase {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -86,7 +86,7 @@ impl ItemsControlImpl for MenuBase {
     fn needs_container_override(_this: &Self, item: &Option<BoxedValue>, _index: i32) -> (bool, Option<RecycleKey>) {
         Self::needs_menu_container(item)
     }
-}
+} }
 
 impl MenuBaseImpl for MenuBase {
     fn close(_this: &Self) {

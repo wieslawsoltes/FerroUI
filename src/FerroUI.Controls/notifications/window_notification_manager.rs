@@ -62,7 +62,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for WindowNotificationManager {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for WindowNotificationManager {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(this.position());
@@ -75,17 +75,17 @@ impl FerroObjectImpl for WindowNotificationManager {
             this.update_pseudo_classes(change.get_new_value::<NotificationPosition>());
         }
     }
-}
+} }
 
-impl VisualImpl for WindowNotificationManager {
+ferroui_base::ferro_overrides! { impl VisualImpl for WindowNotificationManager {
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
 
         this.items().clear();
     }
-}
+} }
 
-impl TemplatedControlImpl for WindowNotificationManager {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for WindowNotificationManager {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -95,7 +95,7 @@ impl TemplatedControlImpl for WindowNotificationManager {
             *this.items.borrow_mut() = items_control.children();
         }
     }
-}
+} }
 
 ferro_properties! {
     impl WindowNotificationManager {

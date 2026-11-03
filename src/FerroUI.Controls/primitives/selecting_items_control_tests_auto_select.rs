@@ -85,7 +85,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for TestSelector {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TestSelector {
     fn constructed(this: &Self) {
         ferroui_base::ferro_thread_local! {
             static DONE: Cell<bool> = const { Cell::new(false) };
@@ -93,7 +93,7 @@ impl FerroObjectImpl for TestSelector {
         override_selection_mode::<TestSelector>(&DONE);
         Self::parent_constructed(this);
     }
-}
+} }
 
 impl TestSelector {
     fn new() -> Ref<Self> {
@@ -173,7 +173,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for AlwaysSelectedTestSelectorHidingFirstContainers {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for AlwaysSelectedTestSelectorHidingFirstContainers {
     fn constructed(this: &Self) {
         ferroui_base::ferro_thread_local! {
             static DONE: Cell<bool> = const { Cell::new(false) };
@@ -181,9 +181,9 @@ impl FerroObjectImpl for AlwaysSelectedTestSelectorHidingFirstContainers {
         override_selection_mode::<AlwaysSelectedTestSelectorHidingFirstContainers>(&DONE);
         Self::parent_constructed(this);
     }
-}
+} }
 
-impl ItemsControlImpl for AlwaysSelectedTestSelectorHidingFirstContainers {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for AlwaysSelectedTestSelectorHidingFirstContainers {
     fn prepare_container_for_item_override(
         this: &Self,
         container: &Ref<Control>,
@@ -195,7 +195,7 @@ impl ItemsControlImpl for AlwaysSelectedTestSelectorHidingFirstContainers {
             container.set_is_visible(false);
         }
     }
-}
+} }
 
 impl AlwaysSelectedTestSelectorHidingFirstContainers {
     fn new(hidden_count: i32) -> Ref<Self> {
@@ -224,7 +224,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for AlwaysSelectedTestSelectorDisablingFirstContainers {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for AlwaysSelectedTestSelectorDisablingFirstContainers {
     fn constructed(this: &Self) {
         ferroui_base::ferro_thread_local! {
             static DONE: Cell<bool> = const { Cell::new(false) };
@@ -232,9 +232,9 @@ impl FerroObjectImpl for AlwaysSelectedTestSelectorDisablingFirstContainers {
         override_selection_mode::<AlwaysSelectedTestSelectorDisablingFirstContainers>(&DONE);
         Self::parent_constructed(this);
     }
-}
+} }
 
-impl ItemsControlImpl for AlwaysSelectedTestSelectorDisablingFirstContainers {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for AlwaysSelectedTestSelectorDisablingFirstContainers {
     fn prepare_container_for_item_override(
         this: &Self,
         container: &Ref<Control>,
@@ -246,7 +246,7 @@ impl ItemsControlImpl for AlwaysSelectedTestSelectorDisablingFirstContainers {
             container.set_is_enabled(false);
         }
     }
-}
+} }
 
 impl AlwaysSelectedTestSelectorDisablingFirstContainers {
     fn new(disabled_count: i32) -> Ref<Self> {

@@ -21,7 +21,7 @@ ferroui_base::ferro_class_info!(ToggleSplitButtonAutomationPeer {
     interfaces: [Rc<dyn IToggleProvider> => ProviderAdapter::as_toggle_provider]
 });
 
-impl FerroObjectImpl for ToggleSplitButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ToggleSplitButtonAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -32,11 +32,11 @@ impl FerroObjectImpl for ToggleSplitButtonAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for ToggleSplitButtonAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ToggleSplitButtonAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ToggleSplitButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ToggleSplitButtonAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::SplitButton
     }
@@ -44,7 +44,7 @@ impl AutomationPeerImpl for ToggleSplitButtonAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "ToggleSplitButton".to_owned()
     }
-}
+} }
 
 impl IToggleProvider for ProviderAdapter<ToggleSplitButtonAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

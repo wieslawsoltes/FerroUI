@@ -26,7 +26,7 @@ ferroui_base::ferro_class_info!(CalendarDatePickerAutomationPeer {
     ]
 });
 
-impl FerroObjectImpl for CalendarDatePickerAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for CalendarDatePickerAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -37,11 +37,11 @@ impl FerroObjectImpl for CalendarDatePickerAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for CalendarDatePickerAutomationPeer {}
+ferroui_base::ferro_impl_classes!(CalendarDatePickerAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for CalendarDatePickerAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for CalendarDatePickerAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Button
     }
@@ -57,7 +57,7 @@ impl AutomationPeerImpl for CalendarDatePickerAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl IInvokeProvider for ProviderAdapter<CalendarDatePickerAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

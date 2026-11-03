@@ -27,7 +27,7 @@ pub struct InfoBarAutomationPeer {
 ferro_class!(InfoBarAutomationPeer: ControlAutomationPeer);
 ferro_class_info!(InfoBarAutomationPeer { markup: { namespace: "FerroUI.Automation.Peers" } });
 
-impl FerroObjectImpl for InfoBarAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for InfoBarAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         *this.last_name.borrow_mut() = this.get_name();
@@ -45,11 +45,11 @@ impl FerroObjectImpl for InfoBarAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for InfoBarAutomationPeer {}
+ferroui_base::ferro_impl_classes!(InfoBarAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for InfoBarAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for InfoBarAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::StatusBar
     }
@@ -76,7 +76,7 @@ impl AutomationPeerImpl for InfoBarAutomationPeer {
             InfoBarSeverity::Informational | InfoBarSeverity::Success => AutomationLiveSetting::Polite,
         }
     }
-}
+} }
 
 impl InfoBarAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -41,13 +41,13 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl ControlImpl for ToggleSplitButton {
+ferroui_base::ferro_overrides! { impl ControlImpl for ToggleSplitButton {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ToggleSplitButtonAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for ToggleSplitButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ToggleSplitButton {
     fn on_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, e);
 
@@ -55,17 +55,17 @@ impl FerroObjectImpl for ToggleSplitButton {
             this.on_is_checked_changed();
         }
     }
-}
+} }
 
-impl StyledElementImpl for ToggleSplitButton {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for ToggleSplitButton {
     /// Both the toggle split button and the split button share the same
     /// exact default style.
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <SplitButton as StaticType>::TYPE
     }
-}
+} }
 
-impl SplitButtonImpl for ToggleSplitButton {
+ferroui_base::ferro_overrides! { impl SplitButtonImpl for ToggleSplitButton {
     fn internal_is_checked(this: &Self) -> bool {
         this.is_checked()
     }
@@ -75,7 +75,7 @@ impl SplitButtonImpl for ToggleSplitButton {
 
         Self::parent_on_click_primary(this, e);
     }
-}
+} }
 
 impl ToggleSplitButtonImpl for ToggleSplitButton {
     fn on_is_checked_changed(this: &Self) {

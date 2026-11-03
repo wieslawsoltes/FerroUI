@@ -260,7 +260,7 @@ ferro_class_info!(Calendar {
 
 ferro_impl_classes!(Calendar: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
-impl FerroObjectImpl for Calendar {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Calendar {
     /// Initializes a new instance of the [`Calendar`] class.
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
@@ -271,9 +271,9 @@ impl FerroObjectImpl for Calendar {
         let _ = this.blackout_dates.set(CalendarBlackoutDatesCollection::new(&this_ref));
         let _ = this.selected_dates.set(SelectedDatesCollection::new(&this_ref));
     }
-}
+} }
 
-impl InputElementImpl for Calendar {
+ferroui_base::ferro_overrides! { impl InputElementImpl for Calendar {
     fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
         Self::parent_on_pointer_released(this, e);
         if !this.has_focus_internal() && e.initial_press_mouse_button() == MouseButton::Left {
@@ -352,9 +352,9 @@ impl InputElementImpl for Calendar {
             }
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for Calendar {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for Calendar {
     /// Builds the visual tree for the [`Calendar`] when a new template is
     /// applied.
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
@@ -372,13 +372,13 @@ impl TemplatedControlImpl for Calendar {
             }
         }
     }
-}
+} }
 
-impl ControlImpl for Calendar {
+ferroui_base::ferro_overrides! { impl ControlImpl for Calendar {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::CalendarAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferro_properties! {
     impl Calendar {

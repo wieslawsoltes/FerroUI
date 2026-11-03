@@ -27,15 +27,15 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for Polyline {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Polyline {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
         this.set_value_with_priority(Self::points_property(), Some(Points::new()), BindingPriority::Template);
     }
-}
+} }
 
-impl ShapeImpl for Polyline {
+ferroui_base::ferro_overrides! { impl ShapeImpl for Polyline {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         let is_filled = this.fill().is_some();
         let points = this.points();
@@ -50,7 +50,7 @@ impl ShapeImpl for Polyline {
         }
         Some(geometry.upcast())
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Polyline {
     ferro_property!(

@@ -28,13 +28,13 @@ ferro_impl_classes!(
     CanvasImpl
 );
 
-impl VisualImpl for PopupOverlayLayer {
+ferroui_base::ferro_overrides! { impl VisualImpl for PopupOverlayLayer {
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
     }
-}
+} }
 
-impl LayoutableImpl for PopupOverlayLayer {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for PopupOverlayLayer {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         for child in this.children().snapshot().iter() {
             child.measure(available_size);
@@ -48,7 +48,7 @@ impl LayoutableImpl for PopupOverlayLayer {
         this.available_size.set(final_size);
         Self::parent_arrange_override(this, final_size)
     }
-}
+} }
 
 impl PopupOverlayLayer {
     pub fn new() -> Ref<Self> {

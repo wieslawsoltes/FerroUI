@@ -36,7 +36,7 @@ ferro_class_info!(TableViewColumn {
 });
 ferro_impl_classes!(TableViewColumn: StyledElementImpl);
 
-impl FerroObjectImpl for TableViewColumn {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TableViewColumn {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -64,7 +64,7 @@ impl FerroObjectImpl for TableViewColumn {
             }
         }
     }
-}
+} }
 
 ferro_properties! {
     impl TableViewColumn {

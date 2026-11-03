@@ -39,7 +39,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl TemplatedControlImpl for TableViewRow {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TableViewRow {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -58,7 +58,7 @@ impl TemplatedControlImpl for TableViewRow {
             cells_presenter.rebuild_cells();
         }
     }
-}
+} }
 
 impl TableViewRow {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

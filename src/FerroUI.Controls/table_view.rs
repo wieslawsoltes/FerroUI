@@ -42,7 +42,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for TableView {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TableView {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -55,9 +55,9 @@ impl FerroObjectImpl for TableView {
             }
         }
     }
-}
+} }
 
-impl StyledElementImpl for TableView {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for TableView {
     fn on_initialized(this: &Self) {
         Self::parent_on_initialized(this);
 
@@ -66,9 +66,9 @@ impl StyledElementImpl for TableView {
             this.subscribe_to_columns(&columns);
         }
     }
-}
+} }
 
-impl ItemsControlImpl for TableView {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for TableView {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -104,7 +104,7 @@ impl ItemsControlImpl for TableView {
             row.clear_cells();
         }
     }
-}
+} }
 
 ferro_properties! {
     impl TableView {

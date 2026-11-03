@@ -77,7 +77,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl FerroObjectImpl for MultiPage {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for MultiPage {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -115,7 +115,7 @@ impl FerroObjectImpl for MultiPage {
             }
         }
     }
-}
+} }
 
 impl Drop for MultiPage {
     fn drop(&mut self) {
@@ -127,7 +127,7 @@ impl Drop for MultiPage {
     }
 }
 
-impl VisualImpl for MultiPage {
+ferroui_base::ferro_overrides! { impl VisualImpl for MultiPage {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -144,9 +144,9 @@ impl VisualImpl for MultiPage {
             this.unsubscribe_from_pages(&collection);
         }
     }
-}
+} }
 
-impl PageImpl for MultiPage {
+ferroui_base::ferro_overrides! { impl PageImpl for MultiPage {
     /// Routes no-argument calls to
     /// [`update_active_page_with`](MultiPageImpl::update_active_page_with)
     /// using [`NavigationType::Replace`] as the default. Subclasses must
@@ -154,7 +154,7 @@ impl PageImpl for MultiPage {
     fn update_active_page(this: &Self) {
         this.update_active_page_with(NavigationType::Replace)
     }
-}
+} }
 
 impl MultiPageImpl for MultiPage {
     fn update_active_page_with(_this: &Self, _navigation_type: NavigationType) {}

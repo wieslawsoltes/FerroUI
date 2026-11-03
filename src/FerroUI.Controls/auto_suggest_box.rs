@@ -250,7 +250,7 @@ ferroui_base::ferro_class_info!(AutoSuggestBox {
 });
 ferro_impl_classes!(AutoSuggestBox: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, HeaderedItemsControlImpl);
 
-impl FerroObjectImpl for AutoSuggestBox {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for AutoSuggestBox {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         // The keys of the text box, before the text box handles them.
@@ -287,15 +287,15 @@ impl FerroObjectImpl for AutoSuggestBox {
             this.update_suggestion_list_size();
         }
     }
-}
+} }
 
-impl ControlImpl for AutoSuggestBox {
+ferroui_base::ferro_overrides! { impl ControlImpl for AutoSuggestBox {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         AutoSuggestBoxAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl ItemsControlImpl for AutoSuggestBox {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for AutoSuggestBox {
     fn on_items_view_collection_changed(this: &Self, args: &ItemsChangedEventArgs<'_>) {
         Self::parent_on_items_view_collection_changed(this, args);
         this.update_suggestions_source();
@@ -310,9 +310,9 @@ impl ItemsControlImpl for AutoSuggestBox {
             DispatcherPriority::NORMAL,
         );
     }
-}
+} }
 
-impl InputElementImpl for AutoSuggestBox {
+ferroui_base::ferro_overrides! { impl InputElementImpl for AutoSuggestBox {
     fn on_got_focus(this: &Self, args: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, args);
         this.has_focus.set(true);
@@ -332,9 +332,9 @@ impl InputElementImpl for AutoSuggestBox {
             this.set_current_value(Self::is_suggestion_list_open_property(), false);
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for AutoSuggestBox {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for AutoSuggestBox {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, args);
         drop(this.template_subscriptions.take());
@@ -445,7 +445,7 @@ impl TemplatedControlImpl for AutoSuggestBox {
         this.update_text_box_text(AutoSuggestionBoxTextChangeReason::ProgrammaticChange);
         this.update_suggestions_popup();
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl AutoSuggestBox {
     ferro_property!(

@@ -24,7 +24,7 @@ struct LayoutTestControl {
 ferro_class!(LayoutTestControl: Layoutable);
 ferro_impl_classes!(LayoutTestControl: FerroObjectImpl, StyledElementImpl, VisualImpl);
 
-impl LayoutableImpl for LayoutTestControl {
+crate::ferro_overrides! { impl LayoutableImpl for LayoutTestControl {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         this.measured.set(true);
         Self::parent_measure_override(this, available_size)
@@ -34,7 +34,7 @@ impl LayoutableImpl for LayoutTestControl {
         this.arranged.set(true);
         Self::parent_arrange_override(this, final_size)
     }
-}
+} }
 
 impl LayoutTestControl {
     fn new() -> Ref<Self> {

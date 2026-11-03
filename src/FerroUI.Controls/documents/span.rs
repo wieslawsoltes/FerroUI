@@ -75,7 +75,7 @@ impl IAddChild<String> for SpanAddChild {
 
 ferroui_base::ferro_impl_classes!(Span: StyledElementImpl);
 
-impl FerroObjectImpl for Span {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Span {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -97,7 +97,7 @@ impl FerroObjectImpl for Span {
             }
         }
     }
-}
+} }
 
 impl TextElementImpl for Span {
     fn on_inline_host_changed(

@@ -81,7 +81,7 @@ crate::ferro_class_info!(InputScope {
     },
 });
 
-impl FerroObjectImpl for InputScope {
+crate::ferro_overrides! { impl FerroObjectImpl for InputScope {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
@@ -93,7 +93,7 @@ impl FerroObjectImpl for InputScope {
         }));
         this.collection_subscription.set(Some(token));
     }
-}
+} }
 
 impl InputScope {
     pub fn construct() -> Self {

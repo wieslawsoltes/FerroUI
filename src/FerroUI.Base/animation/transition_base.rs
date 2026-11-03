@@ -31,7 +31,7 @@ ferro_class! {
 }
 crate::ferro_class_info!(TransitionBase { interfaces: [std::rc::Rc<dyn crate::animation::ITransition>] });
 
-impl FerroObjectImpl for TransitionBase {
+crate::ferro_overrides! { impl FerroObjectImpl for TransitionBase {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -50,7 +50,7 @@ impl FerroObjectImpl for TransitionBase {
             }
         }
     }
-}
+} }
 
 impl TransitionBaseImpl for TransitionBase {
     fn apply(

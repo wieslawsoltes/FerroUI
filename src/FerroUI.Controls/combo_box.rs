@@ -63,13 +63,13 @@ ferro_class!(ComboBox: SelectingItemsControl);
 ferroui_base::ferro_class_info!(ComboBox { new: ComboBox::new });
 ferro_impl_classes!(ComboBox: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
-impl ControlImpl for ComboBox {
+ferroui_base::ferro_overrides! { impl ControlImpl for ComboBox {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ComboBoxAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for ComboBox {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ComboBox {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         let property = change.property();
 
@@ -109,9 +109,9 @@ impl FerroObjectImpl for ComboBox {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl VisualImpl for ComboBox {
+ferroui_base::ferro_overrides! { impl VisualImpl for ComboBox {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.update_selection_box_item(this.selected_item());
@@ -121,9 +121,9 @@ impl VisualImpl for ComboBox {
         Self::parent_invalidate_mirror_transform(this);
         this.update_flow_direction();
     }
-}
+} }
 
-impl InputElementImpl for ComboBox {
+ferroui_base::ferro_overrides! { impl InputElementImpl for ComboBox {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
@@ -250,9 +250,9 @@ impl InputElementImpl for ComboBox {
 
         Self::parent_on_got_focus(this, e);
     }
-}
+} }
 
-impl TemplatedControlImpl for ComboBox {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ComboBox {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         if let Some((opened, closed)) = this.popup_subscriptions.take() {
             opened.dispose();
@@ -280,9 +280,9 @@ impl TemplatedControlImpl for ComboBox {
         let input_text_box = e.name_scope().find_as::<TextBox>("PART_EditableTextBox");
         *this.input_text_box.borrow_mut() = input_text_box;
     }
-}
+} }
 
-impl ItemsControlImpl for ComboBox {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for ComboBox {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -295,9 +295,9 @@ impl ItemsControlImpl for ComboBox {
     fn needs_container_override(this: &Self, item: &Option<BoxedValue>, _index: i32) -> (bool, Option<RecycleKey>) {
         this.needs_container::<ComboBoxItem>(item)
     }
-}
+} }
 
-impl SelectingItemsControlImpl for ComboBox {
+ferroui_base::ferro_overrides! { impl SelectingItemsControlImpl for ComboBox {
     fn update_selection_from_event(this: &Self, container: &Ref<Control>, event_args: &dyn IRoutedEventArgs) -> bool {
         if Self::parent_update_selection_from_event(this, container, event_args) {
             let popup = this.popup.borrow().clone();
@@ -318,7 +318,7 @@ impl SelectingItemsControlImpl for ComboBox {
             )
             && event_args.routed_event().is_some_and(|event| event == *InputElement::pointer_released_event())
     }
-}
+} }
 
 impl ComboBox {
     pub(crate) const PC_DROPDOWN_OPEN: &'static str = ":dropdownopen";

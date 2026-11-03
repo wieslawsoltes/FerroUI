@@ -39,7 +39,7 @@ pub struct DrawingBrush {
 ferro_class!(DrawingBrush: TileBrush);
 crate::ferro_class_info!(DrawingBrush { new: DrawingBrush::new });
 
-impl FerroObjectImpl for DrawingBrush {
+crate::ferro_overrides! { impl FerroObjectImpl for DrawingBrush {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         // Replacing the drawing, or a structural change inside it (e.g. a replaced brush, pen or geometry) changes
         // the recorded content; mark it dirty so it's re-recorded. Mutations _within_ a referenced compositor-aware
@@ -63,9 +63,9 @@ impl FerroObjectImpl for DrawingBrush {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl BrushImpl for DrawingBrush {
+crate::ferro_overrides! { impl BrushImpl for DrawingBrush {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {
         Some(|c| ServerCompositionSimpleContentBrush::new(c))
     }
@@ -115,7 +115,7 @@ impl BrushImpl for DrawingBrush {
 
         CompositionRenderDataSceneBrushContentProperties::serialize(writer, content);
     }
-}
+} }
 
 fn is_compositor(key: &Weak<Compositor>, c: &Compositor) -> bool {
     std::ptr::eq(key.as_ptr(), c)

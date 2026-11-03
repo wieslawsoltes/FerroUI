@@ -19,11 +19,9 @@ ferroui_base::ferro_class_info!(ProgressBarAutomationPeer {
     interfaces: [Rc<dyn IRangeValueProvider> => ProviderAdapter::as_range_value_provider]
 });
 
-impl FerroObjectImpl for ProgressBarAutomationPeer {}
-impl ControlAutomationPeerImpl for ProgressBarAutomationPeer {}
-impl RangeBaseAutomationPeerImpl for ProgressBarAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ProgressBarAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl, RangeBaseAutomationPeerImpl);
 
-impl AutomationPeerImpl for ProgressBarAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ProgressBarAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "ProgressBar".to_owned()
     }
@@ -31,7 +29,7 @@ impl AutomationPeerImpl for ProgressBarAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::ProgressBar
     }
-}
+} }
 
 /// The class implements the members `set_value`, `is_read_only`,
 /// `large_change` and `small_change` of the contract again; the others are

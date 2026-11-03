@@ -25,7 +25,7 @@ ferroui_base::ferro_class_info!(TextBoxAutomationPeer {
     interfaces: [Rc<dyn IValueProvider> => ProviderAdapter::as_value_provider]
 });
 
-impl FerroObjectImpl for TextBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBoxAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -36,11 +36,11 @@ impl FerroObjectImpl for TextBoxAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for TextBoxAutomationPeer {}
+ferroui_base::ferro_impl_classes!(TextBoxAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for TextBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for TextBoxAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Edit
     }
@@ -48,7 +48,7 @@ impl AutomationPeerImpl for TextBoxAutomationPeer {
     fn get_placeholder_text_core(this: &Self) -> Option<String> {
         this.owner().placeholder_text()
     }
-}
+} }
 
 impl TextBoxAutomationPeerImpl for TextBoxAutomationPeer {
     fn owner_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {

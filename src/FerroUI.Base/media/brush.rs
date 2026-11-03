@@ -54,7 +54,7 @@ ferro_class! {
 }
 crate::ferro_class_info!(Brush { interfaces: [std::rc::Rc<dyn crate::media::IBrush>] });
 
-impl FerroObjectImpl for Brush {
+crate::ferro_overrides! { impl FerroObjectImpl for Brush {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         if change.property() == Self::transform_property().as_property()
             || change.property() == Self::relative_transform_property().as_property()
@@ -71,7 +71,7 @@ impl FerroObjectImpl for Brush {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
 impl BrushImpl for Brush {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {

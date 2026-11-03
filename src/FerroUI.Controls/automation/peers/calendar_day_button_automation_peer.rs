@@ -17,14 +17,13 @@ ferroui_base::ferro_class_info!(CalendarDayButtonAutomationPeer {
     interfaces: [Rc<dyn ISelectionItemProvider> => ProviderAdapter::as_selection_item_provider]
 });
 
-impl FerroObjectImpl for CalendarDayButtonAutomationPeer {}
-impl ControlAutomationPeerImpl for CalendarDayButtonAutomationPeer {}
+ferroui_base::ferro_impl_classes!(CalendarDayButtonAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for CalendarDayButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for CalendarDayButtonAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "CalendarDayButton".to_owned()
     }
-}
+} }
 
 impl ISelectionItemProvider for ProviderAdapter<CalendarDayButtonAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

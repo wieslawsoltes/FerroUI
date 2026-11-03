@@ -44,7 +44,7 @@ ferro_class! {
 }
 ferro_class_info!(IconSource { markup: { namespace: "FerroUI.Controls" } });
 
-impl FerroObjectImpl for IconSource {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for IconSource {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if !change.is_effective_value_change() {
@@ -82,7 +82,7 @@ impl FerroObjectImpl for IconSource {
             }
         }
     }
-}
+} }
 
 impl IconSourceImpl for IconSource {
     // IconSource::CreateIconElementCoreImpl: "an abstract base type", E_NOTIMPL.

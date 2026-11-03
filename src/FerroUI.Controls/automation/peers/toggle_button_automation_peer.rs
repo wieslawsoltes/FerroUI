@@ -17,7 +17,7 @@ pub struct ToggleButtonAutomationPeer {
 ferro_class!(ToggleButtonAutomationPeer: ContentControlAutomationPeer);
 ferroui_base::ferro_class_info!(ToggleButtonAutomationPeer { interfaces: [Rc<dyn IToggleProvider> => ProviderAdapter::as_toggle_provider] });
 
-impl FerroObjectImpl for ToggleButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ToggleButtonAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -34,11 +34,11 @@ impl FerroObjectImpl for ToggleButtonAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for ToggleButtonAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ToggleButtonAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ToggleButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ToggleButtonAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Button
     }
@@ -50,7 +50,7 @@ impl AutomationPeerImpl for ToggleButtonAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl IToggleProvider for ProviderAdapter<ToggleButtonAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

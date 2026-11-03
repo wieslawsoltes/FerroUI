@@ -144,7 +144,7 @@ ferro_class_info!(TitleBar {
 });
 ferro_impl_classes!(TitleBar: StyledElementImpl, InteractiveImpl, InputElementImpl);
 
-impl FerroObjectImpl for TitleBar {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TitleBar {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_states();
@@ -181,9 +181,9 @@ impl FerroObjectImpl for TitleBar {
         this.update_states();
         this.update_interactable_elements();
     }
-}
+} }
 
-impl VisualImpl for TitleBar {
+ferroui_base::ferro_overrides! { impl VisualImpl for TitleBar {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.attach_to_window();
@@ -193,17 +193,17 @@ impl VisualImpl for TitleBar {
         Self::parent_on_detached_from_visual_tree(this, e);
         this.detach_from_window();
     }
-}
+} }
 
-impl LayoutableImpl for TitleBar {}
+ferroui_base::ferro_impl_classes!(TitleBar: LayoutableImpl);
 
-impl ControlImpl for TitleBar {
+ferroui_base::ferro_overrides! { impl ControlImpl for TitleBar {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         TitleBarAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl TemplatedControlImpl for TitleBar {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TitleBar {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         this.detach_buttons();
         Self::parent_on_apply_template(this, args);
@@ -245,7 +245,7 @@ impl TemplatedControlImpl for TitleBar {
         this.update_states();
         this.update_interactable_elements();
     }
-}
+} }
 
 fn name_button(button: &Button, name: &str) {
     use crate::automation::AutomationProperties;

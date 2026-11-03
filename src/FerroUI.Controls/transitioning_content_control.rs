@@ -46,7 +46,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl FerroObjectImpl for TransitioningContentControl {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TransitioningContentControl {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         if change.property() == ContentControl::content_property().as_property() {
             this.update_content(true);
@@ -55,16 +55,16 @@ impl FerroObjectImpl for TransitioningContentControl {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl VisualImpl for TransitioningContentControl {
+ferroui_base::ferro_overrides! { impl VisualImpl for TransitioningContentControl {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.update_content(false);
     }
-}
+} }
 
-impl LayoutableImpl for TransitioningContentControl {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TransitioningContentControl {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let result = Self::parent_arrange_override(this, final_size);
 
@@ -124,7 +124,7 @@ impl LayoutableImpl for TransitioningContentControl {
 
         result
     }
-}
+} }
 
 impl ContentControlImpl for TransitioningContentControl {
     fn register_content_presenter(this: &Self, presenter: &ContentPresenter) -> bool {

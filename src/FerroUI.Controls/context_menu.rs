@@ -52,7 +52,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for ContextMenu {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContextMenu {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -66,9 +66,9 @@ impl FerroObjectImpl for ContextMenu {
             this.element_backdrop.connect(this, this.system_backdrop());
         }
     }
-}
+} }
 
-impl VisualImpl for ContextMenu {
+ferroui_base::ferro_overrides! { impl VisualImpl for ContextMenu {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.element_backdrop.connect(this, this.system_backdrop());
@@ -78,9 +78,9 @@ impl VisualImpl for ContextMenu {
         Self::parent_on_detached_from_visual_tree(this, e);
         this.element_backdrop.disconnect();
     }
-}
+} }
 
-impl MenuBaseImpl for ContextMenu {
+ferroui_base::ferro_overrides! { impl MenuBaseImpl for ContextMenu {
     /// Opens the menu.
     fn open(this: &Self) {
         this.open_at(None);
@@ -99,7 +99,7 @@ impl MenuBaseImpl for ContextMenu {
             }
         }
     }
-}
+} }
 
 impl ISetterValue for ContextMenu {
     fn initialize(&self, setter: &Setter) {

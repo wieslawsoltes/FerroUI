@@ -42,7 +42,7 @@ pub struct Pen {
 ferro_class!(Pen: FerroObject);
 crate::ferro_class_info!(Pen { new: Pen::new, interfaces: [std::rc::Rc<dyn crate::media::IPen>] });
 
-impl FerroObjectImpl for Pen {
+crate::ferro_overrides! { impl FerroObjectImpl for Pen {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         this.register_for_serialization();
         this.raise_invalidated();
@@ -60,7 +60,7 @@ impl FerroObjectImpl for Pen {
         }
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
 crate::ferro_properties! { impl Pen {
     ferro_property!(pub fn brush_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {

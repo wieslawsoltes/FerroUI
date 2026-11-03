@@ -71,11 +71,11 @@ impl Drop for TextBlock {
     }
 }
 
-impl ControlImpl for TextBlock {
+ferroui_base::ferro_overrides! { impl ControlImpl for TextBlock {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::TextBlockAutomationPeer::new(this).upcast()
     }
-}
+} }
 ferroui_base::ferro_impl_classes!(TextBlock: StyledElementImpl);
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
@@ -140,7 +140,7 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
     }
 } }
 
-impl VisualImpl for TextBlock {
+ferroui_base::ferro_overrides! { impl VisualImpl for TextBlock {
     /// Renders the `TextBlock` to a drawing context.
     ///
     /// This member is sealed: subclasses override `render_text_layout`.
@@ -163,9 +163,9 @@ impl VisualImpl for TextBlock {
 
         this.dispose_text_layout();
     }
-}
+} }
 
-impl LayoutableImpl for TextBlock {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TextBlock {
     fn on_measure_invalidated(this: &Self) {
         this.dispose_text_layout();
 
@@ -283,7 +283,7 @@ impl LayoutableImpl for TextBlock {
 
         final_size
     }
-}
+} }
 
 impl TextBlockImpl for TextBlock {
     fn render_core(this: &Self, context: &mut DrawingContext) {

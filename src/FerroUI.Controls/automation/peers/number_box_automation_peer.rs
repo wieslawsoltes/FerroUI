@@ -31,7 +31,7 @@ ferroui_base::ferro_class_info!(NumberBoxAutomationPeer {
     interfaces: [Rc<dyn IRangeValueProvider> => ProviderAdapter::as_range_value_provider]
 });
 
-impl FerroObjectImpl for NumberBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NumberBoxAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
@@ -41,11 +41,11 @@ impl FerroObjectImpl for NumberBoxAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for NumberBoxAutomationPeer {}
+ferroui_base::ferro_impl_classes!(NumberBoxAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for NumberBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for NumberBoxAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Spinner
     }
@@ -60,7 +60,7 @@ impl AutomationPeerImpl for NumberBoxAutomationPeer {
             .filter(|name| !name.is_empty())
             .or_else(|| this.owner().header().and_then(|header| ValueTypes::try_to_string(&*header)))
     }
-}
+} }
 
 impl IRangeValueProvider for ProviderAdapter<NumberBoxAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

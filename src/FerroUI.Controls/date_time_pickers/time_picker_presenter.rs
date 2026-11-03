@@ -102,7 +102,7 @@ ferro_class_info!(TimePickerPresenter {
 
 ferro_impl_classes!(TimePickerPresenter: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, ControlImpl);
 
-impl FerroObjectImpl for TimePickerPresenter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TimePickerPresenter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -122,9 +122,9 @@ impl FerroObjectImpl for TimePickerPresenter {
             this.init_picker();
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for TimePickerPresenter {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TimePickerPresenter {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -213,9 +213,9 @@ impl TemplatedControlImpl for TimePickerPresenter {
 
         this.init_picker();
     }
-}
+} }
 
-impl InputElementImpl for TimePickerPresenter {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TimePickerPresenter {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         match e.key {
             Key::Escape => {
@@ -240,9 +240,9 @@ impl InputElementImpl for TimePickerPresenter {
         }
         Self::parent_on_key_down(this, e);
     }
-}
+} }
 
-impl PickerPresenterBaseImpl for TimePickerPresenter {
+ferroui_base::ferro_overrides! { impl PickerPresenterBaseImpl for TimePickerPresenter {
     fn on_confirmed(this: &Self) {
         if let Some(items) = this.items() {
             let mut hr = items.hour_selector.selected_value();
@@ -271,7 +271,7 @@ impl PickerPresenterBaseImpl for TimePickerPresenter {
         }
         Self::parent_on_confirmed(this);
     }
-}
+} }
 
 ferro_properties! {
     impl TimePickerPresenter {

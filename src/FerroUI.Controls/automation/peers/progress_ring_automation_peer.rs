@@ -35,7 +35,7 @@ ferro_class_info!(ProgressRingAutomationPeer {
     markup: { namespace: "FerroUI.Automation.Peers" },
 });
 
-impl FerroObjectImpl for ProgressRingAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ProgressRingAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
@@ -45,11 +45,11 @@ impl FerroObjectImpl for ProgressRingAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for ProgressRingAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ProgressRingAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ProgressRingAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ProgressRingAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::ProgressBar
     }
@@ -84,7 +84,7 @@ impl AutomationPeerImpl for ProgressRingAutomationPeer {
         }
         Self::parent_get_provider_core(this, provider_type)
     }
-}
+} }
 
 impl ProgressRingAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

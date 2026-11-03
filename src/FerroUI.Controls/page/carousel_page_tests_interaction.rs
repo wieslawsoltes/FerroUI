@@ -269,7 +269,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl PageImpl for TrackingPage {
+ferroui_base::ferro_overrides! { impl PageImpl for TrackingPage {
     fn on_navigated_to(this: &Self, args: &NavigatedToEventArgs) {
         this.navigated_to_count.set(this.navigated_to_count.get() + 1);
         Self::parent_on_navigated_to(this, args);
@@ -279,7 +279,7 @@ impl PageImpl for TrackingPage {
         this.navigated_from_count.set(this.navigated_from_count.get() + 1);
         Self::parent_on_navigated_from(this, args);
     }
-}
+} }
 
 impl TrackingPage {
     fn new() -> Ref<Self> {

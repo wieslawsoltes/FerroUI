@@ -40,7 +40,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl TemplatedControlImpl for TableViewColumnHeader {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TableViewColumnHeader {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -58,7 +58,7 @@ impl TemplatedControlImpl for TableViewColumnHeader {
             *this.resizer.borrow_mut() = Some((resizer, token));
         }
     }
-}
+} }
 
 ferro_properties! {
     impl TableViewColumnHeader {

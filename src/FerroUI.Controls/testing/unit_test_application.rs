@@ -27,19 +27,19 @@ pub struct UnitTestApplication {
 
 ferro_class!(UnitTestApplication: Application);
 
-impl FerroObjectImpl for UnitTestApplication {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for UnitTestApplication {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         Application::bind_current(this.to_ref().upcast());
         this.register_services();
     }
-}
+} }
 
-impl ApplicationImpl for UnitTestApplication {
+ferroui_base::ferro_overrides! { impl ApplicationImpl for UnitTestApplication {
     fn register_services(this: &Self) {
         this.services().register(this);
     }
-}
+} }
 
 impl TestServices {
     /// Registers the services with the current service locator as the

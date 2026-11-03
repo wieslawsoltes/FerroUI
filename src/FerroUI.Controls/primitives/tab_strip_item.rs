@@ -26,12 +26,12 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl InputElementImpl for TabStripItem {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TabStripItem {
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, e);
         this.update_selection_from_event(e);
     }
-}
+} }
 
 impl TabStripItem {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

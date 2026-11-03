@@ -36,7 +36,7 @@ ferro_impl_classes!(
     ButtonImpl
 );
 
-impl FerroObjectImpl for RepeatButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RepeatButton {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -44,9 +44,9 @@ impl FerroObjectImpl for RepeatButton {
             this.stop_timer();
         }
     }
-}
+} }
 
-impl InputElementImpl for RepeatButton {
+ferroui_base::ferro_overrides! { impl InputElementImpl for RepeatButton {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
@@ -76,7 +76,7 @@ impl InputElementImpl for RepeatButton {
             this.stop_timer();
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RepeatButton {
     ferro_property!(

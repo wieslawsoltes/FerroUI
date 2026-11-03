@@ -78,13 +78,13 @@ ferroui_base::ferro_class_info!(Button { new: Button::new });
 
 ferro_impl_classes!(Button: LayoutableImpl, InteractiveImpl, ContentControlImpl);
 
-impl ControlImpl for Button {
+ferroui_base::ferro_overrides! { impl ControlImpl for Button {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ButtonAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for Button {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Button {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -173,9 +173,9 @@ impl FerroObjectImpl for Button {
             this.update_is_effectively_enabled();
         }
     }
-}
+} }
 
-impl StyledElementImpl for Button {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for Button {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
         // Control attached again, set the hot key to create a hot key
         // manager for this control.
@@ -210,9 +210,9 @@ impl StyledElementImpl for Button {
 
         this.is_subscribed_to_command.set(false);
     }
-}
+} }
 
-impl VisualImpl for Button {
+ferroui_base::ferro_overrides! { impl VisualImpl for Button {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -242,9 +242,9 @@ impl VisualImpl for Button {
             }
         }
     }
-}
+} }
 
-impl InputElementImpl for Button {
+ferroui_base::ferro_overrides! { impl InputElementImpl for Button {
     fn is_enabled_core(this: &Self) -> bool {
         Self::parent_is_enabled_core(this) && this.command_can_execute.get()
     }
@@ -351,9 +351,9 @@ impl InputElementImpl for Button {
 
         this.set_is_pressed(false);
     }
-}
+} }
 
-impl TemplatedControlImpl for Button {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for Button {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -362,7 +362,7 @@ impl TemplatedControlImpl for Button {
         this.register_flyout_events(flyout.as_ref());
         this.update_pseudo_classes();
     }
-}
+} }
 
 impl ButtonImpl for Button {
     fn on_click(this: &Self) {

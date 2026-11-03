@@ -14,7 +14,7 @@ pub struct ScaleTransform {
 ferro_class!(ScaleTransform: Transform);
 crate::ferro_class_info!(ScaleTransform { new: ScaleTransform::new });
 
-impl FerroObjectImpl for ScaleTransform {
+crate::ferro_overrides! { impl FerroObjectImpl for ScaleTransform {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -22,7 +22,7 @@ impl FerroObjectImpl for ScaleTransform {
             this.raise_changed();
         }
     }
-}
+} }
 
 impl TransformImpl for ScaleTransform {
     fn value(this: &Self) -> Matrix {

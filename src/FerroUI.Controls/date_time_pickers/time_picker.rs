@@ -94,7 +94,7 @@ ferro_impl_classes!(
     InputElementImpl
 );
 
-impl FerroObjectImpl for TimePicker {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TimePicker {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -127,9 +127,9 @@ impl FerroObjectImpl for TimePicker {
             this.set_selected_time_text();
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for TimePicker {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TimePicker {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         let flyout_button = this.flyout_button.borrow().clone();
         if let (Some(flyout_button), Some(token)) = (flyout_button, this.flyout_button_click.take()) {
@@ -213,13 +213,13 @@ impl TemplatedControlImpl for TimePicker {
             bind(TimePickerPresenter::use_seconds_property().as_property(), Self::use_seconds_property().as_property());
         }
     }
-}
+} }
 
-impl ControlImpl for TimePicker {
+ferroui_base::ferro_overrides! { impl ControlImpl for TimePicker {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::TimePickerAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl TimePickerImpl for TimePicker {
     fn on_selected_time_changed(this: &Self, old_time: Option<TimeSpan>, new_time: Option<TimeSpan>) {

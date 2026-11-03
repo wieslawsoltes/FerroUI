@@ -125,7 +125,7 @@ ferro_class_info!(DateTimePickerPanel {
 
 ferro_impl_classes!(DateTimePickerPanel: StyledElementImpl, InteractiveImpl, ControlImpl, PanelImpl);
 
-impl FerroObjectImpl for DateTimePickerPanel {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for DateTimePickerPanel {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -155,9 +155,9 @@ impl FerroObjectImpl for DateTimePickerPanel {
             this.has_init.set(false);
         }
     }
-}
+} }
 
-impl VisualImpl for DateTimePickerPanel {
+ferroui_base::ferro_overrides! { impl VisualImpl for DateTimePickerPanel {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -186,9 +186,9 @@ impl VisualImpl for DateTimePickerPanel {
             parent_scroller.remove_handler(InputElement::scroll_gesture_ended_event(), token);
         }
     }
-}
+} }
 
-impl LayoutableImpl for DateTimePickerPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for DateTimePickerPanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         if available_size.width.is_infinite() || available_size.height.is_infinite() {
             panic!("Panel must have finite height");
@@ -251,9 +251,9 @@ impl LayoutableImpl for DateTimePickerPanel {
 
         final_size
     }
-}
+} }
 
-impl InputElementImpl for DateTimePickerPanel {
+ferroui_base::ferro_overrides! { impl InputElementImpl for DateTimePickerPanel {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         match e.key {
             Key::Up => {
@@ -276,7 +276,7 @@ impl InputElementImpl for DateTimePickerPanel {
         }
         Self::parent_on_key_down(this, e);
     }
-}
+} }
 
 impl IScrollable for DateTimePickerPanel {
     fn extent(&self) -> Size {

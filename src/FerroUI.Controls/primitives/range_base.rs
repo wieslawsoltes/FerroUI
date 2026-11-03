@@ -31,7 +31,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl FerroObjectImpl for RangeBase {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RangeBase {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -46,9 +46,9 @@ impl FerroObjectImpl for RangeBase {
             this.raise_event(&value_changed_event_args);
         }
     }
-}
+} }
 
-impl StyledElementImpl for RangeBase {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for RangeBase {
     fn on_initialized(this: &Self) {
         Self::parent_on_initialized(this);
 
@@ -65,7 +65,7 @@ impl StyledElementImpl for RangeBase {
         Self::parent_on_data_context_end_update(this);
         this.is_data_context_changing.set(false);
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RangeBase {
     ferro_property!(

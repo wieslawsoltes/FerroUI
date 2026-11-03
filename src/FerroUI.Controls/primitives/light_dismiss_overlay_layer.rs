@@ -33,7 +33,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(LightDismissOverlayLayer: FerroObjectImpl);
 
-impl VisualImpl for LightDismissOverlayLayer {
+ferroui_base::ferro_overrides! { impl VisualImpl for LightDismissOverlayLayer {
     fn custom_hit_test(this: &Self, point: Point) -> Option<bool> {
         Some(ICustomHitTest::hit_test(this, point))
     }
@@ -44,7 +44,7 @@ impl VisualImpl for LightDismissOverlayLayer {
     ) -> Option<ferroui_base::media::IntersectionResult> {
         Some(ICustomHitTest::hit_test_geometry(this, geometry))
     }
-}
+} }
 
 impl ICustomHitTest for LightDismissOverlayLayer {
     fn hit_test(&self, point: Point) -> bool {

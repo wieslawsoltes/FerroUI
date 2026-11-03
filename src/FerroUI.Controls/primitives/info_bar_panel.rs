@@ -79,7 +79,7 @@ ferro_properties! { impl InfoBarPanel {
     );
 } }
 
-impl LayoutableImpl for InfoBarPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for InfoBarPanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let mut total_width = 0.0_f64;
         let mut total_height = 0.0_f64;
@@ -213,7 +213,7 @@ impl LayoutableImpl for InfoBarPanel {
 
         final_size
     }
-}
+} }
 
 impl InfoBarPanel {
     fn static_constructor() {

@@ -71,7 +71,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl FerroObjectImpl for Page {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Page {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -90,14 +90,14 @@ impl FerroObjectImpl for Page {
             AutomationProperties::set_name(this, Some(name.as_deref().unwrap_or("")));
         }
     }
-}
+} }
 
-impl ControlImpl for Page {
+ferroui_base::ferro_overrides! { impl ControlImpl for Page {
     fn on_loaded(this: &Self, e: &RoutedEventArgs) {
         Self::parent_on_loaded(this, e);
         this.update_content_safe_area_padding();
     }
-}
+} }
 
 impl PageImpl for Page {
     fn on_navigated_to(this: &Self, args: &NavigatedToEventArgs) {

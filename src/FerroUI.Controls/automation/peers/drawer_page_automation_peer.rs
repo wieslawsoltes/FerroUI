@@ -22,7 +22,7 @@ ferroui_base::ferro_class_info!(DrawerPageAutomationPeer {
     interfaces: [Rc<dyn IExpandCollapseProvider> => ProviderAdapter::as_expand_collapse_provider]
 });
 
-impl FerroObjectImpl for DrawerPageAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for DrawerPageAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -33,11 +33,11 @@ impl FerroObjectImpl for DrawerPageAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for DrawerPageAutomationPeer {}
+ferroui_base::ferro_impl_classes!(DrawerPageAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for DrawerPageAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for DrawerPageAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Pane
     }
@@ -51,7 +51,7 @@ impl AutomationPeerImpl for DrawerPageAutomationPeer {
 
         result
     }
-}
+} }
 
 impl IExpandCollapseProvider for ProviderAdapter<DrawerPageAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

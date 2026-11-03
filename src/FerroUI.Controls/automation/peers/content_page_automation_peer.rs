@@ -14,10 +14,9 @@ pub struct ContentPageAutomationPeer {
 ferro_class!(ContentPageAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(ContentPageAutomationPeer {});
 
-impl FerroObjectImpl for ContentPageAutomationPeer {}
-impl ControlAutomationPeerImpl for ContentPageAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ContentPageAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ContentPageAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ContentPageAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Pane
     }
@@ -31,7 +30,7 @@ impl AutomationPeerImpl for ContentPageAutomationPeer {
 
         result
     }
-}
+} }
 
 impl ContentPageAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

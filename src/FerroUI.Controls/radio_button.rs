@@ -33,13 +33,13 @@ ferro_impl_classes!(
     ButtonImpl
 );
 
-impl ControlImpl for RadioButton {
+ferroui_base::ferro_overrides! { impl ControlImpl for RadioButton {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::RadioButtonAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for RadioButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RadioButton {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -50,9 +50,9 @@ impl FerroObjectImpl for RadioButton {
             this.on_group_name_changed(old_value.as_deref(), new_value.as_deref());
         }
     }
-}
+} }
 
-impl VisualImpl for RadioButton {
+ferroui_base::ferro_overrides! { impl VisualImpl for RadioButton {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         let group_manager = this.group_manager.borrow().clone();
         if let Some(group_manager) = group_manager {
@@ -70,15 +70,15 @@ impl VisualImpl for RadioButton {
             group_manager.remove(&this.handle(), this.group_name().as_deref());
         }
     }
-}
+} }
 
-impl ToggleButtonImpl for RadioButton {
+ferroui_base::ferro_overrides! { impl ToggleButtonImpl for RadioButton {
     fn toggle(this: &Self) {
         if !this.is_checked().unwrap_or_default() {
             this.set_current_value(ToggleButton::is_checked_property(), Some(true));
         }
     }
-}
+} }
 
 /// The radio button viewed as a member of a radio group.
 struct RadioButtonHandle(Ref<RadioButton>);

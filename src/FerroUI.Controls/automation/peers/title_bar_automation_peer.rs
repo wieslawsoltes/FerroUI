@@ -16,11 +16,9 @@ pub struct TitleBarAutomationPeer {
 ferro_class!(TitleBarAutomationPeer: ControlAutomationPeer);
 ferro_class_info!(TitleBarAutomationPeer { markup: { namespace: "FerroUI.Automation.Peers" } });
 
-impl FerroObjectImpl for TitleBarAutomationPeer {}
+ferroui_base::ferro_impl_classes!(TitleBarAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl ControlAutomationPeerImpl for TitleBarAutomationPeer {}
-
-impl AutomationPeerImpl for TitleBarAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for TitleBarAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::TitleBar
     }
@@ -32,7 +30,7 @@ impl AutomationPeerImpl for TitleBarAutomationPeer {
     fn get_name_core(this: &Self) -> Option<String> {
         Self::parent_get_name_core(this).filter(|name| !name.is_empty()).or_else(|| Some(this.owner().title()))
     }
-}
+} }
 
 impl TitleBarAutomationPeer {
     pub fn construct(owner: &TitleBar) -> Self {

@@ -30,13 +30,13 @@ ferroui_base::ferro_impl_classes!(AccessText: StyledElementImpl);
 ferroui_base::ferro_impl_classes!(AccessText: LayoutableImpl);
 ferroui_base::ferro_impl_classes!(AccessText: InteractiveImpl);
 ferroui_base::ferro_impl_classes!(AccessText: InputElementImpl);
-impl ControlImpl for AccessText {
+ferroui_base::ferro_overrides! { impl ControlImpl for AccessText {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::NoneAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for AccessText {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for AccessText {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -47,9 +47,9 @@ impl FerroObjectImpl for AccessText {
             }
         });
     }
-}
+} }
 
-impl VisualImpl for AccessText {
+ferroui_base::ferro_overrides! { impl VisualImpl for AccessText {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         let access_keys = TopLevel::get_top_level(Some(this)).and_then(|top_level| top_level.access_key_handler());
@@ -73,9 +73,9 @@ impl VisualImpl for AccessText {
             }
         }
     }
-}
+} }
 
-impl TextBlockImpl for AccessText {
+ferroui_base::ferro_overrides! { impl TextBlockImpl for AccessText {
     /// Renders the `AccessText` to a drawing context.
     fn render_core(this: &Self, context: &mut DrawingContext) {
         Self::parent_render_core(this, context);
@@ -103,7 +103,7 @@ impl TextBlockImpl for AccessText {
         let text = Self::remove_access_key_marker(text);
         Self::parent_create_text_layout(this, text.as_deref())
     }
-}
+} }
 
 fn as_object(object: &FerroObject) -> &FerroObject {
     object

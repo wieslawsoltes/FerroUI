@@ -14,10 +14,9 @@ pub struct ContentControlAutomationPeer {
 ferro_class!(ContentControlAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(ContentControlAutomationPeer {});
 
-impl FerroObjectImpl for ContentControlAutomationPeer {}
-impl ControlAutomationPeerImpl for ContentControlAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ContentControlAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ContentControlAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ContentControlAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Pane
     }
@@ -59,7 +58,7 @@ impl AutomationPeerImpl for ContentControlAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         false
     }
-}
+} }
 
 fn is_null_or_white_space(value: &Option<String>) -> bool {
     value.as_deref().is_none_or(|value| value.chars().all(char::is_whitespace))

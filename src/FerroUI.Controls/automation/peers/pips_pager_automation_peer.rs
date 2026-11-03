@@ -22,7 +22,7 @@ ferroui_base::ferro_class_info!(PipsPagerAutomationPeer {
     interfaces: [Rc<dyn ISelectionProvider> => ProviderAdapter::as_selection_provider]
 });
 
-impl FerroObjectImpl for PipsPagerAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for PipsPagerAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -33,11 +33,11 @@ impl FerroObjectImpl for PipsPagerAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for PipsPagerAutomationPeer {}
+ferroui_base::ferro_impl_classes!(PipsPagerAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for PipsPagerAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for PipsPagerAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::List
     }
@@ -53,7 +53,7 @@ impl AutomationPeerImpl for PipsPagerAutomationPeer {
             _ => Some("Pips Pager".to_owned()),
         }
     }
-}
+} }
 
 impl ISelectionProvider for ProviderAdapter<PipsPagerAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

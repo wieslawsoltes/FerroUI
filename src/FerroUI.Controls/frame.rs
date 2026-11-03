@@ -114,13 +114,13 @@ ferro_class_info!(Frame {
 });
 ferro_impl_classes!(Frame: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl);
 
-impl FerroObjectImpl for Frame {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Frame {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.back_stack.attach(&this.to_ref());
         this.forward_stack.attach(&this.to_ref());
     }
-}
+} }
 
 ferro_properties! {
     impl Frame {

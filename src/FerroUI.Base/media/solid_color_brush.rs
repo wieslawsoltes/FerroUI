@@ -20,7 +20,7 @@ ferro_class!(SolidColorBrush: Brush);
 crate::ferro_class_info!(SolidColorBrush { new: SolidColorBrush::new });
 ferro_impl_classes!(SolidColorBrush: FerroObjectImpl);
 
-impl BrushImpl for SolidColorBrush {
+crate::ferro_overrides! { impl BrushImpl for SolidColorBrush {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {
         Some(|c| ServerCompositionSimpleSolidColorBrush::new(c))
     }
@@ -29,7 +29,7 @@ impl BrushImpl for SolidColorBrush {
         Self::parent_serialize_changes(this, c, writer);
         ServerCompositionSimpleSolidColorBrushProps::serialize_all_changes(writer, this.color());
     }
-}
+} }
 
 crate::ferro_properties! { impl SolidColorBrush {
     ferro_property!(pub fn color_property() -> StyledProperty<Color> {

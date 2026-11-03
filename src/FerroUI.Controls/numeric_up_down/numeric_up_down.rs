@@ -125,13 +125,13 @@ ferro_class_info!(NumericUpDown {
 
 ferro_impl_classes!(NumericUpDown: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
-impl ControlImpl for NumericUpDown {
+ferroui_base::ferro_overrides! { impl ControlImpl for NumericUpDown {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::NumericUpDownAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for NumericUpDown {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NumericUpDown {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -146,9 +146,9 @@ impl FerroObjectImpl for NumericUpDown {
             }
         }).detach();
     }
-}
+} }
 
-impl InputElementImpl for NumericUpDown {
+ferroui_base::ferro_overrides! { impl InputElementImpl for NumericUpDown {
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, e);
         this.focus_changed(this.is_keyboard_focus_within());
@@ -176,9 +176,9 @@ impl InputElementImpl for NumericUpDown {
             }
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for NumericUpDown {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for NumericUpDown {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         if let Some((text_box, token)) = this.text_box.take() {
             text_box.remove_handler(InputElement::pointer_pressed_event(), token);
@@ -228,7 +228,7 @@ impl TemplatedControlImpl for NumericUpDown {
 
         this.set_valid_spin_direction();
     }
-}
+} }
 
 impl NumericUpDownImpl for NumericUpDown {
     fn on_number_format_changed(

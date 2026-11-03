@@ -35,7 +35,7 @@ ferro_class! {
 }
 ferroui_base::ferro_class_info!(SelectingItemsControlAutomationPeer { interfaces: [Rc<dyn ISelectionProvider> => ProviderAdapter::as_selection_provider] });
 
-impl FerroObjectImpl for SelectingItemsControlAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for SelectingItemsControlAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -51,11 +51,9 @@ impl FerroObjectImpl for SelectingItemsControlAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl AutomationPeerImpl for SelectingItemsControlAutomationPeer {}
-impl ControlAutomationPeerImpl for SelectingItemsControlAutomationPeer {}
-impl ItemsControlAutomationPeerImpl for SelectingItemsControlAutomationPeer {}
+ferroui_base::ferro_impl_classes!(SelectingItemsControlAutomationPeer: AutomationPeerImpl, ControlAutomationPeerImpl, ItemsControlAutomationPeerImpl);
 
 impl SelectingItemsControlAutomationPeerImpl for SelectingItemsControlAutomationPeer {
     fn get_selection_core(this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {

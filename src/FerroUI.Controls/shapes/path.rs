@@ -28,11 +28,11 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(Path: FerroObjectImpl);
 
-impl ShapeImpl for Path {
+ferroui_base::ferro_overrides! { impl ShapeImpl for Path {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         this.data()
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Path {
     ferro_property!(

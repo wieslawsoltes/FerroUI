@@ -42,7 +42,7 @@ ferroui_base::ferro_class_info!(FontIcon {
 });
 ferro_impl_classes!(FontIcon: StyledElementImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for FontIcon {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for FontIcon {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         // CFontIcon::OnPropertyChanged: the glyph, the text properties and the flow direction go
@@ -60,23 +60,23 @@ impl FerroObjectImpl for FontIcon {
             this.update_child_text_block();
         }
     }
-}
+} }
 
-impl VisualImpl for FontIcon {
+ferroui_base::ferro_overrides! { impl VisualImpl for FontIcon {
     // WinUI's icons draw their glyph as it is in a right-to-left flow; a font icon mirrors it only
     // with MirroredWhenRightToLeft (CFontIcon::ApplyScaleTransformForFlowDirection).
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
     }
-}
+} }
 
-impl TemplatedControlImpl for FontIcon {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for FontIcon {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, args);
         *this.text.borrow_mut() = args.name_scope().find_as::<TextBlock>("PART_Text");
         this.update_child_text_block();
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl FontIcon {
     ferro_property!(

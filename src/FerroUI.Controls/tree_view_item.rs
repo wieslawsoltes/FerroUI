@@ -64,15 +64,15 @@ ferro_impl_classes!(
     HeaderedItemsControlImpl
 );
 
-impl ControlImpl for TreeViewItem {
+ferroui_base::ferro_overrides! { impl ControlImpl for TreeViewItem {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::TreeViewItemAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferroui_base::ferro_impl_classes!(TreeViewItem: FerroObjectImpl);
 
-impl StyledElementImpl for TreeViewItem {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for TreeViewItem {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_logical_tree(this, e);
 
@@ -104,9 +104,9 @@ impl StyledElementImpl for TreeViewItem {
             }
         }
     }
-}
+} }
 
-impl InputElementImpl for TreeViewItem {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TreeViewItem {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         if !e.handled() {
             let handler = match e.key {
@@ -167,9 +167,9 @@ impl InputElementImpl for TreeViewItem {
 
         this.items_panel_pointer_pressed.set(false);
     }
-}
+} }
 
-impl TemplatedControlImpl for TreeViewItem {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TreeViewItem {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         let previous = this.header_presenter.take();
         if let (Some(previous), Some(token)) = (previous, this.header_double_tapped_token.take()) {
@@ -196,9 +196,9 @@ impl TemplatedControlImpl for TreeViewItem {
             this.bring_into_view();
         }
     }
-}
+} }
 
-impl ItemsControlImpl for TreeViewItem {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for TreeViewItem {
     fn create_container_for_item_override(
         this: &Self,
         item: &Option<BoxedValue>,
@@ -251,7 +251,7 @@ impl ItemsControlImpl for TreeViewItem {
             _ => {}
         }
     }
-}
+} }
 
 impl TreeViewItemImpl for TreeViewItem {
     fn on_request_bring_into_view(this: &Self, e: &RequestBringIntoViewEventArgs) {

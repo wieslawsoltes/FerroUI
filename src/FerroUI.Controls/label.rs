@@ -29,15 +29,15 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl ControlImpl for Label {
+ferroui_base::ferro_overrides! { impl ControlImpl for Label {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::LabelAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferroui_base::ferro_impl_classes!(Label: FerroObjectImpl);
 
-impl InputElementImpl for Label {
+ferroui_base::ferro_overrides! { impl InputElementImpl for Label {
     fn on_access_key(this: &Self, e: &dyn IRoutedEventArgs) {
         this.label_activated(e);
     }
@@ -51,7 +51,7 @@ impl InputElementImpl for Label {
         }
         Self::parent_on_pointer_pressed(this, e);
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Label {
     ferro_property!(

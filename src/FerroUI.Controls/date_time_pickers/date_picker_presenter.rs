@@ -105,7 +105,7 @@ ferro_impl_classes!(
     PickerPresenterBaseImpl
 );
 
-impl FerroObjectImpl for DatePickerPresenter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for DatePickerPresenter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -138,9 +138,9 @@ impl FerroObjectImpl for DatePickerPresenter {
             this.init_picker();
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for DatePickerPresenter {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for DatePickerPresenter {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -227,9 +227,9 @@ impl TemplatedControlImpl for DatePickerPresenter {
 
         this.init_picker();
     }
-}
+} }
 
-impl InputElementImpl for DatePickerPresenter {
+ferroui_base::ferro_overrides! { impl InputElementImpl for DatePickerPresenter {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         match e.key {
             Key::Escape => {
@@ -255,7 +255,7 @@ impl InputElementImpl for DatePickerPresenter {
         }
         Self::parent_on_key_down(this, e);
     }
-}
+} }
 
 ferro_properties! {
     impl DatePickerPresenter {

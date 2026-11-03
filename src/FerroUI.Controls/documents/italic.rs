@@ -17,13 +17,13 @@ ferro_class!(Italic: Span);
 ferroui_base::ferro_class_info!(Italic { new: Italic::new });
 ferro_impl_classes!(Italic: StyledElementImpl, TextElementImpl, InlineImpl);
 
-impl FerroObjectImpl for Italic {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Italic {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
         this.set_current_value(TextElement::font_style_property(), FontStyle::Italic);
     }
-}
+} }
 
 impl Italic {
     fn static_constructor() {

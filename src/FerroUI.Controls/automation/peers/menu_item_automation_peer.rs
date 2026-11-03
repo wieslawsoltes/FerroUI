@@ -33,7 +33,7 @@ ferroui_base::ferro_class_info!(MenuItemAutomationPeer {
     ]
 });
 
-impl FerroObjectImpl for MenuItemAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for MenuItemAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -44,11 +44,11 @@ impl FerroObjectImpl for MenuItemAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for MenuItemAutomationPeer {}
+ferroui_base::ferro_impl_classes!(MenuItemAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for MenuItemAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for MenuItemAutomationPeer {
     fn get_access_key_core(this: &Self) -> Option<String> {
         let mut result = Self::parent_get_access_key_core(this);
 
@@ -114,7 +114,7 @@ impl AutomationPeerImpl for MenuItemAutomationPeer {
 
         Self::parent_get_provider_core(this, provider_type)
     }
-}
+} }
 
 fn is_null_or_white_space(value: &Option<String>) -> bool {
     value.as_deref().is_none_or(|value| value.chars().all(char::is_whitespace))

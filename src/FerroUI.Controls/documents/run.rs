@@ -20,7 +20,7 @@ ferroui_base::ferro_class_info!(Run { new: Run::new });
 ferroui_base::ferro_impl_classes!(Run: StyledElementImpl);
 ferroui_base::ferro_impl_classes!(Run: TextElementImpl);
 
-impl FerroObjectImpl for Run {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Run {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -30,9 +30,9 @@ impl FerroObjectImpl for Run {
             }
         }
     }
-}
+} }
 
-impl InlineImpl for Run {
+ferroui_base::ferro_overrides! { impl InlineImpl for Run {
     fn build_text_run(this: &Self, text_runs: &mut Vec<Rc<dyn TextRun>>) {
         let text = this.text().unwrap_or_default();
 
@@ -52,7 +52,7 @@ impl InlineImpl for Run {
 
         string_builder.push_str(&text);
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Run {
     ferro_property!(

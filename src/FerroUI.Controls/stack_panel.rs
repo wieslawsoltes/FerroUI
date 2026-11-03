@@ -45,7 +45,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(StackPanel: FerroObjectImpl);
 
-impl LayoutableImpl for StackPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for StackPanel {
     /// General stack panel layout behaviour is to grow unbounded in the
     /// "stacking" direction (size to content). Children in this dimension are
     /// encouraged to be as large as they like. In the other dimension, the
@@ -141,7 +141,7 @@ impl LayoutableImpl for StackPanel {
 
         final_size
     }
-}
+} }
 
 impl StackPanelImpl for StackPanel {
     fn arrange_child(_this: &Self, child: &Ref<Control>, rect: Rect, _panel_size: Size, _orientation: Orientation) {

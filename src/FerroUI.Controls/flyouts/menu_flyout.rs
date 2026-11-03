@@ -38,7 +38,7 @@ ferro_class_info!(MenuFlyout {
 });
 ferro_impl_classes!(MenuFlyout: FlyoutBaseImpl);
 
-impl FerroObjectImpl for MenuFlyout {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for MenuFlyout {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -46,9 +46,9 @@ impl FerroObjectImpl for MenuFlyout {
             this.items.set_items_source(change.get_new_value::<Option<ItemsSource>>());
         }
     }
-}
+} }
 
-impl PopupFlyoutBaseImpl for MenuFlyout {
+ferroui_base::ferro_overrides! { impl PopupFlyoutBaseImpl for MenuFlyout {
     fn create_presenter(this: &Self) -> Ref<Control> {
         let presenter = MenuFlyoutPresenter::new();
         presenter.set_items_source(Some(this.presenter_items_source.clone()));
@@ -76,7 +76,7 @@ impl PopupFlyoutBaseImpl for MenuFlyout {
 
         Self::parent_on_opening(this, args);
     }
-}
+} }
 
 /// The items of a menu flyout as an untyped, notifying list: what the items
 /// collection is to an items control that uses it as its items source.

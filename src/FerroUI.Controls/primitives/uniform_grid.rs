@@ -31,7 +31,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(UniformGrid: FerroObjectImpl);
 
-impl LayoutableImpl for UniformGrid {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for UniformGrid {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         this.update_rows_and_columns();
 
@@ -108,7 +108,7 @@ impl LayoutableImpl for UniformGrid {
 
         final_size
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl UniformGrid {
     ferro_property!(

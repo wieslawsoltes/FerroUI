@@ -11,14 +11,13 @@ pub struct NativeMenuBarAutomationPeer {
 ferro_class!(NativeMenuBarAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(NativeMenuBarAutomationPeer {});
 
-impl FerroObjectImpl for NativeMenuBarAutomationPeer {}
-impl ControlAutomationPeerImpl for NativeMenuBarAutomationPeer {}
+ferroui_base::ferro_impl_classes!(NativeMenuBarAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for NativeMenuBarAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for NativeMenuBarAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::MenuBar
     }
-}
+} }
 
 impl NativeMenuBarAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

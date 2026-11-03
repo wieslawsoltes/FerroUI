@@ -95,7 +95,7 @@ ferroui_base::ferro_impl_classes!(TextPresenter: InputElementImpl);
 ferroui_base::ferro_impl_classes!(TextPresenter: ControlImpl);
 ferroui_base::ferro_impl_classes!(TextPresenter: StyledElementImpl);
 
-impl FerroObjectImpl for TextPresenter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextPresenter {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         let property = change.property();
 
@@ -163,9 +163,9 @@ impl FerroObjectImpl for TextPresenter {
             this.on_preedit_changed(preedit_text.as_deref(), this.preedit_text_cursor_position());
         }
     }
-}
+} }
 
-impl VisualImpl for TextPresenter {
+ferroui_base::ferro_overrides! { impl VisualImpl for TextPresenter {
     /// Renders the `TextPresenter` to a drawing context.
     ///
     /// This member is sealed.
@@ -250,9 +250,9 @@ impl VisualImpl for TextPresenter {
             this.unsubscribe_caret_timer_tick();
         }
     }
-}
+} }
 
-impl LayoutableImpl for TextPresenter {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TextPresenter {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         this.constraint.set(available_size);
 
@@ -297,7 +297,7 @@ impl LayoutableImpl for TextPresenter {
 
         final_size
     }
-}
+} }
 
 impl TextPresenterImpl for TextPresenter {
     fn create_text_layout(this: &Self) -> Rc<TextLayout> {

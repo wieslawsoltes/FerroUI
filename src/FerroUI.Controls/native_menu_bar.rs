@@ -36,13 +36,13 @@ ferro_impl_classes!(
     InputElementImpl
 );
 
-impl ControlImpl for NativeMenuBar {
+ferroui_base::ferro_overrides! { impl ControlImpl for NativeMenuBar {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::NativeMenuBarAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl TemplatedControlImpl for NativeMenuBar {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for NativeMenuBar {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -57,9 +57,9 @@ impl TemplatedControlImpl for NativeMenuBar {
             this.subscribe_to_toplevel(&top_level, &menu);
         }
     }
-}
+} }
 
-impl VisualImpl for NativeMenuBar {
+ferroui_base::ferro_overrides! { impl VisualImpl for NativeMenuBar {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -78,7 +78,7 @@ impl VisualImpl for NativeMenuBar {
             subscriptions.dispose();
         }
     }
-}
+} }
 
 impl NativeMenuBar {
     /// The named parts expected in the control template.

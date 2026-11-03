@@ -17,15 +17,13 @@ pub struct TreeViewItemAutomationPeer {
 ferro_class!(TreeViewItemAutomationPeer: ItemsControlAutomationPeer);
 ferroui_base::ferro_class_info!(TreeViewItemAutomationPeer { interfaces: [Rc<dyn ISelectionItemProvider> => ProviderAdapter::as_selection_item_provider] });
 
-impl FerroObjectImpl for TreeViewItemAutomationPeer {}
-impl ControlAutomationPeerImpl for TreeViewItemAutomationPeer {}
-impl ItemsControlAutomationPeerImpl for TreeViewItemAutomationPeer {}
+ferroui_base::ferro_impl_classes!(TreeViewItemAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl, ItemsControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for TreeViewItemAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for TreeViewItemAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::TreeItem
     }
-}
+} }
 
 impl ISelectionItemProvider for ProviderAdapter<TreeViewItemAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

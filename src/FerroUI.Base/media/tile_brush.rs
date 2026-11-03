@@ -13,7 +13,7 @@ pub struct TileBrush {
 ferro_class!(TileBrush: Brush);
 ferro_impl_classes!(TileBrush: FerroObjectImpl);
 
-impl BrushImpl for TileBrush {
+crate::ferro_overrides! { impl BrushImpl for TileBrush {
     fn serialize_changes(this: &Self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
         Self::parent_serialize_changes(this, c, writer);
         ServerCompositionSimpleTileBrushProps::serialize_all_changes(
@@ -26,7 +26,7 @@ impl BrushImpl for TileBrush {
             this.tile_mode(),
         );
     }
-}
+} }
 
 crate::ferro_properties! { impl TileBrush {
     ferro_property!(pub fn alignment_x_property() -> StyledProperty<AlignmentX> {

@@ -28,7 +28,7 @@ ferroui_base::ferro_class_info!(RadioButtonAutomationPeer {
     interfaces: [Rc<dyn ISelectionItemProvider> => ProviderAdapter::as_selection_item_provider]
 });
 
-impl FerroObjectImpl for RadioButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RadioButtonAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -41,11 +41,11 @@ impl FerroObjectImpl for RadioButtonAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for RadioButtonAutomationPeer {}
+ferroui_base::ferro_impl_classes!(RadioButtonAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for RadioButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for RadioButtonAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "RadioButton".to_owned()
     }
@@ -53,7 +53,7 @@ impl AutomationPeerImpl for RadioButtonAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::RadioButton
     }
-}
+} }
 
 impl RadioButtonAutomationPeerImpl for RadioButtonAutomationPeer {
     fn raise_toggle_state_property_changed_event(this: &Self, old_value: Option<bool>, new_value: Option<bool>) {

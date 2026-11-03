@@ -35,7 +35,7 @@ ferroui_base::ferro_class_info!(Paragraph {
 
 ferroui_base::ferro_impl_classes!(Paragraph: StyledElementImpl);
 
-impl FerroObjectImpl for Paragraph {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Paragraph {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.inlines.set_logical_children(Some(this));
@@ -54,7 +54,7 @@ impl FerroObjectImpl for Paragraph {
             this.invalidate_format_change(change);
         }
     }
-}
+} }
 
 impl TextElementImpl for Paragraph {
     fn on_inline_host_changed(

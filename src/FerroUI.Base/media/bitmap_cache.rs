@@ -18,7 +18,7 @@ ferro_class!(BitmapCache: CacheMode);
 crate::ferro_class_info!(BitmapCache { new: BitmapCache::new });
 ferro_impl_classes!(BitmapCache: StyledElementImpl);
 
-impl FerroObjectImpl for BitmapCache {
+crate::ferro_overrides! { impl FerroObjectImpl for BitmapCache {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         let current = this.current.borrow().clone();
         if let (true, Some(current)) = (change.is_effective_value_change(), current) {
@@ -33,7 +33,7 @@ impl FerroObjectImpl for BitmapCache {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
 impl CacheModeImpl for BitmapCache {
     // We currently only allow visual to be attached to one compositor at a time, so keep it simple for now

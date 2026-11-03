@@ -39,7 +39,7 @@ ferro_class_info!(RatingControlAutomationPeer {
 });
 ferro_impl_classes!(RatingControlAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for RatingControlAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for RatingControlAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Slider
     }
@@ -57,7 +57,7 @@ impl AutomationPeerImpl for RatingControlAutomationPeer {
                 (!caption.is_empty()).then_some(caption)
             })
     }
-}
+} }
 
 impl RatingControlAutomationPeer {
     /// Initializes a new peer of `owner`.

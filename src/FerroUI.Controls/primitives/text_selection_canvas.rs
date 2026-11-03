@@ -73,7 +73,7 @@ ferro_impl_classes!(
     CanvasImpl
 );
 
-impl FerroObjectImpl for TextSelectionHandleCanvas {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextSelectionHandleCanvas {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -165,9 +165,9 @@ impl FerroObjectImpl for TextSelectionHandleCanvas {
             }
         });
     }
-}
+} }
 
-impl LayoutableImpl for TextSelectionHandleCanvas {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TextSelectionHandleCanvas {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         if this.show_handles() {
             this.move_handles_to_selection();
@@ -175,7 +175,7 @@ impl LayoutableImpl for TextSelectionHandleCanvas {
 
         Self::parent_measure_override(this, available_size)
     }
-}
+} }
 
 impl TextSelectionHandleCanvas {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

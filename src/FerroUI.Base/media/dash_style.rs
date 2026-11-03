@@ -22,7 +22,7 @@ pub struct DashStyle {
 ferro_class!(DashStyle: Animatable);
 crate::ferro_class_info!(DashStyle { new: DashStyle::new, interfaces: [std::rc::Rc<dyn crate::media::IDashStyle>] });
 
-impl FerroObjectImpl for DashStyle {
+crate::ferro_overrides! { impl FerroObjectImpl for DashStyle {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -44,7 +44,7 @@ impl FerroObjectImpl for DashStyle {
             }
         }
     }
-}
+} }
 
 crate::ferro_properties! { impl DashStyle {
     ferro_property!(pub fn dashes_property() -> StyledProperty<Option<MediaCollection<f64>>> {

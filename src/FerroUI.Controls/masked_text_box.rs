@@ -29,7 +29,7 @@ ferroui_base::ferro_class_info!(MaskedTextBox { new: MaskedTextBox::new });
 
 ferro_impl_classes!(MaskedTextBox: VisualImpl, LayoutableImpl, InteractiveImpl, ControlImpl, TemplatedControlImpl);
 
-impl FerroObjectImpl for MaskedTextBox {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for MaskedTextBox {
     fn constructed(this: &Self) {
         // The static constructor runs before the instance constructors.
         Self::parent_constructed(this);
@@ -100,15 +100,15 @@ impl FerroObjectImpl for MaskedTextBox {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl StyledElementImpl for MaskedTextBox {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for MaskedTextBox {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <TextBox as StaticType>::TYPE
     }
-}
+} }
 
-impl InputElementImpl for MaskedTextBox {
+ferroui_base::ferro_overrides! { impl InputElementImpl for MaskedTextBox {
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         if this.hide_prompt_on_leave() {
             if let Some(provider) = this.mask_provider() {
@@ -318,7 +318,7 @@ impl InputElementImpl for MaskedTextBox {
 
         Self::parent_on_text_input(this, e);
     }
-}
+} }
 
 impl TextBoxImpl for MaskedTextBox {
     fn coerce_text(this: &Self, mut text: Option<String>) -> Option<String> {

@@ -30,14 +30,14 @@ pub struct PathGeometry {
 ferro_class!(PathGeometry: StreamGeometry);
 crate::ferro_class_info!(PathGeometry { new: PathGeometry::new });
 
-impl FerroObjectImpl for PathGeometry {
+crate::ferro_overrides! { impl FerroObjectImpl for PathGeometry {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_figures(Some(PathFigures::new()));
     }
-}
+} }
 
-impl GeometryImpl for PathGeometry {
+crate::ferro_overrides! { impl GeometryImpl for PathGeometry {
     fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let figures = this.figures()?;
 
@@ -53,7 +53,7 @@ impl GeometryImpl for PathGeometry {
         builder.dispose();
         Some(geometry)
     }
-}
+} }
 
 impl StreamGeometryImpl for PathGeometry {
     fn open_core(this: &Self) -> Box<dyn IGeometryContext> {

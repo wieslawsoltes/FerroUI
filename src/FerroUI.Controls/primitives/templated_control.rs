@@ -43,7 +43,7 @@ ferro_impl_classes!(TemplatedControl: VisualImpl, InteractiveImpl, InputElementI
 
 ferroui_base::ferro_impl_classes!(TemplatedControl: FerroObjectImpl);
 
-impl StyledElementImpl for TemplatedControl {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for TemplatedControl {
     fn notify_child_resources_changed(this: &Self, e: ResourcesChangedEventArgs) {
         if let Some(children) = this.visual_children_snapshot() {
             for child in children.iter() {
@@ -82,9 +82,9 @@ impl StyledElementImpl for TemplatedControl {
             }
         }
     }
-}
+} }
 
-impl LayoutableImpl for TemplatedControl {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TemplatedControl {
     fn apply_template(this: &Self) {
         let template = this.template();
 
@@ -123,9 +123,9 @@ impl LayoutableImpl for TemplatedControl {
             *this.applied_template.borrow_mut() = template;
         }
     }
-}
+} }
 
-impl ControlImpl for TemplatedControl {
+ferroui_base::ferro_overrides! { impl ControlImpl for TemplatedControl {
     fn get_template_focus_target(this: &Self) -> Option<Ref<Control>> {
         for child in this.get_template_descendants() {
             if let Some(control) = child.cast::<Control>() {
@@ -137,7 +137,7 @@ impl ControlImpl for TemplatedControl {
 
         Some(this.to_ref().upcast())
     }
-}
+} }
 
 impl TemplatedControlImpl for TemplatedControl {
     fn on_apply_template(_this: &Self, _e: &TemplateAppliedEventArgs) {}

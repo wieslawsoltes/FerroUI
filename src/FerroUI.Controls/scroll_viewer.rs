@@ -138,13 +138,13 @@ ferroui_base::ferro_class_info!(ScrollViewer {
 
 ferro_impl_classes!(ScrollViewer: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
-impl ControlImpl for ScrollViewer {
+ferroui_base::ferro_overrides! { impl ControlImpl for ScrollViewer {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ScrollViewerAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for ScrollViewer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ScrollViewer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -169,9 +169,9 @@ impl FerroObjectImpl for ScrollViewer {
             this.coerce_value(Self::offset_property().as_property());
         }
     }
-}
+} }
 
-impl InputElementImpl for ScrollViewer {
+ferroui_base::ferro_overrides! { impl InputElementImpl for ScrollViewer {
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, e);
 
@@ -218,9 +218,9 @@ impl InputElementImpl for ScrollViewer {
     fn as_scrollable(this: &Self) -> Option<&dyn IScrollable> {
         Some(this)
     }
-}
+} }
 
-impl TemplatedControlImpl for ScrollViewer {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ScrollViewer {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -232,7 +232,7 @@ impl TemplatedControlImpl for ScrollViewer {
         let subscription = this.subscribe_to_scroll_bars(e);
         *this.scroll_bar_expand_subscription.borrow_mut() = subscription.map(Subscription::new);
     }
-}
+} }
 
 impl ContentControlImpl for ScrollViewer {
     fn register_content_presenter(this: &Self, presenter: &ContentPresenter) -> bool {

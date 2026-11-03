@@ -26,19 +26,19 @@ pub struct WindowBaseAutomationPeer {
 ferro_class!(WindowBaseAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(WindowBaseAutomationPeer { interfaces: [Rc<dyn IRootProvider> => ProviderAdapter::as_root_provider] });
 
-impl FerroObjectImpl for WindowBaseAutomationPeer {}
+ferroui_base::ferro_impl_classes!(WindowBaseAutomationPeer: FerroObjectImpl);
 
-impl ControlAutomationPeerImpl for WindowBaseAutomationPeer {
+ferroui_base::ferro_overrides! { impl ControlAutomationPeerImpl for WindowBaseAutomationPeer {
     fn get_visual_parent(_this: &Self) -> Option<Ref<Visual>> {
         None
     }
-}
+} }
 
-impl AutomationPeerImpl for WindowBaseAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for WindowBaseAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Window
     }
-}
+} }
 
 impl IRootProvider for ProviderAdapter<WindowBaseAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

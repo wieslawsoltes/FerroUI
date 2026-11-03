@@ -14,7 +14,7 @@ pub struct TranslateTransform {
 ferro_class!(TranslateTransform: Transform);
 crate::ferro_class_info!(TranslateTransform { new: TranslateTransform::new });
 
-impl FerroObjectImpl for TranslateTransform {
+crate::ferro_overrides! { impl FerroObjectImpl for TranslateTransform {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -22,7 +22,7 @@ impl FerroObjectImpl for TranslateTransform {
             this.raise_changed();
         }
     }
-}
+} }
 
 impl TransformImpl for TranslateTransform {
     fn value(this: &Self) -> Matrix {

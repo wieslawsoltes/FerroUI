@@ -803,7 +803,7 @@ impl NavigationView {
     }
 }
 
-impl FerroObjectImpl for NavigationView {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NavigationView {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.reset_source(false);
@@ -872,15 +872,15 @@ impl FerroObjectImpl for NavigationView {
             this.update_parts();
         }
     }
-}
+} }
 
-impl ControlImpl for NavigationView {
+ferroui_base::ferro_overrides! { impl ControlImpl for NavigationView {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         NavigationViewAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl LayoutableImpl for NavigationView {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for NavigationView {
     fn apply_template(this: &Self) {
         let template = this.template();
         let applied = this.applied_template.borrow().clone();
@@ -912,9 +912,9 @@ impl LayoutableImpl for NavigationView {
         }
         Self::parent_arrange_override(this, final_size)
     }
-}
+} }
 
-impl InputElementImpl for NavigationView {
+ferroui_base::ferro_overrides! { impl InputElementImpl for NavigationView {
     fn on_key_down(this: &Self, args: &KeyEventArgs) {
         Self::parent_on_key_down(this, args);
         if args.handled() {
@@ -929,9 +929,9 @@ impl InputElementImpl for NavigationView {
             args.set_handled(true);
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for NavigationView {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for NavigationView {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         this.parts.replace(Parts::default()).detach();
         Self::parent_on_apply_template(this, args);
@@ -1048,7 +1048,7 @@ impl TemplatedControlImpl for NavigationView {
         this.update_adaptive_layout(this.last_width.get(), true);
         this.update_parts();
     }
-}
+} }
 
 impl NavigationView {
     fn static_constructor() {

@@ -42,15 +42,15 @@ ferroui_base::ferro_class_info!(Thumb { new: Thumb::new });
 
 ferro_impl_classes!(Thumb: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, TemplatedControlImpl);
 
-impl ControlImpl for Thumb {
+ferroui_base::ferro_overrides! { impl ControlImpl for Thumb {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ThumbAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferroui_base::ferro_impl_classes!(Thumb: FerroObjectImpl);
 
-impl InputElementImpl for Thumb {
+ferroui_base::ferro_overrides! { impl InputElementImpl for Thumb {
     fn on_pointer_capture_lost(this: &Self, e: &PointerCaptureLostEventArgs) {
         if let Some(last_point) = this.last_point.get() {
             let mut ev = VectorEventArgs::new();
@@ -107,7 +107,7 @@ impl InputElementImpl for Thumb {
 
         this.pseudo_classes().remove_pseudo(PC_PRESSED);
     }
-}
+} }
 
 impl ThumbImpl for Thumb {
     fn on_drag_started(_this: &Self, _e: &VectorEventArgs) {}

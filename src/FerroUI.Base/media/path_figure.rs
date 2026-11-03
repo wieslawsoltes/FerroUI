@@ -25,12 +25,12 @@ pub struct PathFigure {
 ferro_class!(PathFigure: FerroObject);
 crate::ferro_class_info!(PathFigure { new: PathFigure::new });
 
-impl FerroObjectImpl for PathFigure {
+crate::ferro_overrides! { impl FerroObjectImpl for PathFigure {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_segments(Some(PathSegments::new()));
     }
-}
+} }
 
 crate::ferro_properties! { impl PathFigure {
     ferro_property!(pub fn is_closed_property() -> StyledProperty<bool> {

@@ -67,7 +67,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for WindowBase {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for WindowBase {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -121,9 +121,9 @@ impl FerroObjectImpl for WindowBase {
             this.is_visible_changed(change);
         }
     }
-}
+} }
 
-impl LayoutableImpl for WindowBase {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for WindowBase {
     fn measure_core(this: &Self, available_size: Size) -> Size {
         this.apply_styling();
         this.apply_template();
@@ -140,9 +140,9 @@ impl LayoutableImpl for WindowBase {
         let arrange_size = this.arrange_override(constraint);
         this.set_bounds(Rect::from_position_size(final_rect.position(), arrange_size));
     }
-}
+} }
 
-impl TopLevelImpl for WindowBase {
+ferroui_base::ferro_overrides! { impl TopLevelImpl for WindowBase {
     fn on_closed(this: &Self) {
         // Window must manually raise Loaded/Unloaded events as it is a visual root and
         // does not raise the attached/detached visual tree notifications
@@ -192,7 +192,7 @@ impl TopLevelImpl for WindowBase {
             this.renderer().resized(client_size);
         }
     }
-}
+} }
 
 impl WindowBaseImpl for WindowBase {
     fn hide(this: &Self) {

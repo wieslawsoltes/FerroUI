@@ -396,7 +396,7 @@ ferro_impl_classes!(
     CanvasImpl
 );
 
-impl LayoutableImpl for TestCanvas {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TestCanvas {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         this.measure_count.set(this.measure_count.get() + 1);
         Self::parent_measure_override(this, available_size)
@@ -406,7 +406,7 @@ impl LayoutableImpl for TestCanvas {
         this.arrange_count.set(this.arrange_count.get() + 1);
         Self::parent_arrange_override(this, final_size)
     }
-}
+} }
 
 impl TestCanvas {
     fn new() -> Ref<Self> {

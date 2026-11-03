@@ -79,13 +79,13 @@ ferro_class_info!(MenuItem { new: MenuItem::new });
 
 ferro_impl_classes!(MenuItem: LayoutableImpl, InteractiveImpl, SelectingItemsControlImpl, HeaderedSelectingItemsControlImpl);
 
-impl ControlImpl for MenuItem {
+ferroui_base::ferro_overrides! { impl ControlImpl for MenuItem {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::MenuItemAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for MenuItem {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for MenuItem {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -170,9 +170,9 @@ impl FerroObjectImpl for MenuItem {
             }
         }
     }
-}
+} }
 
-impl StyledElementImpl for MenuItem {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for MenuItem {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
         // Control attached again, set Hotkey to create a hotkey manager for
         // this control
@@ -225,18 +225,18 @@ impl StyledElementImpl for MenuItem {
 
         this.is_subscribed_to_command.set(false);
     }
-}
+} }
 
-impl VisualImpl for MenuItem {
+ferroui_base::ferro_overrides! { impl VisualImpl for MenuItem {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
         this.try_update_can_execute();
         this.register_in_menu_interaction_handler();
     }
-}
+} }
 
-impl InputElementImpl for MenuItem {
+ferroui_base::ferro_overrides! { impl InputElementImpl for MenuItem {
     fn is_enabled_core(this: &Self) -> bool {
         this.is_enabled() && (this.has_sub_menu() || this.command_can_execute.get())
     }
@@ -274,9 +274,9 @@ impl InputElementImpl for MenuItem {
         Self::parent_on_pointer_exited(this, e);
         this.raise_event(&RoutedEventArgs::with_event(Self::pointer_exited_item_event()));
     }
-}
+} }
 
-impl TemplatedControlImpl for MenuItem {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for MenuItem {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         let old_popup = this.popup.borrow_mut().take();
         if let Some(old_popup) = old_popup {
@@ -311,9 +311,9 @@ impl TemplatedControlImpl for MenuItem {
             *this.popup_events.borrow_mut() = Some((opened, closed));
         }
     }
-}
+} }
 
-impl ItemsControlImpl for MenuItem {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for MenuItem {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -326,7 +326,7 @@ impl ItemsControlImpl for MenuItem {
     fn needs_container_override(_this: &Self, item: &Option<BoxedValue>, _index: i32) -> (bool, Option<RecycleKey>) {
         MenuBase::needs_menu_container(item)
     }
-}
+} }
 
 impl MenuItemImpl for MenuItem {
     fn on_click(this: &Self, e: &RoutedEventArgs) {

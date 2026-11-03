@@ -286,13 +286,13 @@ ferroui_base::ferro_class_info!(ProgressBar {
 });
 ferro_impl_classes!(ProgressBar: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl);
 
-impl ControlImpl for ProgressBar {
+ferroui_base::ferro_overrides! { impl ControlImpl for ProgressBar {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ProgressBarAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for ProgressBar {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ProgressBar {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(Some(this.is_indeterminate()), Some(this.orientation()));
@@ -318,17 +318,17 @@ impl FerroObjectImpl for ProgressBar {
             this.update_pseudo_classes(None, Some(change.get_new_value::<Orientation>()));
         }
     }
-}
+} }
 
-impl LayoutableImpl for ProgressBar {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for ProgressBar {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let result = Self::parent_arrange_override(this, final_size);
         this.update_indicator();
         result
     }
-}
+} }
 
-impl TemplatedControlImpl for ProgressBar {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ProgressBar {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         // Dispose any previous track size listener.
         let previous = this.track_size_changed_listener.borrow_mut().take();
@@ -353,7 +353,7 @@ impl TemplatedControlImpl for ProgressBar {
 
         this.update_indicator();
     }
-}
+} }
 
 impl ProgressBar {
     /// The named parts expected in the control template.

@@ -24,7 +24,7 @@ ferroui_base::ferro_class_info!(SplitButtonAutomationPeer {
     ]
 });
 
-impl FerroObjectImpl for SplitButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for SplitButtonAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -35,11 +35,11 @@ impl FerroObjectImpl for SplitButtonAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for SplitButtonAutomationPeer {}
+ferroui_base::ferro_impl_classes!(SplitButtonAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for SplitButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for SplitButtonAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::SplitButton
     }
@@ -55,7 +55,7 @@ impl AutomationPeerImpl for SplitButtonAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl IInvokeProvider for ProviderAdapter<SplitButtonAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

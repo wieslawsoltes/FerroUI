@@ -18,10 +18,9 @@ pub struct ButtonAutomationPeer {
 ferro_class!(ButtonAutomationPeer: ContentControlAutomationPeer);
 ferroui_base::ferro_class_info!(ButtonAutomationPeer { interfaces: [Rc<dyn IInvokeProvider> => ProviderAdapter::as_invoke_provider] });
 
-impl FerroObjectImpl for ButtonAutomationPeer {}
-impl ControlAutomationPeerImpl for ButtonAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ButtonAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ButtonAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ButtonAutomationPeer {
     fn get_accelerator_key_core(this: &Self) -> Option<String> {
         let mut result = Self::parent_get_accelerator_key_core(this);
 
@@ -43,7 +42,7 @@ impl AutomationPeerImpl for ButtonAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl IInvokeProvider for ProviderAdapter<ButtonAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

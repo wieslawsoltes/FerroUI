@@ -44,7 +44,7 @@ ferro_class!(ContentPresenter: Control);
 ferroui_base::ferro_class_info!(ContentPresenter { new: ContentPresenter::new });
 ferro_impl_classes!(ContentPresenter: InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl VisualImpl for ContentPresenter {
+ferroui_base::ferro_overrides! { impl VisualImpl for ContentPresenter {
     fn render(this: &Self, context: &mut DrawingContext) {
         this.border_renderer.borrow_mut().render(
             context,
@@ -57,7 +57,7 @@ impl VisualImpl for ContentPresenter {
             &this.box_shadow(),
         );
     }
-}
+} }
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentPresenter {
     fn constructed(this: &Self) {
@@ -76,16 +76,16 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentPresenter {
     }
 } }
 
-impl StyledElementImpl for ContentPresenter {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for ContentPresenter {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_logical_tree(this, e);
         *this.recycling_data_template.borrow_mut() = None;
         this.created_child.set(false);
         this.invalidate_measure();
     }
-}
+} }
 
-impl LayoutableImpl for ContentPresenter {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for ContentPresenter {
     fn apply_template(this: &Self) {
         if !this.created_child.get() && this.is_attached_to_logical_tree() {
             this.update_child();
@@ -105,7 +105,7 @@ impl LayoutableImpl for ContentPresenter {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         this.arrange_override_impl(final_size, Vector::default())
     }
-}
+} }
 
 impl ContentPresenter {
     /// The pseudoclasses set by the class.

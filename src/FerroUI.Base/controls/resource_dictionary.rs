@@ -55,7 +55,7 @@ crate::ferro_class_info!(ResourceDictionary {
     interfaces: [Rc<dyn IResourceProvider>, Rc<dyn IResourceDictionary>, Rc<dyn IThemeVariantProvider>],
 });
 
-impl FerroObjectImpl for ResourceDictionary {}
+crate::ferro_impl_classes!(ResourceDictionary: FerroObjectImpl);
 
 impl ResourceProviderImpl for ResourceDictionary {
     fn has_resources(this: &Self) -> bool {

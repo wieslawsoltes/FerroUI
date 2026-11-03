@@ -76,7 +76,7 @@ ferro_class_info!(SplitView {
 
 ferro_impl_classes!(SplitView: StyledElementImpl, LayoutableImpl, InteractiveImpl, ControlImpl);
 
-impl FerroObjectImpl for SplitView {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for SplitView {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -109,9 +109,9 @@ impl FerroObjectImpl for SplitView {
             this.pseudo_classes().set(PC_LIGHT_DISMISS, mode);
         }
     }
-}
+} }
 
-impl VisualImpl for SplitView {
+ferroui_base::ferro_overrides! { impl VisualImpl for SplitView {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -125,9 +125,9 @@ impl VisualImpl for SplitView {
         Self::parent_on_detached_from_visual_tree(this, e);
         this.dispose_pointer_disposable();
     }
-}
+} }
 
-impl InputElementImpl for SplitView {
+ferroui_base::ferro_overrides! { impl InputElementImpl for SplitView {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         if !e.handled() && e.key == Key::Escape && this.is_pane_open() && this.is_in_overlay_mode() {
             this.set_current_value(Self::is_pane_open_property(), false);
@@ -136,9 +136,9 @@ impl InputElementImpl for SplitView {
 
         Self::parent_on_key_down(this, e);
     }
-}
+} }
 
-impl TemplatedControlImpl for SplitView {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for SplitView {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
         let pane = e.name_scope().find_as::<Panel>("PART_PaneRoot");
@@ -147,7 +147,7 @@ impl TemplatedControlImpl for SplitView {
         this.update_visual_state_for_display_mode(this.display_mode());
         this.update_pane_state_pseudo_class(this.is_pane_open());
     }
-}
+} }
 
 impl ContentControlImpl for SplitView {
     fn register_content_presenter(this: &Self, presenter: &ContentPresenter) -> bool {

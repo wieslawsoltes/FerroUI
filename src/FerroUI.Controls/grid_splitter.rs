@@ -161,7 +161,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl InputElementImpl for GridSplitter {
+ferroui_base::ferro_overrides! { impl InputElementImpl for GridSplitter {
     fn on_pointer_entered(this: &Self, e: &PointerEventArgs) {
         Self::parent_on_pointer_entered(this, e);
 
@@ -217,7 +217,7 @@ impl InputElementImpl for GridSplitter {
             _ => {}
         }
     }
-}
+} }
 
 impl ThumbImpl for GridSplitter {
     fn on_drag_started(this: &Self, e: &VectorEventArgs) {
@@ -882,7 +882,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl LayoutableImpl for PreviewAdorner {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for PreviewAdorner {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         // Adorners always get clipped to the owner control. In this case we
         // want to constrain the size to the splitter size but draw on top
@@ -891,7 +891,7 @@ impl LayoutableImpl for PreviewAdorner {
 
         Self::parent_arrange_override(this, final_size)
     }
-}
+} }
 
 impl PreviewAdorner {
     fn new(preview_control: Option<Ref<Control>>) -> Ref<Self> {

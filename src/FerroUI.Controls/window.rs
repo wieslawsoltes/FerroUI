@@ -85,27 +85,27 @@ ferroui_base::ferro_class_info!(Window { new: Window::new });
 
 ferro_impl_classes!(Window: VisualImpl, InteractiveImpl, ContentControlImpl);
 
-impl ControlImpl for Window {
+ferroui_base::ferro_overrides! { impl ControlImpl for Window {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::WindowAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl IFocusScope for Window {}
 
-impl InputElementImpl for Window {
+ferroui_base::ferro_overrides! { impl InputElementImpl for Window {
     fn is_focus_scope(_this: &Self) -> bool {
         true
     }
-}
+} }
 
-impl StyledElementImpl for Window {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for Window {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <Window as StaticType>::TYPE
     }
-}
+} }
 
-impl FerroObjectImpl for Window {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Window {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.initialize();
@@ -142,16 +142,16 @@ impl FerroObjectImpl for Window {
             this.coerce_value(Self::can_maximize_property().as_property());
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for Window {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for Window {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
         this.enable_visual_layer_manager_layers();
     }
-}
+} }
 
-impl LayoutableImpl for Window {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Window {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let size_to_content = this.size_to_content();
         let mut client_size = this.client_size();
@@ -212,9 +212,9 @@ impl LayoutableImpl for Window {
 
         result
     }
-}
+} }
 
-impl TopLevelImpl for Window {
+ferroui_base::ferro_overrides! { impl TopLevelImpl for Window {
     fn handle_closed(this: &Self) {
         this.shown.set(false);
 
@@ -265,9 +265,9 @@ impl TopLevelImpl for Window {
 
         Self::parent_handle_resized(this, client_size, reason);
     }
-}
+} }
 
-impl WindowBaseImpl for Window {
+ferroui_base::ferro_overrides! { impl WindowBaseImpl for Window {
     /// Hides the window but does not close it.
     fn hide(this: &Self) {
         let _freeze = this.freeze_visibility_change_handling();
@@ -325,7 +325,7 @@ impl WindowBaseImpl for Window {
             }
         }
     }
-}
+} }
 
 impl WindowImpl for Window {
     fn handle_closing(this: &Self, reason: WindowCloseReason) -> bool {

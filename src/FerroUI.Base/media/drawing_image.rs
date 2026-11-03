@@ -21,7 +21,7 @@ pub struct DrawingImage {
 ferro_class!(DrawingImage: FerroObject);
 crate::ferro_class_info!(DrawingImage { new: DrawingImage::new, interfaces: [std::rc::Rc<dyn crate::media::IImage>] });
 
-impl FerroObjectImpl for DrawingImage {
+crate::ferro_overrides! { impl FerroObjectImpl for DrawingImage {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -46,7 +46,7 @@ impl FerroObjectImpl for DrawingImage {
             this.raise_invalidated();
         }
     }
-}
+} }
 
 crate::ferro_properties! { impl DrawingImage {
     ferro_property!(

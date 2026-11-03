@@ -28,7 +28,7 @@ pub struct NativeMenu {
 ferro_class!(NativeMenu: FerroObject);
 ferro_class_info!(NativeMenu { new: NativeMenu::new });
 
-impl FerroObjectImpl for NativeMenu {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NativeMenu {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -41,7 +41,7 @@ impl FerroObjectImpl for NativeMenu {
             move |e: &NotifyCollectionChangedEventArgs<'_, Ref<NativeMenuItemBase>>| Self::items_changed(&weak, e),
         ));
     }
-}
+} }
 
 /// The native menu viewed through the interface it implements.
 struct NativeMenuHandle(Ref<NativeMenu>);

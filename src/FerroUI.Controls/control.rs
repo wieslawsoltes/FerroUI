@@ -161,7 +161,7 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for Control {
     }
 } }
 
-impl VisualImpl for Control {
+ferroui_base::ferro_overrides! { impl VisualImpl for Control {
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree_core(this, e);
 
@@ -179,9 +179,9 @@ impl VisualImpl for Control {
     fn ensure_initialized_for_visual_brush(this: &Self) {
         this.ensure_initialized();
     }
-}
+} }
 
-impl InputElementImpl for Control {
+ferroui_base::ferro_overrides! { impl InputElementImpl for Control {
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, e);
 
@@ -270,7 +270,7 @@ impl InputElementImpl for Control {
             }
         }
     }
-}
+} }
 
 impl ControlImpl for Control {
     fn get_template_focus_target(this: &Self) -> Option<Ref<Control>> {

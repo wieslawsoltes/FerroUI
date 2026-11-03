@@ -39,7 +39,7 @@ ferro_class_info!(NavigationViewItemAutomationPeer {
         Rc<dyn IExpandCollapseProvider> => ProviderAdapter::as_expand_collapse_provider,
     ],
 });
-impl FerroObjectImpl for NavigationViewItemAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NavigationViewItemAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
@@ -72,9 +72,9 @@ impl FerroObjectImpl for NavigationViewItemAutomationPeer {
         });
         *this.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
-}
-impl ControlAutomationPeerImpl for NavigationViewItemAutomationPeer {}
-impl AutomationPeerImpl for NavigationViewItemAutomationPeer {
+} }
+ferroui_base::ferro_impl_classes!(NavigationViewItemAutomationPeer: ControlAutomationPeerImpl);
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for NavigationViewItemAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "NavigationViewItem".into()
     }
@@ -105,7 +105,7 @@ impl AutomationPeerImpl for NavigationViewItemAutomationPeer {
             Self::parent_get_provider_core(this, provider_type)
         }
     }
-}
+} }
 impl NavigationViewItemAutomationPeer {
     /// Creates the peer of `owner`.
     pub fn new(owner: &NavigationViewItem) -> Ref<Self> {

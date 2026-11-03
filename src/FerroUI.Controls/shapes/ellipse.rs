@@ -21,18 +21,18 @@ ferro_impl_classes!(Ellipse: StyledElementImpl, VisualImpl, InteractiveImpl, Inp
 
 ferroui_base::ferro_impl_classes!(Ellipse: FerroObjectImpl);
 
-impl ShapeImpl for Ellipse {
+ferroui_base::ferro_overrides! { impl ShapeImpl for Ellipse {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         let rect = Rect::from_size(this.bounds().size()).deflate(this.stroke_thickness() / 2.0);
         Some(EllipseGeometry::with_rect(rect).upcast())
     }
-}
+} }
 
-impl LayoutableImpl for Ellipse {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Ellipse {
     fn measure_override(this: &Self, _available_size: Size) -> Size {
         Size::new(this.stroke_thickness(), this.stroke_thickness())
     }
-}
+} }
 
 impl Ellipse {
     fn static_constructor() {

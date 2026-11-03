@@ -16,7 +16,7 @@ ferro_class!(LineBreak: Inline);
 ferroui_base::ferro_class_info!(LineBreak { new: LineBreak::new });
 ferro_impl_classes!(LineBreak: FerroObjectImpl, StyledElementImpl, TextElementImpl);
 
-impl InlineImpl for LineBreak {
+ferroui_base::ferro_overrides! { impl InlineImpl for LineBreak {
     fn build_text_run(this: &Self, text_runs: &mut Vec<Rc<dyn TextRun>>) {
         let text_run_properties = this.create_text_run_properties();
 
@@ -28,7 +28,7 @@ impl InlineImpl for LineBreak {
     fn append_text(this: &Self, string_builder: &mut String) {
         string_builder.push_str(this.line_break_text());
     }
-}
+} }
 
 /// The soft line break of a rich paragraph: one UTF-16 unit on every platform, the
 /// vertical tab of RichEdit's text object model (`docs/porting/winui-rich-text.md`,

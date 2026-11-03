@@ -26,7 +26,7 @@ ferroui_base::ferro_class_info!(RangeBaseAutomationPeer {
     interfaces: [Rc<dyn IRangeValueProvider> => ProviderAdapter::as_range_value_provider]
 });
 
-impl FerroObjectImpl for RangeBaseAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RangeBaseAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -37,10 +37,9 @@ impl FerroObjectImpl for RangeBaseAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for RangeBaseAutomationPeer {}
-impl AutomationPeerImpl for RangeBaseAutomationPeer {}
+ferroui_base::ferro_impl_classes!(RangeBaseAutomationPeer: ControlAutomationPeerImpl, AutomationPeerImpl);
 
 impl RangeBaseAutomationPeerImpl for RangeBaseAutomationPeer {
     fn is_read_only(_this: &Self) -> bool {

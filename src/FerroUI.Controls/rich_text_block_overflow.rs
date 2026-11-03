@@ -23,7 +23,7 @@ ferroui_base::ferro_impl_classes!(RichTextBlockOverflow:
     FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl,
     InputElementImpl, RichTextBlockImpl);
 
-impl ControlImpl for RichTextBlockOverflow {
+ferroui_base::ferro_overrides! { impl ControlImpl for RichTextBlockOverflow {
     /// WinUI's overflow falls back to the context flyout of its primary view, and
     /// shows it for a request only when its selection policy enables it.
     fn effective_context_flyout(this: &Self, for_request: bool) -> Option<Ref<FlyoutBase>> {
@@ -32,7 +32,7 @@ impl ControlImpl for RichTextBlockOverflow {
         }
         this.context_flyout().or_else(|| this.inherited_context_flyout())
     }
-}
+} }
 
 ferroui_base::ferro_properties! {
     impl RichTextBlockOverflow {

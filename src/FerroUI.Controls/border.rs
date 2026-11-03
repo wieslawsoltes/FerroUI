@@ -27,7 +27,7 @@ ferro_class!(Border: Decorator);
 ferroui_base::ferro_class_info!(Border { new: Border::new });
 ferro_impl_classes!(Border: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl VisualImpl for Border {
+ferroui_base::ferro_overrides! { impl VisualImpl for Border {
     fn render(this: &Self, context: &mut DrawingContext) {
         this.border_render_helper.borrow_mut().render(
             context,
@@ -57,7 +57,7 @@ impl VisualImpl for Border {
         *this.border_visual.borrow_mut() = Some(border_visual);
         result
     }
-}
+} }
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for Border {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -74,7 +74,7 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for Border {
     }
 } }
 
-impl LayoutableImpl for Border {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Border {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let child = this.child();
         LayoutHelper::measure_child_with_border(
@@ -94,7 +94,7 @@ impl LayoutableImpl for Border {
             this.border_thickness(),
         )
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Border {
     ferro_property!(

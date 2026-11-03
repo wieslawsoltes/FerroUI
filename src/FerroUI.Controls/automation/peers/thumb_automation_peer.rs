@@ -11,10 +11,9 @@ pub struct ThumbAutomationPeer {
 ferro_class!(ThumbAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(ThumbAutomationPeer {});
 
-impl FerroObjectImpl for ThumbAutomationPeer {}
-impl ControlAutomationPeerImpl for ThumbAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ThumbAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ThumbAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ThumbAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Thumb
     }
@@ -22,7 +21,7 @@ impl AutomationPeerImpl for ThumbAutomationPeer {
     fn is_content_element_core(_this: &Self) -> bool {
         false
     }
-}
+} }
 
 impl ThumbAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

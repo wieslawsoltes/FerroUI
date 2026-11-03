@@ -58,7 +58,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl TemplatedControlImpl for RefreshVisualizer {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for RefreshVisualizer {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -80,17 +80,17 @@ impl TemplatedControlImpl for RefreshVisualizer {
             }
         }
     }
-}
+} }
 
-impl VisualImpl for RefreshVisualizer {
+ferroui_base::ferro_overrides! { impl VisualImpl for RefreshVisualizer {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
         this.update_content();
     }
-}
+} }
 
-impl FerroObjectImpl for RefreshVisualizer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RefreshVisualizer {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -145,7 +145,7 @@ impl FerroObjectImpl for RefreshVisualizer {
             this.update_content();
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RefreshVisualizer {
     ferro_property!(

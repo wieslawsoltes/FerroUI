@@ -116,20 +116,20 @@ ferroui_base::ferro_class_info!(ScrollBar {
 });
 ferro_impl_classes!(ScrollBar: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
-impl ControlImpl for ScrollBar {
+ferroui_base::ferro_overrides! { impl ControlImpl for ScrollBar {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ScrollBarAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl VisualImpl for ScrollBar {
+ferroui_base::ferro_overrides! { impl VisualImpl for ScrollBar {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.attach_to_scroll_viewer();
     }
-}
+} }
 
-impl FerroObjectImpl for ScrollBar {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ScrollBar {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(this.orientation());
@@ -175,9 +175,9 @@ impl FerroObjectImpl for ScrollBar {
             this.update_is_visible();
         }
     }
-}
+} }
 
-impl InputElementImpl for ScrollBar {
+ferroui_base::ferro_overrides! { impl InputElementImpl for ScrollBar {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         if this.orientation() == Orientation::Vertical {
             if e.key == Key::PageUp {
@@ -258,9 +258,9 @@ impl InputElementImpl for ScrollBar {
             this.last_right_click_position.set(e.get_position(Some(this)));
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for ScrollBar {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ScrollBar {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         for slot in [&this.line_up_button, &this.line_down_button, &this.page_up_button, &this.page_down_button] {
             let previous = slot.borrow_mut().take();
@@ -288,7 +288,7 @@ impl TemplatedControlImpl for ScrollBar {
         attach(&this.page_up_button, "PART_PageUpButton", Self::large_decrement);
         attach(&this.page_down_button, "PART_PageDownButton", Self::large_increment);
     }
-}
+} }
 
 impl ScrollBar {
     /// The named parts expected in the control template.

@@ -14,11 +14,9 @@ pub struct ScrollBarAutomationPeer {
 ferro_class!(ScrollBarAutomationPeer: RangeBaseAutomationPeer);
 ferroui_base::ferro_class_info!(ScrollBarAutomationPeer {});
 
-impl FerroObjectImpl for ScrollBarAutomationPeer {}
-impl ControlAutomationPeerImpl for ScrollBarAutomationPeer {}
-impl RangeBaseAutomationPeerImpl for ScrollBarAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ScrollBarAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl, RangeBaseAutomationPeerImpl);
 
-impl AutomationPeerImpl for ScrollBarAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ScrollBarAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "ScrollBar".to_owned()
     }
@@ -32,7 +30,7 @@ impl AutomationPeerImpl for ScrollBarAutomationPeer {
     fn is_content_element_core(_this: &Self) -> bool {
         false
     }
-}
+} }
 
 impl ScrollBarAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

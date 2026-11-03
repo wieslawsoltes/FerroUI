@@ -52,7 +52,7 @@ ferroui_base::ferro_class_info!(Block {
 
 ferroui_base::ferro_impl_classes!(Block: StyledElementImpl, TextElementImpl);
 
-impl FerroObjectImpl for Block {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Block {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if matches!(
@@ -62,7 +62,7 @@ impl FerroObjectImpl for Block {
             this.invalidate_format_change(change);
         }
     }
-}
+} }
 
 impl BlockImpl for Block {
     fn text(_this: &Self) -> String {

@@ -25,11 +25,11 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl ControlImpl for UserControl {
+ferroui_base::ferro_overrides! { impl ControlImpl for UserControl {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::UserControlAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl UserControl {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

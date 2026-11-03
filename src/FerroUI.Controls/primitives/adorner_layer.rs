@@ -30,7 +30,7 @@ pub struct AdornerLayer {
 ferro_class!(AdornerLayer: Canvas);
 ferro_impl_classes!(AdornerLayer: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl, PanelImpl, CanvasImpl);
 
-impl FerroObjectImpl for AdornerLayer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for AdornerLayer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -53,9 +53,9 @@ impl FerroObjectImpl for AdornerLayer {
             })
             .detach();
     }
-}
+} }
 
-impl LayoutableImpl for AdornerLayer {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for AdornerLayer {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         for child in this.children().snapshot().iter() {
             let info = child.get_value(Self::adorned_element_info_property());
@@ -103,7 +103,7 @@ impl LayoutableImpl for AdornerLayer {
 
         final_size
     }
-}
+} }
 
 /// The value the reference uses when the adorned element has no transform
 /// to the layer: the all-zero matrix, which collapses the adorner.

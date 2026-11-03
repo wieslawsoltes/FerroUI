@@ -24,14 +24,14 @@ ferroui_base::ferro_class_info!(RichTextBlockAutomationPeer {
         Rc<dyn ITextProvider2> => ProviderAdapter::as_text_provider2,
     ]
 });
-impl FerroObjectImpl for RichTextBlockAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RichTextBlockAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.text_automation.observe(this.to_ref());
     }
-}
-impl ControlAutomationPeerImpl for RichTextBlockAutomationPeer {}
-impl AutomationPeerImpl for RichTextBlockAutomationPeer {
+} }
+ferroui_base::ferro_impl_classes!(RichTextBlockAutomationPeer: ControlAutomationPeerImpl);
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for RichTextBlockAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Text
     }
@@ -47,7 +47,7 @@ impl AutomationPeerImpl for RichTextBlockAutomationPeer {
             },
         )
     }
-}
+} }
 impl RichTextAutomationPeer for RichTextBlockAutomationPeer {
     fn text_host(&self) -> Option<RichTextAutomationHost> {
         ControlAutomationPeer::try_owner(self)

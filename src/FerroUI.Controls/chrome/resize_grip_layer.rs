@@ -30,7 +30,7 @@ pub(crate) struct ResizeGripLayer {
 ferro_class!(ResizeGripLayer: Control);
 ferro_impl_classes!(ResizeGripLayer: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for ResizeGripLayer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ResizeGripLayer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -45,9 +45,9 @@ impl FerroObjectImpl for ResizeGripLayer {
         children.add(this.bottom_left.clone().upcast());
         children.add(this.bottom_right.clone().upcast());
     }
-}
+} }
 
-impl LayoutableImpl for ResizeGripLayer {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for ResizeGripLayer {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let gt = this.grip_thickness.get();
         let w = final_size.width;
@@ -83,7 +83,7 @@ impl LayoutableImpl for ResizeGripLayer {
 
         final_size
     }
-}
+} }
 
 impl ResizeGripLayer {
     pub(crate) fn new() -> Ref<Self> {

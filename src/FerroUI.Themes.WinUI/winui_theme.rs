@@ -61,7 +61,7 @@ ferro_class_info!(WinUITheme {
     },
 });
 
-impl FerroObjectImpl for WinUITheme {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for WinUITheme {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -71,7 +71,7 @@ impl FerroObjectImpl for WinUITheme {
             }
         }
     }
-}
+} }
 
 ferro_properties! {
     impl WinUITheme {

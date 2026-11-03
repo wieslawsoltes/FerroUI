@@ -64,16 +64,16 @@ ferro_impl_classes!(
     ButtonImpl
 );
 
-impl FerroObjectImpl for CalendarDayButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for CalendarDayButton {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
         let content: BoxedValue = Rc::new(DateTimeHelper::format_number(DEFAULT_CONTENT));
         this.set_current_value(ContentControl::content_property(), Some(content));
     }
-}
+} }
 
-impl InputElementImpl for CalendarDayButton {
+ferroui_base::ferro_overrides! { impl InputElementImpl for CalendarDayButton {
     /// Provides class handling for the pointer pressed event that occurs
     /// when the left mouse button is pressed while the mouse pointer is
     /// over this control.
@@ -109,21 +109,21 @@ impl InputElementImpl for CalendarDayButton {
             }
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for CalendarDayButton {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for CalendarDayButton {
     /// Builds the visual tree for the [`CalendarDayButton`] when a new
     /// template is applied.
     fn on_apply_template(this: &Self, _e: &TemplateAppliedEventArgs) {
         this.set_pseudo_classes();
     }
-}
+} }
 
-impl ControlImpl for CalendarDayButton {
+ferroui_base::ferro_overrides! { impl ControlImpl for CalendarDayButton {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::CalendarDayButtonAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl CalendarDayButton {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

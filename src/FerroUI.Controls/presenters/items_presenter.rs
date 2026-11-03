@@ -33,7 +33,7 @@ ferro_class!(ItemsPresenter: Control);
 ferroui_base::ferro_class_info!(ItemsPresenter { new: ItemsPresenter::new });
 ferro_impl_classes!(ItemsPresenter: StyledElementImpl, InteractiveImpl, ControlImpl);
 
-impl FerroObjectImpl for ItemsPresenter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ItemsPresenter {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -51,9 +51,9 @@ impl FerroObjectImpl for ItemsPresenter {
             this.invalidate_measure();
         }
     }
-}
+} }
 
-impl VisualImpl for ItemsPresenter {
+ferroui_base::ferro_overrides! { impl VisualImpl for ItemsPresenter {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -66,9 +66,9 @@ impl VisualImpl for ItemsPresenter {
             }
         }
     }
-}
+} }
 
-impl LayoutableImpl for ItemsPresenter {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for ItemsPresenter {
     fn apply_template(this: &Self) {
         if this.panel.borrow().is_some() {
             return;
@@ -108,13 +108,13 @@ impl LayoutableImpl for ItemsPresenter {
             *this.logical_scroll_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
-}
+} }
 
-impl InputElementImpl for ItemsPresenter {
+ferroui_base::ferro_overrides! { impl InputElementImpl for ItemsPresenter {
     fn as_scrollable(this: &Self) -> Option<&dyn IScrollable> {
         Some(this)
     }
-}
+} }
 
 impl IScrollable for ItemsPresenter {
     fn extent(&self) -> Size {

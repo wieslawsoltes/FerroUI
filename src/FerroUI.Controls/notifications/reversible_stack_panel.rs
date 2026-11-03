@@ -30,7 +30,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(ReversibleStackPanel: FerroObjectImpl);
 
-impl LayoutableImpl for ReversibleStackPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for ReversibleStackPanel {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let orientation = this.orientation();
         let spacing = this.spacing();
@@ -73,7 +73,7 @@ impl LayoutableImpl for ReversibleStackPanel {
 
         final_size
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl ReversibleStackPanel {
     ferro_property!(

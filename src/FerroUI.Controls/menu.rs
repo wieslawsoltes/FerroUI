@@ -39,7 +39,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl VisualImpl for Menu {
+ferroui_base::ferro_overrides! { impl VisualImpl for Menu {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -63,9 +63,9 @@ impl VisualImpl for Menu {
 
         Self::parent_on_detached_from_visual_tree(this, e);
     }
-}
+} }
 
-impl ItemsControlImpl for Menu {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for Menu {
     fn prepare_container_for_item_override(this: &Self, element: &Ref<Control>, item: &Option<BoxedValue>, index: i32) {
         Self::parent_prepare_container_for_item_override(this, element, item, index);
 
@@ -77,9 +77,9 @@ impl ItemsControlImpl for Menu {
             }
         }
     }
-}
+} }
 
-impl MenuBaseImpl for Menu {
+ferroui_base::ferro_overrides! { impl MenuBaseImpl for Menu {
     fn close(this: &Self) {
         if !this.is_open() {
             return;
@@ -104,7 +104,7 @@ impl MenuBaseImpl for Menu {
 
         this.raise_event(&RoutedEventArgs::with_event_and_source(MenuBase::opened_event(), this.to_ref()));
     }
-}
+} }
 
 /// The menu viewed as the main menu of a window.
 struct MainMenuHandle(Ref<Menu>);

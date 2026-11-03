@@ -111,7 +111,7 @@ ferroui_base::ferro_class_info!(Hyperlink {
 
 ferroui_base::ferro_impl_classes!(Hyperlink: StyledElementImpl, TextElementImpl, InlineImpl);
 
-impl FerroObjectImpl for Hyperlink {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Hyperlink {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         // As with Underline, the intrinsic format overrides inherited parent
@@ -145,7 +145,7 @@ impl FerroObjectImpl for Hyperlink {
             });
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! {
     impl Hyperlink {

@@ -40,7 +40,7 @@ ferro_class! {
 ferroui_base::ferro_impl_classes!(Inline: StyledElementImpl);
 ferroui_base::ferro_impl_classes!(Inline: TextElementImpl);
 
-impl FerroObjectImpl for Inline {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Inline {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.refresh_decoration_subscriptions();
@@ -60,7 +60,7 @@ impl FerroObjectImpl for Inline {
             _ => {}
         }
     }
-}
+} }
 
 
 impl InlineImpl for Inline {

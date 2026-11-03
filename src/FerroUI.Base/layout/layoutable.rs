@@ -121,7 +121,7 @@ crate::ferro_overrides! { impl FerroObjectImpl for Layoutable {
     }
 } }
 
-impl StyledElementImpl for Layoutable {
+crate::ferro_overrides! { impl StyledElementImpl for Layoutable {
     fn invalidate_styles(this: &Self, recurse: bool) {
         Self::parent_invalidate_styles(this, recurse);
         this.invalidate_measure();
@@ -136,9 +136,9 @@ impl StyledElementImpl for Layoutable {
         Self::parent_on_templated_parent_control_theme_changed(this);
         this.invalidate_measure();
     }
-}
+} }
 
-impl VisualImpl for Layoutable {
+crate::ferro_overrides! { impl VisualImpl for Layoutable {
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         this.is_attaching_to_visual_tree.set(true);
         Self::parent_on_attached_to_visual_tree_core(this, e);
@@ -169,7 +169,7 @@ impl VisualImpl for Layoutable {
         LayoutHelper::invalidate_self_and_children_measure(this);
         Self::parent_on_visual_parent_changed(this, old_parent, new_parent);
     }
-}
+} }
 
 impl LayoutableImpl for Layoutable {
     fn apply_template(_this: &Self) {}

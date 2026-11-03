@@ -33,13 +33,13 @@ ferro_impl_classes!(TopLevelHost: StyledElementImpl, InteractiveImpl);
 // The automation peer override lives in `top_level_host_peers.rs`.
 ferroui_base::ferro_impl_classes!(TopLevelHost: FerroObjectImpl);
 
-impl VisualImpl for TopLevelHost {
+ferroui_base::ferro_overrides! { impl VisualImpl for TopLevelHost {
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
     }
-}
+} }
 
-impl LayoutableImpl for TopLevelHost {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TopLevelHost {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let inset = this.decoration_inset.get();
         let has_inset = inset != Thickness::default();
@@ -99,7 +99,7 @@ impl LayoutableImpl for TopLevelHost {
 
         final_size
     }
-}
+} }
 
 fn is_same(layoutable: &Layoutable, top_level: &Ref<TopLevel>) -> bool {
     let top_level: &Layoutable = top_level;

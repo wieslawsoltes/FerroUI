@@ -157,7 +157,7 @@ ferroui_base::ferro_class_info!(RichTextBlock {
 
 ferroui_base::ferro_impl_classes!(RichTextBlock: StyledElementImpl, InteractiveImpl);
 
-impl FerroObjectImpl for RichTextBlock {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RichTextBlock {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.attach_document();
@@ -204,9 +204,9 @@ impl FerroObjectImpl for RichTextBlock {
             _ => {}
         }
     }
-}
+} }
 
-impl ControlImpl for RichTextBlock {
+ferroui_base::ferro_overrides! { impl ControlImpl for RichTextBlock {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::RichTextBlockAutomationPeer::new(this).upcast()
     }
@@ -214,9 +214,9 @@ impl ControlImpl for RichTextBlock {
     fn context_request_generation(this: &Self) -> Option<u64> {
         Some(this.context_menu_request_generation())
     }
-}
+} }
 
-impl VisualImpl for RichTextBlock {
+ferroui_base::ferro_overrides! { impl VisualImpl for RichTextBlock {
     fn on_attached_to_visual_tree(this: &Self, event: &ferroui_base::VisualTreeAttachmentEventArgs) {
         this.invalidate_context_menu_request();
         Self::parent_on_attached_to_visual_tree(this, event);
@@ -257,7 +257,7 @@ impl VisualImpl for RichTextBlock {
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl RichTextBlockImpl for RichTextBlock {
     fn render_text(this: &Self, context: &mut DrawingContext) {
@@ -327,7 +327,7 @@ impl RichTextBlockImpl for RichTextBlock {
     }
 }
 
-impl LayoutableImpl for RichTextBlock {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for RichTextBlock {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let inner = this.text_layout_constraint(available_size);
         if this.constraint.replace(inner) != inner {
@@ -393,7 +393,7 @@ impl LayoutableImpl for RichTextBlock {
         this.clear_page_layout();
         Self::parent_on_measure_invalidated(this);
     }
-}
+} }
 
 impl RichTextBlock {
     fn owns_page_layout(&self, layout: &Rc<RichTextLayout>, generation: u64) -> bool {
@@ -523,7 +523,7 @@ impl RichTextBlock {
     }
 }
 
-impl InputElementImpl for RichTextBlock {
+ferroui_base::ferro_overrides! { impl InputElementImpl for RichTextBlock {
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, e);
         this.invalidate_visual();
@@ -803,7 +803,7 @@ impl InputElementImpl for RichTextBlock {
             link.cancel_pointer();
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! {
     impl RichTextBlock {

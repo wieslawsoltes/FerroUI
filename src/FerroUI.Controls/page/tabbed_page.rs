@@ -86,7 +86,7 @@ ferro_class_info!(TabbedPage {
 
 ferro_impl_classes!(TabbedPage: LayoutableImpl, InteractiveImpl);
 
-impl FerroObjectImpl for TabbedPage {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TabbedPage {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -132,15 +132,15 @@ impl FerroObjectImpl for TabbedPage {
             this.rebuild_template_created_pages();
         }
     }
-}
+} }
 
-impl StyledElementImpl for TabbedPage {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for TabbedPage {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <TabbedPage as StaticType>::TYPE
     }
-}
+} }
 
-impl VisualImpl for TabbedPage {
+ferroui_base::ferro_overrides! { impl VisualImpl for TabbedPage {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -162,9 +162,9 @@ impl VisualImpl for TabbedPage {
             this.remove_handler(InputElement::swipe_gesture_event(), token);
         }
     }
-}
+} }
 
-impl InputElementImpl for TabbedPage {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TabbedPage {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
@@ -219,9 +219,9 @@ impl InputElementImpl for TabbedPage {
             }
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for TabbedPage {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TabbedPage {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -303,9 +303,9 @@ impl TemplatedControlImpl for TabbedPage {
             );
         }
     }
-}
+} }
 
-impl PageImpl for TabbedPage {
+ferroui_base::ferro_overrides! { impl PageImpl for TabbedPage {
     fn update_content_safe_area_padding(this: &Self) {
         Self::parent_update_content_safe_area_padding(this);
 
@@ -332,7 +332,7 @@ impl PageImpl for TabbedPage {
             }
         }
     }
-}
+} }
 
 impl MultiPageImpl for TabbedPage {
     fn update_active_page_with(this: &Self, navigation_type: NavigationType) {
@@ -354,11 +354,11 @@ impl SelectingMultiPageImpl for TabbedPage {
     }
 }
 
-impl ControlImpl for TabbedPage {
+ferroui_base::ferro_overrides! { impl ControlImpl for TabbedPage {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::TabbedPageAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferro_properties! {
     impl TabbedPage {

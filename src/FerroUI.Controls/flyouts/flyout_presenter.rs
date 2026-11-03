@@ -26,7 +26,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl InputElementImpl for FlyoutPresenter {
+ferroui_base::ferro_overrides! { impl InputElementImpl for FlyoutPresenter {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         if e.key == Key::Escape {
             let mut host = None;
@@ -47,7 +47,7 @@ impl InputElementImpl for FlyoutPresenter {
 
         Self::parent_on_key_down(this, e);
     }
-}
+} }
 
 impl FlyoutPresenter {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -51,12 +51,12 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for TestSelector {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TestSelector {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_selection_mode(SelectionMode::MULTIPLE);
     }
-}
+} }
 
 impl TestSelector {
     fn construct() -> Self {
@@ -105,13 +105,13 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl StyledElementImpl for TestSelectorWithContainers {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for TestSelectorWithContainers {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         TestSelector::TYPE
     }
-}
+} }
 
-impl ItemsControlImpl for TestSelectorWithContainers {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for TestSelectorWithContainers {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -124,7 +124,7 @@ impl ItemsControlImpl for TestSelectorWithContainers {
     fn needs_container_override(this: &Self, item: &Option<BoxedValue>, _index: i32) -> (bool, Option<RecycleKey>) {
         this.needs_container::<TestContainer>(item)
     }
-}
+} }
 
 impl TestSelectorWithContainers {
     fn new() -> Ref<Self> {
@@ -149,12 +149,12 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for TestContainer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TestContainer {
     fn constructed(this: &Self) {
         Self::class_init();
         Self::parent_constructed(this);
     }
-}
+} }
 
 impl ISelectable for TestContainer {
     fn is_selected(&self) -> bool {

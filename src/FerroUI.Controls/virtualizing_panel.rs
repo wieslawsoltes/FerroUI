@@ -87,12 +87,12 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl PanelImpl for VirtualizingPanel {
+ferroui_base::ferro_overrides! { impl PanelImpl for VirtualizingPanel {
     fn invalidate_measure_on_children_changed(_this: &Self) {
         // Don't invalidate measure when children are added or removed: the
         // panel is responsible for managing its children.
     }
-}
+} }
 
 impl VirtualizingPanelImpl for VirtualizingPanel {
     fn scroll_into_view(_this: &Self, _index: i32) -> Option<Ref<Control>> {

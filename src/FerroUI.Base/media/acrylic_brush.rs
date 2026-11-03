@@ -381,7 +381,7 @@ crate::ferro_class_info!(AcrylicBrush {
 });
 ferro_impl_classes!(AcrylicBrush: BrushImpl);
 
-impl FerroObjectImpl for AcrylicBrush {
+crate::ferro_overrides! { impl FerroObjectImpl for AcrylicBrush {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         let property = change.property();
@@ -398,7 +398,7 @@ impl FerroObjectImpl for AcrylicBrush {
             this.on_fallback_color_changed();
         }
     }
-}
+} }
 
 impl XamlCompositionBrushBaseImpl for AcrylicBrush {
     fn on_connected(this: &Self) {

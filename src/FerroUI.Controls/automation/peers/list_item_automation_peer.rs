@@ -19,10 +19,9 @@ pub struct ListItemAutomationPeer {
 ferro_class!(ListItemAutomationPeer: ContentControlAutomationPeer);
 ferroui_base::ferro_class_info!(ListItemAutomationPeer { interfaces: [Rc<dyn ISelectionItemProvider> => ProviderAdapter::as_selection_item_provider] });
 
-impl FerroObjectImpl for ListItemAutomationPeer {}
-impl ControlAutomationPeerImpl for ListItemAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ListItemAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ListItemAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ListItemAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::ListItem
     }
@@ -34,7 +33,7 @@ impl AutomationPeerImpl for ListItemAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl ISelectionItemProvider for ProviderAdapter<ListItemAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

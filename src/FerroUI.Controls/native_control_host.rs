@@ -58,7 +58,7 @@ ferro_impl_classes!(
     InputElementImpl
 );
 
-impl VisualImpl for NativeControlHost {
+ferroui_base::ferro_overrides! { impl VisualImpl for NativeControlHost {
     // As upstream, the base implementation is not called.
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         *this.current_root.borrow_mut() = PresentationSource::from_root_visual(e.root_visual());
@@ -86,7 +86,7 @@ impl VisualImpl for NativeControlHost {
         this.unsubscribe_render_transforms();
         this.update_host();
     }
-}
+} }
 
 impl NativeControlHostImpl for NativeControlHost {
     fn create_native_control_core(this: &Self, parent: Rc<dyn IPlatformHandle>) -> Rc<dyn IPlatformHandle> {
@@ -105,11 +105,11 @@ impl NativeControlHostImpl for NativeControlHost {
     }
 }
 
-impl ControlImpl for NativeControlHost {
+ferroui_base::ferro_overrides! { impl ControlImpl for NativeControlHost {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::NativeControlHostPeer::new(this).upcast()
     }
-}
+} }
 
 fn same_host(a: Option<&Rc<dyn INativeControlHostImpl>>, b: Option<&Rc<dyn INativeControlHostImpl>>) -> bool {
     match (a, b) {

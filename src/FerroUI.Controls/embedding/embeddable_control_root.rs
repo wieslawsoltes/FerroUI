@@ -36,35 +36,35 @@ ferro_impl_classes!(
     TopLevelImpl
 );
 
-impl ControlImpl for EmbeddableControlRoot {
+ferroui_base::ferro_overrides! { impl ControlImpl for EmbeddableControlRoot {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::EmbeddableControlRootAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl TemplatedControlImpl for EmbeddableControlRoot {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for EmbeddableControlRoot {
     fn on_apply_template(this: &Self, e: &crate::primitives::TemplateAppliedEventArgs) {
         use crate::primitives::TemplatedControlImplExt;
         Self::parent_on_apply_template(this, e);
         this.enable_visual_layer_manager_layers();
     }
-}
+} }
 
 impl IFocusScope for EmbeddableControlRoot {}
 
-impl InputElementImpl for EmbeddableControlRoot {
+ferroui_base::ferro_overrides! { impl InputElementImpl for EmbeddableControlRoot {
     fn is_focus_scope(_this: &Self) -> bool {
         true
     }
-}
+} }
 
-impl StyledElementImpl for EmbeddableControlRoot {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for EmbeddableControlRoot {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <EmbeddableControlRoot as StaticType>::TYPE
     }
-}
+} }
 
-impl LayoutableImpl for EmbeddableControlRoot {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for EmbeddableControlRoot {
     fn measure_override(this: &Self, mut available_size: Size) -> Size {
         if this.enforce_client_size.get() {
             available_size = this.platform_impl().map(|platform_impl| platform_impl.client_size()).unwrap_or_default();
@@ -75,7 +75,7 @@ impl LayoutableImpl for EmbeddableControlRoot {
         }
         rv
     }
-}
+} }
 
 impl EmbeddableControlRootImpl for EmbeddableControlRoot {
     fn dispose(this: &Self) {

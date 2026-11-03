@@ -39,7 +39,7 @@ ferroui_base::ferro_class_info!(TextHighlighter {
     },
 });
 
-impl FerroObjectImpl for TextHighlighter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextHighlighter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
@@ -60,7 +60,7 @@ impl FerroObjectImpl for TextHighlighter {
             this.invalidate();
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl TextHighlighter {
     pub fn foreground_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {

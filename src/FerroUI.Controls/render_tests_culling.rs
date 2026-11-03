@@ -181,11 +181,11 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl VisualImpl for TestControl {
+ferroui_base::ferro_overrides! { impl VisualImpl for TestControl {
     fn render(this: &Self, _context: &mut DrawingContext) {
         this.rendered.set(true);
     }
-}
+} }
 
 impl TestControl {
     fn new() -> Ref<Self> {

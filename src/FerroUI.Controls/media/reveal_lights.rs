@@ -1144,7 +1144,7 @@ ferroui_base::ferro_class_info!(XamlAmbientLight {
     },
 });
 
-impl FerroObjectImpl for XamlAmbientLight {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for XamlAmbientLight {
     fn on_property_changed(this: &Self, change: &ferroui_base::FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.property() == Self::color_property().as_property() {
@@ -1153,7 +1153,7 @@ impl FerroObjectImpl for XamlAmbientLight {
             }
         }
     }
-}
+} }
 
 impl XamlLightImpl for XamlAmbientLight {
     fn get_id(_this: &Self) -> String {

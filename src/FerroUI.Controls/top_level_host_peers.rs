@@ -9,11 +9,11 @@ use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Rect, Ref, WeakRef
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-impl ControlImpl for TopLevelHost {
+ferroui_base::ferro_overrides! { impl ControlImpl for TopLevelHost {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         TopLevelHostAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl TopLevelHost {
     /// Gets the peer of the decoration layers of the host, creating it if
@@ -47,11 +47,11 @@ ferroui_base::ferro_class_info!(TopLevelHostAutomationPeer {});
 ferroui_base::ferro_impl_classes!(TopLevelHostAutomationPeer: FerroObjectImpl);
 ferroui_base::ferro_impl_classes!(TopLevelHostAutomationPeer: AutomationPeerImpl);
 
-impl ControlAutomationPeerImpl for TopLevelHostAutomationPeer {
+ferroui_base::ferro_overrides! { impl ControlAutomationPeerImpl for TopLevelHostAutomationPeer {
     fn get_children_core(_this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {
         None
     }
-}
+} }
 
 impl TopLevelHostAutomationPeer {
     fn new(owner: &TopLevelHost) -> Ref<Self> {
@@ -77,7 +77,7 @@ ferroui_base::ferro_class_info!(DecorationsOverlaysAutomationPeer {});
 
 ferroui_base::ferro_impl_classes!(DecorationsOverlaysAutomationPeer: FerroObjectImpl);
 
-impl AutomationPeerImpl for DecorationsOverlaysAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for DecorationsOverlaysAutomationPeer {
     fn bring_into_view_core(this: &Self) {
         this.top_level().get_or_create_automation_peer().bring_into_view()
     }
@@ -178,7 +178,7 @@ impl AutomationPeerImpl for DecorationsOverlaysAutomationPeer {
     fn try_set_parent(_this: &Self, _parent: Option<Ref<AutomationPeer>>) -> bool {
         false
     }
-}
+} }
 
 impl DecorationsOverlaysAutomationPeer {
     fn new(host: &TopLevelHost, top_level: WeakRef<TopLevel>) -> Ref<Self> {

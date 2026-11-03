@@ -31,7 +31,7 @@ ferro_class!(InputPaneAwareDecorator: Decorator);
 ferro_class_info!(InputPaneAwareDecorator { new: InputPaneAwareDecorator::new });
 ferro_impl_classes!(InputPaneAwareDecorator: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for InputPaneAwareDecorator {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for InputPaneAwareDecorator {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -39,9 +39,9 @@ impl FerroObjectImpl for InputPaneAwareDecorator {
             this.ensure_input_pane_padding_applied();
         }
     }
-}
+} }
 
-impl LayoutableImpl for InputPaneAwareDecorator {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for InputPaneAwareDecorator {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         if this.input_pane.borrow().is_some()
             && this.first_layout_done.get()
@@ -72,9 +72,9 @@ impl LayoutableImpl for InputPaneAwareDecorator {
             Self::parent_arrange_override(this, final_size)
         }
     }
-}
+} }
 
-impl VisualImpl for InputPaneAwareDecorator {
+ferroui_base::ferro_overrides! { impl VisualImpl for InputPaneAwareDecorator {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -104,7 +104,7 @@ impl VisualImpl for InputPaneAwareDecorator {
         this.set_current_value(Decorator::padding_property(), Thickness::default());
         this.set_current_input_pane_padding(0.0);
     }
-}
+} }
 
 ferro_properties! {
     impl InputPaneAwareDecorator {

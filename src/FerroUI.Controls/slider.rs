@@ -72,13 +72,13 @@ ferroui_base::ferro_class_info!(Slider { new: Slider::new });
 
 ferro_impl_classes!(Slider: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
-impl ControlImpl for Slider {
+ferroui_base::ferro_overrides! { impl ControlImpl for Slider {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::SliderAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for Slider {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Slider {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(this.orientation());
@@ -91,9 +91,9 @@ impl FerroObjectImpl for Slider {
             this.update_pseudo_classes(change.get_new_value::<Orientation>());
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for Slider {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for Slider {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -174,9 +174,9 @@ impl TemplatedControlImpl for Slider {
         );
         *this.pointer_moved_dispose.borrow_mut() = Some(pointer_moved);
     }
-}
+} }
 
-impl InputElementImpl for Slider {
+ferroui_base::ferro_overrides! { impl InputElementImpl for Slider {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
@@ -239,7 +239,7 @@ impl InputElementImpl for Slider {
 
         e.set_handled(handled);
     }
-}
+} }
 
 impl SliderImpl for Slider {
     fn on_thumb_drag_started(this: &Self, _e: &VectorEventArgs) {

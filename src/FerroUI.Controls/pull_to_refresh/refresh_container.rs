@@ -54,7 +54,7 @@ impl Drop for DecrementCountGuard<'_> {
     }
 }
 
-impl FerroObjectImpl for RefreshContainer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RefreshContainer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -122,9 +122,9 @@ impl FerroObjectImpl for RefreshContainer {
             this.on_is_mouse_enabled_changed();
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for RefreshContainer {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for RefreshContainer {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -151,7 +151,7 @@ impl TemplatedControlImpl for RefreshContainer {
 
         this.on_pull_direction_changed();
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RefreshContainer {
     ferro_property!(

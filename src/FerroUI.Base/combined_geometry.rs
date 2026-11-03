@@ -46,7 +46,7 @@ pub struct CombinedGeometry {
 ferro_class!(CombinedGeometry: Geometry);
 crate::ferro_class_info!(CombinedGeometry { new: CombinedGeometry::new });
 
-impl FerroObjectImpl for CombinedGeometry {
+crate::ferro_overrides! { impl FerroObjectImpl for CombinedGeometry {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -72,7 +72,7 @@ impl FerroObjectImpl for CombinedGeometry {
             *slot.borrow_mut() = Some(subscription);
         }
     }
-}
+} }
 
 impl GeometryImpl for CombinedGeometry {
     fn clone_geometry(this: &Self) -> Ref<Geometry> {

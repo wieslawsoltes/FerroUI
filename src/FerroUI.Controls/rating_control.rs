@@ -125,7 +125,7 @@ fn coerce_rating(value: f64) -> f64 {
     NO_VALUE_SET_SENTINEL
 }
 
-impl FerroObjectImpl for RatingControl {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RatingControl {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         // The default style of WinUI sets the item info MUX_RatingControlDefaultFontInfo; the
@@ -174,15 +174,15 @@ impl FerroObjectImpl for RatingControl {
             this.stamp_out_rating_items();
         }
     }
-}
+} }
 
-impl ControlImpl for RatingControl {
+ferroui_base::ferro_overrides! { impl ControlImpl for RatingControl {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         RatingControlAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl TemplatedControlImpl for RatingControl {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for RatingControl {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         this.cancel_pointer();
         Self::parent_on_apply_template(this, args);
@@ -213,9 +213,9 @@ impl TemplatedControlImpl for RatingControl {
         }
         this.stamp_out_rating_items();
     }
-}
+} }
 
-impl InputElementImpl for RatingControl {
+ferroui_base::ferro_overrides! { impl InputElementImpl for RatingControl {
     fn on_key_down(this: &Self, args: &KeyEventArgs) {
         Self::parent_on_key_down(this, args);
         if args.handled() || !this.can_interact() {
@@ -311,7 +311,7 @@ impl InputElementImpl for RatingControl {
         this.preview.set(None);
         this.update_rating_items_appearance();
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RatingControl {
     ferro_property!(

@@ -15,7 +15,7 @@ pub struct ControlTheme {
 ferro_class!(ControlTheme: StyleBase);
 crate::ferro_class_info!(ControlTheme { new: ControlTheme::new });
 
-impl FerroObjectImpl for ControlTheme {}
+crate::ferro_impl_classes!(ControlTheme: FerroObjectImpl);
 
 impl StyleBaseImpl for ControlTheme {
     fn set_parent(_this: &Self, _parent: Option<&Ref<StyleBase>>) {

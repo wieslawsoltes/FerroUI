@@ -14,10 +14,9 @@ pub struct CarouselPageAutomationPeer {
 ferro_class!(CarouselPageAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(CarouselPageAutomationPeer {});
 
-impl FerroObjectImpl for CarouselPageAutomationPeer {}
-impl ControlAutomationPeerImpl for CarouselPageAutomationPeer {}
+ferroui_base::ferro_impl_classes!(CarouselPageAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for CarouselPageAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for CarouselPageAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Pane
     }
@@ -31,7 +30,7 @@ impl AutomationPeerImpl for CarouselPageAutomationPeer {
 
         result
     }
-}
+} }
 
 impl CarouselPageAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

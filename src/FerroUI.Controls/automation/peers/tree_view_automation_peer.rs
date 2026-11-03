@@ -14,15 +14,13 @@ pub struct TreeViewAutomationPeer {
 ferro_class!(TreeViewAutomationPeer: ItemsControlAutomationPeer);
 ferroui_base::ferro_class_info!(TreeViewAutomationPeer {});
 
-impl FerroObjectImpl for TreeViewAutomationPeer {}
-impl ControlAutomationPeerImpl for TreeViewAutomationPeer {}
-impl ItemsControlAutomationPeerImpl for TreeViewAutomationPeer {}
+ferroui_base::ferro_impl_classes!(TreeViewAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl, ItemsControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for TreeViewAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for TreeViewAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Tree
     }
-}
+} }
 
 impl TreeViewAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

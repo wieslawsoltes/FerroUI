@@ -48,7 +48,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(HeaderedItemsControl: FerroObjectImpl);
 
-impl StyledElementImpl for HeaderedItemsControl {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for HeaderedItemsControl {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_logical_tree(this, e);
 
@@ -57,7 +57,7 @@ impl StyledElementImpl for HeaderedItemsControl {
             this.prepare_item_container(&parent);
         }
     }
-}
+} }
 
 impl HeaderedItemsControlImpl for HeaderedItemsControl {
     fn register_content_presenter(this: &Self, presenter: &ContentPresenter) -> bool {

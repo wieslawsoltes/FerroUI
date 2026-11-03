@@ -79,13 +79,13 @@ ferroui_base::ferro_class_info!(SplitButton { new: SplitButton::new });
 
 ferro_impl_classes!(SplitButton: VisualImpl, LayoutableImpl, InteractiveImpl, ContentControlImpl);
 
-impl ControlImpl for SplitButton {
+ferroui_base::ferro_overrides! { impl ControlImpl for SplitButton {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::SplitButtonAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for SplitButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for SplitButton {
     fn on_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {
         if e.property() == Self::command_property().as_property() {
             // Must unregister events here while a reference to the old
@@ -134,9 +134,9 @@ impl FerroObjectImpl for SplitButton {
 
         Self::parent_on_property_changed(this, e);
     }
-}
+} }
 
-impl StyledElementImpl for SplitButton {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for SplitButton {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_logical_tree(this, e);
 
@@ -166,9 +166,9 @@ impl StyledElementImpl for SplitButton {
 
         this.is_attached_to_logical_tree.set(false);
     }
-}
+} }
 
-impl InputElementImpl for SplitButton {
+ferroui_base::ferro_overrides! { impl InputElementImpl for SplitButton {
     fn is_enabled_core(this: &Self) -> bool {
         Self::parent_is_enabled_core(this) && this.command_can_execute.get()
     }
@@ -213,9 +213,9 @@ impl InputElementImpl for SplitButton {
 
         Self::parent_on_key_up(this, e);
     }
-}
+} }
 
-impl TemplatedControlImpl for SplitButton {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for SplitButton {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -262,7 +262,7 @@ impl TemplatedControlImpl for SplitButton {
         this.register_flyout_events(flyout.as_ref());
         this.update_pseudo_classes();
     }
-}
+} }
 
 impl SplitButtonImpl for SplitButton {
     fn internal_is_checked(_this: &Self) -> bool {

@@ -31,7 +31,7 @@ ferro_impl_classes!(
     SelectingItemsControlAutomationPeerImpl
 );
 
-impl AutomationPeerImpl for RadioButtonsAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for RadioButtonsAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "RadioButtons".to_owned()
     }
@@ -49,7 +49,7 @@ impl AutomationPeerImpl for RadioButtonsAutomationPeer {
                 .and_then(|header| ValueTypes::try_to_string(&*header))
         })
     }
-}
+} }
 
 impl RadioButtonsAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

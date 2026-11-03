@@ -14,7 +14,7 @@ pub struct RotateTransform {
 ferro_class!(RotateTransform: Transform);
 crate::ferro_class_info!(RotateTransform { new: RotateTransform::new });
 
-impl FerroObjectImpl for RotateTransform {
+crate::ferro_overrides! { impl FerroObjectImpl for RotateTransform {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -24,7 +24,7 @@ impl FerroObjectImpl for RotateTransform {
             this.raise_changed();
         }
     }
-}
+} }
 
 impl TransformImpl for RotateTransform {
     fn value(this: &Self) -> Matrix {

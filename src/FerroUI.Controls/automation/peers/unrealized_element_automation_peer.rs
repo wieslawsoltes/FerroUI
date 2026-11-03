@@ -11,9 +11,9 @@ pub struct UnrealizedElementAutomationPeer {
 ferro_class!(UnrealizedElementAutomationPeer: AutomationPeer);
 ferroui_base::ferro_class_info!(UnrealizedElementAutomationPeer {});
 
-impl FerroObjectImpl for UnrealizedElementAutomationPeer {}
+ferroui_base::ferro_impl_classes!(UnrealizedElementAutomationPeer: FerroObjectImpl);
 
-impl AutomationPeerImpl for UnrealizedElementAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for UnrealizedElementAutomationPeer {
     fn bring_into_view_core(this: &Self) {
         if let Some(parent) = this.get_parent() {
             parent.bring_into_view();
@@ -57,7 +57,7 @@ impl AutomationPeerImpl for UnrealizedElementAutomationPeer {
     fn try_set_parent(_this: &Self, _parent: Option<Ref<AutomationPeer>>) -> bool {
         false
     }
-}
+} }
 
 impl UnrealizedElementAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

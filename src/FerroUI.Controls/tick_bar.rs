@@ -78,7 +78,7 @@ ferro_impl_classes!(TickBar: StyledElementImpl, LayoutableImpl, InteractiveImpl,
 
 ferroui_base::ferro_impl_classes!(TickBar: FerroObjectImpl);
 
-impl VisualImpl for TickBar {
+ferroui_base::ferro_overrides! { impl VisualImpl for TickBar {
     /// Draws the ticks.
     ///
     /// Ticks can be drawn in 8 different ways depending on the `Placement`
@@ -267,7 +267,7 @@ impl VisualImpl for TickBar {
             }
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl TickBar {
     ferro_property!(

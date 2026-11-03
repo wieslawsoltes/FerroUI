@@ -163,7 +163,7 @@ ferro_class_info!(CalendarDatePicker {
 
 ferro_impl_classes!(CalendarDatePicker: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
-impl FerroObjectImpl for CalendarDatePicker {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for CalendarDatePicker {
     /// Initializes a new instance of the [`CalendarDatePicker`] class.
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
@@ -279,9 +279,9 @@ impl FerroObjectImpl for CalendarDatePicker {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl InputElementImpl for CalendarDatePicker {
+ferroui_base::ferro_overrides! { impl InputElementImpl for CalendarDatePicker {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
 
@@ -401,9 +401,9 @@ impl InputElementImpl for CalendarDatePicker {
 
         Self::parent_on_key_up(this, e);
     }
-}
+} }
 
-impl TemplatedControlImpl for CalendarDatePicker {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for CalendarDatePicker {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         if let Some(subscriptions) = this.calendar_subscriptions.take() {
             subscriptions.dispose();
@@ -576,13 +576,13 @@ impl TemplatedControlImpl for CalendarDatePicker {
 
         this.update_pseudo_classes();
     }
-}
+} }
 
-impl ControlImpl for CalendarDatePicker {
+ferroui_base::ferro_overrides! { impl ControlImpl for CalendarDatePicker {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::CalendarDatePickerAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl CalendarDatePickerImpl for CalendarDatePicker {
     fn on_date_validation_error(this: &Self, e: &CalendarDatePickerDateValidationErrorEventArgs) {

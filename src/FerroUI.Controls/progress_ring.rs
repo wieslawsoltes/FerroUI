@@ -95,7 +95,7 @@ ferro_class_info!(ProgressRing {
 });
 ferro_impl_classes!(ProgressRing: StyledElementImpl, LayoutableImpl, InteractiveImpl, InputElementImpl);
 
-impl FerroObjectImpl for ProgressRing {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ProgressRing {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
@@ -141,9 +141,9 @@ impl FerroObjectImpl for ProgressRing {
             this.settings.update(this.bounds().width);
         }
     }
-}
+} }
 
-impl VisualImpl for ProgressRing {
+ferroui_base::ferro_overrides! { impl VisualImpl for ProgressRing {
     fn on_attached_to_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, args);
         this.attached.set(true);
@@ -155,15 +155,15 @@ impl VisualImpl for ProgressRing {
         this.stop_animation();
         Self::parent_on_detached_from_visual_tree(this, args);
     }
-}
+} }
 
-impl ControlImpl for ProgressRing {
+ferroui_base::ferro_overrides! { impl ControlImpl for ProgressRing {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         ProgressRingAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl TemplatedControlImpl for ProgressRing {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ProgressRing {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         this.stop_animation();
         Self::parent_on_apply_template(this, args);
@@ -173,7 +173,7 @@ impl TemplatedControlImpl for ProgressRing {
         this.update_states();
         this.update_progress();
     }
-}
+} }
 
 ferro_properties! { impl ProgressRing {
     ferro_property!(

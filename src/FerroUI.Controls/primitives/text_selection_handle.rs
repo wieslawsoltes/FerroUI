@@ -49,7 +49,7 @@ ferro_class_info!(TextSelectionHandle {
 
 ferro_impl_classes!(TextSelectionHandle: FerroObjectImpl, StyledElementImpl, VisualImpl, InteractiveImpl);
 
-impl TemplatedControlImpl for TextSelectionHandle {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TextSelectionHandle {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -69,9 +69,9 @@ impl TemplatedControlImpl for TextSelectionHandle {
 
         this.update_handle_classes();
     }
-}
+} }
 
-impl ControlImpl for TextSelectionHandle {
+ferroui_base::ferro_overrides! { impl ControlImpl for TextSelectionHandle {
     fn on_size_changed(this: &Self, e: &SizeChangedEventArgs) {
         Self::parent_on_size_changed(this, e);
 
@@ -89,7 +89,7 @@ impl ControlImpl for TextSelectionHandle {
 
         this.invalidate_visual();
     }
-}
+} }
 
 impl ThumbImpl for TextSelectionHandle {
     fn on_drag_started(this: &Self, e: &VectorEventArgs) {
@@ -119,15 +119,15 @@ impl ThumbImpl for TextSelectionHandle {
     }
 }
 
-impl LayoutableImpl for TextSelectionHandle {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TextSelectionHandle {
     fn arrange_core(this: &Self, final_rect: Rect) {
         this.update_handle_classes();
 
         Self::parent_arrange_core(this, final_rect);
     }
-}
+} }
 
-impl InputElementImpl for TextSelectionHandle {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TextSelectionHandle {
     fn on_pointer_capture_lost(this: &Self, e: &PointerCaptureLostEventArgs) {
         if let Some(last_point) = this.last_point.get() {
             let mut ev = VectorEventArgs::new();
@@ -194,7 +194,7 @@ impl InputElementImpl for TextSelectionHandle {
         this.pseudo_classes().remove_pseudo(PC_PRESSED);
         e.pointer().capture(None);
     }
-}
+} }
 
 impl TextSelectionHandle {
     fn static_constructor() {

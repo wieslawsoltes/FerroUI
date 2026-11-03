@@ -64,7 +64,7 @@ ferroui_base::ferro_class_info!(TabControl { new: TabControl::new });
 
 ferro_impl_classes!(TabControl: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for TabControl {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TabControl {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -95,9 +95,9 @@ impl FerroObjectImpl for TabControl {
             }
         }
     }
-}
+} }
 
-impl VisualImpl for TabControl {
+ferroui_base::ferro_overrides! { impl VisualImpl for TabControl {
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
 
@@ -107,9 +107,9 @@ impl VisualImpl for TabControl {
         this.should_animate.set(false);
         Self::reset_transition_presenter(this.content_presenter2().as_ref());
     }
-}
+} }
 
-impl LayoutableImpl for TabControl {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TabControl {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let result = Self::parent_arrange_override(this, final_size);
 
@@ -129,9 +129,9 @@ impl LayoutableImpl for TabControl {
 
         result
     }
-}
+} }
 
-impl TemplatedControlImpl for TabControl {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TabControl {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         let items_presenter_part = e.name_scope().find_as::<ItemsPresenter>("PART_ItemsPresenter");
         *this.items_presenter_part.borrow_mut() = items_presenter_part.clone();
@@ -151,9 +151,9 @@ impl TemplatedControlImpl for TabControl {
             );
         }
     }
-}
+} }
 
-impl ItemsControlImpl for TabControl {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for TabControl {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -204,9 +204,9 @@ impl ItemsControlImpl for TabControl {
         Self::parent_clear_container_for_item_override(this, element);
         this.update_selected_content(None);
     }
-}
+} }
 
-impl SelectingItemsControlImpl for TabControl {
+ferroui_base::ferro_overrides! { impl SelectingItemsControlImpl for TabControl {
     fn should_trigger_selection(this: &Self, selectable: &Visual, event_args: &PointerEventArgs) -> bool {
         matches!(
             event_args.properties().pointer_update_kind,
@@ -223,7 +223,7 @@ impl SelectingItemsControlImpl for TabControl {
 
         Self::parent_update_selection_from_event(this, container, event_args)
     }
-}
+} }
 
 impl TabControlImpl for TabControl {
     fn register_content_presenter(this: &Self, presenter: &ContentPresenter) -> bool {

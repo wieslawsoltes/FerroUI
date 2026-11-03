@@ -462,7 +462,7 @@ ferroui_base::ferro_class_info!(MicaBackdrop {
     },
 });
 
-impl FerroObjectImpl for MicaBackdrop {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for MicaBackdrop {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.property() == Self::kind_property().as_property() {
@@ -473,7 +473,7 @@ impl FerroObjectImpl for MicaBackdrop {
             }
         }
     }
-}
+} }
 
 impl SystemBackdropImpl for MicaBackdrop {
     fn on_target_connected(this: &Self, connected_target: &Rc<dyn ICompositionSupportsSystemBackdrop>, xaml_root: &TopLevel) {

@@ -27,15 +27,15 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for Polygon {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Polygon {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
         this.set_value_with_priority(Self::points_property(), Some(Points::new()), BindingPriority::Template);
     }
-}
+} }
 
-impl ShapeImpl for Polygon {
+ferroui_base::ferro_overrides! { impl ShapeImpl for Polygon {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         let points = this.points();
         let geometry = PolylineGeometry::with_points_and_fill_rule(
@@ -49,7 +49,7 @@ impl ShapeImpl for Polygon {
         }
         Some(geometry.upcast())
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Polygon {
     ferro_property!(

@@ -48,7 +48,7 @@ ferroui_base::ferro_class_info!(Track { new: Track::new });
 
 ferro_impl_classes!(Track: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for Track {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Track {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(this.orientation());
@@ -65,9 +65,9 @@ impl FerroObjectImpl for Track {
             this.apply_deferred_thumb_drag();
         }
     }
-}
+} }
 
-impl LayoutableImpl for Track {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Track {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let mut desired_size = Size::new(0.0, 0.0);
 
@@ -179,7 +179,7 @@ impl LayoutableImpl for Track {
         this.last_drag.set(Vector::default());
         arrange_size
     }
-}
+} }
 
 impl TrackImpl for Track {
     fn value_from_point(this: &Self, point: Point) -> f64 {

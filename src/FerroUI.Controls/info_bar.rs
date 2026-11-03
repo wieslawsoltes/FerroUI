@@ -240,7 +240,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for InfoBar {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for InfoBar {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         // The states that do not wait for the template (InfoBar::OnApplyTemplate sets them all
@@ -283,15 +283,15 @@ impl FerroObjectImpl for InfoBar {
             this.update_close_button();
         }
     }
-}
+} }
 
-impl ControlImpl for InfoBar {
+ferroui_base::ferro_overrides! { impl ControlImpl for InfoBar {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         InfoBarAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl TemplatedControlImpl for InfoBar {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for InfoBar {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         this.detach_close_button();
         Self::parent_on_apply_template(this, args);
@@ -328,7 +328,7 @@ impl TemplatedControlImpl for InfoBar {
         this.update_foreground();
         this.update_content_position();
     }
-}
+} }
 
 ferro_properties! { impl InfoBar {
     ferro_property!(

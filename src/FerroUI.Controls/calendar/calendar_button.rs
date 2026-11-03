@@ -63,16 +63,16 @@ ferro_impl_classes!(
     ButtonImpl
 );
 
-impl FerroObjectImpl for CalendarButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for CalendarButton {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
         let content: BoxedValue = Rc::new(DateTimeHelper::get_current_date_format().abbreviated_month_names()[0].clone());
         this.set_current_value(ContentControl::content_property(), Some(content));
     }
-}
+} }
 
-impl InputElementImpl for CalendarButton {
+ferroui_base::ferro_overrides! { impl InputElementImpl for CalendarButton {
     /// Provides class handling for the pointer pressed event that occurs
     /// when the left mouse button is pressed while the mouse pointer is
     /// over this control.
@@ -108,15 +108,15 @@ impl InputElementImpl for CalendarButton {
             }
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for CalendarButton {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for CalendarButton {
     /// Builds the visual tree for the [`CalendarButton`] when a new
     /// template is applied.
     fn on_apply_template(this: &Self, _e: &TemplateAppliedEventArgs) {
         this.set_pseudo_classes();
     }
-}
+} }
 
 impl CalendarButton {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -23,7 +23,7 @@ ferroui_base::ferro_class_info!(CalendarAutomationPeer {
     ]
 });
 
-impl FerroObjectImpl for CalendarAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for CalendarAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -34,11 +34,11 @@ impl FerroObjectImpl for CalendarAutomationPeer {
             }
         }).detach();
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for CalendarAutomationPeer {}
+ferroui_base::ferro_impl_classes!(CalendarAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for CalendarAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for CalendarAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Calendar
     }
@@ -46,7 +46,7 @@ impl AutomationPeerImpl for CalendarAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "Calendar".to_owned()
     }
-}
+} }
 
 impl ISelectionProvider for ProviderAdapter<CalendarAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

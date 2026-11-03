@@ -47,7 +47,7 @@ ferro_impl_classes!(
 
 impl IFocusScope for OverlayPopupHost {}
 
-impl FerroObjectImpl for OverlayPopupHost {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for OverlayPopupHost {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -64,7 +64,7 @@ impl FerroObjectImpl for OverlayPopupHost {
         }
         *this.keyboard_navigation_handler.borrow_mut() = keyboard_navigation_handler;
     }
-}
+} }
 
 impl InteractiveImpl for OverlayPopupHost {
     fn interactive_parent(this: &Self) -> Option<Ref<Interactive>> {
@@ -72,13 +72,13 @@ impl InteractiveImpl for OverlayPopupHost {
     }
 }
 
-impl InputElementImpl for OverlayPopupHost {
+ferroui_base::ferro_overrides! { impl InputElementImpl for OverlayPopupHost {
     fn is_focus_scope(_this: &Self) -> bool {
         true
     }
-}
+} }
 
-impl LayoutableImpl for OverlayPopupHost {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for OverlayPopupHost {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let mut reposition = false;
 
@@ -103,7 +103,7 @@ impl LayoutableImpl for OverlayPopupHost {
         }
         Self::parent_arrange_override(this, final_size)
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl OverlayPopupHost {
     ferro_property!(

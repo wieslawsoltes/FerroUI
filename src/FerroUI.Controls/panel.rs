@@ -42,7 +42,7 @@ ferroui_base::ferro_class_info!(Panel { new: Panel::new });
 
 ferro_impl_classes!(Panel: LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl VisualImpl for Panel {
+ferroui_base::ferro_overrides! { impl VisualImpl for Panel {
     /// Renders the visual to a drawing context.
     fn render(this: &Self, context: &mut DrawingContext) {
         if let Some(background) = this.background() {
@@ -52,7 +52,7 @@ impl VisualImpl for Panel {
 
         Self::parent_render(this, context);
     }
-}
+} }
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for Panel {
     fn constructed(this: &Self) {
@@ -80,7 +80,7 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for Panel {
     }
 } }
 
-impl StyledElementImpl for Panel {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for Panel {
     fn child_index_provider(this: &Self) -> Option<Rc<dyn IChildIndexProvider>> {
         let provider = this
             .child_index_provider
@@ -88,7 +88,7 @@ impl StyledElementImpl for Panel {
             .clone();
         Some(provider)
     }
-}
+} }
 
 impl PanelImpl for Panel {
     fn children_changed(this: &Self, e: &NotifyCollectionChangedEventArgs<'_, Ref<Control>>) {

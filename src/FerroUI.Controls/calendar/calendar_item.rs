@@ -109,7 +109,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl VisualImpl for CalendarItem {
+ferroui_base::ferro_overrides! { impl VisualImpl for CalendarItem {
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
 
@@ -120,9 +120,9 @@ impl VisualImpl for CalendarItem {
         this.is_mouse_left_button_down.set(false);
         this.is_mouse_left_button_down_year_view.set(false);
     }
-}
+} }
 
-impl TemplatedControlImpl for CalendarItem {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for CalendarItem {
     /// Builds the visual tree for the [`CalendarItem`] when a new template
     /// is applied.
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
@@ -167,7 +167,7 @@ impl TemplatedControlImpl for CalendarItem {
             }
         }
     }
-}
+} }
 
 ferro_properties! {
     impl CalendarItem {

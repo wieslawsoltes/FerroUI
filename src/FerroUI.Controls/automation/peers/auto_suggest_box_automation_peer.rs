@@ -23,7 +23,7 @@ ferroui_base::ferro_class_info!(AutoSuggestBoxAutomationPeer {
 });
 ferro_impl_classes!(AutoSuggestBoxAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for AutoSuggestBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for AutoSuggestBoxAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "AutoSuggestBox".to_owned()
     }
@@ -31,7 +31,7 @@ impl AutomationPeerImpl for AutoSuggestBoxAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Group
     }
-}
+} }
 
 impl AutoSuggestBoxAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

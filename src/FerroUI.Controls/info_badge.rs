@@ -56,7 +56,7 @@ ferro_class_info!(InfoBadge {
 });
 ferro_impl_classes!(InfoBadge: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for InfoBadge {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for InfoBadge {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.on_display_kind_properties_changed();
@@ -84,9 +84,9 @@ impl FerroObjectImpl for InfoBadge {
             this.update_corner_radius();
         }
     }
-}
+} }
 
-impl LayoutableImpl for InfoBadge {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for InfoBadge {
     /// InfoBadge::MeasureOverride: a badge narrower than it is high is as wide as it is high.
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let desired = Self::parent_measure_override(this, available_size);
@@ -96,14 +96,14 @@ impl LayoutableImpl for InfoBadge {
             desired
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for InfoBadge {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for InfoBadge {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, args);
         this.on_display_kind_properties_changed();
     }
-}
+} }
 
 ferro_properties! { impl InfoBadge {
     ferro_property!(

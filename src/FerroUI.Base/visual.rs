@@ -225,7 +225,7 @@ crate::ferro_overrides! { impl FerroObjectImpl for Visual {
     }
 } }
 
-impl StyledElementImpl for Visual {
+crate::ferro_overrides! { impl StyledElementImpl for Visual {
     fn logical_children_collection_changed(this: &Self, e: &NotifyCollectionChangedEventArgs<'_, Ref<StyledElement>>) {
         Self::parent_logical_children_collection_changed(this, e);
         if let Some(source) = this.presentation_source() {
@@ -244,7 +244,7 @@ impl StyledElementImpl for Visual {
             }
         }
     }
-}
+} }
 
 impl VisualImpl for Visual {
     fn render(_this: &Self, _context: &mut DrawingContext) {}

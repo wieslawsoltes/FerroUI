@@ -57,7 +57,7 @@ ferro_class_info!(CarouselPage {
 
 ferro_impl_classes!(CarouselPage: LayoutableImpl, InteractiveImpl, PageImpl);
 
-impl FerroObjectImpl for CarouselPage {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for CarouselPage {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -92,15 +92,15 @@ impl FerroObjectImpl for CarouselPage {
             );
         }
     }
-}
+} }
 
-impl StyledElementImpl for CarouselPage {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for CarouselPage {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <CarouselPage as StaticType>::TYPE
     }
-}
+} }
 
-impl VisualImpl for CarouselPage {
+ferroui_base::ferro_overrides! { impl VisualImpl for CarouselPage {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -127,9 +127,9 @@ impl VisualImpl for CarouselPage {
             this.remove_handler(InputElement::pointer_wheel_changed_event(), token);
         }
     }
-}
+} }
 
-impl InputElementImpl for CarouselPage {
+ferroui_base::ferro_overrides! { impl InputElementImpl for CarouselPage {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
         if e.handled() || !this.is_keyboard_navigation_enabled() {
@@ -161,9 +161,9 @@ impl InputElementImpl for CarouselPage {
             e.set_handled(true);
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for CarouselPage {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for CarouselPage {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -211,7 +211,7 @@ impl TemplatedControlImpl for CarouselPage {
             this.update_active_page();
         }
     }
-}
+} }
 
 impl MultiPageImpl for CarouselPage {
     fn update_active_page_with(this: &Self, navigation_type: NavigationType) {
@@ -260,11 +260,11 @@ impl SelectingMultiPageImpl for CarouselPage {
     }
 }
 
-impl ControlImpl for CarouselPage {
+ferroui_base::ferro_overrides! { impl ControlImpl for CarouselPage {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::CarouselPageAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferro_properties! {
     impl CarouselPage {

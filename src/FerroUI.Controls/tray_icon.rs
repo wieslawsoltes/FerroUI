@@ -65,7 +65,7 @@ pub struct TrayIcon {
 ferro_class!(TrayIcon: FerroObject);
 ferro_class_info!(TrayIcon { new: TrayIcon::new });
 
-impl FerroObjectImpl for TrayIcon {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TrayIcon {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -84,7 +84,7 @@ impl FerroObjectImpl for TrayIcon {
             }
         }
     }
-}
+} }
 
 /// The tray icon viewed through the interfaces it implements.
 struct TrayIconHandle(Ref<TrayIcon>);

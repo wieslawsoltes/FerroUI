@@ -51,11 +51,11 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl ControlImpl for ToolTip {
+ferroui_base::ferro_overrides! { impl ControlImpl for ToolTip {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ToolTipAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferroui_base::ferro_impl_classes!(ToolTip: FerroObjectImpl);
 

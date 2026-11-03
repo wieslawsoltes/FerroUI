@@ -166,7 +166,7 @@ ferroui_base::ferro_class_info!(SelectingItemsControl { new: SelectingItemsContr
 
 ferro_impl_classes!(SelectingItemsControl: LayoutableImpl, InteractiveImpl, ControlImpl);
 
-impl FerroObjectImpl for SelectingItemsControl {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for SelectingItemsControl {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -242,9 +242,9 @@ impl FerroObjectImpl for SelectingItemsControl {
             this.set_current_value(Self::selected_value_property(), binding_evaluator.evaluate(&selected_item));
         }
     }
-}
+} }
 
-impl StyledElementImpl for SelectingItemsControl {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for SelectingItemsControl {
     fn begin_init(this: &Self) {
         Self::parent_begin_init(this);
         this.begin_updating();
@@ -273,17 +273,17 @@ impl StyledElementImpl for SelectingItemsControl {
         this.try_initialize_selection_source(selection.as_ref(), this.update_state.borrow().is_none());
         this.select_inline_items_marked_as_selected();
     }
-}
+} }
 
-impl VisualImpl for SelectingItemsControl {
+ferroui_base::ferro_overrides! { impl VisualImpl for SelectingItemsControl {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
         this.auto_scroll_to_selected_item_if_necessary(this.get_anchor_index());
     }
-}
+} }
 
-impl InputElementImpl for SelectingItemsControl {
+ferroui_base::ferro_overrides! { impl InputElementImpl for SelectingItemsControl {
     fn on_text_input(this: &Self, e: &TextInputEventArgs) {
         if !e.handled() {
             if !this.is_text_search_enabled() {
@@ -309,17 +309,17 @@ impl InputElementImpl for SelectingItemsControl {
 
         Self::parent_on_text_input(this, e);
     }
-}
+} }
 
-impl TemplatedControlImpl for SelectingItemsControl {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for SelectingItemsControl {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
         this.auto_scroll_to_selected_item_if_necessary(this.get_anchor_index());
     }
-}
+} }
 
-impl ItemsControlImpl for SelectingItemsControl {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for SelectingItemsControl {
     fn on_items_view_collection_changed(this: &Self, e: &ItemsChangedEventArgs<'_>) {
         Self::parent_on_items_view_collection_changed(this, e);
 
@@ -401,7 +401,7 @@ impl ItemsControlImpl for SelectingItemsControl {
         let _reset = Reset(&this.ignore_container_selection_changed);
         element.clear_value(Self::is_selected_property());
     }
-}
+} }
 
 impl SelectingItemsControlImpl for SelectingItemsControl {
     fn should_trigger_selection(_this: &Self, selectable: &Visual, event_args: &PointerEventArgs) -> bool {

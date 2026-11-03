@@ -25,8 +25,7 @@ ferro_class! {
 }
 ferroui_base::ferro_class_info!(ItemsControlAutomationPeer { interfaces: [Rc<dyn IScrollProvider> => ProviderAdapter::as_scroll_provider] });
 
-impl FerroObjectImpl for ItemsControlAutomationPeer {}
-impl ControlAutomationPeerImpl for ItemsControlAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ItemsControlAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
 impl ItemsControlAutomationPeerImpl for ItemsControlAutomationPeer {
     fn scroller(this: &Self) -> Option<Rc<dyn IScrollProvider>> {
@@ -46,11 +45,11 @@ impl ItemsControlAutomationPeerImpl for ItemsControlAutomationPeer {
     }
 }
 
-impl AutomationPeerImpl for ItemsControlAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ItemsControlAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::List
     }
-}
+} }
 
 impl IScrollProvider for ProviderAdapter<ItemsControlAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

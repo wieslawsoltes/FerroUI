@@ -29,7 +29,7 @@ ferro_class! {
     }
 }
 
-impl FerroObjectImpl for Drawing {
+crate::ferro_overrides! { impl FerroObjectImpl for Drawing {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -41,7 +41,7 @@ impl FerroObjectImpl for Drawing {
         this.update_value_subscription(change.property(), Some(change.new_value()));
         this.raise_invalidated();
     }
-}
+} }
 
 impl DrawingImpl for Drawing {
     fn draw_core(_this: &Self, _context: &mut DrawingContext) {

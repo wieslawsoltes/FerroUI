@@ -70,7 +70,7 @@ ferro_class!(ScrollContentPresenter: ContentPresenter);
 ferroui_base::ferro_class_info!(ScrollContentPresenter { new: ScrollContentPresenter::new });
 ferro_impl_classes!(ScrollContentPresenter: StyledElementImpl, InteractiveImpl, ControlImpl);
 
-impl FerroObjectImpl for ScrollContentPresenter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ScrollContentPresenter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -148,9 +148,9 @@ impl FerroObjectImpl for ScrollContentPresenter {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl VisualImpl for ScrollContentPresenter {
+ferroui_base::ferro_overrides! { impl VisualImpl for ScrollContentPresenter {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.attach_to_scroll_viewer();
@@ -166,9 +166,9 @@ impl VisualImpl for ScrollContentPresenter {
             this.detach_from_scroll_viewer();
         }
     }
-}
+} }
 
-impl LayoutableImpl for ScrollContentPresenter {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for ScrollContentPresenter {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let child = match this.child() {
             Some(child) if this.logical_scroll_subscription.borrow().is_none() => child,
@@ -209,9 +209,9 @@ impl LayoutableImpl for ScrollContentPresenter {
 
         this.arrange_with_anchoring(&child, final_size)
     }
-}
+} }
 
-impl InputElementImpl for ScrollContentPresenter {
+ferroui_base::ferro_overrides! { impl InputElementImpl for ScrollContentPresenter {
     fn on_pointer_wheel_changed(this: &Self, e: &PointerWheelEventArgs) {
         // Not upstream: Ctrl and the wheel zoom the content of a scroll viewer whose `ZoomMode`
         // is enabled, about the point under the pointer.
@@ -289,7 +289,7 @@ impl InputElementImpl for ScrollContentPresenter {
     fn as_scrollable(this: &Self) -> Option<&dyn IScrollable> {
         Some(this)
     }
-}
+} }
 
 impl IScrollable for ScrollContentPresenter {
     fn extent(&self) -> Size {

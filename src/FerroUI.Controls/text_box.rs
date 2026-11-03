@@ -129,13 +129,13 @@ ferroui_base::ferro_class_info!(TextBox { new: TextBox::new });
 
 ferro_impl_classes!(TextBox: StyledElementImpl, InteractiveImpl);
 
-impl ControlImpl for TextBox {
+ferroui_base::ferro_overrides! { impl ControlImpl for TextBox {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::TextBoxAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for TextBox {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBox {
     fn constructed(this: &Self) {
         // The static constructor runs before the instance constructors.
         Self::parent_constructed(this);
@@ -256,9 +256,9 @@ impl FerroObjectImpl for TextBox {
             this.clear_undo_redo();
         }
     }
-}
+} }
 
-impl VisualImpl for TextBox {
+ferroui_base::ferro_overrides! { impl VisualImpl for TextBox {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -282,9 +282,9 @@ impl VisualImpl for TextBox {
 
         this.im_client.set_presenter(None, None);
     }
-}
+} }
 
-impl LayoutableImpl for TextBox {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TextBox {
     fn apply_template(this: &Self) {
         // The base class does not raise on_apply_template when a null template
         // removes the old subtree. Stop listening before that subtree detaches.
@@ -346,9 +346,9 @@ impl LayoutableImpl for TextBox {
 
         Self::parent_measure_override(this, available_size)
     }
-}
+} }
 
-impl InputElementImpl for TextBox {
+ferroui_base::ferro_overrides! { impl InputElementImpl for TextBox {
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, e);
 
@@ -1059,9 +1059,9 @@ impl InputElementImpl for TextBox {
         this.is_in_touch_caret_mode.set(false);
         this.has_touch_selection.set(false);
     }
-}
+} }
 
-impl TemplatedControlImpl for TextBox {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for TextBox {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         let presenter = e.name_scope().get_as::<TextPresenter>("PART_TextPresenter");
         *this.presenter.borrow_mut() = Some(presenter.clone());
@@ -1082,7 +1082,7 @@ impl TemplatedControlImpl for TextBox {
             presenter.show_caret();
         }
     }
-}
+} }
 
 impl TextBoxImpl for TextBox {
     fn coerce_text(this: &Self, value: Option<String>) -> Option<String> {

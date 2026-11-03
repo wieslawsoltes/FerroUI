@@ -134,7 +134,7 @@ ferro_class! {
 
 ferroui_base::ferro_impl_classes!(PopupFlyoutBase: FerroObjectImpl);
 
-impl FlyoutBaseImpl for PopupFlyoutBase {
+ferroui_base::ferro_overrides! { impl FlyoutBaseImpl for PopupFlyoutBase {
     /// Shows the flyout at the given control. Sealed in the reference:
     /// derived classes override `show_at_core`.
     fn show_at(this: &Self, placement_target: &Control) {
@@ -146,7 +146,7 @@ impl FlyoutBaseImpl for PopupFlyoutBase {
     fn hide(this: &Self) {
         this.hide_core(true);
     }
-}
+} }
 
 impl PopupFlyoutBaseImpl for PopupFlyoutBase {
     fn hide_core(this: &Self, can_cancel: bool) -> bool {

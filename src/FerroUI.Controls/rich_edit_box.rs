@@ -400,7 +400,7 @@ ferroui_base::ferro_class_info!(RichEditBox {
 });
 ferro_impl_classes!(RichEditBox: StyledElementImpl, InteractiveImpl);
 
-impl LayoutableImpl for RichEditBox {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for RichEditBox {
     fn apply_template(this: &Self) {
         let template = this.template();
         let applied = this.applied_template.borrow().clone();
@@ -420,9 +420,9 @@ impl LayoutableImpl for RichEditBox {
         this.on_text_view_geometry_changed();
         result
     }
-}
+} }
 
-impl TemplatedControlImpl for RichEditBox {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for RichEditBox {
     fn on_apply_template(this: &Self, event: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, event);
         let scope = event.name_scope();
@@ -441,15 +441,15 @@ impl TemplatedControlImpl for RichEditBox {
         this.reset_caret_blink();
         this.ensure_caret_visible();
     }
-}
+} }
 
-impl ControlImpl for RichEditBox {
+ferroui_base::ferro_overrides! { impl ControlImpl for RichEditBox {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::RichEditBoxAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for RichEditBox {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RichEditBox {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.text_presenter.set_owner(&this.to_ref());
@@ -575,9 +575,9 @@ impl FerroObjectImpl for RichEditBox {
             this.text_presenter.invalidate_document_layout();
         }
     }
-}
+} }
 
-impl VisualImpl for RichEditBox {
+ferroui_base::ferro_overrides! { impl VisualImpl for RichEditBox {
     fn on_attached_to_visual_tree(this: &Self, event: &VisualTreeAttachmentEventArgs) {
         this.invalidate_context_menu_request();
         Self::parent_on_attached_to_visual_tree(this, event);
@@ -590,9 +590,9 @@ impl VisualImpl for RichEditBox {
         Self::parent_on_detached_from_visual_tree(this, event);
         this.stop_caret_blink();
     }
-}
+} }
 
-impl InputElementImpl for RichEditBox {
+ferroui_base::ferro_overrides! { impl InputElementImpl for RichEditBox {
     fn on_got_focus(this: &Self, event: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, event);
         if !this.is_focused() {
@@ -758,7 +758,7 @@ impl InputElementImpl for RichEditBox {
             );
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl RichEditBox {
     /// The shared document the editor edits (`RichDocument`, a FerroUI addition, D3).

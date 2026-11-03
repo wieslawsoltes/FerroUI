@@ -17,13 +17,13 @@ ferro_class!(Underline: Span);
 ferroui_base::ferro_class_info!(Underline { new: Underline::new });
 ferro_impl_classes!(Underline: StyledElementImpl, TextElementImpl, InlineImpl);
 
-impl FerroObjectImpl for Underline {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Underline {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
         this.set_current_value(Inline::text_decorations_property(), Some(TextDecorations::underline()));
     }
-}
+} }
 
 impl Underline {
     fn static_constructor() {

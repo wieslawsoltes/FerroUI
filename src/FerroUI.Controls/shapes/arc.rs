@@ -31,7 +31,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(Arc: FerroObjectImpl);
 
-impl ShapeImpl for Arc {
+ferroui_base::ferro_overrides! { impl ShapeImpl for Arc {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         let angle1 = MathUtilities::deg2rad(this.start_angle());
         let angle2 = angle1 + MathUtilities::deg2rad(this.sweep_angle());
@@ -84,7 +84,7 @@ impl ShapeImpl for Arc {
             Some(arc_geometry.upcast())
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Arc {
     ferro_property!(

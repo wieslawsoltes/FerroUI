@@ -56,7 +56,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for ButtonSpinner {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ButtonSpinner {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(this.button_spinner_location());
@@ -69,9 +69,9 @@ impl FerroObjectImpl for ButtonSpinner {
             this.update_pseudo_classes(change.get_new_value::<Location>());
         }
     }
-}
+} }
 
-impl InputElementImpl for ButtonSpinner {
+ferroui_base::ferro_overrides! { impl InputElementImpl for ButtonSpinner {
     fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
         Self::parent_on_pointer_released(this, e);
 
@@ -145,21 +145,21 @@ impl InputElementImpl for ButtonSpinner {
             e.set_handled(true);
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for ButtonSpinner {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ButtonSpinner {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         this.set_increase_button(e.name_scope().find_as::<Button>("PART_IncreaseButton"));
         this.set_decrease_button(e.name_scope().find_as::<Button>("PART_DecreaseButton"));
         this.set_button_usage();
     }
-}
+} }
 
-impl SpinnerImpl for ButtonSpinner {
+ferroui_base::ferro_overrides! { impl SpinnerImpl for ButtonSpinner {
     fn on_valid_spin_direction_changed(this: &Self, _old_value: ValidSpinDirections, _new_value: ValidSpinDirections) {
         this.set_button_usage();
     }
-}
+} }
 
 impl ButtonSpinnerImpl for ButtonSpinner {
     fn on_allow_spin_changed(this: &Self, _old_value: bool, _new_value: bool) {

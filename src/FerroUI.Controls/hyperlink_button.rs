@@ -33,7 +33,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl ButtonImpl for HyperlinkButton {
+ferroui_base::ferro_overrides! { impl ButtonImpl for HyperlinkButton {
     fn on_click(this: &Self) {
         Self::parent_on_click(this);
 
@@ -53,9 +53,9 @@ impl ButtonImpl for HyperlinkButton {
             });
         }
     }
-}
+} }
 
-impl FerroObjectImpl for HyperlinkButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for HyperlinkButton {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -63,7 +63,7 @@ impl FerroObjectImpl for HyperlinkButton {
             this.pseudo_classes().set(PC_VISITED, change.get_new_value::<bool>());
         }
     }
-}
+} }
 
 impl HyperlinkButton {
     /// The pseudoclasses set by the class.

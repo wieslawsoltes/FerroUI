@@ -74,13 +74,13 @@ ferro_class!(Popup: Control);
 ferroui_base::ferro_class_info!(Popup { new: Popup::new });
 ferro_impl_classes!(Popup: InteractiveImpl, InputElementImpl);
 
-impl ControlImpl for Popup {
+ferroui_base::ferro_overrides! { impl ControlImpl for Popup {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::PopupAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for Popup {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Popup {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         let generation = this.lifecycle_generation.get();
@@ -132,31 +132,31 @@ impl FerroObjectImpl for Popup {
             open_state.popup_host.set_is_hit_test_visible(change.get_new_value::<bool>());
         }
     }
-}
+} }
 
-impl StyledElementImpl for Popup {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for Popup {
     fn on_detached_from_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_logical_tree(this, e);
         this.close();
     }
-}
+} }
 
-impl VisualImpl for Popup {
+ferroui_base::ferro_overrides! { impl VisualImpl for Popup {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         if this.is_open_requested.get() {
             this.open();
         }
     }
-}
+} }
 
-impl LayoutableImpl for Popup {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Popup {
     /// Measures the control: a size of 0,0 as the popup itself takes up no
     /// space.
     fn measure_core(_this: &Self, _available_size: Size) -> Size {
         Size::default()
     }
-}
+} }
 
 /// Resets the flag that makes the popup ignore changes of `IsOpen`.
 struct IgnoreIsOpenScope<'a> {

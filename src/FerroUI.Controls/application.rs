@@ -108,7 +108,7 @@ impl NewApplication for Application {
     }
 }
 
-impl FerroObjectImpl for Application {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Application {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let _ = this.host.owner.set(this.to_ref().downgrade());
@@ -124,7 +124,7 @@ impl FerroObjectImpl for Application {
             }
         }
     }
-}
+} }
 
 impl ApplicationImpl for Application {
     fn initialize(_this: &Self) {}

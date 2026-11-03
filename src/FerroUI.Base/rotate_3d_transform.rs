@@ -70,7 +70,7 @@ pub struct Rotate3DTransform {
 ferro_class!(Rotate3DTransform: Transform);
 crate::ferro_class_info!(Rotate3DTransform { new: Rotate3DTransform::new });
 
-impl FerroObjectImpl for Rotate3DTransform {
+crate::ferro_overrides! { impl FerroObjectImpl for Rotate3DTransform {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -78,7 +78,7 @@ impl FerroObjectImpl for Rotate3DTransform {
             this.raise_changed();
         }
     }
-}
+} }
 
 impl TransformImpl for Rotate3DTransform {
     fn value(this: &Self) -> Matrix {

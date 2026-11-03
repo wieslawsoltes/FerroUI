@@ -18,7 +18,7 @@ pub struct PopupRootAutomationPeer {
 ferro_class!(PopupRootAutomationPeer: WindowBaseAutomationPeer);
 ferroui_base::ferro_class_info!(PopupRootAutomationPeer {});
 
-impl FerroObjectImpl for PopupRootAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for PopupRootAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -43,11 +43,11 @@ impl FerroObjectImpl for PopupRootAutomationPeer {
         });
         *this.closed_subscription.borrow_mut() = Some(subscription);
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for PopupRootAutomationPeer {}
+ferroui_base::ferro_impl_classes!(PopupRootAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for PopupRootAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for PopupRootAutomationPeer {
     fn is_content_element_core(_this: &Self) -> bool {
         false
     }
@@ -60,7 +60,7 @@ impl AutomationPeerImpl for PopupRootAutomationPeer {
         let parent = Self::parent_get_parent_core(this);
         parent
     }
-}
+} }
 
 impl PopupRootAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

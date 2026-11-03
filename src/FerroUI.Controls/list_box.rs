@@ -40,7 +40,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(ListBox: FerroObjectImpl);
 
-impl InputElementImpl for ListBox {
+ferroui_base::ferro_overrides! { impl InputElementImpl for ListBox {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         let hotkeys = this.get_platform_settings().map(|settings| settings.hotkey_configuration());
         let ctrl = hotkeys.as_ref().is_some_and(|hotkeys| e.key_modifiers.contains(hotkeys.command_modifiers));
@@ -59,9 +59,9 @@ impl InputElementImpl for ListBox {
 
         Self::parent_on_key_down(this, e);
     }
-}
+} }
 
-impl TemplatedControlImpl for ListBox {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ListBox {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
         let scroll = e
@@ -71,9 +71,9 @@ impl TemplatedControlImpl for ListBox {
             .filter(|element| element.as_scrollable().is_some());
         this.set_scroll(scroll);
     }
-}
+} }
 
-impl ItemsControlImpl for ListBox {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for ListBox {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -86,13 +86,13 @@ impl ItemsControlImpl for ListBox {
     fn needs_container_override(this: &Self, item: &Option<BoxedValue>, _index: i32) -> (bool, Option<RecycleKey>) {
         this.needs_container::<ListBoxItem>(item)
     }
-}
+} }
 
-impl ControlImpl for ListBox {
+ferroui_base::ferro_overrides! { impl ControlImpl for ListBox {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ListBoxAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl ListBox {
     /// The named parts expected in the control template: the scrollable

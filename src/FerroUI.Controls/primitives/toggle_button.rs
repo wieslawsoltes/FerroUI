@@ -46,13 +46,13 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl ControlImpl for ToggleButton {
+ferroui_base::ferro_overrides! { impl ControlImpl for ToggleButton {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ToggleButtonAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for ToggleButton {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ToggleButton {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(this.is_checked());
@@ -67,9 +67,9 @@ impl FerroObjectImpl for ToggleButton {
             this.on_is_checked_changed(&RoutedEventArgs::with_event(Self::is_checked_changed_event()));
         }
     }
-}
+} }
 
-impl ButtonImpl for ToggleButton {
+ferroui_base::ferro_overrides! { impl ButtonImpl for ToggleButton {
     fn on_click(this: &Self) {
         if !this.is_effectively_enabled() {
             return;
@@ -78,7 +78,7 @@ impl ButtonImpl for ToggleButton {
         this.toggle();
         Self::parent_on_click(this);
     }
-}
+} }
 
 impl ToggleButtonImpl for ToggleButton {
     fn toggle(this: &Self) {

@@ -67,7 +67,7 @@ ferroui_base::ferro_impl_classes!(SelectableTextBlock: LayoutableImpl);
 ferroui_base::ferro_impl_classes!(SelectableTextBlock: InteractiveImpl);
 ferroui_base::ferro_impl_classes!(SelectableTextBlock: ControlImpl);
 
-impl FerroObjectImpl for SelectableTextBlock {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for SelectableTextBlock {
     fn constructed(this: &Self) {
         // The static constructor runs before the instance constructors: the
         // base constructor already raises property changes handled here.
@@ -110,9 +110,9 @@ impl FerroObjectImpl for SelectableTextBlock {
             this.invalidate_text_layout();
         }
     }
-}
+} }
 
-impl InputElementImpl for SelectableTextBlock {
+ferroui_base::ferro_overrides! { impl InputElementImpl for SelectableTextBlock {
     fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_got_focus(this, e);
 
@@ -315,9 +315,9 @@ impl InputElementImpl for SelectableTextBlock {
 
         e.pointer().capture(None);
     }
-}
+} }
 
-impl TextBlockImpl for SelectableTextBlock {
+ferroui_base::ferro_overrides! { impl TextBlockImpl for SelectableTextBlock {
     fn create_text_layout(this: &Self, text: Option<&str>) -> Rc<TextLayout> {
         let typeface =
             Typeface::with_style(this.font_family(), this.font_style(), this.font_weight(), this.font_stretch());
@@ -473,7 +473,7 @@ impl TextBlockImpl for SelectableTextBlock {
 
         Self::parent_render_text_layout(this, context, origin);
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl SelectableTextBlock {
     ferro_property!(

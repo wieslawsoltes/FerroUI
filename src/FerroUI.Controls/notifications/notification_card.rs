@@ -52,7 +52,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for NotificationCard {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NotificationCard {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_notification_type();
@@ -80,7 +80,7 @@ impl FerroObjectImpl for NotificationCard {
             this.raise_event(&RoutedEventArgs::with_event(Self::notification_closed_event()));
         }
     }
-}
+} }
 
 ferro_properties! {
     impl NotificationCard {

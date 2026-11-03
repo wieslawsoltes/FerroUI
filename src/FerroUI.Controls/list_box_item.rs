@@ -33,7 +33,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(ListBoxItem: FerroObjectImpl);
 
-impl InputElementImpl for ListBoxItem {
+ferroui_base::ferro_overrides! { impl InputElementImpl for ListBoxItem {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
         this.update_selection_from_event(e);
@@ -48,13 +48,13 @@ impl InputElementImpl for ListBoxItem {
         Self::parent_on_key_down(this, e);
         this.update_selection_from_event(e);
     }
-}
+} }
 
-impl ControlImpl for ListBoxItem {
+ferroui_base::ferro_overrides! { impl ControlImpl for ListBoxItem {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ListItemAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl ISelectable for ListBoxItem {
     fn is_selected(&self) -> bool {

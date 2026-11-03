@@ -394,7 +394,7 @@ impl FlexPanel {
     }
 }
 
-impl LayoutableImpl for FlexPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for FlexPanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let Some(children) = this.non_empty_visible_children() else {
             this.state.lines.borrow_mut().clear();
@@ -596,9 +596,9 @@ impl LayoutableImpl for FlexPanel {
 
         final_size
     }
-}
+} }
 
-impl PanelImpl for FlexPanel {
+ferroui_base::ferro_overrides! { impl PanelImpl for FlexPanel {
     fn children_changed(this: &Self, e: &NotifyCollectionChangedEventArgs<'_, Ref<Control>>) {
         Self::parent_children_changed(this, e);
 
@@ -626,7 +626,7 @@ impl PanelImpl for FlexPanel {
 
         this.update_visible_children();
     }
-}
+} }
 
 #[derive(Default)]
 struct FlexLayoutState {

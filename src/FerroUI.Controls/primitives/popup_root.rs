@@ -37,23 +37,23 @@ pub struct PopupRoot {
 ferro_class!(PopupRoot: WindowBase);
 ferro_impl_classes!(PopupRoot: VisualImpl, TemplatedControlImpl, ContentControlImpl);
 
-impl ControlImpl for PopupRoot {
+ferroui_base::ferro_overrides! { impl ControlImpl for PopupRoot {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::PopupRootAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl TopLevelImpl for PopupRoot {
+ferroui_base::ferro_overrides! { impl TopLevelImpl for PopupRoot {
     /// The popups that are currently open directly inside the popup of
     /// this root, in the order they were opened.
     fn opened_popups(this: &Self) -> Vec<Ref<Popup>> {
         this.parent().and_then(|parent| parent.cast::<Popup>()).map(|popup| popup.opened_popups()).unwrap_or_default()
     }
-}
+} }
 
 impl IFocusScope for PopupRoot {}
 
-impl FerroObjectImpl for PopupRoot {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for PopupRoot {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -83,14 +83,14 @@ impl FerroObjectImpl for PopupRoot {
             }
         }
     }
-}
+} }
 
-impl StyledElementImpl for PopupRoot {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for PopupRoot {
     /// The styling parent of the popup root: its logical parent.
     fn styling_parent(this: &Self) -> Option<StyleHostRef> {
         this.parent().map(StyleHostRef::Element)
     }
-}
+} }
 
 impl InteractiveImpl for PopupRoot {
     /// The parent control in the event route.
@@ -102,7 +102,7 @@ impl InteractiveImpl for PopupRoot {
     }
 }
 
-impl InputElementImpl for PopupRoot {
+ferroui_base::ferro_overrides! { impl InputElementImpl for PopupRoot {
     fn is_focus_scope(_this: &Self) -> bool {
         true
     }
@@ -110,7 +110,7 @@ impl InputElementImpl for PopupRoot {
     fn as_hosted_visual_tree_root(this: &Self) -> Option<&dyn IHostedVisualTreeRoot> {
         Some(this)
     }
-}
+} }
 
 impl IHostedVisualTreeRoot for PopupRoot {
     /// The control that is hosting the popup root.
@@ -130,7 +130,7 @@ impl IHostedVisualTreeRoot for PopupRoot {
     }
 }
 
-impl LayoutableImpl for PopupRoot {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for PopupRoot {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let max_auto_size =
             this.platform_impl().map(|platform_impl| platform_impl.max_auto_size_hint()).unwrap_or(Size::INFINITY);
@@ -166,9 +166,9 @@ impl LayoutableImpl for PopupRoot {
 
         Size::new(width, height)
     }
-}
+} }
 
-impl WindowBaseImpl for PopupRoot {
+ferroui_base::ferro_overrides! { impl WindowBaseImpl for PopupRoot {
     fn arrange_set_bounds(this: &Self, size: Size) -> Size {
         let mut reposition = false;
 
@@ -204,7 +204,7 @@ impl WindowBaseImpl for PopupRoot {
 
         this.client_size()
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl PopupRoot {
     ferro_property!(

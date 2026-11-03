@@ -40,7 +40,7 @@ pub struct TransformGroup {
 ferro_class!(TransformGroup: Transform);
 crate::ferro_class_info!(TransformGroup { new: TransformGroup::new });
 
-impl FerroObjectImpl for TransformGroup {
+crate::ferro_overrides! { impl FerroObjectImpl for TransformGroup {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_children(Transforms::new());
@@ -100,7 +100,7 @@ impl FerroObjectImpl for TransformGroup {
             this.on_transform_invalidated();
         }
     }
-}
+} }
 
 impl TransformImpl for TransformGroup {
     fn value(this: &Self) -> Matrix {

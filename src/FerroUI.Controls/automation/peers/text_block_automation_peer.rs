@@ -15,7 +15,7 @@ pub struct TextBlockAutomationPeer {
 ferro_class!(TextBlockAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(TextBlockAutomationPeer {});
 
-impl FerroObjectImpl for TextBlockAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlockAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -31,11 +31,11 @@ impl FerroObjectImpl for TextBlockAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for TextBlockAutomationPeer {}
+ferroui_base::ferro_impl_classes!(TextBlockAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for TextBlockAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for TextBlockAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Text
     }
@@ -49,7 +49,7 @@ impl AutomationPeerImpl for TextBlockAutomationPeer {
         // Return false if the control is part of a control template.
         this.owner().templated_parent().is_none() && Self::parent_is_control_element_core(this)
     }
-}
+} }
 
 impl TextBlockAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

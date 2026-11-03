@@ -23,14 +23,14 @@ ferro_class_info!(NavigationViewAutomationPeer {
     interfaces: [Rc<dyn ISelectionProvider> => ProviderAdapter::as_selection_provider]
 });
 ferro_impl_classes!(NavigationViewAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
-impl AutomationPeerImpl for NavigationViewAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for NavigationViewAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "NavigationView".into()
     }
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Custom
     }
-}
+} }
 impl NavigationViewAutomationPeer {
     /// Creates the peer of `owner`.
     pub fn new(owner: &NavigationView) -> Ref<Self> {

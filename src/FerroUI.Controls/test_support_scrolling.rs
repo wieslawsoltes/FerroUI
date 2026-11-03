@@ -33,19 +33,19 @@ pub struct TestScrollable {
 ferro_class!(TestScrollable: Control);
 ferro_impl_classes!(TestScrollable: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for TestScrollable {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TestScrollable {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         register_logical_scrollable::<TestScrollable>();
     }
-}
+} }
 
-impl LayoutableImpl for TestScrollable {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TestScrollable {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         this.available_size.set(available_size);
         Size::new(150.0, 150.0)
     }
-}
+} }
 
 impl TestScrollable {
     pub fn new() -> Ref<Self> {

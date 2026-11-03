@@ -186,7 +186,7 @@ crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
     }
 } }
 
-impl VisualImpl for InputElement {
+crate::ferro_overrides! { impl VisualImpl for InputElement {
     fn on_detached_from_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree_core(this, e);
 
@@ -210,7 +210,7 @@ impl VisualImpl for InputElement {
         Self::parent_on_attached_to_visual_tree_core(this, e);
         this.update_is_effectively_enabled();
     }
-}
+} }
 
 impl InputElementImpl for InputElement {
     fn is_enabled_core(this: &Self) -> bool {

@@ -60,7 +60,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(WrapPanel: FerroObjectImpl);
 
-impl LayoutableImpl for WrapPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for WrapPanel {
     fn measure_override(this: &Self, constraint: Size) -> Size {
         let item_width = this.item_width();
         let item_height = this.item_height();
@@ -204,7 +204,7 @@ impl LayoutableImpl for WrapPanel {
 
         final_size
     }
-}
+} }
 
 /// The state shared by the arrangement of every line of a [`WrapPanel`].
 struct LineArrangement<'a> {

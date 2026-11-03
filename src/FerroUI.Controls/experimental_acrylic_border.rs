@@ -34,7 +34,7 @@ ferro_class!(ExperimentalAcrylicBorder: Decorator);
 ferroui_base::ferro_class_info!(ExperimentalAcrylicBorder { new: ExperimentalAcrylicBorder::new });
 ferro_impl_classes!(ExperimentalAcrylicBorder: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for ExperimentalAcrylicBorder {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ExperimentalAcrylicBorder {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         if change.property() == Self::material_property().as_property() {
             this.update_material_subscription();
@@ -44,9 +44,9 @@ impl FerroObjectImpl for ExperimentalAcrylicBorder {
         }
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl VisualImpl for ExperimentalAcrylicBorder {
+ferroui_base::ferro_overrides! { impl VisualImpl for ExperimentalAcrylicBorder {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -100,9 +100,9 @@ impl VisualImpl for ExperimentalAcrylicBorder {
 
         v.as_draw_list_visual().clone()
     }
-}
+} }
 
-impl LayoutableImpl for ExperimentalAcrylicBorder {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for ExperimentalAcrylicBorder {
     /// Measures the control.
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let child = this.child();
@@ -114,7 +114,7 @@ impl LayoutableImpl for ExperimentalAcrylicBorder {
         let child = this.child();
         LayoutHelper::arrange_child(child.as_deref().map(|c| -> &Layoutable { c }), final_size, this.padding())
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl ExperimentalAcrylicBorder {
     ferro_property!(

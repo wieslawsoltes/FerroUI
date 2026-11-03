@@ -196,7 +196,7 @@ ferroui_base::ferro_class_info!(NumberBox {
 });
 ferro_impl_classes!(NumberBox: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
-impl FerroObjectImpl for NumberBox {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NumberBox {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         // NumberBox listens to PreviewKeyDown of its text box, "because textbox eats the down arrow
@@ -256,15 +256,15 @@ impl FerroObjectImpl for NumberBox {
             this.reevaluate_forwarded_uia_properties();
         }
     }
-}
+} }
 
-impl ControlImpl for NumberBox {
+ferroui_base::ferro_overrides! { impl ControlImpl for NumberBox {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         NumberBoxAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl InputElementImpl for NumberBox {
+ferroui_base::ferro_overrides! { impl InputElementImpl for NumberBox {
     fn on_key_up(this: &Self, args: &KeyEventArgs) {
         Self::parent_on_key_up(this, args);
         if args.handled() {
@@ -328,9 +328,9 @@ impl InputElementImpl for NumberBox {
             args.set_handled(true);
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for NumberBox {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for NumberBox {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, args);
         this.unhook_events();
@@ -382,7 +382,7 @@ impl TemplatedControlImpl for NumberBox {
             this.update_text_to_value();
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl NumberBox {
     ferro_property!(

@@ -21,19 +21,19 @@ ferro_impl_classes!(Rectangle: StyledElementImpl, VisualImpl, InteractiveImpl, I
 
 ferroui_base::ferro_impl_classes!(Rectangle: FerroObjectImpl);
 
-impl ShapeImpl for Rectangle {
+ferroui_base::ferro_overrides! { impl ShapeImpl for Rectangle {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         let rect = Rect::from_size(this.bounds().size()).deflate(this.stroke_thickness() / 2.0);
 
         Some(RectangleGeometry::with_rect_and_radii(rect, this.radius_x(), this.radius_y()).upcast())
     }
-}
+} }
 
-impl LayoutableImpl for Rectangle {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Rectangle {
     fn measure_override(this: &Self, _available_size: Size) -> Size {
         Size::new(this.stroke_thickness(), this.stroke_thickness())
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Rectangle {
     ferro_property!(

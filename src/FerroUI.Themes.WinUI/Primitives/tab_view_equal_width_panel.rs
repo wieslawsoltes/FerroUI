@@ -106,7 +106,7 @@ ferro_properties! { impl TabViewEqualWidthPanel {
     );
 } }
 
-impl LayoutableImpl for TabViewEqualWidthPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TabViewEqualWidthPanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let children = this.children().snapshot();
         let visible: Vec<&Ref<Control>> = children.iter().filter(|child| child.is_visible()).collect();
@@ -180,9 +180,9 @@ impl LayoutableImpl for TabViewEqualWidthPanel {
 
         final_size
     }
-}
+} }
 
-impl VisualImpl for TabViewEqualWidthPanel {
+ferroui_base::ferro_overrides! { impl VisualImpl for TabViewEqualWidthPanel {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.subscribe_to_viewport();
@@ -194,7 +194,7 @@ impl VisualImpl for TabViewEqualWidthPanel {
             subscription.dispose();
         }
     }
-}
+} }
 
 impl INavigableContainer for TabViewEqualWidthPanel {
     fn get_control(

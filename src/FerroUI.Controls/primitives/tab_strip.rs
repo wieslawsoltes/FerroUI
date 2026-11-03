@@ -36,7 +36,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(TabStrip: FerroObjectImpl);
 
-impl ItemsControlImpl for TabStrip {
+ferroui_base::ferro_overrides! { impl ItemsControlImpl for TabStrip {
     fn create_container_for_item_override(
         _this: &Self,
         _item: &Option<BoxedValue>,
@@ -49,9 +49,9 @@ impl ItemsControlImpl for TabStrip {
     fn needs_container_override(this: &Self, item: &Option<BoxedValue>, _index: i32) -> (bool, Option<RecycleKey>) {
         this.needs_container::<TabStripItem>(item)
     }
-}
+} }
 
-impl SelectingItemsControlImpl for TabStrip {
+ferroui_base::ferro_overrides! { impl SelectingItemsControlImpl for TabStrip {
     fn should_trigger_selection(this: &Self, selectable: &Visual, e: &PointerEventArgs) -> bool {
         matches!(
             e.properties().pointer_update_kind,
@@ -68,7 +68,7 @@ impl SelectingItemsControlImpl for TabStrip {
 
         Self::parent_update_selection_from_event(this, container, event_args)
     }
-}
+} }
 
 impl TabStrip {
     fn static_constructor() {

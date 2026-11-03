@@ -20,7 +20,7 @@ ferro_class!(RadialGradientBrush: GradientBrush);
 crate::ferro_class_info!(RadialGradientBrush { new: RadialGradientBrush::new });
 ferro_impl_classes!(RadialGradientBrush: FerroObjectImpl);
 
-impl BrushImpl for RadialGradientBrush {
+crate::ferro_overrides! { impl BrushImpl for RadialGradientBrush {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {
         Some(|c| ServerCompositionSimpleRadialGradientBrush::new(c))
     }
@@ -33,7 +33,7 @@ impl BrushImpl for RadialGradientBrush {
             this.radius_y(),
         );
     }
-}
+} }
 
 impl GradientBrushImpl for RadialGradientBrush {
     fn to_immutable(this: &Self) -> Rc<dyn IImmutableBrush> {

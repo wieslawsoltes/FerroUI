@@ -342,13 +342,13 @@ ferro_class_info!(AutoCompleteBox {
 
 ferro_impl_classes!(AutoCompleteBox: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
-impl ControlImpl for AutoCompleteBox {
+ferroui_base::ferro_overrides! { impl ControlImpl for AutoCompleteBox {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::AutoCompleteBoxAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for AutoCompleteBox {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for AutoCompleteBox {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -356,9 +356,9 @@ impl FerroObjectImpl for AutoCompleteBox {
             this.on_value_member_binding_changed(change.get_new_value::<Option<AssignedBinding>>());
         }
     }
-}
+} }
 
-impl InputElementImpl for AutoCompleteBox {
+ferroui_base::ferro_overrides! { impl InputElementImpl for AutoCompleteBox {
     /// Provides handling for the key down event.
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
@@ -409,9 +409,9 @@ impl InputElementImpl for AutoCompleteBox {
 
         Self::parent_on_lost_focus(this, e);
     }
-}
+} }
 
-impl TemplatedControlImpl for AutoCompleteBox {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for AutoCompleteBox {
     /// Builds the visual tree for the [`AutoCompleteBox`] control when a
     /// new template is applied.
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
@@ -443,7 +443,7 @@ impl TemplatedControlImpl for AutoCompleteBox {
 
         Self::parent_on_apply_template(this, e);
     }
-}
+} }
 
 impl AutoCompleteBoxImpl for AutoCompleteBox {
     fn get_selection_adapter_part(_this: &Self, name_scope: &NameScopeRef) -> Option<Rc<dyn ISelectionAdapter>> {

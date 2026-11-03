@@ -33,7 +33,7 @@ ferroui_base::ferro_class_info!(EmbeddableControlRootAutomationPeer {
     ]
 });
 
-impl FerroObjectImpl for EmbeddableControlRootAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for EmbeddableControlRootAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -58,15 +58,15 @@ impl FerroObjectImpl for EmbeddableControlRootAutomationPeer {
         });
         *this.closed_subscription.borrow_mut() = Some(subscription);
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for EmbeddableControlRootAutomationPeer {
+ferroui_base::ferro_overrides! { impl ControlAutomationPeerImpl for EmbeddableControlRootAutomationPeer {
     fn get_visual_parent(_this: &Self) -> Option<Ref<Visual>> {
         None
     }
-}
+} }
 
-impl AutomationPeerImpl for EmbeddableControlRootAutomationPeer {}
+ferroui_base::ferro_impl_classes!(EmbeddableControlRootAutomationPeer: AutomationPeerImpl);
 
 impl IEmbeddedRootProvider for ProviderAdapter<EmbeddableControlRootAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

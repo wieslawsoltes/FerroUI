@@ -133,7 +133,7 @@ ferro_class_info!(NavigationPage {
 
 ferro_impl_classes!(NavigationPage: InteractiveImpl);
 
-impl FerroObjectImpl for NavigationPage {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NavigationPage {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -190,15 +190,15 @@ impl FerroObjectImpl for NavigationPage {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl StyledElementImpl for NavigationPage {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for NavigationPage {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <NavigationPage as StaticType>::TYPE
     }
-}
+} }
 
-impl VisualImpl for NavigationPage {
+ferroui_base::ferro_overrides! { impl VisualImpl for NavigationPage {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -237,9 +237,9 @@ impl VisualImpl for NavigationPage {
         this.clear_navigation_state();
         this.invalidate_navigation_stack_cache();
     }
-}
+} }
 
-impl LayoutableImpl for NavigationPage {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for NavigationPage {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let top_command_bar_presenter = this.top_command_bar_presenter.borrow().clone();
         if let Some(presenter) = top_command_bar_presenter {
@@ -253,9 +253,9 @@ impl LayoutableImpl for NavigationPage {
 
         Self::parent_measure_override(this, available_size)
     }
-}
+} }
 
-impl InputElementImpl for NavigationPage {
+ferroui_base::ferro_overrides! { impl InputElementImpl for NavigationPage {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
@@ -265,9 +265,9 @@ impl InputElementImpl for NavigationPage {
             e.set_handled(true);
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for NavigationPage {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for NavigationPage {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -311,9 +311,9 @@ impl TemplatedControlImpl for NavigationPage {
         this.apply_has_shadow();
         this.update_active_page();
     }
-}
+} }
 
-impl PageImpl for NavigationPage {
+ferroui_base::ferro_overrides! { impl PageImpl for NavigationPage {
     fn update_content_safe_area_padding(this: &Self) {
         let content_host = this.content_host.borrow().clone();
         let nav_bar = this.nav_bar();
@@ -361,7 +361,7 @@ impl PageImpl for NavigationPage {
             }
         }
     }
-}
+} }
 
 impl MultiPageImpl for NavigationPage {
     // The navigation type is intentionally unused; lifecycle events are fired in each navigation method
@@ -525,11 +525,11 @@ impl MultiPageImpl for NavigationPage {
     }
 }
 
-impl ControlImpl for NavigationPage {
+ferroui_base::ferro_overrides! { impl ControlImpl for NavigationPage {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::NavigationPageAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 /// The interface handle of a navigation page: what the pages it hosts hold
 /// as their `Navigation`. It does not keep the navigation page alive (the

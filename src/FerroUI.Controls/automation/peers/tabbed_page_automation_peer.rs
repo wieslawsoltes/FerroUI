@@ -14,10 +14,9 @@ pub struct TabbedPageAutomationPeer {
 ferro_class!(TabbedPageAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(TabbedPageAutomationPeer {});
 
-impl FerroObjectImpl for TabbedPageAutomationPeer {}
-impl ControlAutomationPeerImpl for TabbedPageAutomationPeer {}
+ferroui_base::ferro_impl_classes!(TabbedPageAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for TabbedPageAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for TabbedPageAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Pane
     }
@@ -51,7 +50,7 @@ impl AutomationPeerImpl for TabbedPageAutomationPeer {
 
         result
     }
-}
+} }
 
 impl TabbedPageAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

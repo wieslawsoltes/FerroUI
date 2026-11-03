@@ -28,7 +28,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for ComboBoxItem {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ComboBoxItem {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -43,7 +43,7 @@ impl FerroObjectImpl for ComboBoxItem {
             }
         });
     }
-}
+} }
 
 impl ComboBoxItem {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

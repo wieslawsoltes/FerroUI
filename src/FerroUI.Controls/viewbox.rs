@@ -23,7 +23,7 @@ ferro_class!(Viewbox: Control);
 ferroui_base::ferro_class_info!(Viewbox { new: Viewbox::new });
 ferro_impl_classes!(Viewbox: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for Viewbox {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Viewbox {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -65,9 +65,9 @@ impl FerroObjectImpl for Viewbox {
             }
         }
     }
-}
+} }
 
-impl LayoutableImpl for Viewbox {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Viewbox {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let child = this.container();
 
@@ -91,7 +91,7 @@ impl LayoutableImpl for Viewbox {
 
         child_size * scale
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Viewbox {
     ferro_property!(

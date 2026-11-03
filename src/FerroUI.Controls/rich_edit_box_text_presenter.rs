@@ -49,7 +49,7 @@ ferroui_base::ferro_class_info!(RichEditBoxTextPresenter {
 });
 ferro_impl_classes!(RichEditBoxTextPresenter: StyledElementImpl, InteractiveImpl, VisualImpl);
 
-impl FerroObjectImpl for RichEditBoxTextPresenter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RichEditBoxTextPresenter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         // The RichEditBox that owns this presenter handles its context requests.
@@ -64,21 +64,21 @@ impl FerroObjectImpl for RichEditBoxTextPresenter {
             owner.on_text_view_property_changed(change);
         }
     }
-}
+} }
 
-impl ControlImpl for RichEditBoxTextPresenter {
+ferroui_base::ferro_overrides! { impl ControlImpl for RichEditBoxTextPresenter {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::RichEditBoxTextPresenterAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl InputElementImpl for RichEditBoxTextPresenter {
+ferroui_base::ferro_overrides! { impl InputElementImpl for RichEditBoxTextPresenter {
     fn as_scrollable(this: &Self) -> Option<&dyn IScrollable> {
         Some(this)
     }
-}
+} }
 
-impl RichTextBlockImpl for RichEditBoxTextPresenter {
+ferroui_base::ferro_overrides! { impl RichTextBlockImpl for RichEditBoxTextPresenter {
     fn default_incremental_tab(this: &Self, font_size: f64) -> f64 {
         this.owner().map_or_else(
             || Self::parent_default_incremental_tab(this, font_size),
@@ -154,9 +154,9 @@ impl RichTextBlockImpl for RichEditBoxTextPresenter {
             |owner| owner.active_selection_brush(),
         )
     }
-}
+} }
 
-impl LayoutableImpl for RichEditBoxTextPresenter {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for RichEditBoxTextPresenter {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         this.layout_width
             .set(if this.text_wrapping() == TextWrapping::NoWrap {
@@ -204,7 +204,7 @@ impl LayoutableImpl for RichEditBoxTextPresenter {
         this.notify_geometry_changed();
         result
     }
-}
+} }
 
 impl IScrollable for RichEditBoxTextPresenter {
     fn extent(&self) -> Size {

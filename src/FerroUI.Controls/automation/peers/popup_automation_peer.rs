@@ -11,7 +11,7 @@ pub struct PopupAutomationPeer {
 ferro_class!(PopupAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(PopupAutomationPeer {});
 
-impl FerroObjectImpl for PopupAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for PopupAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -31,16 +31,16 @@ impl FerroObjectImpl for PopupAutomationPeer {
             }
         }).detach();
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for PopupAutomationPeer {
+ferroui_base::ferro_overrides! { impl ControlAutomationPeerImpl for PopupAutomationPeer {
     fn get_children_core(this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {
         let host = this.popup();
         host.host().map(|popup_host| vec![this.get_or_create(&popup_host.as_control())])
     }
-}
+} }
 
-impl AutomationPeerImpl for PopupAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for PopupAutomationPeer {
     fn is_content_element_core(_this: &Self) -> bool {
         false
     }
@@ -48,7 +48,7 @@ impl AutomationPeerImpl for PopupAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         false
     }
-}
+} }
 
 impl PopupAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

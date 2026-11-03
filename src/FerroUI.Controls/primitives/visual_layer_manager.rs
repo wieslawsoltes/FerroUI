@@ -35,7 +35,7 @@ ferro_class!(VisualLayerManager: Decorator);
 ferroui_base::ferro_class_info!(VisualLayerManager { new: VisualLayerManager::new });
 ferro_impl_classes!(VisualLayerManager: FerroObjectImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl StyledElementImpl for VisualLayerManager {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for VisualLayerManager {
     fn notify_child_resources_changed(this: &Self, e: ResourcesChangedEventArgs) {
         for layer in this.layers_snapshot() {
             layer.notify_resources_changed(e, true);
@@ -61,9 +61,9 @@ impl StyledElementImpl for VisualLayerManager {
             layer.notify_detached_from_logical_tree(e);
         }
     }
-}
+} }
 
-impl LayoutableImpl for VisualLayerManager {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for VisualLayerManager {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         for layer in this.layers_snapshot() {
             layer.measure(available_size);
@@ -79,7 +79,7 @@ impl LayoutableImpl for VisualLayerManager {
 
         Self::parent_arrange_override(this, final_size)
     }
-}
+} }
 
 impl VisualLayerManager {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

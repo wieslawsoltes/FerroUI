@@ -26,7 +26,7 @@ ferroui_base::ferro_class_info!(InlineUIContainer {
 
 ferroui_base::ferro_impl_classes!(InlineUIContainer: StyledElementImpl);
 
-impl FerroObjectImpl for InlineUIContainer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for InlineUIContainer {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -80,7 +80,7 @@ impl FerroObjectImpl for InlineUIContainer {
             }
         }
     }
-}
+} }
 
 impl TextElementImpl for InlineUIContainer {
     fn on_inline_host_changed(

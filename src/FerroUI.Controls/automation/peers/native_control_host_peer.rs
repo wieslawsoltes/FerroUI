@@ -14,7 +14,7 @@ pub struct NativeControlHostPeer {
 ferro_class!(NativeControlHostPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(NativeControlHostPeer {});
 
-impl FerroObjectImpl for NativeControlHostPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NativeControlHostPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -28,9 +28,9 @@ impl FerroObjectImpl for NativeControlHostPeer {
             }
         }).detach();
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for NativeControlHostPeer {
+ferroui_base::ferro_overrides! { impl ControlAutomationPeerImpl for NativeControlHostPeer {
     fn get_children_core(this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {
         if let Some(host) = this.owner().cast::<NativeControlHost>() {
             if let Some(native_control_handle) = host.native_control_handle() {
@@ -39,9 +39,9 @@ impl ControlAutomationPeerImpl for NativeControlHostPeer {
         }
         None
     }
-}
+} }
 
-impl AutomationPeerImpl for NativeControlHostPeer {}
+ferroui_base::ferro_impl_classes!(NativeControlHostPeer: AutomationPeerImpl);
 
 impl NativeControlHostPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

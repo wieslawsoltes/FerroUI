@@ -45,7 +45,7 @@ ferro_class_info!(ContentPage {
 
 ferro_impl_classes!(ContentPage: VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl);
 
-impl FerroObjectImpl for ContentPage {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentPage {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -59,15 +59,15 @@ impl FerroObjectImpl for ContentPage {
             this.update_command_bars();
         }
     }
-}
+} }
 
-impl StyledElementImpl for ContentPage {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for ContentPage {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <ContentPage as StaticType>::TYPE
     }
-}
+} }
 
-impl TemplatedControlImpl for ContentPage {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ContentPage {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -79,9 +79,9 @@ impl TemplatedControlImpl for ContentPage {
         this.update_command_bars();
         this.update_content_safe_area_padding();
     }
-}
+} }
 
-impl PageImpl for ContentPage {
+ferroui_base::ferro_overrides! { impl PageImpl for ContentPage {
     fn update_content_safe_area_padding(this: &Self) {
         let content_presenter = this.content_presenter.borrow().clone();
         if let Some(content_presenter) = content_presenter {
@@ -93,13 +93,13 @@ impl PageImpl for ContentPage {
             content_presenter.invalidate_measure();
         }
     }
-}
+} }
 
-impl ControlImpl for ContentPage {
+ferroui_base::ferro_overrides! { impl ControlImpl for ContentPage {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ContentPageAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 ferro_properties! {
     impl ContentPage {

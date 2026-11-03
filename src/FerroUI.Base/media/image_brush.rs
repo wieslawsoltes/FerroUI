@@ -17,7 +17,7 @@ ferro_class!(ImageBrush: TileBrush);
 crate::ferro_class_info!(ImageBrush { new: ImageBrush::new });
 ferro_impl_classes!(ImageBrush: FerroObjectImpl);
 
-impl BrushImpl for ImageBrush {
+crate::ferro_overrides! { impl BrushImpl for ImageBrush {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {
         Some(|c| ServerCompositionSimpleImageBrush::new(c))
     }
@@ -27,7 +27,7 @@ impl BrushImpl for ImageBrush {
         let cloned_ref = this.source().and_then(|source| source.bitmap().map(|bitmap| bitmap.clone_ref()));
         writer.write_value(cloned_ref);
     }
-}
+} }
 
 crate::ferro_properties! { impl ImageBrush {
     ferro_property!(pub fn source_property() -> StyledProperty<Option<Rc<dyn IImageBrushSource>>> {

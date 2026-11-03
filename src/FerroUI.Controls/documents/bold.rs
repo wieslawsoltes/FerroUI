@@ -17,13 +17,13 @@ ferro_class!(Bold: Span);
 ferroui_base::ferro_class_info!(Bold { new: Bold::new });
 ferro_impl_classes!(Bold: StyledElementImpl, TextElementImpl, InlineImpl);
 
-impl FerroObjectImpl for Bold {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Bold {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
         this.set_current_value(TextElement::font_weight_property(), FontWeight::Bold);
     }
-}
+} }
 
 impl Bold {
     fn static_constructor() {

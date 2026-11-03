@@ -141,11 +141,11 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl LayoutableImpl for TestLayoutable {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for TestLayoutable {
     fn measure_override(this: &Self, _available_size: Size) -> Size {
         this.desired_size.get()
     }
-}
+} }
 
 impl TestLayoutable {
     fn new(desired_size: Size, margin: f64) -> Ref<Self> {

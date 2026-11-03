@@ -59,14 +59,14 @@ ferro_impl_classes!(
     ToggleButtonImpl
 );
 
-impl ControlImpl for ToggleSwitch {
+ferroui_base::ferro_overrides! { impl ControlImpl for ToggleSwitch {
     fn on_loaded(this: &Self, e: &RoutedEventArgs) {
         Self::parent_on_loaded(this, e);
         this.update_knob_transitions();
     }
-}
+} }
 
-impl TemplatedControlImpl for ToggleSwitch {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for ToggleSwitch {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -103,7 +103,7 @@ impl TemplatedControlImpl for ToggleSwitch {
             this.update_knob_pos(is_checked);
         }
     }
-}
+} }
 
 impl ContentControlImpl for ToggleSwitch {
     fn register_content_presenter(this: &Self, presenter: &ContentPresenter) -> bool {

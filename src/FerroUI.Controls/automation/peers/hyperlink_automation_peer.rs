@@ -35,9 +35,9 @@ ferroui_base::ferro_class_info!(HyperlinkAutomationPeer {
     ]
 });
 
-impl FerroObjectImpl for HyperlinkAutomationPeer {}
+ferroui_base::ferro_impl_classes!(HyperlinkAutomationPeer: FerroObjectImpl);
 
-impl AutomationPeerImpl for HyperlinkAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for HyperlinkAutomationPeer {
     fn bring_into_view_core(this: &Self) {
         if let Ok(range) = this.text_range() {
             let _ = range.scroll_into_view(true);
@@ -208,7 +208,7 @@ impl AutomationPeerImpl for HyperlinkAutomationPeer {
         *this.parent.borrow_mut() = parent.map(|peer| peer.downgrade());
         true
     }
-}
+} }
 
 impl HyperlinkAutomationPeer {
     pub(crate) fn new(

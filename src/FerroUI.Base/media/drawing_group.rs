@@ -36,13 +36,13 @@ pub struct DrawingGroup {
 ferro_class!(DrawingGroup: Drawing);
 crate::ferro_class_info!(DrawingGroup { new: DrawingGroup::new });
 
-impl FerroObjectImpl for DrawingGroup {
+crate::ferro_overrides! { impl FerroObjectImpl for DrawingGroup {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let children = this.children();
         this.subscribe_collection(&children);
     }
-}
+} }
 
 impl DrawingImpl for DrawingGroup {
     fn draw_core(this: &Self, context: &mut DrawingContext) {

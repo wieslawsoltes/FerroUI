@@ -47,7 +47,7 @@ ferro_class! {
 
 ferroui_base::ferro_impl_classes!(TextElement: StyledElementImpl);
 
-impl FerroObjectImpl for TextElement {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextElement {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.refresh_media_subscriptions();
@@ -75,7 +75,7 @@ impl FerroObjectImpl for TextElement {
             _ => {}
         }
     }
-}
+} }
 
 
 impl TextElementImpl for TextElement {

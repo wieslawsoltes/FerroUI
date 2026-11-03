@@ -88,7 +88,7 @@ ferro_impl_classes!(
     InputElementImpl
 );
 
-impl FerroObjectImpl for DatePicker {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for DatePicker {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -129,9 +129,9 @@ impl FerroObjectImpl for DatePicker {
             this.set_selected_date_text();
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for DatePicker {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for DatePicker {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         this.are_controls_available.set(false);
         let flyout_button = this.flyout_button.borrow().clone();
@@ -213,13 +213,13 @@ impl TemplatedControlImpl for DatePicker {
             bind(DatePickerPresenter::year_format_property().as_property(), Self::year_format_property().as_property());
         }
     }
-}
+} }
 
-impl ControlImpl for DatePicker {
+ferroui_base::ferro_overrides! { impl ControlImpl for DatePicker {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::DatePickerAutomationPeer::new(this).upcast()
     }
-}
+} }
 
 impl DatePickerImpl for DatePicker {
     fn on_selected_date_changed(this: &Self, e: &DatePickerSelectedValueChangedEventArgs) {

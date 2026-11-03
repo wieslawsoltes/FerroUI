@@ -25,7 +25,7 @@ ferroui_base::ferro_class_info!(AutoCompleteBoxAutomationPeer {
     ]
 });
 
-impl FerroObjectImpl for AutoCompleteBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for AutoCompleteBoxAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -36,11 +36,11 @@ impl FerroObjectImpl for AutoCompleteBoxAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for AutoCompleteBoxAutomationPeer {}
+ferroui_base::ferro_impl_classes!(AutoCompleteBoxAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for AutoCompleteBoxAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for AutoCompleteBoxAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Group
     }
@@ -48,7 +48,7 @@ impl AutomationPeerImpl for AutoCompleteBoxAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "AutoCompleteBox".to_owned()
     }
-}
+} }
 
 impl IExpandCollapseProvider for ProviderAdapter<AutoCompleteBoxAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

@@ -32,13 +32,13 @@ ferro_class!(Image: Control);
 ferroui_base::ferro_class_info!(Image { new: Image::new });
 ferro_impl_classes!(Image: StyledElementImpl, InteractiveImpl, InputElementImpl);
 
-impl ControlImpl for Image {
+ferroui_base::ferro_overrides! { impl ControlImpl for Image {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ImageAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for Image {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Image {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -57,9 +57,9 @@ impl FerroObjectImpl for Image {
             }
         }
     }
-}
+} }
 
-impl VisualImpl for Image {
+ferroui_base::ferro_overrides! { impl VisualImpl for Image {
     /// Renders the control.
     fn render(this: &Self, context: &mut DrawingContext) {
         let source = this.source();
@@ -124,9 +124,9 @@ impl VisualImpl for Image {
             this.unsubscribe_from_source();
         }
     }
-}
+} }
 
-impl LayoutableImpl for Image {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for Image {
     /// Measures the control.
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let source = this.source();
@@ -154,7 +154,7 @@ impl LayoutableImpl for Image {
             Size::default()
         }
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl Image {
     ferro_property!(

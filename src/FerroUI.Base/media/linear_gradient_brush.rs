@@ -20,7 +20,7 @@ ferro_class!(LinearGradientBrush: GradientBrush);
 crate::ferro_class_info!(LinearGradientBrush { new: LinearGradientBrush::new });
 ferro_impl_classes!(LinearGradientBrush: FerroObjectImpl);
 
-impl BrushImpl for LinearGradientBrush {
+crate::ferro_overrides! { impl BrushImpl for LinearGradientBrush {
     fn factory(_this: &Self) -> Option<ServerBrushFactory> {
         Some(|c| ServerCompositionSimpleLinearGradientBrush::new(c))
     }
@@ -29,7 +29,7 @@ impl BrushImpl for LinearGradientBrush {
         Self::parent_serialize_changes(this, c, writer);
         ServerCompositionSimpleLinearGradientBrushProps::serialize_all_changes(writer, this.start_point(), this.end_point());
     }
-}
+} }
 
 impl GradientBrushImpl for LinearGradientBrush {
     fn to_immutable(this: &Self) -> Rc<dyn IImmutableBrush> {

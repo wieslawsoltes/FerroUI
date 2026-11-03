@@ -96,7 +96,7 @@ ferro_class_info!(DrawerPage {
 
 ferro_impl_classes!(DrawerPage: LayoutableImpl, InteractiveImpl);
 
-impl FerroObjectImpl for DrawerPage {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for DrawerPage {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -185,15 +185,15 @@ impl FerroObjectImpl for DrawerPage {
             Self::apply_foreground(presenter.as_ref(), change.get_new_value::<Option<Rc<dyn IBrush>>>());
         }
     }
-}
+} }
 
-impl StyledElementImpl for DrawerPage {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for DrawerPage {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         <DrawerPage as StaticType>::TYPE
     }
-}
+} }
 
-impl VisualImpl for DrawerPage {
+ferroui_base::ferro_overrides! { impl VisualImpl for DrawerPage {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -240,9 +240,9 @@ impl VisualImpl for DrawerPage {
 
         this.clear_navigation_state();
     }
-}
+} }
 
-impl InputElementImpl for DrawerPage {
+ferroui_base::ferro_overrides! { impl InputElementImpl for DrawerPage {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
@@ -255,9 +255,9 @@ impl InputElementImpl for DrawerPage {
             e.set_handled(true);
         }
     }
-}
+} }
 
-impl ControlImpl for DrawerPage {
+ferroui_base::ferro_overrides! { impl ControlImpl for DrawerPage {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::DrawerPageAutomationPeer::new(this).upcast()
     }
@@ -272,9 +272,9 @@ impl ControlImpl for DrawerPage {
             }
         }
     }
-}
+} }
 
-impl TemplatedControlImpl for DrawerPage {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for DrawerPage {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
@@ -310,9 +310,9 @@ impl TemplatedControlImpl for DrawerPage {
         this.update_backdrop_state();
         this.update_content_safe_area_padding();
     }
-}
+} }
 
-impl PageImpl for DrawerPage {
+ferroui_base::ferro_overrides! { impl PageImpl for DrawerPage {
     fn update_content_safe_area_padding(this: &Self) {
         let content_presenter = this.content_presenter.borrow().clone();
         let drawer_presenter = this.drawer_presenter.borrow().clone();
@@ -413,7 +413,7 @@ impl PageImpl for DrawerPage {
 
         this.update_content_safe_area_padding();
     }
-}
+} }
 
 ferro_properties! {
     impl DrawerPage {

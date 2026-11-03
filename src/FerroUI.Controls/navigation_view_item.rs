@@ -59,14 +59,14 @@ ferro_impl_classes!(NavigationViewItemBase:
     ControlImpl, TemplatedControlImpl, ContentControlImpl
 );
 
-impl FerroObjectImpl for NavigationViewItemBase {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NavigationViewItemBase {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.is_effective_value_change() && change.property() == Self::is_selected_property().as_property() {
             this.pseudo_classes().set(":selected", this.is_selected());
         }
     }
-}
+} }
 
 ferro_properties! { impl NavigationViewItemBase {
     /// Defines the `IsSelected` property: whether the item is the selected item of its navigation
@@ -223,7 +223,7 @@ ferro_class_info!(NavigationViewItem {
 });
 ferro_impl_classes!(NavigationViewItem: StyledElementImpl, InteractiveImpl, ContentControlImpl);
 
-impl FerroObjectImpl for NavigationViewItem {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for NavigationViewItem {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
@@ -281,9 +281,9 @@ impl FerroObjectImpl for NavigationViewItem {
             this.update_parts();
         }
     }
-}
+} }
 
-impl VisualImpl for NavigationViewItem {
+ferroui_base::ferro_overrides! { impl VisualImpl for NavigationViewItem {
     fn on_attached_to_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, args);
         this.update_parts();
@@ -296,15 +296,15 @@ impl VisualImpl for NavigationViewItem {
         }
         Self::parent_on_detached_from_visual_tree(this, args);
     }
-}
+} }
 
-impl ControlImpl for NavigationViewItem {
+ferroui_base::ferro_overrides! { impl ControlImpl for NavigationViewItem {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         NavigationViewItemAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl LayoutableImpl for NavigationViewItem {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for NavigationViewItem {
     fn apply_template(this: &Self) {
         let template = this.template();
         let applied = this.applied_template.borrow().clone();
@@ -322,9 +322,9 @@ impl LayoutableImpl for NavigationViewItem {
             Self::parent_apply_template(this);
         }
     }
-}
+} }
 
-impl InputElementImpl for NavigationViewItem {
+ferroui_base::ferro_overrides! { impl InputElementImpl for NavigationViewItem {
     fn on_key_down(this: &Self, args: &KeyEventArgs) {
         Self::parent_on_key_down(this, args);
         if args.handled() || !this.is_effectively_enabled() || !this.is_own_event(args.source()) {
@@ -409,9 +409,9 @@ impl InputElementImpl for NavigationViewItem {
         this.set_pressed(false);
         this.pressed_on_chevron.set(false);
     }
-}
+} }
 
-impl TemplatedControlImpl for NavigationViewItem {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for NavigationViewItem {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         let previous = this.moving_popup.replace(true);
         this.parts.take().detach();
@@ -445,7 +445,7 @@ impl TemplatedControlImpl for NavigationViewItem {
         this.realize_children();
         this.update_parts();
     }
-}
+} }
 
 ferro_properties! { impl NavigationViewItem {
     /// Defines the `Icon` property: the icon of the item.
@@ -1022,13 +1022,13 @@ ferro_class_info!(NavigationViewItemHeader {
 ferro_impl_classes!(NavigationViewItemHeader: FerroObjectImpl, StyledElementImpl, VisualImpl,
     LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, ContentControlImpl);
 
-impl TemplatedControlImpl for NavigationViewItemHeader {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for NavigationViewItemHeader {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, args);
         *this.root_grid.borrow_mut() = args.name_scope().find_as("NavigationViewItemHeaderRootGrid");
         this.update_visual_state();
     }
-}
+} }
 
 impl NavigationViewItemHeader {
     fn static_constructor() {
@@ -1089,13 +1089,13 @@ ferro_class_info!(NavigationViewItemSeparator {
 ferro_impl_classes!(NavigationViewItemSeparator: FerroObjectImpl, StyledElementImpl, VisualImpl,
     LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, ContentControlImpl);
 
-impl TemplatedControlImpl for NavigationViewItemSeparator {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for NavigationViewItemSeparator {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, args);
         *this.root_grid.borrow_mut() = args.name_scope().find_as("NavigationViewItemSeparatorRootGrid");
         this.update_visual_state();
     }
-}
+} }
 
 impl NavigationViewItemSeparator {
     fn static_constructor() {

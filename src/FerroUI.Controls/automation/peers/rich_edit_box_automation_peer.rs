@@ -30,8 +30,8 @@ ferroui_base::ferro_class_info!(RichEditBoxAutomationPeer {
         Rc<dyn ITextEditProvider> => ProviderAdapter::as_text_edit_provider,
     ]
 });
-impl ControlAutomationPeerImpl for RichEditBoxAutomationPeer {}
-impl AutomationPeerImpl for RichEditBoxAutomationPeer {
+ferroui_base::ferro_impl_classes!(RichEditBoxAutomationPeer: ControlAutomationPeerImpl);
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for RichEditBoxAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Edit
     }
@@ -61,8 +61,8 @@ impl AutomationPeerImpl for RichEditBoxAutomationPeer {
             },
         )
     }
-}
-impl FerroObjectImpl for RichEditBoxAutomationPeer {
+} }
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RichEditBoxAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.text_automation.observe(this.to_ref());
@@ -81,7 +81,7 @@ impl FerroObjectImpl for RichEditBoxAutomationPeer {
             }
         });
     }
-}
+} }
 impl RichEditBoxAutomationPeer {
     pub fn construct(owner: &RichEditBox) -> Self {
         Self {

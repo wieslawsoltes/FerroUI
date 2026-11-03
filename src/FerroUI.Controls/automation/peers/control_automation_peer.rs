@@ -39,12 +39,12 @@ ferro_class! {
 }
 ferroui_base::ferro_class_info!(ControlAutomationPeer {});
 
-impl FerroObjectImpl for ControlAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ControlAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.initialize();
     }
-}
+} }
 
 impl ControlAutomationPeerImpl for ControlAutomationPeer {
     fn get_children_core(this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {
@@ -76,7 +76,7 @@ impl ControlAutomationPeerImpl for ControlAutomationPeer {
     }
 }
 
-impl AutomationPeerImpl for ControlAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ControlAutomationPeer {
     fn is_element_available_core(this: &Self) -> bool {
         this.try_owner().is_some()
     }
@@ -310,7 +310,7 @@ impl AutomationPeerImpl for ControlAutomationPeer {
             }
         }
     }
-}
+} }
 
 /// The line separator of the platform.
 const NEW_LINE: &str = if cfg!(windows) { "\r\n" } else { "\n" };

@@ -20,7 +20,7 @@ ferroui_base::ferro_class_info!(ExpanderAutomationPeer {
     interfaces: [Rc<dyn IExpandCollapseProvider> => ProviderAdapter::as_expand_collapse_provider]
 });
 
-impl FerroObjectImpl for ExpanderAutomationPeer {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ExpanderAutomationPeer {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -31,11 +31,11 @@ impl FerroObjectImpl for ExpanderAutomationPeer {
             }
         });
     }
-}
+} }
 
-impl ControlAutomationPeerImpl for ExpanderAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ExpanderAutomationPeer: ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ExpanderAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ExpanderAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Expander
     }
@@ -47,7 +47,7 @@ impl AutomationPeerImpl for ExpanderAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl IExpandCollapseProvider for ProviderAdapter<ExpanderAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

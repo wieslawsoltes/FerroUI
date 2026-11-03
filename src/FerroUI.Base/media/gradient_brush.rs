@@ -26,7 +26,7 @@ ferro_class! {
     }
 }
 
-impl FerroObjectImpl for GradientBrush {
+crate::ferro_overrides! { impl FerroObjectImpl for GradientBrush {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_gradient_stops(GradientStops::new());
@@ -70,9 +70,9 @@ impl FerroObjectImpl for GradientBrush {
 
         Self::parent_on_property_changed(this, change);
     }
-}
+} }
 
-impl BrushImpl for GradientBrush {
+crate::ferro_overrides! { impl BrushImpl for GradientBrush {
     fn serialize_changes(this: &Self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
         Self::parent_serialize_changes(this, c, writer);
         writer.write(this.spread_method());
@@ -83,7 +83,7 @@ impl BrushImpl for GradientBrush {
             writer.write_value(Some(ImmutableGradientStop::new(stop.offset(), stop.color())));
         }
     }
-}
+} }
 
 impl GradientBrushImpl for GradientBrush {
     fn to_immutable(_this: &Self) -> Rc<dyn IImmutableBrush> {

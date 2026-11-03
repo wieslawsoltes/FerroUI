@@ -431,11 +431,11 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl StyledElementImpl for MockParent {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for MockParent {
     fn is_logical_root(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl MockParent {
     fn new() -> Ref<Self> {
@@ -461,11 +461,11 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl StyledElementImpl for MockHostParent {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for MockHostParent {
     fn is_logical_root(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl IContentPresenterHost for MockHostParent {
     fn logical_children(&self) -> &FerroList<Ref<StyledElement>> {

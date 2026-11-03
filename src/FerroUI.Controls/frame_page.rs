@@ -52,13 +52,13 @@ ferro_class_info!(FramePage {
 });
 ferro_impl_classes!(FramePage: VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl);
 
-impl StyledElementImpl for FramePage {
+ferroui_base::ferro_overrides! { impl StyledElementImpl for FramePage {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         UserControl::TYPE
     }
-}
+} }
 
-impl FerroObjectImpl for FramePage {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for FramePage {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         // Page::OnPropertyChanged2: a page whose cache mode becomes Disabled leaves the cache of its
@@ -71,7 +71,7 @@ impl FerroObjectImpl for FramePage {
             }
         }
     }
-}
+} }
 
 impl FramePageImpl for FramePage {
     fn on_navigating_from(_this: &Self, _args: &NavigatingCancelEventArgs) {}

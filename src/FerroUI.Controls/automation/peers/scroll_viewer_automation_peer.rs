@@ -18,10 +18,9 @@ pub struct ScrollViewerAutomationPeer {
 ferro_class!(ScrollViewerAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(ScrollViewerAutomationPeer { interfaces: [Rc<dyn IScrollProvider> => ProviderAdapter::as_scroll_provider] });
 
-impl FerroObjectImpl for ScrollViewerAutomationPeer {}
-impl ControlAutomationPeerImpl for ScrollViewerAutomationPeer {}
+ferroui_base::ferro_impl_classes!(ScrollViewerAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
 
-impl AutomationPeerImpl for ScrollViewerAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for ScrollViewerAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::ScrollViewer
     }
@@ -34,7 +33,7 @@ impl AutomationPeerImpl for ScrollViewerAutomationPeer {
         // Return false if the control is part of a control template.
         this.owner().templated_parent().is_none() && Self::parent_is_control_element_core(this)
     }
-}
+} }
 
 impl IScrollProvider for ProviderAdapter<ScrollViewerAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {

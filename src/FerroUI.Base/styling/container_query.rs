@@ -18,7 +18,7 @@ pub struct ContainerQuery {
 ferro_class!(ContainerQuery: StyleBase);
 crate::ferro_class_info!(ContainerQuery { new: ContainerQuery::new });
 
-impl FerroObjectImpl for ContainerQuery {}
+crate::ferro_impl_classes!(ContainerQuery: FerroObjectImpl);
 
 impl StyleBaseImpl for ContainerQuery {
     fn set_parent(this: &Self, parent: Option<&Ref<StyleBase>>) {

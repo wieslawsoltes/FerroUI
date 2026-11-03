@@ -91,7 +91,7 @@ impl Drop for InLayoutGuard<'_> {
     }
 }
 
-impl FerroObjectImpl for VirtualizingStackPanel {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for VirtualizingStackPanel {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -104,9 +104,9 @@ impl FerroObjectImpl for VirtualizingStackPanel {
             }
         }).detach();
     }
-}
+} }
 
-impl LayoutableImpl for VirtualizingStackPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for VirtualizingStackPanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let items = this.items();
         let item_count = items.count() as i32;
@@ -293,9 +293,9 @@ impl LayoutableImpl for VirtualizingStackPanel {
 
         final_size
     }
-}
+} }
 
-impl VisualImpl for VirtualizingStackPanel {
+ferroui_base::ferro_overrides! { impl VisualImpl for VirtualizingStackPanel {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
@@ -315,7 +315,7 @@ impl VisualImpl for VirtualizingStackPanel {
         Self::parent_on_detached_from_visual_tree(this, e);
         *this.scroll_anchor_provider.borrow_mut() = None;
     }
-}
+} }
 
 impl VirtualizingPanelImpl for VirtualizingStackPanel {
     fn on_items_changed(this: &Self, _items: &Rc<ItemsSourceView>, e: &ItemsChangedEventArgs<'_>) {

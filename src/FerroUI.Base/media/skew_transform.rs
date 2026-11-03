@@ -14,7 +14,7 @@ pub struct SkewTransform {
 ferro_class!(SkewTransform: Transform);
 crate::ferro_class_info!(SkewTransform { new: SkewTransform::new });
 
-impl FerroObjectImpl for SkewTransform {
+crate::ferro_overrides! { impl FerroObjectImpl for SkewTransform {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -22,7 +22,7 @@ impl FerroObjectImpl for SkewTransform {
             this.raise_changed();
         }
     }
-}
+} }
 
 impl TransformImpl for SkewTransform {
     fn value(this: &Self) -> Matrix {

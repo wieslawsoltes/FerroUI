@@ -364,7 +364,7 @@ ferroui_base::ferro_class_info!(RevealBrush {
 });
 ferro_impl_classes!(RevealBrush: BrushImpl);
 
-impl FerroObjectImpl for RevealBrush {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for RevealBrush {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         let property = change.property();
@@ -380,7 +380,7 @@ impl FerroObjectImpl for RevealBrush {
             this.update_reveal_brush();
         }
     }
-}
+} }
 
 impl XamlCompositionBrushBaseImpl for RevealBrush {
     fn on_connected(this: &Self) {

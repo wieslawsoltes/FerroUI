@@ -74,13 +74,13 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl ControlImpl for Expander {
+ferroui_base::ferro_overrides! { impl ControlImpl for Expander {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::ExpanderAutomationPeer::new(this).upcast()
     }
-}
+} }
 
-impl FerroObjectImpl for Expander {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Expander {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes();
@@ -102,7 +102,7 @@ impl FerroObjectImpl for Expander {
             this.update_pseudo_classes();
         }
     }
-}
+} }
 
 impl ExpanderImpl for Expander {
     fn on_collapsed(this: &Self, event_args: &RoutedEventArgs) {

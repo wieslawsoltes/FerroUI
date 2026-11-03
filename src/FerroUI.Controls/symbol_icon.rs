@@ -522,7 +522,7 @@ ferroui_base::ferro_class_info!(SymbolIcon {
 });
 ferro_impl_classes!(SymbolIcon: StyledElementImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for SymbolIcon {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for SymbolIcon {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         // CSymbolIcon::OnPropertyChanged: the symbol and the foreground go to the text block.
@@ -532,23 +532,23 @@ impl FerroObjectImpl for SymbolIcon {
             this.update_child_text_block();
         }
     }
-}
+} }
 
-impl VisualImpl for SymbolIcon {
+ferroui_base::ferro_overrides! { impl VisualImpl for SymbolIcon {
     // WinUI's icons draw their glyph as it is in a right-to-left flow (a FontIcon mirrors it only
     // with MirroredWhenRightToLeft).
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
     }
-}
+} }
 
-impl TemplatedControlImpl for SymbolIcon {
+ferroui_base::ferro_overrides! { impl TemplatedControlImpl for SymbolIcon {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, args);
         *this.text.borrow_mut() = args.name_scope().find_as::<TextBlock>("PART_Text");
         this.update_child_text_block();
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl SymbolIcon {
     ferro_property!(

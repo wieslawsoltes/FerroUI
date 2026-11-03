@@ -14,11 +14,9 @@ pub struct SliderAutomationPeer {
 ferro_class!(SliderAutomationPeer: RangeBaseAutomationPeer);
 ferroui_base::ferro_class_info!(SliderAutomationPeer {});
 
-impl FerroObjectImpl for SliderAutomationPeer {}
-impl ControlAutomationPeerImpl for SliderAutomationPeer {}
-impl RangeBaseAutomationPeerImpl for SliderAutomationPeer {}
+ferroui_base::ferro_impl_classes!(SliderAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl, RangeBaseAutomationPeerImpl);
 
-impl AutomationPeerImpl for SliderAutomationPeer {
+ferroui_base::ferro_overrides! { impl AutomationPeerImpl for SliderAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
         "Slider".to_owned()
     }
@@ -26,7 +24,7 @@ impl AutomationPeerImpl for SliderAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Slider
     }
-}
+} }
 
 impl SliderAutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

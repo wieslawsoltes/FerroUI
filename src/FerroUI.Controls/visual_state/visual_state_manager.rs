@@ -77,7 +77,7 @@ ferro_class_info!(VisualStateManager {
     },
 });
 
-impl FerroObjectImpl for VisualStateManager {}
+ferroui_base::ferro_impl_classes!(VisualStateManager: FerroObjectImpl);
 
 impl VisualStateManagerImpl for VisualStateManager {
     fn go_to_state_core(

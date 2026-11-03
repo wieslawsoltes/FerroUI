@@ -46,7 +46,7 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(DockPanel: FerroObjectImpl);
 
-impl LayoutableImpl for DockPanel {
+ferroui_base::ferro_overrides! { impl LayoutableImpl for DockPanel {
     /// Updates the desired size of the panel. Called by parent elements; this
     /// is the first pass of layout.
     ///
@@ -212,7 +212,7 @@ impl LayoutableImpl for DockPanel {
 
         final_size
     }
-}
+} }
 
 ferroui_base::ferro_properties! { impl DockPanel {
     ferro_property!(

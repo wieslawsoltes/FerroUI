@@ -21,11 +21,11 @@ pub struct TestRoot {
 ferro_class!(TestRoot: Layoutable);
 ferro_impl_classes!(TestRoot: FerroObjectImpl, VisualImpl, LayoutableImpl);
 
-impl StyledElementImpl for TestRoot {
+crate::ferro_overrides! { impl StyledElementImpl for TestRoot {
     fn is_logical_root(_this: &Self) -> bool {
         true
     }
-}
+} }
 
 impl TestRoot {
     pub fn new() -> Ref<Self> {
@@ -160,11 +160,11 @@ pub struct StyledAsClass1 {
 ferro_class!(StyledAsClass1: Class1);
 ferro_impl_classes!(StyledAsClass1: FerroObjectImpl, VisualImpl, LayoutableImpl);
 
-impl StyledElementImpl for StyledAsClass1 {
+crate::ferro_overrides! { impl StyledElementImpl for StyledAsClass1 {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         Class1::TYPE
     }
-}
+} }
 
 impl StyledAsClass1 {
     pub fn new() -> Ref<Self> {
@@ -215,18 +215,18 @@ impl IChildIndexProvider for PanelIndexProvider {
 ferro_class!(TestPanel: Layoutable);
 ferro_impl_classes!(TestPanel: VisualImpl, LayoutableImpl);
 
-impl FerroObjectImpl for TestPanel {
+crate::ferro_overrides! { impl FerroObjectImpl for TestPanel {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         *this.provider.owner.borrow_mut() = Some(this.to_ref().downgrade());
     }
-}
+} }
 
-impl StyledElementImpl for TestPanel {
+crate::ferro_overrides! { impl StyledElementImpl for TestPanel {
     fn child_index_provider(this: &Self) -> Option<Rc<dyn IChildIndexProvider>> {
         Some(this.provider.clone())
     }
-}
+} }
 
 impl TestPanel {
     pub fn new() -> Ref<Self> {

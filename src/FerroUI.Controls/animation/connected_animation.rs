@@ -1149,7 +1149,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for ConnectedAnimationProxy {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ConnectedAnimationProxy {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.property() == Self::progress_property().as_property() {
@@ -1159,7 +1159,7 @@ impl FerroObjectImpl for ConnectedAnimationProxy {
             }
         }
     }
-}
+} }
 
 ferro_properties! {
     impl ConnectedAnimationProxy {

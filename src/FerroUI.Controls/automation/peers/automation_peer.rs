@@ -155,7 +155,7 @@ fn abstract_member(name: &str) -> ! {
     panic!("The automation peer class does not implement the abstract member `{name}`.")
 }
 
-impl FerroObjectImpl for AutomationPeer {}
+ferroui_base::ferro_impl_classes!(AutomationPeer: FerroObjectImpl);
 
 impl AutomationPeerImpl for AutomationPeer {
     fn get_localized_control_type_core(this: &Self) -> String {

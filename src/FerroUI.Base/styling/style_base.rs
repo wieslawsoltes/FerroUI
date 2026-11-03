@@ -71,7 +71,7 @@ impl From<Ref<StyleBase>> for Rc<dyn IAddChild<BoxedValue>> {
     }
 }
 
-impl FerroObjectImpl for StyleBase {}
+crate::ferro_impl_classes!(StyleBase: FerroObjectImpl);
 
 impl StyleBaseImpl for StyleBase {
     fn set_parent(this: &Self, parent: Option<&Ref<StyleBase>>) {
