@@ -299,6 +299,11 @@ impl DrawingContextImpl {
             None
         };
 
+        // The textures of effect images whose last handle was dropped
+        // (#455, E6) go with this frame.
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        crate::gpu::effect_passes::release_dropped_effect_images();
+
         // The options registered on this thread, else the ones the backend
         // was initialized with (the render thread has no services).
         let use_opacity_save_layer = FerroLocator::current()
