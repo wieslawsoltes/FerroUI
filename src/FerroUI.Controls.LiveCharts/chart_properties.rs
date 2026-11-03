@@ -105,10 +105,10 @@ ferro_properties! { impl Chart {
         FerroProperty::register::<Chart, _>("MaxZoomLevel", 100.0)
     }
     pub fn stroke_property() -> StyledProperty<Option<Color>> {
-        FerroProperty::register::<Chart, _>("Stroke", Some(Color::from_rgb(255, 255, 255)))
+        FerroProperty::register::<Chart, _>("Stroke", Some(Color::from_rgb(255,255,255)))
     }
     pub fn fill_property() -> StyledProperty<Option<Color>> {
-        FerroProperty::register::<Chart, _>("Fill", Some(Color::from_rgb(240, 240, 240)))
+        FerroProperty::register::<Chart, _>("Fill", Some(Color::from_rgb(240,240,240)))
     }
     pub fn center_longitude_property() -> StyledProperty<f64> {
         FerroProperty::register::<Chart, _>("CenterLongitude", 0.0)

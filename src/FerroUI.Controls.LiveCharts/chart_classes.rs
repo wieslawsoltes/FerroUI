@@ -145,9 +145,7 @@ pub struct GeoMap {
     base: Chart,
 }
 ferro_class!(GeoMap:Chart);
-ferro_class_info!(GeoMap {
-    new: GeoMap::new
-});
+ferro_class_info!(GeoMap { new: GeoMap::new });
 ferro_impl_classes!(GeoMap:StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
 impl FerroObjectImpl for GeoMap {
     fn constructed(this: &Self) {
