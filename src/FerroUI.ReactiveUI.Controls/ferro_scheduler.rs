@@ -1,14 +1,13 @@
 //! `FerroScheduler` (ReactiveUI.Primitives, the scheduler of the user-interface thread in the
 //! `Reactive` flavour of the integration, `Concurrency/...Scheduler.cs`), with the queue and the
 //! drain it embeds (`CoalescingDispatchState.cs`) and its work items (`DispatchWorkItem.cs`,
-//! `DispatchWorkState.cs`), and the installation of the dispatcher's synchronization context as
-//! the context of the user-interface thread.
+//! `DispatchWorkState.cs`), and the preparation of the user-interface thread
+//! ([`prepare_ui_thread`]).
 
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer, FerroSynchronizationContext};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_reactive::concurrency::{IScheduler, ScheduledAction, Scheduler};
 use ferroui_reactive::disposables::{Disposable, StableCompositeDisposable};
 use ferroui_reactiveui::IThreadAffineSequencer;
-use ferroui_system::threading::{set_synchronization_context, SynchronizationContext};
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -142,9 +141,16 @@ impl FerroScheduler {
     /// ([`ferroui_system::threading::tasks::set_thread_poster`]): a task of the user-interface
     /// thread woken from another thread is resumed through the dispatcher.
     ///
-    /// The context is the dispatcher's [`FerroSynchronizationContext`] of the thread (installed if
-    /// it has none yet), at [`DispatcherPriority::NORMAL`] when the thread has none. Nothing changes
+    /// The context is the dispatcher's `FerroSynchronizationContext` of the thread (installed if it
+    /// has none yet), at [`DispatcherPriority::NORMAL`] when the thread has none. Nothing changes
     /// when that context is already the current one.
+    ///
+    /// Deprecated: a dispatcher is the schedule of its thread from its start, so the wakes from
+    /// other threads reach it without this, and the dispatcher at the priority of the running job
+    /// is the current schedule of `ferroui-system` (`ferroui_system::task::current_schedule`),
+    /// which the tasks and the reactive libraries read. The code that runs outside of a job takes
+    /// the priority that `Dispatcher::set_current_priority` sets, which the application sets to
+    /// Normal.
     ///
     /// # Panics
     /// Panics when the calling thread is not the user-interface thread.
@@ -152,7 +158,15 @@ impl FerroScheduler {
     // context itself; the base crate of FerroUI keeps its own current context, so the integration
     // installs it as the context of `ferroui-system`, which the tasks and the reactive libraries
     // read.
+    #[deprecated(
+        since = "0.5.0",
+        note = "the dispatcher is the schedule of its thread and of its jobs (`ferroui_system::task::current_schedule`); nothing is to be installed"
+    )]
+    #[allow(deprecated)]
     pub fn install_on_ui_thread() {
+        use ferroui_base::threading::FerroSynchronizationContext;
+        use ferroui_system::threading::{set_synchronization_context, SynchronizationContext};
+
         let dispatcher = Dispatcher::ui_thread();
         dispatcher.verify_access();
         FerroSynchronizationContext::install_if_needed();
@@ -334,5 +348,20 @@ impl IDisposable for DispatchWorkItem {
         if let Some(started) = started {
             started.dispose();
         }
+    }
+}
+
+/// Prepares the user-interface thread for ReactiveUI, where the integration of the reference
+/// installs the synchronization context of the dispatcher: the dispatcher is the schedule of its
+/// thread already, and the code that runs outside of a job continues at
+/// [`DispatcherPriority::NORMAL`] unless the thread has a priority
+/// (`Dispatcher::set_current_priority`, upstream's `InstallIfNeeded`).
+///
+/// # Panics
+/// Panics when the calling thread is not the user-interface thread.
+pub(crate) fn prepare_ui_thread() {
+    Dispatcher::ui_thread().verify_access();
+    if Dispatcher::current_priority().is_none() {
+        Dispatcher::set_current_priority(Some(DispatcherPriority::NORMAL));
     }
 }

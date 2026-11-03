@@ -23,6 +23,10 @@
 //! scheduler, which the cancellation does not need to run. `ConfigureAwait(true)` of a
 //! `SchedulerOperation` is `configure_await(true)`, and the context `MySyncCtx` counts the work it
 //! is posted, which `SchedulerAsync_ScheduleAsync_SyncCtx` checks in addition.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::{
     IScheduler, ISchedulerPeriodic, IStopwatch, IStopwatchProvider, ScheduledAction, Scheduler, SchedulerExt,

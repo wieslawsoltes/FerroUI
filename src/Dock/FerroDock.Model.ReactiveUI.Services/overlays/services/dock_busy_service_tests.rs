@@ -393,36 +393,31 @@ fn synchronous_local_cleanup_notification_failure_prevents_later_global_disposal
 
 #[test]
 fn same_and_foreign_synchronization_contexts_cover_both_handler_dispatch_paths() {
-    use ferroui_system::threading::set_synchronization_context;
+    use ferroui_system::task::set_current_schedule;
     use std::sync::atomic::{AtomicUsize, Ordering};
+    // The synchronization context of the reference is a schedule.
     #[derive(Default)]
     struct Context {
         posts: AtomicUsize,
     }
-    impl SynchronizationContext for Context {
-        fn post(&self, work: Box<dyn FnOnce() + Send>) {
+    impl Schedule for Context {
+        fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
             work();
         }
-        fn send(&self, work: Box<dyn FnOnce() + Send>) {
-            work();
-        }
-        fn post_local(&self, work: Box<dyn FnOnce()>) {
+        fn schedule_local(&self, work: Box<dyn FnOnce()>) {
             self.posts.fetch_add(1, Ordering::Relaxed);
-            work();
-        }
-        fn send_local(&self, work: Box<dyn FnOnce()>) {
             work();
         }
     }
     let _environment = Environment::new();
     let context = Arc::new(Context::default());
-    set_synchronization_context(Some(context.clone()));
+    drop(set_current_schedule(Some(context.clone())));
     let service = DockBusyService::new(None, None);
     service.set_reload_handler(Some(Rc::new(|| Task::from_result(()))));
     assert!(service.can_reload());
     service.begin("inline".into()).dispose();
     assert_eq!(context.posts.load(Ordering::Relaxed), 0);
-    set_synchronization_context(None);
+    drop(set_current_schedule(None));
     service.set_reload_handler(None);
     service.begin("posted".into()).dispose();
     service.update_message(Some("posted message".into()));

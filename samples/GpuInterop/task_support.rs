@@ -8,7 +8,7 @@
 
 use ferroui_base::rendering::composition::{ServerJobError, ServerJobTask};
 use ferroui_base::rendering::SwapchainImagePresentStatus;
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask};
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -20,10 +20,9 @@ use std::task::{Context, Poll};
 /// # Panics
 /// Panics when called from a thread other than the dispatcher thread.
 pub fn start<T: 'static>(future: impl Future<Output = T> + 'static) -> DispatcherTask<T> {
-    let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-        FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-    });
-    context.to_task_scheduler().start_local(future)
+    let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+    let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
+    scheduler.start_local(future)
 }
 
 /// The state of a presentation of a swapchain image (`LastPresent` upstream, a `Task`): `None`

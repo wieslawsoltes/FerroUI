@@ -10,6 +10,10 @@
 //! to is a shared `RefCell`. `NotifyOn(SynchronizationContext)` is `notify_on_context`; the context
 //! `MySyncCtx` of `NotifyOn_SyncCtx`, which posts to the task pool upstream, posts its `Send` work
 //! to a new thread.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::AsyncLock;
 use ferroui_reactive::{IObserver, Notification, NotificationKind, ObservableError, Observer, ObserverExt, ProgressExt};

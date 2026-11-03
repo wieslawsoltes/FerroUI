@@ -1,5 +1,6 @@
 //! Where the polls of a task run: [`Schedule`] and [`FirstPoll`].
 
+use super::executor::{LocalCallback, RunCallback};
 use super::join::AbortHandle;
 
 /// Where the polls of a task run: called from any thread, it queues `poll` to run on the task's
@@ -17,6 +18,26 @@ pub trait Schedule: Send + Sync + 'static {
     /// keeps the handle, and may abort the task here. Does nothing by default.
     fn spawned(&self, task: AbortHandle) {
         let _ = task;
+    }
+
+    /// Queues `work`, which need not be `Send`, to run on the thread of this schedule, in order
+    /// with its other work; called on that thread (a `SynchronizationContext.Post` from the thread
+    /// of the context). By default the work is kept as a callback of the calling thread, and the
+    /// schedule is given a piece of work that runs it there; work that the schedule drops without
+    /// running it is dropped on its thread, the next time that thread runs its queue
+    /// ([`run_pending`](super::run_pending)). A schedule that can hold work that is not `Send` (a
+    /// dispatcher) queues it directly.
+    fn schedule_local(&self, work: Box<dyn FnOnce()>) {
+        let run = RunCallback::new(LocalCallback::register(work).handle());
+        self.schedule(Box::new(move || run.run()));
+    }
+
+    /// The identity of the schedule, by which [`is_current_schedule`](super::is_current_schedule)
+    /// compares two of them: by default the address of the schedule. A schedule that stands for
+    /// another object (an adapter) gives the address of that object, so that two of them for the
+    /// same object are the same schedule.
+    fn identity(&self) -> *const () {
+        (self as *const Self).cast()
     }
 }
 

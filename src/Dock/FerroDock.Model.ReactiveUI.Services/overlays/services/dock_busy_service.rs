@@ -10,7 +10,7 @@ use ferroui_reactiveui::{
 };
 use ferroui_system::prop;
 use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, OnceCell, RefCell};
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -18,7 +18,8 @@ use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
 /// Per-host busy scopes and source ReactiveUI reload command.
-/// Notifications belong to the captured synchronization context or Rx scheduler.
+/// Notifications belong to the captured schedule (the synchronization context of the reference)
+/// or Rx scheduler.
 pub struct DockBusyService {
     reactive: ReactiveObject,
     global: Option<Rc<dyn IDockGlobalBusyService>>,
@@ -38,12 +39,12 @@ impl DockBusyService {
     /// Reload visibility starts true; CanReload starts false until a handler is set.
     pub fn new(
         global_busy_service: Option<Rc<dyn IDockGlobalBusyService>>,
-        synchronization_context: Option<Arc<dyn SynchronizationContext>>,
+        schedule: Option<Arc<dyn Schedule>>,
     ) -> Rc<Self> {
         let service = Rc::new_cyclic(|runtime| Self {
             reactive: ReactiveObject::new(),
             global: global_busy_service,
-            dispatcher: ServiceDispatcher::new(synchronization_context, None),
+            dispatcher: ServiceDispatcher::new(schedule, None),
             reload_command: OnceCell::new(),
             busy_count: Cell::new(0),
             reload_handler: RefCell::new(None),

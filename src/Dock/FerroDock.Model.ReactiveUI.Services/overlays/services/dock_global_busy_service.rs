@@ -4,7 +4,7 @@
 use crate::threading::{ActionDisposable, ServiceDispatcher};
 use ferrodock_model::services::IDockGlobalBusyService;
 use ferroui_reactiveui::{reactive_object, IReactiveObjectExt, ReactiveObject};
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -27,11 +27,12 @@ pub struct DockGlobalBusyService {
 reactive_object!(DockGlobalBusyService);
 
 impl DockGlobalBusyService {
-    /// Creates a shared service using the optional default message and notification context.
+    /// Creates a shared service using the optional default message and notification schedule
+    /// (the `SynchronizationContext` of the reference; a dispatcher's `task_schedule(priority)`).
     /// An absent or whitespace-only default message becomes `"Working..."`.
     pub fn new(
         default_message: Option<String>,
-        synchronization_context: Option<Arc<dyn SynchronizationContext>>,
+        schedule: Option<Arc<dyn Schedule>>,
     ) -> Rc<Self> {
         let default_message = default_message
             .filter(|text| !text.trim().is_empty())
@@ -39,7 +40,7 @@ impl DockGlobalBusyService {
         Rc::new_cyclic(|self_weak| Self {
             reactive: ReactiveObject::new(),
             default_message,
-            dispatcher: ServiceDispatcher::new(synchronization_context, None),
+            dispatcher: ServiceDispatcher::new(schedule, None),
             busy_count: Cell::new(0),
             is_busy: RefCell::new(false),
             message: RefCell::new(None),
@@ -116,27 +117,26 @@ mod tests {
     use ferroui_reactive::concurrency::{HistoricalScheduler, ImmediateScheduler};
     use ferroui_reactiveui::RxSchedulers;
     use ferroui_system::component_model::INotifyPropertyChanged;
-    use ferroui_system::threading::{current_synchronization_context, set_synchronization_context};
+    use ferroui_system::task::set_current_schedule;
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     struct Environment {
-        context: Option<Arc<dyn SynchronizationContext>>,
+        schedule: Option<Arc<dyn Schedule>>,
         scheduler: Rc<dyn ferroui_reactive::concurrency::IScheduler>,
     }
     impl Environment {
         fn new() -> Self {
             let this = Self {
-                context: current_synchronization_context(),
+                schedule: set_current_schedule(None),
                 scheduler: RxSchedulers::main_thread_scheduler(),
             };
-            set_synchronization_context(None);
             RxSchedulers::set_main_thread_scheduler(ImmediateScheduler::instance());
             this
         }
     }
     impl Drop for Environment {
         fn drop(&mut self) {
-            set_synchronization_context(self.context.take());
+            drop(set_current_schedule(self.schedule.take()));
             RxSchedulers::set_main_thread_scheduler(self.scheduler.clone());
         }
     }
@@ -267,27 +267,22 @@ mod tests {
 
     #[test]
     fn explicit_synchronization_context_receives_the_notifications() {
+        // The synchronization context of the reference is a schedule.
         #[derive(Default)]
-        struct InlineContext {
+        struct InlineSchedule {
             posts: AtomicUsize,
         }
-        impl SynchronizationContext for InlineContext {
-            fn post(&self, work: Box<dyn FnOnce() + Send>) {
+        impl Schedule for InlineSchedule {
+            fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
                 work();
             }
-            fn send(&self, work: Box<dyn FnOnce() + Send>) {
-                work();
-            }
-            fn post_local(&self, work: Box<dyn FnOnce()>) {
+            fn schedule_local(&self, work: Box<dyn FnOnce()>) {
                 self.posts.fetch_add(1, Ordering::Relaxed);
-                work();
-            }
-            fn send_local(&self, work: Box<dyn FnOnce()>) {
                 work();
             }
         }
         let _environment = Environment::new();
-        let context = Arc::new(InlineContext::default());
+        let context = Arc::new(InlineSchedule::default());
         let service = DockGlobalBusyService::new(None, Some(context.clone()));
         let scope = service.begin(None);
         assert!(service.is_busy());

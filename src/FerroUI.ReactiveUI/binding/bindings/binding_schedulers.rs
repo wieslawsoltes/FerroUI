@@ -4,7 +4,7 @@ use super::ViewThreadInvokers;
 use crate::binding::interfaces::IViewThreadInvoker;
 use crate::binding::observables::ViewThreadObservable;
 use ferroui_reactive::concurrency::{IScheduler, SynchronizationContextScheduler};
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use ferroui_system::IObservable;
 use std::any::Any;
 use std::cell::RefCell;
@@ -40,9 +40,18 @@ impl BindingSchedulers {
         drop(previous);
     }
 
+    /// Delivers the writes that wait for the owning thread through `schedule` (a dispatcher's
+    /// `task_schedule(priority)`), or through the view's own dispatcher when `schedule` is `None`
+    /// (`UseSynchronizationContext`).
+    pub fn use_schedule(schedule: Option<Arc<dyn Schedule>>) {
+        Self::set_main_thread(schedule.map(|schedule| SynchronizationContextScheduler::with_schedule(schedule) as Rc<dyn IScheduler>));
+    }
+
     /// Delivers the writes that wait for the owning thread through `context`, or through the
     /// view's own dispatcher when `context` is `None` (`UseSynchronizationContext`).
-    pub fn use_synchronization_context(context: Option<Arc<dyn SynchronizationContext>>) {
+    #[deprecated(since = "0.5.0", note = "use `BindingSchedulers::use_schedule` with a `ferroui_system::task::Schedule`")]
+    #[allow(deprecated)]
+    pub fn use_synchronization_context(context: Option<Arc<dyn ferroui_system::threading::SynchronizationContext>>) {
         Self::set_main_thread(context.map(|context| SynchronizationContextScheduler::new(context) as Rc<dyn IScheduler>));
     }
 
