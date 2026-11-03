@@ -34,8 +34,40 @@ pub type HandleGetter<TSource, TValue> = Rc<dyn Fn(&Rc<TSource>) -> Result<TValu
 /// A setter that takes the shared handle of the owner.
 pub type HandleSetter<TSource, TValue> = Rc<dyn Fn(&Rc<TSource>, TValue)>;
 
+#[cold]
 fn needs_handle(name: &str) -> BindingError {
     BindingError::message(format!("Property {name} is accessed through the shared handle of its owner."))
+}
+
+/// The owner behind an untyped value: the box is the shared object, or
+/// holds a handle of it (the form in which an items control gives its
+/// items to their containers as data context), or an object that is
+/// assignable to the owner type. As the typed expression reads its
+/// source.
+fn owner_of<TSource: 'static>(target: &BoxedValue) -> Option<Rc<TSource>> {
+    let any: Rc<dyn Any> = target.clone();
+    any.downcast::<TSource>().ok().or_else(|| {
+        ValueTypes::try_cast(target, ValueType::of::<Rc<TSource>>())
+            .and_then(|cast| cast.downcast_ref::<Rc<TSource>>().cloned())
+    })
+}
+
+/// Converts an untyped value to the type of the property (null to the
+/// null of a nullable property type).
+fn value_from_untyped<TValue: PropertyValue>(property_name: &str, value: Option<&BoxedValue>) -> Result<TValue, BindingError> {
+    let typed = match value {
+        Some(_) => Value::<TValue>::from_untyped(value),
+        None => ValueTypes::null_value(ValueType::of::<TValue>()).and_then(|v| v.downcast_ref::<TValue>().cloned()),
+    };
+    typed.ok_or_else(|| conversion_error(property_name, value, ValueType::of::<TValue>()))
+}
+
+#[cold]
+fn conversion_error(property_name: &str, value: Option<&BoxedValue>, target: ValueType) -> BindingError {
+    BindingError::message(format!(
+        "Object of type '{}' cannot be converted to type '{}' for property '{}'.",
+        value.map_or("null", |v| v.type_name()), target, property_name
+    ))
 }
 
 /// A property description with typed accessors: values are read and written
@@ -155,36 +187,6 @@ impl<TSource: 'static, TValue: PropertyValue> TypedClrPropertyInfo<TSource, TVal
         }
     }
 
-    /// The owner behind an untyped value: the box is the shared object, or
-    /// holds a handle of it (the form in which an items control gives its
-    /// items to their containers as data context), or an object that is
-    /// assignable to the owner type. As the typed expression reads its
-    /// source.
-    fn owner_of(target: &BoxedValue) -> Option<Rc<TSource>> {
-        let any: Rc<dyn Any> = target.clone();
-        any.downcast::<TSource>().ok().or_else(|| {
-            ValueTypes::try_cast(target, ValueType::of::<Rc<TSource>>())
-                .and_then(|cast| cast.downcast_ref::<Rc<TSource>>().cloned())
-        })
-    }
-
-    /// Converts an untyped value to the type of the property (null to the
-    /// null of a nullable property type).
-    fn value_from_untyped(&self, value: Option<&BoxedValue>) -> Result<TValue, BindingError> {
-        let typed = match value {
-            Some(_) => Value::<TValue>::from_untyped(value),
-            None => ValueTypes::null_value(ValueType::of::<TValue>()).and_then(|v| v.downcast_ref::<TValue>().cloned()),
-        };
-        typed.ok_or_else(|| {
-            BindingError::message(format!(
-                "Object of type '{}' cannot be converted to type '{}' for property '{}'.",
-                value.map_or("null", |v| v.type_name()),
-                ValueType::of::<TValue>(),
-                self.name
-            ))
-        })
-    }
-
     pub(crate) fn notifier<'a>(&self, source: &'a TSource) -> Option<&'a dyn INotifyPropertyChanged> {
         self.inpc.map(|f| f(source))
     }
@@ -216,7 +218,7 @@ impl<TSource: 'static, TValue: PropertyValue> IPropertyInfo for TypedClrProperty
         if self.setter.is_none() {
             return Err(BindingError::message(format!("Property {} doesn't have a setter", self.name)));
         }
-        self.set_typed(target, self.value_from_untyped(value)?);
+        self.set_typed(target, value_from_untyped(&self.name, value)?);
         Ok(())
     }
 
@@ -225,7 +227,7 @@ impl<TSource: 'static, TValue: PropertyValue> IPropertyInfo for TypedClrProperty
     }
 
     fn try_get_boxed(&self, target: &BoxedValue) -> Result<Option<BoxedValue>, BindingError> {
-        let Some(owner) = Self::owner_of(target) else { return Ok(None) };
+        let Some(owner) = owner_of::<TSource>(target) else { return Ok(None) };
         Ok(ValueTypes::normalize(BooleanBoxes::box_value(&self.try_get_from(&owner)?)))
     }
 
@@ -233,9 +235,9 @@ impl<TSource: 'static, TValue: PropertyValue> IPropertyInfo for TypedClrProperty
         if self.setter.is_none() {
             return Err(BindingError::message(format!("Property {} doesn't have a setter", self.name)));
         }
-        let owner = Self::owner_of(target)
+        let owner = owner_of::<TSource>(target)
             .ok_or_else(|| BindingError::message("The property owner is of the wrong type."))?;
-        self.set_on(&owner, self.value_from_untyped(value)?);
+        self.set_on(&owner, value_from_untyped(&self.name, value)?);
         Ok(())
     }
 
@@ -449,15 +451,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
     }
 
     fn update_source(&self, data_context: Option<BoxedValue>) {
-        let source: Option<Rc<TSource>> = data_context.as_ref().and_then(|d| {
-            let any: Rc<dyn Any> = d.clone();
-            // The object itself, or an object that is assignable to the
-            // source type (the cast `(TSource)dataContext` to a base type).
-            any.downcast::<TSource>().ok().or_else(|| {
-                ValueTypes::try_cast(d, ValueType::of::<Rc<TSource>>())
-                    .and_then(|cast| cast.downcast_ref::<Rc<TSource>>().cloned())
-            })
-        });
+        let source = data_context.as_ref().and_then(owner_of::<TSource>);
         if let (Some(d), None) = (&data_context, &source) {
             self.target.log(self.description(), &format!(
                 "Could not convert DataContext of type '{}' to '{}'.",
