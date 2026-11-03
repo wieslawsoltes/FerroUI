@@ -282,7 +282,7 @@ impl SchedulerOperationAwaiter {
         if self.inner.post_back_to_original_context {
             if let Some(context) = current_schedule() {
                 let original = continuation;
-                continuation = Box::new(move || context.schedule_local(original));
+                continuation = Box::new(move || Schedule::schedule_local(&*context, original));
             }
         }
         *self.inner.continuation.borrow_mut() = Some(continuation);

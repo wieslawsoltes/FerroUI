@@ -292,7 +292,7 @@ fn setting_a_context_makes_an_adapter_of_it_the_schedule_of_the_thread_and_the_c
         assert!(thread_schedule().is_some());
         // Two adapters of one context are the same schedule.
         assert!(is_current_schedule(&context_schedule(context.clone())));
-        assert_eq!(current.identity(), Arc::as_ptr(&context).cast::<()>());
+        assert_eq!(Schedule::identity(&*current), Arc::as_ptr(&context).cast::<()>());
 
         set_synchronization_context(None);
         assert!(current_schedule().is_none());

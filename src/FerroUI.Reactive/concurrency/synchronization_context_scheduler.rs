@@ -136,8 +136,9 @@ impl SynchronizationContextScheduler {
         Rc::new_cyclic(|this| Self { this: this.clone(), target, always_post })
     }
 
-    /// The schedule the scheduler posts to, `None` for a scheduler of a deprecated context.
-    pub fn schedule(&self) -> Option<&Arc<dyn Schedule>> {
+    /// The schedule the scheduler posts to (its context), `None` for a scheduler of a deprecated
+    /// context. Not named `schedule`, which is the member of [`IScheduler`].
+    pub fn context_schedule(&self) -> Option<&Arc<dyn Schedule>> {
         match &self.target {
             PostTarget::Schedule(schedule) => Some(schedule),
             PostTarget::Context(_) => None,
@@ -148,7 +149,7 @@ impl SynchronizationContextScheduler {
     ///
     /// # Panics
     /// When the scheduler was made with a schedule ([`with_schedule`](Self::with_schedule)).
-    #[deprecated(since = "0.5.0", note = "use `SynchronizationContextScheduler::schedule`")]
+    #[deprecated(since = "0.5.0", note = "use `SynchronizationContextScheduler::context_schedule`")]
     pub fn context(&self) -> &Arc<dyn SynchronizationContext> {
         match &self.target {
             PostTarget::Context(context) => context,

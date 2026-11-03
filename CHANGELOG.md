@@ -100,7 +100,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 | `FerroSynchronizationContext::set_current`, `install_if_needed`, `ensure`, `RestoreContext` | `Dispatcher::set_current_priority(priority)`, which gives the previous one; the dispatcher sets the priority of its jobs itself |
 | `context.post(f)`, `post_local(f)`, `to_task_scheduler()` | `dispatcher.post(f, priority)`, `post_local(f, priority)`, `dispatcher.to_task_scheduler_with_priority(priority)`; `dispatcher.task_schedule(priority)` for code that takes a schedule |
 | `FerroScheduler::install_on_ui_thread()` | nothing: the dispatcher installs itself |
-| `SynchronizationContextScheduler::new(context)`, `with_always_post(context, always_post)`, `.context()` | `SynchronizationContextScheduler::with_schedule(schedule)`, `with_schedule_and_always_post(schedule, always_post)`, `.schedule()` |
+| `SynchronizationContextScheduler::new(context)`, `with_always_post(context, always_post)`, `.context()` | `SynchronizationContextScheduler::with_schedule(schedule)`, `with_schedule_and_always_post(schedule, always_post)`, `.context_schedule()` |
 | `ContextDisposable::new(context, disposable)`, `.context()` | `ContextDisposable::with_schedule(schedule, disposable)`, `.schedule()` |
 | `observe_on_context(context)`, `subscribe_on_context(context)`, `notify_on_context(context)` | `observe_on_schedule(schedule)`, `subscribe_on_schedule(schedule)`, `notify_on_schedule(schedule)` |
 | `BindingSchedulers::use_synchronization_context(context)` | `BindingSchedulers::use_schedule(schedule)` |
