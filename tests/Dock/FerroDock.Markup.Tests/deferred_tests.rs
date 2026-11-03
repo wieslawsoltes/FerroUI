@@ -269,8 +269,10 @@ fn a_negative_time_span_literal_for_a_deferred_or_tab_panel_delay_is_an_error() 
                 &[],
             );
             let reason = compiled[0].source.clone().expect_err("the document is refused");
+            // A styled property is named `Member:`, a member of a markup type `set_Member: argument 1:`.
             assert!(
-                reason.contains(&format!("{member}: the time span -00:00:01 is negative, and a `Duration` cannot be negative")),
+                reason.contains(member)
+                    && reason.contains("the time span -00:00:01 is negative, and a `Duration` cannot be negative"),
                 "{member}: {reason}"
             );
         }

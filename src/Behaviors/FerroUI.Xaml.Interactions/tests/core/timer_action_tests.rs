@@ -83,17 +83,13 @@ fn debounce_action_without_a_delay_waits_for_the_dispatcher() {
     let action = DebounceAction::new();
     action.actions().expect("the actions").add(counting_action(&runs).upcast());
 
-    let before = timers_with(Duration::ZERO);
     execute(&action);
 
-    // A zero delay is a timer of zero: the actions run when the dispatcher runs it, not in the
-    // invocation.
+    // A zero delay is a timer of zero, which the dispatcher promotes at once instead of
+    // scheduling it (`DispatcherTimer::restart`): the actions run when the dispatcher runs its
+    // jobs, not in the invocation.
     assert_eq!(0, runs.get());
-    let timer = timers_with(Duration::ZERO)
-        .into_iter()
-        .find(|timer| !before.iter().any(|old| Rc::ptr_eq(old, timer)))
-        .expect("the timer of the delay");
-    Dispatcher::force_fire_timer_for_unit_tests(&timer);
+    Dispatcher::ui_thread().run_jobs(None);
     assert_eq!(1, runs.get());
 }
 
