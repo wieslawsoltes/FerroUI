@@ -256,9 +256,13 @@ impl CompiledBindingPath {
         Self { elements: Rc::new([]) }
     }
 
-    /// Builds the expression nodes of the path. Returns whether the path is
-    /// rooted: starts with an element that selects the binding source.
-    pub(crate) fn build_expression(&self, result: &mut Vec<Rc<dyn ExpressionNode>>) -> bool {
+    /// Builds the expression nodes of the path and appends them to `result`.
+    /// Returns whether the path is rooted: starts with an element that selects
+    /// the binding source.
+    ///
+    /// Bindings of other crates that give the path a source node of their own
+    /// (the root source of `{x:Bind}`) build the rest of the expression with it.
+    pub fn build_expression(&self, result: &mut Vec<Rc<dyn ExpressionNode>>) -> bool {
         let mut negated = 0;
         let mut is_rooted = false;
 
