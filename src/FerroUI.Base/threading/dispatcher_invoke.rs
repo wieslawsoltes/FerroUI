@@ -7,6 +7,7 @@ use std::time::Duration;
 
 use super::dispatcher_operation::{box_local_callback, OperationCore, SendCallback, WaitOutcome};
 use super::dispatcher_task::{new_local_task, new_send_task};
+#[allow(deprecated)]
 use super::{
     CancellationToken, Dispatcher, DispatcherOperation, DispatcherOperationStatus, DispatcherPriority,
     DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable, DispatcherTask,
@@ -430,6 +431,13 @@ impl Dispatcher {
     ///
     /// The returned task completes when the future has completed; see
     /// [`invoke_async_task_with_priority`](Self::invoke_async_task_with_priority).
+    ///
+    /// Deprecated: [`spawn`](Self::spawn) does the same and gives a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn`, which gives a `JoinHandle` (a panic of the future is `JoinError::Panicked`, a value)"
+    )]
+    #[allow(deprecated)]
     pub fn invoke_async_task<F, Fut>(&self, callback: F) -> DispatcherTask<Fut::Output>
     where
         F: FnOnce() -> Fut + Send + 'static,
@@ -455,6 +463,14 @@ impl Dispatcher {
     /// The task is a task of the dispatcher
     /// ([`spawn_with_priority`](Self::spawn_with_priority)), with a handle
     /// that keeps the contract of [`DispatcherTask`].
+    ///
+    /// Deprecated: [`spawn_with_priority`](Self::spawn_with_priority) does the
+    /// same and gives a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn_with_priority`, which gives a `JoinHandle` (a panic of the future is `JoinError::Panicked`, a value)"
+    )]
+    #[allow(deprecated)]
     pub fn invoke_async_task_with_priority<F, Fut>(
         &self,
         callback: F,
@@ -478,6 +494,15 @@ impl Dispatcher {
     ///
     /// # Panics
     /// Panics when called from a thread other than the dispatcher thread.
+    ///
+    /// Deprecated: `spawn_local_with_priority(async move { callback().await },
+    /// DispatcherPriority::DEFAULT)` does the same (the callback runs in the
+    /// first poll, a job at that priority) and gives a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn_local_with_priority(async move { callback().await }, DispatcherPriority::DEFAULT)`, which gives a `JoinHandle`"
+    )]
+    #[allow(deprecated)]
     pub fn invoke_async_task_local<F, Fut>(&self, callback: F) -> DispatcherTask<Fut::Output>
     where
         F: FnOnce() -> Fut + 'static,
@@ -493,6 +518,14 @@ impl Dispatcher {
     ///
     /// # Panics
     /// Panics when called from a thread other than the dispatcher thread.
+    ///
+    /// Deprecated: `spawn_local_with_priority(async move { callback().await },
+    /// priority)` does the same and gives a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn_local_with_priority(async move { callback().await }, priority)`, which gives a `JoinHandle`"
+    )]
+    #[allow(deprecated)]
     pub fn invoke_async_task_local_with_priority<F, Fut>(
         &self,
         callback: F,

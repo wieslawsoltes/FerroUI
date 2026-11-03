@@ -21,7 +21,7 @@ use crate::server::wayland_worker::WaylandWorker;
 use ferroui_base::input::{
     DataFormatKind, DataTransfer, DragDropEffects, IAsyncDataTransfer, IDataTransfer, LocalBoxFuture, StandardCursorType,
 };
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use std::cell::{Cell, RefCell};
 use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
@@ -330,16 +330,19 @@ impl WaylandOutgoingTransfer {
             // its own, so that a reader that is slow does not hold the UI thread up. A
             // transfer that fails, and one that has nothing for the type, write nothing:
             // the descriptor is closed either way.
-            drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                let bytes = serialize_for_mime_async(&transfer, &mime).await;
-                let spawned = std::thread::Builder::new().name("FerroWaylandTransfer".to_string()).spawn(move || {
-                    let mut stream = Pipe2Stream::new(fd, PipeDirection::Out);
-                    if let Some(bytes) = bytes {
-                        let _ = stream.write_all(&bytes);
-                    }
-                });
-                drop(spawned);
-            }));
+            drop(Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    let bytes = serialize_for_mime_async(&transfer, &mime).await;
+                    let spawned = std::thread::Builder::new().name("FerroWaylandTransfer".to_string()).spawn(move || {
+                        let mut stream = Pipe2Stream::new(fd, PipeDirection::Out);
+                        if let Some(bytes) = bytes {
+                            let _ = stream.write_all(&bytes);
+                        }
+                    });
+                    drop(spawned);
+                },
+                DispatcherPriority::DEFAULT,
+            ));
         });
     }
 

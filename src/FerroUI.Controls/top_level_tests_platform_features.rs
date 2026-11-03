@@ -10,6 +10,7 @@ use ferroui_base::platform::{IPlatformBehaviorInhibition, ISystemNavigationManag
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::HandlerList;
+use ferroui_system::task::{JoinError, JoinHandle};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
@@ -160,10 +161,10 @@ fn request_platform_inhibition_without_the_feature_has_no_effect() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let target = Window::with_impl(MockWindowingPlatform::create_window_mock());
 
-    let task = target.request_platform_inhibition(PlatformInhibitionType::AppSleep, "Test");
+    let mut task = target.request_platform_inhibition(PlatformInhibitionType::AppSleep, "Test");
 
-    assert!(task.is_completed_successfully());
-    task.result().expect("the task has completed").dispose();
+    assert!(task.is_finished());
+    result_of(&mut task).dispose();
 }
 
 #[test]
@@ -174,12 +175,12 @@ fn request_platform_inhibition_inhibits_app_sleep_until_disposed() {
     window_impl.setup_feature::<dyn IPlatformBehaviorInhibition>(inhibition.clone());
     let target = Window::with_impl(window_impl);
 
-    let task = target.request_platform_inhibition(PlatformInhibitionType::AppSleep, "Playing");
+    let mut task = target.request_platform_inhibition(PlatformInhibitionType::AppSleep, "Playing");
 
     assert_eq!(vec![(true, "Playing".to_string())], *inhibition.calls.borrow());
-    assert!(task.is_completed_successfully());
+    assert!(task.is_finished());
 
-    let inhibited = task.result().expect("the task has completed");
+    let inhibited = result_of(&mut task);
     assert_eq!(1, inhibition.calls.borrow().len());
 
     inhibited.dispose();
@@ -198,24 +199,51 @@ fn request_platform_inhibition_completes_when_the_platform_has_applied_it() {
     window_impl.setup_feature::<dyn IPlatformBehaviorInhibition>(inhibition.clone());
     let target = Window::with_impl(window_impl);
 
-    let task = target.request_platform_inhibition(PlatformInhibitionType::AppSleep, "Playing");
+    let mut task = target.request_platform_inhibition(PlatformInhibitionType::AppSleep, "Playing");
 
     // The request is sent before the method returns.
     assert_eq!(vec![(true, "Playing".to_string())], *inhibition.calls.borrow());
     Dispatcher::ui_thread().run_jobs(None);
-    assert!(!task.is_completed());
+    assert!(!task.is_finished());
 
     inhibition.complete_pending();
-    assert!(!task.is_completed());
+    assert!(!task.is_finished());
     Dispatcher::ui_thread().run_jobs(None);
-    assert!(task.is_completed_successfully());
+    assert!(task.is_finished());
 
     // Lifting the inhibition does not wait for the platform.
-    let inhibited = task.result().expect("the task has completed");
+    let inhibited = result_of(&mut task);
     inhibited.dispose();
     assert_eq!(vec![(true, "Playing".to_string()), (false, "Playing".to_string())], *inhibition.calls.borrow());
     assert_eq!(1, inhibition.pending.borrow().len());
 
+    inhibition.complete_pending();
+    Dispatcher::ui_thread().run_jobs(None);
+}
+
+/// The result of a task that has ended with one, taken from its handle.
+fn result_of<T>(task: &mut JoinHandle<T>) -> T {
+    match Pin::new(task).poll(&mut Context::from_waker(Waker::noop())) {
+        Poll::Ready(Ok(value)) => value,
+        Poll::Ready(Err(error)) => panic!("the task ended without a result: {error}"),
+        Poll::Pending => panic!("the task has not ended"),
+    }
+}
+
+#[test]
+fn an_aborted_inhibition_request_ends_canceled() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let window_impl = MockWindowingPlatform::create_window_mock();
+    let inhibition = TestPlatformBehaviorInhibition::new(false);
+    window_impl.setup_feature::<dyn IPlatformBehaviorInhibition>(inhibition.clone());
+    let target = Window::with_impl(window_impl);
+
+    let mut task = target.request_platform_inhibition(PlatformInhibitionType::AppSleep, "Playing");
+    task.abort();
+    assert!(matches!(
+        Pin::new(&mut task).poll(&mut Context::from_waker(Waker::noop())),
+        Poll::Ready(Err(JoinError::Canceled))
+    ));
     inhibition.complete_pending();
     Dispatcher::ui_thread().run_jobs(None);
 }

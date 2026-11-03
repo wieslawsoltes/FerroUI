@@ -256,18 +256,27 @@ fn primary_selection_of(window: &Window) -> Rc<dyn IClipboard> {
     window.try_get_clipboard(ClipboardType::PrimarySelection).expect("the window has a primary selection")
 }
 
+/// The answer of a clipboard: the output of the task that awaited it, once the dispatcher has run.
+fn answer_of<T>(mut task: ferroui_system::task::JoinHandle<T>) -> T {
+    Dispatcher::ui_thread().run_jobs(None);
+    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    match std::future::Future::poll(std::pin::Pin::new(&mut task), &mut context) {
+        std::task::Poll::Ready(Ok(value)) => value,
+        std::task::Poll::Ready(Err(error)) => panic!("the clipboard has not answered: {error}"),
+        std::task::Poll::Pending => panic!("the clipboard has not answered"),
+    }
+}
+
 /// Places a text on a clipboard and waits for the clipboard.
 fn set_clipboard_text(clipboard: &Rc<dyn IClipboard>, text: &str) {
-    let task = Dispatcher::ui_thread().to_task_scheduler().start_local(clipboard.set_text_async(Some(text)));
-    Dispatcher::ui_thread().run_jobs(None);
-    task.result().expect("the clipboard has answered").expect("the clipboard has taken the text");
+    let task = Dispatcher::ui_thread().start_local(clipboard.set_text_async(Some(text)));
+    answer_of(task).expect("the clipboard has taken the text");
 }
 
 /// Reads the text of a clipboard.
 fn get_clipboard_text(clipboard: &Rc<dyn IClipboard>) -> Option<String> {
-    let task = Dispatcher::ui_thread().to_task_scheduler().start_local(clipboard.try_get_text_async());
-    Dispatcher::ui_thread().run_jobs(None);
-    task.result().expect("the clipboard has answered").expect("the clipboard has delivered its text")
+    let task = Dispatcher::ui_thread().start_local(clipboard.try_get_text_async());
+    answer_of(task).expect("the clipboard has delivered its text")
 }
 
 /// Hosts a text box the way the top level of the reference tests does: in a

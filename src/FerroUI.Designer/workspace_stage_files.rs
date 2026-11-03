@@ -14,16 +14,14 @@ impl DesignerWorkspace {
             return;
         }
         let this = self.clone();
-        Dispatcher::ui_thread()
-            .to_task_scheduler()
-            .spawn_local(async move {
-                let result = this
-                    .save_preview_stage_image_file(id, crate::PreviewStageExportOptions::default())
-                    .await
-                    .map(|_| ());
-                this.file_busy.set(false);
-                this.report(result);
-            });
+        Dispatcher::ui_thread().spawn_local(async move {
+            let result = this
+                .save_preview_stage_image_file(id, crate::PreviewStageExportOptions::default())
+                .await
+                .map(|_| ());
+            this.file_busy.set(false);
+            this.report(result);
+        });
     }
 
     /// Freeze the native PNG before opening the save picker. A later source edit or
@@ -86,13 +84,11 @@ impl DesignerWorkspace {
             return;
         }
         let this = self.clone();
-        Dispatcher::ui_thread()
-            .to_task_scheduler()
-            .spawn_local(async move {
-                let result = this.save_preview_stages_file().await.map(|_| ());
-                this.file_busy.set(false);
-                this.report(result);
-            });
+        Dispatcher::ui_thread().spawn_local(async move {
+            let result = this.save_preview_stages_file().await.map(|_| ());
+            this.file_busy.set(false);
+            this.report(result);
+        });
     }
 
     pub(super) fn request_load_preview_stages(self: &Rc<Self>) {
@@ -100,13 +96,11 @@ impl DesignerWorkspace {
             return;
         }
         let this = self.clone();
-        Dispatcher::ui_thread()
-            .to_task_scheduler()
-            .spawn_local(async move {
-                let result = this.load_preview_stages_file().await.map(|_| ());
-                this.file_busy.set(false);
-                this.report(result);
-            });
+        Dispatcher::ui_thread().spawn_local(async move {
+            let result = this.load_preview_stages_file().await.map(|_| ());
+            this.file_busy.set(false);
+            this.report(result);
+        });
     }
 
     /// Export the collection captured when the picker opens. Newer edits remain

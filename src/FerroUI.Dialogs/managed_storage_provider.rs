@@ -9,7 +9,7 @@ use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerOpenOptions, FilePickerSaveOptions, FolderPickerOpenOptions, IStorageFile,
     IStorageFolder, OpenFilePickerResult, SaveFilePickerResult,
 };
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{BoxedValue, Ref, WeakRef};
 use ferroui_controls::primitives::FlyoutBase;
 use ferroui_controls::primitives::Popup;
@@ -104,13 +104,16 @@ impl ManagedStorageProvider {
                 let filename = filename.to_string();
                 let result = result.clone();
                 let weak = weak.clone();
-                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                    let Some(window) = weak.upgrade() else { return };
-                    if Self::show_overwrite_prompt(&filename, &window.clone().upcast()).await {
-                        *result.borrow_mut() = vec![filename];
-                        window.close();
-                    }
-                });
+                Dispatcher::ui_thread().spawn_local_with_priority(
+                    async move {
+                        let Some(window) = weak.upgrade() else { return };
+                        if Self::show_overwrite_prompt(&filename, &window.clone().upcast()).await {
+                            *result.borrow_mut() = vec![filename];
+                            window.close();
+                        }
+                    },
+                    DispatcherPriority::DEFAULT,
+                );
             });
         }
 
@@ -187,15 +190,18 @@ impl ManagedStorageProvider {
                 let result = result.clone();
                 let weak_popup = weak_popup.clone();
                 let weak_root = weak_root.clone();
-                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                    let Some(root) = weak_root.upgrade() else { return };
-                    if Self::show_overwrite_prompt(&filename, &root).await {
-                        *result.borrow_mut() = vec![filename];
-                        if let Some(popup) = weak_popup.upgrade() {
-                            popup.close();
+                Dispatcher::ui_thread().spawn_local_with_priority(
+                    async move {
+                        let Some(root) = weak_root.upgrade() else { return };
+                        if Self::show_overwrite_prompt(&filename, &root).await {
+                            *result.borrow_mut() = vec![filename];
+                            if let Some(popup) = weak_popup.upgrade() {
+                                popup.close();
+                            }
                         }
-                    }
-                });
+                    },
+                    DispatcherPriority::DEFAULT,
+                );
             });
         }
 

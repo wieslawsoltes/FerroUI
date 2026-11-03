@@ -7,7 +7,7 @@
 use crate::harness::Registry;
 use crate::test_root::TestRoot;
 use ferroui_base::styling::{IStyle, Styles};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, JoinHandle};
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::testing::{NullRenderer, TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{ContentPage, NavigationPage};
@@ -86,8 +86,8 @@ impl NavigationPageStackBenchmark {
         self.root.layout_manager().execute_layout_pass();
         // Upstream blocks on the tasks: without a transition they have
         // completed when the calls return.
-        nav.push_async(content_page("Root")).result().expect("the navigation was not canceled");
-        nav.push_async(content_page("Page 2")).result().expect("the navigation was not canceled");
+        completed(nav.push_async(content_page("Root")));
+        completed(nav.push_async(content_page("Page 2")));
         self.root.layout_manager().execute_layout_pass();
         Dispatcher::ui_thread().run_jobs(Some(DispatcherPriority::LOADED));
         self.nav = Some(nav);
@@ -99,14 +99,24 @@ impl NavigationPageStackBenchmark {
 
     /// Push a page onto a stack that already has two entries (depth 2 -> 3).
     pub fn push(&self) {
-        self.nav().push_async(content_page("Page 3")).result().expect("the navigation was not canceled");
+        completed(self.nav().push_async(content_page("Page 3")));
         self.root.layout_manager().execute_layout_pass();
     }
 
     /// Pop the top page from a stack with two entries (depth 2 -> 1).
     pub fn pop(&self) {
-        self.nav().pop_async().result().expect("the navigation was not canceled");
+        completed(self.nav().pop_async());
         self.root.layout_manager().execute_layout_pass();
+    }
+}
+
+/// The output of a navigation that has ended when its call returns (without a transition), as
+/// upstream blocks on the task.
+fn completed<T>(mut task: JoinHandle<T>) -> T {
+    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    match std::future::Future::poll(std::pin::Pin::new(&mut task), &mut context) {
+        std::task::Poll::Ready(outcome) => outcome.expect("the navigation ended without a failure"),
+        std::task::Poll::Pending => panic!("the navigation has not completed"),
     }
 }
 

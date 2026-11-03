@@ -167,10 +167,13 @@ mod app {
             let transfer = DataTransfer::new();
             transfer.add(DataTransferItem::create_text(Some(DRAG_TEXT)));
             let drag = DragDrop::do_drag_drop_async(e, transfer, DragDropEffects::COPY | DragDropEffects::MOVE);
-            drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                let result = drag.await;
-                DRAG.with(|drag| drag.borrow_mut().result = Some(result));
-            }));
+            drop(Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    let result = drag.await;
+                    DRAG.with(|drag| drag.borrow_mut().result = Some(result));
+                },
+                DispatcherPriority::DEFAULT,
+            ));
         });
     }
 
@@ -1456,7 +1459,7 @@ mod app {
             });
 
             let window = window.clone();
-            let _task = Dispatcher::ui_thread().invoke_async_task_local(move || run(window));
+            let _task = Dispatcher::ui_thread().spawn_local_with_priority(run(window), DispatcherPriority::DEFAULT);
         }
 
         async fn run(window: Ref<Window>) {
@@ -2471,14 +2474,15 @@ mod app {
         /// Runs a future of the UI thread to its end while the test client answers the
         /// compositor: its events are dispatched only when it is asked to.
         async fn pumped<T: 'static>(probe: &mut Probe, future: impl Future<Output = T> + 'static) -> Option<T> {
-            let task = Dispatcher::ui_thread().invoke_async_task_local(move || future);
+            let task = Dispatcher::ui_thread().spawn_local_with_priority(future, DispatcherPriority::DEFAULT);
             let done = wait_for(STEP_TIMEOUT, || {
                 let _ = probe.sync();
-                task.is_completed()
+                task.is_finished()
             })
             .await;
             if done {
-                task.result().ok()
+                // The task has ended: its handle is ready.
+                task.await.ok()
             } else {
                 None
             }

@@ -294,9 +294,12 @@ impl TreePageView {
         let data_transfer: Rc<dyn IAsyncDataTransfer> = data_transfer;
 
         // The original does not await the task.
-        let _ = Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let _ = clipboard.set_data_async(Some(data_transfer)).await;
-        });
+        let _ = Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let _ = clipboard.set_data_async(Some(data_transfer)).await;
+            },
+            DispatcherPriority::DEFAULT,
+        );
     }
 
     /// The text of a selector: the selector without the parts in braces

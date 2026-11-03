@@ -1,7 +1,6 @@
 use crate::animation::AnimationTask;
-use crate::threading::{
-    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
-};
+use crate::threading::{CancellationToken, Dispatcher, DispatcherPriority};
+use ferroui_system::task::JoinHandle;
 use std::future::Future;
 use crate::{Ref, Visual};
 
@@ -14,17 +13,18 @@ pub trait IPageTransition: 'static {
     /// tells whether the transition goes forwards or backwards. The
     /// transition stops as it is when `cancellation_token` is cancelled.
     ///
-    /// The result tracks the progress of the animation: it completes when
-    /// the transition has ended or was cancelled, and it fails (re-raising
-    /// the failure to whoever observes it) when an animation of the
-    /// transition could not be run.
+    /// The result tracks the progress of the animation: the handle of a task
+    /// of the dispatcher that ends with `Ok(())` when the transition has
+    /// ended or was cancelled, and with `JoinError::Panicked` when an
+    /// animation of the transition could not be run (the failure is a value
+    /// of the handle, which the caller handles).
     fn start(
         &self,
         from: Option<&Ref<Visual>>,
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()>;
+    ) -> JoinHandle<()>;
 
     /// The transition as a progress-driven transition, if it is one.
     fn as_progress_page_transition(&self) -> Option<&dyn crate::animation::IProgressPageTransition> {
@@ -49,20 +49,19 @@ impl PartialEq for dyn IPageTransition {
     }
 }
 
-/// Where asynchronous code started on the calling thread continues: the
-/// dispatcher of the thread at the priority of the running job
-/// ([`Dispatcher::current_priority`]), or at [`DispatcherPriority::NORMAL`]
+/// The priority at which asynchronous code started on the calling thread
+/// continues on the dispatcher of the thread: the one of the running job
+/// ([`Dispatcher::current_priority`]), or [`DispatcherPriority::NORMAL`]
 /// outside of a job.
-pub(crate) fn continuation_scheduler() -> DispatcherTaskScheduler {
-    let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-    Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority)
+pub(crate) fn continuation_priority() -> DispatcherPriority {
+    Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL)
 }
 
 /// Runs the body of an asynchronous page transition: synchronously up to its
 /// first pending await, then resumed by the dispatcher at the priority it
 /// started at.
-pub(crate) fn start_async(future: impl Future<Output = ()> + 'static) -> DispatcherTask<()> {
-    continuation_scheduler().start_local(future)
+pub(crate) fn start_async(future: impl Future<Output = ()> + 'static) -> JoinHandle<()> {
+    Dispatcher::current_dispatcher().start_local_with_priority(future, continuation_priority())
 }
 
 /// Awaits the animations of a page transition. A failure to run one of them

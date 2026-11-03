@@ -19,9 +19,8 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{
-    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
-};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::utilities::{HandlerList, MathUtilities};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -31,9 +30,7 @@ use ferroui_base::{
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::future::Future;
-use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll};
 
 const SWIPE_COMMIT_THRESHOLD: f64 = 0.25;
 const VELOCITY_COMMIT_THRESHOLD: f64 = 800.0;
@@ -73,7 +70,7 @@ pub struct VirtualizingCarouselPanel {
     transition_from: RefCell<Option<Ref<Control>>>,
     transition_from_index: Cell<i32>,
     transition: RefCell<Option<Rc<CancellationToken>>>,
-    transition_task: RefCell<Option<DispatcherTask<()>>>,
+    transition_task: RefCell<Option<JoinHandle<()>>>,
     scroll_invalidated: Rc<HandlerList<dyn Fn()>>,
     can_horizontally_scroll: Cell<bool>,
     can_vertically_scroll: Cell<bool>,
@@ -468,29 +465,6 @@ impl Drop for ClearSourceOnExit {
             if is_current {
                 *field.borrow_mut() = None;
             }
-        }
-    }
-}
-
-/// Waits for a page transition to end. An interrupted or failed transition
-/// ends the wait like a completed one: an interruption is expected when a
-/// transition is superseded by a newer navigation action.
-struct TransitionEnd {
-    task: DispatcherTask<()>,
-}
-
-impl Future for TransitionEnd {
-    type Output = ();
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        // The failure of a transition is not re-raised.
-        if self.task.is_faulted() {
-            return Poll::Ready(());
-        }
-
-        match Pin::new(&mut self.task).poll(cx) {
-            Poll::Ready(_) => Poll::Ready(()),
-            Poll::Pending => Poll::Pending,
         }
     }
 }
@@ -1268,7 +1242,7 @@ impl VirtualizingCarouselPanel {
     }
 
     fn complete_finished_transition_if_needed(&self) {
-        let is_task_completed = self.transition_task.borrow().as_ref().is_some_and(|task| task.is_completed());
+        let is_task_completed = self.transition_task.borrow().as_ref().is_some_and(JoinHandle::is_finished);
 
         if self.transition.borrow().is_some() && is_task_completed {
             if let Some(transition_from) = self.transition_from() {
@@ -1282,13 +1256,16 @@ impl VirtualizingCarouselPanel {
         }
     }
 
-    /// The scheduler that runs the asynchronous methods of the panel: the
-    /// dispatcher of the thread at the priority of the running job (the
-    /// current synchronization context of the original), Normal outside of
-    /// one.
-    fn task_scheduler() -> DispatcherTaskScheduler {
+    /// Starts an asynchronous method of the panel: up to its first pending await inside the call,
+    /// then on the dispatcher of the thread at the priority of the running job (the current
+    /// synchronization context of the original), Normal outside of one.
+    fn start_async<F>(future: F) -> JoinHandle<F::Output>
+    where
+        F: Future + 'static,
+        F::Output: 'static,
+    {
         let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-        Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority)
+        Dispatcher::current_dispatcher().start_local_with_priority(future, priority)
     }
 
     fn run_transition_async(
@@ -1298,17 +1275,19 @@ impl VirtualizingCarouselPanel {
         transition_to: Ref<Control>,
         forward: bool,
         transition: Rc<dyn IPageTransition>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let this = self.to_ref().downgrade();
 
-        Self::task_scheduler().start_local(async move {
+        Self::start_async(async move {
             let from: Ref<Visual> = transition_from.upcast();
             let to: Ref<Visual> = transition_to.upcast();
             let task = transition.start(Some(&from), Some(&to), forward, (*transition_cts).clone());
 
             // An interruption is expected when a transition is interrupted
-            // by a newer navigation action.
-            TransitionEnd { task }.await;
+            // by a newer navigation action: an interrupted or failed
+            // transition ends the wait like a completed one, and its failure
+            // is not raised again.
+            let _ = task.await;
 
             let Some(this) = this.upgrade() else {
                 return;
@@ -1839,7 +1818,7 @@ impl VirtualizingCarouselPanel {
         };
         let run = animation.run_async(self, cancellation_token.clone());
 
-        let _ = Self::task_scheduler().start_local(async move {
+        let _ = Self::start_async(async move {
             let _finally = _finally;
 
             if run.await.is_err() {
@@ -1945,7 +1924,7 @@ impl VirtualizingCarouselPanel {
             ClearSourceOnExit { panel: this.clone(), field: |panel| &panel.completion_cts, source: completion_cts };
         let run = animation.run_async(self, cancellation_token.clone());
 
-        let _ = Self::task_scheduler().start_local(async move {
+        let _ = Self::start_async(async move {
             let _finally = _finally;
 
             if run.await.is_err() {

@@ -981,18 +981,21 @@ mod app {
             source.add_handler(InputElement::pointer_pressed_event(), move |_, e| {
                 let e = e.clone();
                 let results = results.clone();
-                drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                    let data = DataTransfer::new();
-                    data.add(DataTransferItem::create(&DataFormat::text(), Some(DRAGGED_TEXT.to_string())));
-                    let data_transfer: Rc<dyn IDataTransfer> = data;
-                    let result = DragDrop::do_drag_drop_async(
-                        &e,
-                        data_transfer,
-                        DragDropEffects::COPY | DragDropEffects::MOVE,
-                    )
-                    .await;
-                    results.borrow_mut().push(result);
-                }));
+                drop(Dispatcher::ui_thread().spawn_local_with_priority(
+                    async move {
+                        let data = DataTransfer::new();
+                        data.add(DataTransferItem::create(&DataFormat::text(), Some(DRAGGED_TEXT.to_string())));
+                        let data_transfer: Rc<dyn IDataTransfer> = data;
+                        let result = DragDrop::do_drag_drop_async(
+                            &e,
+                            data_transfer,
+                            DragDropEffects::COPY | DragDropEffects::MOVE,
+                        )
+                        .await;
+                        results.borrow_mut().push(result);
+                    },
+                    DispatcherPriority::DEFAULT,
+                ));
             });
 
             content.set_child(&source);
@@ -1233,7 +1236,7 @@ mod app {
 
             let window = window.clone();
             let content = content.clone();
-            let _task = Dispatcher::ui_thread().invoke_async_task_local(move || run(window, content));
+            let _task = Dispatcher::ui_thread().spawn_local_with_priority(run(window, content), DispatcherPriority::DEFAULT);
         }
 
         async fn run(window: Ref<Window>, content: Ref<Border>) {
@@ -2369,10 +2372,13 @@ mod app {
             let saved = Rc::new(RefCell::new(None));
             let _save_task = {
                 let (provider, saved) = (provider.clone(), saved.clone());
-                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                    let result = provider.save_file_picker_with_result_async(options).await;
-                    *saved.borrow_mut() = Some(result);
-                })
+                Dispatcher::ui_thread().spawn_local_with_priority(
+                    async move {
+                        let result = provider.save_file_picker_with_result_async(options).await;
+                        *saved.borrow_mut() = Some(result);
+                    },
+                    DispatcherPriority::DEFAULT,
+                )
             };
             let shown = wait_for(Duration::from_secs(20), || client_window_titled(platform, SAVE_TITLE).is_some()).await;
             let dialog = client_window_titled(platform, SAVE_TITLE);
@@ -2428,10 +2434,13 @@ mod app {
             let opened = Rc::new(RefCell::new(None));
             let _open_task = {
                 let (provider, opened) = (provider.clone(), opened.clone());
-                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                    let result = provider.open_file_picker_async(options).await;
-                    *opened.borrow_mut() = Some(result);
-                })
+                Dispatcher::ui_thread().spawn_local_with_priority(
+                    async move {
+                        let result = provider.open_file_picker_async(options).await;
+                        *opened.borrow_mut() = Some(result);
+                    },
+                    DispatcherPriority::DEFAULT,
+                )
             };
             let shown = wait_for(Duration::from_secs(20), || client_window_titled(platform, OPEN_TITLE).is_some()).await;
             report.check("the second dialog is on the server", shown, format!("a window titled {OPEN_TITLE:?}: {shown}"));
