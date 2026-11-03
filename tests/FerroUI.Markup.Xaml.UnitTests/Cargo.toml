@@ -21,6 +21,8 @@ ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "emitter", "testing"] }
 xamlx = { workspace = true }
+# The test classes with properties of the Rust forms of `System.Uri` (C5 of #423) name `url::Url`.
+url = { workspace = true }
 
 [dev-dependencies]
 # The measurement of the theme documents (`emitter::repository_documents`, an ignored test)

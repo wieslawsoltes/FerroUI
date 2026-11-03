@@ -615,6 +615,11 @@ fn declarations_are_merged_and_found_across_crates() {
         assert!(system.resolve(duration).equals(&*time_span), "{duration}");
         assert_eq!(system.resolve(&format!("Option<{duration}>")).full_name(), "System.Nullable`1[System.TimeSpan]");
     }
+    // `UriRef` and `Url`, the other Rust forms of a URI (C5 of #423), and their nullable forms.
+    for uri in ["::ferroui_base::utilities::Uri", "::ferroui_base::utilities::UriRef", "::url::Url"] {
+        assert_eq!(system.resolve(uri).full_name(), "System.Uri", "{uri}");
+        assert_eq!(system.resolve(&format!("Option<{uri}>")).full_name(), "System.Uri", "{uri}");
+    }
 
     // The handles of the table and of the classes are found by the path a crate exports
     // them by and by the path of the declaring module.
