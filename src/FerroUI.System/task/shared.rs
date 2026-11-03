@@ -177,12 +177,19 @@ impl<T: Clone + 'static> Shared<T> {
     }
 }
 
-/// The error of a [`JoinError`] in the error path of the reactive libraries: an abort is
-/// [`Canceled`](super::Canceled), a panic a [`TaskWorkError`] with its message.
-pub(crate) fn join_error_to_observable(error: JoinError) -> ObservableError {
-    match error {
-        JoinError::Canceled => Rc::new(super::Canceled) as ObservableError,
-        JoinError::Panicked(payload) => Rc::new(TaskWorkError { message: super::executor::panic_message(&*payload) }) as ObservableError,
+fn join_error_to_observable(error: JoinError) -> ObservableError {
+    error.to_observable_error()
+}
+
+impl JoinError {
+    /// The error in the error path of the reactive libraries (`ObservableError`): an abort is
+    /// [`Canceled`](super::Canceled), a panic a [`TaskWorkError`] with its message (the fault of a
+    /// task whose `async` method threw).
+    pub fn to_observable_error(&self) -> ObservableError {
+        match self {
+            JoinError::Canceled => Rc::new(super::Canceled) as ObservableError,
+            JoinError::Panicked(payload) => Rc::new(TaskWorkError { message: super::executor::panic_message(&**payload) }) as ObservableError,
+        }
     }
 }
 
