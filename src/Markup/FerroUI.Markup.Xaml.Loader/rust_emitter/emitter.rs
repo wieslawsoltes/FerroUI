@@ -631,6 +631,19 @@ fn time_span_literal(node: &Rc<dyn IXamlAstNode>) -> Option<i64> {
     }
 }
 
+/// The text of a culture literal: `CultureInfo.Parse(text)` of a text, what the compiler
+/// makes of the text of a culture (the parse of its markup metadata: an IETF language tag).
+fn culture_literal(node: &Rc<dyn IXamlAstNode>) -> Option<String> {
+    let call = node.as_method_call_base_node()?;
+    let method = call.method.borrow().clone();
+    if method.name() != "Parse" || !method.declaring_type().is("System.Globalization", "CultureInfo") {
+        return None;
+    }
+    let arguments = call.arguments.borrow().clone();
+    let [argument] = arguments.as_slice() else { return None };
+    Some(argument.clone().as_node().cast::<XamlAstTextNode>()?.text())
+}
+
 struct Emitter<'a> {
     /// What the type system the document was transformed with states for the emitter.
     types: &'a dyn EmitTypes,
@@ -681,6 +694,10 @@ struct Emitter<'a> {
     /// a member that declares a `Duration` takes the literal only when it is not negative
     /// ([`Emitter::coerce_time_span_literal`]).
     time_span_literals: HashMap<String, i64>,
+    /// The locals that hold a culture literal ([`culture_literal`]), with its text: a member
+    /// that declares a `Locale` takes the literal only when it is a BCP-47 tag
+    /// ([`Emitter::refused_locale_literal`]).
+    culture_literals: HashMap<String, String>,
 }
 
 struct ScopedNamespaceTable {
@@ -1483,7 +1500,8 @@ impl<'a> Emitter<'a> {
     fn coerce(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         // A negative time span literal is not stated as a duration at all, not even by the
         // cast at run time that would refuse it: it is an error of the document.
-        if self.refused_time_span_literal(value, target).is_some() {
+        // A culture literal that is no locale is not stated as a locale either.
+        if self.refused_literal(value, target).is_some() {
             return None;
         }
         self.coerce_time_span_literal(value, target)
@@ -1533,6 +1551,33 @@ impl<'a> Emitter<'a> {
                 ferroui_base::animation::SignedDuration::from_ticks(ticks)
             )
         })
+    }
+
+    /// Why the literal `value` cannot be the `target` a member declares: a negative time
+    /// span for a `Duration` ([`Self::refused_time_span_literal`]), or a culture that is no
+    /// locale for a `Locale` ([`Self::refused_locale_literal`]).
+    fn refused_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        self.refused_time_span_literal(value, target).or_else(|| self.refused_locale_literal(value, target))
+    }
+
+    /// Why `value` cannot be the `Locale` (or the nullable form) `target`: a culture literal
+    /// ([`culture_literal`]) that is not an IETF language tag, or whose culture is not a
+    /// locale (a name that is no BCP-47 tag, such as `x-private`; C5 of #423). The error of
+    /// the document, which the run-time loader reports as the error of the conversion or of
+    /// the cast when it loads the document. A literal that is a locale is stated through the
+    /// cast of the untyped value conversions, which cannot refuse it.
+    fn refused_locale_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        if target != self.types.known(Known::Locale) && target != self.types.option_of_known(Known::Locale) {
+            return None;
+        }
+        let text = self.culture_literals.get(&value.expr)?;
+        let culture = match ferroui_base::data::CultureInfoIetfLanguageTagConverter::convert_from(text) {
+            Ok(culture) => culture,
+            Err(error) => return Some(error.to_string()),
+        };
+        ferroui_base::utilities::Locale::try_from(&culture)
+            .err()
+            .map(|error| format!("the culture name '{text}' is not a BCP-47 language tag, and a `Locale` cannot hold it ({error})"))
     }
 
     /// A list of the runtime library created in markup as the collection handle a member
@@ -2048,7 +2093,7 @@ impl<'a> Emitter<'a> {
             }
             let value = match values {
                 SetterValues::Typed(value, value_node) => self.coerce(value, property.property_type()).ok_or_else(|| {
-                    let refused = self.refused_time_span_literal(value, property.property_type());
+                    let refused = self.refused_literal(value, property.property_type());
                     unsupported(
                         value_node,
                         format!(
@@ -2139,7 +2184,7 @@ impl<'a> Emitter<'a> {
         let (property, definition) = self.registered_accessor(node, assignment, &runtime)?;
         let value = match values {
             SetterValues::Typed(value, value_node) => self.coerce(value, property.property_type()).ok_or_else(|| {
-                let refused = self.refused_time_span_literal(value, property.property_type());
+                let refused = self.refused_literal(value, property.property_type());
                 unsupported(
                     value_node,
                     format!(
@@ -3534,6 +3579,11 @@ impl<'a> Emitter<'a> {
         if let Some(ticks) = time_span_literal(node) {
             self.time_span_literals.insert(local.clone(), ticks);
         }
+        // A culture literal is remembered with its text: a member that declares a `Locale`
+        // takes it only when it is a BCP-47 tag.
+        if let Some(text) = culture_literal(node) {
+            self.culture_literals.insert(local.clone(), text);
+        }
         Ok(Typed { expr: local, kind: self.kind_of(returned) })
     }
 
@@ -3887,7 +3937,7 @@ impl<'a> Emitter<'a> {
             let text = match self.coerce(argument, *parameter) {
                 Some(text) => text,
                 None => self.instance_argument(node, &method, index, argument, *parameter).ok_or_else(|| {
-                    let reason = match self.refused_time_span_literal(argument, *parameter) {
+                    let reason = match self.refused_literal(argument, *parameter) {
                         Some(refused) => format!(": {refused}"),
                         None => " cannot be stated as the declared type".to_string(),
                     };
@@ -4100,6 +4150,7 @@ pub fn emit_function<'a>(
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         namespace_tables: Vec::new(),
         time_span_literals: HashMap::new(),
+        culture_literals: HashMap::new(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is

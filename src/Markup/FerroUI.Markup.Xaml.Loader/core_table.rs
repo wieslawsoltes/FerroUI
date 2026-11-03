@@ -541,6 +541,12 @@ pub fn core_handles() -> Vec<(String, CoreRef)> {
     reference(&mut add, "::ferroui_base::data::BindingError", "System.Exception");
     reference(&mut add, "::std::rc::Rc<dyn ::ferroui_base::reactive::IDisposable>", "System.IDisposable");
     reference(&mut add, "::ferroui_base::utilities::CultureInfo", "System.Globalization.CultureInfo");
+    // The other Rust form of a culture (C5 of #423), its identity: the locale, by the path of
+    // its crate and the one `ferroui_base` exports it again by (the compiler reads the paths
+    // as text).
+    for locale in ["::icu_locale_core::Locale", "::ferroui_base::utilities::Locale"] {
+        reference(&mut add, locale, "System.Globalization.CultureInfo");
+    }
     reference(&mut add, "::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>", "System.IServiceProvider");
     reference(
         &mut add,

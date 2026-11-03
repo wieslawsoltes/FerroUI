@@ -10,6 +10,7 @@
 //! table.
 
 use crate::utilities::CultureInfo;
+use icu_locale_core::Locale;
 use crate::{AnyValue, BoxedValue, FerroObject, ObjectType, PropertyValue, Ref, StyledElement, TypeInfo, Upcast};
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -1903,7 +1904,6 @@ fn register_defaults() {
     // converts to a locale as it converts to a culture in markup (an IETF language tag, the
     // empty text the invariant culture, the unknown locale `und`), and the text of a locale
     // is its tag.
-    use icu_locale_core::Locale;
     ValueTypes::register_display::<Locale>();
     ValueTypes::register_nullable::<Locale>();
     ValueTypes::register_cast::<Locale, CultureInfo>(|locale: &Locale| CultureInfo::from(locale));
@@ -2815,7 +2815,7 @@ mod tests {
     /// error.
     #[test]
     fn cultures_and_locales_are_two_forms_of_a_culture() {
-        use icu_locale_core::{locale, Locale};
+        use icu_locale_core::locale;
 
         let culture = |name: &str| -> BoxedValue { Rc::new(CultureInfo::get_culture_info(name)) };
         let locale_type = ValueType::of::<Locale>();

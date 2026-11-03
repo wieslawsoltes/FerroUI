@@ -246,3 +246,51 @@ fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error
         );
     }
 }
+
+// --- the two Rust forms of a culture ------------------------------------------------------
+//
+// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md section 3.4): a property
+// that declares a `Locale` is a `System.Globalization.CultureInfo` property, as one that
+// declares a `CultureInfo`. `RichTextBlock.Language` (the `TextElement.Language` it owns) is
+// one of the framework. A tag whose culture is no locale is an error. The compiled forms of
+// these tests are in `emitter::differential_tests`.
+
+#[test]
+fn a_language_literal_sets_a_locale_property() {
+    use ferroui_base::utilities::{locale, Locale};
+    use ferroui_controls::RichTextBlock;
+
+    let _base = xaml_test_base();
+    let block = parse::<Ref<RichTextBlock>>("<RichTextBlock xmlns='https://github.com/ferroui' Language='ja-JP'/>");
+    assert_eq!(block.language(), locale!("ja-JP"));
+
+    // The case of the subtags is normalized, and the empty tag is the invariant culture.
+    let block = parse::<Ref<RichTextBlock>>("<RichTextBlock xmlns='https://github.com/ferroui' Language='zh-hant-tw'/>");
+    assert_eq!(block.language(), locale!("zh-Hant-TW"));
+    let block = parse::<Ref<RichTextBlock>>("<RichTextBlock xmlns='https://github.com/ferroui' Language=''/>");
+    assert_eq!(block.language(), Locale::UNKNOWN);
+
+    // A culture of the runtime library casts to its locale.
+    let block = parse::<Ref<RichTextBlock>>(
+        "<RichTextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' \
+         xmlns:g='using:System.Globalization' Language='{x:Static g:CultureInfo.InvariantCulture}'/>",
+    );
+    assert_eq!(block.language(), Locale::UNKNOWN);
+}
+
+#[test]
+fn an_invalid_language_tag_for_a_locale_property_is_an_error() {
+    use ferroui_controls::RichTextBlock;
+
+    let _base = xaml_test_base();
+    let error = |xaml: &str| match try_parse::<Ref<RichTextBlock>>(xaml) {
+        Ok(_) => panic!("the tag is not a locale: {xaml}"),
+        Err(error) => describe(&error),
+    };
+    // An IETF tag whose culture is no locale: the error of the cast.
+    let described = error("<RichTextBlock xmlns='https://github.com/ferroui' Language='x-private'/>");
+    assert!(described.contains("The culture name 'x-private' is not a BCP-47 language tag"), "{described}");
+    // A name that is no IETF tag: the error of the conversion of the culture.
+    let described = error("<RichTextBlock xmlns='https://github.com/ferroui' Language='zh-CHT'/>");
+    assert!(described.contains("Culture IETF Name zh-CHT is not a recognized IETF name."), "{described}");
+}

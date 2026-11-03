@@ -15,7 +15,7 @@ use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupDelegate, MarkupInvokeError, MarkupValue};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{CultureInfo, Uri};
+use ferroui_base::utilities::{CultureInfo, Locale, Uri};
 use ferroui_base::{BoxedValue, FerroProperty, TypeInfo};
 use xamlx::type_system::{IXamlType, IXamlTypeSystem, XamlPseudoType};
 
@@ -229,7 +229,11 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
         "System.Delegate" => handles![MarkupDelegate, Option<MarkupDelegate>],
         "System.Exception" => handles![ferroui_base::data::BindingError, Option<ferroui_base::data::BindingError>],
         "System.IDisposable" => handles![Rc<dyn IDisposable>, Option<Rc<dyn IDisposable>>],
-        "System.Globalization.CultureInfo" => handles![CultureInfo, Option<CultureInfo>],
+        // A culture has two Rust forms (C5 of #423): the culture, the formatting parameter,
+        // and the locale, its identity (the `Language` properties). The casts between them
+        // are the ones of the untyped value conversions (a culture whose name is no BCP-47
+        // tag is not a locale).
+        "System.Globalization.CultureInfo" => handles![CultureInfo, Option<CultureInfo>, Locale, Option<Locale>],
         "System.IServiceProvider" => handles![Rc<dyn IServiceProvider>, Option<Rc<dyn IServiceProvider>>],
         "System.ComponentModel.ITypeDescriptorContext" => {
             handles![Rc<dyn ITypeDescriptorContext>, Option<Rc<dyn ITypeDescriptorContext>>]

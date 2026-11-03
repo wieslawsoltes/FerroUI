@@ -285,3 +285,110 @@ fn a_negative_span_from_a_binding_is_a_conversion_error_and_keeps_the_value() {
     target.bind_binding(DurationControl::interval_property(), &binding);
     assert_eq!(target.interval(), Duration::from_secs(9));
 }
+
+// --- the two Rust forms of a culture --------------------------------------------------
+//
+// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md section 3.4): `CultureInfo`
+// and `Locale` are both `System.Globalization.CultureInfo`, and a binding converts between
+// them with the casts of the untyped value conversions. A culture whose name is no BCP-47 tag
+// is not a locale: its conversion fails like any conversion a binding cannot make.
+
+control_class!(
+    /// A control with a property of each Rust form of a culture.
+    LocaleControl: Control [language_property, culture_property]
+);
+
+impl LocaleControl {
+    ferro_property!(pub fn language_property() -> StyledProperty<ferroui_base::utilities::Locale> {
+        FerroProperty::register::<LocaleControl, _>("Language", ferroui_base::utilities::locale!("en-US"))
+    });
+
+    ferro_property!(pub fn culture_property() -> StyledProperty<CultureInfo> {
+        FerroProperty::register::<LocaleControl, _>("Culture", CultureInfo::invariant_culture())
+    });
+
+    fn language(&self) -> ferroui_base::utilities::Locale {
+        self.get_value(Self::language_property())
+    }
+
+    fn culture(&self) -> CultureInfo {
+        self.get_value(Self::culture_property())
+    }
+}
+
+/// A view model with a culture and a locale.
+struct Cultures {
+    culture: RefCell<CultureInfo>,
+    language: RefCell<ferroui_base::utilities::Locale>,
+    property_changed: Event<str>,
+}
+
+impl Cultures {
+    fn new(culture: CultureInfo, language: ferroui_base::utilities::Locale) -> Rc<Self> {
+        Model::new_model(Self { culture: RefCell::new(culture), language: RefCell::new(language), property_changed: Event::new() })
+    }
+
+    fn set_culture(&self, value: CultureInfo) {
+        *self.culture.borrow_mut() = value;
+        self.property_changed.raise("Culture");
+    }
+
+    fn set_language(&self, value: ferroui_base::utilities::Locale) {
+        *self.language.borrow_mut() = value;
+        self.property_changed.raise("Language");
+    }
+}
+
+impl INotifyPropertyChanged for Cultures {
+    fn property_changed(&self) -> &Event<str> {
+        &self.property_changed
+    }
+}
+
+ferro_model!(Cultures, |b| b
+    .notify_property_changed()
+    .property::<Value<CultureInfo>>("Culture", |o| o.culture.borrow().clone(), |o, v| o.set_culture(v))
+    .property::<Value<ferroui_base::utilities::Locale>>("Language", |o| o.language.borrow().clone(), |o, v| o.set_language(v)));
+
+#[test]
+fn a_binding_casts_between_culture_info_and_locale() {
+    use ferroui_base::utilities::locale;
+
+    let source = Cultures::new(CultureInfo::get_culture_info("ja-JP"), locale!("de-DE"));
+    let target = LocaleControl::new();
+    target.set_data_context(Some(source.clone()));
+
+    // A culture is its locale.
+    target.bind_binding(LocaleControl::language_property(), &Binding::with_path("Culture"));
+    assert_eq!(target.language(), locale!("ja-JP"));
+    source.set_culture(CultureInfo::invariant_culture());
+    assert_eq!(target.language(), ferroui_base::utilities::Locale::UNKNOWN);
+
+    // A locale is the culture of its name, and the binding writes a culture back as a
+    // locale.
+    target.bind_binding(LocaleControl::culture_property(), &Binding::with_path_and_mode("Language", BindingMode::TwoWay));
+    assert_eq!(target.culture(), CultureInfo::get_culture_info("de-DE"));
+    source.set_language(locale!("ko-KR"));
+    assert_eq!(target.culture(), CultureInfo::get_culture_info("ko-KR"));
+    target.set_value(LocaleControl::culture_property(), CultureInfo::get_culture_info("fr-FR"));
+    assert_eq!(*source.language.borrow(), locale!("fr-FR"));
+}
+
+#[test]
+fn a_culture_that_is_no_locale_from_a_binding_is_a_conversion_error_and_keeps_the_value() {
+    let source = Cultures::new(CultureInfo::get_culture_info("es-ES_tradnl"), ferroui_base::utilities::Locale::UNKNOWN);
+    let target = LocaleControl::new();
+    let _root = TestRoot::with_child(&target);
+    target.set_data_context(Some(source.clone()));
+
+    // The binding reports the conversion error, and the property keeps its value.
+    let sink = TestLogSink::start(LogEventLevel::Warning);
+    target.bind_binding(LocaleControl::language_property(), &Binding::with_path("Culture"));
+    let logs = sink.stop();
+    assert_eq!(target.language(), ferroui_base::utilities::locale!("en-US"));
+    assert_eq!(logs.len(), 1, "{logs:?}");
+
+    // A culture that is a locale is set.
+    source.set_culture(CultureInfo::get_culture_info("pl-PL"));
+    assert_eq!(target.language(), ferroui_base::utilities::locale!("pl-PL"));
+}
