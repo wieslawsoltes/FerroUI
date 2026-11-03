@@ -72,8 +72,8 @@ pub use array_slice::ArraySlice;
 pub(crate) use culture_info::parent_locale;
 pub use culture_info::{CultureInfo, CultureTypes};
 pub use current_locale::{current_locale, current_ui_locale, set_current_locale, set_current_ui_locale};
-/// The identity of a culture in the text and font API, the `Language` properties and the
-/// ambient locale of a thread (C5 of #423): ICU4X's locale, with its `locale!` macro.
+// The identity of a culture in the text and font API, the `Language` properties and the
+// ambient locale of a thread (C5 of #423): ICU4X's locale, with its `locale!` macro.
 pub use icu_locale_core::{locale, Locale};
 mod compare_info;
 pub use compare_info::{CompareInfo, CompareOptions, ICompareRules, StringComparison};
