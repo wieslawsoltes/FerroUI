@@ -402,6 +402,30 @@ fn a_duration_is_a_system_time_span() {
     assert_eq!(runtime(&time_span).handle(), Some(ValueType::of::<ferroui_base::animation::SignedDuration>()));
 }
 
+/// Not from upstream (C5 of #423): `UriRef` and `url::Url` are the other Rust forms of a URI,
+/// with their nullable forms, and a reference and a URL are values of `System.Uri`.
+#[test]
+fn a_uri_ref_and_a_url_are_system_uris() {
+    use ferroui_base::utilities::{Uri, UriRef};
+
+    let ts = system();
+    let uri = ts.get("System.Uri");
+    for handle in [
+        ValueType::of::<UriRef>(),
+        ValueType::of::<Option<UriRef>>(),
+        ValueType::of::<url::Url>(),
+        ValueType::of::<Option<url::Url>>(),
+        ValueType::of::<Uri>(),
+        ValueType::of::<Option<Uri>>(),
+    ] {
+        assert!(ts.resolve(handle).equals(&*uri), "{}", handle.name());
+    }
+    assert!(ts.is_instance(&boxed(UriRef::parse("Values.xaml").unwrap()), &*uri));
+    assert!(ts.is_instance(&boxed(url::Url::parse("fonts:SystemFonts").unwrap()), &*uri));
+    // The port stays the canonical handle: what markup makes of a URI.
+    assert_eq!(runtime(&uri).handle(), Some(ValueType::of::<Uri>()));
+}
+
 #[test]
 fn static_types_merge_their_metadata_and_project_attached_property_attributes() {
     let ts = system();

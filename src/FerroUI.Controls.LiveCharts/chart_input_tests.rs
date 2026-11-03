@@ -360,3 +360,246 @@ fn right_button_section_and_inverted_trigger_use_distinct_gestures() {
 
 
 
+
+// The geographic map: the cases of the pinned GeoMapTests, GeoMapEventsTests,
+// GeoMapReattachTests, GeoMapAnimationTests and ChartInteractiveApiTests that need a host.
+
+/// The fixture of GeoMapEventsTests: a Mercator map with Russia at 42.
+fn geo_map() -> Ref<Chart> {
+    let chart = crate::GeoMap::new().upcast::<Chart>();
+    chart.set_map_projection(ferroui_livecharts::MapProjection::Mercator);
+    let series = crate::HeatLandSeries::new();
+    series.lands().add(crate::HeatLand::with_value("rus", 42.0));
+    chart.series().add(series.upcast());
+    chart
+}
+fn moved(chart: &Ref<Chart>, pointer: &Rc<dyn IPointer>, position: Point) {
+    let root = chart.visual_root().expect("pointer fixture is attached");
+    let position = chart.translate_point(position, &root).unwrap();
+    let args = PointerEventArgs::new(
+        Some(&ferroui_base::input::InputElement::pointer_moved_event()),
+        chart.clone().upcast::<FerroObject>(),
+        pointer.clone(),
+        Some(&*root),
+        position,
+        0,
+        PointerPointProperties::new(RawInputModifiers::NONE, PointerUpdateKind::Other),
+        KeyModifiers::NONE,
+    );
+    <Chart as InputElementImpl>::on_pointer_moved(chart, &args);
+}
+fn clicks(chart: &Ref<Chart>) -> (Rc<RefCell<Vec<ChartPointerEventArgs>>>, Subscription) {
+    let captured = Rc::new(RefCell::new(Vec::new()));
+    let sink = captured.clone();
+    let subscription = Subscription::new(
+        chart.data_pointer_down(move |args| sink.borrow_mut().push(args.clone())),
+    );
+    (captured, subscription)
+}
+
+/// GeoMapEventsTests.DataPointerDownFiresWhenClickingInsideALand and
+/// DataPointerDownPayloadCarriesLandAndPositionInsideHoverArea, GeoMapTests.
+/// GeoMap_PointerUpOnLand_FiresDataPointerDownWithLandDefinition: a click on Moscow reports
+/// Russia at the release, with its value and a hover area around the click.
+#[test]
+fn geo_map_click_on_a_land_fires_data_pointer_down_at_the_release() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    let _window = attach(&chart);
+    let moscow = chart.project(37.62, 55.75).unwrap().unwrap();
+    let (captured, _subscription) = clicks(&chart);
+    let pointer = mouse();
+    press(&chart, &pointer, PointerUpdateKind::LeftButtonPressed, moscow);
+    assert!(captured.borrow().is_empty(), "a map reports a click at its release");
+    release(&chart, &pointer, MouseButton::Left, moscow);
+    let events = captured.borrow();
+    assert_eq!(events.len(), 1);
+    assert_eq!(events[0].points.len(), 1, "one land under the click");
+    let hit = &events[0].points[0];
+    let land = chart.map_land(hit.id).unwrap();
+    assert_eq!(land.short_name, "rus");
+    assert_eq!(land.value(), 42.0);
+    let bounds = hit.shape.hover_bounds();
+    assert!(moscow.x >= bounds.x && moscow.x <= bounds.x + bounds.width);
+    assert!(moscow.y >= bounds.y && moscow.y <= bounds.y + bounds.height);
+}
+
+/// GeoMapEventsTests.DataPointerDownDoesNotFireWhenClickingTheOcean and
+/// DataPointerDownDoesNotFireWhenPointerMovesPastClickThreshold, GeoMapTests.
+/// GeoMap_DragGesture_DoesNotFireDataPointerDown and ChartInteractiveApiTests.
+/// GeoMap_PointerEventsFlowThroughInvokers.
+#[test]
+fn geo_map_ocean_clicks_and_drags_fire_nothing() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    let _window = attach(&chart);
+    let (captured, _subscription) = clicks(&chart);
+    let pointer = mouse();
+    let ocean = chart.project(-30.0, 0.0).unwrap().unwrap();
+    press(&chart, &pointer, PointerUpdateKind::LeftButtonPressed, ocean);
+    release(&chart, &pointer, MouseButton::Left, ocean);
+    assert!(captured.borrow().is_empty());
+    let moscow = chart.project(37.62, 55.75).unwrap().unwrap();
+    let away = Point::new(moscow.x + 20.0, moscow.y + 20.0);
+    press(&chart, &pointer, PointerUpdateKind::LeftButtonPressed, moscow);
+    moved(&chart, &pointer, away);
+    release(&chart, &pointer, MouseButton::Left, away);
+    assert!(captured.borrow().is_empty());
+    // Within the 5 pixels of a click, the press is still a click.
+    let near = Point::new(moscow.x + 2.0, moscow.y + 2.0);
+    press(&chart, &pointer, PointerUpdateKind::LeftButtonPressed, moscow);
+    moved(&chart, &pointer, near);
+    release(&chart, &pointer, MouseButton::Left, near);
+    assert_eq!(captured.borrow().len(), 1);
+}
+
+/// GeoMapTests.GeoMap_HoverTransitions_FireHoveredPointsChanged: entering France, moving to
+/// Germany and leaving the chart.
+#[test]
+fn geo_map_hover_transitions_report_each_land() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    let _window = attach(&chart);
+    let events = Rc::new(RefCell::new(Vec::new()));
+    let sink = events.clone();
+    let _subscription = Subscription::new(chart.hover_changed(move |args| {
+        sink.borrow_mut().push(args.points.iter().map(|p| p.id).collect::<Vec<_>>())
+    }));
+    let paris = chart.project(2.35, 48.85).unwrap().unwrap();
+    let berlin = chart.project(13.40, 52.52).unwrap().unwrap();
+    let mouse = mouse();
+    moved(&chart, &mouse, paris);
+    moved(&chart, &mouse, berlin);
+    <Chart as InputElementImpl>::on_pointer_exited(
+        &chart,
+        &PointerEventArgs::new(
+            Some(&ferroui_base::input::InputElement::pointer_exited_event()),
+            chart.clone().upcast::<FerroObject>(),
+            mouse.clone(),
+            None,
+            Point::new(0.0, 0.0),
+            0,
+            PointerPointProperties::new(RawInputModifiers::NONE, PointerUpdateKind::Other),
+            KeyModifiers::NONE,
+        ),
+    );
+    let events = events.borrow();
+    assert_eq!(events.len(), 3, "enter, transition, exit");
+    let name = |ids: &Vec<ferroui_livecharts::PointId>| chart.map_land(ids[0]).unwrap().short_name;
+    assert_eq!(name(&events[0]), "fra");
+    assert_eq!(name(&events[1]), "deu");
+    assert!(events[2].is_empty());
+}
+
+/// GeoMapAnimationTests.GeoMap_FirstDraw_LandColorsAppearAtFinalGradient and
+/// GeoMap_DataChange_LandColorsJumpToNewGradientPositions: the lands of a map take their colours
+/// at once; a map has no scene transition.
+#[test]
+fn geo_map_land_colours_change_without_animation() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    chart.set_animations_speed(1000.0);
+    let _window = attach(&chart);
+    let size = chart.bounds().size();
+    let first = chart.scene(size).unwrap();
+    assert!(chart.transition.borrow().is_none());
+    let series = chart.series().get(0).cast::<crate::HeatLandSeries>().unwrap();
+    series.lands().add(crate::HeatLand::with_value("usa", 90.0));
+    let second = chart.scene(size).unwrap();
+    assert!(chart.transition.borrow().is_none());
+    let shown = chart.presentation_scene(Dispatcher::ui_thread().now() as f64, second.clone());
+    assert!(Rc::ptr_eq(&shown, &second));
+    let fill = |scene: &Scene, name: &str| {
+        let land = scene
+            .hits
+            .iter()
+            .find(|hit| chart.map_land(hit.id).is_some_and(|l| l.short_name == name))
+            .unwrap()
+            .id;
+        scene.primitives.iter().find(|p| p.id == Some(land)).unwrap().style.fill
+    };
+    // Russia, alone, is at the start of the ramp; with the United States at 90 it is still the
+    // lower end, and the United States takes the upper end at once.
+    assert_eq!(fill(&first, "rus"), fill(&second, "rus"));
+    assert_eq!(
+        fill(&second, "usa"),
+        Some(ferroui_livecharts::geo_map_chart_engine::HEAT_LAND_MAP[1])
+    );
+}
+
+/// GeoMapReattachTests: a map detached and attached again draws again, and detaching it ends
+/// its hover (Unload_HidesTooltipAndClearsHoveredLand).
+#[test]
+fn geo_map_reattaches_and_detaching_ends_the_hover() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    // Load_BeforeAnyUnload_IsNoOpAndDoesNotThrow: a measure before any attach.
+    assert!(!chart.scene(Size::new(640.0, 360.0)).unwrap().hits.is_empty());
+    let window = attach(&chart);
+    let moscow = chart.project(37.62, 55.75).unwrap().unwrap();
+    chart.move_pointer(moscow);
+    assert!(chart.hover.borrow().is_some());
+    let settle = || {
+        window.update_layout();
+        Dispatcher::ui_thread().run_jobs(None);
+    };
+    window.set_content(None);
+    settle();
+    assert!(!chart.attached.get());
+    assert!(chart.hover.borrow().is_none());
+    // Unload_IsIdempotent.
+    window.set_content(None);
+    settle();
+    window.set_content(Some(Control::boxed(&chart)));
+    settle();
+    assert!(chart.attached.get());
+    assert!(!chart.scene(Size::new(640.0, 360.0)).unwrap().hits.is_empty());
+    window.set_content(None);
+    settle();
+    assert!(!chart.attached.get());
+}
+
+/// The wheel zooms a map in steps and the primary button pans it when its interaction mode
+/// allows; a release settles the viewport.
+#[test]
+fn geo_map_wheel_zoom_and_drag_pan_follow_the_interaction_mode() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    let window = attach(&chart);
+    let center = Point::new(320.0, 180.0);
+    let wheel = |delta: f64| {
+        let args = PointerWheelEventArgs::new(
+            chart.clone().upcast::<FerroObject>(),
+            mouse(),
+            &window,
+            chart.translate_point(center, &window).unwrap(),
+            0,
+            PointerPointProperties::new(RawInputModifiers::NONE, PointerUpdateKind::Other),
+            KeyModifiers::NONE,
+            Vector::new(0.0, delta),
+        );
+        <Chart as InputElementImpl>::on_pointer_wheel_changed(&chart, &args);
+        args.handled()
+    };
+    // MapInteractionMode.None by default.
+    assert!(!wheel(1.0));
+    assert_eq!(chart.zoom_level(), 1.0);
+    chart.set_interaction_mode(MapInteractionMode::BOTH);
+    assert!(wheel(1.0));
+    assert!((chart.zoom_level() - 1.25).abs() < 1e-9);
+    let pointer = mouse();
+    let before = chart.pan_offset();
+    press(&chart, &pointer, PointerUpdateKind::LeftButtonPressed, center);
+    assert!(pointer.captured().is_some());
+    moved(&chart, &pointer, Point::new(center.x + 30.0, center.y + 10.0));
+    let after = chart.pan_offset();
+    assert!((after.x - before.x - 30.0).abs() < 1e-9 && (after.y - before.y - 10.0).abs() < 1e-9);
+    release(&chart, &pointer, MouseButton::Left, Point::new(center.x + 30.0, center.y + 10.0));
+    assert!(pointer.captured().is_none());
+    // A zoom out below the minimum is taken back by the bounce of the release.
+    chart.reset_viewport();
+    chart.zoom_map(center, ZoomDirection::ZoomOut);
+    assert!((chart.zoom_level() - 0.8).abs() < 1e-9);
+    chart.bounce_back();
+    assert_eq!(chart.map_animation.borrow().len(), 1);
+}

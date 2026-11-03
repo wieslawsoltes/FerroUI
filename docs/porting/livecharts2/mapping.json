@@ -73,6 +73,18 @@
       ],
       "status": "partial"
     },
+    "src/LiveChartsCore/CoreHeatLandSeries.cs": {
+      "reason": "Lands, HeatMap (the two blues of the source by default), ColorStops, MinValue, MaxValue, WeightBounds and TryGetValue; the heat of each land of the default layer by its key, a later series over an earlier one, a land of a departed series back to the chart fill (issue 962), and the observation of the lands. A hidden series paints nothing and has no tooltip value, where the source measures every series; a land without a finite value is not painted.",
+      "remaining": [
+        "IsVisibleAtLegend and the heat legend source (SKHeatLegend)."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs",
+        "src/FerroUI.Controls.LiveCharts/geo_models.rs"
+      ],
+      "status": "partial"
+    },
     "src/LiveChartsCore/CoreHeatSeries.cs": {
       "reason": "Heat cells infer numeric/date spacing, bound each series independently, interpolate uniform palettes and expose weight in data/tooltip labels.",
       "remaining": [
@@ -392,6 +404,271 @@
         "src/FerroUI.LiveCharts/easing_functions.rs"
       ],
       "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs": {
+      "reason": "The equirectangular projection with its default bounds of the whole earth, the normalized bounds (NaN to the default, an inverted pair swapped, an equal pair to the defaults; an infinite span too), the preferred ratio of the bounds, the projection and its linear inverse. Screen positions are f64 where the source uses float.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs",
+        "src/FerroUI.LiveCharts/geo/map_projector.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Geo/DrawnMap.cs": {
+      "reason": "Named layers in the order they are added, a layer read from GeoJSON text with the default paints of the source (a new layer takes the given paints, an existing one keeps its own), and FindLand by key in the default layer.",
+      "remaining": [
+        "The directory, stream and asynchronous loaders: a host reads the file and passes its text; the map has no Dispose (it is a value the chart only reads)."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Geo/GeoJsonFeature.cs": {
+      "reason": "The type, properties and geometry of a feature are read from the serde_json value.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/GeoJsonFile.cs": {
+      "reason": "The feature collection is read with serde_json, as the source deserializes it with camel-case names.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/GeoJsonFileSourceGenerationContext.cs": {
+      "reason": "serde_json reads the camel-case names of the source serializer context.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/GeoTooltipPoint.cs": {
+      "reason": "GeoLand carries the land of a hover or a click (its names, its screen bounds and the anchor of its tooltip) and GeoTooltipValue the value of each series that has one, in the order of the series; the heat colour is the fill of the land in the scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/GeoVisualElement.cs": {
+      "reason": "A GeoMarker is a circle at a coordinate: projected through the projection, rotation and viewport on each measure, drawn above the map and hidden on the far side of a globe.",
+      "remaining": [
+        "Other visuals than circles anchored at a coordinate, and their own location in the visual (the marker is centred on its coordinate)."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/geo_models.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Geo/IGeoMapTooltip.cs": {
+      "reason": "The native tooltip of the chart shows the land and its values at the anchor of the land.",
+      "remaining": [
+        "A custom tooltip object of the application."
+      ],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart.rs",
+        "src/FerroUI.Controls.LiveCharts/decorations.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Geo/IGeoMapView.cs": {
+      "reason": "The properties of the view are styled properties of the native chart with the source defaults: ActiveMap (None is the bundled world map), Stroke, Fill, MapProjection, the latitude and longitude bounds (None is the default of the projection, the source NaN), InteractionMode, ZoomingSpeed, MinZoomLevel and MaxZoomLevel; Series takes heat land series.",
+      "remaining": [
+        "TooltipFormatter, and a custom Tooltip."
+      ],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_properties.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs",
+        "scripts/livecharts2/generate_controls.py"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Geo/IGeoSeries.cs": {
+      "reason": "A geo series is the engine HeatLandSeries (Name, IsVisible, TryGetValue) measured by the map engine; Delete has no counterpart in an immutable scene, which a removed series leaves.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/geo_models.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/IHeatLandShape.cs": {
+      "reason": "The heat colour of a land is the fill of its primitives.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/IMapFactory.cs": {
+      "reason": "The factory of the lands is GeoMapChartEngine; Pan, Zoom and SetViewport are the viewport functions of MapViewport and the map methods of the chart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/IWeigthedMapLand.cs": {
+      "reason": "The notifying HeatLand model and the engine HeatLand carry the name and value.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/geo_models.rs",
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/LandData.cs": {
+      "reason": "The coordinates of a ring, their bounds and the diagonal of the bounds; the drawn Shape and its Land are the primitives and hit regions of the retained scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs",
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Geo/LandDefinition.cs": {
+      "reason": "The short name, name, set, bounds and rings of a land; the internal HSize and HCenter, unused by the source, have no counterpart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Geo/MapContext.cs": {
+      "reason": "The chart, map and projector of a measure are the arguments and result of GeoMapChartEngine::measure.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/MapInteractionMode.cs": {
+      "reason": "None, Pan, Zoom and Both, a markup flags type of the controls.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/enums.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Geo/MapLayer.cs": {
+      "reason": "AddFile: Polygon and MultiPolygon features (a polygon a list of one, other types and features without coordinates skipped), the name, shortName and setOf properties lower-cased with the case-insensitive fallback, the feature_<index> name, every ring a land shape sorted by the diagonal of its bounds, and the <short name>_<index> key of a short name read twice. A malformed file is an error that leaves the layer as it was, where the source throws halfway through it. The unused Max, Min and AddLandWhen members have no counterpart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Geo/MapProjection.cs": {
+      "reason": "Default, Mercator and Orthographic, a markup enum of the core assembly.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs": {
+      "reason": "The abstract projector is the enum MapProjector of the three projections, with the map area, ToMap, IsVisible and ToCoordinates; the allocating array overload is the same projection.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/MapShapeContext.cs": {
+      "reason": "The heat paint, stops and bounds of a series are computed in the measure of the series.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/Maps.cs": {
+      "reason": "The bundled world map, parsed once and shared, a map of one default layer from GeoJSON text, and BuildProjector, which fits the preferred ratio of the projection into the map area centred on the shorter side.",
+      "remaining": [
+        "GetMapFromDirectory and the stream readers: a host reads the file and passes its text to map_from_geojson."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/maps.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs": {
+      "reason": "The Mercator projection with the asymmetric default crop of -65 to 85 degrees, the normalized bounds, the conformal preferred ratio, the projection with the extrapolation past the bounds that the chart clips, and the closed-form inverse. A latitude at a pole takes the last finite latitude (89.999999 degrees), so that the poles of a map stay finite where the source projects them to infinity.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Geo/MultiPoligonGeometry.cs": {
+      "reason": "The type and raw coordinates of a geometry are read from the serde_json value.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs": {
+      "reason": "The globe facing the centre coordinate: its radius of half the smaller side, its screen centre, the visibility of the near hemisphere, the projection, and the inverse of Snyder that rejects a position outside the disc.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Geo/RotationTracker.cs": {
+      "reason": "The animated centre of a globe is a rotation of the map animation of the chart, quadratic in and out over the given time, which writes CenterLongitude and CenterLatitude on each frame.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/ZoomOnPointerView.cs": {
+      "reason": "The pivot and direction of a zoom are the arguments of Chart::zoom_map and MapViewport::zoomed.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart.rs",
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Geo/world.geojson": {
+      "reason": "The world map of the source, copied byte for byte (178,383 bytes) and embedded with include_str! as the source embeds it; the attribution is in the NOTICE.md of the crate.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/world.geojson",
+        "src/FerroUI.LiveCharts/geo/maps.rs",
+        "src/FerroUI.LiveCharts/NOTICE.md"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/GeoMapChart.cs": {
+      "reason": "Measure: the title and legend room, a collapsed draw margin that hides the map, the projector fitted into the draw margin and the map clipped to its area, the visible layers, the heat of the series, the markers; FindLandAt with the values of every series and the anchor on the largest visible ring; BuildHitPoints with the screen bounds of the land; Project and Unproject through the viewport; Pan, Zoom, ResetViewport, BounceBack and RotateTo the short way round; a click on a land reported at the release within 5 pixels; the hover of the lands.",
+      "remaining": [
+        "ViewTo, a no-op of the source factory; the heat legend sources (SKHeatLegend); the theme rules of the view; the tooltip throttling of 50 ms (the native hover is immediate)."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/HeatFunctions.cs": {
+      "reason": "BuildColorStops (evenly spread or given offsets; fewer than two colours or offsets of another count an error where the source throws) and InterpolateColor (the position clamped to [0, 1], the channels truncated as the byte conversion). Where the source extrapolates before the first stop, divides by two stops at one offset or takes a NaN weight, the colour is the nearest stop.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs"
+      ],
+      "status": "ported"
     },
     "src/LiveChartsCore/HorizontalBarSeries.cs": {
       "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
@@ -817,6 +1094,30 @@
       ],
       "status": "native-replacement"
     },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/HeatLand.cs": {
+      "reason": "A notifying land with its Name and Value.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/geo_models.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/LandAreaGeometry.cs": {
+      "reason": "A ring of a land is a polygon primitive of the retained scene, transformed by the viewport (the stroke scaled by the zoom, as the canvas matrix of the source scales it), and its hit test is the polygon of the hit region; the native renderer draws it on the GPU path of every backend.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/MapViewportTransform.cs": {
+      "reason": "MapViewport: the zoom about the centre of the control and the pan, its transform, its inverse and whether it is the identity.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "ported"
+    },
     "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/SankeyArcSegmentGeometry.cs": {
       "reason": "The annular sector of a node, not drawn without a sweep; the corner radius rounds the four corners as the corner path effect of the source does.",
       "remaining": [],
@@ -841,6 +1142,35 @@
       ],
       "status": "native-replacement"
     },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/HeatLandSeries.cs": {
+      "reason": "The native HeatLandSeries, a generated ChartSeries of the kind HeatLand with its lands and the default heat map of the source constructors.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs",
+        "scripts/livecharts2/generate_controls.py"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/MapFactory.cs": {
+      "reason": "GenerateLands: the globe in the fill under an orthographic map, the visible layers by descending process index with the chart stroke and fill over the layer paints, the flat projection of each ring, BuildOrthographicPath with the horizon found by 15 bisections and walked along the rim in steps of 3 degrees, the fills under the stroke; Pan, Zoom (the speed clamped to [0.1, 0.95], the overshoot to 80 % of the minimum zoom, the pivot kept in place) and SetViewport. ViewTo is a no-op of the source and has no counterpart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKDefaultGeoTooltip.cs": {
+      "reason": "The text of the tooltip: the name of the land in title case, then a line for each series value, {name}: {value:N2}; placed above the anchor of the land, below it when there is no room.",
+      "remaining": [
+        "The pop-up geometry with its wedge, its drop shadow and its animation, the tooltip paints and text size of the view."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/decorations.rs"
+      ],
+      "status": "partial"
+    },
     "src/skiasharp/LiveChartsCore.SkiaSharp/SankeySeries.cs": {
       "reason": "The native SankeySeries holds SankeyNode and SankeyLink objects; the node and link shapes are those of the engine.",
       "remaining": [],
@@ -858,6 +1188,26 @@
         "src/FerroUI.Controls.LiveCharts/node_models.rs"
       ],
       "status": "native-replacement"
+    },
+    "src/skiasharp/_Shared/SourceGenMapChart.sgp.cs": {
+      "reason": "The view properties and their defaults (MapProjection Default, InteractionMode None, the white stroke and the fill of 240, 240, 240, the zoom levels 1 and 100, the zooming speed of the settings) are the generated properties of the chart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_properties.rs",
+        "scripts/livecharts2/generate_controls.py"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/_Shared/SourceGenMapChart.shared.cs": {
+      "reason": "The native GeoMap is a Chart of the kind GeoMap: the world map as its active map by default, GetPointsAt (find_points), DataPointerDown and HoveredPointsChanged (the chart events), and the title and legend of the chart.",
+      "remaining": [
+        "TooltipFormatter, the theme of the view and the visual elements other than markers."
+      ],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_classes.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "status": "partial"
     }
   },
   "members": {
@@ -1036,6 +1386,22 @@
   },
   "schema": 1,
   "tests": {
+    "tests/CoreTests/ChartTests/ChartTests.cs::CoreTests.ChartTests.ChartTests::void MapShouldHandleNullParams()#L106": {
+      "reason": "A map without series draws the map (the native series collection is never null).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_observes_its_lands_series_and_markers"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/CollapsedDrawMarginAllChartsTests.cs::CoreTests.ChartTests.CollapsedDrawMarginAllChartsTests::void GeoMap_HidesThenResets()#L150": {
+      "reason": "A draw margin collapsed past the control hides the map with no geometry or hover area; a valid one draws it again, clipped to the area of the projection.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_hides_then_resets"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/ChartTests/CollapsedDrawMarginAllChartsTests.cs::CoreTests.ChartTests.CollapsedDrawMarginAllChartsTests::void Sankey_HidesThenResets()#L120": {
       "reason": "The source series and size: a draw margin collapsed past the control is a hidden plot with no geometry or hover area, and a valid margin draws it again (the native scene has no canvas zone clips to inspect).",
       "remaining": [],
@@ -1049,6 +1415,149 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::collapsed_draw_margin_hides_then_resets"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_DragGesture_DoesNotFireDataPointerDown()#L167": {
+      "reason": "A press on Moscow moved by 20 pixels on both axes before its release reports nothing.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_ocean_clicks_and_drags_fire_nothing"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_EnumerateHeatLegendSources_ReturnsHeatLandSeries()#L438": {
+      "reason": "The legend of the map scene lists its heat land series.",
+      "remaining": [
+        "IHeatLegendSource and the gradient legend of SKHeatLegend."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_legend_lists_the_heat_land_series"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_GetPointsAt_ReturnsHitLand()#L243": {
+      "reason": "Moscow hits Russia and the ocean corner nothing, on the engine scene and through Chart::find_points.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_get_points_at_returns_hit_land",
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_takes_the_source_defaults_and_loads_from_markup"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_HeatLandSeriesWeightBounds_AvailableBeforeMeasure()#L517": {
+      "reason": "The bounds of the source lands before any measure, and MinValue and MaxValue in their place.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_heat_land_series_weight_bounds_available_before_measure"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_HeatLegendRight_ReducesDrawMarginWidth()#L415": {
+      "reason": "A legend on the right of an 800 by 600 map narrows the map; the legend is the native series legend.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_title_and_legend_take_room_from_the_map"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_HoverTransitions_FireHoveredPointsChanged()#L195": {
+      "reason": "Paris, Berlin and the exit of the pointer report France, Germany and no point, in that order (hover_changed in place of HoveredPointsChanged, which reports the old points too).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_hover_transitions_report_each_land"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_MultipleHeatSeries_TooltipValuesPreserveDeclarationOrder()#L270": {
+      "reason": "The source series and Brasilia pixel: both values in the order of the series, and the lines of the default tooltip.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_multiple_heat_series_tooltip_values_preserve_declaration_order"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_PointerUpOnLand_FiresDataPointerDownWithLandDefinition()#L127": {
+      "reason": "A click on Moscow reports one point at the release; its land (map_land, the LandDefinition of the source) is Russia and its hover area is the screen bounds of the land. The chart fills the test window of 640 by 360 in place of 600 by 600.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_click_on_a_land_fires_data_pointer_down_at_the_release"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_ProjectUnproject_RoundTrips()#L462": {
+      "reason": "The source chart size, projection and coordinates, round-tripped through the measured projector and viewport.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_project_unproject_round_trips",
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_viewport_and_rotation_before_render"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_Project_ReturnsNullForOrthographicBackHemisphere()#L486": {
+      "reason": "The antipode of the default centre projects to nothing.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_orthographic_back_hemisphere_and_off_disc",
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_viewport_and_rotation_before_render"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_SwappingSeries_PreservesFillOnSharedLands()#L27": {
+      "reason": "The source lands and chart size: after the swap the shared land keeps the heat of the new series and the departed land takes the chart fill, on the engine and through the chart series collection.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_swapping_series_preserves_fill_on_shared_lands",
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_observes_its_lands_series_and_markers"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_TitleSet_ReducesDrawMarginAndAddsVisualToCanvas()#L384": {
+      "reason": "A title moves the map down and shortens it, and its text is in the scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_title_and_legend_take_room_from_the_map"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_TooltipAnchor_PicksLargestContour_NotUnionBbox()#L84": {
+      "reason": "The source chart size, projection and Moscow pixel: the hit is Russia and its anchor is inside one of its rings.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_tooltip_anchor_picks_largest_contour_not_union_bbox"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoMapTests.cs::CoreTests.ChartTests.GeoMapTests::void GeoMap_Unproject_ReturnsNullForOrthographicOffDisc()#L504": {
+      "reason": "The corner of the control, outside the disc, has no coordinate.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_orthographic_back_hemisphere_and_off_disc",
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_viewport_and_rotation_before_render"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoVisualElementTests.cs::CoreTests.ChartTests.GeoVisualElementTests::void DifferentCoordinatesLandOnDifferentPixels()#L120": {
+      "reason": "The source chart, series and coordinates with native markers: a marker is centred on the projection of its coordinate (the one family of the native port), away from the origin, and New York and Tokyo are two pixels.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_markers_are_projected_to_their_coordinates"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoVisualElementTests.cs::CoreTests.ChartTests.GeoVisualElementTests::void VisualIsMovedFromItsOrigin()#L104": {
+      "reason": "The source chart, series and coordinates with native markers: a marker is centred on the projection of its coordinate (the one family of the native port), away from the origin, and New York and Tokyo are two pixels.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_markers_are_projected_to_their_coordinates"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/ChartTests/GeoVisualElementTests.cs::CoreTests.ChartTests.GeoVisualElementTests::void VisualIsProjectedToTheSamePixelAsAVisualElement()#L75": {
+      "reason": "The source chart, series and coordinates with native markers: a marker is centred on the projection of its coordinate (the one family of the native port), away from the origin, and New York and Tokyo are two pixels.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_markers_are_projected_to_their_coordinates"
       ],
       "status": "ported"
     },
@@ -1444,6 +1953,230 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/CoreObjectsTests/GeoMapEventsTests.cs::CoreTests.CoreObjectsTests.GeoMapEventsTests::void DataPointerDownDoesNotFireWhenClickingTheOcean()#L34": {
+      "reason": "A click in the mid-Atlantic reports nothing.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_ocean_clicks_and_drags_fire_nothing"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoMapEventsTests.cs::CoreTests.CoreObjectsTests.GeoMapEventsTests::void DataPointerDownDoesNotFireWhenPointerMovesPastClickThreshold()#L82": {
+      "reason": "A move of 20 pixels cancels the click; a move of 2 does not.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_ocean_clicks_and_drags_fire_nothing"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoMapEventsTests.cs::CoreTests.CoreObjectsTests.GeoMapEventsTests::void DataPointerDownFiresWhenClickingInsideALand()#L15": {
+      "reason": "A click on Moscow reports Russia at the release.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_click_on_a_land_fires_data_pointer_down_at_the_release"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoMapEventsTests.cs::CoreTests.CoreObjectsTests.GeoMapEventsTests::void DataPointerDownPayloadCarriesLandAndPositionInsideHoverArea()#L53": {
+      "reason": "The point of the click is Russia with the value 42 of its series, and the click is inside its hover area.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_click_on_a_land_fires_data_pointer_down_at_the_release"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void ControlCoordinatesProjectorNormalizesDegenerateAndInvertedBounds()#L119": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::control_coordinates_projector_normalizes_degenerate_and_inverted_bounds"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void ControlCoordinatesProjectorRoundTrips()#L265": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::control_coordinates_projector_round_trips"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorIsAlwaysVisible()#L84": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_is_always_visible"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorNormalizesDegenerateAndInvertedBounds()#L97": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_normalizes_degenerate_and_inverted_bounds"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorPreferredRatio()#L62": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_preferred_ratio"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsOriginToCenter()#L10": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_projects_origin_to_center"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsTopLeft()#L23": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_projects_top_left"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsTopRight()#L33": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_projects_top_right"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProperties()#L52": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_properties"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorRespectsOffset()#L43": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_respects_offset"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorRoundTrips()#L248": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::mercator_projector_round_trips"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorCenterPointIsVisible()#L150": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_center_point_is_visible"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorOppositePointIsNotVisible()#L157": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_opposite_point_is_not_visible"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPointJustBeforeHorizonIsVisible()#L171": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_point_just_before_horizon_is_visible"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPointJustBeyondHorizonIsNotVisible()#L164": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_point_just_beyond_horizon_is_not_visible"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPreferredRatio()#L191": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_preferred_ratio"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorProjectsCenterToScreenCenter()#L140": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_projects_center_to_screen_center"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorProperties()#L178": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_properties"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRadiusIsHalfMinDimension()#L200": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_radius_is_half_min_dimension"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRejectsClicksOutsideDisc()#L297": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_rejects_clicks_outside_disc"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRoundTripsOnVisibleHemisphere()#L278": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_round_trips_on_visible_hemisphere"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorScreenCenter()#L207": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_screen_center"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorSymmetry()#L229": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_symmetry"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorVisibilityWithDifferentCenter()#L215": {
+      "reason": "The source projector sizes, offsets, bounds, centres and coordinates, with its tolerances.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::orthographic_projector_visibility_with_different_center"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/CoreObjectsTests/GradientPaintAnimationTests.cs::CoreTests.CoreObjectsTests.GradientPaintAnimationTests::void ColorPos_InterpolatesThenNullSnaps()#L137": {
       "reason": "The source inputs, transition, frame times and expected values are retained on a native Animatable that registers the source property name with the paint motion type.",
       "remaining": [
@@ -1493,6 +2226,94 @@
         "src/FerroUI.LiveCharts/motion/paint_animation_tests.rs::source_linear_start_and_radial_center_interpolate"
       ],
       "status": "partial"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsThrowsWhenStopsLengthMismatch()#L63": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::build_color_stops_throws_when_stops_length_mismatch"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsThrowsWithFewerThanTwoColors()#L56": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::build_color_stops_throws_with_fewer_than_two_colors"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithExplicitStops()#L40": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::build_color_stops_with_explicit_stops"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithNullStopsGeneratesUniformDistribution()#L12": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::build_color_stops_with_null_stops_generates_uniform_distribution"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithThreeColorsAndNullStops()#L23": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::build_color_stops_with_three_colors_and_null_stops"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtEnd()#L93": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolate_color_at_end"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtMidpoint()#L111": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolate_color_at_midpoint"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtStart()#L75": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolate_color_at_start"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorClampsAbove()#L145": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolate_color_clamps_above"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorClampsBelow()#L129": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolate_color_clamps_below"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorHandlesZeroRange()#L161": {
+      "reason": "The source colours, stops and bounds; an error stands for the thrown exception.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolate_color_handles_zero_range"
+      ],
+      "status": "ported"
     },
     "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitStruct()#L225": {
       "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
@@ -1780,6 +2601,103 @@
       ],
       "status": "partial"
     },
+    "tests/CoreTests/OtherTests/ChartInteractiveApiTests.cs::CoreTests.OtherTests.ChartInteractiveApiTests::void GeoMap_FindLandAtReturnsNullOutsideAnyLand()#L509": {
+      "reason": "A position far outside the map finds no land.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_map_get_points_at_returns_hit_land"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/ChartInteractiveApiTests.cs::CoreTests.OtherTests.ChartInteractiveApiTests::void GeoMap_PanAndZoomAndResetViewportBeforeRender()#L466": {
+      "reason": "Pan, a zoom in, a zoom out and ResetViewport before any render, with the zoom levels of the default speed.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_viewport_and_rotation_before_render"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/ChartInteractiveApiTests.cs::CoreTests.OtherTests.ChartInteractiveApiTests::void GeoMap_PointerEventsFlowThroughInvokers()#L493": {
+      "reason": "Presses, moves, releases and the exit of the pointer through the input handlers of the chart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_ocean_clicks_and_drags_fire_nothing",
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_hover_transitions_report_each_land"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/ChartInteractiveApiTests.cs::CoreTests.OtherTests.ChartInteractiveApiTests::void GeoMap_ViewToAndRotateToBeforeRender()#L482": {
+      "reason": "RotateTo with a duration of 0 before any render turns the globe at once; ViewTo is a no-op of the source factory and has no native counterpart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_viewport_and_rotation_before_render"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_BuiltInWorldMap_StillLoads()#L79": {
+      "reason": "The source GeoJSON documents and the bundled world map, read into the default layer.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::import_built_in_world_map_still_loads"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_CustomGeoJson_ParsesMixedPolygonShapes()#L59": {
+      "reason": "The source GeoJSON documents and the bundled world map, read into the default layer.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::import_custom_geo_json_parses_mixed_polygon_shapes"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_DuplicateShortNames_DoNotAbortImport()#L136": {
+      "reason": "The source GeoJSON documents and the bundled world map, read into the default layer.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::import_duplicate_short_names_do_not_abort_import"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_MixedCasePropertyKeys_ResolveCaseInsensitively()#L123": {
+      "reason": "The source GeoJSON documents and the bundled world map, read into the default layer.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/geo_tests.rs::import_mixed_case_property_keys_resolve_case_insensitively"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/GeoMapReattachTests.cs::CoreTests.OtherTests.GeoMapReattachTests::void Load_BeforeAnyUnload_IsNoOpAndDoesNotThrow()#L45": {
+      "reason": "The chart is measured before any attach, detached twice, attached again and measured, and detached again; detaching it ends its hover (the source tooltip and hovered land).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_reattaches_and_detaching_ends_the_hover"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/GeoMapReattachTests.cs::CoreTests.OtherTests.GeoMapReattachTests::void Reattach_DetachLoadDetach_DoesNotThrowAndRendersAfterReload()#L28": {
+      "reason": "The chart is measured before any attach, detached twice, attached again and measured, and detached again; detaching it ends its hover (the source tooltip and hovered land).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_reattaches_and_detaching_ends_the_hover"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/GeoMapReattachTests.cs::CoreTests.OtherTests.GeoMapReattachTests::void Unload_HidesTooltipAndClearsHoveredLand()#L59": {
+      "reason": "The chart is measured before any attach, detached twice, attached again and measured, and detached again; detaching it ends its hover (the source tooltip and hovered land).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_reattaches_and_detaching_ends_the_hover"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/GeoMapReattachTests.cs::CoreTests.OtherTests.GeoMapReattachTests::void Unload_IsIdempotent()#L18": {
+      "reason": "The chart is measured before any attach, detached twice, attached again and measured, and detached again; detaching it ends its hover (the source tooltip and hovered land).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_reattaches_and_detaching_ends_the_hover"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/BoxSeriesTests.cs::CoreTests.SeriesTests.BoxSeriesTest::void ShouldScale()#L19": {
       "reason": "The series, values, chart size and axis limits of the source test, with its assertions on the measured visuals read from the retained scene by point identity.",
       "remaining": [],
@@ -1809,6 +2727,22 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_financial_should_scale"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/GeoMapAnimationTests.cs::CoreTests.SeriesTests.GeoMapAnimationTests::void GeoMap_DataChange_LandColorsJumpToNewGradientPositions()#L98": {
+      "reason": "The no-animation contract of the source: an attached map with an animation speed of 1000 ms starts no scene transition on its first draw or a data change, and its lands take their new colours at once (the trajectory baselines of the source are this constant frame).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_land_colours_change_without_animation"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/GeoMapAnimationTests.cs::CoreTests.SeriesTests.GeoMapAnimationTests::void GeoMap_FirstDraw_LandColorsAppearAtFinalGradient()#L183": {
+      "reason": "The no-animation contract of the source: an attached map with an animation speed of 1000 ms starts no scene transition on its first draw or a data change, and its lands take their new colours at once (the trajectory baselines of the source are this constant frame).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_land_colours_change_without_animation"
       ],
       "status": "ported"
     },
@@ -2241,6 +3175,138 @@
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
         "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void Basic()#L42": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data",
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::world_map_builds_finite_scenes_in_every_projection"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void BasicWithTitleAndLegend()#L116": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "The legend of the source is the gradient bar of an SKHeatLegend; the native legend lists the series."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data",
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_title_and_legend_take_room_from_the_map"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void CustomMap_LoadsAndRendersMexicoStates()#L257": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "The map is read from samples/LiveChartsDemo/mexico-states.geojson, the copy of the sample file the source reads."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data",
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::geo_map_draws_a_custom_map"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void DefaultProjection()#L142": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void DefaultProjectionEuropeView()#L184": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void MarkersOnMap()#L206": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "The markers of the source are GeoVisualElements around GeometryVisual circles; the scenario draws native GeoMarkers with their paints."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data",
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::geo_markers_are_projected_to_their_coordinates"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void MarkersOnMap_RemovedBetweenFrames()#L305": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Both frames (_0 and _1) are scenarios; the second clears the markers of the chart after a first measure."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void MercatorEuropeView()#L160": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void OrthographicDefault()#L56": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data",
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::world_map_builds_finite_scenes_in_every_projection"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void OrthographicHorizonClipsAlongDiscRim()#L96": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data",
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::orthographic_maps_draw_the_globe_then_fills_then_the_stroke",
+        "src/FerroUI.LiveCharts/geo_map_chart_engine_tests.rs::horizon_closes_along_the_rim_instead_of_a_chord"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/MapsTests.cs::SnapshotTests.MapsTests::void OrthographicRotated()#L70": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
