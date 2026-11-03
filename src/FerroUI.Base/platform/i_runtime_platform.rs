@@ -5,16 +5,23 @@ pub trait IRuntimePlatform: 'static {
 
     // CLOCK-SEAM: the wall clock of the platform. The dispatcher clock
     // (`IDispatcherImpl::now`) is monotonic and has no relation to calendar
-    // time, so "now" as a date is asked of the platform here. A platform
-    // without `std::time::SystemTime` — the browser (`wasm32-unknown-unknown`) —
+    // time, so "now" as an instant is asked of the platform here. A platform
+    // without `SystemTime::now()`, the browser (`wasm32-unknown-unknown`),
     // MUST register a runtime platform that overrides this (`Date.now()`);
     // otherwise every "now" is the Unix epoch.
-    /// The current date and time in UTC, read by
+    /// The current instant, read by
+    /// [`system_time_now`](crate::utilities::system_time_now) and
     /// [`DateTime::utc_now`](crate::utilities::DateTime::utc_now). The
     /// default is for a platform without a wall clock: it reports the Unix
     /// epoch, 1970-01-01T00:00:00 UTC.
-    fn get_utc_now(&self) -> crate::utilities::DateTime {
-        crate::utilities::DateTime::UNIX_EPOCH
+    ///
+    /// Since 0.5 the instant is a [`SystemTime`](std::time::SystemTime),
+    /// where it was a `DateTime` of kind UTC: an implementation returns
+    /// `SystemTime::try_from(date_time)` of the value it returned (or the
+    /// system time it read), and a caller that needs the calendar value
+    /// converts with `DateTime::try_from`.
+    fn get_utc_now(&self) -> std::time::SystemTime {
+        std::time::SystemTime::UNIX_EPOCH
     }
 }
 

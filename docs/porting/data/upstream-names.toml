@@ -438,3 +438,20 @@ kind = "type"
 phase = "C5"
 behaviour = "same"
 notes = "Step U1. A Rust form of the markup type System.Uri: a relative URI literal for a Url is a markup error, a relative reference a conversion error of a binding. The text is the one of the URL standard (the C2 conversions). The base URIs and the platform edges move to it in U2 to U4."
+
+[[name]]
+upstream = "System.DateTime, System.DateTimeOffset (instants)"
+rust = "std::time::SystemTime"
+kind = "mechanism"
+phase = "C5"
+behaviour = "same"
+notes = "Step D1 (section 3.3, decision O4). The positions that hold a moment take and return SystemTime: IRuntimePlatform::get_utc_now, UtcNowProvider, LocalUtcOffsetProvider, StorageItemProperties DateCreated and DateModified (and the storage dates of the file system, Android, the browser and iOS), FiredEvent.TriggerTime of the developer tools, ManagedFileChooserItemViewModel.Modified of the dialogs (Option<SystemTime>). DateTime.UtcNow as an instant is ferroui_base::utilities::system_time_now; the browser reads Date.now() and never SystemTime::now(). The calendar values keep DateTime and DateTimeOffset, and the markup properties TriggerTime and Modified stay System.DateTime in local time. The BSON DateTime of the remote protocol keeps its name and converts to and from SystemTime."
+
+[[name]]
+upstream = "System.Guid"
+rust = "uuid::Uuid"
+kind = "type"
+phase = "C5"
+deprecated = "ferroui_remote_protocol::Guid"
+behaviour = "test"
+notes = "Step G1 (section 3.6). The remote protocol takes and returns Uuid (re-exported as ferroui_remote_protocol::Uuid): IMessageTypeResolver.GetByGuid and GetGuid, the identifier attribute and the GUID of each message, the BSON Guid values; the wire layout is Guid.ToByteArray, which is Uuid::to_bytes_le (tested in metsys_bson_tests). Splat's feature usage tracking references and the Guid converters of ReactiveUI take Uuid too. Also deprecated: ferroui_splat::Guid. The Guid of ferroui-microcom stays, the COM GUID layout."

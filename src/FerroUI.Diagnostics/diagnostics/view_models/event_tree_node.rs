@@ -5,7 +5,7 @@ use crate::diagnostics::models::EventChainLink;
 use crate::diagnostics::DevTools;
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEvent, RoutedEventArgs, RoutingStrategies};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::DateTime;
+use ferroui_base::utilities::system_time_now;
 use ferroui_base::{BoxedValue, FerroObject, Ref, Visual};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -136,7 +136,7 @@ impl EventTreeNode {
         let s = sender.to_ref();
         let handled = e.handled();
         let route = e.route();
-        let trigger_time = DateTime::now();
+        let trigger_time = system_time_now();
         let args: RoutedEventArgs = e.as_routed_event_args().clone();
         let weak = Rc::downgrade(this);
 

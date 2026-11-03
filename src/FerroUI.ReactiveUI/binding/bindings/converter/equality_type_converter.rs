@@ -1,10 +1,10 @@
 //! `EqualityTypeConverter` (`ReactiveUI.Binding/Bindings/Converter/EqualityTypeConverter.cs`).
 
 use crate::{ConverterType, IBindingTypeConverter};
-use ferroui_splat::Guid;
 use std::any::Any;
 use std::rc::Rc;
 use std::time::Duration;
+use uuid::Uuid;
 
 /// Converts any value to whether it equals the conversion hint (`EqualityTypeConverter`): the
 /// converter of last resort, from `dyn Any` (upstream's `object`) to `bool`, with an affinity of 1.
@@ -12,8 +12,9 @@ use std::time::Duration;
 ///
 /// Two values are equal when they are the same object, or when they have the same type and that
 /// type is one whose equality is known here: the integers, the floating-point numbers (`NaN` equals
-/// itself, as `Double.Equals` has it), `bool`, `char`, `()`, [`Guid`], [`Duration`], an `Option`
-/// of those, and the strings (`String` and `&'static str`, which compare with each other).
+/// itself, as `Double.Equals` has it), `bool`, `char`, `()`, [`Uuid`] (and the deprecated
+/// `ferroui_splat::Guid`), [`Duration`], an `Option` of those, and the strings (`String` and
+/// `&'static str`, which compare with each other).
 // Deviation (DEVIATIONS.md, ReactiveUI): upstream calls the virtual `Object.Equals`; without
 // reflection the equality of type-erased values is known for the types above only, and values of
 // other types are equal only when they are the same object.
@@ -45,6 +46,8 @@ fn as_str(value: &dyn Any) -> Option<&str> {
 
 /// `Object.Equals(left, right)` for the values whose equality is known (see
 /// [`EqualityTypeConverter`]).
+// The deprecated `ferroui_splat::Guid` is compared until it is removed after 0.5.
+#[allow(deprecated)]
 fn values_equal(left: Option<&dyn Any>, right: Option<&dyn Any>) -> bool {
     let (left, right) = match (left, right) {
         (None, None) => return true,
@@ -87,7 +90,8 @@ fn values_equal(left: Option<&dyn Any>, right: Option<&dyn Any>) -> bool {
         };
     }
 
-    equal_as!(i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize, bool, char, (), Guid, Duration);
+    equal_as!(i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize, bool, char, (), Uuid, Duration);
+    equal_as!(ferroui_splat::Guid);
     equal_as_float!(f32, f64);
     false
 }

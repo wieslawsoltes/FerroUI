@@ -10,21 +10,22 @@
 
 use crate::tests::common::{panics, AppLocatorScope, IMockLogTarget, TestException, TextLogger};
 use ferroui_splat::{
-    AppLocator, DefaultFeatureUsageTrackingSession, Guid, ILogger, IFeatureUsageTrackingSession,
+    AppLocator, DefaultFeatureUsageTrackingSession, ILogger, IFeatureUsageTrackingSession,
     IFeatureUsageTrackingSessionOf,
 };
 use ferroui_system::IDisposable;
 use std::rc::Rc;
+use uuid::Uuid;
 
 #[test]
 fn constructor_sets_root_session_properties() {
     let _scope = AppLocatorScope::new();
-    let feature_name = Guid::new_guid().to_string();
+    let feature_name = Uuid::new_v4().to_string();
     let instance = DefaultFeatureUsageTrackingSession::new(&feature_name);
 
     assert_eq!(instance.feature_name(), feature_name);
-    assert_ne!(instance.feature_reference(), Guid::EMPTY);
-    assert_eq!(instance.parent_reference(), Guid::EMPTY);
+    assert_ne!(instance.feature_reference(), Uuid::nil());
+    assert_eq!(instance.parent_reference(), Uuid::nil());
     instance.dispose();
 }
 
@@ -40,17 +41,17 @@ fn sub_feature_returns_child_session_with_parent_reference() {
     let _scope = AppLocatorScope::new();
     let logger = Rc::new(TextLogger::new());
     AppLocator::register_constant::<dyn ILogger>(logger.clone());
-    let feature_name = Guid::new_guid().to_string();
+    let feature_name = Uuid::new_v4().to_string();
     let instance = DefaultFeatureUsageTrackingSession::new(&feature_name);
 
-    let sub_feature_name = Guid::new_guid().to_string();
+    let sub_feature_name = Uuid::new_v4().to_string();
     let sub_feature = instance.sub_feature(&sub_feature_name);
 
     assert_eq!(sub_feature.feature_name(), sub_feature_name);
     let start_message = logger.logs().last().map(|(_, message)| message.clone()).unwrap_or_default();
     // The reference of the sub-feature is not the empty one.
     assert!(start_message.contains("Feature Start. Reference="));
-    assert!(!start_message.contains(&format!("Reference={},", Guid::EMPTY)));
+    assert!(!start_message.contains(&format!("Reference={},", Uuid::nil())));
     // Its parent is the session.
     assert!(start_message.contains(&format!(", Parent Reference={}", instance.feature_reference())));
 
@@ -61,7 +62,7 @@ fn sub_feature_returns_child_session_with_parent_reference() {
 #[test]
 fn on_exception_does_not_throw() {
     let _scope = AppLocatorScope::new();
-    let instance = DefaultFeatureUsageTrackingSession::new(&Guid::new_guid().to_string());
+    let instance = DefaultFeatureUsageTrackingSession::new(&Uuid::new_v4().to_string());
 
     assert!(!panics(|| instance.on_exception(&TestException::with_message("boom"))));
     instance.dispose();
@@ -70,7 +71,7 @@ fn on_exception_does_not_throw() {
 #[test]
 fn dispose_does_not_throw() {
     let _scope = AppLocatorScope::new();
-    let instance = DefaultFeatureUsageTrackingSession::new(&Guid::new_guid().to_string());
+    let instance = DefaultFeatureUsageTrackingSession::new(&Uuid::new_v4().to_string());
 
     assert!(!panics(|| instance.dispose()));
 }
