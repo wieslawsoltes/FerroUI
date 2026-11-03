@@ -488,9 +488,11 @@ impl CartesianChartEngine {
                 SeriesKind::Pie
                 | SeriesKind::PolarLine
                 | SeriesKind::Sankey
-                | SeriesKind::Treemap => {
+                | SeriesKind::Treemap
+                | SeriesKind::HeatLand => {
                     return Err(ChartError::InvalidData(
-                        "a pie, polar, Sankey or treemap series requires its matching chart engine"
+                        "a pie, polar, Sankey, treemap or heat land series requires its matching \
+                         chart engine"
                             .into(),
                     ));
                 }
