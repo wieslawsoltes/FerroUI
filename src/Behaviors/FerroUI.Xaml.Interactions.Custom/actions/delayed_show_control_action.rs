@@ -4,12 +4,12 @@ use super::control_of;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, ElementRef, FerroObjectImpl, FerroProperty, Nullable, Ref, StyledElementImpl, StyledProperty, Visual};
 use ferroui_controls::Control;
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::DispatcherTimer;
 use std::cell::RefCell;
 use ferroui_xaml_interactivity::{StyledElementAction, StyledElementActionImpl};
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Shows the target control (or the sender) after a delay.
 #[repr(C)]
@@ -31,8 +31,8 @@ ferroui_base::ferro_impl_classes!(DelayedShowControlAction: FerroObjectImpl, Sty
 ferro_properties! {
     impl DelayedShowControlAction {
         /// Identifies the `Delay` property.
-        pub fn delay_property() -> StyledProperty<SignedDuration> {
-            FerroProperty::register::<DelayedShowControlAction, _>("Delay", SignedDuration::from_milliseconds(500.0))
+        pub fn delay_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<DelayedShowControlAction, _>("Delay", Duration::from_millis(500))
         }
 
         /// Identifies the `TargetControl` property.
@@ -60,7 +60,7 @@ impl StyledElementActionImpl for DelayedShowControlAction {
         // The subscription of the tick, which the handler removes (`timer.Tick -= OnTick`).
         let tick: Rc<RefCell<Option<Rc<dyn IDisposable>>>> = Rc::new(RefCell::new(None));
         let timer = DispatcherTimer::new();
-        timer.set_interval(this.delay().to_duration().unwrap_or_default());
+        timer.set_interval(this.delay());
         let on_tick = {
             let tick = tick.clone();
             move |timer: &DispatcherTimer| {
@@ -101,11 +101,11 @@ impl DelayedShowControlAction {
     }
 
     /// Gets or sets the delay before the control is shown. This is a property of the object model.
-    pub fn delay(&self) -> SignedDuration {
+    pub fn delay(&self) -> Duration {
         self.get_value(Self::delay_property())
     }
 
-    pub fn set_delay(&self, value: SignedDuration) {
+    pub fn set_delay(&self, value: Duration) {
         self.set_value(Self::delay_property(), value)
     }
 }

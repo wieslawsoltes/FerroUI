@@ -8,6 +8,7 @@ use ferroui_base::{
 };
 use ferroui_xaml_interactivity::{StyledElementAction, StyledElementActionImpl};
 use std::rc::Rc;
+use std::time::Duration;
 
 /// An action that waits for a specified duration.
 ///
@@ -25,8 +26,13 @@ ferroui_base::ferro_impl_classes!(DelayAction: FerroObjectImpl, StyledElementImp
 ferro_properties! {
     impl DelayAction {
         /// Identifies the `Duration` property.
-        pub fn duration_property() -> StyledProperty<SignedDuration> {
-            FerroProperty::register::<DelayAction, _>("Duration", SignedDuration::ZERO)
+        ///
+        /// A duration as long as the longest time span (`TimeSpan.MaxValue`) or longer, such as
+        /// [`Duration::MAX`], waits forever: the `Timeout.InfiniteTimeSpan` of the reference
+        /// (minus one millisecond) is a negative time span, which is not a `Duration`
+        /// (DEVIATIONS.md, Behaviors).
+        pub fn duration_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<DelayAction, _>("Duration", Duration::ZERO)
         }
     }
 }
@@ -34,17 +40,12 @@ ferro_properties! {
 impl StyledElementActionImpl for DelayAction {
     fn execute(this: &Self, _sender: Option<&BoxedValue>, _parameter: Option<&BoxedValue>) -> Option<BoxedValue> {
         let duration = this.duration();
-        // Minus one millisecond waits forever (`Timeout.InfiniteTimeSpan`).
-        if duration == SignedDuration::from_milliseconds(-1.0) {
+        // The longest durations wait forever (`Timeout.InfiniteTimeSpan` of the reference): the
+        // conversion to a time span saturates at the longest one.
+        if SignedDuration::from(duration) == SignedDuration::MAX_VALUE {
             return Some(Rc::new(ActionTask::spawn(std::future::pending::<()>())));
         }
 
-        let Some(duration) = duration.to_duration() else {
-            panic!(
-                "The value needs to translate in milliseconds to -1 (signifying an infinite timeout), 0, or a positive \
-                 integer less than or equal to the maximum allowed timer duration. (Parameter 'delay')"
-            );
-        };
         Some(Rc::new(ActionTask::spawn(delay(duration))))
     }
 }
@@ -60,12 +61,13 @@ impl DelayAction {
         instantiate(Self::construct())
     }
 
-    /// Gets or sets the duration to wait. This is a property of the object model.
-    pub fn duration(&self) -> SignedDuration {
+    /// Gets or sets the duration to wait; [`Duration::MAX`] waits forever (see
+    /// [`duration_property`](Self::duration_property)). This is a property of the object model.
+    pub fn duration(&self) -> Duration {
         self.get_value(Self::duration_property())
     }
 
-    pub fn set_duration(&self, value: SignedDuration) {
+    pub fn set_duration(&self, value: Duration) {
         self.set_value(Self::duration_property(), value)
     }
 }

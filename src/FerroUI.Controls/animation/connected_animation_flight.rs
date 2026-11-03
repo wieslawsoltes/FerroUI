@@ -691,13 +691,13 @@ impl ConnectedAnimationFlight {
                 )
             })
         };
-        let service_duration = Duration::from_secs_f64(self.service.default_duration().total_seconds().max(0.001));
+        let service_duration = self.service.default_duration().max(Duration::from_millis(1));
         if let Some(direct) =
             configuration.and_then(|configuration| configuration.downcast_ref::<DirectConnectedAnimationConfiguration>())
         {
             let duration = direct
                 .duration()
-                .map(|duration| Duration::from_secs_f64(duration.total_seconds().max(0.001)))
+                .map(|duration| duration.max(Duration::from_millis(1)))
                 .unwrap_or(DIRECT_DURATION);
             let easing = CompositionEasingFunction::create_cubic_bezier_easing_function(
                 &self.compositor,

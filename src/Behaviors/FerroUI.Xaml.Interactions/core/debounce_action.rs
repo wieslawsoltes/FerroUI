@@ -1,7 +1,6 @@
 //! Port of `Core/DebounceAction.cs`.
 
 use super::{attach_actions_to_logical_tree, detach_actions_from_logical_tree};
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::DispatcherTimer;
@@ -12,6 +11,7 @@ use ferroui_base::{
 use ferroui_xaml_interactivity::{ActionCollection, Interaction, StyledElementAction, StyledElementActionImpl};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Duration;
 
 /// An action that will execute its child actions after a specified delay. If invoked again before
 /// the delay elapses, the timer is reset.
@@ -36,8 +36,8 @@ ferro_class_info!(DebounceAction {
 ferro_properties! {
     impl DebounceAction {
         /// Identifies the `Delay` property.
-        pub fn delay_property() -> StyledProperty<SignedDuration> {
-            FerroProperty::register::<DebounceAction, _>("Delay", SignedDuration::ZERO)
+        pub fn delay_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<DebounceAction, _>("Delay", Duration::ZERO)
         }
 
         /// Identifies the `Actions` property.
@@ -96,8 +96,9 @@ impl StyledElementActionImpl for DebounceAction {
     /// Starts (or restarts) the delay; the child actions run with the sender and the parameter
     /// of the last invocation when it elapses. Returns nothing.
     ///
-    /// # Panics
-    /// Panics when the delay is negative (the argument exception of the timer of the reference).
+    /// The reference throws an argument exception for a negative delay; a `Duration` cannot be
+    /// negative, and markup and bindings refuse a negative time span (decision O2 of
+    /// docs/idiomatic-rust-signatures.md).
     fn execute(this: &Self, sender: Option<&BoxedValue>, parameter: Option<&BoxedValue>) -> Option<BoxedValue> {
         *this.last_sender.borrow_mut() = sender.cloned();
         *this.last_parameter.borrow_mut() = parameter.cloned();
@@ -117,10 +118,7 @@ impl StyledElementActionImpl for DebounceAction {
             timer.clone()
         };
 
-        let Some(interval) = this.delay().to_duration() else {
-            panic!("TimeSpan period must be greater than or equal to zero. (Parameter 'value')");
-        };
-        timer.set_interval(interval);
+        timer.set_interval(this.delay());
         timer.stop();
         timer.start();
 
@@ -146,11 +144,11 @@ impl DebounceAction {
 
     /// Gets or sets the delay to wait before executing the actions. This is a property of the
     /// object model.
-    pub fn delay(&self) -> SignedDuration {
+    pub fn delay(&self) -> Duration {
         self.get_value(Self::delay_property())
     }
 
-    pub fn set_delay(&self, value: SignedDuration) {
+    pub fn set_delay(&self, value: Duration) {
         self.set_value(Self::delay_property(), value)
     }
 
