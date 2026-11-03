@@ -246,3 +246,79 @@ fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error
         );
     }
 }
+
+// --- the Rust forms of a URI ----------------------------------------------------------------
+//
+// Not from upstream (C5 of #423, section 3.5 of docs/idiomatic-rust-signatures.md): a property
+// that declares a `UriRef` or a `url::Url` is a `System.Uri` property, as one that declares the
+// port `Uri`. A URI literal sets the reference of its text, with the rule of markup (a leading
+// `/` is relative); a relative reference is not a URL, and a text the URL parser rejects is
+// neither. The compiled forms of these tests are in `emitter::differential_tests`.
+
+/// A `Linked` (`support::emitter`) with the attributes `attributes`.
+fn linked(attributes: &str) -> String {
+    format!(
+        "<t:Linked xmlns='https://github.com/ferroui' xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests' {attributes}/>"
+    )
+}
+
+#[test]
+fn a_uri_literal_sets_a_uri_ref_and_a_url_property() {
+    use crate::support::emitter::Linked;
+    use ferroui_base::utilities::UriRef;
+
+    let _base = xaml_test_base();
+    let target = parse::<Ref<Linked>>(&linked("Source='Values.xaml' Address='https://ferroui.net/a?b=c#d'"));
+    assert_eq!(target.source(), Some(UriRef::Relative("Values.xaml".into())));
+    assert_eq!(target.address().as_ref().map(url::Url::as_str), Some("https://ferroui.net/a?b=c#d"));
+
+    // A leading `/` is relative; an absolute reference is the URL of its text, with its
+    // fragment.
+    let target = parse::<Ref<Linked>>(&linked("Source='/Styles/Base.xaml' Address='fonts:SystemFonts#Inter'"));
+    assert_eq!(target.source(), Some(UriRef::Relative("/Styles/Base.xaml".into())));
+    assert_eq!(target.address().as_ref().map(url::Url::as_str), Some("fonts:SystemFonts#Inter"));
+    let target = parse::<Ref<Linked>>(&linked("Source='ferres://App/Assets/a.xaml#x'"));
+    assert_eq!(target.source(), Some(UriRef::parse("ferres://app/Assets/a.xaml#x").unwrap()));
+    assert_eq!(target.address(), None);
+}
+
+#[test]
+fn a_relative_uri_literal_for_a_url_property_is_an_error() {
+    use crate::support::emitter::Linked;
+
+    let _base = xaml_test_base();
+    let error = match try_parse::<Ref<Linked>>(&linked("Address='Values.xaml'")) {
+        Ok(_) => panic!("a relative reference is not a URL"),
+        Err(error) => error,
+    };
+    let described = describe(&error);
+    assert!(described.contains("The URI Values.xaml is relative and cannot be converted to a Url."), "{described}");
+
+    // A text the URL parser rejects is neither a reference nor a URL.
+    let error = match try_parse::<Ref<Linked>>(&linked("Source='http://host:99999/'")) {
+        Ok(_) => panic!("the port is out of range"),
+        Err(error) => error,
+    };
+    let described = describe(&error);
+    assert!(described.contains("The URI http://host:99999/ is not a valid Url: invalid port number."), "{described}");
+}
+
+#[test]
+fn a_uri_resource_sets_a_uri_ref_and_a_url_property() {
+    use crate::support::emitter::Linked;
+    use ferroui_base::utilities::UriRef;
+
+    let _base = xaml_test_base();
+    let resources = parse::<Ref<ResourceDictionary>>(
+        r#"<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System"
+                    xmlns:t="clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests">
+    <sys:Uri x:Key="Link">https://ferroui.net/</sys:Uri>
+    <t:Linked x:Key="Linked" Source="{StaticResource Link}" Address="{StaticResource Link}"/>
+</ResourceDictionary>"#,
+    );
+    let target = object_of::<Linked>(&resources.get(&"Linked".into()));
+    assert_eq!(target.source(), Some(UriRef::parse("https://ferroui.net/").unwrap()));
+    assert_eq!(target.address().as_ref().map(url::Url::as_str), Some("https://ferroui.net/"));
+}

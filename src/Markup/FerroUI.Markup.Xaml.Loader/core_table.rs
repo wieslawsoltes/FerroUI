@@ -537,6 +537,10 @@ pub fn core_handles() -> Vec<(String, CoreRef)> {
     reference(&mut add, "&'static ::ferroui_base::TypeInfo", "System.Type");
     reference(&mut add, "::ferroui_base::data::core::ValueType", "System.Type");
     reference(&mut add, "::ferroui_base::utilities::Uri", "System.Uri");
+    // The other Rust forms of a URI (C5 of #423): the reference that can be relative and the
+    // absolute URL.
+    reference(&mut add, "::ferroui_base::utilities::UriRef", "System.Uri");
+    reference(&mut add, "::url::Url", "System.Uri");
     reference(&mut add, "::ferroui_base::metadata::MarkupDelegate", "System.Delegate");
     reference(&mut add, "::ferroui_base::data::BindingError", "System.Exception");
     reference(&mut add, "::std::rc::Rc<dyn ::ferroui_base::reactive::IDisposable>", "System.IDisposable");

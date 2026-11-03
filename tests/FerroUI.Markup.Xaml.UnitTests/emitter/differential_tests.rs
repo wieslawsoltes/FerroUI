@@ -183,6 +183,81 @@ fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error
     }
 }
 
+/// A `Linked` (`support::emitter`) with the attributes `attributes`.
+fn linked(attributes: &str) -> String {
+    format!(
+        "<t:Linked xmlns='https://github.com/ferroui' xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests' {attributes}/>"
+    )
+}
+
+/// Not from upstream (C5 of #423, section 3.5 of docs/idiomatic-rust-signatures.md): the
+/// compiled form of `xaml::ferro_intrinsics_tests::a_uri_literal_sets_a_uri_ref_and_a_url_property`.
+/// A URI literal for a property that declares a `UriRef` or a `url::Url` is passed through the
+/// cast of the untyped value conversions (`rt::cast`), which the compiler writes only for a
+/// literal that is one; the run-time loader sets the same values.
+#[test]
+fn a_uri_literal_sets_a_uri_ref_and_a_url_property() {
+    use crate::support::emitter::Linked;
+    use ferroui_base::utilities::UriRef;
+
+    let _app = xaml_test_base();
+    let document = linked("Source='Values.xaml' Address='https://ferroui.net/a'");
+    let generated = generate_file(
+        generated::ASSEMBLY_NAME,
+        generated::ROOT_URI,
+        &[("linked_uris.xaml", document.as_str())],
+        &RuntimeXamlLoaderConfiguration::new(),
+        &[],
+    );
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    for accessor in ["source_property(), rt::cast(", "address_property(), rt::cast("] {
+        assert!(generated.source.contains(accessor), "{accessor}: {}", generated.source);
+    }
+
+    let loaded = try_load(&document).expect("the control loads");
+    let target = ValueTypes::as_object(&*loaded).and_then(|object| object.cast::<Linked>()).expect("a linked control");
+    assert_eq!(target.source(), Some(UriRef::Relative("Values.xaml".into())));
+    assert_eq!(target.address().as_ref().map(url::Url::as_str), Some("https://ferroui.net/a"));
+}
+
+/// Not from upstream (C5 of #423): a relative URI literal for a property that declares a
+/// `url::Url` is an error of the compiler, which names the property and the URI, and a load
+/// error of the run-time loader; so is a text the URL parser rejects, for a `UriRef` too.
+#[test]
+fn a_relative_uri_literal_for_a_url_property_is_an_error() {
+    let _app = xaml_test_base();
+    for (attributes, refused, loaded) in [
+        (
+            "Address='Values.xaml'",
+            "Address: the URI Values.xaml is relative, and a `Url` cannot be relative",
+            "The URI Values.xaml is relative and cannot be converted to a Url.",
+        ),
+        (
+            "Source='http://host:99999/'",
+            "Source: the URI http://host:99999/ is not a valid URL (invalid port number)",
+            "The URI http://host:99999/ is not a valid Url: invalid port number.",
+        ),
+    ] {
+        let document = linked(attributes);
+        let generated = generate_file(
+            generated::ASSEMBLY_NAME,
+            generated::ROOT_URI,
+            &[("linked_relative_url.xaml", document.as_str())],
+            &RuntimeXamlLoaderConfiguration::new(),
+            &[],
+        );
+        let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+        assert!(reason.contains(refused), "{reason}");
+
+        let error = match try_load(&document) {
+            Ok(_) => panic!("{attributes}: the URI is refused"),
+            Err(error) => error,
+        };
+        let described = describe(&error);
+        assert!(described.contains(loaded), "{described}");
+    }
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")

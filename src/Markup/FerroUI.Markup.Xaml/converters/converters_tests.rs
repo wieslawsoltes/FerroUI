@@ -165,6 +165,68 @@ fn uri_type_converter_keeps_rooted_paths_relative() {
     assert_eq!(convert(&*conv, "http:").unwrap_err().message(), "Unable to parse URI: http:");
 }
 
+/// Not from upstream (C5 of #423): a URI converts to the other Rust forms of a URI, `UriRef`
+/// and `url::Url`; a relative reference is not a `Url` (section 3.5 of
+/// docs/idiomatic-rust-signatures.md).
+#[test]
+fn uri_type_converter_converts_to_a_uri_ref_and_a_url() {
+    use ferroui_base::utilities::{UriKind, UriRef};
+    use url::Url;
+
+    register_types();
+    let conv = FerroUriTypeConverter::new();
+    let (reference, url) = (ValueType::of::<UriRef>(), ValueType::of::<Url>());
+    let (nullable_reference, nullable_url) = (ValueType::of::<Option<UriRef>>(), ValueType::of::<Option<Url>>());
+    for destination in [reference, url, nullable_reference, nullable_url, ValueType::of::<String>()] {
+        assert!(conv.can_convert_to(None, destination), "{destination}");
+    }
+    assert!(!conv.can_convert_to(None, ValueType::of::<i32>()));
+
+    let to = |value: BoxedValue, destination: ValueType| conv.convert_to(None, None, Some(&value), destination);
+    let as_reference = |converted: Result<Option<BoxedValue>, XamlLoadError>| {
+        converted.unwrap().unwrap().downcast_ref::<UriRef>().cloned().unwrap()
+    };
+    let as_url = |converted: Result<Option<BoxedValue>, XamlLoadError>| {
+        converted.unwrap().unwrap().downcast_ref::<Url>().map(|url| url.as_str().to_string()).unwrap()
+    };
+
+    // Text and a `Uri` convert to the reference of the same text, with the rule of markup.
+    assert_eq!(as_reference(to(boxed("/Assets/icon.png".to_string()), reference)), UriRef::Relative("/Assets/icon.png".into()));
+    assert_eq!(as_reference(to(boxed("Values.xaml".to_string()), reference)), UriRef::Relative("Values.xaml".into()));
+    let resource = UriRef::parse("ferres://app/Assets/icon.png").unwrap();
+    assert_eq!(as_reference(to(boxed("ferres://app/Assets/icon.png".to_string()), reference)), resource);
+    let uri = Uri::new("ferres://app/Assets/icon.png", UriKind::Absolute).unwrap();
+    assert_eq!(as_reference(to(boxed(uri.clone()), reference)), resource);
+    assert_eq!(as_reference(to(boxed(resource.clone()), reference)), resource);
+
+    // An absolute one converts to its URL; a relative one is not a URL.
+    assert_eq!(as_url(to(boxed("ferres://app/Assets/icon.png".to_string()), url)), "ferres://app/Assets/icon.png");
+    assert_eq!(as_url(to(boxed(uri), url)), "ferres://app/Assets/icon.png");
+    assert_eq!(as_url(to(boxed(Url::parse("fonts:SystemFonts").unwrap()), url)), "fonts:SystemFonts");
+    let error = to(boxed("/Assets/icon.png".to_string()), url).unwrap_err();
+    assert_eq!(error.message(), "The URI /Assets/icon.png is relative and cannot be converted to a Url.");
+    assert!(to(boxed(UriRef::Relative("Values.xaml".into())), nullable_url).is_err());
+    let error = to(boxed("http://host:99999/".to_string()), reference).unwrap_err();
+    assert_eq!(error.message(), "The URI http://host:99999/ is not a valid Url: invalid port number.");
+    assert!(to(boxed("http:".to_string()), reference).is_err());
+    assert!(to(boxed(1i32), url).is_err());
+
+    // The nullable forms, and null.
+    let some = to(boxed("Values.xaml".to_string()), nullable_reference).unwrap().unwrap();
+    assert_eq!(some.downcast_ref::<Option<UriRef>>(), Some(&Some(UriRef::Relative("Values.xaml".into()))));
+    let some = to(boxed("fonts:SystemFonts".to_string()), nullable_url).unwrap().unwrap();
+    assert_eq!(some.downcast_ref::<Option<Url>>(), Some(&Some(Url::parse("fonts:SystemFonts").unwrap())));
+    let none = conv.convert_to(None, None, None, nullable_url).unwrap().unwrap();
+    assert_eq!(none.downcast_ref::<Option<Url>>(), Some(&None));
+    let none = conv.convert_to(None, None, None, nullable_reference).unwrap().unwrap();
+    assert_eq!(none.downcast_ref::<Option<UriRef>>(), Some(&None));
+    assert!(conv.convert_to(None, None, None, reference).is_err());
+
+    // To text, as every converter.
+    let text = to(boxed(resource), ValueType::of::<String>()).unwrap().unwrap();
+    assert_eq!(text.downcast_ref::<String>().map(String::as_str), Some("ferres://app/Assets/icon.png"));
+}
+
 // --- FontFamilyTypeConverter ----------------------------------------------
 
 #[test]

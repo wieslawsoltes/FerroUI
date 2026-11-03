@@ -34,8 +34,10 @@ pub use spring_solver::SpringSolver;
 pub use span_string_tokenizer::{FormatError, SpanStringTokenizer};
 
 mod uri;
+mod uri_ref;
 
 pub use uri::{Uri, UriFormatError, UriKind, UriToUrlError};
+pub use uri_ref::UriRef;
 
 mod disposable_lock;
 mod ref_countable;
