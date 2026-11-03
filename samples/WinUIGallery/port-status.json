@@ -3306,6 +3306,265 @@
         }
       ]
     },
+    "ItemsRepeater": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ItemsRepeater.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/repeater_samples.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs",
+        "src/FerroUI.Controls.Repeater/item_template_wrapper.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/stack_layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/uniform_grid_layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/flow_layout.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "basic_repeater_adds_and_removes_bars_and_switches_layout_and_template"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "activity_feed_layout_alternates_narrow_and_wide_tiles_with_parity_templates"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "template_selectors_choose_by_parity_and_by_item_type"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "flow_layout_options_update_the_layout_and_the_realized_count"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "mixed_type_repeater_presents_numbers_and_text_with_their_templates"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "nested_repeaters_present_each_category_with_its_own_items"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "animated_scrolling_items_colour_the_rectangle_and_announce_the_selection"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "animated_scrolling_scale_follows_the_distance_from_the_viewport_centre"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "content_heavy_repeater_filters_and_sorts_recipes_in_columns"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "repeater_pages_and_their_handlers_release_their_native_controls"
+        }
+      ],
+      "notes": "All six catalog examples (and the nested repeaters of the source page, which has no sample definition of its own) use the native ItemsRepeater of ferroui-controls-repeater with the layouts, element factories and selectors of the port; the Gallery layouts ActivityFeedLayout and VariedImageSizeLayout are Rust VirtualizingLayouts; x:Bind becomes {Binding} over markup types and the C# handlers are Rust. Four examples are ported; the animated scrolling and content-heavy examples miss the accessibility announcements and the key-index mapping of their custom source. ThemeResource becomes DynamicResource; text styles are written as their sizes and weights. Rendering and host accessibility acceptance remain pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterBasicNonInteractiveItems.txt",
+          "source_sha256": "a54902629d217b8132d611e373244ca8a79916c27bd2eb8ad0b81c43d31e7fb6",
+          "status": "ported",
+          "notes": "Native ItemsRepeater over an observable list of Bar models: Add Item and Remove Item (disabled at zero items) and the layout choice set the vertical StackLayout, horizontal StackLayout or UniformGridLayout with the HorizontalBar, VerticalBar or Circular template and the MaxWidth of the source handler. The templates bind the Bar sizes with {Binding} (x:Bind). System.Random is a seeded generator; the code substitutions of the source viewer are not updated by the options.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "basic_repeater_adds_and_removes_bars_and_switches_layout_and_template"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterVirtualizingScrollableListItems.txt",
+          "source_sha256": "e794d642b11d26f937ec1bc71d9365d1ba5b78a21888fda9ec477d90914b7089",
+          "status": "ported",
+          "notes": "ItemsRepeaterScrollHost and ScrollViewer around a repeater of 500 numbers; MyDataTemplateSelector is a native IDataTemplateSelector (even Normal, odd Accent); the Gallery ActivityFeedLayout is ported to a Rust VirtualizingLayout (rows of two narrow and one wide tile, virtualized by rows, its state per context), and the option switches to the UniformGridLayout of the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "activity_feed_layout_alternates_narrow_and_wide_tiles_with_parity_templates"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "template_selectors_choose_by_parity_and_by_item_type"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/FlowLayoutVirtualization.txt",
+          "source_sha256": "8aee680fc9a70616c38dd9957d4e6e74e8a7f280901fbd4068297ec41255261b",
+          "status": "ported",
+          "notes": "FlowLayout over 500 items with the orientation, line alignment, minimum item spacing and line spacing options; ElementPrepared and ElementClearing keep the realized elements and update the count once per dispatcher turn (TryEnqueue). ScrollMode has no FerroUI counterpart: the orientation sets the scroll bar visibilities, a disabled scroll bar disabling scrolling. Header becomes a label.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "flow_layout_options_update_the_layout_and_the_realized_count"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsrepeaterMixedTypeCollection.txt",
+          "source_sha256": "6d7bf0d352c3b812edccc27461c92be983ee8b50074abd23d23a8c46b73067c4",
+          "status": "ported",
+          "notes": "The mixed list of numbers and text in a UniformGridLayout; StringOrIntTemplateSelector is a native IDataTemplateSelector choosing IntDataTemplate or StringDataTemplate by the type of the item. HeaderTextBlockStyle is written as its size and weight.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "mixed_type_repeater_presents_numbers_and_text_with_their_templates"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "template_selectors_choose_by_parity_and_by_item_type"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterAnimatedScrollingContentDisplay.txt",
+          "source_sha256": "b9ce86b8eac579c012bf04c28a0d573374348ce485d2a86a4c8120a9a1d2fefe",
+          "status": "partial",
+          "notes": "Buttons of the 20 colours: a click colours the rectangle and names the selected button; GotFocus remembers the index and centres the item; GettingFocus returns focus from outside to that item; Home and End reach the first and the last item. Adapted: the composition ExpressionAnimation on the scroll manipulation property set becomes a scale set from the scroll offset after each layout pass and scroll change (same expression, about the item centre); StartBringIntoView with VerticalAlignmentRatio 0.5 becomes a scroll offset that centres the item, without the animation. Pending: the accessibility announcement of UIHelper.AnnounceActionForAccessibility (no notification event on FerroUI automation peers).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "animated_scrolling_items_colour_the_rectangle_and_announce_the_selection"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "animated_scrolling_scale_follows_the_distance_from_the_viewport_centre"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterVirtualizedContentHeavyLayout.txt",
+          "source_sha256": "b3778bae44caa700e84f3be2b66c0843d141355d74f63bf8086b55f5b1b1f7ae",
+          "status": "partial",
+          "notes": "The Gallery VariedImageSizeLayout is ported to a Rust VirtualizingLayout (columns of 200, the lowest column first, bounds cached until the items change); 1000 generated recipes (seeded generator) bound with {Binding} over the Recipe markup type; the ingredient filter (ignoring case) and the two sort orders replace the items. Pending: the IKeyIndexMapping of the custom MyItemsSource (an observable list is replaced instead) and the automation notification of the result count.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "content_heavy_repeater_filters_and_sorts_recipes_in_columns"
+            }
+          ]
+        }
+      ]
+    },
+    "LayoutPanel": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/LayoutPanel.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/repeater_samples.rs",
+        "src/FerroUI.Controls.Repeater/layout_panel.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/stack_layout.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "layout_panel_page_arranges_its_children_with_the_featured_tile_layout"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "layout_panel_switches_to_a_stack_and_follows_the_spacing"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "repeater_pages_and_their_handlers_release_their_native_controls"
+        }
+      ],
+      "notes": "The catalog example uses the native LayoutPanel with its border, corner radius and padding around the layout; the FeaturedTileLayout of the source (Samples/LayoutPanel/FeaturedTileLayout.cs) is a Rust NonVirtualizingLayout, and the options switch to a vertical StackLayout and set the spacing of both, as the C# handlers do. Header becomes a label, ThemeResource becomes DynamicResource. Rendering and host accessibility acceptance remain pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/LayoutPanel/LayoutPanelCustomLayout.txt",
+          "source_sha256": "c303b093a0f2329199d65fd9a15c0485099384d37c6acc99f0b848c3e323b5d2",
+          "status": "ported",
+          "notes": "The nine children arranged by the ported FeaturedTileLayout (the first spanning the width, then rows of two columns as high as their taller child), the layout choice (featured tile or vertical stack) and the spacing slider, with the handlers of the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "layout_panel_page_arranges_its_children_with_the_featured_tile_layout"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "layout_panel_switches_to_a_stack_and_follows_the_spacing"
+            }
+          ]
+        }
+      ]
+    },
+    "ItemsView": {
+      "status": "pending",
+      "implementation": [],
+      "tests": [],
+      "notes": "G1 (#418) found no WinUI ItemsView on main: ferroui-controls-repeater has the ItemsRepeater, LinedFlowLayout and SelectionModel, but not ItemsView or ItemContainer (ferroui_controls::ItemsView in items_source.rs is an unrelated view of items). The three examples need its container selection modes, ItemInvoked and the ScrollView it hosts; the control is G2 work.",
+      "examples": []
+    },
     "SystemBackdropElement": {
       "status": "pending",
       "implementation": [],

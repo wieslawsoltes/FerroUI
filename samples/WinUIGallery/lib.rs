@@ -25,6 +25,7 @@ mod media_samples;
 pub mod navigation;
 mod navigation_view_samples;
 mod platform_samples;
+mod repeater_samples;
 mod sizing_sample;
 mod text_samples;
 mod window_samples;
@@ -64,3 +65,6 @@ mod window_samples_tests;
 
 #[cfg(test)]
 mod text_samples_tests;
+
+#[cfg(test)]
+mod repeater_samples_tests;
