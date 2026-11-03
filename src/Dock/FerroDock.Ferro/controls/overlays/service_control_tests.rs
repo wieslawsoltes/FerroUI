@@ -9,30 +9,29 @@ use ferroui_reactive::concurrency::{IScheduler, ImmediateScheduler};
 use ferroui_reactiveui::{ICommand, RxSchedulers};
 use ferroui_system::component_model::INotifyPropertyChanged;
 use ferroui_system::events::Event;
-use ferroui_system::threading::{
-    current_synchronization_context, set_synchronization_context, tasks::Task,
-    SynchronizationContext,
-};
+use ferroui_system::task::{set_current_schedule, Schedule};
+use ferroui_system::threading::tasks::Task;
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::Arc;
 
-struct Environment(Option<Arc<dyn SynchronizationContext>>, Rc<dyn IScheduler>);
+/// No current schedule (the synchronization context of the reference), so that the services use
+/// the Rx main-thread scheduler, the immediate one; both are restored when dropped.
+struct Environment(Option<Arc<dyn Schedule>>, Rc<dyn IScheduler>);
 impl Environment {
     fn new() -> Self {
         let old = Self(
-            current_synchronization_context(),
+            set_current_schedule(None),
             RxSchedulers::main_thread_scheduler(),
         );
-        set_synchronization_context(None);
         RxSchedulers::set_main_thread_scheduler(ImmediateScheduler::instance());
         old
     }
 }
 impl Drop for Environment {
     fn drop(&mut self) {
-        set_synchronization_context(self.0.take());
+        drop(set_current_schedule(self.0.take()));
         RxSchedulers::set_main_thread_scheduler(self.1.clone());
     }
 }
