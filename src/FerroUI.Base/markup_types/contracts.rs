@@ -5,7 +5,7 @@
 //!
 //! Handles compare by identity.
 
-use crate::data::core::ValueTypes;
+use crate::data::core::{NullableRegistration, ValueTypes};
 use crate::ferro_markup_type;
 use crate::metadata::{MarkupType, MarkupTyped};
 use std::rc::Rc;
@@ -412,10 +412,12 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// (The handles of contracts implemented by classes are also registered by
 /// those classes when they are initialised.)
 pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::ISolidColorBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IImmutableBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IImmutableSolidColorBrush>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Rc<dyn crate::media::IBrush>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::ISolidColorBrush>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::IImmutableBrush>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::IImmutableSolidColorBrush>>(),
+    ] });
     // A theme variant provider is a resource provider.
     ValueTypes::register_cast::<Rc<dyn crate::controls::IThemeVariantProvider>, Rc<dyn crate::controls::IResourceProvider>>(
         |provider| provider.clone(),
@@ -430,36 +432,38 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<Rc<dyn crate::media::IImmutableSolidColorBrush>, Rc<dyn crate::media::IImmutableBrush>>(
         |b| b.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IImage>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IImageBrushSource>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::imaging::IBitmap>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::ITransform>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::fonts::IFontCollection>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IPen>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IDashStyle>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IExperimentalAcrylicMaterial>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::effects::IEffect>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::input::ICommand>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::ITransition>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::IPageTransition>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::IClock>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::platform::storage::IStorageProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::TextTrimming>>();
-    ValueTypes::register_nullable::<crate::controls::NameScopeRef>();
-    ValueTypes::register_nullable::<Rc<dyn crate::INamed>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::styling::IStyle>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::styling::SetterBase>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::styling::ITemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::controls::IResourceProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::controls::IResourceDictionary>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::controls::IThemeVariantProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::controls::IDeferredContent>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::data::converters::IValueConverter>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::data::converters::IMultiValueConverter>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::easings::IEasing>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::IAnimation>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::IAnimationSetter>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::ICustomAnimator>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::data::BindingBase>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Rc<dyn crate::media::IImage>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::IImageBrushSource>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::imaging::IBitmap>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::ITransform>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::fonts::IFontCollection>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::IPen>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::IDashStyle>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::IExperimentalAcrylicMaterial>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::effects::IEffect>>(),
+        NullableRegistration::of::<Rc<dyn crate::input::ICommand>>(),
+        NullableRegistration::of::<Rc<dyn crate::animation::ITransition>>(),
+        NullableRegistration::of::<Rc<dyn crate::animation::IPageTransition>>(),
+        NullableRegistration::of::<Rc<dyn crate::animation::IClock>>(),
+        NullableRegistration::of::<Rc<dyn crate::platform::storage::IStorageProvider>>(),
+        NullableRegistration::of::<Rc<dyn crate::media::TextTrimming>>(),
+        NullableRegistration::of::<crate::controls::NameScopeRef>(),
+        NullableRegistration::of::<Rc<dyn crate::INamed>>(),
+        NullableRegistration::of::<Rc<dyn crate::styling::IStyle>>(),
+        NullableRegistration::of::<Rc<dyn crate::styling::SetterBase>>(),
+        NullableRegistration::of::<Rc<dyn crate::styling::ITemplate>>(),
+        NullableRegistration::of::<Rc<dyn crate::controls::IResourceProvider>>(),
+        NullableRegistration::of::<Rc<dyn crate::controls::IResourceDictionary>>(),
+        NullableRegistration::of::<Rc<dyn crate::controls::IThemeVariantProvider>>(),
+        NullableRegistration::of::<Rc<dyn crate::controls::IDeferredContent>>(),
+        NullableRegistration::of::<Rc<dyn crate::data::converters::IValueConverter>>(),
+        NullableRegistration::of::<Rc<dyn crate::data::converters::IMultiValueConverter>>(),
+        NullableRegistration::of::<Rc<dyn crate::animation::easings::IEasing>>(),
+        NullableRegistration::of::<Rc<dyn crate::animation::IAnimation>>(),
+        NullableRegistration::of::<Rc<dyn crate::animation::IAnimationSetter>>(),
+        NullableRegistration::of::<Rc<dyn crate::animation::ICustomAnimator>>(),
+        NullableRegistration::of::<Rc<dyn crate::data::BindingBase>>(),
+    ] });
 
 }

@@ -2,7 +2,7 @@
 //! enumerations, the paragraph tab stops and the input scopes
 //! (`docs/porting/winui-rich-text.md`).
 
-use crate::data::core::ValueTypes;
+use crate::data::core::{NullableRegistration, ValueTypes};
 use crate::input::InputScopeNameValue;
 use crate::media::text_formatting::{TabAlignment, TabLeader, TextTabStops};
 use crate::media::{
@@ -26,15 +26,17 @@ pub(super) const TYPES: &[&MarkupType] = &[
 ];
 
 pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<FontCapitals>();
-    ValueTypes::register_nullable::<FontEastAsianLanguage>();
-    ValueTypes::register_nullable::<FontEastAsianWidths>();
-    ValueTypes::register_nullable::<FontFraction>();
-    ValueTypes::register_nullable::<FontNumeralAlignment>();
-    ValueTypes::register_nullable::<FontNumeralStyle>();
-    ValueTypes::register_nullable::<FontVariants>();
-    ValueTypes::register_nullable::<InputScopeNameValue>();
-    ValueTypes::register_nullable::<TabAlignment>();
-    ValueTypes::register_nullable::<TabLeader>();
-    ValueTypes::register_nullable::<TextTabStops>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<FontCapitals>(),
+        NullableRegistration::of::<FontEastAsianLanguage>(),
+        NullableRegistration::of::<FontEastAsianWidths>(),
+        NullableRegistration::of::<FontFraction>(),
+        NullableRegistration::of::<FontNumeralAlignment>(),
+        NullableRegistration::of::<FontNumeralStyle>(),
+        NullableRegistration::of::<FontVariants>(),
+        NullableRegistration::of::<InputScopeNameValue>(),
+        NullableRegistration::of::<TabAlignment>(),
+        NullableRegistration::of::<TabLeader>(),
+        NullableRegistration::of::<TextTabStops>(),
+    ] });
 }

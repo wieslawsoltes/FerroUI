@@ -7,7 +7,7 @@
 use crate::utilities::CultureInfo;
 use crate::animation::{IAnimation, IAnimationSetter, ITransition, KeyFrame, KeyFrames, Transitions};
 use crate::collections::{FerroDictionary, FerroList};
-use crate::data::core::ValueTypes;
+use crate::data::core::{NullableRegistration, ValueTypes};
 use crate::data::{
     BindingBase, BindingMode, BindingOperations, BindingPriority, CompiledBinding, CompiledBindingPath, MultiBinding, ReflectionBinding,
     RelativeSource, RelativeSourceMode, TemplateBinding, TreeType, UpdateSourceTrigger,
@@ -1070,56 +1070,58 @@ pub(super) fn register_value_types() {
     // one is null without it (`Option<Vec<T>>`). The run-time XAML loader states the same
     // nine when its type system is created; a process that loads compiled markup alone
     // never creates one, and reads such a property all the same.
-    ValueTypes::register_nullable::<Vec<bool>>();
-    ValueTypes::register_nullable::<Vec<u8>>();
-    ValueTypes::register_nullable::<Vec<i32>>();
-    ValueTypes::register_nullable::<Vec<i64>>();
-    ValueTypes::register_nullable::<Vec<f32>>();
-    ValueTypes::register_nullable::<Vec<f64>>();
-    ValueTypes::register_nullable::<Vec<String>>();
-    ValueTypes::register_nullable::<Vec<Point>>();
-    ValueTypes::register_nullable::<Vec<BoxedValue>>();
-    ValueTypes::register_nullable::<Rc<NumberFormatInfo>>();
-    ValueTypes::register_nullable::<Transitions>();
-    ValueTypes::register_nullable::<GradientStops>();
-    ValueTypes::register_nullable::<PathFigures>();
-    ValueTypes::register_nullable::<PathSegments>();
-    ValueTypes::register_nullable::<Points>();
-    ValueTypes::register_nullable::<GeometryCollection>();
-    ValueTypes::register_nullable::<Transforms>();
-    ValueTypes::register_nullable::<DrawingCollection>();
-    ValueTypes::register_nullable::<MediaCollection<f64>>();
-    ValueTypes::register_nullable::<RoutedEvent>();
-    ValueTypes::register_nullable::<FerroList<Point>>();
-    ValueTypes::register_nullable::<FerroList<String>>();
-    ValueTypes::register_nullable::<FerroList<Ref<GradientStop>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn ITransition>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<KeyFrame>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<InputScopeName>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<PathFigure>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<PathSegment>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<Drawing>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<Transform>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<Geometry>>>();
-    ValueTypes::register_nullable::<Selector>();
-    ValueTypes::register_nullable::<StyleQuery>();
-    ValueTypes::register_nullable::<StyleChildren>();
-    ValueTypes::register_nullable::<KeyFrames>();
-    ValueTypes::register_nullable::<GestureRecognizerCollection>();
-    ValueTypes::register_nullable::<Rc<Setter>>();
-    ValueTypes::register_nullable::<Rc<TargetPropertyPath>>();
-    ValueTypes::register_nullable::<Rc<RelativeSource>>();
-    ValueTypes::register_nullable::<Rc<CompiledBinding>>();
-    ValueTypes::register_nullable::<Rc<ReflectionBinding>>();
-    ValueTypes::register_nullable::<Rc<MultiBinding>>();
-    ValueTypes::register_nullable::<Rc<TemplateBinding>>();
-    ValueTypes::register_nullable::<FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn IAnimationSetter>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn IResourceProvider>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<KeyBinding>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn SetterBase>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn IAnimation>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn BindingBase>>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Vec<bool>>(),
+        NullableRegistration::of::<Vec<u8>>(),
+        NullableRegistration::of::<Vec<i32>>(),
+        NullableRegistration::of::<Vec<i64>>(),
+        NullableRegistration::of::<Vec<f32>>(),
+        NullableRegistration::of::<Vec<f64>>(),
+        NullableRegistration::of::<Vec<String>>(),
+        NullableRegistration::of::<Vec<Point>>(),
+        NullableRegistration::of::<Vec<BoxedValue>>(),
+        NullableRegistration::of::<Rc<NumberFormatInfo>>(),
+        NullableRegistration::of::<Transitions>(),
+        NullableRegistration::of::<GradientStops>(),
+        NullableRegistration::of::<PathFigures>(),
+        NullableRegistration::of::<PathSegments>(),
+        NullableRegistration::of::<Points>(),
+        NullableRegistration::of::<GeometryCollection>(),
+        NullableRegistration::of::<Transforms>(),
+        NullableRegistration::of::<DrawingCollection>(),
+        NullableRegistration::of::<MediaCollection<f64>>(),
+        NullableRegistration::of::<RoutedEvent>(),
+        NullableRegistration::of::<FerroList<Point>>(),
+        NullableRegistration::of::<FerroList<String>>(),
+        NullableRegistration::of::<FerroList<Ref<GradientStop>>>(),
+        NullableRegistration::of::<FerroList<Rc<dyn ITransition>>>(),
+        NullableRegistration::of::<FerroList<Ref<KeyFrame>>>(),
+        NullableRegistration::of::<FerroList<Ref<InputScopeName>>>(),
+        NullableRegistration::of::<FerroList<Ref<PathFigure>>>(),
+        NullableRegistration::of::<FerroList<Ref<PathSegment>>>(),
+        NullableRegistration::of::<FerroList<Ref<Drawing>>>(),
+        NullableRegistration::of::<FerroList<Ref<Transform>>>(),
+        NullableRegistration::of::<FerroList<Ref<Geometry>>>(),
+        NullableRegistration::of::<Selector>(),
+        NullableRegistration::of::<StyleQuery>(),
+        NullableRegistration::of::<StyleChildren>(),
+        NullableRegistration::of::<KeyFrames>(),
+        NullableRegistration::of::<GestureRecognizerCollection>(),
+        NullableRegistration::of::<Rc<Setter>>(),
+        NullableRegistration::of::<Rc<TargetPropertyPath>>(),
+        NullableRegistration::of::<Rc<RelativeSource>>(),
+        NullableRegistration::of::<Rc<CompiledBinding>>(),
+        NullableRegistration::of::<Rc<ReflectionBinding>>(),
+        NullableRegistration::of::<Rc<MultiBinding>>(),
+        NullableRegistration::of::<Rc<TemplateBinding>>(),
+        NullableRegistration::of::<FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>>(),
+        NullableRegistration::of::<FerroList<Rc<dyn IAnimationSetter>>>(),
+        NullableRegistration::of::<FerroList<Rc<dyn IResourceProvider>>>(),
+        NullableRegistration::of::<FerroList<Ref<KeyBinding>>>(),
+        NullableRegistration::of::<FerroList<Rc<dyn SetterBase>>>(),
+        NullableRegistration::of::<FerroList<Rc<dyn IAnimation>>>(),
+        NullableRegistration::of::<FerroList<Rc<dyn BindingBase>>>(),
+    ] });
     // A named collection is the list it derives from: the same list, so that the members
     // of the list (`Capacity`) are reached through the collection.
     ValueTypes::register_cast::<KeyFrames, FerroList<Ref<KeyFrame>>>(|c| (**c).clone());
@@ -1148,9 +1150,11 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Rc<crate::media::FontManager>>();
     ValueTypes::register_cast::<Rc<TransformOperations>, Rc<dyn crate::media::ITransform>>(|operations| operations.clone());
     // A converter is a converter contract.
-    ValueTypes::register_nullable::<Rc<DefaultValueConverter>>();
-    ValueTypes::register_nullable::<Rc<StringFormatValueConverter>>();
-    ValueTypes::register_nullable::<Rc<StringFormatMultiValueConverter>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Rc<DefaultValueConverter>>(),
+        NullableRegistration::of::<Rc<StringFormatValueConverter>>(),
+        NullableRegistration::of::<Rc<StringFormatMultiValueConverter>>(),
+    ] });
     ValueTypes::register_cast::<Rc<DefaultValueConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     ValueTypes::register_cast::<Rc<StringFormatValueConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     ValueTypes::register_cast::<Rc<StringFormatMultiValueConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());

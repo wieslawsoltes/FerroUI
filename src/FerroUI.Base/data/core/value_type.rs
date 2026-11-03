@@ -406,11 +406,28 @@ fn insert_display(id: TypeId, display: DisplayFn) {
     });
 }
 
-fn insert_nullable(id: TypeId, facts: NullableType, wrap: fn(&dyn std::any::Any) -> Option<BoxedValue>) {
-    with_registry(|r| {
-        r.set_cast((facts.inner.id(), id), ConvertFn::Borrowed(BorrowedConversion::Static(wrap)));
-        r.nullable.insert(id, facts);
-    });
+/// Typed operations for one nullable value in the binding registry.
+#[derive(Clone, Copy)]
+pub struct NullableRegistration {
+    inner: fn() -> ValueType,
+    nullable: fn() -> TypeId,
+    unwrap: UnwrapFn,
+    null: NullFn,
+    wrap: fn(&dyn std::any::Any) -> Option<BoxedValue>,
+}
+
+impl NullableRegistration {
+    /// Describes the conversions between `T`, `Option<T>` and a boxed null.
+    pub const fn of<T: PropertyValue>() -> Self {
+        Self {
+            inner: ValueType::of::<T>,
+            nullable: TypeId::of::<Option<T>>,
+            unwrap: |value| value.downcast_ref::<Option<T>>()?.as_ref()
+                .map(|item| Rc::new(item.clone()) as BoxedValue),
+            null: || Rc::new(None::<T>),
+            wrap: |value| Some(Rc::new(Some(value.downcast_ref::<T>()?.clone()))),
+        }
+    }
 }
 
 fn insert_cast(key: (TypeId, TypeId), cast: ConvertFn) {
@@ -433,6 +450,35 @@ fn insert_object(id: TypeId, nullable_id: TypeId, as_object: ObjectFn, restore: 
         if id != root {
             r.set_conversion((root, nullable_id), ConvertFn::FromRoot(restore_nullable));
         }
+    });
+}
+
+// The four casts share the same registry policy for every reference model.
+struct ReferenceOperations {
+    register_identity: fn(),
+    unwrap: UnwrapFn,
+    null: NullFn,
+    object_to_nullable: fn(&BoxedValue) -> Option<BoxedValue>,
+    object_to_handle: fn(&BoxedValue) -> Option<BoxedValue>,
+    handle_to_object: fn(&BoxedValue) -> Option<BoxedValue>,
+    handle_to_nullable: fn(&BoxedValue) -> Option<BoxedValue>,
+}
+
+#[inline(never)]
+fn install_reference(object: ValueType, handle: TypeId, nullable: TypeId, ops: &ReferenceOperations) {
+    let id = object.id();
+    if with_registry(|r| r.references.insert(id, ()).is_some()) {
+        return;
+    }
+    (ops.register_identity)();
+    with_registry(|r| {
+        r.nullable.insert(nullable, NullableType { inner: object, unwrap: ops.unwrap, null: ops.null });
+        r.reference_handles.insert(handle, id);
+        r.reference_objects.insert(id, handle);
+        r.set_cast((id, nullable), ConvertFn::StaticBox(ops.object_to_nullable));
+        r.set_cast((id, handle), ConvertFn::StaticBox(ops.object_to_handle));
+        r.set_cast((handle, id), ConvertFn::StaticBox(ops.handle_to_object));
+        r.set_cast((handle, nullable), ConvertFn::StaticBox(ops.handle_to_nullable));
     });
 }
 
@@ -498,21 +544,19 @@ impl ValueTypes {
     /// treat `None` as null and `Some(v)` as `v`, and convert a `T` (or null)
     /// to `Option<T>` when a target requires it.
     pub fn register_nullable<T: PropertyValue>() {
-        fn unwrap<T: PropertyValue>(value: &dyn AnyValue) -> Option<BoxedValue> {
-            match value.downcast_ref::<Option<T>>() {
-                Some(Some(v)) => Some(Rc::new(v.clone())),
-                _ => None,
+        Self::register_nullable_types(&const { [NullableRegistration::of::<T>()] });
+    }
+
+    /// Registers the nullable forms in declaration order on the current thread.
+    pub fn register_nullable_types(types: &[NullableRegistration]) {
+        with_registry(|registry| {
+            for entry in types {
+                let inner = (entry.inner)();
+                let nullable = (entry.nullable)();
+                registry.set_cast((inner.id(), nullable), ConvertFn::Borrowed(BorrowedConversion::Static(entry.wrap)));
+                registry.nullable.insert(nullable, NullableType { inner, unwrap: entry.unwrap, null: entry.null });
             }
-        }
-        fn null<T: PropertyValue>() -> BoxedValue {
-            Rc::new(Option::<T>::None)
-        }
-        fn wrap<T: PropertyValue>(value: &dyn std::any::Any) -> Option<BoxedValue> {
-            Some(Rc::new(Some(value.downcast_ref::<T>()?.clone())))
-        }
-        insert_nullable(TypeId::of::<Option<T>>(), NullableType {
-            inner: ValueType::of::<T>(), unwrap: unwrap::<T>, null: null::<T>,
-        }, wrap::<T>);
+        });
     }
 
     /// Registers an assignability cast: values of `TFrom` are values of
@@ -936,36 +980,20 @@ impl ValueTypes {
             let any: Rc<dyn std::any::Any> = value.clone();
             any.downcast::<T>().ok()
         }
-        let registered = with_registry(|r| r.references.insert(TypeId::of::<T>(), ()).is_some());
-        if registered {
-            return;
-        }
-        Self::register_reference_identity::<Rc<T>>(|value| Rc::as_ptr(value) as *const ());
-        with_registry(|r| {
-            r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), NullableType {
-                inner: ValueType::of::<T>(), unwrap: unwrap::<T>, null: null::<T>,
-            });
-            r.reference_handles.insert(TypeId::of::<Rc<T>>(), TypeId::of::<T>());
-            r.reference_objects.insert(TypeId::of::<T>(), TypeId::of::<Rc<T>>());
-            // The object, its handle and its nullable handle are the same
-            // reference: these conversions are assignability casts.
-            r.set_cast(
-                (TypeId::of::<T>(), TypeId::of::<Option<Rc<T>>>()),
-                ConvertFn::StaticBox(|v: &BoxedValue| to_rc::<T>(v).map(|v| Rc::new(Some(v)) as BoxedValue)),
-            );
-            r.set_cast(
-                (TypeId::of::<T>(), TypeId::of::<Rc<T>>()),
-                ConvertFn::StaticBox(|v: &BoxedValue| to_rc::<T>(v).map(|v| Rc::new(v) as BoxedValue)),
-            );
-            r.set_cast(
-                (TypeId::of::<Rc<T>>(), TypeId::of::<T>()),
-                ConvertFn::StaticBox(|v: &BoxedValue| v.downcast_ref::<Rc<T>>().map(|v| v.clone() as BoxedValue)),
-            );
-            r.set_cast(
-                (TypeId::of::<Rc<T>>(), TypeId::of::<Option<Rc<T>>>()),
-                ConvertFn::StaticBox(|v: &BoxedValue| v.downcast_ref::<Rc<T>>().map(|v| Rc::new(Some(v.clone())) as BoxedValue)),
-            );
-        });
+        install_reference(
+            ValueType::of::<T>(),
+            TypeId::of::<Rc<T>>(),
+            TypeId::of::<Option<Rc<T>>>(),
+            &const { ReferenceOperations {
+                register_identity: || ValueTypes::register_reference_identity::<Rc<T>>(|v| Rc::as_ptr(v).cast()),
+                unwrap: unwrap::<T>,
+                null: null::<T>,
+                object_to_nullable: |v| to_rc::<T>(v).map(|v| Rc::new(Some(v)) as BoxedValue),
+                object_to_handle: |v| to_rc::<T>(v).map(|v| Rc::new(v) as BoxedValue),
+                handle_to_object: |v| v.downcast_ref::<Rc<T>>().map(|v| v.clone() as BoxedValue),
+                handle_to_nullable: |v| v.downcast_ref::<Rc<T>>().map(|v| Rc::new(Some(v.clone())) as BoxedValue),
+            } },
+        );
     }
 
     /// Whether the type is a registered reference (model) type.
@@ -1965,6 +1993,46 @@ mod tests {
     use super::*;
     use crate::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
     use crate::{ferro_markup_enum, ferro_markup_type};
+
+    #[test]
+    fn nullable_batches_install_typed_casts_in_declaration_order() {
+        #[derive(Clone, PartialEq, Debug)]
+        struct Count(u32);
+
+        let target = ValueType::of::<Option<Count>>();
+        ValueTypes::register_cast::<Count, Option<Count>>(|_| None);
+        ValueTypes::register_nullable_types(&const { [
+            NullableRegistration::of::<String>(),
+            NullableRegistration::of::<Count>(),
+            NullableRegistration::of::<Option<Count>>(),
+        ] });
+        assert!(ValueTypes::nullable_inner(target).unwrap().is::<Count>());
+        let source: BoxedValue = Rc::new(Count(7));
+        let wrapped = ValueTypes::try_cast(&source, target).unwrap();
+        assert_eq!(wrapped.downcast_ref::<Option<Count>>(), Some(&Some(Count(7))));
+        let nested = ValueTypes::try_cast(&wrapped, ValueType::of::<Option<Option<Count>>>()).unwrap();
+        assert_eq!(nested.downcast_ref::<Option<Option<Count>>>(), Some(&Some(Some(Count(7)))));
+        assert_eq!(ValueTypes::null_value(target).unwrap().downcast_ref::<Option<Count>>(), Some(&None));
+    }
+
+    #[test]
+    fn registering_a_reference_twice_preserves_a_custom_handle_cast() {
+        #[derive(PartialEq)]
+        struct Model;
+
+        ValueTypes::register_reference::<Model>();
+        let model = Rc::new(Model);
+        let boxed = model.clone() as BoxedValue;
+        let target = ValueType::of::<Rc<Model>>();
+        let handle = ValueTypes::try_cast(&boxed, target).unwrap();
+        assert!(Rc::ptr_eq(&model, handle.downcast_ref::<Rc<Model>>().unwrap()));
+        let replacement = Rc::new(Model);
+        let other = replacement.clone();
+        ValueTypes::register_boxed_cast::<Model, Rc<Model>>(move |_| Some(other.clone()));
+        ValueTypes::register_reference::<Model>();
+        let handle = ValueTypes::try_cast(&boxed, target).unwrap();
+        assert!(Rc::ptr_eq(&replacement, handle.downcast_ref::<Rc<Model>>().unwrap()));
+    }
 
     #[test]
     fn replacing_one_conversion_route_preserves_the_other_registered_views() {

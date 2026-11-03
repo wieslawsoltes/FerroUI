@@ -4,7 +4,7 @@
 
 use crate::animation::easings::Easing;
 use crate::animation::{Cue, IterationCount, IterationType, TimeSpan};
-use crate::data::core::ValueTypes;
+use crate::data::core::{NullableRegistration, ValueTypes};
 use crate::data::CultureInfoIetfLanguageTagConverter;
 use crate::utilities::{CultureInfo, DateTime, DateTimeKind, DateTimeOffset, DayOfWeek, Decimal, NumberStyles};
 use crate::ferro_markup_type;
@@ -676,46 +676,48 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers the nullable forms of the value types with the untyped value
 /// conversions of the current thread.
 pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<Thickness>();
-    ValueTypes::register_nullable::<Point>();
-    ValueTypes::register_nullable::<Vector>();
-    ValueTypes::register_nullable::<Size>();
-    ValueTypes::register_nullable::<Rect>();
-    ValueTypes::register_nullable::<Matrix>();
-    ValueTypes::register_nullable::<CornerRadius>();
-    ValueTypes::register_nullable::<RelativePoint>();
-    ValueTypes::register_nullable::<RelativeRect>();
-    ValueTypes::register_nullable::<RelativeScalar>();
-    ValueTypes::register_nullable::<PixelPoint>();
-    ValueTypes::register_nullable::<PixelSize>();
-    ValueTypes::register_nullable::<PixelRect>();
-    ValueTypes::register_nullable::<PixelVector>();
-    ValueTypes::register_nullable::<Vector3D>();
-    ValueTypes::register_nullable::<RoundedRect>();
-    ValueTypes::register_nullable::<Color>();
-    ValueTypes::register_nullable::<HslColor>();
-    ValueTypes::register_nullable::<HsvColor>();
-    ValueTypes::register_nullable::<FontWeight>();
-    ValueTypes::register_nullable::<FontFamily>();
-    ValueTypes::register_nullable::<FontFeature>();
-    ValueTypes::register_nullable::<FontFeatureCollection>();
-    ValueTypes::register_nullable::<TextDecorationCollection>();
-    ValueTypes::register_nullable::<BoxShadow>();
-    ValueTypes::register_nullable::<BoxShadows>();
-    ValueTypes::register_nullable::<KeyGesture>();
-    ValueTypes::register_nullable::<Cue>();
-    ValueTypes::register_nullable::<IterationCount>();
-    ValueTypes::register_nullable::<Easing>();
-    ValueTypes::register_nullable::<ThemeVariant>();
-    ValueTypes::register_nullable::<TimeSpan>();
-    ValueTypes::register_nullable::<Uri>();
-    ValueTypes::register_nullable::<CultureInfo>();
-    ValueTypes::register_nullable::<Rc<Cursor>>();
-    ValueTypes::register_nullable::<TextLineBounds>();
-    ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::SystemBackdropTheme>();
-    ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::MicaKind>();
-    ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::DesktopAcrylicKind>();
-    ValueTypes::register_nullable::<crate::media::AcrylicBrushBackgroundSource>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Thickness>(),
+        NullableRegistration::of::<Point>(),
+        NullableRegistration::of::<Vector>(),
+        NullableRegistration::of::<Size>(),
+        NullableRegistration::of::<Rect>(),
+        NullableRegistration::of::<Matrix>(),
+        NullableRegistration::of::<CornerRadius>(),
+        NullableRegistration::of::<RelativePoint>(),
+        NullableRegistration::of::<RelativeRect>(),
+        NullableRegistration::of::<RelativeScalar>(),
+        NullableRegistration::of::<PixelPoint>(),
+        NullableRegistration::of::<PixelSize>(),
+        NullableRegistration::of::<PixelRect>(),
+        NullableRegistration::of::<PixelVector>(),
+        NullableRegistration::of::<Vector3D>(),
+        NullableRegistration::of::<RoundedRect>(),
+        NullableRegistration::of::<Color>(),
+        NullableRegistration::of::<HslColor>(),
+        NullableRegistration::of::<HsvColor>(),
+        NullableRegistration::of::<FontWeight>(),
+        NullableRegistration::of::<FontFamily>(),
+        NullableRegistration::of::<FontFeature>(),
+        NullableRegistration::of::<FontFeatureCollection>(),
+        NullableRegistration::of::<TextDecorationCollection>(),
+        NullableRegistration::of::<BoxShadow>(),
+        NullableRegistration::of::<BoxShadows>(),
+        NullableRegistration::of::<KeyGesture>(),
+        NullableRegistration::of::<Cue>(),
+        NullableRegistration::of::<IterationCount>(),
+        NullableRegistration::of::<Easing>(),
+        NullableRegistration::of::<ThemeVariant>(),
+        NullableRegistration::of::<TimeSpan>(),
+        NullableRegistration::of::<Uri>(),
+        NullableRegistration::of::<CultureInfo>(),
+        NullableRegistration::of::<Rc<Cursor>>(),
+        NullableRegistration::of::<TextLineBounds>(),
+        NullableRegistration::of::<crate::rendering::composition::system_backdrops::SystemBackdropTheme>(),
+        NullableRegistration::of::<crate::rendering::composition::system_backdrops::MicaKind>(),
+        NullableRegistration::of::<crate::rendering::composition::system_backdrops::DesktopAcrylicKind>(),
+        NullableRegistration::of::<crate::media::AcrylicBrushBackgroundSource>(),
+    ] });
 
     // The text of a value (its `ToString()` in the managed original, what a string format
     // or a binding to text shows): the value types that define one.
@@ -748,10 +750,12 @@ pub(super) fn register_value_types() {
     ValueTypes::register_display::<DateTime>();
     ValueTypes::register_display::<DateTimeOffset>();
     ValueTypes::register_display::<Decimal>();
-    ValueTypes::register_nullable::<DateTime>();
-    ValueTypes::register_nullable::<DateTimeOffset>();
-    ValueTypes::register_nullable::<Decimal>();
-    ValueTypes::register_nullable::<NumberStyles>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<DateTime>(),
+        NullableRegistration::of::<DateTimeOffset>(),
+        NullableRegistration::of::<Decimal>(),
+        NullableRegistration::of::<NumberStyles>(),
+    ] });
     ValueTypes::register_display::<Uri>();
     ValueTypes::register_display::<CultureInfo>();
     ValueTypes::register_display::<Rc<Cursor>>();

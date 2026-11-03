@@ -142,7 +142,7 @@ EVENT_ARGS_NOT_COPIED = set()
 ENUM_USES = {
     "FerroUI.Base": """use crate::animation::*;
 use crate::collections::ResetBehavior;
-use crate::data::core::ValueTypes;
+use crate::data::core::{NullableRegistration, ValueTypes};
 use crate::data::*;
 use crate::ferro_markup_enum;
 use crate::input::navigation::*;
@@ -170,13 +170,13 @@ use crate::platform::*;
 use crate::primitives::popup_positioning::*;
 use crate::primitives::*;
 use crate::*;
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::core::{NullableRegistration, ValueTypes};
 use ferroui_base::ferro_markup_enum;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 """,
     "FerroUI.Controls.ColorPicker": """use crate::color_palettes::*;
 use crate::*;
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::core::{NullableRegistration, ValueTypes};
 use ferroui_base::ferro_markup_enum;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 """,
@@ -534,7 +534,9 @@ def generate_enums(sources, crate, report):
         "\n/// Registers the nullable form of each enumeration with the untyped value\n"
         "/// conversions of the current thread.\npub(super) fn register_value_types() {\n"
     )
-    out.extend("    ValueTypes::register_nullable::<%s>();\n" % name for name in names)
+    out.append("    ValueTypes::register_nullable_types(&const { [\n")
+    out.extend("        NullableRegistration::of::<%s>(),\n" % name for name in names)
+    out.append("    ] });\n")
     out.append("}\n")
     return "".join(out)
 

@@ -41,5 +41,5 @@ pub use untyped_binding_expression_base::{
     ObservableSink, Publish, UntypedBindingExpression, UntypedBindingExpressionBase,
 };
 pub(crate) use value_type::value_type_id;
-pub use value_type::{ValueType, ValueTypes};
+pub use value_type::{NullableRegistration, ValueType, ValueTypes};
 pub use weak_value::WeakValue;

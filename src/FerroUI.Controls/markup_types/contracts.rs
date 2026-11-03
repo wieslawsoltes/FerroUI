@@ -14,7 +14,7 @@ use crate::templates::{
 };
 use crate::documents::Inline;
 use crate::{Control, Panel};
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::core::{NullableRegistration, ValueTypes};
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::{IAddChild, MarkupType, MarkupTyped};
 use ferroui_base::styling::ITemplate;
@@ -200,21 +200,25 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers the nullable forms of the contract handles that can be held in
 /// untyped values with the untyped value conversions of the current thread.
 pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<Rc<dyn crate::notifications::INotification>>();
-    ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Control>>>>();
-    ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Inline>>>>();
-    ValueTypes::register_nullable::<Rc<dyn IDataTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn IControlTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Control>>>>>();
-    ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Ref<Control>>>>();
-    ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Panel>>>>>();
-    ValueTypes::register_nullable::<Rc<dyn IWindowDrawnDecorationsTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn ISelectionModel>>();
-    ValueTypes::register_nullable::<Rc<dyn IPopupHost>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Rc<dyn crate::notifications::INotification>>(),
+        NullableRegistration::of::<Rc<dyn IAddChild<Ref<Control>>>>(),
+        NullableRegistration::of::<Rc<dyn IAddChild<Ref<Inline>>>>(),
+        NullableRegistration::of::<Rc<dyn IDataTemplate>>(),
+        NullableRegistration::of::<Rc<dyn IControlTemplate>>(),
+        NullableRegistration::of::<Rc<dyn ITemplateOf<Option<Ref<Control>>>>>(),
+        NullableRegistration::of::<Rc<dyn ITemplateOf<Ref<Control>>>>(),
+        NullableRegistration::of::<Rc<dyn ITemplateOf<Option<Ref<Panel>>>>>(),
+        NullableRegistration::of::<Rc<dyn IWindowDrawnDecorationsTemplate>>(),
+        NullableRegistration::of::<Rc<dyn ISelectionModel>>(),
+        NullableRegistration::of::<Rc<dyn IPopupHost>>(),
+    ] });
     // The data template contracts derive from the data template.
-    ValueTypes::register_nullable::<Rc<dyn ITreeDataTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn IRecyclingDataTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn ITypedDataTemplate>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Rc<dyn ITreeDataTemplate>>(),
+        NullableRegistration::of::<Rc<dyn IRecyclingDataTemplate>>(),
+        NullableRegistration::of::<Rc<dyn ITypedDataTemplate>>(),
+    ] });
     ValueTypes::register_cast::<Rc<dyn ITreeDataTemplate>, Rc<dyn IDataTemplate>>(|t| t.clone());
     ValueTypes::register_cast::<Rc<dyn IRecyclingDataTemplate>, Rc<dyn IDataTemplate>>(|t| t.clone());
     ValueTypes::register_cast::<Rc<dyn ITypedDataTemplate>, Rc<dyn IDataTemplate>>(|t| t.clone());

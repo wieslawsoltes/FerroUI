@@ -17,7 +17,7 @@ use crate::{
 };
 use super::classes::RoutedEventOf;
 use crate::ScrollChangedEventArgs;
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::core::{NullableRegistration, ValueTypes};
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEvent};
 use ferroui_base::animation::TimeSpan;
 use ferroui_base::Vector;
@@ -580,28 +580,30 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// values with the untyped value conversions of the current thread.
 pub(super) fn register_value_types() {
     ValueTypes::register_cast::<RoutedEvent<ScrollChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
-    ValueTypes::register_nullable::<Rc<dyn crate::ICommandBarElement>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn crate::ICommandBarElement>>>();
-    ValueTypes::register_nullable::<Controls>();
-    ValueTypes::register_nullable::<RowDefinitions>();
-    ValueTypes::register_nullable::<ColumnDefinitions>();
-    ValueTypes::register_nullable::<ItemCollection>();
-    ValueTypes::register_nullable::<InlineCollection>();
-    ValueTypes::register_nullable::<DataTemplates>();
-    ValueTypes::register_nullable::<FerroList<Ref<Control>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<Inline>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn IDataTemplate>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<RowDefinition>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<ColumnDefinition>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<NativeMenuItemBase>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<Page>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<TableViewColumn>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<VisualStateGroup>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<StateTriggerBase>>>();
-    ValueTypes::register_nullable::<Rc<WindowIcon>>();
-    ValueTypes::register_nullable::<Rc<RefCell<CustomPopupPlacement>>>();
-    ValueTypes::register_nullable::<CustomPopupPlacementCallbackValue>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Rc<dyn crate::ICommandBarElement>>(),
+        NullableRegistration::of::<FerroList<Rc<dyn crate::ICommandBarElement>>>(),
+        NullableRegistration::of::<Controls>(),
+        NullableRegistration::of::<RowDefinitions>(),
+        NullableRegistration::of::<ColumnDefinitions>(),
+        NullableRegistration::of::<ItemCollection>(),
+        NullableRegistration::of::<InlineCollection>(),
+        NullableRegistration::of::<DataTemplates>(),
+        NullableRegistration::of::<FerroList<Ref<Control>>>(),
+        NullableRegistration::of::<FerroList<Ref<Inline>>>(),
+        NullableRegistration::of::<FerroList<Rc<dyn IDataTemplate>>>(),
+        NullableRegistration::of::<FerroList<Ref<RowDefinition>>>(),
+        NullableRegistration::of::<FerroList<Ref<ColumnDefinition>>>(),
+        NullableRegistration::of::<FerroList<Ref<NativeMenuItemBase>>>(),
+        NullableRegistration::of::<FerroList<Ref<Page>>>(),
+        NullableRegistration::of::<FerroList<Ref<TableViewColumn>>>(),
+        NullableRegistration::of::<FerroList<Ref<VisualStateGroup>>>(),
+        NullableRegistration::of::<FerroList<Ref<VisualState>>>(),
+        NullableRegistration::of::<FerroList<Ref<StateTriggerBase>>>(),
+        NullableRegistration::of::<Rc<WindowIcon>>(),
+        NullableRegistration::of::<Rc<RefCell<CustomPopupPlacement>>>(),
+        NullableRegistration::of::<CustomPopupPlacementCallbackValue>(),
+    ] });
     // The delegate of a method named in markup is a callback: the value of a
     // `CustomPopupPlacementCallback` property.
     ValueTypes::register_cast::<MarkupDelegate, CustomPopupPlacementCallbackValue>(custom_popup_placement_callback);

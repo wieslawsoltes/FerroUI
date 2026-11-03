@@ -5,7 +5,7 @@
 
 use crate::color_palettes::*;
 use crate::*;
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::core::{NullableRegistration, ValueTypes};
 use ferroui_base::ferro_markup_enum;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 
@@ -103,14 +103,16 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers the nullable form of each enumeration with the untyped value
 /// conversions of the current thread.
 pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<AlphaComponentPosition>();
-    ValueTypes::register_nullable::<ColorComponent>();
-    ValueTypes::register_nullable::<ColorModel>();
-    ValueTypes::register_nullable::<ColorSpectrumComponents>();
-    ValueTypes::register_nullable::<ColorSpectrumShape>();
-    ValueTypes::register_nullable::<ColorViewTab>();
-    ValueTypes::register_nullable::<FlatColor>();
-    ValueTypes::register_nullable::<HsvComponent>();
-    ValueTypes::register_nullable::<MaterialColor>();
-    ValueTypes::register_nullable::<RgbComponent>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<AlphaComponentPosition>(),
+        NullableRegistration::of::<ColorComponent>(),
+        NullableRegistration::of::<ColorModel>(),
+        NullableRegistration::of::<ColorSpectrumComponents>(),
+        NullableRegistration::of::<ColorSpectrumShape>(),
+        NullableRegistration::of::<ColorViewTab>(),
+        NullableRegistration::of::<FlatColor>(),
+        NullableRegistration::of::<HsvComponent>(),
+        NullableRegistration::of::<MaterialColor>(),
+        NullableRegistration::of::<RgbComponent>(),
+    ] });
 }

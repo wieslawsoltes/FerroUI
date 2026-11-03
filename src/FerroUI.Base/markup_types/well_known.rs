@@ -12,7 +12,7 @@
 use crate::controls::{Classes, NameScopeRef};
 use crate::data::core::expression_nodes::CastTarget;
 use crate::data::core::plugins::IPropertyAccessor;
-use crate::data::core::{ClrPropertyInfo, IPropertyInfo, ValueTypes};
+use crate::data::core::{ClrPropertyInfo, IPropertyInfo, NullableRegistration, ValueTypes};
 use crate::data::{BindingBase, BindingExpressionBase, BindingPriority, CompiledBindingPath, CompiledBindingPathBuilder};
 use crate::ferro_markup_type;
 use crate::interactivity::{IRoutedEventArgs, RoutedEvent, RoutedEventArgs, RoutingStrategies};
@@ -497,26 +497,30 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImage>>(|bitmap| bitmap.clone());
     ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImageBrushSource>>(|bitmap| bitmap.clone());
     ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::imaging::IBitmap>>(|bitmap| bitmap.clone());
-    ValueTypes::register_nullable::<UnsetValueType>();
-    ValueTypes::register_nullable::<EventArgs>();
-    ValueTypes::register_nullable::<CancelEventArgs>();
-    ValueTypes::register_nullable::<OwnedFerroPropertyChangedEventArgs>();
-    ValueTypes::register_nullable::<RuntimePlatformInfo>();
-    ValueTypes::register_nullable::<CompiledBindingPath>();
-    ValueTypes::register_nullable::<CompiledBindingPathBuilder>();
-    ValueTypes::register_nullable::<Rc<dyn IPropertyInfo>>();
-    ValueTypes::register_nullable::<Rc<dyn IPropertyAccessor>>();
-    ValueTypes::register_nullable::<Rc<dyn IRoutedEventArgs>>();
-    ValueTypes::register_nullable::<Rc<dyn IRuntimePlatform>>();
-    ValueTypes::register_nullable::<Rc<dyn ISupportInitialize>>();
-    ValueTypes::register_nullable::<Rc<dyn BindingExpressionBase>>();
-    ValueTypes::register_nullable::<Rc<dyn IDisposable>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<UnsetValueType>(),
+        NullableRegistration::of::<EventArgs>(),
+        NullableRegistration::of::<CancelEventArgs>(),
+        NullableRegistration::of::<OwnedFerroPropertyChangedEventArgs>(),
+        NullableRegistration::of::<RuntimePlatformInfo>(),
+        NullableRegistration::of::<CompiledBindingPath>(),
+        NullableRegistration::of::<CompiledBindingPathBuilder>(),
+        NullableRegistration::of::<Rc<dyn IPropertyInfo>>(),
+        NullableRegistration::of::<Rc<dyn IPropertyAccessor>>(),
+        NullableRegistration::of::<Rc<dyn IRoutedEventArgs>>(),
+        NullableRegistration::of::<Rc<dyn IRuntimePlatform>>(),
+        NullableRegistration::of::<Rc<dyn ISupportInitialize>>(),
+        NullableRegistration::of::<Rc<dyn BindingExpressionBase>>(),
+        NullableRegistration::of::<Rc<dyn IDisposable>>(),
+    ] });
     // A binding expression is disposable.
     ValueTypes::register_cast::<Rc<dyn BindingExpressionBase>, Rc<dyn IDisposable>>(|expression| expression.clone());
-    ValueTypes::register_nullable::<Classes>();
-    ValueTypes::register_nullable::<Rc<ImmutableSolidColorBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn IAddChild<BoxedValue>>>();
-    ValueTypes::register_nullable::<Rc<dyn IAddChild<String>>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Classes>(),
+        NullableRegistration::of::<Rc<ImmutableSolidColorBrush>>(),
+        NullableRegistration::of::<Rc<dyn IAddChild<BoxedValue>>>(),
+        NullableRegistration::of::<Rc<dyn IAddChild<String>>>(),
+    ] });
     // An immutable brush is a brush.
     ValueTypes::register_cast::<Rc<ImmutableSolidColorBrush>, Rc<dyn IBrush>>(|brush| brush.clone());
     ValueTypes::register_cast::<Rc<ImmutableSolidColorBrush>, Rc<dyn crate::media::IImmutableSolidColorBrush>>(

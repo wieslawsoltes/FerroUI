@@ -24,7 +24,7 @@ use crate::xaml_il::runtime::{
 };
 use crate::xamlx_runtime::{IXamlParentStackProviderV1, IXamlXmlNamespaceInfoProviderV1, XamlXmlNamespaceInfoV1};
 use crate::{FerroXamlLoader, IProvideValueTarget, IRootObjectProvider, IUriContext, IXamlTypeResolver, MarkupExtension};
-use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::data::core::{NullableRegistration, ValueType, ValueTypes};
 use ferroui_base::controls::{IDeferredContent, IResourceProvider, IThemeVariantProvider, ResourceHostRef};
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::IPropertyInfo;
@@ -284,39 +284,43 @@ fn register_value_types() {
     ];
     // The binding extensions are not reference types: like every binding,
     // they are boxed as their handle.
-    ValueTypes::register_nullable::<Rc<DynamicResourceExtension>>();
-    ValueTypes::register_nullable::<Rc<CompiledBindingExtension>>();
-    ValueTypes::register_nullable::<Rc<ReflectionBindingExtension>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Rc<DynamicResourceExtension>>(),
+        NullableRegistration::of::<Rc<CompiledBindingExtension>>(),
+        NullableRegistration::of::<Rc<ReflectionBindingExtension>>(),
+    ] });
 
     // Nullable forms of the values members of this crate take and return.
-    ValueTypes::register_nullable::<Rc<dyn IServiceProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn ITypeDescriptorContext>>();
-    ValueTypes::register_nullable::<Rc<dyn TypeConverter>>();
-    ValueTypes::register_nullable::<Rc<dyn IFerroXamlIlEagerParentStackProvider>>();
-    ValueTypes::register_nullable::<Uri>();
-    ValueTypes::register_nullable::<CultureInfo>();
-    ValueTypes::register_nullable::<XamlSourceInfo>();
-    ValueTypes::register_nullable::<ValueType>();
-    ValueTypes::register_nullable::<&'static TypeInfo>();
-    ValueTypes::register_nullable::<Rc<dyn BindingBase>>();
-    ValueTypes::register_nullable::<Rc<CompiledBinding>>();
-    ValueTypes::register_nullable::<Rc<ReflectionBinding>>();
-    ValueTypes::register_nullable::<Rc<RelativeSource>>();
-    ValueTypes::register_nullable::<Rc<dyn IValueConverter>>();
-    ValueTypes::register_nullable::<Rc<dyn IPropertyInfo>>();
-    ValueTypes::register_nullable::<Rc<dyn IResourceProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn IThemeVariantProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn IStyle>>();
-    ValueTypes::register_nullable::<Rc<dyn ITemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn IDeferredContent>>();
-    ValueTypes::register_nullable::<ResourceHostRef>();
-    ValueTypes::register_nullable::<CompiledBindingPath>();
-    ValueTypes::register_nullable::<Rc<dyn IBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn IControlTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn IDataTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn IWindowDrawnDecorationsTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Control>>>>>();
-    ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Panel>>>>>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<Rc<dyn IServiceProvider>>(),
+        NullableRegistration::of::<Rc<dyn ITypeDescriptorContext>>(),
+        NullableRegistration::of::<Rc<dyn TypeConverter>>(),
+        NullableRegistration::of::<Rc<dyn IFerroXamlIlEagerParentStackProvider>>(),
+        NullableRegistration::of::<Uri>(),
+        NullableRegistration::of::<CultureInfo>(),
+        NullableRegistration::of::<XamlSourceInfo>(),
+        NullableRegistration::of::<ValueType>(),
+        NullableRegistration::of::<&'static TypeInfo>(),
+        NullableRegistration::of::<Rc<dyn BindingBase>>(),
+        NullableRegistration::of::<Rc<CompiledBinding>>(),
+        NullableRegistration::of::<Rc<ReflectionBinding>>(),
+        NullableRegistration::of::<Rc<RelativeSource>>(),
+        NullableRegistration::of::<Rc<dyn IValueConverter>>(),
+        NullableRegistration::of::<Rc<dyn IPropertyInfo>>(),
+        NullableRegistration::of::<Rc<dyn IResourceProvider>>(),
+        NullableRegistration::of::<Rc<dyn IThemeVariantProvider>>(),
+        NullableRegistration::of::<Rc<dyn IStyle>>(),
+        NullableRegistration::of::<Rc<dyn ITemplate>>(),
+        NullableRegistration::of::<Rc<dyn IDeferredContent>>(),
+        NullableRegistration::of::<ResourceHostRef>(),
+        NullableRegistration::of::<CompiledBindingPath>(),
+        NullableRegistration::of::<Rc<dyn IBrush>>(),
+        NullableRegistration::of::<Rc<dyn IControlTemplate>>(),
+        NullableRegistration::of::<Rc<dyn IDataTemplate>>(),
+        NullableRegistration::of::<Rc<dyn IWindowDrawnDecorationsTemplate>>(),
+        NullableRegistration::of::<Rc<dyn ITemplateOf<Option<Ref<Control>>>>>(),
+        NullableRegistration::of::<Rc<dyn ITemplateOf<Option<Ref<Panel>>>>>(),
+    ] });
 
     // A service provider is accepted where a type descriptor context is
     // expected: the context of markup is its service provider.

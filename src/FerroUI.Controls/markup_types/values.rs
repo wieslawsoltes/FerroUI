@@ -10,7 +10,7 @@ use crate::{
     NumberBoxValueChangedEventArgs, Symbol, TextLayoutRoundingPlacement, TickList, WindowTransparencyLevel,
     WindowTransparencyLevelCollection,
 };
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::core::{NullableRegistration, ValueTypes};
 use ferroui_base::ferro_markup_type;
 use ferroui_base::media::MediaCollection;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
@@ -128,24 +128,28 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers the nullable forms of the value types with the untyped value
 /// conversions of the current thread.
 pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<GridLength>();
-    ValueTypes::register_nullable::<WindowTransparencyLevel>();
-    ValueTypes::register_nullable::<WindowTransparencyLevelCollection>();
-    ValueTypes::register_nullable::<AcrylicPlatformCompensationLevels>();
-    ValueTypes::register_nullable::<TickList>();
-    ValueTypes::register_nullable::<TextLayoutRoundingPlacement>();
-    ValueTypes::register_nullable::<Symbol>();
-    ValueTypes::register_nullable::<InfoBarSeverity>();
-    ValueTypes::register_nullable::<crate::ZoomMode>();
-    ValueTypes::register_nullable::<InfoBarCloseReason>();
-    ValueTypes::register_nullable::<NumberBoxSpinButtonPlacementMode>();
-    ValueTypes::register_nullable::<NumberBoxValidationMode>();
-    ValueTypes::register_nullable::<AutoSuggestionBoxTextChangeReason>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<GridLength>(),
+        NullableRegistration::of::<WindowTransparencyLevel>(),
+        NullableRegistration::of::<WindowTransparencyLevelCollection>(),
+        NullableRegistration::of::<AcrylicPlatformCompensationLevels>(),
+        NullableRegistration::of::<TickList>(),
+        NullableRegistration::of::<TextLayoutRoundingPlacement>(),
+        NullableRegistration::of::<Symbol>(),
+        NullableRegistration::of::<InfoBarSeverity>(),
+        NullableRegistration::of::<crate::ZoomMode>(),
+        NullableRegistration::of::<InfoBarCloseReason>(),
+        NullableRegistration::of::<NumberBoxSpinButtonPlacementMode>(),
+        NullableRegistration::of::<NumberBoxValidationMode>(),
+        NullableRegistration::of::<AutoSuggestionBoxTextChangeReason>(),
+    ] });
     crate::navigation::register_value_types();
     crate::navigation_view_events::register_value_types();
-    ValueTypes::register_nullable::<crate::media::ApplicationTheme>();
-    ValueTypes::register_nullable::<crate::media::RevealBrushState>();
-    ValueTypes::register_nullable::<crate::media::FocusVisualKind>();
+    ValueTypes::register_nullable_types(&const { [
+        NullableRegistration::of::<crate::media::ApplicationTheme>(),
+        NullableRegistration::of::<crate::media::RevealBrushState>(),
+        NullableRegistration::of::<crate::media::FocusVisualKind>(),
+    ] });
     // A tick list is the list of numbers it derives from: the same list, so that the
     // members of the list (`Capacity`, `Add`) are reached through the tick list.
     ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));
