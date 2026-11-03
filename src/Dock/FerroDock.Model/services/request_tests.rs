@@ -2,6 +2,7 @@ use super::delegate_command::DelegateCommand;
 use super::*;
 use crate::BoxedValue;
 use ferroui_reactiveui::ICommand;
+use ferroui_system::task::Shared;
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -47,7 +48,7 @@ fn confirmation_metadata_and_commands_dispatch_exact_request_without_implicit_co
     ));
     assert!(calls.borrow()[0].1);
     assert!(!calls.borrow()[1].1);
-    assert!(!request.task().is_completed());
+    assert!(!request.task().is_finished());
 }
 
 #[test]
@@ -60,19 +61,19 @@ fn confirmation_task_is_shared_first_completion_wins_and_completion_can_reenter(
         Rc::new(|request, result| request.complete(result)),
     );
     let task = request.task();
-    assert_eq!(task.id(), request.task().id());
+    assert!(Shared::ptr_eq(&task, &request.task()));
     let seen = Rc::new(Cell::new(0));
     let count = seen.clone();
     let weak = Rc::downgrade(&request);
-    task.continue_with(move |task| {
-        assert!(task.result().unwrap());
+    task.on_finished(move |outcome| {
+        assert!(matches!(outcome, Ok(Ok(true))));
         count.set(count.get() + 1);
         weak.upgrade().unwrap().complete(false);
     });
     request.confirm().execute(None);
     request.cancel().execute(None);
     request.complete(false);
-    assert!(task.result().unwrap());
+    assert!(task.result().unwrap().unwrap());
     assert_eq!(seen.get(), 1);
 }
 
@@ -131,18 +132,18 @@ fn dialog_close_keeps_nullable_result_content_and_callback_identities() {
     ));
     assert!(Rc::ptr_eq(results.borrow()[0].1.as_ref().unwrap(), &result));
     assert!(results.borrow()[1].1.is_none());
-    assert!(!request.task().is_completed());
+    assert!(!request.task().is_finished());
     let task = request.task();
     request.complete(Some(result.clone()));
     request.complete(None);
-    assert_eq!(task.id(), request.task().id());
-    assert!(Rc::ptr_eq(&task.result().unwrap().unwrap(), &result));
+    assert!(Shared::ptr_eq(&task, &request.task()));
+    assert!(Rc::ptr_eq(&task.result().unwrap().unwrap().unwrap(), &result));
     let other = DialogRequest::new(content, None, Rc::new(|_, _| {}));
     assert!(other.title().is_none());
     other.complete(None);
     other.complete(Some(result));
-    assert!(other.task().is_completed_successfully());
-    assert!(other.task().result().unwrap().is_none());
+    assert!(matches!(other.task().result(), Some(Ok(_))));
+    assert!(other.task().result().unwrap().unwrap().is_none());
 }
 
 #[test]
@@ -223,8 +224,8 @@ fn dialog_content_and_reload_contracts_use_actual_shared_tasks_and_nullable_resu
         }
     }
     impl IReloadable for Content {
-        fn reload_async(&self) -> ferroui_system::threading::tasks::Task<()> {
-            ferroui_system::threading::tasks::Task::from_result(())
+        fn reload_async(&self) -> Shared<Result<(), ferroui_system::ObservableError>> {
+            Shared::ready(Ok(()))
         }
     }
     let content = Content(RefCell::new(None));
@@ -238,7 +239,7 @@ fn dialog_content_and_reload_contracts_use_actual_shared_tasks_and_nullable_resu
     assert!(Rc::ptr_eq(seen.borrow().as_ref().unwrap(), &value));
     content.0.borrow().as_ref().unwrap()(None);
     assert!(seen.borrow().is_none());
-    assert!(content.reload_async().is_completed_successfully());
+    assert!(matches!(content.reload_async().result(), Some(Ok(()))));
 }
 
 #[test]

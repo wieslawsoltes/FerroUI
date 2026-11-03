@@ -4,8 +4,8 @@
 use super::delegate_command::DelegateCommand;
 use crate::BoxedValue;
 use ferroui_reactiveui::ICommand;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
-use ferroui_system::IDisposable;
+use ferroui_system::task::{Shared, SharedSender};
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -18,12 +18,14 @@ pub struct DialogRequest {
     title: Option<String>,
     close: Rc<dyn ICommand>,
     global_handle: RefCell<Option<Rc<dyn IDisposable>>>,
-    completion: TaskCompletionSource<Option<BoxedValue>>,
+    completion: RefCell<Option<SharedSender<Result<Option<BoxedValue>, ObservableError>>>>,
+    task: Shared<Result<Option<BoxedValue>, ObservableError>>,
 }
 impl DialogRequest {
     /// Creates a request retaining the content object. The native ICommand parameter
     /// is a borrowed canonical BoxedValue handle so reference identity is preserved.
     pub fn new(content: BoxedValue, title: Option<String>, close: DialogCloseAction) -> Rc<Self> {
+        let (completion, task) = Shared::channel();
         Rc::new_cyclic(|runtime: &Weak<Self>| {
             let weak = runtime.clone();
             let command = DelegateCommand::new(
@@ -41,7 +43,8 @@ impl DialogRequest {
                 title,
                 close: command,
                 global_handle: RefCell::new(None),
-                completion: TaskCompletionSource::new(),
+                completion: RefCell::new(Some(completion)),
+                task,
             }
         })
     }
@@ -65,13 +68,18 @@ impl DialogRequest {
     pub fn set_global_handle(&self, value: Option<Rc<dyn IDisposable>>) {
         self.global_handle.replace(value);
     }
-    /// Gets the shared result task.
-    pub fn task(&self) -> Task<Option<BoxedValue>> {
-        self.completion.task()
+    /// Gets the shared result task: the `Shared` of the result, whose `flatten()` is a future of
+    /// it.
+    pub fn task(&self) -> Shared<Result<Option<BoxedValue>, ObservableError>> {
+        self.task.clone()
     }
     /// Completes once with a nullable result, retaining the supplied object identity.
     pub fn complete(&self, result: Option<BoxedValue>) {
-        self.completion.try_set_result(result);
+        // Taken out of the cell before it sends: the continuations may reach this request.
+        let completion = self.completion.borrow_mut().take();
+        if let Some(completion) = completion {
+            completion.send(Ok(result));
+        }
     }
 }
 impl PartialEq for DialogRequest {

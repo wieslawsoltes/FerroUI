@@ -1,26 +1,26 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
 use ferroui_system::ObservableError;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll, Wake, Waker};
 
-// All result/status storage remains the real System task. Only its await wake
+// All result/status storage remains the shared System task (`Shared`). Only its await wake
 // is adapted: an await registered while pending must not resume inline inside
 // InvokeAsync's completion, equivalent to RunContinuationsAsynchronously.
 // The Send Waker crosses the worker boundary, never a thread-affine Rc/value.
 // Its System executor forwards the wake to its owner's queue/poster.
 #[derive(Clone)]
 pub(crate) struct DispatcherInvocation {
-    task: Task<()>,
+    task: Shared<Result<(), ObservableError>>,
     source_waker: Option<Waker>,
     async_waker: Option<Waker>,
 }
 impl DispatcherInvocation {
-    pub(crate) fn new(task: Task<()>) -> Self {
+    pub(crate) fn new(task: Shared<Result<(), ObservableError>>) -> Self {
         Self {
             task,
             source_waker: None,
@@ -41,8 +41,8 @@ impl Wake for AsyncWake {
 impl Future for DispatcherInvocation {
     type Output = Result<(), ObservableError>;
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        if self.task.is_completed() {
-            return Poll::Ready(self.task.result());
+        if let Some(result) = self.task.result() {
+            return Poll::Ready(result);
         }
         if self
             .source_waker
@@ -57,6 +57,7 @@ impl Future for DispatcherInvocation {
             .as_ref()
             .expect("cached asynchronous wake")
             .clone();
-        Pin::new(&mut self.task).poll(&mut Context::from_waker(&waker))
+        let mut task = self.task.clone().flatten();
+        Pin::new(&mut task).poll(&mut Context::from_waker(&waker))
     }
 }
