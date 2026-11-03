@@ -521,7 +521,8 @@ fn install_reference(object: ValueType, handle: TypeId, nullable: TypeId, ops: &
 struct ElementReferenceOperations {
     as_object: ObjectFn,
     from_object: FromObjectFn,
-    from_nullable_object: FromObjectFn,
+    from_root: fn(&dyn std::any::Any) -> Option<BoxedValue>,
+    from_root_to_nullable: fn(&dyn std::any::Any) -> Option<BoxedValue>,
     from_handle: fn(&dyn std::any::Any) -> Option<BoxedValue>,
     from_handle_to_nullable: fn(&dyn std::any::Any) -> Option<BoxedValue>,
     from_nullable_handle: fn(&dyn std::any::Any) -> Option<BoxedValue>,
@@ -552,8 +553,8 @@ fn install_element_reference(
         let root = TypeId::of::<Ref<FerroObject>>();
         // For T = FerroObject these keys overlap the casts above. Retain the
         // separate assignability/borrowed views just as public registration does.
-        r.set_conversion((root, element), ConvertFn::FromRoot(ops.from_object));
-        r.set_conversion((root, nullable_element), ConvertFn::FromRoot(ops.from_nullable_object));
+        r.set_conversion((root, element), ConvertFn::Borrowed(BorrowedConversion::Static(ops.from_root)));
+        r.set_conversion((root, nullable_element), ConvertFn::Borrowed(BorrowedConversion::Static(ops.from_root_to_nullable)));
         r.set_conversion((element, handle), ConvertFn::Borrowed(BorrowedConversion::Static(ops.to_handle)));
         r.set_cast((element, nullable_handle), ConvertFn::Borrowed(BorrowedConversion::Static(ops.to_nullable_handle)));
         r.set_cast((nullable_element, nullable_handle), ConvertFn::Borrowed(BorrowedConversion::Static(ops.nullable_to_nullable_handle)));
@@ -739,8 +740,13 @@ impl ValueTypes {
             &const { ElementReferenceOperations {
                 as_object: element::<T>,
                 from_object: reference::<T>,
-                from_nullable_object: |object| {
-                    Some(Rc::new(Some(ElementRef::of(&object.cast::<T>()?))))
+                from_root: |value| {
+                    let element = value.downcast_ref::<Ref<FerroObject>>()?.cast::<T>()?;
+                    Some(Rc::new(ElementRef::of(&element)))
+                },
+                from_root_to_nullable: |value| {
+                    let element = value.downcast_ref::<Ref<FerroObject>>()?.cast::<T>()?;
+                    Some(Rc::new(Some(ElementRef::of(&element))))
                 },
                 from_handle: |value| Some(Rc::new(ElementRef::of(value.downcast_ref::<Ref<T>>()?))),
                 from_handle_to_nullable: |value| {
