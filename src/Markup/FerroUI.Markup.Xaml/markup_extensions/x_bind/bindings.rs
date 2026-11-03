@@ -3,6 +3,7 @@
 
 use super::root_node::XBindRootNode;
 use crate::XamlLoadError;
+use ferroui_base::controls::{NameScope, NameScopeRef};
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::data::core::{ValueType, ValueTypes, WeakValue};
 use ferroui_base::reactive::Subscription;
@@ -116,7 +117,16 @@ crate::identity_eq!(XBindings);
 
 impl XBindings {
     /// The bindings of `root` (a boxed root object), created on the first `x:Bind` of the root.
-    pub(crate) fn for_root_value(root: &BoxedValue, scope: XBindScope) -> Result<Rc<Self>, XamlLoadError> {
+    ///
+    /// The root of a template instance keeps `name_scope`, the name scope of the template, by
+    /// holding it as its own (`NameScope::set_name_scope`, as a document root holds its scope):
+    /// the template returns only its root, and a path that starts at a named element of the
+    /// template finds the element in that scope, which compiled paths hold weakly.
+    pub(crate) fn for_root_value(
+        root: &BoxedValue,
+        scope: XBindScope,
+        name_scope: Option<&NameScopeRef>,
+    ) -> Result<Rc<Self>, XamlLoadError> {
         let object = ValueTypes::as_object(&**root).ok_or_else(|| {
             XamlLoadError::with_message(format!(
                 "x:Bind requires the root of its document to be an object of the object model; '{}' is not",
@@ -142,6 +152,13 @@ impl XBindings {
             hook: RefCell::new(None),
         });
         object.set_value(Self::bindings_property(), Some(Rc::new(RootOwnership(result.clone()))));
+        if let (XBindScope::Template(_), Some(name_scope)) = (scope, name_scope) {
+            if let Some(element) = object.to_ref().cast::<StyledElement>() {
+                if NameScope::get_name_scope(&element).is_none() {
+                    NameScope::set_name_scope(&element, Some(name_scope.clone()));
+                }
+            }
+        }
         result.hook(&object);
         Ok(result)
     }

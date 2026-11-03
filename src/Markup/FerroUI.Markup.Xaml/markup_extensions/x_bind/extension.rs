@@ -2,7 +2,8 @@
 
 use super::bindings::XBindScope;
 use super::{XBinding, XBindings};
-use crate::{IRootObjectProvider, XamlLoadError};
+use crate::{IRootObjectProvider, ServiceProviderExtensions, XamlLoadError};
+use ferroui_base::controls::NameScopeRef;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::{BindingMode, CompiledBindingPath, UpdateSourceTrigger};
 use ferroui_base::metadata::IServiceProvider;
@@ -109,13 +110,19 @@ impl XBindExtension {
 
     /// The binding of one target, registered with the [`XBindings`] of `root`: the root object
     /// of the document, or the root of the template instance for a binding with a data type.
-    pub fn create_binding(&self, root: &BoxedValue) -> Result<Rc<XBinding>, XamlLoadError> {
+    /// `name_scope` is the name scope of the place the binding is declared in; a template
+    /// instance keeps it (see [`XBindings`]).
+    pub fn create_binding(
+        &self,
+        root: &BoxedValue,
+        name_scope: Option<&NameScopeRef>,
+    ) -> Result<Rc<XBinding>, XamlLoadError> {
         self.validate()?;
         let scope = match self.data_type() {
             Some(data_type) => XBindScope::Template(data_type),
             None => XBindScope::Root,
         };
-        let group = XBindings::for_root_value(root, scope)?;
+        let group = XBindings::for_root_value(root, scope, name_scope)?;
         Ok(XBinding::new(group, self.path(), self.mode(), self.update_source_trigger()))
     }
 
@@ -131,7 +138,8 @@ impl XBindExtension {
             None => roots.root_object(),
         }
         .ok_or_else(|| XamlLoadError::with_message("x:Bind requires the root object of its document"))?;
-        self.create_binding(&root)
+        let name_scope = provider.get_name_scope().map(NameScopeRef);
+        self.create_binding(&root, name_scope.as_ref())
     }
 }
 
