@@ -355,6 +355,37 @@ fn the_programs_of_the_library_declare_the_uniforms_of_their_parameters() {
     );
 }
 
+/// The WGSL module of the pass (E5): the program, then the bindings and the
+/// entry points; `sample_content` for a content-sampling program only, the
+/// composition of an overlay with its blend mode. naga checks the modules of
+/// the library in `ferroui-vello` (`gpu/effect_pass_tests.rs`).
+#[test]
+fn the_wgsl_module_wraps_the_program_with_the_pass() {
+    for effect in library_shader_effects() {
+        let shader = effect.shader().unwrap();
+        let module = shader.wgsl_module();
+        assert!(module.starts_with(&*shader.wgsl), "{effect}: the program comes first");
+        for binding in [
+            format!("@group(0) @binding({SHADER_WGSL_UNIFORMS_BINDING}) var<uniform> uniforms: Uniforms;"),
+            format!("@group(0) @binding({SHADER_WGSL_PASS_BINDING}) var<uniform> ferroui_pass: FerroUiShaderPass;"),
+            format!("@group(0) @binding({SHADER_WGSL_CONTENT_BINDING}) var ferroui_content: texture_2d<f32>;"),
+            format!("fn {SHADER_WGSL_VERTEX_ENTRY}("),
+            format!("fn {SHADER_WGSL_FRAGMENT_ENTRY}("),
+        ] {
+            assert!(module.contains(&binding), "{effect}: {binding}");
+        }
+        assert_eq!(shader.samples_content(), module.contains("fn sample_content("), "{effect}");
+        assert_eq!(!shader.samples_content(), module.contains("fn ferroui_blend("), "{effect}");
+    }
+    // Each blend mode of an overlay composes with a function of its own.
+    let blend = |mode: BitmapBlendingMode| ShaderEffectDescription::overlay("", WGSL, mode).wgsl_module();
+    assert!(blend(BitmapBlendingMode::Screen).contains("return s + d - s * d;"));
+    assert!(blend(BitmapBlendingMode::SourceOver).contains("return s + d * (1.0 - s.a);"));
+    assert_eq!(blend(BitmapBlendingMode::Unspecified), blend(BitmapBlendingMode::SourceOver));
+    assert!(blend(BitmapBlendingMode::Overlay).contains("fn ferroui_hard_light("));
+    assert!(blend(BitmapBlendingMode::Hue).contains("fn ferroui_set_sat("));
+}
+
 #[test]
 fn the_shader_effects_print_parse_back_and_are_registered() {
     let neutral = library_shader_effects().into_iter().map(|effect| effect.neutral().expect("a neutral value"));
