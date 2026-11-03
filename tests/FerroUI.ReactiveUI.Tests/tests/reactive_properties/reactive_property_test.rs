@@ -8,8 +8,8 @@ use ferroui_reactive::ObservableExt;
 use ferroui_reactive_testing::{duration_to_ticks, TestScheduler};
 use ferroui_reactiveui::*;
 use ferroui_system::component_model::DataErrorsChangedEventArgs;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
-use ferroui_system::IDisposable;
+use ferroui_system::task::oneshot;
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
@@ -405,9 +405,9 @@ fn validation_with_async_failed_case() {
 
 #[test]
 fn validation_with_async_success_case() {
-    let tcs = TaskCompletionSource::<Option<String>>::new();
-    let task = tcs.task();
-    let rp = null_string_property().add_validation_error_async(move |_: Option<String>| -> Task<Option<String>> { task.clone() });
+    let (tcs, task) = oneshot::channel::<Result<Option<String>, ObservableError>>();
+    let task = task.shared();
+    let rp = null_string_property().add_validation_error_async(move |_: Option<String>| task.clone().flatten());
 
     let error: Rc<RefCell<Option<DataErrors>>> = Rc::new(RefCell::new(None));
     let sink = error.clone();
@@ -417,7 +417,7 @@ fn validation_with_async_success_case() {
     assert!(error.borrow().is_none());
 
     rp.set_value(text("dummy"));
-    tcs.set_result(None);
+    tcs.send(Ok(None)).expect("the validator waits for the task");
 
     assert!(!rp.has_errors());
     assert!(error.borrow().is_none());

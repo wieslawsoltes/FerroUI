@@ -4,7 +4,7 @@ use crate::{ISuspensionDriver, ISuspensionDriverOf, ISuspensionHost, ISuspension
 use ferroui_reactive::disposables::{CompositeDisposable, Disposable};
 use ferroui_reactive::Observer;
 use ferroui_splat::{AppLocator, IFullLogger, ILogManager};
-use ferroui_system::threading::tasks::block_on;
+use ferroui_system::task::block_on;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
