@@ -2748,6 +2748,128 @@
           "target_control": "FlipViewExample3"
         }
       ]
+    },
+    "ThemeShadow": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ThemeShadow.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/materials_samples.rs",
+        "src/FerroUI.Base/media/theme_shadow.rs",
+        "src/FerroUI.Base/visual/theme_shadow.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/materials_samples_tests.rs",
+          "name": "theme_shadow_border_casts_its_shadow_on_the_receiver_at_the_slider_elevation"
+        }
+      ],
+      "notes": "The source example uses the native ThemeShadow as the Shadow of the Border, with ShadowRect_Loaded (the grid is a receiver of the shadow) and TranslationSliderInApp_ValueChanged (the Z of the Border's Translation) in Rust. As in WinUI 3 the theme shadow is a drop shadow and the receivers draw nothing (CThemeShadow::IsDropShadowMode). The ThemeShadow is a resource set as the Shadow, as the templates of the WinUI theme share theirs; OverlayCornerRadius is its value, 8. Rendering against Windows captures remains pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ThemeShadow/ThemeshadowAppliedBorder.txt",
+          "source_sha256": "14391c0329c0104d3682dabe0280bcfa6ec40703294a2c3c4c7926d6a0db6e98",
+          "status": "ported",
+          "notes": "ThemeShadow on a Border, its receiver and the Z-translation slider (StepFrequency is TickFrequency with IsSnapToTickEnabled; Header is a composed label).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "theme_shadow_border_casts_its_shadow_on_the_receiver_at_the_slider_elevation"
+            }
+          ]
+        }
+      ]
+    },
+    "Acrylic": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/Acrylic.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/materials_samples.rs",
+        "src/FerroUI.Base/media/acrylic_brush.rs",
+        "src/FerroUI.Themes.WinUI/Resources/AcrylicBrush_themeresources.xaml"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/materials_samples_tests.rs",
+          "name": "acrylic_page_keeps_three_examples_and_the_loaded_state_of_its_brushes"
+        },
+        {
+          "path": "samples/WinUIGallery/materials_samples_tests.rs",
+          "name": "acrylic_options_change_tint_fallback_and_luminosity_of_their_own_brush"
+        }
+      ],
+      "notes": "All three source examples use the native AcrylicBrush over the source's shapes: the theme's AcrylicInAppFillColorDefaultBrush, and the page's CustomAcrylicInAppBrush and CustomAcrylicInAppLuminosity with the source's values, page resources under their keys, changed by AcrylicPage_Loaded, Slider_ValueChanged, ColorSelector_SelectionChanged, FallbackColorSelector_SelectionChanged and LuminositySlider_ValueChanged in Rust. The SolidColorBrush items of the colour boxes and their ColorTemplate are composed items (a swatch and the colour); the handlers map the selected index to the colour. The ThemeDictionaries of the source have only Default, so the brushes are plain resources; the AdaptiveTrigger sizes are the wide ones. The link of the intro to the SystemBackdrops page is text. Rendering against Windows captures remains pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/Acrylic/DefaultAppAcrylicBrush.txt",
+          "source_sha256": "f1ee4e6ec816c2e3f04223d7b4570b7e6792b926e8b644e18409ee38405d9586",
+          "status": "ported",
+          "notes": "The theme resource AcrylicInAppFillColorDefaultBrush (a DynamicResource) over the source's shapes.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_page_keeps_three_examples_and_the_loaded_state_of_its_brushes"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Acrylic/CustomAcrylicAppBrush.txt",
+          "source_sha256": "9060e2e85127697c2d74f139eb6fb87205ea2863bf7fc5f786645aca6363a05e",
+          "status": "ported",
+          "notes": "TintOpacity, TintColor and FallbackColor of the page's brush from the slider and the two colour boxes, as the C# handlers set them.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_page_keeps_three_examples_and_the_loaded_state_of_its_brushes"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_options_change_tint_fallback_and_luminosity_of_their_own_brush"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Acrylic/LuminosityAppAcrylic.txt",
+          "source_sha256": "b00dcddc13a034e5031167982f139ebca2a45c254b22994f40fbe4138f7b85f6",
+          "status": "ported",
+          "notes": "TintOpacity and TintLuminosityOpacity of the luminosity brush from its two sliders.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_page_keeps_three_examples_and_the_loaded_state_of_its_brushes"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_options_change_tint_fallback_and_luminosity_of_their_own_brush"
+            }
+          ]
+        }
+      ]
     }
   }
 }

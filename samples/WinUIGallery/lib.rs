@@ -20,6 +20,7 @@ mod feedback_samples;
 mod frame_sample;
 pub mod gallery;
 mod input_samples;
+mod materials_samples;
 mod media_samples;
 pub mod navigation;
 mod navigation_view_samples;
@@ -52,3 +53,6 @@ mod connected_animation_samples_tests;
 
 #[cfg(test)]
 mod media_samples_tests;
+
+#[cfg(test)]
+mod materials_samples_tests;
