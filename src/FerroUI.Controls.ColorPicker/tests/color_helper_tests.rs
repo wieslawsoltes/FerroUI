@@ -8,22 +8,22 @@ use crate::primitives::ColorHelper;
 use crate::{ColorComponent, ColorModel, HsvComponent};
 use ferroui_base::layout::Orientation;
 use ferroui_base::media::{Color, Colors, HsvColor};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{current_ui_locale, set_current_ui_locale, Locale};
 
 /// Sets the UI culture of the thread and restores it when dropped.
-struct UiCultureScope(CultureInfo);
+struct UiCultureScope(Locale);
 
 impl UiCultureScope {
     fn new(name: &str) -> Self {
-        let previous = CultureInfo::current_ui_culture();
-        CultureInfo::set_current_ui_culture(CultureInfo::get_culture_info(name));
+        let previous = current_ui_locale();
+        set_current_ui_locale(Locale::try_from_str(name).unwrap());
         Self(previous)
     }
 }
 
 impl Drop for UiCultureScope {
     fn drop(&mut self) {
-        CultureInfo::set_current_ui_culture(self.0.clone());
+        set_current_ui_locale(self.0.clone());
     }
 }
 

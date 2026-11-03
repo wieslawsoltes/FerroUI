@@ -65,9 +65,9 @@ impl StringComparison {
     /// The comparer and the options this comparison stands for.
     fn resolve(self) -> (CompareInfo, CompareOptions) {
         match self {
-            StringComparison::CurrentCulture => (CultureInfo::current_culture().compare_info(), CompareOptions::NONE),
+            StringComparison::CurrentCulture => (CultureInfo::current_formatting().compare_info(), CompareOptions::NONE),
             StringComparison::CurrentCultureIgnoreCase => {
-                (CultureInfo::current_culture().compare_info(), CompareOptions::IGNORE_CASE)
+                (CultureInfo::current_formatting().compare_info(), CompareOptions::IGNORE_CASE)
             }
             StringComparison::InvariantCulture => (CompareInfo::invariant(), CompareOptions::NONE),
             StringComparison::InvariantCultureIgnoreCase => (CompareInfo::invariant(), CompareOptions::IGNORE_CASE),

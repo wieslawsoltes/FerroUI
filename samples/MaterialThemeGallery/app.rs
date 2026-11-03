@@ -32,7 +32,7 @@ impl ApplicationImpl for App {
     /// `Initialize()`: the theme, then the document of the application.
     fn initialize(this: &Self) {
         crate::register_types();
-        CultureInfo::set_current_culture(native_date_culture());
+        CultureInfo::set_current_formatting(native_date_culture());
         let gallery_theme = theme::create();
         this.styles().add(theme::as_style(&gallery_theme));
         *this.theme.borrow_mut() = Some(gallery_theme);

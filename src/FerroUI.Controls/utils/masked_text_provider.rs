@@ -320,7 +320,7 @@ impl MaskedTextProvider {
             return Err(MaskedTextProviderError::MaskInvalidChar);
         }
 
-        let culture = culture.unwrap_or_else(CultureInfo::current_culture);
+        let culture = culture.unwrap_or_else(CultureInfo::current_formatting);
         let mut provider = Self {
             ascii_only: restrict_to_ascii,
             allow_prompt_as_input,
@@ -2111,7 +2111,7 @@ mod tests {
         assert!(p.reset_on_prompt());
         assert!(p.reset_on_space());
         assert!(p.skip_literals());
-        assert_eq!(p.culture(), &CultureInfo::current_culture());
+        assert_eq!(p.culture(), &CultureInfo::current_formatting());
         assert_eq!(p.length(), 5);
         assert_eq!(p.edit_position_count(), 4);
         assert_eq!(p.assigned_edit_position_count(), 0);
@@ -2548,7 +2548,7 @@ mod tests {
 
     #[test]
     fn culture_separators() {
-        assert_eq!(CultureInfo::current_culture(), CultureInfo::invariant_culture());
+        assert_eq!(CultureInfo::current_formatting(), CultureInfo::invariant_culture());
 
         let p = MaskedTextProvider::new_with_culture("$0,000.00 00/00 00:00", Some(CultureInfo::invariant_culture())).unwrap();
         assert_eq!(p.to_display_string(), "\u{A4}_,___.__ __/__ __:__");

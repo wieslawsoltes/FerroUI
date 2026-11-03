@@ -231,7 +231,7 @@ mod calendar_automation_peer_tests {
 
     impl Drop for CultureScope {
         fn drop(&mut self) {
-            CultureInfo::set_current_culture(self.previous_culture.clone());
+            CultureInfo::set_current_formatting(self.previous_culture.clone());
             self.locator.dispose();
         }
     }
@@ -240,10 +240,10 @@ mod calendar_automation_peer_tests {
     fn value_joins_selected_dates_with_current_culture() {
         let _scope = test_scope();
         let _previous_culture =
-            CultureScope { previous_culture: CultureInfo::current_culture(), locator: FerroLocator::enter_scope() };
+            CultureScope { previous_culture: CultureInfo::current_formatting(), locator: FerroLocator::enter_scope() };
         // The culture data of en-GB comes from the culture data provider of the tests.
         TestCultureDataProvider::register();
-        CultureInfo::set_current_culture(CultureInfo::get_culture_info("en-GB"));
+        CultureInfo::set_current_formatting(CultureInfo::get_culture_info("en-GB"));
 
         let selected_dates = [DateTime::new(2026, 5, 7), DateTime::new(2026, 5, 8)];
         let target = Calendar::new();
@@ -254,7 +254,7 @@ mod calendar_automation_peer_tests {
             target.selected_dates().add(date);
         }
 
-        let culture = CultureInfo::current_culture();
+        let culture = CultureInfo::current_formatting();
         assert_eq!(
             Some(
                 selected_dates

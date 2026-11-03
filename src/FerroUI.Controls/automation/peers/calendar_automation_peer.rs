@@ -135,7 +135,7 @@ impl CalendarAutomationPeer {
     /// Gets the selected dates, formatted with the current culture and
     /// joined with its list separator (the value provider contract).
     pub fn value(&self) -> Option<String> {
-        let culture = CultureInfo::current_culture();
+        let culture = CultureInfo::current_formatting();
         let dates: Vec<String> =
             self.owner().selected_dates().to_vec().into_iter().map(|x| x.to_string_provider(&culture)).collect();
         Some(dates.join(culture.text_info().list_separator()))

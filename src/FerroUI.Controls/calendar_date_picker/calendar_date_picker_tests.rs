@@ -16,7 +16,9 @@ use ferroui_base::input::{InputElement, Key, KeyModifiers, KeyboardNavigationHan
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::{Brushes, IBrush};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::{CultureInfo, DateTime, DateTimeStyles, TestCultureDataProvider};
+use ferroui_base::utilities::{
+    current_ui_locale, locale, set_current_ui_locale, CultureInfo, DateTime, DateTimeStyles, Locale, TestCultureDataProvider,
+};
 use ferroui_base::{BoxedValue, FerroProperty, Ref};
 use std::cell::Cell;
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -51,13 +53,13 @@ fn start_focus_services() -> (AppScope, FocusScope) {
 /// Restores the current cultures of the thread when dropped.
 struct CultureScope {
     culture: CultureInfo,
-    ui_culture: CultureInfo,
+    ui_culture: Locale,
 }
 
 impl Drop for CultureScope {
     fn drop(&mut self) {
-        CultureInfo::set_current_culture(self.culture.clone());
-        CultureInfo::set_current_ui_culture(self.ui_culture.clone());
+        CultureInfo::set_current_formatting(self.culture.clone());
+        set_current_ui_locale(self.ui_culture.clone());
     }
 }
 
@@ -66,11 +68,10 @@ impl Drop for CultureScope {
 /// application.
 fn use_en_us() -> CultureScope {
     let scope =
-        CultureScope { culture: CultureInfo::current_culture(), ui_culture: CultureInfo::current_ui_culture() };
+        CultureScope { culture: CultureInfo::current_formatting(), ui_culture: current_ui_locale() };
     TestCultureDataProvider::register();
-    let culture = CultureInfo::get_culture_info("en-US");
-    CultureInfo::set_current_culture(culture.clone());
-    CultureInfo::set_current_ui_culture(culture);
+    CultureInfo::set_current_formatting(CultureInfo::get_culture_info("en-US"));
+    set_current_ui_locale(locale!("en-US"));
     scope
 }
 

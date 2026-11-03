@@ -16,7 +16,7 @@ use ferroui_base::layout::{ILayoutManager, VerticalAlignment};
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::reactive::Observable;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::{CultureInfo, DateTimeFormatInfo, TestCultureDataProvider};
+use ferroui_base::utilities::{current_ui_locale, set_current_ui_locale, CultureInfo, DateTimeFormatInfo, Locale, TestCultureDataProvider};
 use ferroui_base::{AnyValue, BoxedValue, Ref, Size, Visual};
 use std::cell::Cell;
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -40,18 +40,18 @@ fn start_with(services: TestServices) -> AppScope {
 }
 
 /// Restores the current cultures when dropped.
-struct CultureScope(CultureInfo, CultureInfo);
+struct CultureScope(CultureInfo, Locale);
 
 impl CultureScope {
     fn new() -> Self {
-        Self(CultureInfo::current_culture(), CultureInfo::current_ui_culture())
+        Self(CultureInfo::current_formatting(), current_ui_locale())
     }
 }
 
 impl Drop for CultureScope {
     fn drop(&mut self) {
-        CultureInfo::set_current_culture(self.0.clone());
-        CultureInfo::set_current_ui_culture(self.1.clone());
+        CultureInfo::set_current_formatting(self.0.clone());
+        set_current_ui_locale(self.1.clone());
     }
 }
 
@@ -63,8 +63,8 @@ fn use_empty_designator_culture() -> CultureScope {
     date_time_format.set_am_designator("");
     date_time_format.set_pm_designator("");
     let culture = CultureInfo::invariant_culture().with_date_time_format(date_time_format);
-    CultureInfo::set_current_culture(culture.clone());
-    CultureInfo::set_current_ui_culture(culture);
+    CultureInfo::set_current_formatting(culture);
+    set_current_ui_locale(Locale::UNKNOWN);
     scope
 }
 
@@ -513,7 +513,7 @@ fn clock_identifier_follows_the_culture() {
     // The invariant pattern is `HH:mm`.
     assert_eq!("24HourClock", TimePicker::new().clock_identifier());
 
-    CultureInfo::set_current_culture(CultureInfo::get_culture_info("en-US"));
+    CultureInfo::set_current_formatting(CultureInfo::get_culture_info("en-US"));
     let time_picker = TimePicker::new();
     assert_eq!("12HourClock", time_picker.clock_identifier());
 
@@ -528,7 +528,7 @@ fn clock_identifier_follows_the_culture() {
     assert_eq!(Some("PM"), text_of(&host_at(&container, 6)).text().as_deref());
     assert_eq!(7, container.column_definitions().count());
 
-    CultureInfo::set_current_culture(CultureInfo::get_culture_info("en-GB"));
+    CultureInfo::set_current_formatting(CultureInfo::get_culture_info("en-GB"));
     assert_eq!("24HourClock", TimePicker::new().clock_identifier());
     time_picker.set_selected_time(Some(SignedDuration::from_hms(9, 4, 5)));
     assert_eq!(Some("am"), text_of(&host_at(&container, 6)).text().as_deref());

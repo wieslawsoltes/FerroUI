@@ -1,6 +1,6 @@
 use super::round_digits;
 use ferroui_base::media::{Color, HsvColor, KnownColor, KnownColors};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_ui_locale;
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, PoisonError};
 
@@ -48,9 +48,8 @@ impl ColorHelper {
     /// Only English names are currently supported following known color names.
     /// In the future known color names could be localized.
     pub fn to_display_name_exists() -> bool {
-        let culture = CultureInfo::current_ui_culture();
-        let name = culture.name();
-        name.len() >= 2 && name.as_bytes()[..2].eq_ignore_ascii_case(b"EN")
+        // The language subtag of the locale, which holds it in lower case.
+        current_ui_locale().id.language.as_str().starts_with("en")
     }
 
     /// Determines an approximate display name for the given color.
