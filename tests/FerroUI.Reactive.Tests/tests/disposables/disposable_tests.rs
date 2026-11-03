@@ -8,6 +8,10 @@
 //! context `MySync` of `ContextDisposable` runs the work it is posted at once, from `post` and
 //! `post_local` alike (the disposal is posted with `post_local`), and records it in an atomic flag,
 //! since a context is shared between threads.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::{IScheduler, Scheduler};
 use ferroui_reactive::disposables::{

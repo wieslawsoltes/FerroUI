@@ -6,6 +6,10 @@
 //! is made there with the context current, as on upstream's `Task.Run`, and the subject ends there
 //! with the context cleared, as on the test thread of upstream; the awaiter of the port is a task,
 //! whose `continue_with` is `OnCompleted`.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::subjects::{AsyncSubject, SubjectBase};
 use ferroui_reactive::{IDisposable, IObservable, IObserver, ObservableExt};

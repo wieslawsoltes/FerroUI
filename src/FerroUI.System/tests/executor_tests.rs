@@ -1,10 +1,10 @@
-//! Tests of `task`: the executor of the crate (steps A1 and A2 of phase C4 of #423,
+//! Tests of `task`: the executor of the crate (steps A1, A2 and A5 of phase C4 of #423,
 //! docs/idiomatic-rust-async.md, section 3.1): spawning and polling, the reentrancy rule, wakes
-//! from other threads, schedules, aborts, panics, and the handles of tasks.
+//! from other threads, schedules, the current schedule, aborts, panics, and the handles of tasks.
 
 use crate::task::{
-    block_on, poll_now, run_pending, set_thread_schedule, spawn_local, spawn_local_on, spawn_on, try_id, AbortHandle, FirstPoll, JoinError,
-    JoinHandle, Schedule,
+    block_on, current_schedule, is_current_schedule, poll_now, run_pending, set_current_schedule, set_thread_schedule, spawn_local, spawn_local_on,
+    spawn_on, thread_schedule, try_id, AbortHandle, FirstPoll, JoinError, JoinHandle, Schedule,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -712,4 +712,121 @@ fn try_id_is_the_task_being_polled_and_poll_now_polls_a_task_inside_the_caller()
     assert_eq!(schedule.len(), 1);
     schedule.run_all();
     assert!(handle.is_finished());
+}
+
+// ---------------------------------------------------------------------------
+// The current schedule (A5): the schedule of the work that runs, which a task spawned in it takes.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn a_task_spawned_in_the_work_of_a_schedule_resumes_inline_while_it_is_current_and_queued_otherwise() {
+    let schedule = Arc::new(QueueSchedule::default());
+    let as_schedule: Arc<dyn Schedule> = schedule.clone();
+    let other: Arc<dyn Schedule> = Arc::new(QueueSchedule::default());
+    let previous = set_current_schedule(Some(as_schedule.clone()));
+    let (first, second) = (Gate::default(), Gate::default());
+    let log = Rc::new(RefCell::new(Vec::new()));
+    let (l, f, s) = (log.clone(), first.clone(), second.clone());
+    let handle = spawn_local(async move {
+        f.wait().await;
+        l.borrow_mut().push("after the first gate");
+        s.wait().await;
+        l.borrow_mut().push("after the second gate");
+    });
+
+    // The schedule the task was spawned in is current: the wake polls it inside the call.
+    first.open();
+    assert_eq!(*log.borrow(), ["after the first gate"]);
+    assert_eq!(schedule.len(), 0);
+
+    // Another schedule is current: the wake queues one poll on the task's schedule.
+    drop(set_current_schedule(Some(other)));
+    second.open();
+    assert_eq!(*log.borrow(), ["after the first gate"]);
+    assert_eq!(schedule.len(), 1);
+    schedule.run_all();
+    assert_eq!(*log.borrow(), ["after the first gate", "after the second gate"]);
+    assert!(handle.is_finished());
+    drop(set_current_schedule(previous));
+}
+
+#[test]
+fn a_task_spawned_in_the_work_of_a_schedule_is_woken_from_another_thread_through_that_schedule() {
+    let schedule = Arc::new(QueueSchedule::default());
+    let previous = set_current_schedule(Some(schedule.clone() as Arc<dyn Schedule>));
+    let gate = Gate::default();
+    let done = Rc::new(Cell::new(false));
+    let (g, d) = (gate.clone(), done.clone());
+    let handle = spawn_local(async move {
+        g.wait().await;
+        d.set(true);
+    });
+
+    let opener = gate.clone();
+    thread::spawn(move || opener.open()).join().unwrap();
+    assert!(!done.get());
+    // The wake is a poll on the schedule, not an entry of the queue of the thread.
+    assert!(!run_pending());
+    assert_eq!(schedule.len(), 1);
+    schedule.run_all();
+    assert!(done.get());
+    assert!(handle.is_finished());
+    drop(set_current_schedule(previous));
+}
+
+#[test]
+fn a_task_spawned_outside_of_the_work_of_a_schedule_stays_in_the_queue_of_the_thread() {
+    // A schedule of the thread is not a current schedule: the task resumes inside the waking call
+    // wherever the wake comes from on this thread, as before.
+    let schedule = Arc::new(QueueSchedule::default());
+    set_thread_schedule(Some(schedule.clone()));
+    assert!(current_schedule().is_none());
+    assert!(thread_schedule().is_some());
+    let gate = Gate::default();
+    let done = Rc::new(Cell::new(false));
+    let (g, d) = (gate.clone(), done.clone());
+    let handle = spawn_local(async move {
+        g.wait().await;
+        d.set(true);
+    });
+    let other: Arc<dyn Schedule> = Arc::new(QueueSchedule::default());
+    let previous = set_current_schedule(Some(other));
+    gate.open();
+    assert!(done.get());
+    assert!(handle.is_finished());
+    assert_eq!(schedule.len(), 0);
+    drop(set_current_schedule(previous));
+    set_thread_schedule(None);
+    assert!(thread_schedule().is_none());
+}
+
+#[test]
+fn block_on_runs_its_future_with_no_current_schedule() {
+    let schedule: Arc<dyn Schedule> = Arc::new(QueueSchedule::default());
+    let previous = set_current_schedule(Some(schedule.clone()));
+    let inside = block_on(async { current_schedule().is_none() });
+    assert!(inside);
+    assert!(is_current_schedule(&schedule));
+    drop(set_current_schedule(previous));
+    assert!(!is_current_schedule(&schedule));
+}
+
+#[test]
+fn work_that_is_not_send_is_scheduled_through_a_callback_of_its_thread() {
+    let schedule = QueueSchedule::default();
+    let ran = Rc::new(Cell::new(0));
+    let r = ran.clone();
+    schedule.schedule_local(Box::new(move || r.set(r.get() + 1)));
+    assert_eq!(ran.get(), 0);
+    assert_eq!(schedule.len(), 1);
+    schedule.run_all();
+    assert_eq!(ran.get(), 1);
+
+    // Work that the schedule drops without running it is forgotten, and never runs.
+    let r = ran.clone();
+    schedule.schedule_local(Box::new(move || r.set(r.get() + 10)));
+    let dropped: Vec<_> = schedule.polls.lock().unwrap().drain(..).collect();
+    drop(dropped);
+    assert!(!run_pending());
+    assert_eq!(ran.get(), 1);
 }

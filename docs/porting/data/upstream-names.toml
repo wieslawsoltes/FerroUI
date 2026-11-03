@@ -368,6 +368,42 @@ phase = "C4"
 behaviour = "same"
 notes = "Step A4b. A cancellation that names no task (threading::tasks::canceled(), the cancellation of RunAsync, the work of the tests) is Canceled; TaskCanceledError::is_cancellation recognizes both, and a Canceled cancels a Task as a TaskCanceledError does. TaskCanceledError stays, not deprecated, as the outcome of a canceled Task that names it (TaskCanceledException.Task), until Task moves to the executor (A7)."
 
+[[name]]
+upstream = "System.Threading.SynchronizationContext"
+rust = "ferroui_system::task::Schedule"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_system::threading::SynchronizationContext"
+behaviour = "test"
+notes = "Step A5. Post is Schedule::schedule (Send work) and Schedule::schedule_local (work of the thread of the schedule); Send and OperationStarted/OperationCompleted have no counterpart (blocking on the dispatcher is Dispatcher::invoke). A dispatcher is the schedule of its thread (task::set_thread_schedule) from its start to its shutdown, and its task_schedule(priority) is the context of a priority. A task spawned where a schedule is current continues by the rule of await: inline when completed in that schedule, queued on it otherwise (F3). threading::context_schedule adapts a context. The Rx forms of a context take a schedule: SynchronizationContextScheduler::with_schedule, ContextDisposable::with_schedule, observe_on_schedule, subscribe_on_schedule, notify_on_schedule, BindingSchedulers::use_schedule; their context forms are deprecated. Tested in src/FerroUI.Base/threading/dispatcher_schedule_tests.rs and src/FerroUI.System/tests/executor_tests.rs."
+
+[[name]]
+upstream = "System.Threading.SynchronizationContext.Current"
+rust = "ferroui_system::task::current_schedule"
+kind = "member"
+phase = "C4"
+deprecated = "ferroui_system::threading::current_synchronization_context"
+behaviour = "same"
+notes = "Step A5. The schedule of the running work: in a dispatcher job the dispatcher at the priority of the job, None outside of such work (a thread without a dispatcher, or the code of a dispatcher thread outside of a job unless Dispatcher::set_current_priority set one). is_current_schedule compares by Schedule::identity. FromEvent, the awaiter of AsyncSubject, ConfigureAwait(true) of ScheduleAsync and the dock services capture it."
+
+[[name]]
+upstream = "System.Threading.SynchronizationContext.SetSynchronizationContext"
+rust = "ferroui_system::task::set_current_schedule"
+kind = "member"
+phase = "C4"
+deprecated = "ferroui_system::threading::set_synchronization_context"
+behaviour = "same"
+notes = "Step A5. Gives the previous schedule, which the caller restores; a dispatcher sets it around each job. The schedule that the wakes from other threads go to is task::set_thread_schedule; the deprecated set_synchronization_context sets both to an adapter of the context."
+
+[[name]]
+upstream = "Avalonia.Threading.AvaloniaSynchronizationContext"
+rust = "ferroui_base::threading::Dispatcher::current_priority"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_base::threading::FerroSynchronizationContext"
+behaviour = "same"
+notes = "Step A5. The context of the dispatcher kept one role, the priority of the running job: Dispatcher::current_priority (None outside of a job) and Dispatcher::set_current_priority (InstallIfNeeded, which Application does at Normal; the previous priority is given back, in the place of RestoreContext, also deprecated). Post is Dispatcher::post or post_local at that priority; the context of a priority as a schedule is Dispatcher::task_schedule(priority). FerroScheduler::install_on_ui_thread is deprecated: the dispatcher installs itself."
+
 # C5: the public signatures take std and the chosen crates (docs/idiomatic-rust-signatures.md).
 
 [[name]]

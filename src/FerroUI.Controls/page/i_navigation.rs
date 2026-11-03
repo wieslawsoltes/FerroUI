@@ -1,6 +1,6 @@
 use super::Page;
 use ferroui_base::animation::IPageTransition;
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask};
 use ferroui_base::{BoxedValue, Ref};
 use std::future::Future;
 use std::rc::Rc;
@@ -165,13 +165,13 @@ impl PartialEq for dyn INavigation {
 
 /// Runs the body of an asynchronous navigation member the way calling an
 /// asynchronous method does: synchronously up to its first pending await,
-/// then resumed through the synchronization context of the calling thread
-/// (the dispatcher's context when the thread has none).
+/// then resumed by the dispatcher of the calling thread at the priority of
+/// the running job (the synchronization context of the original), Normal
+/// outside of one.
 pub(crate) fn start_async<T: 'static>(future: impl Future<Output = T> + 'static) -> DispatcherTask<T> {
-    let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-        FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-    });
-    context.to_task_scheduler().start_local(future)
+    let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+    let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
+    scheduler.start_local(future)
 }
 
 /// A task that has already completed.

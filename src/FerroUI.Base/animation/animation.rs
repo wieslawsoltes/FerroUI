@@ -1,6 +1,5 @@
-use crate::animation::cancellation::register_local;
 use crate::animation::easings::Easing;
-use crate::animation::i_page_transition::continuation_context;
+use crate::animation::i_page_transition::continuation_scheduler;
 use crate::animation::key_frame::KeyFrameTimingMode;
 use crate::animation::{
     Animatable, AnimationError, AnimationTask, AnimatorFactory, AnimatorKeyFrame, Cue, FillMode,
@@ -330,13 +329,13 @@ impl Animation {
             }
         } else {
             // The completion action runs once every animator has completed,
-            // through the synchronization context that is current now.
+            // in a job of the dispatcher at the priority that is current now.
             let remaining = Rc::new(Cell::new(animators.len()));
             let schedule_on_complete = on_complete.map(|on_complete| {
-                let context = continuation_context();
+                let scheduler = continuation_scheduler();
                 Rc::new(move || {
                     let on_complete = on_complete.clone();
-                    context.post_local(move || on_complete());
+                    scheduler.dispatcher().post_local(move || on_complete(), scheduler.priority());
                 })
             });
 
@@ -567,9 +566,8 @@ impl Animation {
                 if let Some(subscriptions) = subscriptions {
                     subscriptions.dispose();
                 }
-                let cancellation: Option<
-                    crate::animation::cancellation::LocalCancellationRegistration,
-                > = cancellation.borrow_mut().take();
+                let cancellation: Option<crate::threading::CancellationGuard> =
+                    cancellation.borrow_mut().take();
                 if let Some(cancellation) = cancellation {
                     cancellation.dispose();
                 }
@@ -587,7 +585,10 @@ impl Animation {
         // which case there is nothing left to dispose on cancellation.
         *subscriptions.borrow_mut() = Some(applied);
 
-        let registration = register_local(&cancellation_token, move || finish());
+        // Runs on this thread: at once when the token is canceled here (or was already), in a
+        // dispatcher job when it is canceled on another thread (the dispatcher is the schedule of
+        // its thread).
+        let registration = cancellation_token.register_local(move || finish());
         if !run.is_completed() || !cancellation_token.is_cancelled() {
             *cancellation.borrow_mut() = Some(registration);
         }

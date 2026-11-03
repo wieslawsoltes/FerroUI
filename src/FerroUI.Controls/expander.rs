@@ -9,9 +9,7 @@ use ferroui_base::interactivity::{
     RoutingStrategies,
 };
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::threading::{
-    CancellationToken, Dispatcher, DispatcherPriority, FerroSynchronizationContext,
-};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, FerroObject, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty,
@@ -342,13 +340,9 @@ impl Expander {
                 content_transition.start(Some(&visual_content), None, !forward, token)
             };
 
-            let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-                FerroSynchronizationContext::with_dispatcher(
-                    &Dispatcher::current_dispatcher(),
-                    DispatcherPriority::NORMAL,
-                )
-            });
-            drop(context.to_task_scheduler().start_local(async move {
+            let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+            let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
+            drop(scheduler.start_local(async move {
                 if task.await.is_ok() {
                     post_completed();
                 }

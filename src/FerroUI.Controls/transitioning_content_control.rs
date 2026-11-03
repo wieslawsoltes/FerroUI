@@ -9,10 +9,7 @@ use ferroui_base::interactivity::{
     Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies,
 };
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
-use ferroui_base::threading::{
-    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask,
-    FerroSynchronizationContext,
-};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size, StyledElementImpl,
@@ -92,16 +89,13 @@ impl LayoutableImpl for TransitioningContentControl {
                 let to: Ref<Visual> = to.upcast();
                 let task = transition.start(Some(&from), Some(&to), !this.is_transition_reversed(), cancel.clone());
 
-                // The continuation always runs as a job of the
-                // synchronization context, never inside this arrange pass.
+                // The continuation always runs as a job of the dispatcher at
+                // the priority of the running job, never inside this arrange
+                // pass.
                 let this = this.to_ref();
-                let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-                    FerroSynchronizationContext::with_dispatcher(
-                        &Dispatcher::current_dispatcher(),
-                        DispatcherPriority::NORMAL,
-                    )
-                });
-                drop(context.to_task_scheduler().start_local(async move {
+                let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+                let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
+                drop(scheduler.start_local(async move {
                     if task.is_completed() {
                         YieldOnce(false).await;
                     }

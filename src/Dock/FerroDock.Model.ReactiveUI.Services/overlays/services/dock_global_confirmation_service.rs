@@ -4,7 +4,7 @@
 use crate::threading::{ActionDisposable, ServiceDispatcher};
 use ferrodock_model::services::IDockGlobalConfirmationService;
 use ferroui_reactiveui::{reactive_object, IReactiveObjectExt, ReactiveObject};
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -27,11 +27,12 @@ pub struct DockGlobalConfirmationService {
 reactive_object!(DockGlobalConfirmationService);
 
 impl DockGlobalConfirmationService {
-    /// Creates a shared service using the optional default message and notification context.
+    /// Creates a shared service using the optional default message and notification schedule
+    /// (the `SynchronizationContext` of the reference; a dispatcher's `task_schedule(priority)`).
     /// An absent or whitespace-only default message becomes `"Confirmation open in another window."`.
     pub fn new(
         default_message: Option<String>,
-        synchronization_context: Option<Arc<dyn SynchronizationContext>>,
+        schedule: Option<Arc<dyn Schedule>>,
     ) -> Rc<Self> {
         let default_message = default_message
             .filter(|text| !text.trim().is_empty())
@@ -39,7 +40,7 @@ impl DockGlobalConfirmationService {
         Rc::new_cyclic(|self_weak| Self {
             reactive: ReactiveObject::new(),
             default_message,
-            dispatcher: ServiceDispatcher::new(synchronization_context, None),
+            dispatcher: ServiceDispatcher::new(schedule, None),
             confirmation_count: Cell::new(0),
             is_confirmation_open: RefCell::new(false),
             message: RefCell::new(None),

@@ -198,7 +198,7 @@ question; each is decided in the step named.
 |---|---|---|
 | F1 | **Lost wake of a dispatcher task polled in a nested loop.** `poll_task` takes the task out of the table while it polls it and clears its `scheduled` flag. If the future pumps the queue during that poll (a synchronous `invoke_local_with_priority` at a priority other than `Send`, `DispatcherOperation::wait`, `push_frame`), and something it awaits completes there, the queued poll runs inside the pump, finds no task and does nothing, and `scheduled` stays set: every later wake is swallowed and the task never resumes. The executor of `ferroui-system` handles the same case (a wake during a poll repolls after it). | A2 fixes it, with a test: done (`a_task_whose_poll_pumps_the_queue_resumes_after_a_wake_that_ran_in_the_pump`) |
 | F2 | **A panic in a future of `ferroui-system` strands it.** `poll_task` does not catch: the panic leaves through the call that woke the future (often `set_result`), the task stays `Running` in the table with its `polling` flag set, and the awaiters of the same task that were not woken yet never are (the panic leaves `finish` with the rest of its wakers). The dispatcher's executor catches and faults the task. | A1 (the panic faults the task, as on the dispatcher): done |
-| F3 | **Continuations inline or queued.** Section 1.4: the two executors of a dispatcher thread order continuations differently, and neither is the .NET rule. | A2 keeps the dispatcher's rule; A5 decides the rule for the tasks of the reactive libraries on a dispatcher thread |
+| F3 | **Continuations inline or queued.** Section 1.4: the two executors of a dispatcher thread order continuations differently, and neither is the .NET rule. | A2 keeps the dispatcher's rule; A5 decides the rule for the tasks of the reactive libraries on a dispatcher thread: decided, the rule of `await` in .NET (the A5 status below) |
 | F4 | **Order of cancellation callbacks.** The port runs them in the order of registration; .NET runs them in reverse order. Not recorded in DEVIATIONS. | A4 keeps the order of registration and records it: done (A4a) |
 | F5 | **The platform signal runs jobs while processing is disabled** (as upstream: only `run_jobs`, `push_frame` and the pumping waits check the counter). A native modal loop that delivers the signal while a layout pass has disabled processing would run jobs inside it. Pinned by `a_platform_signal_runs_jobs_while_processing_is_disabled`. | Open: an owner decision; not changed without a DEVIATIONS row |
 | F6 | **A dropped `TaskCompletionSource` leaves its awaiters pending for ever** (as in .NET); the D-Bus call queue already resolves such a task as canceled (DEVIATIONS, row of `DBusCallQueue`). Pinned by `a_future_awaiting_a_dropped_completion_source_stays_pending`. | A3: the one-shot channel cancels when its sender is dropped: done (the local copies that moved; `threading::tasks::TaskCompletionSource` keeps it until its uses move) |
@@ -440,7 +440,7 @@ where they are large.
 | A3 (done) | `task::oneshot`; the ten local completions move to it, by crate (X11, remote protocol, dialogs, headless, iOS, Android, FreeDesktop, WinUI) | additions; `ferroui-x11`'s public `TaskCompletionSource` deprecated | low per crate; a dropped sender now cancels (F6, a DEVIATIONS row where the copy did not) |
 | A4a (done) | One cancellation type: `CancellationToken` reshaped (section 3.7), `CancellationGuard` (`register_guarded`, `register_local_guarded`), `cancelled()`, `child_token()`, `drop_guard()`; `CancellationTokenSource` over it; `OperationCanceledError` and `TaskCanceledError` convert to and from `task::Canceled`; F4 recorded | additions | low: the old API keeps working and is not deprecated yet |
 | A4b (done) | The uses move, by crate (602: `ferroui-reactive`, `ferroui-base`, `ferroui-dynamic-data`, dock, `ferroui-controls`, ...); the local cancellation types replaced: `LocalCancellationRegistration` of `ferroui-base::animation` (`register_local_guarded`), `CancellationFlag` and `Cancelled` of `ferroui-freedesktop` (`cancelled()`), `AiCancellationToken` of ProTranslate, `LoopCancellation` of `ferroui-native` and `CancelOnDrop` of `ferroui-headless` (`drop_guard()`); `register` gives the guard; then the old names deprecated and the `upstream-names.toml` rows | 0.5: the old names deprecated | medium: registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
-| A5 | `SynchronizationContext` to the thread's schedule: `set_thread_schedule`, `Dispatcher::current_priority`, `FerroScheduler::install_on_ui_thread`, the Rx forms that capture a context, the dock services; the rule for the tasks of the reactive libraries on a dispatcher thread decided (F3) and its order tested | 0.5: the trait, `FerroSynchronizationContext` and `RestoreContext` deprecated | high where F3 changes an order; the Rx, ReactiveUI and dock tests guard it |
+| A5 (done) | `SynchronizationContext` to the thread's schedule: `set_thread_schedule`, `Dispatcher::current_priority`, `FerroScheduler::install_on_ui_thread`, the Rx forms that capture a context, the dock services; the rule for the tasks of the reactive libraries on a dispatcher thread decided (F3) and its order tested | 0.5: the trait, `FerroSynchronizationContext` and `RestoreContext` deprecated | high where F3 changes an order; the Rx, ReactiveUI and dock tests guard it |
 | A6 | The asynchronous public APIs of the controls and platforms return `JoinHandle` or `impl Future` (navigation, dialogs, the behaviors' `TaskHandle`, the callers of `invoke_async_task*` and `to_task_scheduler`), by area | 0.5 | medium: callers visited; deprecated `..._task` variants where needed |
 | A7 | The `Task` forms of Rx, DynamicData and ReactiveUI on futures and `Shared<T>` (section 3.8) | 0.5 (names kept) | medium: the ported upstream tests drive them through completion sources |
 | A8 | `FerroUI.View`'s async data on the dispatcher, abandoned with `abort` | behaviour: the order of the signal write (a test) | low |
@@ -590,6 +590,62 @@ registration of the animations posts its action to the dispatcher of its thread,
 guard and removes its action when dropped. The rows of `upstream-names.toml` map
 `CancellationTokenSource`, `CancellationTokenRegistration`, `OperationCanceledException` and
 `TaskCanceledException`.
+
+A5 is done: the dispatcher is the schedule of its thread. It installs itself when it starts
+(`task::set_thread_schedule`, its schedule at `Default`) and removes itself when it shuts down or
+is reset, so the wakes from other threads of the tasks in the queue of the thread, and the
+callbacks that other threads send to it (`CancellationToken::register_local`), are dispatcher jobs
+at `Default`; `run_pending_wakes` is no longer needed on a dispatcher thread (it still drains the
+queue, which the posted job then finds empty). Around each job (`enter_job`, which took the place
+of `FerroSynchronizationContext::ensure`) the dispatcher at the priority of the job is the
+**current schedule** of the thread (`task::current_schedule`, `set_current_schedule`,
+`is_current_schedule`; the dispatcher keeps one schedule per priority on its thread, so a
+schedule is one object), and the priority is `Dispatcher::current_priority()` (`None` outside of
+a job). `Dispatcher::set_current_priority` sets the priority of the code outside of a job, which
+`Application::register_services` sets to `Normal` when the thread has none (upstream's
+`InstallIfNeeded`), and which the unit test applications and the headless session save and
+restore. `Schedule::schedule_local` posts work that is not `Send` (a dispatcher posts it with
+`post_local`; by default a callback of the thread), and `Schedule::identity` is what two schedules
+are compared by (an adapter of a context is the context).
+
+The rule of F3, decided as the rule of `await` in .NET, where
+`SynchronizationContextAwaitTaskContinuation` runs the continuation inline when the completing code
+runs in the captured context (`SynchronizationContext.Current` is it) and posts it to the context
+otherwise; a context of the port is a dispatcher and a priority, as the contexts of the upstream
+dispatcher are one per priority. A task of `ferroui-system` spawned in a job (`task::spawn_local`,
+`threading::tasks::spawn_local`) takes the current schedule (`Route::Current` of the executor): a
+completion on its thread in a job of the same priority resumes it inside the completing call, and
+any other completion, in a job of another priority, outside of a job or on another thread, queues
+one poll as a job at its priority, behind the work of that priority queued before. A task spawned
+outside of a job, where no schedule is current (as in .NET, where no context is captured), stays
+in the queue of the thread: it resumes inside the completing call wherever that runs on its
+thread (G9 unchanged), and its wakes from other threads go through the schedule of the thread.
+`block_on` runs its future with no current schedule, so that the tasks it spawns are in the queue
+it waits on. The tasks of the dispatcher keep their rule (always queued, G6). The tests are
+`src/FerroUI.Base/threading/dispatcher_schedule_tests.rs` (the current priority, the schedule of the
+thread and its removal at shutdown, wakes from other threads without `run_pending_wakes`, a local
+cancellation from another thread, completions in a job of the task's priority, of another,
+outside of a job, of a task spawned outside of a job, and in a nested frame) and the tests of the
+current schedule in `executor_tests.rs`; G1 to G20 are unchanged.
+
+Deprecated since 0.5.0: the `SynchronizationContext` trait, `current_synchronization_context`,
+`set_synchronization_context` (which now also make an adapter of the context the schedule of the
+thread and the current schedule, `threading::context_schedule`), `FerroSynchronizationContext`,
+`RestoreContext` and `FerroScheduler::install_on_ui_thread`; the Rx forms that take a context
+(`SynchronizationContextScheduler::new`, `with_always_post` and `context`, `ContextDisposable::new`
+and `context`, `observe_on_context`, `subscribe_on_context`, `notify_on_context`) and
+`BindingSchedulers::use_synchronization_context`, beside which the forms that take a schedule keep
+the Rx names (`SynchronizationContextScheduler::with_schedule`, `with_schedule_and_always_post`,
+`ContextDisposable::with_schedule`, `observe_on_schedule`, `subscribe_on_schedule`,
+`notify_on_schedule`, `BindingSchedulers::use_schedule`). `FromEvent`, the awaiter of
+`AsyncSubject` and `ConfigureAwait(true)` of `ScheduleAsync` capture the current schedule. The
+uses moved: the controls, the OpenGL composition and the samples start their asynchronous members
+on `Dispatcher::current_priority()` (or `Normal`), the page transitions and the animations as
+well, the task stream plugin posts at it, and the dock services take an `Option<Arc<dyn
+Schedule>>`. The local cancellation registration of the animations is
+`CancellationToken::register_local`; a cancellation from another thread runs its action in a job
+at `Default`, where it was posted at `Send`. `threading::tasks::{set_thread_poster, ThreadPoster,
+run_pending_wakes}` stay, not deprecated, until the `Task` forms move (A7).
 
 ## 6. Not in scope
 
