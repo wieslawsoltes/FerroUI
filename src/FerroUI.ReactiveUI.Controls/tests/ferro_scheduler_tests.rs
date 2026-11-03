@@ -139,6 +139,9 @@ fn a_new_scheduler_posts_at_background_priority() {
 #[test]
 fn the_dispatcher_of_the_user_interface_thread_is_its_schedule_without_an_installation() {
     let _app = start_app();
+    // The dispatcher of the thread is made on its first use, and is the schedule of the thread
+    // from then on.
+    let _dispatcher = Dispatcher::ui_thread();
     assert!(ferroui_system::task::thread_schedule().is_some());
 
     crate::ferro_scheduler::prepare_ui_thread();
