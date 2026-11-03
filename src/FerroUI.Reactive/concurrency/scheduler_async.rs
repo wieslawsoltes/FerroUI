@@ -14,14 +14,16 @@
 //!
 //! `SchedulerOperation.ConfigureAwait(true)` ([`SchedulerOperation::configure_await`]) posts the
 //! continuation, when the scheduler runs it, to the `SynchronizationContext` that is current when
-//! the operation is awaited; the continuation is not `Send`, so it is posted with
-//! [`post_local`](ferroui_system::threading::SynchronizationContext::post_local), to the context of
-//! the thread.
+//! the operation is awaited, the current schedule of the thread
+//! (`ferroui_system::task::current_schedule`); the continuation is not `Send`, so it is posted with
+//! [`schedule_local`](ferroui_system::task::Schedule::schedule_local), to the schedule of the
+//! thread.
 
 use super::{IScheduler, ScheduledAction, SchedulerExt};
 use crate::disposables::{Disposable, SingleAssignmentDisposableValue};
 use ferroui_system::threading::tasks::{canceled, Task};
-use ferroui_system::threading::{current_synchronization_context, CancellationGuard, CancellationToken};
+use ferroui_system::task::{current_schedule, Schedule};
+use ferroui_system::threading::{CancellationGuard, CancellationToken};
 use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::future::{Future, IntoFuture};
@@ -278,9 +280,9 @@ impl SchedulerOperationAwaiter {
         assert!(!self.inner.awaited.replace(true), "The scheduler operation has already been awaited.");
         let mut continuation: Box<dyn FnOnce()> = Box::new(continuation);
         if self.inner.post_back_to_original_context {
-            if let Some(context) = current_synchronization_context() {
+            if let Some(context) = current_schedule() {
                 let original = continuation;
-                continuation = Box::new(move || context.post_local(original));
+                continuation = Box::new(move || context.schedule_local(original));
             }
         }
         *self.inner.continuation.borrow_mut() = Some(continuation);

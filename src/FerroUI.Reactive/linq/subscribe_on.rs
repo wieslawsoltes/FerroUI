@@ -6,17 +6,18 @@
 //! [`ContextDisposable`].
 //!
 //! Deviation (DEVIATIONS.md, Reactive): the subscription is not `Send`, so it is posted with
-//! [`SynchronizationContext::post_local`](ferroui_system::threading::SynchronizationContext::post_local):
+//! `post_local` ([`Schedule::schedule_local`](ferroui_system::task::Schedule::schedule_local)):
 //! the sequence is subscribed to on the thread of the context, later, when the context runs the
 //! work it was posted. Upstream posts from the thread that subscribes, which may be any thread.
+//!
+//! The context is a schedule of `ferroui-system` (`subscribe_on_schedule`); the form that takes a
+//! `SynchronizationContext` (`subscribe_on_context`) is deprecated since 0.5.0.
 
-use crate::concurrency::{post_with_start_complete, IScheduler};
+use crate::concurrency::{post_with_start_complete, IScheduler, PostTarget};
 use crate::disposables::{ContextDisposable, Disposable, ScheduledDisposable, SerialDisposableValue, SingleAssignmentDisposableValue};
 use crate::internal::subscribe_auto_detach;
-use ferroui_system::threading::SynchronizationContext;
 use ferroui_system::{IDisposable, IObservable, IObserver};
 use std::rc::Rc;
-use std::sync::Arc;
 
 /// The subscription of `SubscribeOn` (`SubscribeOnObservable<TSource>.Subscription`): the work that
 /// subscribes to the source on the scheduler, then the subscription to the source, disposed on the
@@ -77,14 +78,14 @@ struct SubscribeOnContextSubscription {
 }
 
 impl SubscribeOnContextSubscription {
-    fn new<T: 'static>(source: Rc<dyn IObservable<T>>, context: Arc<dyn SynchronizationContext>, observer: Rc<dyn IObserver<T>>) -> Rc<Self> {
+    fn new<T: 'static>(source: Rc<dyn IObservable<T>>, context: PostTarget, observer: Rc<dyn IObserver<T>>) -> Rc<Self> {
         let this = Rc::new(Self { cancel: SingleAssignmentDisposableValue::new() });
         let target = this.clone();
         let disposal_context = context.clone();
         post_with_start_complete(&context, move || {
             if !target.cancel.is_disposed() {
                 let subscription = source.subscribe(observer);
-                let disposal: Rc<dyn IDisposable> = ContextDisposable::new(disposal_context, subscription);
+                let disposal: Rc<dyn IDisposable> = ContextDisposable::with_target(disposal_context, subscription);
                 target.cancel.set_disposable(Some(disposal));
             }
         });
@@ -102,7 +103,7 @@ impl IDisposable for SubscribeOnContextSubscription {
 /// `ObservableBase<TSource>`).
 struct SubscribeOnContextObservable<T> {
     source: Rc<dyn IObservable<T>>,
-    context: Arc<dyn SynchronizationContext>,
+    context: PostTarget,
 }
 
 impl<T: 'static> IObservable<T> for SubscribeOnContextObservable<T> {
@@ -116,10 +117,7 @@ impl<T: 'static> IObservable<T> for SubscribeOnContextObservable<T> {
     }
 }
 
-pub(crate) fn subscribe_on_context<T: 'static>(
-    source: Rc<dyn IObservable<T>>,
-    context: Arc<dyn SynchronizationContext>,
-) -> Rc<dyn IObservable<T>> {
+pub(crate) fn subscribe_on_context<T: 'static>(source: Rc<dyn IObservable<T>>, context: PostTarget) -> Rc<dyn IObservable<T>> {
     Rc::new(SubscribeOnContextObservable { source, context })
 }
 
@@ -135,13 +133,25 @@ macro_rules! subscribe_on_methods {
             crate::linq::subscribe_on::subscribe_on(self.observable(), scheduler)
         }
 
+        /// Subscribes to the sequence, and disposes the subscription, on `schedule`: both are
+        /// posted to it with `schedule_local`; the notifications are not moved
+        /// (`SubscribeOn(SynchronizationContext)`; a dispatcher's `task_schedule(priority)`).
+        fn subscribe_on_schedule(
+            &self,
+            schedule: std::sync::Arc<dyn ferroui_system::task::Schedule>,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
+            crate::linq::subscribe_on::subscribe_on_context(self.observable(), crate::concurrency::PostTarget::Schedule(schedule))
+        }
+
         /// Subscribes to the sequence, and disposes the subscription, on `context`: both are posted
         /// to it; the notifications are not moved (`SubscribeOn(SynchronizationContext)`).
+        #[deprecated(since = "0.5.0", note = "use `subscribe_on_schedule` with a `ferroui_system::task::Schedule`")]
+        #[allow(deprecated)]
         fn subscribe_on_context(
             &self,
             context: std::sync::Arc<dyn ferroui_system::threading::SynchronizationContext>,
         ) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
-            crate::linq::subscribe_on::subscribe_on_context(self.observable(), context)
+            crate::linq::subscribe_on::subscribe_on_context(self.observable(), crate::concurrency::PostTarget::Context(context))
         }
     };
 }

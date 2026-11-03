@@ -31,5 +31,5 @@ pub use scheduler::{
 pub use scheduler_async::{ScheduleAsyncResult, SchedulerOperation, SchedulerOperationAwaiter};
 pub use scheduler_defaults::SchedulerDefaults;
 pub use synchronization_context_scheduler::SynchronizationContextScheduler;
-pub(crate) use synchronization_context_scheduler::post_with_start_complete;
+pub(crate) use synchronization_context_scheduler::{post_with_start_complete, PostTarget};
 pub use virtual_time_scheduler::{VirtualTimeClock, VirtualTimeScheduler};
