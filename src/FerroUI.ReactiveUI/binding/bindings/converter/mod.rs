@@ -1,5 +1,5 @@
 //! `ReactiveUI.Binding/Bindings/Converter`: the built-in typed converters, between strings and
-//! the booleans, identifiers ([`Guid`](ferroui_splat::Guid)), numbers and time spans
+//! the booleans, identifiers ([`Uuid`](uuid::Uuid), upstream's `Guid`), numbers and time spans
 //! ([`Duration`](std::time::Duration)), between each number type and its `Option`, the identity
 //! converter of strings and the equality converter.
 //!
