@@ -1554,3 +1554,27 @@ fn members_that_are_constant_expressions_have_their_values() {
     );
     assert_eq!((scan.statistics.enum_members, scan.statistics.enum_members_without_value), (24, 6));
 }
+
+/// Batch descriptors preserve nullability in the build-time model just as the
+/// individual API does, including const values, local imports and macro tables.
+#[test]
+fn nullable_batch_descriptors_are_read_and_unread_entries_are_counted() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/nullable_registration/lib.rs");
+    let scan = scan_crate(&ScanOptions::new("nullable_registration", root));
+    let registrations: Vec<(&str, Vec<&str>)> = scan.model.value_types.iter().map(|value| {
+        (value.registration.as_str(), value.types.iter().map(|type_| type_.text.as_str()).collect())
+    }).collect();
+    assert_eq!(registrations, [
+        ("nullable", vec!["i64"]),
+        ("nullable", vec!["::std::rc::Rc<dyn ::nullable_registration::IServiceProvider>"]),
+        ("nullable", vec!["::std::rc::Rc<::nullable_registration::Model>"]),
+        ("nullable", vec!["String"]),
+        ("nullable", vec!["u8"]),
+        ("nullable", vec!["u16"]),
+    ], "{}", listing(&scan.diagnostics));
+    assert!(scan.model.value_types.iter().all(|value| value.types.iter().all(RustType::is_resolved)));
+    assert_eq!(scan.model.unread_value_types, [("nullable".to_string(), 2)]);
+    let restored = AssemblyModel::parse(&scan.model.to_json()).expect("batch descriptor model round-trip");
+    assert_eq!(restored.value_types, scan.model.value_types);
+    assert_eq!(restored.unread_value_types, scan.model.unread_value_types);
+}

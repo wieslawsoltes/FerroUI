@@ -29,6 +29,32 @@ fn canonical_registration(name: &str) -> &str {
     if name == "boxed_cast" { "cast" } else { name }
 }
 
+// The descriptor spelling carries the same type fact as the individual API.
+// Keep it in one map for AST paths, declaration tokens and unread accounting:
+// a const array or a macro expansion must not silently lose nullable forms.
+const VALUE_REGISTRATION_OWNERS: &[&str] = &["ValueTypes", "NullableRegistration"];
+
+fn value_registration(owner: &str, function: &str) -> Option<(&'static str, usize)> {
+    match (owner, function) {
+        ("ValueTypes", function) => {
+            let name = function.strip_prefix("register_")?;
+            VALUE_REGISTRATIONS.iter().find(|(known, _)| *known == name).copied()
+        }
+        ("NullableRegistration", "of") => Some(("nullable", 1)),
+        _ => None,
+    }
+}
+
+fn count_value_registrations(tokens: &[TokenTree], excluded_macros: &[&str], mut found: impl FnMut(&'static str)) {
+    for owner in VALUE_REGISTRATION_OWNERS {
+        calls_of(tokens, owner, excluded_macros, &mut |function| {
+            if let Some((registration, _)) = value_registration(owner, function) {
+                found(canonical_registration(registration));
+            }
+        });
+    }
+}
+
 /// Where a declaration is written.
 #[derive(Clone)]
 pub(crate) struct Site {
@@ -348,15 +374,13 @@ impl Source {
         };
         // Every call of a registration function of the untyped value conversions in the text
         // of the file, wherever it stands: what the functions read is counted against it.
-        if text.contains("ValueTypes") {
+        if VALUE_REGISTRATION_OWNERS.iter().any(|owner| text.contains(owner)) {
             if let Ok(tokens) = text.parse::<proc_macro2::TokenStream>() {
                 let tokens = tokens_of(tokens);
                 // What the definition of a declaration macro registers, it registers for the
                 // declarations, which are read where the macro is invoked.
-                calls_of(&tokens, "ValueTypes", DECLARATION_MACROS, &mut |function| {
-                    if let Some(registration) = function.strip_prefix("register_").filter(|name| VALUE_REGISTRATIONS.iter().any(|(known, _)| known == name)) {
-                        self.value_calls.entry(canonical_registration(registration).to_string()).or_default().0 += 1;
-                    }
+                count_value_registrations(&tokens, DECLARATION_MACROS, |registration| {
+                    self.value_calls.entry(registration.to_string()).or_default().0 += 1;
                 });
             }
         }
@@ -1561,19 +1585,18 @@ impl<'ast> Visit<'ast> for RegistrationFinder {
     /// types the path leaves to inference is not read: nothing states them.
     fn visit_expr_path(&mut self, node: &'ast syn::ExprPath) {
         syn::visit::visit_expr_path(self, node);
-        let segments: Vec<&syn::PathSegment> = node.path.segments.iter().collect();
-        let [.., owner, last] = segments.as_slice() else { return };
-        if owner.ident != "ValueTypes" {
+        let mut segments = node.path.segments.iter().rev();
+        let (Some(last), Some(owner)) = (segments.next(), segments.next()) else { return };
+        if !VALUE_REGISTRATION_OWNERS.iter().any(|known| owner.ident == *known) {
             return;
         }
         let line = last.ident.span().start().line;
-        let name = last.ident.to_string();
-        let registration = name.strip_prefix("register_").and_then(|name| VALUE_REGISTRATIONS.iter().find(|(known, _)| *known == name));
+        let registration = value_registration(&owner.ident.to_string(), &last.ident.to_string());
         let (Some((registration, count)), Some(types)) = (registration, type_arguments_of(last)) else { return };
-        if types.len() != *count {
+        if types.len() != count {
             return;
         }
-        match (*registration, types.as_slice()) {
+        match (registration, types.as_slice()) {
             ("cast" | "boxed_cast", [from, to]) => self.casts.push(((from.clone(), to.clone()), line)),
             _ => self.value_types.push(((registration.to_string(), types), line)),
         }
@@ -1654,17 +1677,19 @@ impl Source {
     /// so the calls are found in the tokens, with their types stated.
     fn read_registrations_of_tokens(&mut self, tokens: &[TokenTree], site: &Site) {
         let mut stated: Vec<(String, Vec<Tokens>, usize)> = Vec::new();
-        stated_calls_of(tokens, "ValueTypes", &mut |function, types, line| stated.push((function.to_string(), types, line)));
-        for (function, types, line) in stated {
-            let Some((registration, count)) = function.strip_prefix("register_").and_then(|name| VALUE_REGISTRATIONS.iter().find(|(known, _)| *known == name)) else {
-                continue;
-            };
-            if types.len() != *count {
-                continue;
-            }
+        for owner in VALUE_REGISTRATION_OWNERS {
+            stated_calls_of(tokens, owner, &mut |function, types, line| {
+                if let Some((registration, count)) = value_registration(owner, function) {
+                    if types.len() == count {
+                        stated.push((registration.to_string(), types, line));
+                    }
+                }
+            });
+        }
+        for (registration, types, line) in stated {
             let site = Site { line, ..site.clone() };
-            self.value_calls.entry(canonical_registration(registration).to_string()).or_default().1 += 1;
-            match (*registration, types.as_slice()) {
+            self.value_calls.entry(canonical_registration(&registration).to_string()).or_default().1 += 1;
+            match (registration.as_str(), types.as_slice()) {
                 ("cast" | "boxed_cast", [from, to]) => self.casts.push(Located { site, value: RawCast { from: from.clone(), to: to.clone(), imports: Vec::new() } }),
                 _ => self.value_types.push(Located { site, value: RawValueType { registration: registration.to_string(), types, imports: Vec::new() } }),
             }
@@ -1727,10 +1752,8 @@ impl Source {
                 let met = definitions_met.entry(key).or_insert_with(|| {
                     let mut calls: BTreeMap<String, usize> = BTreeMap::new();
                     for (_, transcriber) in &rules {
-                        calls_of(transcriber, "ValueTypes", &[], &mut |function| {
-                            if let Some(registration) = function.strip_prefix("register_").filter(|name| VALUE_REGISTRATIONS.iter().any(|(known, _)| known == name)) {
-                                *calls.entry(canonical_registration(registration).to_string()).or_default() += 1;
-                            }
+                        count_value_registrations(transcriber, &[], |registration| {
+                            *calls.entry(registration.to_string()).or_default() += 1;
                         });
                     }
                     (calls, false, false)
@@ -1863,5 +1886,25 @@ mod boxed_cast_tests {
         source.read_registrations_of_tokens(&tokens,&site);
         assert_eq!(source.casts.len(),casts+1);assert_eq!(source.value_types.len(),values);
         assert_eq!(source.value_calls.get("cast").unwrap().1,read+1);
+    }
+}
+
+#[cfg(test)]
+mod nullable_descriptor_tests {
+    use super::*;
+
+    #[test]
+    fn nullable_descriptors_in_declaration_tokens_use_the_canonical_registration() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/nullable_registration/lib.rs");
+        let mut source = Source::read(&ScanOptions::new("nullable_registration", root));
+        let before = source.value_types.len();
+        let read = source.value_calls.get("nullable").map_or(0, |value| value.1);
+        let tokens = tokens_of("ValueTypes::register_nullable_types(&const { [NullableRegistration::of::<Rc<dyn IServiceProvider>>()] });".parse().unwrap());
+        source.read_registrations_of_tokens(&tokens, &Site { module: 0, file: 0, line: 1, cfg: Vec::new(), expanded: false });
+        let entries = &source.value_types[before..];
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].value.registration, "nullable");
+        assert_eq!(text_of(&entries[0].value.types[0]), "Rc<dyn IServiceProvider>");
+        assert_eq!(source.value_calls.get("nullable").unwrap().1, read + 1);
     }
 }

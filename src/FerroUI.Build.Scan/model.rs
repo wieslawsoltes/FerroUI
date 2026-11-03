@@ -1061,7 +1061,8 @@ pub struct MacroModel {
 }
 
 /// A registration of Rust types with the untyped value conversions that a function of a
-/// crate makes with its types stated (`ValueTypes::register_nullable::<T>()`): what
+/// crate makes with its types stated (`ValueTypes::register_nullable::<T>()` or a
+/// `NullableRegistration::of::<T>()` descriptor for a batch): what
 /// decides, next to the casts and the declarations, whether a value of one Rust type is a
 /// value of another, and which types are nullable forms.
 #[derive(Clone, Debug, PartialEq, Eq)]
