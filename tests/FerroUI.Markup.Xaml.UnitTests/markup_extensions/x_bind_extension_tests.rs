@@ -1,10 +1,13 @@
-//! `{x:Bind}` in FerroUI XAML: step X1 of #525 (docs/porting/x-bind.md). Not a port of an
-//! upstream file; the behaviour is WinUI's (the NOTICE.md of `ferroui-markup-xaml`).
+//! `{x:Bind}` in FerroUI XAML: steps X1 and X2 of #525 (docs/porting/x-bind.md). Not a port of
+//! an upstream file; the behaviour is WinUI's (the NOTICE.md of `ferroui-markup-xaml`), X2 after
+//! its regression projects `FunctionTests` and `CastingTests`.
 //!
 //! The fixtures in `x_bind/` run through the run-time loader and through the Rust emitter, and
 //! the same assertions check both: the root source, the modes and update triggers, named
 //! elements, attached properties, the typed template, and the lifecycle of the bindings of a root
-//! (`Initialize`, `Update`, `StopTracking`, initialized when the root is attached to a window).
+//! (`Initialize`, `Update`, `StopTracking`, initialized when the root is attached to a window);
+//! functions on the root, on a path and static, with path and literal arguments, called again
+//! when an argument changes, `BindBack`, static members, indexers, casts and interface members.
 //! The diagnostics are load errors of the one and compile errors of the other.
 //!
 //! The emitter's output, `x_bind/x_bind.generated.rs`, is checked in, compiled with the tests and
@@ -26,6 +29,7 @@ use ferroui_markup_xaml_loader::rust_emitter::generate_file;
 
 use crate::support::app::styled_window_application;
 use crate::support::loader::{describe, parse, try_parse};
+use crate::support::x_bind::{XBindHelpers, XBindModel, XBindPage};
 
 #[allow(dead_code)]
 #[rustfmt::skip]
@@ -34,6 +38,8 @@ mod generated;
 
 const ROOT: &str = include_str!("x_bind/x_bind_root.xaml");
 const TEMPLATE: &str = include_str!("x_bind/x_bind_template.xaml");
+const FUNCTIONS: &str = include_str!("x_bind/x_bind_functions.xaml");
+const CASTS: &str = include_str!("x_bind/x_bind_casts.xaml");
 
 const ASSEMBLY: &str = "FerroUI.XBind.Fixture";
 const ROOT_URI: &str = "ferres://FerroUI.XBind.Fixture/";
@@ -315,6 +321,241 @@ fn compiled_typed_template_reads_its_item_and_recycles() {
     assert_template_behavior(compiled_template_host().content_template().unwrap());
 }
 
+// --- functions (step X2, WinUI's FunctionTests) ----------------------------------------------
+
+struct FunctionParts {
+    root_once: Ref<TextBlock>,
+    root_function: Ref<TextBlock>,
+    path_function: Ref<TextBlock>,
+    model_argument: Ref<TextBlock>,
+    static_function: Ref<TextBlock>,
+    literals: Ref<TextBlock>,
+    notifying: Ref<TextBlock>,
+    named_argument: Ref<TextBlock>,
+    bind_back: Ref<TextBox>,
+    path_bind_back: Ref<TextBox>,
+    static_bind_back: Ref<TextBox>,
+    static_member: Ref<TextBlock>,
+    index: Ref<TextBlock>,
+    key: Ref<TextBlock>,
+    interface_member: Ref<TextBlock>,
+    item_host: Ref<ContentControl>,
+}
+
+fn function_parts(root: &Ref<XBindPage>) -> FunctionParts {
+    let scope = NameScope::get_name_scope(root).expect("the document root owns its name scope");
+    let text_block = |name: &str| scope.find_as::<TextBlock>(name).unwrap_or_else(|| panic!("the text block {name}"));
+    let text_box = |name: &str| scope.find_as::<TextBox>(name).unwrap_or_else(|| panic!("the text box {name}"));
+    FunctionParts {
+        root_once: text_block("rootOnce"),
+        root_function: text_block("rootFunction"),
+        path_function: text_block("pathFunction"),
+        model_argument: text_block("modelArgument"),
+        static_function: text_block("staticFunction"),
+        literals: text_block("literals"),
+        notifying: text_block("notifying"),
+        named_argument: text_block("namedArgument"),
+        bind_back: text_box("bindBack"),
+        path_bind_back: text_box("pathBindBack"),
+        static_bind_back: text_box("staticBindBack"),
+        static_member: text_block("staticMember"),
+        index: text_block("index"),
+        key: text_block("key"),
+        interface_member: text_block("interfaceMember"),
+        item_host: scope.find_as::<ContentControl>("itemHost").expect("the item host"),
+    }
+}
+
+fn text(block: &TextBlock) -> Option<String> {
+    block.text()
+}
+
+fn box_text(text_box: &TextBox) -> Option<String> {
+    text_box.text()
+}
+
+fn assert_function_behavior(root: Ref<XBindPage>) {
+    let parts = function_parts(&root);
+    let model = root.model();
+    let bindings = XBindings::get_for_root(&root).expect("the first x:Bind of a document creates the bindings of its root");
+    assert_eq!(bindings.binding_count(), 15);
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+
+    // A function on the root, on a path and static, with path and literal arguments.
+    assert_eq!(text(&parts.root_once).as_deref(), Some("Title: Ada"));
+    assert_eq!(text(&parts.root_function).as_deref(), Some("Title: Ada"));
+    assert_eq!(text(&parts.path_function).as_deref(), Some("Hello, world Ada x3"));
+    assert_eq!(text(&parts.model_argument).as_deref(), Some("Grace+Grace"));
+    assert_eq!(text(&parts.static_function).as_deref(), Some("Ada-Ada"));
+    assert_eq!(text(&parts.literals).as_deref(), Some("quoted, with comma|-2.5|true|null"));
+    assert_eq!(text(&parts.notifying).as_deref(), Some("stamp 1"));
+    assert_eq!(text(&parts.named_argument).as_deref(), Some("Title: Title: Ada"));
+    assert_eq!(box_text(&parts.bind_back).as_deref(), Some("Title: Ada"));
+    assert_eq!(box_text(&parts.path_bind_back).as_deref(), Some("GRACE"));
+    assert_eq!(box_text(&parts.static_bind_back).as_deref(), Some("Ada"));
+    // A static member, an integer and a string indexer, an interface member.
+    assert_eq!(text(&parts.static_member).as_deref(), Some("prefix"));
+    assert_eq!(text(&parts.index).as_deref(), Some("item 1"));
+    assert_eq!(text(&parts.key).as_deref(), Some("value of second key"));
+    assert_eq!(text(&parts.interface_member).as_deref(), Some("named grace"));
+
+    // A OneWay function is called again when an argument path changes; OneTime is not.
+    root.set_title("Grace");
+    assert_eq!(text(&parts.root_once).as_deref(), Some("Title: Ada"));
+    assert_eq!(text(&parts.root_function).as_deref(), Some("Title: Grace"));
+    assert_eq!(text(&parts.path_function).as_deref(), Some("Hello, world Grace x3"));
+    assert_eq!(text(&parts.static_function).as_deref(), Some("Grace-Grace"));
+    assert_eq!(box_text(&parts.bind_back).as_deref(), Some("Title: Grace"));
+    // The argument of namedArgument is the text of a OneTime target: unchanged.
+    assert_eq!(text(&parts.named_argument).as_deref(), Some("Title: Title: Ada"));
+    model.set_name("Ada");
+    assert_eq!(text(&parts.model_argument).as_deref(), Some("Ada+Ada"));
+    assert_eq!(box_text(&parts.path_bind_back).as_deref(), Some("ADA"));
+    // A PropertyChanged with the name of a function calls it again.
+    model.bump();
+    assert_eq!(text(&parts.notifying).as_deref(), Some("stamp 2"));
+
+    // TwoWay through a function writes back through BindBack, and the function is called
+    // again with the new source.
+    parts.bind_back.set_current_value(TextBox::text_property(), Some("Title: Lovelace".into()));
+    assert_eq!(root.title().as_deref(), Some("Lovelace"));
+    assert_eq!(root.parsed().last().map(String::as_str), Some("Title: Lovelace"));
+    assert_eq!(text(&parts.root_function).as_deref(), Some("Title: Lovelace"));
+    parts.bind_back.set_current_value(TextBox::text_property(), Some("Hopper".into()));
+    assert_eq!(root.title().as_deref(), Some("Hopper"));
+    assert_eq!(box_text(&parts.bind_back).as_deref(), Some("Title: Hopper"));
+    // BindBack on the value of a path.
+    parts.path_bind_back.set_current_value(TextBox::text_property(), Some("TURING".into()));
+    assert_eq!(model.name(), "turing");
+    assert_eq!(text(&parts.model_argument).as_deref(), Some("turing+turing"));
+    // A static BindBack, on LostFocus (the default of TextBox.Text).
+    let stored = XBindHelpers::stored().len();
+    parts.static_bind_back.set_current_value(TextBox::text_property(), Some("stored text".into()));
+    assert_eq!(XBindHelpers::stored().len(), stored);
+    parts.static_bind_back.raise_event(&FocusChangedEventArgs::new(InputElement::lost_focus_event()));
+    assert_eq!(XBindHelpers::stored().last().map(String::as_str), Some("stored text"));
+
+    // Update calls every function again, OneTime included.
+    bindings.update().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(text(&parts.root_once).as_deref(), Some("Title: Hopper"));
+
+    // StopTracking releases what the arguments and the owners of the functions listen to.
+    bindings.stop_tracking();
+    root.set_title("Stopped");
+    model.bump();
+    assert_eq!(text(&parts.root_function).as_deref(), Some("Title: Hopper"));
+    assert_eq!(text(&parts.notifying).as_deref(), Some("stamp 2"));
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(text(&parts.root_function).as_deref(), Some("Title: Stopped"));
+    assert_eq!(text(&parts.notifying).as_deref(), Some("stamp 3"));
+    assert!(bindings.diagnostics().is_empty(), "{:?}", bindings.diagnostics());
+
+    // A function on the item of a typed template, called again when its argument changes.
+    let template = parts.item_host.content_template().expect("the item template");
+    let instance = template.build(&None).unwrap();
+    let item_text = instance.to_ref().cast::<TextBlock>().expect("the root of the template is a text block");
+    let item = XBindModel::new("item");
+    instance.set_data_context(Some(item.clone()));
+    assert_eq!(text(&item_text).as_deref(), Some("ITEM"));
+    item.set_name("changed item");
+    assert_eq!(text(&item_text).as_deref(), Some("CHANGED ITEM"));
+}
+
+fn compiled_functions() -> Ref<XBindPage> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_functions_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_functions_arguments_bind_back_static_members_and_indexers() {
+    let _app = styled_window_application();
+    assert_function_behavior(parse::<Ref<XBindPage>>(FUNCTIONS));
+}
+
+#[test]
+fn compiled_functions_arguments_bind_back_static_members_and_indexers() {
+    let _app = styled_window_application();
+    assert_function_behavior(compiled_functions());
+}
+
+// --- casts (step X2, WinUI's CastingTests) ------------------------------------------------
+
+struct CastParts {
+    cast_root: Ref<TextBlock>,
+    cast_member: Ref<TextBlock>,
+    cast_two_way: Ref<TextBox>,
+    cast_leaf: Ref<TextBlock>,
+    cast_function: Ref<TextBlock>,
+    cast_interface: Ref<TextBlock>,
+    attached_path: Ref<TextBlock>,
+}
+
+fn cast_parts(root: &Ref<StackPanel>) -> CastParts {
+    let scope = NameScope::get_name_scope(root).expect("the document root owns its name scope");
+    let text_block = |name: &str| scope.find_as::<TextBlock>(name).unwrap_or_else(|| panic!("the text block {name}"));
+    CastParts {
+        cast_root: text_block("castRoot"),
+        cast_member: text_block("castMember"),
+        cast_two_way: scope.find_as::<TextBox>("castTwoWay").expect("the text box castTwoWay"),
+        cast_leaf: text_block("castLeaf"),
+        cast_function: text_block("castFunction"),
+        cast_interface: text_block("castInterface"),
+        attached_path: text_block("attachedPath"),
+    }
+}
+
+fn assert_cast_behavior(root: Ref<StackPanel>) {
+    let parts = cast_parts(&root);
+    let bindings = XBindings::get_for_root(&root).unwrap();
+    assert_eq!(bindings.binding_count(), 7);
+    let model = XBindModel::new("grace");
+    root.set_tag(Some(model.clone()));
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+
+    // A cast passes on a value of the type: the root, a member of it, a function of it.
+    let cast_model = parts.cast_root.tag().and_then(|tag| tag.downcast_ref::<XBindModel>().map(|cast| std::ptr::eq(cast, &*model)));
+    assert_eq!(cast_model, Some(true));
+    assert_eq!(text(&parts.cast_member).as_deref(), Some("grace"));
+    assert_eq!(box_text(&parts.cast_two_way).as_deref(), Some("grace"));
+    assert_eq!(text(&parts.cast_function).as_deref(), Some("GRACE"));
+    // A cast to another type passes on null.
+    assert_eq!(text(&parts.cast_leaf), None);
+    // The member of an interface, and an attached property after a path.
+    assert_eq!(text(&parts.cast_interface).as_deref(), Some("named grace"));
+    assert_eq!(parts.attached_path.tag().and_then(|tag| tag.downcast_ref::<i32>().copied()), Some(4));
+
+    model.set_name("ada");
+    assert_eq!(text(&parts.cast_member).as_deref(), Some("ada"));
+    assert_eq!(text(&parts.cast_function).as_deref(), Some("ADA"));
+    // TwoWay through a cast inside the path (WinUI: `((local:T)DataContext).Username`).
+    parts.cast_two_way.set_current_value(TextBox::text_property(), Some("turing".into()));
+    assert_eq!(model.name(), "turing");
+    assert_eq!(text(&parts.cast_member).as_deref(), Some("turing"));
+
+    // A value of another type: the casts to the model pass on null, the cast to a text passes.
+    root.set_tag(Some(Rc::new("plain text".to_string())));
+    assert!(parts.cast_root.tag().is_none());
+    assert_eq!(text(&parts.cast_leaf).as_deref(), Some("plain text"));
+    assert_eq!(text(&parts.cast_member), None);
+}
+
+fn compiled_casts() -> Ref<StackPanel> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_casts_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_casts_interface_members_and_attached_properties() {
+    let _app = styled_window_application();
+    assert_cast_behavior(parse::<Ref<StackPanel>>(CASTS));
+}
+
+#[test]
+fn compiled_casts_interface_members_and_attached_properties() {
+    let _app = styled_window_application();
+    assert_cast_behavior(compiled_casts());
+}
+
 // --- diagnostics --------------------------------------------------------------------------
 
 /// A document with one x:Bind on its second line, and what its error says. The run-time
@@ -327,7 +568,6 @@ const DIAGNOSTICS: &[(&str, &str)] = &[
     ("<TextBox Text='{x:Bind Tag, Mode=TwoWay, UpdateSourceTrigger=Explicit}'/>", "'Explicit' is not a supported value"),
     ("<TextBlock Text='{x:Bind Tag, Mode=Default}'/>", "x:Bind Mode must be OneTime, OneWay or TwoWay"),
     ("<TextBlock Text='{x:Bind $self.Tag}'/>", "'$self' is not x:Bind syntax"),
-    ("<TextBlock Text='{x:Bind ((TextBlock)Tag).Text}'/>", "a cast is not supported yet"),
     (
         "<ContentControl><ContentControl.ContentTemplate><DataTemplate><TextBlock Text='{x:Bind Tag}'/></DataTemplate></ContentControl.ContentTemplate></ContentControl>",
         "DataTemplates containing x:Bind need a DataType",
@@ -336,11 +576,31 @@ const DIAGNOSTICS: &[(&str, &str)] = &[
         "<StackPanel.Styles><Style Selector='TextBlock'><Setter Property='Tag' Value='{x:Bind Tag}'/></Style></StackPanel.Styles>",
         "Cannot use x:Bind in Styles",
     ),
+    // Step X2: functions, BindBack, casts and indexers, with WinUI's messages.
+    ("<TextBlock Text='{x:Bind Missing(Name)}'/>", "Function 'Missing' not found on type"),
+    ("<TextBlock Text='{x:Bind Name()}'/>", "Expecting a method"),
+    ("<TextBlock Text='{x:Bind local:XBindHelpers.Join(Name)}'/>", "Mismatched function parameter count"),
+    ("<TextBlock Text='{x:Bind local:XBindHelpers.Join(Name, 2, 1)}'/>", "Invalid or mismatched parameter at position '2'"),
+    ("<TextBlock Text='{x:Bind local:XBindHelpers.Join(Name, Name, IsVisible)}'/>", "Invalid or mismatched parameter at position '3'"),
+    ("<TextBlock IsVisible='{x:Bind local:XBindHelpers.Join(Name, Name, 1)}'/>", "Function return type 'System.String' must match binding target type"),
+    ("<TextBlock Text='{x:Bind local:XBindModel.Shout(Name)}'/>", "to be a static function"),
+    ("<TextBlock Text='{x:Bind local:XBindHelpers.Join(Name, Name, 1).Length}'/>", "Functions are only supported at the end of the bind path"),
+    ("<TextBlock Text='{x:Bind local:XBindHelpers.Join(Name, Format(Name), 1)}'/>", "Functions cannot have other functions as parameters"),
+    ("<TextBox Text='{x:Bind local:XBindHelpers.Join(Name, Name, 1), Mode=TwoWay}'/>", "BindBack was expected, but not found"),
+    ("<TextBlock Text='{x:Bind local:XBindHelpers.Join(Name, Name, 1), BindBack=local:XBindHelpers.Store}'/>", "Unexpected BindBack found"),
+    (
+        "<TextBox Text='{x:Bind local:XBindHelpers.Join(Name, Name, 1), Mode=TwoWay, BindBack=local:XBindHelpers.Join}'/>",
+        "BindBack must point to a method that takes one argument of type",
+    ),
+    ("<TextBox Text='{x:Bind (x:String)Tag, Mode=TwoWay}'/>", "TwoWay binding is invalid when the binding expression ends with a cast"),
+    ("<TextBlock Text='{x:Bind ((local:XBindModel)IsVisible).Name}'/>", "Unable to cast type"),
+    ("<TextBlock Text='{x:Bind IsVisible[0]}'/>", "does not have an indexer"),
+    ("<TextBlock Text='{x:Bind Name Other}'/>", "Invalid binding path 'Name Other' : Syntax error at 'Other'"),
 ];
 
 fn diagnostic_document(body: &str) -> String {
     format!(
-        "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  {body}\n</StackPanel>"
+        "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:local='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'>\n  {body}\n</StackPanel>"
     )
 }
 
@@ -361,6 +621,7 @@ fn diagnostics_are_load_errors_with_the_position() {
 #[test]
 fn diagnostics_are_compile_errors() {
     let _app = styled_window_application();
+    crate::register_types();
     for (body, expected) in DIAGNOSTICS {
         let document = diagnostic_document(body);
         let file = generate_file(
@@ -382,7 +643,12 @@ fn emitted_fixture() -> String {
     let file = generate_file(
         ASSEMBLY,
         ROOT_URI,
-        &[("x_bind_root.xaml", ROOT), ("x_bind_template.xaml", TEMPLATE)],
+        &[
+            ("x_bind_root.xaml", ROOT),
+            ("x_bind_template.xaml", TEMPLATE),
+            ("x_bind_functions.xaml", FUNCTIONS),
+            ("x_bind_casts.xaml", CASTS),
+        ],
         &RuntimeXamlLoaderConfiguration::new(),
         &[],
     );

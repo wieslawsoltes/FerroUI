@@ -364,3 +364,17 @@ pub fn try_load(
 pub fn register_compiled_xaml() {
     ::ferroui_markup_xaml::FerroXamlLoader::register_compiled_xaml(ASSEMBLY_NAME, try_load);
 }
+
+// Placeholders of step X2 of #525 (x_bind_functions.xaml, x_bind_casts.xaml), written by hand so
+// that the tests compile before the fixture is regenerated; the regeneration replaces this file.
+pub fn build_x_bind_functions_xaml(
+    _service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_markup_xaml_tests::support::x_bind::XBindPage>, ::ferroui_markup_xaml::XamlLoadError> {
+    ::core::result::Result::Err(::ferroui_markup_xaml::XamlLoadError::with_message("regenerate the x:Bind fixture"))
+}
+
+pub fn build_x_bind_casts_xaml(
+    _service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
+    ::core::result::Result::Err(::ferroui_markup_xaml::XamlLoadError::with_message("regenerate the x:Bind fixture"))
+}
