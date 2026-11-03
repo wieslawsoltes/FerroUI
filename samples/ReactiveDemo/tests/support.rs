@@ -1,7 +1,7 @@
 //! Shared helpers of the tests: the application scope with ReactiveUI built, the bodies of the
 //! generated per-document tests, a search service and a launcher that record what they are asked.
 
-use crate::crate_search::{CatalogueSearchService, ICrateSearchService, SearchTask};
+use crate::crate_search::{CatalogueSearchService, CrateSearchMetadata, ICrateSearchService, SearchTask};
 use crate::{register_types, App, LauncherSource, SAMPLE};
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
