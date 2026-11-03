@@ -1,5 +1,7 @@
 [workspace]
 resolver = "2"
+# Detachable native keyboard workspace, consumed through ordinary path dependencies.
+exclude = ["components/FerroBoard"]
 members = [
     "src/FerroUI.Designer.Core",
     "src/FerroUI.Designer.Project",

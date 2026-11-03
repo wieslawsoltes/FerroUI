@@ -239,6 +239,8 @@ Markup is loaded at run time with `ferroui-markup-xaml-loader` (the feature `xam
 
 <!-- crates-table:end -->
 
+The native on-screen keyboard is included as the self-contained [FerroBoard component](components/FerroBoard/README.md), with a compiled test page in ControlCatalog under **Text → FerroBoard**.
+
 ## Getting started
 
 Clone the repository and build the workspace:
@@ -498,6 +500,7 @@ The layout follows the upstream project so that files can be compared side by si
 
 | Path | Contents |
 |---|---|
+| `components/FerroBoard` | Detachable native on-screen keyboard, standalone sample and tests; try Text → FerroBoard in ControlCatalog |
 | `src` | The crates of the framework, one directory per upstream project (`src/FerroUI.Base`, `src/FerroUI.Controls`, `src/Markup/...`, `src/Skia/...`, `src/Windows/...`, ...) |
 | `native/FerroUI.Native` | The Objective-C++ library of the macOS platform |
 | `external/XamlX` | The XAML compiler front end (`xamlx`) |
