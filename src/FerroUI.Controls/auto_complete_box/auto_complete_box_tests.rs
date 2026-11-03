@@ -1779,13 +1779,19 @@ fn async_population_that_reports_cancellation_changes_nothing() {
 }
 
 // `IsValidMinimumPopulateDelay` of the reference: a negative delay is not a value of the property.
+// The property is a `Duration`, which has no negative value, so it needs no validation; a negative
+// time span (a resource, a view model) does not convert to it (decision O2 of
+// docs/idiomatic-rust-signatures.md).
 #[test]
 fn minimum_populate_delay_is_not_negative() {
     let property = AutoCompleteBox::minimum_populate_delay_property();
-    let is_valid = property.validate_value().expect("the property validates its values");
-    assert!(is_valid(&SignedDuration::ZERO));
-    assert!(is_valid(&SignedDuration::from_seconds(1.0)));
-    assert!(!is_valid(&SignedDuration::from_ticks(-1)));
+    assert!(property.validate_value().is_none());
+    let target = ferroui_base::data::core::ValueType::of::<Duration>();
+    let negative: BoxedValue = Rc::new(SignedDuration::from_ticks(-1));
+    assert!(ValueTypes::try_cast(&negative, target).is_none());
+    let positive: BoxedValue = Rc::new(SignedDuration::from_seconds(1.0));
+    let converted = ValueTypes::try_cast(&positive, target).expect("a duration");
+    assert_eq!(converted.downcast_ref::<Duration>(), Some(&Duration::from_secs(1)));
 }
 
 #[test]
@@ -1796,7 +1802,7 @@ fn minimum_populate_delay_defers_the_population_to_the_timer() {
         control.populated(move |_| count.set(count.get() + 1)).detach();
         let timers_before = Dispatcher::timers_for_unit_tests().len();
 
-        control.set_minimum_populate_delay(SignedDuration::from_milliseconds(250.0));
+        control.set_minimum_populate_delay(Duration::from_millis(250));
 
         textbox.set_text(Some("a"));
         run_jobs();
@@ -1824,7 +1830,7 @@ fn minimum_populate_delay_defers_the_population_to_the_timer() {
         assert_eq!(timers_before, Dispatcher::timers_for_unit_tests().len());
 
         // Without a delay the population is immediate again.
-        control.set_minimum_populate_delay(SignedDuration::ZERO);
+        control.set_minimum_populate_delay(Duration::ZERO);
         textbox.set_text(Some("ac"));
         run_jobs();
         assert_eq!(Some("ac"), control.search_text().as_deref());
@@ -2101,7 +2107,7 @@ fn minimum_populate_delay_delays_the_asynchronous_population_and_its_cancellatio
         let populated = Rc::new(Cell::new(0));
         let count = populated.clone();
         control.populated(move |_| count.set(count.get() + 1)).detach();
-        control.set_minimum_populate_delay(SignedDuration::from_milliseconds(250.0));
+        control.set_minimum_populate_delay(Duration::from_millis(250));
         assert!(delay_timers().is_empty());
 
         textbox.set_text(Some("a"));
@@ -2157,7 +2163,7 @@ fn minimum_populate_delay_delays_the_asynchronous_population_and_its_cancellatio
         textbox.set_text(Some("alpi"));
         run_jobs();
         assert_eq!(1, delay_timers().len());
-        control.set_minimum_populate_delay(SignedDuration::ZERO);
+        control.set_minimum_populate_delay(Duration::ZERO);
         assert!(delay_timers().is_empty());
         assert_eq!(2, calls.borrow().len());
         textbox.set_text(Some("alpin"));

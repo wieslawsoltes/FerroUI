@@ -1415,6 +1415,31 @@ pub(crate) fn paint_effect_graph_for_prewarm(
     IServerObject::dispose(&*brush);
 }
 
+/// Draws a custom effect that is a runtime shader (#455, E4) once for the
+/// prewarm of the GPU programs: pushed as an effect of the drawing context
+/// around `stand_in` (nothing inside without one), as the render walk pushes
+/// it around the content of a visual, so that the backend compiles its
+/// program and makes the pipeline of the draw. A drawing context without
+/// effects draws nothing.
+pub(crate) fn paint_custom_effect_for_prewarm(
+    effect: &crate::media::effects::ImmutableCustomEffect,
+    stand_in: Option<Arc<SharedBitmapImpl>>,
+    canvas: &mut dyn IDrawingContextImpl,
+    rect: Rect,
+) {
+    if is_empty(&rect) {
+        return;
+    }
+    let Some(effects) = canvas.as_drawing_context_impl_with_effects() else { return };
+    effects.push_effect(Some(rect), effect);
+    if let Some(bitmap) = &stand_in {
+        draw_stand_in(bitmap, canvas, rect);
+    }
+    if let Some(effects) = canvas.as_drawing_context_impl_with_effects() {
+        effects.pop_effect();
+    }
+}
+
 /// Draws the image that stands in for a source parameter in the prewarm:
 /// at its size from the top left of the area, as a surface brush draws a
 /// tile of it.

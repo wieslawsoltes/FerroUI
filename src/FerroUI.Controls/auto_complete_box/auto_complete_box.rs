@@ -20,7 +20,6 @@ use crate::{
     AssignedBinding, ContentControl, ControlImpl, ItemsChangedEventArgs, ItemsChangedHandler, ItemsSource,
     SelectionChangedEventArgs, TextBlock, TextBox, TextChangedEventArgs,
 };
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction};
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::data::core::ValueTypes;
@@ -48,6 +47,7 @@ use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Represents the filter used by the [`AutoCompleteBox`] control to
 /// determine whether an item is a possible match for the specified text.
@@ -558,11 +558,11 @@ ferro_properties! {
         }
 
         /// Identifies the `MinimumPopulateDelay` property.
-        pub fn minimum_populate_delay_property() -> StyledProperty<SignedDuration> {
-            FerroProperty::register_with::<AutoCompleteBox, _>(
-                "MinimumPopulateDelay",
-                StyledPropertyOptions::new(SignedDuration::ZERO).validate(AutoCompleteBox::is_valid_minimum_populate_delay),
-            )
+        ///
+        /// A `Duration`: a negative delay, which the reference refuses in its validation
+        /// (`IsValidMinimumPopulateDelay`), is not a value of the type.
+        pub fn minimum_populate_delay_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<AutoCompleteBox, _>("MinimumPopulateDelay", Duration::ZERO)
         }
 
         /// Identifies the `MaxDropDownHeight` property.
@@ -727,10 +727,6 @@ impl AutoCompleteBox {
         *value >= -1
     }
 
-    fn is_valid_minimum_populate_delay(value: &SignedDuration) -> bool {
-        value.total_milliseconds() >= 0.0
-    }
-
     fn is_valid_max_drop_down_height(value: &f64) -> bool {
         *value >= 0.0
     }
@@ -766,21 +762,21 @@ impl AutoCompleteBox {
     /// dispatcher timer will be stopped. The timer will not be restarted
     /// until the next text update call by the user.
     fn on_minimum_populate_delay_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
-        let new_value = e.get_new_value::<SignedDuration>();
+        let new_value = e.get_new_value::<Duration>();
 
         // Stop any existing timer.
         let existing = self.delay_timer.borrow().as_ref().map(|(timer, _)| timer.clone());
         if let Some(timer) = existing {
             timer.stop();
 
-            if new_value == SignedDuration::ZERO {
+            if new_value.is_zero() {
                 if let Some((_, tick)) = self.delay_timer.take() {
                     tick.dispose();
                 }
             }
         }
 
-        if new_value > SignedDuration::ZERO {
+        if !new_value.is_zero() {
             // Create or clear a dispatcher timer instance.
             let timer = self.delay_timer.borrow().as_ref().map(|(timer, _)| timer.clone());
             let timer = timer.unwrap_or_else(|| {
@@ -795,8 +791,8 @@ impl AutoCompleteBox {
                 timer
             });
 
-            // Set the new tick interval: the delay is positive here, so it is a duration.
-            timer.set_interval(new_value.to_duration().unwrap_or_default());
+            // Set the new tick interval.
+            timer.set_interval(new_value);
         }
     }
 
@@ -1073,11 +1069,11 @@ impl AutoCompleteBox {
     /// Gets or sets the minimum delay after text is typed in the text box
     /// before the control populates the list of possible matches in the
     /// drop-down. The default is zero.
-    pub fn minimum_populate_delay(&self) -> SignedDuration {
+    pub fn minimum_populate_delay(&self) -> Duration {
         self.get_value(Self::minimum_populate_delay_property())
     }
 
-    pub fn set_minimum_populate_delay(&self, value: SignedDuration) {
+    pub fn set_minimum_populate_delay(&self, value: Duration) {
         self.set_value(Self::minimum_populate_delay_property(), value)
     }
 

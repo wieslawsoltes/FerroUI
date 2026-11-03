@@ -2236,7 +2236,7 @@ pub trait AutoCompleteBoxProps: ElementBuilder {
     }
 
     /// Sets [`AutoCompleteBox::minimum_populate_delay_property`](ferroui_controls::AutoCompleteBox::minimum_populate_delay_property).
-    fn minimum_populate_delay<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+    fn minimum_populate_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::minimum_populate_delay_property(), value)
     }
 
@@ -6760,7 +6760,7 @@ pub trait RichEditBoxProps: ElementBuilder {
     }
 
     /// Sets [`RichEditBox::caret_blink_interval_property`](ferroui_controls::RichEditBox::caret_blink_interval_property).
-    fn caret_blink_interval<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+    fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::caret_blink_interval_property(), value)
     }
 
@@ -7163,12 +7163,12 @@ pub trait ScrollBarProps: ElementBuilder {
     }
 
     /// Sets [`ScrollBar::hide_delay_property`](ferroui_controls::primitives::ScrollBar::hide_delay_property).
-    fn hide_delay<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+    fn hide_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::hide_delay_property(), value)
     }
 
     /// Sets [`ScrollBar::show_delay_property`](ferroui_controls::primitives::ScrollBar::show_delay_property).
-    fn show_delay<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+    fn show_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::show_delay_property(), value)
     }
 }
@@ -8243,7 +8243,7 @@ pub trait TextBoxProps: ElementBuilder {
     }
 
     /// Sets [`TextBox::caret_blink_interval_property`](ferroui_controls::TextBox::caret_blink_interval_property).
-    fn caret_blink_interval<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+    fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::caret_blink_interval_property(), value)
     }
 
@@ -8529,7 +8529,7 @@ pub trait TextPresenterProps: ElementBuilder {
     }
 
     /// Sets [`TextPresenter::caret_blink_interval_property`](ferroui_controls::presenters::TextPresenter::caret_blink_interval_property).
-    fn caret_blink_interval<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
+    fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::caret_blink_interval_property(), value)
     }
 

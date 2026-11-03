@@ -1,6 +1,5 @@
 //! Port of `Core/DelayedLoadTrigger.cs`.
 
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::DispatcherTimer;
 use ferroui_base::{
@@ -11,6 +10,7 @@ use ferroui_controls::Control;
 use ferroui_xaml_interactivity::{Interaction, StyledElementBehaviorImpl, StyledElementTriggerOfT};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Invokes its actions after the associated control is attached to the visual tree and a delay
 /// elapses.
@@ -28,8 +28,8 @@ ferroui_base::ferro_impl_classes!(DelayedLoadTrigger: FerroObjectImpl, StyledEle
 ferro_properties! {
     impl DelayedLoadTrigger {
         /// Identifies the `Delay` property.
-        pub fn delay_property() -> StyledProperty<SignedDuration> {
-            FerroProperty::register::<DelayedLoadTrigger, _>("Delay", SignedDuration::from_milliseconds(500.0))
+        pub fn delay_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<DelayedLoadTrigger, _>("Delay", Duration::from_millis(500))
         }
     }
 }
@@ -38,7 +38,7 @@ ferroui_base::ferro_overrides! {
     impl StyledElementBehaviorImpl for DelayedLoadTrigger {
         fn on_attached_to_visual_tree(this: &Self) {
             let timer = DispatcherTimer::new();
-            timer.set_interval(this.delay().to_duration().unwrap_or_default());
+            timer.set_interval(this.delay());
             let trigger = this.to_ref().downgrade();
             let tick = timer.tick(move |_timer: &DispatcherTimer| {
                 if let Some(trigger) = trigger.upgrade() {
@@ -69,11 +69,11 @@ impl DelayedLoadTrigger {
     }
 
     /// Gets or sets the delay before actions are executed.
-    pub fn delay(&self) -> SignedDuration {
+    pub fn delay(&self) -> Duration {
         self.get_value(Self::delay_property())
     }
 
-    pub fn set_delay(&self, value: SignedDuration) {
+    pub fn set_delay(&self, value: Duration) {
         self.set_value(Self::delay_property(), value)
     }
 

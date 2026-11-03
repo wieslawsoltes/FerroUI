@@ -197,3 +197,52 @@ fn a_time_span_resource_sets_a_duration_property() {
     let brush = object_of::<AcrylicBrush>(&resources.get(&"Brush".into()));
     assert_eq!(brush.tint_transition_duration(), Duration::from_secs(2));
 }
+
+/// The documents of the timer properties of the controls (step T3 of C5): the caret blink
+/// interval of the text controls, the delays of the scroll bar, the minimum populate delay of
+/// the auto-complete box. `{}` is the time span.
+const CONTROL_TIMER_DOCUMENTS: &[(&str, &str)] = &[
+    ("TextBox.CaretBlinkInterval", "<TextBox xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+    ("TextPresenter.CaretBlinkInterval", "<TextPresenter xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+    ("RichEditBox.CaretBlinkInterval", "<RichEditBox xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+    ("ScrollBar.HideDelay", "<ScrollBar xmlns='https://github.com/ferroui' HideDelay='{}'/>"),
+    ("ScrollBar.ShowDelay", "<ScrollBar xmlns='https://github.com/ferroui' ShowDelay='{}'/>"),
+    ("AutoCompleteBox.MinimumPopulateDelay", "<AutoCompleteBox xmlns='https://github.com/ferroui' MinimumPopulateDelay='{}'/>"),
+];
+
+/// Not from upstream (C5 of #423, step T3): the timer properties of the controls declare a
+/// `Duration`; a time span literal sets them as the duration of the same value.
+#[test]
+fn a_time_span_literal_sets_the_timer_properties_of_the_controls() {
+    let _base = xaml_test_base();
+    let text_box = parse::<Ref<ferroui_controls::TextBox>>(&CONTROL_TIMER_DOCUMENTS[0].1.replace("{}", "0:0:0.25"));
+    assert_eq!(text_box.caret_blink_interval(), Duration::from_millis(250));
+    let presenter = parse::<Ref<ferroui_controls::presenters::TextPresenter>>(&CONTROL_TIMER_DOCUMENTS[1].1.replace("{}", "0.3"));
+    assert_eq!(presenter.caret_blink_interval(), Duration::from_millis(300));
+    let editor = parse::<Ref<ferroui_controls::RichEditBox>>(&CONTROL_TIMER_DOCUMENTS[2].1.replace("{}", "0:0:0"));
+    assert_eq!(editor.caret_blink_interval(), Duration::ZERO);
+    let scroll_bar = parse::<Ref<ferroui_controls::primitives::ScrollBar>>(&CONTROL_TIMER_DOCUMENTS[3].1.replace("{}", "0:0:1.5"));
+    assert_eq!(scroll_bar.hide_delay(), Duration::from_millis(1500));
+    let scroll_bar = parse::<Ref<ferroui_controls::primitives::ScrollBar>>(&CONTROL_TIMER_DOCUMENTS[4].1.replace("{}", "0:0:0.4"));
+    assert_eq!(scroll_bar.show_delay(), Duration::from_millis(400));
+    let auto_complete_box = parse::<Ref<ferroui_controls::AutoCompleteBox>>(&CONTROL_TIMER_DOCUMENTS[5].1.replace("{}", "00:00:01"));
+    assert_eq!(auto_complete_box.minimum_populate_delay(), Duration::from_secs(1));
+}
+
+/// Not from upstream (C5 of #423, step T3, decision O2): a negative time span literal for a
+/// timer property of the controls is a load error, as for any `Duration` property.
+#[test]
+fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error() {
+    let _base = xaml_test_base();
+    for (property, document) in CONTROL_TIMER_DOCUMENTS {
+        let error = match crate::support::loader::try_parse_untyped(&document.replace("{}", "-0:0:1"), None) {
+            Ok(_) => panic!("{property}: a negative time span is not a duration"),
+            Err(error) => error,
+        };
+        let described = describe(&error);
+        assert!(
+            described.contains("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration."),
+            "{property}: {described}"
+        );
+    }
+}

@@ -1,7 +1,6 @@
 use crate::documents::{TextElement, Typography};
 use crate::primitives::{TextSelectionHandleCanvas, TextSelectorLayer};
 use crate::{Border, Control, ControlImpl, TextBlock, TextBox, TextBoxTextInputMethodClient};
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, VerticalAlignment};
@@ -26,6 +25,7 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::time::Duration;
 
 /// Immutable range formatting for the same UTF-16 positions used by
 /// [`TextLayout`], the caret, selection and input methods. Replace the collection
@@ -441,7 +441,7 @@ ferroui_base::ferro_properties! { impl TextPresenter {
 
     ferro_property!(
         /// Defines the `CaretBlinkInterval` property.
-        pub fn caret_blink_interval_property() -> StyledProperty<SignedDuration> {
+        pub fn caret_blink_interval_property() -> StyledProperty<Duration> {
             TextBox::caret_blink_interval_property().add_owner::<TextPresenter>()
         }
     );
@@ -836,11 +836,11 @@ impl TextPresenter {
     }
 
     /// The caret blink rate.
-    pub fn caret_blink_interval(&self) -> SignedDuration {
+    pub fn caret_blink_interval(&self) -> Duration {
         self.get_value(Self::caret_blink_interval_property())
     }
 
-    pub fn set_caret_blink_interval(&self, value: SignedDuration) {
+    pub fn set_caret_blink_interval(&self, value: Duration) {
         self.set_value(Self::caret_blink_interval_property(), value)
     }
 
@@ -1258,10 +1258,9 @@ impl TextPresenter {
 
         let caret_blink_interval = self.caret_blink_interval();
 
-        if caret_blink_interval > SignedDuration::ZERO {
+        if !caret_blink_interval.is_zero() {
             let caret_timer = DispatcherTimer::new();
-            // Positive here, so the interval is a duration.
-            caret_timer.set_interval(caret_blink_interval.to_duration().unwrap_or_default());
+            caret_timer.set_interval(caret_blink_interval);
 
             // The handler is created once per timer: a tick allocates nothing.
             let weak = self.to_ref().downgrade();

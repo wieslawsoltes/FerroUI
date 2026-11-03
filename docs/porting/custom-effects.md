@@ -295,6 +295,66 @@ texture the scene paints with. So the plan, stated as it is:
   smaller step and keeps every program readable in its own language; the IR stays an option if the
   sample set shows the duplication is the larger cost.
 
+**Shader effects as built (E4).** The hook is the provided, type-level
+`CustomEffect::shader() -> Option<ShaderEffectDescription>` (decision 4, `None` by default),
+read once per type, cached by `TypeId` and registered for the prewarm under
+`custom-effect:<NAME>` (`media/effects/custom_effect_shader.rs`).
+
+- *The description.* `ShaderEffectDescription` holds the SkSL (`sksl`) and the WGSL (`wgsl`), the
+  mode (`ShaderEffectMode::ContentSampling` or `Overlay`), the blend mode of an overlay
+  (`BitmapBlendingMode`, source over by default), the sample radius (how far from the pixel it
+  colours the program samples the content, in device independent pixels) and the padding
+  behaviour (`ShaderEffectPadding::Effect`, the padding of the effect alone, or `SampleRadius`,
+  which adds the sample radius to each side), and the names of further children, reserved for the
+  images of E6: a description with children is not supported yet, reported once and drawn
+  unchanged. It is made with `content_sampling(sksl, wgsl)` or `overlay(sksl, wgsl, blend_mode)`
+  and `with_sample_radius`, `with_padding`, `with_children`.
+- *Precedence.* A type with both a graph and a shader is drawn as its graph; its shader is not read
+  (`ImmutableCustomEffect::shader` is `None`), and a graph that does not load gives the no-op of
+  E1, not the shader. Every backend draws graphs; shaders need a backend that runs programs.
+- *The uniform convention, as implemented.* `layer_size` (`float2`, the area of the effect in
+  device pixels, rounded out to whole pixels) and `layer_scale` (`float`, device pixels per device
+  independent pixel, the mean of the two axes when they differ) come first, then the parameters in
+  the order of `for_each_parameter`, named with every `-` written `_` (`cell-size` is
+  `cell_size`): `Float` a `float`, `Point`, `Vector` and `Size` a `float2`, `Color` a premultiplied
+  `float4`, `Rect` a `float4` (x, y, width, height), `Bool` (0 or 1) and `Int` an `int`; `Text` has
+  no uniform. Values pass as they are: a program scales a length by `layer_scale`. The program is
+  given the centre of the pixel it colours in device pixels from the top left corner of the area.
+  The SkSL declares the uniforms in that order, `uniform shader content;` when it samples the
+  content, and `half4 main(float2 coord)`; the WGSL declares them as the members of
+  `struct Uniforms` and `fn effect(coord: vec2<f32>) -> vec4<f32>`, the pass of E5 adding the
+  bindings (`uniforms`, `fn sample_content`) and the entry points.
+  `ImmutableCustomEffect::for_each_shader_uniform` visits the block of a frame without allocating
+  and `shader_uniform_layout` gives the declarations a backend checks its program against.
+- *Skia* (`ferroui-skia/custom_shader_effects.rs`). The drawing context pushes a shader effect
+  (the render walk pushes it as an effect of the drawing context, as it pushes an effect without a
+  graph) as its program: compiled once per thread and type by the cache of `runtime_effects.rs`,
+  its uniforms checked once (names, order, types, no arrays) and its children (one shader
+  `content` for a content-sampling program, none for an overlay). A content-sampling program is
+  the runtime shader image filter of a save layer (`image_filters::runtime_shader_with_options`,
+  the sample radius in device pixels), the layer bound to `content`; an overlay is drawn over the
+  content inside the save layer with its blend mode before the layer is composed. Skia evaluates a
+  runtime shader image filter with translations only (`SkRuntimeImageFilter` takes the matrix
+  capability `kTranslate` and applies the rest of the transform to the result), so the layer is
+  saved under a translation by whole device pixels to the top left of the area, clipped to the
+  area, and the content drawn into it with its own transform: the layer has the resolution of the
+  device (under a rotation, the area is scaled to the lengths of the axes and Skia transforms the
+  result). The layer is composed with the opacity in effect. A program that does not compile,
+  does not match, or has children is reported once (an error in the log area `Skia`) and the
+  content drawn unchanged; nothing panics. This works on raster, Ganesh and Graphite surfaces and
+  in pictures.
+- *Vello* draws a shader effect as E1 draws an effect without a factory until E5: the content
+  unchanged in a layer without a filter, reported once. Its CPU mode does not run the CPU
+  reference yet (E5, with the route of E3).
+- *The library* (`media::effects::library`, E4): `pixelate` (`PixelateEffect`, content-sampling:
+  each cell of `cell-size` device independent pixels, clamped to 0..64 and at least one device
+  pixel, shows the pixel at its centre; sample radius 64), `scanline` (`ScanlineShaderEffect`, an
+  overlay drawn source over: the lower half of each band of `spacing` black at `strength`) and
+  `spotlight` (`SpotlightShaderEffect`, an overlay screened over the content: a light of `color`
+  fading from (`center-x`, `center-y`) to `radius`), Effector's pixelation, scan line and spotlight
+  shaders with the clamps of its factories, each with its SkSL, its WGSL and its CPU reference, and
+  a neutral value that leaves the content unchanged.
+
 ### 3.5 Input routing for interactive effects
 
 A mutable effect class may implement an input trait (the members of `ISkiaInputEffectHandler`:
@@ -355,6 +415,17 @@ ported as the reference set.
   light multiply, pixel operations) against its CPU reference, the library effects without a
   layer drawn on the processor (`cpu_layer_count`), and nested layers over steady frames without
   a texture allocated by the pool.
+- E4: the description, its precedence below a graph, the uniform of each kind of parameter, the
+  block and the layout of an effect, the padding of a sample radius, the SkSL and the WGSL of the
+  library declaring the uniforms of their parameters, round trips, registration and prewarm,
+  neutral values and CPU references (`media/effects/custom_effect_shader_tests.rs`); the SkSL of
+  the library compiled and checked, the checks of a program against the convention, the geometry
+  of the layer (`ferroui-skia/custom_shader_effects.rs`); the render walk pushing a shader effect
+  (`composition_custom_effect_tests.rs`); each library shader effect drawn on Skia raster at 96
+  and 192 DPI and on Graphite against its CPU reference, a neutral value and the area of the
+  effect, and a program that does not compile, does not match or has children drawing the content
+  unchanged, reported once (`tests.rs`, `gpu/metal/tests.rs`); Vello drawing a shader effect
+  unchanged until E5 (`effect_tests.rs`).
 - Later steps: per effect and backend, the GPU output against the CPU reference
   (`tests/FerroUI.RenderTests`, `tests/FerroUI.RenderBackends.Comparison`); the steady-state test
   (no new texture or program over frames that change only parameters, with the allocation
@@ -371,7 +442,7 @@ Each step is one pull request from main.
 | E1 | The open effect model in ferroui-base (section 3.2): `CustomEffect`, `EffectParameterValue`, `ImmutableCustomEffect`, `CustomEffectClass` and `Effect::construct_custom`, `IEffect::as_custom_effect`, `EffectExtensions::to_custom_effect`, `CustomEffectRegistry` and `Effect::parse`, `CustomEffectAnimator` and `EffectTransition`; the no-op and the report of Skia and Vello; tests | additions (a provided method of `IEffect`) | low: the built-in effects take the same paths; an `IEffect` of an unknown kind still panics in `get_effect_output_padding` as upstream |
 | E2 | Graph effects (section 3.3, kind 1): the description hook of `CustomEffect`, loaded once per type into an `EffectGraph`, painted around the content by the render walk with the parameters as animatable members, registered for the prewarm; the colour effects of the sample set as graphs. **Done**: `graph`, `for_each_graph_value`, `cpu_reference`, the library of section 3.3, the catalog page "Custom effects" | addition | medium: the walk gains a second way to draw `Visual.Effect`; the graph painter is shared with the effect brushes |
 | E3 | Convolution and the Vello colour layers: a `ConvolveMatrixEffect` node (Skia: a matrix convolution image filter; Vello: a WGSL pass), and Vello step 2 of gpu-rendering.md ("layers with an effect": the content into a pooled device texture, a pass into another) for the colour matrix nodes, so the graph effects are GPU on Vello's GPU and hybrid modes. **Done**: `ConvolveMatrix`, `push_convolve_matrix_layer`, the node, sharpen and edge detect; the route for the colour matrix, convolution, light multiply, pixel operation and luminance layers; WebGL2 keeps the CPU path (route step 3) | addition | high: the Vello pass reads the content of a layer, a new route in the scene |
-| E4 | Runtime shader effects on Skia (section 3.4): the shader description (SkSL source, the uniform convention, children, blend mode, overlay or content-sampling), compiled once per thread by `runtime_effects.rs`, drawn as a runtime-shader image filter of a save layer; the shader samples | addition | medium: SkSL errors surface at the first draw (logged once, then the no-op) |
+| E4 | Runtime shader effects on Skia (section 3.4): the shader description (SkSL source, the uniform convention, children, blend mode, overlay or content-sampling), compiled once per thread by `runtime_effects.rs`, drawn as a runtime-shader image filter of a save layer; the shader samples. **Done**: `shader`, `ShaderEffectDescription`, the uniform convention, the Skia programs, pixelate, scan lines and spotlight in the library and on the catalog page "Custom effects" (section 3.4, "Shader effects as built") | addition | medium: SkSL errors surface at the first draw (logged once, then the no-op) |
 | E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3) | addition | high: depends on E3 |
 | E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
 | E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples | addition | medium: event ordering and capture |
@@ -393,6 +464,14 @@ rendered into a pooled texture, passed through the program into another pooled t
 scene paints with. The graph effects of the library are GPU on Skia and on Vello's hybrid and GPU
 modes; Vello's CPU mode draws them by the references, and WebGL2 keeps the CPU path until step 3
 of the route. Another custom effect keeps the no-op of E1.
+
+E4 is done: a custom effect whose type is a runtime shader is drawn by Skia with its SkSL program
+on every surface (a runtime shader image filter of a save layer for a content-sampling program, an
+overlay drawn into the layer), compiled once per thread and type, its uniforms checked once against
+the convention of section 3.4 and set from the snapshot each frame (section 3.4, "Shader effects as
+built"); pixelate, scan lines and spotlight ship as such effects with SkSL, WGSL and CPU
+references, and the render tests hold Skia raster and Graphite to those references. Vello draws a
+shader effect's content unchanged, reported once, until E5 draws its WGSL.
 
 ## 5. Not in scope
 

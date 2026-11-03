@@ -1,11 +1,12 @@
-//! Tests of custom effects on `Visual.Effect` (#455, E1 to E3; not from
+//! Tests of custom effects on `Visual.Effect` (#455, E1 to E4; not from
 //! upstream): the snapshot of a custom effect, or of a custom effect class,
 //! crosses the batch stream to the server visual as a value; the render walk
 //! pushes an effect without a graph around the content, which a drawing
 //! context without a factory for it draws unchanged, and draws an effect
 //! with a graph as its graph around the content, the values of the snapshot
-//! as its members. A child module of the compositor tests, whose fixture
-//! renders the composition visuals.
+//! as its members, and pushes a runtime shader effect (E4) as an effect of
+//! the drawing context, which draws it with its program. A child module of
+//! the compositor tests, whose fixture renders the composition visuals.
 
 use super::{CompositorCanvas, TestBorder};
 use crate::media::effects::library::{
@@ -443,4 +444,42 @@ fn a_graph_that_does_not_load_is_drawn_as_an_effect_without_a_graph() {
     let text = effect.to_string();
     assert!(entries.iter().any(|e| e.starts_with("PushEffect ") && e.ends_with(&text)), "{entries:?}");
     assert!(entries.iter().any(|e| e == "PopEffect"), "{entries:?}");
+}
+
+#[test]
+fn a_shader_effect_is_pushed_around_the_content_as_a_shader() {
+    use crate::media::effects::library::{PixelateEffect, SpotlightShaderEffect};
+
+    let s = CompositorCanvas::new();
+    let child = TestBorder::filled(10.0, 10.0, 40.0, 30.0);
+    s.canvas.add(&child);
+    s.run_jobs();
+    let plain = render(&s, &child);
+
+    let effects = [
+        ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }),
+        ImmutableCustomEffect::new(SpotlightShaderEffect::default()),
+    ];
+    for effect in effects {
+        assert!(effect.has_shader(), "{effect}");
+        assert!(!effect.has_graph(), "{effect}");
+        child.set_effect(Some(effect.clone().into()));
+        s.run_jobs();
+        let entries = render(&s, &child);
+
+        // The walk pushes the effect of the drawing context around the
+        // content, which the recording context marks as a shader...
+        let text = format!("shader {effect}");
+        let push = entries
+            .iter()
+            .position(|e| e.starts_with("PushEffect ") && e.ends_with(&text))
+            .unwrap_or_else(|| panic!("the shader effect is pushed: {entries:?}"));
+        let draw = entries.iter().position(|e| e.starts_with("DrawRectangle Red")).expect("the content is drawn");
+        let pop = entries.iter().position(|e| e == "PopEffect").expect("the effect is popped");
+        assert!(push < draw && draw < pop, "{entries:?}");
+        // ...and draws nothing else.
+        let without: Vec<String> =
+            entries.iter().filter(|e| !e.starts_with("PushEffect") && e.as_str() != "PopEffect").cloned().collect();
+        assert_eq!(plain, without, "{effect}");
+    }
 }

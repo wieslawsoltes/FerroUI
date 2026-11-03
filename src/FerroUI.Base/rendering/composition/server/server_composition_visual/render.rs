@@ -204,7 +204,8 @@ impl IServerTreeVisitor for RenderContext<'_> {
             // A custom effect that is an effect graph (#455) is drawn as its
             // graph around the content, as a layer visual draws its effect
             // brush around its children; any other effect is an effect of
-            // the drawing context.
+            // the drawing context, a runtime shader effect (E4) among them,
+            // which the backend draws with its program.
             let graph = effect.as_custom_effect().is_some_and(|custom| {
                 push_custom_effect_graph_with(self.canvas, custom, bounds.to_rect(), visual.compositor())
             });

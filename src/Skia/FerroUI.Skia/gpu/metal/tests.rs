@@ -1593,3 +1593,79 @@ fn graphite_draws_the_library_effects_as_their_cpu_references() {
         assert!(most <= largest && mean <= 0.75, "{effect}: largest difference {most}, mean {mean}");
     }
 }
+
+/// The runtime shader effects of the library drawn by Graphite on the Metal
+/// device (#455, E4): the SkSL programs on the GPU (the content of a
+/// content-sampling program the layer's texture, an overlay drawn into the
+/// layer), compared with the CPU reference of each effect applied to the same
+/// scene drawn plain by Graphite.
+#[test]
+fn graphite_draws_the_library_shader_effects_as_their_cpu_references() {
+    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+    use ferroui_base::media::effects::ImmutableCustomEffect;
+
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    const SIZE: i32 = 64;
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(32.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    // The premultiplied RGBA pixels of the target, read back once.
+    fn pixels(target: &GraphiteTarget) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                // `pixel` gives the colour un-premultiplied.
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+
+    let spotlight = SpotlightShaderEffect { center_x: 0.4, center_y: 0.5, radius: 0.5, strength: 0.8, color: Colors::ORANGE };
+    let effects = [
+        (ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), 3u8),
+        (ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }), 3),
+        (ImmutableCustomEffect::new(spotlight), 4),
+    ];
+    for (effect, largest) in effects {
+        assert!(effect.has_shader(), "{effect}");
+        let plain = GraphiteTarget::new(&device);
+        plain.draw(|context| {
+            context.clear(Colors::TRANSPARENT);
+            scene(context);
+        });
+        let mut expected = pixels(&plain);
+        plain.dispose();
+        assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+
+        let target = GraphiteTarget::new(&device);
+        target.draw(|context| {
+            context.clear(Colors::TRANSPARENT);
+            let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+            scene(context);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+        });
+        let actual = pixels(&target);
+        target.dispose();
+        let most = expected.iter().zip(&actual).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+        let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+        let mean = total as f64 / expected.len() as f64;
+        assert!(most <= largest && mean <= 0.75, "{effect}: largest difference {most}, mean {mean}");
+    }
+}

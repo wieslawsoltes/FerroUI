@@ -1,6 +1,5 @@
 //! Port of `Input/InactivityTrigger.cs`.
 
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::{InputElement, KeyEventArgs, PointerEventArgs};
 use ferroui_base::interactivity::{Interactive, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::reactive::IDisposable;
@@ -13,6 +12,7 @@ use ferroui_controls::{Control, TopLevel};
 use ferroui_xaml_interactivity::{BehaviorImpl, BehaviorImplExt, Interaction, TriggerOfT};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Duration;
 
 /// The top level a trigger listens to and its handlers.
 struct TopLevelHandlers {
@@ -37,8 +37,8 @@ ferroui_base::ferro_impl_classes!(InactivityTrigger: FerroObjectImpl);
 ferro_properties! {
     impl InactivityTrigger {
         /// Identifies the `Timeout` property.
-        pub fn timeout_property() -> StyledProperty<SignedDuration> {
-            FerroProperty::register::<InactivityTrigger, _>("Timeout", SignedDuration::from_seconds(5.0))
+        pub fn timeout_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<InactivityTrigger, _>("Timeout", Duration::from_secs(5))
         }
     }
 }
@@ -57,7 +57,7 @@ ferroui_base::ferro_overrides! {
             };
 
             let timer = DispatcherTimer::new();
-            timer.set_interval(this.timeout().to_duration().unwrap_or_default());
+            timer.set_interval(this.timeout());
             let trigger = this.to_ref().downgrade();
             let tick = timer.tick(move |_timer: &DispatcherTimer| {
                 if let Some(trigger) = trigger.upgrade() {
@@ -133,11 +133,11 @@ impl InactivityTrigger {
     }
 
     /// Gets or sets the inactivity timeout duration.
-    pub fn timeout(&self) -> SignedDuration {
+    pub fn timeout(&self) -> Duration {
         self.get_value(Self::timeout_property())
     }
 
-    pub fn set_timeout(&self, value: SignedDuration) {
+    pub fn set_timeout(&self, value: Duration) {
         self.set_value(Self::timeout_property(), value)
     }
 
@@ -150,7 +150,7 @@ impl InactivityTrigger {
         if let Some(timer) = timer {
             timer.stop();
             // Update the interval in case the property changed.
-            timer.set_interval(self.timeout().to_duration().unwrap_or_default());
+            timer.set_interval(self.timeout());
             timer.start();
         }
     }

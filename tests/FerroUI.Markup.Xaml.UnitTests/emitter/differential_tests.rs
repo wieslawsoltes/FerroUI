@@ -140,6 +140,49 @@ fn a_negative_time_span_literal_for_a_duration_property_is_an_error() {
     assert!(described.contains("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration."), "{described}");
 }
 
+/// Not from upstream (C5 of #423, step T3, decision O2): the compiled form of
+/// `xaml::ferro_intrinsics_tests::a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error`.
+/// The timer properties of the controls declare a `Duration`: the compiler sets a literal that
+/// is not negative with `rt::duration` and refuses a negative one, naming the property.
+#[test]
+fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error() {
+    let _app = xaml_test_base();
+    let documents = [
+        ("CaretBlinkInterval", "<TextBox xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+        ("CaretBlinkInterval", "<TextPresenter xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+        ("CaretBlinkInterval", "<RichEditBox xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+        ("HideDelay", "<ScrollBar xmlns='https://github.com/ferroui' HideDelay='{}'/>"),
+        ("ShowDelay", "<ScrollBar xmlns='https://github.com/ferroui' ShowDelay='{}'/>"),
+        ("MinimumPopulateDelay", "<AutoCompleteBox xmlns='https://github.com/ferroui' MinimumPopulateDelay='{}'/>"),
+    ];
+    for (property, document) in documents {
+        let positive = document.replace("{}", "0:0:0.5");
+        let generated = generate_file(
+            generated::ASSEMBLY_NAME,
+            generated::ROOT_URI,
+            &[("control_timer_duration.xaml", positive.as_str())],
+            &RuntimeXamlLoaderConfiguration::new(),
+            &[],
+        );
+        assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{property}: {:?}", generated.documents);
+        assert!(generated.source.contains("rt::duration(value_"), "{property}: {}", generated.source);
+
+        let negative = document.replace("{}", "-0:0:1");
+        let generated = generate_file(
+            generated::ASSEMBLY_NAME,
+            generated::ROOT_URI,
+            &[("control_timer_negative_duration.xaml", negative.as_str())],
+            &RuntimeXamlLoaderConfiguration::new(),
+            &[],
+        );
+        let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+        assert!(
+            reason.contains(&format!("{property}: the time span -00:00:01 is negative, and a `Duration` cannot be negative")),
+            "{reason}"
+        );
+    }
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")
