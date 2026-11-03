@@ -19,6 +19,12 @@
 //!   `MaskInvert`) and the matrix convolution. The order is that of the
 //!   queue: the content is submitted first, then the pass, then the scene
 //!   that paints with its result.
+//! - The passes of the runtime shader effects (#455, E5) are one more
+//!   program on that route: the WGSL of a custom effect's description,
+//!   wrapped with the bindings of the pass, checked by naga against the
+//!   uniform convention of its parameters once per type and compiled once
+//!   per device and type; a content-sampling program reads the content, an
+//!   overlay is composed over it with its blend mode.
 //!
 //! The pipelines are compiled once per device and thread; the parameters
 //! are uniforms written for each pass. The textures, kept in pools per size
@@ -31,13 +37,20 @@
 #![cfg_attr(not(feature = "hybrid"), allow(dead_code))]
 
 use super::{VelloDeviceTexture, VelloTextureAlpha, VelloWgpuDevice};
+use ferroui_base::logging::{LogEventLevel, Logger};
+use ferroui_base::media::effects::{
+    ImmutableCustomEffect, ShaderUniformType, ShaderUniformValue, SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_PASS_BINDING,
+    SHADER_WGSL_UNIFORMS_BINDING,
+};
 use ferroui_base::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
 use ferroui_base::platform::{LightingParameters, PixelOperation};
 use ferroui_base::rendering::composition::effects::BlendEffectMode;
 use ferroui_base::rendering::composition::server::{LightSource, LIGHT_MAP_MAX_SCALE};
+use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::mem::ManuallyDrop;
+use std::rc::Rc;
 use std::sync::{Arc, Weak};
 
 /// The most point and spot lights the pass evaluates.
@@ -831,6 +844,82 @@ ferroui_base::ferro_thread_local! {
         ManuallyDrop::new(RefCell::new(HashMap::new()));
 }
 
+/// The layout entry of a uniform buffer of the fragment stage at `binding`.
+fn uniform_entry(binding: u32) -> wgpu::BindGroupLayoutEntry {
+    wgpu::BindGroupLayoutEntry {
+        binding,
+        visibility: wgpu::ShaderStages::FRAGMENT,
+        ty: wgpu::BindingType::Buffer {
+            ty: wgpu::BufferBindingType::Uniform,
+            has_dynamic_offset: false,
+            min_binding_size: None,
+        },
+        count: None,
+    }
+}
+
+/// The layout entry of a texture of the pool the fragment stage reads with
+/// `textureLoad` at `binding`.
+fn texture_entry(binding: u32) -> wgpu::BindGroupLayoutEntry {
+    wgpu::BindGroupLayoutEntry {
+        binding,
+        visibility: wgpu::ShaderStages::FRAGMENT,
+        ty: wgpu::BindingType::Texture {
+            sample_type: wgpu::TextureSampleType::Float { filterable: false },
+            view_dimension: wgpu::TextureViewDimension::D2,
+            multisampled: false,
+        },
+        count: None,
+    }
+}
+
+/// The pipeline of a pass into a texture of the pool: the entry points
+/// `vs_main` and `fs_main` of the WGSL `source`, the bind group `entries`
+/// (group 0), writing `Rgba8Unorm` without blending.
+fn create_pass_pipeline(
+    wgpu_device: &wgpu::Device,
+    label: Option<&str>,
+    source: String,
+    entries: &[wgpu::BindGroupLayoutEntry],
+) -> (wgpu::RenderPipeline, wgpu::BindGroupLayout) {
+    let module = wgpu_device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label,
+        source: wgpu::ShaderSource::Wgsl(source.into()),
+    });
+    let layout = wgpu_device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor { label, entries });
+    let pipeline_layout = wgpu_device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label,
+        bind_group_layouts: &[Some(&layout)],
+        immediate_size: 0,
+    });
+    let pipeline = wgpu_device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label,
+        layout: Some(&pipeline_layout),
+        vertex: wgpu::VertexState {
+            module: &module,
+            entry_point: Some("vs_main"),
+            buffers: &[],
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &module,
+            entry_point: Some("fs_main"),
+            targets: &[Some(wgpu::ColorTargetState {
+                format: wgpu::TextureFormat::Rgba8Unorm,
+                blend: None,
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        }),
+        primitive: wgpu::PrimitiveState::default(),
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState::default(),
+        multiview_mask: None,
+        cache: None,
+    });
+    (pipeline, layout)
+}
+
 fn with_layer_pipeline<R>(device: &Arc<VelloWgpuDevice>, program: LayerProgram, f: impl FnOnce(&mut LayerPipeline) -> R) -> R {
     LAYER_PIPELINES.with(|pipelines| {
         let mut pipelines = pipelines.borrow_mut();
@@ -843,63 +932,11 @@ fn with_layer_pipeline<R>(device: &Arc<VelloWgpuDevice>, program: LayerProgram, 
             None => {
                 let wgpu_device = device.device();
                 let label = Some(program.label());
-                let module = wgpu_device.create_shader_module(wgpu::ShaderModuleDescriptor {
-                    label,
-                    source: wgpu::ShaderSource::Wgsl(program.source().into()),
-                });
-                let mut entries = vec![wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                }];
+                let mut entries = vec![uniform_entry(0)];
                 for input in 0..program.inputs() {
-                    entries.push(wgpu::BindGroupLayoutEntry {
-                        binding: 1 + input as u32,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
-                        ty: wgpu::BindingType::Texture {
-                            sample_type: wgpu::TextureSampleType::Float { filterable: false },
-                            view_dimension: wgpu::TextureViewDimension::D2,
-                            multisampled: false,
-                        },
-                        count: None,
-                    });
+                    entries.push(texture_entry(1 + input as u32));
                 }
-                let layout = wgpu_device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor { label, entries: &entries });
-                let pipeline_layout = wgpu_device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                    label,
-                    bind_group_layouts: &[Some(&layout)],
-                    immediate_size: 0,
-                });
-                let pipeline = wgpu_device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                    label,
-                    layout: Some(&pipeline_layout),
-                    vertex: wgpu::VertexState {
-                        module: &module,
-                        entry_point: Some("vs_main"),
-                        buffers: &[],
-                        compilation_options: wgpu::PipelineCompilationOptions::default(),
-                    },
-                    fragment: Some(wgpu::FragmentState {
-                        module: &module,
-                        entry_point: Some("fs_main"),
-                        targets: &[Some(wgpu::ColorTargetState {
-                            format: wgpu::TextureFormat::Rgba8Unorm,
-                            blend: None,
-                            write_mask: wgpu::ColorWrites::ALL,
-                        })],
-                        compilation_options: wgpu::PipelineCompilationOptions::default(),
-                    }),
-                    primitive: wgpu::PrimitiveState::default(),
-                    depth_stencil: None,
-                    multisample: wgpu::MultisampleState::default(),
-                    multiview_mask: None,
-                    cache: None,
-                });
+                let (pipeline, layout) = create_pass_pipeline(wgpu_device, label, program.source(), &entries);
                 let buffer = wgpu_device.create_buffer(&wgpu::BufferDescriptor {
                     label,
                     size: (program.uniform_floats() * 4) as u64,
@@ -1122,4 +1159,358 @@ pub(crate) fn convolution_texture(
     floats[32..36].copy_from_slice(&[convolution.gain(), convolution.bias, keep_alpha, repeat_edges]);
     floats[36..40].copy_from_slice(&[area.width as f32, area.height as f32, 0.0, 0.0]);
     run_layer_pass(device, LayerProgram::Convolution, &floats, &[content])
+}
+
+// --- shader effects ---------------------------------------------------------------------
+
+/// The WGSL module of the pass of a shader effect type (#455, E5): the
+/// program of its description wrapped by
+/// [`ShaderEffectDescription::wgsl_module`](ferroui_base::media::effects::ShaderEffectDescription::wgsl_module),
+/// checked by naga against the uniform convention of the parameters of the
+/// type, with the layout of its uniform block.
+#[derive(Debug)]
+pub(crate) struct ShaderModule {
+    /// The module the pipelines are compiled from.
+    source: String,
+    /// The byte offset of each uniform of the convention in the block, in
+    /// the order of the convention.
+    offsets: Vec<u32>,
+    /// The size of the block in bytes: a multiple of 16.
+    size: usize,
+}
+
+/// Whether a member of `struct Uniforms` has the type of the convention.
+fn uniform_type_matches(inner: &wgpu::naga::TypeInner, expected: ShaderUniformType) -> bool {
+    use wgpu::naga::{Scalar, TypeInner, VectorSize};
+    match (inner, expected) {
+        (TypeInner::Scalar(scalar), ShaderUniformType::Float) => *scalar == Scalar::F32,
+        (TypeInner::Scalar(scalar), ShaderUniformType::Int) => *scalar == Scalar::I32,
+        (TypeInner::Vector { size: VectorSize::Bi, scalar }, ShaderUniformType::Float2) => *scalar == Scalar::F32,
+        (TypeInner::Vector { size: VectorSize::Quad, scalar }, ShaderUniformType::Float4) => *scalar == Scalar::F32,
+        _ => false,
+    }
+}
+
+/// The offsets of the members of the uniform block `uniforms` of `module`
+/// and the size of the block, when its members are the uniforms of `layout`
+/// (names, order and types, none an array or a struct).
+fn uniform_block_layout(
+    module: &wgpu::naga::Module,
+    layout: &[(String, ShaderUniformType)],
+) -> Result<(Vec<u32>, usize), String> {
+    let expected = || {
+        let members: Vec<String> = layout.iter().map(|(name, ty)| format!("{name}: {}", ty.wgsl())).collect();
+        members.join(", ")
+    };
+    let Some((_, variable)) = module.global_variables.iter().find(|(_, variable)| {
+        variable.name.as_deref() == Some("uniforms") && variable.space == wgpu::naga::AddressSpace::Uniform
+    }) else {
+        return Err("the module has no uniform block `uniforms`".to_owned());
+    };
+    let wgpu::naga::TypeInner::Struct { members, span } = &module.types[variable.ty].inner else {
+        return Err(format!("Uniforms is not a struct ({})", expected()));
+    };
+    if members.len() != layout.len() {
+        return Err(format!(
+            "Uniforms has {} members, the convention has {} ({})",
+            members.len(),
+            layout.len(),
+            expected()
+        ));
+    }
+    let mut offsets = Vec::with_capacity(members.len());
+    for (index, (member, (name, ty))) in members.iter().zip(layout).enumerate() {
+        let declared = member.name.as_deref().unwrap_or("");
+        if declared != name.as_str() {
+            return Err(format!("member {index} of Uniforms is {declared}, the convention has {name} ({})", expected()));
+        }
+        if !uniform_type_matches(&module.types[member.ty].inner, *ty) {
+            return Err(format!("the member {name} of Uniforms is not a {} ({})", ty.wgsl(), expected()));
+        }
+        offsets.push(member.offset);
+    }
+    let size = (*span as usize).max(16).div_ceil(16) * 16;
+    Ok((offsets, size))
+}
+
+/// The module of the pass of the shader of `effect`, checked: the
+/// description has no children besides the content (step E6), the module
+/// parses and validates with naga (the version wgpu compiles it with,
+/// without optional capabilities, so every device takes it), and its block
+/// `uniforms` declares the uniforms of the convention
+/// ([`ImmutableCustomEffect::shader_uniform_layout`]). The error says why
+/// not. No device is needed.
+pub(crate) fn check_shader_module(effect: &ImmutableCustomEffect) -> Result<ShaderModule, String> {
+    use wgpu::naga;
+    let Some(description) = effect.shader() else {
+        return Err("the effect is not a shader effect".to_owned());
+    };
+    if !description.children.is_empty() {
+        return Err("children besides the content are not supported yet".to_owned());
+    }
+    let source = description.wgsl_module();
+    let module = naga::front::wgsl::parse_str(&source)
+        .map_err(|error| format!("its WGSL does not parse: {}", error.emit_to_string(&source)))?;
+    let mut validator = naga::valid::Validator::new(naga::valid::ValidationFlags::all(), naga::valid::Capabilities::empty());
+    validator
+        .validate(&module)
+        .map_err(|error| format!("its WGSL is not valid: {}", error.emit_to_string(&source)))?;
+    let (offsets, size) = uniform_block_layout(&module, &effect.shader_uniform_layout())?;
+    Ok(ShaderModule { source, offsets, size })
+}
+
+/// The names of the shader effects whose module failed, each reported once.
+static SHADER_REPORTED: std::sync::Mutex<Vec<&'static str>> = std::sync::Mutex::new(Vec::new());
+
+/// Reports that the shader effect `name` is not drawn by its WGSL (`reason`)
+/// and that its content is drawn unchanged: logged the first time for a
+/// name (an error in the log area `Vello`), when it returns `true`.
+pub(crate) fn report_shader_failure(name: &'static str, reason: &str) -> bool {
+    {
+        let mut reported = SHADER_REPORTED.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        if reported.contains(&name) {
+            return false;
+        }
+        reported.push(name);
+    }
+    if let Some(logger) = Logger::try_get(LogEventLevel::Error, "Vello") {
+        logger.log(
+            None,
+            &format!("The shader of the custom effect {name} is not drawn ({reason}); its content is drawn unchanged."),
+        );
+    }
+    true
+}
+
+/// How many times the failure of the shader effect `name` was reported (0
+/// or 1).
+#[cfg(test)]
+pub(crate) fn shader_failure_reports(name: &str) -> usize {
+    SHADER_REPORTED
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .iter()
+        .filter(|reported| **reported == name)
+        .count()
+}
+
+/// The compiled pipeline of a shader effect type on a device, with its
+/// buffers: the block of the effect and the uniforms of the pass, written
+/// for each pass (every pass is submitted on its own, as the layer passes
+/// are).
+struct ShaderPipeline {
+    device: Weak<VelloWgpuDevice>,
+    type_id: TypeId,
+    pipeline: wgpu::RenderPipeline,
+    layout: wgpu::BindGroupLayout,
+    uniforms: wgpu::Buffer,
+    pass: wgpu::Buffer,
+    /// The bind groups the pipeline was run with, by the identity of the
+    /// texture of the content (a texture of the pool).
+    bind_groups: Vec<(u64, wgpu::BindGroup)>,
+    /// The bytes of the block, kept for the next pass.
+    block: Vec<u8>,
+}
+
+ferroui_base::ferro_thread_local! {
+    // The modules of the shader effect types of this thread, checked once
+    // per type; `None` for a type whose module failed (reported once).
+    static SHADER_MODULES: RefCell<HashMap<TypeId, Option<Rc<ShaderModule>>>> = RefCell::new(HashMap::new());
+    // Kept beyond the end of the thread, as the objects of the lighting
+    // pass are (see there).
+    static SHADER_PIPELINES: ManuallyDrop<RefCell<Vec<ShaderPipeline>>> = ManuallyDrop::new(RefCell::new(Vec::new()));
+}
+
+/// The checked module of the shader of `effect`, checked on the first call
+/// of this thread for its type; `None` when it failed (reported once, see
+/// [`check_shader_module`]).
+pub(crate) fn shader_module(effect: &ImmutableCustomEffect) -> Option<Rc<ShaderModule>> {
+    let type_id = effect.value_type_id();
+    if let Some(found) = SHADER_MODULES.with(|modules| modules.borrow().get(&type_id).cloned()) {
+        return found;
+    }
+    let module = match check_shader_module(effect) {
+        Ok(module) => Some(Rc::new(module)),
+        Err(reason) => {
+            report_shader_failure(effect.name(), &reason);
+            None
+        }
+    };
+    SHADER_MODULES.with(|modules| modules.borrow_mut().insert(type_id, module.clone()));
+    module
+}
+
+fn with_shader_pipeline<R>(
+    device: &Arc<VelloWgpuDevice>,
+    type_id: TypeId,
+    module: &ShaderModule,
+    f: impl FnOnce(&mut ShaderPipeline) -> R,
+) -> R {
+    SHADER_PIPELINES.with(|pipelines| {
+        let mut pipelines = pipelines.borrow_mut();
+        pipelines.retain(|pipeline| pipeline.device.strong_count() > 0);
+        let found = pipelines.iter().position(|pipeline| {
+            pipeline.type_id == type_id && std::ptr::eq(pipeline.device.as_ptr(), Arc::as_ptr(device))
+        });
+        let index = match found {
+            Some(index) => index,
+            None => {
+                let wgpu_device = device.device();
+                let label = Some("FerroUI shader effect");
+                let entries = [
+                    uniform_entry(SHADER_WGSL_UNIFORMS_BINDING),
+                    uniform_entry(SHADER_WGSL_PASS_BINDING),
+                    texture_entry(SHADER_WGSL_CONTENT_BINDING),
+                ];
+                let (pipeline, layout) = create_pass_pipeline(wgpu_device, label, module.source.clone(), &entries);
+                let buffer = |size: usize| {
+                    wgpu_device.create_buffer(&wgpu::BufferDescriptor {
+                        label,
+                        size: size as u64,
+                        usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                        mapped_at_creation: false,
+                    })
+                };
+                let (uniforms, pass) = (buffer(module.size), buffer(16));
+                pipelines.push(ShaderPipeline {
+                    device: Arc::downgrade(device),
+                    type_id,
+                    pipeline,
+                    layout,
+                    uniforms,
+                    pass,
+                    bind_groups: Vec::new(),
+                    block: Vec::with_capacity(module.size),
+                });
+                pipelines.len() - 1
+            }
+        };
+        f(&mut pipelines[index])
+    })
+}
+
+/// Where a shader effect is drawn: the area of the effect, in device pixels,
+/// and the part of it the textures of its pass hold.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct ShaderArea {
+    /// The device pixel of the area at the top left texel of the textures
+    /// (whole pixels).
+    pub(crate) origin: [f32; 2],
+    /// The width and the height of the area (`layer_size`).
+    pub(crate) size: [f32; 2],
+    /// Device pixels per device independent pixel (`layer_scale`).
+    pub(crate) scale: f32,
+}
+
+/// Writes the uniforms of `effect` in `shader` into `block` at `offsets`
+/// (the layout of its module); `false` when they do not match it.
+fn fill_uniform_block(block: &mut [u8], offsets: &[u32], effect: &ImmutableCustomEffect, shader: ShaderArea) -> bool {
+    let mut index = 0;
+    let mut complete = true;
+    effect.for_each_shader_uniform(shader.size, shader.scale, &mut |_, value| {
+        let Some(&offset) = offsets.get(index) else {
+            complete = false;
+            return;
+        };
+        index += 1;
+        let at = offset as usize;
+        let mut put = |at: usize, bytes: [u8; 4]| match block.get_mut(at..at + 4) {
+            Some(slot) => slot.copy_from_slice(&bytes),
+            None => complete = false,
+        };
+        match value {
+            ShaderUniformValue::Int(value) => put(at, value.to_ne_bytes()),
+            other => {
+                for (component, value) in other.floats().iter().enumerate() {
+                    put(at + component * 4, value.to_ne_bytes());
+                }
+            }
+        }
+    });
+    complete && index == offsets.len()
+}
+
+/// The shader of `effect` over `content` (a texture of the pool holding the
+/// part `area` of the area of the effect, `shader`) into a texture of the
+/// pool of the same size: the program compiled once per device and type,
+/// the uniforms of this frame written into its buffers. `None` when its
+/// module failed (reported once).
+pub(crate) fn shader_effect_texture(
+    device: &Arc<VelloWgpuDevice>,
+    content: &Arc<VelloDeviceTexture>,
+    area: LayerArea,
+    effect: &ImmutableCustomEffect,
+    shader: ShaderArea,
+) -> Option<Arc<VelloDeviceTexture>> {
+    let module = shader_module(effect)?;
+    let mut pass_bytes = [0u8; 16];
+    let pass_floats = [shader.origin[0], shader.origin[1], area.width as f32, area.height as f32];
+    for (slot, value) in pass_bytes.chunks_exact_mut(4).zip(pass_floats) {
+        slot.copy_from_slice(&value.to_ne_bytes());
+    }
+    let output = pooled_texture(device, content.width(), content.height());
+    let drawn = with_shader_pipeline(device, effect.value_type_id(), &module, |pipeline| {
+        let mut block = std::mem::take(&mut pipeline.block);
+        block.clear();
+        block.resize(module.size, 0);
+        let complete = fill_uniform_block(&mut block, &module.offsets, effect, shader);
+        if complete {
+            device.queue().write_buffer(&pipeline.uniforms, 0, &block);
+        }
+        pipeline.block = block;
+        if !complete {
+            report_shader_failure(effect.name(), "its uniforms do not match its module");
+            return false;
+        }
+        device.queue().write_buffer(&pipeline.pass, 0, &pass_bytes);
+        let id = content.id();
+        let index = match pipeline.bind_groups.iter().position(|(key, _)| *key == id) {
+            Some(index) => index,
+            None => {
+                if pipeline.bind_groups.len() >= MAX_BIND_GROUPS {
+                    pipeline.bind_groups.clear();
+                }
+                let bind_group = device.device().create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: Some("FerroUI shader effect"),
+                    layout: &pipeline.layout,
+                    entries: &[
+                        wgpu::BindGroupEntry {
+                            binding: SHADER_WGSL_UNIFORMS_BINDING,
+                            resource: pipeline.uniforms.as_entire_binding(),
+                        },
+                        wgpu::BindGroupEntry { binding: SHADER_WGSL_PASS_BINDING, resource: pipeline.pass.as_entire_binding() },
+                        wgpu::BindGroupEntry {
+                            binding: SHADER_WGSL_CONTENT_BINDING,
+                            resource: wgpu::BindingResource::TextureView(content.view()),
+                        },
+                    ],
+                });
+                pipeline.bind_groups.push((id, bind_group));
+                pipeline.bind_groups.len() - 1
+            }
+        };
+        let mut encoder =
+            device.device().create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("FerroUI shader effect") });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("FerroUI shader effect"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: output.view(),
+                    resolve_target: None,
+                    ops: wgpu::Operations { load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT), store: wgpu::StoreOp::Store },
+                    depth_slice: None,
+                })],
+                depth_stencil_attachment: None,
+                occlusion_query_set: None,
+                timestamp_writes: None,
+                multiview_mask: None,
+            });
+            pass.set_pipeline(&pipeline.pipeline);
+            pass.set_bind_group(0, &pipeline.bind_groups[index].1, &[]);
+            pass.draw(0..3, 0..1);
+        }
+        device.queue().submit(Some(encoder.finish()));
+        true
+    });
+    drawn.then_some(output)
 }
