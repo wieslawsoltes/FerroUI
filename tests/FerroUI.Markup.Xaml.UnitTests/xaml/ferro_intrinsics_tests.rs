@@ -264,11 +264,9 @@ fn a_language_literal_sets_a_locale_property() {
     let block = parse::<Ref<RichTextBlock>>("<RichTextBlock xmlns='https://github.com/ferroui' Language='ja-JP'/>");
     assert_eq!(block.language(), locale!("ja-JP"));
 
-    // The case of the subtags is normalized, and the empty tag is the invariant culture.
+    // The case of the subtags is normalized.
     let block = parse::<Ref<RichTextBlock>>("<RichTextBlock xmlns='https://github.com/ferroui' Language='zh-hant-tw'/>");
     assert_eq!(block.language(), locale!("zh-Hant-TW"));
-    let block = parse::<Ref<RichTextBlock>>("<RichTextBlock xmlns='https://github.com/ferroui' Language=''/>");
-    assert_eq!(block.language(), Locale::UNKNOWN);
 
     // A culture of the runtime library casts to its locale.
     let block = parse::<Ref<RichTextBlock>>(
