@@ -1537,6 +1537,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "naga",
  "roxmltree 0.20.0",
  "serde_json",
  "xamlx",
