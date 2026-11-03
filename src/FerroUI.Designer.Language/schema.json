@@ -28252,6 +28252,12 @@
         "type_name": "Option<ValueType>",
         "documentation": "XBindExtension.DataType: Option<ValueType>",
         "values": []
+      },
+      "BindBack": {
+        "name": "BindBack",
+        "type_name": "Option<String>",
+        "documentation": "XBindExtension.BindBack: Option<String>",
+        "values": []
       }
     },
     "namespace_aliases": [
