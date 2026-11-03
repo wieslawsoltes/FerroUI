@@ -19,6 +19,10 @@ pub struct PageAdaptation {
     pub page_id: &'static str,
     pub xaml: &'static str,
     pub notes: &'static str,
+    /// Whether the page is `ported` in `port-status.json`: every catalog example of the page has
+    /// a native adaptation with its events and bindings, or a recorded reason why it cannot.
+    /// Otherwise the page is `partial`.
+    pub ported: bool,
 }
 
 macro_rules! page {
@@ -27,6 +31,15 @@ macro_rules! page {
             page_id: $id,
             xaml: include_str!(concat!("Pages/", $id, ".xaml")),
             notes: $notes,
+            ported: false,
+        }
+    };
+    (ported $id:literal, $notes:literal) => {
+        PageAdaptation {
+            page_id: $id,
+            xaml: include_str!(concat!("Pages/", $id, ".xaml")),
+            notes: $notes,
+            ported: true,
         }
     };
 }

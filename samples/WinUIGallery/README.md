@@ -2,7 +2,7 @@
 
 A FerroUI port of [Microsoft WinUI Gallery](https://github.com/microsoft/WinUI-Gallery) at commit `14061eeac21c38ae99f302edf3d9136d4f652c4c` (W10 of [docs/porting/winui-controls.md](../../docs/porting/winui-controls.md)). It shows the native WinUI controls of `ferroui-controls` (NumberBox, RadioButtons, RatingControl, AutoSuggestBox, InfoBar, InfoBadge, ProgressRing, the icon elements, NavigationView, Frame and FramePage) and the upstream-ported controls in the pages of the gallery, with the WinUI theme.
 
-The whole pinned catalog is browsable: 126 pages and 350 sample definitions, each with the original XAML and code of its source file, the path of that file and its SHA-256. A subset of the pages have native examples: reviewed adaptations of the original markup in `Pages/`, with their handlers in Rust. `port-status.json` records the state of every page; every page with native examples is `partial`, since it does not reproduce every example, event, binding or pixel of the original.
+The whole pinned catalog is browsable: 126 pages and 350 sample definitions, each with the original XAML and code of its source file, the path of that file and its SHA-256. A subset of the pages have native examples: reviewed adaptations of the original markup in `Pages/`, with their handlers in Rust. `port-status.json` records the state of every page: `ported` when every catalog example of the page has a native adaptation with its events and bindings, or a recorded reason why it cannot (`not-applicable`, a Windows-only API); `partial` when the native examples cover a reviewed subset; `pending` when the page has only its source. No state claims pixel parity, which is a separate comparison against Windows captures.
 
 ## Run
 

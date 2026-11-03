@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_commit": "14061eeac21c38ae99f302edf3d9136d4f652c4c",
-  "coverage_rule": "The complete catalog and source browser do not establish page or API parity. Every native adaptation remains partial. Runtime load tests establish constructibility; only named interaction tests establish their bounded behaviors.",
+  "coverage_rule": "The complete catalog and source browser do not establish page or API parity. A page is ported when every catalog example of it has a native adaptation with its events and bindings, or a recorded reason (not-applicable, with the Windows-only API) why it cannot; otherwise it is partial. Runtime load tests establish constructibility; only named interaction tests establish their bounded behaviors; rendering parity against Windows is a separate check.",
   "pages": {
     "AccessibilityColorContrast": {
       "status": "partial",

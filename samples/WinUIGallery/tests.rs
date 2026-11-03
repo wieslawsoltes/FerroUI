@@ -121,6 +121,22 @@ fn all_reviewed_native_adaptations_load_real_controls() {
 }
 
 #[test]
+fn adaptation_port_states_match_port_status() {
+    // `port-status.json` is written with an indent of two spaces: a page is a key of `pages` and
+    // its status is the first member of its entry.
+    let status = include_str!("port-status.json");
+    for adaptation in examples::ADAPTATIONS {
+        let state = if adaptation.ported { "ported" } else { "partial" };
+        let entry = format!("\n    \"{}\": {{\n      \"status\": \"{state}\"", adaptation.page_id);
+        assert!(
+            status.contains(&entry),
+            "{}: port-status.json does not record it as {state}",
+            adaptation.page_id
+        );
+    }
+}
+
+#[test]
 fn button_click_and_disabled_option_update_native_controls() {
     let _application = start();
     let root = examples::create(examples::find("Button").unwrap()).unwrap();
