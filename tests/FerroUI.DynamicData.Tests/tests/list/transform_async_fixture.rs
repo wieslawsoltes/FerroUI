@@ -3,16 +3,18 @@
 //!
 //! Upstream's factory returns `Task.FromResult(..)`, a task that has ended; here it returns a
 //! future that ends at its first poll, so the transforms end inside the edit, as upstream's do
-//! (docs/porting/reactive.md, section 5.8).
+//! (docs/porting/reactive.md, section 5.8). The `TaskCompletionSource` of the cancellation test is
+//! a `oneshot` channel: its sender, dropped by the cancellation, plays `SetCanceled`.
 
 use crate::domain::{Person, PersonWithGender};
 use crate::utilities::{assert_equivalent_strict, ListObservableExtensions};
 use ferroui_dynamic_data::list::testing::ChangeSetAggregator;
 use ferroui_dynamic_data::list::{Change, ChangeSet, IObservableList, ListChangeReason, ObservableListEx, SourceList, SourceListEditConvenienceEx};
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::threading::tasks::{block_on, TaskCompletionSource};
+use ferroui_system::task::{block_on, oneshot, Canceled};
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, ObservableError};
+use std::cell::RefCell;
 use std::future::Future;
 use std::rc::Rc;
 
@@ -176,17 +178,22 @@ fn transform_on_refresh() {
 #[test]
 fn transform_async_cancels_token_on_un_subscribe() {
     let source = SourceList::<Rc<Person>>::new();
-    let tcs = TaskCompletionSource::<Rc<Person>>::new();
-    let factory_tcs = tcs.clone();
+    let (sender, receiver) = oneshot::channel::<Result<Rc<Person>, ObservableError>>();
+    let tcs = Rc::new(RefCell::new(Some(sender)));
+    let task = receiver.shared();
+    let factory_task = task.clone();
     let sub = source
         .connect()
         .transform_async_with_token(
             move |_c: Rc<Person>, _p: Option<Rc<Person>>, _count: usize, cancel: CancellationToken| {
-                let tcs = factory_tcs.clone();
+                let (tcs, task) = (tcs.clone(), factory_task.clone());
                 async move {
-                    let canceled = tcs.clone();
-                    let registration = cancel.register_local(move || canceled.set_canceled());
-                    let result = tcs.task().await;
+                    // `SetCanceled`: the sender is dropped.
+                    let registration = cancel.register_local(move || {
+                        let sender = tcs.borrow_mut().take();
+                        drop(sender);
+                    });
+                    let result = task.flatten().await;
                     registration.dispose();
                     result
                 }
@@ -198,7 +205,7 @@ fn transform_async_cancels_token_on_un_subscribe() {
     source.add(Person::unknown());
 
     sub.dispose();
-    assert!(tcs.task().is_canceled());
+    assert!(matches!(task.try_recv(), Err(Canceled)));
 
     source.dispose();
 }

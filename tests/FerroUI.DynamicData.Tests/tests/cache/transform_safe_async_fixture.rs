@@ -4,7 +4,9 @@
 //!
 //! Upstream's factories return `Task.FromResult(..)`, a task that has ended; here they return a
 //! future that ends at its first poll. A test that awaits a delay awaits a task of a worker thread
-//! (`Task::run`), and `block_on` waits for it (docs/porting/reactive.md, section 5.8).
+//! (`run`, whose `Shared` it flattens), and `block_on` waits for it (docs/porting/reactive.md,
+//! section 5.8). The `TaskCompletionSource` of the cancellation test is a `oneshot` channel: its
+//! sender, dropped by the cancellation, plays `SetCanceled`.
 
 use crate::domain::{Person, PersonWithAgeGroup, PersonWithGender};
 use ferroui_dynamic_data::cache::testing::ChangeSetAggregator;
@@ -13,7 +15,8 @@ use ferroui_dynamic_data::kernel::Error;
 use ferroui_reactive::subjects::Subject;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactive_testing::new_error;
-use ferroui_system::threading::tasks::{block_on, run, Task, TaskCompletionSource};
+use ferroui_system::task::{block_on, oneshot, Canceled, Flatten};
+use ferroui_system::threading::tasks::run;
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
@@ -51,11 +54,12 @@ fn default_factory() -> TransformFactory {
 }
 
 /// A task that ends after `milliseconds` on a worker thread (`Task.Delay`).
-fn delay(milliseconds: u64) -> Task<()> {
+fn delay(milliseconds: u64) -> Flatten<()> {
     run(move || {
         std::thread::sleep(Duration::from_millis(milliseconds));
         Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
     })
+    .flatten()
 }
 
 /// `TransformStub`.
@@ -327,17 +331,22 @@ fn transform_on_refresh_case2() {
 #[test]
 fn transform_safe_async_cancels_token_on_un_subscribe() {
     let source = SourceCache::new(|p: &Rc<Person>| p.name());
-    let tcs = TaskCompletionSource::<Rc<Person>>::new();
-    let factory_tcs = tcs.clone();
+    let (sender, receiver) = oneshot::channel::<Result<Rc<Person>, ObservableError>>();
+    let tcs = Rc::new(RefCell::new(Some(sender)));
+    let task = receiver.shared();
+    let factory_task = task.clone();
     let sub = source
         .connect()
         .transform_safe_async_with_token(
             move |_c: Rc<Person>, _p: Option<Rc<Person>>, _key: String, cancel: CancellationToken| {
-                let tcs = factory_tcs.clone();
+                let (tcs, task) = (tcs.clone(), factory_task.clone());
                 async move {
-                    let canceled = tcs.clone();
-                    let registration = cancel.register_local(move || canceled.set_canceled());
-                    let result = tcs.task().await;
+                    // `SetCanceled`: the sender is dropped.
+                    let registration = cancel.register_local(move || {
+                        let sender = tcs.borrow_mut().take();
+                        drop(sender);
+                    });
+                    let result = task.flatten().await;
                     registration.dispose();
                     result
                 }
@@ -351,7 +360,7 @@ fn transform_safe_async_cancels_token_on_un_subscribe() {
     source.add_or_update(Person::unknown());
 
     sub.dispose();
-    assert!(tcs.task().is_canceled());
+    assert!(matches!(task.try_recv(), Err(Canceled)));
 
     source.dispose();
 }
@@ -379,7 +388,7 @@ fn with_max_concurrency(max_concurrency: usize) {
 
     source.add_or_update_items((1..=TRANSFORM_COUNT as i32).map(|l| Person::new(format!("Person{l}"), l)));
 
-    block_on(results.data().count_changed().where_(|c| *c == TRANSFORM_COUNT).take(1).to_task()).expect("every item is transformed");
+    block_on(results.data().count_changed().where_(|c| *c == TRANSFORM_COUNT).take(1).to_task().flatten()).expect("every item is transformed");
 
     assert_eq!(error_count.get(), 0);
 

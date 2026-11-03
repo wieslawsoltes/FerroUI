@@ -3,8 +3,10 @@
 //!
 //! Upstream's factories return `Task.FromResult(..)`, a task that has ended; here they return a
 //! future that ends at its first poll, so the transforms end inside the edit, as upstream's do. A
-//! test that awaits a delay awaits a task of a worker thread (`Task::run`), and `block_on` waits for
-//! it (docs/porting/reactive.md, section 5.8).
+//! test that awaits a delay awaits a task of a worker thread (`run`, whose `Shared` it flattens),
+//! and `block_on` waits for it (docs/porting/reactive.md, section 5.8). The
+//! `TaskCompletionSource`s of the cancellation test and of the forced transforms are `oneshot`
+//! channels: a send plays `SetResult`, a dropped sender `SetCanceled`.
 
 use crate::domain::{Person, PersonWithAgeGroup, PersonWithGender, Randomizer};
 use crate::utilities::{CacheObservableExtensions, ObservableExtensions};
@@ -14,7 +16,8 @@ use ferroui_dynamic_data::cache::{ChangeSet, IConnectableCache, IObservableCache
 use ferroui_reactive::subjects::Subject;
 use ferroui_reactive::{Notification, ObservableExt};
 use ferroui_reactive_testing::new_error;
-use ferroui_system::threading::tasks::{block_on, run, Task, TaskCompletionSource};
+use ferroui_system::task::{block_on, oneshot, Canceled, Flatten};
+use ferroui_system::threading::tasks::run;
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
@@ -55,11 +58,12 @@ fn default_factory() -> TransformFactory {
 }
 
 /// A task that ends after `milliseconds` on a worker thread (`Task.Delay`).
-fn delay(milliseconds: u64) -> Task<()> {
+fn delay(milliseconds: u64) -> Flatten<()> {
     run(move || {
         std::thread::sleep(Duration::from_millis(milliseconds));
         Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
     })
+    .flatten()
 }
 
 /// `TransformStub`.
@@ -217,7 +221,7 @@ fn remove_flows_to_the_end() {
     }
 
     // Add one event as an initial empty change set is sent.
-    let changes = block_on(collection.to_observable_change_set().take(COUNT * 2 + 1).to_list().to_task()).expect("the changes arrive");
+    let changes = block_on(collection.to_observable_change_set().take(COUNT * 2 + 1).to_list().to_task().flatten()).expect("the changes arrive");
 
     assert_eq!(changes.len(), 201);
     assert_eq!(collection.count(), 0);
@@ -340,16 +344,21 @@ fn transform_on_refresh_case2() {
 #[test]
 fn transform_async_cancels_token_on_un_subscribe() {
     let source = SourceCache::new(|p: &Rc<Person>| p.name());
-    let tcs = TaskCompletionSource::<Rc<Person>>::new();
-    let factory_tcs = tcs.clone();
+    let (sender, receiver) = oneshot::channel::<Result<Rc<Person>, ObservableError>>();
+    let tcs = Rc::new(RefCell::new(Some(sender)));
+    let task = receiver.shared();
+    let factory_task = task.clone();
     let sub = source
         .connect()
         .transform_async_with_token(move |_c: Rc<Person>, _p: Option<Rc<Person>>, _key: String, cancel: CancellationToken| {
-            let tcs = factory_tcs.clone();
+            let (tcs, task) = (tcs.clone(), factory_task.clone());
             async move {
-                let canceled = tcs.clone();
-                let registration = cancel.register_local(move || canceled.set_canceled());
-                let result = tcs.task().await;
+                // `SetCanceled`: the sender is dropped.
+                let registration = cancel.register_local(move || {
+                    let sender = tcs.borrow_mut().take();
+                    drop(sender);
+                });
+                let result = task.flatten().await;
                 registration.dispose();
                 result
             }
@@ -359,7 +368,7 @@ fn transform_async_cancels_token_on_un_subscribe() {
     source.add_or_update(Person::unknown());
 
     sub.dispose();
-    assert!(tcs.task().is_canceled());
+    assert!(matches!(task.try_recv(), Err(Canceled)));
 
     source.dispose();
 }
@@ -384,7 +393,7 @@ fn with_max_concurrency(max_concurrency: usize) {
 
     source.add_or_update_items((1..=TRANSFORM_COUNT as i32).map(|l| Person::new(format!("Person{l}"), l)));
 
-    block_on(results.data().count_changed().where_(|c| *c == TRANSFORM_COUNT).take(1).to_task()).expect("every item is transformed");
+    block_on(results.data().count_changed().where_(|c| *c == TRANSFORM_COUNT).take(1).to_task().flatten()).expect("every item is transformed");
 
     results.dispose();
     source.dispose();
@@ -412,18 +421,19 @@ fn forced_transform_completing_alongside_source_update_are_delivered_serially() 
     let registered = Rc::new(Cell::new(0usize));
 
     // One release handle per transform invocation, so each can be completed on command.
-    let outstanding: Rc<RefCell<HashMap<String, VecDeque<TaskCompletionSource<()>>>>> = Rc::new(RefCell::new(HashMap::new()));
+    type Release = oneshot::Sender<Result<(), ObservableError>>;
+    let outstanding: Rc<RefCell<HashMap<String, VecDeque<Release>>>> = Rc::new(RefCell::new(HashMap::new()));
 
     let (factory_outstanding, factory_registered) = (outstanding.clone(), registered.clone());
     let published = source
         .connect()
         .transform_async_forced(
             move |person: Rc<Person>| {
-                let release = TaskCompletionSource::<()>::new();
-                factory_outstanding.borrow_mut().entry(person.name()).or_default().push_back(release.clone());
+                let (release, released) = oneshot::channel::<Result<(), ObservableError>>();
+                factory_outstanding.borrow_mut().entry(person.name()).or_default().push_back(release);
                 factory_registered.set(factory_registered.get() + 1);
                 async move {
-                    release.task().await?;
+                    released.flatten().await?;
                     Ok::<_, ObservableError>(PersonWithGender::from_person(&person, gender(&person)))
                 }
             },
@@ -440,7 +450,9 @@ fn forced_transform_completing_alongside_source_update_are_delivered_serially() 
 
     let release = |name: &str| {
         let release = outstanding.borrow_mut().get_mut(name).and_then(VecDeque::pop_front);
-        release.unwrap_or_else(|| panic!("a transform for {name} should be outstanding")).set_result(());
+        // `SetResult`: a transform that is no longer awaited gives the value back, which is
+        // dropped.
+        let _ = release.unwrap_or_else(|| panic!("a transform for {name} should be outstanding")).send(Ok(()));
     };
 
     // Seed a single item, so that the forced pass has something to re-transform.
@@ -465,8 +477,8 @@ fn forced_transform_completing_alongside_source_update_are_delivered_serially() 
     force.on_completed();
     source.dispose();
 
-    assert!(terminal.is_completed(), "the sequence should have ended");
-    let last_notification = terminal.result().expect("the sequence has a last notification");
+    assert!(terminal.is_finished(), "the sequence should have ended");
+    let last_notification = terminal.result().expect("the sequence has ended").expect("the sequence has a last notification");
 
     match last_notification {
         Notification::OnCompleted => {}
