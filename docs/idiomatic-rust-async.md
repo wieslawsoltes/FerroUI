@@ -287,7 +287,8 @@ pub fn block_on<F: Future + 'static>(future: F) -> F::Output;                   
 - `Shared<T>` (`JoinHandle::shared`, `T: Clone`): several observers, the role of `Task<T>` of
   `ferroui-system` in the reactive libraries, with `on_finished(callback)` for the synchronous
   continuations of Rx (`ContinueWith(ExecuteSynchronously)`), which run before the awaiting
-  futures are woken (G9).
+  futures are woken (G9). `Shared::channel()` makes one that code ends by hand (`SharedSender`),
+  the completion sources of the operators (A7).
 
 The outcome of a future that can fail is part of `T` (`Result<T, ObservableError>` for the Rx
 forms); a future that returns `Err` of the cancellation error (section 3.6) is how Rx code stops
@@ -442,7 +443,7 @@ where they are large.
 | A4b (done) | The uses move, by crate (602: `ferroui-reactive`, `ferroui-base`, `ferroui-dynamic-data`, dock, `ferroui-controls`, ...); the local cancellation types replaced: `LocalCancellationRegistration` of `ferroui-base::animation` (`register_local_guarded`), `CancellationFlag` and `Cancelled` of `ferroui-freedesktop` (`cancelled()`), `AiCancellationToken` of ProTranslate, `LoopCancellation` of `ferroui-native` and `CancelOnDrop` of `ferroui-headless` (`drop_guard()`); `register` gives the guard; then the old names deprecated and the `upstream-names.toml` rows | 0.5: the old names deprecated | medium: registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
 | A5 (done) | `SynchronizationContext` to the thread's schedule: `set_thread_schedule`, `Dispatcher::current_priority`, `FerroScheduler::install_on_ui_thread`, the Rx forms that capture a context, the dock services; the rule for the tasks of the reactive libraries on a dispatcher thread decided (F3) and its order tested | 0.5: the trait, `FerroSynchronizationContext` and `RestoreContext` deprecated | high where F3 changes an order; the Rx, ReactiveUI and dock tests guard it |
 | A6 | The asynchronous public APIs of the controls and platforms return `JoinHandle` or `impl Future` (navigation, dialogs, the behaviors' `TaskHandle`, the callers of `invoke_async_task*` and `to_task_scheduler`), by area | 0.5 | medium: callers visited; deprecated `..._task` variants where needed |
-| A7 | The `Task` forms of Rx, DynamicData and ReactiveUI on futures and `Shared<T>` (section 3.8) | 0.5 (names kept) | medium: the ported upstream tests drive them through completion sources |
+| A7 (done) | The `Task` forms of Rx, DynamicData and ReactiveUI on futures and `Shared<T>` (section 3.8) | 0.5 (names kept); `Task`, `TaskCompletionSource` and the executor functions of `threading::tasks` deprecated | medium: the ported upstream tests drive them through completion sources |
 | A8 | `FerroUI.View`'s async data on the dispatcher, abandoned with `abort` | behaviour: the order of the signal write (a test) | low |
 | A9 | The inventory (`CancellationToken` becomes the target; `Task`, `TaskCompletionSource`, `SynchronizationContext`, `CancellationTokenSource` counted until removed), `upstream-names.toml`, the migration notes, docs/porting/reactive.md section 5.8 and PORTING-GUIDE | | |
 
@@ -646,6 +647,49 @@ Schedule>>`. The local cancellation registration of the animations is
 `CancellationToken::register_local`; a cancellation from another thread runs its action in a job
 at `Default`, where it was posted at `Send`. `threading::tasks::{set_thread_poster, ThreadPoster,
 run_pending_wakes}` stay, not deprecated, until the `Task` forms move (A7).
+
+A7 is done: the tasks of the reactive libraries are `Shared<Result<T, ObservableError>>`. `Shared`
+gained what a task that code ends by hand needs (`shared.rs`): `Shared::channel()` gives a `Shared`
+that no task ends and its `SharedSender` (`send`, `cancel`; a dropped sender leaves the `Shared`
+pending, as a `TaskCompletionSource` leaves its task, which `ToTask` of a sequence that lets go of its
+observer, `Never`, needs), `Shared::ready` and `from_outcome`, removable continuations
+(`on_finished` gives an `OnFinishedId`, `remove_on_finished`), `ptr_eq`, and on a
+`Shared<Result<T, ObservableError>>` `flatten()` (`Flatten<T>`, a future of the result; an abort or a
+panic is `Canceled` or a `TaskWorkError`, `JoinError::to_observable_error`) and `result()`. The
+receivers of a `oneshot` channel of a `Result<T, ObservableError>` have `flatten()` too (a dropped
+sender is `Canceled`), and `Canceled::is_cancellation` recognizes a cancellation. The Rx forms keep
+their names: `to_task` (its four forms), `get_awaiter` and `run_async` (of sequences and connectable
+sequences), the eight `for_each_async` forms and `AsyncSubject::get_awaiter` give a `Shared`, ended by
+an internal `TaskCompletion` over a `SharedSender` with the `TrySet` forms; `ToObservable` is
+implemented for every future of a result and takes it by value; `from_async`, `start_async`,
+`defer_async`, `using_async`, `create_async*`, the task forms of `select_many` and `ScheduleAsync`
+run their futures with `task::spawn_local(..).shared()`, and the forms that take a task use the
+`Shared` of a `Flatten` (or of a deprecated `Task`) as it is, so that their continuations run where
+that task ends; `Merge`, `Concat` and `Switch` take sequences of `Shared`s. DynamicData
+(`IAsyncDisposable::dispose_async`), ReactiveUI (`Interaction::handle`, its handlers,
+`TaskObservable`, the async validators of `ReactiveProperty`), ReactiveUI.Testing, the dependency
+injection (`dispose_async`, `DisposeTask`), the dock's services and requests, `FerroUI.View` and the
+samples moved the same way; the forms that already took closures returning futures
+(`ReactiveCommand::create_from_task*`, `TransformAsync` and the others) kept their signatures.
+`threading::tasks::run` keeps its name and gives a `Shared`.
+
+Deprecated since 0.5.0: `Task` (a `Shared` of its outcome with a status and an id, so that its
+continuations, its awaiters and the error of a canceled task that names it are as before),
+`TaskCompletionSource` (a dropped source still leaves its task pending, G20), `TaskStatus`,
+`ContinuationId`, `TaskCanceledError`, and `spawn_local`, `block_on`, `run_pending_wakes`,
+`set_thread_poster` and `ThreadPoster` of `threading::tasks`, with `From` conversions
+(`Shared::from(task)`, `oneshot::Sender::from(source)`, `Task::from(receiver)`). Nothing uses them
+but their own tests (`task_tests.rs`, `async_ordering_tests.rs`, the conversions in
+`shared_tests.rs`), the ordering and schedule tests of the dispatcher (which pin G9 and F3 on them),
+six ported Rx tests that check that a cancellation names its task (`SelectMany` and `Merge` of
+canceled completion sources), and two compatibility paths of `ferroui-reactive` (a deprecated `Task`
+given to a `Task` form, or in a sequence of tasks, is used through its `Shared`), all under
+`#[allow(deprecated)]`. The ported tests that drove Rx, DynamicData and ReactiveUI through completion
+sources use `oneshot` channels (a sender plays `TaskCompletionSource`, `receiver.flatten()` is the
+task), or `Shared::channel()` where the task must stay pending or be handed to an API. G1 to G20 are
+unchanged. What changed (DEVIATIONS.md, Reactive and ReactiveUI): a canceled task of these forms ends
+with its cancellation error, `Canceled`, where it ended with a new `TaskCanceledError` that named
+the task; a panic of a future is a `TaskWorkError` on the error path, as before.
 
 ## 6. Not in scope
 
