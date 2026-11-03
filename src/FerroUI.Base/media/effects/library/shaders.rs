@@ -1,8 +1,8 @@
 //! The runtime shader effects of the library (#455, E4; not from upstream):
 //! effects of Effector's sample set as programs with the uniform convention
 //! of [`ShaderEffectDescription`] (docs/porting/custom-effects.md, section
-//! 3.4), each with its SkSL for Skia, its WGSL for Vello (drawn from step E5
-//! on) and its CPU reference.
+//! 3.4), each with its SkSL for Skia, its WGSL for Vello (drawn by a pass of
+//! the device, E5) and its CPU reference (Vello's CPU mode).
 //!
 //! - [`PixelateEffect`] samples the content: each cell of the grid shows the
 //!   pixel at its centre (Effector's pixelation, a nearest scale down and up).
