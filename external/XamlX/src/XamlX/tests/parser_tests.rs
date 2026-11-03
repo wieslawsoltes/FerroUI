@@ -428,6 +428,55 @@ fn markup_extension_quotes_and_escapes() {
     assert_eq!(extension_texts("{Ext a{b}c}"), vec!["a{b}c"]);
 }
 
+/// Not from upstream: the path of `x:Bind` keeps separators and quotes inside `()` and `[]`,
+/// the bracket characters WinUI's XAML compiler declares for it; other extensions and other
+/// properties do not.
+#[test]
+fn markup_extension_x_bind_path_brackets() {
+    let parse = |ext: &str| {
+        let resolver = |n: &str| -> XamlResult<Rc<XamlAstXmlTypeReference>> {
+            match n.strip_prefix("x:") {
+                Some(name) => Ok(XamlAstXmlTypeReference::new(&ni(), Some(X), name)),
+                None => Ok(XamlAstXmlTypeReference::new(&ni(), Some(""), n)),
+            }
+        };
+        SystemXamlMarkupExtensionParser::parse(&ni(), ext, &resolver).expect("the extension parses")
+    };
+    let texts = |ext: &str| -> (Vec<String>, Vec<String>) {
+        let parsed = parse(ext);
+        let object = parsed.cast::<XamlAstObjectNode>().expect("object node");
+        let arguments = object
+            .arguments
+            .borrow()
+            .iter()
+            .map(|a| a.cast::<XamlAstTextNode>().expect("text argument").text())
+            .collect();
+        let properties = object
+            .children
+            .borrow()
+            .iter()
+            .map(|c| {
+                let prop = c.cast::<XamlAstXamlPropertyValueNode>().expect("property node");
+                let value = prop.values.borrow()[0].cast::<XamlAstTextNode>().expect("text value").text();
+                format!("{}={value}", prop.property().cast::<XamlAstNamePropertyReference>().unwrap().name())
+            })
+            .collect();
+        (arguments, properties)
+    };
+    assert_eq!(
+        texts("{x:Bind Format(Name, 'a, b', 3), Mode=OneWay}"),
+        (vec!["Format(Name, 'a, b', 3)".to_string()], vec!["Mode=OneWay".to_string()])
+    );
+    assert_eq!(texts("{x:Bind Map['key'].Length}").0, vec!["Map['key'].Length"]);
+    assert_eq!(texts("{x:Bind ((local:T)Tag).Name}").0, vec!["((local:T)Tag).Name"]);
+    assert_eq!(
+        texts("{XBind Path=Join(A, B), BindBack=Parse}").1,
+        vec!["Path=Join(A, B)".to_string(), "BindBack=Parse".to_string()]
+    );
+    // Without the bracket characters the comma separates two arguments.
+    assert_eq!(texts("{Ext Format(Name, Other)}").0, vec!["Format(Name", "Other)"]);
+}
+
 #[test]
 fn markup_extension_nested_and_quoted_extensions() {
     let nested = parse_extension("{Outer {Inner 1}, P='{Inner 2}'}").expect("the extension parses");
