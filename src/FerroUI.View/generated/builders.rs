@@ -8426,7 +8426,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::TextDecoration>> TextDecoration
 /// The properties and routed events of [`TextElement`](ferroui_controls::documents::TextElement).
 pub trait TextElementProps: ElementBuilder {
     /// Sets [`TextElement::language_property`](ferroui_controls::documents::TextElement::language_property).
-    fn language<M>(self, value: impl IntoProp<ferroui_base::utilities::CultureInfo, M>) -> Self {
+    fn language<M>(self, value: impl IntoProp<ferroui_base::utilities::Locale, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::language_property(), value)
     }
 
@@ -10117,7 +10117,7 @@ pub trait AttachedProps: ElementBuilder {
     }
 
     /// Sets the attached [`TextElement::language_property`](ferroui_controls::documents::TextElement::language_property).
-    fn text_element_language<M>(self, value: impl IntoProp<ferroui_base::utilities::CultureInfo, M>) -> Self {
+    fn text_element_language<M>(self, value: impl IntoProp<ferroui_base::utilities::Locale, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::language_property(), value)
     }
 
