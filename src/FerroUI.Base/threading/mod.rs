@@ -26,6 +26,9 @@ mod i_dispatcher;
 mod i_dispatcher_impl;
 
 pub use ferroui_system::task::Canceled;
+// The handle of a task of the dispatcher (`Dispatcher::spawn_local`, `spawn`, `start_local`) and how
+// it ends without an output: the types of `ferroui-system`, for the crates that use the dispatcher.
+pub use ferroui_system::task::{AbortHandle, JoinError, JoinHandle};
 pub use ferroui_system::threading::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
 #[allow(deprecated)]
 pub use ferroui_system::threading::{CancellationTokenRegistration, CancellationTokenSource};
