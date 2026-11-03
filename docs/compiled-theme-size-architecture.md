@@ -1,5 +1,7 @@
 # Where the editable WinUI executable spends its bytes
 
+For the subsequent broad Rust source refactor, see the [current architecture report](compiled-theme-rust-architecture.md) and its [complete measurement evidence](benchmarks/compiled-theme-rust-idioms-linux-x86_64.json). That report includes a new whole-executable census and the comparisons against the retained 28,087,224-byte compact-unwind reference. The census and experiments below retain their historical source revisions and are not relabeled as measurements of the new implementation.
+
 The reference executable is the 28,324,712-byte stripped Linux x86-64 PIE at runtime revision `ff5ea13a`, built with whole-graph profile use, `opt-level=z`, FatLTO, safe ICF and packed relative relocations. The next 30% target is **19,827,298 bytes**. Reaching it requires removing **8,497,414 bytes from this executable**. Both numbers refer to the installed ELF containing all 169 WinUI documents and the editable runtime. [Reference measurements and rebuild instructions](compiled-theme-performance.md#whole-graph-profile-guided-release)
 
 | File-backed bytes | Baseline |

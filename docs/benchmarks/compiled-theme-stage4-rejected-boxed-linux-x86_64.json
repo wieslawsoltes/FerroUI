@@ -1,0 +1,3111 @@
+{
+  "schema": "ferroui-rejected-boxed-route-audit-v1",
+  "status": "stage4_rejected_boxed_performance_unresolved_narrow_source_only_trial_prepared",
+  "scope": "Read-only bounded analysis of the rejected boxed root-handle conversion. This supplements the passing hash/Clone code-generation audit and preserves the failing performance result. No compiler, linker or benchmark was run by this audit.",
+  "exact_lane": {
+    "source": "scripts/themes/bench/registration_hot_paths.rs",
+    "source_sha256": "849d1bc8eb3ea07e94ac54a97fa79fda8a131d04ad9dac6bf09f7658856cec51",
+    "input": "boxed(Other::new().upcast::<FerroObject>())",
+    "target": "ValueType::of::<ElementRef<Target>>()",
+    "operation": "ValueTypes::try_convert_registered(&wrong, destination).is_none()",
+    "description": "The conversion key exists. A Ref<FerroObject> contains an Other instance; the runtime cast to unrelated Target rejects it. This is distinct from the bool borrowed_wrong map miss and successful typed boxed_live."
+  },
+  "artifacts": {
+    "reference": {
+      "binary": "/tmp/ferro-run/registration-stage4/reference-registration",
+      "binary_sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d",
+      "native_object": "/tmp/ferro-run/registration-stage4/reference-registration.native/001-reference-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+      "native_object_sha256": "0349f7a39ba53c7475f6fc16f19f5f21002d15cf92f2fba96bc8091ed43609bb"
+    },
+    "stage4": {
+      "binary": "/tmp/ferro-run/registration-stage4/candidate-registration",
+      "binary_sha256": "a04c167978f4c63c3aaea0b12f4ebce3c26291a6124945d56986ada072413ab1",
+      "native_object": "/tmp/ferro-run/registration-stage4/candidate-registration.native/001-candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+      "native_object_sha256": "f1ab1c5f84f017c80824b949b2b17fd2f6e9a320b68d47968c8f521a0c861ac9"
+    },
+    "isolated_clone": {
+      "binary": "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration",
+      "binary_sha256": "a4571fe8bd95fd8c979b03853dfb843ed075705fd2724125a53a7bef1970215c",
+      "native_object": "/tmp/ferro-run/inline-clone-trial/registration/001-candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+      "native_object_sha256": "5e8a7f7bc8dc1a36b10dad8e1b38db5539bdf42a58ff60b6420033dcdb8fa070"
+    },
+    "identity_proof": {
+      "path": "/tmp/ferro496-conversion-audit/stage4/report.json",
+      "sha256": "95c6c0dd235b23b031a92123b41b05fcbc2894c128e03725475ecf2359b01f10"
+    }
+  },
+  "route_correction": {
+    "baseline_commit": "6d5225",
+    "baseline_source": "register_conversion<TFrom,TTo> inserts ConvertFn::Borrowed(BorrowedConversion::Shared(Rc callback)). register_element_ref invokes it for Ref<FerroObject> -> ElementRef<T> and its nullable target.",
+    "baseline_runtime": "Borrowed Shared: apply invokes as_any, then the Rc callback performs Any downcast and class cast directly.",
+    "stage4_runtime": "FromRoot: apply performs as_any and Any downcast, then invokes the static reference callback, which performs the class cast.",
+    "correction": "Any earlier description of this baseline route as the internal ConvertFn::Boxed variant is superseded by the exact source and native callback. The public API takes a boxed value; its original internal converter is Borrowed(Shared)."
+  },
+  "native_findings": [
+    {
+      "finding": "No additional call boundary or ownership operation was found in the measured rejection route.",
+      "detail": "Excluding common public/TLS/map work, both routes invoke as_any, Any::type_id, one converter callback, Ref<FerroObject>::cast<Target> and TypeInfo::is_assignable_from. Baseline cloned/dropped the shared callback Rc; stage4 copies the static pointer and does not clone an owning root handle before the class cast. Both return None before output allocation on this lane."
+    },
+    {
+      "finding": "The class-check implementations are unchanged in instruction sequence.",
+      "detail": "cast<Target> is 83 bytes / 28 instructions and is_assignable_from is 29 bytes / 11 instructions in reference, stage4 and isolated Clone trial. The stage4 static reference leaf is 122 bytes and matches the isolated trial instruction sequence."
+    },
+    {
+      "finding": "The passing hash and clone checks remain valid.",
+      "detail": "Both native map lookup routes retain call-free pair hashing. No outer ConvertFn or nested BorrowedConversion Clone body/call was reintroduced."
+    },
+    {
+      "finding": "Fresh PGO changes instruction placement and branch direction.",
+      "detail": "The FromRoot apply block starts at 0x78 in stage4 and 0xc1 in the isolated trial. Stage4 tag 3 cleanup takes two conditional branches to the return; isolated cleanup takes one branch then falls through a comparison. Stage4 cleanup instructions match baseline cleanup, but the original tag 0 shared-Rc path uses a different arm. No causal percentage or attribution to alignment/cache/branch prediction is established."
+    },
+    {
+      "finding": "The FromRoot dispatcher arm is covered by training.",
+      "detail": "Accepted stage4 apply entry count is 12,889; switch weights are Borrowed 12,424, StaticBox 144, Boxed 64, FromRoot 257, Number 0. The residual path is not explained by a zero-count FromRoot arm."
+    }
+  ],
+  "helper_comparison": {
+    "cast": {
+      "same_instructions_all_three": true,
+      "instruction_count": {
+        "reference": 28,
+        "stage4": 28,
+        "isolated_clone": 28
+      }
+    },
+    "assignable": {
+      "same_instructions_all_three": true,
+      "instruction_count": {
+        "reference": 11,
+        "stage4": 11,
+        "isolated_clone": 11
+      }
+    }
+  },
+  "short_process_cohorts": {
+    "6": {
+      "source": "/tmp/ferro-run/registration-stage4-6.json",
+      "sha256": "62474a08a5f4759695a9140023d26e38106af2de4943f4613cd50b95d9d8eb9e",
+      "declared_comparison": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 34.063572,
+          "candidate_median": 37.011906,
+          "candidate_reference_ratio": {
+            "median": 1.1532078553854224,
+            "bootstrap_95_percent": [
+              1.010775135621333,
+              1.359619515987614
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 34.278942,
+          "candidate_median": 37.12447,
+          "candidate_reference_ratio": {
+            "median": 1.168782009542298,
+            "bootstrap_95_percent": [
+              1.029858884660413,
+              1.3595451844797986
+            ]
+          }
+        }
+      },
+      "paired_samples": [
+        {
+          "index": 0,
+          "reference_ns": 38.19452,
+          "candidate_ns": 34.491246,
+          "ratio": 0.9030417452556021
+        },
+        {
+          "index": 1,
+          "reference_ns": 37.820204,
+          "candidate_ns": 37.62171,
+          "ratio": 0.9947516412127233
+        },
+        {
+          "index": 2,
+          "reference_ns": 30.47597,
+          "candidate_ns": 48.617154,
+          "ratio": 1.5952619063478537
+        },
+        {
+          "index": 3,
+          "reference_ns": 38.492302,
+          "candidate_ns": 45.749026,
+          "ratio": 1.1885240326754165
+        },
+        {
+          "index": 4,
+          "reference_ns": 35.190824,
+          "candidate_ns": 34.295818,
+          "ratio": 0.9745670632776317
+        },
+        {
+          "index": 5,
+          "reference_ns": 36.681976,
+          "candidate_ns": 34.590814,
+          "ratio": 0.942992111439144
+        },
+        {
+          "index": 6,
+          "reference_ns": 25.836248,
+          "candidate_ns": 47.789726,
+          "ratio": 1.849716181699448
+        },
+        {
+          "index": 7,
+          "reference_ns": 32.378072,
+          "candidate_ns": 39.922484,
+          "ratio": 1.2330099210354462
+        },
+        {
+          "index": 8,
+          "reference_ns": 36.957924,
+          "candidate_ns": 37.011906,
+          "ratio": 1.0014606339901562
+        },
+        {
+          "index": 9,
+          "reference_ns": 34.688398,
+          "candidate_ns": 36.04431,
+          "ratio": 1.039088343024662
+        },
+        {
+          "index": 10,
+          "reference_ns": 36.594608,
+          "candidate_ns": 35.130554,
+          "ratio": 0.9599926306083124
+        },
+        {
+          "index": 11,
+          "reference_ns": 41.493836,
+          "candidate_ns": 42.732854,
+          "ratio": 1.0298602905742433
+        },
+        {
+          "index": 12,
+          "reference_ns": 26.076382,
+          "candidate_ns": 40.826464,
+          "ratio": 1.5656490996335306
+        },
+        {
+          "index": 13,
+          "reference_ns": 24.59186,
+          "candidate_ns": 40.040358,
+          "ratio": 1.6281955899228442
+        },
+        {
+          "index": 14,
+          "reference_ns": 34.063572,
+          "candidate_ns": 35.122904,
+          "ratio": 1.0310986763220251
+        },
+        {
+          "index": 15,
+          "reference_ns": 38.667922,
+          "candidate_ns": 36.767984,
+          "ratio": 0.950865267598295
+        },
+        {
+          "index": 16,
+          "reference_ns": 28.011874,
+          "candidate_ns": 32.74035,
+          "ratio": 1.1688025585150068
+        },
+        {
+          "index": 17,
+          "reference_ns": 35.695272,
+          "candidate_ns": 37.308826,
+          "ratio": 1.0452035776614899
+        },
+        {
+          "index": 18,
+          "reference_ns": 29.405,
+          "candidate_ns": 37.120366,
+          "ratio": 1.2623827920421695
+        },
+        {
+          "index": 19,
+          "reference_ns": 25.349186,
+          "candidate_ns": 34.465248,
+          "ratio": 1.359619515987614
+        },
+        {
+          "index": 20,
+          "reference_ns": 25.464316,
+          "candidate_ns": 46.665578,
+          "ratio": 1.8325871388023929
+        },
+        {
+          "index": 21,
+          "reference_ns": 37.279902,
+          "candidate_ns": 37.681598,
+          "ratio": 1.010775135621333
+        },
+        {
+          "index": 22,
+          "reference_ns": 36.210296,
+          "candidate_ns": 35.78767,
+          "ratio": 0.9883285682061257
+        },
+        {
+          "index": 23,
+          "reference_ns": 36.228564,
+          "candidate_ns": 36.51561,
+          "ratio": 1.0079231956309394
+        },
+        {
+          "index": 24,
+          "reference_ns": 33.879738,
+          "candidate_ns": 39.07038,
+          "ratio": 1.1532078553854224
+        },
+        {
+          "index": 25,
+          "reference_ns": 38.3153,
+          "candidate_ns": 37.175088,
+          "ratio": 0.9702413396215089
+        },
+        {
+          "index": 26,
+          "reference_ns": 26.037026,
+          "candidate_ns": 36.472464,
+          "ratio": 1.400792241018617
+        },
+        {
+          "index": 27,
+          "reference_ns": 24.67933,
+          "candidate_ns": 35.577258,
+          "ratio": 1.441581193654771
+        },
+        {
+          "index": 28,
+          "reference_ns": 23.423308,
+          "candidate_ns": 40.728198,
+          "ratio": 1.738789328988032
+        },
+        {
+          "index": 29,
+          "reference_ns": 22.912912,
+          "candidate_ns": 32.319886,
+          "ratio": 1.4105534032514069
+        },
+        {
+          "index": 30,
+          "reference_ns": 23.98462,
+          "candidate_ns": 33.72505,
+          "ratio": 1.406111499786113
+        }
+      ],
+      "posthoc_reference_groups": {
+        "reference_under_30ns": {
+          "pairs": 12,
+          "reference_median": 25.406751,
+          "candidate_median": 36.796414999999996,
+          "ratio_median": 1.426067298453089
+        },
+        "reference_at_least_30ns": {
+          "pairs": 19,
+          "reference_median": 36.594608,
+          "candidate_median": 37.011906,
+          "ratio_median": 1.0079231956309394
+        }
+      },
+      "ratio_by_pair_parity": {
+        "0": {
+          "pairs": 16,
+          "median": 1.2155926752785882
+        },
+        "1": {
+          "pairs": 15,
+          "median": 1.039088343024662
+        }
+      }
+    },
+    "7": {
+      "source": "/tmp/ferro-run/registration-stage4-7.json",
+      "sha256": "46e6c58d3fb9b83870a2a45f367c8aff7bf2f8bb44c4ca8fec835c3f978950e2",
+      "declared_comparison": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 30.87451,
+          "candidate_median": 37.394434,
+          "candidate_reference_ratio": {
+            "median": 1.1979457487746363,
+            "bootstrap_95_percent": [
+              1.0066290951598627,
+              1.2693577522086281
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 30.906794,
+          "candidate_median": 37.398672,
+          "candidate_reference_ratio": {
+            "median": 1.1968767773195756,
+            "bootstrap_95_percent": [
+              1.0066257181797789,
+              1.2692794022452425
+            ]
+          }
+        }
+      },
+      "paired_samples": [
+        {
+          "index": 0,
+          "reference_ns": 30.87451,
+          "candidate_ns": 36.985988,
+          "ratio": 1.1979457487746363
+        },
+        {
+          "index": 1,
+          "reference_ns": 37.381874,
+          "candidate_ns": 37.629682,
+          "ratio": 1.0066290951598627
+        },
+        {
+          "index": 2,
+          "reference_ns": 37.48052,
+          "candidate_ns": 37.497046,
+          "ratio": 1.0004409223778112
+        },
+        {
+          "index": 3,
+          "reference_ns": 37.542972,
+          "candidate_ns": 37.52757,
+          "ratio": 0.9995897501135499
+        },
+        {
+          "index": 4,
+          "reference_ns": 37.670462,
+          "candidate_ns": 37.394434,
+          "ratio": 0.9926725613293512
+        },
+        {
+          "index": 5,
+          "reference_ns": 29.864704,
+          "candidate_ns": 38.591178,
+          "ratio": 1.2922002508379122
+        },
+        {
+          "index": 6,
+          "reference_ns": 24.243104,
+          "candidate_ns": 30.773172,
+          "ratio": 1.2693577522086281
+        },
+        {
+          "index": 7,
+          "reference_ns": 26.083634,
+          "candidate_ns": 31.334282,
+          "ratio": 1.201300478299918
+        },
+        {
+          "index": 8,
+          "reference_ns": 38.352534,
+          "candidate_ns": 37.848546,
+          "ratio": 0.9868590690774174
+        },
+        {
+          "index": 9,
+          "reference_ns": 30.831858,
+          "candidate_ns": 37.537204,
+          "ratio": 1.217481087257213
+        },
+        {
+          "index": 10,
+          "reference_ns": 26.647912,
+          "candidate_ns": 38.498812,
+          "ratio": 1.4447215226468775
+        },
+        {
+          "index": 11,
+          "reference_ns": 37.81678,
+          "candidate_ns": 37.882258,
+          "ratio": 1.0017314536034003
+        },
+        {
+          "index": 12,
+          "reference_ns": 28.253994,
+          "candidate_ns": 32.838736,
+          "ratio": 1.1622688105617918
+        },
+        {
+          "index": 13,
+          "reference_ns": 37.858782,
+          "candidate_ns": 37.963558,
+          "ratio": 1.0027675480949176
+        },
+        {
+          "index": 14,
+          "reference_ns": 36.235014,
+          "candidate_ns": 37.542472,
+          "ratio": 1.0360827237433936
+        },
+        {
+          "index": 15,
+          "reference_ns": 39.038954,
+          "candidate_ns": 38.674652,
+          "ratio": 0.99066824382641
+        },
+        {
+          "index": 16,
+          "reference_ns": 41.093552,
+          "candidate_ns": 38.404332,
+          "ratio": 0.934558589629828
+        },
+        {
+          "index": 17,
+          "reference_ns": 31.905932,
+          "candidate_ns": 38.677636,
+          "ratio": 1.212239654995817
+        },
+        {
+          "index": 18,
+          "reference_ns": 24.609848,
+          "candidate_ns": 33.49669,
+          "ratio": 1.3611091787320264
+        },
+        {
+          "index": 19,
+          "reference_ns": 35.394024,
+          "candidate_ns": 36.730848,
+          "ratio": 1.0377697658791214
+        },
+        {
+          "index": 20,
+          "reference_ns": 23.792976,
+          "candidate_ns": 36.216286,
+          "ratio": 1.5221419128065357
+        },
+        {
+          "index": 21,
+          "reference_ns": 25.155558,
+          "candidate_ns": 34.728338,
+          "ratio": 1.3805433375797111
+        },
+        {
+          "index": 22,
+          "reference_ns": 24.784928,
+          "candidate_ns": 35.6195,
+          "ratio": 1.4371435737073757
+        },
+        {
+          "index": 23,
+          "reference_ns": 25.712604,
+          "candidate_ns": 32.254068,
+          "ratio": 1.2544069048782456
+        },
+        {
+          "index": 24,
+          "reference_ns": 24.983322,
+          "candidate_ns": 39.013554,
+          "ratio": 1.5615839238672902
+        },
+        {
+          "index": 25,
+          "reference_ns": 24.331374,
+          "candidate_ns": 38.911442,
+          "ratio": 1.5992291269699772
+        },
+        {
+          "index": 26,
+          "reference_ns": 24.421126,
+          "candidate_ns": 33.041196,
+          "ratio": 1.3529759438610651
+        },
+        {
+          "index": 27,
+          "reference_ns": 37.996506,
+          "candidate_ns": 37.122208,
+          "ratio": 0.9769900421896688
+        },
+        {
+          "index": 28,
+          "reference_ns": 25.1175,
+          "candidate_ns": 36.653394,
+          "ratio": 1.459277157360406
+        },
+        {
+          "index": 29,
+          "reference_ns": 36.376664,
+          "candidate_ns": 35.878164,
+          "ratio": 0.986296159537884
+        },
+        {
+          "index": 30,
+          "reference_ns": 31.680888,
+          "candidate_ns": 36.197978,
+          "ratio": 1.1425809150299069
+        }
+      ],
+      "posthoc_reference_groups": {
+        "reference_under_30ns": {
+          "pairs": 14,
+          "reference_median": 25.050411,
+          "candidate_median": 35.173919,
+          "ratio_median": 1.3708262581558688
+        },
+        "reference_at_least_30ns": {
+          "pairs": 17,
+          "reference_median": 37.48052,
+          "candidate_median": 37.537204,
+          "ratio_median": 1.0017314536034003
+        }
+      },
+      "ratio_by_pair_parity": {
+        "0": {
+          "pairs": 16,
+          "median": 1.2336517504916322
+        },
+        "1": {
+          "pairs": 15,
+          "median": 1.0377697658791214
+        }
+      }
+    }
+  },
+  "long_balanced_control_cohorts": [
+    {
+      "path": "/tmp/ferro-run/stage4-boxed-rejection-6.json",
+      "sha256": "2f7e7138fb0ddbce2e6d7dc95cb44a4c93e6226dc0ee0daf9ea1187a35a4ff18",
+      "method": "Focused follow-up to the stage4 rejected-boxed signal. Existing unmodified binaries, three warmup blocks, two lanes, five million operations per process, all six orders of candidate/reference/same-image reference control, alternating lane order. Same-image control runs the exact reference executable as a separate fresh process. This supplements rather than replaces the original rotated short-process cohorts. No profile training or source change.",
+      "source": {
+        "path": "/tmp/ferro496-conversion-recovery/boxed-rejection-check.py",
+        "sha256": "162ca3d99693a7cf306e3eeb0f227db32ec9d7f23f5c8feddf410f8b16ae9271"
+      },
+      "manifest": {
+        "path": "/tmp/ferro-run/registration-stage4-build.json",
+        "sha256": "2b30ea82553728953cc82996f08a1d469dca698af2fd6b0e7516abbe8f66465c"
+      },
+      "cpu": 6,
+      "blocks": 31,
+      "iterations": 5000000,
+      "artifacts": {
+        "reference": {
+          "path": "/tmp/ferro-run/registration-stage4/reference-registration",
+          "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d"
+        },
+        "candidate": {
+          "path": "/tmp/ferro-run/registration-stage4/candidate-registration",
+          "sha256": "a04c167978f4c63c3aaea0b12f4ebce3c26291a6124945d56986ada072413ab1"
+        },
+        "reference_control": {
+          "path": "/tmp/ferro-run/registration-stage4/reference-registration",
+          "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d"
+        }
+      },
+      "comparisons": {
+        "boxed_wrong": {
+          "thread_cpu_ns": {
+            "medians_ns_per_operation": {
+              "reference": 24.7378074,
+              "candidate": 35.5982356,
+              "reference_control": 25.4105224
+            },
+            "candidate_reference": {
+              "median": 1.3928401801387449,
+              "bootstrap_95_percent": [
+                1.3292121273448025,
+                1.433258965247666
+              ]
+            },
+            "candidate_reference_control": {
+              "median": 1.3914035809880887,
+              "bootstrap_95_percent": [
+                1.3389807173763744,
+                1.4354036809246002
+              ]
+            },
+            "same_image_control_reference": {
+              "median": 1.0153449595184076,
+              "bootstrap_95_percent": [
+                0.9854235959427379,
+                1.0372650030977484
+              ]
+            }
+          },
+          "wall_ns": {
+            "medians_ns_per_operation": {
+              "reference": 24.7414542,
+              "candidate": 35.6195394,
+              "reference_control": 25.4111358
+            },
+            "candidate_reference": {
+              "median": 1.392596313296153,
+              "bootstrap_95_percent": [
+                1.3291172270706708,
+                1.4340816990723666
+              ]
+            },
+            "candidate_reference_control": {
+              "median": 1.3911871204750728,
+              "bootstrap_95_percent": [
+                1.3387410063292904,
+                1.4354025632253333
+              ]
+            },
+            "same_image_control_reference": {
+              "median": 1.0153577022364833,
+              "bootstrap_95_percent": [
+                0.9927734722057557,
+                1.0371842647748137
+              ]
+            }
+          }
+        },
+        "boxed_live": {
+          "thread_cpu_ns": {
+            "medians_ns_per_operation": {
+              "reference": 34.9481142,
+              "candidate": 33.1989252,
+              "reference_control": 34.3909194
+            },
+            "candidate_reference": {
+              "median": 0.9648850108485207,
+              "bootstrap_95_percent": [
+                0.9415854703627423,
+                0.9844054297837078
+              ]
+            },
+            "candidate_reference_control": {
+              "median": 0.9516952689356005,
+              "bootstrap_95_percent": [
+                0.9355313266209272,
+                0.9646200598928154
+              ]
+            },
+            "same_image_control_reference": {
+              "median": 1.0079773122577285,
+              "bootstrap_95_percent": [
+                0.9944119001525142,
+                1.0291215618924556
+              ]
+            }
+          },
+          "wall_ns": {
+            "medians_ns_per_operation": {
+              "reference": 34.9489392,
+              "candidate": 33.6529242,
+              "reference_control": 34.4017828
+            },
+            "candidate_reference": {
+              "median": 0.9651703163865054,
+              "bootstrap_95_percent": [
+                0.9487503510030504,
+                1.001405004017976
+              ]
+            },
+            "candidate_reference_control": {
+              "median": 0.9521221920325778,
+              "bootstrap_95_percent": [
+                0.9402501896600156,
+                0.9681067153133938
+              ]
+            },
+            "same_image_control_reference": {
+              "median": 1.0079784648389918,
+              "bootstrap_95_percent": [
+                0.9943837224410458,
+                1.0294438273666955
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/tmp/ferro-run/stage4-boxed-rejection-7.json",
+      "sha256": "c6152299650707ef7acabb460119aded9f9e1c7e8c3929d3aa9fa76be00a83b3",
+      "method": "Focused follow-up to the stage4 rejected-boxed signal. Existing unmodified binaries, three warmup blocks, two lanes, five million operations per process, all six orders of candidate/reference/same-image reference control, alternating lane order. Same-image control runs the exact reference executable as a separate fresh process. This supplements rather than replaces the original rotated short-process cohorts. No profile training or source change.",
+      "source": {
+        "path": "/tmp/ferro496-conversion-recovery/boxed-rejection-check.py",
+        "sha256": "162ca3d99693a7cf306e3eeb0f227db32ec9d7f23f5c8feddf410f8b16ae9271"
+      },
+      "manifest": {
+        "path": "/tmp/ferro-run/registration-stage4-build.json",
+        "sha256": "2b30ea82553728953cc82996f08a1d469dca698af2fd6b0e7516abbe8f66465c"
+      },
+      "cpu": 7,
+      "blocks": 31,
+      "iterations": 5000000,
+      "artifacts": {
+        "reference": {
+          "path": "/tmp/ferro-run/registration-stage4/reference-registration",
+          "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d"
+        },
+        "candidate": {
+          "path": "/tmp/ferro-run/registration-stage4/candidate-registration",
+          "sha256": "a04c167978f4c63c3aaea0b12f4ebce3c26291a6124945d56986ada072413ab1"
+        },
+        "reference_control": {
+          "path": "/tmp/ferro-run/registration-stage4/reference-registration",
+          "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d"
+        }
+      },
+      "comparisons": {
+        "boxed_wrong": {
+          "thread_cpu_ns": {
+            "medians_ns_per_operation": {
+              "reference": 32.7937442,
+              "candidate": 36.1432714,
+              "reference_control": 32.8014378
+            },
+            "candidate_reference": {
+              "median": 1.0464774720304237,
+              "bootstrap_95_percent": [
+                0.981187235094674,
+                1.1111625668618903
+              ]
+            },
+            "candidate_reference_control": {
+              "median": 1.0497464860598373,
+              "bootstrap_95_percent": [
+                0.9848481033788008,
+                1.1326127966256405
+              ]
+            },
+            "same_image_control_reference": {
+              "median": 1.0022363708790052,
+              "bootstrap_95_percent": [
+                0.9782245901250166,
+                1.0132216952684483
+              ]
+            }
+          },
+          "wall_ns": {
+            "medians_ns_per_operation": {
+              "reference": 32.7947186,
+              "candidate": 36.1522718,
+              "reference_control": 32.8112894
+            },
+            "candidate_reference": {
+              "median": 1.046478253725616,
+              "bootstrap_95_percent": [
+                0.9872467944780304,
+                1.1111626069279856
+              ]
+            },
+            "candidate_reference_control": {
+              "median": 1.0497490517703487,
+              "bootstrap_95_percent": [
+                0.9852472204601408,
+                1.1326400296844172
+              ]
+            },
+            "same_image_control_reference": {
+              "median": 1.0020295150053362,
+              "bootstrap_95_percent": [
+                0.9784922280422412,
+                1.0134704176987175
+              ]
+            }
+          }
+        },
+        "boxed_live": {
+          "thread_cpu_ns": {
+            "medians_ns_per_operation": {
+              "reference": 48.4448712,
+              "candidate": 48.1395792,
+              "reference_control": 51.7592116
+            },
+            "candidate_reference": {
+              "median": 0.9877375827959147,
+              "bootstrap_95_percent": [
+                0.9642701986730977,
+                1.06532982518186
+              ]
+            },
+            "candidate_reference_control": {
+              "median": 0.9746507956787107,
+              "bootstrap_95_percent": [
+                0.9437999641645444,
+                1.0181545530540492
+              ]
+            },
+            "same_image_control_reference": {
+              "median": 1.0238462105151869,
+              "bootstrap_95_percent": [
+                0.9794073514036151,
+                1.0770258325917292
+              ]
+            }
+          },
+          "wall_ns": {
+            "medians_ns_per_operation": {
+              "reference": 48.4558972,
+              "candidate": 48.140571,
+              "reference_control": 51.8053872
+            },
+            "candidate_reference": {
+              "median": 0.9877061826044968,
+              "bootstrap_95_percent": [
+                0.9640198631780171,
+                1.0653889980485298
+              ]
+            },
+            "candidate_reference_control": {
+              "median": 0.9751298658157106,
+              "bootstrap_95_percent": [
+                0.9437755863601369,
+                1.018153645622579
+              ]
+            },
+            "same_image_control_reference": {
+              "median": 1.0238105940053313,
+              "bootstrap_95_percent": [
+                0.9794783245574669,
+                1.0779625191207127
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "timing_interpretation": [
+    "Both original 31-pair cohorts flagged boxed_wrong. The reference-first/reference-fast grouping describes the short-process bimodality; it is not a replacement gate.",
+    "The longer CPU6 control experiment confirms a persistent rejected-path slowdown: candidate/reference 1.39284 with 95% interval 1.32921\u20131.43326, candidate/identical reference-control 1.39140, while the same-image control interval includes 1. Successful boxed conversion improves in that cohort.",
+    "The longer CPU7 cohort includes parity for both rejected and successful paths; it does not erase the CPU6 failure. No averaging or exclusion of CPU6 is used to declare acceptance.",
+    "The inspection has not identified a new extra call or class-check implementation change that explains the magnitude. The narrower callback-boundary trial is a hypothesis to test; branch/layout observations are not an asserted cause."
+  ],
+  "native_evidence": {
+    "reference": {
+      "public": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/reference-public.asm",
+        "sha256": "8ed3fe08ec19d913d01e9ab2aac2ccf1de4186eb2402e2b980099d89dab010aa",
+        "sections": [
+          {
+            "symbol": "_RNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+            "instructions": [
+              "0: pushq %r15",
+              "2: pushq %r14",
+              "4: pushq %r13",
+              "6: pushq %r12",
+              "8: pushq %rbx",
+              "9: subq $0x1c0, %rsp",
+              "10: movq %rsi, %r14",
+              "13: movq %rdi, %rbx",
+              "16: movq (%rdi), %rax",
+              "19: movq 0x8(%rdi), %rcx",
+              "1d: movq 0x10(%rcx), %rdx",
+              "21: decq %rdx",
+              "24: andq $-0x10, %rdx",
+              "28: leaq (%rax,%rdx), %rdi",
+              "2c: addq $0x10, %rdi",
+              "30: callq *0x20(%rcx)",
+              "33: leaq 0x1a0(%rsp), %r15",
+              "3b: movq %r15, %rdi",
+              "3e: movq %rax, %rsi",
+              "41: callq *0x18(%rdx)",
+              "44: movups 0x10(%r14), %xmm0",
+              "49: movups %xmm0, 0x10(%r15)",
+              "4e: callq 0x53",
+              "53: testq %rax, %rax",
+              "56: je 0x2c2",
+              "5c: movabsq $0x7fffffffffffffff, %rcx",
+              "66: cmpq %rcx, (%rax)",
+              "69: jae 0x177",
+              "6f: cmpq $0x0, 0x8(%rax)",
+              "74: je 0x183",
+              "7a: leaq (%rip), %rdi",
+              "81: callq 0x86",
+              "86: movq (%rip), %rcx",
+              "8d: cmpq %rcx, %rax",
+              "90: jne 0x2ce",
+              "96: callq 0x9b",
+              "9b: testq %rax, %rax",
+              "9e: je 0x2c2",
+              "a4: movq %rax, %r14",
+              "a7: cmpq $0x0, (%rax)",
+              "ab: jne 0x2db",
+              "b1: orq $-0x1, (%r14)",
+              "b5: cmpq $0x0, 0x8(%r14)",
+              "ba: je 0x2e7",
+              "c0: movq %r14, %rdi",
+              "c3: addq $0xe8, %rdi",
+              "ca: leaq 0x1a0(%rsp), %rsi",
+              "d2: callq 0xd7",
+              "d7: testq %rax, %rax",
+              "da: je 0x2ff",
+              "e0: movq %rax, %rcx",
+              "e3: addq $0x8, %rax",
+              "e7: cmpl $0x2, (%rcx)",
+              "ea: je 0x308",
+              "f0: movb (%rax), %cl",
+              "f2: movzbl %cl, %edx",
+              "f5: leaq (%rip), %rsi",
+              "fc: movslq (%rsi,%rdx,4), %rdx",
+              "100: addq %rsi, %rdx",
+              "103: jmpq *%rdx",
+              "105: movq 0x8(%rax), %rdx",
+              "109: testq %rdx, %rdx",
+              "10c: jne 0x318",
+              "112: movq 0x10(%rax), %rax",
+              "116: xorl %edx, %edx",
+              "118: movq (%r14), %rdi",
+              "11b: incq %rdi",
+              "11e: movq %rdi, (%r14)",
+              "121: movb %cl, 0x8(%rsp)",
+              "125: movb %sil, 0x9(%rsp)",
+              "12a: movq %rdx, 0x10(%rsp)",
+              "12f: movq %rax, 0x18(%rsp)",
+              "134: cmpb $-0x1, %cl",
+              "137: je 0x334",
+              "13d: leaq 0x8(%rsp), %rdi",
+              "142: movq %rbx, %rsi",
+              "145: callq 0x14a",
+              "14a: movq %rax, %rbx",
+              "14d: movq %rdx, %r14",
+              "150: leaq 0x8(%rsp), %rdi",
+              "155: callq 0x15a",
+              "15a: movq %rbx, %rax",
+              "15d: movq %r14, %rdx",
+              "160: addq $0x1c0, %rsp",
+              "167: popq %rbx",
+              "168: popq %r12",
+              "16a: popq %r13",
+              "16c: popq %r14",
+              "16e: popq %r15",
+              "170: retq",
+              "171: movq 0x8(%rax), %rdx",
+              "175: jmp 0x118",
+              "177: leaq (%rip), %rdi",
+              "17e: callq 0x183",
+              "183: callq 0x188",
+              "188: testq %rax, %rax",
+              "18b: je 0x2c2",
+              "191: movq %rax, %r14",
+              "194: movups (%rip), %xmm0",
+              "19b: movaps %xmm0, 0x30(%rsp)",
+              "1a0: movups (%rip), %xmm1",
+              "1a7: movaps %xmm1, 0x20(%rsp)",
+              "1ac: movaps %xmm1, 0x40(%rsp)",
+              "1b1: movaps %xmm0, 0x50(%rsp)",
+              "1b6: movaps %xmm1, 0x60(%rsp)",
+              "1bb: movaps %xmm0, 0x70(%rsp)",
+              "1c0: movaps %xmm1, 0x80(%rsp)",
+              "1c8: movaps %xmm0, 0x90(%rsp)",
+              "1d0: movaps %xmm1, 0xa0(%rsp)",
+              "1d8: movaps %xmm0, 0xb0(%rsp)",
+              "1e0: movaps %xmm1, 0xc0(%rsp)",
+              "1e8: movaps %xmm0, 0xd0(%rsp)",
+              "1f0: movaps %xmm1, 0xe0(%rsp)",
+              "1f8: movaps %xmm0, 0xf0(%rsp)",
+              "200: movaps %xmm1, 0x100(%rsp)",
+              "208: movaps %xmm0, 0x110(%rsp)",
+              "210: movaps %xmm0, 0x130(%rsp)",
+              "218: movaps %xmm1, 0x120(%rsp)",
+              "220: movaps %xmm0, 0x150(%rsp)",
+              "228: movaps %xmm1, 0x140(%rsp)",
+              "230: movaps %xmm0, 0x170(%rsp)",
+              "238: movaps %xmm1, 0x160(%rsp)",
+              "240: movaps %xmm0, 0x190(%rsp)",
+              "248: movaps %xmm1, 0x180(%rsp)",
+              "250: cmpq $0x0, (%rax)",
+              "254: jne 0x34b",
+              "25a: orq $-0x1, (%r14)",
+              "25e: movq %r14, %r15",
+              "261: addq $0x8, %r15",
+              "265: movq %r15, %rdi",
+              "268: callq 0x26d",
+              "26d: leaq 0x20(%rsp), %rsi",
+              "272: movl $0x180, %ecx",
+              "277: movq %r15, %rdi",
+              "27a: rep movsb (%rsi), %es:(%rdi)",
+              "27c: incq (%r14)",
+              "27f: callq 0x284",
+              "284: leaq (%rip), %rsi",
+              "28b: leaq 0x20(%rsp), %r12",
+              "290: movq %r12, %rdi",
+              "293: callq 0x298",
+              "298: movq (%r12), %r15",
+              "29c: movq 0x8(%r12), %r14",
+              "2a1: movq 0x10(%r12), %r12",
+              "2a6: shlq $0x3, %r12",
+              "2aa: xorl %eax, %eax",
+              "2ac: cmpq %rax, %r12",
+              "2af: je 0x33b",
+              "2b5: leaq 0x8(%rax), %r13",
+              "2b9: callq *(%r14,%rax)",
+              "2bd: movq %r13, %rax",
+              "2c0: jmp 0x2ac",
+              "2c2: leaq (%rip), %rdi",
+              "2c9: callq 0x2ce",
+              "2ce: movq %rax, %rdi",
+              "2d1: callq 0x2d6",
+              "2d6: jmp 0x96",
+              "2db: leaq (%rip), %rdi",
+              "2e2: callq 0x2e7",
+              "2e7: leaq (%rip), %rdi",
+              "2ee: leaq (%rip), %rdx",
+              "2f5: pushq $0x17",
+              "2f7: popq %rsi",
+              "2f8: callq 0x2fd",
+              "2fd: jmp 0x325",
+              "2ff: movb $-0x1, %cl",
+              "301: xorl %edi, %edi",
+              "303: jmp 0x11e",
+              "308: movq (%rax), %rax",
+              "30b: addq $0x18, %rax",
+              "30f: jmp 0xf0",
+              "314: movq 0x8(%rax), %rdx",
+              "318: movq 0x10(%rax), %rax",
+              "31c: incq (%rdx)",
+              "31f: jne 0x118",
+              "325: ud2",
+              "327: movq 0x8(%rax), %rdx",
+              "32b: movb 0x1(%rax), %sil",
+              "32f: jmp 0x175",
+              "334: xorl %ebx, %ebx",
+              "336: jmp 0x15a",
+              "33b: movq %r15, %rdi",
+              "33e: movq %r14, %rsi",
+              "341: callq 0x346",
+              "346: jmp 0x7a",
+              "34b: leaq (%rip), %rdi",
+              "352: callq 0x357",
+              "357: jmp 0x325",
+              "359: movq %rax, %rbx",
+              "35c: leaq 0x20(%rsp), %rsi",
+              "361: movl $0x180, %ecx",
+              "366: movq %r15, %rdi",
+              "369: rep movsb (%rsi), %es:(%rdi)",
+              "36b: jmp 0x394",
+              "36d: movq %rax, %rbx",
+              "370: movq %r15, %rdi",
+              "373: movq %r14, %rsi",
+              "376: callq 0x37b",
+              "37b: jmp 0x397",
+              "37d: movq %rax, %rbx",
+              "380: leaq 0x20(%rsp), %rdi",
+              "385: callq 0x38a",
+              "38a: jmp 0x397",
+              "38c: callq 0x391",
+              "391: movq %rax, %rbx",
+              "394: incq (%r14)",
+              "397: movq %rbx, %rdi",
+              "39a: callq 0x39f",
+              "39f: movq %rax, %rbx",
+              "3a2: leaq 0x8(%rsp), %rdi",
+              "3a7: callq 0x3ac",
+              "3ac: jmp 0x397",
+              "3ae: callq 0x3b3"
+            ],
+            "relocations": [
+              {
+                "offset": "000000000000004f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "000000000000007d",
+                "type": "R_X86_64_PC32",
+                "target": ".text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type14GLOBAL_APPLIED0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1t_6option6OptionQIB28_INtNtB1t_4cell4CelljEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "0000000000000082",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs3_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell4CelljEE3getCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "0000000000000089",
+                "type": "R_X86_64_PC32",
+                "target": ".bss._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type10GLOBAL_LEN.0-0x4"
+              },
+              {
+                "offset": "0000000000000097",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "00000000000000d3",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.29906-0x4"
+              },
+              {
+                "offset": "00000000000000f8",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata._RNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered-0x4"
+              },
+              {
+                "offset": "0000000000000146",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs4_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4"
+              },
+              {
+                "offset": "0000000000000156",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_.23032-0x4"
+              },
+              {
+                "offset": "000000000000017a",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.c534ce06278c8b4f103fc65add3f14f6.493-0x4"
+              },
+              {
+                "offset": "000000000000017f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell30panic_already_mutably_borrowed-0x4"
+              },
+              {
+                "offset": "0000000000000184",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "0000000000000197",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3+0xc"
+              },
+              {
+                "offset": "00000000000001a3",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3-0x4"
+              },
+              {
+                "offset": "0000000000000269",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4"
+              },
+              {
+                "offset": "0000000000000280",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type17register_defaults-0x4"
+              },
+              {
+                "offset": "0000000000000287",
+                "type": "R_X86_64_PC32",
+                "target": ".text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8DEFERRED00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellINtNtCs1C1lLj4PWSY_5alloc3vec3VecFEuEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "0000000000000294",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvMs4_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtCs1C1lLj4PWSY_5alloc3vec3VecFEuEEE4takeCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "00000000000002c5",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.501ae5ec37329a2343b65d07557dab83.1-0x4"
+              },
+              {
+                "offset": "00000000000002ca",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtNtCsgHYyB3hU8Ec_3std6thread5local18panic_access_error-0x4"
+              },
+              {
+                "offset": "00000000000002d2",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12apply_global-0x4"
+              },
+              {
+                "offset": "00000000000002de",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.c534ce06278c8b4f103fc65add3f14f6.494-0x4"
+              },
+              {
+                "offset": "00000000000002e3",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4"
+              },
+              {
+                "offset": "00000000000002ea",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata..Lanon.c534ce06278c8b4f103fc65add3f14f6.495-0x4"
+              },
+              {
+                "offset": "00000000000002f1",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.c534ce06278c8b4f103fc65add3f14f6.496-0x4"
+              },
+              {
+                "offset": "00000000000002f9",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core6option13expect_failed-0x4"
+              },
+              {
+                "offset": "0000000000000342",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "000000000000034e",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.c534ce06278c8b4f103fc65add3f14f6.497-0x4"
+              },
+              {
+                "offset": "0000000000000353",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4"
+              },
+              {
+                "offset": "0000000000000377",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "0000000000000386",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4"
+              },
+              {
+                "offset": "000000000000038d",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+              },
+              {
+                "offset": "000000000000039b",
+                "type": "R_X86_64_PLT32",
+                "target": "_Unwind_Resume-0x4"
+              },
+              {
+                "offset": "00000000000003a8",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_.23032-0x4"
+              },
+              {
+                "offset": "00000000000003af",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/reference-apply.asm",
+        "sha256": "52620b7f6cd595ececf1841619451cfa57093b4bc73dfbd3b0e04cd7e45d7fa4",
+        "sections": [
+          {
+            "symbol": "_RNvMs4_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+            "instructions": [
+              "0: pushq %r15",
+              "2: pushq %r14",
+              "4: pushq %rbx",
+              "5: subq $0x10, %rsp",
+              "9: movq %rdi, %rbx",
+              "c: movzbl (%rdi), %eax",
+              "f: leaq (%rip), %rcx",
+              "16: movslq (%rcx,%rax,4), %rax",
+              "1a: addq %rcx, %rax",
+              "1d: jmpq *%rax",
+              "1f: movq (%rsi), %rax",
+              "22: movq 0x8(%rsi), %rcx",
+              "26: movq 0x10(%rcx), %rdx",
+              "2a: decq %rdx",
+              "2d: andq $-0x10, %rdx",
+              "31: leaq (%rax,%rdx), %rdi",
+              "35: addq $0x10, %rdi",
+              "39: callq *0x20(%rcx)",
+              "3c: movq 0x8(%rbx), %rcx",
+              "40: testq %rcx, %rcx",
+              "43: je 0x6d",
+              "45: movq 0x10(%rbx), %r8",
+              "49: movq 0x10(%r8), %rsi",
+              "4d: decq %rsi",
+              "50: andq $-0x10, %rsi",
+              "54: leaq (%rcx,%rsi), %rdi",
+              "58: addq $0x10, %rdi",
+              "5c: movq %rax, %rsi",
+              "5f: callq *0x28(%r8)",
+              "63: addq $0x10, %rsp",
+              "67: popq %rbx",
+              "68: popq %r14",
+              "6a: popq %r15",
+              "6c: retq",
+              "6d: movq 0x10(%rbx), %rcx",
+              "71: leaq (%rip), %rsi",
+              "78: cmpq %rsi, %rcx",
+              "7b: jne 0x8a",
+              "7d: movq %rax, %rdi",
+              "80: movq %rdx, %rsi",
+              "83: callq 0x88",
+              "88: jmp 0x63",
+              "8a: leaq (%rip), %rsi",
+              "91: movq %rax, %rdi",
+              "94: cmpq %rsi, %rcx",
+              "97: je 0xa0",
+              "99: movq %rdx, %rsi",
+              "9c: callq *%rcx",
+              "9e: jmp 0x63",
+              "a0: movq %rdx, %rsi",
+              "a3: callq 0xa8",
+              "a8: jmp 0x63",
+              "aa: movq 0x8(%rbx), %r15",
+              "ae: movq (%rsi), %rax",
+              "b1: movq 0x8(%rsi), %rcx",
+              "b5: movq 0x10(%rcx), %rdx",
+              "b9: decq %rdx",
+              "bc: andq $-0x10, %rdx",
+              "c0: leaq (%rax,%rdx), %rdi",
+              "c4: addq $0x10, %rdi",
+              "c8: callq *0x20(%rcx)",
+              "cb: movq %rax, %rbx",
+              "ce: movq %rsp, %r14",
+              "d1: movq %r14, %rdi",
+              "d4: movq %rax, %rsi",
+              "d7: callq *0x18(%rdx)",
+              "da: movdqa (%r14), %xmm0",
+              "df: pcmpeqb (%rip), %xmm0",
+              "e7: pmovmskb %xmm0, %eax",
+              "eb: cmpl $0xffff, %eax",
+              "f0: jne 0x160",
+              "f2: movq %rbx, %rdi",
+              "f5: callq *%r15",
+              "f8: jmp 0x63",
+              "fd: movq %rsi, %rdi",
+              "100: callq *0x8(%rbx)",
+              "103: jmp 0x63",
+              "108: movq 0x8(%rbx), %rax",
+              "10c: movq 0x10(%rbx), %rcx",
+              "110: movq 0x10(%rcx), %rdx",
+              "114: decq %rdx",
+              "117: andq $-0x10, %rdx",
+              "11b: leaq (%rax,%rdx), %rdi",
+              "11f: addq $0x10, %rdi",
+              "123: callq *0x28(%rcx)",
+              "126: jmp 0x63",
+              "12b: movq 0x8(%rbx), %r14",
+              "12f: movq (%rsi), %rax",
+              "132: movq 0x8(%rsi), %rcx",
+              "136: movq 0x10(%rcx), %rdx",
+              "13a: decq %rdx",
+              "13d: andq $-0x10, %rdx",
+              "141: leaq (%rax,%rdx), %rdi",
+              "145: addq $0x10, %rdi",
+              "149: callq *0x20(%rcx)",
+              "14c: movzbl 0x1(%rbx), %ecx",
+              "150: movq %rax, %rdi",
+              "153: movq %rdx, %rsi",
+              "156: movl %ecx, %edx",
+              "158: callq *%r14",
+              "15b: jmp 0x63",
+              "160: xorl %eax, %eax",
+              "162: jmp 0x63"
+            ],
+            "relocations": [
+              {
+                "offset": "0000000000000012",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata.hot._RNvMs4_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4"
+              },
+              {
+                "offset": "0000000000000074",
+                "type": "R_X86_64_PC32",
+                "target": ".text._RINvNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes17register_nullable4wrapNtNtNtBe_7styling13theme_variant12ThemeVariantEBe_-0x4"
+              },
+              {
+                "offset": "0000000000000084",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes17register_nullable4wrapNtNtNtBe_7styling13theme_variant12ThemeVariantEBe_-0x4"
+              },
+              {
+                "offset": "000000000000008d",
+                "type": "R_X86_64_PC32",
+                "target": ".text._RINvNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes17register_nullable4wrapINtNtCs1C1lLj4PWSY_5alloc2rc2RcNtNtBc_15relative_source14RelativeSourceEEBe_-0x4"
+              },
+              {
+                "offset": "00000000000000a4",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes17register_nullable4wrapINtNtCs1C1lLj4PWSY_5alloc2rc2RcNtNtBc_15relative_source14RelativeSourceEEBe_-0x4"
+              },
+              {
+                "offset": "00000000000000e3",
+                "type": "R_X86_64_PC32",
+                "target": ".LCPI11182_0-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "cast": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/reference-cast.asm",
+        "sha256": "ff0fee60a183aff16afaee2380f05397634ac260f7427c76123cdfa415613555",
+        "sections": [
+          {
+            "symbol": "_RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_",
+            "instructions": [
+              "0: pushq %r14",
+              "2: pushq %rbx",
+              "3: pushq %rax",
+              "4: movq %rsi, %rbx",
+              "7: movq %rdi, %r14",
+              "a: movq 0x10(%rsi), %rax",
+              "e: decq %rax",
+              "11: andq $-0x10, %rax",
+              "15: movq 0x20(%rdi,%rax), %rax",
+              "1a: testq %rax, %rax",
+              "1d: je 0x24",
+              "1f: movq (%rax), %rsi",
+              "22: jmp 0x2b",
+              "24: leaq (%rip), %rsi",
+              "2b: leaq (%rip), %rdi",
+              "32: callq 0x37",
+              "37: testb %al, %al",
+              "39: je 0x42",
+              "3b: incq (%r14)",
+              "3e: jne 0x45",
+              "40: ud2",
+              "42: xorl %r14d, %r14d",
+              "45: movq %r14, %rax",
+              "48: movq %rbx, %rdx",
+              "4b: addq $0x8, %rsp",
+              "4f: popq %rbx",
+              "50: popq %r14",
+              "52: retq"
+            ],
+            "relocations": [
+              {
+                "offset": "0000000000000027",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro._RNvNtCseCMZVCq70TC_12ferroui_base12ferro_object17FERRO_OBJECT_TYPE-0x4"
+              },
+              {
+                "offset": "000000000000002e",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro._RNvNvXs4_CsjdsPGE2mFyg_18registration_probeNtB7_6TargetNtNtCseCMZVCq70TC_12ferroui_base11type_system10StaticType4TYPE4TYPE-0x4"
+              },
+              {
+                "offset": "0000000000000033",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMNtCseCMZVCq70TC_12ferroui_base11type_systemNtB2_8TypeInfo18is_assignable_from-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "assignable": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/reference-assignable.asm",
+        "sha256": "4f13be4d005bbbb1a212ce0b1b5d7f92eb605ef259b180f20ee620e0158431bc",
+        "sections": [
+          {
+            "symbol": "_RNvMNtCseCMZVCq70TC_12ferroui_base11type_systemNtB2_8TypeInfo18is_assignable_from",
+            "instructions": [
+              "0: testq %rsi, %rsi",
+              "3: sete %al",
+              "6: cmpq %rsi, %rdi",
+              "9: sete %cl",
+              "c: orb %al, %cl",
+              "e: jne 0x16",
+              "10: movq 0x30(%rsi), %rsi",
+              "14: jmp 0x0",
+              "16: testq %rsi, %rsi",
+              "19: setne %al",
+              "1c: retq"
+            ],
+            "relocations": []
+          }
+        ]
+      },
+      "drop": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/reference-drop.asm",
+        "sha256": "7d9164f165fad7eabc52ff3d380f64661ecddddceadc8c478ceb2dbc108a6216",
+        "sections": [
+          {
+            "symbol": "_RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_.23032",
+            "instructions": [
+              "0: movzbl (%rdi), %eax",
+              "3: testl %eax, %eax",
+              "5: jne 0x16",
+              "7: movq 0x8(%rdi), %rax",
+              "b: testq %rax, %rax",
+              "e: je 0x15",
+              "10: decq (%rax)",
+              "13: je 0x30",
+              "15: retq",
+              "16: cmpl $0x2, %eax",
+              "19: jne 0x15",
+              "1b: movq 0x8(%rdi), %rax",
+              "1f: decq (%rax)",
+              "22: jne 0x15",
+              "24: movq 0x10(%rdi), %rsi",
+              "28: movq %rax, %rdi",
+              "2b: jmp 0x30",
+              "30: movq 0x10(%rdi), %rsi",
+              "34: movq %rax, %rdi",
+              "37: jmp 0x3c"
+            ],
+            "relocations": [
+              {
+                "offset": "000000000000002c",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_DNtNtCseCMZVCq70TC_12ferroui_base14ferro_property8AnyValueEL_RL0_B1s_EEp6OutputINtNtBO_6option6OptionNtNtBO_3cmp8OrderingEEL_E9drop_slowB1x_-0x4"
+              },
+              {
+                "offset": "0000000000000038",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "borrowed_root_callback": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/reference-callback.asm",
+        "sha256": "555c0933024ba439e7388fa159ddb075ea8212e9483f4ee2958888dc8496293a",
+        "sections": [
+          {
+            "symbol": "_RNCINvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes19register_conversionINtNtBe_11type_system3RefNtNtBe_12ferro_object11FerroObjectEINtNtBe_11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetENCINvB4_20register_element_refB39_Es2_0E0B3b_",
+            "instructions": [
+              "0: pushq %r14",
+              "2: pushq %rbx",
+              "3: subq $0x18, %rsp",
+              "7: movq %rsi, %rbx",
+              "a: movq %rsp, %r14",
+              "d: movq %r14, %rdi",
+              "10: callq *0x18(%rdx)",
+              "13: movdqa (%r14), %xmm0",
+              "18: pcmpeqb (%rip), %xmm0",
+              "20: pmovmskb %xmm0, %eax",
+              "24: cmpl $0xffff, %eax",
+              "29: jne 0x65",
+              "2b: movq (%rbx), %rdi",
+              "2e: movq 0x8(%rbx), %rsi",
+              "32: callq 0x37",
+              "37: testq %rax, %rax",
+              "3a: je 0x65",
+              "3c: movq %rax, %rbx",
+              "3f: incq 0x8(%rax)",
+              "43: je 0x76",
+              "45: movq %rdx, %r14",
+              "48: decq (%rbx)",
+              "4b: jne 0x58",
+              "4d: movq %rbx, %rdi",
+              "50: movq %r14, %rsi",
+              "53: callq 0x58",
+              "58: movq %rbx, %rdi",
+              "5b: movq %r14, %rsi",
+              "5e: callq 0x63",
+              "63: jmp 0x67",
+              "65: xorl %eax, %eax",
+              "67: leaq (%rip), %rdx",
+              "6e: addq $0x18, %rsp",
+              "72: popq %rbx",
+              "73: popq %r14",
+              "75: retq",
+              "76: ud2"
+            ],
+            "relocations": [
+              {
+                "offset": "000000000000001c",
+                "type": "R_X86_64_PC32",
+                "target": ".LCPI269_0-0x4"
+              },
+              {
+                "offset": "0000000000000033",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4"
+              },
+              {
+                "offset": "0000000000000054",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4"
+              },
+              {
+                "offset": "000000000000005f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetEE3newB1B_-0x4"
+              },
+              {
+                "offset": "000000000000006a",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.0-0x4"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "stage4": {
+      "public": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/stage4-public.asm",
+        "sha256": "fc6e44950cd67e925c9e876359b1e4ad4f018b6121ce9dc2e346a3b0c9420cb7",
+        "sections": [
+          {
+            "symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+            "instructions": [
+              "0: pushq %r15",
+              "2: pushq %r14",
+              "4: pushq %r13",
+              "6: pushq %r12",
+              "8: pushq %rbx",
+              "9: subq $0x1c0, %rsp",
+              "10: movq %rsi, %r14",
+              "13: movq %rdi, %rbx",
+              "16: movq (%rdi), %rax",
+              "19: movq 0x8(%rdi), %rcx",
+              "1d: movq 0x10(%rcx), %rdx",
+              "21: decq %rdx",
+              "24: andq $-0x10, %rdx",
+              "28: leaq (%rax,%rdx), %rdi",
+              "2c: addq $0x10, %rdi",
+              "30: callq *0x20(%rcx)",
+              "33: leaq 0x1a0(%rsp), %r15",
+              "3b: movq %r15, %rdi",
+              "3e: movq %rax, %rsi",
+              "41: callq *0x18(%rdx)",
+              "44: movups 0x10(%r14), %xmm0",
+              "49: movups %xmm0, 0x10(%r15)",
+              "4e: callq 0x53",
+              "53: testq %rax, %rax",
+              "56: je 0x292",
+              "5c: movabsq $0x7fffffffffffffff, %rcx",
+              "66: cmpq %rcx, (%rax)",
+              "69: jae 0x14e",
+              "6f: cmpq $0x0, 0x8(%rax)",
+              "74: je 0x15a",
+              "7a: leaq (%rip), %rdi",
+              "81: callq 0x86",
+              "86: movq (%rip), %rcx",
+              "8d: cmpq %rcx, %rax",
+              "90: jne 0x29e",
+              "96: callq 0x9b",
+              "9b: testq %rax, %rax",
+              "9e: je 0x292",
+              "a4: movq %rax, %r14",
+              "a7: cmpq $0x0, (%rax)",
+              "ab: jne 0x2ab",
+              "b1: orq $-0x1, (%r14)",
+              "b5: cmpq $0x0, 0x8(%r14)",
+              "ba: je 0x2b7",
+              "c0: movq %r14, %rdi",
+              "c3: addq $0xe8, %rdi",
+              "ca: leaq 0x1a0(%rsp), %rsi",
+              "d2: callq 0xd7",
+              "d7: testq %rax, %rax",
+              "da: je 0x2cf",
+              "e0: movq %rax, %rcx",
+              "e3: addq $0x8, %rax",
+              "e7: cmpl $0x2, (%rcx)",
+              "ea: je 0x2de",
+              "f0: movb (%rax), %cl",
+              "f2: movzbl %cl, %edx",
+              "f5: leaq (%rip), %rsi",
+              "fc: movslq (%rsi,%rdx,4), %rdx",
+              "100: addq %rsi, %rdx",
+              "103: jmpq *%rdx",
+              "105: movq 0x8(%rax), %rdx",
+              "109: incq (%r14)",
+              "10c: leaq 0x8(%rsp), %rdi",
+              "111: movb %cl, (%rdi)",
+              "113: movb %sil, 0x1(%rdi)",
+              "117: movq %rdx, 0x8(%rdi)",
+              "11b: movq %rax, 0x10(%rdi)",
+              "11f: movq %rbx, %rsi",
+              "122: callq 0x127",
+              "127: movq %rax, %rbx",
+              "12a: movq %rdx, %r14",
+              "12d: leaq 0x8(%rsp), %rdi",
+              "132: callq 0x137",
+              "137: movq %rbx, %rax",
+              "13a: movq %r14, %rdx",
+              "13d: addq $0x1c0, %rsp",
+              "144: popq %rbx",
+              "145: popq %r12",
+              "147: popq %r13",
+              "149: popq %r14",
+              "14b: popq %r15",
+              "14d: retq",
+              "14e: leaq (%rip), %rdi",
+              "155: callq 0x15a",
+              "15a: callq 0x15f",
+              "15f: testq %rax, %rax",
+              "162: je 0x292",
+              "168: movq %rax, %r14",
+              "16b: movups (%rip), %xmm0",
+              "172: movaps %xmm0, 0x30(%rsp)",
+              "177: movups (%rip), %xmm1",
+              "17e: movaps %xmm1, 0x20(%rsp)",
+              "183: movaps %xmm1, 0x40(%rsp)",
+              "188: movaps %xmm0, 0x50(%rsp)",
+              "18d: movaps %xmm1, 0x60(%rsp)",
+              "192: movaps %xmm0, 0x70(%rsp)",
+              "197: movaps %xmm1, 0x80(%rsp)",
+              "19f: movaps %xmm0, 0x90(%rsp)",
+              "1a7: movaps %xmm1, 0xa0(%rsp)",
+              "1af: movaps %xmm0, 0xb0(%rsp)",
+              "1b7: movaps %xmm1, 0xc0(%rsp)",
+              "1bf: movaps %xmm0, 0xd0(%rsp)",
+              "1c7: movaps %xmm1, 0xe0(%rsp)",
+              "1cf: movaps %xmm0, 0xf0(%rsp)",
+              "1d7: movaps %xmm1, 0x100(%rsp)",
+              "1df: movaps %xmm0, 0x110(%rsp)",
+              "1e7: movaps %xmm0, 0x130(%rsp)",
+              "1ef: movaps %xmm1, 0x120(%rsp)",
+              "1f7: movaps %xmm0, 0x150(%rsp)",
+              "1ff: movaps %xmm1, 0x140(%rsp)",
+              "207: movaps %xmm0, 0x170(%rsp)",
+              "20f: movaps %xmm1, 0x160(%rsp)",
+              "217: movaps %xmm0, 0x190(%rsp)",
+              "21f: movaps %xmm1, 0x180(%rsp)",
+              "227: cmpq $0x0, (%rax)",
+              "22b: jne 0x32e",
+              "231: orq $-0x1, (%r14)",
+              "235: movq %r14, %r15",
+              "238: addq $0x8, %r15",
+              "23c: movq %r15, %rdi",
+              "23f: callq 0x244",
+              "244: leaq 0x20(%rsp), %rsi",
+              "249: movl $0x180, %ecx",
+              "24e: movq %r15, %rdi",
+              "251: rep movsb (%rsi), %es:(%rdi)",
+              "253: incq (%r14)",
+              "256: callq 0x25b",
+              "25b: leaq 0x20(%rsp), %r12",
+              "260: movq %r12, %rdi",
+              "263: callq 0x268",
+              "268: movq (%r12), %r15",
+              "26c: movq 0x8(%r12), %r14",
+              "271: movq 0x10(%r12), %r12",
+              "276: shlq $0x3, %r12",
+              "27a: xorl %eax, %eax",
+              "27c: cmpq %rax, %r12",
+              "27f: je 0x31e",
+              "285: leaq 0x8(%rax), %r13",
+              "289: callq *(%r14,%rax)",
+              "28d: movq %r13, %rax",
+              "290: jmp 0x27c",
+              "292: leaq (%rip), %rdi",
+              "299: callq 0x29e",
+              "29e: movq %rax, %rdi",
+              "2a1: callq 0x2a6",
+              "2a6: jmp 0x96",
+              "2ab: leaq (%rip), %rdi",
+              "2b2: callq 0x2b7",
+              "2b7: leaq (%rip), %rdi",
+              "2be: leaq (%rip), %rdx",
+              "2c5: pushq $0x17",
+              "2c7: popq %rsi",
+              "2c8: callq 0x2cd",
+              "2cd: jmp 0x30f",
+              "2cf: incq (%r14)",
+              "2d2: movb $-0x1, 0x8(%rsp)",
+              "2d7: xorl %ebx, %ebx",
+              "2d9: jmp 0x137",
+              "2de: movq (%rax), %rax",
+              "2e1: addq $0x18, %rax",
+              "2e5: jmp 0xf0",
+              "2ea: movq 0x8(%rax), %rdx",
+              "2ee: testq %rdx, %rdx",
+              "2f1: jne 0x302",
+              "2f3: movq 0x10(%rax), %rax",
+              "2f7: xorl %edx, %edx",
+              "2f9: jmp 0x109",
+              "2fe: movq 0x8(%rax), %rdx",
+              "302: movq 0x10(%rax), %rax",
+              "306: incq (%rdx)",
+              "309: jne 0x109",
+              "30f: ud2",
+              "311: movq 0x8(%rax), %rdx",
+              "315: movb 0x1(%rax), %sil",
+              "319: jmp 0x109",
+              "31e: movq %r15, %rdi",
+              "321: movq %r14, %rsi",
+              "324: callq 0x329",
+              "329: jmp 0x7a",
+              "32e: leaq (%rip), %rdi",
+              "335: callq 0x33a",
+              "33a: jmp 0x30f",
+              "33c: movq %rax, %rbx",
+              "33f: leaq 0x20(%rsp), %rsi",
+              "344: movl $0x180, %ecx",
+              "349: movq %r15, %rdi",
+              "34c: rep movsb (%rsi), %es:(%rdi)",
+              "34e: jmp 0x377",
+              "350: movq %rax, %rbx",
+              "353: movq %r15, %rdi",
+              "356: movq %r14, %rsi",
+              "359: callq 0x35e",
+              "35e: jmp 0x37a",
+              "360: movq %rax, %rbx",
+              "363: leaq 0x20(%rsp), %rdi",
+              "368: callq 0x36d",
+              "36d: jmp 0x37a",
+              "36f: callq 0x374",
+              "374: movq %rax, %rbx",
+              "377: incq (%r14)",
+              "37a: movq %rbx, %rdi",
+              "37d: callq 0x382",
+              "382: movq %rax, %rbx",
+              "385: leaq 0x8(%rsp), %rdi",
+              "38a: callq 0x38f",
+              "38f: jmp 0x37a",
+              "391: callq 0x396"
+            ],
+            "relocations": [
+              {
+                "offset": "000000000000004f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "000000000000007d",
+                "type": "R_X86_64_PC32",
+                "target": ".text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type14GLOBAL_APPLIED0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1t_6option6OptionQIB28_INtNtB1t_4cell4CelljEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "0000000000000082",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs3_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell4CelljEE3getCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "0000000000000089",
+                "type": "R_X86_64_PC32",
+                "target": ".bss._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type10GLOBAL_LEN.0-0x4"
+              },
+              {
+                "offset": "0000000000000097",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "00000000000000d3",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068-0x4"
+              },
+              {
+                "offset": "00000000000000f8",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered-0x4"
+              },
+              {
+                "offset": "0000000000000123",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4"
+              },
+              {
+                "offset": "0000000000000133",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_-0x4"
+              },
+              {
+                "offset": "0000000000000151",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.297-0x4"
+              },
+              {
+                "offset": "0000000000000156",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell30panic_already_mutably_borrowed-0x4"
+              },
+              {
+                "offset": "000000000000015b",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "000000000000016e",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3+0xc"
+              },
+              {
+                "offset": "000000000000017a",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3-0x4"
+              },
+              {
+                "offset": "0000000000000240",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4"
+              },
+              {
+                "offset": "0000000000000257",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type17register_defaults-0x4"
+              },
+              {
+                "offset": "0000000000000264",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvMs4_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtCs1C1lLj4PWSY_5alloc3vec3VecFEuEEE4takeCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "0000000000000295",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.501ae5ec37329a2343b65d07557dab83.1-0x4"
+              },
+              {
+                "offset": "000000000000029a",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtNtCsgHYyB3hU8Ec_3std6thread5local18panic_access_error-0x4"
+              },
+              {
+                "offset": "00000000000002a2",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12apply_global-0x4"
+              },
+              {
+                "offset": "00000000000002ae",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.298-0x4"
+              },
+              {
+                "offset": "00000000000002b3",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4"
+              },
+              {
+                "offset": "00000000000002ba",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata..Lanon.a2e4c631894b6985ab2d9e35701d75a2.299-0x4"
+              },
+              {
+                "offset": "00000000000002c1",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.300-0x4"
+              },
+              {
+                "offset": "00000000000002c9",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core6option13expect_failed-0x4"
+              },
+              {
+                "offset": "0000000000000325",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "0000000000000331",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.301-0x4"
+              },
+              {
+                "offset": "0000000000000336",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4"
+              },
+              {
+                "offset": "000000000000035a",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "0000000000000369",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4"
+              },
+              {
+                "offset": "0000000000000370",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+              },
+              {
+                "offset": "000000000000037e",
+                "type": "R_X86_64_PLT32",
+                "target": "_Unwind_Resume-0x4"
+              },
+              {
+                "offset": "000000000000038b",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_-0x4"
+              },
+              {
+                "offset": "0000000000000392",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/stage4-apply.asm",
+        "sha256": "4c43b3466c8a06246e4d49fc0c28804b677cb91917052ea0d0bb0226832b9d01",
+        "sections": [
+          {
+            "symbol": "_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+            "instructions": [
+              "0: pushq %r15",
+              "2: pushq %r14",
+              "4: pushq %rbx",
+              "5: subq $0x10, %rsp",
+              "9: movq %rdi, %rbx",
+              "c: movzbl (%rdi), %eax",
+              "f: leaq (%rip), %rcx",
+              "16: movslq (%rcx,%rax,4), %rax",
+              "1a: addq %rcx, %rax",
+              "1d: jmpq *%rax",
+              "1f: movq (%rsi), %rax",
+              "22: movq 0x8(%rsi), %rcx",
+              "26: movq 0x10(%rcx), %rdx",
+              "2a: decq %rdx",
+              "2d: andq $-0x10, %rdx",
+              "31: leaq (%rax,%rdx), %rdi",
+              "35: addq $0x10, %rdi",
+              "39: callq *0x20(%rcx)",
+              "3c: movq 0x8(%rbx), %rcx",
+              "40: testq %rcx, %rcx",
+              "43: je 0x6d",
+              "45: movq 0x10(%rbx), %r8",
+              "49: movq 0x10(%r8), %rsi",
+              "4d: decq %rsi",
+              "50: andq $-0x10, %rsi",
+              "54: leaq (%rcx,%rsi), %rdi",
+              "58: addq $0x10, %rdi",
+              "5c: movq %rax, %rsi",
+              "5f: callq *0x28(%r8)",
+              "63: addq $0x10, %rsp",
+              "67: popq %rbx",
+              "68: popq %r14",
+              "6a: popq %r15",
+              "6c: retq",
+              "6d: movq %rax, %rdi",
+              "70: movq %rdx, %rsi",
+              "73: callq *0x10(%rbx)",
+              "76: jmp 0x63",
+              "78: movq 0x8(%rbx), %r15",
+              "7c: movq (%rsi), %rax",
+              "7f: movq 0x8(%rsi), %rcx",
+              "83: movq 0x10(%rcx), %rdx",
+              "87: decq %rdx",
+              "8a: andq $-0x10, %rdx",
+              "8e: leaq (%rax,%rdx), %rdi",
+              "92: addq $0x10, %rdi",
+              "96: callq *0x20(%rcx)",
+              "99: movq %rax, %rbx",
+              "9c: movq %rsp, %r14",
+              "9f: movq %r14, %rdi",
+              "a2: movq %rax, %rsi",
+              "a5: callq *0x18(%rdx)",
+              "a8: movdqa (%r14), %xmm0",
+              "ad: pcmpeqb (%rip), %xmm0",
+              "b5: pmovmskb %xmm0, %eax",
+              "b9: cmpl $0xffff, %eax",
+              "be: jne 0x128",
+              "c0: movq %rbx, %rdi",
+              "c3: callq *%r15",
+              "c6: jmp 0x63",
+              "c8: movq %rsi, %rdi",
+              "cb: callq *0x8(%rbx)",
+              "ce: jmp 0x63",
+              "d0: movq 0x8(%rbx), %rax",
+              "d4: movq 0x10(%rbx), %rcx",
+              "d8: movq 0x10(%rcx), %rdx",
+              "dc: decq %rdx",
+              "df: andq $-0x10, %rdx",
+              "e3: leaq (%rax,%rdx), %rdi",
+              "e7: addq $0x10, %rdi",
+              "eb: callq *0x28(%rcx)",
+              "ee: jmp 0x63",
+              "f3: movq 0x8(%rbx), %r14",
+              "f7: movq (%rsi), %rax",
+              "fa: movq 0x8(%rsi), %rcx",
+              "fe: movq 0x10(%rcx), %rdx",
+              "102: decq %rdx",
+              "105: andq $-0x10, %rdx",
+              "109: leaq (%rax,%rdx), %rdi",
+              "10d: addq $0x10, %rdi",
+              "111: callq *0x20(%rcx)",
+              "114: movzbl 0x1(%rbx), %ecx",
+              "118: movq %rax, %rdi",
+              "11b: movq %rdx, %rsi",
+              "11e: movl %ecx, %edx",
+              "120: callq *%r14",
+              "123: jmp 0x63",
+              "128: xorl %eax, %eax",
+              "12a: jmp 0x63"
+            ],
+            "relocations": [
+              {
+                "offset": "0000000000000012",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata.hot._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4"
+              },
+              {
+                "offset": "00000000000000b1",
+                "type": "R_X86_64_PC32",
+                "target": ".LCPI10026_0-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "cast": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/stage4-cast.asm",
+        "sha256": "ff0fee60a183aff16afaee2380f05397634ac260f7427c76123cdfa415613555",
+        "sections": [
+          {
+            "symbol": "_RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_",
+            "instructions": [
+              "0: pushq %r14",
+              "2: pushq %rbx",
+              "3: pushq %rax",
+              "4: movq %rsi, %rbx",
+              "7: movq %rdi, %r14",
+              "a: movq 0x10(%rsi), %rax",
+              "e: decq %rax",
+              "11: andq $-0x10, %rax",
+              "15: movq 0x20(%rdi,%rax), %rax",
+              "1a: testq %rax, %rax",
+              "1d: je 0x24",
+              "1f: movq (%rax), %rsi",
+              "22: jmp 0x2b",
+              "24: leaq (%rip), %rsi",
+              "2b: leaq (%rip), %rdi",
+              "32: callq 0x37",
+              "37: testb %al, %al",
+              "39: je 0x42",
+              "3b: incq (%r14)",
+              "3e: jne 0x45",
+              "40: ud2",
+              "42: xorl %r14d, %r14d",
+              "45: movq %r14, %rax",
+              "48: movq %rbx, %rdx",
+              "4b: addq $0x8, %rsp",
+              "4f: popq %rbx",
+              "50: popq %r14",
+              "52: retq"
+            ],
+            "relocations": [
+              {
+                "offset": "0000000000000027",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro._RNvNtCseCMZVCq70TC_12ferroui_base12ferro_object17FERRO_OBJECT_TYPE-0x4"
+              },
+              {
+                "offset": "000000000000002e",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro._RNvNvXs4_CsjdsPGE2mFyg_18registration_probeNtB7_6TargetNtNtCseCMZVCq70TC_12ferroui_base11type_system10StaticType4TYPE4TYPE-0x4"
+              },
+              {
+                "offset": "0000000000000033",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMNtCseCMZVCq70TC_12ferroui_base11type_systemNtB2_8TypeInfo18is_assignable_from-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "assignable": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/stage4-assignable.asm",
+        "sha256": "2148a49818a74ed6261c492eb76d719dae81ef67cc6eea3150d9c94ced923463",
+        "sections": [
+          {
+            "symbol": "_RNvMNtCseCMZVCq70TC_12ferroui_base11type_systemNtB2_8TypeInfo18is_assignable_from",
+            "instructions": [
+              "0: testq %rsi, %rsi",
+              "3: sete %al",
+              "6: cmpq %rsi, %rdi",
+              "9: sete %cl",
+              "c: orb %al, %cl",
+              "e: jne 0x16",
+              "10: movq 0x30(%rsi), %rsi",
+              "14: jmp 0x0",
+              "16: testq %rsi, %rsi",
+              "19: setne %al",
+              "1c: retq"
+            ],
+            "relocations": []
+          }
+        ]
+      },
+      "drop": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/stage4-drop.asm",
+        "sha256": "0cd7870c901610af863148cd1a04c7aa815eecbc71c1507d037ea78c644b6b41",
+        "sections": [
+          {
+            "symbol": "_RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_",
+            "instructions": [
+              "0: movzbl (%rdi), %eax",
+              "3: testl %eax, %eax",
+              "5: jne 0x16",
+              "7: movq 0x8(%rdi), %rax",
+              "b: testq %rax, %rax",
+              "e: je 0x15",
+              "10: decq (%rax)",
+              "13: je 0x30",
+              "15: retq",
+              "16: cmpl $0x2, %eax",
+              "19: jne 0x15",
+              "1b: movq 0x8(%rdi), %rax",
+              "1f: decq (%rax)",
+              "22: jne 0x15",
+              "24: movq 0x10(%rdi), %rsi",
+              "28: movq %rax, %rdi",
+              "2b: jmp 0x30",
+              "30: movq 0x10(%rdi), %rsi",
+              "34: movq %rax, %rdi",
+              "37: jmp 0x3c"
+            ],
+            "relocations": [
+              {
+                "offset": "000000000000002c",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_DNtNtCseCMZVCq70TC_12ferroui_base14ferro_property8AnyValueEL_RL0_B1s_EEp6OutputINtNtBO_6option6OptionNtNtBO_3cmp8OrderingEEL_E9drop_slowB1x_-0x4"
+              },
+              {
+                "offset": "0000000000000038",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "static_root_callback": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/stage4-root-leaf.asm",
+        "sha256": "38a9e91904924db71d27b1ba0a10716a21428777068d2d9659eb52b7203df8a3",
+        "sections": [
+          {
+            "symbol": "_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_",
+            "instructions": [
+              "0: pushq %r15",
+              "2: pushq %r14",
+              "4: pushq %rbx",
+              "5: movq (%rdi), %rax",
+              "8: movq 0x8(%rdi), %rsi",
+              "c: movq %rax, %rdi",
+              "f: callq 0x14",
+              "14: testq %rax, %rax",
+              "17: je 0x45",
+              "19: movq %rax, %r14",
+              "1c: incq 0x8(%rax)",
+              "20: je 0x58",
+              "22: movq %rdx, %rbx",
+              "25: movq %r14, %rdi",
+              "28: movq %rdx, %rsi",
+              "2b: callq 0x30",
+              "30: movq %rax, %r15",
+              "33: decq (%r14)",
+              "36: jne 0x48",
+              "38: movq %r14, %rdi",
+              "3b: movq %rbx, %rsi",
+              "3e: callq 0x43",
+              "43: jmp 0x48",
+              "45: xorl %r15d, %r15d",
+              "48: leaq (%rip), %rdx",
+              "4f: movq %r15, %rax",
+              "52: popq %rbx",
+              "53: popq %r14",
+              "55: popq %r15",
+              "57: retq",
+              "58: ud2",
+              "5a: movq %rax, %r15",
+              "5d: decq (%r14)",
+              "60: jne 0x6d",
+              "62: movq %r14, %rdi",
+              "65: movq %rbx, %rsi",
+              "68: callq 0x6d",
+              "6d: movq %r15, %rdi",
+              "70: callq 0x75",
+              "75: callq 0x7a"
+            ],
+            "relocations": [
+              {
+                "offset": "0000000000000010",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4"
+              },
+              {
+                "offset": "000000000000002c",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetEE3newB1B_-0x4"
+              },
+              {
+                "offset": "000000000000003f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4"
+              },
+              {
+                "offset": "000000000000004b",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.0-0x4"
+              },
+              {
+                "offset": "0000000000000069",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4"
+              },
+              {
+                "offset": "0000000000000071",
+                "type": "R_X86_64_PLT32",
+                "target": "_Unwind_Resume-0x4"
+              },
+              {
+                "offset": "0000000000000076",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "isolated_clone": {
+      "public": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/isolated_clone-public.asm",
+        "sha256": "2ba6033a16776d90a6a5f3a52c7a4791a62f6aee033c457eac4ad8178afa3fb5",
+        "sections": [
+          {
+            "symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+            "instructions": [
+              "0: pushq %r15",
+              "2: pushq %r14",
+              "4: pushq %r13",
+              "6: pushq %r12",
+              "8: pushq %rbx",
+              "9: subq $0x1c0, %rsp",
+              "10: movq %rsi, %r14",
+              "13: movq %rdi, %rbx",
+              "16: movq (%rdi), %rax",
+              "19: movq 0x8(%rdi), %rcx",
+              "1d: movq 0x10(%rcx), %rdx",
+              "21: decq %rdx",
+              "24: andq $-0x10, %rdx",
+              "28: leaq (%rax,%rdx), %rdi",
+              "2c: addq $0x10, %rdi",
+              "30: callq *0x20(%rcx)",
+              "33: leaq 0x1a0(%rsp), %r15",
+              "3b: movq %r15, %rdi",
+              "3e: movq %rax, %rsi",
+              "41: callq *0x18(%rdx)",
+              "44: movups 0x10(%r14), %xmm0",
+              "49: movups %xmm0, 0x10(%r15)",
+              "4e: callq 0x53",
+              "53: testq %rax, %rax",
+              "56: je 0x30b",
+              "5c: movabsq $0x7fffffffffffffff, %rcx",
+              "66: cmpq %rcx, (%rax)",
+              "69: jae 0x2c3",
+              "6f: cmpq $0x0, 0x8(%rax)",
+              "74: jne 0x1b9",
+              "7a: callq 0x7f",
+              "7f: testq %rax, %rax",
+              "82: je 0x30b",
+              "88: movq %rax, %r14",
+              "8b: movups (%rip), %xmm0",
+              "92: movaps %xmm0, 0x30(%rsp)",
+              "97: movups (%rip), %xmm1",
+              "9e: movaps %xmm1, 0x20(%rsp)",
+              "a3: movaps %xmm1, 0x40(%rsp)",
+              "a8: movaps %xmm0, 0x50(%rsp)",
+              "ad: movaps %xmm1, 0x60(%rsp)",
+              "b2: movaps %xmm0, 0x70(%rsp)",
+              "b7: movaps %xmm1, 0x80(%rsp)",
+              "bf: movaps %xmm0, 0x90(%rsp)",
+              "c7: movaps %xmm1, 0xa0(%rsp)",
+              "cf: movaps %xmm0, 0xb0(%rsp)",
+              "d7: movaps %xmm1, 0xc0(%rsp)",
+              "df: movaps %xmm0, 0xd0(%rsp)",
+              "e7: movaps %xmm1, 0xe0(%rsp)",
+              "ef: movaps %xmm0, 0xf0(%rsp)",
+              "f7: movaps %xmm1, 0x100(%rsp)",
+              "ff: movaps %xmm0, 0x110(%rsp)",
+              "107: movaps %xmm0, 0x130(%rsp)",
+              "10f: movaps %xmm1, 0x120(%rsp)",
+              "117: movaps %xmm0, 0x150(%rsp)",
+              "11f: movaps %xmm1, 0x140(%rsp)",
+              "127: movaps %xmm0, 0x170(%rsp)",
+              "12f: movaps %xmm1, 0x160(%rsp)",
+              "137: movaps %xmm0, 0x190(%rsp)",
+              "13f: movaps %xmm1, 0x180(%rsp)",
+              "147: cmpq $0x0, (%rax)",
+              "14b: jne 0x2fd",
+              "151: orq $-0x1, (%r14)",
+              "155: movq %r14, %r15",
+              "158: addq $0x8, %r15",
+              "15c: movq %r15, %rdi",
+              "15f: callq 0x164",
+              "164: leaq 0x20(%rsp), %rsi",
+              "169: movl $0x180, %ecx",
+              "16e: movq %r15, %rdi",
+              "171: rep movsb (%rsi), %es:(%rdi)",
+              "173: incq (%r14)",
+              "176: callq 0x17b",
+              "17b: leaq 0x20(%rsp), %r12",
+              "180: movq %r12, %rdi",
+              "183: callq 0x188",
+              "188: movq (%r12), %r15",
+              "18c: movq 0x8(%r12), %r14",
+              "191: movq 0x10(%r12), %r12",
+              "196: shlq $0x3, %r12",
+              "19a: xorl %eax, %eax",
+              "19c: cmpq %rax, %r12",
+              "19f: je 0x1ae",
+              "1a1: leaq 0x8(%rax), %r13",
+              "1a5: callq *(%r14,%rax)",
+              "1a9: movq %r13, %rax",
+              "1ac: jmp 0x19c",
+              "1ae: movq %r15, %rdi",
+              "1b1: movq %r14, %rsi",
+              "1b4: callq 0x1b9",
+              "1b9: movq %fs:0x0, %rdi",
+              "1c2: movq (%rip), %rax",
+              "1c9: cmpq %rax, %rdi",
+              "1cc: jne 0x2cf",
+              "1d2: callq 0x1d7",
+              "1d7: testq %rax, %rax",
+              "1da: je 0x30b",
+              "1e0: movq %rax, %r14",
+              "1e3: cmpq $0x0, (%rax)",
+              "1e7: jne 0x2d9",
+              "1ed: orq $-0x1, (%r14)",
+              "1f1: cmpq $0x0, 0x8(%r14)",
+              "1f6: je 0x2e5",
+              "1fc: movq %r14, %rdi",
+              "1ff: addq $0xe8, %rdi",
+              "206: leaq 0x1a0(%rsp), %rsi",
+              "20e: callq 0x213",
+              "213: testq %rax, %rax",
+              "216: je 0x246",
+              "218: movq %rax, %rcx",
+              "21b: addq $0x8, %rax",
+              "21f: cmpl $0x2, (%rcx)",
+              "222: jne 0x22b",
+              "224: movq (%rax), %rax",
+              "227: addq $0x18, %rax",
+              "22b: movb (%rax), %cl",
+              "22d: movzbl %cl, %edx",
+              "230: leaq (%rip), %rsi",
+              "237: movslq (%rsi,%rdx,4), %rdx",
+              "23b: addq %rsi, %rdx",
+              "23e: jmpq *%rdx",
+              "240: movq 0x8(%rax), %rdx",
+              "244: jmp 0x27e",
+              "246: incq (%r14)",
+              "249: movb $-0x1, 0x8(%rsp)",
+              "24e: xorl %ebx, %ebx",
+              "250: jmp 0x2ac",
+              "252: movq 0x8(%rax), %rdx",
+              "256: movb 0x1(%rax), %sil",
+              "25a: jmp 0x27e",
+              "25c: movq 0x8(%rax), %rdx",
+              "260: testq %rdx, %rdx",
+              "263: jne 0x271",
+              "265: movq 0x10(%rax), %rax",
+              "269: xorl %edx, %edx",
+              "26b: jmp 0x244",
+              "26d: movq 0x8(%rax), %rdx",
+              "271: movq 0x10(%rax), %rax",
+              "275: incq (%rdx)",
+              "278: je 0x309",
+              "27e: incq (%r14)",
+              "281: leaq 0x8(%rsp), %rdi",
+              "286: movb %cl, (%rdi)",
+              "288: movb %sil, 0x1(%rdi)",
+              "28c: movq %rdx, 0x8(%rdi)",
+              "290: movq %rax, 0x10(%rdi)",
+              "294: movq %rbx, %rsi",
+              "297: callq 0x29c",
+              "29c: movq %rax, %rbx",
+              "29f: movq %rdx, %r14",
+              "2a2: leaq 0x8(%rsp), %rdi",
+              "2a7: callq 0x2ac",
+              "2ac: movq %rbx, %rax",
+              "2af: movq %r14, %rdx",
+              "2b2: addq $0x1c0, %rsp",
+              "2b9: popq %rbx",
+              "2ba: popq %r12",
+              "2bc: popq %r13",
+              "2be: popq %r14",
+              "2c0: popq %r15",
+              "2c2: retq",
+              "2c3: leaq (%rip), %rdi",
+              "2ca: callq 0x2cf",
+              "2cf: callq 0x2d4",
+              "2d4: jmp 0x1d2",
+              "2d9: leaq (%rip), %rdi",
+              "2e0: callq 0x2e5",
+              "2e5: leaq (%rip), %rdi",
+              "2ec: leaq (%rip), %rdx",
+              "2f3: pushq $0x17",
+              "2f5: popq %rsi",
+              "2f6: callq 0x2fb",
+              "2fb: jmp 0x309",
+              "2fd: leaq (%rip), %rdi",
+              "304: callq 0x309",
+              "309: ud2",
+              "30b: leaq (%rip), %rdi",
+              "312: callq 0x317",
+              "317: movq %rax, %rbx",
+              "31a: leaq 0x20(%rsp), %rsi",
+              "31f: movl $0x180, %ecx",
+              "324: movq %r15, %rdi",
+              "327: rep movsb (%rsi), %es:(%rdi)",
+              "329: jmp 0x366",
+              "32b: movq %rax, %rbx",
+              "32e: leaq 0x8(%rsp), %rdi",
+              "333: callq 0x338",
+              "338: jmp 0x369",
+              "33a: callq 0x33f",
+              "33f: movq %rax, %rbx",
+              "342: movq %r15, %rdi",
+              "345: movq %r14, %rsi",
+              "348: callq 0x34d",
+              "34d: jmp 0x369",
+              "34f: movq %rax, %rbx",
+              "352: leaq 0x20(%rsp), %rdi",
+              "357: callq 0x35c",
+              "35c: jmp 0x369",
+              "35e: callq 0x363",
+              "363: movq %rax, %rbx",
+              "366: incq (%r14)",
+              "369: movq %rbx, %rdi",
+              "36c: callq 0x371"
+            ],
+            "relocations": [
+              {
+                "offset": "000000000000004f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "000000000000007b",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "000000000000008e",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3+0xc"
+              },
+              {
+                "offset": "000000000000009a",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3-0x4"
+              },
+              {
+                "offset": "0000000000000160",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4"
+              },
+              {
+                "offset": "0000000000000177",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type17register_defaults-0x4"
+              },
+              {
+                "offset": "0000000000000184",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvMs4_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtCs1C1lLj4PWSY_5alloc3vec3VecFEuEEE4takeCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "00000000000001b5",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "00000000000001be",
+                "type": "R_X86_64_TPOFF32",
+                "target": "_RNvNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type14GLOBAL_APPLIED0s_023___RUST_STD_INTERNAL_VAL"
+              },
+              {
+                "offset": "00000000000001c5",
+                "type": "R_X86_64_PC32",
+                "target": ".bss._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type10GLOBAL_LEN.0-0x4"
+              },
+              {
+                "offset": "00000000000001d3",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4"
+              },
+              {
+                "offset": "000000000000020f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069-0x4"
+              },
+              {
+                "offset": "0000000000000233",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered-0x4"
+              },
+              {
+                "offset": "0000000000000298",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4"
+              },
+              {
+                "offset": "00000000000002a8",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_-0x4"
+              },
+              {
+                "offset": "00000000000002c6",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.297-0x4"
+              },
+              {
+                "offset": "00000000000002cb",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell30panic_already_mutably_borrowed-0x4"
+              },
+              {
+                "offset": "00000000000002d0",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12apply_global-0x4"
+              },
+              {
+                "offset": "00000000000002dc",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.298-0x4"
+              },
+              {
+                "offset": "00000000000002e1",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4"
+              },
+              {
+                "offset": "00000000000002e8",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata..Lanon.a2e4c631894b6985ab2d9e35701d75a2.299-0x4"
+              },
+              {
+                "offset": "00000000000002ef",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.300-0x4"
+              },
+              {
+                "offset": "00000000000002f7",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core6option13expect_failed-0x4"
+              },
+              {
+                "offset": "0000000000000300",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.301-0x4"
+              },
+              {
+                "offset": "0000000000000305",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4"
+              },
+              {
+                "offset": "000000000000030e",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.501ae5ec37329a2343b65d07557dab83.1-0x4"
+              },
+              {
+                "offset": "0000000000000313",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtNtCsgHYyB3hU8Ec_3std6thread5local18panic_access_error-0x4"
+              },
+              {
+                "offset": "0000000000000334",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_-0x4"
+              },
+              {
+                "offset": "000000000000033b",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+              },
+              {
+                "offset": "0000000000000349",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4"
+              },
+              {
+                "offset": "0000000000000358",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4"
+              },
+              {
+                "offset": "000000000000035f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+              },
+              {
+                "offset": "000000000000036d",
+                "type": "R_X86_64_PLT32",
+                "target": "_Unwind_Resume-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/isolated_clone-apply.asm",
+        "sha256": "60231870f05a9fad8d5ddd07bbcf5e57c23fafbe2658eb327e97c58b966ac2e0",
+        "sections": [
+          {
+            "symbol": "_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+            "instructions": [
+              "0: pushq %r15",
+              "2: pushq %r14",
+              "4: pushq %rbx",
+              "5: subq $0x10, %rsp",
+              "9: movq %rdi, %rbx",
+              "c: movzbl (%rdi), %eax",
+              "f: leaq (%rip), %rcx",
+              "16: movslq (%rcx,%rax,4), %rax",
+              "1a: addq %rcx, %rax",
+              "1d: jmpq *%rax",
+              "1f: movq (%rsi), %rax",
+              "22: movq 0x8(%rsi), %rcx",
+              "26: movq 0x10(%rcx), %rdx",
+              "2a: decq %rdx",
+              "2d: andq $-0x10, %rdx",
+              "31: leaq (%rax,%rdx), %rdi",
+              "35: addq $0x10, %rdi",
+              "39: callq *0x20(%rcx)",
+              "3c: movq 0x8(%rbx), %rcx",
+              "40: testq %rcx, %rcx",
+              "43: je 0x11d",
+              "49: movq 0x10(%rbx), %r8",
+              "4d: movq 0x10(%r8), %rsi",
+              "51: decq %rsi",
+              "54: andq $-0x10, %rsi",
+              "58: leaq (%rcx,%rsi), %rdi",
+              "5c: addq $0x10, %rdi",
+              "60: movq %rax, %rsi",
+              "63: callq *0x28(%r8)",
+              "67: jmp 0x126",
+              "6c: movq 0x8(%rbx), %r14",
+              "70: movq (%rsi), %rax",
+              "73: movq 0x8(%rsi), %rcx",
+              "77: movq 0x10(%rcx), %rdx",
+              "7b: decq %rdx",
+              "7e: andq $-0x10, %rdx",
+              "82: leaq (%rax,%rdx), %rdi",
+              "86: addq $0x10, %rdi",
+              "8a: callq *0x20(%rcx)",
+              "8d: movzbl 0x1(%rbx), %ecx",
+              "91: movq %rax, %rdi",
+              "94: movq %rdx, %rsi",
+              "97: movl %ecx, %edx",
+              "99: callq *%r14",
+              "9c: jmp 0x126",
+              "a1: movq 0x8(%rbx), %rax",
+              "a5: movq 0x10(%rbx), %rcx",
+              "a9: movq 0x10(%rcx), %rdx",
+              "ad: decq %rdx",
+              "b0: andq $-0x10, %rdx",
+              "b4: leaq (%rax,%rdx), %rdi",
+              "b8: addq $0x10, %rdi",
+              "bc: callq *0x28(%rcx)",
+              "bf: jmp 0x126",
+              "c1: movq 0x8(%rbx), %r15",
+              "c5: movq (%rsi), %rax",
+              "c8: movq 0x8(%rsi), %rcx",
+              "cc: movq 0x10(%rcx), %rdx",
+              "d0: decq %rdx",
+              "d3: andq $-0x10, %rdx",
+              "d7: leaq (%rax,%rdx), %rdi",
+              "db: addq $0x10, %rdi",
+              "df: callq *0x20(%rcx)",
+              "e2: movq %rax, %rbx",
+              "e5: movq %rsp, %r14",
+              "e8: movq %r14, %rdi",
+              "eb: movq %rax, %rsi",
+              "ee: callq *0x18(%rdx)",
+              "f1: movdqa (%r14), %xmm0",
+              "f6: pcmpeqb (%rip), %xmm0",
+              "fe: pmovmskb %xmm0, %eax",
+              "102: cmpl $0xffff, %eax",
+              "107: jne 0x119",
+              "109: movq %rbx, %rdi",
+              "10c: callq *%r15",
+              "10f: jmp 0x126",
+              "111: movq %rsi, %rdi",
+              "114: callq *0x8(%rbx)",
+              "117: jmp 0x126",
+              "119: xorl %eax, %eax",
+              "11b: jmp 0x126",
+              "11d: movq %rax, %rdi",
+              "120: movq %rdx, %rsi",
+              "123: callq *0x10(%rbx)",
+              "126: addq $0x10, %rsp",
+              "12a: popq %rbx",
+              "12b: popq %r14",
+              "12d: popq %r15",
+              "12f: retq"
+            ],
+            "relocations": [
+              {
+                "offset": "0000000000000012",
+                "type": "R_X86_64_PC32",
+                "target": ".rodata._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4"
+              },
+              {
+                "offset": "00000000000000fa",
+                "type": "R_X86_64_PC32",
+                "target": ".LCPI9902_0-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "cast": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/isolated_clone-cast.asm",
+        "sha256": "ff0fee60a183aff16afaee2380f05397634ac260f7427c76123cdfa415613555",
+        "sections": [
+          {
+            "symbol": "_RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_",
+            "instructions": [
+              "0: pushq %r14",
+              "2: pushq %rbx",
+              "3: pushq %rax",
+              "4: movq %rsi, %rbx",
+              "7: movq %rdi, %r14",
+              "a: movq 0x10(%rsi), %rax",
+              "e: decq %rax",
+              "11: andq $-0x10, %rax",
+              "15: movq 0x20(%rdi,%rax), %rax",
+              "1a: testq %rax, %rax",
+              "1d: je 0x24",
+              "1f: movq (%rax), %rsi",
+              "22: jmp 0x2b",
+              "24: leaq (%rip), %rsi",
+              "2b: leaq (%rip), %rdi",
+              "32: callq 0x37",
+              "37: testb %al, %al",
+              "39: je 0x42",
+              "3b: incq (%r14)",
+              "3e: jne 0x45",
+              "40: ud2",
+              "42: xorl %r14d, %r14d",
+              "45: movq %r14, %rax",
+              "48: movq %rbx, %rdx",
+              "4b: addq $0x8, %rsp",
+              "4f: popq %rbx",
+              "50: popq %r14",
+              "52: retq"
+            ],
+            "relocations": [
+              {
+                "offset": "0000000000000027",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro._RNvNtCseCMZVCq70TC_12ferroui_base12ferro_object17FERRO_OBJECT_TYPE-0x4"
+              },
+              {
+                "offset": "000000000000002e",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro._RNvNvXs4_CsjdsPGE2mFyg_18registration_probeNtB7_6TargetNtNtCseCMZVCq70TC_12ferroui_base11type_system10StaticType4TYPE4TYPE-0x4"
+              },
+              {
+                "offset": "0000000000000033",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMNtCseCMZVCq70TC_12ferroui_base11type_systemNtB2_8TypeInfo18is_assignable_from-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "assignable": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/isolated_clone-assignable.asm",
+        "sha256": "e8ba08202e95f34a9802a62e65077fcb14a669ea8fd0eba268bebfaaebd65925",
+        "sections": [
+          {
+            "symbol": "_RNvMNtCseCMZVCq70TC_12ferroui_base11type_systemNtB2_8TypeInfo18is_assignable_from",
+            "instructions": [
+              "0: testq %rsi, %rsi",
+              "3: sete %al",
+              "6: cmpq %rsi, %rdi",
+              "9: sete %cl",
+              "c: orb %al, %cl",
+              "e: jne 0x16",
+              "10: movq 0x30(%rsi), %rsi",
+              "14: jmp 0x0",
+              "16: testq %rsi, %rsi",
+              "19: setne %al",
+              "1c: retq"
+            ],
+            "relocations": []
+          }
+        ]
+      },
+      "drop": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/isolated_clone-drop.asm",
+        "sha256": "687d8b8b492d09944265972c60798d9e00490b33f613f21a9063bc1ff49792bc",
+        "sections": [
+          {
+            "symbol": "_RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_.33040",
+            "instructions": [
+              "0: movzbl (%rdi), %eax",
+              "3: testl %eax, %eax",
+              "5: jne 0x21",
+              "7: movq 0x8(%rdi), %rax",
+              "b: testq %rax, %rax",
+              "e: je 0x26",
+              "10: decq (%rax)",
+              "13: jne 0x26",
+              "15: movq 0x10(%rdi), %rsi",
+              "19: movq %rax, %rdi",
+              "1c: jmp 0x21",
+              "21: cmpl $0x2, %eax",
+              "24: je 0x27",
+              "26: retq",
+              "27: movq 0x8(%rdi), %rax",
+              "2b: decq (%rax)",
+              "2e: jne 0x26",
+              "30: movq 0x10(%rdi), %rsi",
+              "34: movq %rax, %rdi",
+              "37: jmp 0x3c"
+            ],
+            "relocations": [
+              {
+                "offset": "000000000000001d",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4"
+              },
+              {
+                "offset": "0000000000000038",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_DNtNtCseCMZVCq70TC_12ferroui_base14ferro_property8AnyValueEL_RL0_B1s_EEp6OutputINtNtBO_6option6OptionNtNtBO_3cmp8OrderingEEL_E9drop_slowB1x_-0x4"
+              }
+            ]
+          }
+        ]
+      },
+      "static_root_callback": {
+        "path": "/tmp/ferro496-conversion-audit/stage4-rejected-boxed/isolated_clone-root-leaf.asm",
+        "sha256": "38a9e91904924db71d27b1ba0a10716a21428777068d2d9659eb52b7203df8a3",
+        "sections": [
+          {
+            "symbol": "_RINvNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB8_10ValueTypes20register_element_ref9referenceNtCsjdsPGE2mFyg_18registration_probe6TargetEB1R_",
+            "instructions": [
+              "0: pushq %r15",
+              "2: pushq %r14",
+              "4: pushq %rbx",
+              "5: movq (%rdi), %rax",
+              "8: movq 0x8(%rdi), %rsi",
+              "c: movq %rax, %rdi",
+              "f: callq 0x14",
+              "14: testq %rax, %rax",
+              "17: je 0x45",
+              "19: movq %rax, %r14",
+              "1c: incq 0x8(%rax)",
+              "20: je 0x58",
+              "22: movq %rdx, %rbx",
+              "25: movq %r14, %rdi",
+              "28: movq %rdx, %rsi",
+              "2b: callq 0x30",
+              "30: movq %rax, %r15",
+              "33: decq (%r14)",
+              "36: jne 0x48",
+              "38: movq %r14, %rdi",
+              "3b: movq %rbx, %rsi",
+              "3e: callq 0x43",
+              "43: jmp 0x48",
+              "45: xorl %r15d, %r15d",
+              "48: leaq (%rip), %rdx",
+              "4f: movq %r15, %rax",
+              "52: popq %rbx",
+              "53: popq %r14",
+              "55: popq %r15",
+              "57: retq",
+              "58: ud2",
+              "5a: movq %rax, %r15",
+              "5d: decq (%r14)",
+              "60: jne 0x6d",
+              "62: movq %r14, %rdi",
+              "65: movq %rbx, %rsi",
+              "68: callq 0x6d",
+              "6d: movq %r15, %rdi",
+              "70: callq 0x75",
+              "75: callq 0x7a"
+            ],
+            "relocations": [
+              {
+                "offset": "0000000000000010",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RINvMs6_NtCseCMZVCq70TC_12ferroui_base11type_systemINtB6_3RefNtNtB8_12ferro_object11FerroObjectE4castNtCsjdsPGE2mFyg_18registration_probe6TargetEB1D_-0x4"
+              },
+              {
+                "offset": "000000000000002c",
+                "type": "R_X86_64_PLT32",
+                "target": ".text._RNvMs7_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtCseCMZVCq70TC_12ferroui_base11element_ref10ElementRefNtCsjdsPGE2mFyg_18registration_probe6TargetEE3newB1B_-0x4"
+              },
+              {
+                "offset": "000000000000003f",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4"
+              },
+              {
+                "offset": "000000000000004b",
+                "type": "R_X86_64_PC32",
+                "target": ".data.rel.ro..Lanon.592117ef0138605b0f1cc828e8e1d16b.0-0x4"
+              },
+              {
+                "offset": "0000000000000069",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.hot._RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E9drop_slowB1x_-0x4"
+              },
+              {
+                "offset": "0000000000000071",
+                "type": "R_X86_64_PLT32",
+                "target": "_Unwind_Resume-0x4"
+              },
+              {
+                "offset": "0000000000000076",
+                "type": "R_X86_64_PLT32",
+                "target": ".text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "proposed_source_only_trial": {
+    "status": "source_only_trial_prepared_not_compiled_or_applied",
+    "source": {
+      "repository": "/workspace/scratch/6f70b20c54b6/FerroUI",
+      "path": "src/FerroUI.Base/data/core/value_type.rs",
+      "frozen_stage4_sha256": "9d581166d51d0bf7a9a84d9b1a68fb558c00459d5546ae88ae3df89e9ecfb427",
+      "candidate_sha256": "d6550b20e448ac9b46b40b8f5fb0b7654e872446fe5adbffca476d2b51ee6f39"
+    },
+    "patch": {
+      "path": "/tmp/ferro496-conversion-recovery/weak-root-static/static-weak-root.patch",
+      "sha256": "ccdd9107aa7a5e9cc06d6c58b53ef6ab300f5ed738656dc480fa5dc860625cae"
+    },
+    "change": "Replace only the two Ref<FerroObject> to weak-element conversion callbacks with BorrowedConversion::Static leaves, placing root Any downcast and class cast directly in each concrete leaf. Keep the shared installer and all public signatures.",
+    "descriptor_estimate": {
+      "old_function_pointers": 9,
+      "new_function_pointers": 10,
+      "x86_64_estimated_bytes_before": 72,
+      "x86_64_estimated_bytes_after": 80,
+      "net_estimated_bytes_per_descriptor": 8,
+      "note": "Source-level thin function-pointer descriptor estimate only. Linked section/code/relocation size must be measured; no estimate of total binary or native text delta is claimed."
+    },
+    "semantic_checks": [
+      {
+        "case": "Ordinary T conversion-only route",
+        "reason": "set_conversion is retained. Registration::Conversion exposes neither cast nor borrowed implicit-conversion view even though its boxed converter uses the Borrowed variant internally."
+      },
+      {
+        "case": "T = FerroObject overlapping keys",
+        "reason": "The three earlier set_cast calls and their order are unchanged. set_conversion retains the existing independent cast and borrowed views inside OverrideRoutes."
+      },
+      {
+        "case": "Pre-existing custom cast or captured conversion",
+        "reason": "Registry::set_conversion is unchanged: it preserves earlier cast/borrowed views and replaces only the conversion. Re-registration still restores the built-in converter at the same point in the same key order."
+      },
+      {
+        "case": "Any downcast and wrong runtime subclass",
+        "reason": "Both routes invoke AnyValue::as_any once through ConvertFn::Borrowed, then downcast_ref<Ref<FerroObject>> and cast<T>. Either failure returns None before boxing. This is the same underlying as_any/downcast sequence as FromRoot."
+      },
+      {
+        "case": "Successful nonnullable and nullable root conversion",
+        "reason": "Each direct leaf holds the temporary successful Ref<T>, creates the same weak ElementRef, boxes exactly ElementRef<T> or Some(ElementRef<T>), then drops the temporary handle. No owned Rc callback adapter or pre-cast strong-handle clone is introduced."
+      },
+      {
+        "case": "Wrong class for nullable destination",
+        "reason": "The class cast uses ? before Some wrapping, so it still returns conversion failure None, not a boxed nullable null."
+      },
+      {
+        "case": "Metadata/object callback",
+        "reason": "The from_object: reference::<T> field and element_ref_objects insertion are unchanged. Compiler metadata, object-to-weak lookup callback and its public behavior are retained."
+      },
+      {
+        "case": "Registry borrowing and callback reentrancy",
+        "reason": "Lookup still clones the converter out of the registry before invocation; only the contained static function representation changes. The installer performs no callback invocation."
+      }
+    ],
+    "unchanged": "Hash annotation, manual ConvertFn Clone, registry representation, setter methods, public lookup methods, nullable registration, remaining typed/expired conversions, metadata, class/interface/property registration and all public API signatures.",
+    "validation_limits": "Source review and patch applicability only; no source checkout was modified and no compiler, linker, test or benchmark was run.",
+    "patch_applicability_check": {
+      "command": "git apply --check /tmp/ferro496-conversion-recovery/weak-root-static/static-weak-root.patch",
+      "repository": "/workspace/scratch/6f70b20c54b6/FerroUI",
+      "exit_code": 0,
+      "mutates_checkout": false
+    }
+  },
+  "reproduction": {
+    "tools": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin",
+    "commands": [
+      "llvm-nm --print-size <retained FatLTO object>",
+      "llvm-objdump --disassemble-symbols=<selected exact symbols> --no-show-raw-insn --reloc <retained FatLTO object>",
+      "git show 6d5225:src/FerroUI.Base/data/core/value_type.rs (register_conversion and register_element_ref)",
+      "Read the immutable cohort JSONs referenced above; the longer runner rotates all six process orders and includes the exact reference executable as a second arm."
+    ]
+  },
+  "limits": "Selected normalized instruction records omit redundant symbol annotations but retain instruction offsets and relocation targets. Final machine placement was not causally tested. The proposed patch has only source/semantic/applicability review and must be compiled and measured before any performance claim."
+}

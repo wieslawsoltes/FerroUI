@@ -1,0 +1,990 @@
+{
+  "schema": "ferroui-final-conversion-pgo-audit-v2",
+  "status": "codegen_audit_complete_fresh_profile_hash_and_clone_verified",
+  "scope": "Read-only targeted profile, optimized LLVM IR and retained final native-object audit for the source with explicit always-inline IdHasher::write_u64 and semantically equivalent ConvertFn::clone. Runtime performance is assessed by separate quiet paired measurements.",
+  "source": {
+    "head": "a1e622c5a86433dcfe0a2b2d7b1f76a57dc06122",
+    "source_hashes": {
+      "src/FerroUI.Base/data/core/typed_binding_expression.rs": "c9fc092b0a334b87b15c0f30fcd75e96751d295edac3c84c086753766389c36a",
+      "src/FerroUI.Base/data/core/value_type.rs": "9d581166d51d0bf7a9a84d9b1a68fb558c00459d5546ae88ae3df89e9ecfb427",
+      "src/FerroUI.Base/ferro_property.rs": "d98feb8cf97112e64e454fc13000b7cec71b83b48eda2dff9eeaae236906288d",
+      "src/FerroUI.Base/metadata/markup_type.rs": "b64013654d831ab7e32b257e362977ab2a5e388a145d8448b80d66e9324a9f9c",
+      "src/FerroUI.Base/tests/class_registration_tests.rs": "70129fcbc1ac7d9dfbaa32e0a203cfacac431df8c0e4395281c2ea58b4f47b00",
+      "src/FerroUI.Base/tests/element_ref_registration_tests.rs": "f230381f6f8e645a4271577a1942d52c34bd1b1b671b1377f7b5f2407f730286",
+      "src/FerroUI.Base/tests/mod.rs": "3907161ba77d26cf83cf1dc2af62a1dd8da94882d9910449367ba204be81b08c",
+      "src/FerroUI.Base/type_system.rs": "a61adc4f72f143e2aa1def25d2b6180bb95d63dcbf90b9c6c473a5a59296dcca",
+      "src/FerroUI.Build.Scan/model.rs": "c76f87cc91ecb88857a173338e62169b6009f07dea067258ff4a377716ebfaa8",
+      "src/FerroUI.Build.Scan/scanner/mod.rs": "c6572275c33be7a6d603d96d3e118a860274985898673747d137714b1472a662",
+      "src/FerroUI.Build.Scan/scanner/source.rs": "313f4ec3da24ef4d3ab0c91534081be20a4d4fd3fd93d6f97496e8840721f69b",
+      "src/FerroUI.Build.Scan/scanner/tests.rs": "f6ed55a03c040c27d5c99d98853b1ff92bd08cca4a34ee06412b8a55fd0c3cc0",
+      "src/FerroUI.Build.Scan/tests/fixtures/nullable_registration/lib.rs": "a715cba4209a18b4736259dbea268b8dce9a8303a799cc56ee233c8d93a0ac17"
+    },
+    "parent_snapshot_sha256": "c5fefc4f63851de3befc782ba812b31c7ee176f7c9282705eeb60e414a9b5a10",
+    "changes_from_stage3": [
+      "src/FerroUI.Base/data/core/value_type.rs"
+    ],
+    "additional_patch_sha256": "e69e8564c48a5da15b7e2309164a756e384981c5660d319dfe4fa45455a87174",
+    "note": "Exact root source equals measurement checkout for all13 captured files. Only production change from stage3: manual always-inline Clone for ConvertFn with identical five variant operations.",
+    "root_snapshot_path": "/workspace/scratch/6f70b20c54b6/FerroUI",
+    "root_snapshot_hash_checks": {
+      "src/FerroUI.Base/data/core/typed_binding_expression.rs": true,
+      "src/FerroUI.Base/data/core/value_type.rs": true,
+      "src/FerroUI.Base/ferro_property.rs": true,
+      "src/FerroUI.Base/metadata/markup_type.rs": true,
+      "src/FerroUI.Base/tests/class_registration_tests.rs": true,
+      "src/FerroUI.Base/tests/element_ref_registration_tests.rs": true,
+      "src/FerroUI.Base/tests/mod.rs": true,
+      "src/FerroUI.Base/type_system.rs": true,
+      "src/FerroUI.Build.Scan/model.rs": true,
+      "src/FerroUI.Build.Scan/scanner/mod.rs": true,
+      "src/FerroUI.Build.Scan/scanner/source.rs": true,
+      "src/FerroUI.Build.Scan/scanner/tests.rs": true,
+      "src/FerroUI.Build.Scan/tests/fixtures/nullable_registration/lib.rs": true
+    },
+    "measurement_snapshot_path": "/tmp/ferro496-base",
+    "measurement_snapshot_hash_checks": {
+      "src/FerroUI.Base/data/core/typed_binding_expression.rs": true,
+      "src/FerroUI.Base/data/core/value_type.rs": true,
+      "src/FerroUI.Base/ferro_property.rs": true,
+      "src/FerroUI.Base/metadata/markup_type.rs": true,
+      "src/FerroUI.Base/tests/class_registration_tests.rs": true,
+      "src/FerroUI.Base/tests/element_ref_registration_tests.rs": true,
+      "src/FerroUI.Base/tests/mod.rs": true,
+      "src/FerroUI.Base/type_system.rs": true,
+      "src/FerroUI.Build.Scan/model.rs": true,
+      "src/FerroUI.Build.Scan/scanner/mod.rs": true,
+      "src/FerroUI.Build.Scan/scanner/source.rs": true,
+      "src/FerroUI.Build.Scan/scanner/tests.rs": true,
+      "src/FerroUI.Build.Scan/tests/fixtures/nullable_registration/lib.rs": true
+    }
+  },
+  "training": {
+    "method": "Same original profile_winui.py training cases, distinct fresh raw directory, no QA lanes. Existing instrumentation target reused at the original -Cprofile-generate path. Final whole graph uses a new content-addressed profile path.",
+    "profile": {
+      "path": "/tmp/ferro-run/ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329.profdata",
+      "sha256": "ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329",
+      "raw_files": 13,
+      "raw_bytes": 424292632
+    },
+    "provenance_file": "/tmp/ferro-run/stage4-retraining.json",
+    "provenance_sha256_at_profile_ready": "122bb56ef12d45d3704747f92232dff785694f1c509b77474598fbd9be8691b1",
+    "cases": [
+      {
+        "lane": "startup",
+        "round": 0,
+        "arguments": []
+      },
+      {
+        "lane": "templates",
+        "round": 0,
+        "arguments": []
+      },
+      {
+        "lane": "property",
+        "round": 0,
+        "arguments": [
+          "0"
+        ]
+      },
+      {
+        "lane": "edit",
+        "round": 0,
+        "arguments": [
+          "/tmp/ferro-run/pgo/winui-pgo-c510yqsy/Compact.fxp"
+        ]
+      },
+      {
+        "lane": "startup",
+        "round": 1,
+        "arguments": []
+      },
+      {
+        "lane": "templates",
+        "round": 1,
+        "arguments": []
+      },
+      {
+        "lane": "property",
+        "round": 1,
+        "arguments": [
+          "1"
+        ]
+      },
+      {
+        "lane": "edit",
+        "round": 1,
+        "arguments": [
+          "/tmp/ferro-run/pgo/winui-pgo-c510yqsy/Compact.fxp"
+        ]
+      },
+      {
+        "lane": "startup",
+        "round": 2,
+        "arguments": []
+      },
+      {
+        "lane": "templates",
+        "round": 2,
+        "arguments": []
+      },
+      {
+        "lane": "property",
+        "round": 2,
+        "arguments": [
+          "2"
+        ]
+      },
+      {
+        "lane": "edit",
+        "round": 2,
+        "arguments": [
+          "/tmp/ferro-run/pgo/winui-pgo-c510yqsy/Compact.fxp"
+        ]
+      },
+      {
+        "lane": "structure",
+        "arguments": [
+          "/tmp/ferro-run/pgo/winui-pgo-c510yqsy/Generic.fxp"
+        ]
+      }
+    ],
+    "case_count": 13,
+    "instrumented_nonzero_coverage": {
+      "ferroui_base": 10313,
+      "ferroui_controls": 3696,
+      "ferroui_markup_xaml": 382,
+      "ferroui_markup_xaml_loader": 891,
+      "ferroui_themes_winui": 203,
+      "winui_theme_probe": 34
+    }
+  },
+  "fresh_profile_checks": {
+    "selected_records": 6,
+    "same_cfg_hash_and_counter_vectors_as_stage3": true,
+    "current_root_cgu": [
+      "14"
+    ],
+    "records": [
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "fresh_profile_key": "ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "cfg_hash_hex": "0xa4d0ad3efffffff",
+        "block_counts": [
+          2457
+        ],
+        "cfg_matches_stage3": true,
+        "counts_match_stage3": true,
+        "indirect_target_lines": []
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_",
+        "fresh_profile_key": "ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_",
+        "cfg_hash_hex": "0xa4d0ad3efffffff",
+        "block_counts": [
+          4486
+        ],
+        "cfg_matches_stage3": true,
+        "counts_match_stage3": true,
+        "indirect_target_lines": []
+      },
+      {
+        "symbol": "_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed",
+        "fresh_profile_key": "ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed",
+        "cfg_hash_hex": "0x9d5340ef0741edf",
+        "block_counts": [
+          7173,
+          11232,
+          361703,
+          357896,
+          5226,
+          2886,
+          5226,
+          2886,
+          5109,
+          117,
+          1404,
+          1482,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cfg_matches_stage3": true,
+        "counts_match_stage3": true,
+        "indirect_target_lines": [
+          "[  0, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_,     344972 ] (95.37%)",
+          "[  0, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_,      16419 ] (4.54%)",
+          "[  0, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_,        234 ] (0.06%)",
+          "[  0, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_,         78 ] (0.02%)",
+          "[  1, ferroui_base.aa5a9f3f002932e2-cgu.10;_RNCINvMs_NtNtCseCMZVCq70TC_12ferroui_base6layout10layoutableNtB7_10Layoutable15affects_measureBW_E0Bb_,       1365 ] (19.03%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs5_NtCseCMZVCq70TC_12ferroui_base14ferro_propertyNtB8_25PropertyChangedObservable17add_class_handlerNtNtCslPlBjtdTYjg_16ferroui_controls7control7ControlNvMs7_NtB1L_4gridNtB2D_4Grid33on_cell_attached_property_changedE0B1L_,       1248 ] (17.40%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs_NtCslPlBjtdTYjg_16ferroui_controls5panelNtB7_5Panel22affects_parent_measureNtNtB9_4grid4GridE0B9_,       1248 ] (17.40%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs5_NtCseCMZVCq70TC_12ferroui_base14ferro_propertyNtB8_25PropertyChangedObservable17add_class_handlerNtNtCslPlBjtdTYjg_16ferroui_controls15definition_base14DefinitionBaseNvMs0_B1J_B1H_29on_user_size_property_changedE0B1L_,       1014 ] (14.14%)",
+          "[  1, ferroui_base.aa5a9f3f002932e2-cgu.10;_RNCINvMs0_NtCseCMZVCq70TC_12ferroui_base6visualNtB8_6Visual14affects_renderBJ_Es_0Ba_,        468 ] (6.52%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs_NtNtCseCMZVCq70TC_12ferroui_base6layout10layoutableNtB7_10Layoutable15affects_arrangeNtNtNtCslPlBjtdTYjg_16ferroui_controls10presenters17content_presenter16ContentPresenterE0B1A_,        312 ] (4.35%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs0_NtCseCMZVCq70TC_12ferroui_base6visualNtB8_6Visual14affects_renderNtNtCslPlBjtdTYjg_16ferroui_controls6border6BorderE0B1f_,        195 ] (2.72%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs0_NtCseCMZVCq70TC_12ferroui_base6visualNtB8_6Visual14affects_renderNtNtNtCslPlBjtdTYjg_16ferroui_controls10presenters17content_presenter16ContentPresenterE0B1h_,        195 ] (2.72%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs_NtNtCseCMZVCq70TC_12ferroui_base6layout10layoutableNtB7_10Layoutable15affects_measureNtNtCslPlBjtdTYjg_16ferroui_controls9decorator9DecoratorE0B1y_,        156 ] (2.17%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs5_NtCseCMZVCq70TC_12ferroui_base14ferro_propertyNtB8_25PropertyChangedObservable17add_class_handlerNtNtNtCslPlBjtdTYjg_16ferroui_controls10primitives17templated_control16TemplatedControlNCNvMs_B1J_B1H_18static_constructor0E0B1N_,        117 ] (1.63%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs0_NtCseCMZVCq70TC_12ferroui_base6visualNtB8_6Visual14affects_renderNtNtNtCslPlBjtdTYjg_16ferroui_controls10presenters17content_presenter16ContentPresenterEs_0B1h_,        117 ] (1.63%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs0_NtCseCMZVCq70TC_12ferroui_base6visualNtB8_6Visual14affects_renderNtNtCslPlBjtdTYjg_16ferroui_controls6border6BorderEs_0B1f_,        117 ] (1.63%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs0_NtCseCMZVCq70TC_12ferroui_base6visualNtB8_6Visual14affects_renderNtNtCslPlBjtdTYjg_16ferroui_controls10text_block9TextBlockE0B1f_,        117 ] (1.63%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs0_NtCseCMZVCq70TC_12ferroui_base6visualNtB8_6Visual14affects_renderNtNtCslPlBjtdTYjg_16ferroui_controls5panel5PanelE0B1f_,        114 ] (1.59%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs_NtNtCseCMZVCq70TC_12ferroui_base6layout10layoutableNtB7_10Layoutable15affects_measureNtNtCslPlBjtdTYjg_16ferroui_controls11stack_panel10StackPanelE0B1y_,         78 ] (1.09%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs5_NtCseCMZVCq70TC_12ferroui_base14ferro_propertyNtB8_25PropertyChangedObservable17add_class_handlerNtNtCslPlBjtdTYjg_16ferroui_controls9decorator9DecoratorNCNvMB1J_B1H_18static_constructor0E0B1L_,         78 ] (1.09%)",
+          "[  1, ferroui_base.aa5a9f3f002932e2-cgu.10;_RNCNvMs0_NtCseCMZVCq70TC_12ferroui_base6visualNtB7_6Visual18static_constructors0_0B9_,         78 ] (1.09%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs_NtNtCseCMZVCq70TC_12ferroui_base6layout10layoutableNtB7_10Layoutable15affects_measureNtNtNtCslPlBjtdTYjg_16ferroui_controls10presenters17content_presenter16ContentPresenterE0B1A_,         78 ] (1.09%)",
+          "[  1, ferroui_base.aa5a9f3f002932e2-cgu.10;_RNCNvMs_NtNtCseCMZVCq70TC_12ferroui_base5input13input_elementNtB6_12InputElement18static_constructor0Ba_,         39 ] (0.54%)",
+          "[  1, ferroui_controls.fe3f1ddd31fc3b54-cgu.06;_RNCINvMs_NtNtCseCMZVCq70TC_12ferroui_base6layout10layoutableNtB7_10Layoutable15affects_measureNtNtCslPlBjtdTYjg_16ferroui_controls11symbol_icon10SymbolIconE0B1y_,         39 ] (0.54%)",
+          "[  2, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNCNCNvXs0_NtNtCseCMZVCq70TC_12ferroui_base4data27template_binding_expressionNtB9_25TemplateBindingExpressionNtNtNtBb_4core31untyped_binding_expression_base24UntypedBindingExpression10start_core00Bd_,       6786 ] (60.42%)",
+          "[  2, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNCNvXs0_NtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core16expression_nodes21templated_parent_nodeNtB7_19TemplatedParentNodeNtNtB9_15expression_node14ExpressionNode17on_source_changeds_0Bf_,       2184 ] (19.44%)",
+          "[  2, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNCNvXs1_NtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core7plugins30ferro_property_accessor_pluginNtB7_21FerroPropertyAccessorNtNtB9_19i_property_accessor17IPropertyAccessor9subscribe0Bf_,       1287 ] (11.46%)",
+          "[  2, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNCNCNvMs_NtNtCseCMZVCq70TC_12ferroui_base4data27template_binding_expressionNtB8_25TemplateBindingExpression27on_templated_parent_changed00Bc_,        429 ] (3.82%)",
+          "[  2, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNCNvMs5_NtCseCMZVCq70TC_12ferroui_base23ferro_object_extensionsINtB7_18PropertyObservableINtNtCsevLNFiNqfJP_4core6option6OptionINtNtB9_11type_system3RefNtNtCslPlBjtdTYjg_16ferroui_controls7control7ControlEEE10initialize0B2v_,        273 ] (2.43%)",
+          "[  2, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNCNvXso_NtCslPlBjtdTYjg_16ferroui_controls15navigation_viewNtB7_14NavigationViewNtNtNtB9_10primitives17templated_control20TemplatedControlImpl17on_apply_templates3_0B9_,        117 ] (1.04%)",
+          "[  2, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNCNvMs2_NtCslPlBjtdTYjg_16ferroui_controls15navigation_viewNtB7_14NavigationView14subscribe_item0B9_,         78 ] (0.69%)",
+          "[  2, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNCNvXs_NtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core16expression_nodes28ferro_property_accessor_nodeNtB6_25FerroPropertyAccessorNodeNtNtB8_15expression_node14ExpressionNode17on_source_changed0Be_,         39 ] (0.35%)",
+          "[  2, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNCINvMs0_NtNtNtCseCMZVCq70TC_12ferroui_base5input19gesture_recognizers29gesture_recognizer_collectionNtB8_27GestureRecognizerCollection3addINtNtBe_11type_system3RefNtNtBa_18gesture_recognizer17GestureRecognizerEE0Be_,         39 ] (0.35%)"
+        ]
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB1w_6option6OptionRNtB2U_12BindingErrorEEE9call_onceB9_",
+        "fresh_profile_key": "ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB1w_6option6OptionRNtB2U_12BindingErrorEEE9call_onceB9_",
+        "cfg_hash_hex": "0xa4d0ad3efffffff",
+        "block_counts": [
+          0
+        ],
+        "cfg_matches_stage3": true,
+        "counts_match_stage3": true,
+        "indirect_target_lines": []
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "fresh_profile_key": "ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "cfg_hash_hex": "0xb435d4c4a7f3cf9",
+        "block_counts": [
+          361703,
+          357896,
+          0
+        ],
+        "cfg_matches_stage3": true,
+        "counts_match_stage3": true,
+        "indirect_target_lines": [
+          "[  0, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_,     344395 ] (96.23%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.13;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls7control7ControlEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,       4329 ] (1.21%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls15content_control14ContentControlEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,       2379 ] (0.66%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.03;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls6button6ButtonEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,       1677 ] (0.47%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.03;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls13scroll_viewer12ScrollViewerEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,        897 ] (0.25%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtCslPlBjtdTYjg_16ferroui_controls10presenters17content_presenter16ContentPresenterEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB18_,        663 ] (0.19%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtCslPlBjtdTYjg_16ferroui_controls10primitives10scroll_bar9ScrollBarEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB18_,        624 ] (0.17%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls6border6BorderEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,        624 ] (0.17%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.03;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtCslPlBjtdTYjg_16ferroui_controls10split_view10split_view9SplitViewEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB18_,        429 ] (0.12%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls10text_block9TextBlockEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,        312 ] (0.09%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.03;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls20navigation_view_item22NavigationViewItemBaseEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,        273 ] (0.08%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.03;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls20navigation_view_item18NavigationViewItemEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,        273 ] (0.08%)",
+          "[  0, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_,        234 ] (0.07%)",
+          "[  0, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_,        234 ] (0.07%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtCslPlBjtdTYjg_16ferroui_controls10presenters24scroll_content_presenter22ScrollContentPresenterEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB18_,        234 ] (0.07%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.03;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls15navigation_view14NavigationViewEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,        195 ] (0.05%)",
+          "[  0, ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_,         78 ] (0.02%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls11symbol_icon10SymbolIconEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,         39 ] (0.01%)",
+          "[  0, ferroui_themes_winui.96792d4edb23bbd1-cgu.12;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCscUXTGitoVcP_20ferroui_themes_winui11winui_theme10WinUIThemeEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,          4 ] (0.00%)",
+          "[  0, ferroui_controls.fe3f1ddd31fc3b54-cgu.08;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtCslPlBjtdTYjg_16ferroui_controls11application11ApplicationEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB16_,          3 ] (0.00%)"
+        ]
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "fresh_profile_key": "ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "cfg_hash_hex": "0xa4d0ad3efffffff",
+        "block_counts": [
+          357896
+        ],
+        "cfg_matches_stage3": true,
+        "counts_match_stage3": true,
+        "indirect_target_lines": []
+      }
+    ],
+    "selected_exact_profile_output": "/tmp/ferro496-conversion-audit/stage4/selected-current-profile.txt",
+    "selected_exact_profile_output_sha256": "7a04e56776a6a9926335caf0c73c6bc441659cd7b785b42c3b5a614814e367d5"
+  },
+  "interpretation": [
+    "Current exact key presence in the raw profile is necessary, but optimized !prof metadata and indirect target promotion must also be verified before calling a profile accepted.",
+    "Raw CFG counter vectors and LLVM function_entry_count have different meanings; the raw selected notify block vector is not its call count.",
+    "The diagnostic inherited-profile inline-Clone trial eliminated the native clone boundary and restored boxed conversion parity, but lost unrelated profile identities. It is not final acceptance evidence.",
+    "Both ConvertFn and nested BorrowedConversion clone boundaries must be checked in the optimized Base and final native path; an inline attribute alone is not evidence of inlining."
+  ],
+  "prior_diagnostic": {
+    "report": "/tmp/ferro496-conversion-audit/inline-clone/report.json",
+    "sha256": "cdacf915a13459efa33b0ff9d8183452667c354b3d288e9fb6f828ccd8665b19",
+    "scope": "Diagnostic only; source-mismatched inherited PGO."
+  },
+  "reproduction": {
+    "tools_root": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin",
+    "steps": [
+      "Run llvm-profdata show --counts --ic-targets --function=<symbol> <profile> for each selected symbol. The six selected exact root keys use cgu.14.",
+      "Locate real archive members using llvm-ar t and llvm-nm --print-file-name; extract only selected bitcode members with llvm-ar p, then llvm-dis.",
+      "Resolve !prof and !PGOFuncName on root notify and virtual handlers; inspect hash_one for calls or alloca, and conversion wrappers for ConvertFn or BorrowedConversion clone calls.",
+      "Inspect the retained final FatLTO object with llvm-nm and targeted llvm-objdump --disassemble-symbols --reloc. Verify both public lookup routes inline pair hashing and boxed conversion has no nested or outer clone boundary.",
+      "Verify binary, native capture, fixture source, profile and Base hashes against the exact final fixture manifest before interpreting native evidence."
+    ]
+  },
+  "fresh_conversion_profile_checks": {
+    "records": [
+      {
+        "symbol": "_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+        "fresh_profile_key": "ferroui_base.aa5a9f3f002932e2-cgu.11;_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+        "cfg_hash_hex": "0x153265388f3cffb",
+        "block_counts": [
+          257,
+          144,
+          64,
+          0,
+          9056,
+          257,
+          3368,
+          0
+        ]
+      },
+      {
+        "symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "fresh_profile_key": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "cfg_hash_hex": "0x62a47a10fbf8939",
+        "block_counts": [
+          257,
+          257,
+          0,
+          0
+        ]
+      },
+      {
+        "symbol": "_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_",
+        "fresh_profile_key": "_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_",
+        "cfg_hash_hex": "0xa4d0ad3efffffff",
+        "block_counts": [
+          115042
+        ]
+      }
+    ],
+    "selected_output": "/tmp/ferro496-conversion-audit/stage4/selected-conversion-profile.txt",
+    "selected_output_sha256": "be1469792635a4296b73323c2ffbb6bc7459e16691832cd2ed8f49cc2bb3b3c2"
+  },
+  "optimized_base": {
+    "rlib": "/tmp/ferro-run/stage4-base/libferroui_base-59aaffbecfa5583b.rlib",
+    "sha256": "2ba02254bc929307b70f06ee5bb37c41b372c77c831bcb51737358e8d10f772c",
+    "bytes": 213312536,
+    "compiler_record": "/tmp/ferro-run/stage4-base/compiler.json",
+    "compiler_record_sha256": "8b5a884dd7e97e4c86ee112c70eccbb3e6313a558b8b902b2543f1f63f40eebe",
+    "result_record": "/tmp/ferro-run/stage4-base/result.json",
+    "result_record_sha256": "e37103678448aa4c619ba8a08b7a0c55eb657191c231727553854de7f78be7c5",
+    "profile_argument": "/tmp/ferro-run/ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329.profdata",
+    "codegen_flags_in_command_order": [
+      "opt-level=s",
+      "linker-plugin-lto",
+      "codegen-units=16",
+      "metadata=9c809aa2fbecc8ae",
+      "extra-filename=-59aaffbecfa5583b",
+      "strip=debuginfo",
+      "profile-use=/tmp/ferro-run/ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329.profdata",
+      "llvm-args=--addrsig",
+      "opt-level=z"
+    ],
+    "current_key_checks": {
+      "artifact_sha_matches_inspected_base": true,
+      "compiler_and_result_same_argv": true,
+      "profile_sha_matches_training": true,
+      "profile_argument_matches_training": true,
+      "notify_current_key_is_cgu14": true,
+      "all_81_root_vtable_profiles_accepted": true,
+      "all_explicit_root_names_current_cgu14": true,
+      "two_root_handler_promotions": true,
+      "handler_list_helper_calls_absent": true,
+      "hash_folded": true,
+      "conversion_paths_all_have_accepted_profiles": true,
+      "no_nested_or_outer_clone_calls": true,
+      "no_nested_or_outer_clone_definition": true,
+      "all_13_recorded_changed_sources_match_root_and_measurement": true
+    },
+    "root_vtable_profile_summary": {
+      "previous_definition_count": 81,
+      "current_definition_count": 81,
+      "same_accepted_profile_count": 81,
+      "explicit_current_pgo_name_count": 15,
+      "named_functions": [
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 4486}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 13501}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 16731}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 2457}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 234}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_6layout10layoutable10LayoutableEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_6layout10layoutable10LayoutableEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 0}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_7styling6styles6StylesE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_7styling6styles6StylesE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 23}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 16419}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation15transition_base14TransitionBaseEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation15transition_base14TransitionBaseEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 312}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 117}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 234}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 234}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 39}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 78}"
+          ]
+        },
+        {
+          "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+          "pgo_name": [
+            "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_\"}"
+          ],
+          "function_profile": [
+            "!{!\"function_entry_count\", i64 78}"
+          ]
+        }
+      ],
+      "note": "The 15 explicit local root PGO names intentionally move from cgu.10 to cgu.14; their exact fresh keys and accepted counts are verified. The 66 definitions without explicit local names retain accepted zero/nonzero metadata too."
+    },
+    "notify_property_changed": {
+      "symbol": "_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal fastcc void @_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #4 personality ptr @rust_eh_personality !prof !40466 !guid !40467 !PGOFuncName !40468 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 14164}"
+      ],
+      "pgo_name": [
+        "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.14;_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed\"}"
+      ],
+      "promoted_target_compares": [
+        "%13 = icmp eq ptr %12, @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "%21 = icmp eq ptr %20, @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "%204 = icmp eq ptr %203, @_RNCNCNvXs0_NtNtCseCMZVCq70TC_12ferroui_base4data27template_binding_expressionNtB9_25TemplateBindingExpressionNtNtNtBb_4core31untyped_binding_expression_base24UntypedBindingExpression10start_core00Bd_",
+        "%227 = icmp eq ptr %203, @_RNCNvXs0_NtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core16expression_nodes21templated_parent_nodeNtB7_19TemplatedParentNodeNtNtB9_15expression_node14ExpressionNode17on_source_changeds_0Bf_",
+        "%230 = icmp eq ptr %203, @_RNCNvXs1_NtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core7plugins30ferro_property_accessor_pluginNtB7_21FerroPropertyAccessorNtNtB9_19i_property_accessor17IPropertyAccessor9subscribe0Bf_"
+      ]
+    },
+    "notify_root_promotions": [
+      "%13 = icmp eq ptr %12, @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "%21 = icmp eq ptr %20, @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_"
+    ],
+    "handler_list_helper_calls": [],
+    "hash_one": {
+      "symbol": "_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_",
+      "name": "BuildHasherDefault<IdHasher>::hash_one",
+      "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define noundef i64 @_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_(ptr noalias nofree noundef nonnull readonly captures(none) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #21 personality ptr @rust_eh_personality !prof !9965 !guid !9966 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 115042}"
+      ],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 9,
+      "full_ir": "define noundef i64 @_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_(ptr noalias nofree noundef nonnull readonly captures(none) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #21 personality ptr @rust_eh_personality !prof !9965 !guid !9966 {\n  %3 = getelementptr inbounds nuw i8, ptr %1, i64 8\n  %4 = load i64, ptr %3, align 1, !alias.scope !9967, !noalias !9972\n  %5 = getelementptr inbounds nuw i8, ptr %1, i64 24\n  %6 = load i64, ptr %5, align 1, !alias.scope !9978, !noalias !9981\n  %7 = tail call noundef i64 @llvm.fshl.i64(i64 %4, i64 %4, i64 32)\n  %8 = xor i64 %7, %6\n  ret i64 %8\n}",
+      "calls_write_u64": false,
+      "stack_allocations": 0
+    },
+    "conversion_paths": [
+      {
+        "symbol": "_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+        "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+        "definition": "define internal fastcc noundef align 8 ptr @_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %1) unnamed_addr #12 personality ptr @rust_eh_personality !prof !4652 !guid !4653 !PGOFuncName !4654 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 48}"
+        ],
+        "pgo_name": [
+          "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.11;_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_\"}"
+        ],
+        "attributes": [
+          "{ inlinehint minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 85,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type13with_registryINtNtCsevLNFiNqfJP_4core6option6OptionNtB2_9ConvertFnENCNvMsb_B2_NtB2_10ValueTypes22try_convert_registered0EB8_",
+        "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+        "definition": "define void @_RINvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type13with_registryINtNtCsevLNFiNqfJP_4core6option6OptionNtB2_9ConvertFnENCNvMsb_B2_NtB2_10ValueTypes22try_convert_registered0EB8_(ptr dead_on_unwind noalias nofree noundef writable sret([24 x i8]) align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) %1) unnamed_addr #10 personality ptr @rust_eh_personality !prof !17751 !guid !17752 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 257}"
+        ],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 78,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+        "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+        "definition": "define internal fastcc { ptr, ptr } @_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %1) unnamed_addr #12 !prof !37695 !guid !37696 !PGOFuncName !37697 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 12889}"
+        ],
+        "pgo_name": [
+          "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.11;_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply\"}"
+        ],
+        "attributes": [
+          "{ inlinehint minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 156,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+        "definition": "define { ptr, ptr } @_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered(ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(16) %0, ptr noalias nofree noundef readonly align 8 captures(none) dead_on_return dereferenceable(32) %1) unnamed_addr #10 personality ptr @rust_eh_personality !prof !17751 !guid !41279 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 257}"
+        ],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 72,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0E0bEB1Z_",
+        "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o",
+        "definition": "define noundef zeroext i1 @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0E0bEB1Z_(ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %0) unnamed_addr #0 personality ptr @rust_eh_personality !prof !6070 !guid !6071 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 257}"
+        ],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 26,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es0_0B3s_EB1Z_",
+        "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o",
+        "definition": "define void @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es0_0B3s_EB1Z_(ptr dead_on_unwind noalias nofree noundef writable writeonly sret([24 x i8]) align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %1, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) %2) unnamed_addr #0 personality ptr @rust_eh_personality !prof !6070 !guid !6085 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 257}"
+        ],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 155,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es_0uEB1Z_",
+        "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o",
+        "definition": "define void @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es_0uEB1Z_(ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %0) unnamed_addr #2 personality ptr @rust_eh_personality !prof !1056 !guid !6158 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 0}"
+        ],
+        "pgo_name": [],
+        "attributes": [
+          "{ cold minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 85,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+        "member": "ferroui_base-59aaffbecfa5583b.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o",
+        "definition": "define internal fastcc noundef align 8 ptr @_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %1) unnamed_addr #4 personality ptr @rust_eh_personality !prof !15104 !guid !15105 !PGOFuncName !15106 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 569}"
+        ],
+        "pgo_name": [
+          "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.15;_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_\"}"
+        ],
+        "attributes": [
+          "{ inlinehint minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 75,
+        "clone_calls": []
+      }
+    ],
+    "clone_fold_evidence": {
+      "path": "/tmp/ferro496-conversion-audit/stage4/inlined-nested-clone.ll",
+      "sha256": "f3fbd399b6c00b22dfb20818884419a92e63e5e57a60f0bcbdb65d3cc183704e",
+      "selected_ir": "define void @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es0_0B3s_EB1Z_(ptr dead_on_unwind noalias nofree noundef writable writeonly sret([24 x i8]) align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %1, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) %2) unnamed_addr #0 personality ptr @rust_eh_personality !prof !6070 !guid !6085 {\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !6086)\n  %4 = load ptr, ptr %1, align 8, !alias.scope !6086, !noalias !6089, !nonnull !1065, !noundef !1065\n  %5 = tail call noundef ptr %4(ptr noalias nofree noundef align 8 dereferenceable_or_null(400) null), !prof !6075, !noalias !6092, !inline_history !6093\n  %6 = icmp eq ptr %5, null\n  br i1 %6, label %69, label %7, !prof !6077\n\n7:                                                ; preds = %3\n  %8 = load i64, ptr %5, align 8, !noalias !6094, !noundef !1065\n  %9 = icmp eq i64 %8, 0\n  br i1 %9, label %11, label %10, !prof !6081\n\n10:                                               ; preds = %7\n  tail call void @_RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed(ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @anon.a2e4c631894b6985ab2d9e35701d75a2.298) #71, !noalias !6100\n  unreachable\n\n11:                                               ; preds = %7\n  store i64 -1, ptr %5, align 8, !noalias !6094\n  %12 = getelementptr inbounds nuw i8, ptr %5, i64 8\n  %13 = load ptr, ptr %12, align 8, !alias.scope !6101, !noalias !6100, !noundef !1065\n  %14 = icmp eq ptr %13, null\n  br i1 %14, label %19, label %21, !prof !6077\n\n15:                                               ; preds = %21, %19\n  %16 = landingpad { ptr, i32 }\n          cleanup\n  %17 = load i64, ptr %5, align 8, !noalias !6104, !noundef !1065\n  %18 = add i64 %17, 1\n  store i64 %18, ptr %5, align 8, !noalias !6104\n  resume { ptr, i32 } %16\n\n19:                                               ; preds = %11\n  invoke void @_RNvNtCsevLNFiNqfJP_4core6option13expect_failed(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) @anon.a2e4c631894b6985ab2d9e35701d75a2.299, i64 noundef 23, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @anon.a2e4c631894b6985ab2d9e35701d75a2.300) #71\n          to label %20 unwind label %15, !noalias !6100\n\n20:                                               ; preds = %19\n  unreachable\n\n21:                                               ; preds = %11\n  %22 = getelementptr inbounds nuw i8, ptr %5, i64 232\n  %23 = invoke fastcc noundef align 8 ptr @_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_(ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) %22, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %2) #68\n          to label %24 unwind label %15, !prof !6081, !noalias !6111\n\n24:                                               ; preds = %21\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !6112)\n  %25 = icmp eq ptr %23, null\n  br i1 %25, label %70, label %26, !prof !6077\n\n26:                                               ; preds = %24\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !6115)\n  %27 = load i64, ptr %23, align 8, !range !5922, !alias.scope !6118, !noalias !6121, !noundef !1065\n  %28 = getelementptr inbounds nuw i8, ptr %23, i64 8\n  %29 = icmp eq i64 %27, 2\n  br i1 %29, label %31, label %34, !prof !6077\n\n30:                                               ; preds = %34\n  unreachable\n\n31:                                               ; preds = %26\n  %32 = load ptr, ptr %28, align 8, !alias.scope !6118, !noalias !6121, !nonnull !1065, !noundef !1065\n  %33 = getelementptr inbounds nuw i8, ptr %32, i64 24\n  br label %34\n\n34:                                               ; preds = %31, %26\n  %35 = phi ptr [ %33, %31 ], [ %28, %26 ]\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !6126)\n  %36 = load i8, ptr %35, align 8, !range !5932, !alias.scope !6126, !noalias !6129, !noundef !1065\n  %37 = getelementptr inbounds nuw i8, ptr %35, i64 8\n  switch i8 %36, label %30 [\n    i8 0, label %38\n    i8 1, label %52\n    i8 2, label %54\n    i8 3, label %63\n    i8 4, label %65\n  ], !prof !6131\n\n38:                                               ; preds = %34\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !6132)\n  %39 = load ptr, ptr %37, align 8, !alias.scope !6135, !noalias !6136, !noundef !1065\n  %40 = icmp eq ptr %39, null\n  br i1 %40, label %49, label %41\n\n41:                                               ; preds = %38\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !6138)\n  %42 = getelementptr inbounds nuw i8, ptr %35, i64 16\n  %43 = load ptr, ptr %42, align 8, !alias.scope !6141, !noalias !6136, !nonnull !1065, !align !3504, !noundef !1065\n  %44 = load i64, ptr %39, align 8, !noalias !6142, !noundef !1065\n  %45 = icmp ne i64 %44, 0\n  tail call void @llvm.assume(i1 %45)\n  %46 = add i64 %44, 1\n  store i64 %46, ptr %39, align 8, !noalias !6142\n  %47 = icmp eq i64 %46, 0\n  br i1 %47, label %48, label %70, !prof !3546\n\n48:                                               ; preds = %41\n  tail call void @llvm.trap()\n  unreachable\n\n49:                                               ; preds = %38\n  %50 = getelementptr inbounds nuw i8, ptr %35, i64 16\n  %51 = load ptr, ptr %50, align 8, !alias.scope !6143, !noalias !6136, !nonnull !1065, !noundef !1065\n  br label %70\n\n52:                                               ; preds = %34\n  %53 = load ptr, ptr %37, align 8, !alias.scope !6126, !noalias !6129, !nonnull !1065, !noundef !1065\n  br label %70\n\n54:                                               ; preds = %34\n  tail call void @llvm.experimental.noalias.scope.decl(metadata !6146)\n  %55 = load ptr, ptr %37, align 8, !alias.scope !6149, !noalias !6129, !nonnull !1065, !noundef !1065\n  %56 = getelementptr inbounds nuw i8, ptr %35, i64 16\n  %57 = load ptr, ptr %56, align 8, !alias.scope !6149, !noalias !6129, !nonnull !1065, !align !3504, !noundef !1065\n  %58 = load i64, ptr %55, align 8, !noalias !6150, !noundef !1065\n  %59 = icmp ne i64 %58, 0\n  tail call void @llvm.assume(i1 %59)\n  %60 = add i64 %58, 1\n  store i64 %60, ptr %55, align 8, !noalias !6150\n  %61 = icmp eq i64 %60, 0\n  br i1 %61, label %62, label %70, !prof !3546\n\n62:                                               ; preds = %54\n  tail call void @llvm.trap()\n  unreachable\n\n63:                                               ; preds = %34\n  %64 = load ptr, ptr %37, align 8, !alias.scope !6126, !noalias !6129, !nonnull !1065, !noundef !1065\n  br label %70\n\n65:                                               ; preds = %34\n  %66 = load ptr, ptr %37, align 8, !alias.scope !6126, !noalias !6129, !nonnull !1065, !noundef !1065\n  %67 = getelementptr inbounds nuw i8, ptr %35, i64 1\n  %68 = load i8, ptr %67, align 1, !range !4767, !alias.scope !6126, !noalias !6129, !noundef !1065\n  br label %70\n\n69:                                               ; preds = %3\n  tail call void @_RNvNtNtCsgHYyB3hU8Ec_3std6thread5local18panic_access_error(ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @anon.a2e4c631894b6985ab2d9e35701d75a2.170) #71\n  unreachable\n\n70:                                               ; preds = %65, %63, %54, %52, %49, %41, %24\n  %71 = phi ptr [ %57, %54 ], [ undef, %65 ], [ undef, %52 ], [ %43, %41 ], [ undef, %63 ], [ %51, %49 ], [ undef, %24 ]\n  %72 = phi ptr [ %55, %54 ], [ %66, %65 ], [ %53, %52 ], [ %39, %41 ], [ %64, %63 ], [ null, %49 ], [ undef, %24 ]\n  %73 = phi i8 [ undef, %54 ], [ %68, %65 ], [ undef, %52 ], [ undef, %41 ], [ undef, %63 ], [ undef, %49 ], [ undef, %24 ]\n  %74 = phi i8 [ 2, %54 ], [ 4, %65 ], [ 1, %52 ], [ 0, %41 ], [ 3, %63 ], [ 0, %49 ], [ -1, %24 ]\n  %75 = load i64, ptr %5, align 8, !noalias !6151, !noundef !1065\n  %76 = add i64 %75, 1\n  store i64 %76, ptr %5, align 8, !noalias !6151\n  store i8 %74, ptr %0, align 8\n  %77 = getelementptr inbounds nuw i8, ptr %0, i64 1\n  store i8 %73, ptr %77, align 1\n  %78 = getelementptr inbounds nuw i8, ptr %0, i64 8\n  store ptr %72, ptr %78, align 8\n  %79 = getelementptr inbounds nuw i8, ptr %0, i64 16\n  store ptr %71, ptr %79, align 8\n  ret void\n}\n",
+      "interpretation": "In the accepted conversion TLS wrapper, the outer five-variant switch is inline. BorrowedConversion Shared increments Rc directly with the overflow trap; its Static branch copies pointers. Boxed increments Rc directly. Neither clone is called, and registry borrow release remains after constructing the cloned fields."
+    },
+    "verdict": "Current fresh profile metadata is accepted; root-handler promotions, folded pair hashing and both clone levels are verified in optimized Base. Final native-object confirmation remains pending."
+  },
+  "final_verdict": "The exact fresh-profile stage4 Base accepts the current root and conversion profile identities, restores both root-handler promotions, and folds both clone levels. The exact captured final fixture object confirms call-free rotate32/XOR hashing in both public conversion lookup routes and no outlined outer or nested Clone symbols or calls. Candidate and reference binary/native-capture/fixture/source/profile/Base identities match their manifests. Separate quiet paired benchmarks remain the authority for runtime performance.",
+  "final_native_lookup": {
+    "binary": "/tmp/ferro-run/registration-stage4/candidate-registration",
+    "binary_sha256": "a04c167978f4c63c3aaea0b12f4ebce3c26291a6124945d56986ada072413ab1",
+    "native_object": "/tmp/ferro-run/registration-stage4/candidate-registration.native/001-candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+    "native_object_sha256": "f1ab1c5f84f017c80824b949b2b17fd2f6e9a320b68d47968c8f521a0c861ac9",
+    "native_object_bytes": 18139192,
+    "selected_symbols": [
+      "0000000000000000 00000000000000f9 t _RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+      "0000000000000000 00000000000000f7 t _RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068",
+      "0000000000000000 0000000000000396 t _RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+      "0000000000000000 000000000000037e t _RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property"
+    ],
+    "pair_key_hash_one_symbol_present": false,
+    "functions": [
+      {
+        "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+        "kind": "lookup",
+        "calls": [],
+        "lookup_relocations": [],
+        "rotate32": [
+          "f:      \trolq\t$0x20, %rcx"
+        ],
+        "xor_instructions": [
+          "13:      \txorq\t0x18(%rsi), %rcx"
+        ],
+        "disassembly": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_:\n\n0000000000000000 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_>:\n       0:      \tcmpq\t$0x0, 0x18(%rdi)\n       5:      \tje\t0xf6 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_+0xf6>\n       b:      \tmovq\t0x8(%rsi), %rcx\n       f:      \trolq\t$0x20, %rcx\n      13:      \txorq\t0x18(%rsi), %rcx\n      17:      \tmovq\t%rcx, %r8\n      1a:      \tshrq\t$0x39, %r8\n      1e:      \tmovq\t(%rdi), %rax\n      21:      \tmovq\t0x8(%rdi), %rdx\n      25:      \tmovd\t%r8d, %xmm0\n      2a:      \tpunpcklbw\t%xmm0, %xmm0    # xmm0 = xmm0[0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7]\n      2e:      \tpshuflw\t$0x0, %xmm0, %xmm0      # xmm0 = xmm0[0,0,0,0,4,5,6,7]\n      33:      \tpshufd\t$0x44, %xmm0, %xmm0     # xmm0 = xmm0[0,1,0,1]\n      38:      \txorl\t%edi, %edi\n      3a:      \tpcmpeqd\t%xmm1, %xmm1\n      3e:      \tandq\t%rdx, %rcx\n      41:      \tmovdqu\t(%rax,%rcx), %xmm2\n      46:      \tmovdqa\t%xmm2, %xmm3\n      4a:      \tpcmpeqb\t%xmm0, %xmm3\n      4e:      \tpmovmskb\t%xmm3, %r8d\n      53:      \ttestw\t%r8w, %r8w\n      57:      \tje\t0xab <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_+0xab>\n      59:      \tmovdqu\t(%rsi), %xmm3\n      5d:      \tbsfl\t%r8d, %r9d\n      61:      \taddq\t%rcx, %r9\n      64:      \tandq\t%rdx, %r9\n      67:      \tmovq\t%r9, %r11\n      6a:      \tshlq\t$0x6, %r11\n      6e:      \tmovq\t%rax, %r10\n      71:      \tsubq\t%r11, %r10\n      74:      \tmovdqu\t-0x40(%r10), %xmm4\n      7a:      \tpcmpeqb\t%xmm3, %xmm4\n      7e:      \tpmovmskb\t%xmm4, %r11d\n      83:      \tcmpl\t$0xffff, %r11d          # imm = 0xFFFF\n      8a:      \tjne\t0xe7 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_+0xe7>\n      8c:      \tmovdqu\t0x10(%rsi), %xmm3\n      91:      \tmovdqu\t-0x30(%r10), %xmm4\n      97:      \tpcmpeqb\t%xmm3, %xmm4\n      9b:      \tpmovmskb\t%xmm4, %r10d\n      a0:      \tcmpl\t$0xffff, %r10d          # imm = 0xFFFF\n      a7:      \tje\t0xb9 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_+0xb9>\n      a9:      \tjmp\t0xe7 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_+0xe7>\n      ab:      \tpcmpeqb\t%xmm1, %xmm2\n      af:      \tpmovmskb\t%xmm2, %r10d\n      b4:      \ttestl\t%r10d, %r10d\n      b7:      \tje\t0xd7 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_+0xd7>\n      b9:      \tshlq\t$0x6, %r9\n      bd:      \tsubq\t%r9, %rax\n      c0:      \txorl\t%ecx, %ecx\n      c2:      \ttestw\t%r8w, %r8w\n      c6:      \tcmoveq\t%rcx, %rax\n      ca:      \taddq\t$-0x20, %rax\n      ce:      \ttestw\t%r8w, %r8w\n      d2:      \tcmoveq\t%rcx, %rax\n      d6:      \tretq\n      d7:      \taddq\t%rdi, %rcx\n      da:      \taddq\t$0x10, %rcx\n      de:      \taddq\t$0x10, %rdi\n      e2:      \tjmp\t0x3e <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_+0x3e>\n      e7:      \tleal\t-0x1(%r8), %r9d\n      eb:      \tandl\t%r8d, %r9d\n      ee:      \tmovl\t%r9d, %r8d\n      f1:      \tjmp\t0x53 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_+0x53>\n      f6:      \txorl\t%eax, %eax\n      f8:      \tretq\n\n"
+      },
+      {
+        "section": ".text._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "kind": "public_conversion",
+        "calls": [
+          "30:      \tcallq\t*0x20(%rcx)",
+          "41:      \tcallq\t*0x18(%rdx)",
+          "4e:      \tcallq\t0x53 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x53>",
+          "81:      \tcallq\t0x86 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x86>",
+          "96:      \tcallq\t0x9b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x9b>",
+          "d2:      \tcallq\t0xd7 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0xd7>",
+          "122:      \tcallq\t0x127 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x127>",
+          "132:      \tcallq\t0x137 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x137>",
+          "155:      \tcallq\t0x15a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x15a>",
+          "15a:      \tcallq\t0x15f <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x15f>",
+          "23f:      \tcallq\t0x244 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x244>",
+          "256:      \tcallq\t0x25b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x25b>",
+          "263:      \tcallq\t0x268 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x268>",
+          "289:      \tcallq\t*(%r14,%rax)",
+          "299:      \tcallq\t0x29e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x29e>",
+          "2a1:      \tcallq\t0x2a6 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2a6>",
+          "2b2:      \tcallq\t0x2b7 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2b7>",
+          "2c8:      \tcallq\t0x2cd <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2cd>",
+          "324:      \tcallq\t0x329 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x329>",
+          "335:      \tcallq\t0x33a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x33a>",
+          "359:      \tcallq\t0x35e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x35e>",
+          "368:      \tcallq\t0x36d <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x36d>",
+          "36f:      \tcallq\t0x374 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x374>",
+          "37d:      \tcallq\t0x382 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x382>",
+          "38a:      \tcallq\t0x38f <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x38f>",
+          "391:      \tcallq\t0x396 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x396>"
+        ],
+        "lookup_relocations": [
+          "00000000000000d3:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068-0x4"
+        ]
+      },
+      {
+        "section": ".text.unlikely._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property",
+        "kind": "public_conversion",
+        "calls": [
+          "28:      \tcallq\t*0x18(%rbx)",
+          "35:      \tcallq\t0x3a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x3a>",
+          "68:      \tcallq\t0x6d <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x6d>",
+          "7d:      \tcallq\t0x82 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x82>",
+          "b9:      \tcallq\t0xbe <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0xbe>",
+          "ef:      \tcallq\t0xf4 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0xf4>",
+          "14c:      \tcallq\t*0x28(%r15)",
+          "162:      \tcallq\t0x167 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x167>",
+          "185:      \tcallq\t*%r15",
+          "193:      \tcallq\t0x198 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x198>",
+          "271:      \tcallq\t0x276 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x276>",
+          "286:      \tcallq\t0x28b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x28b>",
+          "291:      \tcallq\t0x296 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x296>",
+          "2b1:      \tcallq\t*(%r15,%rax)",
+          "2c0:      \tcallq\t0x2c5 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x2c5>",
+          "2d1:      \tcallq\t0x2d6 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x2d6>",
+          "2d9:      \tcallq\t0x2de <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x2de>",
+          "2ea:      \tcallq\t0x2ef <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x2ef>",
+          "300:      \tcallq\t0x305 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x305>",
+          "30e:      \tcallq\t0x313 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x313>",
+          "31c:      \tcallq\t0x321 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x321>",
+          "330:      \tcallq\t0x335 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x335>",
+          "337:      \tcallq\t0x33c <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x33c>",
+          "357:      \tcallq\t0x35c <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x35c>",
+          "364:      \tcallq\t0x369 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x369>",
+          "36b:      \tcallq\t0x370 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x370>",
+          "379:      \tcallq\t0x37e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property+0x37e>"
+        ],
+        "lookup_relocations": [
+          "00000000000000ba:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068-0x4"
+        ]
+      },
+      {
+        "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068",
+        "kind": "lookup",
+        "calls": [],
+        "lookup_relocations": [],
+        "rotate32": [
+          "17:      \trolq\t$0x20, %rdx"
+        ],
+        "xor_instructions": [
+          "1e:      \txorq\t0x18(%rsi), %rdx",
+          "7c:      \txorq\t%rcx, %r14",
+          "83:      \txorq\t%r8, %r15"
+        ],
+        "disassembly": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068:\n\n0000000000000000 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068>:\n       0:      \tcmpq\t$0x0, 0x18(%rdi)\n       5:      \tje\t0xb1 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068+0xb1>\n       b:      \tpushq\t%r15\n       d:      \tpushq\t%r14\n       f:      \tpushq\t%rbx\n      10:      \tmovq\t0x8(%rsi), %rcx\n      14:      \tmovq\t%rcx, %rdx\n      17:      \trolq\t$0x20, %rdx\n      1b:      \tmovq\t(%rsi), %r8\n      1e:      \txorq\t0x18(%rsi), %rdx\n      22:      \tmovq\t%rdx, %r9\n      25:      \tshrq\t$0x39, %r9\n      29:      \tmovq\t(%rdi), %rax\n      2c:      \tmovq\t0x8(%rdi), %rdi\n      30:      \tmovd\t%r9d, %xmm0\n      35:      \tpunpcklbw\t%xmm0, %xmm0    # xmm0 = xmm0[0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7]\n      39:      \tpshuflw\t$0x0, %xmm0, %xmm0      # xmm0 = xmm0[0,0,0,0,4,5,6,7]\n      3e:      \tpshufd\t$0x44, %xmm0, %xmm0     # xmm0 = xmm0[0,1,0,1]\n      43:      \txorl\t%r9d, %r9d\n      46:      \tandq\t%rdi, %rdx\n      49:      \tmovdqu\t(%rax,%rdx), %xmm1\n      4e:      \tmovdqa\t%xmm1, %xmm2\n      52:      \tpcmpeqb\t%xmm0, %xmm2\n      56:      \tpmovmskb\t%xmm2, %r10d\n      5b:      \ttestw\t%r10w, %r10w\n      5f:      \tje\t0xb4 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068+0xb4>\n      61:      \tbsfl\t%r10d, %r11d\n      65:      \taddq\t%rdx, %r11\n      68:      \tandq\t%rdi, %r11\n      6b:      \tmovq\t%r11, %r14\n      6e:      \tshlq\t$0x6, %r14\n      72:      \tmovq\t%rax, %rbx\n      75:      \tsubq\t%r14, %rbx\n      78:      \tmovq\t-0x38(%rbx), %r14\n      7c:      \txorq\t%rcx, %r14\n      7f:      \tmovq\t-0x40(%rbx), %r15\n      83:      \txorq\t%r8, %r15\n      86:      \torq\t%r14, %r15\n      89:      \tjne\t0xa5 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068+0xa5>\n      8b:      \tmovdqu\t0x10(%rsi), %xmm2\n      90:      \tmovdqu\t-0x30(%rbx), %xmm3\n      95:      \tpcmpeqb\t%xmm2, %xmm3\n      99:      \tpmovmskb\t%xmm3, %ebx\n      9d:      \tcmpl\t$0xffff, %ebx           # imm = 0xFFFF\n      a3:      \tje\t0xc4 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068+0xc4>\n      a5:      \tleal\t-0x1(%r10), %r11d\n      a9:      \tandl\t%r10d, %r11d\n      ac:      \tmovl\t%r11d, %r10d\n      af:      \tjmp\t0x5b <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068+0x5b>\n      b1:      \txorl\t%eax, %eax\n      b3:      \tretq\n      b4:      \tpcmpeqd\t%xmm2, %xmm2\n      b8:      \tpcmpeqb\t%xmm2, %xmm1\n      bc:      \tpmovmskb\t%xmm1, %ebx\n      c0:      \ttestl\t%ebx, %ebx\n      c2:      \tje\t0xe7 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068+0xe7>\n      c4:      \tshlq\t$0x6, %r11\n      c8:      \tsubq\t%r11, %rax\n      cb:      \txorl\t%ecx, %ecx\n      cd:      \ttestw\t%r10w, %r10w\n      d1:      \tcmoveq\t%rcx, %rax\n      d5:      \taddq\t$-0x20, %rax\n      d9:      \ttestw\t%r10w, %r10w\n      dd:      \tcmoveq\t%rcx, %rax\n      e1:      \tpopq\t%rbx\n      e2:      \tpopq\t%r14\n      e4:      \tpopq\t%r15\n      e6:      \tretq\n      e7:      \taddq\t%r9, %rdx\n      ea:      \taddq\t$0x10, %rdx\n      ee:      \taddq\t$0x10, %r9\n      f2:      \tjmp\t0x46 <_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068+0x46>\n"
+      }
+    ],
+    "verdict": "Both public conversion APIs reach lookups with inline rotate32/XOR and no function calls; the separately outlined pair-key hash_one symbol is absent.",
+    "passed": true,
+    "fixture_build_identity": {
+      "manifest": "/tmp/ferro-run/registration-stage4/candidate-registration.json",
+      "manifest_sha256": "5ffb11994adb04d8c839678a8f09834c6f1503aa2e888385ea119a831c1f5aed",
+      "source_sha256": "849d1bc8eb3ea07e94ac54a97fa79fda8a131d04ad9dac6bf09f7658856cec51",
+      "profile": "/tmp/ferro-run/ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329.profdata",
+      "profile_sha256": "ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329",
+      "base_rlib_sha256": {
+        "libferroui_base-59aaffbecfa5583b.rlib": "2ba02254bc929307b70f06ee5bb37c41b372c77c831bcb51737358e8d10f772c"
+      },
+      "command": [
+        "/tmp/ferro-tools/bin/rustc",
+        "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/registration_hot_paths.rs",
+        "--edition=2021",
+        "--crate-name",
+        "registration_probe",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "-Cpanic=unwind",
+        "-Copt-level=z",
+        "-Clto=fat",
+        "-Ccodegen-units=1",
+        "-Cprofile-use=/tmp/ferro-run/ec080cdfdf0077d7def03773baa4643b06a1b85d453f18cb35c00dc967d5e329.profdata",
+        "-Cllvm-args=--addrsig",
+        "-Cstrip=symbols",
+        "-Clink-arg=-fuse-ld=lld",
+        "-Clink-arg=-Wl,--icf=safe",
+        "-Clink-arg=-Wl,-z,pack-relative-relocs",
+        "-Clinker=/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/compact_unwind_link.py",
+        "-Ldependency=/tmp/ferro-run/stage4-graph",
+        "-Ldependency=/tmp/ferro-run/registration-host-deps",
+        "--extern",
+        "ferroui_base=/tmp/ferro-run/stage4-graph/libferroui_base-59aaffbecfa5583b.rlib",
+        "-o",
+        "/tmp/ferro-run/registration-stage4/candidate-registration"
+      ],
+      "checks": {
+        "binary_sha_matches_manifest": true,
+        "profile_sha_matches_fresh_stage4": true,
+        "base_rlib_sha_matches_audited_stage4": true,
+        "fixture_source_unchanged": true
+      }
+    },
+    "boxed_clone": {
+      "public_body_present": true,
+      "outlined_symbols": [],
+      "relocations": [],
+      "nested_borrowed_clone_symbols": [],
+      "nested_borrowed_clone_relocations": [],
+      "public_disassembly": ".text._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered:\n\n0000000000000000 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered>:\n       0:      \tpushq\t%r15\n       2:      \tpushq\t%r14\n       4:      \tpushq\t%r13\n       6:      \tpushq\t%r12\n       8:      \tpushq\t%rbx\n       9:      \tsubq\t$0x1c0, %rsp            # imm = 0x1C0\n      10:      \tmovq\t%rsi, %r14\n      13:      \tmovq\t%rdi, %rbx\n      16:      \tmovq\t(%rdi), %rax\n      19:      \tmovq\t0x8(%rdi), %rcx\n      1d:      \tmovq\t0x10(%rcx), %rdx\n      21:      \tdecq\t%rdx\n      24:      \tandq\t$-0x10, %rdx\n      28:      \tleaq\t(%rax,%rdx), %rdi\n      2c:      \taddq\t$0x10, %rdi\n      30:      \tcallq\t*0x20(%rcx)\n      33:      \tleaq\t0x1a0(%rsp), %r15\n      3b:      \tmovq\t%r15, %rdi\n      3e:      \tmovq\t%rax, %rsi\n      41:      \tcallq\t*0x18(%rdx)\n      44:      \tmovups\t0x10(%r14), %xmm0\n      49:      \tmovups\t%xmm0, 0x10(%r15)\n      4e:      \tcallq\t0x53 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x53>\n\t\t000000000000004f:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4\n      53:      \ttestq\t%rax, %rax\n      56:      \tje\t0x292 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x292>\n      5c:      \tmovabsq\t$0x7fffffffffffffff, %rcx # imm = 0x7FFFFFFFFFFFFFFF\n      66:      \tcmpq\t%rcx, (%rax)\n      69:      \tjae\t0x14e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x14e>\n      6f:      \tcmpq\t$0x0, 0x8(%rax)\n      74:      \tje\t0x15a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x15a>\n      7a:      \tleaq\t(%rip), %rdi            # 0x81 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x81>\n\t\t000000000000007d:  R_X86_64_PC32\t.text._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type14GLOBAL_APPLIED0s_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1t_6option6OptionQIB28_INtNtB1t_4cell4CelljEEEEE9call_onceBe_-0x4\n      81:      \tcallq\t0x86 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x86>\n\t\t0000000000000082:  R_X86_64_PLT32\t.text.hot._RNvMs3_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell4CelljEE3getCseCMZVCq70TC_12ferroui_base-0x4\n      86:      \tmovq\t(%rip), %rcx            # 0x8d <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x8d>\n\t\t0000000000000089:  R_X86_64_PC32\t.bss._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type10GLOBAL_LEN.0-0x4\n      8d:      \tcmpq\t%rcx, %rax\n      90:      \tjne\t0x29e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x29e>\n      96:      \tcallq\t0x9b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x9b>\n\t\t0000000000000097:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4\n      9b:      \ttestq\t%rax, %rax\n      9e:      \tje\t0x292 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x292>\n      a4:      \tmovq\t%rax, %r14\n      a7:      \tcmpq\t$0x0, (%rax)\n      ab:      \tjne\t0x2ab <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2ab>\n      b1:      \torq\t$-0x1, (%r14)\n      b5:      \tcmpq\t$0x0, 0x8(%r14)\n      ba:      \tje\t0x2b7 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2b7>\n      c0:      \tmovq\t%r14, %rdi\n      c3:      \taddq\t$0xe8, %rdi\n      ca:      \tleaq\t0x1a0(%rsp), %rsi\n      d2:      \tcallq\t0xd7 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0xd7>\n\t\t00000000000000d3:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33068-0x4\n      d7:      \ttestq\t%rax, %rax\n      da:      \tje\t0x2cf <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2cf>\n      e0:      \tmovq\t%rax, %rcx\n      e3:      \taddq\t$0x8, %rax\n      e7:      \tcmpl\t$0x2, (%rcx)\n      ea:      \tje\t0x2de <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2de>\n      f0:      \tmovb\t(%rax), %cl\n      f2:      \tmovzbl\t%cl, %edx\n      f5:      \tleaq\t(%rip), %rsi            # 0xfc <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0xfc>\n\t\t00000000000000f8:  R_X86_64_PC32\t.rodata._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered-0x4\n      fc:      \tmovslq\t(%rsi,%rdx,4), %rdx\n     100:      \taddq\t%rsi, %rdx\n     103:      \tjmpq\t*%rdx\n     105:      \tmovq\t0x8(%rax), %rdx\n     109:      \tincq\t(%r14)\n     10c:      \tleaq\t0x8(%rsp), %rdi\n     111:      \tmovb\t%cl, (%rdi)\n     113:      \tmovb\t%sil, 0x1(%rdi)\n     117:      \tmovq\t%rdx, 0x8(%rdi)\n     11b:      \tmovq\t%rax, 0x10(%rdi)\n     11f:      \tmovq\t%rbx, %rsi\n     122:      \tcallq\t0x127 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x127>\n\t\t0000000000000123:  R_X86_64_PLT32\t.text.hot._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4\n     127:      \tmovq\t%rax, %rbx\n     12a:      \tmovq\t%rdx, %r14\n     12d:      \tleaq\t0x8(%rsp), %rdi\n     132:      \tcallq\t0x137 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x137>\n\t\t0000000000000133:  R_X86_64_PLT32\t.text.hot._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_-0x4\n     137:      \tmovq\t%rbx, %rax\n     13a:      \tmovq\t%r14, %rdx\n     13d:      \taddq\t$0x1c0, %rsp            # imm = 0x1C0\n     144:      \tpopq\t%rbx\n     145:      \tpopq\t%r12\n     147:      \tpopq\t%r13\n     149:      \tpopq\t%r14\n     14b:      \tpopq\t%r15\n     14d:      \tretq\n     14e:      \tleaq\t(%rip), %rdi            # 0x155 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x155>\n\t\t0000000000000151:  R_X86_64_PC32\t.data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.297-0x4\n     155:      \tcallq\t0x15a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x15a>\n\t\t0000000000000156:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell30panic_already_mutably_borrowed-0x4\n     15a:      \tcallq\t0x15f <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x15f>\n\t\t000000000000015b:  R_X86_64_PLT32\t.text.hot._RNvYNCNKNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8REGISTRY00INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTINtNtB1k_6option6OptionQIB1Z_INtNtB1k_4cell7RefCellIB1Z_NtB8_8RegistryEEEEEE9call_onceBe_-0x4\n     15f:      \ttestq\t%rax, %rax\n     162:      \tje\t0x292 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x292>\n     168:      \tmovq\t%rax, %r14\n     16b:      \tmovups\t(%rip), %xmm0           # 0x172 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x172>\n\t\t000000000000016e:  R_X86_64_PC32\t.data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3+0xc\n     172:      \tmovaps\t%xmm0, 0x30(%rsp)\n     177:      \tmovups\t(%rip), %xmm1           # 0x17e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x17e>\n\t\t000000000000017a:  R_X86_64_PC32\t.data.rel.ro..Lanon.8006689590757fb8f2be11f7fdda18a0.3-0x4\n     17e:      \tmovaps\t%xmm1, 0x20(%rsp)\n     183:      \tmovaps\t%xmm1, 0x40(%rsp)\n     188:      \tmovaps\t%xmm0, 0x50(%rsp)\n     18d:      \tmovaps\t%xmm1, 0x60(%rsp)\n     192:      \tmovaps\t%xmm0, 0x70(%rsp)\n     197:      \tmovaps\t%xmm1, 0x80(%rsp)\n     19f:      \tmovaps\t%xmm0, 0x90(%rsp)\n     1a7:      \tmovaps\t%xmm1, 0xa0(%rsp)\n     1af:      \tmovaps\t%xmm0, 0xb0(%rsp)\n     1b7:      \tmovaps\t%xmm1, 0xc0(%rsp)\n     1bf:      \tmovaps\t%xmm0, 0xd0(%rsp)\n     1c7:      \tmovaps\t%xmm1, 0xe0(%rsp)\n     1cf:      \tmovaps\t%xmm0, 0xf0(%rsp)\n     1d7:      \tmovaps\t%xmm1, 0x100(%rsp)\n     1df:      \tmovaps\t%xmm0, 0x110(%rsp)\n     1e7:      \tmovaps\t%xmm0, 0x130(%rsp)\n     1ef:      \tmovaps\t%xmm1, 0x120(%rsp)\n     1f7:      \tmovaps\t%xmm0, 0x150(%rsp)\n     1ff:      \tmovaps\t%xmm1, 0x140(%rsp)\n     207:      \tmovaps\t%xmm0, 0x170(%rsp)\n     20f:      \tmovaps\t%xmm1, 0x160(%rsp)\n     217:      \tmovaps\t%xmm0, 0x190(%rsp)\n     21f:      \tmovaps\t%xmm1, 0x180(%rsp)\n     227:      \tcmpq\t$0x0, (%rax)\n     22b:      \tjne\t0x32e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x32e>\n     231:      \torq\t$-0x1, (%r14)\n     235:      \tmovq\t%r14, %r15\n     238:      \taddq\t$0x8, %r15\n     23c:      \tmovq\t%r15, %rdi\n     23f:      \tcallq\t0x244 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x244>\n\t\t0000000000000240:  R_X86_64_PLT32\t.text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4\n     244:      \tleaq\t0x20(%rsp), %rsi\n     249:      \tmovl\t$0x180, %ecx            # imm = 0x180\n     24e:      \tmovq\t%r15, %rdi\n     251:      \trep\t\tmovsb\t(%rsi), %es:(%rdi)\n     253:      \tincq\t(%r14)\n     256:      \tcallq\t0x25b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x25b>\n\t\t0000000000000257:  R_X86_64_PLT32\t.text.unlikely._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type17register_defaults-0x4\n     25b:      \tleaq\t0x20(%rsp), %r12\n     260:      \tmovq\t%r12, %rdi\n     263:      \tcallq\t0x268 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x268>\n\t\t0000000000000264:  R_X86_64_PLT32\t.text._RNvMs4_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB5_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtCs1C1lLj4PWSY_5alloc3vec3VecFEuEEE4takeCseCMZVCq70TC_12ferroui_base-0x4\n     268:      \tmovq\t(%r12), %r15\n     26c:      \tmovq\t0x8(%r12), %r14\n     271:      \tmovq\t0x10(%r12), %r12\n     276:      \tshlq\t$0x3, %r12\n     27a:      \txorl\t%eax, %eax\n     27c:      \tcmpq\t%rax, %r12\n     27f:      \tje\t0x31e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x31e>\n     285:      \tleaq\t0x8(%rax), %r13\n     289:      \tcallq\t*(%r14,%rax)\n     28d:      \tmovq\t%r13, %rax\n     290:      \tjmp\t0x27c <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x27c>\n     292:      \tleaq\t(%rip), %rdi            # 0x299 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x299>\n\t\t0000000000000295:  R_X86_64_PC32\t.data.rel.ro..Lanon.501ae5ec37329a2343b65d07557dab83.1-0x4\n     299:      \tcallq\t0x29e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x29e>\n\t\t000000000000029a:  R_X86_64_PLT32\t.text.unlikely._RNvNtNtCsgHYyB3hU8Ec_3std6thread5local18panic_access_error-0x4\n     29e:      \tmovq\t%rax, %rdi\n     2a1:      \tcallq\t0x2a6 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2a6>\n\t\t00000000000002a2:  R_X86_64_PLT32\t.text.hot._RNvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12apply_global-0x4\n     2a6:      \tjmp\t0x96 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x96>\n     2ab:      \tleaq\t(%rip), %rdi            # 0x2b2 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2b2>\n\t\t00000000000002ae:  R_X86_64_PC32\t.data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.298-0x4\n     2b2:      \tcallq\t0x2b7 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2b7>\n\t\t00000000000002b3:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4\n     2b7:      \tleaq\t(%rip), %rdi            # 0x2be <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2be>\n\t\t00000000000002ba:  R_X86_64_PC32\t.rodata..Lanon.a2e4c631894b6985ab2d9e35701d75a2.299-0x4\n     2be:      \tleaq\t(%rip), %rdx            # 0x2c5 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2c5>\n\t\t00000000000002c1:  R_X86_64_PC32\t.data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.300-0x4\n     2c5:      \tpushq\t$0x17\n     2c7:      \tpopq\t%rsi\n     2c8:      \tcallq\t0x2cd <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2cd>\n\t\t00000000000002c9:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core6option13expect_failed-0x4\n     2cd:      \tjmp\t0x30f <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x30f>\n     2cf:      \tincq\t(%r14)\n     2d2:      \tmovb\t$-0x1, 0x8(%rsp)\n     2d7:      \txorl\t%ebx, %ebx\n     2d9:      \tjmp\t0x137 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x137>\n     2de:      \tmovq\t(%rax), %rax\n     2e1:      \taddq\t$0x18, %rax\n     2e5:      \tjmp\t0xf0 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0xf0>\n     2ea:      \tmovq\t0x8(%rax), %rdx\n     2ee:      \ttestq\t%rdx, %rdx\n     2f1:      \tjne\t0x302 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x302>\n     2f3:      \tmovq\t0x10(%rax), %rax\n     2f7:      \txorl\t%edx, %edx\n     2f9:      \tjmp\t0x109 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x109>\n     2fe:      \tmovq\t0x8(%rax), %rdx\n     302:      \tmovq\t0x10(%rax), %rax\n     306:      \tincq\t(%rdx)\n     309:      \tjne\t0x109 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x109>\n     30f:      \tud2\n     311:      \tmovq\t0x8(%rax), %rdx\n     315:      \tmovb\t0x1(%rax), %sil\n     319:      \tjmp\t0x109 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x109>\n     31e:      \tmovq\t%r15, %rdi\n     321:      \tmovq\t%r14, %rsi\n     324:      \tcallq\t0x329 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x329>\n\t\t0000000000000325:  R_X86_64_PLT32\t.text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4\n     329:      \tjmp\t0x7a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x7a>\n     32e:      \tleaq\t(%rip), %rdi            # 0x335 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x335>\n\t\t0000000000000331:  R_X86_64_PC32\t.data.rel.ro..Lanon.a2e4c631894b6985ab2d9e35701d75a2.301-0x4\n     335:      \tcallq\t0x33a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x33a>\n\t\t0000000000000336:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core4cell22panic_already_borrowed-0x4\n     33a:      \tjmp\t0x30f <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x30f>\n     33c:      \tmovq\t%rax, %rbx\n     33f:      \tleaq\t0x20(%rsp), %rsi\n     344:      \tmovl\t$0x180, %ecx            # imm = 0x180\n     349:      \tmovq\t%r15, %rdi\n     34c:      \trep\t\tmovsb\t(%rsi), %es:(%rdi)\n     34e:      \tjmp\t0x377 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x377>\n     350:      \tmovq\t%rax, %rbx\n     353:      \tmovq\t%r15, %rdi\n     356:      \tmovq\t%r14, %rsi\n     359:      \tcallq\t0x35e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x35e>\n\t\t000000000000035a:  R_X86_64_PLT32\t.text.hot._RNvXs1_NtCs1C1lLj4PWSY_5alloc7raw_vecINtB5_6RawVecFEuENtNtNtCsevLNFiNqfJP_4core3ops4drop4Drop4dropCseCMZVCq70TC_12ferroui_base-0x4\n     35e:      \tjmp\t0x37a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x37a>\n     360:      \tmovq\t%rax, %rbx\n     363:      \tleaq\t0x20(%rsp), %rdi\n     368:      \tcallq\t0x36d <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x36d>\n\t\t0000000000000369:  R_X86_64_PLT32\t.text._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEB15_-0x4\n     36d:      \tjmp\t0x37a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x37a>\n     36f:      \tcallq\t0x374 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x374>\n\t\t0000000000000370:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4\n     374:      \tmovq\t%rax, %rbx\n     377:      \tincq\t(%r14)\n     37a:      \tmovq\t%rbx, %rdi\n     37d:      \tcallq\t0x382 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x382>\n\t\t000000000000037e:  R_X86_64_PLT32\t_Unwind_Resume-0x4\n     382:      \tmovq\t%rax, %rbx\n     385:      \tleaq\t0x8(%rsp), %rdi\n     38a:      \tcallq\t0x38f <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x38f>\n\t\t000000000000038b:  R_X86_64_PLT32\t.text.hot._RINvNtCsevLNFiNqfJP_4core3ptr9drop_glueNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type9ConvertFnEBJ_-0x4\n     38f:      \tjmp\t0x37a <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x37a>\n     391:      \tcallq\t0x396 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x396>\n\t\t0000000000000392:  R_X86_64_PLT32\t.text.unlikely._RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup-0x4\n\n",
+      "passed": true,
+      "interpretation": "The public boxed conversion contains its clone logic directly, with no separately outlined ConvertFn::clone boundary. Native inlining does not establish runtime performance by itself."
+    },
+    "link_capture_manifest": "/tmp/ferro-run/registration-stage4/candidate-registration.native/original-link.json",
+    "link_capture_manifest_sha256": "0e00a9906fe54456227b0c4733c82cb37f5c5c7c6786ca2c30dcb1b32dec587c",
+    "link_capture_top_level_keys": [
+      "cwd",
+      "command",
+      "objects",
+      "command_with_captured_objects"
+    ],
+    "reference_comparison": {
+      "binary": "/tmp/ferro-run/registration-stage4/reference-registration",
+      "binary_sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d",
+      "binary_identical_to_prior_audited_reference": true,
+      "native_object": "/tmp/ferro-run/registration-stage4/reference-registration.native/001-reference-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+      "native_object_sha256": "0349f7a39ba53c7475f6fc16f19f5f21002d15cf92f2fba96bc8091ed43609bb",
+      "manifest": "/tmp/ferro-run/registration-stage4/reference-registration.json",
+      "manifest_sha256": "06b461e6bf8265de511737a225f73641a1657906db2ae3633024172a258d6db6",
+      "profile": "/tmp/ferro-run/pgo/winui-pgo-c510yqsy/736840a1a89cda4724cbc66d7e6e8bf525be704f769fc12027b6a9ca4ddbe709.profdata",
+      "profile_sha256": "736840a1a89cda4724cbc66d7e6e8bf525be704f769fc12027b6a9ca4ddbe709",
+      "base_rlib_sha256": {
+        "libferroui_base-2b5aa572aaca685f.rlib": "72d33b0c2ea73f0d16561425d7cb8312fd1ac210a8bd3b13ca8478cae77d2f52"
+      },
+      "selected_symbols": [
+        "0000000000000000 00000000000000f9 t _RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+        "0000000000000000 00000000000000f7 t _RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.29906",
+        "0000000000000000 00000000000003b3 t _RNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "0000000000000000 0000000000000385 t _RNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property"
+      ],
+      "lookup_bodies": [
+        {
+          "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+          "calls": [],
+          "rotate32": [
+            "f:      \trolq\t$0x20, %rcx"
+          ],
+          "xor_instructions": [
+            "13:      \txorq\t0x18(%rsi), %rcx"
+          ]
+        },
+        {
+          "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.29906",
+          "calls": [],
+          "rotate32": [
+            "17:      \trolq\t$0x20, %rdx"
+          ],
+          "xor_instructions": [
+            "1e:      \txorq\t0x18(%rsi), %rdx",
+            "7c:      \txorq\t%rcx, %r14",
+            "83:      \txorq\t%r8, %r15"
+          ]
+        }
+      ],
+      "public_conversion_routes": [
+        {
+          "section": ".text._RNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+          "lookup_relocations": [
+            "00000000000000d3:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.29906-0x4"
+          ]
+        },
+        {
+          "section": ".text.unlikely._RNvMs8_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes24try_convert_for_property",
+          "lookup_relocations": [
+            "00000000000000ba:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.29906-0x4"
+          ]
+        }
+      ],
+      "checks": {
+        "source_matches_final_candidate": true,
+        "profile_matches_original_reference": true,
+        "base_matches_original_reference": true,
+        "binary_matches_build_manifest": true,
+        "both_reference_lookups_inline_hash_without_calls": true
+      },
+      "conclusion": "The final candidate restores inline rotate32/XOR lookup hashing also present in the matched original reference; their instruction/register layouts need not be identical.",
+      "link_capture_manifest": "/tmp/ferro-run/registration-stage4/reference-registration.native/original-link.json",
+      "link_capture_manifest_sha256": "a6db6a385976aa17ebe5cb75a8ef719a47beb73dc0733ea41adff4e10dcf2cb0",
+      "native_capture_identity_checks": {
+        "one_matching_captured_native_object": true,
+        "native_sha_matches_capture": true,
+        "native_bytes_match_capture": true,
+        "capture_manifest_matches_fixture": true,
+        "native_objects_match_fixture": true,
+        "original_link_command_matches_fixture": true,
+        "linked_output_matches_audited_binary": true
+      }
+    },
+    "native_capture_identity_checks": {
+      "one_matching_captured_native_object": true,
+      "native_sha_matches_capture": true,
+      "native_bytes_match_capture": true,
+      "capture_manifest_matches_fixture": true,
+      "native_objects_match_fixture": true,
+      "original_link_command_matches_fixture": true,
+      "linked_output_matches_audited_binary": true
+    }
+  }
+}

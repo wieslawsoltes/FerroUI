@@ -1,0 +1,43 @@
+{
+  "binary": "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration",
+  "binary_sha256": "a4571fe8bd95fd8c979b03853dfb843ed075705fd2724125a53a7bef1970215c",
+  "native_object": "/tmp/ferro-run/inline-clone-trial/registration/001-candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+  "native_object_sha256": "5e8a7f7bc8dc1a36b10dad8e1b38db5539bdf42a58ff60b6420033dcdb8fa070",
+  "manifest": "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration.json",
+  "manifest_sha256": "34ad6eb6c5141957b7e4ce4f53a94c4633f4886ba5d9e4c408a16e5f3fe644e8",
+  "link_capture": "/tmp/ferro-run/inline-clone-trial/registration/original-link.json",
+  "link_capture_sha256": "02c7a30c06698bbc030cd4622b2b3beb94083b5bb2841b159d512d97186aa3d8",
+  "native_symbols": [
+    "0000000000000000 00000000000000fb t _RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+    "0000000000000000 00000000000000f7 t _RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069",
+    "0000000000000000 0000000000000130 t _RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+    "0000000000000000 0000000000000371 t _RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered"
+  ],
+  "public_clone_relocations": [],
+  "public_lookup_relocations": [
+    "000000000000020f:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069-0x4"
+  ],
+  "public_apply_relocations": [
+    "0000000000000298:  R_X86_64_PLT32\t.text._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4"
+  ],
+  "public_inlined_clone_region": "     20e:      \tcallq\t0x213 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x213>\n\t\t000000000000020f:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069-0x4\n     213:      \ttestq\t%rax, %rax\n     216:      \tje\t0x246 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x246>\n     218:      \tmovq\t%rax, %rcx\n     21b:      \taddq\t$0x8, %rax\n     21f:      \tcmpl\t$0x2, (%rcx)\n     222:      \tjne\t0x22b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x22b>\n     224:      \tmovq\t(%rax), %rax\n     227:      \taddq\t$0x18, %rax\n     22b:      \tmovb\t(%rax), %cl\n     22d:      \tmovzbl\t%cl, %edx\n     230:      \tleaq\t(%rip), %rsi            # 0x237 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x237>\n\t\t0000000000000233:  R_X86_64_PC32\t.rodata._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered-0x4\n     237:      \tmovslq\t(%rsi,%rdx,4), %rdx\n     23b:      \taddq\t%rsi, %rdx\n     23e:      \tjmpq\t*%rdx\n     240:      \tmovq\t0x8(%rax), %rdx\n     244:      \tjmp\t0x27e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x27e>\n     246:      \tincq\t(%r14)\n     249:      \tmovb\t$-0x1, 0x8(%rsp)\n     24e:      \txorl\t%ebx, %ebx\n     250:      \tjmp\t0x2ac <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2ac>\n     252:      \tmovq\t0x8(%rax), %rdx\n     256:      \tmovb\t0x1(%rax), %sil\n     25a:      \tjmp\t0x27e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x27e>\n     25c:      \tmovq\t0x8(%rax), %rdx\n     260:      \ttestq\t%rdx, %rdx\n     263:      \tjne\t0x271 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x271>\n     265:      \tmovq\t0x10(%rax), %rax\n     269:      \txorl\t%edx, %edx\n     26b:      \tjmp\t0x244 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x244>\n     26d:      \tmovq\t0x8(%rax), %rdx\n     271:      \tmovq\t0x10(%rax), %rax\n     275:      \tincq\t(%rdx)\n     278:      \tje\t0x309 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x309>\n     27e:      \tincq\t(%r14)\n     281:      \tleaq\t0x8(%rsp), %rdi\n     286:      \tmovb\t%cl, (%rdi)\n     288:      \tmovb\t%sil, 0x1(%rdi)\n     28c:      \tmovq\t%rdx, 0x8(%rdi)\n     290:      \tmovq\t%rax, 0x10(%rdi)\n     294:      \tmovq\t%rbx, %rsi\n     297:      \tcallq\t0x29c <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x29c>\n\t\t0000000000000298:  R_X86_64_PLT32\t.text._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4\n     29c:      \tmovq\t%rax, %rbx",
+  "outlined_convert_fn_clone_symbols": [],
+  "lookup_bodies": [
+    {
+      "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_:",
+      "calls": [],
+      "rotate32": [
+        "21:      \trolq\t$0x20, %r9"
+      ]
+    },
+    {
+      "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069:",
+      "calls": [],
+      "rotate32": [
+        "17:      \trolq\t$0x20, %rdx"
+      ]
+    }
+  ],
+  "passed": true,
+  "scope": "Diagnostic only: the preserved Base loses root and conversion PGO identities under the inherited stage3 profile. This proves native clone/hash call elimination; final matched-profile performance requires fresh training."
+}

@@ -1,0 +1,1507 @@
+{
+  "rlib": "/tmp/ferro-run/inline-clone-trial/graph/libferroui_base-3ba9c98342616a1a.rlib",
+  "rlib_sha256": "2f66f2a5aca0eb596769960923974f97cda5ea1af6620f06b8a6f30797381d02",
+  "functions": [
+    {
+      "symbol": "_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_",
+      "name": "BuildHasherDefault<IdHasher>::hash_one",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define noundef i64 @_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_(ptr noalias nofree noundef nonnull readonly captures(none) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #21 personality ptr @rust_eh_personality !prof !9835 !guid !9836 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 65774}"
+      ],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 9,
+      "full_ir": "define noundef i64 @_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_(ptr noalias nofree noundef nonnull readonly captures(none) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #21 personality ptr @rust_eh_personality !prof !9835 !guid !9836 {\n  %3 = getelementptr inbounds nuw i8, ptr %1, i64 8\n  %4 = load i64, ptr %3, align 1, !alias.scope !9837, !noalias !9842\n  %5 = getelementptr inbounds nuw i8, ptr %1, i64 24\n  %6 = load i64, ptr %5, align 1, !alias.scope !9848, !noalias !9851\n  %7 = tail call noundef i64 @llvm.fshl.i64(i64 %4, i64 %4, i64 32)\n  %8 = xor i64 %7, %6\n  ret i64 %8\n}",
+      "calls_write_u64": false,
+      "stack_allocations": 0
+    },
+    {
+      "symbol": "_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed",
+      "name": "<ferroui_base::ferro_object::FerroObject>::notify_property_changed",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal fastcc void @_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #3 personality ptr @rust_eh_personality !guid !40110 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvNtCsevLNFiNqfJP_4core6option13expect_failed(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) @anon.dceb4afab905ff1a4370faac103edc86.1514, i64 noundef 26, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @anon.dceb4afab905ff1a4370faac103edc86.1515) #50, !noalias !40114",
+        "tail call void %11(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1), !inline_history !40117",
+        "%22 = tail call fastcc noundef zeroext i1 @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8is_emptyB2b_(ptr noundef nonnull align 8 %21) #47, !noalias !40130",
+        "%24 = tail call fastcc noundef ptr @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8snapshotB2b_(ptr noundef nonnull align 8 %21) #47, !noalias !40130",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtCslytMwmYsTKf_8smallvec8SmallVecATyIBv_DG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_EEj2_EE9drop_slowB2d_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %3) #48",
+        "invoke void %70(ptr noundef nonnull %68, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1)",
+        "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtCslytMwmYsTKf_8smallvec8SmallVecATyIBv_DG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_EEj2_EE9drop_slowB2d_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %3) #48",
+        "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #49",
+        "%86 = call fastcc noundef zeroext i1 @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8is_emptyB2b_(ptr noundef nonnull align 8 %85) #47",
+        "%88 = call fastcc noundef ptr @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8snapshotB2b_(ptr noundef nonnull align 8 %85) #47",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtCslytMwmYsTKf_8smallvec8SmallVecATyIBv_DG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_EEj2_EE9drop_slowB2d_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %4) #48",
+        "invoke void %134(ptr noundef nonnull %132, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1)",
+        "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtCslytMwmYsTKf_8smallvec8SmallVecATyIBv_DG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_EEj2_EE9drop_slowB2d_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %4) #48",
+        "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #49"
+      ],
+      "lines": 254,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": false
+    },
+    {
+      "symbol": "_RNvMs_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB4_25LocalValueBindingObserverlE10next_valueB8_",
+      "name": "<ferroui_base::property_store::local_value_binding_observer::LocalValueBindingObserver<i32>>::next_value",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define void @_RNvMs_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB4_25LocalValueBindingObserverlE10next_valueB8_(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef align 8 captures(address) dead_on_return dereferenceable(32) %1) unnamed_addr #2 personality ptr @rust_eh_personality !prof !2993 !guid !54504 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 0}"
+      ],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "%11 = invoke { ptr, ptr } @_RNvMs1c_NtCs1C1lLj4PWSY_5alloc2rcINtB6_4WeakDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E7upgradeCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %10)",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %5) #48",
+        "%42 = invoke noundef zeroext i1 @_RNvXsv_NtCs1C1lLj4PWSY_5alloc5boxedINtB5_3BoxDG_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL0_lEEp6OutputbEL_EIBL_TRlEE4callCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %38, ptr noalias nofree noundef nonnull readonly align 4 captures(address, read_provenance) dereferenceable(4) %25)",
+        "%60 = invoke noundef i32 @_RNvMs_NtCseCMZVCq70TC_12ferroui_base15styled_propertyINtB4_14StyledPropertylE15binding_defaultB6_(ptr noundef nonnull align 8 %53, ptr noundef nonnull align 8 %59, ptr noundef nonnull align 8 %0)",
+        "invoke void @_RNvMNtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerNtB2_17LocalBindingState8validate(ptr noundef nonnull align 8 %10, ptr noundef nonnull align 8 %72, ptr noundef nonnull align 8 %75, i32 noundef %7, ptr noundef %22, ptr %24)",
+        "invoke void @_RINvMNtNtCseCMZVCq70TC_12ferroui_base14property_store11value_storeNtB3_10ValueStore15set_local_valuelEB7_(ptr noundef nonnull align 8 %89, ptr noundef nonnull align 8 %88, ptr noundef nonnull align 8 %91, i32 noundef %82)",
+        "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %5) #48",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core5error5ErrorEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %3) #48",
+        "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #49",
+        "tail call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core5error5ErrorEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %116) #48",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core5error5ErrorEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %128) #48"
+      ],
+      "lines": 245,
+      "function_profile_matches_stage2": true,
+      "pgo_name_matches_stage2": true,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvXs3_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB5_7UntypedlEINtNtCsfwoXgjGyLJY_14ferroui_system12i_observable9IObserverINtNtCs1C1lLj4PWSY_5alloc2rc2RcDNtNtB9_14ferro_property8AnyValueEL_EE7on_nextB9_",
+      "name": "<ferroui_base::property_store::local_value_binding_observer::Untyped<i32> as ferroui_system::i_observable::IObserver<alloc::rc::Rc<dyn ferroui_base::ferro_property::AnyValue>>>::on_next",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define void @_RNvXs3_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB5_7UntypedlEINtNtCsfwoXgjGyLJY_14ferroui_system12i_observable9IObserverINtNtCs1C1lLj4PWSY_5alloc2rc2RcDNtNtB9_14ferro_property8AnyValueEL_EE7on_nextB9_(ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(8) %0, ptr noundef nonnull %1, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(56) %2) unnamed_addr #2 personality ptr @rust_eh_personality !prof !2993 !guid !70628 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 0}"
+      ],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "%8 = invoke noundef ptr @_RNvMs1c_NtCs1C1lLj4PWSY_5alloc2rcINtB6_4WeakINtNtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observer25LocalValueBindingObserverlEE7upgradeBN_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(8) %0)",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCseCMZVCq70TC_12ferroui_base14ferro_property8AnyValueEL_E9drop_slowBI_(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %6) #48",
+        "%32 = invoke { ptr, ptr } %31(ptr noundef nonnull %29) #47",
+        "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCseCMZVCq70TC_12ferroui_base14ferro_property8AnyValueEL_E9drop_slowBI_(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %6) #48",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observer25LocalValueBindingObserverlEE9drop_slowBK_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %5) #48",
+        "invoke void @_RNvMs_NtCseCMZVCq70TC_12ferroui_base15styled_propertyINtB4_14StyledPropertylE12from_untypedB6_(ptr noalias nofree noundef nonnull sret([32 x i8]) align 8 captures(address) dereferenceable(32) %4, ptr noundef nonnull align 8 %23, ptr noundef nonnull %48, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %49)",
+        "invoke void @_RNvMs_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB4_25LocalValueBindingObserverlE10next_valueB8_(ptr noundef nonnull align 8 %21, ptr noalias nofree noundef nonnull align 8 captures(address) dereferenceable(32) %4)",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observer25LocalValueBindingObserverlEE9drop_slowBK_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %5) #48",
+        "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #49"
+      ],
+      "lines": 124,
+      "function_profile_matches_stage2": true,
+      "pgo_name_matches_stage2": true,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::ferro_object::FerroObject>::{closure#0} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject,)>>::call_once",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_(ptr nofree nonnull readnone align 8 captures(none) %0) unnamed_addr #28 personality ptr @rust_eh_personality !guid !77167 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 3,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::ferro_object::FerroObject>::{closure#2} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property_changed_event_args::FerroPropertyChangedEventArgs)>>::call_once",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_(ptr nofree nonnull readnone align 8 captures(none) %0, ptr noalias nofree readonly align 8 captures(none) %1) unnamed_addr #28 personality ptr @rust_eh_personality !guid !77168 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 3,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB1w_6option6OptionRNtB2U_12BindingErrorEEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::ferro_object::FerroObject>::{closure#3} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property::FerroProperty, ferroui_base::data::binding_value::BindingValueType, core::option::Option<&ferroui_base::data::binding_value::BindingError>)>>::call_once",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB1w_6option6OptionRNtB2U_12BindingErrorEEE9call_onceB9_(ptr nofree nonnull readnone align 8 captures(none) %0, ptr nofree nonnull readnone align 8 captures(none) %1, i32 %2, ptr noalias nofree readonly align 8 captures(none) %3) unnamed_addr #28 personality ptr @rust_eh_personality !guid !77169 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 3,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": true,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::ferro_object::FerroObject>::{closure#1} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property_changed_event_args::FerroPropertyChangedEventArgs)>>::call_once",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #1 personality ptr @rust_eh_personality !guid !77170 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvNtCsevLNFiNqfJP_4core6option13expect_failed(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) @anon.dceb4afab905ff1a4370faac103edc86.1514, i64 noundef 26, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @anon.dceb4afab905ff1a4370faac103edc86.1515) #50, !noalias !77183",
+        "tail call void %13(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1), !inline_history !77186"
+      ],
+      "lines": 27,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": false
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::styled_element::StyledElement>::{closure#0} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject,)>>::call_once",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_(ptr noundef nonnull align 8 %0) unnamed_addr #1 personality ptr @rust_eh_personality !guid !77187 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvXsj_NtCseCMZVCq70TC_12ferroui_base14styled_elementNtB5_13StyledElementNtNtB7_12ferro_object15FerroObjectImpl11constructed(ptr noundef nonnull align 8 %0)"
+      ],
+      "lines": 4,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::styled_element::StyledElement>::{closure#2} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property_changed_event_args::FerroPropertyChangedEventArgs)>>::call_once",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #1 personality ptr @rust_eh_personality !guid !77188 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvXsj_NtCseCMZVCq70TC_12ferroui_base14styled_elementNtB5_13StyledElementNtNtB7_12ferro_object15FerroObjectImpl19on_property_changed(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1)"
+      ],
+      "lines": 4,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::animation::animatable::Animatable>::{closure#1} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property_changed_event_args::FerroPropertyChangedEventArgs)>>::call_once",
+      "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #1 personality ptr @rust_eh_personality !guid !77198 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvXsa_NtNtCseCMZVCq70TC_12ferroui_base9animation10animatableNtB5_10AnimatableNtNtB9_12ferro_object15FerroObjectImpl24on_property_changed_core(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1)"
+      ],
+      "lines": 4,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    }
+  ],
+  "missing_symbols": [],
+  "root_vtable_profile_summary": {
+    "previous_definitions": 81,
+    "current_present": 81,
+    "same_accepted_profile": 0,
+    "same_pgo_name": 66,
+    "differences": [
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB1w_6option6OptionRNtB2U_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5input11input_scope10InputScopeE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media10dash_style9DashStyleEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media11path_figure10PathFigureE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media13drawing_image12DrawingImageEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media3pen3PenEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media5brush5BrushEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media7drawing7DrawingEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_6layout10layoutable10LayoutableEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_7styling6styles6StylesE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation15transition_base14TransitionBaseEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15bool_transition14BoolTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15bool_transition14BoolTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15bool_transition14BoolTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2j_6option6OptionRNtB3V_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15bool_transition14BoolTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15size_transition14SizeTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15size_transition14SizeTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15size_transition14SizeTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2j_6option6OptionRNtB3V_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15size_transition14SizeTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16brush_transition15BrushTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16brush_transition15BrushTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16brush_transition15BrushTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2l_6option6OptionRNtB3X_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16brush_transition15BrushTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16color_transition15ColorTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16color_transition15ColorTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16color_transition15ColorTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2l_6option6OptionRNtB3X_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16color_transition15ColorTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16float_transition15FloatTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16float_transition15FloatTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16float_transition15FloatTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2l_6option6OptionRNtB3X_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16float_transition15FloatTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16point_transition15PointTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16point_transition15PointTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16point_transition15PointTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2l_6option6OptionRNtB3X_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16point_transition15PointTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2n_6option6OptionRNtB3Z_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17effect_transition16EffectTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17effect_transition16EffectTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17effect_transition16EffectTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2n_6option6OptionRNtB3Z_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17effect_transition16EffectTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17vector_transition16VectorTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17vector_transition16VectorTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17vector_transition16VectorTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2n_6option6OptionRNtB3Z_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17vector_transition16VectorTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions18integer_transition17IntegerTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions18integer_transition17IntegerTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions18integer_transition17IntegerTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2p_6option6OptionRNtB41_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions18integer_transition17IntegerTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions20thickness_transition19ThicknessTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions20thickness_transition19ThicknessTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions20thickness_transition19ThicknessTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2t_6option6OptionRNtB45_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions20thickness_transition19ThicknessTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions22box_shadows_transition20BoxShadowsTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions22box_shadows_transition20BoxShadowsTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions22box_shadows_transition20BoxShadowsTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2w_6option6OptionRNtB48_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions22box_shadows_transition20BoxShadowsTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions24corner_radius_transition22CornerRadiusTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions24corner_radius_transition22CornerRadiusTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions24corner_radius_transition22CornerRadiusTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2A_6option6OptionRNtB4c_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions24corner_radius_transition22CornerRadiusTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions25relative_point_transition23RelativePointTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions25relative_point_transition23RelativePointTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions25relative_point_transition23RelativePointTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2C_6option6OptionRNtB4e_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions25relative_point_transition23RelativePointTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2H_6option6OptionRNtB4j_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions31transform_operations_transition29TransformOperationsTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions31transform_operations_transition29TransformOperationsTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions31transform_operations_transition29TransformOperationsTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2O_6option6OptionRNtB4q_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions31transform_operations_transition29TransformOperationsTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      }
+    ]
+  },
+  "value_path_profile_comparison": {
+    "selected": [
+      {
+        "kind": "public",
+        "stage3_symbol": "_RNvMsa_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "trial_symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "same_symbol": false,
+        "stage3_profile": [
+          "!{!\"function_entry_count\", i64 257}"
+        ],
+        "trial_profile": [],
+        "stage3_member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+        "trial_member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o"
+      },
+      {
+        "kind": "apply",
+        "stage3_symbol": "_RNvMs4_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+        "trial_symbol": "_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+        "same_symbol": false,
+        "stage3_profile": [
+          "!{!\"function_entry_count\", i64 12889}"
+        ],
+        "trial_profile": [],
+        "stage3_member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+        "trial_member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o"
+      }
+    ],
+    "stage3_path_clone_calls": 1,
+    "trial_path_clone_calls": 0,
+    "trial_current_functions": [
+      {
+        "symbol": "_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+        "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+        "definition": "define internal fastcc noundef align 8 ptr @_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %1) unnamed_addr #10 personality ptr @rust_eh_personality !guid !4496 {",
+        "function_profile": [],
+        "pgo_name": [],
+        "attributes": [
+          "{ inlinehint minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 85,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type13with_registryINtNtCsevLNFiNqfJP_4core6option6OptionNtB2_9ConvertFnENCNvMsb_B2_NtB2_10ValueTypes22try_convert_registered0EB8_",
+        "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+        "definition": "define void @_RINvNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type13with_registryINtNtCsevLNFiNqfJP_4core6option6OptionNtB2_9ConvertFnENCNvMsb_B2_NtB2_10ValueTypes22try_convert_registered0EB8_(ptr dead_on_unwind noalias nofree noundef writable sret([24 x i8]) align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) %1) unnamed_addr #9 personality ptr @rust_eh_personality !guid !17342 {",
+        "function_profile": [],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 78,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+        "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+        "definition": "define internal fastcc { ptr, ptr } @_RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %1) unnamed_addr #9 !guid !37211 {",
+        "function_profile": [],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 156,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered",
+        "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.11.rcgu.o",
+        "definition": "define { ptr, ptr } @_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered(ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(16) %0, ptr noalias nofree noundef readonly align 8 captures(none) dead_on_return dereferenceable(32) %1) unnamed_addr #9 personality ptr @rust_eh_personality !guid !40345 {",
+        "function_profile": [],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 72,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0E0bEB1Z_",
+        "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o",
+        "definition": "define noundef zeroext i1 @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0E0bEB1Z_(ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %0) unnamed_addr #0 personality ptr @rust_eh_personality !guid !5998 {",
+        "function_profile": [],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 26,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es0_0B3s_EB1Z_",
+        "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o",
+        "definition": "define void @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es0_0B3s_EB1Z_(ptr dead_on_unwind noalias nofree noundef writable writeonly sret([24 x i8]) align 8 captures(none) dereferenceable(24) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %1, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) %2) unnamed_addr #0 personality ptr @rust_eh_personality !guid !6009 {",
+        "function_profile": [],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 155,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es_0uEB1Z_",
+        "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o",
+        "definition": "define void @_RINvMs2_NtNtCsgHYyB3hU8Ec_3std6thread5localINtB6_8LocalKeyINtNtCsevLNFiNqfJP_4core4cell7RefCellINtNtBZ_6option6OptionNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8RegistryEEE4withNCINvB1T_13with_registryIB1w_NtB1T_9ConvertFnENCNvMsb_B1T_NtB1T_10ValueTypes22try_convert_registered0Es_0uEB1Z_(ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(8) %0) unnamed_addr #0 personality ptr @rust_eh_personality !guid !6081 {",
+        "function_profile": [],
+        "pgo_name": [],
+        "attributes": [
+          "{ minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 85,
+        "clone_calls": []
+      },
+      {
+        "symbol": "_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+        "member": "ferroui_base-3ba9c98342616a1a.ferroui_base.aa5a9f3f002932e2-cgu.15.rcgu.o",
+        "definition": "define internal fastcc noundef align 8 ptr @_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %1) unnamed_addr #4 personality ptr @rust_eh_personality !prof !14778 !guid !14779 !PGOFuncName !14780 {",
+        "function_profile": [
+          "!{!\"function_entry_count\", i64 569}"
+        ],
+        "pgo_name": [
+          "!{!\"ferroui_base.aa5a9f3f002932e2-cgu.15;_RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_\"}"
+        ],
+        "attributes": [
+          "{ inlinehint minsize nonlazybind optsize uwtable \"probe-stack\"=\"inline-asm\" \"target-cpu\"=\"x86-64\" }"
+        ],
+        "lines": 75,
+        "clone_calls": []
+      }
+    ]
+  },
+  "validation_scope": "Diagnostic source-change codegen audit under inherited stage3 profile14ab6d82. Root and conversion function profile identities drift, so this artifact cannot support final matched-profile runtime acceptance.",
+  "status": "diagnostic_native_clone_and_hash_calls_eliminated_profile_drift_confirmed",
+  "source_value_type_sha256": "9d581166d51d0bf7a9a84d9b1a68fb558c00459d5546ae88ae3df89e9ecfb427",
+  "conclusion": "Rootnotify movesCGU10\u219214 and loses accepted14164entry/two promotions; all81priorroot-vtable profiles cease matching. ValueTypes::try_convert_registered and ConvertFn::apply also change mangled impl identities and lose accepted257/12889profiles. The cloned converter path already has zeroClonecalls in pre-LTO IR. Fresh training on this exact source is required.",
+  "final_native_proof": {
+    "binary": "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration",
+    "binary_sha256": "a4571fe8bd95fd8c979b03853dfb843ed075705fd2724125a53a7bef1970215c",
+    "native_object": "/tmp/ferro-run/inline-clone-trial/registration/001-candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+    "native_object_sha256": "5e8a7f7bc8dc1a36b10dad8e1b38db5539bdf42a58ff60b6420033dcdb8fa070",
+    "manifest": "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration.json",
+    "manifest_sha256": "34ad6eb6c5141957b7e4ce4f53a94c4633f4886ba5d9e4c408a16e5f3fe644e8",
+    "link_capture": "/tmp/ferro-run/inline-clone-trial/registration/original-link.json",
+    "link_capture_sha256": "02c7a30c06698bbc030cd4622b2b3beb94083b5bb2841b159d512d97186aa3d8",
+    "native_symbols": [
+      "0000000000000000 00000000000000fb t _RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_",
+      "0000000000000000 00000000000000f7 t _RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069",
+      "0000000000000000 0000000000000130 t _RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply",
+      "0000000000000000 0000000000000371 t _RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered"
+    ],
+    "public_clone_relocations": [],
+    "public_lookup_relocations": [
+      "000000000000020f:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069-0x4"
+    ],
+    "public_apply_relocations": [
+      "0000000000000298:  R_X86_64_PLT32\t.text._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4"
+    ],
+    "public_inlined_clone_region": "     20e:      \tcallq\t0x213 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x213>\n\t\t000000000000020f:  R_X86_64_PLT32\t.text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069-0x4\n     213:      \ttestq\t%rax, %rax\n     216:      \tje\t0x246 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x246>\n     218:      \tmovq\t%rax, %rcx\n     21b:      \taddq\t$0x8, %rax\n     21f:      \tcmpl\t$0x2, (%rcx)\n     222:      \tjne\t0x22b <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x22b>\n     224:      \tmovq\t(%rax), %rax\n     227:      \taddq\t$0x18, %rax\n     22b:      \tmovb\t(%rax), %cl\n     22d:      \tmovzbl\t%cl, %edx\n     230:      \tleaq\t(%rip), %rsi            # 0x237 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x237>\n\t\t0000000000000233:  R_X86_64_PC32\t.rodata._RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered-0x4\n     237:      \tmovslq\t(%rsi,%rdx,4), %rdx\n     23b:      \taddq\t%rsi, %rdx\n     23e:      \tjmpq\t*%rdx\n     240:      \tmovq\t0x8(%rax), %rdx\n     244:      \tjmp\t0x27e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x27e>\n     246:      \tincq\t(%r14)\n     249:      \tmovb\t$-0x1, 0x8(%rsp)\n     24e:      \txorl\t%ebx, %ebx\n     250:      \tjmp\t0x2ac <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x2ac>\n     252:      \tmovq\t0x8(%rax), %rdx\n     256:      \tmovb\t0x1(%rax), %sil\n     25a:      \tjmp\t0x27e <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x27e>\n     25c:      \tmovq\t0x8(%rax), %rdx\n     260:      \ttestq\t%rdx, %rdx\n     263:      \tjne\t0x271 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x271>\n     265:      \tmovq\t0x10(%rax), %rax\n     269:      \txorl\t%edx, %edx\n     26b:      \tjmp\t0x244 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x244>\n     26d:      \tmovq\t0x8(%rax), %rdx\n     271:      \tmovq\t0x10(%rax), %rax\n     275:      \tincq\t(%rdx)\n     278:      \tje\t0x309 <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x309>\n     27e:      \tincq\t(%r14)\n     281:      \tleaq\t0x8(%rsp), %rdi\n     286:      \tmovb\t%cl, (%rdi)\n     288:      \tmovb\t%sil, 0x1(%rdi)\n     28c:      \tmovq\t%rdx, 0x8(%rdi)\n     290:      \tmovq\t%rax, 0x10(%rdi)\n     294:      \tmovq\t%rbx, %rsi\n     297:      \tcallq\t0x29c <_RNvMsb_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_10ValueTypes22try_convert_registered+0x29c>\n\t\t0000000000000298:  R_X86_64_PLT32\t.text._RNvMs5_NtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_typeNtB5_9ConvertFn5apply-0x4\n     29c:      \tmovq\t%rax, %rbx",
+    "outlined_convert_fn_clone_symbols": [],
+    "lookup_bodies": [
+      {
+        "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_:",
+        "calls": [],
+        "rotate32": [
+          "21:      \trolq\t$0x20, %r9"
+        ]
+      },
+      {
+        "section": ".text._RINvMs2_NtNtNtCsgHYyB3hU8Ec_3std11collections4hash3mapINtB6_7HashMapTNtNtCsevLNFiNqfJP_4core3any6TypeIdB15_ENtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type12RegistrationINtNtB19_4hash18BuildHasherDefaultNtB1K_8IdHasherEE3getB14_EB1Q_.33069:",
+        "calls": [],
+        "rotate32": [
+          "17:      \trolq\t$0x20, %rdx"
+        ]
+      }
+    ],
+    "passed": true,
+    "scope": "Diagnostic only: the preserved Base loses root and conversion PGO identities under the inherited stage3 profile. This proves native clone/hash call elimination; final matched-profile performance requires fresh training."
+  },
+  "diagnostic_timing": {
+    "path": "/tmp/ferro-run/inline-clone-trial/registration/comparison-cpu6.json",
+    "sha256": "edc8ddbbff1e8ab2ea576a7364fbd19296b55d8dc8e02230b74ae6dca33c9bf3",
+    "method": "Eight lanes; two warmups and alternating fresh processes; rotated lanes; pinned CPU; thread CPU ns/op.",
+    "experiment_note": "Isolated recovery trial using the passed profile; final acceptance requires retraining annotated source.",
+    "cpu": 6,
+    "pairs": 31,
+    "warmups": 2,
+    "reference_binary": "/tmp/ferro-run/registration-stage2/reference-registration",
+    "reference_manifest_sha256": "8c58cfa5e74832973fd4fe009e876745adf466028fe6e82f5f84713305674d25",
+    "reference_build": {
+      "identity": {
+        "command": [
+          "/tmp/ferro-tools/bin/rustc",
+          "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/registration_hot_paths.rs",
+          "--edition=2021",
+          "--crate-name",
+          "registration_probe",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-Cpanic=unwind",
+          "-Copt-level=z",
+          "-Clto=fat",
+          "-Ccodegen-units=1",
+          "-Cprofile-use=/tmp/ferro-run/pgo/winui-pgo-c510yqsy/736840a1a89cda4724cbc66d7e6e8bf525be704f769fc12027b6a9ca4ddbe709.profdata",
+          "-Cllvm-args=--addrsig",
+          "-Cstrip=symbols",
+          "-Clink-arg=-fuse-ld=lld",
+          "-Clink-arg=-Wl,--icf=safe",
+          "-Clink-arg=-Wl,-z,pack-relative-relocs",
+          "-Clinker=/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/compact_unwind_link.py",
+          "-Ldependency=/tmp/ferro-run/baseline-graph",
+          "-Ldependency=/tmp/ferro-run/registration-host-deps",
+          "--extern",
+          "ferroui_base=/tmp/ferro-run/baseline-graph/libferroui_base-2b5aa572aaca685f.rlib",
+          "-o",
+          "/tmp/ferro-run/registration-stage2/reference-registration"
+        ],
+        "source_sha256": "849d1bc8eb3ea07e94ac54a97fa79fda8a131d04ad9dac6bf09f7658856cec51",
+        "inputs": {
+          "graph": "/tmp/ferro-run/baseline-graph",
+          "profile": "/tmp/ferro-run/pgo/winui-pgo-c510yqsy/736840a1a89cda4724cbc66d7e6e8bf525be704f769fc12027b6a9ca4ddbe709.profdata",
+          "profile_sha256": "736840a1a89cda4724cbc66d7e6e8bf525be704f769fc12027b6a9ca4ddbe709",
+          "rlib_sha256": {
+            "libadler2-e39a1fb18334017e.rlib": "0f76438ac025adb15ef9435def9106731243aae7b83aa6e443995cc65aff6030",
+            "libarrayvec-3de762c02c8f8004.rlib": "aacf7f208c9bd238a550b66a3bacd8c763bed3357929b3586ec8ef6d6363a0a8",
+            "libbitflags-72fb52f9911f7140.rlib": "86ce2104467df94111034ea1fc5d9636e45435011abedce19a3e930a8b62e4ac",
+            "libcfg_if-1b3d66f19efbef56.rlib": "2efa2420878e4f93675c01b518b89ee07b0070af31e9169ee04bab695592d567",
+            "libcrc32fast-847241c18a14ced5.rlib": "9c52ca953992c89091c340e4caa3a876b48b4cda17557ebaca33b8ec9e0f277b",
+            "libderanged-15cdfde792631974.rlib": "0e8b62d6c1407c6b2901d06f3fb9a36782b4fc1886f7af99915f4a67d5a2d38c",
+            "libferroui_base-2b5aa572aaca685f.rlib": "72d33b0c2ea73f0d16561425d7cb8312fd1ac210a8bd3b13ca8478cae77d2f52",
+            "libferroui_controls-f7133557ad949340.rlib": "07afcbc08e0b0d9948f7922cc3fdccfbc7dbb30688ba7dacbf24e7600572a8c7",
+            "libferroui_dialogs-b3930cbb8f87f9d4.rlib": "0613c046092132dc17f0b98eb5a72022e249dfb91b00c259a8dfbc7b469efca3",
+            "libferroui_markup-08e6a9f9a89bf4b8.rlib": "a6cefa934988d88665c390259f2b8d9d1d54cfcc2fe1f8960765115247ced87b",
+            "libferroui_markup_xaml-dfa54b471cef376c.rlib": "354647e9cdd46f86eb994d1c286ac1aa1da5446a387812a9f7eadc6dacf20941",
+            "libferroui_markup_xaml_loader-66006858e80f2228.rlib": "946c762afc0db048cc5737bf79b73760f5998fd7422bbc8c804e086dda4250f7",
+            "libferroui_remote_protocol-8b16726c9e600684.rlib": "0e3aa3061b77e83a3fa195075600b5a633743af937b9014082feb0993b361a84",
+            "libferroui_system-e02e159150bc936b.rlib": "7122cdb12b8dc408b9f1bb2e064728d67665cc001ecb5593ab669acdb987b085",
+            "libferroui_themes_winui-d8a6e08450370e24.rlib": "88f142952bddce613270a15fa3262a34541d9a7e6a5a3ceacf871fd3c92cb9e2",
+            "libferroui_xaml_binary-41bde4d84c42864b.rlib": "159f922daaaa2591093f2b2239bb8234314f6125dd7789271ace7a660889dd20",
+            "libflate2-49146c6e20cfe730.rlib": "f836a93d460e22eccecce4ed032f73541f8c382c00bb6e07e59931a8e0907622",
+            "libform_urlencoded-7fc390321a14923a.rlib": "7df25ec73f28763e21538815edea57d4a72a0b8422c80038c72925852bc9ed28",
+            "libicu_collections-164cc826406fcc3f.rlib": "6612abff34700eaea5aeacf2105b8664793fc617625d763ad1255c02ebdc2365",
+            "libicu_locale_core-cfd0a55a084dc1f2.rlib": "3a98ee09f295515ca7d87f8325555f61fbc53f66a2160113438e3fb9ef365ef4",
+            "libicu_normalizer-d433f276460f9d1d.rlib": "b5296953833ca5729acb742680aade37d2b7df8eafbbf9e8c77e7b9026a4ed43",
+            "libicu_normalizer_data-0b1ee15099f9c91b.rlib": "e5ef0f7366bf762e37efdaf61cdfb557d2964663e3e2e2d01ef7133512fce407",
+            "libicu_properties-4831273a1981a2b8.rlib": "20852ca0f3d0151e8e5604944d16ae942f422d51fbc35c43cc377a46489f45dd",
+            "libicu_properties_data-2cb1812eda6ecf58.rlib": "026b401c6d7c3bbfc78acb9cd7b8a8258cab13e2a5d7b5a84463b796c2f217d9",
+            "libicu_provider-451ca026f3dd8adc.rlib": "d4034669facb3c01b0cda36bf93d07d965c9bb00f7dcc27f1097dafded969a3c",
+            "libidna-601d50379b930cf6.rlib": "ba699d374a717020455b42074e2d4d15533c4d23825c8519d048df0b388b7c61",
+            "libidna_adapter-5a4f16b61a09f60a.rlib": "f7f1531f87633f3d60bff90a968dad1e7eae8ed46c9966a72f7b050427e3575e",
+            "liblibc-1d5aaa3bcc3d5d90.rlib": "79c1fa1fd19d5a4f3b7b705517dc2c4246986e8c84c2868738c91738962c841d",
+            "liblitemap-d22f689d46e3bbe5.rlib": "41a41cd953f4bde0cc27b86e6e7a5ea1bb65c8aa1d262df7d941db38cc80712f",
+            "libminiz_oxide-6e2a7f03d5f0a666.rlib": "49ecd738f66977dadd036b3eb1cdee32c040ab647bdc9a7a838e32523ba464f0",
+            "libnum_conv-c05c47315d90205b.rlib": "f6439e5ddd0f8fda4c6b4149f2e90129ac63b00dfe0939f7de0d8b80cff09e83",
+            "libnum_traits-37b718a6729bcc1b.rlib": "e3a398cd1ebe2f3fd58ca998350ebb5b6ee90456e2132a881b8cc59ab09678ad",
+            "libpercent_encoding-a86944d1d3463ef7.rlib": "20bf5bd9d2d5a3203502fea5007abdf0888d3fa541d74edf7e67294a1304efad",
+            "libpotential_utf-abd5295e9879b96d.rlib": "634b6b64d07bf4f58cda4edfe3853784f29853e41788eb0c1966b39513f056ed",
+            "libpowerfmt-eeeac14fb12f794c.rlib": "31fddfadc3db2af36ca217815ba6635e59b3fdab3d24b8bb46a8b10effa8f930",
+            "libroxmltree-d7a8f7f39d7afb2f.rlib": "2ad21e293ebcb9f215ac3085d6acdbf0034936adb4009385557d80ab2e0205fd",
+            "librust_decimal-e4dc2b3a9ae47059.rlib": "1e58eb61b4eb716a2b4a5e4feb7568d55396a702394268006132b64756606608",
+            "librustc_hash-a8d402858b65d5a2.rlib": "1c8e047fdd4b04e92f61eb4b9bfbc4c906442289dabf11c58f0954b47feb3ced",
+            "libsimd_adler32-57c9c24e43f151ae.rlib": "2f46a7c1d7bf9daca72cbae030c23d2f8f0aebdef54f16088aba2a5e4c61e6ea",
+            "libsmallvec-ebbc30cc3a51cf6e.rlib": "6364b210b161c693e50a4e2b9294b42ffa67369db637ac8303d66e3798a2612d",
+            "libstable_deref_trait-8e2cc72b5ce7bf40.rlib": "231a0a0cfd5170d6b6b04e10537e5bfccb2bec12afb47e3e2e38576b1049e3ee",
+            "libsysinfo-eac4ff3dbe638673.rlib": "0b187b3eb2d2aca3fc8f94497769ccff3dd0e192d54e8eaf3b0c6e0a4a5e4394",
+            "libtime-06b72c7c69b1d8e0.rlib": "14952e35b7c4cd12a1150ce78773e65c52e14c0d253979cac2c2fff3275adf64",
+            "libtime_core-cdd44037ccb8c0e1.rlib": "1e6c49fa1f02e2cde61e54c6fb851e852e1d2bb4f420c0d6bb016ca5f105c6a7",
+            "libtinystr-cdb1bafdb4923409.rlib": "28cb8f99081f7929ec86ef5d99b1f068da48d2d0dca34800d3f8891eb2243f9b",
+            "liburl-bffbd9386428c734.rlib": "56984567908ffc097ac6fc8826dbef8e21f2c1495239f20d9ca6892c02d6214c",
+            "libutf8_iter-e910e4b1a88fcdb8.rlib": "b2769d6b23cce0ecab7f0ebeb040d1c0578fee0ac5d42c127914a4dab2eaa8e7",
+            "libuuid-3c1f215d3ee68ef1.rlib": "6a5df7ea62f4c14b74c83039241a987251ec54b92710505ee59d9f531699fda2",
+            "libwriteable-23bd853184268b7c.rlib": "9ad3927318e9b109669cee91370c9ce4bb176c64bf21f2fd2ddfd3d013f9df6e",
+            "libxamlx-3ae8c7efe8346cd7.rlib": "fbddfb547fefcb9d7e7a8ca67b7275b0d436234f2e7c58602d45b06c70b023c0",
+            "libyoke-9e3bf00862ebc11e.rlib": "4b17063bcf31cb06b3fb7c1f8cc3b3481f2d146fd37196b0efc6fbfea6736591",
+            "libzerofrom-77aaf007d46ae3dd.rlib": "c867b169f4f09ba1646e8e261d8ea6b09d6b5ae5a466f645120aa828d1e0e943",
+            "libzerotrie-fba4ae61f0a67813.rlib": "ef358e7d588acf4e63833b1e8231223e2e3ed40389d65ab9f1ea778943c6a8c3",
+            "libzerovec-b0927d769442edd5.rlib": "3b73b1d95973d44e290e5ff2bb451003f98d02b275c4163b98ca25a677926a39"
+          },
+          "additional_dependencies": [
+            "/tmp/ferro-run/registration-host-deps"
+          ],
+          "dependency_artifacts_sha256": {
+            "/tmp/ferro-run/baseline-graph": {
+              "libadler2-e39a1fb18334017e.rlib": "0f76438ac025adb15ef9435def9106731243aae7b83aa6e443995cc65aff6030",
+              "libarrayvec-3de762c02c8f8004.rlib": "aacf7f208c9bd238a550b66a3bacd8c763bed3357929b3586ec8ef6d6363a0a8",
+              "libbitflags-72fb52f9911f7140.rlib": "86ce2104467df94111034ea1fc5d9636e45435011abedce19a3e930a8b62e4ac",
+              "libcfg_if-1b3d66f19efbef56.rlib": "2efa2420878e4f93675c01b518b89ee07b0070af31e9169ee04bab695592d567",
+              "libcrc32fast-847241c18a14ced5.rlib": "9c52ca953992c89091c340e4caa3a876b48b4cda17557ebaca33b8ec9e0f277b",
+              "libderanged-15cdfde792631974.rlib": "0e8b62d6c1407c6b2901d06f3fb9a36782b4fc1886f7af99915f4a67d5a2d38c",
+              "libferroui_base-2b5aa572aaca685f.rlib": "72d33b0c2ea73f0d16561425d7cb8312fd1ac210a8bd3b13ca8478cae77d2f52",
+              "libferroui_controls-f7133557ad949340.rlib": "07afcbc08e0b0d9948f7922cc3fdccfbc7dbb30688ba7dacbf24e7600572a8c7",
+              "libferroui_dialogs-b3930cbb8f87f9d4.rlib": "0613c046092132dc17f0b98eb5a72022e249dfb91b00c259a8dfbc7b469efca3",
+              "libferroui_markup-08e6a9f9a89bf4b8.rlib": "a6cefa934988d88665c390259f2b8d9d1d54cfcc2fe1f8960765115247ced87b",
+              "libferroui_markup_xaml-dfa54b471cef376c.rlib": "354647e9cdd46f86eb994d1c286ac1aa1da5446a387812a9f7eadc6dacf20941",
+              "libferroui_markup_xaml_loader-66006858e80f2228.rlib": "946c762afc0db048cc5737bf79b73760f5998fd7422bbc8c804e086dda4250f7",
+              "libferroui_remote_protocol-8b16726c9e600684.rlib": "0e3aa3061b77e83a3fa195075600b5a633743af937b9014082feb0993b361a84",
+              "libferroui_system-e02e159150bc936b.rlib": "7122cdb12b8dc408b9f1bb2e064728d67665cc001ecb5593ab669acdb987b085",
+              "libferroui_themes_winui-d8a6e08450370e24.rlib": "88f142952bddce613270a15fa3262a34541d9a7e6a5a3ceacf871fd3c92cb9e2",
+              "libferroui_xaml_binary-41bde4d84c42864b.rlib": "159f922daaaa2591093f2b2239bb8234314f6125dd7789271ace7a660889dd20",
+              "libflate2-49146c6e20cfe730.rlib": "f836a93d460e22eccecce4ed032f73541f8c382c00bb6e07e59931a8e0907622",
+              "libform_urlencoded-7fc390321a14923a.rlib": "7df25ec73f28763e21538815edea57d4a72a0b8422c80038c72925852bc9ed28",
+              "libicu_collections-164cc826406fcc3f.rlib": "6612abff34700eaea5aeacf2105b8664793fc617625d763ad1255c02ebdc2365",
+              "libicu_locale_core-cfd0a55a084dc1f2.rlib": "3a98ee09f295515ca7d87f8325555f61fbc53f66a2160113438e3fb9ef365ef4",
+              "libicu_normalizer-d433f276460f9d1d.rlib": "b5296953833ca5729acb742680aade37d2b7df8eafbbf9e8c77e7b9026a4ed43",
+              "libicu_normalizer_data-0b1ee15099f9c91b.rlib": "e5ef0f7366bf762e37efdaf61cdfb557d2964663e3e2e2d01ef7133512fce407",
+              "libicu_properties-4831273a1981a2b8.rlib": "20852ca0f3d0151e8e5604944d16ae942f422d51fbc35c43cc377a46489f45dd",
+              "libicu_properties_data-2cb1812eda6ecf58.rlib": "026b401c6d7c3bbfc78acb9cd7b8a8258cab13e2a5d7b5a84463b796c2f217d9",
+              "libicu_provider-451ca026f3dd8adc.rlib": "d4034669facb3c01b0cda36bf93d07d965c9bb00f7dcc27f1097dafded969a3c",
+              "libidna-601d50379b930cf6.rlib": "ba699d374a717020455b42074e2d4d15533c4d23825c8519d048df0b388b7c61",
+              "libidna_adapter-5a4f16b61a09f60a.rlib": "f7f1531f87633f3d60bff90a968dad1e7eae8ed46c9966a72f7b050427e3575e",
+              "liblibc-1d5aaa3bcc3d5d90.rlib": "79c1fa1fd19d5a4f3b7b705517dc2c4246986e8c84c2868738c91738962c841d",
+              "liblitemap-d22f689d46e3bbe5.rlib": "41a41cd953f4bde0cc27b86e6e7a5ea1bb65c8aa1d262df7d941db38cc80712f",
+              "libminiz_oxide-6e2a7f03d5f0a666.rlib": "49ecd738f66977dadd036b3eb1cdee32c040ab647bdc9a7a838e32523ba464f0",
+              "libnum_conv-c05c47315d90205b.rlib": "f6439e5ddd0f8fda4c6b4149f2e90129ac63b00dfe0939f7de0d8b80cff09e83",
+              "libnum_traits-37b718a6729bcc1b.rlib": "e3a398cd1ebe2f3fd58ca998350ebb5b6ee90456e2132a881b8cc59ab09678ad",
+              "libpercent_encoding-a86944d1d3463ef7.rlib": "20bf5bd9d2d5a3203502fea5007abdf0888d3fa541d74edf7e67294a1304efad",
+              "libpotential_utf-abd5295e9879b96d.rlib": "634b6b64d07bf4f58cda4edfe3853784f29853e41788eb0c1966b39513f056ed",
+              "libpowerfmt-eeeac14fb12f794c.rlib": "31fddfadc3db2af36ca217815ba6635e59b3fdab3d24b8bb46a8b10effa8f930",
+              "libroxmltree-d7a8f7f39d7afb2f.rlib": "2ad21e293ebcb9f215ac3085d6acdbf0034936adb4009385557d80ab2e0205fd",
+              "librust_decimal-e4dc2b3a9ae47059.rlib": "1e58eb61b4eb716a2b4a5e4feb7568d55396a702394268006132b64756606608",
+              "librustc_hash-a8d402858b65d5a2.rlib": "1c8e047fdd4b04e92f61eb4b9bfbc4c906442289dabf11c58f0954b47feb3ced",
+              "libsimd_adler32-57c9c24e43f151ae.rlib": "2f46a7c1d7bf9daca72cbae030c23d2f8f0aebdef54f16088aba2a5e4c61e6ea",
+              "libsmallvec-ebbc30cc3a51cf6e.rlib": "6364b210b161c693e50a4e2b9294b42ffa67369db637ac8303d66e3798a2612d",
+              "libstable_deref_trait-8e2cc72b5ce7bf40.rlib": "231a0a0cfd5170d6b6b04e10537e5bfccb2bec12afb47e3e2e38576b1049e3ee",
+              "libsysinfo-eac4ff3dbe638673.rlib": "0b187b3eb2d2aca3fc8f94497769ccff3dd0e192d54e8eaf3b0c6e0a4a5e4394",
+              "libtime-06b72c7c69b1d8e0.rlib": "14952e35b7c4cd12a1150ce78773e65c52e14c0d253979cac2c2fff3275adf64",
+              "libtime_core-cdd44037ccb8c0e1.rlib": "1e6c49fa1f02e2cde61e54c6fb851e852e1d2bb4f420c0d6bb016ca5f105c6a7",
+              "libtinystr-cdb1bafdb4923409.rlib": "28cb8f99081f7929ec86ef5d99b1f068da48d2d0dca34800d3f8891eb2243f9b",
+              "liburl-bffbd9386428c734.rlib": "56984567908ffc097ac6fc8826dbef8e21f2c1495239f20d9ca6892c02d6214c",
+              "libutf8_iter-e910e4b1a88fcdb8.rlib": "b2769d6b23cce0ecab7f0ebeb040d1c0578fee0ac5d42c127914a4dab2eaa8e7",
+              "libuuid-3c1f215d3ee68ef1.rlib": "6a5df7ea62f4c14b74c83039241a987251ec54b92710505ee59d9f531699fda2",
+              "libwriteable-23bd853184268b7c.rlib": "9ad3927318e9b109669cee91370c9ce4bb176c64bf21f2fd2ddfd3d013f9df6e",
+              "libxamlx-3ae8c7efe8346cd7.rlib": "fbddfb547fefcb9d7e7a8ca67b7275b0d436234f2e7c58602d45b06c70b023c0",
+              "libyoke-9e3bf00862ebc11e.rlib": "4b17063bcf31cb06b3fb7c1f8cc3b3481f2d146fd37196b0efc6fbfea6736591",
+              "libzerofrom-77aaf007d46ae3dd.rlib": "c867b169f4f09ba1646e8e261d8ea6b09d6b5ae5a466f645120aa828d1e0e943",
+              "libzerotrie-fba4ae61f0a67813.rlib": "ef358e7d588acf4e63833b1e8231223e2e3ed40389d65ab9f1ea778943c6a8c3",
+              "libzerovec-b0927d769442edd5.rlib": "3b73b1d95973d44e290e5ff2bb451003f98d02b275c4163b98ca25a677926a39"
+            },
+            "/tmp/ferro-run/registration-host-deps": {
+              "libdisplaydoc-4f81b7522d09b694.so": "b36f9a446c5b1f3444d4fd34b67f4b5e257c97e82a2f140e16e4ba0f98403b42",
+              "libpaste-28bb4fa3786cc7b2.so": "fe6a0cb439e976e5b7f17c21b8887f754c110d78619a06b2ae2d1952ae401b8e",
+              "libyoke_derive-0fe6ed0e33d92cd1.so": "c5aa211db8499a8c23a77e8d551e65852fe561f16fd598d12479f4f895fb7261",
+              "libzerofrom_derive-0fafa7f4138ce728.so": "5e7f584823d776d3b0c12a7b97975380abd794c373e45b2662f04b6383eeddfd",
+              "libzerovec_derive-48a965bef2fa29dd.so": "ede6485eae7c07d017a365249841e7416284c0c6fce5fc2568fb78405862b7ca"
+            }
+          }
+        },
+        "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+        "native_linker": {
+          "cc": {
+            "invoked_as": "/usr/bin/cc",
+            "path": "/usr/bin/x86_64-linux-gnu-gcc-13",
+            "sha256": "6117c52522997d2aaccb2b52b3c6bf42c0a6c5edb1d718431fed6b2fc5fec234",
+            "version": "cc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "lld": {
+            "invoked_as": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/ld.lld",
+            "path": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/ld.lld",
+            "sha256": "acf9413ba755c639cd394ba156cdaabd3a859138ce7885dfe0b9f6bf3f287278",
+            "version": "LLD 23.1.1 (/checkout/src/llvm-project/llvm 1b9c0d5ff9bbe7634aead059efe6b11a7eeba145) (compatible with GNU linkers)",
+            "source": "rustc sysroot",
+            "backend": {
+              "path": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld",
+              "sha256": "4739514e3484915747c34b35007cd990235cc6b490b2d0525a61ac402ca16af9"
+            }
+          }
+        },
+        "linker_source_sha256": {
+          "compact_unwind_link.py": "36477e1afabf3be1822871acdd1316f11a390adebb8f0671244c73bc87e91b5a",
+          "compact_unwind.py": "ea42ad02f5c0d8ca158a50c2b43a95e7e1697f91600b9108b78873026c0c5711",
+          "attribute_codegen.py": "24324f87bdcc073afdb67e09f1afac0cc85d0f3ecf9a97083b3aab77979e57ff"
+        }
+      },
+      "build_seconds": 127.12397228899863,
+      "bytes": 3809000,
+      "sha256": "754c35f18ec0b8e3f3e4eb4e3df0675535d0e27e16368f18e1ea9be22129891d",
+      "compact_unwind_applied": true
+    },
+    "candidate_build": {
+      "identity": {
+        "command": [
+          "/tmp/ferro-tools/bin/rustc",
+          "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/registration_hot_paths.rs",
+          "--edition=2021",
+          "--crate-name",
+          "registration_probe",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-Cpanic=unwind",
+          "-Copt-level=z",
+          "-Clto=fat",
+          "-Ccodegen-units=1",
+          "-Cprofile-use=/tmp/ferro-run/14ab6d82afc601fca80bf6785dc2c5d6dc613c545677945d3f213642f63fda80.profdata",
+          "-Cllvm-args=--addrsig",
+          "-Cstrip=symbols",
+          "-Clink-arg=-fuse-ld=lld",
+          "-Clink-arg=-Wl,--icf=safe",
+          "-Clink-arg=-Wl,-z,pack-relative-relocs",
+          "-Clinker=/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/compact_unwind_link.py",
+          "-Ldependency=/tmp/ferro-run/inline-clone-trial/graph",
+          "-Ldependency=/tmp/ferro-run/registration-host-deps",
+          "--extern",
+          "ferroui_base=/tmp/ferro-run/inline-clone-trial/graph/libferroui_base-3ba9c98342616a1a.rlib",
+          "-o",
+          "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration"
+        ],
+        "source": "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/registration_hot_paths.rs",
+        "source_sha256": "849d1bc8eb3ea07e94ac54a97fa79fda8a131d04ad9dac6bf09f7658856cec51",
+        "base": "/tmp/ferro-run/inline-clone-trial/graph/libferroui_base-3ba9c98342616a1a.rlib",
+        "base_sha256": "2f66f2a5aca0eb596769960923974f97cda5ea1af6620f06b8a6f30797381d02",
+        "profile": "/tmp/ferro-run/14ab6d82afc601fca80bf6785dc2c5d6dc613c545677945d3f213642f63fda80.profdata",
+        "profile_sha256": "14ab6d82afc601fca80bf6785dc2c5d6dc613c545677945d3f213642f63fda80",
+        "dependency_artifacts_sha256": {
+          "/tmp/ferro-run/inline-clone-trial/graph": {
+            "libadler2-53fe514955cc397f.rlib": "7f1437ca426137d9787f9a691fcd7cf690076c349a1765d3f22a6371fd99b5a0",
+            "libarrayvec-cf3949f8a8348230.rlib": "f0ee5e38488a9c0417453884574d41ee8315870b6a2094fa326a8fd9681b546e",
+            "libbitflags-72129645e54afb32.rlib": "18c0aeb587ad22c8ab77bbc81f2235cc91a530e0db66beb80d326e904dfc4de5",
+            "libcfg_if-cef5a54d9c856d03.rlib": "e8f2811d822676d98520ab4a8745fac26a75ca3a2cbce8c33c2c750a7c2d9053",
+            "libcrc32fast-02fd3ee0ddf0592c.rlib": "9ce2ee17839bbe67a448681149846fe0c666c449d252c678a005f2241bc02d3a",
+            "libderanged-b3fcbc2ac4afa219.rlib": "3c902f7f5efc34302e50b7224471490eab12ad0910bb696f702bc8317ee4418b",
+            "libferroui_base-3ba9c98342616a1a.rlib": "2f66f2a5aca0eb596769960923974f97cda5ea1af6620f06b8a6f30797381d02",
+            "libferroui_system-da69396fa53ac8ce.rlib": "c8e6f8e141e27c9e6d2e987578128cd4754d9efd2100b289e365155c617c2ad7",
+            "libflate2-b87482f615d0fb46.rlib": "c0d45f7a5f114896a0b7070f6f6427c17f94740bd16c23b4c755194e8c2d3612",
+            "libform_urlencoded-304c4043553667f0.rlib": "ea3ebbc34032cee1582ae5c59313209642d000fe178f16f26ff65e0fe16e921b",
+            "libicu_collections-afe11ab73e236f6e.rlib": "f3a8359cba71987bd705f3c1f0367f95482e2c82cae973147d5f714c0bb310b0",
+            "libicu_locale_core-a542b83b7912d531.rlib": "782dcd74132788c80153d26d296d9e8d6bfb9cbac1f5655cf6491962abfdf497",
+            "libicu_normalizer-2a0eb1c2b1a4eeda.rlib": "2797ff844ee1c01bd0e89696be31ba52ceb9842abfe759d2dc2d330416405ad4",
+            "libicu_normalizer_data-0718fbcef4388a30.rlib": "1655ec424c8c10b9d7a76ba2f470761a17c50e959de756f608f4551b9a3ee95c",
+            "libicu_properties-41397e4be87ae9a5.rlib": "e59bec3514cefc756f282b3c144f768901dbdb0d33b0b3239449e468a36383e0",
+            "libicu_properties_data-ecb1c43ecd07d958.rlib": "2534e730c6438ef170f76551bc5a0bf88195a1c31d1427b91114ff184ea1516c",
+            "libicu_provider-3a41111d0e54fc2f.rlib": "1b4e66d36c9b8e3c3eca14ccd2b103806af2fdc2c684ed6534ed4e9787351d0b",
+            "libidna-ac7cc601bc562680.rlib": "b56c058dbd29403b7b2b13ecdc5493937b45b56a20e16354135804f4794ce868",
+            "libidna_adapter-4f488964a8c74269.rlib": "5e36d728a948d90d8b41896ef8bd5476bae76bbbbcea37d753db6e4674c3e018",
+            "liblibc-2d2dd34914705e19.rlib": "24e376f81382f9b4b1287c19e0c323a81f6d59683e3e74b13e6aed92c88e6f6a",
+            "liblitemap-b7c1724547ff9560.rlib": "3123ad84f804f4dbe25e542daaf9b4df774e96138029622dbed4a64e4d774bd2",
+            "libminiz_oxide-5e8bc5a9ef6db64e.rlib": "442769e3fcd3ce11e610deac512cd4fdb4b1803a031c04540929afa51420eeac",
+            "libnum_conv-0ef950a3b3fe6676.rlib": "8244aac0451a5727c549e40ec6a110fe94b1adb0b9e07ac08dbdeba0e5736259",
+            "libnum_traits-c6429a672bfb3576.rlib": "9147d57d14c2b43eea9c07264a4e9b8da33ce9528a04ad5f458261bce855bf3f",
+            "libpercent_encoding-df69532d4d42f2da.rlib": "7d4d49699fabe2e6feaa8456038d4fbd80a113a6a1273c7722b92b948904f729",
+            "libpotential_utf-3d313c234ecf6ed4.rlib": "0bef8c7f56563b489d55e25c5e4d7365cadba56372b3f693eba3a534d7b32a05",
+            "libpowerfmt-f90fa8871010d730.rlib": "6ba7b6a896aa03339b797320894c155464fe87bec68e5e37a8797a6790a3a33c",
+            "libroxmltree-c45003dfc2ae6a5e.rlib": "01ebb24306dfd660fb74b22958c97c571338d362c66f4b0f9a4aaade31b48acf",
+            "librust_decimal-13e9e53eea132f5f.rlib": "8ec8dd871c1ebbc2b544cf7aa92da808f7a1f0557e4c4c8affa38215ea9c74cd",
+            "librustc_hash-8403dcb85c7dec07.rlib": "3e134f9c4c2a96578d983cb1570232d5a505c9cc617fee0a9e836f7eb93b5a52",
+            "libsimd_adler32-e932c91a4591f157.rlib": "94376510a82be0f5c04eaee470295011192a8f4a2fbcb5cf14acf04d1ed3a2cf",
+            "libsmallvec-6d3cd150b7e518cf.rlib": "292523b27cb0492d93396189a8f17d424051669d4d4fd460ad6cb8daeb7b3196",
+            "libstable_deref_trait-fe6b8d221c048f7c.rlib": "6538d0c65f6a6075902c9ed850ec12d744d0b38c040cc2059a64152217b3d5a9",
+            "libsysinfo-bdaed2ffe52a7ed0.rlib": "37f99a8cdf334c5f23b1f7ad2a612b2279030a78ba7391a2ff6622e414340eec",
+            "libtime-984b11491421417e.rlib": "29175b0f96e3696a2c89915ed26b711be8423ad8c3e4426699de22cbb31c4dd4",
+            "libtime_core-96df8cd25140b3f6.rlib": "9fbdd87899c0466433ed7310d42c2947eff48a18812d59980786dd18c9e0e866",
+            "libtinystr-acc01e1bcb4d9bff.rlib": "2b6fa23ad84205d2c99234b876142270f3bdf6f368bf3c798bd8e6771383ccfb",
+            "liburl-f1ad6c74e33884db.rlib": "cfccb5b1633f2cd3f542a53ce3ba594727e4bce14d2de0c68d75a93b56982ef2",
+            "libutf8_iter-4779dfe48829824e.rlib": "d405f2a610401597cf9f7084d36424d65a4f23c8cc766e4a3abad8cd3beb6a20",
+            "libuuid-90a0598e74e871ed.rlib": "17f09447bde741e148a99895045b980e5b1395855f4913e47abc1cba33b22116",
+            "libwriteable-6867b3facf068384.rlib": "095204c131912da744d6c098a6aad7666ac8259cf475be1faa4358180ad528d8",
+            "libxamlx-59185e0120052b1a.rlib": "9816f3da1286659a81e2e71c328479adbd59f7c1b6200d40476167e181fd526b",
+            "libyoke-2060f989ae90acdc.rlib": "8b1b686de000fbaf03f3c1131278d82c8658d2587dd33a46672257c3ec62cc24",
+            "libzerofrom-6b9222e77a289669.rlib": "e3cfaf667acaaffed5612ef0b51c87e6d28822582573a45a87d1afc605bdc992",
+            "libzerotrie-d3ba1e274bde4280.rlib": "5d87bde906ed79d082bd49930a29f1e999a15c2b20abac6b8a1d43178e497099",
+            "libzerovec-9e57378d2da9a5cf.rlib": "86ccc4307b44af2097813ceb31c5b6ce3cfa4318adca8d6ab282dc54a7b07258"
+          },
+          "/tmp/ferro-run/registration-host-deps": {
+            "libdisplaydoc-4f81b7522d09b694.so": "b36f9a446c5b1f3444d4fd34b67f4b5e257c97e82a2f140e16e4ba0f98403b42",
+            "libpaste-28bb4fa3786cc7b2.so": "fe6a0cb439e976e5b7f17c21b8887f754c110d78619a06b2ae2d1952ae401b8e",
+            "libyoke_derive-0fe6ed0e33d92cd1.so": "c5aa211db8499a8c23a77e8d551e65852fe561f16fd598d12479f4f895fb7261",
+            "libzerofrom_derive-0fafa7f4138ce728.so": "5e7f584823d776d3b0c12a7b97975380abd794c373e45b2662f04b6383eeddfd",
+            "libzerovec_derive-48a965bef2fa29dd.so": "ede6485eae7c07d017a365249841e7416284c0c6fce5fc2568fb78405862b7ca"
+          }
+        },
+        "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+        "native_linker": {
+          "cc": {
+            "invoked_as": "/usr/bin/cc",
+            "path": "/usr/bin/x86_64-linux-gnu-gcc-13",
+            "sha256": "6117c52522997d2aaccb2b52b3c6bf42c0a6c5edb1d718431fed6b2fc5fec234",
+            "version": "cc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "lld": {
+            "invoked_as": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/ld.lld",
+            "path": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/ld.lld",
+            "sha256": "acf9413ba755c639cd394ba156cdaabd3a859138ce7885dfe0b9f6bf3f287278",
+            "version": "LLD 23.1.1 (/checkout/src/llvm-project/llvm 1b9c0d5ff9bbe7634aead059efe6b11a7eeba145) (compatible with GNU linkers)",
+            "source": "rustc sysroot",
+            "backend": {
+              "path": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld",
+              "sha256": "4739514e3484915747c34b35007cd990235cc6b490b2d0525a61ac402ca16af9"
+            }
+          }
+        },
+        "template_manifest": "/tmp/ferro-run/registration-stage2/candidate-registration.json",
+        "template_manifest_sha256": "6bf170659c736551aef4be84d8bbb918c133219e56af3424d61251629a10720f",
+        "driver_sha256": "bada9b57ec0c7e26f1470c0ee58178aa564462c99353e341345bb32ca0922d18",
+        "capture_wrapper_sha256": "cd210c0a09fd69fab54c30f7ee3db71554cc7831214111896a99feb3b9855b95",
+        "helper_sha256": {
+          "compare_registration.py": "23210562b8c328b63d0e7c3328f1c4aac4223ecb35ee55bf48b0dd6e4238583d",
+          "compact_unwind_link.py": "36477e1afabf3be1822871acdd1316f11a390adebb8f0671244c73bc87e91b5a",
+          "compact_unwind.py": "ea42ad02f5c0d8ca158a50c2b43a95e7e1697f91600b9108b78873026c0c5711",
+          "attribute_codegen.py": "24324f87bdcc073afdb67e09f1afac0cc85d0f3ecf9a97083b3aab77979e57ff"
+        },
+        "environment": {
+          "PATH": "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld:/tmp/ferro-tools/bin:/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld:/root/.codex/tmp/arg0-linux/codex-arg0uTFHGu:/opt/codex/codex-path:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+          "FERROUI_CC": "/tmp/ferro-run/inline-clone-trial/registration/capture-cc.py",
+          "FERRO_TRIAL_REAL_CC": "/usr/bin/cc",
+          "RAYON_NUM_THREADS": "1",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:2,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "LLVM_PROFILE_FILE": "/tmp/ferro-run/inline-clone-trial/registration/qa-only-%m-%p.profraw"
+        }
+      },
+      "build_seconds": 52.449881120999635,
+      "bytes": 3748352,
+      "sha256": "a4571fe8bd95fd8c979b03853dfb843ed075705fd2724125a53a7bef1970215c",
+      "compact_unwind_applied": true,
+      "link_capture": {
+        "cwd": "/workspace/scratch/6f70b20c54b6/FerroUI",
+        "command": [
+          "/usr/bin/cc",
+          "-m64",
+          "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+          "-Wl,--as-needed",
+          "-Wl,-Bstatic",
+          "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/lib/libcompiler_builtins-2ae2df7d631cccc2.rlib",
+          "-Wl,-Bdynamic",
+          "-lgcc_s",
+          "-lutil",
+          "-lrt",
+          "-lpthread",
+          "-lm",
+          "-ldl",
+          "-lc",
+          "-L",
+          "/tmp/ferro-run/inline-clone-trial/registration/rustcy0RzWx/raw-dylibs",
+          "-B/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld",
+          "-fuse-ld=lld",
+          "-Wl,--eh-frame-hdr",
+          "-Wl,-z,noexecstack",
+          "-L",
+          "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/lib",
+          "-o",
+          "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration",
+          "-Wl,--gc-sections",
+          "-pie",
+          "-Wl,-z,relro,-z,now",
+          "-Wl,--strip-all",
+          "-nodefaultlibs",
+          "-fuse-ld=lld",
+          "-Wl,--icf=safe",
+          "-Wl,-z,pack-relative-relocs"
+        ],
+        "objects": [
+          {
+            "original": "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+            "captured": "/tmp/ferro-run/inline-clone-trial/registration/001-candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+            "sha256": "5e8a7f7bc8dc1a36b10dad8e1b38db5539bdf42a58ff60b6420033dcdb8fa070",
+            "bytes": 17707320,
+            "fat_lto_object": true
+          }
+        ],
+        "command_with_captured_objects": [
+          "/usr/bin/cc",
+          "-m64",
+          "/tmp/ferro-run/inline-clone-trial/registration/001-candidate-registration.registration_probe.dfd598c7c0696b62-cgu.0.rcgu.o",
+          "-Wl,--as-needed",
+          "-Wl,-Bstatic",
+          "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/lib/libcompiler_builtins-2ae2df7d631cccc2.rlib",
+          "-Wl,-Bdynamic",
+          "-lgcc_s",
+          "-lutil",
+          "-lrt",
+          "-lpthread",
+          "-lm",
+          "-ldl",
+          "-lc",
+          "-L",
+          "/tmp/ferro-run/inline-clone-trial/registration/rustcy0RzWx/raw-dylibs",
+          "-B/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld",
+          "-fuse-ld=lld",
+          "-Wl,--eh-frame-hdr",
+          "-Wl,-z,noexecstack",
+          "-L",
+          "/tmp/ferro-tools/lib/rustlib/x86_64-unknown-linux-gnu/lib",
+          "-o",
+          "/tmp/ferro-run/inline-clone-trial/registration/candidate-registration",
+          "-Wl,--gc-sections",
+          "-pie",
+          "-Wl,-z,relro,-z,now",
+          "-Wl,--strip-all",
+          "-nodefaultlibs",
+          "-fuse-ld=lld",
+          "-Wl,--icf=safe",
+          "-Wl,-z,pack-relative-relocs"
+        ]
+      }
+    },
+    "checksums": {
+      "boxed_live": 500000,
+      "borrowed_live": 500000,
+      "boxed_wrong": 500000,
+      "borrowed_wrong": 500000,
+      "boxed_expired": 500000,
+      "borrowed_expired": 500000,
+      "register_element": 40000,
+      "property_registration": 7998000
+    },
+    "comparisons": {
+      "register_element": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 348.247625,
+          "candidate_median": 190.045175,
+          "candidate_reference_ratio": {
+            "median": 0.5386620361373929,
+            "bootstrap_95_percent": [
+              0.5334485358736362,
+              0.5651295799011905
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 348.288525,
+          "candidate_median": 190.082525,
+          "candidate_reference_ratio": {
+            "median": 0.53869027820226,
+            "bootstrap_95_percent": [
+              0.5334981190685067,
+              0.5652293634776581
+            ]
+          }
+        }
+      },
+      "property_registration": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 327.2555,
+          "candidate_median": 374.956,
+          "candidate_reference_ratio": {
+            "median": 1.1441492023581394,
+            "bootstrap_95_percent": [
+              1.0496818377241064,
+              1.302714704266618
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 327.57075,
+          "candidate_median": 375.23225,
+          "candidate_reference_ratio": {
+            "median": 1.1047647718674278,
+            "bootstrap_95_percent": [
+              1.0495602050956858,
+              1.3027344627231932
+            ]
+          }
+        }
+      },
+      "boxed_live": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 35.835462,
+          "candidate_median": 35.311904,
+          "candidate_reference_ratio": {
+            "median": 0.985616414420898,
+            "bootstrap_95_percent": [
+              0.959448014542619,
+              1.009816865306818
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 35.838472,
+          "candidate_median": 35.315668,
+          "candidate_reference_ratio": {
+            "median": 0.9856215563902179,
+            "bootstrap_95_percent": [
+              0.959962911863122,
+              1.0098216699006617
+            ]
+          }
+        }
+      },
+      "borrowed_live": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 31.11632,
+          "candidate_median": 28.542842,
+          "candidate_reference_ratio": {
+            "median": 0.9273625778118302,
+            "bootstrap_95_percent": [
+              0.8997037567424425,
+              0.945866269455137
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 31.120062,
+          "candidate_median": 28.545686,
+          "candidate_reference_ratio": {
+            "median": 0.9273127233323242,
+            "bootstrap_95_percent": [
+              0.8996854183645264,
+              0.9458525273628668
+            ]
+          }
+        }
+      },
+      "boxed_wrong": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 27.298616,
+          "candidate_median": 27.545662,
+          "candidate_reference_ratio": {
+            "median": 0.9929867154584111,
+            "bootstrap_95_percent": [
+              0.9582581626439163,
+              1.0415338184470566
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 27.301302,
+          "candidate_median": 27.549734,
+          "candidate_reference_ratio": {
+            "median": 0.9929812309236733,
+            "bootstrap_95_percent": [
+              0.9582646002506309,
+              1.041556196559021
+            ]
+          }
+        }
+      },
+      "borrowed_wrong": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 12.45728,
+          "candidate_median": 12.40344,
+          "candidate_reference_ratio": {
+            "median": 0.9752693650350758,
+            "bootstrap_95_percent": [
+              0.9387686916010463,
+              1.0033702271631153
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 12.460332,
+          "candidate_median": 12.406548,
+          "candidate_reference_ratio": {
+            "median": 0.9752479074679529,
+            "bootstrap_95_percent": [
+              0.9388159922970066,
+              1.0034328407460824
+            ]
+          }
+        }
+      },
+      "boxed_expired": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 24.264656,
+          "candidate_median": 22.7448,
+          "candidate_reference_ratio": {
+            "median": 0.957293611612557,
+            "bootstrap_95_percent": [
+              0.9163610092065595,
+              0.9841710721157059
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 24.267616,
+          "candidate_median": 22.74844,
+          "candidate_reference_ratio": {
+            "median": 0.9572810955556773,
+            "bootstrap_95_percent": [
+              0.9171637051535776,
+              0.9843788285084072
+            ]
+          }
+        }
+      },
+      "borrowed_expired": {
+        "thread_cpu_ns_per_operation": {
+          "reference_median": 34.196248,
+          "candidate_median": 32.868198,
+          "candidate_reference_ratio": {
+            "median": 0.9503981610898941,
+            "bootstrap_95_percent": [
+              0.942060129632033,
+              0.9850828787007024
+            ]
+          }
+        },
+        "wall_ns_per_operation": {
+          "reference_median": 34.20142,
+          "candidate_median": 32.871448,
+          "candidate_reference_ratio": {
+            "median": 0.950374177426583,
+            "bootstrap_95_percent": [
+              0.9420829758896673,
+              0.9850804145699258
+            ]
+          }
+        }
+      }
+    },
+    "interpretation": "All six weak-conversion lane intervals include parity or improvement in this quiet diagnostic. Boxed live and boxed wrong are consistent with restored parity. Property-registration setup is slower. The candidate loses broad root-handler and value-conversion profile identities under the inherited stage3 profile; these timings are diagnostic only and do not establish final performance acceptance or isolate all causal effects of inlining Clone. Fresh source-matched training and whole-graph verification are required."
+  }
+}

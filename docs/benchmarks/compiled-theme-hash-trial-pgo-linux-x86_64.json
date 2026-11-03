@@ -1,0 +1,707 @@
+{
+  "rlib": "/tmp/ferro-run/inline-id-hash-trial/graph/libferroui_base-174087f896f84490.rlib",
+  "rlib_sha256": "2b62e6890ab251a0ff9bb96840a470606d07b8d32b7e21b049fb953b0955df1d",
+  "functions": [
+    {
+      "symbol": "_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed",
+      "name": "<ferroui_base::ferro_object::FerroObject>::notify_property_changed",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define internal fastcc void @_RNvMs4_NtCseCMZVCq70TC_12ferroui_base12ferro_objectNtB5_11FerroObject23notify_property_changed(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #0 personality ptr @rust_eh_personality !guid !40066 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvNtCsevLNFiNqfJP_4core6option13expect_failed(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) @anon.e30e95d69cc4127655950bff19767600.1518, i64 noundef 26, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @anon.e30e95d69cc4127655950bff19767600.1519) #49, !noalias !40070",
+        "tail call void %11(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1), !inline_history !40073",
+        "%22 = tail call fastcc noundef zeroext i1 @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8is_emptyB2b_(ptr noundef nonnull align 8 %21) #46, !noalias !40086",
+        "%24 = tail call fastcc noundef ptr @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8snapshotB2b_(ptr noundef nonnull align 8 %21) #46, !noalias !40086",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtCslytMwmYsTKf_8smallvec8SmallVecATyIBv_DG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_EEj2_EE9drop_slowB2d_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %3) #47",
+        "invoke void %70(ptr noundef nonnull %68, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1)",
+        "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtCslytMwmYsTKf_8smallvec8SmallVecATyIBv_DG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_EEj2_EE9drop_slowB2d_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %3) #47",
+        "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #48",
+        "%86 = call fastcc noundef zeroext i1 @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8is_emptyB2b_(ptr noundef nonnull align 8 %85) #46",
+        "%88 = call fastcc noundef ptr @_RNvMs2_NtNtCsfwoXgjGyLJY_14ferroui_system6events12handler_listINtB5_11HandlerListDG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_E8snapshotB2b_(ptr noundef nonnull align 8 %85) #46",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtCslytMwmYsTKf_8smallvec8SmallVecATyIBv_DG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_EEj2_EE9drop_slowB2d_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %4) #47",
+        "invoke void %134(ptr noundef nonnull %132, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1)",
+        "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtCslytMwmYsTKf_8smallvec8SmallVecATyIBv_DG0_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL1_INtNtCseCMZVCq70TC_12ferroui_base33ferro_property_changed_event_args29FerroPropertyChangedEventArgsL0_EEEp6OutputuEL_EEj2_EE9drop_slowB2d_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %4) #47",
+        "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #48"
+      ],
+      "lines": 254,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": false
+    },
+    {
+      "symbol": "_RNvMs_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB4_25LocalValueBindingObserverlE10next_valueB8_",
+      "name": "<ferroui_base::property_store::local_value_binding_observer::LocalValueBindingObserver<i32>>::next_value",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define void @_RNvMs_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB4_25LocalValueBindingObserverlE10next_valueB8_(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef align 8 captures(address) dead_on_return dereferenceable(32) %1) unnamed_addr #3 personality ptr @rust_eh_personality !prof !3013 !guid !54458 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 0}"
+      ],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "%11 = invoke { ptr, ptr } @_RNvMs1c_NtCs1C1lLj4PWSY_5alloc2rcINtB6_4WeakDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E7upgradeCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %10)",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %5) #47",
+        "%42 = invoke noundef zeroext i1 @_RNvXsv_NtCs1C1lLj4PWSY_5alloc5boxedINtB5_3BoxDG_INtNtNtCsevLNFiNqfJP_4core3ops8function2FnTRL0_lEEp6OutputbEL_EIBL_TRlEE4callCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %38, ptr noalias nofree noundef nonnull readonly align 4 captures(address, read_provenance) dereferenceable(4) %25)",
+        "%60 = invoke noundef i32 @_RNvMs_NtCseCMZVCq70TC_12ferroui_base15styled_propertyINtB4_14StyledPropertylE15binding_defaultB6_(ptr noundef nonnull align 8 %53, ptr noundef nonnull align 8 %59, ptr noundef nonnull align 8 %0)",
+        "invoke void @_RNvMNtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerNtB2_17LocalBindingState8validate(ptr noundef nonnull align 8 %10, ptr noundef nonnull align 8 %72, ptr noundef nonnull align 8 %75, i32 noundef %7, ptr noundef %22, ptr %24)",
+        "invoke void @_RINvMNtNtCseCMZVCq70TC_12ferroui_base14property_store11value_storeNtB3_10ValueStore15set_local_valuelEB7_(ptr noundef nonnull align 8 %89, ptr noundef nonnull align 8 %88, ptr noundef nonnull align 8 %91, i32 noundef %82)",
+        "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core3any3AnyEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %5) #47",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core5error5ErrorEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %3) #47",
+        "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #48",
+        "tail call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core5error5ErrorEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %116) #47",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCsevLNFiNqfJP_4core5error5ErrorEL_E9drop_slowCseCMZVCq70TC_12ferroui_base(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %128) #47"
+      ],
+      "lines": 245,
+      "function_profile_matches_stage2": true,
+      "pgo_name_matches_stage2": true,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvXs3_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB5_7UntypedlEINtNtCsfwoXgjGyLJY_14ferroui_system12i_observable9IObserverINtNtCs1C1lLj4PWSY_5alloc2rc2RcDNtNtB9_14ferro_property8AnyValueEL_EE7on_nextB9_",
+      "name": "<ferroui_base::property_store::local_value_binding_observer::Untyped<i32> as ferroui_system::i_observable::IObserver<alloc::rc::Rc<dyn ferroui_base::ferro_property::AnyValue>>>::on_next",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define void @_RNvXs3_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB5_7UntypedlEINtNtCsfwoXgjGyLJY_14ferroui_system12i_observable9IObserverINtNtCs1C1lLj4PWSY_5alloc2rc2RcDNtNtB9_14ferro_property8AnyValueEL_EE7on_nextB9_(ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(8) %0, ptr noundef nonnull %1, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(56) %2) unnamed_addr #3 personality ptr @rust_eh_personality !prof !3013 !guid !70547 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 0}"
+      ],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "%8 = invoke noundef ptr @_RNvMs1c_NtCs1C1lLj4PWSY_5alloc2rcINtB6_4WeakINtNtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observer25LocalValueBindingObserverlEE7upgradeBN_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(8) %0)",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCseCMZVCq70TC_12ferroui_base14ferro_property8AnyValueEL_E9drop_slowBI_(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %6) #47",
+        "%32 = invoke { ptr, ptr } %31(ptr noundef nonnull %29) #46",
+        "call void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcDNtNtCseCMZVCq70TC_12ferroui_base14ferro_property8AnyValueEL_E9drop_slowBI_(ptr noalias nofree noundef nonnull align 8 dereferenceable(16) %6) #47",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observer25LocalValueBindingObserverlEE9drop_slowBK_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %5) #47",
+        "invoke void @_RNvMs_NtCseCMZVCq70TC_12ferroui_base15styled_propertyINtB4_14StyledPropertylE12from_untypedB6_(ptr noalias nofree noundef nonnull sret([32 x i8]) align 8 captures(address) dereferenceable(32) %4, ptr noundef nonnull align 8 %23, ptr noundef nonnull %48, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(32) %49)",
+        "invoke void @_RNvMs_NtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observerINtB4_25LocalValueBindingObserverlE10next_valueB8_(ptr noundef nonnull align 8 %21, ptr noalias nofree noundef nonnull align 8 captures(address) dereferenceable(32) %4)",
+        "invoke void @_RNvMs6_NtCs1C1lLj4PWSY_5alloc2rcINtB5_2RcINtNtNtCseCMZVCq70TC_12ferroui_base14property_store28local_value_binding_observer25LocalValueBindingObserverlEE9drop_slowBK_(ptr noalias nofree noundef nonnull align 8 dereferenceable(8) %5) #47",
+        "call void @_RNvNtCsevLNFiNqfJP_4core9panicking16panic_in_cleanup() #48"
+      ],
+      "lines": 124,
+      "function_profile_matches_stage2": true,
+      "pgo_name_matches_stage2": true,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::ferro_object::FerroObject>::{closure#0} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject,)>>::call_once",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_(ptr nofree nonnull readnone align 8 captures(none) %0) unnamed_addr #28 personality ptr @rust_eh_personality !guid !77055 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 3,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::ferro_object::FerroObject>::{closure#2} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property_changed_event_args::FerroPropertyChangedEventArgs)>>::call_once",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_(ptr nofree nonnull readnone align 8 captures(none) %0, ptr noalias nofree readonly align 8 captures(none) %1) unnamed_addr #28 personality ptr @rust_eh_personality !guid !77056 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 3,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB1w_6option6OptionRNtB2U_12BindingErrorEEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::ferro_object::FerroObject>::{closure#3} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property::FerroProperty, ferroui_base::data::binding_value::BindingValueType, core::option::Option<&ferroui_base::data::binding_value::BindingError>)>>::call_once",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB1w_6option6OptionRNtB2U_12BindingErrorEEE9call_onceB9_(ptr nofree nonnull readnone align 8 captures(none) %0, ptr nofree nonnull readnone align 8 captures(none) %1, i32 %2, ptr noalias nofree readonly align 8 captures(none) %3) unnamed_addr #28 personality ptr @rust_eh_personality !guid !77057 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 3,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": true,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::ferro_object::FerroObject>::{closure#1} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property_changed_event_args::FerroPropertyChangedEventArgs)>>::call_once",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #2 personality ptr @rust_eh_personality !guid !77058 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvNtCsevLNFiNqfJP_4core6option13expect_failed(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) @anon.e30e95d69cc4127655950bff19767600.1518, i64 noundef 26, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @anon.e30e95d69cc4127655950bff19767600.1519) #49, !noalias !77071",
+        "tail call void %13(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1), !inline_history !77074"
+      ],
+      "lines": 27,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": false
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::styled_element::StyledElement>::{closure#0} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject,)>>::call_once",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_(ptr noundef nonnull align 8 %0) unnamed_addr #2 personality ptr @rust_eh_personality !guid !77075 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvXsj_NtCseCMZVCq70TC_12ferroui_base14styled_elementNtB5_13StyledElementNtNtB7_12ferro_object15FerroObjectImpl11constructed(ptr noundef nonnull align 8 %0)"
+      ],
+      "lines": 4,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::styled_element::StyledElement>::{closure#2} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property_changed_event_args::FerroPropertyChangedEventArgs)>>::call_once",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #2 personality ptr @rust_eh_personality !guid !77076 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvXsj_NtCseCMZVCq70TC_12ferroui_base14styled_elementNtB5_13StyledElementNtNtB7_12ferro_object15FerroObjectImpl19on_property_changed(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1)"
+      ],
+      "lines": 4,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+      "name": "<ferroui_base::ferro_object::root_vtable<ferroui_base::animation::animatable::Animatable>::{closure#1} as core::ops::function::FnOnce<(&ferroui_base::ferro_object::FerroObject, &ferroui_base::ferro_property_changed_event_args::FerroPropertyChangedEventArgs)>>::call_once",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.10.rcgu.o",
+      "definition": "define internal void @_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(56) %1) unnamed_addr #2 personality ptr @rust_eh_personality !guid !77086 {",
+      "function_profile": [],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [
+        "tail call void @_RNvXsa_NtNtCseCMZVCq70TC_12ferroui_base9animation10animatableNtB5_10AnimatableNtNtB9_12ferro_object15FerroObjectImpl24on_property_changed_core(ptr noundef nonnull align 8 %0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(56) %1)"
+      ],
+      "lines": 4,
+      "function_profile_matches_stage2": false,
+      "pgo_name_matches_stage2": false,
+      "promoted_target_compare_count_matches_stage2": true
+    },
+    {
+      "symbol": "_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_",
+      "name": "BuildHasherDefault<IdHasher>::hash_one",
+      "member": "ferroui_base-174087f896f84490.ferroui_base.aa5a9f3f002932e2-cgu.14.rcgu.o",
+      "definition": "define noundef i64 @_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_(ptr noalias nofree noundef nonnull readonly captures(none) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #16 personality ptr @rust_eh_personality !prof !24120 !guid !24121 {",
+      "function_profile": [
+        "!{!\"function_entry_count\", i64 115042}"
+      ],
+      "pgo_name": [],
+      "promoted_target_compares": [],
+      "non_llvm_calls": [],
+      "lines": 9,
+      "full_ir": "define noundef i64 @_RINvYINtNtCsevLNFiNqfJP_4core4hash18BuildHasherDefaultNtNtNtNtCseCMZVCq70TC_12ferroui_base4data4core10value_type8IdHasherENtB6_11BuildHasher8hash_oneRTNtNtB8_3any6TypeIdB2p_EEBY_(ptr noalias nofree noundef nonnull readonly captures(none) %0, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(32) %1) unnamed_addr #16 personality ptr @rust_eh_personality !prof !24120 !guid !24121 {\n  %3 = getelementptr inbounds nuw i8, ptr %1, i64 8\n  %4 = load i64, ptr %3, align 1, !alias.scope !24122, !noalias !24127\n  %5 = getelementptr inbounds nuw i8, ptr %1, i64 24\n  %6 = load i64, ptr %5, align 1, !alias.scope !24133, !noalias !24136\n  %7 = tail call noundef i64 @llvm.fshl.i64(i64 %4, i64 %4, i64 32)\n  %8 = xor i64 %7, %6\n  ret i64 %8\n}",
+      "calls_write_u64": false,
+      "stack_allocations": 0
+    }
+  ],
+  "missing_symbols": [],
+  "root_vtable_profile_summary": {
+    "previous_definitions": 81,
+    "current_present": 81,
+    "same_accepted_profile": 0,
+    "same_pgo_name": 66,
+    "differences": [
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_EE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB1w_6option6OptionRNtB2U_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtB7_11FerroObjectEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRB12_RNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtB9_14styled_element13StyledElementEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5input11input_scope10InputScopeE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media10dash_style9DashStyleEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media11path_figure10PathFigureE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media13drawing_image12DrawingImageEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media3pen3PenEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media5brush5BrushEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_5media7drawing7DrawingEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_6layout10layoutable10LayoutableEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_7styling6styles6StylesE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation10animatable10AnimatableEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtB9_9animation15transition_base14TransitionBaseEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15bool_transition14BoolTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15bool_transition14BoolTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15bool_transition14BoolTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2j_6option6OptionRNtB3V_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15bool_transition14BoolTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15size_transition14SizeTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15size_transition14SizeTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15size_transition14SizeTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2j_6option6OptionRNtB3V_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions15size_transition14SizeTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16brush_transition15BrushTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16brush_transition15BrushTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16brush_transition15BrushTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2l_6option6OptionRNtB3X_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16brush_transition15BrushTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16color_transition15ColorTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16color_transition15ColorTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16color_transition15ColorTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2l_6option6OptionRNtB3X_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16color_transition15ColorTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16float_transition15FloatTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16float_transition15FloatTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16float_transition15FloatTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2l_6option6OptionRNtB3X_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16float_transition15FloatTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16point_transition15PointTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16point_transition15PointTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16point_transition15PointTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2l_6option6OptionRNtB3X_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions16point_transition15PointTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2n_6option6OptionRNtB3Z_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17double_transition16DoubleTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17effect_transition16EffectTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17effect_transition16EffectTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17effect_transition16EffectTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2n_6option6OptionRNtB3Z_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17effect_transition16EffectTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17vector_transition16VectorTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17vector_transition16VectorTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17vector_transition16VectorTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2n_6option6OptionRNtB3Z_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions17vector_transition16VectorTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions18integer_transition17IntegerTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions18integer_transition17IntegerTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions18integer_transition17IntegerTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2p_6option6OptionRNtB41_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions18integer_transition17IntegerTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions20thickness_transition19ThicknessTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions20thickness_transition19ThicknessTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions20thickness_transition19ThicknessTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2t_6option6OptionRNtB45_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions20thickness_transition19ThicknessTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions22box_shadows_transition20BoxShadowsTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions22box_shadows_transition20BoxShadowsTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions22box_shadows_transition20BoxShadowsTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2w_6option6OptionRNtB48_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions22box_shadows_transition20BoxShadowsTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions24corner_radius_transition22CornerRadiusTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions24corner_radius_transition22CornerRadiusTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions24corner_radius_transition22CornerRadiusTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2A_6option6OptionRNtB4c_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions24corner_radius_transition22CornerRadiusTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions25relative_point_transition23RelativePointTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions25relative_point_transition23RelativePointTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions25relative_point_transition23RelativePointTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2C_6option6OptionRNtB4e_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions25relative_point_transition23RelativePointTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2H_6option6OptionRNtB4j_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions28solid_color_brush_transition25SolidColorBrushTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": false
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions31transform_operations_transition29TransformOperationsTransitionE0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions31transform_operations_transition29TransformOperationsTransitionEs0_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions31transform_operations_transition29TransformOperationsTransitionEs1_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_14ferro_property13FerroPropertyNtNtNtB9_4data13binding_value16BindingValueTypeINtNtB2O_6option6OptionRNtB4q_12BindingErrorEEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      },
+      {
+        "symbol": "_RNvYNCINvNtCseCMZVCq70TC_12ferroui_base12ferro_object11root_vtableNtNtNtNtB9_9animation11transitions31transform_operations_transition29TransformOperationsTransitionEs_0INtNtNtCsevLNFiNqfJP_4core3ops8function6FnOnceTRNtB7_11FerroObjectRNtNtB9_33ferro_property_changed_event_args29FerroPropertyChangedEventArgsEE9call_onceB9_",
+        "present": true,
+        "profile_matches": false,
+        "pgo_name_matches": true
+      }
+    ]
+  }
+}

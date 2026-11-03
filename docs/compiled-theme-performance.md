@@ -2,7 +2,13 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
-## Current compact Linux x86-64 result
+## Broad Rust source refactor
+
+The continuation of PR #496 targets inherited virtual slots, generated resource operations, XamlX ownership, decoder errors, nullable and reference registration, typed binding setup, and property and reflection installation. The public generic APIs remain the entry points. The [Rust architecture report](compiled-theme-rust-architecture.md) records the current source candidate, full executable size, source and profile identities, API review, correctness checks, and runtime comparisons. Its [raw evidence](benchmarks/compiled-theme-rust-idioms-linux-x86_64.json) keeps each rejected and repaired build separate.
+
+The measurements below retain their original revisions and build policies. In particular, the compact-unwind reference is the 28,087,224-byte executable used to assess the source refactor; the earlier 28,324,712-byte census does not describe the new candidate.
+
+## Compact Linux x86-64 reference before the source refactor
 
 The full editable WinUI consumer measures **28,087,224 bytes** with `--use-opt-level z --compact-unwind`, down 237,488 bytes (0.84%) from the previous best. The optional link reduces unwind metadata while preserving the reference addresses and bytes of all executable code and application data. The original ordinary release was 54,577,848 bytes. The measured build is 48.54% smaller. [Reproduction, performance and archive verification](compiled-theme-size-architecture.md#smaller-unwind-records-with-the-original-code-layout)
 
