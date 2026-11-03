@@ -618,6 +618,8 @@ impl DateTime {
     }
 }
 
+/// The instant of a system time, truncated to whole ticks of 100
+/// nanoseconds (towards the epoch).
 impl From<SystemTime> for DateTime {
     fn from(time: SystemTime) -> Self {
         let ticks = match time.duration_since(UNIX_EPOCH) {
@@ -625,6 +627,27 @@ impl From<SystemTime> for DateTime {
             Err(before) => -((before.duration().as_nanos() / 100) as i64),
         };
         DateTime { ticks }
+    }
+}
+
+/// The system time of the instant. Every tick is a whole number of
+/// nanoseconds, so the instant is exact; it is an error
+/// ([`Error::Argument`]) only where the platform's `SystemTime` cannot hold
+/// it (before 1970 on `wasm32-unknown-unknown`).
+impl TryFrom<DateTime> for SystemTime {
+    type Error = Error;
+
+    fn try_from(value: DateTime) -> Result<Self, Self::Error> {
+        let ticks = value.ticks.unsigned_abs();
+        let duration = std::time::Duration::new(ticks / 10_000_000, (ticks % 10_000_000) as u32 * 100);
+        let time = if value.ticks < 0 {
+            UNIX_EPOCH.checked_sub(duration)
+        } else {
+            UNIX_EPOCH.checked_add(duration)
+        };
+        time.ok_or_else(|| {
+            Error::Argument("The instant cannot be represented as a SystemTime on this platform.".to_string())
+        })
     }
 }
 

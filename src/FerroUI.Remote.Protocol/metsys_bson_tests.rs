@@ -256,6 +256,23 @@ fn date_time_is_truncated_to_whole_milliseconds() {
 }
 
 #[test]
+fn date_time_converts_to_and_from_system_time() {
+    use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+    let time = UNIX_EPOCH + Duration::new(1_717_236_000, 123_456_789);
+    let value = DateTime::from(time);
+    assert_eq!(value, DateTime::from_unix_ticks(17_172_360_001_234_567));
+    // The system time of a value is exact; the value was truncated to a whole tick.
+    assert_eq!(SystemTime::try_from(value).unwrap(), UNIX_EPOCH + Duration::new(1_717_236_000, 123_456_700));
+    assert_eq!(SystemTime::try_from(Helper::EPOCH).unwrap(), UNIX_EPOCH);
+    // Before 1970, where the platform's system time can hold it.
+    if let Some(before) = UNIX_EPOCH.checked_sub(Duration::from_millis(1_500)) {
+        assert_eq!(DateTime::from(before), DateTime::from_unix_ticks(-15_000_000));
+        assert_eq!(SystemTime::try_from(DateTime::from_unix_ticks(-15_000_000)).unwrap(), before);
+    }
+}
+
+#[test]
 fn regex_is_type_11_with_two_names_and_always_the_unicode_option() {
     let bytes = document("a", Value::Regex(Regex::new("ab", RegexOptions::IgnoreCase)));
     assert_eq!(bytes, [0x0E, 0, 0, 0, 0x0B, 0x61, 0, 0x61, 0x62, 0, 0x69, 0x75, 0, 0]);
