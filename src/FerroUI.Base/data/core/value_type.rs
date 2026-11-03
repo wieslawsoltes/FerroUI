@@ -454,11 +454,16 @@ impl ValueTypes {
     /// Why `value` does not cast to `target` although its type is assignable
     /// to it: the error of the cast registered with
     /// [`register_try_cast`](Self::register_try_cast). `None` when no such
-    /// cast is registered between the two types, or when the value casts.
+    /// cast is registered between the two types, or when the value casts. For
+    /// the nullable form of a type (`Option<Url>`), the error of the cast to
+    /// the type, which the cast to the nullable form performs.
     pub fn cast_error(value: &BoxedValue, target: ValueType) -> Option<String> {
         let key = (value_type_id(&**value), target.id());
-        let error = with_registry(|r| r.cast_errors.get(&key).cloned())?;
-        error(&**value)
+        let (error, inner) = with_registry(|r| (r.cast_errors.get(&key).cloned(), r.nullable_inner.get(&target.id()).copied()));
+        match error {
+            Some(error) => error(&**value),
+            None => Self::cast_error(value, inner?),
+        }
     }
 
     /// States that the Rust type `TFrom` dereferences to `TTo`: `&TFrom`
@@ -1895,6 +1900,49 @@ fn register_defaults() {
     }
     ValueTypes::register_parse::<std::time::Duration>(parse_duration);
     ValueTypes::register_conversion::<String, Option<std::time::Duration>>(|text| parse_duration(text).map(Some));
+
+    // `UriRef` and `url::Url` are the other Rust forms of `System.Uri` (C5 of #423, section 3.5
+    // of docs/idiomatic-rust-signatures.md). A `Uri` is the reference of the same text, and an
+    // absolute `Uri` or `UriRef` the URL of its text; a relative reference is not a URL, and a
+    // text the URL parser rejects is neither: the casts refuse them with their error. A
+    // reference and a URL are the `Uri` of the same text. Their text is the one of their
+    // `Display`, and text converts to them with the rule of markup (`UriRef::parse`).
+    fn uri_is_relative(uri: &dyn fmt::Display) -> String {
+        format!("The URI {uri} is relative and cannot be converted to a Url.")
+    }
+    fn uri_is_not_a_url(uri: &dyn fmt::Display, error: ::url::ParseError) -> String {
+        format!("The URI {uri} is not a valid Url: {error}.")
+    }
+    ValueTypes::register_nullable::<crate::utilities::UriRef>();
+    ValueTypes::register_nullable::<::url::Url>();
+    ValueTypes::register_display::<crate::utilities::UriRef>();
+    ValueTypes::register_display::<::url::Url>();
+    ValueTypes::register_try_cast::<crate::utilities::Uri, crate::utilities::UriRef>(|uri| {
+        crate::utilities::UriRef::try_from(uri).map_err(|error| uri_is_not_a_url(uri, error))
+    });
+    ValueTypes::register_try_cast::<crate::utilities::Uri, ::url::Url>(|uri| match ::url::Url::try_from(uri) {
+        Ok(url) => Ok(url),
+        Err(crate::utilities::UriToUrlError::Relative) => Err(uri_is_relative(uri)),
+        Err(crate::utilities::UriToUrlError::Invalid(error)) => Err(uri_is_not_a_url(uri, error)),
+    });
+    ValueTypes::register_try_cast::<crate::utilities::UriRef, ::url::Url>(|reference| {
+        reference.as_url().cloned().ok_or_else(|| uri_is_relative(reference))
+    });
+    ValueTypes::register_cast::<crate::utilities::UriRef, crate::utilities::Uri>(|reference| {
+        crate::utilities::Uri::from(reference)
+    });
+    ValueTypes::register_cast::<::url::Url, crate::utilities::Uri>(|url| crate::utilities::Uri::from(url.clone()));
+    ValueTypes::register_cast::<::url::Url, crate::utilities::UriRef>(|url| crate::utilities::UriRef::Absolute(url.clone()));
+    fn parse_uri_ref(text: &str) -> Option<crate::utilities::UriRef> {
+        crate::utilities::UriRef::parse(text).ok()
+    }
+    fn parse_url(text: &str) -> Option<::url::Url> {
+        parse_uri_ref(text)?.as_url().cloned()
+    }
+    ValueTypes::register_parse::<crate::utilities::UriRef>(parse_uri_ref);
+    ValueTypes::register_parse::<::url::Url>(parse_url);
+    ValueTypes::register_conversion::<String, Option<crate::utilities::UriRef>>(|text| parse_uri_ref(text).map(Some));
+    ValueTypes::register_conversion::<String, Option<::url::Url>>(|text| parse_url(text).map(Some));
 }
 
 impl ValueTypes {
@@ -2784,5 +2832,82 @@ mod tests {
         assert_eq!(ValueTypes::compare(&shorter, &longer), Some(std::cmp::Ordering::Less));
         assert_eq!(ValueTypes::compare(&shorter, &b(SignedDuration::from_seconds(1.0))), Some(std::cmp::Ordering::Equal));
         assert_eq!(ValueTypes::compare(&b(SignedDuration::from_seconds(-1.0)), &longer), Some(std::cmp::Ordering::Less));
+    }
+
+    /// Not from upstream (C5 of #423, section 3.5 of docs/idiomatic-rust-signatures.md): `Uri`,
+    /// `UriRef` and `url::Url` are the three Rust forms of `System.Uri`. A `Uri` is the reference
+    /// of the same text, and an absolute one the URL of it; a relative reference is not a URL,
+    /// and the casts refuse it with their error.
+    #[test]
+    fn uris_uri_refs_and_urls_are_three_forms_of_a_uri() {
+        use crate::utilities::{Uri, UriKind, UriRef};
+
+        let uri = |text: &str| -> BoxedValue { Rc::new(Uri::new(text, UriKind::RelativeOrAbsolute).unwrap()) };
+        let reference = |text: &str| -> BoxedValue { Rc::new(UriRef::parse(text).unwrap()) };
+        let address = |text: &str| -> BoxedValue { Rc::new(::url::Url::parse(text).unwrap()) };
+        let (uri_type, reference_type, url_type) = (ValueType::of::<Uri>(), ValueType::of::<UriRef>(), ValueType::of::<::url::Url>());
+        for (from, to) in [
+            (uri_type, reference_type),
+            (uri_type, url_type),
+            (reference_type, uri_type),
+            (reference_type, url_type),
+            (url_type, uri_type),
+            (url_type, reference_type),
+        ] {
+            assert!(ValueTypes::is_assignable(from, to), "{} to {}", from.name(), to.name());
+        }
+        assert!(ValueTypes::is_assignable(uri_type, ValueType::of::<Option<UriRef>>()));
+        assert!(ValueTypes::is_assignable(uri_type, ValueType::of::<Option<::url::Url>>()));
+
+        // A `Uri` is the reference of the same text, relative or absolute.
+        let cast = ValueTypes::try_cast(&uri("/Styles/Base.xaml"), reference_type).expect("a reference");
+        assert_eq!(cast.downcast_ref::<UriRef>(), Some(&UriRef::Relative("/Styles/Base.xaml".into())));
+        let cast = ValueTypes::try_cast(&uri("fonts:SystemFonts#Inter"), reference_type).expect("a reference");
+        assert_eq!(cast.downcast_ref::<UriRef>(), Some(&UriRef::parse("fonts:SystemFonts#Inter").unwrap()));
+        let nullable = ValueTypes::try_cast(&uri("Values.xaml"), ValueType::of::<Option<UriRef>>()).expect("a nullable reference");
+        assert_eq!(nullable.downcast_ref::<Option<UriRef>>(), Some(&Some(UriRef::Relative("Values.xaml".into()))));
+
+        // An absolute `Uri` or reference is its URL, a relative one is refused with its error.
+        let cast = ValueTypes::try_cast(&uri("https://example.com/a"), url_type).expect("a URL");
+        assert_eq!(cast.downcast_ref::<::url::Url>().map(::url::Url::as_str), Some("https://example.com/a"));
+        let cast = ValueTypes::try_cast(&reference("ferres://app/a.xaml"), url_type).expect("a URL");
+        assert_eq!(cast.downcast_ref::<::url::Url>().map(::url::Url::as_str), Some("ferres://app/a.xaml"));
+        for relative in [uri("Values.xaml"), reference("Values.xaml")] {
+            assert!(ValueTypes::try_cast(&relative, url_type).is_none());
+            assert!(ValueTypes::try_convert(Some(&relative), url_type).is_none());
+            assert!(ValueTypes::try_cast(&relative, ValueType::of::<Option<::url::Url>>()).is_none());
+            let expected = Some("The URI Values.xaml is relative and cannot be converted to a Url.");
+            assert_eq!(ValueTypes::cast_error(&relative, url_type).as_deref(), expected);
+            // The nullable form of the target refuses it with the same error.
+            assert_eq!(ValueTypes::cast_error(&relative, ValueType::of::<Option<::url::Url>>()).as_deref(), expected);
+        }
+        // A text the URL parser rejects is neither a reference nor a URL.
+        let invalid = uri("http://host:99999/");
+        assert!(ValueTypes::try_cast(&invalid, reference_type).is_none());
+        assert_eq!(
+            ValueTypes::cast_error(&invalid, reference_type).as_deref(),
+            Some("The URI http://host:99999/ is not a valid Url: invalid port number.")
+        );
+        assert_eq!(ValueTypes::cast_error(&uri("https://example.com/"), url_type), None);
+
+        // A reference and a URL are the `Uri` of the same text.
+        let cast = ValueTypes::try_cast(&reference("../Fonts/#Name"), uri_type).expect("a URI");
+        assert_eq!(cast.downcast_ref::<Uri>().map(Uri::original_string), Some("../Fonts/#Name"));
+        let cast = ValueTypes::try_cast(&address("fonts:SystemFonts"), uri_type).expect("a URI");
+        assert_eq!(cast.downcast_ref::<Uri>(), Some(&Uri::absolute("fonts:SystemFonts").unwrap()));
+        let cast = ValueTypes::try_cast(&address("fonts:SystemFonts"), reference_type).expect("a reference");
+        assert_eq!(cast.downcast_ref::<UriRef>(), Some(&UriRef::parse("fonts:SystemFonts").unwrap()));
+
+        // Their text, and text converts to them with the rule of markup.
+        assert_eq!(ValueTypes::to_display_string(Some(&reference("/Styles/Base.xaml"))), "/Styles/Base.xaml");
+        assert_eq!(ValueTypes::to_display_string(Some(&address("http://host"))), "http://host/");
+        let text = |text: &str| -> BoxedValue { Rc::new(text.to_string()) };
+        let parsed = ValueTypes::try_convert(Some(&text("/Styles/Base.xaml")), reference_type).flatten().expect("a reference");
+        assert_eq!(parsed.downcast_ref::<UriRef>(), Some(&UriRef::Relative("/Styles/Base.xaml".into())));
+        let parsed = ValueTypes::try_convert(Some(&text("fonts:SystemFonts")), url_type).flatten().expect("a URL");
+        assert_eq!(parsed.downcast_ref::<::url::Url>().map(::url::Url::as_str), Some("fonts:SystemFonts"));
+        let parsed = ValueTypes::try_convert(Some(&text("fonts:SystemFonts")), ValueType::of::<Option<::url::Url>>()).flatten();
+        assert!(parsed.expect("a nullable URL").downcast_ref::<Option<::url::Url>>().is_some_and(Option::is_some));
+        assert!(ValueTypes::try_convert(Some(&text("/Styles/Base.xaml")), url_type).is_none());
     }
 }
