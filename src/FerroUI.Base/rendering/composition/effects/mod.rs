@@ -25,7 +25,10 @@ pub use custom_effect_painting::{custom_effect_graph_padding, pop_custom_effect_
 pub(crate) use custom_effect_painting::{pop_custom_effect_graph_with, push_custom_effect_graph_with};
 pub use effect_graph::blur_amount_to_radius;
 pub use effect_prewarm::{effect_prewarm_names, register_effect_prewarm};
-pub(crate) use effect_prewarm::{effect_prewarm_generation, effect_prewarm_since, register_effect_graph_prewarm};
+pub(crate) use effect_prewarm::{
+    effect_prewarm_effects_since, effect_prewarm_generation, effect_prewarm_since, register_custom_effect_prewarm,
+    register_effect_graph_prewarm,
+};
 pub(crate) use effect_graph::{
     EffectColor, EffectGraph, EffectMatrix, EffectMemberKind, EffectNode, EffectNodeKind, EffectPropertyValue,
     EffectScalar, PixelOp,

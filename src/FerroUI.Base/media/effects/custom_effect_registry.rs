@@ -10,8 +10,9 @@
 //!
 //! The effects FerroUI ships ([`library`](super::library)) are registered the
 //! first time the registry is read. Registering a type also loads its effect
-//! graph, if it has one ([`CustomEffect::graph`]), and registers the graph
-//! for the prewarm of the GPU programs.
+//! graph, if it has one ([`CustomEffect::graph`]), or else reads its runtime
+//! shader ([`CustomEffect::shader`]), and registers either for the prewarm of
+//! the GPU programs.
 
 use super::custom_effect::normalize_identifier;
 use super::{CustomEffect, ImmutableCustomEffect};
@@ -67,8 +68,9 @@ pub struct CustomEffectRegistry;
 
 impl CustomEffectRegistry {
     /// Registers `T` under [`CustomEffect::NAME`], and loads its graph
-    /// ([`CustomEffect::graph`]), which is registered for the prewarm.
-    /// Registering a type again does nothing.
+    /// ([`CustomEffect::graph`]) or its shader ([`CustomEffect::shader`]),
+    /// which is registered for the prewarm. Registering a type again does
+    /// nothing.
     pub fn register<T: CustomEffect>() -> Result<(), CustomEffectRegistrationError> {
         let name = T::NAME;
         if name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_') {
@@ -91,8 +93,9 @@ impl CustomEffectRegistry {
         }
         registry.push(Registration { name, key, type_id: TypeId::of::<T>(), parse: parse_registered::<T> });
         drop(registry);
-        // Not under the lock: the graph is code of the effect.
+        // Not under the lock: the graph and the shader are code of the effect.
         let _ = super::custom_effect_graph::load_custom_effect_graph::<T>();
+        let _ = super::custom_effect_shader::load_custom_effect_shader::<T>();
         Ok(())
     }
 

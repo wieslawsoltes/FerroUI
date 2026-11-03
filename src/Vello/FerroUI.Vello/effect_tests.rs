@@ -738,6 +738,30 @@ mod effects {
         assert!(!effect.report_unhandled("Vello"));
     }
 
+    /// A runtime shader effect (#455, E4) is drawn as an effect without a
+    /// factory until its WGSL program is drawn (E5): its content unchanged,
+    /// reported once.
+    #[test]
+    fn shader_effect_draws_unchanged_until_its_wgsl_is_drawn() {
+        use ferroui_base::media::effects::library::PixelateEffect;
+        use ferroui_base::media::effects::ImmutableCustomEffect;
+
+        let effect = ImmutableCustomEffect::new(PixelateEffect { cell_size: 16.0 });
+        assert!(effect.has_shader());
+        let target = Target::new();
+        target.draw_impl(|context| {
+            context.push_effect(Some(Rect::new(0.0, 0.0, 100.0, 100.0)), &effect);
+            red_square(context, 40.0);
+            context.pop_effect();
+        });
+
+        assert_eq!(RED, target.pixel(40, 50));
+        assert_eq!(RED, target.pixel(59, 59));
+        assert_eq!(TRANSPARENT, target.pixel(39, 50));
+        assert_eq!(TRANSPARENT, target.pixel(60, 50));
+        assert!(!effect.report_unhandled("Vello"));
+    }
+
     #[test]
     fn effect_with_clip_rect_draws_through_a_bounded_layer() {
         let target = Target::new();
