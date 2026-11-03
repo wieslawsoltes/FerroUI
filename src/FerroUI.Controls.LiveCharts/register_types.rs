@@ -23,6 +23,7 @@ const TYPES: &[&TypeInfo] = &[
     crate::PolarChart::TYPE,
     crate::SankeyChart::TYPE,
     crate::TreemapChart::TYPE,
+    crate::GeoMap::TYPE,
     crate::LineSeries::TYPE,
     crate::StepLineSeries::TYPE,
     crate::AreaSeries::TYPE,
@@ -46,20 +47,25 @@ const TYPES: &[&TypeInfo] = &[
     crate::SankeyNode::TYPE,
     crate::SankeyLink::TYPE,
     crate::TreemapNode::TYPE,
+    crate::HeatLandSeries::TYPE,
+    crate::HeatLand::TYPE,
+    crate::GeoMarker::TYPE,
     crate::ChartAutomationPeer::TYPE,
 ];
 ferroui_base::ferro_rust_paths! {
     classes:[crate::Chart,crate::ChartPoint,crate::ChartSeries,crate::Axis,
-        crate::CartesianChart,crate::PieChart,crate::PolarChart,crate::SankeyChart,crate::TreemapChart,
+        crate::CartesianChart,crate::PieChart,crate::PolarChart,crate::SankeyChart,crate::TreemapChart,crate::GeoMap,
         crate::LineSeries,crate::StepLineSeries,crate::AreaSeries,crate::StackedAreaSeries,crate::StackedStepAreaSeries,
         crate::ColumnSeries,crate::RowSeries,crate::StackedColumnSeries,crate::StackedRowSeries,crate::ScatterSeries,
         crate::HeatSeries,crate::RangeColumnSeries,crate::RangeRowSeries,crate::RangeLineSeries,
         crate::CandlesticksSeries,crate::BoxSeries,crate::PieSeries,crate::PolarLineSeries,
         crate::SankeySeries,crate::TreemapSeries,crate::SankeyNode,crate::SankeyLink,crate::TreemapNode,
+        crate::HeatLandSeries,crate::HeatLand,crate::GeoMarker,
         crate::ChartAutomationPeer],
     types:[crate::ChartKind,crate::LegendPosition,crate::TooltipPosition,crate::ZoomAndPanMode,
+        crate::MapInteractionMode,
         crate::ChartPoints,crate::ChartSeriesCollection,crate::Axes,
-        crate::SankeyNodes,crate::SankeyLinks,crate::TreemapNodes],
+        crate::SankeyNodes,crate::SankeyLinks,crate::TreemapNodes,crate::HeatLands,crate::GeoMarkers],
     contracts:[],generics:[],generic_contracts:[],
 }
 
@@ -77,12 +83,15 @@ pub fn register_types() {
             <crate::LegendPosition as MarkupTyped>::MARKUP,
             <crate::TooltipPosition as MarkupTyped>::MARKUP,
             <crate::ZoomAndPanMode as MarkupTyped>::MARKUP,
+            <crate::MapInteractionMode as MarkupTyped>::MARKUP,
             <crate::ChartPoints as MarkupTyped>::MARKUP,
             <crate::ChartSeriesCollection as MarkupTyped>::MARKUP,
             <crate::Axes as MarkupTyped>::MARKUP,
             <crate::SankeyNodes as MarkupTyped>::MARKUP,
             <crate::SankeyLinks as MarkupTyped>::MARKUP,
             <crate::TreemapNodes as MarkupTyped>::MARKUP,
+            <crate::HeatLands as MarkupTyped>::MARKUP,
+            <crate::GeoMarkers as MarkupTyped>::MARKUP,
         ]);
         ValueTypes::register_global(register_value_types);
         register_rust_paths();
