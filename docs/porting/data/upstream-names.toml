@@ -404,6 +404,24 @@ deprecated = "ferroui_base::threading::FerroSynchronizationContext"
 behaviour = "same"
 notes = "Step A5. The context of the dispatcher kept one role, the priority of the running job: Dispatcher::current_priority (None outside of a job) and Dispatcher::set_current_priority (InstallIfNeeded, which Application does at Normal; the previous priority is given back, in the place of RestoreContext, also deprecated). Post is Dispatcher::post or post_local at that priority; the context of a priority as a schedule is Dispatcher::task_schedule(priority). FerroScheduler::install_on_ui_thread is deprecated: the dispatcher installs itself."
 
+[[name]]
+upstream = "System.Threading.Tasks.Task"
+rust = "ferroui_system::task::JoinHandle"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_base::threading::DispatcherTask"
+behaviour = "deviation"
+notes = "Step A6. The Task that an asynchronous member returns is the JoinHandle of a task of the dispatcher (re-exported by ferroui_base::threading with JoinError and AbortHandle): a future of Result<T, JoinError>, is_finished (IsCompleted), abort (the outcome is JoinError::Canceled), one owner (shared() for several observers, T: Clone); dropping it detaches the task. Deviation: an exception of the task (a panic) is JoinError::Panicked, a value of the handle, where await raises it again; the code that awaits a task and must fail with it matches Panicked and calls resume_unwind. The members that returned DispatcherTask return JoinHandle: NavigationPage, INavigation and PageNavigationExtensions (PushAsync, PopAsync, PopToRootAsync, PopToPageAsync, ReplaceAsync, PushModalAsync, PopModalAsync, PopAllModalsAsync), Window.ShowDialog, TopLevel.RequestPlatformInhibition, IPageTransition.Start, ICompositionGlContext.DisposeAsync and ICompositionGlTexture.DisposeAsync; the navigation members and the dialogs keep their DispatcherTask form as deprecated ..._task methods. The Task of the behaviors is TaskHandle over a shared JoinHandle. Also deprecated: DispatcherTaskScheduler and Dispatcher::to_task_scheduler, to_task_scheduler_with_priority (Dispatcher::spawn_local, start_local, spawn_with_priority and their _with_priority forms). Tested in src/FerroUI.Base/threading/dispatcher_tests.rs and the tests of each member."
+
+[[name]]
+upstream = "Avalonia.Threading.Dispatcher.InvokeAsync (an asynchronous callback, Func<Task>)"
+rust = "ferroui_base::threading::Dispatcher::spawn"
+kind = "member"
+phase = "C4"
+deprecated = "ferroui_base::threading::Dispatcher::invoke_async_task"
+behaviour = "deviation"
+notes = "Step A6. spawn and spawn_with_priority run the Send callback in a job of the dispatcher and the future it makes there, and give a JoinHandle (a panic is JoinError::Panicked). The callback that need not be Send (invoke_async_task_local, invoke_async_task_local_with_priority) is spawn_local_with_priority(async move { callback().await }, priority), at Default for the forms without a priority: its first poll is a job at that priority, as the job of the callback was."
+
 # C5: the public signatures take std and the chosen crates (docs/idiomatic-rust-signatures.md).
 
 [[name]]
