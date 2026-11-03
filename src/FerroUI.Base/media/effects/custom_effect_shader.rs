@@ -1,8 +1,9 @@
 //! The runtime shaders of custom effects (#455, E4; not from upstream): the
 //! description of [`CustomEffect::shader`], loaded once per type, and the
 //! uniform convention the backends hand the parameters of a snapshot to the
-//! program with (docs/porting/custom-effects.md, section 3.4). The convention
-//! is documented on [`ShaderEffectDescription`].
+//! program with (docs/porting/custom-effects.md, section 3.4), and the images
+//! a program samples as children (E6, section 3.6). The convention is
+//! documented on [`ShaderEffectDescription`].
 
 use super::{CustomEffect, EffectParameterValue, ImmutableCustomEffect};
 use crate::media::imaging::BitmapBlendingMode;
@@ -73,7 +74,8 @@ pub enum ShaderEffectPadding {
 ///    `float`, a `Point`, `Vector` or `Size` a `float2`, a `Color` a
 ///    premultiplied `float4` (red, green and blue times the alpha, 0 to 1), a
 ///    `Rect` a `float4` (x, y, width, height), a `Bool` (0 or 1) or an `Int` an
-///    `int`. A `Text` parameter has no uniform.
+///    `int`. A `Text` parameter has no uniform, nor has an `Image` parameter,
+///    which is a child (below).
 ///
 /// The values of the parameters are passed as they are: a length in device
 /// independent pixels is turned into device pixels by the program, with
@@ -97,6 +99,37 @@ pub enum ShaderEffectPadding {
 /// the bindings: `uniforms`, the block, and `fn sample_content(coord:
 /// vec2<f32>) -> vec4<f32>`, the content at `coord` (content-sampling
 /// programs only), and calls `effect` at the centre of each pixel.
+///
+/// # Images: the children
+///
+/// An image parameter of the effect ([`EffectParameterValue::Image`]) named
+/// in [`children`](Self::children) is a child of the program (#455, E6):
+///
+/// - in SkSL, `uniform shader <name>;`, declared after the uniforms in the
+///   order of `children` (`<name>` the parameter's name with every `-`
+///   written `_`), sampled with `<name>.eval(coord)`;
+/// - in WGSL, `fn sample_<name>(coord: vec2<f32>) -> vec4<f32>`, which the
+///   pass adds with the texture of the image (binding
+///   [`SHADER_WGSL_CHILDREN_BINDING`] and up, in the order of `children`).
+///
+/// Both give the image at `coord`, in the device pixels of the area of the
+/// effect: the image stretched over the whole area (`layer_size`), the texel
+/// under `coord * image_size / layer_size` (nearest, as the content is
+/// sampled), premultiplied, transparent beyond the area. An empty image
+/// ([`EffectImage::empty`](super::EffectImage::empty)) is transparent. The
+/// backends upload an image once (per context or device) and bind the upload
+/// while the image lives, so a frame that changes only uniforms uploads
+/// nothing; the CPU reference of an effect samples
+/// [`EffectImage::pixels`](super::EffectImage::pixels) the same way
+/// ([`EffectImagePixels::sample_stretched`](super::EffectImagePixels::sample_stretched)).
+///
+/// Children are for overlays ([`ShaderEffectMode::Overlay`]): the shape of
+/// Effector's page transitions, programs drawn over the content from images
+/// (with the blend mode `Source` they replace it). A program that samples the
+/// content takes no images: Skia draws it as a runtime shader image filter,
+/// which takes its other children from the builder of the program, and
+/// skia-safe 0.153 binds no setter for them; both backends refuse it, so that
+/// a program draws the same everywhere.
 ///
 /// Each backend checks its program against the parameters when it compiles
 /// it (decision 1 of the plan): a program whose uniforms are not those of the
@@ -130,10 +163,13 @@ pub struct ShaderEffectDescription {
     pub sample_radius: f64,
     /// How far the output reaches beyond the content.
     pub padding: ShaderEffectPadding,
-    /// The names of further children the program samples besides the
-    /// content: reserved for the secondary images of step E6 and **not yet
-    /// supported**; a description with children is reported once and drawn
-    /// as an effect without a factory.
+    /// The images the program samples (#455, E6): the names of image
+    /// parameters of the effect, in the order the program declares them as
+    /// children (see "Images: the children" above). At most
+    /// [`MAX_SHADER_CHILDREN`], each an image parameter, for an overlay only;
+    /// a description that breaks this is reported once and drawn as an effect
+    /// without a factory
+    /// ([`ImmutableCustomEffect::check_shader_children`]).
     pub children: Vec<Cow<'static, str>>,
 }
 
@@ -176,8 +212,8 @@ impl ShaderEffectDescription {
         self
     }
 
-    /// The description with the children `children` besides the content
-    /// (step E6, not yet supported).
+    /// The description with the children `children`: the names of the image
+    /// parameters the program samples, in the order it declares them.
     pub fn with_children<S: Into<Cow<'static, str>>>(mut self, children: impl IntoIterator<Item = S>) -> Self {
         self.children = children.into_iter().map(Into::into).collect();
         self
@@ -218,11 +254,19 @@ impl ShaderEffectDescription {
     ///   Skia's blend modes; `Unspecified` is source over). Pixels beyond the
     ///   part of the area the textures hold are transparent.
     ///
+    /// - For each child (an image, E6), at binding
+    ///   [`SHADER_WGSL_CHILDREN_BINDING`] plus its index,
+    ///   `var ferroui_child_<name>: texture_2d<f32>;` and `fn
+    ///   sample_<name>(coord: vec2<f32>) -> vec4<f32>`: the image stretched
+    ///   over the area, the texel under `coord * size / layer_size`,
+    ///   transparent beyond it.
+    ///
     /// The names the pass adds start with `ferroui_` (and `FerroUi`), but
-    /// `uniforms`, `sample_content`, `vs_main` and `fs_main`: a program that
-    /// declares one of them does not compile.
+    /// `uniforms`, `sample_content`, `sample_<name>` of the children,
+    /// `vs_main` and `fs_main`: a program that declares one of them does not
+    /// compile.
     pub fn wgsl_module(&self) -> String {
-        shader_wgsl_module(&self.wgsl, self.mode, self.blend_mode)
+        shader_wgsl_module(&self.wgsl, self.mode, self.blend_mode, &self.children)
     }
 }
 
@@ -238,6 +282,14 @@ pub const SHADER_WGSL_PASS_BINDING: u32 = 1;
 /// The binding (group 0) of the content, `ferroui_content`, a
 /// `texture_2d<f32>`, in the WGSL module of a shader effect.
 pub const SHADER_WGSL_CONTENT_BINDING: u32 = 2;
+
+/// The binding (group 0) of the first child of a shader effect (an image,
+/// E6), a `texture_2d<f32>`, in its WGSL module; the next child is at the
+/// next binding.
+pub const SHADER_WGSL_CHILDREN_BINDING: u32 = 3;
+
+/// The most children (images) the program of a shader effect samples.
+pub const MAX_SHADER_CHILDREN: usize = 8;
 
 /// The vertex entry point of the WGSL module of a shader effect.
 pub const SHADER_WGSL_VERTEX_ENTRY: &str = "vs_main";
@@ -464,13 +516,42 @@ fn blend_wgsl(mode: BitmapBlendingMode) -> String {
     }
 }
 
+/// The texture and the sampling function of the child `{name}` at
+/// `{binding}` (an image, E6).
+const CHILD_WGSL: &str = r#"
+@group(0) @binding({binding}) var ferroui_child_{name}: texture_2d<f32>;
+
+// The image `{name}` at `coord` (device pixels of the area): the image
+// stretched over the area, the texel under `coord * size / layer_size`;
+// transparent beyond the image.
+fn sample_{name}(coord: vec2<f32>) -> vec4<f32> {
+    let size = vec2<f32>(textureDimensions(ferroui_child_{name}));
+    let texel = floor(coord * size / max(uniforms.layer_size, vec2<f32>(1.0)));
+    if (any(texel < vec2<f32>(0.0)) || any(texel >= size)) {
+        return vec4<f32>(0.0);
+    }
+    return textureLoad(ferroui_child_{name}, vec2<i32>(texel), 0);
+}
+"#;
+
 /// The WGSL module of a shader effect: the program `wgsl`, the bindings and
-/// the entry points of the pass (see
+/// the entry points of the pass, and the children `children` (see
 /// [`ShaderEffectDescription::wgsl_module`]).
-fn shader_wgsl_module(wgsl: &str, mode: ShaderEffectMode, blend_mode: BitmapBlendingMode) -> String {
-    let mut module = String::with_capacity(wgsl.len() + 4096);
+fn shader_wgsl_module(
+    wgsl: &str,
+    mode: ShaderEffectMode,
+    blend_mode: BitmapBlendingMode,
+    children: &[Cow<'static, str>],
+) -> String {
+    let mut module = String::with_capacity(wgsl.len() + 4096 + children.len() * 640);
     module.push_str(wgsl);
     module.push_str(SHADER_PASS_WGSL);
+    for (index, child) in children.iter().enumerate() {
+        let binding = SHADER_WGSL_CHILDREN_BINDING + index as u32;
+        module.push_str(
+            &CHILD_WGSL.replace("{binding}", &binding.to_string()).replace("{name}", &shader_uniform_name(child)),
+        );
+    }
     match mode {
         ShaderEffectMode::ContentSampling => module.push_str(CONTENT_SAMPLING_WGSL),
         ShaderEffectMode::Overlay => {
@@ -550,7 +631,7 @@ impl ShaderUniformValue {
     }
 
     /// The uniform of a parameter value by the convention; `None` for text,
-    /// which has none.
+    /// which has none, and for an image, which is a child.
     pub fn from_parameter(value: &EffectParameterValue) -> Option<Self> {
         Some(match value {
             EffectParameterValue::Bool(value) => Self::Int(i32::from(*value)),
@@ -567,7 +648,7 @@ impl ShaderUniformValue {
             EffectParameterValue::Rect(rect) => {
                 Self::Float4([rect.x as f32, rect.y as f32, rect.width as f32, rect.height as f32])
             }
-            EffectParameterValue::Text(_) => return None,
+            EffectParameterValue::Text(_) | EffectParameterValue::Image(_) => return None,
         })
     }
 
