@@ -49,8 +49,8 @@ impl BindingExpressionNode {
     }
 }
 
-/// Parses the path of every compiled binding extension (its first constructor argument or its
-/// `Path` property) and merges the long-form source properties (`ElementName`,
+/// Parses the path of every compiled binding extension and of every `{x:Bind}` (its first
+/// constructor argument or its `Path` property) and merges the long-form source properties (`ElementName`,
 /// `RelativeSource`) into it, leaving a [`ParsedBindingPathNode`] in place of the path text.
 pub struct FerroXamlIlBindingPathParser;
 
@@ -64,12 +64,14 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathParser {
             return Ok(node);
         };
         let types = context.try_get_ferro_types()?;
-        if !binding
-            .type_()
-            .get_clr_type()?
-            .equals(&*types.compiled_binding_extension)
-        {
+        let binding_type = binding.type_().get_clr_type()?;
+        let is_x_bind = super::x_bind::is_x_bind_extension(&binding_type);
+        if !is_x_bind && !binding_type.equals(&*types.compiled_binding_extension) {
             return Ok(node);
+        }
+        if is_x_bind {
+            // The root source of an `x:Bind` in a typed template is its item.
+            super::x_bind::prepare_scope(context, &binding)?;
         }
 
         let converted_node =
