@@ -386,3 +386,11 @@ kind = "mechanism"
 phase = "C5"
 behaviour = "deviation"
 notes = "Step T3 (decisions O1, O2). The timer properties and functions take Duration: TextBox, TextPresenter and RichEditBox CaretBlinkInterval, ScrollBar HideDelay and ShowDelay, AutoCompleteBox MinimumPopulateDelay, the durations of DirectConnectedAnimationConfiguration and ConnectedAnimationService, DebounceAction Delay, ThrottleAction Interval, DelayAction Duration, DelayedLoadBehavior Delay, DelayedLoadTrigger Delay, DelayedShowControlAction Delay, InactivityTrigger Timeout, VisualDebugBehavior Duration, SelectionIndicatorAnimation default_duration and try_start, DeferredContentScheduling.Delay, the timeline and settings of the deferred content control, DelayedUniformTabPanel ExpansionDelay. The markup name stays System.TimeSpan; a negative span is a markup error and a conversion error of a binding. Deviation: the infinite wait of DelayAction is Duration::MAX, not minus one millisecond (DEVIATIONS.md, Behaviors)."
+
+[[name]]
+upstream = "System.DateTime, System.DateTimeOffset (instants)"
+rust = "std::time::SystemTime"
+kind = "mechanism"
+phase = "C5"
+behaviour = "same"
+notes = "Step D1 (section 3.3, decision O4). The positions that hold a moment take and return SystemTime: IRuntimePlatform::get_utc_now, UtcNowProvider, LocalUtcOffsetProvider, StorageItemProperties DateCreated and DateModified (and the storage dates of the file system, Android, the browser and iOS), FiredEvent.TriggerTime of the developer tools, ManagedFileChooserItemViewModel.Modified of the dialogs (Option<SystemTime>). DateTime.UtcNow as an instant is ferroui_base::utilities::system_time_now; the browser reads Date.now() and never SystemTime::now(). The calendar values keep DateTime and DateTimeOffset, and the markup properties TriggerTime and Modified stay System.DateTime in local time. The BSON DateTime of the remote protocol keeps its name and converts to and from SystemTime."
