@@ -4,7 +4,7 @@
 
 use crate::primitives::{ColorPreviewer, ColorSlider, ColorSpectrum};
 use crate::{register_types, ColorPicker, ColorView, ASSEMBLY};
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::metadata::{from_markup_value, MarkupAttributeValue};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
@@ -21,12 +21,12 @@ use std::rc::Rc;
 /// The global clock of the themed application: the transitions of the control themes need
 /// one. It never pulses.
 struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

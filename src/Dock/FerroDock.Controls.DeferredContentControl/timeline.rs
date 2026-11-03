@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use crate::presentation::IDeferredContentPresentationTarget;
 use crate::timeline_queue::TimelineQueue;
-use ferroui_base::animation::TimeSpan;
 use std::cell::Cell;
 use std::rc::{Rc, Weak};
+use std::time::Duration;
 /// Determines which budget limits a timeline dispatcher pass.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 #[repr(i32)]
@@ -24,10 +24,10 @@ pub struct DeferredContentPresentationTimeline {
     queue: TimelineQueue,
     budget_mode: Cell<DeferredContentPresentationBudgetMode>,
     max_presentations_per_pass: Cell<i32>,
-    max_realization_time_per_pass: Cell<TimeSpan>,
-    initial_delay: Cell<TimeSpan>,
-    follow_up_delay: Cell<TimeSpan>,
-    reveal_duration: Cell<TimeSpan>,
+    max_realization_time_per_pass: Cell<Duration>,
+    initial_delay: Cell<Duration>,
+    follow_up_delay: Cell<Duration>,
+    reveal_duration: Cell<Duration>,
 }
 impl PartialEq for DeferredContentPresentationTimeline {
     fn eq(&self, other: &Self) -> bool {
@@ -42,10 +42,10 @@ impl DeferredContentPresentationTimeline {
             queue: TimelineQueue::new(this.clone()),
             budget_mode: Cell::new(DeferredContentPresentationBudgetMode::ItemCount),
             max_presentations_per_pass: Cell::new(8),
-            max_realization_time_per_pass: Cell::new(TimeSpan::from_milliseconds(10.0)),
-            initial_delay: Cell::new(TimeSpan::ZERO),
-            follow_up_delay: Cell::new(TimeSpan::from_milliseconds(1.0)),
-            reveal_duration: Cell::new(TimeSpan::from_milliseconds(90.0)),
+            max_realization_time_per_pass: Cell::new(Duration::from_millis(10)),
+            initial_delay: Cell::new(Duration::ZERO),
+            follow_up_delay: Cell::new(Duration::from_millis(1)),
+            reveal_duration: Cell::new(Duration::from_millis(90)),
         })
     }
     /// Gets the active dispatcher-pass budget mode.
@@ -65,37 +65,36 @@ impl DeferredContentPresentationTimeline {
         self.max_presentations_per_pass.set(value.max(1));
     }
     /// Gets the realization-time budget for one pass.
-    pub fn max_realization_time_per_pass(&self) -> TimeSpan {
+    pub fn max_realization_time_per_pass(&self) -> Duration {
         self.max_realization_time_per_pass.get()
     }
-    /// Sets the realization-time budget, clamping negative intervals to zero.
-    pub fn set_max_realization_time_per_pass(&self, value: TimeSpan) {
-        self.max_realization_time_per_pass
-            .set(value.max(TimeSpan::ZERO));
+    /// Sets the realization-time budget.
+    pub fn set_max_realization_time_per_pass(&self, value: Duration) {
+        self.max_realization_time_per_pass.set(value);
     }
     /// Gets the delay applied when a target joins the timeline.
-    pub fn initial_delay(&self) -> TimeSpan {
+    pub fn initial_delay(&self) -> Duration {
         self.initial_delay.get()
     }
-    /// Sets the initial delay, clamping negative intervals to zero.
-    pub fn set_initial_delay(&self, value: TimeSpan) {
-        self.initial_delay.set(value.max(TimeSpan::ZERO));
+    /// Sets the initial delay.
+    pub fn set_initial_delay(&self, value: Duration) {
+        self.initial_delay.set(value);
     }
     /// Gets the delay between due follow-up passes.
-    pub fn follow_up_delay(&self) -> TimeSpan {
+    pub fn follow_up_delay(&self) -> Duration {
         self.follow_up_delay.get()
     }
-    /// Sets the follow-up delay, clamping negative intervals to zero.
-    pub fn set_follow_up_delay(&self, value: TimeSpan) {
-        self.follow_up_delay.set(value.max(TimeSpan::ZERO));
+    /// Sets the follow-up delay.
+    pub fn set_follow_up_delay(&self, value: Duration) {
+        self.follow_up_delay.set(value);
     }
     /// Gets the reveal-animation duration.
-    pub fn reveal_duration(&self) -> TimeSpan {
+    pub fn reveal_duration(&self) -> Duration {
         self.reveal_duration.get()
     }
-    /// Sets the reveal duration, clamping negative intervals to zero.
-    pub fn set_reveal_duration(&self, value: TimeSpan) {
-        self.reveal_duration.set(value.max(TimeSpan::ZERO));
+    /// Sets the reveal duration.
+    pub fn set_reveal_duration(&self, value: Duration) {
+        self.reveal_duration.set(value);
     }
     pub(crate) fn queue(&self) -> &TimelineQueue {
         &self.queue
@@ -115,7 +114,7 @@ impl DeferredContentPresentationTimeline {
     pub(crate) fn enqueue(
         &self,
         target: Rc<dyn IDeferredContentPresentationTarget>,
-        delay: TimeSpan,
+        delay: Duration,
         order: i32,
     ) {
         self.queue.enqueue(target, delay, order);
@@ -135,9 +134,9 @@ ferroui_base::ferro_markup_type!(class DeferredContentPresentationTimeline {
     properties:[
         BudgetMode:DeferredContentPresentationBudgetMode {get:|o:&Rc<DeferredContentPresentationTimeline>|o.budget_mode(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:DeferredContentPresentationBudgetMode|o.set_budget_mode(v)},
         MaxPresentationsPerPass:i32 {get:|o:&Rc<DeferredContentPresentationTimeline>|o.max_presentations_per_pass(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:i32|o.set_max_presentations_per_pass(v)},
-        MaxRealizationTimePerPass:TimeSpan {get:|o:&Rc<DeferredContentPresentationTimeline>|o.max_realization_time_per_pass(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:TimeSpan|o.set_max_realization_time_per_pass(v)},
-        InitialDelay:TimeSpan {get:|o:&Rc<DeferredContentPresentationTimeline>|o.initial_delay(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:TimeSpan|o.set_initial_delay(v)},
-        FollowUpDelay:TimeSpan {get:|o:&Rc<DeferredContentPresentationTimeline>|o.follow_up_delay(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:TimeSpan|o.set_follow_up_delay(v)},
-        RevealDuration:TimeSpan {get:|o:&Rc<DeferredContentPresentationTimeline>|o.reveal_duration(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:TimeSpan|o.set_reveal_duration(v)}
+        MaxRealizationTimePerPass:Duration {get:|o:&Rc<DeferredContentPresentationTimeline>|o.max_realization_time_per_pass(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:Duration|o.set_max_realization_time_per_pass(v)},
+        InitialDelay:Duration {get:|o:&Rc<DeferredContentPresentationTimeline>|o.initial_delay(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:Duration|o.set_initial_delay(v)},
+        FollowUpDelay:Duration {get:|o:&Rc<DeferredContentPresentationTimeline>|o.follow_up_delay(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:Duration|o.set_follow_up_delay(v)},
+        RevealDuration:Duration {get:|o:&Rc<DeferredContentPresentationTimeline>|o.reveal_duration(),set:|o:&Rc<DeferredContentPresentationTimeline>,v:Duration|o.set_reveal_duration(v)}
     ]
 });

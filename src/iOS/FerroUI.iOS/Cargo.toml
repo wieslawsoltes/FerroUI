@@ -21,6 +21,8 @@ ferroui-controls.workspace = true
 ferroui-metal.workspace = true
 # The OpenGL contracts the platform implements (OpenGL ES over EAGL).
 ferroui-opengl.workspace = true
+# The one-shot channel the pickers and the launcher wait on.
+ferroui-system.workspace = true
 bitflags.workspace = true
 
 # What the example shows its content with. Optional, behind the feature the example requires.

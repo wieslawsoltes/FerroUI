@@ -1,0 +1,90 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lc="https://ferroui.dev/livecharts"
+             Header="TreemapChart"
+             x:Class="ControlCatalog.Pages.TreemapChartPage">
+  <!-- Not from upstream: the treemap chart of the LiveCharts2 port (docs/porting/livecharts2.md). -->
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Spacing="16">
+      <TextBlock Classes="h2">Weighted rectangles of flat and nested nodes</TextBlock>
+      <WrapPanel Orientation="Horizontal" ItemSpacing="16" LineSpacing="16">
+        <StackPanel Spacing="8" Width="360">
+          <TextBlock Classes="h3">Labels on the leaves</TextBlock>
+          <lc:TreemapChart Height="320">
+            <lc:TreemapSeries Name="Regions" Padding="4" Stroke="#FFFFFFFF" StrokeThickness="2"
+                              DataLabels="True" DataLabelsSize="14" DataLabelsColor="#FFFFFFFF">
+              <lc:TreemapSeries.Nodes>
+                <lc:TreemapNode Name="Asia" Value="40" />
+                <lc:TreemapNode Name="Europe" Value="25" />
+                <lc:TreemapNode Name="Americas" Value="15" />
+                <lc:TreemapNode Name="Africa" Value="10" />
+                <lc:TreemapNode Name="Oceania" Value="7" />
+                <lc:TreemapNode Name="Antarctica" Value="3" />
+              </lc:TreemapSeries.Nodes>
+            </lc:TreemapSeries>
+          </lc:TreemapChart>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="360">
+          <TextBlock Classes="h3">Two levels, rolled up from the leaves</TextBlock>
+          <lc:TreemapChart Height="320">
+            <lc:TreemapSeries Name="Population" Padding="4" CornerRadius="4" Fill="#A0608ADA"
+                              Stroke="#FFFFFFFF" StrokeThickness="2">
+              <lc:TreemapSeries.Nodes>
+                <lc:TreemapNode Name="Asia">
+                  <lc:TreemapNode.Children>
+                    <lc:TreemapNodes>
+                      <lc:TreemapNode Name="China" Value="1400" />
+                      <lc:TreemapNode Name="India" Value="1300" />
+                      <lc:TreemapNode Name="Japan" Value="125" />
+                      <lc:TreemapNode Name="Indonesia" Value="270" />
+                    </lc:TreemapNodes>
+                  </lc:TreemapNode.Children>
+                </lc:TreemapNode>
+                <lc:TreemapNode Name="Europe">
+                  <lc:TreemapNode.Children>
+                    <lc:TreemapNodes>
+                      <lc:TreemapNode Name="Germany" Value="83" />
+                      <lc:TreemapNode Name="France" Value="67" />
+                      <lc:TreemapNode Name="Italy" Value="60" />
+                      <lc:TreemapNode Name="Spain" Value="46" />
+                    </lc:TreemapNodes>
+                  </lc:TreemapNode.Children>
+                </lc:TreemapNode>
+                <lc:TreemapNode Name="Americas">
+                  <lc:TreemapNode.Children>
+                    <lc:TreemapNodes>
+                      <lc:TreemapNode Name="USA" Value="330" />
+                      <lc:TreemapNode Name="Brazil" Value="220" />
+                      <lc:TreemapNode Name="Mexico" Value="130" />
+                    </lc:TreemapNodes>
+                  </lc:TreemapNode.Children>
+                </lc:TreemapNode>
+              </lc:TreemapSeries.Nodes>
+            </lc:TreemapSeries>
+          </lc:TreemapChart>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="360">
+          <TextBlock Classes="h3">Two series share the plot by their totals</TextBlock>
+          <lc:TreemapChart Height="320" LegendPosition="Bottom">
+            <lc:TreemapSeries Name="2023" Padding="4" Stroke="#FFFFFFFF" StrokeThickness="2">
+              <lc:TreemapSeries.Nodes>
+                <lc:TreemapNode Name="Americas" Value="60" />
+                <lc:TreemapNode Name="EMEA" Value="50" />
+                <lc:TreemapNode Name="APAC" Value="28" />
+                <lc:TreemapNode Name="Other" Value="15" />
+              </lc:TreemapSeries.Nodes>
+            </lc:TreemapSeries>
+            <lc:TreemapSeries Name="2024" Padding="4" Stroke="#FFFFFFFF" StrokeThickness="2">
+              <lc:TreemapSeries.Nodes>
+                <lc:TreemapNode Name="Americas" Value="40" />
+                <lc:TreemapNode Name="EMEA" Value="28" />
+                <lc:TreemapNode Name="APAC" Value="16" />
+                <lc:TreemapNode Name="Other" Value="8" />
+              </lc:TreemapSeries.Nodes>
+            </lc:TreemapSeries>
+          </lc:TreemapChart>
+        </StackPanel>
+      </WrapPanel>
+    </StackPanel>
+  </ScrollViewer>
+</ContentPage>

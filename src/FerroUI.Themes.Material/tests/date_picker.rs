@@ -4,7 +4,7 @@ use crate::{
     MaterialDatePicker, MaterialDatePickerMode, MaterialDatePickerState, MaterialDateSelectionMode,
     MaterialTheme, register_types,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::input::{
     InputElement, Key, KeyEventArgs, KeyModifiers, KeyboardDevice, NavigationMethod,
 };
@@ -27,11 +27,11 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 struct TestClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -551,8 +551,8 @@ fn mode_motion_uses_source_spatial_and_effect_roles_and_reduced_motion_finishes(
     p.set_reduced_motion(false);
     let w = window(&p);
     p.set_display_mode(MaterialDatePickerMode::Input);
-    clock.subject.on_next(TimeSpan::ZERO);
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::ZERO);
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     w.update_layout();
     let body: Ref<Panel> = named(&p, "PART_Body");
     let expected = crate::MaterialMotionScheme::Expressive
@@ -575,8 +575,8 @@ fn range_mode_uses_native_fast_effects_crossfade_without_spatial_slide() {
     p.set_reduced_motion(false);
     let w = window(&p);
     p.set_display_mode(MaterialDatePickerMode::Input);
-    clock.subject.on_next(TimeSpan::ZERO);
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::ZERO);
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     w.update_layout();
     let input: Ref<Grid> = named(&p, "PART_Input");
     let body: Ref<Panel> = named(&p, "PART_Body");

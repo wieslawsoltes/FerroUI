@@ -18,6 +18,15 @@
 //!   schedule's thread, inside the first work it gives the schedule, and the future is polled
 //!   there at once.
 //!
+//! The schedule of a thread ([`set_thread_schedule`]; a dispatcher is the schedule of its thread)
+//! is where the wakes from other threads of the tasks in the queue of the thread go, and the
+//! callbacks that other threads send to it. The work of a schedule may make it the current
+//! schedule of its thread while it runs ([`set_current_schedule`], [`current_schedule`]; a
+//! dispatcher job is the dispatcher at the priority of the job): [`spawn_local`] in that work
+//! gives the task that schedule, whose wakes poll it at once while the same schedule is current
+//! and queue a poll on it otherwise (the rule of `await` with a `SynchronizationContext`), and
+//! [`Schedule::schedule_local`] posts work that is not `Send` to it.
+//!
 //! A schedule is told of the tasks given to it ([`Schedule::spawned`]), with an [`AbortHandle`],
 //! so that it can end them (a dispatcher aborts its tasks when it shuts down). [`try_id`] is the
 //! [`Id`] of the task being polled, and [`poll_now`] polls a task of the thread inside the calling
@@ -35,13 +44,23 @@
 //! [`Shared`] (from [`JoinHandle::shared`]) is the outcome of a task for several observers, with
 //! synchronous continuations ([`Shared::on_finished`]) that run before the awaiting futures are
 //! woken.
+//!
+//! [`oneshot`] is a value sent once to the code that awaits it (the port of
+//! `TaskCompletionSource`), from any thread; a sender dropped without sending ends the receiver
+//! with [`Canceled`].
 
+mod canceled;
 pub(crate) mod executor;
 mod join;
+pub mod oneshot;
 mod schedule;
 mod shared;
 
-pub use executor::{block_on, poll_now, run_pending, set_thread_schedule, spawn_local, spawn_local_on, spawn_on, try_id};
+pub use canceled::Canceled;
+pub use executor::{
+    block_on, current_schedule, is_current_schedule, poll_now, run_pending, set_current_schedule, set_thread_schedule, spawn_local, spawn_local_on,
+    spawn_on, thread_schedule, try_id,
+};
 pub use join::{AbortHandle, Id, JoinError, JoinHandle};
 pub use schedule::{FirstPoll, Schedule};
 pub use shared::Shared;

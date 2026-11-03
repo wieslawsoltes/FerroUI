@@ -523,12 +523,24 @@ pub fn core_handles() -> Vec<(String, CoreRef)> {
         add(&format!("Vec<{rust}>"), CoreRef::Array(Box::new(t(full_name))));
         add(&format!("Option<Vec<{rust}>>"), CoreRef::Array(Box::new(t(full_name))));
     }
+    add("::ferroui_base::animation::SignedDuration", t("System.TimeSpan"));
     add("::ferroui_base::animation::TimeSpan", t("System.TimeSpan"));
+    add("Option<::ferroui_base::animation::SignedDuration>", nullable("System.TimeSpan"));
     add("Option<::ferroui_base::animation::TimeSpan>", nullable("System.TimeSpan"));
+    // The other Rust form of a time span (C5 of #423), by both of its paths: the compiler
+    // reads the paths as text.
+    for duration in ["::std::time::Duration", "::core::time::Duration"] {
+        add(duration, t("System.TimeSpan"));
+        add(&format!("Option<{duration}>"), nullable("System.TimeSpan"));
+    }
     reference(&mut add, "String", "System.String");
     reference(&mut add, "&'static ::ferroui_base::TypeInfo", "System.Type");
     reference(&mut add, "::ferroui_base::data::core::ValueType", "System.Type");
     reference(&mut add, "::ferroui_base::utilities::Uri", "System.Uri");
+    // The other Rust forms of a URI (C5 of #423): the reference that can be relative and the
+    // absolute URL.
+    reference(&mut add, "::ferroui_base::utilities::UriRef", "System.Uri");
+    reference(&mut add, "::url::Url", "System.Uri");
     reference(&mut add, "::ferroui_base::metadata::MarkupDelegate", "System.Delegate");
     reference(&mut add, "::ferroui_base::data::BindingError", "System.Exception");
     reference(&mut add, "::std::rc::Rc<dyn ::ferroui_base::reactive::IDisposable>", "System.IDisposable");

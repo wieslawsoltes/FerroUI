@@ -1,0 +1,29 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lc="https://ferroui.dev/livecharts"
+             Header="SankeyChart"
+             x:Class="ControlCatalog.Pages.SankeyChartPage">
+  <!-- Not from upstream: the Sankey chart of the LiveCharts2 port (docs/porting/livecharts2.md).
+       The links of a series refer to its node objects, so the class of the page builds the
+       graphs of the two series. -->
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Spacing="16">
+      <TextBlock Classes="h2">Flows between nodes</TextBlock>
+      <WrapPanel Orientation="Horizontal" ItemSpacing="16" LineSpacing="16">
+        <StackPanel Spacing="8" Width="560">
+          <TextBlock Classes="h3">Columns, with labels outside the sources and sinks</TextBlock>
+          <lc:SankeyChart x:Name="EnergyChart" Height="340">
+            <lc:SankeySeries Name="Energy" NodeWidth="16" DataLabels="True" DataLabelsSize="13" />
+          </lc:SankeyChart>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="440">
+          <TextBlock Classes="h3">Bipartite arcs with node colours</TextBlock>
+          <lc:SankeyChart x:Name="SalesChart" Height="440">
+            <lc:SankeySeries Name="Sales" Layout="BipartiteArc" NodeWidth="18"
+                             DataLabels="True" DataLabelsSize="12" />
+          </lc:SankeyChart>
+        </StackPanel>
+      </WrapPanel>
+    </StackPanel>
+  </ScrollViewer>
+</ContentPage>

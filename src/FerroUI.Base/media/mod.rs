@@ -5,6 +5,7 @@ mod color;
 mod color_tests;
 mod colors;
 mod color_matrix;
+mod convolve_matrix;
 mod drawing_context;
 #[cfg(test)]
 mod drawing_context_tests;
@@ -124,6 +125,7 @@ mod translate_transform;
 
 pub use alignment_x::AlignmentX;
 pub use color_matrix::{ColorMatrix, ColorMatrixAlphaMode, LUMINANCE_WEIGHTS};
+pub use convolve_matrix::ConvolveMatrix;
 pub use alignment_y::AlignmentY;
 pub use arc_segment::ArcSegment;
 pub use bezier_segment::BezierSegment;
@@ -258,10 +260,11 @@ pub use drawing_collection::DrawingCollection;
 pub use drawing_group::DrawingGroup;
 pub use drawing_image::DrawingImage;
 pub use effects::{
-    BlurEffect, DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions,
-    IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect, IMutableEffect,
-    ImmutableBlurEffect, ImmutableDropShadowDirectionEffect, ImmutableDropShadowEffect,
-    ImmutableLuminanceToAlphaEffect,
+    BlurEffect, CustomEffect, CustomEffectClass, CustomEffectRegistrationError, CustomEffectRegistry,
+    DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions,
+    EffectParameterValue, IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect,
+    IMutableEffect, ImmutableBlurEffect, ImmutableCustomEffect, ImmutableDropShadowDirectionEffect,
+    ImmutableDropShadowEffect, ImmutableLuminanceToAlphaEffect,
 };
 pub use experimental_acrylic_material::ExperimentalAcrylicMaterial;
 pub use geometry_drawing::GeometryDrawing;

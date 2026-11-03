@@ -3,14 +3,14 @@
 //! A message on the wire is a header of twenty bytes and a BSON document:
 //! the length of the document (a little-endian `int32` that does not count
 //! the header), the sixteen bytes of the identifier of the message class
-//! (`Guid.ToByteArray`), then the document.
+//! (`Guid.ToByteArray`, which is `Uuid::to_bytes_le`), then the document.
 
 use std::io::{Read, Write};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, Weak};
 
 use crate::error::{catch_handler, Error};
-use crate::guid::Guid;
+use crate::guid::uuid_from_byte_array;
 use crate::i_message_type_resolver::IMessageTypeResolver;
 use crate::i_transport::{
     Delegate, ExceptionHandler, HandlerToken, IFerroRemoteTransportConnection, Message, MessageHandler,
@@ -114,7 +114,7 @@ impl BsonStreamTransportConnection {
             let mut info_block = [0u8; 20];
             self.read_exact(input_stream, &mut info_block)?;
             let length = i32::from_le_bytes([info_block[0], info_block[1], info_block[2], info_block[3]]);
-            let guid = Guid::from_byte_array(&info_block[4..20])?;
+            let guid = uuid_from_byte_array(&info_block[4..20])?;
             if length < 0 {
                 // `new byte[length]`.
                 return Err(Error::Overflow("Arithmetic operation resulted in an overflow.".to_string()));
@@ -156,7 +156,7 @@ impl BsonStreamTransportConnection {
     }
 
     fn write(&self, data: &dyn BsonObject) -> Result<(), Error> {
-        let guid = self.resolver.get_guid(data.get_type())?.to_byte_array();
+        let guid = self.resolver.get_guid(data.get_type())?.to_bytes_le();
         let mut output_block = self.output_block.lock().unwrap();
         output_block.clear();
         output_block.extend_from_slice(&ZERO_LENGTH);
@@ -526,7 +526,7 @@ mod tests {
         let errors = exceptions_of(&connection);
         connection.start_reading();
         let mut frame = vec![0xFFu8, 0xFF, 0xFF, 0xFF];
-        frame.extend_from_slice(&MeasureViewportMessage::GUID.to_byte_array());
+        frame.extend_from_slice(&MeasureViewportMessage::GUID.to_bytes_le());
         PipeWriter(wire.clone()).write_all(&frame).unwrap();
         assert!(matches!(errors.recv_timeout(TIMEOUT), Ok(Error::Overflow(_))));
         wire.close();
@@ -544,7 +544,7 @@ mod tests {
         let errors = exceptions_of(&connection);
         connection.start_reading();
         let mut frame = vec![0x24u8, 0, 0, 0];
-        frame.extend_from_slice(&MeasureViewportMessage::GUID.to_byte_array());
+        frame.extend_from_slice(&MeasureViewportMessage::GUID.to_bytes_le());
         frame.extend_from_slice(&[0x24, 0, 0, 0, 0x01]);
         PipeWriter(wire.clone()).write_all(&frame).unwrap();
         wire.close();

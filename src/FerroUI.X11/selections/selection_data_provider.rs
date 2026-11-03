@@ -17,7 +17,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::imaging::PngBitmapEncoderOptions;
-use ferroui_base::threading::{Dispatcher, DispatcherFrame};
+use ferroui_base::threading::{Dispatcher, DispatcherFrame, DispatcherPriority};
 use std::any::Any;
 use std::cell::RefCell;
 use std::ffi::{c_long, c_ulong};
@@ -532,7 +532,7 @@ impl SelectionDataProvider {
 
         // The transfer goes on by itself, as the task the reference does
         // not await.
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || transfer));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(transfer, DispatcherPriority::DEFAULT));
     }
 
     fn send_data_to_client(&self, window: XID, property: Atom, target: Atom, bytes: Vec<u8>) {

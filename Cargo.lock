@@ -1510,6 +1510,7 @@ dependencies = [
  "ferroui-controls-livecharts",
  "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
+ "ferroui-designer",
  "ferroui-desktop",
  "ferroui-devtools",
  "ferroui-diagnostics",
@@ -1555,6 +1556,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-vulkan",
  "jni-sys 0.4.1",
  "libc",
@@ -1617,6 +1619,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "naga",
  "roxmltree 0.20.0",
  "serde_json",
  "xamlx",
@@ -1929,6 +1932,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-markup-xaml",
+ "ferroui-system",
  "sysinfo",
 ]
 
@@ -1967,6 +1971,7 @@ dependencies = [
  "bitflags",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-system",
  "futures-util",
  "uuid",
  "zbus",
@@ -1989,6 +1994,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-themes-simple",
 ]
 
@@ -2082,6 +2088,7 @@ dependencies = [
  "ferroui-metal",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-themes-simple",
  "libc",
  "objc2",
@@ -2132,6 +2139,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "url",
 ]
 
 [[package]]
@@ -2142,6 +2150,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup",
+ "url",
 ]
 
 [[package]]
@@ -2152,6 +2161,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "url",
  "xamlx",
 ]
 
@@ -2167,6 +2177,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+ "url",
  "xamlx",
 ]
 
@@ -2599,6 +2610,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-protranslate-core",
  "ferroui-protranslate-formats",
+ "ferroui-system",
  "regex",
  "serde",
  "serde_json",
@@ -2685,12 +2697,14 @@ dependencies = [
  "ferroui-reactiveui",
  "ferroui-splat",
  "ferroui-system",
+ "uuid",
 ]
 
 [[package]]
 name = "ferroui-remote-protocol"
 version = "0.5.0-preview.1"
 dependencies = [
+ "ferroui-system",
  "uuid",
 ]
 
@@ -2759,6 +2773,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-splat",
  "ferroui-system",
+ "uuid",
 ]
 
 [[package]]
@@ -2900,6 +2915,7 @@ name = "ferroui-vello"
 version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-fonts-inter",
  "ferroui-harfbuzz",
@@ -3021,6 +3037,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-microcom",
+ "ferroui-system",
  "ferroui-win32",
  "microcom-codegen",
  "windows-sys 0.61.2",
@@ -3038,6 +3055,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-themes-simple",
  "ferroui-vulkan",
  "libc",

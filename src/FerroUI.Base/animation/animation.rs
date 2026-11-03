@@ -1,16 +1,15 @@
-use crate::animation::cancellation::register_local;
 use crate::animation::easings::Easing;
-use crate::animation::i_page_transition::continuation_context;
+use crate::animation::i_page_transition::continuation_priority;
 use crate::animation::key_frame::KeyFrameTimingMode;
 use crate::animation::{
     Animatable, AnimationError, AnimationTask, AnimatorFactory, AnimatorKeyFrame, Cue, FillMode,
-    IAnimator, IClock, IterationCount, KeyFrames, PlaybackBehavior, PlaybackDirection, TimeSpan,
+    IAnimator, IClock, IterationCount, KeyFrames, PlaybackBehavior, PlaybackDirection, SignedDuration,
 };
 use crate::data::{BindingMode, BindingPriority};
 use crate::reactive::{
     CompositeDisposable, Disposable, IDisposable, IObservable, Observable, SerialDisposable,
 };
-use crate::threading::CancellationToken;
+use crate::threading::{CancellationToken, Dispatcher};
 use crate::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, DirectProperty,
     DirectPropertyMetadata, FerroObject, FerroObjectImpl, FerroProperty, Ref, Visual, WeakRef,
@@ -39,14 +38,14 @@ crate::ferro_thread_local! {
 #[repr(C)]
 pub struct Animation {
     base: FerroObject,
-    duration: Cell<TimeSpan>,
+    duration: Cell<SignedDuration>,
     iteration_count: Cell<IterationCount>,
     playback_direction: Cell<PlaybackDirection>,
     playback_behavior: Cell<PlaybackBehavior>,
     fill_mode: Cell<FillMode>,
     easing: RefCell<Easing>,
-    delay: Cell<TimeSpan>,
-    delay_between_iterations: Cell<TimeSpan>,
+    delay: Cell<SignedDuration>,
+    delay_between_iterations: Cell<SignedDuration>,
     speed_ratio: Cell<f64>,
     children: KeyFrames,
     preview_values: RefCell<Option<Rc<CompositeDisposable>>>,
@@ -92,7 +91,7 @@ crate::ferro_properties! {
 impl Animation {
     direct_cell_property!(
         /// Defines the `Duration` property: the active time of one iteration.
-        duration_property, "Duration", TimeSpan, duration, set_duration, duration, TimeSpan::ZERO
+        duration_property, "Duration", SignedDuration, duration, set_duration, duration, SignedDuration::ZERO
     );
 
     direct_cell_property!(
@@ -121,13 +120,13 @@ impl Animation {
 
     direct_cell_property!(
         /// Defines the `Delay` property: the initial delay time.
-        delay_property, "Delay", TimeSpan, delay, set_delay, delay, TimeSpan::ZERO
+        delay_property, "Delay", SignedDuration, delay, set_delay, delay, SignedDuration::ZERO
     );
 
     direct_cell_property!(
         /// Defines the `DelayBetweenIterations` property.
-        delay_between_iterations_property, "DelayBetweenIterations", TimeSpan, delay_between_iterations,
-        set_delay_between_iterations, delay_between_iterations, TimeSpan::ZERO
+        delay_between_iterations_property, "DelayBetweenIterations", SignedDuration, delay_between_iterations,
+        set_delay_between_iterations, delay_between_iterations, SignedDuration::ZERO
     );
 
     ferro_property!(for Animation;
@@ -158,14 +157,14 @@ impl Animation {
     pub fn construct() -> Self {
         Self {
             base: FerroObject::construct(),
-            duration: Cell::new(TimeSpan::ZERO),
+            duration: Cell::new(SignedDuration::ZERO),
             iteration_count: Cell::new(IterationCount::new(1)),
             playback_direction: Cell::new(PlaybackDirection::Normal),
             playback_behavior: Cell::new(PlaybackBehavior::Auto),
             fill_mode: Cell::new(FillMode::None),
             easing: RefCell::new(Easing::default()),
-            delay: Cell::new(TimeSpan::ZERO),
-            delay_between_iterations: Cell::new(TimeSpan::ZERO),
+            delay: Cell::new(SignedDuration::ZERO),
+            delay_between_iterations: Cell::new(SignedDuration::ZERO),
             speed_ratio: Cell::new(1.0),
             children: KeyFrames::new(),
             preview_values: RefCell::new(None),
@@ -330,13 +329,13 @@ impl Animation {
             }
         } else {
             // The completion action runs once every animator has completed,
-            // through the synchronization context that is current now.
+            // in a job of the dispatcher at the priority that is current now.
             let remaining = Rc::new(Cell::new(animators.len()));
             let schedule_on_complete = on_complete.map(|on_complete| {
-                let context = continuation_context();
+                let (dispatcher, priority) = (Dispatcher::current_dispatcher(), continuation_priority());
                 Rc::new(move || {
                     let on_complete = on_complete.clone();
-                    context.post_local(move || on_complete());
+                    dispatcher.post_local(move || on_complete(), priority);
                 })
             });
 
@@ -542,7 +541,7 @@ impl Animation {
         clock: Option<Rc<dyn IClock>>,
         cancellation_token: CancellationToken,
     ) -> AnimationTask {
-        if cancellation_token.is_cancellation_requested() {
+        if cancellation_token.is_cancelled() {
             return AnimationTask::completed();
         }
 
@@ -567,9 +566,8 @@ impl Animation {
                 if let Some(subscriptions) = subscriptions {
                     subscriptions.dispose();
                 }
-                let cancellation: Option<
-                    crate::animation::cancellation::LocalCancellationRegistration,
-                > = cancellation.borrow_mut().take();
+                let cancellation: Option<crate::threading::CancellationGuard> =
+                    cancellation.borrow_mut().take();
                 if let Some(cancellation) = cancellation {
                     cancellation.dispose();
                 }
@@ -587,8 +585,11 @@ impl Animation {
         // which case there is nothing left to dispose on cancellation.
         *subscriptions.borrow_mut() = Some(applied);
 
-        let registration = register_local(&cancellation_token, move || finish());
-        if !run.is_completed() || !cancellation_token.is_cancellation_requested() {
+        // Runs on this thread: at once when the token is canceled here (or was already), in a
+        // dispatcher job when it is canceled on another thread (the dispatcher is the schedule of
+        // its thread).
+        let registration = cancellation_token.register_local(move || finish());
+        if !run.is_completed() || !cancellation_token.is_cancelled() {
             *cancellation.borrow_mut() = Some(registration);
         }
 

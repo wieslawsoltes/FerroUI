@@ -23,6 +23,10 @@ path = "lib.rs"
 # through it, the controls, which a build script then builds for the host. No crate of the repository
 # enables it: every build compiles against the type models (`TypeSystem::Model`).
 runtime-host = ["dep:ferroui-markup-xaml", "ferroui-markup-xaml-loader/emitter"]
+# The GLSL ES of the runtime shader effects, translated from their WGSL at build time with naga
+# (`shader_effects`): off by default, so that a build script that compiles markup does not build the
+# shader translator; a crate that ships shader effects for WebGL2 enables it.
+shader-effects = ["dep:naga"]
 
 [dependencies]
 serde_json = "1"
@@ -38,6 +42,9 @@ ferroui-markup-xaml-loader = { workspace = true, features = ["compiler"] }
 # The type-system contracts of the compiler (`IXamlType`, `IXamlTypeSystem`), which the build-time type
 # system over the type model implements (docs/porting/xaml.md, 9.5.5). The loader links it already.
 xamlx = { workspace = true }
+# The GLSL ES of the runtime shader effects for WebGL2, translated from their WGSL at build time
+# (`shader_effects`, docs/porting/custom-effects.md, decision 2): the naga of `wgpu`.
+naga = { workspace = true, features = ["wgsl-in", "glsl-out"], optional = true }
 # The type model, the source scanner and the export of a model (docs/porting/xaml.md, 9.5.1 and
 # 9.5.13): the crate the framework crates scan themselves with. Its modules are exported from this
 # crate under the names they had here.

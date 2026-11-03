@@ -8,7 +8,7 @@ use crate::templates::ControlTemplate;
 use crate::test_support::{boxed, TestAssetLoader, TestServiceProvider};
 use crate::xaml_il::runtime::IFerroXamlIlParentStackProvider;
 use crate::{register_types, IXamlTypeResolver, XamlLoadError};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::data::core::ValueType;
@@ -99,13 +99,50 @@ fn points_list_type_converter_rejects_malformed_lists() {
 #[test]
 fn time_span_type_converter_accepts_seconds_and_time_spans() {
     let conv = TimeSpanTypeConverter::new();
-    let value = |text: &str| *convert(&*conv, text).unwrap().unwrap().downcast_ref::<TimeSpan>().unwrap();
-    assert_eq!(value("0.25"), TimeSpan::from_seconds(0.25));
-    assert_eq!(value("2"), TimeSpan::from_seconds(2.0));
-    assert_eq!(value("0:0:1.5"), TimeSpan::from_seconds(1.5));
-    assert_eq!(value("00:01:00"), TimeSpan::from_seconds(60.0));
+    let value = |text: &str| *convert(&*conv, text).unwrap().unwrap().downcast_ref::<SignedDuration>().unwrap();
+    assert_eq!(value("0.25"), SignedDuration::from_seconds(0.25));
+    assert_eq!(value("2"), SignedDuration::from_seconds(2.0));
+    assert_eq!(value("0:0:1.5"), SignedDuration::from_seconds(1.5));
+    assert_eq!(value("00:01:00"), SignedDuration::from_seconds(60.0));
     assert!(convert(&*conv, "abc").is_err());
     assert!(convert(&*conv, "1:xx").is_err());
+}
+
+/// Not from upstream (C5 of #423): a time span converts to the other Rust form of a time
+/// span, `Duration`, unless it is negative (decision O2 of docs/idiomatic-rust-signatures.md).
+#[test]
+fn time_span_type_converter_converts_to_a_duration() {
+    use std::time::Duration;
+
+    register_types();
+    let conv = TimeSpanTypeConverter::new();
+    let duration = ValueType::of::<Duration>();
+    let nullable = ValueType::of::<Option<Duration>>();
+    assert!(conv.can_convert_to(None, duration) && conv.can_convert_to(None, nullable));
+    assert!(conv.can_convert_to(None, ValueType::of::<String>()));
+    assert!(!conv.can_convert_to(None, ValueType::of::<i32>()));
+
+    let to = |value: BoxedValue, destination: ValueType| conv.convert_to(None, None, Some(&value), destination);
+    let value = |converted: Result<Option<BoxedValue>, XamlLoadError>| *converted.unwrap().unwrap().downcast_ref::<Duration>().unwrap();
+    assert_eq!(value(to(boxed(SignedDuration::from_seconds(1.5)), duration)), Duration::from_millis(1500));
+    assert_eq!(value(to(boxed("0:0:2".to_string()), duration)), Duration::from_secs(2));
+    assert_eq!(value(to(boxed("0.25".to_string()), duration)), Duration::from_millis(250));
+    assert_eq!(value(to(boxed(Duration::from_secs(3)), duration)), Duration::from_secs(3));
+    let some = to(boxed(SignedDuration::from_seconds(4.0)), nullable).unwrap().unwrap();
+    assert_eq!(some.downcast_ref::<Option<Duration>>(), Some(&Some(Duration::from_secs(4))));
+    let none = conv.convert_to(None, None, None, nullable).unwrap().unwrap();
+    assert_eq!(none.downcast_ref::<Option<Duration>>(), Some(&None));
+
+    // A negative time span is not a duration: an error, never zero.
+    let error = to(boxed(SignedDuration::from_seconds(-1.0)), duration).unwrap_err();
+    assert_eq!(error.message(), "The TimeSpan -00:00:01 is negative and cannot be converted to a Duration.");
+    assert!(to(boxed("-0:0:1".to_string()), nullable).is_err());
+    assert!(to(boxed("abc".to_string()), duration).is_err());
+    assert!(to(boxed(1i32), duration).is_err());
+
+    // To text, as every converter.
+    let text = to(boxed(SignedDuration::from_seconds(1.0)), ValueType::of::<String>()).unwrap().unwrap();
+    assert_eq!(text.downcast_ref::<String>().map(String::as_str), Some("00:00:01"));
 }
 
 // --- FerroUriTypeConverter ------------------------------------------------
@@ -126,6 +163,68 @@ fn uri_type_converter_keeps_rooted_paths_relative() {
     assert_eq!(conv.convert_from(None, None, None), Ok(None));
     // A scheme without a rest is not a URI.
     assert_eq!(convert(&*conv, "http:").unwrap_err().message(), "Unable to parse URI: http:");
+}
+
+/// Not from upstream (C5 of #423): a URI converts to the other Rust forms of a URI, `UriRef`
+/// and `url::Url`; a relative reference is not a `Url` (section 3.5 of
+/// docs/idiomatic-rust-signatures.md).
+#[test]
+fn uri_type_converter_converts_to_a_uri_ref_and_a_url() {
+    use ferroui_base::utilities::{UriKind, UriRef};
+    use url::Url;
+
+    register_types();
+    let conv = FerroUriTypeConverter::new();
+    let (reference, url) = (ValueType::of::<UriRef>(), ValueType::of::<Url>());
+    let (nullable_reference, nullable_url) = (ValueType::of::<Option<UriRef>>(), ValueType::of::<Option<Url>>());
+    for destination in [reference, url, nullable_reference, nullable_url, ValueType::of::<String>()] {
+        assert!(conv.can_convert_to(None, destination), "{destination}");
+    }
+    assert!(!conv.can_convert_to(None, ValueType::of::<i32>()));
+
+    let to = |value: BoxedValue, destination: ValueType| conv.convert_to(None, None, Some(&value), destination);
+    let as_reference = |converted: Result<Option<BoxedValue>, XamlLoadError>| {
+        converted.unwrap().unwrap().downcast_ref::<UriRef>().cloned().unwrap()
+    };
+    let as_url = |converted: Result<Option<BoxedValue>, XamlLoadError>| {
+        converted.unwrap().unwrap().downcast_ref::<Url>().map(|url| url.as_str().to_string()).unwrap()
+    };
+
+    // Text and a `Uri` convert to the reference of the same text, with the rule of markup.
+    assert_eq!(as_reference(to(boxed("/Assets/icon.png".to_string()), reference)), UriRef::Relative("/Assets/icon.png".into()));
+    assert_eq!(as_reference(to(boxed("Values.xaml".to_string()), reference)), UriRef::Relative("Values.xaml".into()));
+    let resource = UriRef::parse("ferres://app/Assets/icon.png").unwrap();
+    assert_eq!(as_reference(to(boxed("ferres://app/Assets/icon.png".to_string()), reference)), resource);
+    let uri = Uri::new("ferres://app/Assets/icon.png", UriKind::Absolute).unwrap();
+    assert_eq!(as_reference(to(boxed(uri.clone()), reference)), resource);
+    assert_eq!(as_reference(to(boxed(resource.clone()), reference)), resource);
+
+    // An absolute one converts to its URL; a relative one is not a URL.
+    assert_eq!(as_url(to(boxed("ferres://app/Assets/icon.png".to_string()), url)), "ferres://app/Assets/icon.png");
+    assert_eq!(as_url(to(boxed(uri), url)), "ferres://app/Assets/icon.png");
+    assert_eq!(as_url(to(boxed(Url::parse("fonts:SystemFonts").unwrap()), url)), "fonts:SystemFonts");
+    let error = to(boxed("/Assets/icon.png".to_string()), url).unwrap_err();
+    assert_eq!(error.message(), "The URI /Assets/icon.png is relative and cannot be converted to a Url.");
+    assert!(to(boxed(UriRef::Relative("Values.xaml".into())), nullable_url).is_err());
+    let error = to(boxed("http://host:99999/".to_string()), reference).unwrap_err();
+    assert_eq!(error.message(), "The URI http://host:99999/ is not a valid Url: invalid port number.");
+    assert!(to(boxed("http:".to_string()), reference).is_err());
+    assert!(to(boxed(1i32), url).is_err());
+
+    // The nullable forms, and null.
+    let some = to(boxed("Values.xaml".to_string()), nullable_reference).unwrap().unwrap();
+    assert_eq!(some.downcast_ref::<Option<UriRef>>(), Some(&Some(UriRef::Relative("Values.xaml".into()))));
+    let some = to(boxed("fonts:SystemFonts".to_string()), nullable_url).unwrap().unwrap();
+    assert_eq!(some.downcast_ref::<Option<Url>>(), Some(&Some(Url::parse("fonts:SystemFonts").unwrap())));
+    let none = conv.convert_to(None, None, None, nullable_url).unwrap().unwrap();
+    assert_eq!(none.downcast_ref::<Option<Url>>(), Some(&None));
+    let none = conv.convert_to(None, None, None, nullable_reference).unwrap().unwrap();
+    assert_eq!(none.downcast_ref::<Option<UriRef>>(), Some(&None));
+    assert!(conv.convert_to(None, None, None, reference).is_err());
+
+    // To text, as every converter.
+    let text = to(boxed(resource), ValueType::of::<String>()).unwrap().unwrap();
+    assert_eq!(text.downcast_ref::<String>().map(String::as_str), Some("ferres://app/Assets/icon.png"));
 }
 
 // --- FontFamilyTypeConverter ----------------------------------------------

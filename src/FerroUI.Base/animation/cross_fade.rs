@@ -1,10 +1,11 @@
 use crate::animation::easings::Easing;
 use crate::animation::{
-    Animation, Cue, FillMode, IPageTransition, IProgressPageTransition, KeyFrame, PageTransitionItem, TimeSpan,
+    Animation, Cue, FillMode, IPageTransition, IProgressPageTransition, KeyFrame, PageTransitionItem, SignedDuration,
 };
 use crate::animation::i_page_transition::{start_async, when_all};
 use crate::styling::Setter;
-use crate::threading::{CancellationToken, DispatcherTask};
+use crate::threading::CancellationToken;
+use ferroui_system::task::JoinHandle;
 use crate::{Ref, Visual};
 
 const SIDE_PEEK_OPACITY: f64 = 0.72;
@@ -28,11 +29,11 @@ impl Default for CrossFade {
 impl CrossFade {
     /// Creates a cross-fade with a zero duration.
     pub fn new() -> Self {
-        Self::with_duration(TimeSpan::ZERO)
+        Self::with_duration(SignedDuration::ZERO)
     }
 
     /// Creates a cross-fade with the given duration.
-    pub fn with_duration(duration: TimeSpan) -> Self {
+    pub fn with_duration(duration: SignedDuration) -> Self {
         let opacity_animation = |from: f64, to: f64| {
             let animation = Animation::new();
             animation.set_fill_mode(FillMode::Forward);
@@ -50,11 +51,11 @@ impl CrossFade {
     }
 
     /// The duration of the animation.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.fade_out_animation.duration()
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.fade_out_animation.set_duration(value);
         self.fade_in_animation.set_duration(value);
     }
@@ -94,14 +95,14 @@ impl CrossFade {
         from: Option<&Ref<Visual>>,
         to: Option<&Ref<Visual>>,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let fade_out_animation = self.fade_out_animation.clone();
         let fade_in_animation = self.fade_in_animation.clone();
         let from = from.cloned();
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -119,7 +120,7 @@ impl CrossFade {
             when_all(tasks).await;
 
             if let Some(from) = &from {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
             }
@@ -176,7 +177,7 @@ impl IPageTransition for CrossFade {
         to: Option<&Ref<Visual>>,
         _forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         self.start_cross_fade(from, to, cancellation_token)
     }
 

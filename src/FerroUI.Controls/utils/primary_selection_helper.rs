@@ -2,7 +2,8 @@ use super::clipboard_helper::{CatchUnwind, ClipboardHelper};
 use crate::{Control, TopLevel};
 use ferroui_base::input::platform::{ClipboardExtensions, ClipboardType};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::threading::{Dispatcher, DispatcherTask};
+use ferroui_base::threading::Dispatcher;
+use ferroui_system::task::JoinHandle;
 use std::any::Any;
 
 pub(crate) struct PrimarySelectionHelper;
@@ -19,10 +20,10 @@ impl PrimarySelectionHelper {
     pub(crate) fn publish_text_async(
         source: &Control,
         text_factory: impl FnOnce() -> Option<String> + 'static,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let source = source.to_ref();
 
-        Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        Dispatcher::ui_thread().start_local(async move {
             let Some(primary_selection) = TopLevel::get_top_level(Some(&source))
                 .and_then(|top_level| top_level.try_get_clipboard(ClipboardType::PrimarySelection))
             else {

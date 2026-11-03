@@ -1,23 +1,18 @@
 use super::*;
 use crate::test_environment::Environment;
 use ferroui_reactive::concurrency::{HistoricalScheduler, IScheduler, ScheduledAction};
-use ferroui_system::threading::{set_synchronization_context, SynchronizationContext};
+use ferroui_system::task::{set_current_schedule, Schedule};
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
+/// A current schedule (the synchronization context of the reference) that must not be used.
 struct UnusedContext;
-impl SynchronizationContext for UnusedContext {
-    fn post(&self, _: Box<dyn FnOnce() + Send>) {
+impl Schedule for UnusedContext {
+    fn schedule(&self, _: Box<dyn FnOnce() + Send>) {
         panic!("must use Rx scheduler")
     }
-    fn send(&self, _: Box<dyn FnOnce() + Send>) {
-        panic!("must use Rx scheduler")
-    }
-    fn post_local(&self, _: Box<dyn FnOnce()>) {
-        panic!("must use Rx scheduler")
-    }
-    fn send_local(&self, _: Box<dyn FnOnce()>) {
+    fn schedule_local(&self, _: Box<dyn FnOnce()>) {
         panic!("must use Rx scheduler")
     }
 }
@@ -27,7 +22,7 @@ fn invokes_the_current_scheduler_per_call_and_ignores_same_synchronization_conte
     let first = HistoricalScheduler::historical();
     let second = HistoricalScheduler::historical();
     RxSchedulers::set_main_thread_scheduler(first.clone());
-    set_synchronization_context(Some(Arc::new(UnusedContext)));
+    drop(set_current_schedule(Some(Arc::new(UnusedContext))));
     let dispatcher: Rc<dyn IDockDispatcher> = MainThreadDispatcher::new();
     let calls = Rc::new(Cell::new(0));
     let seen = calls.clone();

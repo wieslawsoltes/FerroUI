@@ -276,13 +276,13 @@ impl IControlledDispatcherImpl for X11PlatformThreading {
             return;
         };
         let queue = platform.event_grouper_dispatch_queue().clone();
-        while !cancellation_token.is_cancellation_requested() {
+        while !cancellation_token.is_cancelled() {
             let mut now = self.elapsed_milliseconds();
             if self.next_timer.get().is_some_and(|next_timer| now > next_timer) {
                 self.timer.raise();
             }
 
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -301,7 +301,7 @@ impl IControlledDispatcherImpl for X11PlatformThreading {
                 self.signal.lock.lock().unwrap_or_else(PoisonError::into_inner).wakeup_requested = false;
             }
 
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
             self.check_signaled();

@@ -8,13 +8,13 @@ use ferroui_controls::{
     Panel, PanelImpl, ScrollViewer,
 };
 use ferroui_base::animation::easings::{Easing, SplineEasing};
-use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::CancellationTokenSource;
+use ferroui_base::threading::CancellationToken;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroLocator,
@@ -122,7 +122,7 @@ impl Drop for BringIntoViewPins {
 struct ScrollAnimation {
     id: u64,
     _proxy: Ref<RepeaterAnimationProxy>,
-    cancellation: CancellationTokenSource,
+    cancellation: CancellationToken,
 }
 
 /// Compatibility host for a repeater inside a native ScrollViewer. Its
@@ -734,8 +734,8 @@ impl ItemsRepeaterScrollHost {
         let target = bring.change_view_offset;
         let id = bring.id;
         let proxy = RepeaterAnimationProxy::new();
-        let cancellation = CancellationTokenSource::new();
-        let token = cancellation.token();
+        let cancellation = CancellationToken::new();
+        let token = cancellation.clone();
         let weak = self.to_ref().downgrade();
         let weak_viewer = viewer.downgrade();
         proxy.set_changed(Some(Rc::new(move |progress| {
@@ -770,7 +770,7 @@ impl ItemsRepeaterScrollHost {
         let animation = Animation::new();
         // ChangeView's duration is platform-owned in WinUI. The native host
         // supplies a 250 ms scrolling transition on the framework clock.
-        animation.set_duration(TimeSpan::from_milliseconds(250.0));
+        animation.set_duration(SignedDuration::from_milliseconds(250.0));
         animation.set_easing(Easing::new(SplineEasing::with_points(0.25, 0.1, 0.25, 1.0)));
         animation.set_fill_mode(FillMode::Both);
         animation.children().add(KeyFrame::with_cue(

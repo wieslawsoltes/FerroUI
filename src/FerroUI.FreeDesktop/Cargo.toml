@@ -17,6 +17,8 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+# The one-shot channel of the D-Bus call queue.
+ferroui-system.workspace = true
 bitflags.workspace = true
 
 # D-Bus (docs/porting/x11-platform.md, section 3). The services of a FreeDesktop session exist on

@@ -12,7 +12,7 @@ use crate::{
 use ferroui_base::input::platform::{ClipboardError, ClipboardExtensions, ClipboardType, IClipboard};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use std::any::Any;
-use ferroui_base::animation::TimeSpan;
+use std::time::Duration;
 use ferroui_base::data::{BindingMode, BindingPriority};
 use ferroui_base::input::{
     ContextRequestedEventArgs, FocusChangedEventArgs, HoldingRoutedEventArgs, HoldingState, InputElement,
@@ -34,7 +34,8 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::IPlatformSettings;
 use ferroui_base::reactive::{CompositeDisposable, IDisposable, IObserver, Observable, ObservableExt, Subscription};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_system::task::{JoinError, JoinHandle};
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AttachedProperty, BoxedValue,
@@ -84,6 +85,8 @@ pub struct TextBox {
     presenter: RefCell<Option<Ref<TextPresenter>>>,
     scroll_viewer: RefCell<Option<Ref<ScrollViewer>>>,
     im_client: Rc<TextBoxTextInputMethodClient>,
+    password_input_privacy: RefCell<Option<Subscription>>,
+    updating_password_privacy: Cell<bool>,
     undo_redo_helper: UndoRedoHelper<UndoRedoState>,
     /// The handle through which the undo/redo helper reaches this text box.
     undo_redo_host: RefCell<Option<Rc<dyn IUndoRedoHost<UndoRedoState>>>>,
@@ -139,6 +142,7 @@ impl FerroObjectImpl for TextBox {
     fn constructed(this: &Self) {
         // The static constructor runs before the instance constructors.
         Self::parent_constructed(this);
+        this.update_password_input_privacy();
 
         let object: &FerroObject = this;
         let accepts_return = FerroObjectExtensions::get_observable(object, Self::accepts_return_property());
@@ -236,13 +240,19 @@ impl FerroObjectImpl for TextBox {
             || property == Self::password_char_property().as_property()
             || property == Self::reveal_password_property().as_property()
         {
+            if property == Self::password_char_property().as_property() {
+                this.update_password_input_privacy();
+                ferroui_base::input::text_input::TextInputMethodClient::request_reset(&*this.im_client);
+            }
             this.update_command_states();
         } else if property == Self::caret_index_property().as_property() {
             this.on_caret_index_changed(change);
         } else if property == Self::selection_start_property().as_property() {
             this.on_selection_start_changed(change);
+            this.im_client.on_selection_changed();
         } else if property == Self::selection_end_property().as_property() {
             this.on_selection_end_changed(change);
+            this.im_client.on_selection_changed();
         } else if property == Self::max_lines_property().as_property() {
             this.invalidate_measure();
         } else if property == Self::min_lines_property().as_property() {
@@ -1271,8 +1281,8 @@ ferroui_base::ferro_properties! { impl TextBox, also [
 
     ferro_property!(
         /// Defines the `CaretBlinkInterval` property.
-        pub fn caret_blink_interval_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<TextBox, _>("CaretBlinkInterval", TimeSpan::from_milliseconds(500.0))
+        pub fn caret_blink_interval_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<TextBox, _>("CaretBlinkInterval", Duration::from_millis(500))
         }
     );
 
@@ -1545,6 +1555,29 @@ impl TextBox {
         }).detach();
     }
 
+    // A visual mask must also make the native input context private. Preserve
+    // the caller's underlying value source while the mask temporarily owns it.
+    fn update_password_input_privacy(&self) {
+        if self.updating_password_privacy.replace(true) { return; }
+        struct Reset<'a>(&'a Cell<bool>);
+        impl Drop for Reset<'_> { fn drop(&mut self) { self.0.set(false); } }
+        let _reset = Reset(&self.updating_password_privacy);
+        loop {
+            let masked = self.password_char() != '\0';
+            if masked == self.password_input_privacy.borrow().is_some() { break; }
+            if masked {
+                let value = self.set_value_with_priority(
+                    ferroui_base::input::text_input::TextInputOptions::is_sensitive_property(),
+                    true, BindingPriority::Animation,
+                ).expect("password input privacy requires an owned priority value");
+                *self.password_input_privacy.borrow_mut() = Some(Subscription::new(value));
+            } else {
+                // Taken first: dropping the guard notifies, and a handler may change the mask.
+                drop(self.password_input_privacy.take());
+            }
+        }
+    }
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self {
@@ -1553,6 +1586,8 @@ impl TextBox {
             presenter: RefCell::new(None),
             scroll_viewer: RefCell::new(None),
             im_client: TextBoxTextInputMethodClient::new(),
+            password_input_privacy: RefCell::new(None),
+            updating_password_privacy: Cell::new(false),
             undo_redo_helper: UndoRedoHelper::unattached(),
             undo_redo_host: RefCell::new(None),
             is_undoing_redoing: Cell::new(false),
@@ -1700,11 +1735,11 @@ impl TextBox {
     }
 
     /// The caret blink rate.
-    pub fn caret_blink_interval(&self) -> TimeSpan {
+    pub fn caret_blink_interval(&self) -> Duration {
         self.get_value(Self::caret_blink_interval_property())
     }
 
-    pub fn set_caret_blink_interval(&self, value: TimeSpan) {
+    pub fn set_caret_blink_interval(&self, value: Duration) {
         self.set_value(Self::caret_blink_interval_property(), value)
     }
 
@@ -1715,6 +1750,31 @@ impl TextBox {
 
     pub fn set_selection_start(&self, value: i32) {
         self.set_value(Self::selection_start_property(), value)
+    }
+
+    /// Observes completed selection operations, independently of focus, read-only
+    /// state or presenter creation. Individual endpoint writes remain individual
+    /// operations.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the text box.
+    pub fn selection_changed(&self, handler: impl Fn() + 'static) -> Subscription {
+        use ferroui_base::input::text_input::TextInputMethodClient;
+        Subscription::new(self.im_client.selection_changed(Rc::new(handler)))
+    }
+
+    /// Sets the UTF-16 range and caret as one native selection operation. Property
+    /// notifications retain their usual order; selection observers see the final
+    /// coerced range when the operation completes.
+    pub fn set_selection_and_caret(
+        &self,
+        selection: ferroui_base::input::text_input::TextSelection,
+        caret_index: i32,
+    ) {
+        let _change = self.im_client.begin_change();
+        self.set_caret_index(caret_index);
+        self.set_selection_start(selection.start);
+        self.set_selection_end(selection.end);
     }
 
     fn on_selection_start_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
@@ -2395,8 +2455,10 @@ impl TextBox {
         ClipboardHelper::start(async move {
             match pasted.await {
                 Ok(result) => result,
+                // A failure of the paste is the one the clipboard operation does not handle.
+                Err(JoinError::Panicked(payload)) => std::panic::resume_unwind(payload),
                 // A paste that was dropped with the dispatcher has nothing left to do.
-                Err(_) => Ok(()),
+                Err(JoinError::Canceled) => Ok(()),
             }
         });
     }
@@ -2407,10 +2469,10 @@ impl TextBox {
     /// A failure platform clipboards are known for is logged and pastes
     /// nothing; any other failure is the result of the task, for whoever
     /// awaits it.
-    fn paste_core_async(&self, clipboard: Option<Rc<dyn IClipboard>>) -> DispatcherTask<Result<(), ClipboardError>> {
+    fn paste_core_async(&self, clipboard: Option<Rc<dyn IClipboard>>) -> JoinHandle<Result<(), ClipboardError>> {
         let this = self.to_ref();
 
-        Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        Dispatcher::ui_thread().start_local(async move {
             let event_args =
                 PastingFromClipboardEventArgs::new(Self::pasting_from_clipboard_event(), clipboard.clone());
             this.raise_event(&event_args);

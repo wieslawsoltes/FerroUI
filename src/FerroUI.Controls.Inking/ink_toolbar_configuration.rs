@@ -12,7 +12,7 @@ use ferroui_controls::{
     Slider, SliderImpl, StackPanel, StackPanelImpl, TextBlock, WrapPanel,
 };
 use ferroui_base::animation::easings::CubicEaseOut;
-use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, SignedDuration};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::{
@@ -391,8 +391,8 @@ impl InkToolbarPenConfigurationControl {
                 subscriptions.add(overlay);
             }
             let animation = Animation::new();
-            animation.set_duration(TimeSpan::from_milliseconds(200.0));
-            animation.set_delay(TimeSpan::from_milliseconds(index as f64 * 30.0));
+            animation.set_duration(SignedDuration::from_milliseconds(200.0));
+            animation.set_delay(SignedDuration::from_milliseconds(index as f64 * 30.0));
             animation.set_fill_mode(FillMode::Backward);
             animation.set_easing(CubicEaseOut::new());
             animation.children().add(KeyFrame::with_cue(

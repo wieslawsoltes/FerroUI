@@ -1,6 +1,6 @@
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::ServerJobTask;
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use std::rc::Rc;
 
@@ -30,7 +30,7 @@ pub trait ICompositionGlTexture {
     fn begin_draw(&self) -> Rc<dyn ICompositionGlTextureLease>;
 
     /// Releases the texture (`DisposeAsync`), once the compositor has stopped using it.
-    fn dispose_async(&self) -> DispatcherTask<()>;
+    fn dispose_async(&self) -> JoinHandle<()>;
 }
 
 /// Represents a drawing operation in progress for an [`ICompositionGlTexture`]. Disposing

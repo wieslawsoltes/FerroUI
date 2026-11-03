@@ -2,12 +2,11 @@
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use crate::presentation::IDeferredContentPresentationTarget;
 use crate::{DeferredContentPresentationBudgetMode, DeferredContentPresentationTimeline};
-use ferroui_base::animation::TimeSpan;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
-use std::time::{Instant, SystemTime};
+use std::time::{Duration, Instant, SystemTime};
 struct PendingEntry {
     target: Rc<dyn IDeferredContentPresentationTarget>,
     due_at: Cell<SystemTime>,
@@ -57,15 +56,12 @@ impl TimelineQueue {
     pub(crate) fn enqueue(
         &self,
         target: Rc<dyn IDeferredContentPresentationTarget>,
-        delay: TimeSpan,
+        delay: Duration,
         order: i32,
     ) {
         Dispatcher::ui_thread().verify_access();
         let timeline = self.timeline();
-        let due_at = SystemTime::now()
-            + normalize(timeline.initial_delay() + delay)
-                .to_duration()
-                .expect("normalized delay");
+        let due_at = SystemTime::now() + timeline.initial_delay().saturating_add(delay);
         let sequence = self.next_sequence.get().wrapping_add(1);
         self.next_sequence.set(sequence);
         let key = key(&target);
@@ -173,9 +169,7 @@ impl TimelineQueue {
             }
             let should_continue = match stopwatch {
                 None => completed_count < batch_size,
-                Some(start) => {
-                    TimeSpan::from(start.elapsed()) < timeline.max_realization_time_per_pass()
-                }
+                Some(start) => start.elapsed() < timeline.max_realization_time_per_pass(),
             };
             if !should_continue {
                 break;
@@ -208,9 +202,8 @@ impl TimelineQueue {
         }
         self.schedule_flush(self.earliest_due_delay(now));
     }
-    fn schedule_flush(&self, delay: TimeSpan) {
-        let delay = normalize(delay);
-        let due_at = SystemTime::now() + delay.to_duration().expect("normalized delay");
+    fn schedule_flush(&self, delay: Duration) {
+        let due_at = SystemTime::now() + delay;
         if self.is_scheduled.get()
             && self
                 .scheduled_due_at
@@ -224,7 +217,7 @@ impl TimelineQueue {
         let version = self.schedule_version.get().wrapping_add(1);
         self.schedule_version.set(version);
         let timeline = self.timeline();
-        if delay == TimeSpan::ZERO {
+        if delay.is_zero() {
             Dispatcher::ui_thread().post_local(
                 move || timeline.queue().flush_scheduled_batch(version),
                 DispatcherPriority::BACKGROUND,
@@ -239,7 +232,7 @@ impl TimelineQueue {
                         DispatcherPriority::BACKGROUND,
                     );
                 },
-                delay.to_duration().expect("positive delay"),
+                delay,
                 DispatcherPriority::BACKGROUND,
             )
             .detach();
@@ -263,7 +256,7 @@ impl TimelineQueue {
             target.set_enqueued_timeline(None);
         }
     }
-    fn earliest_due_delay(&self, now: SystemTime) -> TimeSpan {
+    fn earliest_due_delay(&self, now: SystemTime) -> Duration {
         let earliest = self
             .pending
             .borrow()
@@ -271,12 +264,9 @@ impl TimelineQueue {
             .map(|entry| entry.due_at.get())
             .min()
             .expect("nonempty pending queue");
-        TimeSpan::from(earliest.duration_since(now).unwrap_or_default())
+        earliest.duration_since(now).unwrap_or_default()
     }
 }
 fn key(target: &Rc<dyn IDeferredContentPresentationTarget>) -> usize {
     Rc::as_ptr(target) as *const () as usize
-}
-fn normalize(delay: TimeSpan) -> TimeSpan {
-    delay.max(TimeSpan::ZERO)
 }

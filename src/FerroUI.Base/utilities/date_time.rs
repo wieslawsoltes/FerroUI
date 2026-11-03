@@ -20,7 +20,7 @@ use super::date_time_format::{self, Parsed};
 use super::{
     CultureInfo, DateTimeFormatProvider, DateTimeKind, DateTimeStyles, DayOfWeek, FormatError, TimeZoneInfo,
 };
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use crate::platform::{IRuntimePlatform, StandardRuntimePlatform};
 use crate::{FerroLocator, LocatorExtensions};
 use std::cell::RefCell;
@@ -32,15 +32,38 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 
-/// Gives the current UTC time.
-pub type UtcNowProvider = Rc<dyn Fn() -> DateTime>;
+/// Gives the current instant.
+///
+/// Since 0.5 the provider returns a [`SystemTime`], where it returned a
+/// `DateTime`: a provider that pins a date returns
+/// `SystemTime::try_from(date_time)` of it.
+pub type UtcNowProvider = Rc<dyn Fn() -> SystemTime>;
 
 crate::ferro_thread_local! {
     // CLOCK-SEAM: tests pin "now" here. The wall clock itself is `IRuntimePlatform::get_utc_now`.
     static UTC_NOW_PROVIDER: RefCell<Option<UtcNowProvider>> = const { RefCell::new(None) };
 }
 
-const TICKS_PER_DAY: i64 = TimeSpan::TICKS_PER_DAY;
+/// The current instant: the time of the pinned source of this thread
+/// ([`DateTime::set_utc_now_provider`]) when there is one, else the wall
+/// clock of the registered [`IRuntimePlatform`], else the one of the
+/// standard runtime platform.
+///
+/// Code that can run in the browser reads "now" here rather than with
+/// `SystemTime::now()`, which `wasm32-unknown-unknown` does not have: the
+/// runtime platform of the browser reads `Date.now()`.
+pub fn system_time_now() -> SystemTime {
+    let provider = UTC_NOW_PROVIDER.with(|current| current.borrow().clone());
+    if let Some(provider) = provider {
+        return provider();
+    }
+    match FerroLocator::current().get_service::<dyn IRuntimePlatform>() {
+        Some(platform) => platform.get_utc_now(),
+        None => StandardRuntimePlatform::new().get_utc_now(),
+    }
+}
+
+const TICKS_PER_DAY: i64 = SignedDuration::TICKS_PER_DAY;
 /// The Julian day number of 0001-01-01 (proleptic Gregorian).
 const JULIAN_DAY_OF_YEAR_ONE: i32 = 1_721_426;
 /// Days from 0001-01-01 to 10000-01-01.
@@ -99,7 +122,7 @@ impl DateTime {
     ) -> DateTime {
         assert!((0..1000).contains(&millisecond), "Valid values are between 0 and 999, inclusive. (Parameter 'millisecond')");
         let value = Self::new_with_time(year, month, day, hour, minute, second);
-        DateTime { ticks: value.ticks + millisecond as i64 * TimeSpan::TICKS_PER_MILLISECOND, kind: value.kind }
+        DateTime { ticks: value.ticks + millisecond as i64 * SignedDuration::TICKS_PER_MILLISECOND, kind: value.kind }
     }
 
     /// The date `year`-`month`-`day` at midnight; `None` when the arguments
@@ -120,9 +143,9 @@ impl DateTime {
             return None;
         }
         let date = Self::try_new(year, month, day)?;
-        let time = hour as i64 * TimeSpan::TICKS_PER_HOUR
-            + minute as i64 * TimeSpan::TICKS_PER_MINUTE
-            + second as i64 * TimeSpan::TICKS_PER_SECOND;
+        let time = hour as i64 * SignedDuration::TICKS_PER_HOUR
+            + minute as i64 * SignedDuration::TICKS_PER_MINUTE
+            + second as i64 * SignedDuration::TICKS_PER_SECOND;
         Some(DateTime { ticks: date.ticks + time, kind: DateTimeKind::Unspecified })
     }
 
@@ -161,28 +184,28 @@ impl DateTime {
 
     // --- the clock ---
 
-    /// Installs (or with `None` removes) the source of the current UTC time
+    /// Installs (or with `None` removes) the source of the current instant
     /// of the current thread and returns the previous one. Tests use it to
-    /// pin [`now`](Self::now), [`utc_now`](Self::utc_now) and [`today`](Self::today).
+    /// pin [`system_time_now`], [`now`](Self::now), [`utc_now`](Self::utc_now)
+    /// and [`today`](Self::today).
     pub fn set_utc_now_provider(provider: Option<UtcNowProvider>) -> Option<UtcNowProvider> {
         UTC_NOW_PROVIDER.with(|current| current.replace(provider))
     }
 
     /// The current date and time in UTC (kind [`DateTimeKind::Utc`]): the
-    /// time of the pinned source of this thread
-    /// ([`set_utc_now_provider`](Self::set_utc_now_provider)) when there is
-    /// one, else the wall clock of the registered
-    /// [`IRuntimePlatform`], else the one of the standard runtime platform.
+    /// instant of [`system_time_now`] as a date. An instant outside of the
+    /// years 1 to 9999 is [`MIN_VALUE`](Self::MIN_VALUE) or
+    /// [`MAX_VALUE`](Self::MAX_VALUE).
     pub fn utc_now() -> DateTime {
-        let provider = UTC_NOW_PROVIDER.with(|current| current.borrow().clone());
-        if let Some(provider) = provider {
-            return provider().to_universal_time();
-        }
-        let now = match FerroLocator::current().get_service::<dyn IRuntimePlatform>() {
-            Some(platform) => platform.get_utc_now(),
-            None => StandardRuntimePlatform::new().get_utc_now(),
-        };
-        now.specify_kind(DateTimeKind::Utc)
+        let now = system_time_now();
+        let date = DateTime::try_from(now).unwrap_or_else(|_| {
+            if now < SystemTime::UNIX_EPOCH {
+                DateTime::MIN_VALUE
+            } else {
+                DateTime::MAX_VALUE
+            }
+        });
+        date.specify_kind(DateTimeKind::Utc)
     }
 
     /// The current date and time in local time (kind [`DateTimeKind::Local`]).
@@ -217,8 +240,8 @@ impl DateTime {
 
     /// The time elapsed since midnight.
     #[inline]
-    pub const fn time_of_day(self) -> TimeSpan {
-        TimeSpan::from_ticks(self.ticks % TICKS_PER_DAY)
+    pub const fn time_of_day(self) -> SignedDuration {
+        SignedDuration::from_ticks(self.ticks % TICKS_PER_DAY)
     }
 
     /// The calendar date of the value.
@@ -261,25 +284,25 @@ impl DateTime {
     /// The hour, 0..=23.
     #[inline]
     pub const fn hour(self) -> i32 {
-        (self.ticks / TimeSpan::TICKS_PER_HOUR % 24) as i32
+        (self.ticks / SignedDuration::TICKS_PER_HOUR % 24) as i32
     }
 
     /// The minute, 0..=59.
     #[inline]
     pub const fn minute(self) -> i32 {
-        (self.ticks / TimeSpan::TICKS_PER_MINUTE % 60) as i32
+        (self.ticks / SignedDuration::TICKS_PER_MINUTE % 60) as i32
     }
 
     /// The second, 0..=59.
     #[inline]
     pub const fn second(self) -> i32 {
-        (self.ticks / TimeSpan::TICKS_PER_SECOND % 60) as i32
+        (self.ticks / SignedDuration::TICKS_PER_SECOND % 60) as i32
     }
 
     /// The millisecond, 0..=999.
     #[inline]
     pub const fn millisecond(self) -> i32 {
-        (self.ticks / TimeSpan::TICKS_PER_MILLISECOND % 1000) as i32
+        (self.ticks / SignedDuration::TICKS_PER_MILLISECOND % 1000) as i32
     }
 
     // --- calendar facts ---
@@ -318,25 +341,25 @@ impl DateTime {
 
     /// The value `value` later. Panics when out of range.
     #[track_caller]
-    pub fn add(self, value: TimeSpan) -> DateTime {
+    pub fn add(self, value: SignedDuration) -> DateTime {
         self.add_ticks(value.ticks())
     }
 
     /// The value `value` later; `None` when out of range.
-    pub fn try_add(self, value: TimeSpan) -> Option<DateTime> {
+    pub fn try_add(self, value: SignedDuration) -> Option<DateTime> {
         self.try_add_ticks(value.ticks())
     }
 
     /// The value `value` earlier. Panics when out of range.
     #[track_caller]
-    pub fn subtract(self, value: TimeSpan) -> DateTime {
+    pub fn subtract(self, value: SignedDuration) -> DateTime {
         value.ticks().checked_neg().and_then(|ticks| self.try_add_ticks(ticks)).expect(OUT_OF_RANGE)
     }
 
     /// The interval from `other` to this value.
     #[inline]
-    pub fn subtract_date_time(self, other: DateTime) -> TimeSpan {
-        TimeSpan::from_ticks(self.ticks - other.ticks)
+    pub fn subtract_date_time(self, other: DateTime) -> SignedDuration {
+        SignedDuration::from_ticks(self.ticks - other.ticks)
     }
 
     fn try_add_units(self, value: f64, ticks_per_unit: i64) -> Option<DateTime> {
@@ -670,40 +693,40 @@ impl Hash for DateTime {
     }
 }
 
-impl Add<TimeSpan> for DateTime {
+impl Add<SignedDuration> for DateTime {
     type Output = DateTime;
     #[track_caller]
-    fn add(self, rhs: TimeSpan) -> DateTime {
+    fn add(self, rhs: SignedDuration) -> DateTime {
         DateTime::add(self, rhs)
     }
 }
 
-impl Sub<TimeSpan> for DateTime {
+impl Sub<SignedDuration> for DateTime {
     type Output = DateTime;
     #[track_caller]
-    fn sub(self, rhs: TimeSpan) -> DateTime {
+    fn sub(self, rhs: SignedDuration) -> DateTime {
         self.subtract(rhs)
     }
 }
 
 impl Sub<DateTime> for DateTime {
-    type Output = TimeSpan;
+    type Output = SignedDuration;
     #[inline]
-    fn sub(self, rhs: DateTime) -> TimeSpan {
+    fn sub(self, rhs: DateTime) -> SignedDuration {
         self.subtract_date_time(rhs)
     }
 }
 
-impl AddAssign<TimeSpan> for DateTime {
+impl AddAssign<SignedDuration> for DateTime {
     #[track_caller]
-    fn add_assign(&mut self, rhs: TimeSpan) {
+    fn add_assign(&mut self, rhs: SignedDuration) {
         *self = *self + rhs;
     }
 }
 
-impl SubAssign<TimeSpan> for DateTime {
+impl SubAssign<SignedDuration> for DateTime {
     #[track_caller]
-    fn sub_assign(&mut self, rhs: TimeSpan) {
+    fn sub_assign(&mut self, rhs: SignedDuration) {
         *self = *self - rhs;
     }
 }
@@ -724,7 +747,7 @@ impl fmt::Debug for DateTime {
             self.hour(),
             self.minute(),
             self.second(),
-            self.ticks % TimeSpan::TICKS_PER_SECOND,
+            self.ticks % SignedDuration::TICKS_PER_SECOND,
             self.kind
         )
     }
@@ -793,7 +816,7 @@ impl TryFrom<DateTime> for SystemTime {
 pub(super) fn system_time_of_utc_ticks(ticks: i64) -> Result<SystemTime, SystemTimeRangeError> {
     let since_epoch = ticks as i128 - UNIX_EPOCH_TICKS as i128;
     let ticks = since_epoch.unsigned_abs();
-    let ticks_per_second = TimeSpan::TICKS_PER_SECOND as u128;
+    let ticks_per_second = SignedDuration::TICKS_PER_SECOND as u128;
     let seconds = u64::try_from(ticks / ticks_per_second).map_err(|_| SystemTimeRangeError::OutsideSystemTimeRange)?;
     let duration = Duration::new(seconds, ((ticks % ticks_per_second) * 100) as u32);
     let time = if since_epoch >= 0 {

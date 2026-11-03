@@ -1,12 +1,13 @@
 use crate::animation::easings::Easing;
 use crate::animation::{
     Animation, Cue, IAnimationSetter, IPageTransition, IProgressPageTransition, KeyFrame,
-    PageSlide, PageTransitionItem, SlideAxis, TimeSpan,
+    PageSlide, PageTransitionItem, SlideAxis, SignedDuration,
 };
 use crate::media::{ITransform, Rotate3DTransform};
 use crate::styling::Setter;
 use crate::animation::i_page_transition::{start_async, when_all};
-use crate::threading::{CancellationToken, DispatcherTask};
+use crate::threading::CancellationToken;
+use ferroui_system::task::JoinHandle;
 use crate::{Ref, Visual};
 use std::cell::Cell;
 use std::ops::Deref;
@@ -45,7 +46,7 @@ impl Rotate3DTransition {
     /// Creates a rotation with the given duration and axis. `depth`
     /// defines the depth of the 3D effect; when `None` it is calculated
     /// automatically.
-    pub fn with_duration(duration: TimeSpan, orientation: SlideAxis, depth: Option<f64>) -> Self {
+    pub fn with_duration(duration: SignedDuration, orientation: SlideAxis, depth: Option<f64>) -> Self {
         Self { base: PageSlide::with_duration(duration, orientation), depth: Cell::new(depth) }
     }
 
@@ -160,7 +161,7 @@ impl IPageTransition for Rotate3DTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let orientation = self.orientation();
         let depth = self.depth.get();
         let duration = self.duration();
@@ -171,7 +172,7 @@ impl IPageTransition for Rotate3DTransition {
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -238,7 +239,7 @@ impl IPageTransition for Rotate3DTransition {
 
             when_all(tasks).await;
 
-            if !cancellation_token.is_cancellation_requested() {
+            if !cancellation_token.is_cancelled() {
                 if let Some(to) = &to {
                     to.set_z_index(2);
                 }

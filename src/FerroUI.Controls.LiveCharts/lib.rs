@@ -1,6 +1,7 @@
 //! Live chart controls using FerroUI's property, input and drawing services: the Cartesian and
-//! pie charts (L2) and the polar chart (L4) of the LiveCharts2 port (docs/porting/livecharts2.md);
-//! see NOTICE.md for the source attribution.
+//! pie charts (L2), the polar chart (L4), the Sankey and treemap charts (L4b) and the geographic
+//! map (L4c) of the LiveCharts2 port (docs/porting/livecharts2.md); see NOTICE.md for the source
+//! attribution.
 
 pub use ferroui_livecharts as core;
 
@@ -14,7 +15,9 @@ mod chart_series;
 mod collections;
 mod decorations;
 mod enums;
+mod geo_models;
 mod identity;
+mod node_models;
 mod register_types;
 pub mod renderer;
 pub mod scene_transition;
@@ -26,11 +29,17 @@ pub use chart_automation_peer::ChartAutomationPeer;
 pub use chart_classes::*;
 pub use chart_point::ChartPoint;
 pub use chart_series::ChartSeries;
-pub use collections::{Axes, ChartPoints, ChartSeriesCollection};
-pub use enums::{ChartKind, LegendPosition, TooltipPosition, ZoomAndPanMode};
-pub use ferroui_livecharts::{
-    AxisPosition, BrushSpace, FindingStrategy, PolarLabelsPosition, PolarScale, RadialAlignment,
-    SeriesKind,
+pub use collections::{
+    Axes, ChartPoints, ChartSeriesCollection, GeoMarkers, HeatLands, SankeyLinks, SankeyNodes,
+    TreemapNodes,
 };
+pub use enums::{ChartKind, LegendPosition, MapInteractionMode, TooltipPosition, ZoomAndPanMode};
+pub use ferroui_livecharts::{
+    AxisPosition, BrushSpace, DrawnMap, FindingStrategy, GeoLand, GeoTooltipValue, MapProjection,
+    MapViewport, Maps, PolarLabelsPosition, PolarScale, RadialAlignment, SankeyLabelPosition,
+    SankeyLayoutKind, SeriesKind, ZoomDirection,
+};
+pub use geo_models::{GeoMarker, HeatLand};
+pub use node_models::{SankeyLink, SankeyNode, TreemapNode};
 pub use register_types::{register_types, ASSEMBLY};
 pub use series_classes::*;

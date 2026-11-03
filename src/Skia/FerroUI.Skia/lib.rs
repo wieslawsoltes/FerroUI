@@ -15,6 +15,7 @@ pub mod metal;
 
 mod combined_geometry_impl;
 mod composition_effects;
+mod custom_shader_effects;
 mod drawing_context_impl;
 mod ellipse_geometry_impl;
 mod font_manager_impl;

@@ -1,21 +1,25 @@
-use crate::guid::Guid;
+use uuid::Uuid;
+
+use crate::guid::parse_uuid_const;
 use crate::metsys_bson::BsonClass;
 
 /// The identifier of a message class on the wire: the header of every
 /// message carries it, and the receiving end finds the class by it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct FerroRemoteMessageGuidAttribute {
-    guid: Guid,
+    guid: Uuid,
 }
 
 impl FerroRemoteMessageGuidAttribute {
     /// The attribute with the identifier of the given text (`Guid.Parse`). A
     /// text that is not an identifier fails the build of the constant.
     pub const fn new(guid: &str) -> FerroRemoteMessageGuidAttribute {
-        FerroRemoteMessageGuidAttribute { guid: Guid::parse_const(guid) }
+        FerroRemoteMessageGuidAttribute { guid: parse_uuid_const(guid) }
     }
 
-    pub const fn guid(&self) -> Guid {
+    /// The identifier. Since 0.5 a [`Uuid`], where it was the port type
+    /// `Guid`.
+    pub const fn guid(&self) -> Uuid {
         self.guid
     }
 }
@@ -47,7 +51,7 @@ macro_rules! ferro_remote_message_guid {
 
         impl $class {
             /// The identifier of the message class on the wire.
-            pub const GUID: $crate::Guid = <$class as $crate::FerroRemoteMessage>::ATTRIBUTE.guid();
+            pub const GUID: $crate::Uuid = <$class as $crate::FerroRemoteMessage>::ATTRIBUTE.guid();
         }
     };
 }

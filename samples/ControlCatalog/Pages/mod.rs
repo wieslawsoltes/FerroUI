@@ -14,6 +14,9 @@ mod border_page;
 mod cartesian_chart_page;
 mod pie_chart_page;
 mod polar_chart_page;
+mod sankey_chart_page;
+mod treemap_chart_page;
+mod geo_map_page;
 mod button_spinner_page;
 mod buttons_page;
 mod calendar_date_picker_page;
@@ -33,6 +36,7 @@ mod context_flyout_page;
 mod context_menu_page;
 mod cursor_page;
 mod custom_drawing;
+mod custom_effects_page;
 mod custom_drawing_example_control;
 mod data_validation_page;
 mod dialogs_page;
@@ -146,6 +150,9 @@ pub use border_page::BorderPage;
 pub use cartesian_chart_page::CartesianChartPage;
 pub use pie_chart_page::PieChartPage;
 pub use polar_chart_page::PolarChartPage;
+pub use sankey_chart_page::SankeyChartPage;
+pub use treemap_chart_page::TreemapChartPage;
+pub use geo_map_page::GeoMapPage;
 pub use button_spinner_page::ButtonSpinnerPage;
 pub use buttons_page::{ButtonsPage, RelayCommand};
 pub use calendar_date_picker_page::CalendarDatePickerPage;
@@ -345,6 +352,9 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     CartesianChartPage::TYPE,
     PieChartPage::TYPE,
     PolarChartPage::TYPE,
+    SankeyChartPage::TYPE,
+    TreemapChartPage::TYPE,
+    GeoMapPage::TYPE,
     ButtonSpinnerPage::TYPE,
     ButtonsPage::TYPE,
     CanvasPage::TYPE,
@@ -448,6 +458,9 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &CartesianChartPage::XAML_CLASS,
     &PieChartPage::XAML_CLASS,
     &PolarChartPage::XAML_CLASS,
+    &SankeyChartPage::XAML_CLASS,
+    &TreemapChartPage::XAML_CLASS,
+    &GeoMapPage::XAML_CLASS,
     &ButtonSpinnerPage::XAML_CLASS,
     &ButtonsPage::XAML_CLASS,
     &CanvasPage::XAML_CLASS,

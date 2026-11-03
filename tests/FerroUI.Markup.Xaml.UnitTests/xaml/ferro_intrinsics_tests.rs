@@ -3,10 +3,12 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use ferroui_base::animation::TimeSpan;
+use std::time::Duration;
+
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{Color, IBrush, TextDecorations, TextTrimming};
+use ferroui_base::media::{AcrylicBrush, Color, IBrush, TextDecorations, TextTrimming};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{CornerRadius, Matrix, Point, Ref, RelativePoint, RelativeUnit, Size, Thickness, Vector};
 use ferroui_controls::{GridLength, GridUnitType, WindowTransparencyLevel};
@@ -14,7 +16,8 @@ use ferroui_markup_xaml::{RuntimeXamlDiagnostic, RuntimeXamlDiagnosticSeverity, 
 use xamlx::exceptions::XamlError;
 
 use crate::support::app::xaml_test_base;
-use crate::support::loader::{describe, document_without_uri, parse, try_load_document, uri, xaml_error};
+use crate::support::helpers::object_of;
+use crate::support::loader::{describe, document_without_uri, parse, try_load_document, try_parse, uri, xaml_error};
 use crate::support::xaml::ferro_intrinsics_tests::TestIntrinsicsControl;
 
 #[test]
@@ -45,7 +48,7 @@ fn all_intrinsics_are_parsed_and_set() {
     let color = Color::parse("#44ff11").expect("a color");
     let brush: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(color));
 
-    assert_eq!(TimeSpan::from_seconds(610.0), target.time_span_property());
+    assert_eq!(SignedDuration::from_seconds(610.0), target.time_span_property());
     assert_eq!(Thickness::uniform(1.0), target.thickness_property());
     assert_eq!(Thickness::uniform(1.0), target.thickness_property());
     assert_eq!(Point::new(15.0, 15.0), target.point_property());
@@ -146,4 +149,176 @@ fn should_parse_formatted_color_tag() {
     </Color>
 </ResourceDictionary>"#,
     );
+}
+
+// --- the two Rust forms of a time span ----------------------------------------------------
+//
+// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md): a property that declares
+// a `Duration` is a `System.TimeSpan` property, as one that declares a `SignedDuration`.
+// `AcrylicBrush.TintTransitionDuration` is the one of the framework. A negative time span is
+// rejected, never clamped (decision O2). The compiled forms of these tests are in
+// `emitter::differential_tests`.
+
+#[test]
+fn a_time_span_literal_sets_a_duration_property() {
+    let _base = xaml_test_base();
+    let brush = parse::<Ref<AcrylicBrush>>("<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='0:0:1.5'/>");
+    assert_eq!(brush.tint_transition_duration(), Duration::from_millis(1500));
+
+    // The shorthand of seconds, and zero.
+    let brush = parse::<Ref<AcrylicBrush>>("<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='0.25'/>");
+    assert_eq!(brush.tint_transition_duration(), Duration::from_millis(250));
+    let brush = parse::<Ref<AcrylicBrush>>("<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='0:0:0'/>");
+    assert_eq!(brush.tint_transition_duration(), Duration::ZERO);
+}
+
+#[test]
+fn a_negative_time_span_literal_for_a_duration_property_is_an_error() {
+    let _base = xaml_test_base();
+    let error = match try_parse::<Ref<AcrylicBrush>>("<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='-0:0:1'/>") {
+        Ok(_) => panic!("a negative time span is not a duration"),
+        Err(error) => error,
+    };
+    let described = describe(&error);
+    assert!(described.contains("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration."), "{described}");
+}
+
+#[test]
+fn a_time_span_resource_sets_a_duration_property() {
+    let _base = xaml_test_base();
+    let resources = parse::<Ref<ResourceDictionary>>(
+        r#"<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+    <sys:TimeSpan x:Key="Transition">0:0:2</sys:TimeSpan>
+    <AcrylicBrush x:Key="Brush" TintTransitionDuration="{StaticResource Transition}"/>
+</ResourceDictionary>"#,
+    );
+    let brush = object_of::<AcrylicBrush>(&resources.get(&"Brush".into()));
+    assert_eq!(brush.tint_transition_duration(), Duration::from_secs(2));
+}
+
+/// The documents of the timer properties of the controls (step T3 of C5): the caret blink
+/// interval of the text controls, the delays of the scroll bar, the minimum populate delay of
+/// the auto-complete box. `{}` is the time span.
+const CONTROL_TIMER_DOCUMENTS: &[(&str, &str)] = &[
+    ("TextBox.CaretBlinkInterval", "<TextBox xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+    ("TextPresenter.CaretBlinkInterval", "<TextPresenter xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+    ("RichEditBox.CaretBlinkInterval", "<RichEditBox xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+    ("ScrollBar.HideDelay", "<ScrollBar xmlns='https://github.com/ferroui' HideDelay='{}'/>"),
+    ("ScrollBar.ShowDelay", "<ScrollBar xmlns='https://github.com/ferroui' ShowDelay='{}'/>"),
+    ("AutoCompleteBox.MinimumPopulateDelay", "<AutoCompleteBox xmlns='https://github.com/ferroui' MinimumPopulateDelay='{}'/>"),
+];
+
+/// Not from upstream (C5 of #423, step T3): the timer properties of the controls declare a
+/// `Duration`; a time span literal sets them as the duration of the same value.
+#[test]
+fn a_time_span_literal_sets_the_timer_properties_of_the_controls() {
+    let _base = xaml_test_base();
+    let text_box = parse::<Ref<ferroui_controls::TextBox>>(&CONTROL_TIMER_DOCUMENTS[0].1.replace("{}", "0:0:0.25"));
+    assert_eq!(text_box.caret_blink_interval(), Duration::from_millis(250));
+    let presenter = parse::<Ref<ferroui_controls::presenters::TextPresenter>>(&CONTROL_TIMER_DOCUMENTS[1].1.replace("{}", "0.3"));
+    assert_eq!(presenter.caret_blink_interval(), Duration::from_millis(300));
+    let editor = parse::<Ref<ferroui_controls::RichEditBox>>(&CONTROL_TIMER_DOCUMENTS[2].1.replace("{}", "0:0:0"));
+    assert_eq!(editor.caret_blink_interval(), Duration::ZERO);
+    let scroll_bar = parse::<Ref<ferroui_controls::primitives::ScrollBar>>(&CONTROL_TIMER_DOCUMENTS[3].1.replace("{}", "0:0:1.5"));
+    assert_eq!(scroll_bar.hide_delay(), Duration::from_millis(1500));
+    let scroll_bar = parse::<Ref<ferroui_controls::primitives::ScrollBar>>(&CONTROL_TIMER_DOCUMENTS[4].1.replace("{}", "0:0:0.4"));
+    assert_eq!(scroll_bar.show_delay(), Duration::from_millis(400));
+    let auto_complete_box = parse::<Ref<ferroui_controls::AutoCompleteBox>>(&CONTROL_TIMER_DOCUMENTS[5].1.replace("{}", "00:00:01"));
+    assert_eq!(auto_complete_box.minimum_populate_delay(), Duration::from_secs(1));
+}
+
+/// Not from upstream (C5 of #423, step T3, decision O2): a negative time span literal for a
+/// timer property of the controls is a load error, as for any `Duration` property.
+#[test]
+fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error() {
+    let _base = xaml_test_base();
+    for (property, document) in CONTROL_TIMER_DOCUMENTS {
+        let error = match crate::support::loader::try_parse_untyped(&document.replace("{}", "-0:0:1"), None) {
+            Ok(_) => panic!("{property}: a negative time span is not a duration"),
+            Err(error) => error,
+        };
+        let described = describe(&error);
+        assert!(
+            described.contains("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration."),
+            "{property}: {described}"
+        );
+    }
+}
+
+// --- the Rust forms of a URI ----------------------------------------------------------------
+//
+// Not from upstream (C5 of #423, section 3.5 of docs/idiomatic-rust-signatures.md): a property
+// that declares a `UriRef` or a `url::Url` is a `System.Uri` property, as one that declares the
+// port `Uri`. A URI literal sets the reference of its text, with the rule of markup (a leading
+// `/` is relative); a relative reference is not a URL, and a text the URL parser rejects is
+// neither. The compiled forms of these tests are in `emitter::differential_tests`.
+
+/// A `Linked` (`support::emitter`) with the attributes `attributes`.
+fn linked(attributes: &str) -> String {
+    format!(
+        "<t:Linked xmlns='https://github.com/ferroui' xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests' {attributes}/>"
+    )
+}
+
+#[test]
+fn a_uri_literal_sets_a_uri_ref_and_a_url_property() {
+    use crate::support::emitter::Linked;
+    use ferroui_base::utilities::UriRef;
+
+    let _base = xaml_test_base();
+    let target = parse::<Ref<Linked>>(&linked("Source='Values.xaml' Address='https://ferroui.net/a?b=c#d'"));
+    assert_eq!(target.source(), Some(UriRef::Relative("Values.xaml".into())));
+    assert_eq!(target.address().as_ref().map(url::Url::as_str), Some("https://ferroui.net/a?b=c#d"));
+
+    // A leading `/` is relative; an absolute reference is the URL of its text, with its
+    // fragment.
+    let target = parse::<Ref<Linked>>(&linked("Source='/Styles/Base.xaml' Address='fonts:SystemFonts#Inter'"));
+    assert_eq!(target.source(), Some(UriRef::Relative("/Styles/Base.xaml".into())));
+    assert_eq!(target.address().as_ref().map(url::Url::as_str), Some("fonts:SystemFonts#Inter"));
+    let target = parse::<Ref<Linked>>(&linked("Source='ferres://App/Assets/a.xaml#x'"));
+    assert_eq!(target.source(), Some(UriRef::parse("ferres://app/Assets/a.xaml#x").unwrap()));
+    assert_eq!(target.address(), None);
+}
+
+#[test]
+fn a_relative_uri_literal_for_a_url_property_is_an_error() {
+    use crate::support::emitter::Linked;
+
+    let _base = xaml_test_base();
+    let error = match try_parse::<Ref<Linked>>(&linked("Address='Values.xaml'")) {
+        Ok(_) => panic!("a relative reference is not a URL"),
+        Err(error) => error,
+    };
+    let described = describe(&error);
+    assert!(described.contains("The URI Values.xaml is relative and cannot be converted to a Url."), "{described}");
+
+    // A text the URL parser rejects is neither a reference nor a URL.
+    let error = match try_parse::<Ref<Linked>>(&linked("Source='http://host:99999/'")) {
+        Ok(_) => panic!("the port is out of range"),
+        Err(error) => error,
+    };
+    let described = describe(&error);
+    assert!(described.contains("The URI http://host:99999/ is not a valid Url: invalid port number."), "{described}");
+}
+
+#[test]
+fn a_uri_resource_sets_a_uri_ref_and_a_url_property() {
+    use crate::support::emitter::Linked;
+    use ferroui_base::utilities::UriRef;
+
+    let _base = xaml_test_base();
+    let resources = parse::<Ref<ResourceDictionary>>(
+        r#"<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System"
+                    xmlns:t="clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests">
+    <sys:Uri x:Key="Link">https://ferroui.net/</sys:Uri>
+    <t:Linked x:Key="Linked" Source="{StaticResource Link}" Address="{StaticResource Link}"/>
+</ResourceDictionary>"#,
+    );
+    let target = object_of::<Linked>(&resources.get(&"Linked".into()));
+    assert_eq!(target.source(), Some(UriRef::parse("https://ferroui.net/").unwrap()));
+    assert_eq!(target.address().as_ref().map(url::Url::as_str), Some("https://ferroui.net/"));
 }

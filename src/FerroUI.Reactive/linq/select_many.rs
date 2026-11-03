@@ -14,7 +14,7 @@
 use crate::disposables::{CompositeDisposable, SingleAssignmentDisposableValue};
 use crate::internal::{unary, OperatorSink, Sink};
 use ferroui_system::threading::tasks::Task;
-use ferroui_system::threading::{CancellationToken, CancellationTokenSource};
+use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -376,7 +376,7 @@ type TaskSelector<T, C, R> = Rc<dyn Fn(T, usize, CancellationToken) -> Result<(T
 struct SelectManyTaskSink<T, C, R> {
     this: Weak<SelectManyTaskSink<T, C, R>>,
     sink: Sink<R>,
-    cancel: CancellationTokenSource,
+    cancel: CancellationToken,
     selector: TaskSelector<T, C, R>,
     count: Cell<usize>,
     index: Cell<usize>,
@@ -397,7 +397,7 @@ impl<T: 'static, C: Clone + 'static, R: 'static> SelectManyTaskSink<T, C, R> {
             },
             // A canceled task is a `TaskCanceledError` naming it, unless the sink cancelled it.
             Err(error) => {
-                if !(task.is_canceled() && self.cancel.is_cancellation_requested()) {
+                if !(task.is_canceled() && self.cancel.is_cancelled()) {
                     self.sink.forward_on_error(error);
                 }
             }
@@ -416,7 +416,7 @@ impl<T: 'static, C: Clone + 'static, R: 'static> IObserver<T> for SelectManyTask
         let index = self.index.get();
         self.index.set(index.wrapping_add(1));
         self.count.set(self.count.get() + 1);
-        let (task, project) = match (self.selector)(value, index, self.cancel.token()) {
+        let (task, project) = match (self.selector)(value, index, self.cancel.clone()) {
             Ok(selected) => selected,
             Err(error) => {
                 self.sink.forward_on_error(error);
@@ -431,7 +431,7 @@ impl<T: 'static, C: Clone + 'static, R: 'static> IObserver<T> for SelectManyTask
             let this = self.this.upgrade().expect("the sink is alive while it receives notifications");
             let continuation = task.continue_with(move |task| {
                 this.pending.borrow_mut().remove(&index);
-                if !this.cancel.is_cancellation_requested() {
+                if !this.cancel.is_cancelled() {
                     this.on_completed_task(task, project);
                 }
             });
@@ -480,7 +480,7 @@ fn select_many_task_observable<T: 'static, C: Clone + 'static, R: 'static>(
         Rc::new_cyclic(|this| SelectManyTaskSink {
             this: this.clone(),
             sink: Sink::new(observer),
-            cancel: CancellationTokenSource::new(),
+            cancel: CancellationToken::new(),
             selector,
             count: Cell::new(1),
             index: Cell::new(0),

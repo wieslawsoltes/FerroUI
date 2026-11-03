@@ -12,7 +12,7 @@
 use crate::motion::{
     MaterialMotionRole, MaterialMotionScheme, MaterialSpringState, animations_enabled,
 };
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
@@ -449,7 +449,7 @@ impl MaterialExtendedFabLayout {
         self.last_frame.set(None);
         let weak = self.to_ref().downgrade();
         let subscription =
-            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: TimeSpan| {
+            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     // A clock may have snapshotted this observer just before a detach.
                     if !this.is_attached_to_visual_tree() || !this.is_effectively_visible() {

@@ -91,6 +91,9 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/CartesianChartPage.xaml", "CartesianChart", Icons::GRID, "Column, line, area and row series on X and Y axes");
             s.add("/Pages/PieChartPage.xaml", "PieChart", Icons::GRID, "Pies, doughnuts and gauges");
             s.add("/Pages/PolarChartPage.xaml", "PolarChart", Icons::GRID, "Polar lines and radars on angle and radius axes");
+            s.add("/Pages/SankeyChartPage.xaml", "SankeyChart", Icons::GRID, "Flows between nodes in columns or on arcs");
+            s.add("/Pages/TreemapChartPage.xaml", "TreemapChart", Icons::GRID, "Weighted rectangles of flat and nested nodes");
+            s.add("/Pages/GeoMapPage.xaml", "GeoMap", Icons::GRID, "Heat lands on Mercator, globe and flat world maps");
             s.add("/Pages/TreeViewPage.xaml", "TreeView", Icons::TREE, "Hierarchical data with expandable nodes");
         }),
         section("Date & Time", Icons::DATE, &mut unavailable, |s| {
@@ -170,6 +173,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add_page(|| crate::pages::winui_composition_pages::zoom_page().upcast(), "Zoom and manipulation", Icons::VIEWBOX, "Visuals that follow the zoom of a scroll viewer");
             s.add_page(|| crate::pages::winui_composition_pages::acrylic_brush_page().upcast(), "Acrylic brush", Icons::BLUR, "The acrylic recipe of WinUI over a busy scene");
             s.add_page(|| crate::pages::winui_composition_pages::blend_effects_page().upcast(), "Blend and colour effects", Icons::PALETTE, "Blend modes, saturation, tint and colour matrices");
+            s.add_page(|| crate::pages::winui_composition_pages::custom_effects_page().upcast(), "Custom effects", Icons::PALETTE, "Tint, grayscale, sepia, saturation, contrast, invert, glow, pixelate, scan lines and spotlight as Visual.Effect");
             s.add_page(|| crate::pages::winui_composition_pages::lighting_page().upcast(), "Lighting", Icons::LIGHTNING, "Coloured lights and the scene lighting effect");
             s.add_page(|| crate::pages::winui_composition_pages::reveal_page().upcast(), "Reveal", Icons::SPARKLE, "Reveal brushes lit by the XAML lights of WinUI");
             s.add_page(|| crate::pages::winui_composition_pages::system_backdrops_page().upcast(), "System backdrops", Icons::WINDOW, "Mica, Mica Alt and desktop acrylic window backdrops");

@@ -10,7 +10,8 @@ use crate::diagnostics::XamlSourceInfo;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
 use crate::markup_extensions::{
     AddChildOfOn, CompiledBindingExtension, DynamicResourceExtension, On, OnFormFactorExtension, OnPlatformExtension,
-    ReflectionBindingExtension, RelativeSourceExtension, ResolveByNameExtension, StaticResourceExtension,
+    ReflectionBindingExtension, RelativeSourceExtension, ResolveByNameExtension, StaticResourceExtension, XBindExtension,
+    XBinding, XBindings,
 };
 use crate::styling::{MergeResourceInclude, ResourceInclude, StyleInclude};
 use crate::templates::{
@@ -120,6 +121,9 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = markup_types![
     RelativeSourceExtension,
     ResolveByNameExtension,
     StaticResourceExtension,
+    XBindExtension,
+    XBinding,
+    XBindings,
     // FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindings
     PropertyInfoAccessorFactory,
     // FerroUI.Markup.Xaml.Styling
@@ -287,6 +291,12 @@ fn register_value_types() {
     ValueTypes::register_nullable::<Rc<DynamicResourceExtension>>();
     ValueTypes::register_nullable::<Rc<CompiledBindingExtension>>();
     ValueTypes::register_nullable::<Rc<ReflectionBindingExtension>>();
+    // `{x:Bind}` provides an `XBinding`, which a binding-typed member takes; its lifecycle
+    // object is a handle too.
+    ValueTypes::register_nullable::<Rc<XBindExtension>>();
+    ValueTypes::register_nullable::<Rc<XBinding>>();
+    ValueTypes::register_nullable::<Rc<XBindings>>();
+    ValueTypes::register_cast::<Rc<XBinding>, Rc<dyn BindingBase>>(|binding| binding.clone());
 
     // Nullable forms of the values members of this crate take and return.
     ValueTypes::register_nullable::<Rc<dyn IServiceProvider>>();
@@ -431,6 +441,7 @@ mod tests {
             "FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindingExtension",
             "FerroUI.Markup.Xaml.MarkupExtensions.ResolveByNameExtension",
             "FerroUI.Markup.Xaml.MarkupExtensions.ReflectionBindingExtension",
+            "FerroUI.Markup.Xaml.MarkupExtensions.XBindExtension",
             "FerroUI.Markup.Xaml.Templates.DataTemplate",
             "FerroUI.Markup.Xaml.Templates.ControlTemplate",
             "FerroUI.Markup.Xaml.Styling.StyleInclude",

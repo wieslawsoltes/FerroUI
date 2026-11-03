@@ -6,11 +6,14 @@
 //! thread. A future is polled when it is spawned, and again whenever it is woken: at once on its
 //! own thread, or right after the poll that runs when the wake comes from inside it. A wake from
 //! another thread goes into the queue of the task's thread and through that thread's poster, which
-//! runs [`run_pending_wakes`] there; the dispatcher of the user interface is the poster of its
-//! thread. A panic of a future faults its task with a [`TaskWorkError`] that holds the message of
-//! the panic.
+//! runs [`run_pending_wakes`] there; the dispatcher of the user interface is the poster (the
+//! schedule) of its thread. A future spawned in a job of a dispatcher takes the dispatcher at the
+//! priority of the job instead ([`crate::task::spawn_local`]): a wake in a job of the same
+//! priority polls it at once, any other wake queues a job at that priority. A panic of a future
+//! faults its task with a [`TaskWorkError`] that holds the message of the panic.
 
-use super::task::{Task, TaskCanceledError};
+use super::task::Task;
+use crate::task::Canceled;
 use crate::task::executor::{panic_message, spawn_task, Failure};
 use crate::task::{FirstPoll, Schedule};
 use crate::ObservableError;
@@ -32,9 +35,9 @@ impl Schedule for PosterSchedule {
 }
 
 /// Runs `future` on the current thread and gives its task: the output of the future ends it, an
-/// error that is a [`TaskCanceledError`] cancels it, and a panic faults it with a
-/// [`TaskWorkError`]. The future is polled at once, and again whenever it is woken (the module's
-/// documentation).
+/// error that is a cancellation ([`Canceled`], [`TaskCanceledError`](super::TaskCanceledError))
+/// cancels it, and a panic faults it with a [`TaskWorkError`]. The future is polled at once, and
+/// again whenever it is woken (the module's documentation).
 pub fn spawn_local<T: 'static>(future: impl Future<Output = Result<T, ObservableError>> + 'static) -> Task<T> {
     let task = Task::with_status(super::TaskStatus::Running);
     let (target, failed) = (task.clone(), task.clone());
@@ -148,5 +151,5 @@ pub fn run<T: Send + 'static>(work: impl FnOnce() -> Result<T, Box<dyn std::erro
 /// A future that ends with a cancellation (`Task.FromCanceled` awaited): for code that stops
 /// because its token was cancelled.
 pub fn canceled<T>() -> Result<T, ObservableError> {
-    Err(Rc::new(TaskCanceledError::default()))
+    Err(Rc::new(Canceled))
 }

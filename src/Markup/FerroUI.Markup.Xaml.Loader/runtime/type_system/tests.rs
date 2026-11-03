@@ -366,19 +366,64 @@ fn assemblies_expose_their_xml_namespace_definitions() {
 #[test]
 fn rust_types_without_metadata_are_opaque() {
     let ts = system();
-    let opaque = ts.resolve(ValueType::of::<std::time::Duration>());
-    assert_eq!(opaque.name(), "core::time::Duration");
-    assert!(opaque.equals(&*ts.resolve(ValueType::of::<std::time::Duration>())));
+    // `Instant`: a type of std nothing declares markup metadata for (`Duration`, the example
+    // before C5 of #423, is a time span now).
+    let opaque = ts.resolve(ValueType::of::<std::time::Instant>());
+    assert_eq!(opaque.name(), "std::time::Instant");
+    assert!(opaque.equals(&*ts.resolve(ValueType::of::<std::time::Instant>())));
     assert!(opaque.is_assignable_from(&*opaque));
     assert!(ts.well_known_types().object.is_assignable_from(&*opaque));
     assert!(!opaque.is_assignable_from(&*ts.well_known_types().object));
     assert!(!opaque.is_assignable_from(&*ts.well_known_types().string));
     assert!(opaque.methods().is_empty() && opaque.constructors().is_empty());
     // A value of the type is an instance of it.
-    let value = boxed(std::time::Duration::from_secs(1));
+    let value = boxed(std::time::Instant::now());
     assert!(ts.is_instance(&value, &*opaque));
     assert!(!ts.is_instance(&value, &*ts.well_known_types().string));
     let _ = ValueTypes::accepts_null(ValueType::of::<String>());
+}
+
+/// Not from upstream (C5 of #423): `Duration` is the other Rust form of a time span, its
+/// nullable form the other form of the nullable time span, and a duration is a value of
+/// the time span.
+#[test]
+fn a_duration_is_a_system_time_span() {
+    let ts = system();
+    let time_span = ts.get("System.TimeSpan");
+    let duration = ts.resolve(ValueType::of::<std::time::Duration>());
+    assert!(duration.equals(&*time_span));
+    assert!(ts.resolve(ValueType::of::<ferroui_base::animation::SignedDuration>()).equals(&*time_span));
+    assert_eq!(ts.resolve(ValueType::of::<Option<std::time::Duration>>()).full_name(), "System.Nullable`1[System.TimeSpan]");
+    assert!(ts
+        .resolve(ValueType::of::<Option<std::time::Duration>>())
+        .equals(&*ts.resolve(ValueType::of::<Option<ferroui_base::animation::SignedDuration>>())));
+    assert!(ts.is_instance(&boxed(std::time::Duration::from_secs(1)), &*time_span));
+    // The signed form stays the canonical handle: what markup makes of a time span.
+    assert_eq!(runtime(&time_span).handle(), Some(ValueType::of::<ferroui_base::animation::SignedDuration>()));
+}
+
+/// Not from upstream (C5 of #423): `UriRef` and `url::Url` are the other Rust forms of a URI,
+/// with their nullable forms, and a reference and a URL are values of `System.Uri`.
+#[test]
+fn a_uri_ref_and_a_url_are_system_uris() {
+    use ferroui_base::utilities::{Uri, UriRef};
+
+    let ts = system();
+    let uri = ts.get("System.Uri");
+    for handle in [
+        ValueType::of::<UriRef>(),
+        ValueType::of::<Option<UriRef>>(),
+        ValueType::of::<url::Url>(),
+        ValueType::of::<Option<url::Url>>(),
+        ValueType::of::<Uri>(),
+        ValueType::of::<Option<Uri>>(),
+    ] {
+        assert!(ts.resolve(handle).equals(&*uri), "{}", handle.name());
+    }
+    assert!(ts.is_instance(&boxed(UriRef::parse("Values.xaml").unwrap()), &*uri));
+    assert!(ts.is_instance(&boxed(url::Url::parse("fonts:SystemFonts").unwrap()), &*uri));
+    // The port stays the canonical handle: what markup makes of a URI.
+    assert_eq!(runtime(&uri).handle(), Some(ValueType::of::<Uri>()));
 }
 
 #[test]
@@ -532,7 +577,7 @@ fn system_types_with_registered_metadata_are_projections_of_it() {
     assert!(time_span.is_value_type());
     let parse = method(&time_span, "Parse");
     let parsed = parse.invoke(&[boxed("0:0:1.5".to_string())]).ok().flatten().expect("parsed");
-    assert_eq!(parsed.downcast_ref::<ferroui_base::animation::TimeSpan>().map(|t| t.ticks()), Some(15_000_000));
+    assert_eq!(parsed.downcast_ref::<ferroui_base::animation::SignedDuration>().map(|t| t.ticks()), Some(15_000_000));
     // Members only the metadata declares.
     assert!(time_span.methods().iter().any(|m| m.name() == "FromSeconds"));
     assert!(time_span.properties().iter().any(|p| p.name() == "Ticks"));

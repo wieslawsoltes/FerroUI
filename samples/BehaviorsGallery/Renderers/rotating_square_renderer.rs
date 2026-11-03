@@ -1,6 +1,6 @@
 //! Port of `Renderers/RotatingSquareRenderer.cs` of the reference sample.
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::{Brushes, DrawingContext, IBrush};
 use ferroui_base::{ferro_markup_type, Matrix, Rect};
 use ferroui_xaml_interactions_custom::IRenderTargetBitmapRenderer;
@@ -19,7 +19,7 @@ impl PartialEq for RotatingSquareRenderer {
 
 impl IRenderTargetBitmapRenderer for RotatingSquareRenderer {
     /// `Render(DrawingContext, TimeSpan)`.
-    fn render(&self, context: &mut DrawingContext<'_>, elapsed: TimeSpan) {
+    fn render(&self, context: &mut DrawingContext<'_>, elapsed: SignedDuration) {
         let state = context.push_transform(
             Matrix::create_translation(-100.0, -100.0)
                 * Matrix::create_rotation(elapsed.total_seconds())

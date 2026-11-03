@@ -4,7 +4,9 @@
 //! purpose with a DEVIATIONS row and a new test.
 
 use crate::threading::tasks::{run_pending_wakes, spawn_local, TaskCompletionSource, TaskStatus};
+#[allow(deprecated)]
 use crate::threading::CancellationTokenSource;
+use crate::threading::CancellationToken;
 use crate::ObservableError;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -63,6 +65,7 @@ fn a_future_awaiting_a_dropped_completion_source_stays_pending() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn a_cancellation_runs_its_callbacks_once_in_registration_order_on_the_cancelling_thread() {
     let source = CancellationTokenSource::new();
     let token = source.token();
@@ -70,7 +73,7 @@ fn a_cancellation_runs_its_callbacks_once_in_registration_order_on_the_cancellin
     let mut registrations = Vec::new();
     for n in 0..4 {
         let calls = calls.clone();
-        registrations.push(token.register(move || calls.lock().unwrap().push((n, thread::current().id()))));
+        registrations.push(token.register_handle(move || calls.lock().unwrap().push((n, thread::current().id()))));
     }
     // Removing one keeps the order of the others.
     registrations[1].dispose();
@@ -87,24 +90,24 @@ fn a_cancellation_runs_its_callbacks_once_in_registration_order_on_the_cancellin
 
     // A callback registered after the cancellation runs at once, on the thread that registers it.
     let c = calls.clone();
-    let _late = token.register(move || c.lock().unwrap().push((4, thread::current().id())));
+    let _late = token.register_handle(move || c.lock().unwrap().push((4, thread::current().id())));
     assert_eq!(calls.lock().unwrap().last(), Some(&(4, thread::current().id())));
 }
 
 #[test]
 fn callbacks_that_other_threads_send_to_a_thread_run_in_the_order_they_arrived() {
-    let sources: Vec<CancellationTokenSource> = (0..3).map(|_| CancellationTokenSource::new()).collect();
+    let tokens: Vec<CancellationToken> = (0..3).map(|_| CancellationToken::new()).collect();
     let log = Rc::new(RefCell::new(Vec::new()));
-    let _registrations: Vec<_> = sources
+    let _registrations: Vec<_> = tokens
         .iter()
         .enumerate()
-        .map(|(n, source)| {
+        .map(|(n, token)| {
             let l = log.clone();
-            source.token().register_local(move || l.borrow_mut().push(n))
+            token.register_local(move || l.borrow_mut().push(n))
         })
         .collect();
 
-    let remote = sources.clone();
+    let remote = tokens.clone();
     thread::spawn(move || {
         for n in [2, 0, 1] {
             remote[n].cancel();

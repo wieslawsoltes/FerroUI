@@ -2,6 +2,7 @@ use super::walker::{walk, IServerTreeVisitor, TreeWalkContext};
 use super::ServerCompositionVisual;
 use crate::media::{RenderOptions, TextOptions};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
+use crate::rendering::composition::effects::{pop_custom_effect_graph_with, push_custom_effect_graph_with};
 use crate::rendering::composition::server::{render_scope, CompositorPools, IDirtyRectTracker, LitContent, ServerVisualRenderContext};
 use crate::Matrix;
 use std::rc::Rc;
@@ -200,8 +201,18 @@ impl IServerTreeVisitor for RenderContext<'_> {
         }
 
         if let (Some(effect), Some(bounds)) = (visual.effect(), visual.sub_tree_bounds.get()) {
-            if let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() {
-                effects.push_effect(Some(bounds.to_rect()), &*effect);
+            // A custom effect that is an effect graph (#455) is drawn as its
+            // graph around the content, as a layer visual draws its effect
+            // brush around its children; any other effect is an effect of
+            // the drawing context, a runtime shader effect (E4) among them,
+            // which the backend draws with its program.
+            let graph = effect.as_custom_effect().is_some_and(|custom| {
+                push_custom_effect_graph_with(self.canvas, custom, bounds.to_rect(), visual.compositor())
+            });
+            if !graph {
+                if let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() {
+                    effects.push_effect(Some(bounds.to_rect()), &*effect);
+                }
             }
         }
 
@@ -238,9 +249,14 @@ impl IServerTreeVisitor for RenderContext<'_> {
                 visual.content.render_after_children(visual, &mut ServerVisualRenderContext::new(canvas));
             });
 
-            if visual.effect().is_some() && visual.sub_tree_bounds.get().is_some() {
-                if let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() {
-                    effects.pop_effect();
+            if let (Some(effect), Some(bounds)) = (visual.effect(), visual.sub_tree_bounds.get()) {
+                let graph = effect.as_custom_effect().is_some_and(|custom| {
+                    pop_custom_effect_graph_with(self.canvas, custom, bounds.to_rect(), visual.compositor())
+                });
+                if !graph {
+                    if let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() {
+                        effects.pop_effect();
+                    }
                 }
             }
 

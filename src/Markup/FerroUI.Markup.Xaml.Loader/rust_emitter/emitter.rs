@@ -614,6 +614,40 @@ fn untyped_argument(local: &str, member: &str, index: usize, node: &Rc<dyn IXaml
     )
 }
 
+/// The ticks of a time span literal: `TimeSpan.FromTicks(ticks)` of a constant, what the
+/// compiler makes of the text of a time span (`FerroXamlIlLanguageParseIntrinsics`).
+fn time_span_literal(node: &Rc<dyn IXamlAstNode>) -> Option<i64> {
+    let call = node.as_method_call_base_node()?;
+    let method = call.method.borrow().clone();
+    if method.name() != "FromTicks" || !method.declaring_type().is("System", "TimeSpan") {
+        return None;
+    }
+    let arguments = call.arguments.borrow().clone();
+    let [argument] = arguments.as_slice() else { return None };
+    let constant = argument.clone().as_node().cast::<XamlConstantNode>()?;
+    match &constant.constant {
+        XamlValue::Int64(ticks) => Some(*ticks),
+        _ => None,
+    }
+}
+
+/// The text of a URI literal: `new Uri(text, kind)` of two constants, what the compiler makes
+/// of the text of a URI (`FerroXamlIlLanguageParseIntrinsics`).
+fn uri_literal(n: &XamlAstNewClrObjectNode) -> Option<String> {
+    let type_ = n.type_.borrow().get_clr_type().ok()?;
+    if !type_.is("System", "Uri") {
+        return None;
+    }
+    let arguments = n.arguments.borrow().clone();
+    let [text, kind] = arguments.as_slice() else { return None };
+    let text = text.clone().as_node().cast::<XamlConstantNode>()?;
+    let kind = kind.clone().as_node().cast::<XamlConstantNode>()?;
+    match (&text.constant, &kind.constant) {
+        (XamlValue::String(text), XamlValue::Int32(_)) => Some(text.clone()),
+        _ => None,
+    }
+}
+
 struct Emitter<'a> {
     /// What the type system the document was transformed with states for the emitter.
     types: &'a dyn EmitTypes,
@@ -660,6 +694,14 @@ struct Emitter<'a> {
     /// Scoped tables are shared by the document's guards and deferred factories. A merged
     /// dictionary can contribute thousands of values with the same lexical declaration.
     namespace_tables: Vec<ScopedNamespaceTable>,
+    /// The locals that hold a time span literal ([`time_span_literal`]), with its ticks:
+    /// a member that declares a `Duration` takes the literal only when it is not negative
+    /// ([`Emitter::coerce_time_span_literal`]).
+    time_span_literals: HashMap<String, i64>,
+    /// The expressions of the URI literals of the document ([`uri_literal`]), with their
+    /// text: a member that declares a `UriRef` or a `Url` takes the literal only when it is
+    /// one ([`Emitter::refused_uri_literal`]).
+    uri_literals: HashMap<String, String>,
 }
 
 struct ScopedNamespaceTable {
@@ -716,6 +758,10 @@ impl<'a> Emitter<'a> {
         }
         let local = self.local_named(base);
         self.line(format!("let {local} = {};", value.expr));
+        // A URI literal stays one in the local that holds it.
+        if let Some(text) = self.uri_literals.get(&value.expr).cloned() {
+            self.uri_literals.insert(local.clone(), text);
+        }
         Typed { expr: local, kind: value.kind }
     }
 
@@ -1051,7 +1097,13 @@ impl<'a> Emitter<'a> {
             for value in &values {
                 arguments.push(self.value(&value.as_node())?);
             }
-            return self.constructor_call(node, &n.constructor, &arguments);
+            let created = self.constructor_call(node, &n.constructor, &arguments)?;
+            // A URI literal is remembered with its text: a member that declares a `UriRef` or a
+            // `Url` takes it only when it is one.
+            if let Some(text) = uri_literal(n) {
+                self.uri_literals.insert(created.expr.clone(), text);
+            }
+            return Ok(created);
         }
         if !n.arguments.borrow().is_empty() {
             return Err(unsupported(node, "constructor arguments"));
@@ -1460,9 +1512,94 @@ impl<'a> Emitter<'a> {
     /// run-time loader applies to the argument of the property's setter
     /// (`to_exact`). `None`: it cannot be stated.
     fn coerce(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
-        self.coerce_static(value, target)
+        // A negative time span literal is not stated as a duration at all, nor a relative URI
+        // literal as a URL, not even by the cast at run time that would refuse it: it is an
+        // error of the document.
+        if self.refused_literal(value, target).is_some() {
+            return None;
+        }
+        self.coerce_time_span_literal(value, target)
+            .or_else(|| self.coerce_static(value, target))
             .or_else(|| self.coerce_runtime_list(value, target))
             .or_else(|| self.coerce_registered(value, target))
+    }
+
+    /// Whether `target` is `Duration` (`false`) or its nullable form (`true`).
+    fn duration_target(&self, target: TypeKey<'a>) -> Option<bool> {
+        if target == self.types.known(Known::Duration) {
+            Some(false)
+        } else if target == self.types.option_of_known(Known::Duration) {
+            Some(true)
+        } else {
+            None
+        }
+    }
+
+    /// A time span literal ([`time_span_literal`]) as the `Duration` (or the nullable form)
+    /// a member declares: `rt::duration` of the local, a conversion that cannot fail, since
+    /// the compiler checked that the literal is not negative. A negative literal is no
+    /// duration (decision O2 of docs/idiomatic-rust-signatures.md): `None`, and
+    /// [`Self::refused_time_span_literal`] says why.
+    fn coerce_time_span_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        let nullable = self.duration_target(target)?;
+        let ticks = *self.time_span_literals.get(&value.expr)?;
+        if ticks < 0 {
+            return None;
+        }
+        let duration = format!("rt::duration({})", value.expr);
+        Some(match nullable {
+            true => format!("::core::option::Option::Some({duration})"),
+            false => duration,
+        })
+    }
+
+    /// Why `value` cannot be the `Duration` (or the nullable form) `target`: a negative time
+    /// span literal. The error of the document, which the run-time loader reports as the
+    /// error of the cast when it loads the document.
+    fn refused_time_span_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        self.duration_target(target)?;
+        let ticks = *self.time_span_literals.get(&value.expr)?;
+        (ticks < 0).then(|| {
+            format!(
+                "the time span {} is negative, and a `Duration` cannot be negative",
+                ferroui_base::animation::SignedDuration::from_ticks(ticks)
+            )
+        })
+    }
+
+    /// Whether `target` is `Url` (`true`) or `UriRef` (`false`), or the nullable form of one.
+    fn uri_target(&self, target: TypeKey<'a>) -> Option<bool> {
+        if target == self.types.known(Known::Url) || target == self.types.option_of_known(Known::Url) {
+            Some(true)
+        } else if target == self.types.known(Known::UriRef) || target == self.types.option_of_known(Known::UriRef) {
+            Some(false)
+        } else {
+            None
+        }
+    }
+
+    /// Why the URI literal `value` ([`uri_literal`]) cannot be the `UriRef` or `Url` (or the
+    /// nullable form) `target`: a text the URL parser rejects is neither, and a relative
+    /// reference is not a URL (C5 of #423). The error of the document, which the run-time
+    /// loader reports as the error of the cast when it loads the document. A literal that
+    /// is one is passed through the cast of the untyped value conversions (`rt::cast`).
+    fn refused_uri_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        let url = self.uri_target(target)?;
+        let text = self.uri_literals.get(&value.expr)?;
+        match ferroui_base::utilities::UriRef::parse(text) {
+            Err(error) => Some(format!("the URI {text} is not a valid URL ({error})")),
+            Ok(reference) if url && reference.is_relative() => {
+                Some(format!("the URI {text} is relative, and a `Url` cannot be relative"))
+            }
+            Ok(_) => None,
+        }
+    }
+
+    /// Why the literal `value` cannot be `target`: a negative time span for a `Duration`
+    /// ([`Self::refused_time_span_literal`]), a relative URI for a `Url` or a URI that is no
+    /// URL ([`Self::refused_uri_literal`]).
+    fn refused_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        self.refused_time_span_literal(value, target).or_else(|| self.refused_uri_literal(value, target))
     }
 
     /// A list of the runtime library created in markup as the collection handle a member
@@ -1978,9 +2115,13 @@ impl<'a> Emitter<'a> {
             }
             let value = match values {
                 SetterValues::Typed(value, value_node) => self.coerce(value, property.property_type()).ok_or_else(|| {
+                    let refused = self.refused_literal(value, property.property_type());
                     unsupported(
                         value_node,
-                        format!("{property_name}: the value cannot be stated as `{}`", property.property_type_name()),
+                        format!(
+                            "{property_name}: {}",
+                            refused.unwrap_or_else(|| format!("the value cannot be stated as `{}`", property.property_type_name()))
+                        ),
                     )
                 })?,
                 SetterValues::Untyped(local, value_node) => {
@@ -2065,9 +2206,13 @@ impl<'a> Emitter<'a> {
         let (property, definition) = self.registered_accessor(node, assignment, &runtime)?;
         let value = match values {
             SetterValues::Typed(value, value_node) => self.coerce(value, property.property_type()).ok_or_else(|| {
+                let refused = self.refused_literal(value, property.property_type());
                 unsupported(
                     value_node,
-                    format!("{property_name}: the value cannot be stated as `{}`", property.property_type_name()),
+                    format!(
+                        "{property_name}: {}",
+                        refused.unwrap_or_else(|| format!("the value cannot be stated as `{}`", property.property_type_name()))
+                    ),
                 )
             })?,
             SetterValues::Untyped(local, value_node) => untyped_argument(local, &self.member_name(&runtime), 0, value_node),
@@ -3451,6 +3596,11 @@ impl<'a> Emitter<'a> {
         let returned = returned.ok_or_else(|| unsupported(node, "a method call that yields nothing"))?;
         let local = self.local_named("value");
         self.line(format!("let {local} = {call};"));
+        // A time span literal is remembered with its ticks: a member that declares a
+        // `Duration` takes it only when it is not negative.
+        if let Some(ticks) = time_span_literal(node) {
+            self.time_span_literals.insert(local.clone(), ticks);
+        }
         Ok(Typed { expr: local, kind: self.kind_of(returned) })
     }
 
@@ -3804,7 +3954,11 @@ impl<'a> Emitter<'a> {
             let text = match self.coerce(argument, *parameter) {
                 Some(text) => text,
                 None => self.instance_argument(node, &method, index, argument, *parameter).ok_or_else(|| {
-                    unsupported(node, format!("{name}: argument {index} cannot be stated as the declared type"))
+                    let reason = match self.refused_literal(argument, *parameter) {
+                        Some(refused) => format!(": {refused}"),
+                        None => " cannot be stated as the declared type".to_string(),
+                    };
+                    unsupported(node, format!("{name}: argument {index}{reason}"))
                 })?,
             };
             // The instance is passed by reference: a local of exactly the declared type as it is.
@@ -4012,6 +4166,8 @@ pub fn emit_function<'a>(
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         namespace_tables: Vec::new(),
+        time_span_literals: HashMap::new(),
+        uri_literals: HashMap::new(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is

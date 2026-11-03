@@ -688,15 +688,18 @@ impl MainViewModel {
             // `async void`: the screenshot is taken on the dispatcher; a failure is written to
             // the debug output.
             let take = screenshot_handler.take(&control);
-            let _ = Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                if let Err(ex) = take.await {
-                    if cfg!(debug_assertions) {
-                        // `Debug.WriteLine` of upstream: written in debug builds only.
-                        eprintln!("{ex}");
+            let _ = Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    if let Err(ex) = take.await {
+                        if cfg!(debug_assertions) {
+                            // `Debug.WriteLine` of upstream: written in debug builds only.
+                            eprintln!("{ex}");
+                        }
+                        //TODO: Notify error
                     }
-                    //TODO: Notify error
-                }
-            });
+                },
+                DispatcherPriority::DEFAULT,
+            );
         }
     }
 

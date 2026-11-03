@@ -59,6 +59,13 @@ fn effect_text(effect: &dyn IEffect) -> String {
         format!("blur({})", blur.radius())
     } else if let Some(shadow) = effect.as_drop_shadow_effect() {
         format!("drop-shadow({} {} {})", shadow.offset_x(), shadow.offset_y(), shadow.blur_radius())
+    } else if let Some(custom) = effect.as_custom_effect() {
+        // A runtime shader effect (#455, E4) is marked as one.
+        if custom.has_shader() {
+            format!("shader {custom}")
+        } else {
+            custom.to_string()
+        }
     } else {
         "effect".to_string()
     }
@@ -83,7 +90,8 @@ pub struct MockDrawingContextImpl {
     /// Whether explicit isolated group pushes are accepted. Off by default.
     pub supports_compositing_layers: bool,
     /// Whether pushed effects are recorded with the effect
-    /// (`PushEffect <clip> blur(<radius>)`). Off by default.
+    /// (`PushEffect <clip> blur(<radius>)`; a custom effect by its effect
+    /// string, after `shader ` for a runtime shader effect). Off by default.
     pub log_effects: bool,
     /// Whether the context reports acrylic support
     /// (`DrawRectangleWithMaterial <tint> <rect>`). Off by default.
@@ -103,6 +111,11 @@ pub struct MockDrawingContextImpl {
     /// (`PushRenderOptions <text> <interpolation> <edge> <blending>
     /// <full opacity>`) rather than as `PushRenderOptions`. Off by default.
     pub log_render_options: bool,
+    /// Whether pushed colour matrix layers are recorded with their matrix
+    /// (`PushColorMatrixLayer <bounds> <alpha mode> <matrix>`, the twenty
+    /// members of the row-major 4 x 5 form, rounded to three decimals). Off
+    /// by default.
+    pub log_matrices: bool,
 }
 
 impl MockDrawingContextImpl {
@@ -118,6 +131,7 @@ impl MockDrawingContextImpl {
             supports_layer_effects: false,
             supports_gpu_effects: false,
             log_render_options: false,
+            log_matrices: false,
         }
     }
 
@@ -367,10 +381,16 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for MockDrawingContext
     fn push_color_matrix_layer(
         &mut self,
         bounds: Rect,
-        _matrix: &crate::media::ColorMatrix,
+        matrix: &crate::media::ColorMatrix,
         alpha_mode: crate::media::ColorMatrixAlphaMode,
     ) {
-        self.log.push(format!("PushColorMatrixLayer {bounds} {alpha_mode:?}"));
+        if self.log_matrices {
+            let members: Vec<String> =
+                matrix.to_row_major_4x5().iter().map(|value| format!("{}", (value * 1000.0).round() / 1000.0)).collect();
+            self.log.push(format!("PushColorMatrixLayer {bounds} {alpha_mode:?} [{}]", members.join(" ")));
+        } else {
+            self.log.push(format!("PushColorMatrixLayer {bounds} {alpha_mode:?}"));
+        }
     }
 
     fn pop_color_matrix_layer(&mut self) {
@@ -386,6 +406,28 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for MockDrawingContext
 
     fn pop_multiply_layer(&mut self) {
         self.log.push("PopMultiplyLayer");
+    }
+
+    fn push_convolve_matrix_layer(&mut self, bounds: Rect, convolution: &crate::media::ConvolveMatrix) {
+        if self.log_matrices {
+            let elements: Vec<String> =
+                convolution.elements().iter().map(|value| format!("{}", (value * 1000.0).round() / 1000.0)).collect();
+            self.log.push(format!(
+                "PushConvolveMatrixLayer {bounds} {}x{} [{}]",
+                convolution.kernel_width,
+                convolution.kernel_height,
+                elements.join(" ")
+            ));
+        } else {
+            self.log.push(format!(
+                "PushConvolveMatrixLayer {bounds} {}x{}",
+                convolution.kernel_width, convolution.kernel_height
+            ));
+        }
+    }
+
+    fn pop_convolve_matrix_layer(&mut self) {
+        self.log.push("PopConvolveMatrixLayer");
     }
 
     fn draw_lighting(&mut self, rect: Rect, lighting: &crate::platform::LightingParameters) -> bool {

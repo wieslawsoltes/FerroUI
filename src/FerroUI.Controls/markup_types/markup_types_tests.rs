@@ -1081,7 +1081,7 @@ fn a_binding_path_indexes_an_items_source() {
 #[test]
 fn a_notification_is_created_and_set_through_its_metadata() {
     use crate::notifications::{INotification, Notification, NotificationType};
-    use ferroui_base::animation::TimeSpan;
+    use ferroui_base::animation::SignedDuration;
 
     crate::register_types();
     let markup = MarkupType::find("FerroUI.Controls.Notifications", "Notification").expect("the notification");
@@ -1095,8 +1095,8 @@ fn a_notification_is_created_and_set_through_its_metadata() {
     (type_.set.expect("a setter"))(&[notification.clone(), boxed(NotificationType::Warning)]).expect("the type is set");
     let expiration = markup.find_property("Expiration").expect("Expiration");
     let set_expiration = expiration.set.expect("a setter");
-    set_expiration(&[notification.clone(), boxed(TimeSpan::from_seconds(2.0))]).expect("the expiration is set");
-    assert!(set_expiration(&[notification.clone(), boxed(TimeSpan::from_seconds(-1.0))]).is_err());
+    set_expiration(&[notification.clone(), boxed(SignedDuration::from_seconds(2.0))]).expect("the expiration is set");
+    assert!(set_expiration(&[notification.clone(), boxed(SignedDuration::from_seconds(-1.0))]).is_err());
 
     // The value is the notification, and a notification of the contract (the content of an
     // action that shows it).

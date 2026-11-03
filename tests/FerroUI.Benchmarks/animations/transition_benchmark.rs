@@ -1,7 +1,7 @@
 //! Running a transition of a number over a number of frames.
 
 use crate::harness::Registry;
-use ferroui_base::animation::{DoubleTransition, TimeSpan, Transition};
+use ferroui_base::animation::{DoubleTransition, SignedDuration, Transition};
 use ferroui_base::layout::Layoutable;
 use ferroui_base::reactive::{IObservable, IObserver, LightweightSubject, ObservableError};
 use ferroui_base::Ref;
@@ -26,7 +26,7 @@ impl TransitionBenchmark {
         let frame_count_in_constructor = 0;
 
         let transition = DoubleTransition::new();
-        transition.set_duration(TimeSpan::from_milliseconds(f64::from(frame_count_in_constructor)));
+        transition.set_duration(SignedDuration::from_milliseconds(f64::from(frame_count_in_constructor)));
         transition.set_property(Some(Layoutable::width_property().as_property()));
 
         let time_producer = Rc::new(LightweightSubject::new());

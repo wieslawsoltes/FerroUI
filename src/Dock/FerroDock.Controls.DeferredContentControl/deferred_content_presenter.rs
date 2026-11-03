@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use crate::deferred_content_control::{changed_schedule, same_content, same_template};
 use crate::{presentation, reveal, scheduling, target::TargetState, DeferredContentControl};
-use ferroui_base::animation::TimeSpan;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
@@ -14,6 +13,7 @@ use ferroui_base::{
 use ferroui_controls::{presenters::ContentPresenter, templates::IDataTemplate, ControlImpl};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::time::Duration;
 /// A native ContentPresenter batching materialization on a presentation timeline.
 #[repr(C)]
 pub struct DeferredContentPresenter {
@@ -108,7 +108,7 @@ impl DeferredContentPresenter {
         &self,
         content: Option<BoxedValue>,
         template: Option<Rc<dyn IDataTemplate>>,
-        duration: TimeSpan,
+        duration: Duration,
     ) {
         let had_child = self.child().is_some();
         let has_content = content.is_some();
@@ -145,7 +145,7 @@ impl DeferredContentPresenter {
                 .unwrap_or_else(|| scheduling::resolve_timeline(self))
                 .reveal_duration()
         } else {
-            TimeSpan::ZERO
+            Duration::ZERO
         };
         self.apply_deferred_state(content.clone(), template.clone(), duration);
         self.applied_content.replace(content);

@@ -4,7 +4,8 @@
 //! The reference awaits a task completion source that the handler of the
 //! result completes, and adds the handler to an event of the activity
 //! (`+=`) and removes it when the result arrived (`-=`). Here the task
-//! completion source is [`Completion`], and the event, which the activity
+//! completion source is a one-shot channel (`ferroui_system::task::oneshot`)
+//! whose sender the handler holds, and the event, which the activity
 //! keeps as one handler ([`IActivityResultHandler`]), is chained by
 //! [`add_activity_result`] and [`add_request_permissions_result`].
 
@@ -12,11 +13,8 @@ use crate::i_activity_result_handler::{
     ActivityResultHandler, IActivityResultHandler, Intent, RequestPermissionsResultHandler, PERMISSION_GRANTED,
 };
 use std::cell::RefCell;
-use std::future::Future;
-use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
-use std::task::{Context, Poll, Waker};
 
 static S_LAST_REQUEST_CODE: AtomicI32 = AtomicI32::new(20000);
 
@@ -28,70 +26,6 @@ pub(crate) fn get_next_request_code() -> i32 {
 /// (`arg3.All(p => p == Permission.Granted)`).
 pub(crate) fn all_granted(grant_results: &[i32]) -> bool {
     grant_results.iter().all(|p| *p == PERMISSION_GRANTED)
-}
-
-struct State<T> {
-    result: Option<T>,
-    waker: Option<Waker>,
-}
-
-/// A value that arrives later, on the UI thread: what stands for the task
-/// completion sources of the reference, whose tasks the callers await.
-/// This is the side that sets the value.
-///
-/// Not from the reference.
-pub(crate) struct Completion<T> {
-    state: Rc<RefCell<State<T>>>,
-}
-
-/// The side of a [`Completion`] that waits for the value.
-pub(crate) struct CompletionFuture<T> {
-    state: Rc<RefCell<State<T>>>,
-}
-
-impl<T> Clone for Completion<T> {
-    fn clone(&self) -> Self {
-        Self { state: self.state.clone() }
-    }
-}
-
-impl<T> Completion<T> {
-    /// Creates a completion and the future of its value.
-    pub(crate) fn new() -> (Completion<T>, CompletionFuture<T>) {
-        let state = Rc::new(RefCell::new(State { result: None, waker: None }));
-        (Completion { state: state.clone() }, CompletionFuture { state })
-    }
-
-    /// Sets the value, unless one was set; tells whether it was set now.
-    pub(crate) fn try_set_result(&self, result: T) -> bool {
-        let waker = {
-            let mut state = self.state.borrow_mut();
-            if state.result.is_some() {
-                return false;
-            }
-            state.result = Some(result);
-            state.waker.take()
-        };
-        if let Some(waker) = waker {
-            waker.wake();
-        }
-        true
-    }
-}
-
-impl<T> Future for CompletionFuture<T> {
-    type Output = T;
-
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
-        let mut state = self.state.borrow_mut();
-        match state.result.take() {
-            Some(result) => Poll::Ready(result),
-            None => {
-                state.waker = Some(cx.waker().clone());
-                Poll::Pending
-            }
-        }
-    }
 }
 
 /// One handler of an event of an activity and the handler that was there
@@ -189,15 +123,13 @@ pub(crate) use imp::check_permission;
 
 #[cfg(target_os = "android")]
 mod imp {
-    use super::{
-        add_request_permissions_result, all_granted, get_next_request_code, Completion,
-        RequestPermissionsResultSubscription,
-    };
+    use super::{add_request_permissions_result, all_granted, get_next_request_code, RequestPermissionsResultSubscription};
     use crate::ferro_activity::FerroActivity;
     use crate::i_activity_result_handler::{RequestPermissionsResultHandler, PERMISSION_GRANTED};
     use crate::interop::java::{call_int, call_void, new_string_array, JavaObject, JavaValue};
     use crate::interop::natives::sdk_int;
     use ferroui_base::input::LocalBoxFuture;
+    use ferroui_system::task::oneshot;
     use std::cell::RefCell;
     use std::rc::Rc;
 
@@ -226,7 +158,10 @@ mod imp {
         }
 
         let current_request_code = get_next_request_code();
-        let (tcs, task) = Completion::<bool>::new();
+        let (tcs, task) = oneshot::channel::<bool>();
+        // The handler is called for every result of the activity: the first of its request takes
+        // the sender.
+        let tcs = RefCell::new(Some(tcs));
         let subscription: Rc<RefCell<Option<RequestPermissionsResultSubscription>>> = Rc::new(RefCell::new(None));
         let request_permissions_result: RequestPermissionsResultHandler = {
             let subscription = subscription.clone();
@@ -242,7 +177,10 @@ mod imp {
                     subscription.remove(&*main_activity);
                 }
 
-                let _ = tcs.try_set_result(all_granted(arg3));
+                if let Some(tcs) = tcs.take() {
+                    // A check whose wait was dropped does not want the answer.
+                    let _ = tcs.send(all_granted(arg3));
+                }
             })
         };
         *subscription.borrow_mut() = Some(add_request_permissions_result(&*main_activity, request_permissions_result));
@@ -254,7 +192,9 @@ mod imp {
             &[JavaValue::Object(Some(&permissions)), JavaValue::Int(current_request_code)],
         );
 
-        Box::pin(task)
+        // Deviation (DEVIATIONS.md, Android platform): a handler that is dropped without a result
+        // (its activity is gone) answers `false`; the task of the reference would never complete.
+        Box::pin(async move { task.await.unwrap_or(false) })
     }
 }
 
@@ -264,18 +204,11 @@ mod tests {
     // device.
     use super::*;
     use crate::i_activity_result_handler::{PERMISSION_DENIED, RESULT_CANCELED, RESULT_OK};
+    use ferroui_system::task::oneshot;
     use std::cell::Cell;
-    use std::sync::atomic::AtomicUsize;
-    use std::sync::Arc;
-    use std::task::Wake;
-
-    struct CountingWaker(AtomicUsize);
-
-    impl Wake for CountingWaker {
-        fn wake(self: Arc<Self>) {
-            self.0.fetch_add(1, Ordering::SeqCst);
-        }
-    }
+    use std::future::Future;
+    use std::pin::Pin;
+    use std::task::{Context, Poll, Waker};
 
     #[derive(Default)]
     struct Activity {
@@ -330,31 +263,6 @@ mod tests {
         assert!(all_granted(&[]));
         assert!(all_granted(&[PERMISSION_GRANTED, PERMISSION_GRANTED]));
         assert!(!all_granted(&[PERMISSION_GRANTED, PERMISSION_DENIED]));
-    }
-
-    #[test]
-    fn the_future_is_ready_once_the_value_is_set() {
-        let (completion, mut future) = Completion::<u32>::new();
-        let counter = Arc::new(CountingWaker(AtomicUsize::new(0)));
-        let waker = Waker::from(counter.clone());
-        let mut cx = Context::from_waker(&waker);
-
-        assert_eq!(Poll::Pending, Pin::new(&mut future).poll(&mut cx));
-        assert_eq!(0, counter.0.load(Ordering::SeqCst));
-        assert!(completion.try_set_result(7));
-        assert_eq!(1, counter.0.load(Ordering::SeqCst));
-        // The first value stays.
-        assert!(!completion.clone().try_set_result(8));
-        assert_eq!(Poll::Ready(7), Pin::new(&mut future).poll(&mut cx));
-    }
-
-    #[test]
-    fn a_value_set_before_the_first_poll_is_returned_by_it() {
-        let (completion, mut future) = Completion::<&str>::new();
-        assert!(completion.try_set_result("done"));
-        let waker = Waker::from(Arc::new(CountingWaker(AtomicUsize::new(0))));
-        let mut cx = Context::from_waker(&waker);
-        assert_eq!(Poll::Ready("done"), Pin::new(&mut future).poll(&mut cx));
     }
 
     #[test]
@@ -436,7 +344,8 @@ mod tests {
     fn a_handler_removes_itself_while_it_runs() {
         let activity = Rc::new(Activity::default());
         let subscription: Rc<RefCell<Option<RequestPermissionsResultSubscription>>> = Rc::new(RefCell::new(None));
-        let (completion, mut future) = Completion::<bool>::new();
+        let (completion, mut future) = oneshot::channel::<bool>();
+        let completion = RefCell::new(Some(completion));
         let handler: RequestPermissionsResultHandler = {
             let subscription = subscription.clone();
             let activity = Rc::downgrade(&activity);
@@ -448,7 +357,9 @@ mod tests {
                 if let (Some(subscription), Some(activity)) = (subscription, activity.upgrade()) {
                     subscription.remove(&*activity);
                 }
-                let _ = completion.try_set_result(all_granted(grant_results));
+                if let Some(completion) = completion.take() {
+                    let _ = completion.send(all_granted(grant_results));
+                }
             })
         };
         *subscription.borrow_mut() = Some(add_request_permissions_result(&*activity, handler));
@@ -459,8 +370,7 @@ mod tests {
 
         activity.raise_request_permissions_result(20001, &[PERMISSION_DENIED]);
         assert!(activity.request_permissions_result().is_none());
-        let waker = Waker::from(Arc::new(CountingWaker(AtomicUsize::new(0))));
-        let mut cx = Context::from_waker(&waker);
-        assert_eq!(Poll::Ready(false), Pin::new(&mut future).poll(&mut cx));
+        let mut cx = Context::from_waker(Waker::noop());
+        assert_eq!(Poll::Ready(Ok(false)), Pin::new(&mut future).poll(&mut cx));
     }
 }

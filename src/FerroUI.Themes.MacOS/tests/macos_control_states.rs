@@ -2,7 +2,7 @@
 //! actual selectors and layout rather than searching their XAML source text.
 
 use crate::MacOSTheme;
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan, TransitionBase};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration, TransitionBase};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::input::{IKeyboardDevice, IKeyboardNavigationHandler, InputManager, KeyboardDevice, KeyboardNavigationHandler, KeyModifiers, NavigationMethod};
 use ferroui_base::media::{Color, IBrush};
@@ -20,7 +20,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 struct PulseClock {
-    ticks: LightweightSubject<TimeSpan>,
+    ticks: LightweightSubject<SignedDuration>,
     elapsed: Cell<f64>,
     state: Cell<PlayState>,
 }
@@ -40,12 +40,12 @@ impl PulseClock {
 
     fn advance(&self, seconds: f64) {
         self.elapsed.set(self.elapsed.get() + seconds);
-        self.ticks.on_next(TimeSpan::from_seconds(self.elapsed.get()));
+        self.ticks.on_next(SignedDuration::from_seconds(self.elapsed.get()));
     }
 }
 
-impl IObservable<TimeSpan> for PulseClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for PulseClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.ticks.subscribe(observer)
     }
 }
@@ -172,7 +172,7 @@ fn switch_reverses_an_in_flight_transition_from_its_visible_position() {
     let transitions = moving.transitions().expect("Loaded must attach the switch knob transitions");
     let transition = transitions.get(0).as_object().and_then(|o| o.cast::<TransitionBase>())
         .expect("the knob's DoubleTransition");
-    assert_eq!(TimeSpan::from_milliseconds(180.0), transition.duration(), "the knob transition must resolve its live motion token");
+    assert_eq!(SignedDuration::from_milliseconds(180.0), transition.duration(), "the knob transition must resolve its live motion token");
     switch.set_is_checked(Some(true));
     scene.clock.advance(0.01);
     scene.clock.advance(0.09);

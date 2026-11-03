@@ -3,7 +3,7 @@ use crate::{
     MaterialExtendedFab, MaterialExtendedFabLayout, MaterialExtendedFabSize, MaterialMotionRole,
     MaterialMotionScheme, MaterialTheme, register_types,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::input::{ICommand, KeyModifiers, KeyboardDevice, NavigationMethod};
 use ferroui_base::media::FlowDirection;
 use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver, LightweightSubject};
@@ -18,11 +18,11 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 struct TestClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -170,8 +170,8 @@ fn collapse_keeps_label_until_settled_and_uses_independent_native_springs() {
     button.set_is_expanded(false);
     assert!(label.is_visible());
     assert!(clock.subject.has_observers());
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     let scheme = MaterialMotionScheme::Expressive;
     let spatial = scheme
         .spring(MaterialMotionRole::FastSpatial)
@@ -184,7 +184,7 @@ fn collapse_keeps_label_until_settled_and_uses_independent_native_springs() {
     assert!(label.is_visible());
     window.update_layout();
     assert!(button.bounds().width > 56.0 && button.bounds().width < 160.0);
-    clock.subject.on_next(TimeSpan::from_seconds(2.0));
+    clock.subject.on_next(SignedDuration::from_seconds(2.0));
     window.update_layout();
     assert!(!label.is_visible());
     assert_eq!(56.0, button.bounds().width);
@@ -198,8 +198,8 @@ fn reversing_expansion_preserves_spatial_velocity_and_current_width() {
     let _window = window(&button);
     let layout: Ref<MaterialExtendedFabLayout> = named(&button, "PART_FabLayout");
     button.set_is_expanded(false);
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.08));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.08));
     let spring = MaterialMotionScheme::Expressive.spring(MaterialMotionRole::FastSpatial);
     let interrupted = spring.sample(0.08, 1.0, 0.0, 0.0);
     let before = layout.expansion_progress();
@@ -209,7 +209,7 @@ fn reversing_expansion_preserves_spatial_velocity_and_current_width() {
         layout.expansion_progress(),
         "retargeting must not jump to an endpoint"
     );
-    clock.subject.on_next(TimeSpan::from_seconds(0.13));
+    clock.subject.on_next(SignedDuration::from_seconds(0.13));
     let expected = spring
         .sample(0.05, interrupted.value, 1.0, interrupted.velocity)
         .value;
@@ -224,8 +224,8 @@ fn reduced_motion_snaps_an_active_expansion_and_removes_clock_work() {
     let button = button(MaterialExtendedFabSize::Medium, false);
     let window = window(&button);
     button.set_is_expanded(false);
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.03));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.03));
     button.set_reduced_motion(true);
     window.update_layout();
     let layout: Ref<MaterialExtendedFabLayout> = named(&button, "PART_FabLayout");

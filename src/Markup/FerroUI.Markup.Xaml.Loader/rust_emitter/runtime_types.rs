@@ -280,6 +280,9 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::StyleQuery => TypeId::of::<ferroui_base::styling::StyleQuery>(),
             Known::RuntimeList => TypeId::of::<RuntimeList>(),
             Known::ListItems => TypeId::of::<Rc<FerroList<Option<BoxedValue>>>>(),
+            Known::Duration => TypeId::of::<std::time::Duration>(),
+            Known::UriRef => TypeId::of::<ferroui_base::utilities::UriRef>(),
+            Known::Url => TypeId::of::<url::Url>(),
         })
     }
 
@@ -322,6 +325,9 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::StyleQuery => TypeId::of::<Option<ferroui_base::styling::StyleQuery>>(),
             Known::RuntimeList => TypeId::of::<Option<RuntimeList>>(),
             Known::ListItems => TypeId::of::<Option<Rc<FerroList<Option<BoxedValue>>>>>(),
+            Known::Duration => TypeId::of::<Option<std::time::Duration>>(),
+            Known::UriRef => TypeId::of::<Option<ferroui_base::utilities::UriRef>>(),
+            Known::Url => TypeId::of::<Option<url::Url>>(),
         })
     }
 

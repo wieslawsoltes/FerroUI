@@ -18,7 +18,7 @@ pub fn start_themed_application() -> UnitTestApplicationScope {
 }
 
 pub struct MockGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     play_state: std::cell::Cell<ferroui_base::animation::PlayState>,
 }
 
@@ -31,10 +31,10 @@ impl MockGlobalClock {
     }
 }
 
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for MockGlobalClock {
     fn subscribe(
         &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
     }

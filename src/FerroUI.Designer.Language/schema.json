@@ -321,8 +321,8 @@
       },
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "Animation.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "Animation.Duration: SignedDuration",
         "values": []
       },
       "IterationCount": {
@@ -365,14 +365,14 @@
       },
       "Delay": {
         "name": "Delay",
-        "type_name": "TimeSpan",
-        "documentation": "Animation.Delay: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "Animation.Delay: SignedDuration",
         "values": []
       },
       "DelayBetweenIterations": {
         "name": "DelayBetweenIterations",
-        "type_name": "TimeSpan",
-        "documentation": "Animation.DelayBetweenIterations: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "Animation.DelayBetweenIterations: SignedDuration",
         "values": []
       },
       "Children": {
@@ -608,8 +608,8 @@
       },
       "MinimumPopulateDelay": {
         "name": "MinimumPopulateDelay",
-        "type_name": "TimeSpan",
-        "documentation": "AutoCompleteBox.MinimumPopulateDelay: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "AutoCompleteBox.MinimumPopulateDelay: Duration",
         "values": [],
         "attached": false
       },
@@ -3791,8 +3791,8 @@
     "properties": {
       "DefaultDuration": {
         "name": "DefaultDuration",
-        "type_name": "TimeSpan",
-        "documentation": "ConnectedAnimationService.DefaultDuration: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "ConnectedAnimationService.DefaultDuration: Duration",
         "values": []
       },
       "DefaultEasingFunction": {
@@ -4677,8 +4677,8 @@
     "properties": {
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "CrossFade.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "CrossFade.Duration: SignedDuration",
         "values": []
       },
       "FadeInEasing": {
@@ -9757,6 +9757,16 @@
         ],
         "attached": false
       },
+      "AllowFocusOnInteraction": {
+        "name": "AllowFocusOnInteraction",
+        "type_name": "bool",
+        "documentation": "InputElement.AllowFocusOnInteraction: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "IsEnabled": {
         "name": "IsEnabled",
         "type_name": "bool",
@@ -10692,8 +10702,8 @@
       },
       "KeyTime": {
         "name": "KeyTime",
-        "type_name": "TimeSpan",
-        "documentation": "KeyFrame.KeyTime: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "KeyFrame.KeyTime: SignedDuration",
         "values": []
       },
       "Cue": {
@@ -14525,8 +14535,8 @@
     "properties": {
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "PageSlide.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "PageSlide.Duration: SignedDuration",
         "values": []
       },
       "Orientation": {
@@ -17938,8 +17948,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "TimeSpan",
-        "documentation": "RichEditBox.CaretBlinkInterval: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "RichEditBox.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },
@@ -18693,8 +18703,8 @@
       },
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "Rotate3DTransition.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "Rotate3DTransition.Duration: SignedDuration",
         "values": []
       },
       "Orientation": {
@@ -18987,15 +18997,15 @@
       },
       "HideDelay": {
         "name": "HideDelay",
-        "type_name": "TimeSpan",
-        "documentation": "ScrollBar.HideDelay: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "ScrollBar.HideDelay: Duration",
         "values": [],
         "attached": false
       },
       "ShowDelay": {
         "name": "ShowDelay",
-        "type_name": "TimeSpan",
-        "documentation": "ScrollBar.ShowDelay: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "ScrollBar.ShowDelay: Duration",
         "values": [],
         "attached": false
       }
@@ -22893,8 +22903,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "TimeSpan",
-        "documentation": "TextBox.CaretBlinkInterval: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "TextBox.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },
@@ -23641,8 +23651,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "TimeSpan",
-        "documentation": "TextPresenter.CaretBlinkInterval: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "TextPresenter.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },
@@ -24218,8 +24228,8 @@
       },
       "SelectedTime": {
         "name": "SelectedTime",
-        "type_name": "Option<TimeSpan>",
-        "documentation": "TimePicker.SelectedTime: Option<TimeSpan>",
+        "type_name": "Option<SignedDuration>",
+        "documentation": "TimePicker.SelectedTime: Option<SignedDuration>",
         "values": [],
         "attached": false
       }
@@ -24281,8 +24291,8 @@
       },
       "Time": {
         "name": "Time",
-        "type_name": "TimeSpan",
-        "documentation": "TimePickerPresenter.Time: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "TimePickerPresenter.Time: SignedDuration",
         "values": [],
         "attached": false
       }
@@ -25031,15 +25041,15 @@
     "properties": {
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "TransitionBase.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "TransitionBase.Duration: SignedDuration",
         "values": [],
         "attached": false
       },
       "Delay": {
         "name": "Delay",
-        "type_name": "TimeSpan",
-        "documentation": "TransitionBase.Delay: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "TransitionBase.Delay: SignedDuration",
         "values": [],
         "attached": false
       },
@@ -28199,6 +28209,88 @@
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "XBindExtension",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_markup_xaml::markup_extensions::XBindExtension",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Path": {
+        "name": "Path",
+        "type_name": "Option<CompiledBindingPath>",
+        "documentation": "XBindExtension.Path: Option<CompiledBindingPath>",
+        "values": []
+      },
+      "Mode": {
+        "name": "Mode",
+        "type_name": "BindingMode",
+        "documentation": "XBindExtension.Mode: BindingMode",
+        "values": [
+          "Default",
+          "OneWay",
+          "TwoWay",
+          "OneTime",
+          "OneWayToSource"
+        ]
+      },
+      "UpdateSourceTrigger": {
+        "name": "UpdateSourceTrigger",
+        "type_name": "UpdateSourceTrigger",
+        "documentation": "XBindExtension.UpdateSourceTrigger: UpdateSourceTrigger",
+        "values": [
+          "Default",
+          "PropertyChanged",
+          "LostFocus",
+          "Explicit"
+        ]
+      },
+      "DataType": {
+        "name": "DataType",
+        "type_name": "Option<ValueType>",
+        "documentation": "XBindExtension.DataType: Option<ValueType>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Markup.Xaml.MarkupExtensions",
+      "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
+    "name": "XBinding",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_markup_xaml::markup_extensions::XBinding",
+    "base": "BindingBase",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Markup.Xaml.MarkupExtensions",
+      "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
+    "name": "XBindings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_markup_xaml::markup_extensions::XBindings",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "IsInitialized": {
+        "name": "IsInitialized",
+        "type_name": "bool",
+        "documentation": "XBindings.IsInitialized: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Markup.Xaml.MarkupExtensions",
+      "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"
     ]
   },
   {

@@ -3,7 +3,7 @@ use crate::primitives::{ScrollBarVisibility, SelectingItemsControl};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::test_support::{string_of, test_scope, TestRoot, TestScope};
 use crate::{Canvas, Carousel, Control, DataValidationErrors, ItemsControl, ItemsSource, Panel, ScrollViewer, TextBlock};
-use ferroui_base::animation::{IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority, TemplateBinding};
 use ferroui_base::input::{InputElement, Key, KeyEventArgs};
@@ -82,7 +82,7 @@ fn strings(values: &[&str]) -> Rc<FerroList<String>> {
 
 fn page_slide(orientation: SlideAxis) -> Option<Rc<dyn IPageTransition>> {
     let transition: Rc<dyn IPageTransition> =
-        Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(100.0), orientation));
+        Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(100.0), orientation));
     Some(transition)
 }
 

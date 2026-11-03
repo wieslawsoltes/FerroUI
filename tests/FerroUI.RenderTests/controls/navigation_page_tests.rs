@@ -7,7 +7,7 @@ use crate::test_base::{test_font_family, CompareOptions, TestBase};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{Brushes, Color, SolidColorBrush};
 use ferroui_base::styling::{Selectors, Setter, Style};
-use ferroui_base::threading::{Dispatcher, DispatcherTask};
+use ferroui_base::threading::{Dispatcher, JoinHandle};
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::{Border, ContentPage, Control, Decorator, NavigationPage, TextBlock};
 use ferroui_themes_simple::SimpleTheme;
@@ -32,12 +32,16 @@ fn solid(color: &str) -> Ref<SolidColorBrush> {
     SolidColorBrush::with_color(Color::parse(color).expect("the color is valid"))
 }
 
-fn wait(task: DispatcherTask<()>) {
-    if !task.is_completed() {
+fn wait(mut task: JoinHandle<()>) {
+    if !task.is_finished() {
         Dispatcher::ui_thread().run_jobs(None);
     }
-    assert!(task.is_completed(), "the navigation did not complete");
-    task.result().expect("the navigation was not canceled")
+    assert!(task.is_finished(), "the navigation did not complete");
+    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    match std::future::Future::poll(std::pin::Pin::new(&mut task), &mut context) {
+        std::task::Poll::Ready(outcome) => outcome.expect("the navigation ended without a failure"),
+        std::task::Poll::Pending => unreachable!("the navigation has ended"),
+    }
 }
 
 fn page_content() -> Ref<Border> {

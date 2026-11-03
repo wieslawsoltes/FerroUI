@@ -6,13 +6,13 @@ use super::item_collection_transition_progress::ItemCollectionTransitionProgress
 use ferroui_controls::Control;
 use ferroui_base::animation::easings::{Easing, SplineEasing};
 use ferroui_base::animation::{
-    Animatable, Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, TimeSpan,
+    Animatable, Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, SignedDuration,
 };
 use ferroui_base::data::BindingPriority;
 use ferroui_base::media::MatrixTransform;
 use ferroui_base::reactive::{IObserver, LightweightSubject, Subscription};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::CancellationTokenSource;
+use ferroui_base::threading::CancellationToken;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroLocator, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, LocatorExtensions, Matrix,
@@ -183,7 +183,7 @@ impl AnimationManager {
             transform: MatrixTransform::new(),
             opacity: Rc::new(LightweightSubject::new()),
             values: RefCell::new(Vec::new()),
-            cancellation: CancellationTokenSource::new(),
+            cancellation: CancellationToken::new(),
             progress: transition.start(),
             finished: Cell::new(false),
         });
@@ -219,7 +219,7 @@ impl AnimationManager {
             }
         }));
         let animation = Animation::new();
-        animation.set_duration(TimeSpan::from_milliseconds(timeline.duration()));
+        animation.set_duration(SignedDuration::from_milliseconds(timeline.duration()));
         animation.set_fill_mode(FillMode::Both);
         animation.children().add(KeyFrame::with_cue(
             Cue::new(0.0),
@@ -229,7 +229,7 @@ impl AnimationManager {
             Cue::new(1.0),
             [Setter::new(RepeaterAnimationProxy::progress_property(), 1.0) as _],
         ));
-        let task = animation.run_async_with_clock(&proxy, Some(clock), state.cancellation.token());
+        let task = animation.run_async_with_clock(&proxy, Some(clock), state.cancellation.clone());
         let weak = Rc::downgrade(self);
         task.on_completed(move || {
             if let Some(this) = weak.upgrade() {
@@ -271,7 +271,7 @@ struct RunningTransition {
     transform: Ref<MatrixTransform>,
     opacity: Rc<LightweightSubject<f64>>,
     values: RefCell<Vec<Subscription>>,
-    cancellation: CancellationTokenSource,
+    cancellation: CancellationToken,
     progress: Rc<ItemCollectionTransitionProgress>,
     finished: Cell<bool>,
 }

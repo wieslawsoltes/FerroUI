@@ -1,4 +1,4 @@
-use crate::animation::{Clock, IClock, PlayState, TimeSpan};
+use crate::animation::{Clock, IClock, PlayState, SignedDuration};
 use crate::reactive::{SingleSubscriberObservableBase, IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use crate::utilities::MathUtilities;
 use std::cell::RefCell;
@@ -10,8 +10,8 @@ pub struct TransitionInstance {
     this: Weak<TransitionInstance>,
     core: SingleSubscriberObservableBase<f64>,
     timer_subscription: RefCell<Option<Subscription>>,
-    delay: TimeSpan,
-    duration: TimeSpan,
+    delay: SignedDuration,
+    duration: SignedDuration,
     base_clock: Rc<dyn IClock>,
     clock: RefCell<Option<Rc<Clock>>>,
 }
@@ -20,8 +20,8 @@ pub struct TransitionInstance {
 /// completes or is disposed, whether or not its subscription is kept.
 struct TimerObserver(Rc<TransitionInstance>);
 
-impl IObserver<TimeSpan> for TimerObserver {
-    fn on_next(&self, value: TimeSpan) {
+impl IObserver<SignedDuration> for TimerObserver {
+    fn on_next(&self, value: SignedDuration) {
         self.0.timer_tick(value);
     }
 
@@ -37,7 +37,7 @@ impl IObserver<TimeSpan> for TimerObserver {
 impl TransitionInstance {
     /// Creates the progress of a transition that runs on `clock`, starts
     /// after `delay` and takes `duration`.
-    pub fn new(clock: Rc<dyn IClock>, delay: TimeSpan, duration: TimeSpan) -> Rc<Self> {
+    pub fn new(clock: Rc<dyn IClock>, delay: SignedDuration, duration: SignedDuration) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             core: SingleSubscriberObservableBase::new(),
@@ -49,7 +49,7 @@ impl TransitionInstance {
         })
     }
 
-    fn timer_tick(&self, t: TimeSpan) {
+    fn timer_tick(&self, t: SignedDuration) {
         // [<------------- normalizedTotalDur ------------------>]
         // [<---- Delay ---->][<---------- Duration ------------>]
         //                   ^- normalizedDelayEnd

@@ -16,7 +16,7 @@ mod app;
 #[cfg(feature = "desktop")]
 pub use app::App;
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::collections::FerroList;
 use ferroui_base::controls::NameScope;
 use ferroui_base::metadata::from_markup_value;
@@ -39,7 +39,7 @@ struct Sources {
 
 impl Sources {
     fn new(generation: usize) -> Self {
-        let base = DateTimeOffset::new(2026, 1, 1, 0, 0, 0, TimeSpan::ZERO);
+        let base = DateTimeOffset::new(2026, 1, 1, 0, 0, 0, SignedDuration::ZERO);
         let bump = generation as f64 * 3.0;
         Self {
             categories: Rc::new(FerroList::from_items((1..=6).map(|i| format!("P{i}")))),
@@ -94,7 +94,7 @@ impl DemoState {
     fn add_sample(&self) {
         let sources = self.sources.borrow();
         let n = sources.actual.count();
-        let base = DateTimeOffset::new(2026, 1, 1, 0, 0, 0, TimeSpan::ZERO);
+        let base = DateTimeOffset::new(2026, 1, 1, 0, 0, 0, SignedDuration::ZERO);
         sources.categories.add(format!("P{}", n + 1));
         sources.dates.add(base.add_days(n as f64));
         sources

@@ -6,7 +6,7 @@ use super::{
     CalendarWeekRule, CultureInfo, DateTime, DateTimeFormatInfo, DateTimeKind, DateTimeOffset, DateTimeStyles,
     DayOfWeek, GregorianCalendar, IsoWeek, TestCultureDataProvider, TimeZoneInfo,
 };
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use std::rc::Rc;
 
 fn invariant() -> CultureInfo {
@@ -48,9 +48,10 @@ fn year_first() -> CultureInfo {
 }
 
 fn pin_now(utc: DateTime, offset_hours: i64) {
-    DateTime::set_utc_now_provider(Some(Rc::new(move || utc.specify_kind(DateTimeKind::Utc))));
+    let instant = std::time::SystemTime::try_from(utc.specify_kind(DateTimeKind::Utc)).unwrap();
+    DateTime::set_utc_now_provider(Some(Rc::new(move || instant)));
     TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new(move |_| {
-        TimeSpan::from_ticks(offset_hours * TimeSpan::TICKS_PER_HOUR)
+        SignedDuration::from_ticks(offset_hours * SignedDuration::TICKS_PER_HOUR)
     })));
 }
 
@@ -81,7 +82,7 @@ fn components_round_trip() {
     assert_eq!(value.day_of_year(), 60);
     assert_eq!(value.day_of_week(), DayOfWeek::Thursday);
     assert_eq!(value.date(), DateTime::new(2024, 2, 29));
-    assert_eq!(value.time_of_day(), TimeSpan::from_dhms_milliseconds(0, 13, 45, 59, 123));
+    assert_eq!(value.time_of_day(), SignedDuration::from_dhms_milliseconds(0, 13, 45, 59, 123));
     assert_eq!(value.kind(), DateTimeKind::Unspecified);
     assert_eq!(DateTime::new(2000, 1, 1).ticks(), 630_822_816_000_000_000);
     assert_eq!(DateTime::new(2000, 10, 10).ticks(), 631_067_328_000_000_000);
@@ -182,14 +183,14 @@ fn add_years_handles_leap_days() {
 #[test]
 fn operators_with_time_span() {
     let start = DateTime::new(2024, 1, 1);
-    let end = start + TimeSpan::from_hours(36.0);
+    let end = start + SignedDuration::from_hours(36.0);
     assert_eq!(end, DateTime::new_with_time(2024, 1, 2, 12, 0, 0));
-    assert_eq!(end - start, TimeSpan::from_hours(36.0));
-    assert_eq!(start - end, TimeSpan::from_hours(-36.0));
-    assert_eq!(end - TimeSpan::from_hours(36.0), start);
+    assert_eq!(end - start, SignedDuration::from_hours(36.0));
+    assert_eq!(start - end, SignedDuration::from_hours(-36.0));
+    assert_eq!(end - SignedDuration::from_hours(36.0), start);
     let mut value = start;
-    value += TimeSpan::from_days(1.0);
-    value -= TimeSpan::from_hours(1.0);
+    value += SignedDuration::from_days(1.0);
+    value -= SignedDuration::from_hours(1.0);
     assert_eq!(value, DateTime::new_with_time(2024, 1, 1, 23, 0, 0));
 }
 
@@ -215,14 +216,45 @@ fn now_can_be_pinned() {
     assert_eq!(DateTime::now(), DateTime::new_with_time(2024, 10, 13, 1, 30, 0));
     assert_eq!(DateTime::now().kind(), DateTimeKind::Local);
     assert_eq!(DateTime::today(), DateTime::new(2024, 10, 13));
-    assert_eq!(DateTimeOffset::now().offset(), TimeSpan::from_hours(2.0));
+    assert_eq!(DateTimeOffset::now().offset(), SignedDuration::from_hours(2.0));
     assert_eq!(DateTimeOffset::now().date_time(), DateTime::new_with_time(2024, 10, 13, 1, 30, 0));
-    assert_eq!(DateTimeOffset::utc_now().offset(), TimeSpan::ZERO);
+    assert_eq!(DateTimeOffset::utc_now().offset(), SignedDuration::ZERO);
 
     DateTime::set_utc_now_provider(None);
     TimeZoneInfo::set_local_utc_offset_provider(None);
     assert!(DateTime::utc_now() > DateTime::new(2024, 1, 1));
-    assert_eq!(DateTimeOffset::now().offset(), TimeSpan::ZERO);
+    assert_eq!(DateTimeOffset::now().offset(), SignedDuration::ZERO);
+}
+
+#[test]
+fn the_clock_and_the_local_offset_are_instants() {
+    use std::time::{Duration, SystemTime};
+
+    // 2024-06-01T10:00:00Z.
+    let instant = SystemTime::UNIX_EPOCH + Duration::from_secs(1_717_236_000);
+    DateTime::set_utc_now_provider(Some(Rc::new(move || instant)));
+    let asked = Rc::new(std::cell::Cell::new(None));
+    TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new({
+        let asked = asked.clone();
+        move |at: SystemTime| {
+            asked.set(Some(at));
+            SignedDuration::from_hours(2.0)
+        }
+    })));
+    assert_eq!(super::system_time_now(), instant);
+    assert_eq!(DateTime::utc_now(), DateTime::new_with_time(2024, 6, 1, 10, 0, 0));
+    assert_eq!(DateTime::now(), DateTime::new_with_time(2024, 6, 1, 12, 0, 0));
+    assert_eq!(asked.get(), Some(instant));
+
+    // An instant after the years of DateTime is its largest value.
+    let late = SystemTime::UNIX_EPOCH + Duration::from_secs(400_000_000_000);
+    DateTime::set_utc_now_provider(Some(Rc::new(move || late)));
+    assert_eq!(super::system_time_now(), late);
+    assert_eq!(DateTime::utc_now(), DateTime::MAX_VALUE);
+    assert_eq!(DateTime::utc_now().kind(), DateTimeKind::Utc);
+
+    DateTime::set_utc_now_provider(None);
+    TimeZoneInfo::set_local_utc_offset_provider(None);
 }
 
 #[test]
@@ -675,81 +707,81 @@ fn parse_offsets_and_kinds() {
 
 #[test]
 fn date_time_offset_construction_and_components() {
-    let value = DateTimeOffset::new(2000, 10, 10, 1, 30, 0, TimeSpan::from_hours(2.0));
-    assert_eq!(value.offset(), TimeSpan::from_hours(2.0));
+    let value = DateTimeOffset::new(2000, 10, 10, 1, 30, 0, SignedDuration::from_hours(2.0));
+    assert_eq!(value.offset(), SignedDuration::from_hours(2.0));
     assert_eq!((value.year(), value.month(), value.day(), value.hour(), value.minute(), value.second()), (2000, 10, 10, 1, 30, 0));
     assert_eq!(value.date_time(), DateTime::new_with_time(2000, 10, 10, 1, 30, 0));
     assert_eq!(value.date_time().kind(), DateTimeKind::Unspecified);
     assert_eq!(value.utc_date_time(), DateTime::new_with_time(2000, 10, 9, 23, 30, 0));
     assert_eq!(value.utc_date_time().kind(), DateTimeKind::Utc);
     assert_eq!(value.date(), DateTime::new(2000, 10, 10));
-    assert_eq!(value.time_of_day(), TimeSpan::from_hms(1, 30, 0));
+    assert_eq!(value.time_of_day(), SignedDuration::from_hms(1, 30, 0));
     assert_eq!(value.day_of_week(), DayOfWeek::Tuesday);
     assert_eq!(value.day_of_year(), 284);
-    assert_eq!(value.ticks() - value.utc_ticks(), TimeSpan::from_hours(2.0).ticks());
+    assert_eq!(value.ticks() - value.utc_ticks(), SignedDuration::from_hours(2.0).ticks());
 
     assert_eq!(DateTimeOffset::MIN_VALUE.date_time(), DateTime::MIN_VALUE);
     assert_eq!(DateTimeOffset::MAX_VALUE.date_time(), DateTime::MAX_VALUE);
-    assert_eq!(DateTimeOffset::MIN_VALUE.offset(), TimeSpan::ZERO);
+    assert_eq!(DateTimeOffset::MIN_VALUE.offset(), SignedDuration::ZERO);
     assert_eq!(DateTimeOffset::default(), DateTimeOffset::MIN_VALUE);
 
-    assert!(DateTimeOffset::try_new(2000, 1, 1, 0, 0, 0, TimeSpan::from_hours(15.0)).is_none());
-    assert!(DateTimeOffset::try_new(2000, 1, 1, 0, 0, 0, TimeSpan::from_seconds(30.0)).is_none());
-    assert!(DateTimeOffset::try_new(1, 1, 1, 0, 0, 0, TimeSpan::from_hours(1.0)).is_none());
-    assert!(DateTimeOffset::try_new(2000, 2, 30, 0, 0, 0, TimeSpan::ZERO).is_none());
-    assert!(panics(|| ignore(DateTimeOffset::new(9999, 12, 31, 23, 0, 0, TimeSpan::from_hours(-2.0)))));
+    assert!(DateTimeOffset::try_new(2000, 1, 1, 0, 0, 0, SignedDuration::from_hours(15.0)).is_none());
+    assert!(DateTimeOffset::try_new(2000, 1, 1, 0, 0, 0, SignedDuration::from_seconds(30.0)).is_none());
+    assert!(DateTimeOffset::try_new(1, 1, 1, 0, 0, 0, SignedDuration::from_hours(1.0)).is_none());
+    assert!(DateTimeOffset::try_new(2000, 2, 30, 0, 0, 0, SignedDuration::ZERO).is_none());
+    assert!(panics(|| ignore(DateTimeOffset::new(9999, 12, 31, 23, 0, 0, SignedDuration::from_hours(-2.0)))));
 }
 
 #[test]
 fn date_time_offset_compares_instants() {
-    let first = DateTimeOffset::new(2000, 10, 10, 12, 0, 0, TimeSpan::from_hours(2.0));
-    let same = DateTimeOffset::new(2000, 10, 10, 10, 0, 0, TimeSpan::ZERO);
-    let later = DateTimeOffset::new(2000, 10, 10, 11, 0, 0, TimeSpan::ZERO);
+    let first = DateTimeOffset::new(2000, 10, 10, 12, 0, 0, SignedDuration::from_hours(2.0));
+    let same = DateTimeOffset::new(2000, 10, 10, 10, 0, 0, SignedDuration::ZERO);
+    let later = DateTimeOffset::new(2000, 10, 10, 11, 0, 0, SignedDuration::ZERO);
     assert_eq!(first, same);
     assert!(!first.equals_exact(same));
-    assert!(first.equals_exact(same.to_offset(TimeSpan::from_hours(2.0))));
+    assert!(first.equals_exact(same.to_offset(SignedDuration::from_hours(2.0))));
     assert!(first < later);
     assert_eq!(DateTimeOffset::compare(first, later), -1);
     assert_eq!(later.compare_to(first), 1);
-    assert_eq!(later - first, TimeSpan::from_hours(1.0));
+    assert_eq!(later - first, SignedDuration::from_hours(1.0));
     // Optional values order the way the pickers compare them.
     assert!(Some(first) < Some(later));
 }
 
 #[test]
 fn date_time_offset_arithmetic_keeps_the_offset() {
-    let value = DateTimeOffset::new(2024, 1, 31, 12, 0, 0, TimeSpan::from_hours(-8.0));
-    assert_eq!(value.add_months(1), DateTimeOffset::new(2024, 2, 29, 12, 0, 0, TimeSpan::from_hours(-8.0)));
-    assert_eq!(value.add_months(1).offset(), TimeSpan::from_hours(-8.0));
+    let value = DateTimeOffset::new(2024, 1, 31, 12, 0, 0, SignedDuration::from_hours(-8.0));
+    assert_eq!(value.add_months(1), DateTimeOffset::new(2024, 2, 29, 12, 0, 0, SignedDuration::from_hours(-8.0)));
+    assert_eq!(value.add_months(1).offset(), SignedDuration::from_hours(-8.0));
     assert_eq!(value.add_years(1).date(), DateTime::new(2025, 1, 31));
     assert_eq!(value.add_days(1.0).day(), 1);
-    assert_eq!((value + TimeSpan::from_minutes(30.0)).minute(), 30);
-    assert_eq!((value - TimeSpan::from_hours(12.0)).hour(), 0);
+    assert_eq!((value + SignedDuration::from_minutes(30.0)).minute(), 30);
+    assert_eq!((value - SignedDuration::from_hours(12.0)).hour(), 0);
     assert_eq!(value.to_universal_time().hour(), 20);
-    assert_eq!(value.to_offset(TimeSpan::from_hours(1.0)).date_time(), DateTime::new_with_time(2024, 1, 31, 21, 0, 0));
+    assert_eq!(value.to_offset(SignedDuration::from_hours(1.0)).date_time(), DateTime::new_with_time(2024, 1, 31, 21, 0, 0));
     assert!(panics(|| ignore(DateTimeOffset::MAX_VALUE.add_days(1.0))));
-    assert!(panics(|| ignore(DateTimeOffset::MAX_VALUE.to_offset(TimeSpan::from_hours(1.0)))));
+    assert!(panics(|| ignore(DateTimeOffset::MAX_VALUE.to_offset(SignedDuration::from_hours(1.0)))));
 }
 
 #[test]
 fn date_time_offset_from_date_time() {
     pin_now(DateTime::new(2024, 1, 1), 3);
     let clock = DateTime::new_with_time(2024, 6, 1, 12, 0, 0);
-    assert_eq!(DateTimeOffset::from_date_time(clock).offset(), TimeSpan::from_hours(3.0));
+    assert_eq!(DateTimeOffset::from_date_time(clock).offset(), SignedDuration::from_hours(3.0));
     assert_eq!(DateTimeOffset::from(clock).date_time(), clock);
-    assert_eq!(DateTimeOffset::from_date_time(clock.specify_kind(DateTimeKind::Utc)).offset(), TimeSpan::ZERO);
-    assert_eq!(DateTimeOffset::from_date_time_offset(clock, TimeSpan::from_hours(-1.0)).utc_date_time().hour(), 13);
-    assert!(panics(move || ignore(DateTimeOffset::from_date_time_offset(clock.specify_kind(DateTimeKind::Utc), TimeSpan::from_hours(1.0)))));
-    let value = DateTimeOffset::new(2024, 6, 1, 12, 0, 0, TimeSpan::ZERO);
+    assert_eq!(DateTimeOffset::from_date_time(clock.specify_kind(DateTimeKind::Utc)).offset(), SignedDuration::ZERO);
+    assert_eq!(DateTimeOffset::from_date_time_offset(clock, SignedDuration::from_hours(-1.0)).utc_date_time().hour(), 13);
+    assert!(panics(move || ignore(DateTimeOffset::from_date_time_offset(clock.specify_kind(DateTimeKind::Utc), SignedDuration::from_hours(1.0)))));
+    let value = DateTimeOffset::new(2024, 6, 1, 12, 0, 0, SignedDuration::ZERO);
     assert_eq!(value.local_date_time(), DateTime::new_with_time(2024, 6, 1, 15, 0, 0));
     assert_eq!(value.local_date_time().kind(), DateTimeKind::Local);
-    assert_eq!(value.to_local_time().offset(), TimeSpan::from_hours(3.0));
-    assert_eq!(DateTimeOffset::from_ticks(clock.ticks(), TimeSpan::ZERO).date_time(), clock);
+    assert_eq!(value.to_local_time().offset(), SignedDuration::from_hours(3.0));
+    assert_eq!(DateTimeOffset::from_ticks(clock.ticks(), SignedDuration::ZERO).date_time(), clock);
 }
 
 #[test]
 fn date_time_offset_formatting() {
-    let value = DateTimeOffset::new(2000, 10, 10, 9, 5, 0, TimeSpan::from_hms(-5, -30, 0));
+    let value = DateTimeOffset::new(2000, 10, 10, 9, 5, 0, SignedDuration::from_hms(-5, -30, 0));
     assert_eq!(value.to_string_format("", &invariant()), "10/10/2000 09:05:00 -05:30");
     assert_eq!(value.to_string_format("", &en_us()), "10/10/2000 9:05:00\u{202F}AM -05:30");
     assert_eq!(value.to_string_provider(&en_us()), "10/10/2000 9:05:00\u{202F}AM -05:30");
@@ -765,7 +797,7 @@ fn date_time_offset_formatting() {
     assert_eq!(value.to_string_format("u", &en_us()), "2000-10-10 14:35:00Z");
     assert_eq!(value.to_string_format("R", &en_us()), "Tue, 10 Oct 2000 14:35:00 GMT");
     assert!(value.try_to_string_format("U", &en_us()).is_err());
-    let utc = DateTimeOffset::new(2000, 10, 10, 0, 0, 0, TimeSpan::ZERO);
+    let utc = DateTimeOffset::new(2000, 10, 10, 0, 0, 0, SignedDuration::ZERO);
     assert_eq!(utc.to_string_format("", &en_us()), "10/10/2000 12:00:00\u{202F}AM +00:00");
     CultureInfo::set_current_culture(en_us());
     assert_eq!(utc.to_string(), "10/10/2000 12:00:00\u{202F}AM +00:00");
@@ -854,40 +886,40 @@ fn day_of_week_values() {
 
 #[test]
 fn time_span_members_of_the_pickers() {
-    let value = TimeSpan::from_hms(13, 5, 9);
+    let value = SignedDuration::from_hms(13, 5, 9);
     assert_eq!((value.days(), value.hours(), value.minutes(), value.seconds(), value.milliseconds()), (0, 13, 5, 9, 0));
-    assert_eq!(TimeSpan::from_hours(10.0), TimeSpan::from_hms(10, 0, 0));
-    assert_eq!(TimeSpan::from_days(1.5), TimeSpan::from_dhms(1, 12, 0, 0));
-    assert_eq!(TimeSpan::from_dhms_milliseconds(1, 2, 3, 4, 5).ticks(), 937_840_050_000);
-    assert_eq!(TimeSpan::from_dhms(1, 12, 0, 0).total_days(), 1.5);
-    assert_eq!(TimeSpan::from_hms(1, 30, 0).total_hours(), 1.5);
-    assert_eq!(TimeSpan::from_hms(0, 1, 30).total_minutes(), 1.5);
-    assert_eq!(TimeSpan::from_hms(-1, -30, 0).duration(), TimeSpan::from_hms(1, 30, 0));
-    assert_eq!(TimeSpan::from_hms(-1, -30, 0).hours(), -1);
-    assert_eq!(TimeSpan::from_hms(-1, -30, 0).minutes(), -30);
-    assert_eq!(TimeSpan::from_hms(25, 0, 0).days(), 1);
+    assert_eq!(SignedDuration::from_hours(10.0), SignedDuration::from_hms(10, 0, 0));
+    assert_eq!(SignedDuration::from_days(1.5), SignedDuration::from_dhms(1, 12, 0, 0));
+    assert_eq!(SignedDuration::from_dhms_milliseconds(1, 2, 3, 4, 5).ticks(), 937_840_050_000);
+    assert_eq!(SignedDuration::from_dhms(1, 12, 0, 0).total_days(), 1.5);
+    assert_eq!(SignedDuration::from_hms(1, 30, 0).total_hours(), 1.5);
+    assert_eq!(SignedDuration::from_hms(0, 1, 30).total_minutes(), 1.5);
+    assert_eq!(SignedDuration::from_hms(-1, -30, 0).duration(), SignedDuration::from_hms(1, 30, 0));
+    assert_eq!(SignedDuration::from_hms(-1, -30, 0).hours(), -1);
+    assert_eq!(SignedDuration::from_hms(-1, -30, 0).minutes(), -30);
+    assert_eq!(SignedDuration::from_hms(25, 0, 0).days(), 1);
 
     // The formats of the time picker.
     assert_eq!(value.to_string_format("%h"), "13");
-    assert_eq!(TimeSpan::from_hms(3, 5, 9).to_string_format("%h"), "3");
-    assert_eq!(TimeSpan::from_hms(3, 5, 9).to_string_format("hh"), "03");
+    assert_eq!(SignedDuration::from_hms(3, 5, 9).to_string_format("%h"), "3");
+    assert_eq!(SignedDuration::from_hms(3, 5, 9).to_string_format("hh"), "03");
     assert_eq!(value.to_string_format("mm"), "05");
     assert_eq!(value.to_string_format("%m"), "5");
     assert_eq!(value.to_string_format("ss"), "09");
     assert_eq!(value.to_string_format("%s"), "9");
-    assert_eq!(TimeSpan::from_hms(0, 0, 0).to_string_format("mm"), "00");
+    assert_eq!(SignedDuration::from_hms(0, 0, 0).to_string_format("mm"), "00");
     assert_eq!(value.to_string_format("hh\\:mm\\:ss"), "13:05:09");
     assert_eq!(value.to_string_format("h'h 'm'm'"), "13h 5m");
-    assert_eq!(TimeSpan::from_dhms_milliseconds(2, 3, 4, 5, 60).to_string_format("d\\.hh\\:mm\\:ss\\.fff"), "2.03:04:05.060");
-    assert_eq!(TimeSpan::from_dhms_milliseconds(0, 0, 0, 5, 60).to_string_format("s\\.FFF"), "5.06");
-    assert_eq!(TimeSpan::from_hms(-3, 0, 0).to_string_format("hh"), "03");
+    assert_eq!(SignedDuration::from_dhms_milliseconds(2, 3, 4, 5, 60).to_string_format("d\\.hh\\:mm\\:ss\\.fff"), "2.03:04:05.060");
+    assert_eq!(SignedDuration::from_dhms_milliseconds(0, 0, 0, 5, 60).to_string_format("s\\.FFF"), "5.06");
+    assert_eq!(SignedDuration::from_hms(-3, 0, 0).to_string_format("hh"), "03");
     // Standard formats.
     assert_eq!(value.to_string_format(""), "13:05:09");
     assert_eq!(value.to_string_format("c"), "13:05:09");
     assert_eq!(value.to_string_format("g"), "13:05:09");
-    assert_eq!(TimeSpan::from_dhms_milliseconds(1, 3, 5, 9, 500).to_string_format("g"), "1:3:05:09.5");
-    assert_eq!(TimeSpan::from_hms(3, 5, 9).to_string_format("G"), "0:03:05:09.0000000");
-    assert_eq!(TimeSpan::from_hms(-3, -5, -9).to_string_format("g"), "-3:05:09");
+    assert_eq!(SignedDuration::from_dhms_milliseconds(1, 3, 5, 9, 500).to_string_format("g"), "1:3:05:09.5");
+    assert_eq!(SignedDuration::from_hms(3, 5, 9).to_string_format("G"), "0:03:05:09.0000000");
+    assert_eq!(SignedDuration::from_hms(-3, -5, -9).to_string_format("g"), "-3:05:09");
     // Invalid formats.
     for invalid in ["x", "hh:mm", "hhh", "mmm", "sss", "%", "%%", "'open", "end\\", "HH"] {
         assert!(value.try_to_string_format(invalid).is_err(), "{invalid}");
@@ -984,7 +1016,7 @@ fn date_time_offset_parse_matches_net() {
 
     let mut failures = Vec::new();
     for (text, expected) in DATE_TIME_OFFSET_PARSE {
-        let actual = DateTimeOffset::parse(text, &CultureInfo::invariant_culture()).ok().map(|value| (value.ticks(), value.offset().ticks() / TimeSpan::TICKS_PER_MINUTE));
+        let actual = DateTimeOffset::parse(text, &CultureInfo::invariant_culture()).ok().map(|value| (value.ticks(), value.offset().ticks() / SignedDuration::TICKS_PER_MINUTE));
         if actual != *expected {
             failures.push(format!("{text:?}: expected {expected:?}, got {actual:?}"));
         }
@@ -992,7 +1024,7 @@ fn date_time_offset_parse_matches_net() {
     }
 
     for (text, expected, expected_date_time) in OFFSET_PARSE {
-        let actual = DateTimeOffset::parse(text, &CultureInfo::invariant_culture()).ok().map(|value| (value.ticks(), value.offset().ticks() / TimeSpan::TICKS_PER_MINUTE));
+        let actual = DateTimeOffset::parse(text, &CultureInfo::invariant_culture()).ok().map(|value| (value.ticks(), value.offset().ticks() / SignedDuration::TICKS_PER_MINUTE));
         if actual != *expected {
             failures.push(format!("{text:?}: expected {expected:?}, got {actual:?}"));
         }
@@ -1011,13 +1043,13 @@ fn date_time_offset_parses_the_stated_offset_or_the_local_one() {
     let invariant = CultureInfo::invariant_culture();
     // An offset in the text is the offset of the value.
     let parsed = DateTimeOffset::parse("2024-03-05T14:30:15+02:00", &invariant).unwrap();
-    assert!(parsed.equals_exact(DateTimeOffset::new(2024, 3, 5, 14, 30, 15, TimeSpan::from_hours(2.0))));
+    assert!(parsed.equals_exact(DateTimeOffset::new(2024, 3, 5, 14, 30, 15, SignedDuration::from_hours(2.0))));
     let parsed = DateTimeOffset::parse("2024-03-05T14:30:15.5-05:30", &invariant).unwrap();
-    assert_eq!(parsed.offset(), TimeSpan::from_minutes(-330.0));
+    assert_eq!(parsed.offset(), SignedDuration::from_minutes(-330.0));
     assert_eq!((parsed.hour(), parsed.minute(), parsed.second(), parsed.millisecond()), (14, 30, 15, 500));
     // The UTC designator is the offset zero.
     let parsed = DateTimeOffset::parse("2024-03-05T14:30:15Z", &invariant).unwrap();
-    assert!(parsed.equals_exact(DateTimeOffset::new(2024, 3, 5, 14, 30, 15, TimeSpan::ZERO)));
+    assert!(parsed.equals_exact(DateTimeOffset::new(2024, 3, 5, 14, 30, 15, SignedDuration::ZERO)));
     // Without an offset the text is a local time.
     let parsed = DateTimeOffset::parse("03/05/2024 14:30:15", &invariant).unwrap();
     let clock = DateTime::new_with_time(2024, 3, 5, 14, 30, 15);
@@ -1113,7 +1145,7 @@ fn date_time_before_1970_converts_where_the_platform_can_hold_it() {
 fn local_and_unspecified_date_times_are_local_time_for_system_time() {
     use std::time::SystemTime;
 
-    TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new(|_| TimeSpan::from_hours(-5.0))));
+    TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new(|_| SignedDuration::from_hours(-5.0))));
     let clock = DateTime::new_with_time(2024, 6, 1, 10, 0, 0);
     let instant = system_time(1_717_254_000, 0).unwrap();
     assert_eq!(SystemTime::try_from(clock), Ok(instant));
@@ -1133,7 +1165,7 @@ fn local_and_unspecified_date_times_are_local_time_for_system_time() {
 fn date_time_offset_converts_to_and_from_system_time() {
     use std::time::SystemTime;
 
-    let value = DateTimeOffset::new(2024, 3, 5, 14, 30, 15, TimeSpan::from_hours(2.0));
+    let value = DateTimeOffset::new(2024, 3, 5, 14, 30, 15, SignedDuration::from_hours(2.0));
     let time = SystemTime::try_from(value).unwrap();
     assert_eq!(time, system_time(1_709_641_815, 0).unwrap());
 
@@ -1141,7 +1173,7 @@ fn date_time_offset_converts_to_and_from_system_time() {
     let back = DateTimeOffset::try_from(time).unwrap();
     assert_eq!(back, value);
     assert!(!back.equals_exact(value));
-    assert_eq!(back.offset(), TimeSpan::ZERO);
+    assert_eq!(back.offset(), SignedDuration::ZERO);
     assert_eq!(back.utc_date_time(), value.utc_date_time());
     assert!(back.equals_exact(value.to_universal_time()));
 

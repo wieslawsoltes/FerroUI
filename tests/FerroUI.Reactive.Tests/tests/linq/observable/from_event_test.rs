@@ -12,6 +12,10 @@
 //! threads that have no context, run on that thread with the context cleared, since the sequence
 //! belongs to the thread that made it. The waits for the handler to be added and removed are checks
 //! of flags, since the context `MyEventSyncCtx` runs the work it is posted at once.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::{IScheduler, ScheduledAction, Scheduler};
 use ferroui_reactive::{IDisposable, IObservable, Observable, ObservableExt};

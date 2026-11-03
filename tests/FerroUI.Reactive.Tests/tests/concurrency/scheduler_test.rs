@@ -23,6 +23,10 @@
 //! scheduler, which the cancellation does not need to run. `ConfigureAwait(true)` of a
 //! `SchedulerOperation` is `configure_await(true)`, and the context `MySyncCtx` counts the work it
 //! is posted, which `SchedulerAsync_ScheduleAsync_SyncCtx` checks in addition.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::{
     IScheduler, ISchedulerPeriodic, IStopwatch, IStopwatchProvider, ScheduledAction, Scheduler, SchedulerExt,
@@ -32,8 +36,7 @@ use ferroui_reactive::{IDisposable, IObserver, ObservableError};
 use ferroui_reactive_testing::{assert_messages, assert_throws, duration_to_ticks, ticks_to_duration, ticks_to_time, ReactiveTest as RT, TestScheduler};
 use ferroui_system::threading::tasks::{TaskCanceledError, TaskCompletionSource};
 use ferroui_system::threading::{
-    current_synchronization_context, set_synchronization_context, CancellationToken, CancellationTokenSource,
-    SynchronizationContext,
+    current_synchronization_context, set_synchronization_context, CancellationToken, SynchronizationContext,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -638,9 +641,9 @@ fn scheduler_async_awaiters() {
 
 #[test]
 fn scheduler_async_yield_cancel1() {
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
-    let op = Scheduler::immediate().yield_with_token(cts.token());
+    let op = Scheduler::immediate().yield_with_token(cts.clone());
     let aw = op.get_awaiter();
 
     cts.cancel();
@@ -652,9 +655,9 @@ fn scheduler_async_yield_cancel1() {
 
 #[test]
 fn scheduler_async_yield_cancel2() {
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
-    let op = Scheduler::immediate().yield_with_token(cts.token());
+    let op = Scheduler::immediate().yield_with_token(cts.clone());
     let aw = op.get_awaiter();
 
     assert!(!aw.is_completed());
@@ -672,9 +675,9 @@ fn scheduler_async_yield_cancel2() {
 #[test]
 fn scheduler_async_sleep_cancel() {
     let s = TestScheduler::new();
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
-    let op = s.scheduler().sleep_with_token(Duration::from_secs(3600), cts.token());
+    let op = s.scheduler().sleep_with_token(Duration::from_secs(3600), cts.clone());
     let aw = op.get_awaiter();
 
     assert!(!aw.is_completed());

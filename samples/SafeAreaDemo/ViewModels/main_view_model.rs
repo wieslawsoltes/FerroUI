@@ -1,7 +1,7 @@
 //! Port of `ViewModels/MainViewModel.cs`.
 
 use ferroui_base::animation::easings::{IEasing, LinearEasing};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::ThemeVariant;
@@ -24,7 +24,7 @@ pub struct MainViewModel {
     auto_safe_area_padding: Cell<bool>,
     input_pane: RefCell<Option<Rc<dyn IInputPane>>>,
     input_pane_easing: RefCell<Option<Rc<dyn IEasing>>>,
-    input_pane_duration: Cell<Option<TimeSpan>>,
+    input_pane_duration: Cell<Option<SignedDuration>>,
     canvas_size: Cell<Rect>,
     /// The handler added to `SafeAreaChanged` of the insets manager (`+=`), removed by the
     /// next [`initialize`](Self::initialize) (`-=`).
@@ -72,7 +72,7 @@ impl MainViewModel {
         self.input_pane_easing.borrow().clone()
     }
 
-    pub fn input_pane_duration(&self) -> Option<TimeSpan> {
+    pub fn input_pane_duration(&self) -> Option<SignedDuration> {
         self.input_pane_duration.get()
     }
 
@@ -214,7 +214,7 @@ impl MainViewModel {
     }
 
     fn input_pane_on_state_changed(&self, e: &InputPaneStateEventArgs) {
-        self.input_pane_duration.set(Some(TimeSpan::from(e.animation_duration())));
+        self.input_pane_duration.set(Some(SignedDuration::from(e.animation_duration())));
         *self.input_pane_easing.borrow_mut() = Some(e.easing().cloned().unwrap_or_else(|| Rc::new(LinearEasing)));
         self.raise_keyboard_changed();
     }
@@ -263,7 +263,7 @@ ferro_markup_type!(class MainViewModel {
     properties: [
         InputPaneState: InputPaneState { get: |this: &Rc<MainViewModel>| this.input_pane_state() },
         InputPaneEasing: Option<Rc<dyn IEasing>> { get: |this: &Rc<MainViewModel>| this.input_pane_easing() },
-        InputPaneDuration: Option<TimeSpan> { get: |this: &Rc<MainViewModel>| this.input_pane_duration() },
+        InputPaneDuration: Option<SignedDuration> { get: |this: &Rc<MainViewModel>| this.input_pane_duration() },
         InputPaneMarkerMargin: Thickness { get: |this: &Rc<MainViewModel>| this.input_pane_marker_margin() },
         InputPaneRect: Rect { get: |this: &Rc<MainViewModel>| this.input_pane_rect() },
         CanvasSize: Rect {

@@ -5,7 +5,7 @@
 
 use crate::animation::easings::*;
 use crate::animation::{
-    CompositePageTransition, CrossFade, FillMode, IPageTransition, PageSlide, Rotate3DTransition, SlideAxis, TimeSpan,
+    CompositePageTransition, CrossFade, FillMode, IPageTransition, PageSlide, Rotate3DTransition, SlideAxis, SignedDuration,
 };
 use crate::data::core::ValueTypes;
 use crate::ferro_markup_type;
@@ -363,12 +363,12 @@ ferro_markup_type!(class CrossFade {
     interfaces: [Rc<dyn IPageTransition>],
     constructors: [
         () => || Rc::new(CrossFade::new()),
-        (TimeSpan) => |duration: TimeSpan| Rc::new(CrossFade::with_duration(duration)),
+        (SignedDuration) => |duration: SignedDuration| Rc::new(CrossFade::with_duration(duration)),
     ],
     properties: [
-        Duration: TimeSpan {
+        Duration: SignedDuration {
             get: |t: &Rc<CrossFade>| t.duration(),
-            set: |t: &Rc<CrossFade>, value: TimeSpan| t.set_duration(value)
+            set: |t: &Rc<CrossFade>, value: SignedDuration| t.set_duration(value)
         },
         FadeInEasing: Easing {
             get: |t: &Rc<CrossFade>| t.fade_in_easing(),
@@ -392,14 +392,14 @@ ferro_markup_type!(class PageSlide {
     interfaces: [Rc<dyn IPageTransition>],
     constructors: [
         () => || Rc::new(PageSlide::new()),
-        (TimeSpan, SlideAxis) => |duration: TimeSpan, orientation: SlideAxis| {
+        (SignedDuration, SlideAxis) => |duration: SignedDuration, orientation: SlideAxis| {
             Rc::new(PageSlide::with_duration(duration, orientation))
         },
     ],
     properties: [
-        Duration: TimeSpan {
+        Duration: SignedDuration {
             get: |t: &Rc<PageSlide>| t.duration(),
-            set: |t: &Rc<PageSlide>, value: TimeSpan| t.set_duration(value)
+            set: |t: &Rc<PageSlide>, value: SignedDuration| t.set_duration(value)
         },
         Orientation: SlideAxis {
             get: |t: &Rc<PageSlide>| t.orientation(),
@@ -429,7 +429,7 @@ ferro_markup_type!(class Rotate3DTransition {
     interfaces: [Rc<dyn IPageTransition>],
     constructors: [
         () => || Rc::new(Rotate3DTransition::new()),
-        (TimeSpan, SlideAxis, Option<f64>) => |duration: TimeSpan, orientation: SlideAxis, depth: Option<f64>| {
+        (SignedDuration, SlideAxis, Option<f64>) => |duration: SignedDuration, orientation: SlideAxis, depth: Option<f64>| {
             Rc::new(Rotate3DTransition::with_duration(duration, orientation, depth))
         },
     ],
@@ -438,9 +438,9 @@ ferro_markup_type!(class Rotate3DTransition {
             get: |t: &Rc<Rotate3DTransition>| t.depth(),
             set: |t: &Rc<Rotate3DTransition>, value: Option<f64>| t.set_depth(value)
         },
-        Duration: TimeSpan {
+        Duration: SignedDuration {
             get: |t: &Rc<Rotate3DTransition>| t.duration(),
-            set: |t: &Rc<Rotate3DTransition>, value: TimeSpan| t.set_duration(value)
+            set: |t: &Rc<Rotate3DTransition>, value: SignedDuration| t.set_duration(value)
         },
         Orientation: SlideAxis {
             get: |t: &Rc<Rotate3DTransition>| t.orientation(),

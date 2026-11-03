@@ -1,7 +1,7 @@
 //! Port of `RenderTarget/RenderTargetBitmapBehavior.cs`.
 
 use crate::{IRenderTargetBitmapRenderHost, IRenderTargetBitmapRenderer};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::imaging::RenderTargetBitmap;
 use ferroui_base::media::IImage;
 use ferroui_base::reactive::IDisposable;
@@ -193,7 +193,7 @@ impl RenderTargetBitmapBehavior {
         Rc::new(RenderHostHandle(self.to_ref()))
     }
 
-    fn elapsed(&self) -> TimeSpan {
+    fn elapsed(&self) -> SignedDuration {
         let now = Dispatcher::ui_thread().now();
         let start = match self.stopwatch_start.get() {
             Some(start) => start,
@@ -202,7 +202,7 @@ impl RenderTargetBitmapBehavior {
                 now
             }
         };
-        TimeSpan::from_milliseconds((now - start) as f64)
+        SignedDuration::from_milliseconds((now - start) as f64)
     }
 
     fn on_tick(&self) {

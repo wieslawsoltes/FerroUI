@@ -1,7 +1,7 @@
 //! Port of `Animations/FadeInBehavior.cs`.
 
 use crate::{AttachedToVisualTreeBehavior, AttachedToVisualTreeBehaviorImpl};
-use ferroui_base::animation::{Animatable, TimeSpan};
+use ferroui_base::animation::{Animatable, SignedDuration};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObjectImpl, FerroProperty, Ref, StaticType,
@@ -29,13 +29,13 @@ ferroui_base::ferro_impl_classes!(
 ferro_properties! {
     impl FadeInBehavior {
         /// Gets or sets the delay before the animation starts.
-        pub fn initial_delay_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<FadeInBehavior, _>("InitialDelay", TimeSpan::from_milliseconds(500.0))
+        pub fn initial_delay_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<FadeInBehavior, _>("InitialDelay", SignedDuration::from_milliseconds(500.0))
         }
 
         /// Gets or sets the duration of the fade in animation.
-        pub fn duration_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<FadeInBehavior, _>("Duration", TimeSpan::from_milliseconds(250.0))
+        pub fn duration_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<FadeInBehavior, _>("Duration", SignedDuration::from_milliseconds(250.0))
         }
     }
 }
@@ -69,20 +69,20 @@ impl FadeInBehavior {
     }
 
     /// The delay before the animation starts.
-    pub fn initial_delay(&self) -> TimeSpan {
+    pub fn initial_delay(&self) -> SignedDuration {
         self.get_value(Self::initial_delay_property())
     }
 
-    pub fn set_initial_delay(&self, value: TimeSpan) {
+    pub fn set_initial_delay(&self, value: SignedDuration) {
         self.set_value(Self::initial_delay_property(), value)
     }
 
     /// The duration of the fade in animation.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.get_value(Self::duration_property())
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.set_value(Self::duration_property(), value)
     }
 }

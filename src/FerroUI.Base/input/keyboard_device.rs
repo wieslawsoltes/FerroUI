@@ -177,6 +177,9 @@ impl KeyboardDevice {
         key_modifiers: KeyModifiers,
         is_focus_change_cancellable: bool,
     ) {
+        if method == NavigationMethod::Pointer && element.is_some_and(|e| !e.allow_focus_on_interaction()) {
+            return;
+        }
         let focused_element = self.focused_element();
 
         if element == focused_element.as_ref() {
@@ -229,7 +232,7 @@ impl KeyboardDevice {
             }
         }
 
-        if !change_focus {
+        if !change_focus || (method == NavigationMethod::Pointer && element.as_ref().is_some_and(|e| !e.allow_focus_on_interaction())) {
             return;
         }
 

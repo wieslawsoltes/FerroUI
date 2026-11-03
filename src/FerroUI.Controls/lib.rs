@@ -194,6 +194,8 @@ mod button_tests;
 #[cfg(test)]
 mod property_defaults_tests;
 #[cfg(test)]
+mod timer_interval_tests;
+#[cfg(test)]
 mod control_focus_adorner_tests;
 #[cfg(test)]
 mod hotkey_manager_tests;
@@ -550,6 +552,8 @@ pub use rich_text_block_overflow::RichTextBlockOverflow;
 pub use rich_text_layout::RichTextLineMetrics;
 #[cfg(test)]
 mod rich_text_block_tests;
+#[cfg(test)]
+mod rich_text_selection_overlay_tests;
 mod text_changed_event_args;
 mod text_changing_event_args;
 mod text_layout_rounding_placement;

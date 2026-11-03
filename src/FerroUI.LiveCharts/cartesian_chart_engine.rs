@@ -485,9 +485,15 @@ impl CartesianChartEngine {
                 SeriesKind::Heat => draw_heat(&mut scene, si, s, points, xs, ys, x_axes, y_axes),
                 SeriesKind::Financial => draw_financial(&mut scene, si, s, points, xs, ys, x_axes),
                 SeriesKind::Box => draw_box(&mut scene, si, s, series, points, xs, ys, x_axes),
-                SeriesKind::Pie | SeriesKind::PolarLine => {
+                SeriesKind::Pie
+                | SeriesKind::PolarLine
+                | SeriesKind::Sankey
+                | SeriesKind::Treemap
+                | SeriesKind::HeatLand => {
                     return Err(ChartError::InvalidData(
-                        "a pie or polar series requires its matching chart engine".into(),
+                        "a pie, polar, Sankey, treemap or heat land series requires its matching \
+                         chart engine"
+                            .into(),
                     ));
                 }
             }

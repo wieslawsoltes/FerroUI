@@ -1,5 +1,5 @@
 use crate::animation::easings::Easing;
-use crate::animation::{Animatable, IClock, TimeSpan};
+use crate::animation::{Animatable, IClock, SignedDuration};
 use crate::reactive::IDisposable;
 use crate::{
     ferro_class, ferro_property, BoxedValue, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
@@ -13,8 +13,8 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct TransitionBase {
     base: FerroObject,
-    duration: Cell<TimeSpan>,
-    delay: Cell<TimeSpan>,
+    duration: Cell<SignedDuration>,
+    delay: Cell<SignedDuration>,
     easing: RefCell<Easing>,
     prop: Cell<Option<&'static FerroProperty>>,
 }
@@ -71,24 +71,24 @@ impl TransitionBaseImpl for TransitionBase {
 crate::ferro_properties! { impl TransitionBase {
     ferro_property!(
         /// Defines the `Duration` property.
-        pub fn duration_property() -> DirectProperty<TransitionBase, TimeSpan> {
+        pub fn duration_property() -> DirectProperty<TransitionBase, SignedDuration> {
             FerroProperty::register_direct::<TransitionBase, _>(
                 "Duration",
                 |o| o.duration(),
                 Some(|o, v| o.set_duration(v)),
-                TimeSpan::ZERO,
+                SignedDuration::ZERO,
             )
         }
     );
 
     ferro_property!(
         /// Defines the `Delay` property.
-        pub fn delay_property() -> DirectProperty<TransitionBase, TimeSpan> {
+        pub fn delay_property() -> DirectProperty<TransitionBase, SignedDuration> {
             FerroProperty::register_direct::<TransitionBase, _>(
                 "Delay",
                 |o| o.delay(),
                 Some(|o, v| o.set_delay(v)),
-                TimeSpan::ZERO,
+                SignedDuration::ZERO,
             )
         }
     );
@@ -123,28 +123,28 @@ impl TransitionBase {
     pub fn construct() -> Self {
         Self {
             base: FerroObject::construct(),
-            duration: Cell::new(TimeSpan::ZERO),
-            delay: Cell::new(TimeSpan::ZERO),
+            duration: Cell::new(SignedDuration::ZERO),
+            delay: Cell::new(SignedDuration::ZERO),
             easing: RefCell::new(Easing::default()),
             prop: Cell::new(None),
         }
     }
 
     /// The duration of the transition.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.duration.get()
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.set_and_raise_cell(Self::duration_property(), &self.duration, value);
     }
 
     /// The delay before the transition starts.
-    pub fn delay(&self) -> TimeSpan {
+    pub fn delay(&self) -> SignedDuration {
         self.delay.get()
     }
 
-    pub fn set_delay(&self, value: TimeSpan) {
+    pub fn set_delay(&self, value: SignedDuration) {
         self.set_and_raise_cell(Self::delay_property(), &self.delay, value);
     }
 

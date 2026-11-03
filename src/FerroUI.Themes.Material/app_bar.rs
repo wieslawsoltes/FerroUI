@@ -12,7 +12,7 @@ use crate::app_bar_state::{
 use crate::motion::{
     MaterialMotionRole, MaterialMotionScheme, MaterialSpringState, animations_enabled,
 };
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::input::{
     InputElement, InputElementImpl, InputElementImplExt, KeyModifiers, PointerCaptureLostEventArgs,
@@ -868,7 +868,7 @@ impl MaterialAppBar {
         self.last_frame.set(None);
         let weak = self.to_ref().downgrade();
         let subscription =
-            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: TimeSpan| {
+            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     if !this.is_attached_to_visual_tree() || !this.is_effectively_visible() {
                         this.stop_clock();

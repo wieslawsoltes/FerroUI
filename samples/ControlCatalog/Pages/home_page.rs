@@ -2,7 +2,7 @@
 //! `Pages/HomePage.xaml`.
 
 use crate::markup::xaml_class;
-use ferroui_base::animation::{Animation, Cue, IterationCount, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, Cue, IterationCount, KeyFrame, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::LayoutableImpl;
@@ -82,7 +82,7 @@ impl HomePage {
         target.set_render_transform(Some(transform.into()));
 
         let animation = Animation::new();
-        animation.set_duration(TimeSpan::from_seconds(duration.as_secs_f64()));
+        animation.set_duration(SignedDuration::from_seconds(duration.as_secs_f64()));
         animation.set_iteration_count(IterationCount::INFINITE);
         for (cue, x, y) in [(0.0, 0.0, 0.0), (0.5, dx, dy), (1.0, 0.0, 0.0)] {
             let key_frame = KeyFrame::new();

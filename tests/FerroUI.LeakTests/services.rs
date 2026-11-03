@@ -2,7 +2,7 @@
 //! reference test suite (the mock windowing platform and the Simple theme),
 //! and what stands for a collection of the reference.
 
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::input::{
     AccessKeyHandler, IAccessKeyHandler, IKeyboardDevice, InputManager, KeyModifiers, KeyboardDevice, NavigationMethod,
 };
@@ -15,7 +15,7 @@ use std::rc::Rc;
 
 /// The global clock of a test: it pulses when the test tells it to.
 pub struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
@@ -25,13 +25,13 @@ impl MockGlobalClock {
     }
 
     /// Tells the subscribers of the clock that the time is `time`.
-    pub fn pulse(&self, time: TimeSpan) {
+    pub fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

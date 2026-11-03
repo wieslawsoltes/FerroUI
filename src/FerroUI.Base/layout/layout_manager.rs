@@ -4,7 +4,7 @@ use super::{
     BringIntoViewRequest, EffectiveViewportChangedEventArgs, IBringIntoViewLayoutManager, ILayoutManager, ILayoutRoot,
     Layoutable,
 };
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::MediaContext;
 use crate::rendering::LayoutPassTiming;
@@ -492,7 +492,7 @@ impl ILayoutManager for LayoutManager {
                     logger.log_with_values(
                         Some(self as &dyn Any),
                         "Layout pass finished in {Time}",
-                        &[&TimeSpan::from(elapsed)],
+                        &[&SignedDuration::from(elapsed)],
                     );
                 }
             }

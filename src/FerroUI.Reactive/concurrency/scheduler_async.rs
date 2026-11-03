@@ -8,21 +8,22 @@
 //! Deviation (DEVIATIONS.md, Reactive): the body of `ScheduleAsync` is a closure returning a future
 //! of `Result<(), ObservableError>` (upstream's `Task`) or of `Result<Rc<dyn IDisposable>,
 //! ObservableError>` (`Task<IDisposable>`), which runs as a task of the thread
-//! (`Task::spawn_local`). An awaited operation that the token cancels ends with a
-//! `TaskCanceledError` where upstream's `GetResult` throws `OperationCanceledException`.
+//! (`Task::spawn_local`). An awaited operation that the token cancels ends with a cancellation
+//! (`ferroui_system::task::Canceled`) where upstream's `GetResult` throws
+//! `OperationCanceledException`.
 //!
 //! `SchedulerOperation.ConfigureAwait(true)` ([`SchedulerOperation::configure_await`]) posts the
 //! continuation, when the scheduler runs it, to the `SynchronizationContext` that is current when
-//! the operation is awaited; the continuation is not `Send`, so it is posted with
-//! [`post_local`](ferroui_system::threading::SynchronizationContext::post_local), to the context of
-//! the thread.
+//! the operation is awaited, the current schedule of the thread
+//! (`ferroui_system::task::current_schedule`); the continuation is not `Send`, so it is posted with
+//! [`schedule_local`](ferroui_system::task::Schedule::schedule_local), to the schedule of the
+//! thread.
 
 use super::{IScheduler, ScheduledAction, SchedulerExt};
 use crate::disposables::{Disposable, SingleAssignmentDisposableValue};
 use ferroui_system::threading::tasks::{canceled, Task};
-use ferroui_system::threading::{
-    current_synchronization_context, CancellationToken, CancellationTokenSource, LocalCancellationTokenRegistration,
-};
+use ferroui_system::task::{current_schedule, Schedule};
+use ferroui_system::threading::{CancellationGuard, CancellationToken};
 use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::future::{Future, IntoFuture};
@@ -91,13 +92,13 @@ pub(crate) fn get_cancellation_token(scheduler: &Rc<dyn IScheduler>) -> Cancella
 /// One run of a `ScheduleAsync` body (`AsyncInvocation<TState>`): disposing it cancels the token of
 /// the body and disposes what the body ended with.
 struct AsyncInvocation {
-    cts: CancellationTokenSource,
+    token: CancellationToken,
     run: SingleAssignmentDisposableValue,
 }
 
 impl IDisposable for AsyncInvocation {
     fn dispose(&self) {
-        self.cts.cancel();
+        self.token.cancel();
         self.run.dispose();
     }
 }
@@ -108,11 +109,11 @@ pub(crate) fn invoke_async<R: ScheduleAsyncResult, Fut: Future<Output = Result<R
     scheduler: &Rc<dyn IScheduler>,
     action: impl FnOnce(Rc<dyn IScheduler>, CancellationToken) -> Fut,
 ) -> Rc<dyn IDisposable> {
-    let invocation = Rc::new(AsyncInvocation { cts: CancellationTokenSource::new(), run: SingleAssignmentDisposableValue::new() });
-    if invocation.cts.is_cancellation_requested() {
+    let invocation = Rc::new(AsyncInvocation { token: CancellationToken::new(), run: SingleAssignmentDisposableValue::new() });
+    if invocation.token.is_cancelled() {
         return Disposable::empty();
     }
-    let token = invocation.cts.token();
+    let token = invocation.token.clone();
     let cancelable: Rc<dyn IScheduler> = Rc::new(CancelableScheduler { scheduler: scheduler.clone(), token: token.clone() });
     let task = Task::spawn_local(action(cancelable, token));
     let target = invocation.clone();
@@ -177,7 +178,7 @@ struct AwaiterInner {
     schedule: ScheduleContinuation,
     token: CancellationToken,
     post_back_to_original_context: bool,
-    registration: RefCell<Option<LocalCancellationTokenRegistration>>,
+    registration: RefCell<Option<CancellationGuard>>,
     /// Whether a continuation was given (`_continuation != null`).
     awaited: Cell<bool>,
     /// The continuation until it runs (the guard `ran` of upstream).
@@ -242,7 +243,7 @@ impl SchedulerOperationAwaiter {
             resumed: Cell::new(false),
             waker: RefCell::new(None),
         });
-        if token.can_be_canceled() {
+        if token.can_be_cancelled() {
             let target = Rc::downgrade(&inner);
             let registration = token.register_local(move || {
                 if let Some(target) = target.upgrade() {
@@ -256,13 +257,13 @@ impl SchedulerOperationAwaiter {
 
     /// Whether the operation has ended: false unless its token is cancelled (`IsCompleted`).
     pub fn is_completed(&self) -> bool {
-        self.inner.token.is_cancellation_requested()
+        self.inner.token.is_cancelled()
     }
 
-    /// The outcome of the operation: a `TaskCanceledError` when its token is cancelled
+    /// The outcome of the operation: a cancellation (`Canceled`) when its token is cancelled
     /// (`GetResult`, which throws `OperationCanceledException`).
     pub fn get_result(&self) -> Result<(), ObservableError> {
-        if self.inner.token.is_cancellation_requested() {
+        if self.inner.token.is_cancelled() {
             return canceled();
         }
         Ok(())
@@ -279,9 +280,9 @@ impl SchedulerOperationAwaiter {
         assert!(!self.inner.awaited.replace(true), "The scheduler operation has already been awaited.");
         let mut continuation: Box<dyn FnOnce()> = Box::new(continuation);
         if self.inner.post_back_to_original_context {
-            if let Some(context) = current_synchronization_context() {
+            if let Some(context) = current_schedule() {
                 let original = continuation;
-                continuation = Box::new(move || context.post_local(original));
+                continuation = Box::new(move || Schedule::schedule_local(&*context, original));
             }
         }
         *self.inner.continuation.borrow_mut() = Some(continuation);

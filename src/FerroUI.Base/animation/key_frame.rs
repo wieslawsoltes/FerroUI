@@ -1,4 +1,4 @@
-use crate::animation::{Cue, IAnimationSetter, KeySpline, TimeSpan};
+use crate::animation::{Cue, IAnimationSetter, KeySpline, SignedDuration};
 use crate::collections::FerroList;
 use crate::{ferro_class, ferro_impl_classes, instantiate, FerroObject, FerroObjectImpl, Ref};
 use std::cell::{Cell, RefCell};
@@ -18,7 +18,7 @@ pub(crate) enum KeyFrameTimingMode {
 #[repr(C)]
 pub struct KeyFrame {
     base: FerroObject,
-    k_time_span: Cell<TimeSpan>,
+    k_time_span: Cell<SignedDuration>,
     k_cue: Cell<Cue>,
     k_key_spline: RefCell<Option<Ref<KeySpline>>>,
     setters: FerroList<Rc<dyn IAnimationSetter>>,
@@ -34,7 +34,7 @@ impl KeyFrame {
     pub fn construct() -> Self {
         Self {
             base: FerroObject::construct(),
-            k_time_span: Cell::new(TimeSpan::ZERO),
+            k_time_span: Cell::new(SignedDuration::ZERO),
             k_cue: Cell::new(Cue::default()),
             k_key_spline: RefCell::new(None),
             setters: FerroList::new(),
@@ -55,7 +55,7 @@ impl KeyFrame {
     }
 
     /// Creates a key frame at `key_time` with the given setters.
-    pub fn with_key_time(key_time: TimeSpan, setters: impl IntoIterator<Item = Rc<dyn IAnimationSetter>>) -> Ref<Self> {
+    pub fn with_key_time(key_time: SignedDuration, setters: impl IntoIterator<Item = Rc<dyn IAnimationSetter>>) -> Ref<Self> {
         let result = Self::new();
         result.set_key_time(key_time);
         result.setters.add_range(setters);
@@ -73,13 +73,13 @@ impl KeyFrame {
     }
 
     /// The key time of this key frame.
-    pub fn key_time(&self) -> TimeSpan {
+    pub fn key_time(&self) -> SignedDuration {
         self.k_time_span.get()
     }
 
     /// Sets the key time of this key frame. Panics when the cue has been
     /// set: only one of them can be.
-    pub fn set_key_time(&self, value: TimeSpan) {
+    pub fn set_key_time(&self, value: SignedDuration) {
         if self.timing_mode.get() == KeyFrameTimingMode::Cue {
             panic!("You can only set either KeyTime or Cue.");
         }

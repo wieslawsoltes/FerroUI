@@ -3,7 +3,6 @@ use super::{
     ManagedFileChooserItemType, ManagedFileChooserItemViewModel, ManagedFileChooserSources,
 };
 use crate::ManagedFileDialogOptions;
-use ferroui_base::animation::TimeSpan;
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::metadata::from_markup_value;
@@ -11,7 +10,7 @@ use ferroui_base::platform::storage::file_io::path;
 use ferroui_base::platform::storage::{FilePickerOpenOptions, FilePickerSaveOptions, FolderPickerOpenOptions, IStorageFolder, IStorageItem};
 use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::{DateTime, DateTimeOffset, HandlerList, StringComparison};
+use ferroui_base::utilities::{HandlerList, StringComparison};
 use ferroui_base::{ferro_markup_type, BoxedValue, FerroLocator, LocatorExtensions};
 use ferroui_controls::platform::IMountedVolumeInfoProvider;
 use ferroui_controls::primitives::SelectedItemsList;
@@ -102,18 +101,10 @@ fn file_exists(path: Option<&str>) -> bool {
     path.is_some_and(|path| !path.is_empty() && std::path::Path::new(path).is_file())
 }
 
-/// The local time of the last write of an entry (`LastWriteTime`).
-fn last_write_time(metadata: &std::fs::Metadata) -> DateTime {
-    const NANOSECONDS_PER_TICK: u128 = 100;
-
-    let Ok(time) = metadata.modified() else {
-        return DateTime::default();
-    };
-    let ticks = match time.duration_since(std::time::SystemTime::UNIX_EPOCH) {
-        Ok(after) => (after.as_nanos() / NANOSECONDS_PER_TICK) as i64,
-        Err(before) => -((before.duration().as_nanos() / NANOSECONDS_PER_TICK) as i64),
-    };
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(ticks)).local_date_time()
+/// The time of the last write of an entry (`LastWriteTime`), `None` when
+/// the file system does not report it.
+fn last_write_time(metadata: &std::fs::Metadata) -> Option<std::time::SystemTime> {
+    metadata.modified().ok()
 }
 
 /// Whether an entry is hidden from the listing when hidden files are not

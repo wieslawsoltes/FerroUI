@@ -17,7 +17,7 @@ use crate::{
 };
 use ferroui_base::animation::{
     CrossFade, IClock, IGlobalClock, IPageTransition, IProgressPageTransition, PageSlide, PageTransitionItem,
-    PlayState, SlideAxis, TimeSpan,
+    PlayState, SlideAxis, SignedDuration,
 };
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::TemplateBinding;
@@ -26,7 +26,8 @@ use ferroui_base::input::{SwipeGestureEndedEventArgs, SwipeGestureEventArgs};
 use ferroui_base::layout::Layoutable;
 use ferroui_base::media::{ITransform, ScaleTransform, Transform, TransformGroup, TranslateTransform};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
-use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{FerroLocator, Ref, Size, StaticType, Vector, Visual};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
@@ -40,18 +41,18 @@ fn start() -> TestScope {
 
 /// The global clock of a test: pulses every subscriber.
 struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
 impl MockGlobalClock {
-    fn pulse(&self, time: TimeSpan) {
+    fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -221,8 +222,8 @@ fn swipe(id: i32, x: f64, y: f64) -> SwipeGestureEventArgs {
     SwipeGestureEventArgs::new(id, Vector::new(x, y), Vector::default())
 }
 
-fn completed_task() -> DispatcherTask<()> {
-    Dispatcher::current_dispatcher().to_task_scheduler().start_local(async {})
+fn completed_task() -> JoinHandle<()> {
+    Dispatcher::current_dispatcher().start_local(async {})
 }
 
 /// The stand-in for a task completion source: its task completes when the
@@ -238,8 +239,8 @@ impl TaskGate {
         Rc::new(Self::default())
     }
 
-    fn task(self: &Rc<Self>) -> DispatcherTask<()> {
-        Dispatcher::current_dispatcher().to_task_scheduler().start_local(TaskGateFuture(self.clone()))
+    fn task(self: &Rc<Self>) -> JoinHandle<()> {
+        Dispatcher::current_dispatcher().start_local(TaskGateFuture(self.clone()))
     }
 
     fn set_result(&self) {
@@ -273,7 +274,7 @@ struct StartCall {
     cancellation_token: CancellationToken,
 }
 
-type StartSetup = Box<dyn Fn(&StartCall) -> Option<DispatcherTask<()>>>;
+type StartSetup = Box<dyn Fn(&StartCall) -> Option<JoinHandle<()>>>;
 
 /// A page transition that records how it was started.
 #[derive(Default)]
@@ -288,7 +289,7 @@ impl MockTransition {
     }
 
     /// Sets up the task that a start returns; `None` leaves the default.
-    fn setup(&self, setup: impl Fn(&StartCall) -> Option<DispatcherTask<()>> + 'static) {
+    fn setup(&self, setup: impl Fn(&StartCall) -> Option<JoinHandle<()>> + 'static) {
         *self.setup.borrow_mut() = Some(Box::new(setup));
     }
 
@@ -316,7 +317,7 @@ impl IPageTransition for MockTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let call = StartCall { from: from.cloned(), to: to.cloned(), forward, cancellation_token };
         let task = self.setup.borrow().as_ref().and_then(|setup| setup(&call));
         self.starts.borrow_mut().push(call);
@@ -352,7 +353,7 @@ fn refreshing_swipe_wiring_reuses_a_single_recognizer() {
     let t = create_target(strs(&["foo", "bar"]));
     let (target, carousel) = (&t.panel, &t.carousel);
     let page_slide = || -> Option<Rc<dyn IPageTransition>> {
-        Some(Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(1.0), SlideAxis::Horizontal)))
+        Some(Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(1.0), SlideAxis::Horizontal)))
     };
 
     carousel.set_is_swipe_enabled(true);
@@ -666,12 +667,12 @@ mod transitions {
         layout(&t.panel);
 
         assert!(cancelation_token.borrow().is_some());
-        assert!(!cancelation_token.borrow().as_ref().unwrap().is_cancellation_requested());
+        assert!(!cancelation_token.borrow().as_ref().unwrap().is_cancelled());
 
         t.carousel.set_selected_index(0);
         layout(&t.panel);
 
-        assert!(cancelation_token.borrow().as_ref().unwrap().is_cancellation_requested());
+        assert!(cancelation_token.borrow().as_ref().unwrap().is_cancelled());
     }
 
     #[test]
@@ -729,7 +730,7 @@ mod transitions {
             to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             self.starts
                 .borrow_mut()
                 .push((from.map_or(1.0, |from| from.opacity()), from.and_then(|from| from.render_transform())));
@@ -743,7 +744,7 @@ mod transitions {
             }
 
             // Never completes: the reference waits until it is cancelled.
-            Dispatcher::current_dispatcher().to_task_scheduler().start_local(std::future::pending::<()>())
+            Dispatcher::current_dispatcher().start_local(std::future::pending::<()>())
         }
     }
 }
@@ -942,8 +943,8 @@ mod gestures {
 
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::default()));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert_eq!(2, carousel.selected_index());
@@ -980,7 +981,7 @@ mod gestures {
         let _app = start();
         let t = create_target_with_transition(
             strs(&["foo", "bar"]),
-            Rc::new(CrossFade::with_duration(TimeSpan::from_seconds(1.0))),
+            Rc::new(CrossFade::with_duration(SignedDuration::from_seconds(1.0))),
         );
         let (panel, carousel) = (&t.panel, &t.carousel);
         carousel.set_is_swipe_enabled(true);
@@ -1003,8 +1004,8 @@ mod gestures {
         panel.raise_event(&swipe(1, 1000.0, 0.0));
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::new(1000.0, 0.0)));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert!(transition.update_call_count.get() > 0);
@@ -1025,8 +1026,8 @@ mod gestures {
         panel.raise_event(&swipe(1, 1000.0, 0.0));
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::new(1000.0, 0.0)));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert_eq!(1, carousel.selected_index());
@@ -1071,8 +1072,8 @@ mod gestures {
         panel.raise_event(&swipe(1, 1000.0, 0.0));
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::new(1000.0, 0.0)));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert_eq!(Some(true), hidden_when_reset.get());
@@ -1095,8 +1096,8 @@ mod gestures {
 
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::default()));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(0.1));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(0.1));
         run_jobs();
 
         let post_release_progresses: Vec<f64> =
@@ -1104,7 +1105,7 @@ mod gestures {
 
         assert!(post_release_progresses.iter().any(|&p| p > 0.0 && p < release_start_progress));
 
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert_eq!(0.0, *transition.progresses.borrow().last().unwrap());
@@ -1124,9 +1125,9 @@ mod gestures {
 
         carousel.set_selected_index(1);
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(0.1));
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(0.1));
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         let progresses = transition.progresses.borrow();
@@ -1150,7 +1151,7 @@ mod gestures {
             _to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             completed_task()
         }
 
@@ -1194,7 +1195,7 @@ mod gestures {
             _to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             completed_task()
         }
 
@@ -1233,7 +1234,7 @@ mod gestures {
             _to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             completed_task()
         }
 
@@ -1294,7 +1295,7 @@ mod gestures {
             _to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             completed_task()
         }
 
@@ -1330,7 +1331,7 @@ mod gestures {
     #[test]
     fn vertical_swipe_forward_realizes_next_item() {
         let _app = start();
-        let transition = Rc::new(PageSlide::with_duration(TimeSpan::from_seconds(1.0), SlideAxis::Vertical));
+        let transition = Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(1.0), SlideAxis::Vertical));
         let t = create_target_with_transition(strs(&["foo", "bar"]), transition);
         let (panel, carousel) = (&t.panel, &t.carousel);
         carousel.set_is_swipe_enabled(true);
@@ -1357,8 +1358,8 @@ mod gestures {
         panel.raise_event(&swipe(1, 1000.0, 0.0));
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::new(1000.0, 0.0)));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_milliseconds(50.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_milliseconds(50.0));
         run_jobs();
 
         assert_eq!(0, carousel.selected_index());

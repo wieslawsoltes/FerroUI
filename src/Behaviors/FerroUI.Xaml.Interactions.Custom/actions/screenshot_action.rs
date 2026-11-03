@@ -111,7 +111,7 @@ impl ScreenshotAction {
         options.set_file_type_choices(Some(vec![FilePickerFileTypes::image_png()]));
 
         let save = top_level.storage_provider().save_file_picker_async(options);
-        drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        drop(Dispatcher::ui_thread().start_local(async move {
             // A failure is reported in the debug output, as the reference writes it.
             let result: std::io::Result<()> = async {
                 if let Some(file) = save.await? {

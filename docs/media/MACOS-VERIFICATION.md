@@ -239,3 +239,18 @@ build and checked unchanged after the native replay. The runner now captures
 staged integration files directly on subsequent runs and requires both named
 camera contracts instead of the obsolete single-test count. Later verification
 documentation edits are separate from the compiled source hashes.
+
+## Upstream integration — 2026-11-03
+
+The desktop branch integrates `origin/main` at
+`1549651d8f55f9b4cf80fcf23165dce7a0b6b96d` without text conflicts. The native
+media sample (with macOS verification features) and desktop ControlCatalog
+compile. The Metal catalog smoke passes playback, frame retirement on navigation,
+non-acquiring camera discovery and both QR payloads.
+
+The larger native verification run passed all 16 orientation/crop cases, its
+orientation negative control and native accessibility/keyboard transport checks.
+It was stopped during the memory soak at the user's request, before completing
+that stage and the remaining suite. This is partial integration evidence, not a
+new full-profile pass. Logs are outside Git in
+`/Volumes/SSD/build-cache/ferroui-portable-media-evidence/main-integration-1549651d-2026-11-03/`.

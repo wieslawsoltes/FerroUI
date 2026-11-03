@@ -72,7 +72,7 @@ fn defer_async_with_cancel_cancel() {
                 run(move || {
                     e.set();
 
-                    while !ct.is_cancellation_requested() {
+                    while !ct.is_cancelled() {
                         std::hint::spin_loop();
                     }
 

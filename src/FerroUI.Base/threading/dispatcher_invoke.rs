@@ -2,16 +2,17 @@ use std::any::Any;
 use std::fmt;
 use std::future::Future;
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
 
 use super::dispatcher_operation::{box_local_callback, OperationCore, SendCallback, WaitOutcome};
 use super::dispatcher_task::{new_local_task, new_send_task};
+#[allow(deprecated)]
 use super::{
     CancellationToken, Dispatcher, DispatcherOperation, DispatcherOperationStatus, DispatcherPriority,
-    DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable, DispatcherTask, FerroSynchronizationContext,
-    OperationCanceledError,
+    DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable, DispatcherTask,
 };
+use ferroui_system::task::Canceled;
 
 /// The error of a synchronous invoke with a timeout.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -50,7 +51,7 @@ impl Dispatcher {
     pub fn invoke<R: Send + 'static>(
         &self,
         callback: impl FnOnce() -> R + Send + 'static,
-    ) -> Result<R, OperationCanceledError> {
+    ) -> Result<R, Canceled> {
         self.invoke_with_cancellation(callback, DispatcherPriority::SEND, &CancellationToken::none())
     }
 
@@ -60,7 +61,7 @@ impl Dispatcher {
         &self,
         callback: impl FnOnce() -> R + Send + 'static,
         priority: DispatcherPriority,
-    ) -> Result<R, OperationCanceledError> {
+    ) -> Result<R, Canceled> {
         self.invoke_with_cancellation(callback, priority, &CancellationToken::none())
     }
 
@@ -74,21 +75,21 @@ impl Dispatcher {
         callback: impl FnOnce() -> R + Send + 'static,
         priority: DispatcherPriority,
         cancellation_token: &CancellationToken,
-    ) -> Result<R, OperationCanceledError> {
+    ) -> Result<R, Canceled> {
         DispatcherPriority::validate(priority, "priority");
 
         // Fast-Path: if on the same thread, and invoking at Send priority,
         // and the cancellation token is not already canceled, then just
         // call the callback directly.
-        if !cancellation_token.is_cancellation_requested() && priority == DispatcherPriority::SEND && self.check_access()
+        if !cancellation_token.is_cancelled() && priority == DispatcherPriority::SEND && self.check_access()
         {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+            let _restore = self.enter_job(priority);
             return Ok(callback());
         }
 
         // Slow-Path: go through the queue.
         let operation = DispatcherOperation::new_send(&self.to_arc(), priority, callback);
-        self.invoke_impl(&operation, cancellation_token, None).map_err(|_| OperationCanceledError)
+        self.invoke_impl(&operation, cancellation_token, None).map_err(|_| Canceled)
     }
 
     /// Executes the specified callback synchronously with the specified
@@ -112,9 +113,9 @@ impl Dispatcher {
         DispatcherPriority::validate(priority, "priority");
 
         // Fast-Path, see invoke_with_cancellation.
-        if !cancellation_token.is_cancellation_requested() && priority == DispatcherPriority::SEND && self.check_access()
+        if !cancellation_token.is_cancelled() && priority == DispatcherPriority::SEND && self.check_access()
         {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+            let _restore = self.enter_job(priority);
             return Ok(callback());
         }
 
@@ -127,7 +128,7 @@ impl Dispatcher {
     ///
     /// # Panics
     /// Panics when called from a thread other than the dispatcher thread.
-    pub fn invoke_local<R: 'static>(&self, callback: impl FnOnce() -> R + 'static) -> Result<R, OperationCanceledError> {
+    pub fn invoke_local<R: 'static>(&self, callback: impl FnOnce() -> R + 'static) -> Result<R, Canceled> {
         self.invoke_local_with_cancellation(callback, DispatcherPriority::SEND, &CancellationToken::none())
     }
 
@@ -140,7 +141,7 @@ impl Dispatcher {
         &self,
         callback: impl FnOnce() -> R + 'static,
         priority: DispatcherPriority,
-    ) -> Result<R, OperationCanceledError> {
+    ) -> Result<R, Canceled> {
         self.invoke_local_with_cancellation(callback, priority, &CancellationToken::none())
     }
 
@@ -154,19 +155,19 @@ impl Dispatcher {
         callback: impl FnOnce() -> R + 'static,
         priority: DispatcherPriority,
         cancellation_token: &CancellationToken,
-    ) -> Result<R, OperationCanceledError> {
+    ) -> Result<R, Canceled> {
         self.verify_access();
         DispatcherPriority::validate(priority, "priority");
 
         // Fast-Path, see invoke_with_cancellation.
-        if !cancellation_token.is_cancellation_requested() && priority == DispatcherPriority::SEND {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+        if !cancellation_token.is_cancelled() && priority == DispatcherPriority::SEND {
+            let _restore = self.enter_job(priority);
             return Ok(callback());
         }
 
         // Slow-Path: go through the queue.
         let operation = DispatcherOperation::new_local(&self.to_arc(), priority, callback);
-        self.invoke_impl(&operation, cancellation_token, None).map_err(|_| OperationCanceledError)
+        self.invoke_impl(&operation, cancellation_token, None).map_err(|_| Canceled)
     }
 
     /// Like [`invoke_with_timeout`](Self::invoke_with_timeout) for callbacks
@@ -185,8 +186,8 @@ impl Dispatcher {
         DispatcherPriority::validate(priority, "priority");
 
         // Fast-Path, see invoke_with_cancellation.
-        if !cancellation_token.is_cancellation_requested() && priority == DispatcherPriority::SEND {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+        if !cancellation_token.is_cancelled() && priority == DispatcherPriority::SEND {
+            let _restore = self.enter_job(priority);
             return Ok(callback());
         }
 
@@ -201,7 +202,7 @@ impl Dispatcher {
         cancellation_token: &CancellationToken,
         timeout: Option<Duration>,
     ) -> Result<R, DispatcherInvokeError> {
-        if cancellation_token.is_cancellation_requested() {
+        if cancellation_token.is_cancelled() {
             operation.core().set_status(DispatcherOperationStatus::Aborted);
             operation.core().call_abort_callbacks();
             return Err(DispatcherInvokeError::Canceled);
@@ -271,7 +272,7 @@ impl Dispatcher {
 
     fn send_inline(&self, action: impl FnOnce(), priority: DispatcherPriority) {
         let result = catch_unwind(AssertUnwindSafe(|| {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+            let _restore = self.enter_job(priority);
             action();
         }));
         if let Err(payload) = result {
@@ -375,7 +376,7 @@ impl Dispatcher {
         // Could be a non-dispatcher thread, lock to read
         {
             let mut st = self.lock();
-            if !cancellation_token.is_cancellation_requested() && !st.has_shutdown_finished {
+            if !cancellation_token.is_cancelled() && !st.has_shutdown_finished {
                 // Add the operation to the work queue
                 st.queue.enqueue(operation.priority(), operation.clone());
 
@@ -395,16 +396,23 @@ impl Dispatcher {
             // We have enqueued the operation.  Register a callback
             // with the cancellation token to abort the operation
             // when cancellation is requested.
-            if cancellation_token.can_be_canceled() {
+            if cancellation_token.can_be_cancelled() {
                 let to_abort = operation.clone();
-                let registration = Arc::new(cancellation_token.register(move || {
+                let registration = Arc::new(Mutex::new(Some(cancellation_token.register(move || {
                     to_abort.abort();
-                }));
+                }))));
 
-                // Revoke the cancellation when the operation is done.
+                // Revoke the cancellation when the operation is done: the
+                // guard is taken out of its lock before it is dropped.
                 let revoke = registration.clone();
-                operation.add_aborted(Arc::new(move || revoke.dispose()));
-                operation.add_completed(Arc::new(move || registration.dispose()));
+                operation.add_aborted(Arc::new(move || {
+                    let guard = revoke.lock().unwrap_or_else(PoisonError::into_inner).take();
+                    drop(guard);
+                }));
+                operation.add_completed(Arc::new(move || {
+                    let guard = registration.lock().unwrap_or_else(PoisonError::into_inner).take();
+                    drop(guard);
+                }));
             }
         } else {
             // We failed to enqueue the operation, and the caller that
@@ -423,6 +431,13 @@ impl Dispatcher {
     ///
     /// The returned task completes when the future has completed; see
     /// [`invoke_async_task_with_priority`](Self::invoke_async_task_with_priority).
+    ///
+    /// Deprecated: [`spawn`](Self::spawn) does the same and gives a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn`, which gives a `JoinHandle` (a panic of the future is `JoinError::Panicked`, a value)"
+    )]
+    #[allow(deprecated)]
     pub fn invoke_async_task<F, Fut>(&self, callback: F) -> DispatcherTask<Fut::Output>
     where
         F: FnOnce() -> Fut + Send + 'static,
@@ -448,6 +463,14 @@ impl Dispatcher {
     /// The task is a task of the dispatcher
     /// ([`spawn_with_priority`](Self::spawn_with_priority)), with a handle
     /// that keeps the contract of [`DispatcherTask`].
+    ///
+    /// Deprecated: [`spawn_with_priority`](Self::spawn_with_priority) does the
+    /// same and gives a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn_with_priority`, which gives a `JoinHandle` (a panic of the future is `JoinError::Panicked`, a value)"
+    )]
+    #[allow(deprecated)]
     pub fn invoke_async_task_with_priority<F, Fut>(
         &self,
         callback: F,
@@ -471,6 +494,15 @@ impl Dispatcher {
     ///
     /// # Panics
     /// Panics when called from a thread other than the dispatcher thread.
+    ///
+    /// Deprecated: `spawn_local_with_priority(async move { callback().await },
+    /// DispatcherPriority::DEFAULT)` does the same (the callback runs in the
+    /// first poll, a job at that priority) and gives a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn_local_with_priority(async move { callback().await }, DispatcherPriority::DEFAULT)`, which gives a `JoinHandle`"
+    )]
+    #[allow(deprecated)]
     pub fn invoke_async_task_local<F, Fut>(&self, callback: F) -> DispatcherTask<Fut::Output>
     where
         F: FnOnce() -> Fut + 'static,
@@ -486,6 +518,14 @@ impl Dispatcher {
     ///
     /// # Panics
     /// Panics when called from a thread other than the dispatcher thread.
+    ///
+    /// Deprecated: `spawn_local_with_priority(async move { callback().await },
+    /// priority)` does the same and gives a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn_local_with_priority(async move { callback().await }, priority)`, which gives a `JoinHandle`"
+    )]
+    #[allow(deprecated)]
     pub fn invoke_async_task_local_with_priority<F, Fut>(
         &self,
         callback: F,

@@ -1,15 +1,13 @@
 //! Ported from `Composition/SelectionIndicatorAnimation.cs`.
 
-use super::composition_animation_helpers::to_duration;
-use crate::argument_out_of_range::throw_if_less_than;
 use ferroui_base::animation::easings::{IEasing, SpringEasing};
-use ferroui_base::animation::TimeSpan;
 use ferroui_base::numerics::Vector3;
 use ferroui_base::rendering::composition::animations::{ICompositionAnimation, ICompositionAnimationBase};
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::Visual;
 use ferroui_controls::primitives::TemplatedControl;
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Creates and applies the composition animation used to move a selection indicator between
 /// item containers.
@@ -19,25 +17,21 @@ impl SelectionIndicatorAnimation {
     const INDICATOR_PART_NAME: &'static str = "PART_SelectedPipe";
 
     /// Gets the default selection indicator animation duration.
-    pub fn default_duration() -> TimeSpan {
-        TimeSpan::from_milliseconds(250.0)
+    pub fn default_duration() -> Duration {
+        Duration::from_millis(250)
     }
 
     /// Finds the standard selection indicator parts in the newly and the previously selected
     /// item containers and starts their movement animation over `duration`. Returns `true` when
     /// composition visuals were available and the animation was installed; otherwise, `false`.
     ///
-    /// # Panics
-    ///
-    /// When `duration` is negative (the `ArgumentOutOfRangeException` of the reference).
-    #[track_caller]
+    /// The reference throws an `ArgumentOutOfRangeException` for a negative duration; a
+    /// `Duration` cannot be negative.
     pub fn try_start(
         new_selection: Option<&TemplatedControl>,
         old_selection: Option<&TemplatedControl>,
-        duration: TimeSpan,
+        duration: Duration,
     ) -> bool {
-        throw_if_less_than(duration, TimeSpan::ZERO, "duration");
-
         let (Some(new_selection), Some(old_selection)) = (new_selection, old_selection) else {
             return false;
         };
@@ -69,20 +63,16 @@ impl SelectionIndicatorAnimation {
     /// Deviation (DEVIATIONS.md, Behaviors): the `TryStart(Visual, Visual, Visual, Visual,
     /// TimeSpan)` overload of the reference; Rust has no overloads.
     ///
-    /// # Panics
-    ///
-    /// When `duration` is negative (the `ArgumentOutOfRangeException` of the reference).
-    #[track_caller]
+    /// The reference throws an `ArgumentOutOfRangeException` for a negative duration; a
+    /// `Duration` cannot be negative.
     pub fn try_start_with_visuals(
         new_indicator: Option<&Visual>,
         old_indicator: Option<&Visual>,
         new_selection: Option<&Visual>,
         old_selection: Option<&Visual>,
-        duration: TimeSpan,
+        duration: Duration,
     ) -> bool {
-        throw_if_less_than(duration, TimeSpan::ZERO, "duration");
-
-        if duration == TimeSpan::ZERO {
+        if duration.is_zero() {
             return false;
         }
         let (Some(new_indicator), Some(old_indicator), Some(new_selection), Some(old_selection)) =
@@ -126,7 +116,7 @@ impl SelectionIndicatorAnimation {
             None,
         );
         offset_animation.insert_expression_key_frame(1.0, "this.FinalValue", None);
-        offset_animation.set_duration(to_duration(duration));
+        offset_animation.set_duration(duration);
 
         let scale_animation = compositor.create_vector3_key_frame_animation();
         scale_animation.set_target(Some("Scale".to_string()));
@@ -141,7 +131,7 @@ impl SelectionIndicatorAnimation {
             spring_easing.clone(),
         );
         scale_animation.insert_key_frame_with_easing(1.0, Vector3::ONE, spring_easing);
-        scale_animation.set_duration(to_duration(duration));
+        scale_animation.set_duration(duration);
 
         let animation_group = compositor.create_animation_group();
         animation_group.add(offset_animation as Rc<dyn ICompositionAnimation>);

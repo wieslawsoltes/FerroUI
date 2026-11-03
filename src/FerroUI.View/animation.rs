@@ -9,12 +9,12 @@ use crate::reactive::on_cleanup;
 use ferroui_base::animation::{
     Animatable, Animation, BoolTransition, BrushTransition, ColorTransition, CornerRadiusTransition, Cue,
     DoubleTransition, FillMode, FloatTransition, ITransition, IntegerTransition, IterationCount, KeyFrame,
-    PointTransition, SizeTransition, ThicknessTransition, TimeSpan, Transitions, VectorTransition,
+    PointTransition, SizeTransition, ThicknessTransition, SignedDuration, Transitions, VectorTransition,
 };
 use ferroui_base::animation::easings::Easing;
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::CancellationTokenSource;
+use ferroui_base::threading::CancellationToken;
 use ferroui_base::{BoxedValue, CornerRadius, FerroProperty, ObjectType, Point, Ref, Size, Thickness, Upcast, Vector};
 use std::rc::Rc;
 use std::time::Duration;
@@ -23,13 +23,13 @@ use std::time::Duration;
 pub trait Transitionable {
     /// A transition of `property`, of values of this type, that takes
     /// `duration`, with an easing.
-    fn transition(property: &'static FerroProperty, duration: TimeSpan, easing: Option<Easing>) -> Rc<dyn ITransition>;
+    fn transition(property: &'static FerroProperty, duration: SignedDuration, easing: Option<Easing>) -> Rc<dyn ITransition>;
 }
 
 macro_rules! transitionable {
     ($($value:ty => $transition:ty),* $(,)?) => {
         $(impl Transitionable for $value {
-            fn transition(property: &'static FerroProperty, duration: TimeSpan, easing: Option<Easing>) -> Rc<dyn ITransition> {
+            fn transition(property: &'static FerroProperty, duration: SignedDuration, easing: Option<Easing>) -> Rc<dyn ITransition> {
                 let transition = <$transition>::with_property(property, duration);
                 if let Some(easing) = easing {
                     transition.set_easing(easing);
@@ -62,7 +62,7 @@ where
     P: TypedProperty + ?Sized,
     P::Value: Transitionable,
 {
-    <P::Value as Transitionable>::transition(property.untyped(), TimeSpan::from(duration), None)
+    <P::Value as Transitionable>::transition(property.untyped(), SignedDuration::from(duration), None)
 }
 
 /// A transition with an easing (`"CubicEaseOut"`, an easing of the port).
@@ -71,7 +71,7 @@ where
     P: TypedProperty + ?Sized,
     P::Value: Transitionable,
 {
-    <P::Value as Transitionable>::transition(property.untyped(), TimeSpan::from(duration), Some(easing.into()))
+    <P::Value as Transitionable>::transition(property.untyped(), SignedDuration::from(duration), Some(easing.into()))
 }
 
 /// The `Transitions` of a control, for its `transitions` setter.
@@ -115,7 +115,7 @@ impl KeyFrameBuilder {
 /// An animation that takes `duration`.
 pub fn animation(duration: Duration) -> AnimationBuilder {
     let animation = Animation::new();
-    animation.set_duration(TimeSpan::from(duration));
+    animation.set_duration(SignedDuration::from(duration));
     AnimationBuilder { animation }
 }
 
@@ -149,7 +149,7 @@ impl AnimationBuilder {
 
     /// Its delay.
     pub fn delay(self, delay: Duration) -> Self {
-        self.animation.set_delay(TimeSpan::from(delay));
+        self.animation.set_delay(SignedDuration::from(delay));
         self
     }
 
@@ -170,9 +170,9 @@ where
 {
     use_effect_with(trigger, move |_| {
         let Some(control) = target.get_untracked() else { return };
-        let cancellation = CancellationTokenSource::new();
+        let cancellation = CancellationToken::new();
         let animatable: &Animatable = (*control).upcast();
-        let _task = animation().build().run_async(animatable, cancellation.token());
+        let _task = animation().build().run_async(animatable, cancellation.clone());
         on_cleanup(move || cancellation.cancel());
     });
 }

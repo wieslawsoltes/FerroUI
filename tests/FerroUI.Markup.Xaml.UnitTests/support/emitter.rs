@@ -11,7 +11,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::{IServiceProvider, MarkupType, MarkupTyped};
 use ferroui_base::styling::DuplicateSetterError;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{CultureInfo, UriRef};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_type, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty,
     InitializationError, Ref, StyledElementImpl, StyledElementImplExt, StyledProperty, TypeInfo, VisualImpl,
@@ -201,6 +201,53 @@ impl Captioned {
 
     pub fn caption(&self) -> Option<Rc<Caption>> {
         self.get_value(Self::caption_property())
+    }
+}
+
+// --- The Rust forms of a URI -------------------------------------------------
+
+/// Not from upstream (C5 of #423, section 3.5 of docs/idiomatic-rust-signatures.md): a control
+/// with a registered property of each Rust form of a URI that markup sets beside the port
+/// `Uri`: a reference that can be relative (`Source`) and an absolute URL (`Address`).
+#[repr(C)]
+pub struct Linked {
+    base: Control,
+}
+
+ferro_class!(Linked: Control);
+ferro_impl_classes!(Linked: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl);
+ferro_class_info!(Linked {
+    new: Linked::new,
+    markup: { namespace: "FerroUI.Markup.Xaml.UnitTests" },
+});
+
+ferro_properties! {
+    impl Linked {
+        pub fn source_property() -> StyledProperty<Option<UriRef>> {
+            FerroProperty::register::<Linked, _>("Source", None)
+        }
+
+        pub fn address_property() -> StyledProperty<Option<url::Url>> {
+            FerroProperty::register::<Linked, _>("Address", None)
+        }
+    }
+}
+
+impl Linked {
+    pub fn construct() -> Self {
+        Self { base: Control::construct() }
+    }
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+
+    pub fn source(&self) -> Option<UriRef> {
+        self.get_value(Self::source_property())
+    }
+
+    pub fn address(&self) -> Option<url::Url> {
+        self.get_value(Self::address_property())
     }
 }
 
@@ -399,7 +446,7 @@ ferro_markup_type!(class Desk {
 });
 
 pub(crate) const MODULE: TypeModule = TypeModule {
-    types: &[FailingEndInit::TYPE, Captioned::TYPE],
+    types: &[FailingEndInit::TYPE, Captioned::TYPE, Linked::TYPE],
     markup_types: &[
         <Caption as MarkupTyped>::MARKUP,
         <CaptionConverter as MarkupTyped>::MARKUP,
@@ -424,6 +471,7 @@ pub(crate) const MODULE: TypeModule = TypeModule {
 pub(crate) const RUST_PATHS: &[(&TypeInfo, &str)] = &[
     (FailingEndInit::TYPE, "ferroui_markup_xaml_tests::support::emitter::FailingEndInit"),
     (Captioned::TYPE, "ferroui_markup_xaml_tests::support::emitter::Captioned"),
+    (Linked::TYPE, "ferroui_markup_xaml_tests::support::emitter::Linked"),
     // The classes of the class documents of the corpus.
     (MyButton::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton"),
     (MyHost::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost"),
@@ -432,8 +480,10 @@ pub(crate) const RUST_PATHS: &[(&TypeInfo, &str)] = &[
 
 /// The public Rust path of the type whose accessor of a registered property generated
 /// code calls (`Captioned::caption_property()`), by the type itself.
-pub(crate) const TYPE_RUST_PATHS: &[(fn() -> std::any::TypeId, &str)] =
-    &[(|| std::any::TypeId::of::<Captioned>(), "ferroui_markup_xaml_tests::support::emitter::Captioned")];
+pub(crate) const TYPE_RUST_PATHS: &[(fn() -> std::any::TypeId, &str)] = &[
+    (|| std::any::TypeId::of::<Captioned>(), "ferroui_markup_xaml_tests::support::emitter::Captioned"),
+    (|| std::any::TypeId::of::<Linked>(), "ferroui_markup_xaml_tests::support::emitter::Linked"),
+];
 
 /// The public Rust paths of the types with markup metadata of this module, for generated code.
 pub(crate) const MARKUP_RUST_PATHS: &[(&MarkupType, &str, bool)] = &[

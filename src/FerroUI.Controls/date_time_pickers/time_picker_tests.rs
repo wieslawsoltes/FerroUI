@@ -10,7 +10,7 @@ use crate::{
     Border, Button, Control, DataValidationErrors, Grid, GridLength, Panel, RowDefinition, ScrollViewer, StackPanel,
     TextBlock, Window,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
 use ferroui_base::layout::{ILayoutManager, VerticalAlignment};
 use ferroui_base::media::text_formatting::testing::TextTestScope;
@@ -223,7 +223,7 @@ fn selected_time_changed_should_fire_when_selected_time_set() {
     let time_picker = TimePicker::new();
     let flag = handled.clone();
     time_picker.selected_time_changed(move |_| flag.set(true)).detach();
-    let value = TimeSpan::from_hours(10.0);
+    let value = SignedDuration::from_hours(10.0);
     time_picker.set_selected_time(Some(value));
     Dispatcher::ui_thread().run_jobs(None);
     assert!(handled.get());
@@ -323,7 +323,7 @@ fn selected_time_null_should_use_placeholders() {
     let minute_text = text_of(&host_at(&container, 2));
     let second_text = text_of(&host_at(&container, 4));
 
-    let ts = TimeSpan::from_hours(10.0);
+    let ts = SignedDuration::from_hours(10.0);
     time_picker.set_selected_time(Some(ts));
     assert!(hour_text.text().is_some());
     assert!(minute_text.text().is_some());
@@ -348,7 +348,7 @@ fn using_12_hour_clock_on_culture_with_empty_period_should_show_period() {
 
     let period_text = text_of(&host_at(&container, 6));
 
-    let ts = TimeSpan::from_hours(10.0);
+    let ts = SignedDuration::from_hours(10.0);
     time_picker.set_selected_time(Some(ts));
     assert!(!period_text.text().unwrap_or_default().is_empty());
 
@@ -404,8 +404,8 @@ fn selected_time_enable_data_validation() {
 
     let flag = handled.clone();
     time_picker.selected_time_changed(move |e| {
-        let min_time = TimeSpan::from_hms(10, 0, 0);
-        let max_time = TimeSpan::from_hms(15, 0, 0);
+        let min_time = SignedDuration::from_hms(10, 0, 0);
+        let max_time = SignedDuration::from_hms(15, 0, 0);
 
         if e.new_time().is_some_and(|new_time| new_time < min_time) {
             std::panic::panic_any(ThrownDataValidationError { message: format!("time is less than {max_time}") });
@@ -420,12 +420,12 @@ fn selected_time_enable_data_validation() {
 
     // time is less than
     let exception =
-        assert_throws_data_validation_exception(|| time_picker.set_selected_time(Some(TimeSpan::from_hms(1, 2, 3))));
+        assert_throws_data_validation_exception(|| time_picker.set_selected_time(Some(SignedDuration::from_hms(1, 2, 3))));
     assert!(exception.message.starts_with("time is less than"));
 
     // time is over
     let exception =
-        assert_throws_data_validation_exception(|| time_picker.set_selected_time(Some(TimeSpan::from_hms(21, 22, 23))));
+        assert_throws_data_validation_exception(|| time_picker.set_selected_time(Some(SignedDuration::from_hms(21, 22, 23))));
     assert!(exception.message.starts_with("time is over"));
 
     let exception = BindingError::message("failed validation");
@@ -445,7 +445,7 @@ fn selected_time_enable_data_validation() {
     assert_errors_are(&time_picker, &exception);
 
     Dispatcher::ui_thread().run_jobs(None);
-    time_picker.set_selected_time(Some(TimeSpan::from_hms(11, 12, 13)));
+    time_picker.set_selected_time(Some(SignedDuration::from_hms(11, 12, 13)));
     assert!(handled.get());
 }
 
@@ -521,7 +521,7 @@ fn clock_identifier_follows_the_culture() {
     time_picker.set_template(Some(create_template(false)));
     time_picker.apply_template();
     let container = button_content_grid(&time_picker);
-    time_picker.set_selected_time(Some(TimeSpan::from_hms(15, 4, 5)));
+    time_picker.set_selected_time(Some(SignedDuration::from_hms(15, 4, 5)));
     assert_eq!(Some("3"), text_of(&host_at(&container, 0)).text().as_deref());
     assert_eq!(Some("04"), text_of(&host_at(&container, 2)).text().as_deref());
     assert_eq!(Some("05"), text_of(&host_at(&container, 4)).text().as_deref());
@@ -530,7 +530,7 @@ fn clock_identifier_follows_the_culture() {
 
     CultureInfo::set_current_culture(CultureInfo::get_culture_info("en-GB"));
     assert_eq!("24HourClock", TimePicker::new().clock_identifier());
-    time_picker.set_selected_time(Some(TimeSpan::from_hms(9, 4, 5)));
+    time_picker.set_selected_time(Some(SignedDuration::from_hms(9, 4, 5)));
     assert_eq!(Some("am"), text_of(&host_at(&container, 6)).text().as_deref());
 }
 
@@ -608,7 +608,7 @@ struct WindowTarget {
 impl WindowTarget {
     /// Shows a window with a 24 hour time picker with seconds whose
     /// selected time is `selected`.
-    fn show(selected: TimeSpan) -> Self {
+    fn show(selected: SignedDuration) -> Self {
         let time_picker = TimePicker::new();
         time_picker.set_clock_identifier("24HourClock");
         time_picker.set_use_seconds(true);
@@ -651,7 +651,7 @@ impl WindowTarget {
 #[test]
 fn window_popup_accept_updates_selected_time_and_closes() {
     let _app = start_with(TestServices::styled_window());
-    let selected = TimeSpan::from_hms(10, 20, 30);
+    let selected = SignedDuration::from_hms(10, 20, 30);
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
@@ -691,8 +691,8 @@ fn window_popup_accept_updates_selected_time_and_closes() {
     target.part::<Button>("PART_AcceptButton").perform_click();
     Dispatcher::ui_thread().run_jobs(None);
 
-    assert_eq!(Some(TimeSpan::from_hms(9, 21, 30)), target.time_picker.selected_time());
-    assert_eq!(TimeSpan::from_hms(9, 21, 30), target.presenter.time());
+    assert_eq!(Some(SignedDuration::from_hms(9, 21, 30)), target.time_picker.selected_time());
+    assert_eq!(SignedDuration::from_hms(9, 21, 30), target.presenter.time());
     assert_eq!(1, changes.get());
     assert!(!target.popup.is_open());
     assert!(target.popup.host().is_none());
@@ -704,7 +704,7 @@ fn window_popup_accept_updates_selected_time_and_closes() {
 #[test]
 fn window_popup_dismiss_leaves_selected_time_unchanged() {
     let _app = start_with(TestServices::styled_window());
-    let selected = TimeSpan::from_hms(10, 20, 30);
+    let selected = SignedDuration::from_hms(10, 20, 30);
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();

@@ -9,9 +9,7 @@ use ferroui_base::interactivity::{
     RoutingStrategies,
 };
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::threading::{
-    CancellationTokenSource, Dispatcher, DispatcherPriority, FerroSynchronizationContext,
-};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, FerroObject, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty,
@@ -45,7 +43,7 @@ pub enum ExpandDirection {
 pub struct Expander {
     base: HeaderedContentControl,
     ignore_property_changed: Cell<bool>,
-    last_transition_cts: RefCell<Option<CancellationTokenSource>>,
+    last_transition_cts: RefCell<Option<CancellationToken>>,
 }
 
 ferro_class! {
@@ -329,8 +327,8 @@ impl Expander {
             let expand_direction = self.expand_direction();
             let forward = expand_direction == ExpandDirection::Left || expand_direction == ExpandDirection::Up;
 
-            let cts = CancellationTokenSource::new();
-            let token = cts.token();
+            let cts = CancellationToken::new();
+            let token = cts.clone();
             let last = self.last_transition_cts.replace(Some(cts));
             if let Some(last) = last {
                 last.cancel();
@@ -342,17 +340,16 @@ impl Expander {
                 content_transition.start(Some(&visual_content), None, !forward, token)
             };
 
-            let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-                FerroSynchronizationContext::with_dispatcher(
-                    &Dispatcher::current_dispatcher(),
-                    DispatcherPriority::NORMAL,
-                )
-            });
-            drop(context.to_task_scheduler().start_local(async move {
-                if task.await.is_ok() {
-                    post_completed();
-                }
-            }));
+            let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+            // A transition that failed or was aborted ends without the completed state.
+            drop(Dispatcher::current_dispatcher().start_local_with_priority(
+                async move {
+                    if task.await.is_ok() {
+                        post_completed();
+                    }
+                },
+                priority,
+            ));
         } else {
             post_completed();
         }

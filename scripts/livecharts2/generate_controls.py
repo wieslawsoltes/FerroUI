@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Generate repetitive native property declarations, not chart algorithms.
 
-From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2
-and the polar chart of L4; the Sankey, treemap and geographic charts add their rows with their
-engines.
+From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2,
+the polar chart of L4, the Sankey and treemap charts of L4b and the geographic map of L4c.
 
 The generated classes remain ordinary FerroUI classes visible to the XAML source
 scanner. This replaces the managed UI-property generator for this native host.
@@ -226,18 +225,44 @@ families = [('LineSeries','Line'),('StepLineSeries','StepLine'),('AreaSeries','A
 ('ColumnSeries','Column'),('RowSeries','Row'),('StackedColumnSeries','StackedColumn'),
 ('StackedRowSeries','StackedRow'),('ScatterSeries','Scatter'),('HeatSeries','Heat'),
 ('RangeColumnSeries','RangeColumn'),('RangeRowSeries','RangeRow'),('RangeLineSeries','RangeLine'),
-('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie'),('PolarLineSeries','PolarLine')]
-classes = HEADER + '''use crate::ChartSeries;
-use ferroui_base::{ferro_class,ferro_class_info,instantiate,FerroObjectImpl,FerroObjectImplExt,Ref};
-use ferroui_livecharts::SeriesKind;
+('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie'),('PolarLineSeries','PolarLine'),
+('SankeySeries','Sankey'),('TreemapSeries','Treemap'),('HeatLandSeries','HeatLand')]
+# The Sankey and treemap series hold nodes (and links) and the heat land series lands instead of
+# chart points: the collections each instance owns, its markup content (`Nodes`, `Lands`) and the
+# properties of the source series (ISankeySeries; the treemap's padding and corner radius are the
+# shared Padding and CornerRadius; the ColorStops, MinValue and MaxValue of CoreHeatLandSeries,
+# whose HeatMap is the shared one with the source's default).
+node_collections = {'SankeySeries':[('nodes','SankeyNodes'),('links','SankeyLinks')],
+                    'TreemapSeries':[('nodes','TreemapNodes')],
+                    'HeatLandSeries':[('lands','HeatLands')]}
+node_content = {'SankeySeries':'Nodes','TreemapSeries':'Nodes','HeatLandSeries':'Lands'}
+family_overrides = {'HeatLandSeries':['heat_map']}
+node_props = {
+ 'SankeySeries':[('nodes','Nodes','SankeyNodes','SankeyNodes::new()'),('links','Links','SankeyLinks','SankeyLinks::new()'),
+  ('node_width','NodeWidth','f64','12.0'),('node_padding','NodePadding','f64','8.0'),
+  ('node_corner_radius','NodeCornerRadius','f64','0.0'),('layout_iterations','LayoutIterations','u32','32'),
+  ('node_label_position','NodeLabelPosition','SankeyLabelPosition','SankeyLabelPosition::Auto'),
+  ('layout','Layout','SankeyLayoutKind','SankeyLayoutKind::Vertical'),
+  ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None')],
+ 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()')],
+ 'HeatLandSeries':[('lands','Lands','HeatLands','HeatLands::new()'),('color_stops','ColorStops','Option<Vec<f64>>','None'),
+  ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')]}
+classes = HEADER + '''use crate::{ChartSeries,HeatLands,SankeyLinks,SankeyNodes,TreemapNodes};
+use ferroui_base::{ferro_class,ferro_class_info,ferro_properties,instantiate,FerroObjectImpl,FerroObjectImplExt,FerroProperty,Ref,StyledProperty};
+use ferroui_base::media::Color;
+use ferroui_livecharts::{SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
 '''
 for name,kind in families:
+    owned=''.join(f'this.set_{prop}({typ}::new());' for prop,typ in node_collections.get(name,[]))
+    info=(f'ferro_class_info!({name} {{ new: {name}::new, markup: {{ content: {node_content[name]} }} }});' if name in node_collections
+          else f'ferro_class_info!({name} {{ new:{name}::new }});')
+    extra=''.join(f'ChartSeries::{prop}_property().override_default_value::<{name}>(defaults.{prop});' for prop in family_overrides.get(name,[]))
     classes += f'''\n#[repr(C)]
 pub struct {name} {{ base:ChartSeries }}
 ferro_class!({name}: ChartSeries);
-ferro_class_info!({name} {{ new:{name}::new }});
+{info}
 impl FerroObjectImpl for {name} {{
-    fn constructed(this:&Self) {{ Self::parent_constructed(this);this.set_kind(SeriesKind::{kind}); }}
+    fn constructed(this:&Self) {{ Self::parent_constructed(this);this.set_kind(SeriesKind::{kind});{owned} }}
 }}
 impl {name} {{
     fn static_constructor() {{
@@ -247,18 +272,22 @@ impl {name} {{
         ChartSeries::data_padding_property().override_default_value::<{name}>(defaults.data_padding);
         ChartSeries::geometry_size_property().override_default_value::<{name}>(defaults.geometry_size);
         ChartSeries::padding_property().override_default_value::<{name}>(defaults.padding);
-        ChartSeries::max_bar_width_property().override_default_value::<{name}>(defaults.max_bar_width);
+        ChartSeries::max_bar_width_property().override_default_value::<{name}>(defaults.max_bar_width);{extra}
     }}
     pub fn construct()->Self {{Self{{base:ChartSeries::construct()}}}}
     pub fn new()->Ref<Self> {{instantiate(Self::construct())}}
 }}
 '''
+for name,props in node_props.items():
+    classes += '\n' + properties(name,props)
 
-collections = HEADER + '''use crate::{ChartPoint,ChartSeries,Axis};
+collections = HEADER + '''use crate::{ChartPoint,ChartSeries,Axis,SankeyNode,SankeyLink,TreemapNode,HeatLand,GeoMarker};
 use ferroui_base::{collections::FerroList,ferro_markup_type,Ref};
 use std::ops::Deref;
 '''
-for name,typ in [('ChartPoints','ChartPoint'),('ChartSeriesCollection','ChartSeries'),('Axes','Axis')]:
+for name,typ in [('ChartPoints','ChartPoint'),('ChartSeriesCollection','ChartSeries'),('Axes','Axis'),
+                 ('SankeyNodes','SankeyNode'),('SankeyLinks','SankeyLink'),('TreemapNodes','TreemapNode'),
+                 ('HeatLands','HeatLand'),('GeoMarkers','GeoMarker')]:
     collections += f'''
 #[derive(Clone,Debug,PartialEq)]
 pub struct {name}(FerroList<Ref<{typ}>>);
@@ -298,11 +327,25 @@ chart_props = [
  ('fit_to_bounds','FitToBounds','bool','false'),
  ('min_value','MinValue','f64','0.0'),('max_value','MaxValue','Option<f64>','None'),
  ('clockwise','Clockwise','bool','true'),
+ # The geographic map (IGeoMapView, and the CenterLongitude and CenterLatitude of GeoMapChart):
+ # no ActiveMap is the bundled world map; no latitude or longitude bound is the projection's
+ # default; the stroke and fill of the lands are the source's white and light grey.
+ ('active_map','ActiveMap','Option<Rc<DrawnMap>>','None'),
+ ('map_projection','MapProjection','MapProjection','MapProjection::Default'),
+ ('min_latitude','MinLatitude','Option<f64>','None'),('max_latitude','MaxLatitude','Option<f64>','None'),
+ ('min_longitude','MinLongitude','Option<f64>','None'),('max_longitude','MaxLongitude','Option<f64>','None'),
+ ('interaction_mode','InteractionMode','MapInteractionMode','MapInteractionMode::NONE'),
+ ('min_zoom_level','MinZoomLevel','f64','1.0'),('max_zoom_level','MaxZoomLevel','f64','100.0'),
+ ('stroke','Stroke','Option<Color>','Some(Color::from_rgb(255,255,255))'),
+ ('fill','Fill','Option<Color>','Some(Color::from_rgb(240,240,240))'),
+ ('center_longitude','CenterLongitude','f64','0.0'),('center_latitude','CenterLatitude','f64','0.0'),
+ ('markers','Markers','GeoMarkers','GeoMarkers::new()'),
 ]
-chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartSeriesCollection,Axes,LegendPosition,TooltipPosition,ZoomAndPanMode};
+chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartSeriesCollection,Axes,GeoMarkers,LegendPosition,MapInteractionMode,TooltipPosition,ZoomAndPanMode};
 use ferroui_base::{ferro_properties,FerroProperty,StyledProperty,Rect};
 use ferroui_base::media::Color;
-use ferroui_livecharts::{FindingStrategy,Section};
+use ferroui_livecharts::{DrawnMap,FindingStrategy,MapProjection,Section};
+use std::rc::Rc;
 '''+properties('Chart',chart_props)
 
 chart_classes=HEADER+'''use crate::{Chart,ChartKind};
@@ -313,7 +356,8 @@ use ferroui_controls::ControlImpl;
 # The chart classes, their kind and the defaults their source view takes from LiveChartsSettings
 # (PolarInitialRotation = -90: the angle zero points up).
 chart_families=[('CartesianChart','Cartesian',[]),('PieChart','Pie',[]),
-                ('PolarChart','Polar',[('initial_rotation','-90.0')])]
+                ('PolarChart','Polar',[('initial_rotation','-90.0')]),
+                ('SankeyChart','Sankey',[]),('TreemapChart','Treemap',[]),('GeoMap','GeoMap',[])]
 for cls,kind,defaults in chart_families:
     overrides=''.join(f'Chart::{prop}_property().override_default_value::<{cls}>({value});' for prop,value in defaults)
     static=f'fn static_constructor(){{{overrides}}}' if overrides else ''

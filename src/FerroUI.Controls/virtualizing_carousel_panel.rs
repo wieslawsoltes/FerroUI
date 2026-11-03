@@ -7,7 +7,7 @@ use crate::{
 };
 use ferroui_base::animation::easings::{Easing, QuadraticEaseOut, SineEaseOut};
 use ferroui_base::animation::{
-    Animation, Cue, FillMode, IPageTransition, KeyFrame, PageTransitionItem, SlideAxis, TimeSpan,
+    Animation, Cue, FillMode, IPageTransition, KeyFrame, PageTransitionItem, SlideAxis, SignedDuration,
 };
 use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
@@ -19,10 +19,8 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{
-    CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
-    FerroSynchronizationContext,
-};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::utilities::{HandlerList, MathUtilities};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -32,9 +30,7 @@ use ferroui_base::{
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::future::Future;
-use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll};
 
 const SWIPE_COMMIT_THRESHOLD: f64 = 0.25;
 const VELOCITY_COMMIT_THRESHOLD: f64 = 800.0;
@@ -73,8 +69,8 @@ pub struct VirtualizingCarouselPanel {
     realized_index: Cell<i32>,
     transition_from: RefCell<Option<Ref<Control>>>,
     transition_from_index: Cell<i32>,
-    transition: RefCell<Option<Rc<CancellationTokenSource>>>,
-    transition_task: RefCell<Option<DispatcherTask<()>>>,
+    transition: RefCell<Option<Rc<CancellationToken>>>,
+    transition_task: RefCell<Option<JoinHandle<()>>>,
     scroll_invalidated: Rc<HandlerList<dyn Fn()>>,
     can_horizontally_scroll: Cell<bool>,
     can_vertically_scroll: Cell<bool>,
@@ -92,8 +88,8 @@ pub struct VirtualizingCarouselPanel {
     swipe_axis: Cell<Option<SlideAxis>>,
     locked_axis: Cell<SlideAxis>,
 
-    completion_cts: RefCell<Option<Rc<CancellationTokenSource>>>,
-    offset_animation_cts: RefCell<Option<Rc<CancellationTokenSource>>>,
+    completion_cts: RefCell<Option<Rc<CancellationToken>>>,
+    offset_animation_cts: RefCell<Option<Rc<CancellationToken>>>,
     completion_end_progress: Cell<f64>,
     is_rubber_banding: Cell<bool>,
     drag_start_offset: Cell<f64>,
@@ -199,7 +195,7 @@ impl LayoutableImpl for VirtualizingCarouselPanel {
             let transition = this.get_transition();
 
             if let (Some(transition_from), Some(to), Some(transition)) = (transition_from, to, transition) {
-                let transition_cts = Rc::new(CancellationTokenSource::new());
+                let transition_cts = Rc::new(CancellationToken::new());
                 *this.transition.borrow_mut() = Some(transition_cts.clone());
 
                 let forward = this.realized_index.get() > this.transition_from_index.get();
@@ -457,8 +453,8 @@ impl ILogicalScrollable for VirtualizingCarouselPanel {
 /// if the field still holds the source of that call.
 struct ClearSourceOnExit {
     panel: WeakRef<VirtualizingCarouselPanel>,
-    field: fn(&VirtualizingCarouselPanel) -> &RefCell<Option<Rc<CancellationTokenSource>>>,
-    source: Rc<CancellationTokenSource>,
+    field: fn(&VirtualizingCarouselPanel) -> &RefCell<Option<Rc<CancellationToken>>>,
+    source: Rc<CancellationToken>,
 }
 
 impl Drop for ClearSourceOnExit {
@@ -469,29 +465,6 @@ impl Drop for ClearSourceOnExit {
             if is_current {
                 *field.borrow_mut() = None;
             }
-        }
-    }
-}
-
-/// Waits for a page transition to end. An interrupted or failed transition
-/// ends the wait like a completed one: an interruption is expected when a
-/// transition is superseded by a newer navigation action.
-struct TransitionEnd {
-    task: DispatcherTask<()>,
-}
-
-impl Future for TransitionEnd {
-    type Output = ();
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        // The failure of a transition is not re-raised.
-        if self.task.is_faulted() {
-            return Poll::Ready(());
-        }
-
-        match Pin::new(&mut self.task).poll(cx) {
-            Poll::Ready(_) => Poll::Ready(()),
-            Poll::Pending => Poll::Pending,
         }
     }
 }
@@ -583,8 +556,8 @@ impl VirtualizingCarouselPanel {
     /// Whether the field holds a cancellation source that has not been
     /// cancelled.
     #[inline]
-    fn is_active(source: &RefCell<Option<Rc<CancellationTokenSource>>>) -> bool {
-        source.borrow().as_ref().is_some_and(|source| !source.is_cancellation_requested())
+    fn is_active(source: &RefCell<Option<Rc<CancellationToken>>>) -> bool {
+        source.borrow().as_ref().is_some_and(|source| !source.is_cancelled())
     }
 
     /// The carousel that the panel is displaying items for.
@@ -1269,7 +1242,7 @@ impl VirtualizingCarouselPanel {
     }
 
     fn complete_finished_transition_if_needed(&self) {
-        let is_task_completed = self.transition_task.borrow().as_ref().is_some_and(|task| task.is_completed());
+        let is_task_completed = self.transition_task.borrow().as_ref().is_some_and(JoinHandle::is_finished);
 
         if self.transition.borrow().is_some() && is_task_completed {
             if let Some(transition_from) = self.transition_from() {
@@ -1283,33 +1256,38 @@ impl VirtualizingCarouselPanel {
         }
     }
 
-    /// The scheduler that runs the asynchronous methods of the panel: the
-    /// one of the current synchronization context.
-    fn task_scheduler() -> DispatcherTaskScheduler {
-        let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-            FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-        });
-        context.to_task_scheduler()
+    /// Starts an asynchronous method of the panel: up to its first pending await inside the call,
+    /// then on the dispatcher of the thread at the priority of the running job (the current
+    /// synchronization context of the original), Normal outside of one.
+    fn start_async<F>(future: F) -> JoinHandle<F::Output>
+    where
+        F: Future + 'static,
+        F::Output: 'static,
+    {
+        let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+        Dispatcher::current_dispatcher().start_local_with_priority(future, priority)
     }
 
     fn run_transition_async(
         &self,
-        transition_cts: Rc<CancellationTokenSource>,
+        transition_cts: Rc<CancellationToken>,
         transition_from: Ref<Control>,
         transition_to: Ref<Control>,
         forward: bool,
         transition: Rc<dyn IPageTransition>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let this = self.to_ref().downgrade();
 
-        Self::task_scheduler().start_local(async move {
+        Self::start_async(async move {
             let from: Ref<Visual> = transition_from.upcast();
             let to: Ref<Visual> = transition_to.upcast();
-            let task = transition.start(Some(&from), Some(&to), forward, transition_cts.token());
+            let task = transition.start(Some(&from), Some(&to), forward, (*transition_cts).clone());
 
             // An interruption is expected when a transition is interrupted
-            // by a newer navigation action.
-            TransitionEnd { task }.await;
+            // by a newer navigation action: an interrupted or failed
+            // transition ends the wait like a completed one, and its failure
+            // is not raised again.
+            let _ = task.await;
 
             let Some(this) = this.upgrade() else {
                 return;
@@ -1317,7 +1295,7 @@ impl VirtualizingCarouselPanel {
 
             let is_current =
                 this.transition.borrow().as_ref().is_some_and(|current| Rc::ptr_eq(current, &transition_cts));
-            if transition_cts.is_cancellation_requested() || !is_current {
+            if transition_cts.is_cancelled() || !is_current {
                 return;
             }
 
@@ -1372,7 +1350,7 @@ impl VirtualizingCarouselPanel {
         self.animate_viewport_offset_async(
             current_offset,
             target_offset,
-            TimeSpan::from_seconds(MAX_COMPLETION_DURATION),
+            SignedDuration::from_seconds(MAX_COMPLETION_DURATION),
             QuadraticEaseOut::new().into(),
             |this| {
                 this.reset_viewport_transition_state();
@@ -1769,7 +1747,7 @@ impl VirtualizingCarouselPanel {
         self.animate_viewport_offset_async(
             current_offset,
             end_offset,
-            TimeSpan::from_seconds(duration_seconds),
+            SignedDuration::from_seconds(duration_seconds),
             easing,
             move |this| {
                 this.total_delta.set(0.0);
@@ -1800,7 +1778,7 @@ impl VirtualizingCarouselPanel {
         property: &'static StyledProperty<f64>,
         from: f64,
         to: f64,
-        duration: TimeSpan,
+        duration: SignedDuration,
         easing: Easing,
     ) -> Ref<Animation> {
         let animation = Animation::new();
@@ -1816,14 +1794,14 @@ impl VirtualizingCarouselPanel {
         &self,
         from_offset: f64,
         to_offset: f64,
-        duration: TimeSpan,
+        duration: SignedDuration,
         easing: Easing,
         on_completed: impl FnOnce(&Self) + 'static,
     ) {
         self.cancel_offset_animation();
-        let offset_animation_cts = Rc::new(CancellationTokenSource::new());
+        let offset_animation_cts = Rc::new(CancellationToken::new());
         *self.offset_animation_cts.borrow_mut() = Some(offset_animation_cts.clone());
-        let cancellation_token = offset_animation_cts.token();
+        let cancellation_token = (*offset_animation_cts).clone();
 
         let animation =
             Self::create_progress_animation(Self::offset_animation_progress_property(), 0.0, 1.0, duration, easing);
@@ -1840,14 +1818,14 @@ impl VirtualizingCarouselPanel {
         };
         let run = animation.run_async(self, cancellation_token.clone());
 
-        let _ = Self::task_scheduler().start_local(async move {
+        let _ = Self::start_async(async move {
             let _finally = _finally;
 
             if run.await.is_err() {
                 return;
             }
 
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -1916,7 +1894,7 @@ impl VirtualizingCarouselPanel {
         if let Some(previous_completion_cts) = previous_completion_cts {
             previous_completion_cts.cancel();
         }
-        let completion_cts = Rc::new(CancellationTokenSource::new());
+        let completion_cts = Rc::new(CancellationToken::new());
         *self.completion_cts.borrow_mut() = Some(completion_cts.clone());
 
         self.set_value(Self::completion_progress_property(), current_progress);
@@ -1925,7 +1903,7 @@ impl VirtualizingCarouselPanel {
             Self::completion_progress_property(),
             current_progress,
             completion_end_progress,
-            TimeSpan::from_seconds(duration_seconds),
+            SignedDuration::from_seconds(duration_seconds),
             easing,
         );
 
@@ -1937,23 +1915,23 @@ impl VirtualizingCarouselPanel {
         &self,
         animation: Ref<Animation>,
         carousel: Ref<Carousel>,
-        completion_cts: Rc<CancellationTokenSource>,
+        completion_cts: Rc<CancellationToken>,
     ) {
-        let cancellation_token = completion_cts.token();
+        let cancellation_token = (*completion_cts).clone();
 
         let this = self.to_ref().downgrade();
         let _finally =
             ClearSourceOnExit { panel: this.clone(), field: |panel| &panel.completion_cts, source: completion_cts };
         let run = animation.run_async(self, cancellation_token.clone());
 
-        let _ = Self::task_scheduler().start_local(async move {
+        let _ = Self::start_async(async move {
             let _finally = _finally;
 
             if run.await.is_err() {
                 return;
             }
 
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 

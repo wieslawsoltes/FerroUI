@@ -198,10 +198,10 @@ question; each is decided in the step named.
 |---|---|---|
 | F1 | **Lost wake of a dispatcher task polled in a nested loop.** `poll_task` takes the task out of the table while it polls it and clears its `scheduled` flag. If the future pumps the queue during that poll (a synchronous `invoke_local_with_priority` at a priority other than `Send`, `DispatcherOperation::wait`, `push_frame`), and something it awaits completes there, the queued poll runs inside the pump, finds no task and does nothing, and `scheduled` stays set: every later wake is swallowed and the task never resumes. The executor of `ferroui-system` handles the same case (a wake during a poll repolls after it). | A2 fixes it, with a test: done (`a_task_whose_poll_pumps_the_queue_resumes_after_a_wake_that_ran_in_the_pump`) |
 | F2 | **A panic in a future of `ferroui-system` strands it.** `poll_task` does not catch: the panic leaves through the call that woke the future (often `set_result`), the task stays `Running` in the table with its `polling` flag set, and the awaiters of the same task that were not woken yet never are (the panic leaves `finish` with the rest of its wakers). The dispatcher's executor catches and faults the task. | A1 (the panic faults the task, as on the dispatcher): done |
-| F3 | **Continuations inline or queued.** Section 1.4: the two executors of a dispatcher thread order continuations differently, and neither is the .NET rule. | A2 keeps the dispatcher's rule; A5 decides the rule for the tasks of the reactive libraries on a dispatcher thread |
-| F4 | **Order of cancellation callbacks.** The port runs them in the order of registration; .NET runs them in reverse order. Not recorded in DEVIATIONS. | A4 keeps the order of registration and records it |
+| F3 | **Continuations inline or queued.** Section 1.4: the two executors of a dispatcher thread order continuations differently, and neither is the .NET rule. | A2 keeps the dispatcher's rule; A5 decides the rule for the tasks of the reactive libraries on a dispatcher thread: decided, the rule of `await` in .NET (the A5 status below) |
+| F4 | **Order of cancellation callbacks.** The port runs them in the order of registration; .NET runs them in reverse order. Not recorded in DEVIATIONS. | A4 keeps the order of registration and records it: done (A4a) |
 | F5 | **The platform signal runs jobs while processing is disabled** (as upstream: only `run_jobs`, `push_frame` and the pumping waits check the counter). A native modal loop that delivers the signal while a layout pass has disabled processing would run jobs inside it. Pinned by `a_platform_signal_runs_jobs_while_processing_is_disabled`. | Open: an owner decision; not changed without a DEVIATIONS row |
-| F6 | **A dropped `TaskCompletionSource` leaves its awaiters pending for ever** (as in .NET); the D-Bus call queue already resolves such a task as canceled (DEVIATIONS, row of `DBusCallQueue`). Pinned by `a_future_awaiting_a_dropped_completion_source_stays_pending`. | A3: the one-shot channel cancels when its sender is dropped |
+| F6 | **A dropped `TaskCompletionSource` leaves its awaiters pending for ever** (as in .NET); the D-Bus call queue already resolves such a task as canceled (DEVIATIONS, row of `DBusCallQueue`). Pinned by `a_future_awaiting_a_dropped_completion_source_stays_pending`. | A3: the one-shot channel cancels when its sender is dropped: done (the local copies that moved; `threading::tasks::TaskCompletionSource` keeps it until its uses move) |
 | F7 | **`DispatcherTask` has one observer.** Its result is taken once; a second `await` or `result()` of a clone panics. `Task<T>` of `ferroui-system` is multi-observer (`T: Clone`). | A1: `JoinHandle` (one owner) and `Shared` (several): done |
 
 ## 2. The ordering the dispatcher guarantees (A0)
@@ -437,10 +437,11 @@ where they are large.
 | A0 (done, #498) | This plan; the ordering tests of section 2 | unchanged | none |
 | A1 (done) | The executor core in `ferroui-system` (`task::{spawn_local_on, JoinHandle, JoinError, Shared, Schedule, block_on}`), with its tests; `threading::tasks` (`Task`, `spawn_local`, `block_on`, `run`) on it with today's inline rule; a panic faults the task (F2) | additions | medium: every task of the reactive libraries; their ported tests and G9, G19, G20 guard it |
 | A2 (done) | The dispatcher on the core: its schedule per priority, `Dispatcher::spawn_local`, `spawn_local_with_priority` and `spawn`; `DispatcherTask`, `DispatcherTaskScheduler` and `invoke_async_task*` as wrappers over them; `resume`, `yield_now`, `await_with_priority` on the core; the lost wake (F1) fixed, with a test | additions | high: every asynchronous step of the user interface; G1 to G17 unchanged |
-| A3 | `task::oneshot`; the ten local completions move to it, by crate (X11, remote protocol, dialogs, headless, iOS, Android, FreeDesktop, WinUI) | additions; `ferroui-x11`'s public `TaskCompletionSource` deprecated | low per crate; a dropped sender now cancels (F6, a DEVIATIONS row where the copy did not) |
-| A4 | One cancellation type: `CancellationToken` reshaped (section 3.7), `CancellationGuard`, `cancelled()`, `child_token()`, `drop_guard()`; `task::Canceled` for `OperationCanceledError` and `TaskCanceledError`; the local cancellation types replaced; F4 recorded | 0.5: the old names deprecated | medium: 602 uses; registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
-| A5 | `SynchronizationContext` to the thread's schedule: `set_thread_schedule`, `Dispatcher::current_priority`, `FerroScheduler::install_on_ui_thread`, the Rx forms that capture a context, the dock services; the rule for the tasks of the reactive libraries on a dispatcher thread decided (F3) and its order tested | 0.5: the trait, `FerroSynchronizationContext` and `RestoreContext` deprecated | high where F3 changes an order; the Rx, ReactiveUI and dock tests guard it |
-| A6 | The asynchronous public APIs of the controls and platforms return `JoinHandle` or `impl Future` (navigation, dialogs, the behaviors' `TaskHandle`, the callers of `invoke_async_task*` and `to_task_scheduler`), by area | 0.5 | medium: callers visited; deprecated `..._task` variants where needed |
+| A3 (done) | `task::oneshot`; the ten local completions move to it, by crate (X11, remote protocol, dialogs, headless, iOS, Android, FreeDesktop, WinUI) | additions; `ferroui-x11`'s public `TaskCompletionSource` deprecated | low per crate; a dropped sender now cancels (F6, a DEVIATIONS row where the copy did not) |
+| A4a (done) | One cancellation type: `CancellationToken` reshaped (section 3.7), `CancellationGuard` (`register_guarded`, `register_local_guarded`), `cancelled()`, `child_token()`, `drop_guard()`; `CancellationTokenSource` over it; `OperationCanceledError` and `TaskCanceledError` convert to and from `task::Canceled`; F4 recorded | additions | low: the old API keeps working and is not deprecated yet |
+| A4b (done) | The uses move, by crate (602: `ferroui-reactive`, `ferroui-base`, `ferroui-dynamic-data`, dock, `ferroui-controls`, ...); the local cancellation types replaced: `LocalCancellationRegistration` of `ferroui-base::animation` (`register_local_guarded`), `CancellationFlag` and `Cancelled` of `ferroui-freedesktop` (`cancelled()`), `AiCancellationToken` of ProTranslate, `LoopCancellation` of `ferroui-native` and `CancelOnDrop` of `ferroui-headless` (`drop_guard()`); `register` gives the guard; then the old names deprecated and the `upstream-names.toml` rows | 0.5: the old names deprecated | medium: registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
+| A5 (done) | `SynchronizationContext` to the thread's schedule: `set_thread_schedule`, `Dispatcher::current_priority`, `FerroScheduler::install_on_ui_thread`, the Rx forms that capture a context, the dock services; the rule for the tasks of the reactive libraries on a dispatcher thread decided (F3) and its order tested | 0.5: the trait, `FerroSynchronizationContext` and `RestoreContext` deprecated | high where F3 changes an order; the Rx, ReactiveUI and dock tests guard it |
+| A6 (done) | The asynchronous public APIs of the controls and platforms return `JoinHandle` or `impl Future` (navigation, dialogs, the behaviors' `TaskHandle`, the callers of `invoke_async_task*` and `to_task_scheduler`), by area | 0.5: `DispatcherTask`, `DispatcherTaskScheduler`, `invoke_async_task*`, `to_task_scheduler*` deprecated | medium: callers visited; deprecated `..._task` variants where needed |
 | A7 | The `Task` forms of Rx, DynamicData and ReactiveUI on futures and `Shared<T>` (section 3.8) | 0.5 (names kept) | medium: the ported upstream tests drive them through completion sources |
 | A8 | `FerroUI.View`'s async data on the dispatcher, abandoned with `abort` | behaviour: the order of the signal write (a test) | low |
 | A9 | The inventory (`CancellationToken` becomes the target; `Task`, `TaskCompletionSource`, `SynchronizationContext`, `CancellationTokenSource` counted until removed), `upstream-names.toml`, the migration notes, docs/porting/reactive.md section 5.8 and PORTING-GUIDE | | |
@@ -482,6 +483,220 @@ from other threads through a dispatcher job on every dispatcher thread, where to
 A5 with `set_thread_schedule` and the rule of F3. Nothing is deprecated yet: `DispatcherTask`,
 `DispatcherTaskScheduler` and `invoke_async_task*` become deprecated with A6, which replaces their
 uses.
+
+A3 is done: the one-shot channel is `ferroui_system::task::oneshot` (`oneshot.rs`; its tests are
+`src/FerroUI.System/tests/oneshot_tests.rs`). `channel()` gives a `Sender` (`send(self, value)`,
+which gives the value back when the receiver is gone; `is_closed`) and a `Receiver` (a future of
+`Result<T, Canceled>`; `try_recv`, `is_finished`, the blocking `blocking_recv` and `recv_timeout`;
+`shared()`, a `SharedReceiver` for several waiters, which wakes them in the order they waited and a
+task that awaits several clones once). The state is a `Mutex` with the waker of each receiving
+handle (a repoll replaces the handle's waker) and a `Condvar` for the blocking receives; a send wakes
+inside the call, outside of the lock, so the executor of the awaiting task decides where it
+continues. `task::Canceled` (`canceled.rs`, `std::error::Error`) is its error and the type that A4
+makes the one cancellation error. The ten local copies moved, crate by crate:
+
+- `ferroui-x11`: the public `TaskCompletionSource` and `TaskCompletionFuture` of the selections are
+  `#[deprecated(since = "0.5.0")]` wrappers (a sender in the source, a shared receiver for its
+  futures) with their behaviour; the clipboard, the event stream window and the drag source use
+  them with `#[allow(deprecated)]`. `GlibTask` and `GlibTaskCompletion` keep their names and API (a
+  receiver, and a sender that any clone takes); `StartGtkTask` is a shared receiver.
+- `ferroui-remote-protocol`: `Task` (a shared receiver, waited for with `blocking_recv` and
+  `recv_timeout`) and `TaskCompletionSource` (a sender that any clone takes) keep their blocking API;
+  the crate depends on `ferroui-system`, which has no dependency on the framework.
+- `ferroui-dialogs`: the crate-private `TaskCompletionSource` is a sender the callbacks of a dialog
+  share; its `new` gives the receiver, in the place of `CompletionTask`.
+- `ferroui-headless`: `HeadlessUnitTestTask` is a receiver of the outcome (`wait`, `wait_timeout`,
+  `is_completed`), and the session's `TaskCompletionSource` its sender.
+- `ferroui-ios`: the launcher and the pickers use channels directly (the delegates of a picker share
+  the sender); the public `completion::Completion` and `CompletionFuture` are deprecated wrappers.
+- `ferroui-android`: `check_permission` and the pickers wait on channels whose sender the result
+  handler takes; the crate-private `Completion` is gone.
+- `ferroui-freedesktop`: the D-Bus call queue gives the futures of channels (`result_of`, a dropped
+  call is `DBusCallError::Canceled` as before); `CompletionSender`, `CompletionReceiver` and
+  `CanceledValue` are gone.
+- `ferroui-winui`: the agile completion handler of an asynchronous operation holds a sender of its
+  status.
+
+What deviated (F6, each a DEVIATIONS row): a sender that is dropped without a value now ends the wait
+where a copy left it pending for ever: a `GlibTask` with an error, a remote protocol `Task` with
+`Error::InvalidOperation("A task was canceled.")`, the iOS launcher and the Android permission check
+with `false`, an Android picker with no item, a WinUI operation with `E_ABORT`. A start of GTK whose
+thread panics before it answers is `false`, which is upstream's catch. What did not change: the
+copies that already canceled (the headless session, the D-Bus call queue), and the waits that keep
+their own sender while they wait (the dialogs, the iOS pickers, the X11 selections), whose receivers
+are never canceled. What stays: `threading::tasks::TaskCompletionSource` of `ferroui-system` (G20
+and its uses in the reactive libraries), which becomes a deprecated wrapper with the step that
+replaces its uses (A7, the `Task` forms of Rx), and the task-like handles of section 1.2 that are
+not one-shot completions. The blocking transports of the remote protocol stay out of scope (section
+6): only the completion of a send moved.
+
+A4a is done: `CancellationToken` (`threading/cancellation_token.rs` of `ferroui-system`; its tests
+are `src/FerroUI.System/tests/cancellation_tests.rs`) has the shape of `tokio_util`: `new()` (a
+token that can be canceled, by any clone), `cancel()`, `is_cancelled()`, `can_be_cancelled()`,
+`none()` and `Default` (a token that never is, as .NET's default), `child_token()` (canceled with
+its parent, in the parent's pass of the callbacks; the parent holds it weakly and a dropped child
+leaves it), `cancelled()` (`WaitForCancellation`, a `Send` future that owns a clone of the token
+and is woken on the cancelling thread) and `drop_guard()` (`DropGuard`, `disarm()`). A callback
+registered with `register_guarded`, or with `register_local_guarded` for one that runs on the
+registering thread, is kept by a `CancellationGuard` in the shape of `Subscription`: `#[must_use]`,
+`Send`, dropping it removes the callback, `detach()` keeps it, `dispose(self)`. The guard of a local
+callback dropped on another thread removes the registration at once and asks the callback's thread
+to drop the callback (`Pending::Forget` of the executor). The guard forms have names of their own
+because `register` and `register_local` keep their signatures and their registrations that dropping
+keeps, which hundreds of callers rely on: A4b moves those callers and then gives the guard the name
+`register`. The callbacks run as G18 has it (once, in the order of registration, on the cancelling
+thread; F4 is a row of DEVIATIONS), now one at a time outside of the lock of the token, so that a
+callback may register, unregister and cancel; a callback that an earlier one unregistered does not
+run, where it ran when the pass took all the callbacks at once. `CancellationTokenSource` is a token
+that can be canceled, and `token()` a clone of it (so the token can now cancel its source); there
+were no linked sources to map to children. `task::Canceled` is the cancellation error:
+`OperationCanceledError` (`ferroui-base`) and `TaskCanceledError` convert to and from it with `From`
+and keep their shape until A4b. Nothing is deprecated yet (section 4), and the rows of
+`upstream-names.toml` come with A4b.
+
+A4b is done: `CancellationToken::register` and `register_local` give the `CancellationGuard`;
+`register_guarded` and `register_local_guarded` are deprecated aliases of them, and the forms that
+give a registration that dropping keeps are the deprecated `register_handle` and
+`register_local_handle`. `CancellationTokenSource`, `CancellationTokenRegistration`,
+`LocalCancellationTokenRegistration`, `is_cancellation_requested`, `can_be_canceled` and
+`OperationCanceledError` are `#[deprecated(since = "0.5.0")]`, with `From` conversions to the
+token, the guard and `task::Canceled`; nothing in the workspace uses them but their own tests (G18
+and the tests of the source keep the deprecated forms, under `#[allow(deprecated)]`, with their
+assertions). The uses moved crate by crate (about 540 in 100 files: `ferroui-base` 106,
+`ferroui-controls` 78, `ferroui-system` 59, the Rx tests 54, ProTranslate 52, `ferroui-reactive`
+51, the control catalog 32, then headless, X11, FreeDesktop, ReactiveUI, the platforms): a source
+is `CancellationToken::new()` and its clones (an `Rc` of it where a control compares the current
+transition by identity); a source linked to another token by a registration is a
+`child_token()` (the run loops of macOS and GLib, `FromAsync` of ReactiveUI); a registration whose
+result was ignored is `.detach()`ed (the six `done`/`timeout` links of the dispatcher tests, the
+cancel actions of the tests of `TransitioningContentControl`, two producers of the Rx tests); a
+registration kept to be disposed holds the guard, which is disposed or dropped where the
+registration was disposed (the abort of a queued operation keeps it in a slot that the completed
+and aborted handlers take). `TokenRegistration` of `ferroui-reactive` detaches its guard when it is
+dropped, as the `IDisposable` it is. The dispatcher operations, the invokes, `DispatcherTask`,
+`AutoCompletePopulation`, `HeadlessUnitTestTask` and the behaviors' `TaskHandle` give `Canceled`.
+`threading::tasks::canceled()` and the cancellations of `RunAsync` and of the scheduler operations
+end with `Canceled`; `TaskCanceledError::is_cancellation` recognizes both errors, and
+`TaskCanceledError` stays (not deprecated) as the error of a canceled `Task` that names it, until
+A7. The local types: `CancellationFlag` and `Cancelled` of `ferroui-freedesktop` are deprecated
+wrappers, their uses take the token and `signal_watch::run_until_cancelled`;
+`AiCancellationToken` of ProTranslate is a deprecated wrapper and `AiTransport` takes the token
+(the crate depends on `ferroui-system`); `CancelOnDrop` of `ferroui-headless` is `drop_guard()`;
+`CancellationDisposable` wraps the token (`with_token`; `with_source` deprecated). Two stay:
+`LoopCancellation` of `ferroui-native` is the bridge to the native loop's own cancellation object
+(it releases it on the loop thread and ignores a cancellation after the loop exited), and the local
+registration of the animations posts its action to the dispatcher of its thread, which
+`register_local` does not do before the dispatcher is the schedule of its thread (A5); it holds the
+guard and removes its action when dropped. The rows of `upstream-names.toml` map
+`CancellationTokenSource`, `CancellationTokenRegistration`, `OperationCanceledException` and
+`TaskCanceledException`.
+
+A5 is done: the dispatcher is the schedule of its thread. It installs itself when it starts
+(`task::set_thread_schedule`, its schedule at `Default`) and removes itself when it shuts down or
+is reset, so the wakes from other threads of the tasks in the queue of the thread, and the
+callbacks that other threads send to it (`CancellationToken::register_local`), are dispatcher jobs
+at `Default`; `run_pending_wakes` is no longer needed on a dispatcher thread (it still drains the
+queue, which the posted job then finds empty). Around each job (`enter_job`, which took the place
+of `FerroSynchronizationContext::ensure`) the dispatcher at the priority of the job is the
+**current schedule** of the thread (`task::current_schedule`, `set_current_schedule`,
+`is_current_schedule`; the dispatcher keeps one schedule per priority on its thread, so a
+schedule is one object), and the priority is `Dispatcher::current_priority()` (`None` outside of
+a job). `Dispatcher::set_current_priority` sets the priority of the code outside of a job, which
+`Application::register_services` sets to `Normal` when the thread has none (upstream's
+`InstallIfNeeded`), and which the unit test applications and the headless session save and
+restore. `Schedule::schedule_local` posts work that is not `Send` (a dispatcher posts it with
+`post_local`; by default a callback of the thread), and `Schedule::identity` is what two schedules
+are compared by (an adapter of a context is the context).
+
+The rule of F3, decided as the rule of `await` in .NET, where
+`SynchronizationContextAwaitTaskContinuation` runs the continuation inline when the completing code
+runs in the captured context (`SynchronizationContext.Current` is it) and posts it to the context
+otherwise; a context of the port is a dispatcher and a priority, as the contexts of the upstream
+dispatcher are one per priority. A task of `ferroui-system` spawned in a job (`task::spawn_local`,
+`threading::tasks::spawn_local`) takes the current schedule (`Route::Current` of the executor): a
+completion on its thread in a job of the same priority resumes it inside the completing call, and
+any other completion, in a job of another priority, outside of a job or on another thread, queues
+one poll as a job at its priority, behind the work of that priority queued before. A task spawned
+outside of a job, where no schedule is current (as in .NET, where no context is captured), stays
+in the queue of the thread: it resumes inside the completing call wherever that runs on its
+thread (G9 unchanged), and its wakes from other threads go through the schedule of the thread.
+`block_on` runs its future with no current schedule, so that the tasks it spawns are in the queue
+it waits on. The tasks of the dispatcher keep their rule (always queued, G6). The tests are
+`src/FerroUI.Base/threading/dispatcher_schedule_tests.rs` (the current priority, the schedule of the
+thread and its removal at shutdown, wakes from other threads without `run_pending_wakes`, a local
+cancellation from another thread, completions in a job of the task's priority, of another,
+outside of a job, of a task spawned outside of a job, and in a nested frame) and the tests of the
+current schedule in `executor_tests.rs`; G1 to G20 are unchanged.
+
+Deprecated since 0.5.0: the `SynchronizationContext` trait, `current_synchronization_context`,
+`set_synchronization_context` (which now also make an adapter of the context the schedule of the
+thread and the current schedule, `threading::context_schedule`), `FerroSynchronizationContext`,
+`RestoreContext` and `FerroScheduler::install_on_ui_thread`; the Rx forms that take a context
+(`SynchronizationContextScheduler::new`, `with_always_post` and `context`, `ContextDisposable::new`
+and `context`, `observe_on_context`, `subscribe_on_context`, `notify_on_context`) and
+`BindingSchedulers::use_synchronization_context`, beside which the forms that take a schedule keep
+the Rx names (`SynchronizationContextScheduler::with_schedule`, `with_schedule_and_always_post`,
+`ContextDisposable::with_schedule`, `observe_on_schedule`, `subscribe_on_schedule`,
+`notify_on_schedule`, `BindingSchedulers::use_schedule`). `FromEvent`, the awaiter of
+`AsyncSubject` and `ConfigureAwait(true)` of `ScheduleAsync` capture the current schedule. The
+uses moved: the controls, the OpenGL composition and the samples start their asynchronous members
+on `Dispatcher::current_priority()` (or `Normal`), the page transitions and the animations as
+well, the task stream plugin posts at it, and the dock services take an `Option<Arc<dyn
+Schedule>>`. The local cancellation registration of the animations is
+`CancellationToken::register_local`; a cancellation from another thread runs its action in a job
+at `Default`, where it was posted at `Send`. `threading::tasks::{set_thread_poster, ThreadPoster,
+run_pending_wakes}` stay, not deprecated, until the `Task` forms move (A7).
+
+A6 is done: the asynchronous public APIs give a `JoinHandle` (re-exported, with `JoinError` and
+`AbortHandle`, by `ferroui_base::threading`), and `DispatcherTask`, `DispatcherTaskScheduler`,
+`invoke_async_task*`, `to_task_scheduler*` (with `FerroSynchronizationContext::to_task_scheduler`)
+are `#[deprecated(since = "0.5.0")]`, with their behaviour. `Dispatcher::start_local` and
+`start_local_with_priority` are public: the first poll inside the call (`FirstPoll::Now`), what
+`DispatcherTaskScheduler::start_local` did. `From` converts a `DispatcherTask` into a `JoinHandle` (a
+task of its dispatcher that awaits it: the panic that it raises again is `Panicked`, a cancellation
+aborts the task) and a `JoinHandle` into a `DispatcherTask` (a task of the dispatcher of the calling
+thread, polled at once, that forwards the outcome: complete at once when the task has ended, one job
+after it otherwise; a panic faults it and is raised again when observed). The uses moved, by area:
+
+- `ferroui-base`: `IPageTransition::start`, `CrossFade` (`start_cross_fade`), `PageSlide`,
+  `Rotate3DTransition` and `CompositePageTransition` give a `JoinHandle`; a composite fails with the
+  panic of a member (`resume_unwind`), as the `await` of a `DispatcherTask` raised it; the task stream
+  plugin spawns with `spawn_local_with_priority` at `Default`.
+- `ferroui-controls`: `NavigationPage` (the push, pop, replace and modal members and their
+  `_with_transition` and `_with_parameter` forms), `INavigation` and `PageNavigationExtensions`,
+  `Window::show_dialog` and `show_dialog_typed` give a `JoinHandle`, and keep their old form as
+  deprecated `..._task` variants (`push_async_task`, `show_dialog_task`, `push_async_of_task`, ...)
+  that convert the handle; `TopLevel::request_platform_inhibition` gives a `JoinHandle` (no variant:
+  no application uses it). `NavigationPage`, `TabControl`, `TransitioningContentControl`,
+  `VirtualizingCarouselPanel` and `Expander` read a failed transition from `JoinError::Panicked`;
+  `TextBox::paste` raises the panic of its paste again in the clipboard operation.
+- The behaviors: `TaskHandle` shares a `JoinHandle` (`from_handle`, `From`, `abort`; `from_task`
+  deprecated, `task()` gone) and is a future of `Result<T, JoinError>`; every clone that awaits a
+  failed task gets `Panicked`, and a task without a value gives `()` to every awaiter. `AsyncActionGroup`
+  raises the panic of an action's task again, so a failed action fails the group as before.
+- The platforms (FreeDesktop, X11, Wayland, the dialogs, the native menus, the browser, WinUI, the
+  headless session), `ferroui-opengl` (`dispose_async` of the composition context and texture give a
+  `JoinHandle`; a disposal that awaits another raises its panic again, `task_support::join`), the
+  designer, the diagnostics, the color picker, TreeDataGrid, the Material theme, the samples and the
+  render and benchmark tests.
+
+The rule of the replacements keeps every order: `invoke_async_task_local(move || future)` is
+`spawn_local_with_priority(future, DispatcherPriority::DEFAULT)` (its first poll is the job in which
+the callback ran), `to_task_scheduler().start_local(future)` is `start_local(future)` (the priority
+of the current job) and `to_task_scheduler_with_priority(p).start_local(future)` is
+`start_local_with_priority(future, p)`. What changed is where a panic goes: it is the outcome of the
+handle, a value, where a `DispatcherTask` raised it again in whoever observed it; the code of the
+workspace that relied on that raises it explicitly (the composite transition, the paste, the action
+group, the OpenGL disposals), and the rest observed it as a failure that it logged or ignored. A
+deprecated `..._task` variant completes one dispatcher job after its navigation when the navigation
+does not end inside the call. Nothing in the workspace uses a deprecated item but the tests of the
+deprecated items (the dispatcher tests and the ordering suite, under `#[allow(deprecated)]`, unchanged)
+and the deprecated variants themselves. The tests: `start_local`, the two conversions, the page
+transitions (an abort, a failing member of a composite), the navigation (the result, an abort, a
+failure, the `_task` variants), the dialogs (a failed cast, an abort, the `_task` variants), the
+inhibition request (an abort) and `TaskHandle` (the result, a panic for every awaiter, an abort,
+`from_task`). The `upstream-names.toml` rows map `System.Threading.Tasks.Task` and the asynchronous
+`InvokeAsync`.
 
 ## 6. Not in scope
 

@@ -36,12 +36,13 @@ pub(crate) type LocalFuture = Pin<Box<dyn Future<Output = ()>>>;
 pub(crate) type OnFailure = Box<dyn FnOnce(Failure)>;
 pub(crate) type LocalCallbackFn = Box<dyn FnOnce()>;
 
-/// What another thread asks of a thread: to poll a task of its queue, or to run a callback that
-/// was registered there.
+/// What another thread asks of a thread: to poll a task of its queue, to run a callback that
+/// was registered there, or to forget one (and drop it there).
 #[derive(Clone, Copy)]
 enum Pending {
     Task(u64),
     Callback(u64),
+    Forget(u64),
 }
 
 /// The queue of a thread: the wakes and callbacks that came from other threads, and the schedule
@@ -92,6 +93,11 @@ enum Route {
     Thread(Arc<Inbox>),
     /// Every wake queues a poll on the schedule.
     Schedule(Arc<dyn Schedule>),
+    /// The schedule that was current where the task was spawned ([`spawn_local`] in the work of a
+    /// schedule, a dispatcher job): a wake on the task's thread while that schedule is current
+    /// polls at once, any other wake queues one poll on it (the rule of `await` with a
+    /// `SynchronizationContext`).
+    Current(Arc<dyn Schedule>),
 }
 
 /// The part of a task that any thread reaches: its waker, and the abort of its handles.
@@ -134,7 +140,7 @@ impl Header {
     fn queue_poll(self: &Arc<Self>) {
         match &self.route {
             Route::Thread(inbox) => inbox.push(Pending::Task(self.id)),
-            Route::Schedule(schedule) => {
+            Route::Schedule(schedule) | Route::Current(schedule) => {
                 if !self.scheduled.swap(true, Ordering::AcqRel) {
                     let header = self.clone();
                     schedule.schedule(Box::new(move || {
@@ -176,6 +182,9 @@ impl Wake for Header {
             Route::Thread(_) if self.on_its_thread() => {
                 poll_task(self.id);
             }
+            Route::Current(schedule) if self.on_its_thread() && is_current_schedule(schedule) => {
+                poll_task(self.id);
+            }
             _ => self.queue_poll(),
         }
     }
@@ -200,6 +209,8 @@ crate::ferro_thread_local! {
     static CALLBACKS: RefCell<HashMap<u64, LocalCallbackFn>> = RefCell::new(HashMap::new());
     /// The id of the task being polled on the thread ([`try_id`]).
     static CURRENT: Cell<Option<u64>> = const { Cell::new(None) };
+    /// The schedule of the work that runs on the thread ([`current_schedule`]).
+    static CURRENT_SCHEDULE: RefCell<Option<Arc<dyn Schedule>>> = const { RefCell::new(None) };
 }
 
 /// The ids of the tasks and of the callbacks, unique in the process so that a poll or a request
@@ -208,7 +219,8 @@ static NEXT_TASK: AtomicU64 = AtomicU64::new(1);
 static NEXT_CALLBACK: AtomicU64 = AtomicU64::new(1);
 
 /// Polls a task of the current thread: again after the poll when it was woken from inside it
-/// (the queue of the thread) or a queued poll ran inside it (a schedule, which gets a new poll);
+/// (the queue of the thread, or the schedule it was spawned in while that is current) or a queued
+/// poll ran inside it (a schedule, which gets a new poll);
 /// ends it when its future is ready, panics, or the task was aborted. False when the thread has
 /// no such task.
 fn poll_task(id: u64) -> bool {
@@ -257,7 +269,12 @@ fn poll_task(id: u64) -> bool {
         if !task.repoll.get() {
             return true;
         }
-        if let Route::Schedule(_) = task.header.route {
+        let queued = match &task.header.route {
+            Route::Thread(_) => false,
+            Route::Schedule(_) => true,
+            Route::Current(schedule) => !is_current_schedule(schedule),
+        };
+        if queued {
             task.header.queue_poll();
             return true;
         }
@@ -280,11 +297,27 @@ fn end_task(task: &LocalTask, failure: Option<Failure>) {
 
 /// Adds a task to the table of the current thread and polls it, or queues its first poll.
 /// `on_failure` is told when the task ends without the output of its future: an abort, a panic.
+/// Without a schedule the task goes to the queue of the thread, or to the schedule of the work
+/// that spawns it ([`local_route`]).
 pub(crate) fn spawn_task(future: LocalFuture, schedule: Option<Arc<dyn Schedule>>, first_poll: FirstPoll, on_failure: OnFailure) -> Arc<Header> {
     let route = match schedule {
         Some(schedule) => Route::Schedule(schedule),
-        None => Route::Thread(INBOX.with(Arc::clone)),
+        None => local_route(),
     };
+    spawn_routed(future, route, first_poll, on_failure)
+}
+
+/// Where the wakes of a task spawned on the current thread without a schedule go: the schedule of
+/// the work that spawns it when there is one ([`current_schedule`]: a dispatcher job), the queue of
+/// the thread otherwise.
+fn local_route() -> Route {
+    match current_schedule() {
+        Some(schedule) => Route::Current(schedule),
+        None => Route::Thread(INBOX.with(Arc::clone)),
+    }
+}
+
+fn spawn_routed(future: LocalFuture, route: Route, first_poll: FirstPoll, on_failure: OnFailure) -> Arc<Header> {
     let header = Header::new(route, Some(std::thread::current().id()));
     start_task(header.clone(), future, on_failure, first_poll);
     header
@@ -341,13 +374,13 @@ fn handle_failure<T: 'static>(cell: Arc<JoinCell<T>>) -> OnFailure {
     })
 }
 
-fn spawn_with_handle<F>(future: F, schedule: Option<Arc<dyn Schedule>>, first_poll: FirstPoll) -> JoinHandle<F::Output>
+fn spawn_with_handle<F>(future: F, route: Route, first_poll: FirstPoll) -> JoinHandle<F::Output>
 where
     F: Future + 'static,
     F::Output: 'static,
 {
     let cell = Arc::new(JoinCell::new());
-    let header = spawn_task(handle_future(future, cell.clone()), schedule, first_poll, handle_failure(cell.clone()));
+    let header = spawn_routed(handle_future(future, cell.clone()), route, first_poll, handle_failure(cell.clone()));
     JoinHandle::new(header, cell)
 }
 
@@ -356,12 +389,19 @@ where
 /// woken: at once on this thread (inside the call that wakes it, or right after its own poll when
 /// the wake comes from inside it), and when the thread runs [`run_pending`] for a wake from
 /// another thread (the module's documentation).
+///
+/// Spawned in the work of a schedule ([`current_schedule`]: a dispatcher job), the task takes that
+/// schedule instead: a wake on this thread while the same schedule is current (a job of the same
+/// dispatcher and priority) polls it at once, as above; any other wake, from this thread or
+/// another, queues one poll on the schedule (a job at that priority). This is the rule of `await`
+/// in .NET, which runs a continuation inline when the completing code runs in the captured
+/// `SynchronizationContext` and posts it there otherwise.
 pub fn spawn_local<F>(future: F) -> JoinHandle<F::Output>
 where
     F: Future + 'static,
     F::Output: 'static,
 {
-    spawn_with_handle(future, None, FirstPoll::Now)
+    spawn_with_handle(future, local_route(), FirstPoll::Now)
 }
 
 /// Runs `future` as a task of the current thread whose polls run on `schedule`, and gives its
@@ -372,7 +412,7 @@ where
     F: Future + 'static,
     F::Output: 'static,
 {
-    spawn_with_handle(future, Some(schedule), first_poll)
+    spawn_with_handle(future, Route::Schedule(schedule), first_poll)
 }
 
 /// Runs the future that `create` makes as a task of the thread of `schedule`, and gives its
@@ -463,14 +503,56 @@ pub fn poll_now(id: Id) -> bool {
 
 /// Makes `schedule` the schedule of the current thread, `None` removes it: when a wake of a task
 /// of the thread's queue, or a callback of the thread (`CancellationToken::register_local`), comes
-/// from another thread, the schedule is given work that runs [`run_pending`]. Wakes that are
-/// waiting already run at once.
+/// from another thread, the schedule is given work that runs [`run_pending`]. When a schedule is
+/// set, the wakes that are waiting already run at once. A dispatcher is the schedule of its thread
+/// from its start to its shutdown.
 pub fn set_thread_schedule(schedule: Option<Arc<dyn Schedule>>) {
-    let inbox = INBOX.with(Arc::clone);
+    let Ok(inbox) = INBOX.try_with(Arc::clone) else { return };
+    let installed = schedule.is_some();
     let previous = std::mem::replace(&mut *inbox.schedule.lock().unwrap_or_else(PoisonError::into_inner), schedule);
     drop(previous);
-    if !inbox.is_empty() {
+    if installed && !inbox.is_empty() {
         run_pending();
+    }
+}
+
+/// The schedule of the current thread ([`set_thread_schedule`]), `None` when it has none.
+pub fn thread_schedule() -> Option<Arc<dyn Schedule>> {
+    INBOX.try_with(|inbox| inbox.schedule.lock().unwrap_or_else(PoisonError::into_inner).clone()).ok().flatten()
+}
+
+/// The schedule of the work that runs now on the current thread, which the schedule that runs it
+/// set ([`set_current_schedule`]): in a dispatcher job, the dispatcher at the priority of the job.
+/// `None` outside of such work. What `SynchronizationContext.Current` is for .NET code: a task
+/// spawned with [`spawn_local`] takes it, and the code that posts back to where it started (the
+/// reactive libraries) captures it.
+pub fn current_schedule() -> Option<Arc<dyn Schedule>> {
+    CURRENT_SCHEDULE.try_with(|current| current.borrow().clone()).ok().flatten()
+}
+
+/// Makes `schedule` the schedule of the work that runs now on the current thread
+/// ([`current_schedule`]), and gives the previous one, which the caller restores when the work
+/// ends: for a schedule that runs work (a dispatcher sets it around each job).
+pub fn set_current_schedule(schedule: Option<Arc<dyn Schedule>>) -> Option<Arc<dyn Schedule>> {
+    CURRENT_SCHEDULE.try_with(|current| current.replace(schedule)).ok().flatten()
+}
+
+/// Whether `schedule` is the schedule of the work that runs now on the current thread
+/// ([`current_schedule`]), by its [`identity`](Schedule::identity).
+pub fn is_current_schedule(schedule: &Arc<dyn Schedule>) -> bool {
+    current_schedule().is_some_and(|current| current.identity() == schedule.identity())
+}
+
+/// Puts back the current schedule that a call replaced, when dropped.
+struct RestoreSchedule(Option<Option<Arc<dyn Schedule>>>);
+
+impl Drop for RestoreSchedule {
+    fn drop(&mut self) {
+        if let Some(previous) = self.0.take() {
+            // Dropped outside of the borrow of the slot.
+            let replaced = set_current_schedule(previous);
+            drop(replaced);
+        }
     }
 }
 
@@ -491,6 +573,7 @@ pub fn run_pending() -> bool {
                     poll_task(id);
                 }
                 Pending::Callback(id) => run_callback(id),
+                Pending::Forget(id) => forget_callback(id),
             }
         }
     }
@@ -498,7 +581,9 @@ pub fn run_pending() -> bool {
 
 /// Runs `future` on the current thread until it ends, and gives its output: it is spawned in the
 /// queue of the thread ([`spawn_local`]), and the thread waits for wakes from other threads in
-/// between (a thread with nothing else to run: a console program, a test, a worker).
+/// between (a thread with nothing else to run: a console program, a test, a worker). While it
+/// runs, no schedule is current ([`current_schedule`]), so the tasks that its future spawns are in
+/// the queue of the thread too, which this waits on.
 ///
 /// # Panics
 /// With the panic of the future. Never returns when nothing wakes the future again: a future that
@@ -509,8 +594,9 @@ where
     F: Future + 'static,
     F::Output: 'static,
 {
-    let handle = spawn_local(future);
+    let _restore = RestoreSchedule(Some(set_current_schedule(None)));
     let inbox = INBOX.with(Arc::clone);
+    let handle = spawn_with_handle(future, Route::Thread(inbox.clone()), FirstPoll::Now);
     loop {
         run_pending();
         if let Some(outcome) = handle.try_take() {
@@ -547,8 +633,7 @@ impl LocalCallback {
 
     /// Forgets the callback unless it ran; on the thread of the callback only.
     pub(crate) fn remove(&self) {
-        let removed = CALLBACKS.try_with(|callbacks| callbacks.borrow_mut().remove(&self.id)).ok().flatten();
-        drop(removed);
+        forget_callback(self.id);
     }
 }
 
@@ -565,6 +650,41 @@ impl LocalCallbackHandle {
             run_callback(self.id);
         } else {
             self.inbox.push(Pending::Callback(self.id));
+        }
+    }
+
+    /// Forgets the callback unless it ran, from any thread: at once on the thread of the
+    /// callback; from another thread through the queue of the callback's thread, which drops the
+    /// callback there (it need not be `Send`).
+    pub(crate) fn forget(&self) {
+        if std::thread::current().id() == self.thread {
+            forget_callback(self.id);
+        } else {
+            self.inbox.push(Pending::Forget(self.id));
+        }
+    }
+}
+
+/// Runs a [`LocalCallback`] once ([`run`](Self::run)), or forgets it when dropped without
+/// running it (work that a schedule dropped).
+pub(crate) struct RunCallback(Option<LocalCallbackHandle>);
+
+impl RunCallback {
+    pub(crate) fn new(handle: LocalCallbackHandle) -> Self {
+        Self(Some(handle))
+    }
+
+    pub(crate) fn run(mut self) {
+        if let Some(handle) = self.0.take() {
+            handle.run();
+        }
+    }
+}
+
+impl Drop for RunCallback {
+    fn drop(&mut self) {
+        if let Some(handle) = self.0.take() {
+            handle.forget();
         }
     }
 }
@@ -584,4 +704,10 @@ fn run_callback(id: u64) {
     if let Some(callback) = callback {
         callback();
     }
+}
+
+fn forget_callback(id: u64) {
+    // Dropped outside of the borrow: the callback may own something that registers another.
+    let removed = CALLBACKS.try_with(|callbacks| callbacks.borrow_mut().remove(&id)).ok().flatten();
+    drop(removed);
 }

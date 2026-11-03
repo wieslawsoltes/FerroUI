@@ -19,7 +19,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{Brushes, IBrush};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, JoinHandle};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Point, Ref,
     StyledElementImpl, VisualImpl,
@@ -98,11 +98,9 @@ xaml_class!(EmbeddedView, "/EmbeddedView.xaml");
 
 /// Runs the rest of an `async void` handler on the dispatcher of the thread, where the await of
 /// the reference resumes.
-fn start_async(future: impl Future<Output = ()> + 'static) -> DispatcherTask<()> {
-    let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-        FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-    });
-    context.to_task_scheduler().start_local(future)
+fn start_async(future: impl Future<Output = ()> + 'static) -> JoinHandle<()> {
+    let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+    Dispatcher::current_dispatcher().start_local_with_priority(future, priority)
 }
 
 /// The result of a clipboard operation awaited by an `async void` handler: an exception of

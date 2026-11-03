@@ -33,6 +33,8 @@ ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 # The runtime library of compiled markup. The crate does not link the run-time XAML loader.
 ferroui-markup-xaml = { workspace = true }
+# The one-shot channel the dialogs wait on.
+ferroui-system = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # The mounted volumes of the file system (the drive list of the .NET base library); the browser

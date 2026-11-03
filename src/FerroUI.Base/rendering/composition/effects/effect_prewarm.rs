@@ -14,14 +14,24 @@
 //! ahead of their first draw").
 
 use super::{CompositionEffectFactoryError, EffectGraph, GraphicsEffect};
+use crate::media::effects::ImmutableCustomEffect;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
-/// A registered effect: its name, its graph and the generation of the list
-/// that added it.
+/// What a registered effect is drawn as.
+enum PrewarmItem {
+    /// An effect graph, drawn through the painting of the effect brushes.
+    Graph(Arc<EffectGraph>),
+    /// A custom effect that is a runtime shader (#455, E4), pushed as an
+    /// effect of the drawing context around an image.
+    Effect(ImmutableCustomEffect),
+}
+
+/// A registered effect: its name, what it is drawn as and the generation of
+/// the list that added it.
 struct PrewarmEntry {
     name: String,
-    graph: Arc<EffectGraph>,
+    item: PrewarmItem,
     generation: u64,
 }
 
@@ -54,14 +64,30 @@ impl EffectPrewarmList {
         animatable_properties: &[&str],
     ) -> Result<(), CompositionEffectFactoryError> {
         let graph = EffectGraph::load(effect, animatable_properties).map_err(|(_, error)| error)?;
+        self.register_graph(name, Arc::new(graph));
+        Ok(())
+    }
+
+    /// Adds a graph loaded already under `name`. A name that is registered
+    /// already keeps its graph.
+    pub(crate) fn register_graph(&self, name: &str, graph: Arc<EffectGraph>) {
+        self.register_item(name, PrewarmItem::Graph(graph));
+    }
+
+    /// Adds a custom effect that is a runtime shader under `name`. A name
+    /// that is registered already keeps its effect.
+    pub(crate) fn register_effect(&self, name: &str, effect: ImmutableCustomEffect) {
+        self.register_item(name, PrewarmItem::Effect(effect));
+    }
+
+    fn register_item(&self, name: &str, item: PrewarmItem) {
         let mut entries = self.entries();
         if entries.iter().any(|entry| entry.name == name) {
-            return Ok(());
+            return;
         }
         let generation = self.generation.load(Ordering::Acquire) + 1;
-        entries.push(PrewarmEntry { name: name.to_owned(), graph: Arc::new(graph), generation });
+        entries.push(PrewarmEntry { name: name.to_owned(), item, generation });
         self.generation.store(generation, Ordering::Release);
-        Ok(())
     }
 
     /// The generation of the latest registration; 0 while nothing is
@@ -74,8 +100,28 @@ impl EffectPrewarmList {
     /// registration, and the generation they bring the caller to.
     pub(crate) fn since(&self, generation: u64) -> (u64, Vec<Arc<EffectGraph>>) {
         let entries = self.entries();
-        let graphs = entries.iter().filter(|entry| entry.generation > generation).map(|entry| entry.graph.clone()).collect();
+        let graphs = entries
+            .iter()
+            .filter(|entry| entry.generation > generation)
+            .filter_map(|entry| match &entry.item {
+                PrewarmItem::Graph(graph) => Some(graph.clone()),
+                PrewarmItem::Effect(_) => None,
+            })
+            .collect();
         (self.generation.load(Ordering::Acquire).max(generation), graphs)
+    }
+
+    /// The shader effects registered after `generation`, in the order of
+    /// their registration.
+    pub(crate) fn effects_since(&self, generation: u64) -> Vec<ImmutableCustomEffect> {
+        self.entries()
+            .iter()
+            .filter(|entry| entry.generation > generation)
+            .filter_map(|entry| match &entry.item {
+                PrewarmItem::Effect(effect) => Some(effect.clone()),
+                PrewarmItem::Graph(_) => None,
+            })
+            .collect()
     }
 
     /// The registered names, in the order of their registration.
@@ -107,6 +153,24 @@ pub fn register_effect_prewarm(
     EFFECT_PREWARM.register(name, &effect.into(), animatable_properties)
 }
 
+/// Registers a loaded graph under `name` for the prewarm: the graphs of the
+/// custom effects (#455), loaded once per type, which the prewarm draws
+/// around an image as the render walk draws them around the content of a
+/// visual. A name that is registered already keeps its graph.
+pub(crate) fn register_effect_graph_prewarm(name: &str, graph: Arc<EffectGraph>) {
+    EFFECT_PREWARM.register_graph(name, graph);
+}
+
+/// Registers a custom effect whose type is a runtime shader under `name`
+/// for the prewarm (#455, E4): the value of its type that the prewarm pushes
+/// as an effect of the drawing context around an image, as the render walk
+/// pushes it around the content of a visual, so that the backend compiles its
+/// program and makes its pipeline. A name that is registered already keeps
+/// its effect.
+pub(crate) fn register_custom_effect_prewarm(name: &str, effect: ImmutableCustomEffect) {
+    EFFECT_PREWARM.register_effect(name, effect);
+}
+
 /// The names of the effects registered with [`register_effect_prewarm`], in
 /// the order of their registration.
 pub fn effect_prewarm_names() -> Vec<String> {
@@ -123,6 +187,12 @@ pub(crate) fn effect_prewarm_generation() -> u64 {
 /// [`EffectPrewarmList::since`].
 pub(crate) fn effect_prewarm_since(generation: u64) -> (u64, Vec<Arc<EffectGraph>>) {
     EFFECT_PREWARM.since(generation)
+}
+
+/// The shader effects of the process registered after `generation`; see
+/// [`EffectPrewarmList::effects_since`].
+pub(crate) fn effect_prewarm_effects_since(generation: u64) -> Vec<ImmutableCustomEffect> {
+    EFFECT_PREWARM.effects_since(generation)
 }
 
 #[cfg(test)]

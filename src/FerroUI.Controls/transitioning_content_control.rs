@@ -3,16 +3,14 @@ use crate::primitives::TemplatedControlImpl;
 use crate::{
     ContentControl, ContentControlImpl, ContentControlImplExt, ControlImpl, TransitionCompletedEventArgs,
 };
-use ferroui_base::animation::{CrossFade, IPageTransition, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{
     Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies,
 };
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
-use ferroui_base::threading::{
-    CancellationToken, CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTask,
-    FerroSynchronizationContext,
-};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size, StyledElementImpl,
@@ -29,7 +27,7 @@ use std::task::{Context, Poll};
 #[repr(C)]
 pub struct TransitioningContentControl {
     base: ContentControl,
-    current_transition: RefCell<Option<CancellationTokenSource>>,
+    current_transition: RefCell<Option<CancellationToken>>,
     last_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     presenter2: RefCell<Option<Ref<ContentPresenter>>>,
     is_first_full: Cell<bool>,
@@ -80,7 +78,7 @@ impl LayoutableImpl for TransitioningContentControl {
             {
                 this.should_animate.set(false);
 
-                let cancel = CancellationTokenSource::new();
+                let cancel = CancellationToken::new();
                 *this.current_transition.borrow_mut() = Some(cancel.clone());
 
                 let (from, to) =
@@ -90,33 +88,34 @@ impl LayoutableImpl for TransitioningContentControl {
 
                 let from: Ref<Visual> = from.upcast();
                 let to: Ref<Visual> = to.upcast();
-                let task = transition.start(Some(&from), Some(&to), !this.is_transition_reversed(), cancel.token());
+                let task = transition.start(Some(&from), Some(&to), !this.is_transition_reversed(), cancel.clone());
 
-                // The continuation always runs as a job of the
-                // synchronization context, never inside this arrange pass.
+                // The continuation always runs as a job of the dispatcher at
+                // the priority of the running job, never inside this arrange
+                // pass.
                 let this = this.to_ref();
-                let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-                    FerroSynchronizationContext::with_dispatcher(
-                        &Dispatcher::current_dispatcher(),
-                        DispatcherPriority::NORMAL,
-                    )
-                });
-                drop(context.to_task_scheduler().start_local(async move {
-                    if task.is_completed() {
-                        YieldOnce(false).await;
-                    }
-                    let ran_to_completion = TransitionEnd { task }.await;
+                let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+                drop(Dispatcher::current_dispatcher().start_local_with_priority(
+                    async move {
+                        if task.is_finished() {
+                            YieldOnce(false).await;
+                        }
+                        // A transition that failed or was aborted did not run to completion; its
+                        // failure is not raised again.
+                        let ran_to_completion = task.await.is_ok();
 
-                    this.on_transition_completed(&TransitionCompletedEventArgs::new(
-                        from_content,
-                        to_content,
-                        ran_to_completion && !cancel.is_cancellation_requested(),
-                    ));
+                        this.on_transition_completed(&TransitionCompletedEventArgs::new(
+                            from_content,
+                            to_content,
+                            ran_to_completion && !cancel.is_cancelled(),
+                        ));
 
-                    if !cancel.is_cancellation_requested() {
-                        this.hide_old_presenter();
-                    }
-                }));
+                        if !cancel.is_cancelled() {
+                            this.hide_old_presenter();
+                        }
+                    },
+                    priority,
+                ));
             }
 
             this.should_animate.set(false);
@@ -140,27 +139,6 @@ impl ContentControlImpl for TransitioningContentControl {
         }
 
         false
-    }
-}
-
-/// Waits for a page transition to end; the result tells whether it ran to
-/// completion. The failure of a transition is not re-raised.
-struct TransitionEnd {
-    task: DispatcherTask<()>,
-}
-
-impl Future for TransitionEnd {
-    type Output = bool;
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<bool> {
-        if self.task.is_faulted() {
-            return Poll::Ready(false);
-        }
-
-        match Pin::new(&mut self.task).poll(cx) {
-            Poll::Ready(result) => Poll::Ready(result.is_ok()),
-            Poll::Pending => Poll::Pending,
-        }
     }
 }
 
@@ -189,7 +167,7 @@ struct ImmutableCrossFade {
 }
 
 impl ImmutableCrossFade {
-    fn new(duration: TimeSpan) -> Self {
+    fn new(duration: SignedDuration) -> Self {
         Self { inner: CrossFade::with_duration(duration) }
     }
 }
@@ -201,7 +179,7 @@ impl IPageTransition for ImmutableCrossFade {
         to: Option<&Ref<Visual>>,
         _forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         self.inner.start_cross_fade(from, to, cancellation_token)
     }
 }
@@ -210,7 +188,7 @@ ferro_properties! {
     impl TransitioningContentControl {
         /// Defines the `PageTransition` property.
         pub fn page_transition_property() -> StyledProperty<Option<Rc<dyn IPageTransition>>> {
-            let default: Rc<dyn IPageTransition> = Rc::new(ImmutableCrossFade::new(TimeSpan::from_milliseconds(125.0)));
+            let default: Rc<dyn IPageTransition> = Rc::new(ImmutableCrossFade::new(SignedDuration::from_milliseconds(125.0)));
             FerroProperty::register::<TransitioningContentControl, _>("PageTransition", Some(default))
         }
 

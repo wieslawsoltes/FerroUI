@@ -538,7 +538,9 @@ impl ServerCompositionTarget {
         render_target: &Rc<dyn IRenderTarget>,
         scene_info: &RenderTargetSceneInfo,
     ) {
-        use crate::rendering::composition::effects::{effect_prewarm_generation, effect_prewarm_since};
+        use crate::rendering::composition::effects::{
+            effect_prewarm_effects_since, effect_prewarm_generation, effect_prewarm_since,
+        };
 
         let prewarmed = self.prewarmed_effects.get();
         if self.effect_prewarm_disabled || effect_prewarm_generation() <= prewarmed {
@@ -547,8 +549,10 @@ impl ServerCompositionTarget {
         let scaling = scene_info.scaling;
         let floor = prewarmed.max(compositor_prewarmed_effects(compositor, scaling));
         let (generation, graphs) = effect_prewarm_since(floor);
+        // The custom effects that are runtime shaders (#455, E4).
+        let effects = effect_prewarm_effects_since(floor);
         self.prewarmed_effects.set(generation);
-        if graphs.is_empty() {
+        if graphs.is_empty() && effects.is_empty() {
             return;
         }
 
@@ -589,6 +593,14 @@ impl ServerCompositionTarget {
                     area,
                 );
             }
+            for effect in &effects {
+                crate::rendering::composition::brushes::paint_custom_effect_for_prewarm(
+                    effect,
+                    stand_in.clone(),
+                    context,
+                    area,
+                );
+            }
         });
         if !drew {
             return;
@@ -598,7 +610,7 @@ impl ServerCompositionTarget {
             eprintln!(
                 "effect prewarm of composition target {}: {} effects drawn offscreen in {:.3} ms",
                 self.id,
-                graphs.len(),
+                graphs.len() + effects.len(),
                 started.elapsed().as_secs_f64() * 1000.0
             );
         }

@@ -1,6 +1,7 @@
 //! `Task<TResult>`, `TaskStatus`, `TaskCompletionSource<TResult>` and `TaskCanceledException`
 //! (`System.Threading.Tasks`), single-threaded (docs/porting/reactive.md, section 5.8).
 
+use crate::task::Canceled;
 use crate::ObservableError;
 use std::cell::{Cell, RefCell};
 use std::error::Error;
@@ -28,7 +29,11 @@ pub enum TaskStatus {
     Canceled,
 }
 
-/// The error of a canceled task (`TaskCanceledException`).
+/// The error of a canceled task that names it (`TaskCanceledException` with its `Task`).
+///
+/// A cancellation that names no task is [`Canceled`], the one cancellation error of the workspace
+/// (docs/idiomatic-rust-async.md, section 3.7); this type stays for the outcome of a canceled
+/// [`Task`], whose id it carries, until `Task` itself moves to the executor of `crate::task`.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct TaskCanceledError {
     /// The id of the task, when the error names one (`TaskCanceledException.Task`).
@@ -44,9 +49,25 @@ impl fmt::Display for TaskCanceledError {
 impl Error for TaskCanceledError {}
 
 impl TaskCanceledError {
-    /// Whether `error` is a cancellation: a [`TaskCanceledError`].
+    /// Whether `error` is a cancellation: a [`Canceled`] or a [`TaskCanceledError`].
     pub fn is_cancellation(error: &ObservableError) -> bool {
-        error.downcast_ref::<TaskCanceledError>().is_some()
+        error.is::<Canceled>() || error.is::<TaskCanceledError>()
+    }
+}
+
+/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7): a
+/// cancellation that names no task.
+impl From<Canceled> for TaskCanceledError {
+    fn from(_: Canceled) -> Self {
+        Self::default()
+    }
+}
+
+/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7); the
+/// id of the task is not kept.
+impl From<TaskCanceledError> for Canceled {
+    fn from(_: TaskCanceledError) -> Self {
+        Canceled
     }
 }
 
@@ -117,8 +138,8 @@ impl<T: 'static> Task<T> {
         task
     }
 
-    /// A task that has ended with `error` (`Task.FromException`); a [`TaskCanceledError`] makes it
-    /// canceled.
+    /// A task that has ended with `error` (`Task.FromException`); a cancellation ([`Canceled`],
+    /// [`TaskCanceledError`]) makes it canceled.
     pub fn from_exception(error: ObservableError) -> Self {
         let task = Self::with_status(TaskStatus::WaitingForActivation);
         task.try_complete(Err(error));
@@ -217,8 +238,8 @@ impl<T: 'static> Task<T> {
         removed.is_some()
     }
 
-    /// Ends the task with `outcome` unless it has ended; an error that is a [`TaskCanceledError`]
-    /// cancels it. False when it had ended.
+    /// Ends the task with `outcome` unless it has ended; an error that is a cancellation
+    /// ([`Canceled`], [`TaskCanceledError`]) cancels it. False when it had ended.
     pub(crate) fn try_complete(&self, outcome: Result<T, ObservableError>) -> bool {
         if self.is_completed() {
             return false;
@@ -317,7 +338,8 @@ impl<T: 'static> TaskCompletionSource<T> {
         self.task.try_complete(Ok(result))
     }
 
-    /// Ends the task with `error` (`SetException`); a [`TaskCanceledError`] cancels it.
+    /// Ends the task with `error` (`SetException`); a cancellation ([`Canceled`],
+    /// [`TaskCanceledError`]) cancels it.
     ///
     /// # Panics
     /// When the task has ended (`InvalidOperationException`).

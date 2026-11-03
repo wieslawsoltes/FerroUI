@@ -6,7 +6,7 @@
 
 #![allow(dead_code)]
 
-use crate::animation::{IClock, IGlobalClock, ITransition, PlayState, TimeSpan};
+use crate::animation::{IClock, IGlobalClock, ITransition, PlayState, SignedDuration};
 use crate::layout::{ILayoutManager, ILayoutRoot, LayoutManager, Layoutable, LayoutableImpl};
 use crate::media::IBrush;
 use crate::reactive::{Disposable, IDisposable, IObservable, IObserver};
@@ -27,21 +27,21 @@ mod spring_tests;
 mod style_animation_tests;
 mod transitions_tests;
 
-pub(crate) fn seconds(value: f64) -> TimeSpan {
-    TimeSpan::from_seconds(value)
+pub(crate) fn seconds(value: f64) -> SignedDuration {
+    SignedDuration::from_seconds(value)
 }
 
 /// A clock that is stepped by the test. It has a single observer: the last
 /// subscriber.
 pub(crate) struct TestClock {
-    cur_time: Cell<TimeSpan>,
-    observer: RefCell<Option<Rc<dyn IObserver<TimeSpan>>>>,
+    cur_time: Cell<SignedDuration>,
+    observer: RefCell<Option<Rc<dyn IObserver<SignedDuration>>>>,
     play_state: Cell<PlayState>,
 }
 
 impl TestClock {
     pub(crate) fn new() -> Rc<Self> {
-        Rc::new(Self { cur_time: Cell::new(TimeSpan::ZERO), observer: RefCell::new(None), play_state: Cell::new(PlayState::Run) })
+        Rc::new(Self { cur_time: Cell::new(SignedDuration::ZERO), observer: RefCell::new(None), play_state: Cell::new(PlayState::Run) })
     }
 
     pub(crate) fn as_clock(self: &Rc<Self>) -> Rc<dyn IClock> {
@@ -49,7 +49,7 @@ impl TestClock {
     }
 
     /// Sets the absolute time.
-    pub(crate) fn step(&self, time: TimeSpan) {
+    pub(crate) fn step(&self, time: SignedDuration) {
         let observer = self.observer.borrow().clone();
         if let Some(observer) = observer {
             observer.on_next(time);
@@ -57,7 +57,7 @@ impl TestClock {
     }
 
     /// Advances the time.
-    pub(crate) fn pulse(&self, time: TimeSpan) {
+    pub(crate) fn pulse(&self, time: SignedDuration) {
         self.cur_time.set(self.cur_time.get() + time);
         self.step(self.cur_time.get());
     }
@@ -67,8 +67,8 @@ impl TestClock {
     }
 }
 
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         *self.observer.borrow_mut() = Some(observer);
         Disposable::empty()
     }
@@ -86,12 +86,12 @@ impl IClock for TestClock {
 
 /// The global clock of a test: pulses every subscriber.
 pub(crate) struct MockGlobalClock {
-    subject: crate::reactive::LightweightSubject<TimeSpan>,
+    subject: crate::reactive::LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
 impl MockGlobalClock {
-    pub(crate) fn pulse(&self, time: TimeSpan) {
+    pub(crate) fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 
@@ -100,8 +100,8 @@ impl MockGlobalClock {
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

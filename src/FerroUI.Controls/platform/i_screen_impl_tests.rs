@@ -1,6 +1,6 @@
 use super::platform_manager_tests::TestWindowImpl;
 use super::*;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{PixelPoint, PixelRect, Size};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
@@ -265,9 +265,8 @@ fn default_removal_empties_the_screen() {
 
     // The default request for the screen details is granted.
     let request = screens.request_screen_details();
-    let task = Dispatcher::ui_thread().invoke_async_task_local(move || request);
-    Dispatcher::ui_thread().run_jobs(None);
-    assert_eq!(task.result(), Ok(true));
+    let task = Dispatcher::ui_thread().spawn_local_with_priority(request, DispatcherPriority::DEFAULT);
+    assert_eq!(answer_of(task), Some(true));
 
     *screens.keys.borrow_mut() = vec![0];
     screens.on_changed();
@@ -287,14 +286,23 @@ fn request_screen_details_caches_the_outcome() {
     let screens = Rc::new(TestScreens::default());
 
     let first = screens.request_screen_details();
-    let task = dispatcher.invoke_async_task_local(move || first);
-    dispatcher.run_jobs(None);
-    assert_eq!(task.result(), Ok(false));
+    let task = dispatcher.spawn_local_with_priority(first, DispatcherPriority::DEFAULT);
+    assert_eq!(answer_of(task), Some(false));
     assert_eq!(screens.details_requests.get(), 1);
 
     let second = screens.request_screen_details();
-    let task = dispatcher.invoke_async_task_local(move || second);
-    dispatcher.run_jobs(None);
-    assert_eq!(task.result(), Ok(false));
+    let task = dispatcher.spawn_local_with_priority(second, DispatcherPriority::DEFAULT);
+    assert_eq!(answer_of(task), Some(false));
     assert_eq!(screens.details_requests.get(), 1);
+}
+
+/// The output of a task of the dispatcher of the thread once the dispatcher has run; `None` when the
+/// task did not end with one.
+fn answer_of<T>(mut task: ferroui_system::task::JoinHandle<T>) -> Option<T> {
+    Dispatcher::ui_thread().run_jobs(None);
+    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    match std::future::Future::poll(std::pin::Pin::new(&mut task), &mut context) {
+        std::task::Poll::Ready(outcome) => outcome.ok(),
+        std::task::Poll::Pending => None,
+    }
 }

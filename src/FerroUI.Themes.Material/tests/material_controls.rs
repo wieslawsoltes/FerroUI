@@ -2,7 +2,7 @@
 //! deliberately check the arranged controls and template bindings, not XAML text.
 
 use crate::{register_types, MaterialTheme};
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::{ObjectType, Point, Ref, StaticType, Visual};
@@ -19,11 +19,11 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 struct TestClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -351,7 +351,7 @@ fn loading_animation_honors_live_platform_preference_and_detachment() {
     let window = host(&indicator);
     assert!(clock.subject.has_observers());
     settings.animations_enabled.set(false);
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
     assert!(
         !clock.subject.has_observers(),
         "platform motion preference cancels an active loading cycle"
@@ -377,8 +377,8 @@ fn selection_mark_releases_clock_when_settled_and_when_detached() {
     assert!(!clock.subject.has_observers());
     mark.set_is_checked(Some(true));
     assert!(clock.subject.has_observers());
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(1.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(1.0));
     assert!(
         !clock.subject.has_observers(),
         "a settled check should not keep requesting frames"

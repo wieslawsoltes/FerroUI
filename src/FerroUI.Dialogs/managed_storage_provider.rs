@@ -9,7 +9,7 @@ use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerOpenOptions, FilePickerSaveOptions, FolderPickerOpenOptions, IStorageFile,
     IStorageFolder, OpenFilePickerResult, SaveFilePickerResult,
 };
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{BoxedValue, Ref, WeakRef};
 use ferroui_controls::primitives::FlyoutBase;
 use ferroui_controls::primitives::Popup;
@@ -71,7 +71,7 @@ impl ManagedStorageProvider {
     }
 
     async fn show_as_window(&self, window: Ref<Window>, model: Rc<ManagedFileChooserViewModel>) -> Vec<String> {
-        let tcs = TaskCompletionSource::<bool>::new();
+        let (tcs, closed) = TaskCompletionSource::<bool>::new();
         window.set_title(model.title());
         {
             let model = model.clone();
@@ -104,13 +104,16 @@ impl ManagedStorageProvider {
                 let filename = filename.to_string();
                 let result = result.clone();
                 let weak = weak.clone();
-                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                    let Some(window) = weak.upgrade() else { return };
-                    if Self::show_overwrite_prompt(&filename, &window.clone().upcast()).await {
-                        *result.borrow_mut() = vec![filename];
-                        window.close();
-                    }
-                });
+                Dispatcher::ui_thread().spawn_local_with_priority(
+                    async move {
+                        let Some(window) = weak.upgrade() else { return };
+                        if Self::show_overwrite_prompt(&filename, &window.clone().upcast()).await {
+                            *result.borrow_mut() = vec![filename];
+                            window.close();
+                        }
+                    },
+                    DispatcherPriority::DEFAULT,
+                );
             });
         }
 
@@ -131,7 +134,8 @@ impl ManagedStorageProvider {
             None => WindowBase::show(&window),
         }
 
-        tcs.task().await;
+        // `tcs` keeps the channel open while it waits: the receiver is never canceled.
+        let _ = closed.await;
 
         let result = result.borrow().clone();
         result
@@ -143,7 +147,7 @@ impl ManagedStorageProvider {
         root: Ref<ContentControl>,
         model: Rc<ManagedFileChooserViewModel>,
     ) -> io::Result<Vec<String>> {
-        let tcs = TaskCompletionSource::<bool>::new();
+        let (tcs, closed) = TaskCompletionSource::<bool>::new();
         let root_panel = parent
             .find_descendant_of_type::<Panel>(false)
             .ok_or_else(|| io::Error::other("The top level has no panel to host the managed file chooser."))?;
@@ -186,15 +190,18 @@ impl ManagedStorageProvider {
                 let result = result.clone();
                 let weak_popup = weak_popup.clone();
                 let weak_root = weak_root.clone();
-                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                    let Some(root) = weak_root.upgrade() else { return };
-                    if Self::show_overwrite_prompt(&filename, &root).await {
-                        *result.borrow_mut() = vec![filename];
-                        if let Some(popup) = weak_popup.upgrade() {
-                            popup.close();
+                Dispatcher::ui_thread().spawn_local_with_priority(
+                    async move {
+                        let Some(root) = weak_root.upgrade() else { return };
+                        if Self::show_overwrite_prompt(&filename, &root).await {
+                            *result.borrow_mut() = vec![filename];
+                            if let Some(popup) = weak_popup.upgrade() {
+                                popup.close();
+                            }
                         }
-                    }
-                });
+                    },
+                    DispatcherPriority::DEFAULT,
+                );
             });
         }
 
@@ -230,7 +237,8 @@ impl ManagedStorageProvider {
         }
 
         popup.open();
-        tcs.task().await;
+        // `tcs` keeps the channel open while it waits: the receiver is never canceled.
+        let _ = closed.await;
 
         root_panel.children().remove(popup.clone());
         if let Some(token) = token.take() {
@@ -242,7 +250,7 @@ impl ManagedStorageProvider {
     }
 
     async fn show_overwrite_prompt(filename: &str, root: &Ref<ContentControl>) -> bool {
-        let tcs = TaskCompletionSource::<bool>::new();
+        let (tcs, answered) = TaskCompletionSource::<bool>::new();
         let prompt = ManagedFileChooserOverwritePrompt::new();
         prompt.set_file_name(path::get_file_name(filename).to_string());
         {
@@ -263,7 +271,8 @@ impl ManagedStorageProvider {
         flyout.set_placement(PlacementMode::Center);
         FlyoutBase::show_at(&flyout, root);
 
-        let prompt_result = tcs.task().await;
+        // `tcs` keeps the channel open while it waits: the receiver is never canceled.
+        let prompt_result = answered.await.unwrap_or(false);
         FlyoutBase::hide(&flyout);
 
         prompt_result

@@ -4,7 +4,7 @@
 use super::{EcoTrackerCommunityView, EcoTrackerHabitsView, EcoTrackerHomeView, EcoTrackerStatsView};
 use crate::markup::xaml_class;
 use crate::pages::navigation_demo_helper::{boxed_text, parse_color, parse_geometry};
-use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl, RoutedEventArgs};
@@ -199,7 +199,7 @@ impl EcoTrackerAppPage {
                 return;
             }
             let transition: Rc<dyn IPageTransition> =
-                Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(200.0)));
+                Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(200.0)));
             let _ = nav_page.push_async_with_transition(page, Some(transition)).await;
         }));
     }
@@ -216,7 +216,7 @@ impl EcoTrackerAppPage {
             let nav_page = this.nav_page.borrow().clone();
             if let Some(nav_page) = nav_page {
                 let transition: Rc<dyn IPageTransition> = Rc::new(PageSlide::with_duration(
-                    TimeSpan::from_milliseconds(250.0),
+                    SignedDuration::from_milliseconds(250.0),
                     SlideAxis::Horizontal,
                 ));
                 drop(nav_page.push_async_with_transition(Self::build_tree_detail_page(), Some(transition)));

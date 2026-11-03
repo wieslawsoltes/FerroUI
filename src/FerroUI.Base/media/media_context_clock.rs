@@ -1,13 +1,13 @@
 //! The animation clock of the media context.
 
 use super::media_context::MediaContext;
-use crate::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use crate::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use crate::reactive::{Disposable, IDisposable, IObservable, IObserver};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::{Rc, Weak};
 
-type AnimationFrame = Box<dyn FnOnce(TimeSpan)>;
+type AnimationFrame = Box<dyn FnOnce(SignedDuration)>;
 
 /// The global animation clock: pulsed once per frame by the media context
 /// with the time elapsed since the media context started.
@@ -17,10 +17,10 @@ type AnimationFrame = Box<dyn FnOnce(TimeSpan)>;
 pub struct MediaContextClock {
     this: Weak<MediaContextClock>,
     parent: Weak<MediaContext>,
-    observers: RefCell<Vec<Rc<dyn IObserver<TimeSpan>>>>,
-    new_observers: RefCell<Vec<Rc<dyn IObserver<TimeSpan>>>>,
+    observers: RefCell<Vec<Rc<dyn IObserver<SignedDuration>>>>,
+    new_observers: RefCell<Vec<Rc<dyn IObserver<SignedDuration>>>>,
     queued_animation_frames: RefCell<VecDeque<AnimationFrame>>,
-    current_animation_timestamp: Cell<TimeSpan>,
+    current_animation_timestamp: Cell<SignedDuration>,
 }
 
 impl MediaContextClock {
@@ -31,7 +31,7 @@ impl MediaContextClock {
             observers: RefCell::new(Vec::new()),
             new_observers: RefCell::new(Vec::new()),
             queued_animation_frames: RefCell::new(VecDeque::new()),
-            current_animation_timestamp: Cell::new(TimeSpan::ZERO),
+            current_animation_timestamp: Cell::new(SignedDuration::ZERO),
         })
     }
 
@@ -46,14 +46,14 @@ impl MediaContextClock {
     }
 
     /// Runs `action` with the frame time on the next pulse.
-    pub fn request_animation_frame(&self, action: impl FnOnce(TimeSpan) + 'static) {
+    pub fn request_animation_frame(&self, action: impl FnOnce(SignedDuration) + 'static) {
         if let Some(parent) = self.parent.upgrade() {
             parent.schedule_render(false);
         }
         self.queued_animation_frames.borrow_mut().push_back(Box::new(action));
     }
 
-    pub(crate) fn pulse(&self, now: TimeSpan) {
+    pub(crate) fn pulse(&self, now: SignedDuration) {
         self.new_observers.borrow_mut().clear();
         self.current_animation_timestamp.set(now);
 
@@ -79,8 +79,8 @@ impl MediaContextClock {
     }
 }
 
-impl IObservable<TimeSpan> for MediaContextClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MediaContextClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         if let Some(parent) = self.parent.upgrade() {
             parent.schedule_render(false);
             parent.verify_access();

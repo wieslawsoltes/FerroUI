@@ -4,7 +4,6 @@ use crate::browser_app_builder::BrowserPlatformOptions;
 use crate::interop::completion_helper::PromiseError;
 use crate::interop::storage_helper::{self, StorageItemProperties};
 use crate::interop::{ferro_module, non_null, JsObject};
-use ferroui_base::animation::TimeSpan;
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::file_io::{DecodeResult, StorageBookmarkHelper, StorageProviderHelpers};
 use ferroui_base::platform::storage::{
@@ -14,12 +13,13 @@ use ferroui_base::platform::storage::{
     WellKnownFolder,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{DateTimeOffset, Uri, UriKind};
+use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use std::any::Any;
 use std::cell::RefCell;
 use std::io::{self, Read, Write};
 use std::rc::{Rc, Weak};
+use std::time::{Duration, SystemTime};
 use wasm_bindgen::JsCast;
 
 /// The platform key of the bookmarks of the browser.
@@ -451,8 +451,17 @@ impl JsStorageItem {
     }
 }
 
-fn from_unix_time_milliseconds(milliseconds: i64) -> DateTimeOffset {
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(milliseconds * 10_000))
+/// The instant of a time stamp of the page (`lastModified`), in milliseconds
+/// since the Unix epoch; the epoch when the platform's `SystemTime` cannot
+/// hold it.
+fn from_unix_time_milliseconds(milliseconds: i64) -> SystemTime {
+    let duration = Duration::from_millis(milliseconds.unsigned_abs());
+    let instant = if milliseconds < 0 {
+        SystemTime::UNIX_EPOCH.checked_sub(duration)
+    } else {
+        SystemTime::UNIX_EPOCH.checked_add(duration)
+    };
+    instant.unwrap_or(SystemTime::UNIX_EPOCH)
 }
 
 macro_rules! impl_js_storage_item {
@@ -750,7 +759,7 @@ mod tests {
     #[test]
     fn last_modified_converts_from_unix_milliseconds() {
         let date = from_unix_time_milliseconds(86_400_000);
-        assert_eq!(date, DateTimeOffset::UNIX_EPOCH.add_days(1.0));
+        assert_eq!(date, SystemTime::UNIX_EPOCH + Duration::from_secs(86_400));
     }
 
     #[test]

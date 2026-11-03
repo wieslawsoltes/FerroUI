@@ -3312,7 +3312,7 @@ pub fn build_transitions_xaml(
     // transitions.xaml(1,133) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // transitions.xaml(1,133) Duration
-    let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2000000_i64);
+    let value_0 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 1, 133)?);
     border_0.set_value(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_0), 1, 133)?);

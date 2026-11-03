@@ -222,7 +222,7 @@ impl TypedDragBehaviorBase {
 
         let operation = do_drag_drop(&trigger_event, value.as_ref());
         let this = self.to_ref();
-        drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        drop(Dispatcher::ui_thread().start_local(async move {
             operation.await;
 
             this.on_after_drag_drop(Some(&sender), &trigger_event, value.as_ref());

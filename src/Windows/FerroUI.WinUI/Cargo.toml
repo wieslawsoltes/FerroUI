@@ -26,6 +26,8 @@ ferroui-controls.workspace = true
 ferroui-win32.workspace = true
 # The COM runtime of the bindings the build script generates.
 ferroui-microcom.workspace = true
+# The one-shot channel that brings the status of an asynchronous operation back to its future.
+ferroui-system.workspace = true
 
 # The functions of the system the integration calls: declarations only, linked through
 # `windows-link`, so the crate is checked for a Windows target on any host.

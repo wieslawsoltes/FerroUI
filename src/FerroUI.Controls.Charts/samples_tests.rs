@@ -3,7 +3,7 @@
 // See NOTICE.md for the pinned source and the explicit collection adaptation.
 
 use crate::{Chart, LineSeries, SampleValue, Samples};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::collections::FerroList;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::threading::Dispatcher;
@@ -133,7 +133,7 @@ fn string_list_items_source_can_load_as_x_values() {
 fn date_time_offset_list_items_source_can_load_as_x_values() {
     let _scope = scope();
     let dates = [
-        DateTimeOffset::new(1601, 1, 1, 0, 0, 0, TimeSpan::ZERO),
+        DateTimeOffset::new(1601, 1, 1, 0, 0, 0, SignedDuration::ZERO),
         DateTimeOffset::UNIX_EPOCH,
     ];
     let samples = Samples::from_values(dates);

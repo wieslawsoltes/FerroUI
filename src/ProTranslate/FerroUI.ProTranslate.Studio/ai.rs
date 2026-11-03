@@ -9,12 +9,10 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::future::{poll_fn, Future};
 use std::pin::Pin;
 use std::rc::Rc;
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc, Mutex,
-};
-use std::task::{Poll, Waker};
+use std::task::Poll;
 use url::Url;
+
+pub use ferroui_system::threading::CancellationToken;
 
 #[derive(
     Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
@@ -340,19 +338,36 @@ pub trait AiTransport {
     fn send<'a>(
         &'a self,
         request: AiHttpRequest,
-        cancellation: &'a AiCancellationToken,
+        cancellation: &'a CancellationToken,
     ) -> AiFuture<'a, AiHttpResponse>;
 }
 
-#[derive(Default)]
-struct CancellationState {
-    cancelled: AtomicBool,
-    listeners: Mutex<Vec<Option<Option<Waker>>>>,
+/// `Err(StudioError::Cancelled)` when `cancellation` is canceled.
+fn check_cancelled(cancellation: &CancellationToken) -> Result<(), StudioError> {
+    if cancellation.is_cancelled() {
+        Err(StudioError::Cancelled)
+    } else {
+        Ok(())
+    }
 }
-#[derive(Clone, Default)]
+
+/// The cancellation of an AI request: a flag that any clone sets, and that wakes the requests
+/// waiting for it.
+#[deprecated(
+    since = "0.5.0",
+    note = "use `CancellationToken` (`ferroui_system::threading::CancellationToken`, re-exported here), which the requests take"
+)]
+#[derive(Clone)]
 pub struct AiCancellationToken {
-    state: Arc<CancellationState>,
+    token: CancellationToken,
 }
+#[allow(deprecated)]
+impl Default for AiCancellationToken {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+#[allow(deprecated)]
 impl std::fmt::Debug for AiCancellationToken {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AiCancellationToken")
@@ -360,90 +375,35 @@ impl std::fmt::Debug for AiCancellationToken {
             .finish()
     }
 }
+#[allow(deprecated)]
 impl AiCancellationToken {
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            token: CancellationToken::new(),
+        }
     }
     pub fn cancel(&self) {
-        if !self.state.cancelled.swap(true, Ordering::AcqRel) {
-            let listeners = std::mem::take(
-                &mut *self
-                    .state
-                    .listeners
-                    .lock()
-                    .unwrap_or_else(|error| error.into_inner()),
-            );
-            for listener in listeners.into_iter().flatten().flatten() {
-                listener.wake();
-            }
-        }
+        self.token.cancel();
     }
     pub fn is_cancelled(&self) -> bool {
-        self.state.cancelled.load(Ordering::Acquire)
+        self.token.is_cancelled()
     }
     pub fn check(&self) -> Result<(), StudioError> {
-        if self.is_cancelled() {
-            Err(StudioError::Cancelled)
-        } else {
-            Ok(())
-        }
-    }
-    fn listener(&self) -> CancellationListener {
-        let mut listeners = self
-            .state
-            .listeners
-            .lock()
-            .unwrap_or_else(|error| error.into_inner());
-        let index = listeners
-            .iter()
-            .position(Option::is_none)
-            .unwrap_or(listeners.len());
-        if index == listeners.len() {
-            listeners.push(Some(None));
-        } else {
-            listeners[index] = Some(None);
-        }
-        CancellationListener {
-            state: self.state.clone(),
-            index,
-        }
+        check_cancelled(&self.token)
     }
 }
-struct CancellationListener {
-    state: Arc<CancellationState>,
-    index: usize,
-}
-impl CancellationListener {
-    fn register(&self, waker: &Waker) {
-        if let Some(Some(previous)) = self
-            .state
-            .listeners
-            .lock()
-            .unwrap_or_else(|error| error.into_inner())
-            .get_mut(self.index)
-        {
-            if previous
-                .as_ref()
-                .is_none_or(|previous| !previous.will_wake(waker))
-            {
-                *previous = Some(waker.clone());
-            }
-        }
+/// The token, which the requests take: `&CancellationToken` coerces to `&CancellationToken`.
+#[allow(deprecated)]
+impl std::ops::Deref for AiCancellationToken {
+    type Target = CancellationToken;
+    fn deref(&self) -> &CancellationToken {
+        &self.token
     }
 }
-impl Drop for CancellationListener {
-    fn drop(&mut self) {
-        let mut listeners = self
-            .state
-            .listeners
-            .lock()
-            .unwrap_or_else(|error| error.into_inner());
-        if let Some(listener) = listeners.get_mut(self.index) {
-            *listener = None;
-        }
-        while listeners.last().is_some_and(Option::is_none) {
-            listeners.pop();
-        }
+#[allow(deprecated)]
+impl From<AiCancellationToken> for CancellationToken {
+    fn from(token: AiCancellationToken) -> Self {
+        token.token
     }
 }
 
@@ -536,9 +496,9 @@ impl AiTranslationManager {
         &self,
         provider: AiProvider,
         request: &AiTranslationRequest,
-        cancellation: &AiCancellationToken,
+        cancellation: &CancellationToken,
     ) -> Result<AiTranslationResult, StudioError> {
-        cancellation.check()?;
+        check_cancelled(cancellation)?;
         request.validate()?;
         let config = self.configured(provider)?;
         if request.entries.is_empty() {
@@ -569,9 +529,9 @@ impl AiTranslationManager {
     pub async fn translate_with_best_available(
         &self,
         request: &AiTranslationRequest,
-        cancellation: &AiCancellationToken,
+        cancellation: &CancellationToken,
     ) -> Result<AiTranslationResult, StudioError> {
-        cancellation.check()?;
+        check_cancelled(cancellation)?;
         let provider = self
             .configured_providers()
             .first()
@@ -587,7 +547,7 @@ impl AiTranslationManager {
         source_language: &str,
         target_language: &str,
         context: &str,
-        cancellation: &AiCancellationToken,
+        cancellation: &CancellationToken,
     ) -> Result<String, StudioError> {
         let request = AiTranslationRequest {
             source_language: source_language.into(),
@@ -606,7 +566,7 @@ impl AiTranslationManager {
     pub async fn test_connection(
         &self,
         provider: AiProvider,
-        cancellation: &AiCancellationToken,
+        cancellation: &CancellationToken,
     ) -> Result<bool, StudioError> {
         let text = self
             .translate_single(provider, "Hello", "English", "Spanish", "", cancellation)
@@ -618,10 +578,10 @@ impl AiTranslationManager {
         provider: AiProvider,
         request: &AiTranslationRequest,
         batch_size: usize,
-        cancellation: &AiCancellationToken,
+        cancellation: &CancellationToken,
         progress: &mut dyn FnMut(AiBatchProgress, &AiTranslationResult),
     ) -> Result<AiBatchResult, StudioError> {
-        cancellation.check()?;
+        check_cancelled(cancellation)?;
         request.validate()?;
         if batch_size == 0 {
             return Err(invalid("Translation batch size must be greater than zero"));
@@ -629,7 +589,7 @@ impl AiTranslationManager {
         let total_batches = request.entries.len().div_ceil(batch_size);
         let mut result = AiBatchResult::default();
         for (batch_index, entries) in request.entries.chunks(batch_size).enumerate() {
-            cancellation.check()?;
+            check_cancelled(cancellation)?;
             let batch = AiTranslationRequest {
                 source_language: request.source_language.clone(),
                 target_language: request.target_language.clone(),
@@ -639,7 +599,7 @@ impl AiTranslationManager {
             let translated = self
                 .translate_with_provider(provider, &batch, cancellation)
                 .await?;
-            cancellation.check()?;
+            check_cancelled(cancellation)?;
             result.tokens_used = result
                 .tokens_used
                 .checked_add(translated.tokens_used)
@@ -661,7 +621,7 @@ impl AiTranslationManager {
                 &translated,
             );
             result.batches.push(translated);
-            cancellation.check()?;
+            check_cancelled(cancellation)?;
         }
         Ok(result)
     }
@@ -670,9 +630,9 @@ impl AiTranslationManager {
     pub async fn list_models(
         &self,
         provider: AiProvider,
-        cancellation: &AiCancellationToken,
+        cancellation: &CancellationToken,
     ) -> Result<AiModelList, StudioError> {
-        cancellation.check()?;
+        check_cancelled(cancellation)?;
         let config = self.credentials(provider)?;
         let models = self.list_live_models(config, cancellation).await?;
         Ok(AiModelList {
@@ -697,7 +657,7 @@ impl AiTranslationManager {
     async fn list_live_models(
         &self,
         config: &AiProviderConfig,
-        cancellation: &AiCancellationToken,
+        cancellation: &CancellationToken,
     ) -> Result<Vec<String>, StudioError> {
         let mut models = BTreeSet::new();
         let mut cursor = None;
@@ -885,27 +845,28 @@ impl AiTranslationManager {
         models: bool,
         cursor: Option<&str>,
         body: Option<String>,
-        cancellation: &AiCancellationToken,
+        cancellation: &CancellationToken,
     ) -> Result<AiHttpResponse, StudioError> {
-        cancellation.check()?;
+        check_cancelled(cancellation)?;
         let request = http_request(config, method, models, cursor, body)?;
         let mut pending = self.transport.send(request, cancellation);
-        let listener = cancellation.listener();
+        // Registers the waker of each poll with the token, and removes it when it is dropped.
+        let mut cancelled = cancellation.cancelled();
         poll_fn(|context| {
-            if cancellation.is_cancelled() {
-                return Poll::Ready(Err(StudioError::Cancelled));
-            }
-            listener.register(context.waker());
-            if cancellation.is_cancelled() {
+            if Pin::new(&mut cancelled).poll(context).is_ready() {
                 return Poll::Ready(Err(StudioError::Cancelled));
             }
             match pending.as_mut().poll(context) {
-                Poll::Ready(result) => Poll::Ready(cancellation.check().and(result).map_err(
-                    |error| match error {
-                        StudioError::Cancelled => StudioError::Cancelled,
-                        _ => provider_error(config.provider, &redact(config, &error.to_string())),
-                    },
-                )),
+                Poll::Ready(result) => {
+                    Poll::Ready(check_cancelled(cancellation).and(result).map_err(|error| {
+                        match error {
+                            StudioError::Cancelled => StudioError::Cancelled,
+                            _ => {
+                                provider_error(config.provider, &redact(config, &error.to_string()))
+                            }
+                        }
+                    }))
+                }
                 Poll::Pending => Poll::Pending,
             }
         })

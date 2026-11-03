@@ -3,7 +3,6 @@ use super::{
 };
 use crate::metadata::{PseudoClassesAttribute, TemplatePartAttribute};
 use crate::{Button, ControlImpl, ScrollViewer};
-use ferroui_base::animation::TimeSpan;
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::{
     ContextRequestedEventArgs, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs,
@@ -341,15 +340,15 @@ ferroui_base::ferro_properties! { impl ScrollBar {
 
     ferro_property!(
         /// Defines the `HideDelay` property.
-        pub fn hide_delay_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<ScrollBar, _>("HideDelay", TimeSpan::from_seconds(2.0))
+        pub fn hide_delay_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<ScrollBar, _>("HideDelay", Duration::from_secs(2))
         }
     );
 
     ferro_property!(
         /// Defines the `ShowDelay` property.
-        pub fn show_delay_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<ScrollBar, _>("ShowDelay", TimeSpan::from_seconds(0.5))
+        pub fn show_delay_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<ScrollBar, _>("ShowDelay", Duration::from_millis(500))
         }
     );
 } }
@@ -447,21 +446,21 @@ impl ScrollBar {
 
     /// Determines how long the hide delay will be after the user stops
     /// interacting with the scrollbar.
-    pub fn hide_delay(&self) -> TimeSpan {
+    pub fn hide_delay(&self) -> Duration {
         self.get_value(Self::hide_delay_property())
     }
 
-    pub fn set_hide_delay(&self, value: TimeSpan) {
+    pub fn set_hide_delay(&self, value: Duration) {
         self.set_value(Self::hide_delay_property(), value)
     }
 
     /// Determines how long the show delay will be when the user starts
     /// interacting with the scrollbar.
-    pub fn show_delay(&self) -> TimeSpan {
+    pub fn show_delay(&self) -> Duration {
         self.get_value(Self::show_delay_property())
     }
 
-    pub fn set_show_delay(&self, value: TimeSpan) {
+    pub fn set_show_delay(&self, value: Duration) {
         self.set_value(Self::show_delay_property(), value)
     }
 
@@ -604,7 +603,7 @@ impl ScrollBar {
         *self.owner_subscriptions.borrow_mut() = Some(subscriptions);
     }
 
-    fn invoke_after_delay(&self, handler: DelayedAction, delay: TimeSpan) {
+    fn invoke_after_delay(&self, handler: DelayedAction, delay: Duration) {
         let existing = self.timer.borrow().clone();
         let timer = match existing {
             Some(timer) => {
@@ -632,7 +631,7 @@ impl ScrollBar {
         };
 
         self.timer_action.set(Some(handler));
-        timer.set_interval(delay.to_duration().unwrap_or(Duration::ZERO));
+        timer.set_interval(delay);
 
         timer.start();
     }

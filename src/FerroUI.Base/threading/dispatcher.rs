@@ -8,14 +8,14 @@ use std::thread::{self, ThreadId};
 
 use super::dispatcher_operation::LocalCallback;
 use super::dispatcher_priority_queue::DispatcherPriorityQueue;
+use super::ferro_synchronization_context::PriorityContexts;
 use super::i_dispatcher_impl::{DetachedDispatcherImpl, DetachedDispatcherSignal};
 use super::{
     DispatcherFrame, DispatcherPriority, DispatcherTimer, DispatcherUnhandledExceptionEventArgs,
-    DispatcherUnhandledExceptionFilterEventArgs, FerroSynchronizationContext, IDispatcher, IDispatcherImpl,
-    IDispatcherSignal,
+    DispatcherUnhandledExceptionFilterEventArgs, IDispatcher, IDispatcherImpl, IDispatcherSignal,
 };
 use crate::utilities::HandlerList;
-use ferroui_system::task::{AbortHandle, Id};
+use ferroui_system::task::{AbortHandle, Id, Schedule};
 
 /// Handler of [`Dispatcher::unhandled_exception`].
 pub type DispatcherUnhandledExceptionEventHandler = dyn for<'a> Fn(&DispatcherUnhandledExceptionEventArgs<'a>);
@@ -36,7 +36,10 @@ pub(crate) struct DispatcherLocal {
     signaled_token: Cell<u64>,
     background_token: Cell<Option<u64>>,
     /// The per-priority synchronization contexts, created on demand.
-    pub(crate) priority_contexts: RefCell<Vec<Option<Arc<FerroSynchronizationContext>>>>,
+    pub(crate) priority_contexts: PriorityContexts,
+    /// The per-priority schedules of the tasks ([`Dispatcher::task_schedule`]), created on demand,
+    /// so that the schedule of a priority is one object (the current schedule of its jobs).
+    pub(crate) schedules: RefCell<Vec<Option<Arc<dyn Schedule>>>>,
     /// The tasks of this dispatcher (futures in the task table of the thread, polled from jobs),
     /// aborted when it shuts down; the ended ones are pruned as the table grows.
     pub(crate) tasks: RefCell<BTreeMap<Id, AbortHandle>>,
@@ -68,7 +71,8 @@ impl DispatcherLocal {
             timer_token: Cell::new(0),
             signaled_token: Cell::new(0),
             background_token: Cell::new(None),
-            priority_contexts: RefCell::new(Vec::new()),
+            priority_contexts: PriorityContexts::default(),
+            schedules: RefCell::new(Vec::new()),
             tasks: RefCell::new(BTreeMap::new()),
             tasks_pruned_at: Cell::new(0),
             jobs: RefCell::new(HashMap::new()),
@@ -153,10 +157,10 @@ static NEXT_DISPATCHER_ID: AtomicU64 = AtomicU64::new(1);
 /// [`spawn_local_with_priority`](Self::spawn_local_with_priority) and
 /// [`spawn`](Self::spawn) run a future on the dispatcher thread, polling it
 /// from jobs queued at a fixed priority, and give its
-/// `ferroui_system::task::JoinHandle`;
-/// [`invoke_async_task`](Self::invoke_async_task) and
-/// [`DispatcherTaskScheduler`](super::DispatcherTaskScheduler) do the same
-/// and give a [`DispatcherTask`](super::DispatcherTask).
+/// `ferroui_system::task::JoinHandle`; [`start_local`](Self::start_local)
+/// polls it for the first time inside the call. The deprecated
+/// `invoke_async_task` and `DispatcherTaskScheduler` do the same and give a
+/// `DispatcherTask`.
 /// [`resume`](Self::resume), [`yield_now`](Self::yield_now) and
 /// [`await_with_priority`](Self::await_with_priority) change the priority at
 /// which an `async` block continues. No async runtime is involved.
@@ -237,6 +241,10 @@ impl Dispatcher {
         Self::register_current_thread_dispatcher(&dispatcher, Rc::new(DispatcherLocal::new(id)));
 
         dispatcher.replace_implementation(impl_);
+        // The dispatcher is the schedule of its thread until it shuts down: the wakes from other
+        // threads of the tasks in the queue of the thread, and the callbacks that other threads
+        // send to it, are jobs at the default priority.
+        dispatcher.install_thread_schedule();
         dispatcher
     }
 

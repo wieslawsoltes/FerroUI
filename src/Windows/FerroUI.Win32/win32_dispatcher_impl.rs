@@ -188,7 +188,7 @@ mod imp {
     impl IControlledDispatcherImpl for Win32DispatcherImpl {
         fn run_loop(&self, token: CancellationToken) {
             let mut result = 0;
-            while !token.is_cancellation_requested() {
+            while !token.is_cancelled() {
                 let (r, msg) = get_message();
                 result = r;
                 if result <= 0 {

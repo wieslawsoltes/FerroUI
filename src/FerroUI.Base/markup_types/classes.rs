@@ -183,7 +183,7 @@ ferro_class_info!(KeyFrame {
         content: Setters,
         properties: [
             Setters: FerroList<Rc<dyn IAnimationSetter>> { get: KeyFrame::setters },
-            KeyTime: TimeSpan { get: KeyFrame::key_time, set: KeyFrame::set_key_time },
+            KeyTime: SignedDuration { get: KeyFrame::key_time, set: KeyFrame::set_key_time },
             Cue: Cue { get: KeyFrame::cue, set: KeyFrame::set_cue },
             KeySpline: Option<Ref<KeySpline>> { get: KeyFrame::key_spline, set: KeyFrame::set_key_spline },
         ],

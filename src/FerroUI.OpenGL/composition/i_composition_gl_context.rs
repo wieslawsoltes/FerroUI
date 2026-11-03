@@ -1,7 +1,7 @@
 use super::ICompositionGlTexture;
 use crate::IGlContext;
 use ferroui_base::rendering::composition::{CompositionDrawingSurface, Compositor};
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use std::rc::Rc;
 
@@ -29,5 +29,5 @@ pub trait ICompositionGlContext {
     fn create_texture(&self, surface: &CompositionDrawingSurface, size: PixelSize) -> Rc<dyn ICompositionGlTexture>;
 
     /// Releases the context and its textures (`DisposeAsync`).
-    fn dispose_async(&self) -> DispatcherTask<()>;
+    fn dispose_async(&self) -> JoinHandle<()>;
 }

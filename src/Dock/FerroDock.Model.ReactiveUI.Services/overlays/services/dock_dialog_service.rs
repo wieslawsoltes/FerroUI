@@ -9,7 +9,8 @@ use ferrodock_model::services::{
 use ferrodock_model::BoxedValue;
 use ferroui_reactiveui::{reactive_object, IReactiveObject, IReactiveObjectExt, ReactiveObject};
 use ferroui_system::collections::object_model::ObservableCollection;
-use ferroui_system::threading::{tasks::Task, SynchronizationContext};
+use ferroui_system::task::Schedule;
+use ferroui_system::threading::tasks::Task;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
@@ -26,17 +27,18 @@ pub struct DockDialogService {
 }
 reactive_object!(DockDialogService);
 impl DockDialogService {
-    /// Creates a dialog service with optional global scope and notification context.
+    /// Creates a dialog service with optional global scope and notification schedule
+    /// (the `SynchronizationContext` of the reference; a dispatcher's `task_schedule(priority)`).
     pub fn new(
         global: Option<Rc<dyn IDockGlobalDialogService>>,
-        context: Option<Arc<dyn SynchronizationContext>>,
+        schedule: Option<Arc<dyn Schedule>>,
     ) -> Rc<Self> {
         Rc::new_cyclic(|runtime| {
             let requests = ObservableCollection::new();
             Self {
                 reactive: ReactiveObject::new(),
                 global,
-                dispatcher: ServiceDispatcher::new(context, None),
+                dispatcher: ServiceDispatcher::new(schedule, None),
                 read_only: ReadOnlyObservableCollection::new(requests.clone()),
                 requests,
                 active: RefCell::new(None),

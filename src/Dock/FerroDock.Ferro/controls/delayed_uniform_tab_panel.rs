@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 //! Source uniform tab layout, close-burst debounce and native width transitions.
 use ferroui_base::{
-    animation::{easings::CubicEaseOut, DoubleTransition, TimeSpan, Transitions},
+    animation::{easings::CubicEaseOut, DoubleTransition, SignedDuration, Transitions},
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties,
     input::InputElementImpl,
     instantiate,
@@ -20,6 +20,7 @@ use ferroui_controls::{
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
+    time::Duration,
 };
 
 const WIDTH_EPSILON: f64 = 0.1;
@@ -49,9 +50,9 @@ ferro_properties! {impl DelayedUniformTabPanel {
     /// Identifies spacing between tabs, default zero.
     pub fn item_spacing_property()->StyledProperty<f64>{FerroProperty::register::<Self,_>("ItemSpacing",0.0)}
     /// Identifies the close-burst expansion delay, default one second.
-    pub fn expansion_delay_property()->StyledProperty<TimeSpan>{FerroProperty::register::<Self,_>("ExpansionDelay",TimeSpan::from_seconds(1.0))}
+    pub fn expansion_delay_property()->StyledProperty<Duration>{FerroProperty::register::<Self,_>("ExpansionDelay",Duration::from_secs(1))}
     /// Identifies native resize animation duration, default zero.
-    pub fn resize_animation_duration_property()->StyledProperty<TimeSpan>{FerroProperty::register::<Self,_>("ResizeAnimationDuration",TimeSpan::ZERO)}
+    pub fn resize_animation_duration_property()->StyledProperty<SignedDuration>{FerroProperty::register::<Self,_>("ResizeAnimationDuration",SignedDuration::ZERO)}
     /// Identifies the source's private animated width property.
     pub fn animated_tab_width_property()->StyledProperty<f64>{FerroProperty::register::<Self,_>("AnimatedTabWidth",f64::NAN)}
 }}
@@ -107,20 +108,20 @@ impl DelayedUniformTabPanel {
     pub fn set_item_spacing(&self, value: f64) {
         self.set_value(Self::item_spacing_property(), value);
     }
-    /// Gets expansion delay, including signed source TimeSpan values.
-    pub fn expansion_delay(&self) -> TimeSpan {
+    /// Gets expansion delay.
+    pub fn expansion_delay(&self) -> Duration {
         self.get_value(Self::expansion_delay_property())
     }
     /// Sets expansion delay.
-    pub fn set_expansion_delay(&self, value: TimeSpan) {
+    pub fn set_expansion_delay(&self, value: Duration) {
         self.set_value(Self::expansion_delay_property(), value);
     }
     /// Gets resize animation duration.
-    pub fn resize_animation_duration(&self) -> TimeSpan {
+    pub fn resize_animation_duration(&self) -> SignedDuration {
         self.get_value(Self::resize_animation_duration_property())
     }
     /// Sets resize animation duration and the actual native DoubleTransition.
-    pub fn set_resize_animation_duration(&self, value: TimeSpan) {
+    pub fn set_resize_animation_duration(&self, value: SignedDuration) {
         self.set_value(Self::resize_animation_duration_property(), value);
     }
     fn set_animated_tab_width(&self, value: f64) {
@@ -311,7 +312,7 @@ impl DelayedUniformTabPanel {
         drop(self.layout_subscriptions.take());
     }
     fn queue_expansion(&self, target: f64) {
-        if self.expansion_delay() <= TimeSpan::ZERO {
+        if self.expansion_delay().is_zero() {
             self.stop_expansion_timer();
             self.pending_expansion_width.set(f64::NAN);
             self.is_removal_debounce_active.set(false);
@@ -323,13 +324,7 @@ impl DelayedUniformTabPanel {
     }
     fn restart_expansion_timer(&self) {
         self.expansion_timer.stop();
-        let delay = self.expansion_delay();
-        self.expansion_timer
-            .set_interval(if delay <= TimeSpan::ZERO {
-                std::time::Duration::ZERO
-            } else {
-                delay.to_duration().expect("positive source TimeSpan")
-            });
+        self.expansion_timer.set_interval(self.expansion_delay());
         self.expansion_timer.start();
     }
     fn stop_expansion_timer(&self) {
@@ -352,7 +347,7 @@ impl DelayedUniformTabPanel {
         }
         if !self.current_tab_width.get().is_finite()
             || Self::nearly_equal(self.current_tab_width.get(), target)
-            || self.resize_animation_duration() <= TimeSpan::ZERO
+            || self.resize_animation_duration() <= SignedDuration::ZERO
         {
             self.current_tab_width.set(target);
             self.set_animated_tab_width(target);
@@ -361,7 +356,7 @@ impl DelayedUniformTabPanel {
         }
     }
     fn update_resize_transition(&self) {
-        if self.resize_animation_duration() <= TimeSpan::ZERO {
+        if self.resize_animation_duration() <= SignedDuration::ZERO {
             self.set_transitions(None);
             return;
         }

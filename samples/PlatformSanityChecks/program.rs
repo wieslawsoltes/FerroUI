@@ -36,8 +36,8 @@ fn main() {
 
 #[cfg(target_os = "linux")]
 mod checks {
-    use ferroui_base::animation::TimeSpan;
-    use ferroui_base::threading::{CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
+    use ferroui_base::animation::SignedDuration;
+    use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTimer};
     use ferroui_controls::AppBuilder;
     use platform_sanity_checks::App;
     use std::cell::Cell;
@@ -98,12 +98,12 @@ mod checks {
     }
 
     /// Runs a frame of the main loop of the UI thread that `cb` arranges to end.
-    fn enter_loop(cb: impl FnOnce(&CancellationTokenSource), caller: &'static str) {
+    fn enter_loop(cb: impl FnOnce(&CancellationToken), caller: &'static str) {
         let _enter = Enter::new(caller);
-        let cts = CancellationTokenSource::new();
+        let cts = CancellationToken::new();
         cb(&cts);
-        Dispatcher::ui_thread().main_loop(&cts.token());
-        if !cts.is_cancellation_requested() {
+        Dispatcher::ui_thread().main_loop(&cts);
+        if !cts.is_cancelled() {
             die("Unexpected loop exit");
         }
     }
@@ -164,7 +164,7 @@ mod checks {
                 DispatcherTimer::run(
                     move || {
                         ticks.set(ticks.get() + 1);
-                        println!("Tick {} at {}", ticks.get(), TimeSpan::from(st.elapsed()));
+                        println!("Tick {} at {}", ticks.get(), SignedDuration::from(st.elapsed()));
                         if ticks.get() == 5 {
                             let elapsed = st.elapsed().as_secs_f64();
                             if elapsed < 4.5 {

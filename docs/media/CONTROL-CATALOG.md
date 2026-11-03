@@ -167,13 +167,14 @@ Logs and screenshots are outside Git in
 `/Volumes/SSD/build-cache/ferroui-portable-media-evidence/catalog-final-2026-11-02/`.
 No camera captures or build products are committed.
 
-## Integration status (2026-11-02)
+## Integration status (2026-11-03)
 
-The desktop branch integrates freshly fetched `origin/main` at `f6ccf8b21`
-(41 upstream commits since the previous common history). The two Skia
-import/export conflicts are resolved by retaining upstream pipeline prewarming
-alongside the media frame-context IDs, lease retention and GPU-completion code.
-The catalog retains both its media pages and upstream's new PolarChart page.
+The desktop branch integrates freshly fetched `origin/main` at `1549651d8`.
+This update brings 215 upstream commits since the previous integration and
+merges without text conflicts. The native media sample and desktop catalog
+compile, and the Metal catalog playback/navigation/cleanup/QR smoke passes.
+The full verification rerun was stopped at the user's request; the earlier
+complete Metal/browser results remain tied to their recorded revisions.
 Integrated verification is recorded in [macOS verification](MACOS-VERIFICATION.md).
 
 The user confirmed physical camera operation on macOS after the 30 fps fix.

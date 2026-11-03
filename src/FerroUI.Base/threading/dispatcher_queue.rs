@@ -52,7 +52,7 @@ impl Dispatcher {
         if priority < DispatcherPriority::MINIMUM_ACTIVE_VALUE {
             priority = DispatcherPriority::MINIMUM_ACTIVE_VALUE;
         }
-        while !cancellation_token.is_cancellation_requested() {
+        while !cancellation_token.is_cancelled() {
             let job = self.lock().queue.peek();
             let Some(job) = job else {
                 return;

@@ -151,7 +151,7 @@ impl IDispatcherImplWithExplicitBackgroundProcessing for ManagedDispatcherImpl {
 
 impl IControlledDispatcherImpl for ManagedDispatcherImpl {
     fn run_loop(&self, token: CancellationToken) {
-        let registration = token.can_be_canceled().then(|| {
+        let registration = token.can_be_cancelled().then(|| {
             let shared = self.shared.clone();
             token.register(move || {
                 let mut state = shared.lock();
@@ -159,7 +159,7 @@ impl IControlledDispatcherImpl for ManagedDispatcherImpl {
             })
         });
 
-        while !token.is_cancellation_requested() {
+        while !token.is_cancelled() {
             let signaled = std::mem::take(&mut self.shared.lock().signaled);
 
             if signaled {

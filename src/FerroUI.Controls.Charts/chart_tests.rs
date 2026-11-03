@@ -1,6 +1,6 @@
 //! Chart collection, property, lifecycle and automation contracts.
 use crate::*;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::collections::{
     FerroList, NotifyCollectionChangedAction as Action, NotifyCollectionChangedEventArgs,
 };
@@ -56,7 +56,7 @@ fn record<T>(sink: &Rc<RefCell<Vec<Event>>>, change: &NotifyCollectionChangedEve
 }
 
 fn date(year: i32, month: i32, day: i32) -> DateTimeOffset {
-    DateTimeOffset::new(year, month, day, 0, 0, 0, TimeSpan::ZERO)
+    DateTimeOffset::new(year, month, day, 0, 0, 0, SignedDuration::ZERO)
 }
 
 fn chart_with_axes(

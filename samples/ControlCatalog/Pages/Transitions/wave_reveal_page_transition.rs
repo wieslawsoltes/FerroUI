@@ -1,10 +1,10 @@
 //! Port of `Pages/Transitions/WaveRevealPageTransition.cs`.
 
 use ferroui_base::animation::easings::{CubicEaseOut, Easing};
-use ferroui_base::animation::{IPageTransition, IProgressPageTransition, PageSlide, PageTransitionItem, SlideAxis, TimeSpan};
+use ferroui_base::animation::{IPageTransition, IProgressPageTransition, PageSlide, PageTransitionItem, SlideAxis, SignedDuration};
 use ferroui_base::media::{Geometry, RectangleGeometry, StreamGeometry};
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, JoinHandle};
 use ferroui_base::{Point, Rect, Ref, Size, Visual};
 use mini_mvvm::{delay, start_async};
 use std::cell::{Cell, RefCell};
@@ -161,7 +161,7 @@ impl WaveRevealPageTransition {
 
     /// `new WaveRevealPageTransition(duration, orientation)`: `duration` is the duration of
     /// the animation and `orientation` the axis on which the animation occurs.
-    pub fn with_duration(duration: TimeSpan, orientation: SlideAxis) -> Self {
+    pub fn with_duration(duration: SignedDuration, orientation: SlideAxis) -> Self {
         Self::from_slide(PageSlide::with_duration(duration, orientation))
     }
 
@@ -281,7 +281,7 @@ impl WaveRevealPageTransition {
     #[allow(clippy::too_many_arguments)]
     async fn animate_progress(
         wave: Wave,
-        duration: TimeSpan,
+        duration: SignedDuration,
         slide_in_easing: Easing,
         from: f64,
         to: f64,
@@ -296,7 +296,7 @@ impl WaveRevealPageTransition {
         let duration_ms = (duration.total_milliseconds() * (to - from).abs()).max(50.0);
         let start = Instant::now();
 
-        while !cancellation_token.is_cancellation_requested() {
+        while !cancellation_token.is_cancelled() {
             let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0;
             let t = (elapsed_ms / duration_ms).clamp(0.0, 1.0);
             let eased = slide_in_easing.ease(t);
@@ -311,7 +311,7 @@ impl WaveRevealPageTransition {
             delay(Duration::from_millis(16)).await;
         }
 
-        if !cancellation_token.is_cancellation_requested() {
+        if !cancellation_token.is_cancelled() {
             wave.update(to, from_visual.as_ref(), to_visual.as_ref(), forward, page_length, &[]);
         }
     }
@@ -324,7 +324,7 @@ impl IPageTransition for WaveRevealPageTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let wave = self.wave();
         let duration = self.base.duration();
         let slide_in_easing = self.base.slide_in_easing();
@@ -332,7 +332,7 @@ impl IPageTransition for WaveRevealPageTransition {
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -359,13 +359,13 @@ impl IPageTransition for WaveRevealPageTransition {
             .await;
 
             if let Some(to) = &to {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     to.set_clip(None);
                 }
             }
 
             if let Some(from) = &from {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
             }
@@ -548,8 +548,8 @@ mod tests {
         assert_eq!(1.0, transition.center_sensitivity());
         assert_eq!(1.0, transition.bulge_exponent());
 
-        let transition = WaveRevealPageTransition::with_duration(TimeSpan::from_seconds(0.8), SlideAxis::Vertical);
-        assert_eq!(TimeSpan::from_seconds(0.8), transition.page_slide().duration());
+        let transition = WaveRevealPageTransition::with_duration(SignedDuration::from_seconds(0.8), SlideAxis::Vertical);
+        assert_eq!(SignedDuration::from_seconds(0.8), transition.page_slide().duration());
         assert_eq!(SlideAxis::Vertical, transition.page_slide().orientation());
     }
 

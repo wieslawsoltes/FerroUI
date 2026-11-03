@@ -1,4 +1,8 @@
 //! `RecordingSynchronizationContext` (`TestModels/RecordingSynchronizationContext.cs`).
+//!
+//! `BindingSchedulers::use_synchronization_context` and `SynchronizationContext` are deprecated
+//! since 0.5.0 (step A5 of phase C4 of #423); these tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_system::threading::SynchronizationContext;
 use std::sync::atomic::{AtomicUsize, Ordering};

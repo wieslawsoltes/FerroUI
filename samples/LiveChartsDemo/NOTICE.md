@@ -12,6 +12,14 @@ The chart algorithms are provided by
 See [`src/FerroUI.LiveCharts/NOTICE.md`](../../src/FerroUI.LiveCharts/NOTICE.md)
 for the full notice and dependency mapping.
 
+`mexico-states.geojson` is the map of the states of Mexico of the LiveCharts2 sample
+`samples/ViewModelsSamples/Maps/CustomMap` at the same commit, copied byte for byte (376,048
+bytes; Git blob 9ed7e9ca50f681372f230b92e3bc8bed8a536eff) for the scenario
+`MapsTests_CustomMap_LoadsAndRendersMexicoStates`. Its regeneration script in the sample states
+its origin: a derivative of the Natural Earth 1:10m Admin 1 states and provinces
+(https://www.naturalearthdata.com/), through https://github.com/martynafford/natural-earth-geojson,
+under CC0-1.0 (public domain).
+
 The optional CPU rendering path uses the existing FerroUI Vello and HarfBuzz
 backends. The embedded Inter font is supplied by `ferroui-fonts-inter`, under
 its existing font license and notices.

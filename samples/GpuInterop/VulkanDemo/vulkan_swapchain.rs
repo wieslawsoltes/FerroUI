@@ -10,7 +10,7 @@ use super::vulkan_extensions::VulkanDemoResult;
 use super::vulkan_image::VulkanImage;
 use super::vulkan_semaphore_pair::VulkanSemaphorePair;
 use super::vulkan_timeline_semaphore::VulkanTimelineSemaphore;
-use crate::task_support::{present_status, start, ServerJobTaskFuture};
+use crate::task_support::{join, present_status, start, ServerJobTaskFuture};
 use ash::vk;
 use ferroui_base::platform::{
     PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
@@ -22,14 +22,14 @@ use ferroui_base::rendering::composition::{
     ServerJobTask,
 };
 use ferroui_base::rendering::{ISwapchainImage, SwapchainBase, SwapchainImageFactory, SwapchainImagePresentStatus};
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// The disposals of the images of a swapchain that are under way: what `DisposeAsync` of the
 /// swapchain awaits upstream, where it awaits the disposal of every image.
-pub(super) type Disposals = Rc<RefCell<Vec<DispatcherTask<()>>>>;
+pub(super) type Disposals = Rc<RefCell<Vec<JoinHandle<()>>>>;
 
 pub struct VulkanSwapchain {
     base: SwapchainBase<VulkanSwapchainImage>,
@@ -58,12 +58,12 @@ impl VulkanSwapchain {
     }
 
     /// Releases the images of the swapchain once the compositor is done with them.
-    pub fn dispose_async(&self) -> DispatcherTask<()> {
+    pub fn dispose_async(&self) -> JoinHandle<()> {
         self.base.dispose();
         let disposals = std::mem::take(&mut *self.disposals.borrow_mut());
         start(async move {
             for disposal in disposals {
-                let _ = disposal.await;
+                let _ = join(disposal).await;
             }
         })
     }
@@ -139,7 +139,7 @@ impl VulkanSwapchainImage {
 
     /// `DisposeAsync`: waits for the last presentation, then releases what the compositor
     /// imported and the objects of the image.
-    fn dispose_async(&self) -> DispatcherTask<()> {
+    fn dispose_async(&self) -> JoinHandle<()> {
         let last_present = self.last_present.borrow().clone();
         let imported_image = self.imported_image.borrow().clone();
         let available_semaphore = self.available_semaphore.borrow().clone();
