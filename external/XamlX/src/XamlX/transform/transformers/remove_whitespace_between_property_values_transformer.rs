@@ -3,7 +3,7 @@
 use std::rc::Rc;
 
 use crate::ast::{
-    IXamlAstNode, XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode,
+    IXamlAstNode, XamlAstObjectNode, XamlAstTextNode,
     XamlAstXamlPropertyValueNode,
 };
 use crate::exceptions::XamlResult;
@@ -20,16 +20,16 @@ impl IXamlAstTransformer for RemoveWhitespaceBetweenPropertyValuesTransformer {
         node: Rc<dyn IXamlAstNode>,
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
         let mut property_encountered = false;
-        if let Some(ni) = node.cast::<XamlAstObjectNode>() {
+        if let Some(ni) = node.as_any().downcast_ref::<XamlAstObjectNode>() {
             let mut children = ni.children.borrow_mut();
             let mut c = children.len();
             while c > 0 {
                 c -= 1;
-                let child = children[c].clone();
-                if child.is::<XamlAstXamlPropertyValueNode>() {
+                let child = &children[c];
+                if child.as_any().is::<XamlAstXamlPropertyValueNode>() {
                     property_encountered = true;
                 } else if property_encountered {
-                    if let Some(text_node) = child.cast::<XamlAstTextNode>() {
+                    if let Some(text_node) = child.as_any().downcast_ref::<XamlAstTextNode>() {
                         if WhitespaceNormalization::is_whitespace(&text_node.text.borrow()) {
                             children.remove(c);
                         }

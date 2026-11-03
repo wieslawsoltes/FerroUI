@@ -18,120 +18,120 @@ struct Reader<'a> {
     expansion: Expansion,
 }
 
-pub(super) fn read_uint(input: &mut &[u8]) -> XamlResult<u32> {
+pub(super) fn read_uint(input: &mut &[u8]) -> DecodeResult<u32> {
     let mut v = 0;
     for shift in (0..32).step_by(7) {
         let (&b, rest) = input
             .split_first()
-            .ok_or_else(|| invalid("truncated integer"))?;
+            .ok_or(DecodeError::TruncatedInteger)?;
         *input = rest;
         if (shift == 28 && b > 15) || (shift > 0 && b == 0) {
-            return Err(invalid("invalid unsigned integer"));
+            return Err(DecodeError::InvalidInteger);
         }
         v |= u32::from(b & 127) << shift;
         if b < 128 {
             return Ok(v);
         }
     }
-    Err(invalid("integer overflow"))
+    Err(DecodeError::IntegerOverflow)
 }
 
 impl<'a> Reader<'a> {
-    fn take(&mut self, n: usize) -> XamlResult<&'a [u8]> {
+    fn take(&mut self, n: usize) -> DecodeResult<&'a [u8]> {
         let (value, rest) = self
             .input
             .split_at_checked(n)
-            .ok_or_else(|| invalid("truncated image"))?;
+            .ok_or(DecodeError::TruncatedImage)?;
         self.input = rest;
         Ok(value)
     }
 
-    fn uint(&mut self) -> XamlResult<u32> {
+    fn uint(&mut self) -> DecodeResult<u32> {
         read_uint(&mut self.input)
     }
 
-    fn count(&mut self, min_bytes: usize) -> XamlResult<usize> {
+    fn count(&mut self, min_bytes: usize) -> DecodeResult<usize> {
         let n = self.uint()? as usize;
         if n > MAX_NODES || n > self.input.len() / min_bytes {
-            return Err(invalid("invalid count"));
+            return Err(DecodeError::Count);
         }
         Ok(n)
     }
 
-    fn flag(&mut self) -> XamlResult<bool> {
+    fn flag(&mut self) -> DecodeResult<bool> {
         match self.take(1)? {
             [0] => Ok(false),
             [1] => Ok(true),
-            _ => Err(invalid("invalid flag")),
+            _ => Err(DecodeError::Flag),
         }
     }
 
-    fn text_at(&mut self, index: usize) -> XamlResult<&'a str> {
+    fn text_at(&mut self, index: usize) -> DecodeResult<&'a str> {
         let s = *self
             .strings
             .get(index)
-            .ok_or_else(|| invalid("string index out of range"))?;
+            .ok_or(DecodeError::StringIndex)?;
         self.expanded_text = self
             .expanded_text
             .checked_sub(s.len())
-            .ok_or_else(|| invalid("expanded strings exceed limit"))?;
+            .ok_or(DecodeError::StringLimit)?;
         Ok(s)
     }
 
-    fn text(&mut self) -> XamlResult<&'a str> {
+    fn text(&mut self) -> DecodeResult<&'a str> {
         let idx = self.uint()? as usize;
         self.text_at(idx)
     }
 
-    fn optional(&mut self) -> XamlResult<Option<&'a str>> {
+    fn optional(&mut self) -> DecodeResult<Option<&'a str>> {
         match self.uint()? {
             0 => Ok(None),
             n => self.text_at(n as usize - 1).map(Some),
         }
     }
 
-    fn aliases(&mut self) -> XamlResult<HashMap<String, String>> {
+    fn aliases(&mut self) -> DecodeResult<HashMap<String, String>> {
         let count = self.count(2)?;
         self.alias_entries_left = self
             .alias_entries_left
             .checked_sub(count)
-            .ok_or_else(|| invalid("namespace maps exceed limit"))?;
+            .ok_or(DecodeError::NamespaceLimit)?;
         let mut aliases = HashMap::with_capacity(count);
         for _ in 0..count {
             if aliases
                 .insert(self.text()?.to_owned(), self.text()?.to_owned())
                 .is_some()
             {
-                return Err(invalid("duplicate namespace prefix"));
+                return Err(DecodeError::DuplicatePrefix);
             }
         }
         Ok(aliases)
     }
 
-    fn reference<T: ?Sized + XamlAstCast>(&mut self) -> XamlResult<Rc<T>> {
+    fn reference<T: ?Sized + XamlAstCast>(&mut self) -> DecodeResult<Rc<T>> {
         let back = self.uint()? as usize;
         let index = self
             .nodes
             .len()
             .checked_sub(back)
             .and_then(|n| n.checked_sub(1))
-            .ok_or_else(|| invalid("invalid backwards node reference"))?;
+            .ok_or(DecodeError::BackReference)?;
         let entry = &mut self.nodes[index];
         let result = entry
             .node
             .cast::<T>()
-            .ok_or_else(|| invalid("node in wrong role"))?;
+            .ok_or(DecodeError::NodeRole)?;
         // The parser shares XML type references between an object, its members and
         // generic arguments. Other nodes are mutable occurrences owned by one parent.
         if entry.used && !entry.node.is::<XamlAstXmlTypeReference>() {
-            return Err(invalid("shared mutable occurrence"));
+            return Err(DecodeError::SharedOccurrence);
         }
         entry.used = true;
         self.expansion.include(entry.expansion)?;
         Ok(result)
     }
 
-    fn list<T: ?Sized + XamlAstCast>(&mut self) -> XamlResult<Vec<Rc<T>>> {
+    fn list<T: ?Sized + XamlAstCast>(&mut self) -> DecodeResult<Vec<Rc<T>>> {
         let n = self.count(1)?;
         (0..n).map(|_| self.reference()).collect()
     }
@@ -142,13 +142,13 @@ impl<'a> Reader<'a> {
         line: i32,
         pos: i32,
         scope: u32,
-    ) -> XamlResult<Rc<dyn IXamlAstNode>> {
+    ) -> DecodeResult<Rc<dyn IXamlAstNode>> {
         let scope = match scope {
             0 => None,
             n => Some(
                 self.scopes
                     .get(n as usize - 1)
-                    .ok_or_else(|| invalid("scope index out of range"))?
+                    .ok_or(DecodeError::ScopeIndex)?
                     .clone(),
             ),
         };
@@ -181,7 +181,7 @@ impl<'a> Reader<'a> {
                 if children.iter().any(|c| {
                     !c.is::<dyn IXamlAstValueNode>() && !c.is::<dyn IXamlAstManipulationNode>()
                 }) {
-                    return Err(invalid("invalid object child"));
+                    return Err(DecodeError::ObjectChild);
                 }
                 obj.children.replace(children);
                 Ok(obj)
@@ -202,7 +202,7 @@ impl<'a> Reader<'a> {
                 self.text()?,
                 self.list()?,
             )),
-            _ => Err(invalid("unknown node opcode")),
+            _ => Err(DecodeError::Opcode),
         }
     }
 }
@@ -216,7 +216,7 @@ struct Columns<'a> {
 }
 
 impl<'a> Columns<'a> {
-    fn read(r: &mut Reader<'a>, count: usize) -> XamlResult<Self> {
+    fn read(r: &mut Reader<'a>, count: usize) -> DecodeResult<Self> {
         let lines = r.uint()? as usize;
         let positions = r.uint()? as usize;
         let scopes = r.uint()? as usize;
@@ -229,16 +229,16 @@ impl<'a> Columns<'a> {
         })
     }
 
-    fn next(&mut self, i: usize) -> XamlResult<(u8, i32, i32, u32)> {
+    fn next(&mut self, i: usize) -> DecodeResult<(u8, i32, i32, u32)> {
         let n = read_uint(&mut self.lines)?;
         let delta = ((n >> 1) as i32) ^ -((n & 1) as i32);
         self.last_line = self
             .last_line
             .checked_add(delta)
             .filter(|&v| v >= 0)
-            .ok_or_else(|| invalid("source line overflow"))?;
+            .ok_or(DecodeError::LineOverflow)?;
         let pos = i32::try_from(read_uint(&mut self.positions)?)
-            .map_err(|_| invalid("source column overflow"))?;
+            .map_err(|_| DecodeError::ColumnOverflow)?;
         Ok((
             self.tags[i],
             self.last_line,
@@ -254,8 +254,8 @@ impl<'a> Columns<'a> {
 
 // Return validated, uncompressed operand bytes while preserving the graph's
 // row/column layout. Comparisons can reuse this without constructing an AST.
-pub(super) fn payload(bytes: &[u8]) -> XamlResult<std::borrow::Cow<'_, [u8]>> {
-    let size = expanded_size(bytes)? - 6;
+pub(super) fn payload(bytes: &[u8]) -> DecodeResult<std::borrow::Cow<'_, [u8]>> {
+    let size = envelope_size(bytes)? - 6;
     match bytes[5] & 1 {
         0 => Ok(std::borrow::Cow::Borrowed(&bytes[6..])),
         _ => {
@@ -264,12 +264,12 @@ pub(super) fn payload(bytes: &[u8]) -> XamlResult<std::borrow::Cow<'_, [u8]>> {
             let mut z = flate2::Decompress::new(true);
             let status = z
                 .decompress(data, &mut buffer, flate2::FlushDecompress::Finish)
-                .map_err(|_| invalid("invalid compressed payload"))?;
+                .map_err(|_| DecodeError::CompressedPayload)?;
             if status != flate2::Status::StreamEnd
                 || z.total_out() != size as u64
                 || z.total_in() != data.len() as u64
             {
-                return Err(invalid("compressed payload length mismatch"));
+                return Err(DecodeError::PayloadLength);
             }
             Ok(std::borrow::Cow::Owned(buffer))
         }
@@ -279,6 +279,10 @@ pub(super) fn payload(bytes: &[u8]) -> XamlResult<std::borrow::Cow<'_, [u8]>> {
 /// Decode and validate a complete syntax graph. No framework types are accessed or
 /// application constructors called until the caller transforms the returned document.
 pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
+    decode_document(bytes).map_err(Into::into)
+}
+
+fn decode_document(bytes: &[u8]) -> DecodeResult<XamlDocument> {
     let payload = payload(bytes)?;
     let mut r = Reader {
         input: &payload,
@@ -293,7 +297,7 @@ pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
     r.strings.reserve(strings);
     for _ in 0..strings {
         let len = r.uint()? as usize;
-        let text = std::str::from_utf8(r.take(len)?).map_err(|_| invalid("malformed UTF-8"))?;
+        let text = std::str::from_utf8(r.take(len)?).map_err(|_| DecodeError::Utf8)?;
         r.strings.push(text);
     }
     let mut document = XamlDocument::new();
@@ -316,8 +320,8 @@ pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
         } else {
             (
                 r.take(1)?[0],
-                i32::try_from(r.uint()?).map_err(|_| invalid("source line overflow"))?,
-                i32::try_from(r.uint()?).map_err(|_| invalid("source column overflow"))?,
+                i32::try_from(r.uint()?).map_err(|_| DecodeError::LineOverflow)?,
+                i32::try_from(r.uint()?).map_err(|_| DecodeError::ColumnOverflow)?,
                 r.uint()?,
             )
         };
@@ -329,11 +333,11 @@ pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
         });
     }
     if columns.as_ref().is_some_and(|c| !c.exhausted()) {
-        return Err(invalid("trailing bytes in source columns"));
+        return Err(DecodeError::TrailingColumns);
     }
-    let root = r.nodes.pop().ok_or_else(|| invalid("missing root"))?.node;
+    let root = r.nodes.pop().ok_or(DecodeError::MissingRoot)?.node;
     if !r.input.is_empty() || !root.is::<XamlAstObjectNode>() || r.nodes.iter().any(|n| !n.used) {
-        return Err(invalid("invalid root, unreachable nodes or trailing bytes"));
+        return Err(DecodeError::InvalidRoot);
     }
     document.set_root(root);
     Ok(document)

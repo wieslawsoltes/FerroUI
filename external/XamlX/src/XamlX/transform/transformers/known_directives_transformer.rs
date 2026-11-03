@@ -17,40 +17,45 @@ impl IXamlAstTransformer for KnownDirectivesTransformer {
         context: &AstTransformationContext,
         node: Rc<dyn IXamlAstNode>,
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        let Some(ni) = node.cast::<XamlAstObjectNode>() else {
+        let Some(object) = node.as_any().downcast_ref::<XamlAstObjectNode>() else {
             return Ok(node);
         };
-        let Some(type_) = ni.type_.borrow().cast::<XamlAstXmlTypeReference>() else {
+        let known = &context.configuration().known_directives;
+        if known.borrow().is_empty() {
             return Ok(node);
-        };
-
-        let known_directives = context.configuration().known_directives.borrow().clone();
-        for (ns, name) in known_directives {
-            if type_.xml_namespace().as_deref() == Some(ns.as_str()) && type_.name() == name {
-                let mut vnodes: Vec<Rc<dyn IXamlAstValueNode>> = Vec::new();
-                // As upstream: the first child (of any kind) is reported and ends the transformation.
-                let first_child = ni.children.borrow().first().cloned();
-                if let Some(ch) = first_child {
-                    if let Some(vn) = ch.cast::<dyn IXamlAstValueNode>() {
-                        vnodes.push(vn);
-                    }
-                    context.report_transform_error(
-                        "Only value nodes are allowed as directive children elements",
-                        Some(&*ch),
-                        (),
-                    )?;
-                    return Ok(ni);
-                }
-
-                return Ok(XamlAstXmlDirective::new(
-                    &*ni,
-                    type_.xml_namespace().as_deref(),
-                    &type_.name(),
-                    vnodes,
-                ));
-            }
         }
 
+        let first_child = {
+            let directives = known.borrow();
+            let Some((ns, name)) = match_directive(object, &directives) else {
+                return Ok(node);
+            };
+            let children = object.children.borrow();
+            match children.first() {
+                None => return Ok(XamlAstXmlDirective::new(object, Some(ns), name, Vec::new())),
+                Some(child) => child.clone(),
+            }
+        };
+        // The original transformer queries the first child's value role before
+        // reporting it. Release the configuration and AST borrows first so a
+        // diagnostic handler can modify them.
+        let _value = first_child.cast::<dyn IXamlAstValueNode>();
+        context.report_transform_error(
+            "Only value nodes are allowed as directive children elements",
+            Some(&*first_child),
+            (),
+        )?;
         Ok(node)
     }
+}
+
+fn match_directive<'a>(
+    object: &XamlAstObjectNode,
+    directives: &'a [(String, String)],
+) -> Option<&'a (String, String)> {
+    let type_ref = object.type_.borrow();
+    let xml = type_ref.as_any().downcast_ref::<XamlAstXmlTypeReference>()?;
+    let ns = xml.xml_namespace.borrow();
+    let name = xml.name.borrow();
+    directives.iter().find(|(n, k)| ns.as_deref() == Some(n.as_str()) && k == &*name)
 }

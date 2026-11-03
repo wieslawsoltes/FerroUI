@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crate::ast::{
-    IXamlAstNode, IXamlAstTypeReference, IXamlLineInfo, XamlAstClrTypeReference, XamlAstNodeExtensions,
+    IXamlAstNode, IXamlAstTypeReference, IXamlLineInfo, XamlAstClrTypeReference,
     XamlAstXmlTypeReference,
 };
 use crate::exceptions::{XamlError, XamlResult};
@@ -233,8 +233,8 @@ impl IXamlAstTransformer for TypeReferenceResolver {
         context: &AstTransformationContext,
         node: Rc<dyn IXamlAstNode>,
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        if let Some(xmlref) = node.cast::<XamlAstXmlTypeReference>() {
-            let resolved = Self::resolve_type_reference(context, &xmlref)?;
+        if let Some(xmlref) = node.as_any().downcast_ref::<XamlAstXmlTypeReference>() {
+            let resolved = Self::resolve_type_reference(context, xmlref)?;
             return Ok(resolved);
         }
 

@@ -34,11 +34,11 @@ impl Expansion {
         visits: 1,
     };
 
-    fn include(&mut self, child: Self) -> XamlResult<()> {
+    fn include(&mut self, child: Self) -> DecodeResult<()> {
         self.height = self.height.max(child.height + 1);
         self.visits += child.visits;
         if self.height > MAX_DEPTH || self.visits > MAX_VISITS {
-            return Err(invalid("expanded graph exceeds limit"));
+            return Err(DecodeError::GraphLimit);
         }
         Ok(())
     }
@@ -50,6 +50,81 @@ const TEXT: u8 = 2;
 const OBJECT: u8 = 3;
 const ASSIGN: u8 = 4;
 const DIRECTIVE: u8 = 5;
+
+/// Carry one discriminant through operand and graph validation. Construct the
+/// public diagnostic only when a failure leaves the decoder.
+#[derive(Clone, Copy, Debug)]
+enum DecodeError {
+    GraphLimit,
+    Signature,
+    CompressionHeader,
+    ImageLimit,
+    CompressionMode,
+    TruncatedInteger,
+    InvalidInteger,
+    IntegerOverflow,
+    TruncatedImage,
+    Count,
+    Flag,
+    StringIndex,
+    StringLimit,
+    NamespaceLimit,
+    DuplicatePrefix,
+    BackReference,
+    NodeRole,
+    SharedOccurrence,
+    ScopeIndex,
+    ObjectChild,
+    Opcode,
+    LineOverflow,
+    ColumnOverflow,
+    CompressedPayload,
+    PayloadLength,
+    Utf8,
+    TrailingColumns,
+    MissingRoot,
+    InvalidRoot,
+}
+
+type DecodeResult<T> = Result<T, DecodeError>;
+
+impl From<DecodeError> for XamlError {
+    #[cold]
+    fn from(error: DecodeError) -> Self {
+        let message = match error {
+            DecodeError::GraphLimit => "expanded graph exceeds limit",
+            DecodeError::Signature => "unexpected signature, version or length",
+            DecodeError::CompressionHeader => "truncated compression header",
+            DecodeError::ImageLimit => "expanded image exceeds limit",
+            DecodeError::CompressionMode => "unknown compression mode",
+            DecodeError::TruncatedInteger => "truncated integer",
+            DecodeError::InvalidInteger => "invalid unsigned integer",
+            DecodeError::IntegerOverflow => "integer overflow",
+            DecodeError::TruncatedImage => "truncated image",
+            DecodeError::Count => "invalid count",
+            DecodeError::Flag => "invalid flag",
+            DecodeError::StringIndex => "string index out of range",
+            DecodeError::StringLimit => "expanded strings exceed limit",
+            DecodeError::NamespaceLimit => "namespace maps exceed limit",
+            DecodeError::DuplicatePrefix => "duplicate namespace prefix",
+            DecodeError::BackReference => "invalid backwards node reference",
+            DecodeError::NodeRole => "node in wrong role",
+            DecodeError::SharedOccurrence => "shared mutable occurrence",
+            DecodeError::ScopeIndex => "scope index out of range",
+            DecodeError::ObjectChild => "invalid object child",
+            DecodeError::Opcode => "unknown node opcode",
+            DecodeError::LineOverflow => "source line overflow",
+            DecodeError::ColumnOverflow => "source column overflow",
+            DecodeError::CompressedPayload => "invalid compressed payload",
+            DecodeError::PayloadLength => "compressed payload length mismatch",
+            DecodeError::Utf8 => "malformed UTF-8",
+            DecodeError::TrailingColumns => "trailing bytes in source columns",
+            DecodeError::MissingRoot => "missing root",
+            DecodeError::InvalidRoot => "invalid root, unreachable nodes or trailing bytes",
+        };
+        invalid(message)
+    }
+}
 
 fn invalid(detail: &str) -> XamlError {
     XamlError::invalid_operation(format!("Invalid FXD document: {detail}"))
@@ -63,22 +138,26 @@ pub fn is_binary(bytes: &[u8]) -> bool {
 
 /// Inspect just the envelope, before reserving decompression or AST storage.
 pub(crate) fn expanded_size(bytes: &[u8]) -> XamlResult<usize> {
+    envelope_size(bytes).map_err(Into::into)
+}
+
+fn envelope_size(bytes: &[u8]) -> DecodeResult<usize> {
     if bytes.len() > MAX_DOCUMENT_BYTES || !is_binary(bytes) || bytes.get(4) != Some(&VERSION) {
-        return Err(invalid("unexpected signature, version or length"));
+        return Err(DecodeError::Signature);
     }
     match bytes.get(5) {
         Some(0 | 2) => Ok(bytes.len()),
         Some(1 | 3) => {
             let size = bytes
                 .get(6..10)
-                .ok_or_else(|| invalid("truncated compression header"))?;
+                .ok_or(DecodeError::CompressionHeader)?;
             let size = u32::from_le_bytes(size.try_into().unwrap()) as usize;
             if size > MAX_DOCUMENT_BYTES - 6 {
-                return Err(invalid("expanded image exceeds limit"));
+                return Err(DecodeError::ImageLimit);
             }
             Ok(size + 6)
         }
-        _ => Err(invalid("unknown compression mode")),
+        _ => Err(DecodeError::CompressionMode),
     }
 }
 

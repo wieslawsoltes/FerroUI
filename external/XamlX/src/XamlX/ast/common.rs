@@ -560,17 +560,24 @@ pub trait XamlAstExtensions {
 
 impl XamlAstExtensions for Rc<dyn IXamlAstTypeReference> {
     fn get_clr_type(&self) -> XamlResult<Rc<dyn IXamlType>> {
-        Ok(self.get_clr_type_reference()?.type_.clone())
+        self.as_any()
+            .downcast_ref::<XamlAstClrTypeReference>()
+            .map(|reference| reference.type_.clone())
+            .ok_or_else(|| unresolved_type(&**self))
     }
 
     fn get_clr_type_reference(&self) -> XamlResult<Rc<XamlAstClrTypeReference>> {
-        self.cast::<XamlAstClrTypeReference>().ok_or_else(|| {
-            XamlError::transform_exception(
-                format!("Unable to convert {} to CLR type", self.to_node_string()),
-                Some(&**self),
-            )
-        })
+        self.cast::<XamlAstClrTypeReference>()
+            .ok_or_else(|| unresolved_type(&**self))
     }
+}
+
+#[cold]
+fn unresolved_type(reference: &dyn IXamlAstTypeReference) -> XamlError {
+    XamlError::transform_exception(
+        format!("Unable to convert {} to CLR type", reference.to_node_string()),
+        Some(reference),
+    )
 }
 
 /// `XamlAstExtensions.GetClrProperty`.

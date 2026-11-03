@@ -18,7 +18,7 @@ impl IXamlAstTransformer for NewObjectTransformer {
         _context: &AstTransformationContext,
         node: Rc<dyn IXamlAstNode>,
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        if let Some(obj) = node.cast::<XamlAstConstructableObjectNode>() {
+        if let Some(obj) = node.as_any().downcast_ref::<XamlAstConstructableObjectNode>() {
             let type_ = obj.type_.borrow().clone();
             let mut children: Vec<Rc<dyn IXamlAstManipulationNode>> = Vec::new();
             for child in obj.children.borrow().iter() {
@@ -34,16 +34,16 @@ impl IXamlAstTransformer for NewObjectTransformer {
                 );
             }
             return Ok(XamlValueWithManipulationNode::new(
-                &*obj,
+                obj,
                 XamlAstNewClrObjectNode::new(
-                    &*obj,
+                    obj,
                     type_.get_clr_type_reference()?,
                     obj.constructor.clone(),
                     obj.arguments.borrow().clone(),
                 ),
                 Some(XamlObjectInitializationNode::new(
-                    &*obj,
-                    XamlManipulationGroupNode::new(&*obj, Some(children)),
+                    obj,
+                    XamlManipulationGroupNode::new(obj, Some(children)),
                     type_.get_clr_type()?,
                 )),
             ));

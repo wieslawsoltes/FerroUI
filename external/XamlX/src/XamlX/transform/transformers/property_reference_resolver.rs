@@ -4,7 +4,6 @@ use std::rc::Rc;
 
 use crate::ast::{
     IXamlAstNode, XamlAstClrProperty, XamlAstClrTypeReference, XamlAstNamePropertyReference,
-    XamlAstNodeExtensions,
 };
 use crate::exceptions::XamlResult;
 use crate::transform::{AstTransformationContext, IXamlAstTransformer};
@@ -18,17 +17,17 @@ impl IXamlAstTransformer for PropertyReferenceResolver {
         context: &AstTransformationContext,
         node: Rc<dyn IXamlAstNode>,
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        let Some(prop) = node.cast::<XamlAstNamePropertyReference>() else {
+        let Some(prop) = node.as_any().downcast_ref::<XamlAstNamePropertyReference>() else {
             return Ok(node);
         };
         let prop_name = prop.name();
 
         let fake_property = || -> Rc<dyn IXamlAstNode> {
-            XamlAstClrProperty::new(&*prop, &prop_name, XamlPseudoType::unknown(), None)
+            XamlAstClrProperty::new(prop, &prop_name, XamlPseudoType::unknown(), None)
         };
 
         let declaring_type_reference = prop.declaring_type.borrow().clone();
-        let Some(declaring_ref) = declaring_type_reference.cast::<XamlAstClrTypeReference>() else {
+        let Some(declaring_ref) = declaring_type_reference.as_any().downcast_ref::<XamlAstClrTypeReference>() else {
             return context.report_transform_error(
                 &format!(
                     "Unable to resolve property {} on {}",
@@ -41,7 +40,7 @@ impl IXamlAstTransformer for PropertyReferenceResolver {
         };
 
         let target_type_reference = prop.target_type.borrow().clone();
-        let Some(target_ref) = target_type_reference.cast::<XamlAstClrTypeReference>() else {
+        let Some(target_ref) = target_type_reference.as_any().downcast_ref::<XamlAstClrTypeReference>() else {
             return context.report_transform_error(
                 &format!(
                     "Unable to resolve property on {}",
@@ -67,7 +66,7 @@ impl IXamlAstTransformer for PropertyReferenceResolver {
             });
             if let Some(found) = found {
                 return Ok(XamlAstClrProperty::from_property(
-                    &*prop,
+                    prop,
                     &found,
                     context.configuration(),
                 )?);
@@ -78,7 +77,7 @@ impl IXamlAstTransformer for PropertyReferenceResolver {
                 .find(|p| p.name() == prop_name && p.add().is_some());
             if let Some(add) = clr_event.and_then(|e| e.add()) {
                 return Ok(XamlAstClrProperty::with_setter_methods(
-                    &*prop,
+                    prop,
                     &prop_name,
                     add.declaring_type(),
                     None,
@@ -125,7 +124,7 @@ impl IXamlAstTransformer for PropertyReferenceResolver {
         if setter.is_some() || getter.is_some() {
             let custom_attributes = getter.as_ref().map(|g| g.custom_attributes());
             return Ok(XamlAstClrProperty::with_setter_methods(
-                &*prop,
+                prop,
                 &prop_name,
                 declaring_type,
                 getter,
@@ -136,7 +135,7 @@ impl IXamlAstTransformer for PropertyReferenceResolver {
 
         if adder.is_some() {
             return Ok(XamlAstClrProperty::with_setter_methods(
-                &*prop,
+                prop,
                 &prop_name,
                 declaring_type,
                 None,
