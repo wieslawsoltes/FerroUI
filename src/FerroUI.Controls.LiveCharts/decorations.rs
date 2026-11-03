@@ -162,14 +162,15 @@ pub(crate) fn tooltip_scene(
     color: Color,
 ) -> Scene {
     let mut scene = Scene::new(size, Rect::from_size(size));
+    // A label of several lines (the land and its series values of a map) takes a line each.
     let lines: Vec<_> = args
         .points
         .iter()
-        .map(|point| {
+        .flat_map(|point| {
             if point.label.is_empty() {
-                ferroui_livecharts::axis::format_number(point.value)
+                vec![ferroui_livecharts::axis::format_number(point.value)]
             } else {
-                point.label.clone()
+                point.label.lines().map(str::to_owned).collect()
             }
         })
         .collect();
