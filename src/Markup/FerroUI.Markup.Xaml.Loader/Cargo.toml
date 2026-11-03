@@ -41,6 +41,9 @@ xamlx = { workspace = true, features = ["testing"] }
 ferroui-markup = { workspace = true }
 # Compile-time value parsers (`Thickness::parse`, `Color::try_parse`, `TimeSpan`, `Uri`, ...).
 ferroui-base = { workspace = true }
+# `url::Url`, a Rust form of `System.Uri` (C5 of #423): a handle of the run-time type system and a type
+# the emitter names.
+url = { workspace = true }
 # The XAML runtime library the run-time loader integrates with (service contracts, runtime helpers, loader
 # documents). Only with the `runtime` feature: the compiler extensions build without it.
 ferroui-markup-xaml = { workspace = true, optional = true }

@@ -570,7 +570,7 @@ fn font_fallback_scale_decorations_letter_spacing_and_copied_properties_apply_sc
     let face = mapped_face();
     let chosen = face.clone();
     let mapper = Mapper::new(move |text, _, culture| {
-        assert_eq!(culture.unwrap().name(), "ja-JP");
+        assert_eq!(culture.unwrap().to_string(), "ja-JP");
         FontFallbackMapping::new(chosen.clone(), text.len(), 2.0)
     });
     let _scope = TextTestScope::with_fonts_and_fallback_mapper(fonts(), mapper);

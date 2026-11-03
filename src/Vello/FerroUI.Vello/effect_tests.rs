@@ -738,30 +738,6 @@ mod effects {
         assert!(!effect.report_unhandled("Vello"));
     }
 
-    /// A runtime shader effect (#455, E4) is drawn as an effect without a
-    /// factory until its WGSL program is drawn (E5): its content unchanged,
-    /// reported once.
-    #[test]
-    fn shader_effect_draws_unchanged_until_its_wgsl_is_drawn() {
-        use ferroui_base::media::effects::library::PixelateEffect;
-        use ferroui_base::media::effects::ImmutableCustomEffect;
-
-        let effect = ImmutableCustomEffect::new(PixelateEffect { cell_size: 16.0 });
-        assert!(effect.has_shader());
-        let target = Target::new();
-        target.draw_impl(|context| {
-            context.push_effect(Some(Rect::new(0.0, 0.0, 100.0, 100.0)), &effect);
-            red_square(context, 40.0);
-            context.pop_effect();
-        });
-
-        assert_eq!(RED, target.pixel(40, 50));
-        assert_eq!(RED, target.pixel(59, 59));
-        assert_eq!(TRANSPARENT, target.pixel(39, 50));
-        assert_eq!(TRANSPARENT, target.pixel(60, 50));
-        assert!(!effect.report_unhandled("Vello"));
-    }
-
     #[test]
     fn effect_with_clip_rect_draws_through_a_bounded_layer() {
         let target = Target::new();
@@ -2752,5 +2728,216 @@ mod custom_effect_graphs {
         hard.clamp_edges = true;
         hard.preserve_alpha = true;
         assert_convolution_matches_reference(hard, (25, 28, 40, 30));
+    }
+}
+
+/// The runtime shader effects of the library in the CPU mode (#455, E5):
+/// pushed as effects of the drawing context around a scene of opaque and
+/// translucent colours at 96 and 192 dots per inch, the content rendered by
+/// the CPU renderer over the area of the effect and the CPU reference of the
+/// effect applied to it (decision 3 of the plan); the scenes and tolerances
+/// of the tests of `ferroui-skia`. An application's shader effect without a
+/// CPU reference draws its content unchanged, reported once. The pass of the
+/// hybrid and GPU modes is tested in `gpu/effect_pass_tests.rs`.
+mod custom_shader_effects {
+    use super::*;
+    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+    use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription};
+    use ferroui_base::media::imaging::BitmapBlendingMode;
+    use ferroui_base::platform::AlphaFormat;
+
+    /// The logical size of the targets.
+    const SIZE: i32 = 100;
+
+    /// Opaque red and steel blue squares and a translucent orange band, with
+    /// aliased edges.
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(30.0, 30.0, 20.0, 20.0), &no_shadows());
+        context.draw_rectangle(Some(&solid(steel_blue)), None, rect(52.0, 30.0, 20.0, 20.0), &no_shadows());
+        context.draw_rectangle(Some(&solid(orange)), None, rect(30.0, 52.0, 42.0, 18.0), &no_shadows());
+        context.pop_render_options();
+    }
+
+    /// A target of `SIZE` logical pixels at `scale` device pixels each.
+    fn target(scale: i32) -> Target {
+        let dpi = Vector::new(96.0 * f64::from(scale), 96.0 * f64::from(scale));
+        Target { bitmap: render_interface().create_render_target_bitmap(PixelSize::new(SIZE * scale, SIZE * scale), dpi) }
+    }
+
+    /// The premultiplied RGBA pixels of the target.
+    fn pixels(target: &Target) -> Vec<u8> {
+        let framebuffer = target.bitmap.lock();
+        let size = framebuffer.size();
+        let premultiplied = framebuffer.alpha_format() != AlphaFormat::Unpremul;
+        let mut rgba = Vec::with_capacity((size.width * size.height * 4) as usize);
+        for y in 0..size.height {
+            for x in 0..size.width {
+                let (r, g, b, a) = read_framebuffer_pixel(&*framebuffer, x, y);
+                let scale = |c: u8| if premultiplied { c } else { ((u32::from(c) * u32::from(a) + 127) / 255) as u8 };
+                rgba.extend_from_slice(&[scale(r), scale(g), scale(b), a]);
+            }
+        }
+        framebuffer.dispose();
+        rgba
+    }
+
+    /// The largest difference of a channel, and the mean difference.
+    fn difference(a: &[u8], b: &[u8]) -> (u8, f64) {
+        assert_eq!(a.len(), b.len());
+        let largest = a.iter().zip(b).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+        let total: u64 = a.iter().zip(b).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+        (largest, total as f64 / a.len() as f64)
+    }
+
+    /// Draws `effect` around `scene` over the whole target.
+    fn draw_with(target: &Target, effect: &ImmutableCustomEffect, scene: impl FnOnce(&mut dyn IDrawingContextImpl)) {
+        target.draw(|context| {
+            let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), effect);
+            scene(context);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+        });
+    }
+
+    /// Draws `effect` around the scene at `scale` and compares it with the
+    /// CPU reference: within `largest` levels per channel, and within a mean
+    /// of half a level.
+    fn assert_matches_reference(effect: ImmutableCustomEffect, scale: i32, largest: u8) {
+        assert!(effect.has_shader(), "{effect}");
+        let plain = target(scale);
+        plain.draw(scene);
+        let mut expected = pixels(&plain);
+        let side = (SIZE * scale) as usize;
+        assert!(effect.cpu_reference(&mut expected, side, side, f64::from(scale)), "{effect}");
+
+        let drawn = target(scale);
+        draw_with(&drawn, &effect, scene);
+        let actual = pixels(&drawn);
+        let (most, mean) = difference(&expected, &actual);
+        assert!(most <= largest && mean <= 0.5, "{effect} at {scale}x: largest difference {most}, mean {mean}");
+        // The effect changed something.
+        let (changed, _) = difference(&pixels(&plain), &actual);
+        assert!(changed > 0, "{effect} at {scale}x: the content is changed");
+    }
+
+    #[test]
+    fn the_shader_effects_match_their_cpu_references() {
+        for scale in [1, 2] {
+            assert_matches_reference(ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), scale, 1);
+            assert_matches_reference(
+                ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }),
+                scale,
+                1,
+            );
+            let spotlight =
+                SpotlightShaderEffect { center_x: 0.4, center_y: 0.5, radius: 0.5, strength: 0.8, color: Colors::ORANGE };
+            assert_matches_reference(ImmutableCustomEffect::new(spotlight), scale, 3);
+        }
+    }
+
+    #[test]
+    fn a_neutral_shader_effect_draws_the_content_unchanged() {
+        for effect in [
+            ImmutableCustomEffect::new(PixelateEffect { cell_size: 0.0 }),
+            ImmutableCustomEffect::new(ScanlineShaderEffect { strength: 0.0, ..ScanlineShaderEffect::default() }),
+            ImmutableCustomEffect::new(SpotlightShaderEffect { strength: 0.0, ..SpotlightShaderEffect::default() }),
+        ] {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
+        }
+    }
+
+    #[test]
+    fn a_shader_effect_is_drawn_inside_its_area_only() {
+        // An overlay over the right half of the target: nothing outside it.
+        let effect = ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 1.0 });
+        let drawn = target(1);
+        drawn.draw(|context| {
+            let bounds = Rect::new(50.0, 0.0, 50.0, 100.0);
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+            // After the pop, drawing is plain again.
+            context.push_render_options(aliased());
+            context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(0.0, 0.0, 5.0, 5.0), &no_shadows());
+            context.pop_render_options();
+        });
+        // Rows 2 and 3 of each band of 4 are black inside the area.
+        assert_eq!((0, 0, 0, 255), drawn.pixel(60, 2));
+        assert_eq!(TRANSPARENT, drawn.pixel(60, 1));
+        assert_eq!(TRANSPARENT, drawn.pixel(40, 2));
+        assert_eq!(RED, drawn.pixel(2, 2));
+    }
+
+    #[test]
+    fn a_shader_effect_is_composed_with_the_opacity_in_effect() {
+        // Black bands over the content, the whole at half opacity (as Skia
+        // composes the layer of the effect).
+        let effect = ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 1.0 });
+        let drawn = target(1);
+        drawn.draw(|context| {
+            context.push_opacity(0.5, None);
+            let bounds = Rect::new(0.0, 0.0, 100.0, 100.0);
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+            context.pop_opacity();
+        });
+        let (r, g, b, a) = drawn.pixel(60, 2);
+        assert!((r, g, b) == (0, 0, 0) && (i32::from(a) - 127).abs() <= 1, "{:?}", (r, g, b, a));
+        assert_eq!(TRANSPARENT, drawn.pixel(60, 1));
+    }
+
+    /// A shader effect of an application without a CPU reference.
+    #[derive(Clone, Debug, Default, PartialEq)]
+    struct WithoutReference {
+        amount: f64,
+    }
+
+    impl CustomEffect for WithoutReference {
+        const NAME: &'static str = "vello-cpu-test-shader-without-reference";
+
+        fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+            f("amount", self.amount.into());
+        }
+
+        fn set_parameter(&mut self, _: &str, _: EffectParameterValue) -> bool {
+            false
+        }
+
+        fn shader() -> Option<ShaderEffectDescription> {
+            Some(ShaderEffectDescription::overlay(
+                "uniform float2 layer_size; uniform float layer_scale; uniform float amount;\n\
+                 half4 main(float2 coord) { return half4(0.0, 0.0, 0.0, amount); }",
+                "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, }\n\
+                 fn effect(coord: vec2<f32>) -> vec4<f32> { return vec4<f32>(0.0, 0.0, 0.0, uniforms.amount); }",
+                BitmapBlendingMode::SourceOver,
+            ))
+        }
+    }
+
+    #[test]
+    fn a_shader_effect_without_a_cpu_reference_draws_unchanged_and_reports_once() {
+        let effect = ImmutableCustomEffect::new(WithoutReference { amount: 0.5 });
+        assert!(effect.has_shader());
+        for _ in 0..2 {
+            let drawn = target(1);
+            draw_with(&drawn, &effect, |context| {
+                context.push_render_options(aliased());
+                context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(40.0, 40.0, 20.0, 20.0), &no_shadows());
+                context.pop_render_options();
+            });
+            assert_eq!(RED, drawn.pixel(40, 50));
+            assert_eq!(RED, drawn.pixel(59, 59));
+            assert_eq!(TRANSPARENT, drawn.pixel(39, 50));
+            assert_eq!(TRANSPARENT, drawn.pixel(60, 50));
+        }
+        // Reported already: a later report is not logged.
+        assert!(!effect.report_unhandled("Vello"));
     }
 }

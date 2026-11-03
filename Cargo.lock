@@ -1537,6 +1537,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "naga",
  "roxmltree 0.20.0",
  "serde_json",
  "xamlx",
@@ -2055,6 +2056,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "url",
 ]
 
 [[package]]
@@ -2065,6 +2067,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup",
+ "url",
 ]
 
 [[package]]
@@ -2075,6 +2078,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "url",
  "xamlx",
 ]
 
@@ -2090,6 +2094,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+ "url",
  "xamlx",
 ]
 
@@ -2548,6 +2553,7 @@ name = "ferroui-vello"
 version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-fonts-inter",
  "ferroui-harfbuzz",

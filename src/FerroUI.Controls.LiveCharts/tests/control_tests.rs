@@ -540,3 +540,238 @@ fn treemap_series_release_their_nodes() {
         assert!(survivors.iter().all(|alive| !alive()), "{hierarchical}");
     }
 }
+
+fn heat_lands(series: &HeatLandSeries, lands: &[(&str, f64)]) {
+    series.set_lands(HeatLands::from_items(
+        lands
+            .iter()
+            .map(|&(name, value)| HeatLand::with_value(name, value)),
+    ));
+}
+
+#[test]
+fn geo_map_takes_the_source_defaults_and_loads_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    use ferroui_base::media::Color;
+    // The defaults of SourceGenMapChart and HeatLandSeries.
+    let map = GeoMap::new();
+    assert_eq!(map.chart_kind(), ChartKind::GeoMap);
+    assert_eq!(map.map_projection(), MapProjection::Default);
+    assert_eq!(map.stroke(), Some(Color::from_rgb(255, 255, 255)));
+    assert_eq!(map.fill(), Some(Color::from_rgb(240, 240, 240)));
+    assert_eq!(map.interaction_mode(), MapInteractionMode::NONE);
+    assert_eq!((map.min_zoom_level(), map.max_zoom_level()), (1.0, 100.0));
+    assert_eq!(map.zooming_speed(), 0.2);
+    assert!(map.active_map().is_none());
+    assert_eq!((map.zoom_level(), map.pan_offset()), (1.0, ferroui_base::Point::new(0.0, 0.0)));
+    let series = HeatLandSeries::new();
+    assert_eq!(series.kind(), SeriesKind::HeatLand);
+    assert_eq!(
+        series.heat_map(),
+        vec![Color::from_rgb(179, 229, 252), Color::from_rgb(2, 136, 209)]
+    );
+    assert!(!series.lands().ptr_eq(&HeatLandSeries::new().lands()));
+    assert!(!map.markers().ptr_eq(&GeoMap::new().markers()));
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:GeoMap xmlns:lc="https://ferroui.dev/livecharts" MapProjection="Mercator"
+              InteractionMode="Both">
+          <lc:HeatLandSeries Name="Population">
+            <lc:HeatLand Name="bra" Value="13" />
+            <lc:HeatLand Name="usa" Value="15" />
+          </lc:HeatLandSeries>
+          <lc:GeoMap.Markers>
+            <lc:GeoMarker Longitude="-74" Latitude="40.71" Size="10" />
+          </lc:GeoMap.Markers>
+        </lc:GeoMap>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<GeoMap>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    assert_eq!(chart.map_projection(), MapProjection::Mercator);
+    assert_eq!(chart.interaction_mode(), MapInteractionMode::BOTH);
+    let series = chart.series().get(0).cast::<HeatLandSeries>().unwrap();
+    assert_eq!(series.lands().count(), 2);
+    assert_eq!(chart.markers().get(0).size(), 10.0);
+    let scene = chart.scene(Size::new(800.0, 600.0)).unwrap();
+    assert!(scene.hits.len() > 100);
+    // GeoMap_GetPointsAt_ReturnsHitLand through the chart: the land under Brasilia, its
+    // values and the default tooltip text.
+    let brasilia = chart.project(-47.92, -15.79).unwrap().unwrap();
+    let land = chart.find_land_at(brasilia).unwrap();
+    assert_eq!(land.short_name, "bra");
+    assert_eq!(land.values.len(), 1);
+    assert_eq!(land.values[0].value, 13.0);
+    let hits = chart.find_points(brasilia);
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].label, "Brazil\nPopulation: 13.00");
+    assert_eq!(chart.map_land(hits[0].id), Some(land));
+    let (longitude, latitude) = chart.unproject(brasilia).unwrap().unwrap();
+    assert!((longitude + 47.92).abs() < 1e-6 && (latitude + 15.79).abs() < 1e-6);
+}
+
+/// GeoMapTests.GeoMap_SwappingSeries_PreservesFillOnSharedLands (issue 962) on the chart, and
+/// the observation of the lands, the series and the markers.
+#[test]
+fn geo_map_observes_its_lands_series_and_markers() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = GeoMap::new();
+    chart.set_animations_speed(0.0);
+    let first = HeatLandSeries::new();
+    heat_lands(&first, &[("fra", 10.0), ("usa", 5.0)]);
+    chart.series().add(first.clone().upcast());
+    let size = Size::new(400.0, 400.0);
+    let fill_of = |name: &str| {
+        let scene = chart.scene(size).unwrap();
+        let land = scene
+            .hits
+            .iter()
+            .find(|hit| hit.label.to_lowercase().starts_with(name))
+            .unwrap_or_else(|| panic!("{name}"))
+            .id;
+        scene
+            .primitives
+            .iter()
+            .find(|p| p.id == Some(land))
+            .and_then(|p| p.style.fill)
+    };
+    let high = Some(ferroui_base::media::Color::from_rgb(2, 136, 209));
+    let low = Some(ferroui_base::media::Color::from_rgb(179, 229, 252));
+    assert_eq!(fill_of("france"), high);
+    assert_eq!(fill_of("united states"), low);
+    // A land value, a new land and a replaced series are observed.
+    let revision = chart.revision();
+    first.lands().get(0).set_numeric_value(1.0);
+    assert!(chart.revision() > revision);
+    assert_eq!(fill_of("france"), low);
+    let revision = chart.revision();
+    first.lands().add(HeatLand::with_value("deu", 3.0));
+    assert!(chart.revision() > revision);
+    let second = HeatLandSeries::new();
+    heat_lands(&second, &[("fra", 1.0), ("bra", 99.0)]);
+    chart.series().set(0, second.upcast());
+    assert_eq!(fill_of("france"), low);
+    assert_eq!(
+        fill_of("united states"),
+        Some(ferroui_base::media::Color::from_rgb(240, 240, 240))
+    );
+    // The old series no longer notifies.
+    let revision = chart.revision();
+    first.lands().get(0).set_numeric_value(50.0);
+    assert_eq!(chart.revision(), revision);
+    // Markers, and a marker's coordinate.
+    let marker = GeoMarker::at(2.35, 48.85);
+    chart.markers().add(marker.clone());
+    let revision = chart.revision();
+    marker.set_longitude(13.4);
+    assert!(chart.revision() > revision);
+    // ChartTests.MapShouldHandleNullParams: a map without series draws the map.
+    chart.series().clear();
+    assert!(!chart.scene(size).unwrap().hits.is_empty());
+    // A series of another kind is rejected.
+    chart.series().add(line().upcast());
+    assert!(chart.scene(size).is_err());
+}
+
+/// GeoMapTests.GeoMap_TitleSet_ReducesDrawMarginAndAddsVisualToCanvas and
+/// GeoMap_HeatLegendRight_ReducesDrawMarginWidth: a title moves the map down and a legend on the
+/// right narrows it.
+#[test]
+fn geo_map_title_and_legend_take_room_from_the_map() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = GeoMap::new();
+    chart.set_animations_speed(0.0);
+    let series = HeatLandSeries::new();
+    heat_lands(&series, &[("rus", 1.0), ("usa", 9.0)]);
+    chart.series().add(series.upcast());
+    let size = Size::new(600.0, 600.0);
+    let bare = chart.scene(size).unwrap().plot_bounds;
+    chart.set_title("Hello".into());
+    let titled = chart.scene(size).unwrap();
+    assert!(titled.plot_bounds.y > bare.y);
+    assert!(titled.plot_bounds.height < 600.0);
+    assert!(titled.primitives.iter().any(|p| matches!(
+        &p.geometry,
+        ferroui_livecharts::Geometry::Text { text, .. } if text == "Hello"
+    )));
+    chart.set_title(String::new());
+    chart.set_legend_position(LegendPosition::Right);
+    let size = Size::new(800.0, 600.0);
+    let scene = chart.scene(size).unwrap();
+    assert!(scene.plot_bounds.x + scene.plot_bounds.width < 800.0);
+    assert_eq!(scene.legend.len(), 1);
+}
+
+/// ChartInteractiveApiTests.GeoMap_PanAndZoomAndResetViewportBeforeRender and
+/// GeoMap_ViewToAndRotateToBeforeRender, and GeoMapTests.GeoMap_ProjectUnproject_RoundTrips
+/// and the orthographic cases through the chart.
+#[test]
+fn geo_map_viewport_and_rotation_before_render() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = GeoMap::new();
+    chart.set_animations_speed(0.0);
+    chart.set_map_projection(MapProjection::Mercator);
+    let series = HeatLandSeries::new();
+    heat_lands(&series, &[("bra", 1.0)]);
+    chart.series().add(series.upcast());
+    let size = Size::new(400.0, 400.0);
+    chart.pan_map(ferroui_base::Point::new(10.0, 20.0));
+    assert_eq!(chart.pan_offset(), ferroui_base::Point::new(10.0, 20.0));
+    let pivot = ferroui_base::Point::new(100.0, 100.0);
+    chart.zoom_map(pivot, ZoomDirection::ZoomIn);
+    assert!((chart.zoom_level() - 1.25).abs() < 1e-12);
+    chart.zoom_map(pivot, ZoomDirection::ZoomOut);
+    assert!((chart.zoom_level() - 1.0).abs() < 1e-12);
+    chart.reset_viewport();
+    assert_eq!(chart.map_viewport(), MapViewport::default());
+    assert!(!chart.scene(size).unwrap().hits.is_empty());
+    // A zoomed map keeps the coordinate under the pivot in place.
+    chart.scene(size).unwrap();
+    let under = chart.unproject(pivot).unwrap().unwrap();
+    chart.zoom_map(pivot, ZoomDirection::ZoomIn);
+    let moved = chart.project(under.0, under.1).unwrap().unwrap();
+    assert!((moved.x - pivot.x).abs() < 1e-6 && (moved.y - pivot.y).abs() < 1e-6);
+    chart.reset_zoom();
+    assert_eq!(chart.zoom_level(), 1.0);
+    // A globe turns the short way round, at once outside a visual tree.
+    chart.set_map_projection(MapProjection::Orthographic);
+    chart.set_center_longitude(170.0);
+    chart.rotate_to(-170.0, 20.0, 0.0);
+    assert_eq!((chart.center_longitude(), chart.center_latitude()), (190.0, 20.0));
+    chart.rotate_to(10.0, 20.0, 800.0);
+    assert_eq!(chart.center_longitude(), 10.0);
+    assert!(chart.project(180.0 + 10.0, 0.0).unwrap().is_none());
+    assert!(chart.unproject(ferroui_base::Point::new(0.0, 0.0)).unwrap().is_none());
+    assert!(chart.project(10.0, 20.0).unwrap().is_some());
+}
+
+/// The active map: a custom GeoJSON map in place of the world map, and its lands keyed by their
+/// short names (MapsTests.CustomMap_LoadsAndRendersMexicoStates with an inline map).
+#[test]
+fn geo_map_draws_a_custom_map() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let map = Maps::map_from_geojson(
+        r#"{"type":"FeatureCollection","features":[
+            {"type":"Feature","properties":{"name":"North","shortName":"n"},
+             "geometry":{"type":"Polygon","coordinates":[[[0,10],[10,10],[10,20],[0,20],[0,10]]]}},
+            {"type":"Feature","properties":{"name":"South","shortName":"s"},
+             "geometry":{"type":"Polygon","coordinates":[[[0,0],[10,0],[10,10],[0,10],[0,0]]]}}]}"#,
+    )
+    .unwrap();
+    let chart = GeoMap::new();
+    chart.set_animations_speed(0.0);
+    chart.set_active_map(Some(std::rc::Rc::new(map)));
+    chart.set_min_latitude(Some(-5.0));
+    chart.set_max_latitude(Some(25.0));
+    chart.set_min_longitude(Some(-5.0));
+    chart.set_max_longitude(Some(15.0));
+    let series = HeatLandSeries::new();
+    heat_lands(&series, &[("n", 92.0), ("s", 23.0)]);
+    chart.series().add(series.upcast());
+    let scene = chart.scene(Size::new(600.0, 600.0)).unwrap();
+    assert_eq!(scene.hits.len(), 2);
+    let north = chart.project(5.0, 15.0).unwrap().unwrap();
+    assert_eq!(chart.find_land_at(north).unwrap().short_name, "n");
+    assert!(chart.find_land_at(chart.project(-3.0, 23.0).unwrap().unwrap()).is_none());
+}

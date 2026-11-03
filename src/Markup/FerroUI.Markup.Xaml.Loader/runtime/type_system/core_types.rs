@@ -15,7 +15,7 @@ use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupDelegate, MarkupInvokeError, MarkupValue};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{CultureInfo, Locale, Uri};
+use ferroui_base::utilities::{CultureInfo, Locale, Uri, UriRef};
 use ferroui_base::{BoxedValue, FerroProperty, TypeInfo};
 use xamlx::type_system::{IXamlType, IXamlTypeSystem, XamlPseudoType};
 
@@ -225,7 +225,10 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
             ValueType,
             Option<ValueType>
         ],
-        "System.Uri" => handles![Uri, Option<Uri>],
+        // A URI has three Rust forms (C5 of #423): the port, the reference that can be relative
+        // and the absolute URL. The casts between them are the ones of the untyped value
+        // conversions (a relative reference is not a URL).
+        "System.Uri" => handles![Uri, Option<Uri>, UriRef, Option<UriRef>, url::Url, Option<url::Url>],
         "System.Delegate" => handles![MarkupDelegate, Option<MarkupDelegate>],
         "System.Exception" => handles![ferroui_base::data::BindingError, Option<ferroui_base::data::BindingError>],
         "System.IDisposable" => handles![Rc<dyn IDisposable>, Option<Rc<dyn IDisposable>>],

@@ -281,6 +281,8 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::RuntimeList => TypeId::of::<RuntimeList>(),
             Known::ListItems => TypeId::of::<Rc<FerroList<Option<BoxedValue>>>>(),
             Known::Duration => TypeId::of::<std::time::Duration>(),
+            Known::UriRef => TypeId::of::<ferroui_base::utilities::UriRef>(),
+            Known::Url => TypeId::of::<url::Url>(),
             Known::Locale => TypeId::of::<ferroui_base::utilities::Locale>(),
         })
     }
@@ -325,6 +327,8 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::RuntimeList => TypeId::of::<Option<RuntimeList>>(),
             Known::ListItems => TypeId::of::<Option<Rc<FerroList<Option<BoxedValue>>>>>(),
             Known::Duration => TypeId::of::<Option<std::time::Duration>>(),
+            Known::UriRef => TypeId::of::<Option<ferroui_base::utilities::UriRef>>(),
+            Known::Url => TypeId::of::<Option<url::Url>>(),
             Known::Locale => TypeId::of::<Option<ferroui_base::utilities::Locale>>(),
         })
     }

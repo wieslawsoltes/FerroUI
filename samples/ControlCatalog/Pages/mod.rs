@@ -16,6 +16,7 @@ mod pie_chart_page;
 mod polar_chart_page;
 mod sankey_chart_page;
 mod treemap_chart_page;
+mod geo_map_page;
 mod button_spinner_page;
 mod buttons_page;
 mod calendar_date_picker_page;
@@ -151,6 +152,7 @@ pub use pie_chart_page::PieChartPage;
 pub use polar_chart_page::PolarChartPage;
 pub use sankey_chart_page::SankeyChartPage;
 pub use treemap_chart_page::TreemapChartPage;
+pub use geo_map_page::GeoMapPage;
 pub use button_spinner_page::ButtonSpinnerPage;
 pub use buttons_page::{ButtonsPage, RelayCommand};
 pub use calendar_date_picker_page::CalendarDatePickerPage;
@@ -352,6 +354,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     PolarChartPage::TYPE,
     SankeyChartPage::TYPE,
     TreemapChartPage::TYPE,
+    GeoMapPage::TYPE,
     ButtonSpinnerPage::TYPE,
     ButtonsPage::TYPE,
     CanvasPage::TYPE,
@@ -457,6 +460,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &PolarChartPage::XAML_CLASS,
     &SankeyChartPage::XAML_CLASS,
     &TreemapChartPage::XAML_CLASS,
+    &GeoMapPage::XAML_CLASS,
     &ButtonSpinnerPage::XAML_CLASS,
     &ButtonsPage::XAML_CLASS,
     &CanvasPage::XAML_CLASS,

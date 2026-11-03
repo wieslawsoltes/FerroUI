@@ -53,9 +53,10 @@ pub enum ShaderEffectPadding {
 /// [`CustomEffect::shader`] returns, read once per type.
 ///
 /// It carries two programs with one convention: SkSL for Skia, drawn on
-/// every surface of the backend, and WGSL for Vello, drawn from step E5 on
-/// (until then Vello draws a shader effect as an effect without a factory:
-/// its content unchanged, reported once).
+/// every surface of the backend, and WGSL for Vello, drawn by a pass of the
+/// device in its hybrid and GPU modes (E5; the module of the pass is
+/// [`wgsl_module`](Self::wgsl_module)). Vello's CPU mode draws the CPU
+/// reference of the effect ([`CustomEffect::cpu_reference`]) instead.
 ///
 /// # The uniform convention
 ///
@@ -90,7 +91,7 @@ pub enum ShaderEffectPadding {
 /// area); its entry point is `half4 main(float2 coord)`, which returns a
 /// premultiplied colour.
 ///
-/// The WGSL program of Vello (drawn from step E5 on) declares the uniforms as
+/// The WGSL program of Vello declares the uniforms as
 /// the members of `struct Uniforms`, in the same order, and the function
 /// `fn effect(coord: vec2<f32>) -> vec4<f32>`. The pass of the backend adds
 /// the bindings: `uniforms`, the block, and `fn sample_content(coord:
@@ -113,7 +114,7 @@ pub struct ShaderEffectDescription {
     /// The SkSL program of Skia: `half4 main(float2 coord)`.
     pub sksl: Cow<'static, str>,
     /// The WGSL program of Vello: `fn effect(coord: vec2<f32>) -> vec4<f32>`
-    /// and `struct Uniforms`. Not drawn before step E5.
+    /// and `struct Uniforms`, wrapped by [`wgsl_module`](Self::wgsl_module).
     pub wgsl: Cow<'static, str>,
     /// Whether the program samples the content or is an overlay.
     pub mode: ShaderEffectMode,
@@ -186,6 +187,298 @@ impl ShaderEffectDescription {
     pub fn samples_content(&self) -> bool {
         self.mode == ShaderEffectMode::ContentSampling
     }
+
+    /// The WGSL module of the pass that draws this description on the GPU
+    /// (Vello's hybrid and GPU modes, E5; the source of the GLSL ES of
+    /// WebGL2 that `ferroui-build` translates at build time): the program
+    /// ([`wgsl`](Self::wgsl)) followed by what the pass adds to it.
+    ///
+    /// - `@group(0) @binding(0) var<uniform> uniforms: Uniforms;`
+    ///   ([`SHADER_WGSL_UNIFORMS_BINDING`]): the block of the convention,
+    ///   whose type is the `struct Uniforms` of the program.
+    /// - `@group(0) @binding(1) var<uniform> ferroui_pass: FerroUiShaderPass;`
+    ///   ([`SHADER_WGSL_PASS_BINDING`]): one `vec4<f32>` `area`, the device
+    ///   pixel of the area of the effect at the top left texel of the
+    ///   textures (`x`, `y`, whole pixels) and the width and the height of
+    ///   the part of the area they hold (`z`, `w`).
+    /// - `@group(0) @binding(2) var ferroui_content: texture_2d<f32>;`
+    ///   ([`SHADER_WGSL_CONTENT_BINDING`]): the content, premultiplied, one
+    ///   texel per device pixel, read with `textureLoad` (no sampler).
+    /// - For a content-sampling program, `fn sample_content(coord:
+    ///   vec2<f32>) -> vec4<f32>`: the texel under `coord` (device pixels of
+    ///   the area), as Skia samples the child `content` of a runtime shader
+    ///   image filter at the centre of a texel; transparent beyond the area.
+    ///   An overlay has no `sample_content`: a call of it does not compile.
+    /// - The entry points [`SHADER_WGSL_VERTEX_ENTRY`] (a triangle over the
+    ///   target) and [`SHADER_WGSL_FRAGMENT_ENTRY`], which calls `effect` at
+    ///   the centre of each pixel of the area: a content-sampling program's
+    ///   output is the result; an overlay's output, clamped to 0..1, is
+    ///   composed over the content with the [blend mode](Self::blend_mode)
+    ///   (every mode of `BitmapBlendingMode`, premultiplied, the formulas of
+    ///   Skia's blend modes; `Unspecified` is source over). Pixels beyond the
+    ///   part of the area the textures hold are transparent.
+    ///
+    /// The names the pass adds start with `ferroui_` (and `FerroUi`), but
+    /// `uniforms`, `sample_content`, `vs_main` and `fs_main`: a program that
+    /// declares one of them does not compile.
+    pub fn wgsl_module(&self) -> String {
+        shader_wgsl_module(&self.wgsl, self.mode, self.blend_mode)
+    }
+}
+
+/// The binding (group 0) of the uniform block of the effect, `uniforms`, in
+/// the WGSL module of a shader effect
+/// ([`ShaderEffectDescription::wgsl_module`]).
+pub const SHADER_WGSL_UNIFORMS_BINDING: u32 = 0;
+
+/// The binding (group 0) of the uniforms of the pass, `ferroui_pass`, in the
+/// WGSL module of a shader effect.
+pub const SHADER_WGSL_PASS_BINDING: u32 = 1;
+
+/// The binding (group 0) of the content, `ferroui_content`, a
+/// `texture_2d<f32>`, in the WGSL module of a shader effect.
+pub const SHADER_WGSL_CONTENT_BINDING: u32 = 2;
+
+/// The vertex entry point of the WGSL module of a shader effect.
+pub const SHADER_WGSL_VERTEX_ENTRY: &str = "vs_main";
+
+/// The fragment entry point of the WGSL module of a shader effect.
+pub const SHADER_WGSL_FRAGMENT_ENTRY: &str = "fs_main";
+
+/// The bindings, the content and the vertex stage of the pass of a shader
+/// effect (`ShaderEffectDescription::wgsl_module`).
+const SHADER_PASS_WGSL: &str = r#"
+
+// --- The pass of the backend (docs/porting/custom-effects.md, section 3.4) ---
+
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+
+// What the pass gives the module besides the uniforms of the effect.
+struct FerroUiShaderPass {
+    // x, y: the device pixel of the area of the effect at the top left texel
+    // of the textures; z, w: the width and the height of the part of the
+    // area the textures hold.
+    area: vec4<f32>,
+}
+
+@group(0) @binding(1) var<uniform> ferroui_pass: FerroUiShaderPass;
+
+// The content of the effect: premultiplied, one texel per device pixel.
+@group(0) @binding(2) var ferroui_content: texture_2d<f32>;
+
+// The texel of the content at `pixel` of the textures; transparent beyond
+// the part of the area they hold.
+fn ferroui_content_texel(pixel: vec2<i32>) -> vec4<f32> {
+    let extent = vec2<i32>(ferroui_pass.area.zw);
+    if (any(pixel < vec2<i32>(0)) || any(pixel >= extent)) {
+        return vec4<f32>(0.0);
+    }
+    return textureLoad(ferroui_content, pixel, 0);
+}
+
+@vertex
+fn vs_main(@builtin(vertex_index) index: u32) -> @builtin(position) vec4<f32> {
+    let uv = vec2<f32>(f32((index << 1u) & 2u), f32(index & 2u));
+    return vec4<f32>(uv * 2.0 - 1.0, 0.0, 1.0);
+}
+"#;
+
+/// `sample_content` and the fragment stage of a content-sampling program.
+const CONTENT_SAMPLING_WGSL: &str = r#"
+// The content at `coord` (device pixels of the area): the texel under it, as
+// Skia samples the child `content` at the centre of a texel; transparent
+// beyond the area.
+fn sample_content(coord: vec2<f32>) -> vec4<f32> {
+    return ferroui_content_texel(vec2<i32>(floor(coord - ferroui_pass.area.xy)));
+}
+
+@fragment
+fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    if (any(fragment.xy >= ferroui_pass.area.zw)) {
+        return vec4<f32>(0.0);
+    }
+    // The centre of the pixel in the coordinates of the convention.
+    return effect(fragment.xy + ferroui_pass.area.xy);
+}
+"#;
+
+/// The fragment stage of an overlay: its output composed over the content
+/// by `ferroui_blend`.
+const OVERLAY_WGSL: &str = r#"
+@fragment
+fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    if (any(fragment.xy >= ferroui_pass.area.zw)) {
+        return vec4<f32>(0.0);
+    }
+    let source = clamp(effect(fragment.xy + ferroui_pass.area.xy), vec4<f32>(0.0), vec4<f32>(1.0));
+    let destination = ferroui_content_texel(vec2<i32>(floor(fragment.xy)));
+    return ferroui_blend(source, destination);
+}
+"#;
+
+/// The blend modes of the Compositing and Blending specification that are
+/// not Porter-Duff operators, on colours that are not premultiplied: the
+/// mixed colour composed source over (`ferroui_compose`).
+const BLEND_COMPOSE_WGSL: &str = r#"
+// A premultiplied colour without its alpha.
+fn ferroui_straight(c: vec4<f32>) -> vec3<f32> {
+    if (c.a > 0.0) {
+        return min(c.rgb / c.a, vec3<f32>(1.0));
+    }
+    return vec3<f32>(0.0);
+}
+
+// The colour `mixed` of a blend mode where both colours are, the source
+// and the destination where only one is.
+fn ferroui_compose(s: vec4<f32>, d: vec4<f32>, mixed: vec3<f32>) -> vec4<f32> {
+    let rgb = s.rgb * (1.0 - d.a) + d.rgb * (1.0 - s.a) + s.a * d.a * mixed;
+    return vec4<f32>(rgb, s.a + d.a - s.a * d.a);
+}
+
+fn ferroui_blend(s: vec4<f32>, d: vec4<f32>) -> vec4<f32> {
+    return ferroui_compose(s, d, ferroui_mix(ferroui_straight(d), ferroui_straight(s)));
+}
+"#;
+
+/// A separable blend mode: `ferroui_channel(b, s)` for each channel of the
+/// colours of the destination (`b`) and the source (`s`).
+const SEPARABLE_MIX_WGSL: &str = r#"
+fn ferroui_mix(b: vec3<f32>, s: vec3<f32>) -> vec3<f32> {
+    return vec3<f32>(ferroui_channel(b.r, s.r), ferroui_channel(b.g, s.g), ferroui_channel(b.b, s.b));
+}
+"#;
+
+/// Hard light of one channel (the overlay is hard light with the colours
+/// exchanged).
+const HARD_LIGHT_WGSL: &str = r#"
+fn ferroui_hard_light(b: f32, s: f32) -> f32 {
+    if (s <= 0.5) {
+        return b * 2.0 * s;
+    }
+    let t = 2.0 * s - 1.0;
+    return b + t - b * t;
+}
+"#;
+
+/// The helpers of the blend modes that are not separable.
+const NON_SEPARABLE_WGSL: &str = r#"
+fn ferroui_lum(c: vec3<f32>) -> f32 {
+    return dot(c, vec3<f32>(0.3, 0.59, 0.11));
+}
+
+fn ferroui_clip_color(c: vec3<f32>) -> vec3<f32> {
+    let l = ferroui_lum(c);
+    let n = min(min(c.r, c.g), c.b);
+    let x = max(max(c.r, c.g), c.b);
+    var result = c;
+    if (n < 0.0 && l - n > 0.0) {
+        result = vec3<f32>(l) + (result - vec3<f32>(l)) * (l / (l - n));
+    }
+    if (x > 1.0 && x - l > 0.0) {
+        result = vec3<f32>(l) + (result - vec3<f32>(l)) * ((1.0 - l) / (x - l));
+    }
+    return result;
+}
+
+fn ferroui_set_lum(c: vec3<f32>, l: f32) -> vec3<f32> {
+    return ferroui_clip_color(c + vec3<f32>(l - ferroui_lum(c)));
+}
+
+fn ferroui_sat(c: vec3<f32>) -> f32 {
+    return max(max(c.r, c.g), c.b) - min(min(c.r, c.g), c.b);
+}
+
+fn ferroui_set_sat(c: vec3<f32>, s: f32) -> vec3<f32> {
+    let n = min(min(c.r, c.g), c.b);
+    let x = max(max(c.r, c.g), c.b);
+    if (x <= n) {
+        return vec3<f32>(0.0);
+    }
+    return (c - vec3<f32>(n)) * (s / (x - n));
+}
+"#;
+
+/// The WGSL of the composition of an overlay over the content with
+/// `mode`: `fn ferroui_blend(s: vec4<f32>, d: vec4<f32>) -> vec4<f32>` of
+/// two premultiplied colours, with what it calls. The Porter-Duff operators
+/// and the modes Skia writes in premultiplied form are written so; the
+/// others mix the colours that are not premultiplied (`ferroui_compose`).
+fn blend_wgsl(mode: BitmapBlendingMode) -> String {
+    let premultiplied = |body: &str| format!("\nfn ferroui_blend(s: vec4<f32>, d: vec4<f32>) -> vec4<f32> {{\n    {body}\n}}\n");
+    let separable = |channel: &str| {
+        format!("{BLEND_COMPOSE_WGSL}{SEPARABLE_MIX_WGSL}\nfn ferroui_channel(b: f32, s: f32) -> f32 {{\n{channel}\n}}\n")
+    };
+    let non_separable = |mix: &str| {
+        format!(
+            "{BLEND_COMPOSE_WGSL}{NON_SEPARABLE_WGSL}\nfn ferroui_mix(b: vec3<f32>, s: vec3<f32>) -> vec3<f32> {{\n    return {mix};\n}}\n"
+        )
+    };
+    match mode {
+        BitmapBlendingMode::Unspecified | BitmapBlendingMode::SourceOver => premultiplied("return s + d * (1.0 - s.a);"),
+        BitmapBlendingMode::Source => premultiplied("return s;"),
+        BitmapBlendingMode::Destination => premultiplied("return d;"),
+        BitmapBlendingMode::DestinationOver => premultiplied("return d + s * (1.0 - d.a);"),
+        BitmapBlendingMode::SourceIn => premultiplied("return s * d.a;"),
+        BitmapBlendingMode::DestinationIn => premultiplied("return d * s.a;"),
+        BitmapBlendingMode::SourceOut => premultiplied("return s * (1.0 - d.a);"),
+        BitmapBlendingMode::DestinationOut => premultiplied("return d * (1.0 - s.a);"),
+        BitmapBlendingMode::SourceAtop => premultiplied("return s * d.a + d * (1.0 - s.a);"),
+        BitmapBlendingMode::DestinationAtop => premultiplied("return d * s.a + s * (1.0 - d.a);"),
+        BitmapBlendingMode::Xor => premultiplied("return s * (1.0 - d.a) + d * (1.0 - s.a);"),
+        BitmapBlendingMode::Plus => premultiplied("return min(s + d, vec4<f32>(1.0));"),
+        BitmapBlendingMode::Screen => premultiplied("return s + d - s * d;"),
+        BitmapBlendingMode::Multiply => premultiplied("return s * (1.0 - d.a) + d * (1.0 - s.a) + s * d;"),
+        BitmapBlendingMode::Darken => premultiplied(
+            "return vec4<f32>(s.rgb + d.rgb - max(s.rgb * d.a, d.rgb * s.a), s.a + d.a - s.a * d.a);",
+        ),
+        BitmapBlendingMode::Lighten => premultiplied(
+            "return vec4<f32>(s.rgb + d.rgb - min(s.rgb * d.a, d.rgb * s.a), s.a + d.a - s.a * d.a);",
+        ),
+        BitmapBlendingMode::Difference => premultiplied(
+            "return vec4<f32>(s.rgb + d.rgb - 2.0 * min(s.rgb * d.a, d.rgb * s.a), s.a + d.a - s.a * d.a);",
+        ),
+        BitmapBlendingMode::Exclusion => {
+            premultiplied("return vec4<f32>(s.rgb + d.rgb - 2.0 * s.rgb * d.rgb, s.a + d.a - s.a * d.a);")
+        }
+        BitmapBlendingMode::Overlay => {
+            format!("{HARD_LIGHT_WGSL}{}", separable("    return ferroui_hard_light(s, b);"))
+        }
+        BitmapBlendingMode::HardLight => {
+            format!("{HARD_LIGHT_WGSL}{}", separable("    return ferroui_hard_light(b, s);"))
+        }
+        BitmapBlendingMode::ColorDodge => separable(
+            "    if (b <= 0.0) {\n        return 0.0;\n    }\n    if (s >= 1.0) {\n        return 1.0;\n    }\n    return min(1.0, b / (1.0 - s));",
+        ),
+        BitmapBlendingMode::ColorBurn => separable(
+            "    if (b >= 1.0) {\n        return 1.0;\n    }\n    if (s <= 0.0) {\n        return 0.0;\n    }\n    return 1.0 - min(1.0, (1.0 - b) / s);",
+        ),
+        BitmapBlendingMode::SoftLight => separable(
+            "    if (s <= 0.5) {\n        return b - (1.0 - 2.0 * s) * b * (1.0 - b);\n    }\n    var e = sqrt(b);\n    if (b <= 0.25) {\n        e = ((16.0 * b - 12.0) * b + 4.0) * b;\n    }\n    return b + (2.0 * s - 1.0) * (e - b);",
+        ),
+        BitmapBlendingMode::Hue => non_separable("ferroui_set_lum(ferroui_set_sat(s, ferroui_sat(b)), ferroui_lum(b))"),
+        BitmapBlendingMode::Saturation => {
+            non_separable("ferroui_set_lum(ferroui_set_sat(b, ferroui_sat(s)), ferroui_lum(b))")
+        }
+        BitmapBlendingMode::Color => non_separable("ferroui_set_lum(s, ferroui_lum(b))"),
+        BitmapBlendingMode::Luminosity => non_separable("ferroui_set_lum(b, ferroui_lum(s))"),
+    }
+}
+
+/// The WGSL module of a shader effect: the program `wgsl`, the bindings and
+/// the entry points of the pass (see
+/// [`ShaderEffectDescription::wgsl_module`]).
+fn shader_wgsl_module(wgsl: &str, mode: ShaderEffectMode, blend_mode: BitmapBlendingMode) -> String {
+    let mut module = String::with_capacity(wgsl.len() + 4096);
+    module.push_str(wgsl);
+    module.push_str(SHADER_PASS_WGSL);
+    match mode {
+        ShaderEffectMode::ContentSampling => module.push_str(CONTENT_SAMPLING_WGSL),
+        ShaderEffectMode::Overlay => {
+            module.push_str(&blend_wgsl(blend_mode));
+            module.push_str(OVERLAY_WGSL);
+        }
+    }
+    module
 }
 
 /// The type of a uniform of the convention.

@@ -424,6 +424,21 @@ behaviour = "deviation"
 notes = "Step T3 (decisions O1, O2). The timer properties and functions take Duration: TextBox, TextPresenter and RichEditBox CaretBlinkInterval, ScrollBar HideDelay and ShowDelay, AutoCompleteBox MinimumPopulateDelay, the durations of DirectConnectedAnimationConfiguration and ConnectedAnimationService, DebounceAction Delay, ThrottleAction Interval, DelayAction Duration, DelayedLoadBehavior Delay, DelayedLoadTrigger Delay, DelayedShowControlAction Delay, InactivityTrigger Timeout, VisualDebugBehavior Duration, SelectionIndicatorAnimation default_duration and try_start, DeferredContentScheduling.Delay, the timeline and settings of the deferred content control, DelayedUniformTabPanel ExpansionDelay. The markup name stays System.TimeSpan; a negative span is a markup error and a conversion error of a binding. Deviation: the infinite wait of DelayAction is Duration::MAX, not minus one millisecond (DEVIATIONS.md, Behaviors)."
 
 [[name]]
+upstream = "System.Uri (a reference that can be relative)"
+rust = "ferroui_base::utilities::UriRef"
+kind = "type"
+phase = "C5"
+behaviour = "test"
+notes = "Step U1 (decision O5). An absolute url::Url or a relative reference as written; the markup name stays System.Uri, whose Rust forms are the port Uri, UriRef and url::Url, and markup, resources and bindings set a UriRef property as a Uri property. UriRef::parse follows the rule of markup (a leading / is relative). Equality and hashing are the ones of url::Url, with the fragment, where Uri ignores the fragment of an absolute URI: a map that needs that rule keys by UriRef::without_fragment. UriRef::resolve resolves as Uri::combine does for the references and bases of markup (uri_ref_resolves_like_uri_combine in src/FerroUI.Base/utilities/uri_ref.rs); where the URL standard differs (the base query of a fragment, //host, empty segments, the drive of a file: URL) it follows the standard. The positions move to it in U2 to U4."
+
+[[name]]
+upstream = "System.Uri (an absolute URI)"
+rust = "url::Url"
+kind = "type"
+phase = "C5"
+behaviour = "same"
+notes = "Step U1. A Rust form of the markup type System.Uri: a relative URI literal for a Url is a markup error, a relative reference a conversion error of a binding. The text is the one of the URL standard (the C2 conversions). The base URIs and the platform edges move to it in U2 to U4."
+
 upstream = "System.Globalization.CultureInfo (the identity of a culture)"
 rust = "icu_locale_core::Locale"
 kind = "type"

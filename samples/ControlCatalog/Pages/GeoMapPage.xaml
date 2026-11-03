@@ -1,0 +1,88 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lc="https://ferroui.dev/livecharts"
+             Header="GeoMap"
+             x:Class="ControlCatalog.Pages.GeoMapPage">
+  <!-- Not from upstream: the geographic map of the LiveCharts2 port (docs/porting/livecharts2.md),
+       with the heat lands of the upstream MapsTests snapshots on the bundled world map. -->
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Spacing="16">
+      <TextBlock Classes="h2">Heat lands on a projected world map</TextBlock>
+      <WrapPanel Orientation="Horizontal" ItemSpacing="16" LineSpacing="16">
+        <StackPanel Spacing="8" Width="560">
+          <TextBlock Classes="h3">Mercator, with wheel zoom, drag pan and city markers</TextBlock>
+          <lc:GeoMap Height="400" MapProjection="Mercator" InteractionMode="Both">
+            <lc:HeatLandSeries Name="Index">
+              <lc:HeatLand Name="bra" Value="13" />
+              <lc:HeatLand Name="mex" Value="10" />
+              <lc:HeatLand Name="usa" Value="15" />
+              <lc:HeatLand Name="can" Value="8" />
+              <lc:HeatLand Name="ind" Value="12" />
+              <lc:HeatLand Name="deu" Value="13" />
+              <lc:HeatLand Name="jpn" Value="15" />
+              <lc:HeatLand Name="chn" Value="14" />
+              <lc:HeatLand Name="rus" Value="11" />
+              <lc:HeatLand Name="fra" Value="8" />
+              <lc:HeatLand Name="esp" Value="7" />
+              <lc:HeatLand Name="kor" Value="10" />
+              <lc:HeatLand Name="zaf" Value="12" />
+              <lc:HeatLand Name="are" Value="13" />
+            </lc:HeatLandSeries>
+            <lc:GeoMap.Markers>
+              <lc:GeoMarker Longitude="-74" Latitude="40.71" />
+              <lc:GeoMarker Longitude="139.69" Latitude="35.69" />
+              <lc:GeoMarker Longitude="-3.7" Latitude="40.42" />
+              <lc:GeoMarker Longitude="-46.63" Latitude="-23.55" />
+              <lc:GeoMarker Longitude="151.21" Latitude="-33.87" />
+            </lc:GeoMap.Markers>
+          </lc:GeoMap>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="400">
+          <TextBlock Classes="h3">An orthographic globe</TextBlock>
+          <lc:GeoMap x:Name="Globe" Height="400" MapProjection="Orthographic"
+                     CenterLongitude="15" CenterLatitude="20">
+            <lc:HeatLandSeries Name="Index">
+              <lc:HeatLand Name="bra" Value="13" />
+              <lc:HeatLand Name="mex" Value="10" />
+              <lc:HeatLand Name="usa" Value="15" />
+              <lc:HeatLand Name="can" Value="8" />
+              <lc:HeatLand Name="ind" Value="12" />
+              <lc:HeatLand Name="deu" Value="13" />
+              <lc:HeatLand Name="jpn" Value="15" />
+              <lc:HeatLand Name="chn" Value="14" />
+              <lc:HeatLand Name="rus" Value="11" />
+              <lc:HeatLand Name="fra" Value="8" />
+              <lc:HeatLand Name="esp" Value="7" />
+              <lc:HeatLand Name="kor" Value="10" />
+              <lc:HeatLand Name="zaf" Value="12" />
+              <lc:HeatLand Name="are" Value="13" />
+            </lc:HeatLandSeries>
+          </lc:GeoMap>
+          <Button x:Name="RotateGlobe" HorizontalAlignment="Left">Turn the globe east</Button>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="560">
+          <TextBlock Classes="h3">The default projection framed on Europe</TextBlock>
+          <lc:GeoMap Height="400" MinLatitude="35" MaxLatitude="72" MinLongitude="-25"
+                     MaxLongitude="45">
+            <lc:HeatLandSeries Name="Index">
+              <lc:HeatLand Name="bra" Value="13" />
+              <lc:HeatLand Name="mex" Value="10" />
+              <lc:HeatLand Name="usa" Value="15" />
+              <lc:HeatLand Name="can" Value="8" />
+              <lc:HeatLand Name="ind" Value="12" />
+              <lc:HeatLand Name="deu" Value="13" />
+              <lc:HeatLand Name="jpn" Value="15" />
+              <lc:HeatLand Name="chn" Value="14" />
+              <lc:HeatLand Name="rus" Value="11" />
+              <lc:HeatLand Name="fra" Value="8" />
+              <lc:HeatLand Name="esp" Value="7" />
+              <lc:HeatLand Name="kor" Value="10" />
+              <lc:HeatLand Name="zaf" Value="12" />
+              <lc:HeatLand Name="are" Value="13" />
+            </lc:HeatLandSeries>
+          </lc:GeoMap>
+        </StackPanel>
+      </WrapPanel>
+    </StackPanel>
+  </ScrollViewer>
+</ContentPage>
