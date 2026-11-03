@@ -54,6 +54,7 @@ use super::source::rust_string_literal;
 use super::selector_plans::{Op as SelectorOp, SelectorPlans};
 use super::style_setters::StyleSetters;
 use super::template_bindings::TemplateBindings;
+use super::resource_assignments::{ResourceAssignments, SetterPlan, StaticResource};
 use super::template_values::{TemplateValues, TEMPLATE_PRIORITY};
 use super::theme_tables::{Factory, ThemeTables};
 
@@ -680,6 +681,8 @@ struct Emitter<'a> {
     styles: StyleSetters,
     bindings: TemplateBindings,
     template_values: TemplateValues,
+    resource_assignments: ResourceAssignments,
+    last_static_resource: Option<StaticResource>,
     /// The Rust types of the locals whose type the emitter states (`let` of
     /// an object created with its default constructor): what a part of a
     /// split function can be passed ([`split_into_parts`]).
@@ -2403,7 +2406,17 @@ impl<'a> Emitter<'a> {
             Some(priority_node) => Some(self.priority_value(priority_node)?),
             None => None,
         };
+        let start = self.lines.len();
+        self.last_static_resource = None;
         let value = self.value(&value_node)?;
+        let resource = self.last_static_resource.take().filter(|r| {
+            let inner = value_node.cast::<XamlAstNeedsParentStackValueNode>()
+                .map(|wrapper| wrapper.base.value().as_node());
+            r.node == node_address(inner.as_ref().unwrap_or(&value_node))
+                && r.property == node_address(&assignment.property)
+                && r.result == value.expr && matches!(value.kind, Kind::Exact { .. })
+                && r.position == (node.line(), node.position()) && self.lines.len() == start + 1
+        });
         self.position.set((node.line(), node.position()));
         let local = self.local_named("value");
         let untyped = match value.kind {
@@ -2415,17 +2428,19 @@ impl<'a> Emitter<'a> {
             Kind::Exact { .. } => format!("rt::to_value({})", value.expr),
         };
         self.line(format!("let {local}: ::ferroui_base::metadata::MarkupValue = {untyped};"));
-        if let Some(call) = priority.as_deref().and_then(|priority| self.compact_priority_setter(
-            node, &value_node, &property_name, &branches, target, &local, priority,
-        )) {
-            self.line(call);
-            return Ok(());
-        }
-        if priority.is_none() {
-            if let Some(call) = self.compact_local_setter(node, &value_node, assignment, &branches, target, &local) {
-                self.line(call);
-                return Ok(());
+        let plan = match priority.as_deref() {
+            Some(priority) => self.compact_priority_setter(node, &value_node, &property_name, &branches, priority),
+            None => self.compact_local_setter(node, &value_node, assignment, &branches),
+        };
+        if let Some(plan) = plan {
+            let target_ref = format!("{}.upcast_ref::<::ferroui_base::FerroObject>()", target.expr);
+            let call = plan.call(&target_ref, &local, &node.line().to_string(), &node.position().to_string());
+            let statement = format!("{call}?;");
+            if let Some(resource) = resource.filter(|_| plan.can_share() && is_identifier(&target.expr)) {
+                self.resource_assignments.record(resource, &plan, &target_ref, &self.lines[start..], &statement);
             }
+            self.line(statement);
+            return Ok(());
         }
         let mut lines: Vec<String> = Vec::new();
         let mut closed = false;
@@ -2473,9 +2488,7 @@ impl<'a> Emitter<'a> {
         value_node: &Rc<dyn IXamlAstNode>,
         assignment: &XamlPropertyAssignmentNode,
         branches: &[(SetterTest, Rc<dyn IXamlPropertySetter>)],
-        target: &Typed<'a>,
-        value: &str,
-    ) -> Option<String> {
+    ) -> Option<SetterPlan> {
         let [(SetterTest::Instance(_), unset), (SetterTest::Instance(_), bind), (SetterTest::Instance(expected), set)] = branches else {
             return None;
         };
@@ -2498,10 +2511,7 @@ impl<'a> Emitter<'a> {
         let member = rust_string_literal(&self.member_name(&accessor));
         let name = rust_string_literal(&assignment.property.name());
         let nullable = set.binder_parameters().allow_runtime_null.get();
-        Some(format!(
-            "rt::set_local_value({}.upcast_ref::<::ferroui_base::FerroObject>(), || {definition}, {value}, || {expected}, {nullable}, {member}, {name}, {}, {})?;",
-            target.expr, node.line(), node.position()
-        ))
+        Some(SetterPlan::Local { getter: definition, expected: expected.clone(), nullable, member, name })
     }
 
     /// Share the exact binding-then-value plan for a registered template property.
@@ -2513,10 +2523,8 @@ impl<'a> Emitter<'a> {
         value_node: &Rc<dyn IXamlAstNode>,
         property_name: &str,
         branches: &[(SetterTest, Rc<dyn IXamlPropertySetter>)],
-        target: &Typed<'a>,
-        value: &str,
         priority: &str,
-    ) -> Option<String> {
+    ) -> Option<SetterPlan> {
         let [(binding_test, bind), (value_test, set)] = branches else { return None };
         let bind = bind.as_any().downcast_ref::<BindingWithPrioritySetter>()?;
         let set = set.as_any().downcast_ref::<SetValueWithPrioritySetter>()?;
@@ -2530,17 +2538,13 @@ impl<'a> Emitter<'a> {
         let definition = self.types.property_definition(property, self.types.class_of(&*field.declaring_type())).ok()?;
         let member = rust_string_literal(&format!("{}.{}", property.owner_name(), property.name()));
         let nullable = set.binder_parameters().allow_runtime_null.get();
-        let target = format!("{}.upcast_ref::<::ferroui_base::FerroObject>()", target.expr);
-        let (line, column) = (node.line(), node.position());
         match (binding_test, value_test) {
-            (SetterTest::Instance(_), SetterTest::Instance(expected)) => Some(format!(
-                "rt::bind_or_set_priority({target}, || {definition}, {value}, {priority}, || {expected}, {nullable}, {member}, {line}, {column})?;"
-            )),
-            // The static source type already satisfies the binding overload.
-            // A null value selects the nullable styled-value overload instead.
-            (SetterTest::NonNull, SetterTest::Always) if nullable => Some(format!(
-                "rt::bind_or_set_null({target}, || {definition}, &{value}, {priority}, {member}, {line}, {column})?;"
-            )),
+            (SetterTest::Instance(_), SetterTest::Instance(expected)) => Some(SetterPlan::Priority {
+                getter: definition, expected: expected.clone(), nullable, member, priority: priority.to_owned(),
+            }),
+            (SetterTest::NonNull, SetterTest::Always) if nullable => Some(SetterPlan::Null {
+                getter: definition, member, priority: priority.to_owned(),
+            }),
             _ => None,
         }
     }
@@ -3395,6 +3399,10 @@ impl<'a> Emitter<'a> {
                 if let Some(key) = static_key {
                     self.lines.truncate(first_statement);
                     self.line(format!("let {local} = rt::provide_static_resource(&context, {key}, || {descriptor}, {}, {})?;", node.line(), node.position()));
+                    self.last_static_resource = property.as_ref().map(|owner| StaticResource {
+                        node: node_address(node), property: node_address(owner), result: local.clone(),
+                        key, descriptor, position: (node.line(), node.position()),
+                    });
                     return Ok(Typed { expr: local, kind: self.kind_of(returned) });
                 }
                 self.line(match fallible {
@@ -4228,6 +4236,8 @@ pub fn emit_function<'a>(
         styles: StyleSetters::default(),
         bindings: TemplateBindings::default(),
         template_values: TemplateValues::default(),
+        resource_assignments: ResourceAssignments::default(),
+        last_static_resource: None,
         local_types: HashMap::new(),
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
@@ -4322,6 +4332,7 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(function);
     }
+    let source = emitter.resource_assignments.lower(source, function_name, document_name);
     Ok(emitter.template_values.lower(source, function_name, document_name))
 }
 
