@@ -205,6 +205,7 @@ PORT_DOCUMENTS = [
     ("Pages/PolarChartPage.xaml", "the page of the polar chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
     ("Pages/SankeyChartPage.xaml", "the page of the Sankey chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
     ("Pages/TreemapChartPage.xaml", "the page of the treemap chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
+    ("Pages/GeoMapPage.xaml", "the page of the geographic map of the LiveCharts2 port (docs/porting/livecharts2.md)"),
 ]
 
 

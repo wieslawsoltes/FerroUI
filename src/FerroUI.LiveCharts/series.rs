@@ -30,6 +30,7 @@ pub enum SeriesKind {
     PolarLine,
     Sankey,
     Treemap,
+    HeatLand,
 }
 ferroui_base::ferro_markup_enum!(SeriesKind {
     Line,
@@ -51,7 +52,8 @@ ferroui_base::ferro_markup_enum!(SeriesKind {
     Pie,
     PolarLine,
     Sankey,
-    Treemap
+    Treemap,
+    HeatLand
 });
 impl SeriesKind {
     pub fn is_stacked(self) -> bool {
@@ -252,6 +254,10 @@ impl Series {
             SeriesKind::StackedArea | SeriesKind::StackedStepArea => series.geometry_size = 0.0,
             // CoreTreemapSeries.Padding.
             SeriesKind::Treemap => series.padding = 2.0,
+            // The heat map of the HeatLandSeries constructor.
+            SeriesKind::HeatLand => {
+                series.heat_map = crate::geo_map_chart_engine::HEAT_LAND_MAP.to_vec();
+            }
             _ => {}
         }
         series
@@ -273,9 +279,11 @@ impl Series {
             SeriesKind::Scatter => Point::new(1.0, 1.0),
             SeriesKind::Heat => Point::new(0.0, 0.0),
             SeriesKind::PolarLine => Point::new(1.0, 1.5),
-            SeriesKind::Pie | SeriesKind::Financial | SeriesKind::Sankey | SeriesKind::Treemap => {
-                Point::new(0.5, 0.5)
-            }
+            SeriesKind::Pie
+            | SeriesKind::Financial
+            | SeriesKind::Sankey
+            | SeriesKind::Treemap
+            | SeriesKind::HeatLand => Point::new(0.5, 0.5),
         }
     }
     pub fn from_values(kind: SeriesKind, values: impl IntoIterator<Item = f64>) -> Self {
