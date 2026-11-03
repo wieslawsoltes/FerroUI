@@ -1179,6 +1179,19 @@ pub(crate) struct ShaderModule {
     size: usize,
 }
 
+#[cfg(test)]
+impl ShaderModule {
+    /// The byte offset of each uniform of the convention in the block.
+    pub(crate) fn offsets(&self) -> &[u32] {
+        &self.offsets
+    }
+
+    /// The size of the block in bytes.
+    pub(crate) fn size(&self) -> usize {
+        self.size
+    }
+}
+
 /// Whether a member of `struct Uniforms` has the type of the convention.
 fn uniform_type_matches(inner: &wgpu::naga::TypeInner, expected: ShaderUniformType) -> bool {
     use wgpu::naga::{Scalar, TypeInner, VectorSize};

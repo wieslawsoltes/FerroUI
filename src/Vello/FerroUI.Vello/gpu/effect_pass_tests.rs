@@ -7,7 +7,11 @@
 //! operations, the convolution, the luminance mask) drawn on the device,
 //! compared with their CPU references applied to the same content drawn
 //! plain in the same mode, without a layer drawn on the processor, and their
-//! steady frames allocating nothing.
+//! steady frames allocating nothing; and the runtime shader effects (#455,
+//! E5): their WGSL modules checked by naga against the uniform convention
+//! (without a device), the library's effects drawn by their passes against
+//! their CPU references, a module that fails drawing the content unchanged,
+//! reported once, and their steady frames allocating nothing.
 //!
 //! The pass evaluates the same math in single precision per pixel and the
 //! scene paints its texture one texel per device pixel: within 1 level of
@@ -536,6 +540,419 @@ fn steady_frames_of_the_layers_allocate_no_texture() {
                 drawing.as_drawing_context_impl_with_layer_effects().unwrap().next_pixel_operation_source();
                 other_content(drawing);
                 drawing.as_drawing_context_impl_with_layer_effects().unwrap().pop_pixel_operation();
+            });
+            assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: drawn on the processor");
+            let allocations = super::effect_passes::texture_allocations();
+            if frame == 2 {
+                allocations_after_first = Some(allocations);
+            } else if let Some(previous) = allocations_after_first {
+                assert_eq!(previous, allocations, "{mode:?}: frame {frame} allocated a texture");
+            }
+        }
+    }
+}
+
+// --- runtime shader effects (#455, E5) -----------------------------------------------------
+
+use super::effect_passes::{check_shader_module, shader_failure_reports};
+use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription};
+use ferroui_base::media::imaging::BitmapBlendingMode;
+
+/// The shader effects of the library at values that are not neutral, with
+/// the largest difference to their CPU references they are held to (those of
+/// the tests of `ferroui-skia`).
+fn library_shader_effects() -> Vec<(ImmutableCustomEffect, u8)> {
+    vec![
+        (ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), 1),
+        (ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }), 1),
+        (
+            ImmutableCustomEffect::new(SpotlightShaderEffect {
+                center_x: 0.4,
+                center_y: 0.5,
+                radius: 0.5,
+                strength: 0.8,
+                color: Colors::ORANGE,
+            }),
+            3,
+        ),
+    ]
+}
+
+/// The modules of the library's shader effects parse, validate and declare
+/// the uniforms of their parameters at the offsets of WGSL's layout; no
+/// device is needed.
+#[test]
+fn the_shader_modules_of_the_library_are_checked_by_naga() {
+    for (effect, _) in library_shader_effects() {
+        let module = check_shader_module(&effect).unwrap_or_else(|reason| panic!("{effect}: {reason}"));
+        assert_eq!(0, module.size() % 16, "{effect}: the block is a multiple of 16 bytes");
+        assert_eq!(effect.shader_uniform_layout().len(), module.offsets().len(), "{effect}");
+    }
+    // The offsets of WGSL's layout: `vec2<f32>` aligned to 8, `vec4<f32>`
+    // to 16.
+    let layout = |effect: ImmutableCustomEffect| {
+        let module = check_shader_module(&effect).unwrap();
+        (module.offsets().to_vec(), module.size())
+    };
+    assert_eq!((vec![0, 8, 12], 16), layout(ImmutableCustomEffect::new(PixelateEffect::default())));
+    assert_eq!((vec![0, 8, 12, 16], 32), layout(ImmutableCustomEffect::new(ScanlineShaderEffect::default())));
+    assert_eq!(
+        (vec![0, 8, 12, 16, 20, 24, 32], 48),
+        layout(ImmutableCustomEffect::new(SpotlightShaderEffect::default()))
+    );
+}
+
+/// A shader effect of the tests with the parameters `amount` (a number) and
+/// `on` (a flag) and the description `$description`.
+macro_rules! test_shader_effect {
+    ($type:ident, $name:literal, $description:expr) => {
+        #[derive(Clone, Debug, Default, PartialEq)]
+        struct $type {
+            amount: f64,
+            on: bool,
+        }
+
+        impl CustomEffect for $type {
+            const NAME: &'static str = $name;
+
+            fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+                f("amount", self.amount.into());
+                f("on", self.on.into());
+            }
+
+            fn set_parameter(&mut self, _: &str, _: EffectParameterValue) -> bool {
+                false
+            }
+
+            fn shader() -> Option<ShaderEffectDescription> {
+                Some($description)
+            }
+        }
+    };
+}
+
+/// The uniforms of the effects of the tests by the convention.
+const TEST_UNIFORMS: &str = "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, on: i32, }\n";
+
+test_shader_effect!(
+    Matching,
+    "vello-test-matching-shader",
+    ShaderEffectDescription::content_sampling(
+        "",
+        "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, on: i32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) * uniforms.amount * f32(uniforms.on); }"
+    )
+);
+
+test_shader_effect!(
+    DoesNotParse,
+    "vello-test-shader-that-does-not-parse",
+    ShaderEffectDescription::content_sampling(
+        "",
+        "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, on: i32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return undefined; }"
+    )
+);
+
+test_shader_effect!(
+    WrongType,
+    "vello-test-shader-of-a-wrong-type",
+    ShaderEffectDescription::content_sampling(
+        "",
+        "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, on: f32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) * uniforms.amount; }"
+    )
+);
+
+test_shader_effect!(
+    WrongOrder,
+    "vello-test-shader-of-a-wrong-order",
+    ShaderEffectDescription::content_sampling(
+        "",
+        "struct Uniforms { layer_scale: f32, layer_size: vec2<f32>, amount: f32, on: i32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) * uniforms.amount; }"
+    )
+);
+
+test_shader_effect!(
+    Missing,
+    "vello-test-shader-with-a-missing-uniform",
+    ShaderEffectDescription::content_sampling(
+        "",
+        "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) * uniforms.amount; }"
+    )
+);
+
+test_shader_effect!(
+    Extra,
+    "vello-test-shader-with-an-extra-uniform",
+    ShaderEffectDescription::content_sampling(
+        "",
+        "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, on: i32, extra: f32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) * uniforms.amount; }"
+    )
+);
+
+test_shader_effect!(
+    Renamed,
+    "vello-test-shader-with-a-renamed-uniform",
+    ShaderEffectDescription::content_sampling(
+        "",
+        "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, strength: f32, on: i32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) * uniforms.strength; }"
+    )
+);
+
+test_shader_effect!(
+    OverlaySamplingContent,
+    "vello-test-overlay-that-samples-the-content",
+    ShaderEffectDescription::overlay(
+        "",
+        "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, on: i32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) * uniforms.amount; }",
+        BitmapBlendingMode::SourceOver
+    )
+);
+
+test_shader_effect!(
+    WithChildren,
+    "vello-test-shader-with-children",
+    ShaderEffectDescription::content_sampling(
+        "",
+        "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, amount: f32, on: i32, }\n\
+         fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) * uniforms.amount; }"
+    )
+    .with_children(["page"])
+);
+
+#[test]
+fn a_module_is_checked_against_the_convention() {
+    let check = |effect: ImmutableCustomEffect| check_shader_module(&effect).map(|_| ()).map_err(|reason| (effect.name(), reason));
+    assert_eq!(Ok(()), check(ImmutableCustomEffect::new(Matching::default())));
+    for effect in [
+        ImmutableCustomEffect::new(DoesNotParse::default()),
+        ImmutableCustomEffect::new(WrongType::default()),
+        ImmutableCustomEffect::new(WrongOrder::default()),
+        ImmutableCustomEffect::new(Missing::default()),
+        ImmutableCustomEffect::new(Extra::default()),
+        ImmutableCustomEffect::new(Renamed::default()),
+        ImmutableCustomEffect::new(OverlaySamplingContent::default()),
+        ImmutableCustomEffect::new(WithChildren::default()),
+    ] {
+        assert!(check(effect.clone()).is_err(), "{effect}: the module is refused");
+    }
+}
+
+/// Every blend mode of an overlay composes with WGSL that naga takes.
+#[test]
+fn the_overlays_of_every_blend_mode_are_valid_wgsl() {
+    use wgpu::naga;
+    let program = format!("{TEST_UNIFORMS}fn effect(coord: vec2<f32>) -> vec4<f32> {{ return vec4<f32>(0.5, 0.25, 0.0, uniforms.amount); }}");
+    for mode in [
+        BitmapBlendingMode::Unspecified,
+        BitmapBlendingMode::SourceOver,
+        BitmapBlendingMode::Source,
+        BitmapBlendingMode::Destination,
+        BitmapBlendingMode::DestinationOver,
+        BitmapBlendingMode::SourceIn,
+        BitmapBlendingMode::DestinationIn,
+        BitmapBlendingMode::SourceOut,
+        BitmapBlendingMode::DestinationOut,
+        BitmapBlendingMode::SourceAtop,
+        BitmapBlendingMode::DestinationAtop,
+        BitmapBlendingMode::Xor,
+        BitmapBlendingMode::Plus,
+        BitmapBlendingMode::Screen,
+        BitmapBlendingMode::Overlay,
+        BitmapBlendingMode::Darken,
+        BitmapBlendingMode::Lighten,
+        BitmapBlendingMode::ColorDodge,
+        BitmapBlendingMode::ColorBurn,
+        BitmapBlendingMode::HardLight,
+        BitmapBlendingMode::SoftLight,
+        BitmapBlendingMode::Difference,
+        BitmapBlendingMode::Exclusion,
+        BitmapBlendingMode::Multiply,
+        BitmapBlendingMode::Hue,
+        BitmapBlendingMode::Saturation,
+        BitmapBlendingMode::Color,
+        BitmapBlendingMode::Luminosity,
+    ] {
+        let source = ShaderEffectDescription::overlay("", program.clone(), mode).wgsl_module();
+        let module = naga::front::wgsl::parse_str(&source)
+            .unwrap_or_else(|error| panic!("{mode:?}: {}", error.emit_to_string(&source)));
+        naga::valid::Validator::new(naga::valid::ValidationFlags::all(), naga::valid::Capabilities::empty())
+            .validate(&module)
+            .unwrap_or_else(|error| panic!("{mode:?}: {}", error.emit_to_string(&source)));
+    }
+}
+
+/// The premultiplied RGBA pixels of the target with `effect` drawn over the
+/// area `area` (whole pixels: x, y, width, height; it may reach beyond the
+/// target) by its CPU reference at `scale`, from the content drawn plain
+/// (`plain`): nothing of the content outside the area.
+fn reference_in_area(plain: &[u8], effect: &ImmutableCustomEffect, area: (i32, i32, i32, i32), scale: f64) -> Vec<u8> {
+    let size = i32::from(SIZE);
+    let (x0, y0, width, height) = area;
+    let at = |x: i32, y: i32| ((y * size + x) * 4) as usize;
+    let mut pixels = vec![0u8; (width * height * 4) as usize];
+    for y in 0..height {
+        for x in 0..width {
+            let (tx, ty) = (x0 + x, y0 + y);
+            if (0..size).contains(&tx) && (0..size).contains(&ty) {
+                let from = at(tx, ty);
+                pixels[((y * width + x) * 4) as usize..][..4].copy_from_slice(&plain[from..from + 4]);
+            }
+        }
+    }
+    assert!(effect.cpu_reference(&mut pixels, width as usize, height as usize, scale), "{effect}");
+    let mut expected = vec![0u8; plain.len()];
+    for y in 0..height {
+        for x in 0..width {
+            let (tx, ty) = (x0 + x, y0 + y);
+            if (0..size).contains(&tx) && (0..size).contains(&ty) {
+                let to = at(tx, ty);
+                expected[to..to + 4].copy_from_slice(&pixels[((y * width + x) * 4) as usize..][..4]);
+            }
+        }
+    }
+    expected
+}
+
+/// The shader effects of the library drawn by their passes in the hybrid and
+/// GPU modes, over the whole target at scales 1 and 2 and over an area that
+/// reaches beyond the target, against their CPU references applied to the
+/// content drawn plain in the same mode; no layer drawn on the processor.
+#[test]
+fn the_library_shader_effects_match_their_cpu_references_in_the_gpu_modes() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    for mode in device_modes(&device) {
+        for (effect, largest) in library_shader_effects() {
+            for scale in [1.0, 2.0] {
+                let transform = Matrix::create_scale(scale, scale);
+                let plain = draw_in(&device, mode, |drawing| {
+                    drawing.set_transform(transform);
+                    content(drawing);
+                });
+                let side = i32::from(SIZE);
+                let expected = reference_in_area(&plain, &effect, (0, 0, side, side), scale);
+                let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+                let actual = draw_in(&device, mode, |drawing| {
+                    drawing.set_transform(transform);
+                    let bounds = Rect::new(0.0, 0.0, f64::from(SIZE) / scale, f64::from(SIZE) / scale);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), &effect);
+                    content(drawing);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                });
+                assert_eq!(
+                    cpu_layers,
+                    crate::drawing_context_impl::cpu_layer_count(),
+                    "{mode:?}: {effect} at {scale}x: drawn on the processor"
+                );
+                let (most, mean, _) = difference(&expected, &actual);
+                assert!(most <= largest && mean <= 0.5, "{mode:?}: {effect} at {scale}x: largest {most}, mean {mean}");
+                let (changed, _, _) = difference(&plain, &actual);
+                assert!(changed > 0, "{mode:?}: {effect} at {scale}x: the content is changed");
+            }
+
+            // An area that begins left of the target: the coordinates of the
+            // program are those of the area, its size the whole area.
+            let plain = draw_in(&device, mode, |drawing| content(drawing));
+            let expected = reference_in_area(&plain, &effect, (-20, 10, 80, 60), 1.0);
+            let actual = draw_in(&device, mode, |drawing| {
+                let bounds = Rect::new(-20.0, 10.0, 80.0, 60.0);
+                drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), &effect);
+                content(drawing);
+                drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+            });
+            let (most, mean, _) = difference(&expected, &actual);
+            assert!(most <= largest && mean <= 0.5, "{mode:?}: {effect} beyond the target: largest {most}, mean {mean}");
+        }
+    }
+}
+
+/// A module that does not parse, and one whose uniforms are not those of
+/// its parameters, draw their content unchanged in the GPU modes, reported
+/// once although drawn in every mode and twice, and nothing is drawn on the
+/// processor.
+#[test]
+fn a_shader_that_fails_draws_unchanged_and_reports_once_in_the_gpu_modes() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let effects = [
+        ImmutableCustomEffect::new(DoesNotParse { amount: 0.5, on: true }),
+        ImmutableCustomEffect::new(WrongType { amount: 0.5, on: true }),
+    ];
+    for mode in device_modes(&device) {
+        let plain = draw_in(&device, mode, |drawing| content(drawing));
+        for effect in &effects {
+            for _ in 0..2 {
+                let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+                let actual = draw_in(&device, mode, |drawing| {
+                    drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), effect);
+                    content(drawing);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                });
+                assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: {effect}");
+                let (most, _, _) = difference(&plain, &actual);
+                assert!(most <= 1, "{mode:?}: {effect}: the content unchanged, largest {most}");
+            }
+        }
+    }
+    for effect in &effects {
+        assert_eq!(1, shader_failure_reports(effect.name()), "{effect}");
+    }
+}
+
+/// Frames of the shader effects whose parameters change and whose area moves
+/// by a fraction of a pixel take their textures from the pool, and their
+/// programs are compiled once: once the first frames filled the pool, no
+/// texture is allocated.
+#[test]
+fn steady_frames_of_the_shader_effects_allocate_no_texture() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    for mode in device_modes(&device) {
+        let mut allocations_after_first = None;
+        for frame in 0..6 {
+            let amount = 0.2 + 0.1 * f64::from(frame);
+            let effects = [
+                ImmutableCustomEffect::new(PixelateEffect { cell_size: 2.0 + f64::from(frame) }),
+                ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: amount }),
+                ImmutableCustomEffect::new(SpotlightShaderEffect { strength: amount, ..SpotlightShaderEffect::default() }),
+            ];
+            let bounds = Rect::new(4.0 + 0.25 * f64::from(frame), 6.0, 80.0, 70.0);
+            let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+            draw_in(&device, mode, |drawing| {
+                for effect in &effects {
+                    drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), effect);
+                    content(drawing);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                }
+                // Nested: an overlay over a content-sampling effect.
+                drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), &effects[1]);
+                drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), &effects[0]);
+                other_content(drawing);
+                drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
             });
             assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: drawn on the processor");
             let allocations = super::effect_passes::texture_allocations();
