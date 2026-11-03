@@ -756,6 +756,46 @@ impl XamlIlBindingPathHelper {
     }
 }
 
+impl XamlIlBindingPathHelper {
+    /// Whether `name` is registered as the name of an element in the name scope of the node
+    /// being transformed: the name scope of the document, or of a template it is in. The search
+    /// of a `#name` path element; `{x:Bind}` names an element without the `#`.
+    pub(crate) fn is_named_element(context: &AstTransformationContext, name: &str) -> XamlResult<bool> {
+        let parent_nodes = context.parent_nodes();
+        let Some(namescope_root) = parent_nodes.last() else {
+            return Ok(false);
+        };
+        if ScopeRegistrationFinder::get_target_type(namescope_root, name)?.is_some() {
+            return Ok(true);
+        }
+        for deferred_content in parent_nodes
+            .iter()
+            .filter(|n| n.is::<NestedScopeMetadataNode>())
+        {
+            if ScopeRegistrationFinder::get_target_type(deferred_content, name)?.is_some() {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    /// Whether a path can read a member `name` of `type_`: a registered property (its
+    /// `<name>Property` field), a property or a method, as a property path element resolves it.
+    pub(crate) fn has_path_member(type_: &Rc<dyn IXamlType>, name: &str) -> bool {
+        let ferro_property_field_name = format!("{name}Property");
+        type_
+            .get_all_fields()
+            .into_iter()
+            .any(|f| f.is_static() && f.is_public() && f.name() == ferro_property_field_name)
+            || get_all_defined_properties(type_)
+                .into_iter()
+                .any(|p| p.name() == name)
+            || get_all_defined_methods(type_)
+                .into_iter()
+                .any(|m| m.name() == name)
+    }
+}
+
 /// The local function `GetAllDefinedProperties`.
 fn get_all_defined_properties(type_: &Rc<dyn IXamlType>) -> Vec<Rc<dyn IXamlProperty>> {
     traverse_type_hierarchy(type_)
