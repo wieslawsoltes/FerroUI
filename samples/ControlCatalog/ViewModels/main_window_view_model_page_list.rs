@@ -93,6 +93,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/PolarChartPage.xaml", "PolarChart", Icons::GRID, "Polar lines and radars on angle and radius axes");
             s.add("/Pages/SankeyChartPage.xaml", "SankeyChart", Icons::GRID, "Flows between nodes in columns or on arcs");
             s.add("/Pages/TreemapChartPage.xaml", "TreemapChart", Icons::GRID, "Weighted rectangles of flat and nested nodes");
+            s.add("/Pages/GeoMapPage.xaml", "GeoMap", Icons::GRID, "Heat lands on Mercator, globe and flat world maps");
             s.add("/Pages/TreeViewPage.xaml", "TreeView", Icons::TREE, "Hierarchical data with expandable nodes");
         }),
         section("Date & Time", Icons::DATE, &mut unavailable, |s| {

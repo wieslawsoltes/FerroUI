@@ -1,12 +1,15 @@
 //! Live chart calculation and retained scenes for FerroUI: the core of the LiveCharts2 port
 //! (axes, scales, bounds, stacking, motion, paints, scenes and visual states) and the Cartesian,
-//! pie, polar, Sankey and treemap engines. The geographic engine lands with its upstream tests in
-//! a following part (docs/porting/livecharts2.md); see NOTICE.md for the source attribution.
+//! pie, polar, Sankey, treemap and geographic engines (docs/porting/livecharts2.md); see
+//! NOTICE.md for the source attribution and the bundled world map.
 
 pub mod axis;
 pub mod cartesian_chart_engine;
 pub mod easing;
 pub mod easing_functions;
+pub mod geo;
+pub mod geo_map_chart_engine;
+pub mod heat_functions;
 pub mod kernel;
 pub mod measure;
 pub mod motion;
@@ -25,6 +28,15 @@ pub use cartesian_chart_engine::{
     CartesianChartEngine, CartesianMeasurement, CartesianOptions, CartesianSeriesBounds, Section,
 };
 pub use easing_functions::{EasingFunctions, KeyFrame};
+pub use geo::{
+    DrawnMap, GeographicBounds, LandData, LandDefinition, MapLayer, MapProjection, MapProjector,
+    Maps,
+};
+pub use geo_map_chart_engine::{
+    GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions, GeoMarker, GeoTooltipValue,
+    HeatLand, HeatLandSeries, MapViewport, ZoomDirection,
+};
+pub use heat_functions::HeatFunctions;
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
 pub use motion::{Animatable, Animation, MotionProperty, Repeat};
 pub use paint::BrushSpace;

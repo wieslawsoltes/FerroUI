@@ -139,3 +139,27 @@ impl TreemapChart {
         instantiate(Self::construct())
     }
 }
+
+#[repr(C)]
+pub struct GeoMap {
+    base: Chart,
+}
+ferro_class!(GeoMap:Chart);
+ferro_class_info!(GeoMap { new: GeoMap::new });
+ferro_impl_classes!(GeoMap:StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
+impl FerroObjectImpl for GeoMap {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.set_chart_kind(ChartKind::GeoMap);
+    }
+}
+impl GeoMap {
+    pub fn construct() -> Self {
+        Self {
+            base: Chart::construct(),
+        }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+}

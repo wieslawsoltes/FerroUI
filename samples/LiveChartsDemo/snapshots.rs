@@ -1,5 +1,5 @@
-//! The Cartesian, pie, polar, Sankey and treemap scenarios of LiveCharts2's `tests/SnapshotTests`
-//! at the pin, restated with the native controls. Each scenario keeps the source's chart, series,
+//! The Cartesian, pie, polar, Sankey, treemap and map scenarios of LiveCharts2's
+//! `tests/SnapshotTests` at the pin, restated with the native controls. Each scenario keeps the source's chart, series,
 //! values, axes and size; `livecharts-snapshots` renders them through Vello CPU, and the render job of
 //! `livecharts.yml` keeps the images beside the upstream reference images. The upstream suite
 //! compares SkiaSharp images pixel by pixel, which a native renderer cannot reproduce, so the
@@ -9,16 +9,19 @@
 //! label formatters, `TicksAtCenter`, `IsHoverable`, paints of geometries and separators. The
 //! node and link colours of a Sankey series stand for its `NodeColorMapper`, and the labels a
 //! `LabelMapper` builds are the names of the nodes. The hover scenarios move the pointer after the
-//! first measure, so their renders show the native tooltip.
+//! first measure, so their renders show the native tooltip. The city markers of the map
+//! scenarios are native `GeoMarker`s in place of `GeoVisualElement`s around circle visuals, and
+//! the custom map is the source sample's `mexico-states.geojson`, copied beside this file.
 
 use ferroui_base::media::Color;
 use ferroui_base::{Point, Ref, Size};
 use ferroui_controls_livecharts::{
     Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint, ChartSeries,
-    ColumnSeries, LegendPosition, LineSeries, PieChart, PieSeries, PolarChart,
-    PolarLabelsPosition, PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries,
-    RowSeries, SankeyChart, SankeyLayoutKind, SankeyLink, SankeyLinks, SankeyNode, SankeyNodes,
-    SankeySeries, ScatterSeries, StackedAreaSeries, StackedColumnSeries, StackedRowSeries,
+    ColumnSeries, GeoMap, GeoMarker, HeatLand, HeatLandSeries, HeatLands, LegendPosition,
+    LineSeries, MapProjection, Maps, PieChart, PieSeries, PolarChart, PolarLabelsPosition,
+    PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries, RowSeries, SankeyChart,
+    SankeyLayoutKind, SankeyLink, SankeyLinks, SankeyNode, SankeyNodes, SankeySeries,
+    ScatterSeries, StackedAreaSeries, StackedColumnSeries, StackedRowSeries,
     StackedStepAreaSeries, StepLineSeries, TreemapChart, TreemapNode, TreemapNodes,
     TreemapSeries,
 };
@@ -195,6 +198,23 @@ pub fn scenarios() -> Vec<Scenario> {
             treemap_two_series,
         ),
         scenario("TreemapSeriesTests_HierarchicalTwoLevel", treemap_hierarchical),
+        scenario("MapsTests_Basic", map_basic),
+        scenario("MapsTests_OrthographicDefault", map_orthographic),
+        scenario("MapsTests_OrthographicRotated", map_orthographic_rotated),
+        scenario("MapsTests_OrthographicHorizonClipsAlongDiscRim", map_horizon),
+        sized("MapsTests_BasicWithTitleAndLegend", 800., 600., map_title_and_legend),
+        scenario("MapsTests_DefaultProjection", map_default),
+        scenario("MapsTests_MercatorEuropeView", map_mercator_europe),
+        scenario("MapsTests_DefaultProjectionEuropeView", map_default_europe),
+        sized("MapsTests_MarkersOnMap", 800., 600., map_markers),
+        scenario("MapsTests_CustomMap_LoadsAndRendersMexicoStates", map_mexico),
+        sized("MapsTests_MarkersOnMap_RemovedBetweenFrames_0", 800., 600., map_two_markers),
+        Scenario {
+            name: "MapsTests_MarkersOnMap_RemovedBetweenFrames_1",
+            size: Size::new(800., 600.),
+            build: map_two_markers,
+            then: Some(|c| c.markers().clear()),
+        },
     ]
 }
 
@@ -1383,6 +1403,154 @@ fn treemap_hierarchical() -> Ref<Chart> {
     );
     s.set_corner_radius(4.);
     treemap_chart(vec![s])
+}
+
+// MapsTests.
+
+/// The lands of the source's `CreateHeatSeries`.
+const MAP_LANDS: [(&str, f64); 14] = [
+    ("bra", 13.),
+    ("mex", 10.),
+    ("usa", 15.),
+    ("can", 8.),
+    ("ind", 12.),
+    ("deu", 13.),
+    ("jpn", 15.),
+    ("chn", 14.),
+    ("rus", 11.),
+    ("fra", 8.),
+    ("esp", 7.),
+    ("kor", 10.),
+    ("zaf", 12.),
+    ("are", 13.),
+];
+
+fn heat_series(lands: &[(&str, f64)]) -> Ref<ChartSeries> {
+    let series = HeatLandSeries::new();
+    series.set_lands(HeatLands::from_items(
+        lands
+            .iter()
+            .map(|&(name, value)| HeatLand::with_value(name, value)),
+    ));
+    series.upcast()
+}
+
+/// A map of the source's heat series on the bundled world map.
+fn map(projection: MapProjection) -> Ref<Chart> {
+    let chart = GeoMap::new().upcast::<Chart>();
+    chart.set_animations_speed(0.0);
+    chart.set_map_projection(projection);
+    chart.series().add(heat_series(&MAP_LANDS));
+    chart
+}
+
+fn map_basic() -> Ref<Chart> {
+    map(MapProjection::Mercator)
+}
+
+fn map_orthographic() -> Ref<Chart> {
+    map(MapProjection::Orthographic)
+}
+
+fn globe(longitude: f64, latitude: f64) -> Ref<Chart> {
+    let chart = map(MapProjection::Orthographic);
+    chart.set_center_longitude(longitude);
+    chart.set_center_latitude(latitude);
+    chart
+}
+
+/// Centred on Europe and Africa.
+fn map_orthographic_rotated() -> Ref<Chart> {
+    globe(15., 20.)
+}
+
+/// Centred on Central Asia: Russia, China and India cross the horizon.
+fn map_horizon() -> Ref<Chart> {
+    globe(80., 20.)
+}
+
+fn map_title_and_legend() -> Ref<Chart> {
+    // The source title is a 20 px label with a padding of 12 in black; its legend is the
+    // gradient bar of an SKHeatLegend on the right, where the native legend lists the series.
+    let chart = map(MapProjection::Mercator);
+    chart.set_title("World population by country".into());
+    chart.set_title_size(20.);
+    chart.set_legend_position(LegendPosition::Right);
+    chart
+}
+
+fn map_default() -> Ref<Chart> {
+    map(MapProjection::Default)
+}
+
+/// Iceland to the Caucasus, North Africa to the North Cape.
+fn europe(projection: MapProjection) -> Ref<Chart> {
+    let chart = map(projection);
+    chart.set_min_latitude(Some(35.));
+    chart.set_max_latitude(Some(72.));
+    chart.set_min_longitude(Some(-25.));
+    chart.set_max_longitude(Some(45.));
+    chart
+}
+
+fn map_mercator_europe() -> Ref<Chart> {
+    europe(MapProjection::Mercator)
+}
+
+fn map_default_europe() -> Ref<Chart> {
+    europe(MapProjection::Default)
+}
+
+/// New York, Tokyo, Madrid, Sao Paulo and Sydney.
+const CITIES: [(f64, f64); 5] = [
+    (-74.00, 40.71),
+    (139.69, 35.69),
+    (-3.70, 40.42),
+    (-46.63, -23.55),
+    (151.21, -33.87),
+];
+
+/// The source's 14 px orange red markers with a white outline of 2, the native defaults.
+fn with_markers(cities: &[(f64, f64)]) -> Ref<Chart> {
+    let chart = map(MapProjection::Mercator);
+    for &(longitude, latitude) in cities {
+        chart.markers().add(GeoMarker::at(longitude, latitude));
+    }
+    chart
+}
+
+fn map_markers() -> Ref<Chart> {
+    with_markers(&CITIES)
+}
+
+fn map_two_markers() -> Ref<Chart> {
+    with_markers(&CITIES[..2])
+}
+
+/// The states of Mexico of the source sample, keyed by their ISO 3166-2 codes, framed on Mexico.
+/// The source's `cmx` matches no state of the file (Mexico City is `dif`), as upstream.
+fn map_mexico() -> Ref<Chart> {
+    let chart = GeoMap::new().upcast::<Chart>();
+    chart.set_animations_speed(0.0);
+    let mexico = Maps::map_from_geojson(include_str!("mexico-states.geojson"))
+        .expect("the sample map is valid GeoJSON");
+    chart.set_active_map(Some(std::rc::Rc::new(mexico)));
+    chart.set_map_projection(MapProjection::Mercator);
+    chart.set_min_latitude(Some(13.));
+    chart.set_max_latitude(Some(33.));
+    chart.set_min_longitude(Some(-120.));
+    chart.set_max_longitude(Some(-85.));
+    chart.series().add(heat_series(&[
+        ("cmx", 92.),
+        ("mex", 70.),
+        ("jal", 84.),
+        ("nle", 58.),
+        ("pue", 65.),
+        ("ver", 80.),
+        ("yuc", 23.),
+        ("bcn", 36.),
+    ]));
+    chart
 }
 
 /// Builds a scenario and measures it at its size, applying its change after a first measure.

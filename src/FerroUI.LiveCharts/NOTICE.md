@@ -8,6 +8,17 @@ Source-header attribution: Copyright(c) 2021 Alberto Rodriguez Orozco & LiveChar
 The Rust/FerroUI adaptations and their current parity are recorded in
 `docs/porting/livecharts2.md` and the source/API/test maps beside it.
 
+## World map data
+
+`geo/world.geojson` is the world map of LiveCharts2, `src/LiveChartsCore/Geo/world.geojson` at
+the commit above, copied byte for byte (178,383 bytes; Git blob
+c8d10e5c13f017ca6a689471438f5a5a5f0cacc0) and embedded with `include_str!` as the source embeds
+it as a resource. It is distributed with LiveCharts2 under the MIT license below; the source
+states no other license or origin for it. Its 177 country features (the collection is named
+`world-110`) match the 1:110m Admin 0 countries of Natural Earth
+(https://www.naturalearthdata.com/), which are in the public domain; the source does not name
+its origin.
+
 MIT License
 
 Copyright (c) 2021 Alberto Rodriguez Orozco
