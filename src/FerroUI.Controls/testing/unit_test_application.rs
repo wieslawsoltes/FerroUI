@@ -11,11 +11,10 @@ use ferroui_base::platform::{
 };
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::{IGlobalStyles, Style};
-use ferroui_base::threading::{Dispatcher, FerroSynchronizationContext, UnitTestDispatcherScope};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, UnitTestDispatcherScope};
 use ferroui_base::{ferro_class, instantiate, FerroLocator, FerroObjectImpl, FerroObjectImplExt, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::Arc;
 
 /// The application of unit tests: it registers the services of a
 /// [`TestServices`] instead of those of a real application.
@@ -186,16 +185,16 @@ impl UnitTestApplication {
         let dispatcher = Dispatcher::unit_test_scope();
         Control::reset_loaded_queue_for_unit_tests();
         let scope = FerroLocator::enter_scope();
-        let old_context = FerroSynchronizationContext::current();
+        let old_priority = Dispatcher::current_priority();
         let created = create();
         Dispatcher::reset_before_unit_tests();
-        (created, UnitTestApplicationScope { state: RefCell::new(Some(ScopeState { scope, old_context, dispatcher })) })
+        (created, UnitTestApplicationScope { state: RefCell::new(Some(ScopeState { scope, old_priority, dispatcher })) })
     }
 }
 
 struct ScopeState {
     scope: Rc<dyn IDisposable>,
-    old_context: Option<Arc<FerroSynchronizationContext>>,
+    old_priority: Option<DispatcherPriority>,
     dispatcher: UnitTestDispatcherScope,
 }
 
@@ -234,7 +233,7 @@ impl UnitTestApplicationScope {
 
         state.scope.dispose();
         Dispatcher::reset_before_unit_tests();
-        FerroSynchronizationContext::set_current(state.old_context);
+        Dispatcher::set_current_priority(state.old_priority);
         Control::reset_loaded_queue_for_unit_tests();
         drop(state.dispatcher);
     }

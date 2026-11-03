@@ -14,8 +14,9 @@
 //! - The application builder is not `Send` (it holds `Rc`s): it is created
 //!   on the session thread, as in the original, and stays there, in the
 //!   state of the consumer loop, where the original keeps it in a field of
-//!   the session. The synchronization context of the shared application is
-//!   kept in the same place.
+//!   the session. The synchronization context of the shared application,
+//!   its current priority (`Dispatcher::current_priority`), is kept in the
+//!   same place.
 //! - The session thread is isolated as a unit test thread
 //!   ([`Dispatcher::unit_test_scope`]): the dispatcher of the session is the
 //!   dispatcher of its thread, and resetting it does not touch the tests of
@@ -36,13 +37,13 @@ use crate::{
 };
 use ferroui_base::media::{FontManager, MediaContext};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher, DispatcherFrame, FerroSynchronizationContext};
+use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher, DispatcherFrame, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::{AppBuilder, Application, Control, IToolTipService};
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_system::task::oneshot;
 use std::any::Any;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, VecDeque};
 use std::future::Future;
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
@@ -152,7 +153,7 @@ impl<T> HeadlessUnitTestTask<T> {
 struct SessionThread {
     app_builder: AppBuilder,
     /// Only set and used with PerAssembly isolation
-    shared_context: RefCell<Option<Arc<FerroSynchronizationContext>>>,
+    shared_priority: Cell<Option<DispatcherPriority>>,
 }
 
 type WorkItem = Box<dyn FnOnce(&SessionThread) + Send + 'static>;
@@ -471,7 +472,7 @@ impl HeadlessUnitTestSession {
                             app_builder = app_builder.use_harfbuzz();
                         }
 
-                        SessionThread { app_builder, shared_context: RefCell::new(None) }
+                        SessionThread { app_builder, shared_priority: Cell::new(None) }
                     }) {
                         Ok(session) => {
                             let _ = tcs.send(Ok(()));
@@ -582,12 +583,12 @@ fn finish_composition_in_flight() {
 
 impl SessionThread {
     fn ensure_shared_application(&self) -> Box<dyn IDisposable> {
-        let old_context = FerroSynchronizationContext::current();
+        let old_priority = Dispatcher::current_priority();
         if Application::current().is_none() {
             self.app_builder.setup_unsafe();
-            *self.shared_context.borrow_mut() = FerroSynchronizationContext::current();
+            self.shared_priority.set(Dispatcher::current_priority());
         } else {
-            FerroSynchronizationContext::set_current(self.shared_context.borrow().clone());
+            Dispatcher::set_current_priority(self.shared_priority.get());
         }
 
         Box::new(Cleanup::new(move || {
@@ -595,7 +596,7 @@ impl SessionThread {
                 Dispatcher::ui_thread().run_jobs(None);
                 finish_composition_in_flight();
             });
-            FerroSynchronizationContext::set_current(old_context);
+            Dispatcher::set_current_priority(old_priority);
             if let Err(ex) = jobs {
                 resume_unwind(ex);
             }
@@ -604,7 +605,7 @@ impl SessionThread {
 
     fn ensure_isolated_application(&self) -> Box<dyn IDisposable> {
         let scope = FerroLocator::enter_scope();
-        let old_context = FerroSynchronizationContext::current();
+        let old_priority = Dispatcher::current_priority();
         if let Err(ex) = catch_unwind(AssertUnwindSafe(|| {
             Dispatcher::reset_before_unit_tests();
             self.app_builder.setup_unsafe();
@@ -630,7 +631,7 @@ impl SessionThread {
             // Cleanup jobs can throw, but the ambient state still belongs to this dispatch.
             let scope = catch_unwind(AssertUnwindSafe(|| scope.dispose()));
             Dispatcher::reset_before_unit_tests();
-            FerroSynchronizationContext::set_current(old_context);
+            Dispatcher::set_current_priority(old_priority);
             // Not in the original: the queue of the controls that wait for their loaded event is
             // a static of the thread, which the reset dispatcher will not run (as the scope of
             // the unit test application of the controls does).

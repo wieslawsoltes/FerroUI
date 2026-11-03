@@ -21,7 +21,6 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::{
     CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
-    FerroSynchronizationContext,
 };
 use ferroui_base::utilities::{HandlerList, MathUtilities};
 use ferroui_base::{
@@ -1284,12 +1283,12 @@ impl VirtualizingCarouselPanel {
     }
 
     /// The scheduler that runs the asynchronous methods of the panel: the
-    /// one of the current synchronization context.
+    /// dispatcher of the thread at the priority of the running job (the
+    /// current synchronization context of the original), Normal outside of
+    /// one.
     fn task_scheduler() -> DispatcherTaskScheduler {
-        let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-            FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-        });
-        context.to_task_scheduler()
+        let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+        Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority)
     }
 
     fn run_transition_async(
