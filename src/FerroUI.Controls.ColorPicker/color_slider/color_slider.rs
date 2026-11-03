@@ -238,7 +238,7 @@ impl ColorSlider {
     /// await before this returns.
     fn update_background(&self) {
         let this = self.to_ref();
-        Dispatcher::current_dispatcher().to_task_scheduler().start_local(async move {
+        Dispatcher::current_dispatcher().start_local(async move {
             Self::update_background_async(this).await;
         });
     }
