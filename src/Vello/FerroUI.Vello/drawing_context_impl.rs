@@ -38,6 +38,8 @@ use std::rc::Rc;
 mod acrylic;
 pub(crate) mod box_shadows;
 mod effects;
+#[allow(unused_imports)]
+pub(crate) use effects::cpu_layer_count;
 mod fragments;
 mod scene_brushes;
 
@@ -214,8 +216,12 @@ enum SavedKind {
     Nothing,
     /// An effect: its layer, and its scene when it has one of its own.
     Effect,
-    /// A colour matrix layer: the scene its content is recorded into.
+    /// A layer with an effect (a colour matrix, a multiply, a
+    /// convolution): the scene its content is recorded into.
     ColorMatrix,
+    /// A source of a pixel operation: the scene of the device it is
+    /// recorded into.
+    PixelSource,
     /// An explicitly isolated blend group, including saved multiplied opacity.
     CompositingLayer,
 }
@@ -261,8 +267,12 @@ pub struct DrawingContextImpl {
     text_options: TextOptions,
     /// The effects that are pushed.
     effect_stack: Vec<effects::EffectFrame>,
-    /// The colour matrix layers that are pushed, innermost last.
+    /// The layers with an effect that are pushed, innermost last.
     color_matrix_stack: Vec<effects::ColorMatrixFrame>,
+    /// The pixel operations that are pushed (on the device), innermost
+    /// last.
+    #[cfg_attr(not(feature = "hybrid"), allow(dead_code))]
+    pixel_operation_stack: Vec<effects::PixelOperationFrame>,
     /// The clips that are open in the scene of the context.
     open_clips: usize,
     /// The pixel of the target that is the top left pixel of the scene of
@@ -322,6 +332,7 @@ impl DrawingContextImpl {
             text_options: TextOptions::default(),
             effect_stack: Vec::new(),
             color_matrix_stack: Vec::new(),
+            pixel_operation_stack: Vec::new(),
             open_clips: 0,
             sink_origin: kurbo::Vec2::ZERO,
             fragment: None,
@@ -542,6 +553,7 @@ impl DrawingContextImpl {
             SavedKind::Nothing => {}
             SavedKind::Effect => self.end_effect(),
             SavedKind::ColorMatrix => self.end_color_matrix(),
+            SavedKind::PixelSource => self.end_pixel_source(),
             SavedKind::CompositingLayer => {
                 self.sink().pop_layer();
                 self.current_opacity = self.compositing_opacity_stack.pop()
