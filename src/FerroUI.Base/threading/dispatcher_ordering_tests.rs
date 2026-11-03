@@ -5,6 +5,10 @@
 //!
 //! A child module of `dispatcher_tests`, whose simulated platform implementation, helpers and
 //! services it uses.
+//!
+//! The tasks and completion sources of `threading::tasks` that the tests of G9 drive are
+//! deprecated since 0.5.0 (step A7) and keep their behaviour: the tests stay on them unchanged.
+#![allow(deprecated)]
 
 use super::*;
 use crate::threading::DispatcherProcessingDisabled;

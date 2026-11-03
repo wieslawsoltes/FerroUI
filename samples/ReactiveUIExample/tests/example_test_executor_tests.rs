@@ -9,7 +9,8 @@
 
 use super::support::{await_task, start_application};
 use crate::services::InvalidOperationError;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
+use ferroui_system::ObservableError;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -35,10 +36,11 @@ impl Future for YieldOnce {
 #[test]
 fn headless_executor_propagates_failure_after_async_yield() {
     let _app = start_application();
-    let task: Task<()> = Task::spawn_local(async {
+    let task: Shared<Result<(), ObservableError>> = ferroui_system::task::spawn_local(async {
         YieldOnce { yielded: false }.await;
         Err(InvalidOperationError::new("Expected asynchronous test failure.").into_error())
-    });
+    })
+    .shared();
 
     let error = await_task(&task).expect_err("the failure propagates");
     assert!(error.downcast_ref::<InvalidOperationError>().is_some(), "{error}");
