@@ -439,6 +439,7 @@ phase = "C5"
 behaviour = "same"
 notes = "Step U1. A Rust form of the markup type System.Uri: a relative URI literal for a Url is a markup error, a relative reference a conversion error of a binding. The text is the one of the URL standard (the C2 conversions). The base URIs and the platform edges move to it in U2 to U4."
 
+[[name]]
 upstream = "System.DateTime, System.DateTimeOffset (instants)"
 rust = "std::time::SystemTime"
 kind = "mechanism"
