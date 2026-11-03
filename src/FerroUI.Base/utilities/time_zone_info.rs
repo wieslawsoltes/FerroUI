@@ -4,13 +4,19 @@
 //! UTC is supplied per thread by a provider that a platform layer (or a test)
 //! installs; without one, local time is UTC.
 
+use super::date_time::system_time_of_utc_ticks;
 use super::DateTime;
 use crate::animation::SignedDuration;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::SystemTime;
 
-/// Gives the offset of local time from UTC at a UTC instant.
-pub type LocalUtcOffsetProvider = Rc<dyn Fn(DateTime) -> SignedDuration>;
+/// Gives the offset of local time from UTC at an instant.
+///
+/// Since 0.5 the provider takes a [`SystemTime`], where it took a `DateTime`
+/// of kind UTC: a provider that works on dates converts the instant with
+/// `DateTime::try_from`.
+pub type LocalUtcOffsetProvider = Rc<dyn Fn(SystemTime) -> SignedDuration>;
 
 crate::ferro_thread_local! {
     // TIMEZONE-SEAM: platform crates install the offset of the system time zone here
@@ -34,11 +40,16 @@ impl TimeZoneInfo {
     /// The offset of local time from UTC at the UTC instant `utc_time`
     /// (zero when no provider is installed). The offset is truncated to whole
     /// minutes and limited to 14 hours in either direction.
+    ///
+    /// The provider is asked at the instant of `utc_time`; a date the
+    /// platform's `SystemTime` cannot hold (before 1970 on
+    /// `wasm32-unknown-unknown`) is asked at the Unix epoch.
     pub fn get_local_utc_offset(utc_time: DateTime) -> SignedDuration {
         let provider = LOCAL_UTC_OFFSET_PROVIDER.with(|current| current.borrow().clone());
         match provider {
             Some(provider) => {
-                let ticks = provider(utc_time).ticks();
+                let instant = system_time_of_utc_ticks(utc_time.ticks()).unwrap_or(SystemTime::UNIX_EPOCH);
+                let ticks = provider(instant).ticks();
                 let ticks = ticks - ticks % SignedDuration::TICKS_PER_MINUTE;
                 SignedDuration::from_ticks(ticks.clamp(-Self::MAX_OFFSET.ticks(), Self::MAX_OFFSET.ticks()))
             }

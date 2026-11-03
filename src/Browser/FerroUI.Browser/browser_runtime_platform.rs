@@ -2,11 +2,11 @@ use crate::interop::ferro_module;
 use ferroui_base::platform::{
     AssetAssembly, IAssetLoader, IRuntimePlatform, RuntimePlatformInfo, StandardAssetLoader, StandardRuntimePlatform,
 };
-use ferroui_base::utilities::DateTime;
 use ferroui_base::FerroLocator;
 use ferroui_controls::AppBuilder;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::time::SystemTime;
 
 /// Registers the runtime platform services of the browser.
 pub struct BrowserRuntimePlatformServices;
@@ -62,7 +62,7 @@ impl IRuntimePlatform for BrowserRuntimePlatform {
         })
     }
 
-    fn get_utc_now(&self) -> DateTime {
+    fn get_utc_now(&self) -> SystemTime {
         self.base.get_utc_now()
     }
 }

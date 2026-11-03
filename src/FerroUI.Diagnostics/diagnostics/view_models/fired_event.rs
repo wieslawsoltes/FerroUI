@@ -9,6 +9,7 @@ use ferroui_base::interactivity::{RoutedEvent, RoutedEventArgs, RoutingStrategie
 use ferroui_base::utilities::DateTime;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::SystemTime;
 
 /// `Environment.NewLine`.
 const NEW_LINE: &str = if cfg!(windows) { "\r\n" } else { "\n" };
@@ -50,7 +51,7 @@ pub struct FiredEvent {
     event_args: RoutedEventArgs,
     original_event: Option<RoutedEvent>,
     handled_by: RefCell<Option<Rc<EventChainLink>>>,
-    trigger_time: DateTime,
+    trigger_time: SystemTime,
     event_chain: FerroList<Rc<EventChainLink>>,
     originator: Rc<EventChainLink>,
 }
@@ -71,8 +72,8 @@ impl INotifyPropertyChanged for FiredEvent {
 impl FiredEvent {
     /// C# `new FiredEvent(RoutedEventArgs eventArgs, EventChainLink originator, DateTime triggerTime)`:
     /// the event of `event_args`, with `originator` as the first link of its
-    /// chain.
-    pub fn new(event_args: &RoutedEventArgs, originator: Rc<EventChainLink>, trigger_time: DateTime) -> Rc<Self> {
+    /// chain, raised at the instant `trigger_time`.
+    pub fn new(event_args: &RoutedEventArgs, originator: Rc<EventChainLink>, trigger_time: SystemTime) -> Rc<Self> {
         let this = Rc::new(Self {
             base: ViewModelBase::new(),
             event_args: event_args.clone(),
@@ -93,8 +94,15 @@ impl FiredEvent {
         *e == self.event_args && e.routed_event() == self.original_event
     }
 
-    pub fn trigger_time(&self) -> DateTime {
+    /// The instant the event was raised.
+    pub fn trigger_time(&self) -> SystemTime {
         self.trigger_time
+    }
+
+    /// The markup property `TriggerTime`: the instant the event was raised,
+    /// in local time (the `DateTime.Now` of the reference).
+    fn trigger_date_time(&self) -> DateTime {
+        DateTime::try_from(self.trigger_time).map(DateTime::to_local_time).unwrap_or_default()
     }
 
     /// The routed event.
@@ -185,7 +193,7 @@ ferro_markup_type!(class FiredEvent {
     handles: [FiredEvent, Rc<FiredEvent>, Option<Rc<FiredEvent>>],
     base: ViewModelBase,
     properties: [
-        TriggerTime: DateTime { get: FiredEvent::trigger_time },
+        TriggerTime: DateTime { get: FiredEvent::trigger_date_time },
         Event: RoutedEvent { get: FiredEvent::event },
         IsHandled: bool { get: FiredEvent::is_handled },
         EventChain: FerroList<Rc<EventChainLink>> { get: FiredEvent::event_chain },
