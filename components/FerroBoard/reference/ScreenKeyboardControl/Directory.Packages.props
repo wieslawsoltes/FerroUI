@@ -1,0 +1,12 @@
+<Project>
+  <!--
+    Central package management. Uno Platform packages are implicitly provided by the Uno.Sdk
+    (version pinned in global.json) and must not be listed here.
+  -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="coverlet.collector" Version="10.1.0" />
+  </ItemGroup>
+</Project>

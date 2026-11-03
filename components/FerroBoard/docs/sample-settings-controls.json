@@ -1,0 +1,1245 @@
+{
+  "source": "samples/ScreenKeyboard.Sample/SettingsPanel.cs",
+  "status": "partially_verified",
+  "controls": [
+    {
+      "kind": "header",
+      "label": "Appearance"
+    },
+    {
+      "kind": "slider",
+      "label": "Key height",
+      "min": 36.0,
+      "max": 90.0,
+      "step": 1.0,
+      "property": "KeyHeight"
+    },
+    {
+      "kind": "slider",
+      "label": "Font scale",
+      "min": 0.6,
+      "max": 1.6,
+      "step": 0.05,
+      "property": "FontScale"
+    },
+    {
+      "kind": "slider",
+      "label": "Horizontal key spacing",
+      "min": 0.0,
+      "max": 16.0,
+      "step": 1.0,
+      "property": "KeySpacingHorizontal"
+    },
+    {
+      "kind": "slider",
+      "label": "Vertical key spacing",
+      "min": 0.0,
+      "max": 24.0,
+      "step": 1.0,
+      "property": "KeySpacingVertical"
+    },
+    {
+      "kind": "toggle",
+      "label": "Split keyboard",
+      "property": "SplitKeyboard"
+    },
+    {
+      "kind": "toggle",
+      "label": "Number row",
+      "property": "NumberRow"
+    },
+    {
+      "kind": "toggle",
+      "label": "Smartbar",
+      "property": "SmartbarEnabled"
+    },
+    {
+      "kind": "toggle",
+      "label": "Key press preview",
+      "property": "ShowKeyPreview"
+    },
+    {
+      "kind": "toggle",
+      "label": "Number hints",
+      "property": "HintedNumberRow"
+    },
+    {
+      "kind": "toggle",
+      "label": "Symbol hints",
+      "property": "HintedSymbols"
+    },
+    {
+      "kind": "header",
+      "label": "Languages"
+    },
+    {
+      "kind": "header",
+      "label": "Typing"
+    },
+    {
+      "kind": "toggle",
+      "label": "Auto-capitalization",
+      "property": "AutoCapitalization"
+    },
+    {
+      "kind": "toggle",
+      "label": "Double space inserts period",
+      "property": "DoubleSpacePeriod"
+    },
+    {
+      "kind": "toggle",
+      "label": "Smart punctuation spacing",
+      "property": "AutoSpacePunctuation"
+    },
+    {
+      "kind": "toggle",
+      "label": "Show suggestions",
+      "property": "ShowSuggestions"
+    },
+    {
+      "kind": "toggle",
+      "label": "Auto-correct",
+      "property": "AutoCorrect"
+    },
+    {
+      "kind": "toggle",
+      "label": "Next word prediction",
+      "property": "NextWordPrediction"
+    },
+    {
+      "kind": "toggle",
+      "label": "Learn new words",
+      "property": "LearnWords"
+    },
+    {
+      "kind": "toggle",
+      "label": "Emoji suggestions",
+      "property": "EmojiSuggestions"
+    },
+    {
+      "kind": "toggle",
+      "label": "Incognito mode",
+      "property": "IncognitoMode"
+    },
+    {
+      "kind": "slider",
+      "label": "Suggestion count",
+      "min": 1.0,
+      "max": 5.0,
+      "step": 1.0,
+      "property": "SuggestionCount"
+    },
+    {
+      "kind": "header",
+      "label": "Gestures"
+    },
+    {
+      "kind": "toggle",
+      "label": "Glide typing",
+      "property": "GlideTyping"
+    },
+    {
+      "kind": "toggle",
+      "label": "Show glide trail",
+      "property": "GlideShowTrail"
+    },
+    {
+      "kind": "toggle",
+      "label": "Live glide preview",
+      "property": "GlidePreview"
+    },
+    {
+      "kind": "slider",
+      "label": "Long press delay (ms)",
+      "min": 150.0,
+      "max": 1000.0,
+      "step": 10.0,
+      "property": "LongPressDelay"
+    },
+    {
+      "kind": "header",
+      "label": "Emoji, clipboard & feedback"
+    },
+    {
+      "kind": "toggle",
+      "label": "Clipboard history",
+      "property": "ClipboardHistoryEnabled"
+    },
+    {
+      "kind": "toggle",
+      "label": "Suggest recently copied text",
+      "property": "ClipboardSuggestion"
+    },
+    {
+      "kind": "toggle",
+      "label": "Haptic feedback",
+      "property": "HapticFeedback"
+    }
+  ],
+  "remaining": "Public SettingsPanel class/constructor/Attach and repeated-attachment lifecycle, full refresh/reentrancy/accessibility/native UI semantics, malformed UTF16/native string bridges, full culture/default/error contracts and other platforms remain incomplete",
+  "enum_controls": [
+    {
+      "property": "ThemeMode",
+      "label": "Theme mode",
+      "type": "ThemeMode",
+      "items": [
+        {
+          "name": "FollowSystem",
+          "value": 0
+        },
+        {
+          "name": "Light",
+          "value": 1
+        },
+        {
+          "name": "Dark",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "property": "OneHandedMode",
+      "label": "One-handed mode",
+      "type": "OneHandedMode",
+      "items": [
+        {
+          "name": "Off",
+          "value": 0
+        },
+        {
+          "name": "Left",
+          "value": 1
+        },
+        {
+          "name": "Right",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "property": "SmartbarLayout",
+      "label": "Smartbar layout",
+      "type": "SmartbarLayout",
+      "items": [
+        {
+          "name": "SuggestionsWithActions",
+          "value": 0
+        },
+        {
+          "name": "SuggestionsOnly",
+          "value": 1
+        },
+        {
+          "name": "ActionsOnly",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "property": "SpaceBarMode",
+      "label": "Space bar label",
+      "type": "SpaceBarMode",
+      "items": [
+        {
+          "name": "Nothing",
+          "value": 0
+        },
+        {
+          "name": "CurrentLanguage",
+          "value": 1
+        },
+        {
+          "name": "SpaceBarKey",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "property": "UtilityKeyAction",
+      "label": "Utility key",
+      "type": "UtilityKeyAction",
+      "items": [
+        {
+          "name": "Emoji",
+          "value": 0
+        },
+        {
+          "name": "LanguageSwitch",
+          "value": 1
+        },
+        {
+          "name": "Dynamic",
+          "value": 2
+        },
+        {
+          "name": "Hidden",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "property": "HintMode",
+      "label": "Long press priority",
+      "type": "KeyHintMode",
+      "items": [
+        {
+          "name": "Disabled",
+          "value": 0
+        },
+        {
+          "name": "AccentPriority",
+          "value": 1
+        },
+        {
+          "name": "HintPriority",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "property": "SwipeUp",
+      "label": "Swipe up",
+      "type": "SwipeAction",
+      "items": [
+        {
+          "name": "NoAction",
+          "value": 0
+        },
+        {
+          "name": "CycleToPreviousKeyboardMode",
+          "value": 1
+        },
+        {
+          "name": "CycleToNextKeyboardMode",
+          "value": 2
+        },
+        {
+          "name": "DeleteCharacter",
+          "value": 3
+        },
+        {
+          "name": "DeleteCharactersPrecisely",
+          "value": 4
+        },
+        {
+          "name": "DeleteWord",
+          "value": 5
+        },
+        {
+          "name": "DeleteWordsPrecisely",
+          "value": 6
+        },
+        {
+          "name": "HideKeyboard",
+          "value": 7
+        },
+        {
+          "name": "InsertSpace",
+          "value": 8
+        },
+        {
+          "name": "MoveCursorUp",
+          "value": 9
+        },
+        {
+          "name": "MoveCursorDown",
+          "value": 10
+        },
+        {
+          "name": "MoveCursorLeft",
+          "value": 11
+        },
+        {
+          "name": "MoveCursorRight",
+          "value": 12
+        },
+        {
+          "name": "MoveCursorStartOfLine",
+          "value": 13
+        },
+        {
+          "name": "MoveCursorEndOfLine",
+          "value": 14
+        },
+        {
+          "name": "MoveCursorStartOfPage",
+          "value": 15
+        },
+        {
+          "name": "MoveCursorEndOfPage",
+          "value": 16
+        },
+        {
+          "name": "Redo",
+          "value": 17
+        },
+        {
+          "name": "SelectCharactersPrecisely",
+          "value": 18
+        },
+        {
+          "name": "SelectWordsPrecisely",
+          "value": 19
+        },
+        {
+          "name": "Shift",
+          "value": 20
+        },
+        {
+          "name": "ShowSubtypePicker",
+          "value": 21
+        },
+        {
+          "name": "SwitchToPrevSubtype",
+          "value": 22
+        },
+        {
+          "name": "SwitchToNextSubtype",
+          "value": 23
+        },
+        {
+          "name": "SwitchToClipboardContext",
+          "value": 24
+        },
+        {
+          "name": "SwitchToMediaContext",
+          "value": 25
+        },
+        {
+          "name": "SwitchToEditingContext",
+          "value": 26
+        },
+        {
+          "name": "ToggleOneHandedMode",
+          "value": 27
+        },
+        {
+          "name": "ToggleSmartbarVisibility",
+          "value": 28
+        },
+        {
+          "name": "Undo",
+          "value": 29
+        }
+      ]
+    },
+    {
+      "property": "SwipeDown",
+      "label": "Swipe down",
+      "type": "SwipeAction",
+      "items": [
+        {
+          "name": "NoAction",
+          "value": 0
+        },
+        {
+          "name": "CycleToPreviousKeyboardMode",
+          "value": 1
+        },
+        {
+          "name": "CycleToNextKeyboardMode",
+          "value": 2
+        },
+        {
+          "name": "DeleteCharacter",
+          "value": 3
+        },
+        {
+          "name": "DeleteCharactersPrecisely",
+          "value": 4
+        },
+        {
+          "name": "DeleteWord",
+          "value": 5
+        },
+        {
+          "name": "DeleteWordsPrecisely",
+          "value": 6
+        },
+        {
+          "name": "HideKeyboard",
+          "value": 7
+        },
+        {
+          "name": "InsertSpace",
+          "value": 8
+        },
+        {
+          "name": "MoveCursorUp",
+          "value": 9
+        },
+        {
+          "name": "MoveCursorDown",
+          "value": 10
+        },
+        {
+          "name": "MoveCursorLeft",
+          "value": 11
+        },
+        {
+          "name": "MoveCursorRight",
+          "value": 12
+        },
+        {
+          "name": "MoveCursorStartOfLine",
+          "value": 13
+        },
+        {
+          "name": "MoveCursorEndOfLine",
+          "value": 14
+        },
+        {
+          "name": "MoveCursorStartOfPage",
+          "value": 15
+        },
+        {
+          "name": "MoveCursorEndOfPage",
+          "value": 16
+        },
+        {
+          "name": "Redo",
+          "value": 17
+        },
+        {
+          "name": "SelectCharactersPrecisely",
+          "value": 18
+        },
+        {
+          "name": "SelectWordsPrecisely",
+          "value": 19
+        },
+        {
+          "name": "Shift",
+          "value": 20
+        },
+        {
+          "name": "ShowSubtypePicker",
+          "value": 21
+        },
+        {
+          "name": "SwitchToPrevSubtype",
+          "value": 22
+        },
+        {
+          "name": "SwitchToNextSubtype",
+          "value": 23
+        },
+        {
+          "name": "SwitchToClipboardContext",
+          "value": 24
+        },
+        {
+          "name": "SwitchToMediaContext",
+          "value": 25
+        },
+        {
+          "name": "SwitchToEditingContext",
+          "value": 26
+        },
+        {
+          "name": "ToggleOneHandedMode",
+          "value": 27
+        },
+        {
+          "name": "ToggleSmartbarVisibility",
+          "value": 28
+        },
+        {
+          "name": "Undo",
+          "value": 29
+        }
+      ]
+    },
+    {
+      "property": "SwipeLeft",
+      "label": "Swipe left",
+      "type": "SwipeAction",
+      "items": [
+        {
+          "name": "NoAction",
+          "value": 0
+        },
+        {
+          "name": "CycleToPreviousKeyboardMode",
+          "value": 1
+        },
+        {
+          "name": "CycleToNextKeyboardMode",
+          "value": 2
+        },
+        {
+          "name": "DeleteCharacter",
+          "value": 3
+        },
+        {
+          "name": "DeleteCharactersPrecisely",
+          "value": 4
+        },
+        {
+          "name": "DeleteWord",
+          "value": 5
+        },
+        {
+          "name": "DeleteWordsPrecisely",
+          "value": 6
+        },
+        {
+          "name": "HideKeyboard",
+          "value": 7
+        },
+        {
+          "name": "InsertSpace",
+          "value": 8
+        },
+        {
+          "name": "MoveCursorUp",
+          "value": 9
+        },
+        {
+          "name": "MoveCursorDown",
+          "value": 10
+        },
+        {
+          "name": "MoveCursorLeft",
+          "value": 11
+        },
+        {
+          "name": "MoveCursorRight",
+          "value": 12
+        },
+        {
+          "name": "MoveCursorStartOfLine",
+          "value": 13
+        },
+        {
+          "name": "MoveCursorEndOfLine",
+          "value": 14
+        },
+        {
+          "name": "MoveCursorStartOfPage",
+          "value": 15
+        },
+        {
+          "name": "MoveCursorEndOfPage",
+          "value": 16
+        },
+        {
+          "name": "Redo",
+          "value": 17
+        },
+        {
+          "name": "SelectCharactersPrecisely",
+          "value": 18
+        },
+        {
+          "name": "SelectWordsPrecisely",
+          "value": 19
+        },
+        {
+          "name": "Shift",
+          "value": 20
+        },
+        {
+          "name": "ShowSubtypePicker",
+          "value": 21
+        },
+        {
+          "name": "SwitchToPrevSubtype",
+          "value": 22
+        },
+        {
+          "name": "SwitchToNextSubtype",
+          "value": 23
+        },
+        {
+          "name": "SwitchToClipboardContext",
+          "value": 24
+        },
+        {
+          "name": "SwitchToMediaContext",
+          "value": 25
+        },
+        {
+          "name": "SwitchToEditingContext",
+          "value": 26
+        },
+        {
+          "name": "ToggleOneHandedMode",
+          "value": 27
+        },
+        {
+          "name": "ToggleSmartbarVisibility",
+          "value": 28
+        },
+        {
+          "name": "Undo",
+          "value": 29
+        }
+      ]
+    },
+    {
+      "property": "SwipeRight",
+      "label": "Swipe right",
+      "type": "SwipeAction",
+      "items": [
+        {
+          "name": "NoAction",
+          "value": 0
+        },
+        {
+          "name": "CycleToPreviousKeyboardMode",
+          "value": 1
+        },
+        {
+          "name": "CycleToNextKeyboardMode",
+          "value": 2
+        },
+        {
+          "name": "DeleteCharacter",
+          "value": 3
+        },
+        {
+          "name": "DeleteCharactersPrecisely",
+          "value": 4
+        },
+        {
+          "name": "DeleteWord",
+          "value": 5
+        },
+        {
+          "name": "DeleteWordsPrecisely",
+          "value": 6
+        },
+        {
+          "name": "HideKeyboard",
+          "value": 7
+        },
+        {
+          "name": "InsertSpace",
+          "value": 8
+        },
+        {
+          "name": "MoveCursorUp",
+          "value": 9
+        },
+        {
+          "name": "MoveCursorDown",
+          "value": 10
+        },
+        {
+          "name": "MoveCursorLeft",
+          "value": 11
+        },
+        {
+          "name": "MoveCursorRight",
+          "value": 12
+        },
+        {
+          "name": "MoveCursorStartOfLine",
+          "value": 13
+        },
+        {
+          "name": "MoveCursorEndOfLine",
+          "value": 14
+        },
+        {
+          "name": "MoveCursorStartOfPage",
+          "value": 15
+        },
+        {
+          "name": "MoveCursorEndOfPage",
+          "value": 16
+        },
+        {
+          "name": "Redo",
+          "value": 17
+        },
+        {
+          "name": "SelectCharactersPrecisely",
+          "value": 18
+        },
+        {
+          "name": "SelectWordsPrecisely",
+          "value": 19
+        },
+        {
+          "name": "Shift",
+          "value": 20
+        },
+        {
+          "name": "ShowSubtypePicker",
+          "value": 21
+        },
+        {
+          "name": "SwitchToPrevSubtype",
+          "value": 22
+        },
+        {
+          "name": "SwitchToNextSubtype",
+          "value": 23
+        },
+        {
+          "name": "SwitchToClipboardContext",
+          "value": 24
+        },
+        {
+          "name": "SwitchToMediaContext",
+          "value": 25
+        },
+        {
+          "name": "SwitchToEditingContext",
+          "value": 26
+        },
+        {
+          "name": "ToggleOneHandedMode",
+          "value": 27
+        },
+        {
+          "name": "ToggleSmartbarVisibility",
+          "value": 28
+        },
+        {
+          "name": "Undo",
+          "value": 29
+        }
+      ]
+    },
+    {
+      "property": "SpaceBarSwipeUp",
+      "label": "Space bar swipe up",
+      "type": "SwipeAction",
+      "items": [
+        {
+          "name": "NoAction",
+          "value": 0
+        },
+        {
+          "name": "CycleToPreviousKeyboardMode",
+          "value": 1
+        },
+        {
+          "name": "CycleToNextKeyboardMode",
+          "value": 2
+        },
+        {
+          "name": "DeleteCharacter",
+          "value": 3
+        },
+        {
+          "name": "DeleteCharactersPrecisely",
+          "value": 4
+        },
+        {
+          "name": "DeleteWord",
+          "value": 5
+        },
+        {
+          "name": "DeleteWordsPrecisely",
+          "value": 6
+        },
+        {
+          "name": "HideKeyboard",
+          "value": 7
+        },
+        {
+          "name": "InsertSpace",
+          "value": 8
+        },
+        {
+          "name": "MoveCursorUp",
+          "value": 9
+        },
+        {
+          "name": "MoveCursorDown",
+          "value": 10
+        },
+        {
+          "name": "MoveCursorLeft",
+          "value": 11
+        },
+        {
+          "name": "MoveCursorRight",
+          "value": 12
+        },
+        {
+          "name": "MoveCursorStartOfLine",
+          "value": 13
+        },
+        {
+          "name": "MoveCursorEndOfLine",
+          "value": 14
+        },
+        {
+          "name": "MoveCursorStartOfPage",
+          "value": 15
+        },
+        {
+          "name": "MoveCursorEndOfPage",
+          "value": 16
+        },
+        {
+          "name": "Redo",
+          "value": 17
+        },
+        {
+          "name": "SelectCharactersPrecisely",
+          "value": 18
+        },
+        {
+          "name": "SelectWordsPrecisely",
+          "value": 19
+        },
+        {
+          "name": "Shift",
+          "value": 20
+        },
+        {
+          "name": "ShowSubtypePicker",
+          "value": 21
+        },
+        {
+          "name": "SwitchToPrevSubtype",
+          "value": 22
+        },
+        {
+          "name": "SwitchToNextSubtype",
+          "value": 23
+        },
+        {
+          "name": "SwitchToClipboardContext",
+          "value": 24
+        },
+        {
+          "name": "SwitchToMediaContext",
+          "value": 25
+        },
+        {
+          "name": "SwitchToEditingContext",
+          "value": 26
+        },
+        {
+          "name": "ToggleOneHandedMode",
+          "value": 27
+        },
+        {
+          "name": "ToggleSmartbarVisibility",
+          "value": 28
+        },
+        {
+          "name": "Undo",
+          "value": 29
+        }
+      ]
+    },
+    {
+      "property": "SpaceBarLongPress",
+      "label": "Space bar long press",
+      "type": "SwipeAction",
+      "items": [
+        {
+          "name": "NoAction",
+          "value": 0
+        },
+        {
+          "name": "CycleToPreviousKeyboardMode",
+          "value": 1
+        },
+        {
+          "name": "CycleToNextKeyboardMode",
+          "value": 2
+        },
+        {
+          "name": "DeleteCharacter",
+          "value": 3
+        },
+        {
+          "name": "DeleteCharactersPrecisely",
+          "value": 4
+        },
+        {
+          "name": "DeleteWord",
+          "value": 5
+        },
+        {
+          "name": "DeleteWordsPrecisely",
+          "value": 6
+        },
+        {
+          "name": "HideKeyboard",
+          "value": 7
+        },
+        {
+          "name": "InsertSpace",
+          "value": 8
+        },
+        {
+          "name": "MoveCursorUp",
+          "value": 9
+        },
+        {
+          "name": "MoveCursorDown",
+          "value": 10
+        },
+        {
+          "name": "MoveCursorLeft",
+          "value": 11
+        },
+        {
+          "name": "MoveCursorRight",
+          "value": 12
+        },
+        {
+          "name": "MoveCursorStartOfLine",
+          "value": 13
+        },
+        {
+          "name": "MoveCursorEndOfLine",
+          "value": 14
+        },
+        {
+          "name": "MoveCursorStartOfPage",
+          "value": 15
+        },
+        {
+          "name": "MoveCursorEndOfPage",
+          "value": 16
+        },
+        {
+          "name": "Redo",
+          "value": 17
+        },
+        {
+          "name": "SelectCharactersPrecisely",
+          "value": 18
+        },
+        {
+          "name": "SelectWordsPrecisely",
+          "value": 19
+        },
+        {
+          "name": "Shift",
+          "value": 20
+        },
+        {
+          "name": "ShowSubtypePicker",
+          "value": 21
+        },
+        {
+          "name": "SwitchToPrevSubtype",
+          "value": 22
+        },
+        {
+          "name": "SwitchToNextSubtype",
+          "value": 23
+        },
+        {
+          "name": "SwitchToClipboardContext",
+          "value": 24
+        },
+        {
+          "name": "SwitchToMediaContext",
+          "value": 25
+        },
+        {
+          "name": "SwitchToEditingContext",
+          "value": 26
+        },
+        {
+          "name": "ToggleOneHandedMode",
+          "value": 27
+        },
+        {
+          "name": "ToggleSmartbarVisibility",
+          "value": 28
+        },
+        {
+          "name": "Undo",
+          "value": 29
+        }
+      ]
+    },
+    {
+      "property": "DeleteKeySwipeLeft",
+      "label": "Delete key swipe left",
+      "type": "SwipeAction",
+      "items": [
+        {
+          "name": "NoAction",
+          "value": 0
+        },
+        {
+          "name": "CycleToPreviousKeyboardMode",
+          "value": 1
+        },
+        {
+          "name": "CycleToNextKeyboardMode",
+          "value": 2
+        },
+        {
+          "name": "DeleteCharacter",
+          "value": 3
+        },
+        {
+          "name": "DeleteCharactersPrecisely",
+          "value": 4
+        },
+        {
+          "name": "DeleteWord",
+          "value": 5
+        },
+        {
+          "name": "DeleteWordsPrecisely",
+          "value": 6
+        },
+        {
+          "name": "HideKeyboard",
+          "value": 7
+        },
+        {
+          "name": "InsertSpace",
+          "value": 8
+        },
+        {
+          "name": "MoveCursorUp",
+          "value": 9
+        },
+        {
+          "name": "MoveCursorDown",
+          "value": 10
+        },
+        {
+          "name": "MoveCursorLeft",
+          "value": 11
+        },
+        {
+          "name": "MoveCursorRight",
+          "value": 12
+        },
+        {
+          "name": "MoveCursorStartOfLine",
+          "value": 13
+        },
+        {
+          "name": "MoveCursorEndOfLine",
+          "value": 14
+        },
+        {
+          "name": "MoveCursorStartOfPage",
+          "value": 15
+        },
+        {
+          "name": "MoveCursorEndOfPage",
+          "value": 16
+        },
+        {
+          "name": "Redo",
+          "value": 17
+        },
+        {
+          "name": "SelectCharactersPrecisely",
+          "value": 18
+        },
+        {
+          "name": "SelectWordsPrecisely",
+          "value": 19
+        },
+        {
+          "name": "Shift",
+          "value": 20
+        },
+        {
+          "name": "ShowSubtypePicker",
+          "value": 21
+        },
+        {
+          "name": "SwitchToPrevSubtype",
+          "value": 22
+        },
+        {
+          "name": "SwitchToNextSubtype",
+          "value": 23
+        },
+        {
+          "name": "SwitchToClipboardContext",
+          "value": 24
+        },
+        {
+          "name": "SwitchToMediaContext",
+          "value": 25
+        },
+        {
+          "name": "SwitchToEditingContext",
+          "value": 26
+        },
+        {
+          "name": "ToggleOneHandedMode",
+          "value": 27
+        },
+        {
+          "name": "ToggleSmartbarVisibility",
+          "value": 28
+        },
+        {
+          "name": "Undo",
+          "value": 29
+        }
+      ]
+    },
+    {
+      "property": "EmojiSkinTone",
+      "label": "Default skin tone",
+      "type": "EmojiSkinTone",
+      "items": [
+        {
+          "name": "Default",
+          "value": 0
+        },
+        {
+          "name": "Light",
+          "value": 1
+        },
+        {
+          "name": "MediumLight",
+          "value": 2
+        },
+        {
+          "name": "Medium",
+          "value": 3
+        },
+        {
+          "name": "MediumDark",
+          "value": 4
+        },
+        {
+          "name": "Dark",
+          "value": 5
+        }
+      ]
+    }
+  ],
+  "theme_controls": [
+    {
+      "property": "LightTheme",
+      "label": "Light theme"
+    },
+    {
+      "property": "DarkTheme",
+      "label": "Dark theme"
+    }
+  ],
+  "language_controls": {
+    "filter": "LanguageFilter",
+    "placeholder": "Filter languages",
+    "margin": "0,0,0,4",
+    "scroller": "LanguageScroller",
+    "max_height": 260,
+    "items": "LanguageChoices",
+    "row": "LanguageCheckBox",
+    "hint": "Enable languages; switch with the globe key, a swipe or a long press on space.",
+    "native_names": {
+      "filter": "Filter",
+      "items": "Choices"
+    }
+  },
+  "composition": "SettingsPanel.xaml plus seven source-order passive fragments; MainWindow contains one public SettingsPane, no duplicated scalar UI. Legacy port test identifiers are resolved from source labels in test_ui.rs only."
+}

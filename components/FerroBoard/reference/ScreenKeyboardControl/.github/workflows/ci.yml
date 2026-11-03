@@ -1,0 +1,146 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  core:
+    name: Core (build + tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          dotnet-version: |
+            8.0.x
+      - name: Build
+        run: dotnet build src/ScreenKeyboard.Core -c Release
+      - name: Test
+        run: >
+          dotnet test tests/ScreenKeyboard.Core.Tests -c Release
+          --logger "trx;LogFileName=results.trx"
+          --collect:"XPlat Code Coverage"
+          --results-directory TestResults
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: TestResults
+
+  uno:
+    name: Uno library (${{ matrix.os }})
+    needs: core
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            tfms: net10.0%3Bnet10.0-desktop%3Bnet10.0-browserwasm
+          - os: windows-latest
+            tfms: net10.0%3Bnet10.0-desktop%3Bnet10.0-browserwasm%3Bnet10.0-android%3Bnet10.0-windows10.0.26100
+          - os: macos-latest
+            tfms: net10.0-ios%3Bnet10.0-android
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Select latest Xcode
+        if: runner.os == 'macOS'
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Using $XCODE"
+          sudo xcode-select -s "$XCODE"
+      - name: Install workloads
+        shell: bash
+        run: |
+          case "${{ runner.os }}" in
+            macOS) dotnet workload install ios android ;;
+            Windows) dotnet workload install android ;;
+            *) echo "No workloads required" ;;
+          esac
+      - name: Build library
+        shell: bash
+        run: dotnet build src/ScreenKeyboard.Uno -c Release "-p:SkTargetFrameworks=${{ matrix.tfms }}"
+
+  sample-wasm:
+    name: Sample (WebAssembly)
+    needs: core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Install wasm-tools
+        run: dotnet workload install wasm-tools
+      - name: Publish
+        run: >
+          dotnet publish samples/ScreenKeyboard.Sample -c Release
+          -f net10.0-browserwasm -p:SkTargetFrameworks=net10.0-browserwasm
+          -o artifacts/wasm
+      - name: Upload site
+        uses: actions/upload-artifact@v7
+        with:
+          name: sample-wasm
+          path: artifacts/wasm/wwwroot
+
+  sample-desktop:
+    name: Sample (Desktop, ${{ matrix.os }})
+    needs: core
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Build
+        run: dotnet build samples/ScreenKeyboard.Sample -c Release -f net10.0-desktop -p:SkTargetFrameworks=net10.0-desktop
+
+  pack:
+    name: Pack (preview)
+    needs: [uno]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          dotnet-version: |
+            8.0.x
+      - name: Install workloads
+        run: dotnet workload install android ios wasm-tools
+      - name: Pack
+        shell: bash
+        run: |
+          VERSION="1.0.0-ci.${{ github.run_number }}"
+          dotnet pack src/ScreenKeyboard.Core -c Release -o artifacts/packages -p:Version=$VERSION
+          dotnet pack src/ScreenKeyboard.Uno -c Release -o artifacts/packages -p:Version=$VERSION \
+            "-p:SkTargetFrameworks=net10.0%3Bnet10.0-desktop%3Bnet10.0-browserwasm%3Bnet10.0-android%3Bnet10.0-ios%3Bnet10.0-windows10.0.26100"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: artifacts/packages

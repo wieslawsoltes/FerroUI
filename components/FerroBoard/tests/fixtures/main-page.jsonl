@@ -1,0 +1,64 @@
+{"operation":"constructor","input":null,"result":null,"status":null,"trace":["initialize","load","apply","attach:61.25"],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"target","input":"none","result":null,"status":"","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"target","input":"message","result":null,"status":"Typing into: Message (multi-line)","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"target","input":"no-header","result":null,"status":"Typing into: TextBox","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"target","input":"empty-header","result":null,"status":"Typing into: ","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"target","input":"password","result":null,"status":"Typing into: Password","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"target","input":"control","result":null,"status":"Typing into: Control","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":0,"name":"EmailBox","handled":false},"result":false,"status":"Enter action \u0027Default\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":0,"name":"EmailBox","handled":true},"result":true,"status":"Enter action \u0027Default\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":0,"name":"","handled":false},"result":false,"status":"Enter action \u0027Default\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":0,"name":"","handled":true},"result":true,"status":"Enter action \u0027Default\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":0,"name":null,"handled":false},"result":false,"status":"Enter action \u0027Default\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":0,"name":null,"handled":true},"result":true,"status":"Enter action \u0027Default\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":1,"name":"EmailBox","handled":false},"result":false,"status":"Enter action \u0027NewLine\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":1,"name":"EmailBox","handled":true},"result":true,"status":"Enter action \u0027NewLine\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":1,"name":"","handled":false},"result":false,"status":"Enter action \u0027NewLine\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":1,"name":"","handled":true},"result":true,"status":"Enter action \u0027NewLine\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":1,"name":null,"handled":false},"result":false,"status":"Enter action \u0027NewLine\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":1,"name":null,"handled":true},"result":true,"status":"Enter action \u0027NewLine\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":2,"name":"EmailBox","handled":false},"result":true,"status":"Enter action \u0027Go\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":2,"name":"EmailBox","handled":true},"result":true,"status":"Enter action \u0027Go\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":2,"name":"","handled":false},"result":true,"status":"Enter action \u0027Go\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":2,"name":"","handled":true},"result":true,"status":"Enter action \u0027Go\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":2,"name":null,"handled":false},"result":true,"status":"Enter action \u0027Go\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":2,"name":null,"handled":true},"result":true,"status":"Enter action \u0027Go\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":3,"name":"EmailBox","handled":false},"result":true,"status":"Enter action \u0027Search\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":3,"name":"EmailBox","handled":true},"result":true,"status":"Enter action \u0027Search\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":3,"name":"","handled":false},"result":true,"status":"Enter action \u0027Search\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":3,"name":"","handled":true},"result":true,"status":"Enter action \u0027Search\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":3,"name":null,"handled":false},"result":true,"status":"Enter action \u0027Search\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":3,"name":null,"handled":true},"result":true,"status":"Enter action \u0027Search\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":4,"name":"EmailBox","handled":false},"result":true,"status":"Enter action \u0027Send\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":4,"name":"EmailBox","handled":true},"result":true,"status":"Enter action \u0027Send\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":4,"name":"","handled":false},"result":true,"status":"Enter action \u0027Send\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":4,"name":"","handled":true},"result":true,"status":"Enter action \u0027Send\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":4,"name":null,"handled":false},"result":true,"status":"Enter action \u0027Send\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":4,"name":null,"handled":true},"result":true,"status":"Enter action \u0027Send\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":5,"name":"EmailBox","handled":false},"result":false,"status":"Enter action \u0027Next\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":5,"name":"EmailBox","handled":true},"result":true,"status":"Enter action \u0027Next\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":5,"name":"","handled":false},"result":false,"status":"Enter action \u0027Next\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":5,"name":"","handled":true},"result":true,"status":"Enter action \u0027Next\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":5,"name":null,"handled":false},"result":false,"status":"Enter action \u0027Next\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":5,"name":null,"handled":true},"result":true,"status":"Enter action \u0027Next\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":6,"name":"EmailBox","handled":false},"result":false,"status":"Enter action \u0027Previous\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":6,"name":"EmailBox","handled":true},"result":true,"status":"Enter action \u0027Previous\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":6,"name":"","handled":false},"result":false,"status":"Enter action \u0027Previous\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":6,"name":"","handled":true},"result":true,"status":"Enter action \u0027Previous\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":6,"name":null,"handled":false},"result":false,"status":"Enter action \u0027Previous\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":6,"name":null,"handled":true},"result":true,"status":"Enter action \u0027Previous\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":7,"name":"EmailBox","handled":false},"result":false,"status":"Enter action \u0027Done\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":7,"name":"EmailBox","handled":true},"result":true,"status":"Enter action \u0027Done\u0027 requested by EmailBox.","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":7,"name":"","handled":false},"result":false,"status":"Enter action \u0027Done\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":7,"name":"","handled":true},"result":true,"status":"Enter action \u0027Done\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":7,"name":null,"handled":false},"result":false,"status":"Enter action \u0027Done\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"enter","input":{"action":7,"name":null,"handled":true},"result":true,"status":"Enter action \u0027Done\u0027 requested by .","trace":[],"pane":true,"mode":"Inline","keyHeight":61.25}
+{"operation":"resize","input":{"value":899,"previous":0},"result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":[],"pane":false,"mode":"Overlay","keyHeight":61.25}
+{"operation":"resize","input":{"value":900,"previous":899},"result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":[],"pane":false,"mode":"Inline","keyHeight":61.25}
+{"operation":"resize","input":{"value":899,"previous":900},"result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":[],"pane":false,"mode":"Overlay","keyHeight":61.25}
+{"operation":"settings","input":null,"result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":[],"pane":true,"mode":"Overlay","keyHeight":61.25}
+{"operation":"loaded","input":"false","result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":["get:settings","get:focus","focus:EmailBox"],"pane":false,"mode":"Overlay","keyHeight":61.25}
+{"operation":"loaded","input":"False","result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":["get:settings","get:focus","focus:MessageBox"],"pane":true,"mode":"Overlay","keyHeight":61.25}
+{"operation":"external-setting","input":null,"result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":["save-settings"],"pane":true,"mode":"Overlay","keyHeight":61.25}
+{"operation":"unloaded","input":null,"result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":["save"],"pane":true,"mode":"Overlay","keyHeight":61.25}
+{"operation":"unloaded-again","input":null,"result":null,"status":"Enter action \u0027Done\u0027 requested by .","trace":["save"],"pane":true,"mode":"Overlay","keyHeight":61.25}

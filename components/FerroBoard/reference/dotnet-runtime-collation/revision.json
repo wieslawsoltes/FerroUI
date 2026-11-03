@@ -1,0 +1,6 @@
+{
+  "tag": "v10.0.13",
+  "commit": "6aa72daa24f66c01c3d7b6a32519e9d21396deec",
+  "selected_runtime_commit": "4099f83977f4d29604a9aeb971fb0a7bc1d5f699",
+  "scope": "Public tagged algorithm reference; exact installed servicing source still not established. Validate actual runtime outputs independently."
+}

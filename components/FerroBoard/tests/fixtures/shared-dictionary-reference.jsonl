@@ -1,0 +1,9 @@
+{"tag":"word-owner","alive":true,"same":true,"count":1,"frequency":4,"language":"xx"}
+{"tag":"user-owner","alive":true,"same":true,"count":2}
+{"tag":"aliases","word":true,"same":true,"different":true}
+{"tag":"aliases","word":false,"same":true,"different":true}
+{"tag":"released","word":true,"alive":false}
+{"tag":"released","word":false,"alive":false}
+{"tag":"strong-delegate-held","alive":true,"same":true,"count":2}
+{"tag":"strong-delegate-released","alive":false}
+{"tag":"cycle","alive":false}

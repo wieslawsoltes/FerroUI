@@ -1,0 +1,28 @@
+[package]
+name = "ferroboard-ios"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+# Native launcher, separate from the desktop/core dependency graph.
+[workspace]
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "ferroboard-ios"
+path = "main.rs"
+
+[dependencies]
+ferroboard-sample = { path = "../FerroBoard.Sample", default-features = false }
+ferroboard-core = { path = "../../src/FerroBoard.Core" }
+ferroboard-controls = { path = "../../src/FerroBoard.Controls" }
+ferroui-base = { path = "../../../../src/FerroUI.Base" }
+ferroui-controls = { path = "../../../../src/FerroUI.Controls" }
+
+[target.'cfg(target_vendor = "apple")'.dependencies]
+ferroui-ios = { path = "../../../../src/iOS/FerroUI.iOS" }
+
+objc2-foundation = { version = "=0.3.2", default-features = false, features = ["std", "NSFileManager", "NSString", "NSURL", "NSError", "NSObject", "NSPathUtilities"] }

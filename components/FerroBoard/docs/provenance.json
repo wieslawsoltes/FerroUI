@@ -1,0 +1,17 @@
+{
+  "source": "wieslawsoltes/ScreenKeyboardControl",
+  "source_revision": "3694995fabbebc45a801a455880e3d31888367f1",
+  "import_archive_sha256": "a410f3087bbf6691ff0f2179b7dd98cdd1d8b86fe9fb626c8e4a1abfebc798ad",
+  "base": "df8b92d9438a7f1f797f9f86c2c4c602e3a4bf75",
+  "framework_prerequisites": [
+    "065b2c15e48b58d14195ab6072198e66f027a486",
+    "49ea55f1e2e1b1f48dd8e9af9e92c8826c840362",
+    "3a4b63c0186a326f84f953bdd54b42b72f29cb68",
+    "e495110253c03c40ac066d1c0b47c80a92cf5611",
+    "f926006a1450477788131df3b42897f89beae9f5",
+    "708be08aa6d30f6f09a8e7c83394628537743dc5"
+  ],
+  "scope": "Rust-native keyboard algorithms/resources/controls and standalone workspace. Historical source/member maps retain their original evidence scope; no full port/platform completion claim.",
+  "runtime_emulation_added": false,
+  "framework_generated_follow_up": "Five generated builder lines expose the native pointer-focus property."
+}

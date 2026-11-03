@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:app="using:FerroBoard.Sample"
+ xmlns:sk="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls"
+ xmlns:e="clr-namespace:FerroBoard.Engine;assembly=FerroBoard.Core"
+ xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core"
+ x:Class="FerroBoard.Sample.MainView" x:DataType="app:SampleBindings"
+ RequestedThemeVariant="{CompiledBinding RequestedThemeVariant}">
+ <sk:ScreenKeyboardHost x:Name="Host" VisibilityMode="Auto">
+  <x:Arguments>
+  <sk:OnScreenKeyboard>
+   <x:Arguments><e:KeyboardEngine><x:Arguments>
+    <s:KeyboardSettings/>
+    <x:Static Member="app:SampleComposition.Resources"/>
+    <x:Null/>
+   </x:Arguments></e:KeyboardEngine></x:Arguments>
+  </sk:OnScreenKeyboard>
+
+  </x:Arguments>
+ <Grid RowDefinitions="Auto,*">
+  <Grid Margin="24,18,24,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+   <StackPanel Spacing="4">
+   <TextBlock Text="FerroBoard" FontSize="28" FontWeight="SemiBold"/>
+   <TextBlock Text="Tap a field to type. Try long press, glide, space-bar cursor movement and the emoji panel." TextWrapping="Wrap"/>
+   </StackPanel>
+   <ToggleButton Grid.Column="1" x:Name="SettingsToggle" Content="Settings" VerticalAlignment="Top" IsChecked="{CompiledBinding SettingsPaneOpen, Mode=TwoWay}"/>
+  </Grid>
+  <SplitView Grid.Row="1" x:Name="Split" PanePlacement="Right" OpenPaneLength="380" Margin="24,0,24,12" DisplayMode="{CompiledBinding SettingsDisplayMode}" IsPaneOpen="{CompiledBinding SettingsPaneOpen, Mode=TwoWay}">
+   <ScrollViewer>
+    <StackPanel Spacing="8">
+     <TextBlock Text="Message (multi-line)"/>
+     <TextBox x:Name="MessageBox" AutomationProperties.Name="Message (multi-line)" AcceptsReturn="True" TextInputOptions.Multiline="True" TextInputOptions.AutoCapitalization="True" TextWrapping="Wrap" MinHeight="100" PlaceholderText="Write something…" Text="{CompiledBinding Message, Mode=TwoWay}"/>
+     <TextBlock Text="Full name"/>
+     <TextBox x:Name="NameBox" AutomationProperties.Name="Full name" PlaceholderText="Words are capitalized" TextInputOptions.ContentType="Name"/>
+     <TextBlock Text="Email"/>
+     <TextBox x:Name="EmailBox" AutomationProperties.Name="Email" PlaceholderText="@ key and no auto-capitalization" TextInputOptions.ContentType="Email" TextInputOptions.ReturnKeyType="Next" sk:ScreenKeyboardInput.EnterAction="Next"/>
+     <TextBlock Text="Website"/>
+     <TextBox x:Name="WebsiteBox" AutomationProperties.Name="Website" PlaceholderText="URL layout with / key" TextInputOptions.ContentType="Url"/>
+     <TextBlock Text="Search"/>
+     <TextBox x:Name="SearchBox" AutomationProperties.Name="Search" PlaceholderText="Enter requests search" TextInputOptions.ContentType="Search"/>
+     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+      <StackPanel Spacing="4"><TextBlock Text="Amount"/><TextBox x:Name="AmountBox" AutomationProperties.Name="Amount" TextInputOptions.ContentType="Digits"/></StackPanel>
+      <StackPanel Grid.Column="1" Spacing="4"><TextBlock Text="Phone"/><TextBox x:Name="PhoneBox" AutomationProperties.Name="Phone" TextInputOptions.ContentType="Digits" sk:ScreenKeyboardInput.InputKind="Phone"/></StackPanel>
+     </Grid>
+     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+      <StackPanel Spacing="4"><TextBlock Text="Price"/><TextBox x:Name="PriceBox" AutomationProperties.Name="Price" TextInputOptions.ContentType="Number"/></StackPanel>
+      <StackPanel Grid.Column="1" Spacing="4"><TextBlock Text="Password"/><sk:ProtectedPasswordTextBox x:Name="PasswordField" AutomationProperties.Name="Password" PasswordChar="●" PlaceholderText="Nothing is learned here"/></StackPanel>
+     </Grid>
+     <TextBlock Text="Chat"/>
+     <TextBox x:Name="ChatBox" AutomationProperties.Name="Chat" sk:ScreenKeyboardInput.InputKind="Chat" PlaceholderText="Enter sends; :shortcodes suggest emoji"/>
+     <TextBlock Text="Private note"/>
+     <TextBox x:Name="PrivateNoteBox" AutomationProperties.Name="Private note" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80" TextInputOptions.Multiline="True" TextInputOptions.AutoCapitalization="True" TextInputOptions.IsSensitive="True" sk:ScreenKeyboardInput.IsPrivate="True" PlaceholderText="Private text: keyboard learning and history are disabled"/>
+     <TextBlock Text="PIN"/>
+     <TextBox x:Name="PinBox" AutomationProperties.Name="PIN" PasswordChar="●" TextInputOptions.ContentType="Digits" PlaceholderText="Numeric password"/>
+     <TextBox AutomationProperties.Name="No suggestions" PlaceholderText="No suggestions" sk:ScreenKeyboardInput.SuggestionsEnabled="False"/>
+     <TextBox x:Name="DisabledKeyboardBox" AutomationProperties.Name="Keyboard disabled" PlaceholderText="Keyboard disabled — use your physical keyboard" sk:ScreenKeyboardInput.IsEnabled="False"/>
+     <TextBlock x:Name="StatusText" Text="{CompiledBinding Status}" Opacity="0.7" TextWrapping="Wrap"/>
+    </StackPanel>
+   </ScrollViewer>
+   <SplitView.Pane><app:SettingsPanel x:Name="SettingsPane"/></SplitView.Pane>
+  </SplitView>
+ </Grid>
+ </sk:ScreenKeyboardHost>
+</UserControl>

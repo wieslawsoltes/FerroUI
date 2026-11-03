@@ -1,0 +1,7 @@
+<k:ScreenKeyboardHost xmlns="https://github.com/ferroui"
+ xmlns:k="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls"
+ VisibilityMode="Manual" IsAnimated="False">
+ <TextBox Text="mail" k:ScreenKeyboardInput.InputKind="Email"
+  k:ScreenKeyboardInput.EnterAction="Send" k:ScreenKeyboardInput.IsPrivate="True"
+  k:ScreenKeyboardInput.SuggestionsEnabled="False"/>
+</k:ScreenKeyboardHost>

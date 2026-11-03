@@ -1,0 +1,14 @@
+{"input":"en_US","result":"en-US","appleFallback":false}
+{"input":"en_GB","result":"en-GB","appleFallback":false}
+{"input":"pt_PT","result":"pt-PT","appleFallback":false}
+{"input":"de_DE@collation=phonebook","result":"de-DE_phonebook","appleFallback":false}
+{"input":"tr_TR","result":"tr-TR","appleFallback":false}
+{"input":"sv_SE","result":"sv-SE","appleFallback":false}
+{"input":"ja_JP","result":"ja-JP","appleFallback":false}
+{"input":"zh_Hant_TW","result":"zh-Hant-TW","appleFallback":false}
+{"input":"sr_Cyrl_RS","result":"sr-Cyrl-RS","appleFallback":false}
+{"input":"en_US@calendar=gregorian","result":"en-US","appleFallback":false}
+{"input":"en_US_POSIX@collation=search","result":"en-US-POSIX_search","appleFallback":false}
+{"input":"und","result":"und","appleFallback":false}
+{"input":"","result":"en-PT","appleFallback":true}
+{"input":"en_US_POSIX","result":"en-PT","appleFallback":true}

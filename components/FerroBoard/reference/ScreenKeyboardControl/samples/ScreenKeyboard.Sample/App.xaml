@@ -1,0 +1,48 @@
+<Application x:Class="ScreenKeyboard.Sample.App"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:skt="using:ScreenKeyboard.Controls.Themes">
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <!-- Load WinUI resources -->
+        <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- A keyboard theme defined in XAML (registered in App.xaml.cs). -->
+      <skt:KeyboardTheme x:Key="SunsetTheme"
+                         Id="sample_sunset"
+                         Name="Sunset (XAML)"
+                         IsDark="True"
+                         Background="#FF2B1B2E"
+                         KeyBackground="#FF46304A"
+                         KeyPressedBackground="#FF5E4263"
+                         KeyForeground="#FFFFE9D6"
+                         KeyHintForeground="#FFE0A98A"
+                         FunctionKeyBackground="#FF37263A"
+                         FunctionKeyPressedBackground="#FF4A344E"
+                         FunctionKeyForeground="#FFFFE9D6"
+                         AccentKeyBackground="#FFFF7B54"
+                         AccentKeyPressedBackground="#FFE0643F"
+                         AccentKeyForeground="#FF2B1B2E"
+                         SpaceKeyForeground="#FFE0A98A"
+                         CapsLockForeground="#FFFFB26B"
+                         PopupBackground="#FF46304A"
+                         PopupForeground="#FFFFE9D6"
+                         PopupSelectedBackground="#FFFF7B54"
+                         PopupSelectedForeground="#FF2B1B2E"
+                         SmartbarBackground="#FF2B1B2E"
+                         SmartbarForeground="#FFFFE9D6"
+                         SuggestionHighlightForeground="#FFFFB26B"
+                         PanelBackground="#FF2B1B2E"
+                         PanelForeground="#FFFFE9D6"
+                         PanelItemBackground="#FF46304A"
+                         PanelSelectedForeground="#FFFF7B54"
+                         GlideTrailColor="#FFFF7B54"
+                         KeyCornerRadius="14" />
+
+    </ResourceDictionary>
+  </Application.Resources>
+
+</Application>

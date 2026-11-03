@@ -1,0 +1,7 @@
+{"profile":"empty","error":null,"log":[],"state":{"columns":0,"children":[]},"recovery":{"columns":3,"children":["TouchButton","Border","TouchButton"]}}
+{"profile":"ordinary","error":null,"log":[],"state":{"columns":3,"children":["TouchButton","Border","TouchButton"]},"recovery":{"columns":3,"children":["TouchButton","Border","TouchButton"]}}
+{"profile":"null-first","error":"NullReferenceException","log":[],"state":{"columns":1,"children":[]},"recovery":{"columns":3,"children":["TouchButton","Border","TouchButton"]}}
+{"profile":"null-second","error":"NullReferenceException","log":[],"state":{"columns":3,"children":["TouchButton","Border"]},"recovery":{"columns":3,"children":["TouchButton","Border","TouchButton"]}}
+{"profile":"index-fault","error":"ApplicationException","log":["count","get:0","get:1"],"state":{"columns":3,"children":["TouchButton","Border"]},"recovery":{"columns":3,"children":["TouchButton","Border","TouchButton"]}}
+{"profile":"count-fault","error":"ApplicationException","log":["count"],"state":{"columns":0,"children":[]},"recovery":{"columns":3,"children":["TouchButton","Border","TouchButton"]}}
+{"profile":"negative-count","error":null,"log":["count"],"state":{"columns":0,"children":[]},"recovery":{"columns":3,"children":["TouchButton","Border","TouchButton"]}}

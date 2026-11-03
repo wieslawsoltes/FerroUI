@@ -1,0 +1,13 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:l="clr-namespace:FerroBoard.Layouts;assembly=FerroBoard.Core"
+ x:DataType="l:KeyComputeContext">
+ <StackPanel.DataContext>
+  <l:KeyComputeContext Culture="tr-TR" ShiftState="ShiftedManual" SpaceBarLabel="TR 😀"/>
+ </StackPanel.DataContext>
+ <ContentControl Content="{CompiledBinding Culture}"/>
+ <ContentControl>
+  <ContentControl.Content><l:KeyEvaluator Mode="Symbols" CultureOverride="ja-JP"/></ContentControl.Content>
+ </ContentControl>
+ <ContentControl Content="{CompiledBinding SpaceBarLabel}"/>
+</StackPanel>

@@ -1,0 +1,17 @@
+[package]
+name = "ferroboard-core-ferro"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+links = "ferroboard_core_ferro_xaml"
+build = "build.rs"
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroboard-core = { path = "../FerroBoard.Core" }
+ferroui-base.workspace = true
+ferroui-system.workspace = true
+[build-dependencies]
+ferroui-build-scan.workspace = true
+[dev-dependencies]
+ferroui-build-scan.workspace = true

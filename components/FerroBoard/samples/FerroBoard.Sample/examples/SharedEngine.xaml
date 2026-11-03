@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="FerroBoard Shared Engine Check" Width="940" Height="840"
+ MinWidth="800" MinHeight="780">
+ <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,*,*" RowSpacing="10">
+  <TextBlock Text="Two native keyboard views, one shared engine" FontSize="22"/>
+  <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="12">
+   <StackPanel Spacing="4">
+    <TextBlock Text="Field A (retired view)"/>
+    <TextBox x:Name="FieldA" PlaceholderText="Must remain empty"/>
+   </StackPanel>
+   <StackPanel Grid.Column="1" Spacing="4">
+    <TextBlock Text="Field B (active view)"/>
+    <TextBox x:Name="FieldB" PlaceholderText="Type using keyboard B"/>
+   </StackPanel>
+  </Grid>
+  <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12">
+   <Button x:Name="ReleaseA" Content="Release view A" Focusable="False" AllowFocusOnInteraction="False"/>
+   <Button x:Name="ReleaseB" Content="Release view B" Focusable="False" AllowFocusOnInteraction="False"/>
+  </StackPanel>
+  <TextBlock Grid.Row="3" x:Name="Status" Text="Preparing native adapters"/>
+  <StackPanel Grid.Row="4" Spacing="4">
+   <TextBlock Text="Keyboard A"/>
+   <ContentControl x:Name="ViewA"/>
+  </StackPanel>
+  <StackPanel Grid.Row="5" Spacing="4">
+   <TextBlock Text="Keyboard B"/>
+   <ContentControl x:Name="ViewB"/>
+  </StackPanel>
+ </Grid>
+</Window>

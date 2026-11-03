@@ -1,0 +1,11 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:e="clr-namespace:FerroBoard.Editor;assembly=FerroBoard.Core"
+ x:DataType="e:InputAttributes">
+ <StackPanel.DataContext>
+  <e:InputAttributes Kind="Email" EnterAction="Send" Capitalization="None"
+    IsMultiline="True" AllowSuggestions="False" AllowAutoCorrect="False" IsPrivate="True"/>
+ </StackPanel.DataContext>
+ <ContentControl Content="{CompiledBinding Kind}"/>
+ <ContentControl Content="{CompiledBinding IsPrivate}"/>
+</StackPanel>

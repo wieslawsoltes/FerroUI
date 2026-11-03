@@ -1,0 +1,6 @@
+{"tag":"list-facet","name":"default","indexed":true,"count":3,"readOnly":true,"fixedSize":true}
+{"tag":"list-facet","name":"list","indexed":true,"count":3,"readOnly":false,"fixedSize":false}
+{"tag":"list-facet","name":"array","indexed":true,"count":3,"readOnly":false,"fixedSize":true}
+{"tag":"list-facet","name":"empty-list","indexed":true,"count":0,"readOnly":false,"fixedSize":false}
+{"tag":"list-facet","name":"empty-array","indexed":true,"count":0,"readOnly":false,"fixedSize":true}
+{"tag":"list-facet","name":"dictionary-words","indexed":true,"count":1,"readOnly":false,"fixedSize":false}

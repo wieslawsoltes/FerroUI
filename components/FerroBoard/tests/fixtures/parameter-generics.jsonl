@@ -1,0 +1,3 @@
+{"site":"type","error":"System.ArgumentException"}
+{"site":"method","error":"System.ArgumentException"}
+{"site":"substitution","name":"value","type":"System.Int32\u0026","input":false,"output":false,"optional":false,"shared":true}

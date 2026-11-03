@@ -1,0 +1,7 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:a="clr-namespace:FerroBoard.Controls.Views;assembly=FerroBoard.Controls"
+ x:DataType="a:SmartbarAction">
+ <TextBlock Text="{CompiledBinding Id}"/>
+ <TextBlock Text="{CompiledBinding Name}"/>
+</StackPanel>

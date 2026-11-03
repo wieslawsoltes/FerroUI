@@ -1,0 +1,29 @@
+[package]
+name = "ferroboard-native-consumer"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+build = "build.rs"
+
+# Separate downstream workspace; no dependency on the sample or its test helpers.
+[workspace]
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroboard-controls = { path = "../../src/FerroBoard.Controls" }
+ferroboard-core = { path = "../../src/FerroBoard.Core" }
+ferroboard-core-ferro = { path = "../../src/FerroBoard.Core.Ferro" }
+ferroui-base = { path = "../../../../src/FerroUI.Base" }
+ferroui-controls = { path = "../../../../src/FerroUI.Controls" }
+ferroui-system = { path = "../../../../src/FerroUI.System" }
+ferroui-markup-xaml = { path = "../../../../src/Markup/FerroUI.Markup.Xaml" }
+
+[build-dependencies]
+ferroui-build = { path = "../../../../src/FerroUI.Build.Tasks" }
+
+[dev-dependencies]
+ferroui-headless = { path = "../../../../src/Headless/FerroUI.Headless" }
+ferroui-markup-xaml-loader = { path = "../../../../src/Markup/FerroUI.Markup.Xaml.Loader" }
