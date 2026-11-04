@@ -590,14 +590,24 @@ increase entry storage and generic subscription code, so allocation bytes and
 native size must also be measured. The eight existing boxed lifetime/restart
 regressions remain unchanged.
 
-The new `property-capabilities` gate requires 415 distinct successful tests
-and 27 named cases, then Base/Controls and a fresh WinUI `solid-theme` check
-with exactly 18 whole-theme and 34 Style region programs. The
+The new `property-capabilities` gate requires 415 successful test executions,
+411 distinct tests and 27 named cases, then Base/Controls and a fresh WinUI
+`solid-theme` check with exactly 18 whole-theme and 34 Style region programs.
+The four metadata-override tests selected by both the existing
+`tests::ferro_object_tests` and `metadata::` filters are checked by exact name
+and phase; every other test must occur once. The
 [combined source review and frozen plan](benchmarks/compiled-theme-property-capabilities-source-prototype-linux-x86_64.json)
 retain the exact implementation, profile-query and independent review evidence.
-Actual execution is pending. Default/end and the boxed-delivery correction
-are not yet integrated into this PR's runtime; their production size and
-performance claims remain open.
+The [first actual run](https://github.com/wieslawsoltes/FerroUI/actions/runs/41872498614)
+passed all eight test commands and all 27 mandatory cases, then failed before
+downstream compilation because the original plan incorrectly required 415
+distinct tests. The retained
+[inventory correction evidence](benchmarks/compiled-theme-property-capabilities-source-inventory-correction-linux-x86_64.json)
+records that failure and its exact four overlaps. The corrected gate retains
+every original filter, per-suite count and mandatory case and reruns the same
+immutable source. Its downstream checks remain pending. Default/end and the
+boxed-delivery correction are not yet integrated into this PR's runtime;
+their production size and performance claims remain open.
 
 ### Earlier source history
 

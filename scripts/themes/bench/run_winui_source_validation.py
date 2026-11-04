@@ -69,6 +69,15 @@ PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS = {
     "region_programs": 34,
 }
 
+# Cargo filters are substrings: metadata:: also selects these four existing
+# property-runtime tests. Preserve both executions and guard their exact names.
+PROPERTY_CAPABILITIES_EXPECTED_OVERLAPS = {
+    "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_add_ownered_property": ["metadata", "property-runtime"],
+    "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class": ["metadata", "property-runtime"],
+    "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property": ["metadata", "property-runtime"],
+    "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class": ["metadata", "property-runtime"],
+}
+
 
 def identity(path):
     path = Path(path).resolve(strict=True)
@@ -165,6 +174,42 @@ def successful_tests(contents, label):
     return dict(zip(("passed", "failed", "ignored"), map(int, summaries[0]))), passed
 
 
+def successful_property_capabilities_tests(contents, label):
+    summary, passed = successful_tests(contents, label)
+    executions = re.findall(r"(?m)^test ([A-Za-z_][A-Za-z_0-9:]*)(?: - should panic)? \.\.\. ok$", contents)
+    if len(executions) != len(passed):
+        raise RuntimeError(f"{label} contains duplicate successful test execution lines")
+    return summary, passed
+
+
+def property_capabilities_inventory(rows, required_tests):
+    expected = PROPERTY_CAPABILITIES_EXPECTED_SUMMARIES
+    labels = [row["label"] for row in rows]
+    if len(labels) != len(expected) or set(labels) != set(expected):
+        raise RuntimeError("property-capabilities requires exactly one result for each of its eight test phases")
+    observed = {}
+    executions = 0
+    for row in rows:
+        label = row["label"]
+        if row.get("complete") is not True or row.get("exit") != 0 or row.get("test_summary") != expected[label]:
+            raise RuntimeError(f"{label} does not match its completed frozen test summary")
+        names = row["passed_tests"]
+        if len(names) != expected[label]["passed"] or len(set(names)) != len(names):
+            raise RuntimeError(f"{label} execution count or distinct test names do not match its summary")
+        executions += len(names)
+        for name in names:
+            observed.setdefault(name, []).append(label)
+    overlaps = {name: sorted(phases) for name, phases in observed.items() if len(phases) > 1}
+    if overlaps != PROPERTY_CAPABILITIES_EXPECTED_OVERLAPS:
+        raise RuntimeError("property-capabilities test overlaps differ from the four frozen property-runtime/metadata cases")
+    if executions != 415 or len(observed) != 411:
+        raise RuntimeError("property-capabilities requires exactly 415 successful executions and 411 distinct tests")
+    if len(required_tests) != 27 or len(set(required_tests)) != 27 or not set(required_tests) <= observed.keys():
+        raise RuntimeError("property-capabilities did not pass all 27 distinct required regressions")
+    return {"total_passed_executions": executions, "total_distinct_passed": len(observed),
+            "repeated_test_executions": executions - len(observed), "test_name_overlaps": overlaps}
+
+
 def collect_generated_winui(target, evidence):
     generated = []
     for path in sorted(target.rglob("compiled_xaml.rs")):
@@ -259,6 +304,8 @@ def main():
     elif args.suite == "property-capabilities":
         report["expected_test_summaries"] = PROPERTY_CAPABILITIES_EXPECTED_SUMMARIES
         report["expected_total_passed"] = 415
+        report["expected_total_distinct_passed"] = 411
+        report["expected_name_overlaps"] = PROPERTY_CAPABILITIES_EXPECTED_OVERLAPS
         report["expected_generated_program_counts"] = PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS
     tracked = evidence / "tracked-inputs.txt"
     tracked.write_text(git(source, "ls-files", "--stage") + "\n")
@@ -285,9 +332,8 @@ def main():
                     raise RuntimeError(f"required regressions did not pass: {sorted(missing)}")
                 report["required_tests_passed"] = sorted(set(args.required_test) & passed_tests)
                 if args.suite == "property-capabilities":
-                    report["total_distinct_passed"] = len(passed_tests)
-                    if len(passed_tests) != report["expected_total_passed"]:
-                        raise RuntimeError("property-capabilities did not run exactly 415 distinct successful tests")
+                    report.update(property_capabilities_inventory(
+                        [row for row in report["commands"] if "test_summary" in row], args.required_test))
             log = evidence / (label + ".log")
             resources = evidence / (label + "-resources.txt")
             argv = ["/usr/bin/time", "-v", "-o", str(resources), *command]
@@ -305,7 +351,8 @@ def main():
                     raise RuntimeError(f"{label} exited {row['exit']}; see {log}")
                 if label in test_labels:
                     contents = log.read_text()
-                    row["test_summary"], passed = successful_tests(contents, label)
+                    parse_tests = successful_property_capabilities_tests if args.suite == "property-capabilities" else successful_tests
+                    row["test_summary"], passed = parse_tests(contents, label)
                     row["passed_tests"] = sorted(passed)
                     expected = report.get("expected_test_summaries", {}).get(label)
                     if expected is not None and row["test_summary"] != expected:
