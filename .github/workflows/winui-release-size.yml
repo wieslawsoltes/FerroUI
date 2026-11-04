@@ -5,15 +5,15 @@ on:
     inputs:
       candidate:
         description: 'Candidate commit (complete original-workload PGO rebuild)'
-        default: 'd2d2f83d606f547b4ebda2323a145b14ca8379ad'
+        default: 'ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad'
         required: true
         type: string
       reference:
         description: 'Reference commit (same consumer path, toolchain and policy)'
-        default: 'be91062df9bb018de78113c34a1967c60038f9b6'
+        default: 'd2d2f83d606f547b4ebda2323a145b14ca8379ad'
         required: true
         type: string
-  # Publishing this reviewed workflow can start the fallback once. Ordinary
+  # Updating this frozen source pair starts its reviewed comparison. Ordinary
   # source/tooling pushes on the PR branch do not launch these expensive builds.
   push:
     branches: ['perf/compact-xaml-theme-codegen']
@@ -46,8 +46,8 @@ jobs:
           sudo apt-get install -y build-essential binutils curl xz-utils pkg-config libfontconfig1-dev libfreetype6-dev
       - name: Rebuild, collect and validate both revisions sequentially
         env:
-          CANDIDATE_REVISION: ${{ inputs.candidate || 'd2d2f83d606f547b4ebda2323a145b14ca8379ad' }}
-          REFERENCE_REVISION: ${{ inputs.reference || 'be91062df9bb018de78113c34a1967c60038f9b6' }}
+          CANDIDATE_REVISION: ${{ inputs.candidate || 'ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad' }}
+          REFERENCE_REVISION: ${{ inputs.reference || 'd2d2f83d606f547b4ebda2323a145b14ca8379ad' }}
         run: |
           python3 scripts/themes/bench/run_winui_release_comparison.py \
             --repository "$GITHUB_WORKSPACE" \
