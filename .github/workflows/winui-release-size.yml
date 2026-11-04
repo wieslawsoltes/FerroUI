@@ -1,0 +1,68 @@
+name: Editable WinUI release size
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: 'Candidate commit (complete original-workload PGO rebuild)'
+        default: 'd2d2f83d606f547b4ebda2323a145b14ca8379ad'
+        required: true
+        type: string
+      reference:
+        description: 'Reference commit (same consumer path, toolchain and policy)'
+        default: 'be91062df9bb018de78113c34a1967c60038f9b6'
+        required: true
+        type: string
+  # Publishing this reviewed workflow can start the fallback once. Ordinary
+  # source/tooling pushes on the PR branch do not launch these expensive builds.
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-release-size.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-release-size-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-comparison:
+    name: Two complete editable releases and correctness evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      CARGO_TERM_COLOR: never
+      CARGO_INCREMENTAL: 0
+      RUST_BACKTRACE: 1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Native build and archive dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config libfontconfig1-dev libfreetype6-dev
+      - name: Rebuild, collect and validate both revisions sequentially
+        env:
+          CANDIDATE_REVISION: ${{ inputs.candidate || 'd2d2f83d606f547b4ebda2323a145b14ca8379ad' }}
+          REFERENCE_REVISION: ${{ inputs.reference || 'be91062df9bb018de78113c34a1967c60038f9b6' }}
+        run: |
+          python3 scripts/themes/bench/run_winui_release_comparison.py \
+            --repository "$GITHUB_WORKSPACE" \
+            --work-dir "$RUNNER_TEMP/winui-release-comparison" \
+            --candidate "$CANDIDATE_REVISION" \
+            --reference "$REFERENCE_REVISION"
+      - name: Preserve complete results, inputs and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-editable-release-comparison-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-release-comparison/evidence
+          # Only retained source/results are uploaded; Cargo credentials and
+          # mutable caches live outside this evidence directory.
+          include-hidden-files: true
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 14

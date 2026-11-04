@@ -162,6 +162,19 @@ checksummed official components into an explicitly selected benchmark work
 directory. It records compiler and LLVM identities without changing a system
 toolchain.
 
+The [isolated archive-tool producer](../scripts/themes/bench/prepare_portable_packer.py)
+copies the production portable codecs, XamlX and CLI byte for byte. Its small
+parser facade retains the exact lexical parser method and both namespace
+compatibility mappings. This lets archive preparation compile without the
+framework's Base library. The resulting tool reproduced all eight retained
+archive byte hashes, including each supported scalar/structural encoding;
+[the executed evidence](benchmarks/compiled-theme-portable-packer-linux-x86_64.json)
+records the dependency lock, source copies, compiler and output identities.
+Only that tool executable is supplied through `--packer`. The application still
+compiles the original Loader and Base packages. The validation edit now requires
+all three normal-density font definitions in `Generic.xaml`, matching the
+original training edit, while Compact edits still require exactly one anchor.
+
 The [whole-graph replay driver](../scripts/themes/bench/rebuild_winui_pgo.py)
 executes that policy for one frozen revision. It preserves the original thirteen
 training launches and verifies the three training-source hashes and shipping
@@ -207,6 +220,18 @@ must match the shipping binary before that companion can supply attribution.
 The shipping executable's bytes remain unchanged. Reuse the same compilation
 paths for the reference, with a fresh reference result directory and a freshly
 trained reference profile.
+
+The [comparison orchestrator](../scripts/themes/bench/run_winui_release_comparison.py)
+performs this sequence for both revisions and then checks nine archive cases,
+47 registration tests, compact unwinding and all 156 template activations
+against each real production graph. Its
+[CI workflow](../.github/workflows/winui-release-size.yml) provides a separate
+runner when local shared-memory pressure prevents the full build. Manual inputs
+select exact revisions; the PR branch's automatic trigger is limited to changes
+to that workflow file. The job has read-only repository permissions and uploads
+evidence on success or failure. This comparison does not yet execute the full
+paired property, binding, metadata and animation performance matrix; its final
+report keeps that acceptance work explicitly pending.
 
 The [template validation producer](../scripts/themes/bench/prepare_template_validation.py)
 retains the four original control factories, loader paths, font assertions and
