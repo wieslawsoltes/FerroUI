@@ -171,6 +171,41 @@ the separately observed `TypeId` promotion difference. The existing production
 correctness, allocation and paired delivery gates must pass before acceptance.
 [Patch, review and retained diagnostic evidence](benchmarks/compiled-theme-boxed-binding-correction-review-linux-x86_64.json).
 
+### Comparing subsequent production graphs
+
+The boxed correction is committed at
+[`ad926b4d`](https://github.com/wieslawsoltes/FerroUI/commit/ad926b4d10a68465b5bbc9fe203fa908dc785f59).
+Its separate CI comparison freezes `ab595dd9` as reference. The earlier cold
+initialization comparison remains a separate `d2d2f83d` to `ab595dd9` cohort.
+Neither running comparison establishes a new size or throughput result yet.
+
+The runtime importer now supports a derived arm selection across completed CI
+imports. Each arm retains its original comparison, source, graph, profile and
+tool identities. Relocations remain in separate origin namespaces because two
+CI runs can use the same absolute build paths for different files. The derived
+record does not pretend to be a newly matched build. Twenty read-only checks
+passed, including rejection of altered identities, graph inventories, source
+associations and ambiguous origins. The positive two-origin tooling test uses
+two imports of the same old evidence, not an uncompleted new build.
+[Tooling checks and execution plan](benchmarks/compiled-theme-runtime-cohort-tooling-linux-x86_64.json).
+
+Receiver policies are explicit: the original `be91062d` reference clones exact
+shared receivers, while `ab595dd9` and `ad926b4d` borrow them. The public callable
+fixture keeps its recorded strong-count expectation for the chosen policy.
+The full runtime runner retains the existing sixteen companion links and all
+checks/timing protocols. Reusing an already verified reference executable is
+a separate, explicitly recorded procedure through the individual producers;
+historical timings are never substituted for fresh paired samples.
+
+```sh
+python3 scripts/themes/bench/run_winui_runtime_comparison.py compose \
+  --reference-import /evidence/original/import.json \
+  --reference-arm reference --reference-receiver-policy cloned \
+  --candidate-import /evidence/corrected/import.json \
+  --candidate-arm candidate --candidate-receiver-policy borrowed \
+  --output /evidence/acceptance-selection
+```
+
 ## Source checkpoint
 
 The runtime and focused regression tests are committed through

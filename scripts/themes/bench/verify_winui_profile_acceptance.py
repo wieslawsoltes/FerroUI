@@ -166,7 +166,9 @@ class Audit:
         require(not self.output.exists(), "Use a fresh audit directory; previous evidence is never overwritten")
         self.output.mkdir(parents=True)
         self.import_path = args.import_manifest.resolve(strict=True)
-        self.import_record = read(self.import_path)
+        import run_winui_runtime_comparison
+        self.import_helper = run_winui_runtime_comparison
+        self.import_record = self.import_helper.verify_import(self.import_path)
         require(self.import_record.get("complete"), "Artifact import must complete before profile inspection")
         self.prefix = args.toolchain_prefix.resolve(strict=True)
         self.llvm = self.prefix / "lib/rustlib" / HOST / "bin"
@@ -176,24 +178,25 @@ class Audit:
         Path(self.environment["TMPDIR"]).mkdir()
         self.report = {"schema_version": 1, "scope": __doc__, "complete": False, "accepted": False,
                        "import_manifest": identity(self.import_path), "producer": identity(Path(__file__)),
+                       "import_verifier": identity(Path(self.import_helper.__file__)),
                        "cpu": args.cpu, "started_unix": time.time(), "arms": {}, "commands": [],
                        "removed_environment_names": sorted(set(os.environ) - set(clean_environment)),
                        "limits": {"maximum_disassembled_members_per_arm": 2,
                                   "historical_entry_counts_are_not_thresholds": True,
                                   "throughput_and_final_native_layout": "Not established by this check."}}
-        self.tracked = [self.report["import_manifest"], self.report["producer"]]
+        self.tracked = [self.report["import_manifest"], self.report["producer"], self.report["import_verifier"]]
         self.persist()
 
     def persist(self):
         save(self.output / "result.json", self.report)
 
-    def checked(self, local, original):
+    def checked(self, local, original, arm):
         actual = identity(Path(local["path"]))
         require(actual == local, f"Imported file changed: {local['path']}")
         for key in ("sha256", "bytes"):
             if key in original:
                 require(actual[key] == original[key], f"Imported bytes differ from original: {original['path']}")
-        relocation = self.import_record["relocations"].get(original["path"])
+        relocation = self.import_helper.relocation_for(self.import_record, arm, original["path"])
         require(relocation is not None and relocation["local"] == local, "Missing exact import relocation")
         for key, value in original.items():
             require(relocation["original"].get(key) == value, "Original relocation identity differs")
@@ -216,7 +219,7 @@ class Audit:
     def arm(self, name):
         imported = self.import_record["arms"][name]
         original = imported["original"]
-        paths = {key: self.checked(imported[key], original[key]) for key in
+        paths = {key: self.checked(imported[key], original[key], name) for key in
                  ("build", "base_manifest", "source_manifest", "compiler_record", "profile", "base", "shipping")}
         build, base, source, compiler = (read(paths[key]) for key in ("build", "base_manifest", "source_manifest", "compiler_record"))
         require(build.get("complete") and build.get("source_files_unchanged") and build.get("tool_identities_unchanged"),

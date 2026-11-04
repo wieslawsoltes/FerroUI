@@ -27,6 +27,8 @@ import sys
 HERE = Path(__file__).resolve().parent
 HOST = "x86_64-unknown-linux-gnu"
 ARMS = ("reference", "candidate")
+SELECTION_KIND = "runtime-arm-selection"
+RECEIVER_POLICIES = ("cloned", "borrowed")
 CALLABLE = ("receivers", "getters", "animation", "animation-allocations", "keyframes")
 PROPERTY = ("qa", "allocations", "mixed")
 
@@ -255,10 +257,147 @@ def import_evidence(args):
     print(destination)
 
 
+def toolchain_content(record):
+    """Compare distributions/tools, while retaining each origin's actual paths."""
+    return {
+        "host": record["host"], "compiler": record["compiler"],
+        "components": {name: {key: value[key] for key in ("version", "expected_sha256")}
+                       for name, value in record["components"].items()},
+        "executables": {name: {key: value[key] for key in ("sha256", "bytes")}
+                        for name, value in record["executables"].items()},
+    }
+
+
+def relocation_for(imported, arm, original_path):
+    """Original CI paths are namespaced by origin, never merged across runs."""
+    require(arm in ARMS, "Unknown runtime comparison arm")
+    if imported.get("kind") == SELECTION_KIND:
+        origin = imported["arm_selection"][arm]["origin"]
+        return imported["origin_relocations"][origin].get(original_path)
+    return imported["relocations"].get(original_path)
+
+
+def verify_selection(imported):
+    require(imported.get("schema_version") == 2 and imported.get("original_manifests_modified") is False,
+            "Unsupported or mutable runtime selection")
+    require("relocations" not in imported and "observed_comparison" not in imported,
+            "A selection must not pretend to be one original CI run")
+    require(set(imported["arm_selection"]) == set(imported["arms"]) == set(imported["receiver_policies"]) == set(ARMS),
+            "A runtime selection must define exactly two explicit arms and receiver policies")
+    origins = imported["origin_imports"]
+    require(origins and set(origins) == set(imported["origin_relocations"]) == set(imported["observed_comparisons"])
+            == set(imported["origin_toolchains"]), "Origin namespaces differ or are incomplete")
+    require({choice["origin"] for choice in imported["arm_selection"].values()} == set(origins),
+            "Unselected or missing origin namespace")
+    require(len({record["path"] for record in origins.values()}) == len(origins),
+            "The same import path must not have ambiguous origin namespaces")
+    original_imports = {}
+    for name, record in origins.items():
+        require(identity(record["path"]) == record, "An origin import changed")
+        source = read(record["path"])
+        require(source.get("schema_version") == 1 and "kind" not in source and source.get("complete"),
+                "Select from completed original imports, not nested or fabricated selections")
+        require(imported["origin_relocations"][name] == source["relocations"]
+                and imported["observed_comparisons"][name] == source["observed_comparison"]
+                and imported["origin_toolchains"][name] == source["toolchain"],
+                "Origin evidence differs from the original import")
+        original_imports[name] = source
+    for arm, choice in imported["arm_selection"].items():
+        require(set(choice) == {"origin", "arm"} and choice["arm"] in ARMS,
+                "Arm selection must name one exact origin and original arm")
+        require(imported["receiver_policies"][arm] in RECEIVER_POLICIES, "Invalid receiver policy")
+        require(imported["arms"][arm] == original_imports[choice["origin"]]["arms"][choice["arm"]],
+                "Selected arm record differs from its original import")
+    reference_origin = imported["arm_selection"]["reference"]["origin"]
+    require(imported["toolchain"] == original_imports[reference_origin]["toolchain"],
+            "Canonical toolchain must be the selected reference's original record")
+    contents = []
+    for name, source in original_imports.items():
+        require(identity(source["toolchain"]["path"]) == source["toolchain"], "Origin toolchain manifest changed")
+        contents.append(toolchain_content(read(source["toolchain"]["path"])))
+    require(all(content == contents[0] for content in contents), "Selected origins use different Rust/LLVM distributions or tools")
+    # Verify every original import in its own namespace. This preserves every
+    # old/new path identity even when both CI runs used the same absolute root.
+    for record in origins.values():
+        verify_import(record["path"])
+    return imported
+
+
 def verify_import(path):
     imported = read(path)
     require(imported.get("complete"), "Import did not complete")
+    if imported.get("kind") == SELECTION_KIND:
+        return verify_selection(imported)
+    require(imported.get("schema_version") == 1 and "kind" not in imported, "Unsupported artifact import")
     require(identity(imported["observed_comparison"]["path"]) == imported["observed_comparison"], "CI comparison changed")
+    comparison = read(imported["observed_comparison"]["path"])
+    require(comparison.get("complete") and set(imported["arms"]) == set(ARMS), "Original CI comparison or import is incomplete")
+    old_root = Path(comparison["arms"]["reference"]["manifests"]["build"]["path"]).parents[2]
+    require(str(old_root) == imported["original_evidence_root"], "Original evidence root changed")
+    evidence = Path(imported["evidence_root"]).resolve(strict=True)
+
+    def require_association(local, original):
+        record = imported["relocations"].get(original["path"])
+        require(record is not None and record["local"] == local
+                and all(record["original"].get(key) == value for key, value in original.items()),
+                "Arm identity has no exact original relocation")
+
+    def source_location(old):
+        result = (evidence / Path(old).relative_to(old_root)).resolve(strict=True)
+        require(result.is_relative_to(evidence), "Original source path escapes the evidence root")
+        return str(result)
+
+    require_association(imported["toolchain"], comparison["toolchain"])
+    for name, arm in imported["arms"].items():
+        original, ci = arm["original"], comparison["arms"][name]
+        require(ci.get("complete") and original["build"] == ci["manifests"]["build"], "Wrong original build association")
+        for key, expected in original.items():
+            require_association(arm[key], expected)
+        build, base, source = (read(arm[key]["path"]) for key in ("build", "base_manifest", "source_manifest"))
+        require(build.get("complete") and len(build["training_runs"]) == 13 and base["phases"]["build"]["exit"] == 0,
+                "Original production build did not complete its existing PGO policy")
+        required = {"base_manifest": build["base_manifest"], "source_manifest": build["source"],
+                    "profile": build["profile"], "shipping": build["binary"], "source_archive": build["source_archive"],
+                    "base": base["base"], "compiler_record": base["compiler_record_identity"],
+                    "artifacts": ci["manifests"]["artifacts"], "archives": ci["manifests"]["archives"]}
+        require(all(original[key] == value for key, value in required.items()), "Original Base/build/source association changed")
+        require(base["source"] == build["source"] and base["profile"] == build["profile"] and base["graph"] == build["graph"]
+                and ci["binary"] == build["binary"] and ci["profile"] == build["profile"] and ci["graph"] == build["graph"]
+                and ci["manifests"]["base"] == build["base_manifest"], "Original production graph association changed")
+        require(arm["revision"] == source["head"] == ci["revision"] == comparison["resolved_revisions"][name],
+                "Selected source revision differs from its original CI arm")
+        require(arm["source_directory"] == source_location(source["directory"]), "Frozen source directory changed")
+        for graph_name, old_directory, expected_hash in (
+            ("graph", base["graph"]["path"], base["graph"]["inventory_sha256"]),
+            ("host_dependencies", base["host_dependencies"], base["host_inventory_sha256"]),
+        ):
+            graph = arm[graph_name]
+            require(graph["path"] == source_location(old_directory) and graph["inventory"]["sha256"] == expected_hash,
+                    "Preserved dependency graph association changed")
+            require_association(graph["inventory"], {"path": str(Path(old_directory) / "hashes.json"), "sha256": expected_hash})
+            require(graph["files"] == read(graph["inventory"]["path"]), "Dependency file inventory changed")
+        require(arm["graph"]["files"].get(Path(arm["base"]["path"]).name) == arm["base"]["sha256"],
+                "Selected Base differs from its graph")
+        compiler = read(arm["compiler_record"]["path"])
+        externs = [compiler["argv"][i + 1] for i, token in enumerate(compiler["argv"][:-1]) if token == "--extern"]
+        bitflags = [value.split("=", 1)[1] for value in externs if value.startswith("bitflags=")]
+        require(len(bitflags) == 1 and arm["bitflags_original_extern"] == bitflags[0]
+                and Path(arm["bitflags"]["path"]).name == Path(bitflags[0]).with_suffix(".rlib").name
+                and Path(arm["bitflags"]["path"]).parent == Path(arm["graph"]["path"])
+                and arm["graph"]["files"].get(Path(arm["bitflags"]["path"]).name) == arm["bitflags"]["sha256"]
+                and identity(arm["bitflags"]["path"]) == arm["bitflags"],
+                "Bitflags selection differs from the original Base compiler")
+        archives, view = read(arm["archives"]["path"]), read(arm["archives_view"]["path"])
+        require(view.get("derived_view_only") is True and view["original_manifest"] == arm["archives"]
+                and set(view["cases"]) == set(archives["cases"]) and len(view["cases"]) == 9,
+                "Archive view lost its original nine-case association")
+        for label, original_case in archives["cases"].items():
+            actual = view["cases"][label]
+            require(actual["font"] == original_case["font"], "Archive view changed an expected value")
+            if original_case["archive"] is None:
+                require(actual["archive"] is None, "Embedded archive case changed")
+            else:
+                require_association(actual["archive"], original_case["archive"])
     for record in imported["relocations"].values():
         require(identity(record["local"]["path"]) == record["local"], "Imported artifact changed")
     for arm in imported["arms"].values():
@@ -267,6 +406,64 @@ def verify_import(path):
         verify_source(arm["source_directory"], read(arm["source_manifest"]["path"])["files"])
         require(identity(arm["archives_view"]["path"]) == arm["archives_view"], "Relocated archive view changed")
     return imported
+
+
+def compose_imports(args):
+    """Write a derived view; neither an original manifest nor a graph is edited."""
+    output = fresh(args.output)
+    report = {"schema_version": 2, "kind": SELECTION_KIND, "complete": False,
+              "producer": identity(__file__), "original_manifests_modified": False,
+              "scope": "Explicit selection from separately verified CI imports; not a new matched CI build.",
+              "origin_imports": {}, "origin_relocations": {}, "observed_comparisons": {},
+              "origin_toolchains": {}, "arm_selection": {}, "arms": {}, "receiver_policies": {}}
+    destination = output / "selection.json"
+    save(destination, report)
+    origin_paths = {}
+    try:
+        for arm in ARMS:
+            path = getattr(args, arm + "_import").resolve(strict=True)
+            require(not output.is_relative_to(path.parent), "Keep selections outside the original import directory")
+            source = read(path)
+            require(source.get("schema_version") == 1 and "kind" not in source,
+                    "Compose original imports only; nested selections are unsupported")
+            source = verify_import(path)
+            origin = origin_paths.get(str(path))
+            if origin is None:
+                origin = "origin-" + str(len(origin_paths))
+                origin_paths[str(path)] = origin
+                report["origin_imports"][origin] = identity(path)
+                report["origin_relocations"][origin] = source["relocations"]
+                report["observed_comparisons"][origin] = source["observed_comparison"]
+                report["origin_toolchains"][origin] = source["toolchain"]
+            selected = getattr(args, arm + "_arm")
+            report["arm_selection"][arm] = {"origin": origin, "arm": selected}
+            report["arms"][arm] = source["arms"][selected]
+            report["receiver_policies"][arm] = getattr(args, arm + "_receiver_policy")
+            if arm == "reference":
+                report["toolchain"] = source["toolchain"]
+            save(destination, report)
+        # Completion is published only after all identity/association checks.
+        verify_selection(report)
+        report["complete"] = True
+    except BaseException as error:
+        report["error"] = {"type": type(error).__name__, "message": str(error)}
+        raise
+    finally:
+        save(destination, report)
+    print(destination)
+
+
+def receiver_policies(args, imported):
+    recorded = imported.get("receiver_policies", {})
+    result = {}
+    for arm, default in (("reference", "cloned"), ("candidate", "borrowed")):
+        explicit = getattr(args, arm + "_receiver_policy", None)
+        require(explicit is None or arm not in recorded or explicit == recorded[arm],
+                "Explicit receiver policy differs from the derived selection")
+        result[arm] = explicit or recorded.get(arm) or default
+        require(result[arm] in RECEIVER_POLICIES, "Invalid runtime receiver policy")
+    require(result["candidate"] == "borrowed", "The existing paired callable producer requires a borrowed candidate")
+    return result
 
 
 class RuntimeComparison:
@@ -331,6 +528,7 @@ class RuntimeComparison:
     def execute(self):
         from runtime_artifact_host import verify_native, verify_toolchain
         imported = verify_import(self.args.import_manifest)
+        self.report["receiver_policies"] = receiver_policies(self.args, imported)
         self.report["producer_inputs"] = {name: identity(HERE / name) for name in (
             "run_winui_runtime_comparison.py", "runtime_artifact_host.py", "prepare_property_validation.py",
             "property_validation_cold.rs", "property_allocation_counter.rs", "prepare_callable_validation.py",
@@ -362,7 +560,7 @@ class RuntimeComparison:
         fixtures = self.work / "fixtures"
         fixtures.mkdir()
         self.run("property-materialize", self.producer("prepare_property_validation.py", "materialize", "--source-root", candidate_source, "--work-dir", fixtures / "property"))
-        for arm, policy in (("reference", "cloned"), ("candidate", "borrowed")):
+        for arm, policy in self.report["receiver_policies"].items():
             self.run(arm + "-callable-materialize", self.producer("prepare_callable_validation.py", "materialize", "--source-root", candidate_source,
                      "--receiver-policy", policy, "--output", fixtures / arm))
         # All links finish before checks, counters, host smoke, or paired timings.
@@ -477,6 +675,12 @@ def main():
     prepare = commands.add_parser("import", help="verify and map completed downloaded evidence without compiling")
     prepare.add_argument("--evidence", type=Path, required=True)
     prepare.add_argument("--output", type=Path, required=True)
+    compose = commands.add_parser("compose", help="select arms from completed imports without merging their original path namespaces")
+    for arm in ARMS:
+        compose.add_argument("--" + arm + "-import", type=Path, required=True)
+        compose.add_argument("--" + arm + "-arm", choices=ARMS, required=True)
+        compose.add_argument("--" + arm + "-receiver-policy", choices=RECEIVER_POLICIES, required=True)
+    compose.add_argument("--output", type=Path, required=True)
     run = commands.add_parser("run", help="link/check both real production graphs, then execute existing paired cohorts")
     run.add_argument("--import-manifest", type=Path, required=True)
     run.add_argument("--toolchain-prefix", type=Path, required=True)
@@ -484,10 +688,15 @@ def main():
     run.add_argument("--output", type=Path, required=True)
     run.add_argument("--cpu", type=int, required=True)
     run.add_argument("--checks-only", action="store_true")
+    run.add_argument("--reference-receiver-policy", choices=RECEIVER_POLICIES)
+    run.add_argument("--candidate-receiver-policy", choices=RECEIVER_POLICIES)
     run.add_argument("--pgo-audit-script", type=Path, default=HERE / "verify_winui_profile_acceptance.py")
     args = parser.parse_args()
     if args.command == "import":
         import_evidence(args)
+        return
+    if args.command == "compose":
+        compose_imports(args)
         return
     require(sys.platform == "linux" and args.cpu in os.sched_getaffinity(0), "Require an allowed Linux CPU")
     original_affinity = os.sched_getaffinity(0)
