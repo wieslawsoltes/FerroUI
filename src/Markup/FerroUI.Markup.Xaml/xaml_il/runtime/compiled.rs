@@ -13,6 +13,8 @@
 pub mod binary_resources;
 pub mod theme_resources;
 pub mod style_program;
+#[doc(hidden)]
+pub mod control_theme_program;
 
 use std::any::{Any, TypeId};
 use std::cell::RefCell;

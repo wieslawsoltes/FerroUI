@@ -123,6 +123,7 @@ mod factory_shapes;
 mod imports;
 mod selector_plans;
 mod style_setters;
+mod control_theme_programs;
 
 pub use compiled::{
     generate_class_file_with_binary_resources, generate_file_with_binary_resources,

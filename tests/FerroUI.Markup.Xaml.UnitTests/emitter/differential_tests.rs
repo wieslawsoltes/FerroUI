@@ -94,6 +94,43 @@ fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
     ), "the fused resource factory must retain its scoped namespace provider");
 }
 
+#[test]
+fn complete_control_theme_construction_program_keeps_unsupported_resource_and_visual_factories() {
+    let _app = xaml_test_base();
+    let body = "<Setter Property='Template'><ControlTemplate><Border/></ControlTemplate></Setter>\
+        <Style Selector='^:pointerover'><Setter Property='Opacity' Value='0.5'/></Style>\
+        <Style Selector='^:disabled'><Setter Property='Opacity' Value='{DynamicResource DisabledOpacity}'/></Style>";
+    let source = format!("<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\
+        <ControlTheme x:Key='Accepted' TargetType='Button'>{body}</ControlTheme>\
+        <ControlTheme x:Key='Fallback' TargetType='Button' BasedOn='{{StaticResource Accepted}}'>{body}</ControlTheme>\
+        </ResourceDictionary>");
+    let generated = generate_file(
+        generated::ASSEMBLY_NAME, generated::ROOT_URI, &[("construction_program.xaml", &source)],
+        &RuntimeXamlLoaderConfiguration::new(), &[],
+    );
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    assert_eq!(generated.source.matches("rt::control_theme_program::run(").count(), 1);
+    assert!(generated.source.contains("rt::control_theme_program::add_selected_style"));
+    assert!(generated.source.contains("rt::provide_static_resource("), "BasedOn keeps the whole original factory");
+    assert!(generated.source.contains(".begin_init();"), "the child visual factory retains its original initialization path");
+}
+
+#[test]
+fn a_theme_without_template_locals_does_not_import_the_shared_drop_roles() {
+    let _app = xaml_test_base();
+    let source = "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\
+        <ControlTheme x:Key='Theme' TargetType='Button'>\
+        <Style Selector='^:pointerover'><Setter Property='Opacity' Value='0.5'/></Style>\
+        </ControlTheme></ResourceDictionary>";
+    let generated = generate_file(
+        generated::ASSEMBLY_NAME, generated::ROOT_URI, &[("no_template_program.xaml", source)],
+        &RuntimeXamlLoaderConfiguration::new(), &[],
+    );
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    assert!(!generated.source.contains("control_theme_program"));
+    assert!(!generated.source.contains("ControlTemplate"));
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")
