@@ -1,0 +1,395 @@
+{
+  "artifact": {
+    "bytes": 1186815,
+    "extracted_bytes": 6710976,
+    "extracted_files": 18,
+    "id": 13338258208,
+    "sha256": "ee21e745da9f1e6fe21e32edae76057ecf71833195ef0eb1c2c22046e4b055e1"
+  },
+  "checks": {
+    "construction-grammar": {
+      "failed": 0,
+      "ignored": 0,
+      "passed": 6
+    },
+    "construction-runtime": {
+      "failed": 0,
+      "ignored": 0,
+      "passed": 2
+    },
+    "emitter-differential": {
+      "failed": 0,
+      "ignored": 2,
+      "passed": 25
+    },
+    "region-grammar": {
+      "failed": 0,
+      "ignored": 0,
+      "passed": 7
+    },
+    "region-runtime": {
+      "failed": 0,
+      "ignored": 0,
+      "passed": 3
+    }
+  },
+  "ci": {
+    "conclusion": "success",
+    "head_sha": "4622c95aabe660fe907cb89b295494f6953a85a1",
+    "id": 41855481313,
+    "source_revision": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b",
+    "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/41855481313"
+  },
+  "complete": true,
+  "generated_program_counts": {
+    "construction_programs": 18,
+    "region_programs": 34
+  },
+  "original_validation": {
+    "bytes": 24267,
+    "sha256": "187d2d4cb9d5b2d6e14dd2fd691e4985dbc171711dc2efd371cb1f7aef4bd5e5",
+    "utf8": "{\n  \"bootstrap_producer\": {\n    \"bytes\": 8676,\n    \"path\": \"/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/bootstrap_toolchain.py\",\n    \"sha256\": \"ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb\"\n  },\n  \"commands\": [\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-region-source-validation/evidence/bootstrap-resources.txt\",\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/bootstrap_toolchain.py\",\n        \"--work-dir\",\n        \"/home/runner/work/_temp/winui-region-source-validation/toolchain\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793805252.8996017,\n      \"label\": \"bootstrap\",\n      \"log\": {\n        \"bytes\": 654,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/bootstrap.log\",\n        \"sha256\": \"de6d52926b3fe93057b923914dbd4c63b602f3f57fe72a37c3bba472258bcf7a\"\n      },\n      \"resources\": {\n        \"bytes\": 910,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/bootstrap-resources.txt\",\n        \"sha256\": \"262b3062e5b442ce24844399fbad6f31a0a451cf8cc245575e5372cb67399b83\"\n      },\n      \"started_unix\": 1793805241.1566293\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-region-source-validation/evidence/construction-runtime-resources.txt\",\n        \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-markup-xaml\",\n        \"control_theme_program::tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793805500.0499153,\n      \"label\": \"construction-runtime\",\n      \"log\": {\n        \"bytes\": 14257,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/construction-runtime.log\",\n        \"sha256\": \"7a7ef8bf08d1c091135b88e518e3a8bc5bfd9e1d4ab5a47491cb59cd81b4968f\"\n      },\n      \"passed_tests\": [\n        \"xaml_il::runtime::compiled::control_theme_program::tests::caller_owned_locals_match_original_cleanup_on_error_unwind_and_panicking_drop\",\n        \"xaml_il::runtime::compiled::control_theme_program::tests::returned_theme_payload_matches_original_return_place_cleanup\"\n      ],\n      \"resources\": {\n        \"bytes\": 952,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/construction-runtime-resources.txt\",\n        \"sha256\": \"59a279be12ac977a80dcd68d638dc3c8d5cd5dc3cb90b084af4cb45dfd41bda8\"\n      },\n      \"started_unix\": 1793805252.9021068,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 2\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-region-source-validation/evidence/region-runtime-resources.txt\",\n        \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-markup-xaml\",\n        \"style_region::tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793805500.2591279,\n      \"label\": \"region-runtime\",\n      \"log\": {\n        \"bytes\": 10479,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/region-runtime.log\",\n        \"sha256\": \"d413cdef0cbe92e690a05e4996ccc15630a7b5bcf49a049676f29d9fac70fe05\"\n      },\n      \"passed_tests\": [\n        \"xaml_il::runtime::compiled::style_region::tests::region_dynamic_runs_preserve_getter_order_and_parent_visibility\",\n        \"xaml_il::runtime::compiled::style_region::tests::regions_preserve_interleaved_local_and_return_payload_cleanup\",\n        \"xaml_il::runtime::compiled::style_region::tests::regions_preserve_parent_stack_and_lazy_import_order_on_value_panic\"\n      ],\n      \"resources\": {\n        \"bytes\": 920,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/region-runtime-resources.txt\",\n        \"sha256\": \"4a900fddbe2774d8b884c2cddb4bdbc153f7c1d4ee694ecc1042ba40f2bfe9a5\"\n      },\n      \"started_unix\": 1793805500.0506268,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 3\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-region-source-validation/evidence/construction-grammar-resources.txt\",\n        \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-markup-xaml-loader\",\n        \"--features\",\n        \"emitter\",\n        \"control_theme_programs::tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793805750.0931559,\n      \"label\": \"construction-grammar\",\n      \"log\": {\n        \"bytes\": 12792,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/construction-grammar.log\",\n        \"sha256\": \"aa5841813ca42791b57cb377bf62a3488dc751dd61aa6f79ff05be7dee213f76\"\n      },\n      \"passed_tests\": [\n        \"rust_emitter::control_theme_programs::tests::borrowed_nonprimitive_temporaries_do_not_move_into_leaf_callbacks\",\n        \"rust_emitter::control_theme_programs::tests::complete_nested_factory_keeps_local_order_and_lazy_imports\",\n        \"rust_emitter::control_theme_programs::tests::every_stored_role_must_already_be_present_in_the_resource\",\n        \"rust_emitter::control_theme_programs::tests::imports_of_other_resources_are_not_rooted_by_the_shared_program\",\n        \"rust_emitter::control_theme_programs::tests::selector_arrays_move_each_local_once_in_original_order\",\n        \"rust_emitter::control_theme_programs::tests::unknown_lifecycle_statements_decline_the_whole_function\"\n      ],\n      \"resources\": {\n        \"bytes\": 977,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/construction-grammar-resources.txt\",\n        \"sha256\": \"f3dd7668c66edf8b645f8cb167967ee67c9c81b3b90e27db422edd566e206f61\"\n      },\n      \"started_unix\": 1793805500.2599463,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 6\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-region-source-validation/evidence/region-grammar-resources.txt\",\n        \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-markup-xaml-loader\",\n        \"--features\",\n        \"emitter\",\n        \"control_theme_programs::regions::tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793805750.303196,\n      \"label\": \"region-grammar\",\n      \"log\": {\n        \"bytes\": 11867,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/region-grammar.log\",\n        \"sha256\": \"c00d73419187c4bcb69b1aea6e68ea577d16c3f465b8c4b0c5f63bf4ffa456a9\"\n      },\n      \"passed_tests\": [\n        \"rust_emitter::control_theme_programs::regions::tests::both_stored_roles_are_required_even_when_a_helper_constructs_one\",\n        \"rust_emitter::control_theme_programs::regions::tests::external_parent_changes_split_regions_without_capturing_or_cloning_it\",\n        \"rust_emitter::control_theme_programs::regions::tests::later_use_moves_borrows_reassignment_and_scope_boundaries_decline\",\n        \"rust_emitter::control_theme_programs::regions::tests::parent_stack_must_balance_inside_each_region_and_unsupported_text_is_exact\",\n        \"rust_emitter::control_theme_programs::regions::tests::regions_stay_between_original_declarations_and_share_only_lazy_imports\",\n        \"rust_emitter::control_theme_programs::regions::tests::rejected_prefixes_cannot_contribute_imports_to_a_later_region\",\n        \"rust_emitter::control_theme_programs::regions::tests::sixteen_statements_is_a_deterministic_minimum\"\n      ],\n      \"resources\": {\n        \"bytes\": 965,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/region-grammar-resources.txt\",\n        \"sha256\": \"3b980cf8f436c48c23ee166cc550a1e2af86d4b3ca5d7a6a1ea3f523e609de19\"\n      },\n      \"started_unix\": 1793805750.0940194,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 7\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-region-source-validation/evidence/emitter-differential-resources.txt\",\n        \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-markup-xaml-tests\",\n        \"emitter::differential_tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793806162.1328971,\n      \"label\": \"emitter-differential\",\n      \"log\": {\n        \"bytes\": 17573,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/emitter-differential.log\",\n        \"sha256\": \"5d6b4373d8715afde00f7598563640b92c2f4d2ad194b86af9d2dd5c8680376c\"\n      },\n      \"passed_tests\": [\n        \"emitter::differential_tests::a_compiled_document_that_fails_to_build_fails_the_load\",\n        \"emitter::differential_tests::a_failed_build_reports_the_exception_type_of_the_run_time_loader\",\n        \"emitter::differential_tests::a_failed_end_init_is_the_error_of_the_run_time_loader\",\n        \"emitter::differential_tests::a_failure_below_the_first_line_reports_its_line\",\n        \"emitter::differential_tests::a_list_built_from_text_is_one_list\",\n        \"emitter::differential_tests::a_list_created_in_markup_is_the_list_of_the_run_time_loader\",\n        \"emitter::differential_tests::a_method_is_a_command_in_both_back_ends\",\n        \"emitter::differential_tests::a_static_resource_in_element_syntax_is_the_value_of_its_property\",\n        \"emitter::differential_tests::a_text_is_converted_by_the_type_converter_of_its_property\",\n        \"emitter::differential_tests::a_theme_without_template_locals_does_not_import_the_shared_drop_roles\",\n        \"emitter::differential_tests::a_value_the_dump_cannot_read_fails_the_comparison\",\n        \"emitter::differential_tests::both_back_ends_build_equal_object_trees\",\n        \"emitter::differential_tests::compiled_bindings_read_properties_of_types_generated_code_cannot_name\",\n        \"emitter::differential_tests::compiled_documents_are_registered_by_uri\",\n        \"emitter::differential_tests::complete_control_theme_construction_program_keeps_unsupported_resource_and_visual_factories\",\n        \"emitter::differential_tests::container_queries_are_built_by_both_back_ends\",\n        \"emitter::differential_tests::documents_that_read_their_base_uri_build_equal_object_trees\",\n        \"emitter::differential_tests::eligibility_of_the_corpus_is_as_expected\",\n        \"emitter::differential_tests::generated_output_is_up_to_date\",\n        \"emitter::differential_tests::identical_lexical_scopes_share_guards_and_deferred_namespace_tables\",\n        \"emitter::differential_tests::output_does_not_depend_on_what_ran_before\",\n        \"emitter::differential_tests::scoped_reflection_bindings_keep_their_namespace_in_immediate_and_deferred_generated_content\",\n        \"emitter::differential_tests::scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table\",\n        \"emitter::differential_tests::style_regions_keep_resource_statements_and_share_imports_within_one_factory\",\n        \"emitter::differential_tests::the_position_map_leads_back_to_the_document\"\n      ],\n      \"resources\": {\n        \"bytes\": 957,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/emitter-differential-resources.txt\",\n        \"sha256\": \"4bcbea14118a64e60bbf3d5155b966f1f208964d4cdcc14aeded40c0f42f3977\"\n      },\n      \"started_unix\": 1793805750.3040862,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 2,\n        \"passed\": 25\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-region-source-validation/evidence/downstream-resources.txt\",\n        \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/bin/cargo\",\n        \"check\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-themes-winui\",\n        \"--features\",\n        \"solid-theme\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793806288.8686922,\n      \"label\": \"downstream\",\n      \"log\": {\n        \"bytes\": 13835,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/downstream.log\",\n        \"sha256\": \"69907ef3befd149f319e8d0f0feeff5144aae648d22cf9ef03d477b2f8d8a576\"\n      },\n      \"resources\": {\n        \"bytes\": 920,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/downstream-resources.txt\",\n        \"sha256\": \"2fa48ef1b9084d873a7a32f890c99171be65441177cd76e10cf0d0bd01e835ea\"\n      },\n      \"started_unix\": 1793806162.1337798\n    }\n  ],\n  \"complete\": true,\n  \"environment\": {\n    \"controlled\": {\n      \"CARGO_BUILD_JOBS\": \"1\",\n      \"CARGO_HOME\": \"/home/runner/work/_temp/winui-region-source-validation/cargo-home\",\n      \"CARGO_INCREMENTAL\": \"0\",\n      \"CARGO_PROFILE_DEV_CODEGEN_UNITS\": \"128\",\n      \"CARGO_PROFILE_DEV_DEBUG\": \"0\",\n      \"CARGO_PROFILE_DEV_DEBUG_ASSERTIONS\": \"true\",\n      \"CARGO_PROFILE_DEV_LTO\": \"false\",\n      \"CARGO_PROFILE_DEV_OPT_LEVEL\": \"0\",\n      \"CARGO_PROFILE_TEST_CODEGEN_UNITS\": \"128\",\n      \"CARGO_PROFILE_TEST_DEBUG\": \"0\",\n      \"CARGO_PROFILE_TEST_DEBUG_ASSERTIONS\": \"true\",\n      \"CARGO_PROFILE_TEST_LTO\": \"false\",\n      \"CARGO_PROFILE_TEST_OPT_LEVEL\": \"0\",\n      \"CARGO_TARGET_DIR\": \"/home/runner/work/_temp/winui-region-source-validation/target\",\n      \"CARGO_TERM_COLOR\": \"never\",\n      \"MALLOC_ARENA_MAX\": \"1\",\n      \"MALLOC_CONF\": \"narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false\",\n      \"RAYON_NUM_THREADS\": \"1\",\n      \"RUST_BACKTRACE\": \"1\",\n      \"TMPDIR\": \"/home/runner/work/_temp/winui-region-source-validation/temporary\"\n    },\n    \"removed_names\": [],\n    \"rustc\": \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/bin/rustc\",\n    \"toolchain_library_prefix\": \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/lib\",\n    \"toolchain_path_prefix\": \"/home/runner/work/_temp/winui-region-source-validation/toolchain/install/bin\"\n  },\n  \"expected_test_summaries\": {\n    \"construction-grammar\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 6\n    },\n    \"construction-runtime\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 2\n    },\n    \"emitter-differential\": {\n      \"failed\": 0,\n      \"ignored\": 2,\n      \"passed\": 25\n    },\n    \"region-grammar\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 7\n    },\n    \"region-runtime\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 3\n    }\n  },\n  \"finished_unix\": 1793806288.9361835,\n  \"generated_program_counts\": {\n    \"construction_programs\": 18,\n    \"region_programs\": 34\n  },\n  \"generated_winui\": [\n    {\n      \"bytes\": 4867720,\n      \"construction_programs\": 18,\n      \"path\": \"/home/runner/work/_temp/winui-region-source-validation/target/x86_64-unknown-linux-gnu/debug/build/ferroui-themes-winui-5af1db63c2b4b6a5/out/xaml/compiled_xaml.rs\",\n      \"region_programs\": 34,\n      \"retained\": {\n        \"bytes\": 4867720,\n        \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/generated/000-out.rs\",\n        \"sha256\": \"0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630\"\n      },\n      \"sha256\": \"0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630\"\n    }\n  ],\n  \"lockfile_before\": {\n    \"bytes\": 168627,\n    \"path\": \"/home/runner/work/FerroUI/FerroUI/source/Cargo.lock\",\n    \"sha256\": \"c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b\"\n  },\n  \"plan_only\": false,\n  \"producer\": {\n    \"bytes\": 16939,\n    \"path\": \"/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/run_winui_source_validation.py\",\n    \"sha256\": \"8a765d5ecf1259f5448734e38324d1e95aaad4ffb58503078b66ac0b6cfaae11\"\n  },\n  \"production_acceptance\": false,\n  \"required_metadata_tests\": [],\n  \"required_tests\": [\n    \"xaml_il::runtime::compiled::control_theme_program::tests::caller_owned_locals_match_original_cleanup_on_error_unwind_and_panicking_drop\",\n    \"xaml_il::runtime::compiled::control_theme_program::tests::returned_theme_payload_matches_original_return_place_cleanup\",\n    \"rust_emitter::control_theme_programs::tests::complete_nested_factory_keeps_local_order_and_lazy_imports\",\n    \"rust_emitter::control_theme_programs::tests::every_stored_role_must_already_be_present_in_the_resource\",\n    \"rust_emitter::control_theme_programs::tests::selector_arrays_move_each_local_once_in_original_order\",\n    \"rust_emitter::control_theme_programs::tests::unknown_lifecycle_statements_decline_the_whole_function\",\n    \"rust_emitter::control_theme_programs::tests::borrowed_nonprimitive_temporaries_do_not_move_into_leaf_callbacks\",\n    \"rust_emitter::control_theme_programs::tests::imports_of_other_resources_are_not_rooted_by_the_shared_program\",\n    \"emitter::differential_tests::complete_control_theme_construction_program_keeps_unsupported_resource_and_visual_factories\",\n    \"emitter::differential_tests::a_theme_without_template_locals_does_not_import_the_shared_drop_roles\",\n    \"xaml_il::runtime::compiled::style_region::tests::regions_preserve_interleaved_local_and_return_payload_cleanup\",\n    \"xaml_il::runtime::compiled::style_region::tests::regions_preserve_parent_stack_and_lazy_import_order_on_value_panic\",\n    \"xaml_il::runtime::compiled::style_region::tests::region_dynamic_runs_preserve_getter_order_and_parent_visibility\",\n    \"rust_emitter::control_theme_programs::regions::tests::regions_stay_between_original_declarations_and_share_only_lazy_imports\",\n    \"rust_emitter::control_theme_programs::regions::tests::sixteen_statements_is_a_deterministic_minimum\",\n    \"rust_emitter::control_theme_programs::regions::tests::later_use_moves_borrows_reassignment_and_scope_boundaries_decline\",\n    \"rust_emitter::control_theme_programs::regions::tests::both_stored_roles_are_required_even_when_a_helper_constructs_one\",\n    \"rust_emitter::control_theme_programs::regions::tests::rejected_prefixes_cannot_contribute_imports_to_a_later_region\",\n    \"rust_emitter::control_theme_programs::regions::tests::external_parent_changes_split_regions_without_capturing_or_cloning_it\",\n    \"rust_emitter::control_theme_programs::regions::tests::parent_stack_must_balance_inside_each_region_and_unsupported_text_is_exact\",\n    \"emitter::differential_tests::style_regions_keep_resource_statements_and_share_imports_within_one_factory\"\n  ],\n  \"required_tests_passed\": [\n    \"emitter::differential_tests::a_theme_without_template_locals_does_not_import_the_shared_drop_roles\",\n    \"emitter::differential_tests::complete_control_theme_construction_program_keeps_unsupported_resource_and_visual_factories\",\n    \"emitter::differential_tests::style_regions_keep_resource_statements_and_share_imports_within_one_factory\",\n    \"rust_emitter::control_theme_programs::regions::tests::both_stored_roles_are_required_even_when_a_helper_constructs_one\",\n    \"rust_emitter::control_theme_programs::regions::tests::external_parent_changes_split_regions_without_capturing_or_cloning_it\",\n    \"rust_emitter::control_theme_programs::regions::tests::later_use_moves_borrows_reassignment_and_scope_boundaries_decline\",\n    \"rust_emitter::control_theme_programs::regions::tests::parent_stack_must_balance_inside_each_region_and_unsupported_text_is_exact\",\n    \"rust_emitter::control_theme_programs::regions::tests::regions_stay_between_original_declarations_and_share_only_lazy_imports\",\n    \"rust_emitter::control_theme_programs::regions::tests::rejected_prefixes_cannot_contribute_imports_to_a_later_region\",\n    \"rust_emitter::control_theme_programs::regions::tests::sixteen_statements_is_a_deterministic_minimum\",\n    \"rust_emitter::control_theme_programs::tests::borrowed_nonprimitive_temporaries_do_not_move_into_leaf_callbacks\",\n    \"rust_emitter::control_theme_programs::tests::complete_nested_factory_keeps_local_order_and_lazy_imports\",\n    \"rust_emitter::control_theme_programs::tests::every_stored_role_must_already_be_present_in_the_resource\",\n    \"rust_emitter::control_theme_programs::tests::imports_of_other_resources_are_not_rooted_by_the_shared_program\",\n    \"rust_emitter::control_theme_programs::tests::selector_arrays_move_each_local_once_in_original_order\",\n    \"rust_emitter::control_theme_programs::tests::unknown_lifecycle_statements_decline_the_whole_function\",\n    \"xaml_il::runtime::compiled::control_theme_program::tests::caller_owned_locals_match_original_cleanup_on_error_unwind_and_panicking_drop\",\n    \"xaml_il::runtime::compiled::control_theme_program::tests::returned_theme_payload_matches_original_return_place_cleanup\",\n    \"xaml_il::runtime::compiled::style_region::tests::region_dynamic_runs_preserve_getter_order_and_parent_visibility\",\n    \"xaml_il::runtime::compiled::style_region::tests::regions_preserve_interleaved_local_and_return_payload_cleanup\",\n    \"xaml_il::runtime::compiled::style_region::tests::regions_preserve_parent_stack_and_lazy_import_order_on_value_panic\"\n  ],\n  \"revision\": \"dc93a16d88c8d8e6aedaa852f1106a856ab5993b\",\n  \"schema\": 2,\n  \"scope\": \"Run focused development gates against one immutable repository revision.\\n\\nThis compiles actual framework test crates for the selected source change. The\\nmetadata suite checks Base and downstream Controls expansion; the control-theme\\nsuites check the runtime, emitter and differential corpus, then type-check fresh\\nWinUI output. The explicit control-theme-regions suite additionally requires the\\nregion runtime/grammar cases and both generated program forms. Filters narrow\\nexecution, not compilation. These development suites make no\\nproduction size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,\\nsource identity, lockfile, logs and resource reports survive success or failure.\\n\",\n  \"source\": \"/home/runner/work/FerroUI/FerroUI/source\",\n  \"source_after\": {\n    \"head\": \"dc93a16d88c8d8e6aedaa852f1106a856ab5993b\",\n    \"lockfile\": {\n      \"bytes\": 168627,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/source/Cargo.lock\",\n      \"sha256\": \"c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b\"\n    },\n    \"status\": \"\",\n    \"tree\": \"39bde5869ab448b5868d61e2bc2184032df159d5\"\n  },\n  \"source_unchanged\": true,\n  \"started_unix\": 1793805241.145483,\n  \"suite\": \"control-theme-regions\",\n  \"toolchain\": {\n    \"bytes\": 11806,\n    \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/installation.json\",\n    \"sha256\": \"a24f8ae88b625e628a1b2287bb018148dd7ce7bb50ff8f0cfe6cab6ccdfcc7a2\"\n  },\n  \"tracked_inputs\": {\n    \"bytes\": 1719125,\n    \"path\": \"/home/runner/work/_temp/winui-region-source-validation/evidence/tracked-inputs.txt\",\n    \"sha256\": \"014c36041b5b13ce64adc3981044b2cc21219e9a4eb96b942a837cbb66adccc1\"\n  },\n  \"tree\": \"39bde5869ab448b5868d61e2bc2184032df159d5\"\n}\n"
+  },
+  "production_acceptance": false,
+  "production_comparison_plan": {
+    "compile_paths": {
+      "checkout": "<new comparison root>/checkout reused sequentially",
+      "consumer": "<new comparison root>/shared/consumer reused sequentially",
+      "target": "<new comparison root>/shared/target rebuilt per arm; removed only after collection and correctness"
+    },
+    "compiled_or_measured": false,
+    "created_utc": "2026-11-04T15:33:11.935085+00:00",
+    "only_mutation": "Six full-SHA substitutions: candidate/reference defaults, concurrency fallbacks and environment fallbacks. No command, trigger, flag, timeout, action or upload change.",
+    "original_workflow": {
+      "bytes": 2990,
+      "path": "/workspace/scratch/6f70b20c54b6/FerroUI/.github/workflows/winui-release-size.yml",
+      "sha256": "4953fe364eb08eda1fc8b61bfcb6dee7d435570dfc24063302f17d4521cff3a2"
+    },
+    "pair": {
+      "candidate": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b",
+      "reference": "ad926b4d10a68465b5bbc9fe203fa908dc785f59"
+    },
+    "patch": {
+      "bytes": 2112,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/combined-release-workflow-review/workflow-01.patch",
+      "sha256": "3a130c7df43bfa9cdea135d00833545668d7414fad3a6ea663f67e42db91c093"
+    },
+    "patch_check": {
+      "exit": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "pipeline": {
+      "controlled_cargo_release": {
+        "codegen-units": 16,
+        "debug": 0,
+        "debug-assertions": false,
+        "lto": "thin",
+        "opt-level": "s",
+        "overflow-checks": false,
+        "panic": "unwind"
+      },
+      "correctness": {
+        "archive_cases": 9,
+        "compact_unwind": true,
+        "registry_passed": 47,
+        "structural_resource_probe": 31,
+        "template_activations": 156
+      },
+      "features": "ferroui-themes-winui/solid-theme,retain-archive",
+      "final_link": [
+        "-Clink-arg=-fuse-ld=lld",
+        "-Clink-arg=-Wl,--icf=safe",
+        "-Clink-arg=-Wl,-z,pack-relative-relocs",
+        "-Cstrip=symbols",
+        "-Clto=fat",
+        "-Ccodegen-units=1",
+        "-Clinker=<same checkout>/scripts/themes/bench/compact_unwind_link.py"
+      ],
+      "metric": "entire stripped editable WinUI shipping executable with retained archive; budget10,000,000 B. No throughput/startup/allocation/build-time acceptance from this workflow",
+      "packer": "isolated per-arm tooling only, canonical archives verified; shipping graph retains actual Loader/Base source",
+      "preserved_before_source_switch": [
+        "shipping executable",
+        "complete own profile-use graph",
+        "host proc macros",
+        "raw and merged profiles",
+        "source snapshot and archive",
+        "original compiler and native link records",
+        "generated WinUI",
+        "native attribution"
+      ],
+      "profile_training": {
+        "final_lane": "structure",
+        "lanes_per_round": [
+          "startup",
+          "templates",
+          "property",
+          "edit"
+        ],
+        "per_arm_fresh_profile": true,
+        "rounds": 3,
+        "total_launches": 13
+      },
+      "profile_use_target": [
+        "-Cprofile-use=<own freshly merged profile>",
+        "-Cllvm-args=--addrsig",
+        "-Copt-level=z"
+      ],
+      "shipping_main_sha256": "8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269"
+    },
+    "policy_and_training_inputs": [
+      {
+        "bytes": 11372,
+        "candidate_git_blob": "f68593c78e338dc12ab6d29d003efb4745b621b0",
+        "equal": true,
+        "reference_git_blob": "f68593c78e338dc12ab6d29d003efb4745b621b0",
+        "relative_path": "scripts/themes/bench/profile_winui.py",
+        "sha256": "9abbf0142e12891cb722833d661ec98f3919454ac3d87fa3e30fe0a275f55d93"
+      },
+      {
+        "bytes": 3657,
+        "candidate_git_blob": "29671bfabbe52f4650a60b3ade1ef591fee90a70",
+        "equal": true,
+        "reference_git_blob": "29671bfabbe52f4650a60b3ade1ef591fee90a70",
+        "relative_path": "scripts/themes/bench/winui.rs",
+        "sha256": "8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269"
+      },
+      {
+        "bytes": 2014,
+        "candidate_git_blob": "53e44d4bb3dafd9be6687c6adc77ca6659b9038e",
+        "equal": true,
+        "reference_git_blob": "53e44d4bb3dafd9be6687c6adc77ca6659b9038e",
+        "relative_path": "scripts/themes/bench/pgo_templates.rs",
+        "sha256": "37824fc1775d438a62d01406f115096408e60b032dc91589483dc7b8b4fa34e2"
+      },
+      {
+        "bytes": 7203,
+        "candidate_git_blob": "d55ec6b2559c9ac1cd74215691da3e182ff87a43",
+        "equal": true,
+        "reference_git_blob": "d55ec6b2559c9ac1cd74215691da3e182ff87a43",
+        "relative_path": "scripts/themes/bench/compact_unwind_link.py",
+        "sha256": "36477e1afabf3be1822871acdd1316f11a390adebb8f0671244c73bc87e91b5a"
+      },
+      {
+        "bytes": 9421,
+        "candidate_git_blob": "29c6d6d64492053bbff21eef7a852ff9cd34a477",
+        "equal": true,
+        "reference_git_blob": "29c6d6d64492053bbff21eef7a852ff9cd34a477",
+        "relative_path": "scripts/themes/bench/compact_unwind.py",
+        "sha256": "ea42ad02f5c0d8ca158a50c2b43a95e7e1697f91600b9108b78873026c0c5711"
+      },
+      {
+        "bytes": 23369,
+        "candidate_git_blob": "f165a8da76d2a38c9da73a49ae975b84c89277c7",
+        "equal": true,
+        "reference_git_blob": "f165a8da76d2a38c9da73a49ae975b84c89277c7",
+        "relative_path": "scripts/themes/bench/attribute_codegen.py",
+        "sha256": "24324f87bdcc073afdb67e09f1afac0cc85d0f3ecf9a97083b3aab77979e57ff"
+      },
+      {
+        "bytes": 11346,
+        "candidate_git_blob": "ed2ab6e0bfbafc5e74b81681e41e19f516386e3d",
+        "equal": true,
+        "reference_git_blob": "ed2ab6e0bfbafc5e74b81681e41e19f516386e3d",
+        "relative_path": "scripts/themes/bench/attribute_runtime.py",
+        "sha256": "58ba05dcbc2f6a9c1ce5fb2956bd61f04deae707c124e836b8861316a3f9d3aa"
+      },
+      {
+        "candidate_git_blob": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+        "equal": true,
+        "reference_git_blob": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+        "relative_path": "Cargo.lock"
+      },
+      {
+        "candidate_git_blob": "9d229fbc1be5430539032cb25909950366956517",
+        "equal": true,
+        "reference_git_blob": "9d229fbc1be5430539032cb25909950366956517",
+        "relative_path": "docs/benchmarks/compiled-theme-binding-dispatch-linux-x86_64.json"
+      }
+    ],
+    "prepared_workflow": {
+      "bytes": 2990,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/combined-release-workflow-review/winui-release-size.yml",
+      "sha256": "52c5bf94f22bdb3466fd804e94a011421dd69d3831df9e110f30c0cad166abc0"
+    },
+    "prerequisite": {
+      "required": "verified completed actual-source control-theme-regions gate on exact candidate revision",
+      "run_id": 41855481313,
+      "status": "builder reports terminal SUCCESS; exact raw result verification still pending at preparation time"
+    },
+    "producer_identities": [
+      {
+        "bytes": 23250,
+        "path": "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/run_winui_release_comparison.py",
+        "sha256": "76fb9d46495d2880be2f8b6ca1b55bf74e238df418b3c7b8e5fffc1ff448cfc1"
+      },
+      {
+        "bytes": 31189,
+        "path": "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/rebuild_winui_pgo.py",
+        "sha256": "dea852e85365c09511b9fc729546e03771b3c2166e0f6fd0cdd4ebff244a77ab"
+      },
+      {
+        "bytes": 11471,
+        "path": "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/collect_winui_pgo.py",
+        "sha256": "e3efb1dd203930a70ca162c29371af3544c9e0f2677aec7b45d367e39ca374a6"
+      }
+    ],
+    "published_or_triggered": false,
+    "repository": "/workspace/scratch/6f70b20c54b6/FerroUI",
+    "source_trees": {
+      "candidate": "39bde5869ab448b5868d61e2bc2184032df159d5",
+      "reference": "3524b7e2c34af001860fb67e0f7e1744a3e3eab2"
+    },
+    "tooling_base": "4622c95aabe660fe907cb89b295494f6953a85a1"
+  },
+  "required_tests_passed": [
+    "emitter::differential_tests::a_theme_without_template_locals_does_not_import_the_shared_drop_roles",
+    "emitter::differential_tests::complete_control_theme_construction_program_keeps_unsupported_resource_and_visual_factories",
+    "emitter::differential_tests::style_regions_keep_resource_statements_and_share_imports_within_one_factory",
+    "rust_emitter::control_theme_programs::regions::tests::both_stored_roles_are_required_even_when_a_helper_constructs_one",
+    "rust_emitter::control_theme_programs::regions::tests::external_parent_changes_split_regions_without_capturing_or_cloning_it",
+    "rust_emitter::control_theme_programs::regions::tests::later_use_moves_borrows_reassignment_and_scope_boundaries_decline",
+    "rust_emitter::control_theme_programs::regions::tests::parent_stack_must_balance_inside_each_region_and_unsupported_text_is_exact",
+    "rust_emitter::control_theme_programs::regions::tests::regions_stay_between_original_declarations_and_share_only_lazy_imports",
+    "rust_emitter::control_theme_programs::regions::tests::rejected_prefixes_cannot_contribute_imports_to_a_later_region",
+    "rust_emitter::control_theme_programs::regions::tests::sixteen_statements_is_a_deterministic_minimum",
+    "rust_emitter::control_theme_programs::tests::borrowed_nonprimitive_temporaries_do_not_move_into_leaf_callbacks",
+    "rust_emitter::control_theme_programs::tests::complete_nested_factory_keeps_local_order_and_lazy_imports",
+    "rust_emitter::control_theme_programs::tests::every_stored_role_must_already_be_present_in_the_resource",
+    "rust_emitter::control_theme_programs::tests::imports_of_other_resources_are_not_rooted_by_the_shared_program",
+    "rust_emitter::control_theme_programs::tests::selector_arrays_move_each_local_once_in_original_order",
+    "rust_emitter::control_theme_programs::tests::unknown_lifecycle_statements_decline_the_whole_function",
+    "xaml_il::runtime::compiled::control_theme_program::tests::caller_owned_locals_match_original_cleanup_on_error_unwind_and_panicking_drop",
+    "xaml_il::runtime::compiled::control_theme_program::tests::returned_theme_payload_matches_original_return_place_cleanup",
+    "xaml_il::runtime::compiled::style_region::tests::region_dynamic_runs_preserve_getter_order_and_parent_visibility",
+    "xaml_il::runtime::compiled::style_region::tests::regions_preserve_interleaved_local_and_return_payload_cleanup",
+    "xaml_il::runtime::compiled::style_region::tests::regions_preserve_parent_stack_and_lazy_import_order_on_value_panic"
+  ],
+  "schema_version": 1,
+  "scope": "Actual combined metadata/whole-ControlTheme/style-region source development gates. No optimized shipping size or throughput claim.",
+  "source_files": [
+    {
+      "bytes": 40796,
+      "git_blob": "5a758e6bdbf59c937abf8d5697ea81dac5365f14",
+      "path": "src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/control_theme_programs.rs",
+      "sha256": "231a7a7356eb556bc1686faafd6f37daa884bff70a2805065c5e844027fd2309"
+    },
+    {
+      "bytes": 32823,
+      "git_blob": "ebde0380ae7cdbde86f1091aa4d5188e2d6cefe4",
+      "path": "src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/control_theme_programs/regions.rs",
+      "sha256": "816e8f0c09989738a9a2a6cbc9b91fbeca3faa7cea16bac709a09021d0935ff0"
+    },
+    {
+      "bytes": 252102,
+      "git_blob": "9d9b143727c3daee6341372f446bb34ffdeb2a9c",
+      "path": "src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs",
+      "sha256": "e2bbe98385bce05f7b43e5e713036af072aef832e76d35eaab47cb41a617a36e"
+    },
+    {
+      "bytes": 82904,
+      "git_blob": "a53661ab17ed295f28af12e11754911b700aa887",
+      "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs",
+      "sha256": "5dd4545bba4d109e7231e079917756f6690059e0d83755202a629f6b60deafdf"
+    },
+    {
+      "bytes": 23545,
+      "git_blob": "cb112cb71280e85c3b379cf53776a46db97cda43",
+      "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled/style_region.rs",
+      "sha256": "a7b93d4548d68a537ab231b82c04abdca2365e88562d5b6d943f37babde161f1"
+    },
+    {
+      "bytes": 67515,
+      "git_blob": "cecbfcb4f8e1c370df118b8fa21e24ba14385b59",
+      "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/differential_tests.rs",
+      "sha256": "8f4772c3bd8e32da932a9038f607dde49215d394b58ea4e168aaa92bc2648e41"
+    }
+  ],
+  "verified_artifact_inputs": [
+    {
+      "bytes": 654,
+      "relative_path": "bootstrap.log",
+      "sha256": "de6d52926b3fe93057b923914dbd4c63b602f3f57fe72a37c3bba472258bcf7a"
+    },
+    {
+      "bytes": 910,
+      "relative_path": "bootstrap-resources.txt",
+      "sha256": "262b3062e5b442ce24844399fbad6f31a0a451cf8cc245575e5372cb67399b83"
+    },
+    {
+      "bytes": 14257,
+      "relative_path": "construction-runtime.log",
+      "sha256": "7a7ef8bf08d1c091135b88e518e3a8bc5bfd9e1d4ab5a47491cb59cd81b4968f"
+    },
+    {
+      "bytes": 952,
+      "relative_path": "construction-runtime-resources.txt",
+      "sha256": "59a279be12ac977a80dcd68d638dc3c8d5cd5dc3cb90b084af4cb45dfd41bda8"
+    },
+    {
+      "bytes": 10479,
+      "relative_path": "region-runtime.log",
+      "sha256": "d413cdef0cbe92e690a05e4996ccc15630a7b5bcf49a049676f29d9fac70fe05"
+    },
+    {
+      "bytes": 920,
+      "relative_path": "region-runtime-resources.txt",
+      "sha256": "4a900fddbe2774d8b884c2cddb4bdbc153f7c1d4ee694ecc1042ba40f2bfe9a5"
+    },
+    {
+      "bytes": 12792,
+      "relative_path": "construction-grammar.log",
+      "sha256": "aa5841813ca42791b57cb377bf62a3488dc751dd61aa6f79ff05be7dee213f76"
+    },
+    {
+      "bytes": 977,
+      "relative_path": "construction-grammar-resources.txt",
+      "sha256": "f3dd7668c66edf8b645f8cb167967ee67c9c81b3b90e27db422edd566e206f61"
+    },
+    {
+      "bytes": 11867,
+      "relative_path": "region-grammar.log",
+      "sha256": "c00d73419187c4bcb69b1aea6e68ea577d16c3f465b8c4b0c5f63bf4ffa456a9"
+    },
+    {
+      "bytes": 965,
+      "relative_path": "region-grammar-resources.txt",
+      "sha256": "3b980cf8f436c48c23ee166cc550a1e2af86d4b3ca5d7a6a1ea3f523e609de19"
+    },
+    {
+      "bytes": 17573,
+      "relative_path": "emitter-differential.log",
+      "sha256": "5d6b4373d8715afde00f7598563640b92c2f4d2ad194b86af9d2dd5c8680376c"
+    },
+    {
+      "bytes": 957,
+      "relative_path": "emitter-differential-resources.txt",
+      "sha256": "4bcbea14118a64e60bbf3d5155b966f1f208964d4cdcc14aeded40c0f42f3977"
+    },
+    {
+      "bytes": 13835,
+      "relative_path": "downstream.log",
+      "sha256": "69907ef3befd149f319e8d0f0feeff5144aae648d22cf9ef03d477b2f8d8a576"
+    },
+    {
+      "bytes": 920,
+      "relative_path": "downstream-resources.txt",
+      "sha256": "2fa48ef1b9084d873a7a32f890c99171be65441177cd76e10cf0d0bd01e835ea"
+    },
+    {
+      "bytes": 11806,
+      "relative_path": "installation.json",
+      "sha256": "a24f8ae88b625e628a1b2287bb018148dd7ce7bb50ff8f0cfe6cab6ccdfcc7a2"
+    },
+    {
+      "bytes": 1719125,
+      "relative_path": "tracked-inputs.txt",
+      "sha256": "014c36041b5b13ce64adc3981044b2cc21219e9a4eb96b942a837cbb66adccc1"
+    },
+    {
+      "bytes": 4867720,
+      "relative_path": "generated/000-out.rs",
+      "sha256": "0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630"
+    }
+  ]
+}

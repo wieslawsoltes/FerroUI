@@ -131,6 +131,39 @@ fn a_theme_without_template_locals_does_not_import_the_shared_drop_roles() {
     assert!(!generated.source.contains("ControlTemplate"));
 }
 
+#[test]
+fn style_regions_keep_resource_statements_and_share_imports_within_one_factory() {
+    let _app = xaml_test_base();
+    let styles = |offset: usize| {
+        (offset..offset + 4).map(|index| format!(
+            "<Style Selector='^:state{index}'><Setter Property='Opacity' Value='0.5'/></Style>"
+        )).collect::<String>()
+    };
+    let source = format!("<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\
+        <SolidColorBrush x:Key='Accent' Color='Red'/>\
+        <ControlTheme x:Key='Theme' TargetType='Button'>{}\
+        <Setter Property='Background' Value='{{StaticResource Accent}}'/>{}\
+        </ControlTheme></ResourceDictionary>", styles(0), styles(4));
+    let generated = generate_file(
+        generated::ASSEMBLY_NAME, generated::ROOT_URI, &[("style_regions.xaml", &source)],
+        &RuntimeXamlLoaderConfiguration::new(), &[],
+    );
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    let output = generated.source;
+    assert_eq!(output.matches("rt::style_region::run(").count(), 2);
+    assert_eq!(output.matches("const __STYLE_REGION_PROGRAM:").count(), 1);
+    assert!(!output.contains("rt::control_theme_program::run("));
+    let first = output.find("let mut __style_region_locals_0").unwrap();
+    let resource = output.find("rt::provide_static_resource(").unwrap();
+    let second = output.find("let mut __style_region_locals_1").unwrap();
+    assert!(first < resource && resource < second, "resource lookup retains its original position between caller-owned arrays");
+    let imports = output.split_once("const __STYLE_REGION_PROGRAM:").unwrap().1.split_once("const __STYLE_REGION_STEPS_0:").unwrap().0;
+    assert_eq!(imports.matches("opacity_property()").count(), 1);
+    assert_eq!(imports.matches("rt::to_object(0.5_f64)").count(), 1);
+    assert!(!imports.contains("background_property") && !imports.contains("Accent"));
+    assert!(!output.contains("ControlTemplate"), "the two-role region does not introduce optional template locals");
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")

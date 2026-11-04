@@ -3,7 +3,7 @@
 The next release target is **10,000,000 bytes for the complete stripped Linux
 x86-64 executable**, including the editable WinUI runtime and all theme
 documents. The latest independently imported size checkpoint in this report is
-**27,065,600 bytes** at `ab595dd9`, leaving **17,065,600 bytes** to remove.
+**27,101,920 bytes** at `ad926b4d`, leaving **17,101,920 bytes** to remove.
 Its matched size and targeted correctness gates passed; full release acceptance
 remains blocked by the boxed-style performance regression described below.
 The earlier **27,406,416-byte** stage5 checkpoint remains documented in
@@ -232,12 +232,36 @@ correctness, allocation and paired delivery gates must pass before acceptance.
 
 The boxed correction is committed at
 [`ad926b4d`](https://github.com/wieslawsoltes/FerroUI/commit/ad926b4d10a68465b5bbc9fe203fa908dc785f59).
-Its separate CI comparison freezes `ab595dd9` as reference. It is evaluated
-independently of the completed `d2d2f83d` to `ab595dd9` cold-initialization
-cohort above; that cohort's size result does not validate the boxed correction's
-throughput. The metadata receiver-preparation and ControlTheme/style-region
-prototypes also retain separate actual-source correctness gates. No shipping
-size or performance result from those prototypes is included in this report.
+Its separate [CI comparison](https://github.com/wieslawsoltes/FerroUI/actions/runs/41837864124)
+completed with `ab595dd9` as reference, using fresh original-workload profiles
+for both complete applications. The original artifact has now been independently
+downloaded, reassembled, imported and verified. The
+[boxed-correction production evidence](benchmarks/compiled-theme-boxed-binding-correction-production-linux-x86_64.json)
+preserves the original comparison byte for byte and verifies all 16 arm
+manifests, source graphs, profiles, executable identities and targeted checks.
+
+| Complete stripped executable | Bytes | SHA-256 |
+|---|---:|---|
+| Fresh matched reference, `ab595dd9` | 27,065,536 | `4fdf8011516fdcd7c98a906a649a781071c4a200b4efafcf65db75036e069504` |
+| Boxed correction, `ad926b4d` | 27,101,920 | `0870efcdde1e90f29e87d4c2861a5dfa3fc65a0415e6c0d85d64f41501eaada9` |
+| **Increase against this matched reference** | **36,384 (0.13443%)** | |
+| **Remaining to 10,000,000 bytes** | **17,101,920** | |
+
+Allocated file-backed sections add 34,216 bytes: `.text` +24,144,
+`.data.rel.ro` +3,536, `.eh_frame` +8,468, `.eh_frame_hdr` +1,088,
+`.gcc_except_table` −2,940, `.relr.dyn` +56 and `.rodata` −136.
+Actual file-layout gaps add another 2,168 bytes; ELF/program/section headers
+and nonallocated section contents are unchanged. The new reference is 64 bytes
+smaller than the earlier cold-cohort `ab595dd9` candidate, with different fresh
+profile and binary identities. That separate cohort difference is not assigned
+to a source change or combined with the measured correction delta.
+
+Both arms passed all nine archive cases and the negative control, 47 registry
+tests, compact-unwind checks and 156 template activations, including the added
+resource value `31`. The increase is a measured size cost; throughput recovery
+is still pending. The metadata receiver-preparation and ControlTheme/style-region
+changes retain separate actual-source correctness gates. Their optimized
+shipping size and performance are outside this source pair.
 
 The runtime importer now supports a derived arm selection across completed CI
 imports. Each arm retains its original comparison, source, graph, profile and
@@ -296,9 +320,9 @@ the local array in reverse declaration order so Rust retains the original
 cleanup order. Only complete factories already using all six stored roles are
 accepted, and unsupported factories keep their original generated Rust.
 
-These source checks do not replace the pending full-size and production
-performance comparisons. The separate two-role style-region extension is not
-covered by either completed run. Its combined source is frozen at
+These source checks do not replace the full-size and production performance
+comparisons. The two-role style-region extension has now passed a separate
+combined actual-source gate. Its source is frozen at
 [`dc93a16d`](https://github.com/wieslawsoltes/FerroUI/commit/dc93a16d88c8d8e6aedaa852f1106a856ab5993b),
 including the validated metadata and whole-factory changes. Its executed
 standalone grammar gate passed all 13 cases. Running the actual parsers over
@@ -312,17 +336,31 @@ unwind and exception data. That is a gross scope bound: the regions cover only
 parts of those functions, and instruction tables and shared helpers have their
 own costs. It is not a predicted saving. The new actual-source gate requires
 all 21 named regressions, exact runtime/grammar/differential summaries and fresh
-WinUI generation with both program forms. Its result is pending.
+WinUI generation with both program forms.
 [Source, grammar, coverage and gate plan](benchmarks/compiled-theme-style-region-source-prototype-linux-x86_64.json).
+
+[CI run 41855481313](https://github.com/wieslawsoltes/FerroUI/actions/runs/41855481313)
+completed successfully against the exact combined source: two whole-program
+runtime tests, three region runtime tests, six whole-program grammar tests,
+seven region grammar tests and 25 differential tests passed. Two existing
+differential cases remain ignored. All 21 required cases executed, including
+interleaved cleanup, return-payload lifetime, panic/drop behavior, lazy imports,
+parent-stack visibility and rejection of escaped region locals. Fresh WinUI
+generation compiled with 18 whole programs and 34 region programs. The source
+tree, tracked inputs and lockfile stayed unchanged.
+
+The [combined source-validation evidence](benchmarks/compiled-theme-style-region-source-validation-linux-x86_64.json)
+preserves the exact original validation record, verifies every command and
+resource log and the generated WinUI file, and identifies all six integrated
+source files. The production comparison is pinned to `ad926b4d` as reference
+and `dc93a16d` as candidate. Both arms use the original 13-workload training,
+features, compilation paths, native/link policy and complete editable executable.
+Its measured size and runtime acceptance remain pending.
 
 ### Remote companion linking and subsequent local measurement
 
-The boxed-correction CI comparison completed successfully. Its console records
-27,065,536 bytes for the freshly rebuilt `ab595dd9` reference and 27,101,920
-bytes for `ad926b4d`: a 36,384-byte increase. The original evidence artifact is
-frozen for transport and independent import. This new reference is a separate
-build from the 27,065,600-byte cold-cohort candidate above. The correction's
-performance remains unresolved.
+The boxed-correction artifact import and independent verification are complete,
+as recorded above. Its performance remains unresolved.
 
 The companion pipeline downloads the exact original release artifacts and
 links all eight reference and eight candidate companions together on one CI
