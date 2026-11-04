@@ -8,6 +8,7 @@ WinUI output. The explicit control-theme-regions suite additionally requires the
 region runtime/grammar cases and both generated program forms. Filters narrow
 execution, not compilation. The coercion suite checks owned-value cleanup,
 metadata registration/inheritance, property behavior and downstream typed APIs.
+The inheritance suite adds inherited-change lifetime and registration checks.
 These development suites make no
 production size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,
 source identity, lockfile, logs and resource reports survive success or failure.
@@ -30,7 +31,7 @@ import time
 HERE = Path(__file__).resolve().parent
 HOST = "x86_64-unknown-linux-gnu"
 
-# Counts belong only to the explicit frozen region/coercion suites. Existing
+# Counts belong only to the explicit frozen region/property suites. Existing
 # metadata and whole-theme command plans and acceptance rules remain unchanged.
 REGION_EXPECTED_SUMMARIES = {
     "construction-runtime": {"passed": 2, "failed": 0, "ignored": 0},
@@ -46,6 +47,12 @@ COERCION_EXPECTED_SUMMARIES = {
     "property-metadata": {"passed": 14, "failed": 0, "ignored": 0},
     "coercer-registration": {"passed": 1, "failed": 0, "ignored": 0},
     "metadata": {"passed": 66, "failed": 0, "ignored": 0},
+}
+
+INHERITANCE_EXPECTED_SUMMARIES = {
+    **COERCION_EXPECTED_SUMMARIES,
+    "inheritance-oracles": {"passed": 4, "failed": 0, "ignored": 0},
+    "property-registry": {"passed": 12, "failed": 0, "ignored": 0},
 }
 
 
@@ -78,7 +85,7 @@ def suite_commands(cargo, suite):
         ]
         downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
                       "-p", "ferroui-controls", "--features", "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]
-    elif suite == "coercion":
+    elif suite in {"coercion", "inheritance"}:
         base = [*common, "-p", "ferroui-base", "--features", "compiler-metadata,hot-reload"]
         tests = [
             (label, [*base, test_filter, "--", "--test-threads=1"])
@@ -90,6 +97,14 @@ def suite_commands(cargo, suite):
                 ("metadata", "metadata::"),
             )
         ]
+        if suite == "inheritance":
+            tests.insert(1, (
+                "inheritance-oracles", [*base, "property_store::effective_value::inheritance_tests::",
+                                        "--", "--test-threads=1"],
+            ))
+            tests.insert(4, (
+                "property-registry", [*base, "tests::ferro_property_registry_tests::", "--", "--test-threads=1"],
+            ))
         downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
                       "-p", "ferroui-controls", "--features", "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]
     elif suite in {"control-theme", "control-theme-regions"}:
@@ -148,7 +163,7 @@ def main():
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--suite", choices=("metadata", "coercion", "control-theme", "control-theme-regions"), default="metadata")
+    parser.add_argument("--suite", choices=("metadata", "coercion", "inheritance", "control-theme", "control-theme-regions"), default="metadata")
     parser.add_argument("--required-test", action="append", default=[])
     parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
@@ -214,6 +229,8 @@ def main():
         report["expected_test_summaries"] = REGION_EXPECTED_SUMMARIES
     elif args.suite == "coercion":
         report["expected_test_summaries"] = COERCION_EXPECTED_SUMMARIES
+    elif args.suite == "inheritance":
+        report["expected_test_summaries"] = INHERITANCE_EXPECTED_SUMMARIES
     tracked = evidence / "tracked-inputs.txt"
     tracked.write_text(git(source, "ls-files", "--stage") + "\n")
     report["tracked_inputs"] = identity(tracked)

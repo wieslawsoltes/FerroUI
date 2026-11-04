@@ -465,6 +465,37 @@ retains the original validation record. Fresh production size and coercion
 performance measurements remain required; the existing boxed-style delivery
 blocker is unchanged.
 
+### Demand-rooted inherited-change notifications
+
+The next separate source prototype is frozen at
+[`c7062ec9`](https://github.com/wieslawsoltes/FerroUI/commit/c7062ec91550590d5dedc790a736e13e333a5b17).
+An explicit `StyledPropertyOptions::inherits` call supplies a private typed
+notification callback in the common property header. Both registration cores
+install it before publishing the property; added owners copy it. Removing the
+corresponding private effective-value vtable slot lets non-inheriting value
+types omit the full inherited-change algorithm.
+
+The shared dispatch uses the caller's already-selected property and safely
+projects the source with `Any`. Its cached metadata still supplies defaults;
+old/new value clones, equality, notification, cleanup and recursion keep their
+original order. There is no new allocation or unsafe cast. Nine initialized
+read/write, notification and recoercion bodies are unchanged.
+
+The four differential tests compare the original algorithm across missing
+parents, equal/unequal values, Clone/equality/handler/Drop reentry and panics;
+real metadata overrides, coercing setters, added owners and unrelated attached
+hosts; and public inheritance enable/disable registration. Independent source
+and test reviews passed. The separate source gate requires 409 passes: the
+393-test coercion/property/metadata coverage, four inheritance cases and all
+12 registry cases, with 13 required names and downstream Base/Controls checks.
+Its [prototype and frozen plan](benchmarks/compiled-theme-demand-rooted-inheritance-source-prototype-linux-x86_64.json)
+retain the exact source identities and reviews. Compilation is pending and
+the source is not yet integrated into this PR's runtime.
+
+The old inherited-change family occupies 92,151 bytes, a gross bound. The
+property/options callback pointer and safe source type check have costs. Fresh
+production size and inherited-notification throughput remain required.
+
 ### Earlier source history
 
 The runtime and focused regression tests are committed through

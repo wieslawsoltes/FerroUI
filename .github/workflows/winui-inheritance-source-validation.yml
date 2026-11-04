@@ -1,0 +1,71 @@
+name: Demand-rooted inheritance source validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Immutable source commit for inheritance, coercion and typed API gates'
+        default: 'c7062ec91550590d5dedc790a736e13e333a5b17'
+        required: true
+        type: string
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-inheritance-source-validation.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-inheritance-source-${{ github.ref }}-${{ inputs.revision || 'c7062ec91550590d5dedc790a736e13e333a5b17' }}
+  cancel-in-progress: false
+
+jobs:
+  source-validation:
+    name: Actual inherited-change lifetimes, coercion and property registration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.revision || 'c7062ec91550590d5dedc790a736e13e333a5b17' }}
+          path: source
+          persist-credentials: false
+      - name: Native development dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config time
+      - name: Compile immutable source and run inheritance gates
+        env:
+          SOURCE_REVISION: ${{ inputs.revision || 'c7062ec91550590d5dedc790a736e13e333a5b17' }}
+        run: |
+          python3 tooling/scripts/themes/bench/run_winui_source_validation.py \
+            --source "$GITHUB_WORKSPACE/source" \
+            --revision "$SOURCE_REVISION" \
+            --output "$RUNNER_TEMP/winui-inheritance-source-validation" \
+            --suite inheritance \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts \
+            --required-test property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior \
+            --required-test tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property \
+            --required-test property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind \
+            --required-test property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots \
+            --required-test property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes \
+            --required-test property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind \
+            --required-test property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality \
+            --required-test ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer \
+            --required-test ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations \
+            --required-test ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides
+      - name: Preserve commands, source, results and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-inheritance-source-validation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-inheritance-source-validation/evidence
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 14
