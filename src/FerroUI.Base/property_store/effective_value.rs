@@ -428,67 +428,33 @@ impl<T: PropertyValue> EffectiveValue<T> {
         is_overridden_current_value: bool,
         is_coerced_default_value: bool,
     ) {
-        let old_value = self.value();
-        let mut value_changed = false;
-        let mut base_value_changed = false;
-
-        self.state.is_overriden_current_value.set(is_overridden_current_value);
-        self.state.is_coerced_default_value.set(is_coerced_default_value);
-
-        // `v = value`, or the coerced value. The value as it was given is
-        // only read again where it is stored uncoerced, so without a
-        // coercion `v` is the value itself and not a copy of it.
-        let (v, uncoerced) = match &self.uncommon {
-            Some(uncommon) if !is_coerced_default_value => {
-                ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value)))
-            }
-            _ => (value, None),
+        // Separate caller-owned slots preserve the original parameter/local
+        // drop order: uncoerced, v, old_value, then any unmoved input. The
+        // borrowed engine can move a slot at its original consumption point
+        // without owning T in a different helper/unwind frame.
+        let mut input = Some(value);
+        let mut old_value = Some(self.value());
+        let mut v = None;
+        let mut uncoerced = None;
+        let mut values = transition::WriteFrame {
+            target: self,
+            input: &mut input,
+            old_value: &mut old_value,
+            value: &mut v,
+            uncoerced: &mut uncoerced,
         };
-
-        if priority <= self.state.priority.get() {
-            value_changed = !value_equals(&*self.value.borrow(), &v);
-            // `replace` releases the borrow before the previous value is
-            // dropped: dropping a value may run code that reads the property.
-            self.value.replace(v.clone());
-            self.state.priority.set(priority);
-            if let Some((uncommon, value)) = &uncoerced {
-                uncommon.uncoerced_value.replace(value.clone());
-            }
-        }
-
-        if priority <= self.state.base_priority.get() && priority >= BindingPriority::LocalValue {
-            base_value_changed = !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &v));
-            self.base_value.replace(Some(v));
-            self.state.base_priority.set(priority);
-            if let Some((uncommon, value)) = uncoerced {
-                uncommon.uncoerced_base_value.replace(value);
-            }
-        }
-
-        if value_changed {
-            self.notify_value_changed(owner, old_value);
-        } else if base_value_changed {
-            self.notify_base_value_changed(owner);
-        }
+        transition::write(&self.state, owner, priority, is_overridden_current_value, is_coerced_default_value, &mut values);
     }
 
     fn notify_value_changed(&self, owner: &FerroObject, old_value: T) {
-        let notifying = self.state.property.notifying();
-        if let Some(notifying) = notifying {
-            notifying(owner, true);
-        }
-        let new_value = self.value();
-        owner.raise_property_changed(self.state.property, Some(&old_value), &new_value, self.state.priority.get(), true);
-        if self.state.property.inherits() {
-            // A change handler may have changed the value again: inheritance
-            // children are told the value as it is now, not the value that
-            // was announced to the handlers of this object.
-            let new_value = self.value();
-            owner.values().on_inherited_effective_value_changed(owner, self.state.property, &old_value, &new_value);
-        }
-        if let Some(notifying) = notifying {
-            notifying(owner, false);
-        }
+        let mut new_value = None;
+        let mut inherited_value = None;
+        let mut values = transition::NotificationFrame {
+            target: self,
+            current: &mut new_value,
+            inherited: &mut inherited_value,
+        };
+        transition::notify(&self.state, owner, &old_value, &mut values);
     }
 
     fn notify_base_value_changed(&self, owner: &FerroObject) {
@@ -498,6 +464,9 @@ impl<T: PropertyValue> EffectiveValue<T> {
         }
     }
 }
+
+#[path = "effective_value_transition.rs"]
+mod transition;
 
 /// Downcasts an untyped effective value to its typed form.
 #[inline]
@@ -587,3 +556,7 @@ mod inheritance_tests;
 #[cfg(test)]
 #[path = "effective_value_construction_tests.rs"]
 mod construction_tests;
+
+#[cfg(test)]
+#[path = "effective_value_transition_tests.rs"]
+mod transition_tests;
