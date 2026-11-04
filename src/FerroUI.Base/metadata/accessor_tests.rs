@@ -364,19 +364,31 @@ fn original_checked_static_getter(arguments: &[MarkupValue]) -> Result<MarkupVal
 }
 
 fn original_getters() -> [MarkupInvoke; 4] {
+    // Coerce the original closure while it is still inside Option. Calling
+    // unwrap first gives its argument one inferred lifetime instead of the
+    // higher-ranked input lifetime required by the public MarkupInvoke API.
+    let get: Option<MarkupInvoke> =
+        original_getter_macro!(InvocationReceiver, Option<Returned>; get: getter_expression());
+    let try_get: Option<MarkupInvoke> =
+        original_getter_macro!(InvocationReceiver, Option<Returned>; try_get: checked_getter_expression());
+    let static_get: Option<MarkupInvoke> =
+        original_static_getter_macro!(Option<Returned>; get: static_getter_expression());
+    let static_try_get: Option<MarkupInvoke> =
+        original_static_getter_macro!(Option<Returned>; try_get: checked_static_getter_expression());
     [
-        original_getter_macro!(InvocationReceiver, Option<Returned>; get: getter_expression()).unwrap(),
-        original_getter_macro!(InvocationReceiver, Option<Returned>; try_get: checked_getter_expression()).unwrap(),
-        original_static_getter_macro!(Option<Returned>; get: static_getter_expression()).unwrap(),
-        original_static_getter_macro!(Option<Returned>; try_get: checked_static_getter_expression()).unwrap(),
+        get.unwrap(), try_get.unwrap(), static_get.unwrap(), static_try_get.unwrap(),
     ]
 }
 
 fn setter_cases() -> [(MarkupInvoke, MarkupInvoke); 2] {
     let current = setters();
+    let set: Option<MarkupInvoke> =
+        original_setter_macro!(InvocationReceiver, SetterArgument; set: setter_expression());
+    let try_set: Option<MarkupInvoke> =
+        original_setter_macro!(InvocationReceiver, SetterArgument; try_set: checked_setter_expression());
     [
-        (current[0], original_setter_macro!(InvocationReceiver, SetterArgument; set: setter_expression()).unwrap()),
-        (current[1], original_setter_macro!(InvocationReceiver, SetterArgument; try_set: checked_setter_expression()).unwrap()),
+        (current[0], set.unwrap()),
+        (current[1], try_set.unwrap()),
     ]
 }
 
