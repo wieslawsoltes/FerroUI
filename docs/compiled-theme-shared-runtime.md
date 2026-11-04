@@ -233,6 +233,66 @@ evidence on success or failure. This comparison does not yet execute the full
 paired property, binding, metadata and animation performance matrix; its final
 report keeps that acceptance work explicitly pending.
 
+The [production runtime comparison](../scripts/themes/bench/run_winui_runtime_comparison.py)
+continues from a downloaded, completed CI evidence bundle. Its `import` command
+verifies the original source, compiler, dependency, archive and profile identities
+and writes a separate map from the recorded paths to their local copies. It
+does not rewrite the CI reports. Dependency inventories must describe the exact
+directories supplied to rustc; the property companion selects the `bitflags`
+archive named by the actual Base compiler record.
+
+The `run` command first proves the local Rust/LLVM and target sysroot identities
+against the recorded distribution, then checks whether the imported host
+procedural macros can load. It links both sets of production companions before
+running the property, binding, receiver, getter, animation and allocation checks.
+Both revisions use the current regression fixtures; only the reference receiver
+fixture retains the original temporary strong-reference count. A failed gate
+prevents timing. The `--checks-only` option runs these correctness and allocation
+checks while explicitly leaving performance pending.
+
+Before paired measurements, the
+[bounded profile audit](../scripts/themes/bench/verify_winui_profile_acceptance.py)
+inspects at most two Base bitcode members per revision. It resolves six current
+notification/root-callback symbols, queries their exact current profile keys,
+and requires genuine optimized function-entry metadata. An accepted zero-entry
+validation callback is distinct from missing metadata. Historical entry counts
+are not thresholds: inlining can change those counts. Root-handler target
+promotions are recorded as diagnostics; this audit does not replace the paired
+workloads or establish final native-code layout.
+
+For example, after extracting the complete workflow artifact into a fresh
+directory and installing the matching checksummed toolchain:
+
+```sh
+python3 scripts/themes/bench/run_winui_runtime_comparison.py import \
+  --evidence /path/to/downloaded/evidence \
+  --output /path/to/import
+
+python3 scripts/themes/bench/run_winui_runtime_comparison.py run \
+  --import-manifest /path/to/import/import.json \
+  --toolchain-prefix /path/to/rust-1.99.0/install \
+  --toolchain-manifest /path/to/rust-1.99.0/installation.json \
+  --cpu 4 \
+  --output /path/to/runtime-comparison
+```
+
+Choose an allowed CPU and new output directories. The existing producers retain
+their workload sources, allocation counters and 31-pair timing policies; these
+runs do not train a profile or rebuild Base. Startup is a separate cohort using
+unchanged CI-linked executables staged locally. It requires host ELF-loader and
+symbol-version compatibility plus the editable-archive smoke checks. If that
+compatibility cannot be proved, startup remains pending even when locally linked
+runtime companions can run. Preparing these helpers supplies no new executable
+size, production correctness or performance result.
+
+The [executed tooling preflight](benchmarks/compiled-theme-production-gate-preflight-linux-x86_64.json)
+retains the local distribution/loader self-check and the profile parser's real
+tiny-compiler input plus negative controls. It verifies 18 recorded tool
+identities and the installed union of 27 target libraries, 27 metadata files
+and three shared libraries. The earlier incomplete component-inventory check
+remains in the record. These are preparation checks, separate from accepting
+the completed CI graphs or measuring the application.
+
 The [template validation producer](../scripts/themes/bench/prepare_template_validation.py)
 retains the four original control factories, loader paths, font assertions and
 visual-tree expectations. Its structural case additionally requires the edited
