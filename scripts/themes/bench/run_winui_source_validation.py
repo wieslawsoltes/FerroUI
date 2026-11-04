@@ -13,6 +13,8 @@ The property-capabilities suite combines those cases with default coercion and
 shared boxed delivery, then checks fresh WinUI generation as well as Controls.
 The additive nullable-operations suite preserves that exact inventory, runs all
 24 existing value-type tests and requires each frozen nullable cleanup oracle.
+The additive coercion-construction suite retains the nullable inventory and
+requires each frozen metadata/effective-value construction cleanup oracle.
 These development suites make no
 production size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,
 source identity, lockfile, logs and resource reports survive success or failure.
@@ -150,6 +152,20 @@ NULLABLE_EXPECTED_SUMMARIES = {
     **PROPERTY_CAPABILITIES_EXPECTED_SUMMARIES,
     "value-types": {"passed": len(NULLABLE_VALUE_TYPE_TESTS), "failed": 0, "ignored": 0},
     "nullable-oracles": {"passed": len(NULLABLE_OPERATION_TESTS), "failed": 0, "ignored": 0},
+}
+
+
+# Populated only from the reviewed, frozen construction source before execution.
+COERCION_CONSTRUCTION_TESTS = (
+    'property_store::effective_value::construction_tests::frozen_metadata_construction_matches_original_owned_frames_and_unwind',
+    'property_store::effective_value::construction_tests::public_type_safe_metadata_keeps_unfrozen_clone_only_behavior',
+    'property_store::effective_value::construction_tests::frozen_metadata_generation_keeps_reentrant_input_ownership',
+    'property_store::effective_value::construction_tests::effective_construction_matches_original_default_and_inherited_frames',
+    'property_store::effective_value::construction_tests::effective_construction_keeps_metadata_snapshot_during_clone_reentry',
+)
+COERCION_CONSTRUCTION_EXPECTED_SUMMARIES = {
+    **NULLABLE_EXPECTED_SUMMARIES,
+    "construction-oracles": {"passed": len(COERCION_CONSTRUCTION_TESTS), "failed": 0, "ignored": 0},
 }
 
 
@@ -336,6 +352,51 @@ def nullable_operation_inventory(rows, required_tests):
             "additional_nullable_oracles": sorted(NULLABLE_OPERATION_TESTS)}
 
 
+def coercion_construction_suite_commands(cargo):
+    """Add one frozen construction filter without changing the nullable plan."""
+    if len(COERCION_CONSTRUCTION_TESTS) != 5:
+        raise ValueError("The five construction oracle names must be frozen before this suite can execute")
+    commands, labels = nullable_suite_commands(cargo)
+    template = commands[0][1]
+    assert template[-2:] == ["--", "--test-threads=1"]
+    addition = (
+        "construction-oracles",
+        [*template[:-3], "property_store::effective_value::construction_tests::", *template[-2:]],
+    )
+    assert [label for label, _ in commands[-2:]] == ["downstream", "fresh-winui"]
+    return [*commands[:-2], addition, *commands[-2:]], labels | {addition[0]}
+
+
+def coercion_construction_inventory(rows, required_tests):
+    """Preserve the actual nullable inventory and require five disjoint oracles."""
+    if len(COERCION_CONSTRUCTION_TESTS) != 5 or len(set(COERCION_CONSTRUCTION_TESTS)) != 5:
+        raise RuntimeError("The five distinct construction oracle names have not been frozen")
+    labels = [row["label"] for row in rows]
+    if len(labels) != len(COERCION_CONSTRUCTION_EXPECTED_SUMMARIES) or set(labels) != set(COERCION_CONSTRUCTION_EXPECTED_SUMMARIES):
+        raise RuntimeError("coercion-construction requires all eleven exact test phases")
+    nullable_required = [*NULLABLE_PROPERTY_REQUIRED_TESTS, *NULLABLE_OPERATION_TESTS]
+    expected_required = {*nullable_required, *COERCION_CONSTRUCTION_TESTS}
+    if len(expected_required) != 38 or len(required_tests) != 38 or set(required_tests) != expected_required:
+        raise RuntimeError("coercion-construction requires exactly the original 33 and five frozen construction oracles")
+    base_rows = [row for row in rows if row["label"] in NULLABLE_EXPECTED_SUMMARIES]
+    preserved = nullable_operation_inventory(base_rows, nullable_required)
+    base_names = {name for row in base_rows for name in row["passed_tests"]}
+    row, = [item for item in rows if item["label"] == "construction-oracles"]
+    names = row["passed_tests"]
+    if row.get("complete") is not True or row.get("exit") != 0 or row.get("test_summary") != COERCION_CONSTRUCTION_EXPECTED_SUMMARIES["construction-oracles"]:
+        raise RuntimeError("construction-oracles does not match its exact completed summary")
+    if len(names) != 5 or len(set(names)) != 5 or set(names) != set(COERCION_CONSTRUCTION_TESTS):
+        raise RuntimeError("construction-oracles differs from its complete frozen test-name set")
+    if base_names.intersection(names):
+        raise RuntimeError("construction-oracles unexpectedly overlaps a preserved test phase")
+    observed = base_names | set(names)
+    executions = preserved["total_passed_executions"] + len(names)
+    if executions != 450 or len(observed) != 446 or not expected_required <= observed:
+        raise RuntimeError("coercion-construction requires 450 executions, 446 distinct names and all 38 mandatory cases")
+    return {**preserved, "total_passed_executions": executions, "total_distinct_passed": len(observed),
+            "preserved_nullable_inventory": preserved, "additional_construction_oracles": sorted(names)}
+
+
 def collect_generated_winui(target, evidence):
     generated = []
     for path in sorted(target.rglob("compiled_xaml.rs")):
@@ -357,7 +418,7 @@ def main():
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--suite", choices=("metadata", "coercion", "inheritance", "control-theme", "control-theme-regions", "property-capabilities", "nullable-operations"), default="metadata")
+    parser.add_argument("--suite", choices=("metadata", "coercion", "inheritance", "control-theme", "control-theme-regions", "property-capabilities", "nullable-operations", "coercion-construction"), default="metadata")
     parser.add_argument("--required-test", action="append", default=[])
     parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
@@ -374,6 +435,12 @@ def main():
             parser.error("Nullable oracle names must be frozen before this suite can execute")
         if len(args.required_test) != len(expected_required) or set(args.required_test) != expected_required:
             parser.error("nullable-operations requires exactly the original 27 and all frozen nullable oracle names")
+    if args.suite == "coercion-construction":
+        expected_required = {*NULLABLE_PROPERTY_REQUIRED_TESTS, *NULLABLE_OPERATION_TESTS, *COERCION_CONSTRUCTION_TESTS}
+        if len(COERCION_CONSTRUCTION_TESTS) != 5 or len(expected_required) != 38:
+            parser.error("The five construction oracle names must be frozen before this suite can execute")
+        if len(args.required_test) != 38 or set(args.required_test) != expected_required:
+            parser.error("coercion-construction requires exactly the original 33 and all five construction oracle names")
     if git(source, "rev-parse", "HEAD") != args.revision:
         parser.error("source checkout does not match --revision")
     if git(source, "status", "--porcelain", "--untracked-files=all"):
@@ -414,7 +481,10 @@ def main():
                        "--work-dir", str(output / "toolchain")]),
     ]
     cargo = str(prefix / "bin/cargo")
-    planned, test_labels = nullable_suite_commands(cargo) if args.suite == "nullable-operations" else suite_commands(cargo, args.suite)
+    if args.suite == "coercion-construction":
+        planned, test_labels = coercion_construction_suite_commands(cargo)
+    else:
+        planned, test_labels = nullable_suite_commands(cargo) if args.suite == "nullable-operations" else suite_commands(cargo, args.suite)
     commands.extend(planned)
     report = {
         "schema": 2, "scope": __doc__, "suite": args.suite, "revision": args.revision,
@@ -446,6 +516,16 @@ def main():
         report["expected_name_overlaps"] = PROPERTY_CAPABILITIES_EXPECTED_OVERLAPS
         report["expected_generated_program_counts"] = PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS
         report["expected_additional_test_names"] = {"value-types": list(NULLABLE_VALUE_TYPE_TESTS), "nullable-oracles": list(NULLABLE_OPERATION_TESTS)}
+    elif args.suite == "coercion-construction":
+        report["expected_test_summaries"] = COERCION_CONSTRUCTION_EXPECTED_SUMMARIES
+        report["expected_total_passed"] = 450
+        report["expected_total_distinct_passed"] = 446
+        report["expected_name_overlaps"] = PROPERTY_CAPABILITIES_EXPECTED_OVERLAPS
+        report["expected_generated_program_counts"] = PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS
+        report["expected_additional_test_names"] = {
+            "value-types": list(NULLABLE_VALUE_TYPE_TESTS), "nullable-oracles": list(NULLABLE_OPERATION_TESTS),
+            "construction-oracles": list(COERCION_CONSTRUCTION_TESTS),
+        }
     tracked = evidence / "tracked-inputs.txt"
     tracked.write_text(git(source, "ls-files", "--stage") + "\n")
     report["tracked_inputs"] = identity(tracked)
@@ -476,6 +556,9 @@ def main():
                 elif args.suite == "nullable-operations":
                     report.update(nullable_operation_inventory(
                         [row for row in report["commands"] if "test_summary" in row], args.required_test))
+                elif args.suite == "coercion-construction":
+                    report.update(coercion_construction_inventory(
+                        [row for row in report["commands"] if "test_summary" in row], args.required_test))
             log = evidence / (label + ".log")
             resources = evidence / (label + "-resources.txt")
             argv = ["/usr/bin/time", "-v", "-o", str(resources), *command]
@@ -493,7 +576,7 @@ def main():
                     raise RuntimeError(f"{label} exited {row['exit']}; see {log}")
                 if label in test_labels:
                     contents = log.read_text()
-                    parse_tests = successful_property_capabilities_tests if args.suite in {"property-capabilities", "nullable-operations"} else successful_tests
+                    parse_tests = successful_property_capabilities_tests if args.suite in {"property-capabilities", "nullable-operations", "coercion-construction"} else successful_tests
                     row["test_summary"], passed = parse_tests(contents, label)
                     row["passed_tests"] = sorted(passed)
                     expected = report.get("expected_test_summaries", {}).get(label)
@@ -532,18 +615,18 @@ def main():
                 report["environment"]["toolchain_path_prefix"] = str(prefix / "bin")
                 report["environment"]["toolchain_library_prefix"] = str(prefix / "lib")
                 report["environment"]["rustc"] = environment["RUSTC"]
-        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities", "nullable-operations"}:
+        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities", "nullable-operations", "coercion-construction"}:
             report["generated_winui"] = collect_generated_winui(output / "target", evidence)
             if not any(row["construction_programs"] for row in report["generated_winui"]):
                 raise RuntimeError("fresh WinUI output contains no accepted ControlTheme construction programs")
-            if args.suite in {"control-theme-regions", "property-capabilities", "nullable-operations"}:
+            if args.suite in {"control-theme-regions", "property-capabilities", "nullable-operations", "coercion-construction"}:
                 report["generated_program_counts"] = {
                     key: sum(row[key] for row in report["generated_winui"])
                     for key in ("construction_programs", "region_programs")
                 }
                 if not any(row["region_programs"] for row in report["generated_winui"]):
                     raise RuntimeError("fresh WinUI output contains no accepted Style region programs")
-                if args.suite in {"property-capabilities", "nullable-operations"} and report["generated_program_counts"] != PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS:
+                if args.suite in {"property-capabilities", "nullable-operations", "coercion-construction"} and report["generated_program_counts"] != PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS:
                     raise RuntimeError("fresh WinUI output does not match the frozen 18 whole-theme and 34 Style region programs")
         report["complete"] = True
     except BaseException as error:
@@ -551,7 +634,7 @@ def main():
         raise
     finally:
         previously_complete = report["complete"]
-        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities", "nullable-operations"} and "generated_winui" not in report:
+        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities", "nullable-operations", "coercion-construction"} and "generated_winui" not in report:
             try:
                 report["generated_winui"] = collect_generated_winui(output / "target", evidence)
             except Exception as error:
