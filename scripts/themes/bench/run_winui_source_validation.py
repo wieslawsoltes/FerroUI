@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Run focused development gates against one immutable repository revision.
 
-This compiles the actual Base unit-test crate and downstream Controls metadata.
-The test filters narrow execution, not compilation. It makes no production size,
-throughput, PGO or shipping-acceptance claim. Toolchain, commands, source identity,
-lockfile, logs and GNU time resource reports are retained on success or failure.
+This compiles actual framework test crates for the selected source change. The
+metadata suite checks Base and downstream Controls expansion; the control-theme
+suite checks the runtime, emitter and differential corpus, then type-checks fresh
+WinUI output. Filters narrow execution, not compilation. Neither suite makes a
+production size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,
+source identity, lockfile, logs and resource reports survive success or failure.
 """
 from __future__ import annotations
 
@@ -42,11 +44,62 @@ def git(source, *arguments):
     return subprocess.check_output(["git", "-C", str(source), *arguments], text=True).strip()
 
 
+def suite_commands(cargo, suite):
+    """Fixed command plans: an input selects a suite, never arbitrary shell code."""
+    common = [cargo, "test", "--locked", "--target", HOST, "--lib"]
+    if suite == "metadata":
+        base = [*common, "-p", "ferroui-base", "--features", "compiler-metadata,hot-reload"]
+        tests = [
+            (label, [*base, test_filter, "--", "--test-threads=1"])
+            for label, test_filter in (("metadata", "metadata::"), ("object-smoke", "ferro_object_tests::"),
+                                       ("properties", "tests::ferro_object_tests"))
+        ]
+        downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
+                      "-p", "ferroui-controls", "--features", "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]
+    else:
+        tests = [
+            ("construction-runtime", [*common, "-p", "ferroui-markup-xaml",
+                                       "control_theme_program::tests::", "--", "--test-threads=1"]),
+            ("construction-grammar", [*common, "-p", "ferroui-markup-xaml-loader", "--features", "emitter",
+                                       "control_theme_programs::tests::", "--", "--test-threads=1"]),
+            ("emitter-differential", [*common, "-p", "ferroui-markup-xaml-tests",
+                                      "emitter::differential_tests::", "--", "--test-threads=1"]),
+        ]
+        downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-themes-winui",
+                      "--features", "solid-theme"]
+    return [*tests, ("downstream", downstream)], {label for label, _ in tests}
+
+
+def successful_tests(contents, label):
+    summaries = re.findall(r"test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored;", contents)
+    if len(summaries) != 1 or int(summaries[0][0]) == 0 or int(summaries[0][1]) != 0:
+        raise RuntimeError(f"{label} did not report one nonempty successful test suite")
+    passed = set(re.findall(r"(?m)^test ([A-Za-z_][A-Za-z_0-9:]*)(?: - should panic)? \.\.\. ok$", contents))
+    if len(passed) != int(summaries[0][0]):
+        raise RuntimeError(f"{label} test names do not match its successful summary")
+    return dict(zip(("passed", "failed", "ignored"), map(int, summaries[0]))), passed
+
+
+def collect_generated_winui(target, evidence):
+    generated = []
+    for path in sorted(target.rglob("compiled_xaml.rs")):
+        if any(part.startswith("ferroui-themes-winui-") for part in path.parts):
+            row = identity(path)
+            row["construction_programs"] = path.read_text().count("rt::control_theme_program::run(")
+            retained = evidence / "generated" / f"{len(generated):03d}-{path.parent.parent.name}.rs"
+            retained.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, retained)
+            row["retained"] = identity(retained)
+            generated.append(row)
+    return generated
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--suite", choices=("metadata", "control-theme"), default="metadata")
     parser.add_argument("--required-test", action="append", default=[])
     parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
@@ -95,23 +148,18 @@ def main():
                        "--work-dir", str(output / "toolchain")]),
     ]
     cargo = str(prefix / "bin/cargo")
-    common = [cargo, "test", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
-              "--features", "compiler-metadata,hot-reload"]
-    for label, test_filter in (("metadata", "metadata::"), ("object-smoke", "ferro_object_tests::"),
-                               ("properties", "tests::ferro_object_tests")):
-        commands.append((label, [*common, test_filter, "--", "--test-threads=1"]))
-    commands.append(("downstream", [cargo, "check", "--locked", "--target", HOST, "--lib",
-                     "-p", "ferroui-base", "-p", "ferroui-controls", "--features",
-                     "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]))
+    planned, test_labels = suite_commands(cargo, args.suite)
+    commands.extend(planned)
     report = {
-        "schema": 1, "scope": __doc__, "revision": args.revision,
+        "schema": 2, "scope": __doc__, "suite": args.suite, "revision": args.revision,
         "tree": git(source, "rev-parse", "HEAD^{tree}"), "source": str(source),
         "producer": identity(__file__), "bootstrap_producer": identity(HERE / "bootstrap_toolchain.py"),
         "lockfile_before": identity(source / "Cargo.lock"), "commands": [],
         "environment": {"removed_names": sorted(removed), "controlled": controlled},
         "started_unix": time.time(), "complete": False, "plan_only": args.plan_only,
         "production_acceptance": False,
-        "required_metadata_tests": args.required_test,
+        "required_tests": args.required_test,
+        "required_metadata_tests": args.required_test if args.suite == "metadata" else [],
     }
     tracked = evidence / "tracked-inputs.txt"
     tracked.write_text(git(source, "ls-files", "--stage") + "\n")
@@ -127,8 +175,16 @@ def main():
         raise InterruptedError(f"Source validation interrupted by signal {signum}")
 
     previous_sigterm = signal.signal(signal.SIGTERM, interrupted)
+    passed_tests = set()
     try:
         for label, command in commands:
+            # Every requested regression must have run before the downstream
+            # compile. An empty or stale filter can never become acceptance.
+            if label == "downstream":
+                missing = set(args.required_test) - passed_tests
+                if missing:
+                    raise RuntimeError(f"required regressions did not pass: {sorted(missing)}")
+                report["required_tests_passed"] = sorted(set(args.required_test) & passed_tests)
             log = evidence / (label + ".log")
             resources = evidence / (label + "-resources.txt")
             argv = ["/usr/bin/time", "-v", "-o", str(resources), *command]
@@ -144,15 +200,14 @@ def main():
                     row["exit"] = process.wait()
                 if row["exit"]:
                     raise RuntimeError(f"{label} exited {row['exit']}; see {log}")
-                if label in {"metadata", "object-smoke", "properties"}:
+                if label in test_labels:
                     contents = log.read_text()
-                    summaries = re.findall(r"test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored;", contents)
-                    if len(summaries) != 1 or int(summaries[0][0]) == 0 or int(summaries[0][1]) != 0:
-                        raise RuntimeError(f"{label} did not report one nonempty successful test suite")
-                    row["test_summary"] = dict(zip(("passed", "failed", "ignored"), map(int, summaries[0])))
+                    row["test_summary"], passed = successful_tests(contents, label)
+                    row["passed_tests"] = sorted(passed)
+                    passed_tests.update(passed)
                     if label == "metadata":
                         for name in args.required_test:
-                            if not re.search(r"(?m)^test " + re.escape(name) + r" \.\.\. ok$", contents):
+                            if name not in passed:
                                 raise RuntimeError(f"required metadata regression did not pass: {name}")
                 row["complete"] = True
             finally:
@@ -182,12 +237,23 @@ def main():
                 report["environment"]["toolchain_path_prefix"] = str(prefix / "bin")
                 report["environment"]["toolchain_library_prefix"] = str(prefix / "lib")
                 report["environment"]["rustc"] = environment["RUSTC"]
+        if args.suite == "control-theme":
+            report["generated_winui"] = collect_generated_winui(output / "target", evidence)
+            if not any(row["construction_programs"] for row in report["generated_winui"]):
+                raise RuntimeError("fresh WinUI output contains no accepted ControlTheme construction programs")
         report["complete"] = True
     except BaseException as error:
         report["failure"] = str(error)
         raise
     finally:
         previously_complete = report["complete"]
+        if args.suite == "control-theme" and "generated_winui" not in report:
+            try:
+                report["generated_winui"] = collect_generated_winui(output / "target", evidence)
+            except Exception as error:
+                report["generated_evidence_error"] = str(error)
+                report["complete"] = False
+                report.setdefault("failure", "Could not preserve generated WinUI evidence")
         try:
             report["source_after"] = {
                 "head": git(source, "rev-parse", "HEAD"), "tree": git(source, "rev-parse", "HEAD^{tree}"),

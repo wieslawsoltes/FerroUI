@@ -1,0 +1,68 @@
+name: ControlTheme construction source validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Immutable source commit for construction correctness gates'
+        default: 'af8a87ff58d571afeb4b8de0b746663fb3a7c61d'
+        required: true
+        type: string
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-theme-source-validation.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-theme-source-validation-${{ github.ref }}-${{ inputs.revision || 'af8a87ff58d571afeb4b8de0b746663fb3a7c61d' }}
+  cancel-in-progress: false
+
+jobs:
+  source-validation:
+    name: Actual construction runtime, emitter and fresh WinUI source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.revision || 'af8a87ff58d571afeb4b8de0b746663fb3a7c61d' }}
+          path: source
+          persist-credentials: false
+      - name: Native development dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config time libfontconfig1-dev libfreetype6-dev
+      - name: Compile immutable source and run construction gates
+        env:
+          SOURCE_REVISION: ${{ inputs.revision || 'af8a87ff58d571afeb4b8de0b746663fb3a7c61d' }}
+        run: |
+          python3 tooling/scripts/themes/bench/run_winui_source_validation.py \
+            --source "$GITHUB_WORKSPACE/source" \
+            --revision "$SOURCE_REVISION" \
+            --output "$RUNNER_TEMP/winui-theme-source-validation" \
+            --suite control-theme \
+            --required-test xaml_il::runtime::compiled::control_theme_program::tests::caller_owned_locals_match_original_cleanup_on_error_unwind_and_panicking_drop \
+            --required-test xaml_il::runtime::compiled::control_theme_program::tests::returned_theme_payload_matches_original_return_place_cleanup \
+            --required-test rust_emitter::control_theme_programs::tests::complete_nested_factory_keeps_local_order_and_lazy_imports \
+            --required-test rust_emitter::control_theme_programs::tests::every_stored_role_must_already_be_present_in_the_resource \
+            --required-test rust_emitter::control_theme_programs::tests::selector_arrays_move_each_local_once_in_original_order \
+            --required-test rust_emitter::control_theme_programs::tests::unknown_lifecycle_statements_decline_the_whole_function \
+            --required-test rust_emitter::control_theme_programs::tests::borrowed_nonprimitive_temporaries_do_not_move_into_leaf_callbacks \
+            --required-test rust_emitter::control_theme_programs::tests::imports_of_other_resources_are_not_rooted_by_the_shared_program \
+            --required-test emitter::differential_tests::complete_control_theme_construction_program_keeps_unsupported_resource_and_visual_factories \
+            --required-test emitter::differential_tests::a_theme_without_template_locals_does_not_import_the_shared_drop_roles
+      - name: Preserve commands, source, results and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-theme-source-validation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-theme-source-validation/evidence
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 14
