@@ -1,0 +1,77 @@
+name: Transfer frozen WinUI release evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-release-artifact-transfer.yml']
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: winui-release-artifact-transfer-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  transfer:
+    name: Verify original ZIP and preserve three byte parts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Authenticate metadata, download without token forwarding, and split
+        id: split
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TRANSFER_REPOSITORY: ${{ github.repository }}
+          TRANSFER_REPOSITORY_ID: '1405576478'
+          TRANSFER_RUN_ID: '41815903284'
+          TRANSFER_RUN_ATTEMPT: '1'
+          TRANSFER_ARTIFACT_ID: '13318422418'
+          TRANSFER_HEAD_SHA: '5fd34166cb1f01a2d482e87030e6d9cb5d6cb1f0'
+          TRANSFER_HEAD_BRANCH: 'perf/compact-xaml-theme-codegen'
+          TRANSFER_ARTIFACT_NAME: 'winui-editable-release-comparison-41815903284-1'
+          TRANSFER_SIZE: '1261081055'
+          TRANSFER_SHA256: 'f838b6f512a1fc5f19e22aa81d8c01b634633f0530125c89f20504ce1a4ae6a3'
+          TRANSFER_OUTPUT: ${{ runner.temp }}/winui-artifact-transfer
+        run: python3 scripts/themes/bench/split_release_artifact.py
+      - name: Preserve part 1
+        if: ${{ always() && steps.split.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-release-13318422418-part-001-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-artifact-transfer/parts/part-001
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve part 2
+        if: ${{ always() && steps.split.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-release-13318422418-part-002-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-artifact-transfer/parts/part-002
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve part 3
+        if: ${{ always() && steps.split.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-release-13318422418-part-003-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-artifact-transfer/parts/part-003
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve transfer status and metadata on success or failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-release-13318422418-transfer-status-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-artifact-transfer/evidence
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14

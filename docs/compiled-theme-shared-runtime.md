@@ -9,6 +9,42 @@ changes described here require a fresh profile and full executable measurement;
 fixture savings and the compressed distribution size do not establish progress
 against that budget.
 
+## Completed CI size comparison
+
+[CI run 41815903284](https://github.com/wieslawsoltes/FerroUI/actions/runs/41815903284)
+completed successfully on 2026-11-04 using the frozen source pair below and a
+fresh original-workload profile for each revision. The exact console result is:
+
+| Complete stripped executable | Bytes | SHA-256 |
+|---|---:|---|
+| Matched reference, `be91062d` | 27,437,360 | `7d7c2b3a4efc863f3bbd8f2139eeb61f2bfb65f07083674a43090f56fe5a844e` |
+| Shared-runtime candidate, `d2d2f83d` | 27,141,328 | `84b2f636324f3dc2222f39d64c4e36dd3c8103efd15e3d3fc5151d1e87b8c2a6` |
+| **Saving against the matched reference** | **296,032 (1.07894%)** | |
+| **Remaining to 10,000,000 bytes** | **17,141,328** | |
+
+The target is not met. The fresh CI reference is a separate executable from the
+retained 27,406,416-byte stage5 image. The main file-backed section changes show
+both the code reduction and the costs that offset it:
+
+| Section | Candidate minus matched reference |
+|---|---:|
+| `.text` | −359,168 bytes |
+| `.data.rel.ro` | +42,712 bytes |
+| `.eh_frame` | +22,828 bytes |
+| `.eh_frame_hdr` | +3,560 bytes |
+| `.gcc_except_table` | −8,108 bytes |
+| `.relr.dyn` | +672 bytes |
+
+Both arms completed all nine archive cases, 47 registry tests, the compact-unwind
+check and 156 template activations, including the added resource value `31`.
+These gates do not establish the separate full property/binding, receiver,
+getter and animation comparisons or throughput parity. The
+[CI checkpoint](benchmarks/compiled-theme-shared-runtime-ci-linux-x86_64.json)
+preserves the complete job log, exact console summary and original artifact
+identity. The first connector retrieval rejected the 1,261,081,055-byte evidence
+ZIP because its per-file limit is 536,870,912 bytes. Independent artifact import
+and production runtime acceptance remain pending at this checkpoint.
+
 ## Source checkpoint
 
 The runtime and focused regression tests are committed through

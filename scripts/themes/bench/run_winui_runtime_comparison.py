@@ -17,7 +17,7 @@ import hashlib
 import importlib.util
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import shutil
 import signal
 import subprocess
@@ -61,27 +61,77 @@ def fresh(path):
 
 
 def verify_source(directory, files):
-    """Also prove the bytes of file symlinks flattened by artifact transport."""
+    """Authenticate transported links against the recorded source graph."""
     directory = Path(directory).resolve()
     flattened = []
-    for name, expected in files.items():
-        path = directory / name
-        require(path.resolve().is_relative_to(directory), f"Source escapes its snapshot: {name}")
+    children = {"": set()}
+    for name in files:
+        parts = PurePosixPath(name).parts
+        require(name == str(PurePosixPath(name)) and not PurePosixPath(name).is_absolute()
+                and parts and ".." not in parts, f"Invalid recorded source path: {name}")
+        for index, part in enumerate(parts):
+            children.setdefault("/".join(parts[:index]), set()).add(part)
+    require(not set(files).intersection(children), "Recorded source file/directory collision")
+
+    def recorded_target(name):
+        pending, resolved, chain, seen = list(PurePosixPath(name).parts), [], [], set()
+        while pending:
+            state = (tuple(resolved), tuple(pending))
+            require(state not in seen, f"Recorded source link cycle: {name}")
+            seen.add(state)
+            part = pending.pop(0)
+            if part == "..":
+                require(resolved, f"Recorded source link escapes its snapshot: {name}")
+                resolved.pop()
+                continue
+            if part in ("", "."):
+                continue
+            prefix = "/".join((*resolved, part))
+            entry = files.get(prefix, {})
+            if "symlink" in entry:
+                target = PurePosixPath(entry["symlink"])
+                require(entry["symlink"] and not target.is_absolute(), f"Invalid/external recorded source link: {prefix}")
+                require(len(chain) < 40, "Recorded source link chain exceeds the supported 40-link bound")
+                chain.append({"path": prefix, "target": entry["symlink"]})
+                pending = list(target.parts) + pending
+            else:
+                require(prefix in files or prefix in children, f"Unrecorded source link target: {prefix}")
+                require(not pending or prefix in children, f"Recorded source link traverses a file: {prefix}")
+                resolved.append(part)
+        name = "/".join(resolved)
+        require(name in files or name in children, f"Unrecorded source link target: {name}")
+        return name, chain
+
+    def verify_node(path, name, ancestors=()):
+        resolved = path.resolve(strict=True)
+        require(resolved.is_relative_to(directory), f"Source escapes its snapshot: {path}")
+        expected = files.get(name, {})
         if "symlink" in expected:
+            target_name, chain = recorded_target(name)
             if path.is_symlink():
                 require(str(path.readlink()) == expected["symlink"], f"Source link changed: {name}")
-                continue
-            target = (path.parent / expected["symlink"]).resolve()
-            require(target.is_relative_to(directory), f"Unsupported external source link: {name}")
-            target_name = str(target.relative_to(directory))
-            target_expected = files.get(target_name, {})
-            require("sha256" in target_expected, f"Cannot prove a flattened source link: {name}")
-            actual = identity(path)
-            require(all(actual[k] == target_expected[k] for k in ("sha256", "bytes")), f"Flattened link bytes differ: {name}")
-            flattened.append({"path": name, "original_target": expected["symlink"], "content_target": target_name})
-        else:
-            actual = identity(path)
-            require(all(actual[k] == expected[k] for k in ("sha256", "bytes")), f"Source bytes changed: {name}")
+                return verify_node(resolved, target_name, ancestors)
+            count = verify_node(path, target_name, ancestors)
+            flattened.append({"path": str(path.relative_to(directory)), "source_entry": name,
+                              "original_target": expected["symlink"], "content_target": target_name,
+                              "kind": "directory" if target_name in children else "file",
+                              "recorded_link_chain": chain, "verified_files": count})
+            return count
+        require(not path.is_symlink(), f"Unexpected source symlink: {path}")
+        if name in children:
+            require(name not in ancestors, f"Recursive source directory link: {name}")
+            require(path.is_dir(), f"Source directory missing: {path}")
+            require({child.name for child in path.iterdir()} == children[name],
+                    f"Source directory contains extra or missing entries: {path}")
+            return sum(verify_node(path / child, "/".join(filter(None, (name, child))), (*ancestors, name))
+                       for child in sorted(children[name]))
+        require(path.is_file(), f"Source file missing: {path}")
+        actual = identity(path)
+        require(all(actual[k] == expected[k] for k in ("sha256", "bytes")), f"Source bytes changed: {name}")
+        return 1
+
+    for name in sorted(files):
+        verify_node(directory / name, name)
     return flattened
 
 
