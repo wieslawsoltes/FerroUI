@@ -1,0 +1,2836 @@
+{
+  "assembly": {
+    "producer": {
+      "bytes": 9608,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/producers/assemble_portable_packer_evidence.py",
+      "sha256": "464c3c3076e5225a38ce265542ff2b90c252b37acf1404e20afc6ed6665740c4"
+    },
+    "text": "\"\"\"Assemble compact durable evidence from the executed isolated packer phases.\"\"\"\nfrom pathlib import Path\nimport hashlib\nimport json\nimport tomllib\n\nROOT = Path('/workspace/scratch/6f70b20c54b6')\nREPO = ROOT / 'FerroUI'\nRECOVERY = ROOT / 'ferro-build-recovery'\nPACKAGE = ROOT / 'ferro-portable-packer/package-02'\nBUILD = ROOT / 'ferro-portable-packer/build-01'\nCHECK = ROOT / 'ferro-portable-packer/validation-02'\nOUT = REPO / 'docs/benchmarks/compiled-theme-portable-packer-linux-x86_64.json'\nassert not OUT.exists()\n\ndef ident(p):\n    p = Path(p)\n    with p.open('rb') as stream:\n        digest = hashlib.file_digest(stream, 'sha256').hexdigest()\n    return {'path': str(p.resolve()), 'bytes': p.stat().st_size, 'sha256': digest}\n\ndef read(p):\n    return json.loads(Path(p).read_text())\n\nmaterial = read(PACKAGE / 'materialization.json')\nbuild = read(BUILD / 'build.json')\nbefore = read(BUILD / 'resolved-lock-before.json')\nafter = read(BUILD / 'resolved-lock-after.json')\ncheck = read(CHECK / 'result.json')\narchives = read(CHECK / 'archives/archives.json')\nsource = read(RECOVERY / 'release-candidate-01/source.json')\ntoolchain = read(RECOVERY / 'toolchain/installation.json')\nassert check['complete'] and check['returncode'] == 0\nassert before['resolved_lock'] == after['resolved_lock']\nassert before['external_packages'] == after['external_packages']\nassert before['immutable_inputs_verified'] and after['immutable_inputs_verified']\nassert ident(build['executable']['path']) == build['executable'] == check['packer']\nfor relative, expected in material['files'].items():\n    assert ident(expected['path']) == expected, relative\nfor relative, item in material['verbatim_copies'].items():\n    original = material['source_inputs'][item['source']]\n    assert item['copied']['sha256'] == original['sha256']\n    assert ident(item['copied']['path']) == item['copied']\n    assert ident(original['path']) == original\ncompiler_records = []\nfor path in sorted((BUILD / 'compilers').glob('*.json')):\n    record = read(path)\n    assert record['returncode'] == 0\n    compiler_records.append({'record': ident(path), **record})\nassert 'ferroui_base' not in {item['crate'] for item in compiler_records}\nlocal_packages = [{'name': p['name'], 'version': p['version']} for p in\n                  tomllib.loads((PACKAGE / 'Cargo.lock').read_text())['package'] if not p.get('source')]\nassert {item['name'] for item in local_packages} == {'ferroui-portable-archive-tool', 'xamlx'}\ncopied_inputs = {name: {'source': item['source'], 'bytes': item['copied']['bytes'],\n                       'sha256': item['copied']['sha256']}\n                 for name, item in material['verbatim_copies'].items()}\ntheme_inputs = {str(Path(item['path']).relative_to(Path(source['directory']) / 'src/FerroUI.Themes.WinUI')):\n                {'bytes': item['bytes'], 'sha256': item['sha256']}\n                for item in build['theme_inputs']}\nassert len(theme_inputs) == 169\ncommands = []\nfor row in build['commands']:\n    if row['label'] == 'pack-matrix':\n        continue\n    commands.append({**{k: v for k, v in row.items() if k not in ['resources', 'stdout', 'stderr']},\n                     'stdout': Path(row['stdout']).read_text(), 'stderr': Path(row['stderr']).read_text()})\ncases = {}\nfor row in check['canonical_checks']:\n    assert row['matches']\n    actual = ident(row['actual']['path'])\n    assert actual == row['actual']\n    detail = archives['cases'][row['case']]\n    cases[row['case']] = {**row, **{k: detail[k] for k in ['font', 'command', 'stdout', 'stderr'] if k in detail}}\nfailure, = [row for row in build['commands'] if row['label'] == 'pack-matrix']\nassert failure['returncode'] == 1\ngeneric = Path(source['directory']) / 'src/FerroUI.Themes.WinUI/Resources/Generic.xaml'\nanchor = '<x:Double x:Key=\"ControlContentThemeFontSize\">14</x:Double>'\nassert generic.read_text().count(anchor) == 3\ncompact = Path(source['directory']) / 'src/FerroUI.Themes.WinUI/DensityStyles/Compact.xaml'\nassert compact.read_text().count(anchor) == 1\nreport = {\n    'schema_version': 1,\n    'scope': 'Executed isolated archive-tool build and byte-for-byte archive reproduction; not an application build or performance comparison.',\n    'conclusion': {'tool_build_passed': True, 'canonical_archives_passed': 8,\n                   'shipping_graph_substitution_allowed': False,\n                   'shipping_size_or_throughput_claim': False,\n                   'training_executable_launched': False,\n                   'no_runtime_source_or_archive_codec_changes': True},\n    'source': {'head': source['head'], 'tree': source['tree'],\n               'source_manifest': ident(RECOVERY / 'release-candidate-01/source.json'),\n               'frozen_directory_at_execution': source['directory'],\n               'compile_directory_provenance': source['compile_directory']},\n    'materialization': {'record': ident(PACKAGE / 'materialization.json'),\n                        'producer': material['producer'], 'package': material['package'],\n                        'xamlx_version': material['xamlx_version'],\n                        'verbatim_copied_inputs': copied_inputs,\n                        'source_links_materialized_as_regular_files': material['source_links_materialized_as_regular_files'],\n                        'facade_extraction': material['facade_extraction'],\n                        'generated_sources': {name: {'identity': ident(PACKAGE / name), 'text': (PACKAGE / name).read_text()}\n                                              for name in ['Cargo.toml', 'lib.rs', 'compiler_extensions.rs']},\n                        'immutable_input_count': len(material['files']),\n                        'all_immutable_inputs_verified_before_and_after_compiler': True},\n    'dependency_lock': {'original_seed': material['lock_seed'],\n                        'resolved': after['resolved_lock'],\n                        'resolved_text': (PACKAGE / 'Cargo.lock').read_text(),\n                        'local_packages': local_packages,\n                        'external_packages': after['external_packages'],\n                        'every_external_tuple_present_in_original_source_lock': True,\n                        'pre_and_post_verification_records': [ident(BUILD / 'resolved-lock-before.json'),\n                                                              ident(BUILD / 'resolved-lock-after.json')]},\n    'build': {'record': ident(BUILD / 'build.json'), 'producer': build['producer'],\n              'rustc_wrapper': build['rustc_wrapper'],\n              'policy': 'Tooling-only opt0, CGU128, debug assertions, ordinary native unwind, LTO off, no PGO; one Cargo job and Rayon thread.',\n              'controlled_environment': build['environment'], 'cpu_affinity': build['cpu_affinity'],\n              'compiler_version': toolchain['compiler'], 'cargo_version': toolchain['cargo'],\n              'toolchain_installation': build['toolchain'], 'rustc': build['rustc'], 'cargo': build['cargo'],\n              'commands': commands, 'compiler_records': compiler_records, 'executable': build['executable'],\n              'native_link_arguments_captured': False,\n              'timing_scope': 'Elapsed build duration and child peak RSS are diagnostic resource observations, not paired compile-time benchmarks.'},\n    'canonical_archive_validation': {'record': ident(CHECK / 'result.json'),\n                                     'producer': check['producer'], 'validator': check['validator'],\n                                     'command': check['command'], 'returncode': check['returncode'],\n                                     'stdout': Path(check['stdout']['path']).read_text(),\n                                     'stderr': Path(check['stderr']['path']).read_text(),\n                                     'tmpdir_override': check['tmpdir_override'],\n                                     'packer_and_validator_unchanged': check['unchanged_validator_and_packer'],\n                                     'canonical_evidence': build['canonical_evidence'],\n                                     'theme_document_count': len(theme_inputs), 'theme_inputs': theme_inputs, 'cases': cases},\n    'retained_prior_validation_failure': {'record': ident(BUILD / 'build.json'),\n                                         'phase': failure['label'], 'command': failure['argv'],\n                                         'returncode': failure['returncode'],\n                                         'stdout': Path(failure['stdout']).read_text(),\n                                         'stderr': Path(failure['stderr']).read_text(),\n                                         'diagnosis': 'The original validator required one Generic.xaml font anchor; the actual source has three Default/Light/HighContrast anchors, which original profile_winui.make_archives replaces together.',\n                                         'generic_anchor_count': 3, 'compact_anchor_count': 1,\n                                         'tool_binary_rebuilt_for_correction': False,\n                                         'first_four_canonical_matches': read(BUILD / 'partial-validation.json')['checks']},\n    'resource_boundary': {'closed_development_cache_advice': ident(RECOVERY / 'development-cache-release-01.json'),\n                          'application_headroom_gate': read(RECOVERY / 'application-headroom-gate-01.json'),\n                          'no_new_full_application_compiler_started': True},\n    'assembly': {'producer': ident(__file__), 'text': Path(__file__).read_text()},\n}\nOUT.write_text(json.dumps(report, indent=2, sort_keys=True) + '\\n')\nprint(json.dumps(ident(OUT), indent=2))\n"
+  },
+  "build": {
+    "cargo": {
+      "bytes": 36160240,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/cargo",
+      "sha256": "e951141cc55a6cd7b9876d187bd30a3720e6086b99413af95e3b8de1cdd72f14"
+    },
+    "cargo_version": "cargo 1.99.0 (5f94df478 2026-08-27)",
+    "commands": [
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/cargo",
+          "fetch",
+          "--offline",
+          "--manifest-path",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/Cargo.toml"
+        ],
+        "cumulative_children_peak_rss_kib": 32480,
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "elapsed_seconds": 2.0014170550002746,
+        "final_resources": {
+          "Cached": 6052941824,
+          "MemAvailable": 3786502144,
+          "MemTotal": 10451427328,
+          "SReclaimable": 234790912,
+          "Shmem": 4977963008,
+          "aggregate_oom_kill": 52,
+          "free_disk_bytes": 51320905728,
+          "unix": 1793788219.4942021
+        },
+        "finished_unix": 1793788219.4939725,
+        "label": "resolve",
+        "pid": 5,
+        "returncode": 0,
+        "started_unix": 1793788217.492044,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "argv": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+          "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/prepare_portable_packer.py",
+          "verify-lock",
+          "--manifest",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/materialization.json",
+          "--out",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/resolved-lock-before.json"
+        ],
+        "cumulative_children_peak_rss_kib": 32480,
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "elapsed_seconds": 2.0019572809997044,
+        "final_resources": {
+          "Cached": 6052950016,
+          "MemAvailable": 3806461952,
+          "MemTotal": 10451427328,
+          "SReclaimable": 234790912,
+          "Shmem": 4977963008,
+          "aggregate_oom_kill": 52,
+          "free_disk_bytes": 51320897536,
+          "unix": 1793788221.497702
+        },
+        "finished_unix": 1793788221.4974337,
+        "label": "verify-before",
+        "pid": 13,
+        "returncode": 0,
+        "started_unix": 1793788219.4948912,
+        "stderr": "",
+        "stdout": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/resolved-lock-before.json\n"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/cargo",
+          "build",
+          "--locked",
+          "--offline",
+          "--manifest-path",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/Cargo.toml",
+          "--bin",
+          "ferroui-fxd",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "--message-format=json-render-diagnostics"
+        ],
+        "cumulative_children_peak_rss_kib": 271516,
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "elapsed_seconds": 10.011563224001293,
+        "final_resources": {
+          "Cached": 6412414976,
+          "MemAvailable": 3836444672,
+          "MemTotal": 10451427328,
+          "SReclaimable": 235839488,
+          "Shmem": 4977963008,
+          "aggregate_oom_kill": 52,
+          "free_disk_bytes": 51296296960,
+          "unix": 1793788231.5106711
+        },
+        "finished_unix": 1793788231.510362,
+        "label": "build",
+        "pid": 14,
+        "returncode": 0,
+        "started_unix": 1793788221.4983177,
+        "stderr": "   Compiling crc32fast v1.5.2\n   Compiling simd-adler32 v0.3.10\n   Compiling adler2 v2.0.1\n   Compiling cfg-if v1.0.5\n   Compiling miniz_oxide v0.9.1\n   Compiling roxmltree v0.20.0\n   Compiling xamlx v0.5.0-preview.1 (/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/xamlx)\n   Compiling flate2 v1.1.10\n   Compiling ferroui-portable-archive-tool v0.0.0 (/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02)\n    Finished `dev` profile [unoptimized] target(s) in 9.01s\n",
+        "stdout": "{\"reason\":\"compiler-artifact\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#crc32fast@1.5.2\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2/Cargo.toml\",\"target\":{\"kind\":[\"custom-build\"],\"crate_types\":[\"bin\"],\"name\":\"build-script-build\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2/build.rs\",\"edition\":\"2021\",\"doc\":false,\"doctest\":false,\"test\":false},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/build/crc32fast-a03fc550792cdce7/build-script-build\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"build-script-executed\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#crc32fast@1.5.2\",\"linked_libs\":[],\"linked_paths\":[],\"cfgs\":[\"stable_arm_crc32_intrinsics\",\"stable_vpclmulqdq\"],\"env\":[],\"out_dir\":\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/build/crc32fast-394fb07afe544ec2/out\"}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#simd-adler32@0.3.10\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/simd-adler32-0.3.10/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"simd_adler32\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/simd-adler32-0.3.10/src/lib.rs\",\"edition\":\"2018\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libsimd_adler32-c293dd578c7832ae.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libsimd_adler32-c293dd578c7832ae.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#adler2@2.0.1\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/adler2-2.0.1/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"adler2\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/adler2-2.0.1/src/lib.rs\",\"edition\":\"2021\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libadler2-1d97d09aaced208d.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libadler2-1d97d09aaced208d.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#cfg-if@1.0.5\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"cfg_if\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5/src/lib.rs\",\"edition\":\"2018\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libcfg_if-c2742d5deeb0da7b.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libcfg_if-c2742d5deeb0da7b.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#crc32fast@1.5.2\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"crc32fast\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2/src/lib.rs\",\"edition\":\"2021\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libcrc32fast-65c8eedadacabab2.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libcrc32fast-65c8eedadacabab2.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#miniz_oxide@0.9.1\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/miniz_oxide-0.9.1/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"miniz_oxide\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/miniz_oxide-0.9.1/src/lib.rs\",\"edition\":\"2021\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[\"default\",\"simd\",\"simd-adler32\",\"with-alloc\"],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libminiz_oxide-6eddda43857feb26.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libminiz_oxide-6eddda43857feb26.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#roxmltree@0.20.0\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/roxmltree-0.20.0/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"roxmltree\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/roxmltree-0.20.0/src/lib.rs\",\"edition\":\"2021\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[\"default\",\"positions\",\"std\"],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libroxmltree-394efbd943e0fdb7.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libroxmltree-394efbd943e0fdb7.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"path+file:///workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/xamlx#0.5.0-preview.1\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/xamlx/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"xamlx\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/xamlx/lib.rs\",\"edition\":\"2021\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[\"testing\"],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libxamlx-e7caa67ad0222c88.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libxamlx-e7caa67ad0222c88.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"registry+https://github.com/rust-lang/crates.io-index#flate2@1.1.10\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/flate2-1.1.10/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"flate2\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/flate2-1.1.10/src/lib.rs\",\"edition\":\"2018\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[\"any_impl\",\"miniz_oxide\",\"rust_backend\"],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libflate2-61a4db4744d7acef.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libflate2-61a4db4744d7acef.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"path+file:///workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02#ferroui-portable-archive-tool@0.0.0\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/Cargo.toml\",\"target\":{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"ferroui_markup_xaml_loader\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/lib.rs\",\"edition\":\"2021\",\"doc\":true,\"doctest\":true,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libferroui_markup_xaml_loader-17947722cfde3cd7.rlib\",\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libferroui_markup_xaml_loader-17947722cfde3cd7.rmeta\"],\"executable\":null,\"fresh\":false}\n{\"reason\":\"compiler-artifact\",\"package_id\":\"path+file:///workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02#ferroui-portable-archive-tool@0.0.0\",\"manifest_path\":\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/Cargo.toml\",\"target\":{\"kind\":[\"bin\"],\"crate_types\":[\"bin\"],\"name\":\"ferroui-fxd\",\"src_path\":\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/bin/ferroui-fxd.rs\",\"edition\":\"2021\",\"doc\":true,\"doctest\":false,\"test\":true},\"profile\":{\"opt_level\":\"0\",\"debuginfo\":0,\"debug_assertions\":true,\"overflow_checks\":true,\"test\":false},\"features\":[],\"filenames\":[\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/ferroui-fxd\"],\"executable\":\"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/ferroui-fxd\",\"fresh\":false}\n{\"reason\":\"build-finished\",\"success\":true}\n"
+      },
+      {
+        "argv": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+          "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/prepare_portable_packer.py",
+          "verify-lock",
+          "--manifest",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/materialization.json",
+          "--out",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/resolved-lock-after.json"
+        ],
+        "cumulative_children_peak_rss_kib": 271516,
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "elapsed_seconds": 2.0015809969991096,
+        "final_resources": {
+          "Cached": 6412427264,
+          "MemAvailable": 3846230016,
+          "MemTotal": 10451427328,
+          "SReclaimable": 235839488,
+          "Shmem": 4977963008,
+          "aggregate_oom_kill": 52,
+          "free_disk_bytes": 51296284672,
+          "unix": 1793788233.5138109
+        },
+        "finished_unix": 1793788233.513465,
+        "label": "verify-after",
+        "pid": 609,
+        "returncode": 0,
+        "started_unix": 1793788231.5113451,
+        "stderr": "",
+        "stdout": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/resolved-lock-after.json\n"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+          "--pack-paged",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/unedited-sources",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/installed.fxp"
+        ],
+        "cumulative_children_peak_rss_kib": 271516,
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "elapsed_seconds": 2.0023051669995766,
+        "final_resources": {
+          "Cached": 6431813632,
+          "MemAvailable": 3854786560,
+          "MemTotal": 10451427328,
+          "SReclaimable": 236302336,
+          "Shmem": 4977963008,
+          "aggregate_oom_kill": 52,
+          "free_disk_bytes": 51291099136,
+          "unix": 1793788235.6308637
+        },
+        "finished_unix": 1793788235.6306007,
+        "label": "pack-unedited",
+        "pid": 610,
+        "returncode": 0,
+        "started_unix": 1793788233.626731,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "compiler_records": [
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "-",
+          "--crate-name",
+          "___",
+          "--print=file-names",
+          "--crate-type",
+          "bin",
+          "--crate-type",
+          "rlib",
+          "--crate-type",
+          "dylib",
+          "--crate-type",
+          "cdylib",
+          "--crate-type",
+          "staticlib",
+          "--crate-type",
+          "proc-macro",
+          "--print=sysroot",
+          "--print=split-debuginfo",
+          "--print=crate-name",
+          "--print=cfg",
+          "-Wwarnings"
+        ],
+        "compiler_tree_peak_rss_kib": 32480,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "___",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "environment": {
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788217.9144585,
+        "record": {
+          "bytes": 1067,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788217881836180-8-___-host.json",
+          "sha256": "e84b1879b271d7c29edbf10e898c8a1f05e537d8104e9c687b2333c078fe35f0"
+        },
+        "returncode": 0,
+        "started_unix": 1793788217.8818526,
+        "target": "host"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "-",
+          "--crate-name",
+          "___",
+          "--print=file-names",
+          "--crate-type",
+          "bin",
+          "--crate-type",
+          "rlib",
+          "--crate-type",
+          "dylib",
+          "--crate-type",
+          "cdylib",
+          "--crate-type",
+          "staticlib",
+          "--crate-type",
+          "proc-macro",
+          "--print=sysroot",
+          "--print=split-debuginfo",
+          "--print=crate-name",
+          "--print=cfg",
+          "-Wwarnings"
+        ],
+        "compiler_tree_peak_rss_kib": 32664,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "___",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "environment": {
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788221.5774868,
+        "record": {
+          "bytes": 1067,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788221566021073-17-___-host.json",
+          "sha256": "74263366cd103d14cc1f53f866e9feed06a509406c099675ed93dcd24d55f47c"
+        },
+        "returncode": 0,
+        "started_unix": 1793788221.5660408,
+        "target": "host"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "-",
+          "--crate-name",
+          "___",
+          "--print=file-names",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "--crate-type",
+          "bin",
+          "--crate-type",
+          "rlib",
+          "--crate-type",
+          "dylib",
+          "--crate-type",
+          "cdylib",
+          "--crate-type",
+          "staticlib",
+          "--crate-type",
+          "proc-macro",
+          "--print=sysroot",
+          "--print=split-debuginfo",
+          "--print=crate-name",
+          "--print=cfg",
+          "-Wwarnings"
+        ],
+        "compiler_tree_peak_rss_kib": 32592,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "___",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "environment": {
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788221.6421292,
+        "record": {
+          "bytes": 1135,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788221627383958-21-___-x86_64-unknown-linux-gnu.json",
+          "sha256": "3da405931f02acd7a44a2ce13531de5edca3709f3d736e01d33ee909735c55c8"
+        },
+        "returncode": 0,
+        "started_unix": 1793788221.6274054,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "build_script_build",
+          "--edition=2021",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2/build.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "bin",
+          "--emit=dep-info,link",
+          "-C",
+          "embed-bitcode=no",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"default\", \"nightly\", \"std\"))",
+          "-C",
+          "metadata=b8d9c514998ab882",
+          "-C",
+          "extra-filename=-a03fc550792cdce7",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/build/crc32fast-a03fc550792cdce7",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--cap-lints",
+          "allow"
+        ],
+        "compiler_tree_peak_rss_kib": 122452,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "build_script_build",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2",
+        "environment": {
+          "CARGO_CRATE_NAME": "build_script_build",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2",
+          "CARGO_PKG_NAME": "crc32fast",
+          "CARGO_PKG_VERSION": "1.5.2",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788222.153619,
+        "record": {
+          "bytes": 1927,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788221720728303-30-build_script_build-host.json",
+          "sha256": "13ca51a1d7be7f99804accb6de314bb03e115419bb7b7e841ef823bf97866e4d"
+        },
+        "returncode": 0,
+        "started_unix": 1793788221.7207491,
+        "target": "host"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "simd_adler32",
+          "--edition=2018",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/simd-adler32-0.3.10/src/lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"const-generics\", \"default\", \"nightly\", \"std\"))",
+          "-C",
+          "metadata=b7df7dec7de1989e",
+          "-C",
+          "extra-filename=-c293dd578c7832ae",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--cap-lints",
+          "allow"
+        ],
+        "compiler_tree_peak_rss_kib": 115148,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "simd_adler32",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/simd-adler32-0.3.10",
+        "environment": {
+          "CARGO_CRATE_NAME": "simd_adler32",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/simd-adler32-0.3.10",
+          "CARGO_PKG_NAME": "simd-adler32",
+          "CARGO_PKG_VERSION": "0.3.10",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788222.5034924,
+        "record": {
+          "bytes": 2207,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788222294300994-45-simd_adler32-x86_64-unknown-linux-gnu.json",
+          "sha256": "c02346696aec2c5a91e84e92ece282fb475cb6047aa17e3cc7212634f057c6eb"
+        },
+        "returncode": 0,
+        "started_unix": 1793788222.2943265,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "adler2",
+          "--edition=2021",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/adler2-2.0.1/src/lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"core\", \"default\", \"rustc-dep-of-std\", \"std\"))",
+          "-C",
+          "metadata=9c45ad5830e4e6dd",
+          "-C",
+          "extra-filename=-1d97d09aaced208d",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--cap-lints",
+          "allow"
+        ],
+        "compiler_tree_peak_rss_kib": 102748,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "adler2",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/adler2-2.0.1",
+        "environment": {
+          "CARGO_CRATE_NAME": "adler2",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/adler2-2.0.1",
+          "CARGO_PKG_NAME": "adler2",
+          "CARGO_PKG_VERSION": "2.0.1",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788222.5983148,
+        "record": {
+          "bytes": 2160,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788222544182160-76-adler2-x86_64-unknown-linux-gnu.json",
+          "sha256": "3621fc92d13798b3d0558d3ef285a281c9eff82d73db52acb6c491e98ff6d334"
+        },
+        "returncode": 0,
+        "started_unix": 1793788222.5442066,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "cfg_if",
+          "--edition=2018",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5/src/lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"core\", \"rustc-dep-of-std\"))",
+          "-C",
+          "metadata=e722fb78231de3cd",
+          "-C",
+          "extra-filename=-c2742d5deeb0da7b",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--cap-lints",
+          "allow"
+        ],
+        "compiler_tree_peak_rss_kib": 55900,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "cfg_if",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5",
+        "environment": {
+          "CARGO_CRATE_NAME": "cfg_if",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5",
+          "CARGO_PKG_NAME": "cfg-if",
+          "CARGO_PKG_VERSION": "1.0.5",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788222.6700988,
+        "record": {
+          "bytes": 2135,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788222643536264-88-cfg_if-x86_64-unknown-linux-gnu.json",
+          "sha256": "3306a22de2c45ac32ab88d9f46088b002985b5a5b46ef8da326f775fd20d1b09"
+        },
+        "returncode": 0,
+        "started_unix": 1793788222.64356,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "crc32fast",
+          "--edition=2021",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2/src/lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"default\", \"nightly\", \"std\"))",
+          "-C",
+          "metadata=ab9019d9ef9b9b98",
+          "-C",
+          "extra-filename=-65c8eedadacabab2",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--extern",
+          "cfg_if=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libcfg_if-c2742d5deeb0da7b.rmeta",
+          "--cap-lints",
+          "allow",
+          "--cfg",
+          "stable_arm_crc32_intrinsics",
+          "--cfg",
+          "stable_vpclmulqdq",
+          "--check-cfg",
+          "cfg(stable_arm_crc32_intrinsics)",
+          "--check-cfg",
+          "cfg(stable_vpclmulqdq)"
+        ],
+        "compiler_tree_peak_rss_kib": 121856,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "crc32fast",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2",
+        "environment": {
+          "CARGO_CRATE_NAME": "crc32fast",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crc32fast-1.5.2",
+          "CARGO_PKG_NAME": "crc32fast",
+          "CARGO_PKG_VERSION": "1.5.2",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "OUT_DIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/build/crc32fast-394fb07afe544ec2/out",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788222.8959858,
+        "record": {
+          "bytes": 2662,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788222708380461-95-crc32fast-x86_64-unknown-linux-gnu.json",
+          "sha256": "60bef08041de0afa93fd7782f8e3b3425194e1d978ab32e91845355277a4e8ee"
+        },
+        "returncode": 0,
+        "started_unix": 1793788222.708404,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "miniz_oxide",
+          "--edition=2021",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/miniz_oxide-0.9.1/src/lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--cfg",
+          "feature=\"default\"",
+          "--cfg",
+          "feature=\"simd\"",
+          "--cfg",
+          "feature=\"simd-adler32\"",
+          "--cfg",
+          "feature=\"with-alloc\"",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"alloc\", \"block-boundary\", \"core\", \"default\", \"rustc-dep-of-std\", \"serde\", \"simd\", \"simd-adler32\", \"std\", \"with-alloc\"))",
+          "-C",
+          "metadata=82c478e15db562a6",
+          "-C",
+          "extra-filename=-6eddda43857feb26",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--extern",
+          "adler2=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libadler2-1d97d09aaced208d.rmeta",
+          "--extern",
+          "simd_adler32=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libsimd_adler32-c293dd578c7832ae.rmeta",
+          "--cap-lints",
+          "allow"
+        ],
+        "compiler_tree_peak_rss_kib": 148364,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "miniz_oxide",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/miniz_oxide-0.9.1",
+        "environment": {
+          "CARGO_CRATE_NAME": "miniz_oxide",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/miniz_oxide-0.9.1",
+          "CARGO_PKG_NAME": "miniz_oxide",
+          "CARGO_PKG_VERSION": "0.9.1",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788223.7007132,
+        "record": {
+          "bytes": 2778,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788222933941252-128-miniz_oxide-x86_64-unknown-linux-gnu.json",
+          "sha256": "5fcbd88f756600edf2698f37ae44f179d6bea4c42e6d38bc17ef30c143733d8e"
+        },
+        "returncode": 0,
+        "started_unix": 1793788222.9339688,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "roxmltree",
+          "--edition=2021",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/roxmltree-0.20.0/src/lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--cfg",
+          "feature=\"default\"",
+          "--cfg",
+          "feature=\"positions\"",
+          "--cfg",
+          "feature=\"std\"",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"default\", \"positions\", \"std\"))",
+          "-C",
+          "metadata=df1faf0d8adb4c3e",
+          "-C",
+          "extra-filename=-394efbd943e0fdb7",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--cap-lints",
+          "allow"
+        ],
+        "compiler_tree_peak_rss_kib": 157356,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "roxmltree",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/roxmltree-0.20.0",
+        "environment": {
+          "CARGO_CRATE_NAME": "roxmltree",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/roxmltree-0.20.0",
+          "CARGO_PKG_NAME": "roxmltree",
+          "CARGO_PKG_VERSION": "0.20.0",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788224.4783165,
+        "record": {
+          "bytes": 2286,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788223736736074-192-roxmltree-x86_64-unknown-linux-gnu.json",
+          "sha256": "64cccdc791004da09844762303e4cfaf35a9735eb31ab03e365cbdcc0012db41"
+        },
+        "returncode": 0,
+        "started_unix": 1793788223.7367578,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "xamlx",
+          "--edition=2021",
+          "xamlx/lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--cfg",
+          "feature=\"testing\"",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"testing\"))",
+          "-C",
+          "metadata=c567fe413f86c1b8",
+          "-C",
+          "extra-filename=-e7caa67ad0222c88",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--extern",
+          "roxmltree=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libroxmltree-394efbd943e0fdb7.rmeta"
+        ],
+        "compiler_tree_peak_rss_kib": 271516,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "xamlx",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "environment": {
+          "CARGO_CRATE_NAME": "xamlx",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/xamlx",
+          "CARGO_PKG_NAME": "xamlx",
+          "CARGO_PKG_VERSION": "0.5.0-preview.1",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788228.691033,
+        "record": {
+          "bytes": 2067,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788224514245099-267-xamlx-x86_64-unknown-linux-gnu.json",
+          "sha256": "ac316b2e9d551af78db718ab2a6eed6262cfa0ae467b9186a3222bd639ac1c63"
+        },
+        "returncode": 0,
+        "started_unix": 1793788224.5142672,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "flate2",
+          "--edition=2018",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/flate2-1.1.10/src/lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--cfg",
+          "feature=\"any_impl\"",
+          "--cfg",
+          "feature=\"miniz_oxide\"",
+          "--cfg",
+          "feature=\"rust_backend\"",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values(\"any_c_zlib\", \"any_impl\", \"any_zlib\", \"cloudflare_zlib\", \"default\", \"document-features\", \"libz-ng-sys\", \"libz-sys\", \"miniz-sys\", \"miniz_oxide\", \"runtime_detection\", \"rust_backend\", \"zlib\", \"zlib-default\", \"zlib-ng\", \"zlib-ng-compat\", \"zlib-rs\"))",
+          "-C",
+          "metadata=bb6b860a003e9b62",
+          "-C",
+          "extra-filename=-61a4db4744d7acef",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--extern",
+          "crc32fast=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libcrc32fast-65c8eedadacabab2.rmeta",
+          "--extern",
+          "miniz_oxide=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libminiz_oxide-6eddda43857feb26.rmeta",
+          "--cap-lints",
+          "allow"
+        ],
+        "compiler_tree_peak_rss_kib": 147204,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "flate2",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/flate2-1.1.10",
+        "environment": {
+          "CARGO_CRATE_NAME": "flate2",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/flate2-1.1.10",
+          "CARGO_PKG_NAME": "flate2",
+          "CARGO_PKG_VERSION": "1.1.10",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788229.1478515,
+        "record": {
+          "bytes": 2854,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788228728499489-401-flate2-x86_64-unknown-linux-gnu.json",
+          "sha256": "64b753a6049bffa733f229c2ee4fca2f3e5f69ef3a31a54870e42d2a16e7fa90"
+        },
+        "returncode": 0,
+        "started_unix": 1793788228.728522,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "ferroui_markup_xaml_loader",
+          "--edition=2021",
+          "lib.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "lib",
+          "--emit=dep-info,metadata,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values())",
+          "-C",
+          "metadata=86a82bb30bfc2ea0",
+          "-C",
+          "extra-filename=-17947722cfde3cd7",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--extern",
+          "flate2=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libflate2-61a4db4744d7acef.rmeta",
+          "--extern",
+          "xamlx=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libxamlx-e7caa67ad0222c88.rmeta"
+        ],
+        "compiler_tree_peak_rss_kib": 172868,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "ferroui_markup_xaml_loader",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "environment": {
+          "CARGO_CRATE_NAME": "ferroui_markup_xaml_loader",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+          "CARGO_PKG_NAME": "ferroui-portable-archive-tool",
+          "CARGO_PKG_VERSION": "0.0.0",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788230.2768369,
+        "record": {
+          "bytes": 2234,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788229185080029-455-ferroui_markup_xaml_loader-x86_64-unknown-linux-gnu.json",
+          "sha256": "abd59925882bb1693ed8609b6d24c011441f985e5227ad1d70c6056facbbae56"
+        },
+        "returncode": 0,
+        "started_unix": 1793788229.1851027,
+        "target": "x86_64-unknown-linux-gnu"
+      },
+      {
+        "argv": [
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+          "--crate-name",
+          "ferroui_fxd",
+          "--edition=2021",
+          "bin/ferroui-fxd.rs",
+          "--error-format=json",
+          "--json=diagnostic-rendered-ansi,artifacts,future-incompat",
+          "--crate-type",
+          "bin",
+          "--emit=dep-info,link",
+          "-C",
+          "lto=off",
+          "-C",
+          "embed-bitcode=no",
+          "-C",
+          "codegen-units=128",
+          "--check-cfg",
+          "cfg(docsrs,test)",
+          "--check-cfg",
+          "cfg(feature, values())",
+          "-C",
+          "metadata=51b73e059dc2bb82",
+          "-C",
+          "extra-filename=-883f4a2885a26f66",
+          "--out-dir",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "--target",
+          "x86_64-unknown-linux-gnu",
+          "-C",
+          "strip=debuginfo",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps",
+          "-L",
+          "dependency=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/debug/deps",
+          "--extern",
+          "ferroui_markup_xaml_loader=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libferroui_markup_xaml_loader-17947722cfde3cd7.rlib",
+          "--extern",
+          "flate2=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libflate2-61a4db4744d7acef.rlib",
+          "--extern",
+          "xamlx=/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target/x86_64-unknown-linux-gnu/debug/deps/libxamlx-e7caa67ad0222c88.rlib"
+        ],
+        "compiler_tree_peak_rss_kib": 130120,
+        "cpu_affinity": [
+          4
+        ],
+        "crate": "ferroui_fxd",
+        "cwd": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+        "environment": {
+          "CARGO_CRATE_NAME": "ferroui_fxd",
+          "CARGO_MANIFEST_DIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02",
+          "CARGO_PKG_NAME": "ferroui-portable-archive-tool",
+          "CARGO_PKG_VERSION": "0.0.0",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+        },
+        "finished_unix": 1793788230.512402,
+        "record": {
+          "bytes": 2387,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers/1793788230313663231-565-ferroui_fxd-x86_64-unknown-linux-gnu.json",
+          "sha256": "eb7321e749352775d5f485ff7b54f496d1dc39639de20a726510ea28700ce9b9"
+        },
+        "returncode": 0,
+        "started_unix": 1793788230.313683,
+        "target": "x86_64-unknown-linux-gnu"
+      }
+    ],
+    "compiler_version": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+    "controlled_environment": {
+      "CARGO_BUILD_JOBS": "1",
+      "CARGO_HOME": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cargo-home",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_NET_OFFLINE": "true",
+      "CARGO_PROFILE_DEV_CODEGEN_UNITS": "128",
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_PROFILE_DEV_DEBUG_ASSERTIONS": "true",
+      "CARGO_PROFILE_DEV_LTO": "off",
+      "CARGO_PROFILE_DEV_OPT_LEVEL": "0",
+      "CARGO_PROFILE_DEV_PANIC": "unwind",
+      "CARGO_TARGET_DIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/target",
+      "FERRO_COMPILER_RECORDS": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compilers",
+      "LD_LIBRARY_PATH": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/lib",
+      "LLVM_PROFILE_FILE": "/dev/null",
+      "MALLOC_ARENA_MAX": "1",
+      "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+      "PATH": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin:/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+      "RAYON_NUM_THREADS": "1",
+      "RUSTC": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+      "RUSTC_WRAPPER": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/producers/record_rustc.py",
+      "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/compiler-tmp"
+    },
+    "cpu_affinity": [
+      4
+    ],
+    "executable": {
+      "bytes": 2402024,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+      "sha256": "108a0fedc39c242357eebe957f203164831ce307ba697591b546f0c29930330f"
+    },
+    "native_link_arguments_captured": false,
+    "policy": "Tooling-only opt0, CGU128, debug assertions, ordinary native unwind, LTO off, no PGO; one Cargo job and Rayon thread.",
+    "producer": {
+      "bytes": 9024,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/producers/build_portable_packer.py",
+      "sha256": "be18a3955561f12b5e0712f4344a0cbd8fdd5b936238369cbfff8be42c07e134"
+    },
+    "record": {
+      "bytes": 65547,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/build.json",
+      "sha256": "d9c0de8fe53ef93ee04d6c099c4ace9c9d791b7e29511b2b8902986b4c969c4e"
+    },
+    "rustc": {
+      "bytes": 647376,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/bin/rustc",
+      "sha256": "f3834d26669b03f6855fa54bd2381443123e860167bc0c7a8dd137e5cf6e5e4f"
+    },
+    "rustc_wrapper": {
+      "bytes": 1302,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/producers/record_rustc.py",
+      "sha256": "2e29a3d09bd8336fcd64410115e1faafcd4c2462a85e8a8df6d6d4ca71e39704"
+    },
+    "timing_scope": "Elapsed build duration and child peak RSS are diagnostic resource observations, not paired compile-time benchmarks.",
+    "toolchain_installation": {
+      "bytes": 11296,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/installation.json",
+      "sha256": "058c348e7d2cc6dbe5f628a25840845b4ff487074446d8fec1591ccc4d3ccc4b"
+    }
+  },
+  "canonical_archive_validation": {
+    "canonical_evidence": {
+      "bytes": 11799878,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source/docs/benchmarks/compiled-theme-rust-idioms-linux-x86_64.json",
+      "sha256": "b22f732e0e5b2d06137c44f5ee62ad8d024255a29f1d52ae437df16f98920c20"
+    },
+    "cases": {
+      "installed": {
+        "actual": {
+          "bytes": 296347,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/installed.fxp",
+          "sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "canonical_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb",
+        "case": "installed",
+        "font": [
+          14,
+          14
+        ],
+        "matches": true
+      },
+      "scalar-v1": {
+        "actual": {
+          "bytes": 432443,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/scalar-v1.fxp",
+          "sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+        },
+        "canonical_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4",
+        "case": "scalar-v1",
+        "command": [
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+          "--pack",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/sources",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/scalar-v1.fxp"
+        ],
+        "font": [
+          14,
+          17
+        ],
+        "matches": true,
+        "stderr": "",
+        "stdout": ""
+      },
+      "scalar-v2": {
+        "actual": {
+          "bytes": 245376,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/scalar-v2.fxp",
+          "sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+        },
+        "canonical_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b",
+        "case": "scalar-v2",
+        "command": [
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+          "--pack-solid",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/sources",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/scalar-v2.fxp"
+        ],
+        "font": [
+          14,
+          17
+        ],
+        "matches": true,
+        "stderr": "",
+        "stdout": ""
+      },
+      "scalar-v3": {
+        "actual": {
+          "bytes": 296352,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/scalar-v3.fxp",
+          "sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+        },
+        "canonical_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f",
+        "case": "scalar-v3",
+        "command": [
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+          "--pack-paged",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/sources",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/scalar-v3.fxp"
+        ],
+        "font": [
+          14,
+          17
+        ],
+        "matches": true,
+        "stderr": "",
+        "stdout": ""
+      },
+      "struct-v1": {
+        "actual": {
+          "bytes": 432482,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/struct-v1.fxp",
+          "sha256": "57ddeb14d5960f6a882749781f1d260f56454cbb16a19ced8b1a0b71307253d3"
+        },
+        "canonical_sha256": "57ddeb14d5960f6a882749781f1d260f56454cbb16a19ced8b1a0b71307253d3",
+        "case": "struct-v1",
+        "command": [
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+          "--pack",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/sources",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/struct-v1.fxp"
+        ],
+        "font": [
+          19,
+          29
+        ],
+        "matches": true,
+        "stderr": "",
+        "stdout": ""
+      },
+      "struct-v2": {
+        "actual": {
+          "bytes": 245452,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/struct-v2.fxp",
+          "sha256": "5a4a552eab2458460f0f866c74607b2a16ca4fda24dad19127c24f39327fc5e7"
+        },
+        "canonical_sha256": "5a4a552eab2458460f0f866c74607b2a16ca4fda24dad19127c24f39327fc5e7",
+        "case": "struct-v2",
+        "command": [
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+          "--pack-solid",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/sources",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/struct-v2.fxp"
+        ],
+        "font": [
+          19,
+          29
+        ],
+        "matches": true,
+        "stderr": "",
+        "stdout": ""
+      },
+      "struct-v3": {
+        "actual": {
+          "bytes": 296395,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/struct-v3.fxp",
+          "sha256": "5716161c4a91ece21060c32d3a9eaf40aaacdfdf25aec7ba76770bbf357f09c7"
+        },
+        "canonical_sha256": "5716161c4a91ece21060c32d3a9eaf40aaacdfdf25aec7ba76770bbf357f09c7",
+        "case": "struct-v3",
+        "command": [
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+          "--pack-paged",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/sources",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/struct-v3.fxp"
+        ],
+        "font": [
+          19,
+          29
+        ],
+        "matches": true,
+        "stderr": "",
+        "stdout": ""
+      },
+      "two-edits-v3": {
+        "actual": {
+          "bytes": 296359,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/two-edits-v3.fxp",
+          "sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+        },
+        "canonical_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0",
+        "case": "two-edits-v3",
+        "command": [
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+          "--pack-paged",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/sources",
+          "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives/two-edits-v3.fxp"
+        ],
+        "font": [
+          19,
+          17
+        ],
+        "matches": true,
+        "stderr": "",
+        "stdout": ""
+      }
+    },
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/validate_runtime_release.py",
+      "--source",
+      "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source",
+      "archives",
+      "--packer",
+      "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+      "--installed",
+      "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/installed.fxp",
+      "--output",
+      "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives"
+    ],
+    "packer_and_validator_unchanged": true,
+    "producer": {
+      "bytes": 3844,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/producers/verify_portable_packer_matrix.py",
+      "sha256": "ecceb24e6ab4aacd9007a097bccb028be45b3114213a98e90196f5b3040ac9d8"
+    },
+    "record": {
+      "bytes": 8337,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/result.json",
+      "sha256": "15ca2830357bdc98cffadfcca2566cef8061acb19ae8f213227da43507819fdf"
+    },
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "{\n  \"command\": \"archives\",\n  \"output\": \"/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/archives\",\n  \"cases\": 9,\n  \"counts\": null\n}\n",
+    "theme_document_count": 169,
+    "theme_inputs": {
+      "Controls/AdornerLayer.xaml": {
+        "bytes": 1737,
+        "sha256": "8b8b4633dc2772a08bb5e314deca587a0b7f138e4a69dc22d5d150ceaef31407"
+      },
+      "Controls/AutoCompleteBox.xaml": {
+        "bytes": 19755,
+        "sha256": "980d90c66757e1426d29d1f161780561ab1aa8d7657144037e8f5aba3cbbb666"
+      },
+      "Controls/AutoSuggestBox.xaml": {
+        "bytes": 13804,
+        "sha256": "4f1d2fbd283f178d6f7dab1435e7a2d5520bb0e693fbf1523bf8845a1b4efbfa"
+      },
+      "Controls/Button.xaml": {
+        "bytes": 16102,
+        "sha256": "b3e151ba8b9613b1e360bfa0c2143c23b9e194a0245cd51dec2fd9d2557bddd9"
+      },
+      "Controls/ButtonSpinner.xaml": {
+        "bytes": 7961,
+        "sha256": "b6f9963a7ebae59d1200724798b4329cc81ba0a5ce53e23b22175b89be1f7d4b"
+      },
+      "Controls/Calendar.xaml": {
+        "bytes": 3634,
+        "sha256": "52a9ca78367f4323836e79780254c7ea2fc1ad2511ed73c7ac82fe190d301f38"
+      },
+      "Controls/CalendarButton.xaml": {
+        "bytes": 10037,
+        "sha256": "9c535a6f0891ea6af9bb42a91e697285515ee43a2368bce401f92f50ce8003cc"
+      },
+      "Controls/CalendarDatePicker.xaml": {
+        "bytes": 18651,
+        "sha256": "de68a816f1d3795f405b252807bdb71933e9efd479eae3f91cf5c2cad87f8542"
+      },
+      "Controls/CalendarDayButton.xaml": {
+        "bytes": 15670,
+        "sha256": "75c719881b40216314b24a1965db478f792b6b42fe227476b03ce2c2ddeb60d2"
+      },
+      "Controls/CalendarItem.xaml": {
+        "bytes": 20977,
+        "sha256": "b235f55acf6e105841d74d8ddb9d738b06032efa007b63f33dd98112e531f146"
+      },
+      "Controls/Carousel.xaml": {
+        "bytes": 5188,
+        "sha256": "48eb8010e73d09fc431d35bfd5cacdfe74aeddb3338c6300425e1945668c7d5f"
+      },
+      "Controls/CarouselPage.xaml": {
+        "bytes": 2232,
+        "sha256": "926195c70cf085ed1d38bcfef219431090f2d0d42795a7db053b4165c902eb07"
+      },
+      "Controls/CheckBox.xaml": {
+        "bytes": 18465,
+        "sha256": "4d7f9bc5876ed427d3101231e1503e24e69a2234eb91bb4e0af06003e49d65e1"
+      },
+      "Controls/ComboBox.xaml": {
+        "bytes": 26708,
+        "sha256": "85242faa6f0076e9aa3facc05345e1865ce727dcae4c5e517cf1818a7d6a9331"
+      },
+      "Controls/ComboBoxItem.xaml": {
+        "bytes": 9744,
+        "sha256": "d129bdb7a8f158885bd8d44d4e54ea28ca4fc1a6bba6ce82a9581335ab6464c8"
+      },
+      "Controls/CommandBar.xaml": {
+        "bytes": 56110,
+        "sha256": "7d53182feb23b005359259a95276f9e91827bcafe85dd31e4dc5b46ee96fe202"
+      },
+      "Controls/ContentPage.xaml": {
+        "bytes": 3095,
+        "sha256": "698468edfa9873f06890ee26f0a9545ca4e26ab535c3917052d30cf5b92b8107"
+      },
+      "Controls/ContextMenu.xaml": {
+        "bytes": 5355,
+        "sha256": "a6a85fe7b69238a6b4c46a2fdceb849425ea74ad3ab7e831ffab9c5ac497fb2b"
+      },
+      "Controls/DataValidationErrors.xaml": {
+        "bytes": 6401,
+        "sha256": "185b81fb08bb2349c41a31ca98f96c44def5c37fc7cb591fe4996f1ed6cfd704"
+      },
+      "Controls/DatePicker.xaml": {
+        "bytes": 23349,
+        "sha256": "f3e49090fd70ef433ccc941739f6339ca14dccd68ef390bb9871ff6badd91816"
+      },
+      "Controls/DateTimePickerShared.xaml": {
+        "bytes": 17967,
+        "sha256": "8b905606e1bdaaf797de89e5f0e3115ffcd244bd30cea48ab90d8948ac38f178"
+      },
+      "Controls/DrawerPage.xaml": {
+        "bytes": 36145,
+        "sha256": "545028ba91afc6f9d904c3e5035c01533daede4d496df571056ec083a68dbc40"
+      },
+      "Controls/DropDownButton.xaml": {
+        "bytes": 7685,
+        "sha256": "1dd99b515e33bb105f3f8ff854a73a4d0c4dd9bf5a213fc333f01c3860925440"
+      },
+      "Controls/EmbeddableControlRoot.xaml": {
+        "bytes": 2118,
+        "sha256": "b9a0eaa6de6d9192bdb75d9205e9949cc066ffc8330198301d63f1dd077576fd"
+      },
+      "Controls/Expander.xaml": {
+        "bytes": 23353,
+        "sha256": "ea1b0c43987b5f0218bf5ec5828862ccefb6070b10fdb6de0326b762ae9a5f84"
+      },
+      "Controls/FlyoutPresenter.xaml": {
+        "bytes": 5507,
+        "sha256": "50fea5f6ed6e37da0573e6deba38b347b640d358c780ba3f5c630884b7defb4b"
+      },
+      "Controls/FontIcon.xaml": {
+        "bytes": 2196,
+        "sha256": "371db3f05f1c2d3c3572c2463bd0c4db9590440301f601a3d34fefc61f97e8db"
+      },
+      "Controls/Frame.xaml": {
+        "bytes": 2417,
+        "sha256": "b60ab3da96b4aff4d9d91c3b1dc16345e75dea7c330ab7e9904e4893e9e86828"
+      },
+      "Controls/GridSplitter.xaml": {
+        "bytes": 2508,
+        "sha256": "4fbb03396ac759e0f1e892ea3ae75f35e0e99153c47824b50a5523e315c5c08a"
+      },
+      "Controls/GroupBox.xaml": {
+        "bytes": 6623,
+        "sha256": "ed7eaf2dd778816c3e1bdd09ca3caf38c6559be38cd00b47e70080bfa7b404ab"
+      },
+      "Controls/HeaderedContentControl.xaml": {
+        "bytes": 4255,
+        "sha256": "4b60de39cd20d4d09bd9a86f1fa525b1a4c4e20bf90ac221fd11416106015f6c"
+      },
+      "Controls/HyperlinkButton.xaml": {
+        "bytes": 5651,
+        "sha256": "efc88308219647b5a25c85cb64deb5b71379f9ac69a6f4ffc00353a2361e7b7d"
+      },
+      "Controls/InfoBadge.xaml": {
+        "bytes": 7698,
+        "sha256": "c4ab385eef2b22973f5fff2a0a68fc5cf35db0b530c0ff3bba4470a0e7a56453"
+      },
+      "Controls/InfoBar.xaml": {
+        "bytes": 13402,
+        "sha256": "c9628c5a94b88ccba3a5cb0c8be5ec0ef4e5f2ab2144926aa61b76adbb4a6e9b"
+      },
+      "Controls/ItemsControl.xaml": {
+        "bytes": 1841,
+        "sha256": "93d6d023eff1fc8aeff948b674f71f826367acd1515e305129d79f9a3586a8ee"
+      },
+      "Controls/Label.xaml": {
+        "bytes": 3244,
+        "sha256": "e5529403fa963958a35c9a2aa0c5b572b88e268f1b5d66111827386dff438e65"
+      },
+      "Controls/ListBox.xaml": {
+        "bytes": 4606,
+        "sha256": "1411f699599d2cfced25d044c80eaf5326bdd3a7dcef98d13f64c18fdfcb63c2"
+      },
+      "Controls/ListBoxItem.xaml": {
+        "bytes": 22046,
+        "sha256": "894c211c9fb79f23d0ef66b63c26ee635f2218ac0e6f1e7bbeac3ba9a4a77bc7"
+      },
+      "Controls/ManagedFileChooser.xaml": {
+        "bytes": 32184,
+        "sha256": "773c26e8a69ddf737b81685b1a58aafa4b586c3d73368ee401fd86eca78acf75"
+      },
+      "Controls/Menu.xaml": {
+        "bytes": 12228,
+        "sha256": "ddf19a75056633711f7ef4d50bc41cd71c23598f3917b0972d082d31defc0794"
+      },
+      "Controls/MenuFlyoutPresenter.xaml": {
+        "bytes": 5600,
+        "sha256": "ece1f2baee68108537a766b9b4e8fc6cea5b2350411fd07dae3fa07a6d672f88"
+      },
+      "Controls/MenuItem.xaml": {
+        "bytes": 28882,
+        "sha256": "e913986c055afab96083cfb1f40d918d35b1e987b2e41425cfa59bc3d360dae2"
+      },
+      "Controls/MenuScrollViewer.xaml": {
+        "bytes": 2332,
+        "sha256": "fb8291151cdefe62ce849337df5e1ac5de4b0015bf3954cca3ddbc1be10b0b0e"
+      },
+      "Controls/NavigationPage.xaml": {
+        "bytes": 16824,
+        "sha256": "f2311aee0bd204b0650f8606bf3d42cd741e6b9b4fc5d5dc9674e6890580f673"
+      },
+      "Controls/NavigationView.xaml": {
+        "bytes": 56450,
+        "sha256": "9e5bc964be8dae2b1d33ef7071969fd91bcd2b0e574efb870fdbbc5f549e3b05"
+      },
+      "Controls/NotificationCard.xaml": {
+        "bytes": 12884,
+        "sha256": "7675d3d613bd11ef5103e9f4636b069241475fab340cfb62f7324415785fe071"
+      },
+      "Controls/NumberBox.xaml": {
+        "bytes": 15787,
+        "sha256": "a0f046b1aac1f6c98030d0a62070d3d5a5e2f70fd8a3b0e831ad543351555bdb"
+      },
+      "Controls/NumericUpDown.xaml": {
+        "bytes": 22403,
+        "sha256": "f66114d1e73e1638a1107af1ab62a02024748973f47852e9ec48cf571935864d"
+      },
+      "Controls/OverlayPopupHost.xaml": {
+        "bytes": 1970,
+        "sha256": "1965b38e0a57d5895ac0cbeb45b3dcf9d4024aa3f0d773c096f2a9764dd9b349"
+      },
+      "Controls/PathIcon.xaml": {
+        "bytes": 3554,
+        "sha256": "70c202b29d73948bbfacd77525eb297ccef7c7f1c08e01d25f3d578296ed11e0"
+      },
+      "Controls/PipsPager.xaml": {
+        "bytes": 23817,
+        "sha256": "a213a323c9614558635768fe0a390d87657007ac2ecb16e2b53ab3aa8b8b8c65"
+      },
+      "Controls/PopupRoot.xaml": {
+        "bytes": 2377,
+        "sha256": "8c3fa37c4cbed14127e3129919edaf629882db596c78af4ef9a494913ea520c8"
+      },
+      "Controls/ProgressBar.xaml": {
+        "bytes": 15066,
+        "sha256": "8aea71894a8a74854cf768799c96f5db67bc087e36aa989ee588f2a6e1298227"
+      },
+      "Controls/ProgressRing.xaml": {
+        "bytes": 4258,
+        "sha256": "0a8aa016ca2c3ccd3fbbadb9a79c01a315f5b54947b335abc6b04a4e78447028"
+      },
+      "Controls/RadioButton.xaml": {
+        "bytes": 12891,
+        "sha256": "990d10cd660fae072a12f1883c6c43e108ab29662b4661dfc321a36c04418bd3"
+      },
+      "Controls/RadioButtons.xaml": {
+        "bytes": 3880,
+        "sha256": "53d194f008caff242de2bc06166748ea6baf1ceb36b2307dacbf06df2c63f507"
+      },
+      "Controls/RatingControl.xaml": {
+        "bytes": 8406,
+        "sha256": "a2c13c7842e12fa3d9291733e5a634d955fcefe87ab78a79291fa558772e4ff1"
+      },
+      "Controls/RefreshContainer.xaml": {
+        "bytes": 2663,
+        "sha256": "e8700c0dfec9c7bc73168268ad8deb3844db44cac138e3be19013307563fc20d"
+      },
+      "Controls/RefreshVisualizer.xaml": {
+        "bytes": 2704,
+        "sha256": "a90e6411587d2ae3a86f96f127d586a50783713378d2ec85721ca9bc1a15a9e0"
+      },
+      "Controls/RepeatButton.xaml": {
+        "bytes": 5419,
+        "sha256": "b64c37aa8d9cfe33929e270fdde7ed5f2eb1607be67b03c76c197b4025fe37d7"
+      },
+      "Controls/RevealStyles.xaml": {
+        "bytes": 19382,
+        "sha256": "6eecbca60a01b6638b40fd7f7aca96d06f3003c48322c4f190a90940c42e8e8b"
+      },
+      "Controls/RichEditBox.xaml": {
+        "bytes": 11333,
+        "sha256": "5c5d34c1cb0bc4712d14f65e2a3fa6af38a62054135ff396ceba3730d1bed3fd"
+      },
+      "Controls/ScrollBar.xaml": {
+        "bytes": 27137,
+        "sha256": "c271ef1b01fe94a04eaa2869a95d20c33052a0841da738b8832be4886257c23d"
+      },
+      "Controls/ScrollViewer.xaml": {
+        "bytes": 11873,
+        "sha256": "650451f485f5124f71cc250a7d8b45c447ba7f83ffd98350061331e7178ad284"
+      },
+      "Controls/SelectableTextBlock.xaml": {
+        "bytes": 2199,
+        "sha256": "72bd7555106943c2bf679e8d95a97808c4e08edf3e8fbff9ee9036edd7c55710"
+      },
+      "Controls/Separator.xaml": {
+        "bytes": 1939,
+        "sha256": "a656e8470a7594076fbe268f2544918c3e70f75d7303c8d7c7a35a742ba25b91"
+      },
+      "Controls/Slider.xaml": {
+        "bytes": 24511,
+        "sha256": "6de030b50b00a847e5b07378d46952b61d2b1d160c6b7d9312caaa12faad16d7"
+      },
+      "Controls/SplitButton.xaml": {
+        "bytes": 40150,
+        "sha256": "55a0252bb5e64cea38527bd8e93ad2db18d58b14cab78d6a5a9fe8f62c5a6244"
+      },
+      "Controls/SplitView.xaml": {
+        "bytes": 22080,
+        "sha256": "f35795413309c63835238e25490afdfe99c4cb4c982df98895057efc2d8957d8"
+      },
+      "Controls/SymbolIcon.xaml": {
+        "bytes": 1979,
+        "sha256": "7b2141d692f3a4ef0d281c5dc2e58202f57cf1688e56164e0bcf52b710d60a39"
+      },
+      "Controls/TabControl.xaml": {
+        "bytes": 33306,
+        "sha256": "11e7cf869c92203ad068458be473888dc064c44812f40bc807a6fc473c2cfc88"
+      },
+      "Controls/TabItem.xaml": {
+        "bytes": 31607,
+        "sha256": "d8d241d8cd29c579fd8e666960163e98262b0a6cfcb41b4ad1a831bad5590ab0"
+      },
+      "Controls/TabStrip.xaml": {
+        "bytes": 3047,
+        "sha256": "643e22ad38f3e6aebfb747232968bc963a45d0f9c12c734fa7a187208b2be754"
+      },
+      "Controls/TabStripItem.xaml": {
+        "bytes": 11871,
+        "sha256": "44a4583b30307b6e6ca759a1e5c40201a8c0c4f483d353bc2ea0a54db11bfc10"
+      },
+      "Controls/TabbedPage.xaml": {
+        "bytes": 16175,
+        "sha256": "d6164db08f49dd6c83e36fe64f6aaf1e74089a1f58bf37ed0a04b7a383b47fde"
+      },
+      "Controls/TableView.xaml": {
+        "bytes": 10746,
+        "sha256": "be38a2348abaa3670c087e20dcaf175739e7dd60909c4316d0c79feb2485f948"
+      },
+      "Controls/TableViewCell.xaml": {
+        "bytes": 3098,
+        "sha256": "61dcf60bf94f1a17c2a52d841c134be2421af070939726e689de13fc0dfa2b08"
+      },
+      "Controls/TableViewColumnHeader.xaml": {
+        "bytes": 6731,
+        "sha256": "1a0408eb75d88b3f58ed029f021b1e819b5c5bef2f808d4640a97fb43e2fdd04"
+      },
+      "Controls/TableViewRow.xaml": {
+        "bytes": 8524,
+        "sha256": "eba29333428f07ca783db519e7e86b816de1fdbd053c51e3444767da0503b893"
+      },
+      "Controls/TextBlock.xaml": {
+        "bytes": 5590,
+        "sha256": "5dc0f6bfd28297bcc62a5f1e68444c485a23cf94a7304237622ff70912d125f0"
+      },
+      "Controls/TextBox.xaml": {
+        "bytes": 26779,
+        "sha256": "3590b7e9b0f5d9ba4609d095e18919e19c64d73086c84284f5ace9b9e645918d"
+      },
+      "Controls/TextSelectionHandle.xaml": {
+        "bytes": 3327,
+        "sha256": "09f02ba63e0416e224af5573aad1b57ad9b37e7550196b03d35741201d6b952b"
+      },
+      "Controls/ThemeVariantScope.xaml": {
+        "bytes": 851,
+        "sha256": "343bf57fe4062621e78844e81ccca2d2e4b622906be6cc0be742a934dcd2bcec"
+      },
+      "Controls/Thumb.xaml": {
+        "bytes": 3265,
+        "sha256": "d110371e2a7e3f4f847ed1aea84398a004a399bd8873fae70e1442e482ed1b35"
+      },
+      "Controls/TimePicker.xaml": {
+        "bytes": 25094,
+        "sha256": "20a319134eab18960cbfb14c76199954542d235aaa87ed858a337036131173ae"
+      },
+      "Controls/TitleBar.xaml": {
+        "bytes": 12680,
+        "sha256": "c9214891e1262cfefbf7b07db25705b276eddc1055a3d7980b0d589eb2b249ce"
+      },
+      "Controls/ToggleButton.xaml": {
+        "bytes": 10564,
+        "sha256": "272a9db0ea5692eab7de1c9fa8c0ff6929396228880ef8c91e1edeb1f91444ef"
+      },
+      "Controls/ToggleSwitch.xaml": {
+        "bytes": 18751,
+        "sha256": "a070e9b7299ae1d57c3869485ea7af35e0724b13615b8561a65198b1a32ac3a7"
+      },
+      "Controls/ToolTip.xaml": {
+        "bytes": 5142,
+        "sha256": "0d2d6018edf4e856e791128d9e420a16ca9fa0536e61838d922bd2524803854a"
+      },
+      "Controls/TransitioningContentControl.xaml": {
+        "bytes": 3675,
+        "sha256": "f88a751a3a05bfcf60322ce269de1788f120e618044b8d427b252f8281d4197d"
+      },
+      "Controls/TreeView.xaml": {
+        "bytes": 4089,
+        "sha256": "795bfb74aa88f953721dde90aaabc0c5fa9879172fc1ea6fad5600906b3ae859"
+      },
+      "Controls/TreeViewItem.xaml": {
+        "bytes": 17268,
+        "sha256": "9a33f3d4f05b77e35b143df445f2d1d06982a77365431f040cc17b213fa82388"
+      },
+      "Controls/WinUIControls.xaml": {
+        "bytes": 12315,
+        "sha256": "7a2b58e5f150cababf91bfaa97112ccfc240b348fff135d155a096b6bfbb0251"
+      },
+      "Controls/Window.xaml": {
+        "bytes": 3127,
+        "sha256": "856730de6cea7a01dc75ffdf7a37f85e78c3a5daf794d853c311ccd600f51509"
+      },
+      "Controls/WindowDrawnDecorations.xaml": {
+        "bytes": 23945,
+        "sha256": "a8763df6049b9ef721b91fe3a56f0710758efc96b1ee7ff01e9e88a66f6e03ee"
+      },
+      "Controls/WindowNotificationManager.xaml": {
+        "bytes": 6657,
+        "sha256": "495d1aefe084201774d00c01e6f7ade4d0abc83b0a04b8cee34ef75558d4be82"
+      },
+      "DensityStyles/Compact.xaml": {
+        "bytes": 2828,
+        "sha256": "7cf74df97f44552028c019e56d6f0cd7beadc5f551c79bed32c66c8994c884ec"
+      },
+      "Resources/AcrylicBrush_themeresources.xaml": {
+        "bytes": 25785,
+        "sha256": "127a99a92515da92550cecdd0d2e4aedb294d69c9c1162012f2e206a101d1f01"
+      },
+      "Resources/AppBarButton_themeresources.xaml": {
+        "bytes": 12752,
+        "sha256": "efd0a0f893d2484bf0ed199431619a87dcbf7e88509e6f9e392a4657242d5c70"
+      },
+      "Resources/AppBarSeparator_themeresources.xaml": {
+        "bytes": 1688,
+        "sha256": "53c17e6c6419a51663bba8505ef134417541c6a47d79351092f9de4de798d5da"
+      },
+      "Resources/AppBarToggleButton_themeresources.xaml": {
+        "bytes": 24980,
+        "sha256": "3a584224ae47ad8d881ebe4a25503f2d006e4f403cf2fa8d336c931025baf6a0"
+      },
+      "Resources/AutoSuggestBox_themeresources.xaml": {
+        "bytes": 2814,
+        "sha256": "c18470e5d047609b476313f275f1d619ba6830341c15247304e73a6565a00335"
+      },
+      "Resources/Button_themeresources.xaml": {
+        "bytes": 15733,
+        "sha256": "9f56d140f1fa23ec9b40274c0f1b7adf36b6580c2f3ff284b1ab45eef6c881f0"
+      },
+      "Resources/CalendarDatePicker_themeresources.xaml": {
+        "bytes": 9392,
+        "sha256": "45e5a0c20ed410706b50e81d24a07cc92d554c077039529508caba1309168d1d"
+      },
+      "Resources/CalendarView_themeresources.xaml": {
+        "bytes": 25545,
+        "sha256": "e818059e30d90762e1076c1731225a47adba0df40f618dfc65f2a84594c5b561"
+      },
+      "Resources/CheckBox_themeresources.xaml": {
+        "bytes": 31277,
+        "sha256": "b9600679aee5d5e40cbee7247599bace1f05f1b731f73c5954381fa6e013f137"
+      },
+      "Resources/ComboBox_themeresources.xaml": {
+        "bytes": 36408,
+        "sha256": "5dfa40326baef6bd73a6a24abc9c5da3c653e109b40260ada023860a5e44895f"
+      },
+      "Resources/CommandBar_themeresources.xaml": {
+        "bytes": 7000,
+        "sha256": "e68fe53501a66c810177868b4bf62348c2302a730bb72f429970c00a0d8af9e4"
+      },
+      "Resources/Common_themeresources.xaml": {
+        "bytes": 4408,
+        "sha256": "142f53f02e74bc040c784125b95bfaf64e2d81df95044ebb124dabe64601afc8"
+      },
+      "Resources/Common_themeresources_any.xaml": {
+        "bytes": 55364,
+        "sha256": "6ef401c4d2e9f2ccc57b65cddc8ad2771eef2f718ba5e48e68a8d1728fb457ee"
+      },
+      "Resources/ContentDialog_themeresources.xaml": {
+        "bytes": 4660,
+        "sha256": "e3bc39a6272387deb8567979a4349f0facb43251be4b5ea0b6fd064c76c4a7f9"
+      },
+      "Resources/CornerRadius_themeresources.xaml": {
+        "bytes": 3180,
+        "sha256": "561f6c89354a64044c364b4d87b18ca5b55905952e281ca2c7db0e40565c3602"
+      },
+      "Resources/DatePicker_themeresources.xaml": {
+        "bytes": 12321,
+        "sha256": "1821459c412a6d9b49afe7a5409bea1d37b7270ae0143adac53dc90da0a7d6e6"
+      },
+      "Resources/DateTimePickerFlyout_themeresources.xaml": {
+        "bytes": 8818,
+        "sha256": "db9d4c89ee2559336731053444d665f8fd9154013fb7053d460162f1510a6bb2"
+      },
+      "Resources/Deprecated_themeresources.xaml": {
+        "bytes": 14529,
+        "sha256": "ffe30082becb09ae7070998ac8f553f83f90895d800aca2de23cd605fc289f3d"
+      },
+      "Resources/Deprecated_themeresources_any.xaml": {
+        "bytes": 8055,
+        "sha256": "ff3798fe3f11b7fc1900d736ca3f900c01624c527f3eac2f1090be7b190ed6a6"
+      },
+      "Resources/DropDownButton_themeresources.xaml": {
+        "bytes": 2093,
+        "sha256": "ee5f9d9a246baeb8b80b59160e51247984935ed905bf47dc19bde06bcceac66e"
+      },
+      "Resources/Expander_themeresources.xaml": {
+        "bytes": 8767,
+        "sha256": "caccfea4b7dd40c10b6cc3aca3f8065640a39faebe92944b638c0e0360b2c8b9"
+      },
+      "Resources/FlipViewItem_themeresources.xaml": {
+        "bytes": 1352,
+        "sha256": "ee82728a0476087b2e9887a55be84cb2b8a997d78d23c4eee9a6c3de29d19655"
+      },
+      "Resources/FlipView_themeresources.xaml": {
+        "bytes": 7770,
+        "sha256": "1957b29f30f4a41cd4780743d5942252ef3975763372b6012defdd7455b60d1f"
+      },
+      "Resources/FlyoutPresenter_themeresources.xaml": {
+        "bytes": 1932,
+        "sha256": "d58e34e07c537bb1b187b48ce27acd1f41bbb945756178a93c3eac097c1f88a9"
+      },
+      "Resources/Generic.xaml": {
+        "bytes": 93080,
+        "sha256": "6f9f0622e7a7f8a59512ed30f36ec167a4d5e94e2f6395f64a59216bc83b056d"
+      },
+      "Resources/Glyphs.xaml": {
+        "bytes": 17789,
+        "sha256": "745c8f21bc039844a2cccc84d431c2d25881e2fc610ae5ba049d67832ff360e0"
+      },
+      "Resources/HyperlinkButton_themeresources.xaml": {
+        "bytes": 5356,
+        "sha256": "9259fcef6ce1ae53025f02fb29fb7ba5dad404960f7a8cac1cc11237e2daf953"
+      },
+      "Resources/Hyperlink_themeresources.xaml": {
+        "bytes": 2075,
+        "sha256": "ceb045301d5a7684513bdf5de0a68ff6d86ec87311a11a972866a91953ff1cff"
+      },
+      "Resources/InfoBadge_themeresources.xaml": {
+        "bytes": 3495,
+        "sha256": "2c8ac70f7798beba934aeae371b15430f1a254e6d6e274ef820ab5e6535fa5f5"
+      },
+      "Resources/InfoBar_themeresources.xaml": {
+        "bytes": 8411,
+        "sha256": "ba40be1d031520a32bd7874c044ffefaa67d92f19514c17c9fab01fd2a8eea2a"
+      },
+      "Resources/ListBox_themeresources.xaml": {
+        "bytes": 9269,
+        "sha256": "8a8949d7ae5a57c3eb5090b07e7058349500f37c04894a1d8ce8114dd5ff1246"
+      },
+      "Resources/ListViewItem_themeresources.xaml": {
+        "bytes": 23380,
+        "sha256": "335e2fb7e7b88e3e58fe00f43cac02d25bafcb66d0cc120c32c9aa8394f9ea32"
+      },
+      "Resources/MenuBar_themeresources.xaml": {
+        "bytes": 4613,
+        "sha256": "b34f0173b06bef31f8b16fa97232a8c79b648715d02c0aedb03ea45efdf93196"
+      },
+      "Resources/MenuFlyout_themeresources.xaml": {
+        "bytes": 29596,
+        "sha256": "6806d289d265c79487262ddeea3301df6b576f114af7bda38e9fb5892737b812"
+      },
+      "Resources/NavigationBackButton_themeresources.xaml": {
+        "bytes": 1525,
+        "sha256": "3af4bcadf775e9535882f5dbc4bbbd6000dbc55fba2e0775e49d226bf753abcd"
+      },
+      "Resources/NavigationView_themeresources.xaml": {
+        "bytes": 29293,
+        "sha256": "7ff825e01da615ff4234ed2ab9266dde928bc6864663bf8fc76c19fdc09edd70"
+      },
+      "Resources/NumberBox_themeresources.xaml": {
+        "bytes": 3259,
+        "sha256": "e996118b891f6afee415b851b3a3f661e347680ab6b6d739e405360e83205b7c"
+      },
+      "Resources/PasswordBox_themeresources.xaml": {
+        "bytes": 797,
+        "sha256": "21167a6a36fb072346c0da57669697e789a2468924bf00aa8bdc56f518328278"
+      },
+      "Resources/PipsPager_themeresources.xaml": {
+        "bytes": 12267,
+        "sha256": "2d50218950b2866a6d174e920c46aad5e46b188ba82a481c1c971d86353cef3a"
+      },
+      "Resources/ProgressBar_themeresources.xaml": {
+        "bytes": 3013,
+        "sha256": "e3989f989c80f78a2f4f559c0a59be039e8240666aacef51906b947010a3b58e"
+      },
+      "Resources/ProgressRing_themeresources.xaml": {
+        "bytes": 1781,
+        "sha256": "ab001192a073b9ab969c6d1374cd46fcb62518681679fae517ab7e81b39a1567"
+      },
+      "Resources/RadioButton_themeresources.xaml": {
+        "bytes": 19770,
+        "sha256": "3cd7866ec5c83538cce58ec306ff21e5cb4448fde4f143dc6231815ee6851a7a"
+      },
+      "Resources/RadioButtons_themeresources.xaml": {
+        "bytes": 1895,
+        "sha256": "ee04622d6d657f80f215e9082757c3df47a29d1ae0dd58f25694aabad093c37b"
+      },
+      "Resources/RatingControl_themeresources.xaml": {
+        "bytes": 4023,
+        "sha256": "17c720f3f3bbbec7d1d01bf4bac4dabdf03f597a6fff8af586e686c7b2794332"
+      },
+      "Resources/RefreshContainer_themeresources.xaml": {
+        "bytes": 1610,
+        "sha256": "d2ab967b6193664df396c821d70125575acd07b876232e62a11203883d96fad3"
+      },
+      "Resources/RefreshVisualizer_themeresources.xaml": {
+        "bytes": 1588,
+        "sha256": "ef964c554c334d571c1446ff519a4f96f6153f5d1bfbf79033a8fc79b78d76e6"
+      },
+      "Resources/RepeatButton_themeresources.xaml": {
+        "bytes": 7943,
+        "sha256": "b7371f11b8bf08da2748bdc51ddb3ec41c160d7729fb2f73a450683110e914c8"
+      },
+      "Resources/ResizeGripper_themeresources.xaml": {
+        "bytes": 1643,
+        "sha256": "f55a43e587926ccd1910f6ead52c366446eb2b900ca3e114b34aff847645ca40"
+      },
+      "Resources/RevealBrush_themeresources.xaml": {
+        "bytes": 42964,
+        "sha256": "1fbfc61ae92f9aec5fda4bc878eda2dd20360ea6ec656334ac84e4495b6cfb2c"
+      },
+      "Resources/RichEditBox_themeresources.xaml": {
+        "bytes": 739,
+        "sha256": "ce3656adde4829ff5ceece7ed3358f7006f806d91e61cd8e4a17ef75fbb9b7b8"
+      },
+      "Resources/ScrollBar_themeresources.xaml": {
+        "bytes": 19821,
+        "sha256": "4af3fd16d6975bfec5fb8cf644177771fab1d9e764c6588040c4924ad2efaa2d"
+      },
+      "Resources/ScrollViewer_themeresources.xaml": {
+        "bytes": 1951,
+        "sha256": "8a4749849f326960585419fd3b506d17fc9c097b580a84b0729fb38847a1cffc"
+      },
+      "Resources/SelectorBar_themeresources.xaml": {
+        "bytes": 9020,
+        "sha256": "d1971fe22fc30d346a9032ee5a9efb375f2b2a39083e3429845d6472b4caa5fe"
+      },
+      "Resources/Slider_themeresources.xaml": {
+        "bytes": 16884,
+        "sha256": "74aa9068cca79667c96f9bc6a2a5883a0602c97fce4563a8776aff017dd085d2"
+      },
+      "Resources/SplitButton_themeresources.xaml": {
+        "bytes": 11102,
+        "sha256": "ad5ca4928e9cf4a9ac106347ea3fe88cd9b773ab700b77839e19fc695ba4305d"
+      },
+      "Resources/SplitView_themeresources.xaml": {
+        "bytes": 3313,
+        "sha256": "21b4f2d9a0b9f84046c3b74f3f9ae6a4c8ed048fe9c2ff5768358460b45eb7b6"
+      },
+      "Resources/SystemResources.xaml": {
+        "bytes": 2972,
+        "sha256": "fccf086bd71e1825709621640741175184a5c5e43f4694c6efca17764a60e1e2"
+      },
+      "Resources/TabView_themeresources.xaml": {
+        "bytes": 27497,
+        "sha256": "244d284ddb59b5813f807210d08f3bd7828f97b59397499f81379bf4547927db"
+      },
+      "Resources/TableView_themeresources.xaml": {
+        "bytes": 3871,
+        "sha256": "c09b35bbdb10f3ecac5fde1d61ef046e2b7d802e61e854e88acce7d24aaec1cc"
+      },
+      "Resources/TabularSurfaces_themeresources.xaml": {
+        "bytes": 10170,
+        "sha256": "ae9ad3ac5688bf633f3936ce6586cf2f2de2f166629c0505f6771217470fcaff"
+      },
+      "Resources/TextBlock_themeresources.xaml": {
+        "bytes": 962,
+        "sha256": "27d8e56c417cfeb6d3e233d8c851eb4b08946f12a8333dbd9570c7dea3856559"
+      },
+      "Resources/TextBlock_themeresources_v2.5.xaml": {
+        "bytes": 857,
+        "sha256": "307fba1c1ab03fbf718fd27437c2dfc77c8e531de6adafbbed1415a0509e83a4"
+      },
+      "Resources/TextBox_themeresources.xaml": {
+        "bytes": 15926,
+        "sha256": "9395e39b6cfa354fe0bf07e5b6d54f0da16f920288e81e88481f65a9f28dec44"
+      },
+      "Resources/ThemeShadows.xaml": {
+        "bytes": 2648,
+        "sha256": "d1f70ac4b90cb6021dabb53fad8c366daf9c9d13ee7a913163ee73fd3e1d9612"
+      },
+      "Resources/TimePicker_themeresources.xaml": {
+        "bytes": 12078,
+        "sha256": "e94fcd60388850261156c3fb09c6065bda0992cf7ef7d49ff3d9355e4d7701d5"
+      },
+      "Resources/TitleBar_themeresources.xaml": {
+        "bytes": 9652,
+        "sha256": "fc429a40e9dbbea80c967614329e8e4c64b7e47ced2bf7856d16bea1c7382cbe"
+      },
+      "Resources/ToggleButton_themeresources.xaml": {
+        "bytes": 19758,
+        "sha256": "b97dccbbb3e55fcfef3bc784add7c3f97dc2237e10383ae797aa600a2aba7d51"
+      },
+      "Resources/ToggleSwitch_themeresources.xaml": {
+        "bytes": 19627,
+        "sha256": "a5fb5e1233f0935182f2775e05082221c224e1861eafb6f5561364e014e0b95e"
+      },
+      "Resources/ToolTip_themeresources.xaml": {
+        "bytes": 3865,
+        "sha256": "f838de52e997c51a73f153ec31a06f7bd298271718dca45f10239401f695cad8"
+      },
+      "Resources/TreeView_themeresources.xaml": {
+        "bytes": 13365,
+        "sha256": "2751052a2d87f33efd5bd289ab409562c3065251ee57ef57a745e0de619e9635"
+      },
+      "Strings/InvariantResources.xaml": {
+        "bytes": 1516,
+        "sha256": "d94cc19d84a9d5f74b87ac99cfeff8b80bbac4f977ccee93a8b9b29d0335729b"
+      },
+      "WinUITheme.xaml": {
+        "bytes": 7672,
+        "sha256": "d3bb844b69e45306fa2e8ccd7c06b248c9511f0899598e2c9f62e0153846c6e1"
+      }
+    },
+    "tmpdir_override": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/validation-02/tool-tmp",
+    "validator": {
+      "bytes": 22158,
+      "path": "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/validate_runtime_release.py",
+      "sha256": "754ab07ccd12399179238b6965969606d9d2e0ce7f08d296034763cb0cfada75"
+    }
+  },
+  "conclusion": {
+    "canonical_archives_passed": 8,
+    "no_runtime_source_or_archive_codec_changes": true,
+    "shipping_graph_substitution_allowed": false,
+    "shipping_size_or_throughput_claim": false,
+    "tool_build_passed": true,
+    "training_executable_launched": false
+  },
+  "dependency_lock": {
+    "every_external_tuple_present_in_original_source_lock": true,
+    "external_packages": [
+      {
+        "checksum": "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa",
+        "name": "adler2",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "version": "2.0.1"
+      },
+      {
+        "checksum": "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600",
+        "name": "cfg-if",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "version": "1.0.5"
+      },
+      {
+        "checksum": "01a7799fd6b852db0e61728dde9a204c423b44d689dbd432522543614b490e78",
+        "name": "crc32fast",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "version": "1.5.2"
+      },
+      {
+        "checksum": "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb",
+        "name": "flate2",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "version": "1.1.10"
+      },
+      {
+        "checksum": "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c",
+        "name": "miniz_oxide",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "version": "0.9.1"
+      },
+      {
+        "checksum": "6c20b6793b5c2fa6553b250154b78d6d0db37e72700ae35fad9387a46f487c97",
+        "name": "roxmltree",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "version": "0.20.0"
+      },
+      {
+        "checksum": "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea",
+        "name": "simd-adler32",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "version": "0.3.10"
+      }
+    ],
+    "local_packages": [
+      {
+        "name": "ferroui-portable-archive-tool",
+        "version": "0.0.0"
+      },
+      {
+        "name": "xamlx",
+        "version": "0.5.0-preview.1"
+      }
+    ],
+    "original_seed": {
+      "bytes": 168627,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/original/Cargo.lock",
+      "sha256": "c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b"
+    },
+    "pre_and_post_verification_records": [
+      {
+        "bytes": 2196,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/resolved-lock-before.json",
+        "sha256": "c97e3ef0ce0aac9dcbdc6710fdf0c80c5cdfe3b52003f9f052e3b37b922e612a"
+      },
+      {
+        "bytes": 2196,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/resolved-lock-after.json",
+        "sha256": "c97e3ef0ce0aac9dcbdc6710fdf0c80c5cdfe3b52003f9f052e3b37b922e612a"
+      }
+    ],
+    "resolved": {
+      "bytes": 1778,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/Cargo.lock",
+      "sha256": "be0b2ef9f78d76a22e112de6b590cf45f254a5294e2f76a73532dc4d91964e15"
+    },
+    "resolved_text": "# This file is automatically @generated by Cargo.\n# It is not intended for manual editing.\nversion = 4\n\n[[package]]\nname = \"adler2\"\nversion = \"2.0.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa\"\n\n[[package]]\nname = \"cfg-if\"\nversion = \"1.0.5\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600\"\n\n[[package]]\nname = \"crc32fast\"\nversion = \"1.5.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"01a7799fd6b852db0e61728dde9a204c423b44d689dbd432522543614b490e78\"\ndependencies = [\n \"cfg-if\",\n]\n\n[[package]]\nname = \"ferroui-portable-archive-tool\"\nversion = \"0.0.0\"\ndependencies = [\n \"flate2\",\n \"xamlx\",\n]\n\n[[package]]\nname = \"flate2\"\nversion = \"1.1.10\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb\"\ndependencies = [\n \"crc32fast\",\n \"miniz_oxide\",\n]\n\n[[package]]\nname = \"miniz_oxide\"\nversion = \"0.9.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c\"\ndependencies = [\n \"adler2\",\n \"simd-adler32\",\n]\n\n[[package]]\nname = \"roxmltree\"\nversion = \"0.20.0\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"6c20b6793b5c2fa6553b250154b78d6d0db37e72700ae35fad9387a46f487c97\"\n\n[[package]]\nname = \"simd-adler32\"\nversion = \"0.3.10\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea\"\n\n[[package]]\nname = \"xamlx\"\nversion = \"0.5.0-preview.1\"\ndependencies = [\n \"roxmltree\",\n]\n"
+  },
+  "materialization": {
+    "all_immutable_inputs_verified_before_and_after_compiler": true,
+    "facade_extraction": {
+      "constant": "pub const DEVELOPMENT_NAMESPACE: &str = \"https://github.com/ferroui/hot-reload\";\n",
+      "constant_sha256": "f29362c899d641685881bf45423e08e9c5f9340d5f261965fad8dc2b5e6a32e7",
+      "constant_source": "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/development_key_transformer.rs",
+      "method": "    pub(crate) fn parse_source_syntax(xaml: &str) -> XamlResult<XamlDocument> {\n        let mut compatibility_mappings = HashMap::new();\n        compatibility_mappings.insert(\n            XamlNamespaces::BLEND2008.to_string(),\n            XamlNamespaces::BLEND2008.to_string(),\n        );\n        compatibility_mappings.insert(DEVELOPMENT_NAMESPACE.into(), DEVELOPMENT_NAMESPACE.into());\n        XDocumentXamlParser::parse(xaml, Some(&compatibility_mappings))\n    }\n",
+      "method_sha256": "c651458cf340b13dda8922750cdd1b4196723438d30138c0c7931d0e25274f9c",
+      "method_source": "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/ferro_xaml_il_compiler.rs"
+    },
+    "generated_sources": {
+      "Cargo.toml": {
+        "identity": {
+          "bytes": 1313,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/Cargo.toml",
+          "sha256": "3f0180ab2f24e027e1771fe65956b6433c6b061887d31265f8f94e28f34500ba"
+        },
+        "text": "[workspace]\nresolver = \"2\"\nmembers = [\"xamlx\"]\n\n[package]\nname = \"ferroui-portable-archive-tool\"\nversion = \"0.0.0\"\nedition = \"2021\"\nrust-version = \"1.89\"\npublish = false\nautobins = false\n\n[lib]\nname = \"ferroui_markup_xaml_loader\"\npath = \"lib.rs\"\n\n[[bin]]\nname = \"ferroui-fxd\"\npath = \"bin/ferroui-fxd.rs\"\n\n[dependencies]\nxamlx = { path = \"xamlx\", version = \"=0.5.0-preview.1\", features = [\"testing\"] }\nflate2 = { \"version\" = \"1.1\", \"default-features\" = false, \"features\" = [\"rust_backend\"] }\n\n[workspace.package]\nversion = \"0.5.0-preview.1\"\nedition = \"2021\"\nrust-version = \"1.89\"\nlicense = \"MIT\"\nrepository = \"https://github.com/wieslawsoltes/FerroUI\"\nhomepage = \"https://github.com/wieslawsoltes/FerroUI\"\n# What every published crate states beside its own description (docs/release.md, \"Metadata\"). The\n# readme is the one of the repository: Cargo copies it into each package.\nreadme = \"README.md\"\nkeywords = [\"gui\", \"ui\", \"xaml\", \"framework\", \"cross-platform\"]\ncategories = [\"gui\"]\n\n# The crates of the workspace are pinned to one another at the exact version of the workspace, so\n# that the crates of a release are only ever resolved together (docs/release.md, \"Version scheme\").\n# `scripts/release/set-version.sh <version>` writes the version above and these keys.\n\n[workspace.dependencies]\nroxmltree = \"0.20\"\n"
+      },
+      "compiler_extensions.rs": {
+        "identity": {
+          "bytes": 835,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/compiler_extensions.rs",
+          "sha256": "31680ae5e07e12d901c504bfb38721a5b5fd7dda8be3509d87b34b9369f736c0"
+        },
+        "text": "// Archive-tool facade; the method and constant below are verbatim source excerpts.\nuse std::collections::HashMap;\nuse xamlx::{ast::XamlDocument, exceptions::XamlResult, parsers::XDocumentXamlParser, XamlNamespaces};\n\npub const DEVELOPMENT_NAMESPACE: &str = \"https://github.com/ferroui/hot-reload\";\n\npub(crate) struct FerroXamlIlCompiler;\n\nimpl FerroXamlIlCompiler {\n    pub(crate) fn parse_source_syntax(xaml: &str) -> XamlResult<XamlDocument> {\n        let mut compatibility_mappings = HashMap::new();\n        compatibility_mappings.insert(\n            XamlNamespaces::BLEND2008.to_string(),\n            XamlNamespaces::BLEND2008.to_string(),\n        );\n        compatibility_mappings.insert(DEVELOPMENT_NAMESPACE.into(), DEVELOPMENT_NAMESPACE.into());\n        XDocumentXamlParser::parse(xaml, Some(&compatibility_mappings))\n    }\n}\n"
+      },
+      "lib.rs": {
+        "identity": {
+          "bytes": 112,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/lib.rs",
+          "sha256": "6192b4e6e1512cf8e9b29013f23778406a78881cadeb179167e81f3d30b649c6"
+        },
+        "text": "//! Isolated archive tooling; no framework runtime is linked.\npub mod binary_document;\nmod compiler_extensions;\n"
+      }
+    },
+    "immutable_input_count": 105,
+    "package": "ferroui-portable-archive-tool",
+    "producer": {
+      "bytes": 11754,
+      "path": "/workspace/scratch/6f70b20c54b6/FerroUI/scripts/themes/bench/prepare_portable_packer.py",
+      "sha256": "72da1e3b090ca1bf1150269c31339d6a160b3b538d1ae4299b689449ef9c5ba2"
+    },
+    "record": {
+      "bytes": 106285,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/package-02/materialization.json",
+      "sha256": "dc21b1e94bf14878e1d9ce999b9f02dc2f64b3b2c86675857593750c7f648b50"
+    },
+    "source_links_materialized_as_regular_files": {
+      "external/XamlX/src/XamlX/LICENSE": "../../../../LICENSE",
+      "external/XamlX/src/XamlX/NOTICE-PROJECT.md": "../../../../NOTICE.md",
+      "external/XamlX/src/XamlX/NOTICE.md": "../../NOTICE.md"
+    },
+    "verbatim_copied_inputs": {
+      "README.md": {
+        "bytes": 87626,
+        "sha256": "1b51b11be5146ee862b1282b262f12c4ab39d2108ff2fd6297acd1a594970fc2",
+        "source": "README.md"
+      },
+      "bin/ferroui-fxd.rs": {
+        "bytes": 2500,
+        "sha256": "b811e27b9812e1cefb4f4c8b0e885d8085be2bf963403cbbcb4a96e46451876d",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/bin/ferroui-fxd.rs"
+      },
+      "binary_document/decode.rs": {
+        "bytes": 11042,
+        "sha256": "f7362ceac9807382a46f15c95ad002934af74a807ad493a1b7e76b5df5d84404",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/binary_document/decode.rs"
+      },
+      "binary_document/encode.rs": {
+        "bytes": 13885,
+        "sha256": "cb7c3805f121eb7654ec6fd7c3f23463230d88a29771b41f261c4510b24184c5",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/binary_document/encode.rs"
+      },
+      "binary_document/mod.rs": {
+        "bytes": 5987,
+        "sha256": "cbf078b68151148d89d725598d38177d8909a8a4ae19dbbd1a83e925151de427",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/binary_document/mod.rs"
+      },
+      "binary_document/pack.rs": {
+        "bytes": 9079,
+        "sha256": "e3a4c3ee0cf392bee77878aef47ddecb685cdedcdfd0e0f627c370a8232c2f0f",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/binary_document/pack.rs"
+      },
+      "binary_document/pages.rs": {
+        "bytes": 11462,
+        "sha256": "cf4a0d80ba33dc8059e67082d92b170554b8bfa514e78bb4a44224681fe7ec5f",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/binary_document/pages.rs"
+      },
+      "binary_document/solid.rs": {
+        "bytes": 15742,
+        "sha256": "cde46caafe5e2be2d5689dcc3d3d10075b90b959606ff8f5fd7cbe4d0d8c785c",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/binary_document/solid.rs"
+      },
+      "binary_document/tests.rs": {
+        "bytes": 10625,
+        "sha256": "d332fbb46942bdd2e19f1b682291a2fa8b42fdf37ae4fc64a9b410c48dc3f053",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/binary_document/tests.rs"
+      },
+      "original/Cargo.lock": {
+        "bytes": 168627,
+        "sha256": "c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b",
+        "source": "Cargo.lock"
+      },
+      "original/Cargo.toml": {
+        "bytes": 33071,
+        "sha256": "4ff8555c1b499522ed964cc57d9b8ab9e6424fa0ea6c731d5c66444baaf2204f",
+        "source": "Cargo.toml"
+      },
+      "original/src/Markup/FerroUI.Markup.Xaml.Loader/Cargo.toml": {
+        "bytes": 3567,
+        "sha256": "c553d5270c9b83f4b7cb124c1ed7cf521a440d4a9f324ab2cc84932841d7d55e",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/Cargo.toml"
+      },
+      "original/src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/ferro_xaml_il_compiler.rs": {
+        "bytes": 26424,
+        "sha256": "f06604bccd565d821601c77bf5ed587365892b129709ff7d6348ec3685ad276d",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/ferro_xaml_il_compiler.rs"
+      },
+      "original/src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/development_key_transformer.rs": {
+        "bytes": 1922,
+        "sha256": "914f8c523fcc645ba3c37aae3053fdd491a12e58add70bf8965261048ef4db9e",
+        "source": "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/development_key_transformer.rs"
+      },
+      "xamlx/Cargo.toml": {
+        "bytes": 757,
+        "sha256": "57864bc635c3f7ce3e79d3fc418c8bba3ee83e649be7e5af8e604d5805348777",
+        "source": "external/XamlX/src/XamlX/Cargo.toml"
+      },
+      "xamlx/LICENSE": {
+        "bytes": 1079,
+        "sha256": "2b3a10daf2350f7b900bd7b989cdff149b6b4bd07358db9e5c112bd9560b6b46",
+        "source": "external/XamlX/src/XamlX/LICENSE"
+      },
+      "xamlx/NOTICE-PROJECT.md": {
+        "bytes": 14295,
+        "sha256": "e47c48570888d21b001b75afa56011466dabf0e08772afef280e4904a6e13f6d",
+        "source": "external/XamlX/src/XamlX/NOTICE-PROJECT.md"
+      },
+      "xamlx/NOTICE.md": {
+        "bytes": 1861,
+        "sha256": "c75bb3226aff9fb78ee2bd989adb02f38b715450cdceacd9d543eff551575855",
+        "source": "external/XamlX/src/XamlX/NOTICE.md"
+      },
+      "xamlx/ast/clr.rs": {
+        "bytes": 42523,
+        "sha256": "6e3760b17477c876b26cbc9ada21fdd7d82876ad23f1613832aca6aba7e31dc8",
+        "source": "external/XamlX/src/XamlX/ast/clr.rs"
+      },
+      "xamlx/ast/common.rs": {
+        "bytes": 18618,
+        "sha256": "4863870db4d90df7a021449ebd8e42e07ba55233b9ffe6b5ff04646d4d9f78b9",
+        "source": "external/XamlX/src/XamlX/ast/common.rs"
+      },
+      "xamlx/ast/compiler_helpers.rs": {
+        "bytes": 9557,
+        "sha256": "047f284de6cecc60c66d14726646d87f1389e25e2023ad97ad1282544fd26e0a",
+        "source": "external/XamlX/src/XamlX/ast/compiler_helpers.rs"
+      },
+      "xamlx/ast/intrinsics.rs": {
+        "bytes": 10608,
+        "sha256": "605c0cfba1e577ca6542678715ad181c041c0247d1d2a5857c1fe348386df3e4",
+        "source": "external/XamlX/src/XamlX/ast/intrinsics.rs"
+      },
+      "xamlx/ast/mod.rs": {
+        "bytes": 328,
+        "sha256": "97ebc4fff5851b42973c60d7815e4d20ace12d12088e589e2ff65b640219fdec",
+        "source": "external/XamlX/src/XamlX/ast/mod.rs"
+      },
+      "xamlx/ast/namespace_scope.rs": {
+        "bytes": 1917,
+        "sha256": "811a0055bfba6361af781dc277aa752ef9fae662d834b67940e56937ce0bc77a",
+        "source": "external/XamlX/src/XamlX/ast/namespace_scope.rs"
+      },
+      "xamlx/ast/xaml.rs": {
+        "bytes": 7264,
+        "sha256": "6d6eff30d91c9098fad129435653e9bf9c8c241ef35302ef2a92f0263cd97999",
+        "source": "external/XamlX/src/XamlX/ast/xaml.rs"
+      },
+      "xamlx/ast/xaml_document.rs": {
+        "bytes": 703,
+        "sha256": "56de6c1ed77dfe802d950ad3f038073af20f7daab67bbdb08cea207c009a3bec",
+        "source": "external/XamlX/src/XamlX/ast/xaml_document.rs"
+      },
+      "xamlx/ast/xml.rs": {
+        "bytes": 2599,
+        "sha256": "d7e35b059cb78e9e6f6c4d93567c2b2b392f79d7da883dda174499921fc6e992",
+        "source": "external/XamlX/src/XamlX/ast/xml.rs"
+      },
+      "xamlx/compiler/mod.rs": {
+        "bytes": 194,
+        "sha256": "5b067d2cdbc70363d7db5bdd2337bdab14203192cc5beee13a8b3e9a180402aa",
+        "source": "external/XamlX/src/XamlX/compiler/mod.rs"
+      },
+      "xamlx/compiler/xaml_compiler.rs": {
+        "bytes": 4656,
+        "sha256": "967f534c53d9a677aca98f54ae4cc89dd07e4fc0ac6755e793eb6ad755880742",
+        "source": "external/XamlX/src/XamlX/compiler/xaml_compiler.rs"
+      },
+      "xamlx/compiler/xaml_imperative_compiler.rs": {
+        "bytes": 9059,
+        "sha256": "05cea9e8a93e33703753f37b5e9c79fe24be6b743e44755155237b4f7985c335",
+        "source": "external/XamlX/src/XamlX/compiler/xaml_imperative_compiler.rs"
+      },
+      "xamlx/diagnostics/context_diagnostic_extensions.rs": {
+        "bytes": 3818,
+        "sha256": "d74a0f1250eb54015d8167f2427cc0274af30c67b1c23f22975e52c7f6546dc0",
+        "source": "external/XamlX/src/XamlX/diagnostics/context_diagnostic_extensions.rs"
+      },
+      "xamlx/diagnostics/mod.rs": {
+        "bytes": 421,
+        "sha256": "65d1796b3738247708134c174e1f9c7bf09b01cdb4ff34971e41d05d4263613d",
+        "source": "external/XamlX/src/XamlX/diagnostics/mod.rs"
+      },
+      "xamlx/diagnostics/xaml_diagnostic.rs": {
+        "bytes": 1667,
+        "sha256": "962aa6012b787d4416f81e6c8239c1b05a37092fdf9e5bd469725f83e6427f37",
+        "source": "external/XamlX/src/XamlX/diagnostics/xaml_diagnostic.rs"
+      },
+      "xamlx/diagnostics/xaml_diagnostic_severity.rs": {
+        "bytes": 243,
+        "sha256": "b1f44149c1ecd7df446835a932d5e172179cb525425e53ed61a1c5945dba9bfc",
+        "source": "external/XamlX/src/XamlX/diagnostics/xaml_diagnostic_severity.rs"
+      },
+      "xamlx/diagnostics/xaml_x_well_known_diagnostic_codes.rs": {
+        "bytes": 423,
+        "sha256": "aa982cf06fca308fa4c754f27e5329d521b81230a61ea6e801182cd715a0313b",
+        "source": "external/XamlX/src/XamlX/diagnostics/xaml_x_well_known_diagnostic_codes.rs"
+      },
+      "xamlx/emit/mod.rs": {
+        "bytes": 814,
+        "sha256": "6f498f23286b8276e0838cb8341f73355b9689d0f8ceb3477654058e65c8566e",
+        "source": "external/XamlX/src/XamlX/emit/mod.rs"
+      },
+      "xamlx/emit/xaml_emit_context.rs": {
+        "bytes": 18176,
+        "sha256": "4bdc164e79e3a50afb1c608b0e8f6b811d7ad6084b25aeb5b56209309fe8e4de",
+        "source": "external/XamlX/src/XamlX/emit/xaml_emit_context.rs"
+      },
+      "xamlx/emit/xaml_emit_context_with_locals.rs": {
+        "bytes": 8554,
+        "sha256": "ea4085c37539f873e99a7f7b9ef5d6bd3d0120e699c508c4b51b46a431761a6a",
+        "source": "external/XamlX/src/XamlX/emit/xaml_emit_context_with_locals.rs"
+      },
+      "xamlx/emit/xaml_language_emit_mappings.rs": {
+        "bytes": 2644,
+        "sha256": "75733b06234fe7693c419b36ba4add31ee84c24aec0dba1dcbf2e373af410349",
+        "source": "external/XamlX/src/XamlX/emit/xaml_language_emit_mappings.rs"
+      },
+      "xamlx/emit/xaml_runtime_context.rs": {
+        "bytes": 4503,
+        "sha256": "be440dca27c8a469bd1a74e4dbb157f2658f88657a86b3c7377832316ce3af0c",
+        "source": "external/XamlX/src/XamlX/emit/xaml_runtime_context.rs"
+      },
+      "xamlx/exceptions.rs": {
+        "bytes": 10572,
+        "sha256": "3a2e12db8667d47a0903303fd6252c24ea8b835a3edf105d487b80f26931c055",
+        "source": "external/XamlX/src/XamlX/exceptions.rs"
+      },
+      "xamlx/extensions/mod.rs": {
+        "bytes": 372,
+        "sha256": "7b61fff61614714e31ecdb3e23f66e419e6b978ddff6c2bbe71738cc6d179864",
+        "source": "external/XamlX/src/XamlX/extensions/mod.rs"
+      },
+      "xamlx/extensions/query_interface.rs": {
+        "bytes": 2856,
+        "sha256": "6be9b77f51d6262f961388d8d424733fa930468a5555db053fa3ed242ca886c5",
+        "source": "external/XamlX/src/XamlX/extensions/query_interface.rs"
+      },
+      "xamlx/lib.rs": {
+        "bytes": 2279,
+        "sha256": "136d6510e10729c4d0d235e2a7758334ecb58544a1b43e46f7b7522c372d1cc7",
+        "source": "external/XamlX/src/XamlX/lib.rs"
+      },
+      "xamlx/parsers/comma_separated_parentheses_tree_parser.rs": {
+        "bytes": 3546,
+        "sha256": "8054952b4767954a78644f9ff3cc0c05f1deb6e08544ac549187a11b8c7fdec5",
+        "source": "external/XamlX/src/XamlX/parsers/comma_separated_parentheses_tree_parser.rs"
+      },
+      "xamlx/parsers/compatible_xml_reader.rs": {
+        "bytes": 2981,
+        "sha256": "2e48689c917415b59ea8b9cbf8d8f1735004e7cf74d3dc74a2f58a670a3c3732",
+        "source": "external/XamlX/src/XamlX/parsers/compatible_xml_reader.rs"
+      },
+      "xamlx/parsers/mod.rs": {
+        "bytes": 272,
+        "sha256": "9faa6f4cb072cf72083812471ee88a4c599171b04c15c1f8cff1b1d391e4e5c7",
+        "source": "external/XamlX/src/XamlX/parsers/mod.rs"
+      },
+      "xamlx/parsers/system_xaml_markup_extension_parser/known_strings.rs": {
+        "bytes": 2870,
+        "sha256": "97967f1937ff31701425d455e592976365514a0750292f1dbad5863124f914d4",
+        "source": "external/XamlX/src/XamlX/parsers/system_xaml_markup_extension_parser/known_strings.rs"
+      },
+      "xamlx/parsers/system_xaml_markup_extension_parser/me_scanner.rs": {
+        "bytes": 18619,
+        "sha256": "64b7dca47cfb435fdc4b13153f97fc93ec657b7a0182855bda4438b4dbcd2d6d",
+        "source": "external/XamlX/src/XamlX/parsers/system_xaml_markup_extension_parser/me_scanner.rs"
+      },
+      "xamlx/parsers/system_xaml_markup_extension_parser/me_scanner_shims.rs": {
+        "bytes": 6370,
+        "sha256": "bc550f337ece21418827a693379741a0af8a8497c81b6d723eb5267aa7d85fa3",
+        "source": "external/XamlX/src/XamlX/parsers/system_xaml_markup_extension_parser/me_scanner_shims.rs"
+      },
+      "xamlx/parsers/system_xaml_markup_extension_parser/mod.rs": {
+        "bytes": 492,
+        "sha256": "ae0b586c3434c6c677a28d4d4ba5644e6af54d348de29484520d556b82accae7",
+        "source": "external/XamlX/src/XamlX/parsers/system_xaml_markup_extension_parser/mod.rs"
+      },
+      "xamlx/parsers/system_xaml_markup_extension_parser/system_xaml_markup_extension_parser.rs": {
+        "bytes": 5978,
+        "sha256": "434b88e8cb0b10d9f61ec1779ab4d7b57c31826330f2f572756396225c6ac879",
+        "source": "external/XamlX/src/XamlX/parsers/system_xaml_markup_extension_parser/system_xaml_markup_extension_parser.rs"
+      },
+      "xamlx/parsers/x_document_xaml_parser.rs": {
+        "bytes": 32867,
+        "sha256": "6bba8b28fc6bcb6703e0eec0d6e05037d77d32aa45272651ffb9593bada00004",
+        "source": "external/XamlX/src/XamlX/parsers/x_document_xaml_parser.rs"
+      },
+      "xamlx/testing/mod.rs": {
+        "bytes": 60352,
+        "sha256": "b3acef37c6f95887f2f9fce7d1117ddc9e22c7f791b91b3c76ad66c168624c2f",
+        "source": "external/XamlX/src/XamlX/testing/mod.rs"
+      },
+      "xamlx/tests/ast_tests.rs": {
+        "bytes": 1225,
+        "sha256": "e9994dc84748a44ffeff8ac34dfc8b4df22ce1e4940e34a8dfbe782d76dfb901",
+        "source": "external/XamlX/src/XamlX/tests/ast_tests.rs"
+      },
+      "xamlx/tests/emit_tests.rs": {
+        "bytes": 20786,
+        "sha256": "97da74655ca6b9f7e78501abf4b8845992fd52ddbf177cb07ca9d56300359139",
+        "source": "external/XamlX/src/XamlX/tests/emit_tests.rs"
+      },
+      "xamlx/tests/helpers.rs": {
+        "bytes": 8855,
+        "sha256": "fb977011651946e1b36511b51d3405f6afdfe7f40a23db55e6b6f59e9be039b7",
+        "source": "external/XamlX/src/XamlX/tests/helpers.rs"
+      },
+      "xamlx/tests/mod.rs": {
+        "bytes": 387,
+        "sha256": "9db6200cfc9c98f9550e9f730a06353518cc01df27c355d54a3f4e89ac0be5d9",
+        "source": "external/XamlX/src/XamlX/tests/mod.rs"
+      },
+      "xamlx/tests/parser_tests.rs": {
+        "bytes": 34596,
+        "sha256": "7e5fe35312d64efe3625e5a00245456bea6644ad5da48983cbae79dc864f012c",
+        "source": "external/XamlX/src/XamlX/tests/parser_tests.rs"
+      },
+      "xamlx/tests/test_xaml_language.rs": {
+        "bytes": 20363,
+        "sha256": "7efdc4c73165b7055b20454655dc9032407300a98c1ddb916eacd5100fb5db75",
+        "source": "external/XamlX/src/XamlX/tests/test_xaml_language.rs"
+      },
+      "xamlx/tests/transformer_tests.rs": {
+        "bytes": 36709,
+        "sha256": "4a472359a8018a6a6df69a7f4057dd06588b48f19787d78c735dd005667c5cc5",
+        "source": "external/XamlX/src/XamlX/tests/transformer_tests.rs"
+      },
+      "xamlx/tests/type_system_tests.rs": {
+        "bytes": 13939,
+        "sha256": "0be2b16c3a6d6d45db90f945ddf67be2e4c88444e3bf32fe6777c3057b754cb3",
+        "source": "external/XamlX/src/XamlX/tests/type_system_tests.rs"
+      },
+      "xamlx/tests/whitespace_tests.rs": {
+        "bytes": 15488,
+        "sha256": "81267fe123b8824763ca8bf48fab3fb8be42b7e11dc838f177c5d62ee5762a16",
+        "source": "external/XamlX/src/XamlX/tests/whitespace_tests.rs"
+      },
+      "xamlx/transform/ast_transformation_context.rs": {
+        "bytes": 9406,
+        "sha256": "ae33dbd2fe4f9c7fe29f3dff0a59524495f2b66e72f9eb4683c5843f5ee716ff",
+        "source": "external/XamlX/src/XamlX/transform/ast_transformation_context.rs"
+      },
+      "xamlx/transform/i_xaml_ast_transformer.rs": {
+        "bytes": 592,
+        "sha256": "27c00b93b7bda19e3a611e8d3d2884cea1b4776d14dafa380601150bc71e49ba",
+        "source": "external/XamlX/src/XamlX/transform/i_xaml_ast_transformer.rs"
+      },
+      "xamlx/transform/i_xaml_identifier_generator.rs": {
+        "bytes": 999,
+        "sha256": "e3a72d5c57ad05ca6983be701abe1ac6a23cd3c03bffedad6f1763a73a4afeab",
+        "source": "external/XamlX/src/XamlX/transform/i_xaml_identifier_generator.rs"
+      },
+      "xamlx/transform/mod.rs": {
+        "bytes": 781,
+        "sha256": "bff5b32128c96a9168bc01a8397f3c7b4232bcfa3915738f11b60df41ba06e8f",
+        "source": "external/XamlX/src/XamlX/transform/mod.rs"
+      },
+      "xamlx/transform/namespace_info_helper.rs": {
+        "bytes": 2240,
+        "sha256": "cbd4a9cdb6cb206c7e9805c815be9e565a8eaa8c5eeaf1727b0331c05892b0c9",
+        "source": "external/XamlX/src/XamlX/transform/namespace_info_helper.rs"
+      },
+      "xamlx/transform/transformer_configuration.rs": {
+        "bytes": 11799,
+        "sha256": "d0f5e96bc3831a479567300bfdd57549cbb69e5844bddf3019927d9730ca4021",
+        "source": "external/XamlX/src/XamlX/transform/transformer_configuration.rs"
+      },
+      "xamlx/transform/transformers/apply_whitespace_normalization.rs": {
+        "bytes": 2790,
+        "sha256": "21ec035264a23287194aadd0597e55fb6cec300126ff006fa46112b229eea2f5",
+        "source": "external/XamlX/src/XamlX/transform/transformers/apply_whitespace_normalization.rs"
+      },
+      "xamlx/transform/transformers/constructable_object_transformer.rs": {
+        "bytes": 4766,
+        "sha256": "7cef2bd3431061afcf8678136c88f1f15f1be7206cb3be44e8aab46efbce8f5c",
+        "source": "external/XamlX/src/XamlX/transform/transformers/constructable_object_transformer.rs"
+      },
+      "xamlx/transform/transformers/content_convert_transformer.rs": {
+        "bytes": 2883,
+        "sha256": "9060e4c6824d961679c06641607206078c23388710e8159dab36de4e79bca91a",
+        "source": "external/XamlX/src/XamlX/transform/transformers/content_convert_transformer.rs"
+      },
+      "xamlx/transform/transformers/convert_property_values_to_assignments_transformer.rs": {
+        "bytes": 14767,
+        "sha256": "b538f2440a83de24a7d8d43acc340b272dee30d3f0bd7c0508114fcaca16b1a0",
+        "source": "external/XamlX/src/XamlX/transform/transformers/convert_property_values_to_assignments_transformer.rs"
+      },
+      "xamlx/transform/transformers/deferred_content_transformer.rs": {
+        "bytes": 4073,
+        "sha256": "4d595ec80e4b2c7a80268feb807d6a1bce4774fa3f164d0dd83709f28b5b16e7",
+        "source": "external/XamlX/src/XamlX/transform/transformers/deferred_content_transformer.rs"
+      },
+      "xamlx/transform/transformers/flatten_ast_transformer.rs": {
+        "bytes": 769,
+        "sha256": "eb6ff101dcd61ee61c825439e715a793fd25a4671d89c6704dee6d41d538227a",
+        "source": "external/XamlX/src/XamlX/transform/transformers/flatten_ast_transformer.rs"
+      },
+      "xamlx/transform/transformers/known_directives_transformer.rs": {
+        "bytes": 2209,
+        "sha256": "92d246b9eb8a7164b6491dc65d0f8dda025d8e72f805d8d36de4f48247d90e89",
+        "source": "external/XamlX/src/XamlX/transform/transformers/known_directives_transformer.rs"
+      },
+      "xamlx/transform/transformers/markup_extension_transformer.rs": {
+        "bytes": 1004,
+        "sha256": "05c35aafa76b8d6fe8fc2082f48a90fb6c10c3102a44f9d3eabe32771ee75aab",
+        "source": "external/XamlX/src/XamlX/transform/transformers/markup_extension_transformer.rs"
+      },
+      "xamlx/transform/transformers/mod.rs": {
+        "bytes": 1675,
+        "sha256": "4b9a3ecaed898db361870b9c9dba770b29f2273a18151e2ffb85b0103e12a287",
+        "source": "external/XamlX/src/XamlX/transform/transformers/mod.rs"
+      },
+      "xamlx/transform/transformers/new_object_transformer.rs": {
+        "bytes": 2023,
+        "sha256": "5c71ad4bc619fea9e8881a8d2cef258df60bb8022aea967e51a4b777a210a2e4",
+        "source": "external/XamlX/src/XamlX/transform/transformers/new_object_transformer.rs"
+      },
+      "xamlx/transform/transformers/obsolete_warnings_transformer.rs": {
+        "bytes": 6543,
+        "sha256": "75399d2ced45110be407f165a7b6fe81f605ddf32e4d1a003136da94e923d6ed",
+        "source": "external/XamlX/src/XamlX/transform/transformers/obsolete_warnings_transformer.rs"
+      },
+      "xamlx/transform/transformers/property_reference_resolver.rs": {
+        "bytes": 5701,
+        "sha256": "69d0e15248592409163e6192dc7999e862f3033147ca7ed916db8166b53a059f",
+        "source": "external/XamlX/src/XamlX/transform/transformers/property_reference_resolver.rs"
+      },
+      "xamlx/transform/transformers/remove_whitespace_between_property_values_transformer.rs": {
+        "bytes": 1605,
+        "sha256": "1e7445eda0595a3796f2d2ddaadb2e1d47270851cde3df6d63cd92995bbbffc4",
+        "source": "external/XamlX/src/XamlX/transform/transformers/remove_whitespace_between_property_values_transformer.rs"
+      },
+      "xamlx/transform/transformers/resolve_content_property_transformer.rs": {
+        "bytes": 4640,
+        "sha256": "cabb6ac016f3b63718c4831776f537fe9d38176dee4732bb11623732d5ffd476",
+        "source": "external/XamlX/src/XamlX/transform/transformers/resolve_content_property_transformer.rs"
+      },
+      "xamlx/transform/transformers/resolve_property_value_adders_transformer.rs": {
+        "bytes": 3657,
+        "sha256": "39c72417c84234626121c2718b1144f6406999c0e661d7020714d646d0828478",
+        "source": "external/XamlX/src/XamlX/transform/transformers/resolve_property_value_adders_transformer.rs"
+      },
+      "xamlx/transform/transformers/static_intrinsics_post_process_transformer.rs": {
+        "bytes": 972,
+        "sha256": "6e246bf2b49f10690dea7b7eb8bac91ed81651d10c377c5bb0b70ec222ac9899",
+        "source": "external/XamlX/src/XamlX/transform/transformers/static_intrinsics_post_process_transformer.rs"
+      },
+      "xamlx/transform/transformers/text_node_merger.rs": {
+        "bytes": 2053,
+        "sha256": "18cacccaf682299c561a3fe2fba230661e49fc90c2611cd25bd496599b2a54b8",
+        "source": "external/XamlX/src/XamlX/transform/transformers/text_node_merger.rs"
+      },
+      "xamlx/transform/transformers/top_down_initialization_transformer.rs": {
+        "bytes": 4675,
+        "sha256": "1008d731e7b0a4355f1dcbca622c1508336f7980cdac933efc559e6d4fd924f6",
+        "source": "external/XamlX/src/XamlX/transform/transformers/top_down_initialization_transformer.rs"
+      },
+      "xamlx/transform/transformers/type_reference_resolver.rs": {
+        "bytes": 8511,
+        "sha256": "f195a87d7af95da45e4fad0388f8d2fa711544810349079ae6475ea57d2d3fc7",
+        "source": "external/XamlX/src/XamlX/transform/transformers/type_reference_resolver.rs"
+      },
+      "xamlx/transform/transformers/x_arguments_transformer.rs": {
+        "bytes": 2553,
+        "sha256": "51785c419d11f64f946587d3d2afef03e173ce78da5613b9f3528713716cddc4",
+        "source": "external/XamlX/src/XamlX/transform/transformers/x_arguments_transformer.rs"
+      },
+      "xamlx/transform/transformers/xaml_intrinsics_transformer.rs": {
+        "bytes": 5765,
+        "sha256": "1b6cb8b67a88a1144984fd3511f12c8f1f9ce8cf3ba33d151103b8cff39e3fcf",
+        "source": "external/XamlX/src/XamlX/transform/transformers/xaml_intrinsics_transformer.rs"
+      },
+      "xamlx/transform/whitespace_normalization.rs": {
+        "bytes": 5252,
+        "sha256": "052c026c1389c4159d3327831efef70013bc87d24d21df9fc0decc9a0e9f8a78",
+        "source": "external/XamlX/src/XamlX/transform/whitespace_normalization.rs"
+      },
+      "xamlx/transform/xaml_context_base.rs": {
+        "bytes": 2703,
+        "sha256": "70844d0ae4a87dcd5a9efa1857a46ea9fb555b5df2f6c4c4e03981ef2c854073",
+        "source": "external/XamlX/src/XamlX/transform/xaml_context_base.rs"
+      },
+      "xamlx/transform/xaml_diagnostics_handler.rs": {
+        "bytes": 2175,
+        "sha256": "cf169ec7c8f63ea314676527034f1d3e54c6d437629b77405769e565588b5010",
+        "source": "external/XamlX/src/XamlX/transform/xaml_diagnostics_handler.rs"
+      },
+      "xamlx/transform/xaml_language_type_mappings.rs": {
+        "bytes": 4373,
+        "sha256": "f02dfdb42a59f32663b172b8e4bdae96f0509e0a96cdcad7a2a1cdf1fa4d488c",
+        "source": "external/XamlX/src/XamlX/transform/xaml_language_type_mappings.rs"
+      },
+      "xamlx/transform/xaml_transform_helpers.rs": {
+        "bytes": 20608,
+        "sha256": "5d4bb3e77e96e9a969756c3afba8790beef6d612b0437d438353211582c9cc3d",
+        "source": "external/XamlX/src/XamlX/transform/xaml_transform_helpers.rs"
+      },
+      "xamlx/transform/xaml_xmlns_mappings.rs": {
+        "bytes": 2092,
+        "sha256": "07955c87d1b8238b0f6d53ae9020479a09d9ac7466c3e71ae36935f74dab52cd",
+        "source": "external/XamlX/src/XamlX/transform/xaml_xmlns_mappings.rs"
+      },
+      "xamlx/type_system/mod.rs": {
+        "bytes": 313,
+        "sha256": "d621019aaf02c87f1e8b6f7acc6da9acea597a226be928807d7abf3e862872d3",
+        "source": "external/XamlX/src/XamlX/type_system/mod.rs"
+      },
+      "xamlx/type_system/type_system.rs": {
+        "bytes": 33392,
+        "sha256": "42a12739634fabc3293fc5d6108f57213c90138bffc5ac272dac55d62f8ec590",
+        "source": "external/XamlX/src/XamlX/type_system/type_system.rs"
+      },
+      "xamlx/type_system/type_system_helpers.rs": {
+        "bytes": 13073,
+        "sha256": "308c4e8b948d5ae4755c746931006430cc07fdc8de0c7c977e6e5f2807c492fa",
+        "source": "external/XamlX/src/XamlX/type_system/type_system_helpers.rs"
+      },
+      "xamlx/type_system/xaml_locals_pool.rs": {
+        "bytes": 1948,
+        "sha256": "7f825a4174a7d8f484c59d3b403f0fbd9e7160703243363eaa86eb6760686f4a",
+        "source": "external/XamlX/src/XamlX/type_system/xaml_locals_pool.rs"
+      },
+      "xamlx/type_system/xaml_type_well_known_types.rs": {
+        "bytes": 5164,
+        "sha256": "3bcfb47b16c51d7762fec8439e4f459d2625afc34e2aacff77b8e776afe8e4f5",
+        "source": "external/XamlX/src/XamlX/type_system/xaml_type_well_known_types.rs"
+      },
+      "xamlx/xaml_namespaces.rs": {
+        "bytes": 298,
+        "sha256": "ffd9facef79dca61305ee0c8dec4ddffc0927482e805e12b96948f048ecd2da4",
+        "source": "external/XamlX/src/XamlX/xaml_namespaces.rs"
+      }
+    },
+    "xamlx_version": "0.5.0-preview.1"
+  },
+  "resource_boundary": {
+    "application_headroom_gate": {
+      "complete": true,
+      "maximum_available_bytes": 3917041664,
+      "minimum_available_bytes": 3815071744,
+      "minimum_duration_seconds": 30,
+      "passes": false,
+      "required_available_bytes": 4831838208,
+      "sample_interval_seconds": 5,
+      "samples": [
+        {
+          "MemAvailable": 3869196288,
+          "Shmem": 4977995776,
+          "aggregate_oom_kill": 52,
+          "elapsed_seconds": 0.00026040299962915014,
+          "free_disk_bytes": 51282644992,
+          "unix": 1793788452.746301
+        },
+        {
+          "MemAvailable": 3882205184,
+          "Shmem": 4977995776,
+          "aggregate_oom_kill": 52,
+          "elapsed_seconds": 5.000941663000049,
+          "free_disk_bytes": 51282632704,
+          "unix": 1793788457.7469826
+        },
+        {
+          "MemAvailable": 3815071744,
+          "Shmem": 4977995776,
+          "aggregate_oom_kill": 52,
+          "elapsed_seconds": 10.001737775999572,
+          "free_disk_bytes": 51282604032,
+          "unix": 1793788462.7477791
+        },
+        {
+          "MemAvailable": 3854434304,
+          "Shmem": 4977995776,
+          "aggregate_oom_kill": 52,
+          "elapsed_seconds": 15.002763122000033,
+          "free_disk_bytes": 51282604032,
+          "unix": 1793788467.748804
+        },
+        {
+          "MemAvailable": 3889135616,
+          "Shmem": 4977995776,
+          "aggregate_oom_kill": 52,
+          "elapsed_seconds": 20.003504870999677,
+          "free_disk_bytes": 51282604032,
+          "unix": 1793788472.749546
+        },
+        {
+          "MemAvailable": 3898695680,
+          "Shmem": 4977995776,
+          "aggregate_oom_kill": 52,
+          "elapsed_seconds": 25.00424853000004,
+          "free_disk_bytes": 51282604032,
+          "unix": 1793788477.7502897
+        },
+        {
+          "MemAvailable": 3917041664,
+          "Shmem": 4977995776,
+          "aggregate_oom_kill": 52,
+          "elapsed_seconds": 30.004929897000693,
+          "free_disk_bytes": 51282604032,
+          "unix": 1793788482.750971
+        }
+      ],
+      "scope": "Read-only guest memory gate before any new full application compiler; unrelated shmem is observed, never modified."
+    },
+    "closed_development_cache_advice": {
+      "bytes": 411462,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/development-cache-release-01.json",
+      "sha256": "5468decfd975ca596a64c29d958cf9c98bedfc096215ac8fed419d6ffb5996fb"
+    },
+    "no_new_full_application_compiler_started": true
+  },
+  "retained_prior_validation_failure": {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source/scripts/themes/bench/validate_runtime_release.py",
+      "--source",
+      "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source",
+      "archives",
+      "--packer",
+      "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/ferroui-fxd",
+      "--installed",
+      "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/installed.fxp",
+      "--output",
+      "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/archives"
+    ],
+    "compact_anchor_count": 1,
+    "diagnosis": "The original validator required one Generic.xaml font anchor; the actual source has three Default/Light/HighContrast anchors, which original profile_winui.make_archives replaces together.",
+    "first_four_canonical_matches": [
+      {
+        "archive": {
+          "bytes": 296347,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/installed.fxp",
+          "sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "canonical_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb",
+        "case": "installed",
+        "matches": true
+      },
+      {
+        "archive": {
+          "bytes": 432443,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/archives/scalar-v1.fxp",
+          "sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+        },
+        "canonical_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4",
+        "case": "scalar-v1",
+        "matches": true
+      },
+      {
+        "archive": {
+          "bytes": 245376,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/archives/scalar-v2.fxp",
+          "sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+        },
+        "canonical_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b",
+        "case": "scalar-v2",
+        "matches": true
+      },
+      {
+        "archive": {
+          "bytes": 296352,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/archives/scalar-v3.fxp",
+          "sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+        },
+        "canonical_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f",
+        "case": "scalar-v3",
+        "matches": true
+      }
+    ],
+    "generic_anchor_count": 3,
+    "phase": "pack-matrix",
+    "record": {
+      "bytes": 65547,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/build.json",
+      "sha256": "d9c0de8fe53ef93ee04d6c099c4ace9c9d791b7e29511b2b8902986b4c969c4e"
+    },
+    "returncode": 1,
+    "stderr": "Traceback (most recent call last):\n  File \"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source/scripts/themes/bench/validate_runtime_release.py\", line 399, in <module>\n    main()\n  File \"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source/scripts/themes/bench/validate_runtime_release.py\", line 387, in main\n    report = make_archives(args)\n             ^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source/scripts/themes/bench/validate_runtime_release.py\", line 233, in make_archives\n    replace_once(documents / \"Resources/Generic.xaml\", token, token.replace(\">14<\", \">19<\"))\n  File \"/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source/scripts/themes/bench/validate_runtime_release.py\", line 195, in replace_once\n    raise ValueError(f\"Expected one edit anchor in {path}\")\nValueError: Expected one edit anchor in /workspace/scratch/6f70b20c54b6/ferro-portable-packer/build-01/archives/sources/Resources/Generic.xaml\n",
+    "stdout": "",
+    "tool_binary_rebuilt_for_correction": false
+  },
+  "schema_version": 1,
+  "scope": "Executed isolated archive-tool build and byte-for-byte archive reproduction; not an application build or performance comparison.",
+  "source": {
+    "compile_directory_provenance": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/measurement-source",
+    "frozen_directory_at_execution": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source",
+    "head": "d2d2f83d606f547b4ebda2323a145b14ca8379ad",
+    "source_manifest": {
+      "bytes": 2807315,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/release-candidate-01/source.json",
+      "sha256": "5dbefb214912b98ca1db6de35764a796ab4d6b49483d05ce204b2f134c88c3df"
+    },
+    "tree": "a28e609f5331f8d6c009f616d01053e7352dd34c"
+  }
+}

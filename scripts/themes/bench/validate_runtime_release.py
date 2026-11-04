@@ -189,10 +189,11 @@ def compile_fixture(args: argparse.Namespace) -> dict:
     return report
 
 
-def replace_once(path: Path, old: str, new: str) -> None:
+def replace_exact(path: Path, old: str, new: str, *, count: int = 1) -> None:
     text = path.read_text()
-    if text.count(old) != 1:
-        raise ValueError(f"Expected one edit anchor in {path}")
+    actual = text.count(old)
+    if actual != count:
+        raise ValueError(f"Expected {count} edit anchors in {path}, found {actual}")
     path.write_text(text.replace(old, new))
 
 
@@ -227,12 +228,14 @@ def make_archives(args: argparse.Namespace) -> dict:
 
     token = '<x:Double x:Key="ControlContentThemeFontSize">14</x:Double>'
     compact = documents / "DensityStyles/Compact.xaml"
-    replace_once(compact, token, token.replace(">14<", ">17<"))
+    replace_exact(compact, token, token.replace(">14<", ">17<"))
     for version, option in ((1, "--pack"), (2, "--pack-solid"), (3, "--pack-paged")):
         pack(f"scalar-v{version}", option, [14, 17])
-    replace_once(documents / "Resources/Generic.xaml", token, token.replace(">14<", ">19<"))
+    # Default, Light and HighContrast each define the normal-density value.
+    # Keep the original training edit's replacement of all three definitions.
+    replace_exact(documents / "Resources/Generic.xaml", token, token.replace(">14<", ">19<"), count=3)
     pack("two-edits-v3", "--pack-paged", [19, 17])
-    replace_once(compact, token.replace(">14<", ">17<"),
+    replace_exact(compact, token.replace(">14<", ">17<"),
                  '<x:Double x:Key="AdditionalEditProbe">31</x:Double>\n  ' + token.replace(">14<", ">29<"))
     for version, option in ((1, "--pack"), (2, "--pack-solid"), (3, "--pack-paged")):
         pack(f"struct-v{version}", option, [19, 29])
