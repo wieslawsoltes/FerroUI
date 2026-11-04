@@ -5,12 +5,12 @@ on:
     inputs:
       candidate:
         description: 'Candidate commit (complete original-workload PGO rebuild)'
-        default: 'ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad'
+        default: 'ad926b4d10a68465b5bbc9fe203fa908dc785f59'
         required: true
         type: string
       reference:
         description: 'Reference commit (same consumer path, toolchain and policy)'
-        default: 'd2d2f83d606f547b4ebda2323a145b14ca8379ad'
+        default: 'ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad'
         required: true
         type: string
   # Updating this frozen source pair starts its reviewed comparison. Ordinary
@@ -23,7 +23,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: winui-release-size-${{ github.ref }}
+  # Different frozen source pairs use independent runners and evidence roots.
+  # Serialize repeats of one pair without cancelling another measured cohort.
+  group: winui-release-size-${{ github.ref }}-${{ inputs.reference || 'ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad' }}-${{ inputs.candidate || 'ad926b4d10a68465b5bbc9fe203fa908dc785f59' }}
   cancel-in-progress: false
 
 jobs:
@@ -46,8 +48,8 @@ jobs:
           sudo apt-get install -y build-essential binutils curl xz-utils pkg-config libfontconfig1-dev libfreetype6-dev
       - name: Rebuild, collect and validate both revisions sequentially
         env:
-          CANDIDATE_REVISION: ${{ inputs.candidate || 'ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad' }}
-          REFERENCE_REVISION: ${{ inputs.reference || 'd2d2f83d606f547b4ebda2323a145b14ca8379ad' }}
+          CANDIDATE_REVISION: ${{ inputs.candidate || 'ad926b4d10a68465b5bbc9fe203fa908dc785f59' }}
+          REFERENCE_REVISION: ${{ inputs.reference || 'ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad' }}
         run: |
           python3 scripts/themes/bench/run_winui_release_comparison.py \
             --repository "$GITHUB_WORKSPACE" \
