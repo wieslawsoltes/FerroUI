@@ -1,0 +1,70 @@
+name: Nullable operations editable WinUI release size
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: 'Candidate commit (complete original-workload PGO rebuild)'
+        default: '9961ef9f5fd479c54dc964648d577b14172e677f'
+        required: true
+        type: string
+      reference:
+        description: 'Reference commit (same consumer path, toolchain and policy)'
+        default: 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48'
+        required: true
+        type: string
+  # Updating this frozen source pair starts its reviewed comparison. Ordinary
+  # source/tooling pushes on the PR branch do not launch these expensive builds.
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-nullable-operations-release-size.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  # Different frozen source pairs use independent runners and evidence roots.
+  # Serialize repeats of one pair without cancelling another measured cohort.
+  group: winui-nullable-operations-release-size-${{ github.ref }}-${{ inputs.reference || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}-${{ inputs.candidate || '9961ef9f5fd479c54dc964648d577b14172e677f' }}
+  cancel-in-progress: false
+
+jobs:
+  release-comparison:
+    name: Two complete editable releases and correctness evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      CARGO_TERM_COLOR: never
+      CARGO_INCREMENTAL: 0
+      RUST_BACKTRACE: 1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Native build and archive dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config libfontconfig1-dev libfreetype6-dev
+      - name: Rebuild, collect and validate both revisions sequentially
+        env:
+          CANDIDATE_REVISION: ${{ inputs.candidate || '9961ef9f5fd479c54dc964648d577b14172e677f' }}
+          REFERENCE_REVISION: ${{ inputs.reference || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}
+        run: |
+          python3 scripts/themes/bench/run_winui_release_comparison.py \
+            --repository "$GITHUB_WORKSPACE" \
+            --work-dir "$RUNNER_TEMP/winui-nullable-operations-release-comparison" \
+            --candidate "$CANDIDATE_REVISION" \
+            --reference "$REFERENCE_REVISION"
+      - name: Preserve complete results, inputs and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-nullable-operations-release-comparison-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-nullable-operations-release-comparison/evidence
+          # Only retained source/results are uploaded; Cargo credentials and
+          # mutable caches live outside this evidence directory.
+          include-hidden-files: true
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 14

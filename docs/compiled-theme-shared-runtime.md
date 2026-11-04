@@ -703,6 +703,71 @@ comparison keeps its original source pair and excludes this later change.
 The earlier measured runtime regressions remain open until fresh matching
 production evidence resolves them.
 
+### Validated shared nullable operations
+
+The nullable source is frozen at
+[`9961ef9f`](https://github.com/wieslawsoltes/FerroUI/commit/9961ef9f5fd479c54dc964648d577b14172e677f).
+Three private nullable callbacks now share one typed operation function and a
+borrowed request enum. `NullableRegistration::of<T>()` remains a public const
+constructor, and the descriptor remains `Clone + Copy`. The original unwrap,
+null and wrap expressions retain their exact Rust payload types, cloning and
+allocation behavior. The caller keeps the original owning value frame, and
+registry lookup copies the operation pointer before invoking user code.
+
+Reference registration shares only nullable unwrapping and null construction.
+Its four owning boxed casts remain unchanged, including non-`Clone` model
+support and the original `Rc` identity. Borrowed casts, boxed casts and general
+conversion overrides remain independent and retain their registration order.
+The new operation request contains only borrowed values; it owns no payload.
+
+[CI run 41890523745](https://github.com/wieslawsoltes/FerroUI/actions/runs/41890523745)
+passed all 13 commands: **445 successful executions, 441 distinct tests, the
+exact four existing overlaps, zero failed or ignored, and all 33 mandatory
+cases**. This preserves the previous 415/411 inventory and adds all 24 unchanged
+value-type tests plus six new nullable regressions. The new cases cover original
+cleanup expressions and panics, nested exact types, clone reentry, independent
+conversion overrides, non-`Clone` reference identity and private-layout budgets.
+Base/Controls and fresh WinUI checks passed with 18 whole-theme and 34 region
+programs. All 30 authenticated ZIP members, 26 command log/resource files,
+tracked source inputs, source blobs and generated program counts were verified
+independently. The complete
+[source-validation evidence](benchmarks/compiled-theme-nullable-operations-source-validation-linux-x86_64.json)
+retains raw logs and the exact source/tooling identities.
+
+The actual source tests printed these private layouts on their x86-64 Rust 1.99
+compiler; they are not a stable Rust ABI or a release-size measurement:
+
+| Private representation | Original bytes | Candidate bytes |
+|---|---:|---:|
+| Borrowed conversion leaf | 16 | 24 |
+| Optional borrowed conversion | 24 | 24 |
+| Conversion enum | 24 | 24 |
+| Registration | 32 | 32 |
+| Override routes | 72 | 72 |
+| Conversion map entry | 64 | 64 |
+| Nullable facts | 48 | 40 |
+| Nullable descriptor | 40 | 24 |
+| Reference operations | 56 | 48 |
+| Nullable map entry | 64 | 56 |
+
+The old nullable callback family occupies 315,836 attributed code/unwind/exception
+bytes in the measured `dc93a16d` image. This is the gross scope of the old bodies,
+not an estimated saving: their required conversion, type identity and cloning
+work remains. The new request ABI and one-word leaf growth still require fresh
+matched conversion-path performance evidence.
+
+The separate
+[production plan](benchmarks/compiled-theme-nullable-operations-production-plan-linux-x86_64.json)
+freezes `c686b70c` as reference and `9961ef9f` as candidate, covering the typed
+local metadata correction and nullable operations. Exactly two implementation
+files and one test file differ under `src`/`external`; all 216 Cargo
+manifest/lockfile blobs and all 17 production helpers match. Both arms retain
+the complete editable executable, original 13 training launches, features,
+native/link/unwind policy and correctness gates. The earlier property-capability
+production pair remains unchanged. This new pair has no completed shipping-size,
+allocation or throughput result yet; the 10,000,000-byte target and prior runtime
+regressions remain open.
+
 ### Earlier source history
 
 The runtime and focused regression tests are committed through

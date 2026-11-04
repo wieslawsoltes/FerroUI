@@ -1,0 +1,2275 @@
+{
+  "artifact_intake": "Stage authenticated canonical ZIP verification before expansion; two full expanded cohorts require separately reviewed restoration-backed capacity. Do not remove active graphs or original ZIPs.",
+  "current_main_before": "344ef52f5da639b35e80c37d6b91afd694d4a26c",
+  "current_main_policy_inputs_rechecked": [
+    {
+      "bytes": 23250,
+      "git_blob": "bb6a353a8d7b86a4504869caf8179787727d6b11",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/run_winui_release_comparison.py",
+      "sha256": "76fb9d46495d2880be2f8b6ca1b55bf74e238df418b3c7b8e5fffc1ff448cfc1"
+    },
+    {
+      "bytes": 8676,
+      "git_blob": "8c796fa45edb74f2ab75110bd4d1c8b679805c67",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/bootstrap_toolchain.py",
+      "sha256": "ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb"
+    },
+    {
+      "bytes": 31189,
+      "git_blob": "18bc2d2c3b2c925c3b9b968ae5337b208382b210",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/rebuild_winui_pgo.py",
+      "sha256": "dea852e85365c09511b9fc729546e03771b3c2166e0f6fd0cdd4ebff244a77ab"
+    },
+    {
+      "bytes": 11471,
+      "git_blob": "13046212d20145488ded0792715c272f112bf266",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/collect_winui_pgo.py",
+      "sha256": "e3efb1dd203930a70ca162c29371af3544c9e0f2677aec7b45d367e39ca374a6"
+    },
+    {
+      "bytes": 11754,
+      "git_blob": "4daadcc4840dacb91a5eee393c87876e3dd6e9cd",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/prepare_portable_packer.py",
+      "sha256": "72da1e3b090ca1bf1150269c31339d6a160b3b538d1ae4299b689449ef9c5ba2"
+    },
+    {
+      "bytes": 22158,
+      "git_blob": "fbb2d930e798ed167a0b5a1db0af3bf96601b505",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/validate_runtime_release.py",
+      "sha256": "754ab07ccd12399179238b6965969606d9d2e0ce7f08d296034763cb0cfada75"
+    },
+    {
+      "bytes": 19806,
+      "git_blob": "234f22ea31aabd17cd098bbeb03f22fc93b0a624",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/prepare_template_validation.py",
+      "sha256": "6db804622fc6d885fe67add4bd04ff0d5531807aa0062b1ec886bc5f3829906f"
+    },
+    {
+      "bytes": 833,
+      "git_blob": "f55bc457c5817e251bcbe1dfb263598e3394c4bb",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/template_structural_resource.rs",
+      "sha256": "580437fe767f2029ceb036be21b6732f033c44037d0e22970059d517a75c8e91"
+    },
+    {
+      "bytes": 11372,
+      "git_blob": "f68593c78e338dc12ab6d29d003efb4745b621b0",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/profile_winui.py",
+      "sha256": "9abbf0142e12891cb722833d661ec98f3919454ac3d87fa3e30fe0a275f55d93"
+    },
+    {
+      "bytes": 3657,
+      "git_blob": "29671bfabbe52f4650a60b3ade1ef591fee90a70",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/winui.rs",
+      "sha256": "8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269"
+    },
+    {
+      "bytes": 2014,
+      "git_blob": "53e44d4bb3dafd9be6687c6adc77ca6659b9038e",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/pgo_templates.rs",
+      "sha256": "37824fc1775d438a62d01406f115096408e60b032dc91589483dc7b8b4fa34e2"
+    },
+    {
+      "bytes": 9421,
+      "git_blob": "29c6d6d64492053bbff21eef7a852ff9cd34a477",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/compact_unwind.py",
+      "sha256": "ea42ad02f5c0d8ca158a50c2b43a95e7e1697f91600b9108b78873026c0c5711"
+    },
+    {
+      "bytes": 7203,
+      "git_blob": "d55ec6b2559c9ac1cd74215691da3e182ff87a43",
+      "kind": "blob",
+      "mode": "100755",
+      "path": "scripts/themes/bench/compact_unwind_link.py",
+      "sha256": "36477e1afabf3be1822871acdd1316f11a390adebb8f0671244c73bc87e91b5a"
+    },
+    {
+      "bytes": 23369,
+      "git_blob": "f165a8da76d2a38c9da73a49ae975b84c89277c7",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/attribute_codegen.py",
+      "sha256": "24324f87bdcc073afdb67e09f1afac0cc85d0f3ecf9a97083b3aab77979e57ff"
+    },
+    {
+      "bytes": 11346,
+      "git_blob": "ed2ab6e0bfbafc5e74b81681e41e19f516386e3d",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/attribute_runtime.py",
+      "sha256": "58ba05dcbc2f6a9c1ce5fb2956bd61f04deae707c124e836b8861316a3f9d3aa"
+    },
+    {
+      "bytes": 19624,
+      "git_blob": "c476b5410024ca855c1a32300e281605b05db54e",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/compare_registration.py",
+      "sha256": "23210562b8c328b63d0e7c3328f1c4aac4223ecb35ee55bf48b0dd6e4238583d"
+    },
+    {
+      "bytes": 21863,
+      "git_blob": "c7c684c00f36672b832a0a963558ef98dd2db4a2",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "scripts/themes/bench/measure.py",
+      "sha256": "9e3c5a517ce63f7d8243b7c2fdfb5669838fbbe6855a37650cb44425528c6495"
+    },
+    {
+      "bytes": 33071,
+      "git_blob": "6e2c4f9c54a6bfdb5e3114e631230b220477f0cb",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "Cargo.toml",
+      "sha256": "4ff8555c1b499522ed964cc57d9b8ab9e6424fa0ea6c731d5c66444baaf2204f"
+    },
+    {
+      "bytes": 168627,
+      "git_blob": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "Cargo.lock",
+      "sha256": "c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b"
+    },
+    {
+      "bytes": 38223,
+      "git_blob": "9d229fbc1be5430539032cb25909950366956517",
+      "kind": "blob",
+      "mode": "100644",
+      "path": "docs/benchmarks/compiled-theme-binding-dispatch-linux-x86_64.json",
+      "sha256": "091a06798299bb2972b4b6d5ce5624f500a2dab4b24a7418bf755b58afd19079"
+    }
+  ],
+  "full_release_comparison_complete": false,
+  "independent_workflow_review": {
+    "content": {
+      "checked": {
+        "active_property_capabilities_workflow_unchanged": true,
+        "all17_producers_and_training_policy_bytes_identical_across_arms_and_tooling": true,
+        "all216_cargo_manifests_locks_identical": true,
+        "copy_transform_byte_equality": true,
+        "exact_three_candidate_reference_pin_occurrences": true,
+        "future_source_gate445_441_33_13_correct_and_pending": true,
+        "no_size_or_performance_acceptance": true,
+        "original_read_only_permissions_pinned_actions_timeout_commands_upload_retained": true,
+        "separate_workflow_path_concurrency_workroot_artifact_namespace": true,
+        "source_acceptance_not_assumed": true,
+        "three_runtime_paths_and_each_source_blob_hash": true,
+        "transform_counts": [
+          {
+            "new": "Nullable operations editable WinUI release size",
+            "occurrences": 1,
+            "old": "Property capabilities editable WinUI release size"
+          },
+          {
+            "new": "9961ef9f5fd479c54dc964648d577b14172e677f",
+            "occurrences": 3,
+            "old": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48"
+          },
+          {
+            "new": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+            "occurrences": 3,
+            "old": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b"
+          },
+          {
+            "new": "winui-nullable-operations-release",
+            "occurrences": 5,
+            "old": "winui-property-capabilities-release"
+          }
+        ]
+      },
+      "complete": true,
+      "limitations": [
+        "This review establishes the prepared source pins and policy equivalence, not successful source CI, production execution, native size or performance.",
+        "The candidate comparison includes the typed local metadata lookup correction as well as nullable-operation sharing; the three runtime-file delta is explicit.",
+        "The draft has an active push trigger if published. Publication must follow the separately pinned successful source gate and final identity check; this review does not trigger it."
+      ],
+      "outcome": "No source-only blocker found; keep terminal source-gate/artifact/report prerequisite unresolved until authenticated actual evidence.",
+      "patch": {
+        "bytes": 3713,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/nullable-operations-production-plan-01/workflow.patch",
+        "sha256": "a0c52f9dfc8ad72be8a2456e29fd8f0158c96c6d81922bee5a29e99cef433ddf"
+      },
+      "preserved_policy": {
+        "archive_cases_each_arm": 9,
+        "fresh_winui_expected": {
+          "region_programs": 34,
+          "whole_theme_programs": 18
+        },
+        "frozen_features_and_native_link_unwind_policy": true,
+        "full_editable_executable": true,
+        "original_production_workflow_unchanged": true,
+        "registry_tests_each_arm": 47,
+        "sequential_arms_on_same_runner": true,
+        "source_paths_reused_sequentially": true,
+        "structural_resource": 31,
+        "template_activations_each_arm": 156,
+        "timeout_minutes": 360,
+        "training_launches_each_arm": 13,
+        "unchanged_producers": 17
+      },
+      "proposal": {
+        "bytes": 57761,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/nullable-operations-production-plan-01/prepared-01.json",
+        "sha256": "ad20d2fe42eab6c2faec366a286528044333253486b57b5981e92acdaa03d6af"
+      },
+      "repository_status_after": "clean",
+      "review_scope": "Independent source-only review of the prepared nullable full-production comparison. No preparation producer, Cargo, compiler, native analysis, workload, timer or workflow invocation.",
+      "reviewer": "callable_architecture",
+      "runtime_source_paths": [
+        "src/FerroUI.Base/data/core/value_type.rs",
+        "src/FerroUI.Base/data/core/value_type_nullable_operation_tests.rs",
+        "src/FerroUI.Base/property_store/boxed_local_value_binding_observer.rs"
+      ],
+      "schema_version": 1,
+      "source_pair": {
+        "candidate": "9961ef9f5fd479c54dc964648d577b14172e677f",
+        "reference": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48"
+      },
+      "whole_tree_changed_path_count": 18,
+      "workflow": {
+        "bytes": 3101,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/nullable-operations-production-plan-01/winui-nullable-operations-release-size.yml",
+        "sha256": "bf76e0061dcaafbb558c919790f0a2a1672fec1fa79da4a357edac5094f6acb5"
+      }
+    },
+    "identity": {
+      "bytes": 4163,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/nullable-operations-production-plan-01/independent-review-callable-01.json",
+      "sha256": "cc0c60cbc2113d606ee25140fa68a27711315a70d99bf75d2108e562c2087fa8"
+    }
+  },
+  "launch_prerequisites_complete": true,
+  "original_preparation": {
+    "content": {
+      "all_cargo_manifests_and_locks_identical": {
+        "across_reference_candidate_and_tooling": true,
+        "count": 216,
+        "inputs": [
+          {
+            "git_blob": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "Cargo.lock"
+          },
+          {
+            "git_blob": "6e2c4f9c54a6bfdb5e3114e631230b220477f0cb",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "Cargo.toml"
+          },
+          {
+            "git_blob": "4cf6a17fc07d3181de4fbf37b13a76fbe3f34a2f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "external/XamlX/src/XamlX/Cargo.toml"
+          },
+          {
+            "git_blob": "1ccba73e78e50744fcd0746bd2100fbd992f2639",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/AppWithoutLifetime/Cargo.toml"
+          },
+          {
+            "git_blob": "e327916d5abb1301033d48b146409577da679927",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/BehaviorsGallery/Cargo.toml"
+          },
+          {
+            "git_blob": "2984d86d50dfa8f360a49f5e4e97064203b623ba",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/BindingDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "58998381600e06f2c17159b48d7630f50f28395f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ChartsDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "624b07e362812761057804e838dc061a973854c1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog.Android/Cargo.toml"
+          },
+          {
+            "git_blob": "d1454b53b36b69c0240b50ea84ebaa2bf81241f1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog.Browser/Cargo.toml"
+          },
+          {
+            "git_blob": "f94b8d5245f1f6923ae4cc8a996d7b72f6587262",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog.Desktop/Cargo.toml"
+          },
+          {
+            "git_blob": "9dd93d69deb978c1db1d2a0a2be04a1ef299d8ca",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog.iOS/Cargo.toml"
+          },
+          {
+            "git_blob": "9bc103c0394855bdb49ad26f272a601f5e0e76cc",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog/Cargo.toml"
+          },
+          {
+            "git_blob": "bc2b2d50e7b8b26d2cf1dcc505e260a62cf814a8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlGallery.WinUI/Cargo.toml"
+          },
+          {
+            "git_blob": "d99c9910c585db027ed594e03092baed95ef5b4c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/DesignerStudio/Cargo.toml"
+          },
+          {
+            "git_blob": "77d45edfc91279855ad5f35fae772645acabf92f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/Dock/FerroDockReactiveUISample/Cargo.toml"
+          },
+          {
+            "git_blob": "537f2cf37a5b4d36bdd7ba1d1805eac4ee8f74a0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/GpuInterop/Cargo.toml"
+          },
+          {
+            "git_blob": "b91de6b20d9000264ddb8eeb6fcada8e2bb16f49",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld.Builders/Cargo.toml"
+          },
+          {
+            "git_blob": "a99cfdc0da9f547e339b07faf18187ad53875aaa",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld.ComponentHost/Cargo.toml"
+          },
+          {
+            "git_blob": "b3fcf3004dcc1e375d080031cd79830cfcb91f84",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld.Hooks/Cargo.toml"
+          },
+          {
+            "git_blob": "190d50bf2d96d5f9493d65e0d7b3449b280d171b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld.Macros/Cargo.toml"
+          },
+          {
+            "git_blob": "7b6c27f9179994c95be7227e8b41e36796fc9bdb",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld/Cargo.toml"
+          },
+          {
+            "git_blob": "fe1e114a51a562ef7eda18ba56bc0348aebb864a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HotReload/Cargo.toml"
+          },
+          {
+            "git_blob": "5bd1453a382b2bb93db69d5d671c0623a7877409",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/IntegrationTestApp/Cargo.toml"
+          },
+          {
+            "git_blob": "21c1039295812ae60c31a95020f1bc8e0619651b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/LiveChartsDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "7ba1a9962fb2a3d82cdb6930278139f48d72dec3",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/MaterialThemeGallery/Cargo.toml"
+          },
+          {
+            "git_blob": "c3ca99d4a2f1e1b2b8ff21638608df5fd070b7ba",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/MiniMvvm/Cargo.toml"
+          },
+          {
+            "git_blob": "e101ecc866c31f1250d476b21049a9409b834157",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/PlatformSanityChecks/Cargo.toml"
+          },
+          {
+            "git_blob": "349cc04c663dbccd67f72d59340269b42fc296d1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ProTranslateDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "7ee6554948efa889c649a435ca58ddf27a4bc194",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ReactiveDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "ee8687d5773653af320ed34b394fa9039a36e7c0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ReactiveDemoComponents/Cargo.toml"
+          },
+          {
+            "git_blob": "719e5b49430f451e4c8271e17a58cc820f50c178",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ReactiveUIExample/Cargo.toml"
+          },
+          {
+            "git_blob": "084e20f025c7ab364e493853c703d14da7998dd5",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/RenderDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "e44a036aaea3b67c1c5ab544aac7c16b1fe114e1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SafeAreaDemo.Android/Cargo.toml"
+          },
+          {
+            "git_blob": "7e777617e5aaec01984985fe3c21ec2f6e3221cf",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SafeAreaDemo.Desktop/Cargo.toml"
+          },
+          {
+            "git_blob": "5b2b99a6ae0a57b4c9bb77c28b2101975919692a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SafeAreaDemo.iOS/Cargo.toml"
+          },
+          {
+            "git_blob": "f17102523125a7395c830f7a6331a03333c76685",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SafeAreaDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "82246661b8afa0a797dd3c1c4fe00d55fd3f32d6",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SampleBuild/Cargo.toml"
+          },
+          {
+            "git_blob": "d558d3ae60f65cbaa7e7f051e4e819241b907ee7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SampleControls/Cargo.toml"
+          },
+          {
+            "git_blob": "11edec91e0cc96aad0685ff8008986313c83ed28",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SampleSupport/Cargo.toml"
+          },
+          {
+            "git_blob": "d83ed06b54b82a929c175d2fe6982994f2eff50a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SampleTesting/Cargo.toml"
+          },
+          {
+            "git_blob": "4f77ad8553f175a203497d961577fc4efe8652eb",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/Sandbox/Cargo.toml"
+          },
+          {
+            "git_blob": "1260aba49b1f3c627abe612ab5224b0dd87373ee",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Cells/Cargo.toml"
+          },
+          {
+            "git_blob": "1cd731c13804e70b5fe476f8eeea028c8e58afb3",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/CircleDrawer/Cargo.toml"
+          },
+          {
+            "git_blob": "31b2e37e9066b49dd08a7413cdade2d97f3668c5",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Counter/Cargo.toml"
+          },
+          {
+            "git_blob": "48626f6f38ab317b83b6e33d16e1eb142a517b10",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Crud/Cargo.toml"
+          },
+          {
+            "git_blob": "ad8aeb40f0845b1daf42d34ad95024fa3405cf73",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/FlightBooker/Cargo.toml"
+          },
+          {
+            "git_blob": "35bc7019d4f92bec3a18ace9d0bbfe698a5f1ed8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Temperature/Cargo.toml"
+          },
+          {
+            "git_blob": "d95d3f39ddf3ad8df3a503e89763ed787b436284",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Timer/Cargo.toml"
+          },
+          {
+            "git_blob": "8f9ff0875aded58ac20c238e71f4e4d8ba27ebd2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Cells/Cargo.toml"
+          },
+          {
+            "git_blob": "1e09545924a087a1b4d72a9df314301197a08d51",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/CircleDrawer/Cargo.toml"
+          },
+          {
+            "git_blob": "4fc76e17660f25daa51393aecf1516371bd16e03",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Counter/Cargo.toml"
+          },
+          {
+            "git_blob": "c563f62236e31ae2ade9d77e62cf44c2ecfda77d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Crud/Cargo.toml"
+          },
+          {
+            "git_blob": "c2a3245148f8d0c91807b10161cacf379b003e3b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/FlightBooker/Cargo.toml"
+          },
+          {
+            "git_blob": "e7cfb2c9db4823852981ab400d388b9fc868235f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Temperature/Cargo.toml"
+          },
+          {
+            "git_blob": "3e8ce174628b48432068c37b7ffa7870d2ed01c3",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Timer/Cargo.toml"
+          },
+          {
+            "git_blob": "9daef86ea2cb6049987869889983f06df3ee6dd1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Cells/Cargo.toml"
+          },
+          {
+            "git_blob": "ff99f12a7ab12a191d247518730a4b8d74598068",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/CircleDrawer/Cargo.toml"
+          },
+          {
+            "git_blob": "4147d78009c40b45250f104a63b19931205595b9",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Counter/Cargo.toml"
+          },
+          {
+            "git_blob": "c2f00d99123d9b2c92ae8ff072182aea49fb6ee7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Crud/Cargo.toml"
+          },
+          {
+            "git_blob": "d6c6503594e4abdd29d1fd4cc1a77748ba9ac492",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/FlightBooker/Cargo.toml"
+          },
+          {
+            "git_blob": "7faca54f66f98b3abdece9cfbaf6f78cbbff3755",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Temperature/Cargo.toml"
+          },
+          {
+            "git_blob": "82ebda7951246c066fddb765f2cd8cb44ca10790",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Timer/Cargo.toml"
+          },
+          {
+            "git_blob": "29860d3ea98ed4a311eb61ba0395758b59aa2b89",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Model/Cargo.toml"
+          },
+          {
+            "git_blob": "db3782ecac20b913f92202ccd70befc44bf8e868",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "72d1a1baf7a0fa708bc9294649f3d57b7278c1b2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SingleProjectSandbox/Cargo.toml"
+          },
+          {
+            "git_blob": "2e7c92a44046ada0437ebcb1670822960b6edcd2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/StaticViewLocatorDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "9fc12373e898222a5d12650b772fde0597828f65",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/TextTestApp/Cargo.toml"
+          },
+          {
+            "git_blob": "87248d7846c1bb13648d9af19b15508f46c3e6ca",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/TodoMvc/Cargo.toml"
+          },
+          {
+            "git_blob": "832762fcee7905dd8a79b6202758aa51e67d0d6a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/TreeDataGridDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "86a32877fd170d7403c8aedb0c4d5680374ba4a4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ViewGallery/Cargo.toml"
+          },
+          {
+            "git_blob": "8118e39324aa23720d34619a54bffa0a1246216d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ViewInterop/Cargo.toml"
+          },
+          {
+            "git_blob": "399f426a387a34eb70df4905888df22b9a881040",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/VirtualizationDemo/Cargo.toml"
+          },
+          {
+            "git_blob": "9c81512d388dfb6d8a7f3bae230cad2bffd21ab2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/WinUIEmbedSample/Cargo.toml"
+          },
+          {
+            "git_blob": "822e25df6fad0cbf617c89adac7fc3c3f9bc0096",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/WinUIGallery/Cargo.toml"
+          },
+          {
+            "git_blob": "7e0a4f2999f5811d10c12a9a1a0c38ac05f47a35",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/WinUIThemeGallery/Cargo.toml"
+          },
+          {
+            "git_blob": "5e2464ff8750a63a78f87ba630d7d77faa660819",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/XEmbedSample/Cargo.toml"
+          },
+          {
+            "git_blob": "ed046b1e9d366c244e4b4f63bce21ce78cba0cb7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Android/FerroUI.Android/Cargo.toml"
+          },
+          {
+            "git_blob": "7146a550575fc40ea576c453691278aedf11b763",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Behaviors.Animations/Cargo.toml"
+          },
+          {
+            "git_blob": "093f34a2e4246739a64fe860679ea42ee1a8a136",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Behaviors/Cargo.toml"
+          },
+          {
+            "git_blob": "ff868abaff16619394e505e0b207289bbbc4637a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.Custom/Cargo.toml"
+          },
+          {
+            "git_blob": "56213666a98c5b66b81028ad53417b729c45aa82",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop/Cargo.toml"
+          },
+          {
+            "git_blob": "9b7086da75698e09c8c18dc817fa5dacbb4cfe5d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.Draggable/Cargo.toml"
+          },
+          {
+            "git_blob": "0ea2f8267680a18dec1cc022bf4d2cb1bb78ea7c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.Events/Cargo.toml"
+          },
+          {
+            "git_blob": "c35d9425c0dfa25d5abe4ba6b373373ef8ee7cd4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI/Cargo.toml"
+          },
+          {
+            "git_blob": "149e78bd9996e419d9f13965750098dd8598af69",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.Responsive/Cargo.toml"
+          },
+          {
+            "git_blob": "c52a372cbebad7e3b43894ab946c3dbd4aa32fe2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions/Cargo.toml"
+          },
+          {
+            "git_blob": "feee2a7e1e7218c5ba834c852eded348f7b07a98",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactivity/Cargo.toml"
+          },
+          {
+            "git_blob": "0f8d288f761d600d123895b7f5274820ca168d32",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Browser/FerroUI.Browser/Cargo.toml"
+          },
+          {
+            "git_blob": "98fff826a2f3b0801ac9c13eaa795199490e0ddc",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.DeferredContentControl/Cargo.toml"
+          },
+          {
+            "git_blob": "df954fc8f7102105ea8d9799bf4a1f979a99f26d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.ProportionalStackPanel/Cargo.toml"
+          },
+          {
+            "git_blob": "fa364eb5151811e547a928065ed8ceebe283b7c4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.Recycling.Model.Ferro/Cargo.toml"
+          },
+          {
+            "git_blob": "0fac56933a8b2bcca626e97cf1d38fa1cb0e7d5d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.Recycling.Model/Cargo.toml"
+          },
+          {
+            "git_blob": "cf4c6cda7be78e79c25c780efc319f758fc5e342",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.Recycling/Cargo.toml"
+          },
+          {
+            "git_blob": "67c3840f7720f2a42f5b229a7cee47c8988b47db",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro.Diagnostics/Cargo.toml"
+          },
+          {
+            "git_blob": "038a6b1cfbb8cc2349ac6b223e73ff97265c4aff",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro.Themes.Browser/Cargo.toml"
+          },
+          {
+            "git_blob": "f8a9e952fd010f4951fbf675005c4d58cfcbde7d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro.Themes.Fluent/Cargo.toml"
+          },
+          {
+            "git_blob": "249c125e24e92c22d647adfdc8be7f64c6b28b12",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro.Themes.Simple/Cargo.toml"
+          },
+          {
+            "git_blob": "81afcb358cf10a02f71906a54106d2fd703f3477",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro/Cargo.toml"
+          },
+          {
+            "git_blob": "5d3a37145005e31fd33a4c970eb0ccc648ae4d95",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.MarkupExtension/Cargo.toml"
+          },
+          {
+            "git_blob": "514f4c63bcab3cd65b6344826434fc416301bad6",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.Ferro/Cargo.toml"
+          },
+          {
+            "git_blob": "477990967b09ea231191069e1c9bade4172edaaf",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.ReactiveUI.Ferro/Cargo.toml"
+          },
+          {
+            "git_blob": "4c98815253546d95f654fffebebb38d8407d389d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.ReactiveUI.Services.Ferro/Cargo.toml"
+          },
+          {
+            "git_blob": "17f5c330b03069ad177dd8ffa46677f141cc2677",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.ReactiveUI.Services/Cargo.toml"
+          },
+          {
+            "git_blob": "a8c9ab4a9f1d0c0fd071f33188e18a2aca73f2c4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.ReactiveUI/Cargo.toml"
+          },
+          {
+            "git_blob": "c9c7ebf499b265e376076c86d92049a94d087761",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model/Cargo.toml"
+          },
+          {
+            "git_blob": "45dedd2fedc069ee1e739f440b39e5978c591411",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Runtime/Cargo.toml"
+          },
+          {
+            "git_blob": "64d407316418fd98902ab0c9c9095846e8a31b4b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust/Cargo.toml"
+          },
+          {
+            "git_blob": "f8e27a4466d6a1d1da762ba22c6f03e11ab64191",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Serializer.SystemTextJson.Generators/Cargo.toml"
+          },
+          {
+            "git_blob": "56de055071b9096c6c83e8e44f0274f9ecb80b9f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI/Cargo.toml"
+          },
+          {
+            "git_blob": "7ab021bb47e9487802c3a2f5ab496c3293a85c87",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Serializer.SystemTextJson/Cargo.toml"
+          },
+          {
+            "git_blob": "45e8fe3491ca2f611a855ef3bae7c32f1ef07cdd",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Settings/Cargo.toml"
+          },
+          {
+            "git_blob": "0e70078582760df62155240e245e3ba5ff0bda86",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Base/Cargo.toml"
+          },
+          {
+            "git_blob": "6153c884c8271c26ef7a8810738d7579b1b80f64",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Build.Scan/Cargo.toml"
+          },
+          {
+            "git_blob": "91b41dbf2d42d093d702360ad8a4f3544ae758d8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Build.Tasks/Cargo.toml"
+          },
+          {
+            "git_blob": "524ed4aca498b3c7a1136a5a04ed6528bca2ec74",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.Charts/Cargo.toml"
+          },
+          {
+            "git_blob": "7b48e331ae1883ddcf4355eaaf1b3b0877744905",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.ColorPicker/Cargo.toml"
+          },
+          {
+            "git_blob": "2c1aa30f87cb2825ae66b539024788ca813cf5c6",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.Inking/Cargo.toml"
+          },
+          {
+            "git_blob": "f220458021e9889004650345242e7f60cc36c19d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.LiveCharts/Cargo.toml"
+          },
+          {
+            "git_blob": "f8e86d24a9422938021e2d2163ff499fea911f90",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.Repeater/Cargo.toml"
+          },
+          {
+            "git_blob": "83898e5cafded61c3f8b4ee2f1b35b76f98f2ab2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls/Cargo.toml"
+          },
+          {
+            "git_blob": "e7b9bbe1c8a7ff5357408d75fb5d68f0906b1fdc",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.DependencyInjection/Cargo.toml"
+          },
+          {
+            "git_blob": "a96273411c57577af895acbb12a738ed13ed9b8c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Animation/Cargo.toml"
+          },
+          {
+            "git_blob": "6204d126d54ef75a164f9ce10bb6e56b1abedf17",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Collaboration.Host/Cargo.toml"
+          },
+          {
+            "git_blob": "da6f1e4f019cd28a8776010d16989c1d2270ef76",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Collaboration/Cargo.toml"
+          },
+          {
+            "git_blob": "f7153684c6458881a441cd82eaefdec8a3a3f1c1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Core/Cargo.toml"
+          },
+          {
+            "git_blob": "a11c77975d43092c8ab1168bf8673235d87457aa",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Language/Cargo.toml"
+          },
+          {
+            "git_blob": "273543bb24e903967ff4249ef2457bf197a15d17",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Project/Cargo.toml"
+          },
+          {
+            "git_blob": "b72de311f02e8ee777587348fd2582992be40abf",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Tools/Cargo.toml"
+          },
+          {
+            "git_blob": "aabb75da7642e69639c5bc0e3583f2a3320e1f88",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer/Cargo.toml"
+          },
+          {
+            "git_blob": "00204472f33c5c8eb709e7a2bd34636d43f46672",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.DesignerSupport/Cargo.toml"
+          },
+          {
+            "git_blob": "d82f8c3567dfd036897d6f9d66c17611ac24df12",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Desktop/Cargo.toml"
+          },
+          {
+            "git_blob": "b1f582a2f6c8915dd2832025672882a8eb23c65a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.DevTools/Cargo.toml"
+          },
+          {
+            "git_blob": "153640f09bc4bf97bb9077561344b5d74536a897",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Diagnostics/Cargo.toml"
+          },
+          {
+            "git_blob": "1e651d90aeacd1a5ef5f61d3b9693bfbc8883a86",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Dialogs/Cargo.toml"
+          },
+          {
+            "git_blob": "b2ee098cae2587d1226704d133a3654fb156d712",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.DynamicData/Cargo.toml"
+          },
+          {
+            "git_blob": "99f0260d742acd957518dc83ff6be5d778b88114",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Fonts.Inter/Cargo.toml"
+          },
+          {
+            "git_blob": "1c8e5972c5f5d27a693a3dbba110a5687d6e3268",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.FreeDesktop/Cargo.toml"
+          },
+          {
+            "git_blob": "f647a25ce060ce13e2d56ddbccde0a88b2574880",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.HotPatch/Cargo.toml"
+          },
+          {
+            "git_blob": "6cc2eb985f5da75e098d54baaec84c191242424b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.HotReload/Cargo.toml"
+          },
+          {
+            "git_blob": "8edb23e6b3a241a6707d9699ff73f08e79eac05b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Inspect/Cargo.toml"
+          },
+          {
+            "git_blob": "95fd76a3ca621b8c96f171f161f867ce8015d6a8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.LiveCharts/Cargo.toml"
+          },
+          {
+            "git_blob": "caeff6779bf7c94e9369f58a996bd904432add1c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Mcp/Cargo.toml"
+          },
+          {
+            "git_blob": "7fb7ab1debf506b5baff24b649defb0d31a944eb",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Metal/Cargo.toml"
+          },
+          {
+            "git_blob": "17dba9068d4f8c582c48d5bcc53b311988f54f64",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.MicroCom/Cargo.toml"
+          },
+          {
+            "git_blob": "f95a9e5d1c265e53161ed8f8fddd40d5365d946e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Native/Cargo.toml"
+          },
+          {
+            "git_blob": "af37e9dc83b65f318825f740e67378d027086179",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.OpenGL/Cargo.toml"
+          },
+          {
+            "git_blob": "a84b370a279ac367fef9fe55b4a0c7ae58c7681f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Reactive.Testing/Cargo.toml"
+          },
+          {
+            "git_blob": "9333b8b47cb97c8676f23c9a6ca4994ded1d13bf",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Reactive/Cargo.toml"
+          },
+          {
+            "git_blob": "6ed134e0a85713ac1b36f07fbb52ec9d3c860473",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.ReactiveUI.Controls/Cargo.toml"
+          },
+          {
+            "git_blob": "abec3e79e75aa3106badec6f7e52b3666ecb6fc1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.ReactiveUI.Testing/Cargo.toml"
+          },
+          {
+            "git_blob": "dfbbb334216f70f110a37205fb2d9dc2647071a7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.ReactiveUI/Cargo.toml"
+          },
+          {
+            "git_blob": "60344c7f209920836c1392b4e606e215555140be",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Remote.Protocol/Cargo.toml"
+          },
+          {
+            "git_blob": "ba88619f539ed4aafeadccbc98176d82306a966c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Splat/Cargo.toml"
+          },
+          {
+            "git_blob": "3c63e4092408e719dec0e579e6461792482266d0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.System/Cargo.toml"
+          },
+          {
+            "git_blob": "c0c4ac9b3986b619ee87f1cdda1d19d1f370c9b9",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.Fluent/Cargo.toml"
+          },
+          {
+            "git_blob": "27b0255946864540d2cfdf5e4b9343b51c881912",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.MacOS/Cargo.toml"
+          },
+          {
+            "git_blob": "cb909ba2d2e211d9abcca34eace6d4326f72544b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.Material/Cargo.toml"
+          },
+          {
+            "git_blob": "ae8734c1d28e520fbab767499499404e2c677bc5",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.Simple/Cargo.toml"
+          },
+          {
+            "git_blob": "f5904bf0a1fd53c10aad5ae1954bed89eb95a06a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.WinUI/Cargo.toml"
+          },
+          {
+            "git_blob": "c5c5ad5cb4c7049231d94f86c7724a90848aaec2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.View.Macros/Cargo.toml"
+          },
+          {
+            "git_blob": "c76200a38fe464212cea9155f31b6e96355fad6d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.View/Cargo.toml"
+          },
+          {
+            "git_blob": "002e40598b0934e1ae112b8d61c72ee068d9385a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Vulkan/Cargo.toml"
+          },
+          {
+            "git_blob": "4adb9ecdc945a1bc87d29aa66c0bc5348bd46058",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Wayland/Cargo.toml"
+          },
+          {
+            "git_blob": "acc17c21ebbeaf95e9934c90e520417237998db8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.X11/Cargo.toml"
+          },
+          {
+            "git_blob": "ce2892881846d544dcd049567c8304cfa1cb4017",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI/Cargo.toml"
+          },
+          {
+            "git_blob": "cc90266269e2a8055ea75171e858aefb09c39605",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/HarfBuzz/FerroUI.HarfBuzz/Cargo.toml"
+          },
+          {
+            "git_blob": "62562e976a0a8559649a1e5d6c2c404027b31884",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Headless/FerroUI.Headless.Vnc/Cargo.toml"
+          },
+          {
+            "git_blob": "94b4bae6c40b309eac1873786155e8f119a806d1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Headless/FerroUI.Headless/Cargo.toml"
+          },
+          {
+            "git_blob": "91e82a767e5091a2b21ae6d28279182959851ec7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Linux/FerroUI.LinuxFramebuffer/Cargo.toml"
+          },
+          {
+            "git_blob": "187653182f8ae287ff7fe71e21be7b278ee7c314",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Markup.Xaml.Loader/Cargo.toml"
+          },
+          {
+            "git_blob": "28e7a9cca89d0b22ee254573418bdb9aee03d1e2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/Cargo.toml"
+          },
+          {
+            "git_blob": "a800976f1cff2e8a08cbeca82a6904d5b8ed72b2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Markup.Xaml/Cargo.toml"
+          },
+          {
+            "git_blob": "0fca2cb127d98707a523ed98fc5c3ad5c4460b23",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Markup/Cargo.toml"
+          },
+          {
+            "git_blob": "2efc823f949ad8de84e034ff657d0ddc64d3f0a0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Xaml.Binary/Cargo.toml"
+          },
+          {
+            "git_blob": "54dcba8913b3e4815f9d6f71d9b160e050fe312c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Pretext/FerroUI.Pretext.Contracts/Cargo.toml"
+          },
+          {
+            "git_blob": "da9b69dccd163bb03faba151c5a202c4a87acbab",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Pretext/FerroUI.Pretext.Layout/Cargo.toml"
+          },
+          {
+            "git_blob": "3f2a6b898c9472d5589bd5ab71193f0d6fc228a2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Pretext/FerroUI.Pretext.Media/Cargo.toml"
+          },
+          {
+            "git_blob": "1b90858c25b72771639b53a812844f3041e2a73b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Pretext/FerroUI.Pretext/Cargo.toml"
+          },
+          {
+            "git_blob": "5c62485f1eb89c054faa577b88786b5657df6f46",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate.Build/Cargo.toml"
+          },
+          {
+            "git_blob": "29b72172d42da75ca0b31d80f2135dd758b61800",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate.Core/Cargo.toml"
+          },
+          {
+            "git_blob": "3ba26b623ae49b5fdd0c2628f435d743ab44f967",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate.Formats/Cargo.toml"
+          },
+          {
+            "git_blob": "c2834dfcbb3146f65997e381a7a2016bb5ed4d30",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate.Studio/Cargo.toml"
+          },
+          {
+            "git_blob": "9daa5645df752a4c4ad6e34aa34dd6a7ddc80b34",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate/Cargo.toml"
+          },
+          {
+            "git_blob": "76c61fd933d20a91d9051e587cad7d61c6ddb850",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Skia/FerroUI.Skia/Cargo.toml"
+          },
+          {
+            "git_blob": "ac63d0fc6dfedd538c4405a1391f5e304a9bb50d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/StaticViewLocator/FerroUI.StaticViewLocator.Build/Cargo.toml"
+          },
+          {
+            "git_blob": "bf8efdde0fd0546b8e4c1221c6be9a7f59888700",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros/Cargo.toml"
+          },
+          {
+            "git_blob": "d3174d466df834a66fe1c300097a3ef308ac4944",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/StaticViewLocator/FerroUI.StaticViewLocator/Cargo.toml"
+          },
+          {
+            "git_blob": "1c4d7c0417e95e8bd44ac4ae15aea151ca8aab84",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid/Cargo.toml"
+          },
+          {
+            "git_blob": "bae9a88cce4f2305f2c4d412d0da53c9deb93132",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/TreeDataGrid/FerroUI.TreeDataGrid.Core/Cargo.toml"
+          },
+          {
+            "git_blob": "374a6fd0f03547c05f15b6568f199a2676c6c667",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Vello/FerroUI.Vello/Cargo.toml"
+          },
+          {
+            "git_blob": "49967ed6d371377ab53b084b04b2a907c212de3a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Windows/FerroUI.Win32/Cargo.toml"
+          },
+          {
+            "git_blob": "1c351ce9f23c1bed0e0162fc20caa1cbfc74e4bd",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Windows/FerroUI.WinUI/Cargo.toml"
+          },
+          {
+            "git_blob": "234368d108b45022147304930a2358730051b72e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/iOS/FerroUI.iOS/Cargo.toml"
+          },
+          {
+            "git_blob": "3119c176d5d54082a6e68162f8ded59ed989f7e7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/tools/MicroCom.CodeGenerator/Cargo.toml"
+          },
+          {
+            "git_blob": "2237f2a55f9db003af817a6b6ff5b07dcf654e06",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/tools/RichTextOracle/Cargo.toml"
+          },
+          {
+            "git_blob": "53047ee47b6b9e303b42666d9dfe9d792fde7f61",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/Dock/FerroDock.Markup.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "307f39a73948d092e4fbcdca1bc387e2d2a34a7c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/Dock/FerroDock.Serializer.Generated.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "0f83bf4ec45e22daf2aec02677b01cdaf7cc4d8c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/Dock/FerroDock.Settings.Markup.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "44f770841f2190c78155a33e6742bad8f85c8e52",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.Benchmarks/Cargo.toml"
+          },
+          {
+            "git_blob": "b8cf2b87b222c290881062634d8b24d74c92af11",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.DependencyInjection.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "f3b03427dcf192755c9e268b9561e2dc77fa3524",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.DesignerSupport.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "29a2be1855bd6dbb481fc15f63fd6925dcc57cd4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.DynamicData.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "a90e4c970f4d764c296f5e166aa21444f62af63e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.IntegrationTests.Appium/Cargo.toml"
+          },
+          {
+            "git_blob": "38fb41052a8aaec971f7db3fcb51810963ba3fad",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.IntegrationTests.Win32/Cargo.toml"
+          },
+          {
+            "git_blob": "a5efe5d11ebcf7cd2883b656104be3e270df57b3",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.LeakTests/Cargo.toml"
+          },
+          {
+            "git_blob": "142ae60daa07361c276d2b9e7148d65687ecdbce",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.Markup.Xaml.UnitTests/Cargo.toml"
+          },
+          {
+            "git_blob": "c1ba2cf5e5926c425ba6c784b93a70c66531a794",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.Reactive.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "72386e76003d986011de89bc2323d10ff17e31fa",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.ReactiveUI.Testing.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "2ed3d91647bcd3cad9eaca9b37d126900d6e3472",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.ReactiveUI.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "8e36cb8fb8320cd3147af3f71827b9354c97bc6c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.RenderBackends.Comparison/Cargo.toml"
+          },
+          {
+            "git_blob": "320c26899b1d74966a2f12486575559e20e347cd",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.RenderTests/Cargo.toml"
+          },
+          {
+            "git_blob": "3009046011a0372ee3560e255591344bdb67d245",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.Splat.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "9b322bb04b548ec5707f0bbbeaf5fc03437ef6f0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.StaticViewLocator.Tests/Cargo.toml"
+          },
+          {
+            "git_blob": "724c6bf500b781e525c068f0d9939a973cfd228e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.TreeDataGrid.Benchmarks/Cargo.toml"
+          },
+          {
+            "git_blob": "24d4234b7181d9c4492d248dfeb405d677eeb037",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/XamlIncludeFixture/Application/Cargo.toml"
+          },
+          {
+            "git_blob": "75cb8cb315628c5a3dbcfd5f9fb1db0d649bf26e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/XamlIncludeFixture/Theme/Cargo.toml"
+          }
+        ]
+      },
+      "artifact_intake": "Stage authenticated canonical ZIP verification before expansion; two full expanded cohorts require separately reviewed restoration-backed capacity. Do not remove active graphs or original ZIPs.",
+      "copy_transforms": [
+        {
+          "new": "Nullable operations editable WinUI release size",
+          "occurrences": 1,
+          "old": "Property capabilities editable WinUI release size"
+        },
+        {
+          "new": "9961ef9f5fd479c54dc964648d577b14172e677f",
+          "occurrences": 3,
+          "old": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48"
+        },
+        {
+          "new": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+          "occurrences": 3,
+          "old": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b"
+        },
+        {
+          "new": "winui-nullable-operations-release",
+          "occurrences": 5,
+          "old": "winui-property-capabilities-release"
+        }
+      ],
+      "full_release_comparison_complete": false,
+      "invoked": {
+        "build_producer": false,
+        "compiler": false,
+        "git_read_only": true,
+        "linker": false,
+        "native_analysis": false,
+        "runtime_timing": false
+      },
+      "launch_prerequisites_complete": false,
+      "measured_size_saving_bytes": null,
+      "pending_before_publication": [
+        "Actual successful nullable source CI and authenticated artifact intake.",
+        "Independent verification of exact445/441 inventory,33mandatory cases,13commands and18whole/34region programs.",
+        "Independent workflow review and final exact main/policy identity check."
+      ],
+      "performance": "Unmeasured; source validation and a static callback/layout envelope do not establish throughput, allocations, startup or final size.",
+      "pipeline": {
+        "archive_cases_each_arm": 9,
+        "fresh_winui_expected": {
+          "region_programs": 34,
+          "whole_theme_programs": 18
+        },
+        "frozen_features_and_native_link_unwind_policy": true,
+        "full_editable_executable": true,
+        "original_production_workflow_unchanged": true,
+        "registry_tests_each_arm": 47,
+        "sequential_arms_on_same_runner": true,
+        "source_paths_reused_sequentially": true,
+        "structural_resource": 31,
+        "template_activations_each_arm": 156,
+        "timeout_minutes": 360,
+        "training_launches_each_arm": 13,
+        "unchanged_producers": 17
+      },
+      "policy_training_and_producer_blobs": [
+        {
+          "bytes": 23250,
+          "git_blob": "bb6a353a8d7b86a4504869caf8179787727d6b11",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/run_winui_release_comparison.py",
+          "sha256": "76fb9d46495d2880be2f8b6ca1b55bf74e238df418b3c7b8e5fffc1ff448cfc1"
+        },
+        {
+          "bytes": 8676,
+          "git_blob": "8c796fa45edb74f2ab75110bd4d1c8b679805c67",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/bootstrap_toolchain.py",
+          "sha256": "ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb"
+        },
+        {
+          "bytes": 31189,
+          "git_blob": "18bc2d2c3b2c925c3b9b968ae5337b208382b210",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/rebuild_winui_pgo.py",
+          "sha256": "dea852e85365c09511b9fc729546e03771b3c2166e0f6fd0cdd4ebff244a77ab"
+        },
+        {
+          "bytes": 11471,
+          "git_blob": "13046212d20145488ded0792715c272f112bf266",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/collect_winui_pgo.py",
+          "sha256": "e3efb1dd203930a70ca162c29371af3544c9e0f2677aec7b45d367e39ca374a6"
+        },
+        {
+          "bytes": 11754,
+          "git_blob": "4daadcc4840dacb91a5eee393c87876e3dd6e9cd",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/prepare_portable_packer.py",
+          "sha256": "72da1e3b090ca1bf1150269c31339d6a160b3b538d1ae4299b689449ef9c5ba2"
+        },
+        {
+          "bytes": 22158,
+          "git_blob": "fbb2d930e798ed167a0b5a1db0af3bf96601b505",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/validate_runtime_release.py",
+          "sha256": "754ab07ccd12399179238b6965969606d9d2e0ce7f08d296034763cb0cfada75"
+        },
+        {
+          "bytes": 19806,
+          "git_blob": "234f22ea31aabd17cd098bbeb03f22fc93b0a624",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/prepare_template_validation.py",
+          "sha256": "6db804622fc6d885fe67add4bd04ff0d5531807aa0062b1ec886bc5f3829906f"
+        },
+        {
+          "bytes": 833,
+          "git_blob": "f55bc457c5817e251bcbe1dfb263598e3394c4bb",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/template_structural_resource.rs",
+          "sha256": "580437fe767f2029ceb036be21b6732f033c44037d0e22970059d517a75c8e91"
+        },
+        {
+          "bytes": 11372,
+          "git_blob": "f68593c78e338dc12ab6d29d003efb4745b621b0",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/profile_winui.py",
+          "sha256": "9abbf0142e12891cb722833d661ec98f3919454ac3d87fa3e30fe0a275f55d93"
+        },
+        {
+          "bytes": 3657,
+          "git_blob": "29671bfabbe52f4650a60b3ade1ef591fee90a70",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/winui.rs",
+          "sha256": "8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269"
+        },
+        {
+          "bytes": 2014,
+          "git_blob": "53e44d4bb3dafd9be6687c6adc77ca6659b9038e",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/pgo_templates.rs",
+          "sha256": "37824fc1775d438a62d01406f115096408e60b032dc91589483dc7b8b4fa34e2"
+        },
+        {
+          "bytes": 9421,
+          "git_blob": "29c6d6d64492053bbff21eef7a852ff9cd34a477",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/compact_unwind.py",
+          "sha256": "ea42ad02f5c0d8ca158a50c2b43a95e7e1697f91600b9108b78873026c0c5711"
+        },
+        {
+          "bytes": 7203,
+          "git_blob": "d55ec6b2559c9ac1cd74215691da3e182ff87a43",
+          "kind": "blob",
+          "mode": "100755",
+          "path": "scripts/themes/bench/compact_unwind_link.py",
+          "sha256": "36477e1afabf3be1822871acdd1316f11a390adebb8f0671244c73bc87e91b5a"
+        },
+        {
+          "bytes": 23369,
+          "git_blob": "f165a8da76d2a38c9da73a49ae975b84c89277c7",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/attribute_codegen.py",
+          "sha256": "24324f87bdcc073afdb67e09f1afac0cc85d0f3ecf9a97083b3aab77979e57ff"
+        },
+        {
+          "bytes": 11346,
+          "git_blob": "ed2ab6e0bfbafc5e74b81681e41e19f516386e3d",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/attribute_runtime.py",
+          "sha256": "58ba05dcbc2f6a9c1ce5fb2956bd61f04deae707c124e836b8861316a3f9d3aa"
+        },
+        {
+          "bytes": 19624,
+          "git_blob": "c476b5410024ca855c1a32300e281605b05db54e",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/compare_registration.py",
+          "sha256": "23210562b8c328b63d0e7c3328f1c4aac4223ecb35ee55bf48b0dd6e4238583d"
+        },
+        {
+          "bytes": 21863,
+          "git_blob": "c7c684c00f36672b832a0a963558ef98dd2db4a2",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "scripts/themes/bench/measure.py",
+          "sha256": "9e3c5a517ce63f7d8243b7c2fdfb5669838fbbe6855a37650cb44425528c6495"
+        },
+        {
+          "bytes": 33071,
+          "git_blob": "6e2c4f9c54a6bfdb5e3114e631230b220477f0cb",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "Cargo.toml",
+          "sha256": "4ff8555c1b499522ed964cc57d9b8ab9e6424fa0ea6c731d5c66444baaf2204f"
+        },
+        {
+          "bytes": 168627,
+          "git_blob": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "Cargo.lock",
+          "sha256": "c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b"
+        },
+        {
+          "bytes": 38223,
+          "git_blob": "9d229fbc1be5430539032cb25909950366956517",
+          "kind": "blob",
+          "mode": "100644",
+          "path": "docs/benchmarks/compiled-theme-binding-dispatch-linux-x86_64.json",
+          "sha256": "091a06798299bb2972b4b6d5ce5624f500a2dab4b24a7418bf755b58afd19079"
+        }
+      ],
+      "prepared_at_tooling_head": "344ef52f5da639b35e80c37d6b91afd694d4a26c",
+      "production_acceptance": false,
+      "runtime_source_changes": [
+        {
+          "candidate": {
+            "bytes": 140370,
+            "git_blob": "25ec5b8898cd0f180f3d757cee40b9277c14cdd1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Base/data/core/value_type.rs",
+            "sha256": "9abd80910e8990d4245a7fe055d4a1ae642bf0f7872455e60f7c6f2ea87acf0d"
+          },
+          "path": "src/FerroUI.Base/data/core/value_type.rs",
+          "reference": {
+            "bytes": 139495,
+            "git_blob": "80c72e63324a5ec8871785f1452d99e46910d089",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Base/data/core/value_type.rs",
+            "sha256": "d6550b20e448ac9b46b40b8f5fb0b7654e872446fe5adbffca476d2b51ee6f39"
+          }
+        },
+        {
+          "candidate": {
+            "bytes": 21423,
+            "git_blob": "04baff7843862beb84573491433ae46d0d8112c9",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Base/data/core/value_type_nullable_operation_tests.rs",
+            "sha256": "6f862b35c226b2da44ffbe1a43317e1244eb652aa128cc1188ee745b0f6e2d6f"
+          },
+          "path": "src/FerroUI.Base/data/core/value_type_nullable_operation_tests.rs",
+          "reference": null
+        },
+        {
+          "candidate": {
+            "bytes": 4735,
+            "git_blob": "53211567078fd26fb4d8520881452b42741666f4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Base/property_store/boxed_local_value_binding_observer.rs",
+            "sha256": "0a9dceef14430592eff5b91841234fe0cccee97027a6eac5a9bc39bf81ad812f"
+          },
+          "path": "src/FerroUI.Base/property_store/boxed_local_value_binding_observer.rs",
+          "reference": {
+            "bytes": 4501,
+            "git_blob": "a2ac6348f6ce09b31cb65904f7c6e122634c2416",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Base/property_store/boxed_local_value_binding_observer.rs",
+            "sha256": "d5f280562aff4f858d9593937bac49bacd1e12cf37bb06ed8a4bc6e92f5a1a61"
+          }
+        }
+      ],
+      "schema_version": 1,
+      "scope": "Prepared separate complete-production comparison for typed local metadata and shared nullable operations. Read-only Git/data preparation; no build producer invoked, no size or throughput measured.",
+      "shipping_budget_bytes": 10000000,
+      "source_gate": {
+        "actual_artifact": null,
+        "actual_validation_report": null,
+        "ci_run": 41890523745,
+        "complete": false,
+        "required_commands": 13,
+        "required_distinct_tests": 441,
+        "required_exact_overlaps": 4,
+        "required_executions": 445,
+        "required_mandatory_cases": 33,
+        "source": "9961ef9f5fd479c54dc964648d577b14172e677f",
+        "status_at_preparation": "in_progress",
+        "tooling_head": "344ef52f5da639b35e80c37d6b91afd694d4a26c",
+        "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/41890523745"
+      },
+      "source_pair": {
+        "candidate": "9961ef9f5fd479c54dc964648d577b14172e677f",
+        "reference": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48"
+      },
+      "source_trees": {
+        "candidate": "38330ec823a999425ebfe87f5f258cfc60b4ce11",
+        "reference": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754"
+      },
+      "whole_tree_changed_paths": [
+        ".github/workflows/winui-local-binding-metadata-source-validation.yml",
+        ".github/workflows/winui-property-capabilities-release-size.yml",
+        ".github/workflows/winui-property-capabilities-source-validation.yml",
+        ".github/workflows/winui-release-artifact-transfer.yml",
+        "docs/benchmarks/compiled-theme-boxed-correction-runtime-linux-x86_64-evidence.json.gz",
+        "docs/benchmarks/compiled-theme-boxed-correction-runtime-linux-x86_64.json",
+        "docs/benchmarks/compiled-theme-construction-production-linux-x86_64.json",
+        "docs/benchmarks/compiled-theme-demand-rooted-inheritance-source-validation-linux-x86_64.json",
+        "docs/benchmarks/compiled-theme-property-capabilities-production-plan-linux-x86_64.json",
+        "docs/benchmarks/compiled-theme-property-capabilities-source-inventory-correction-linux-x86_64.json",
+        "docs/benchmarks/compiled-theme-property-capabilities-source-prototype-linux-x86_64.json",
+        "docs/benchmarks/compiled-theme-property-capabilities-source-validation-linux-x86_64.json",
+        "docs/benchmarks/compiled-theme-typed-local-binding-metadata-source-validation-linux-x86_64.json",
+        "docs/compiled-theme-shared-runtime.md",
+        "scripts/themes/bench/run_winui_source_validation.py",
+        "src/FerroUI.Base/data/core/value_type.rs",
+        "src/FerroUI.Base/data/core/value_type_nullable_operation_tests.rs",
+        "src/FerroUI.Base/property_store/boxed_local_value_binding_observer.rs"
+      ],
+      "workflow": {
+        "bytes": 3101,
+        "content_utf8": "name: Nullable operations editable WinUI release size\n\non:\n  workflow_dispatch:\n    inputs:\n      candidate:\n        description: 'Candidate commit (complete original-workload PGO rebuild)'\n        default: '9961ef9f5fd479c54dc964648d577b14172e677f'\n        required: true\n        type: string\n      reference:\n        description: 'Reference commit (same consumer path, toolchain and policy)'\n        default: 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48'\n        required: true\n        type: string\n  # Updating this frozen source pair starts its reviewed comparison. Ordinary\n  # source/tooling pushes on the PR branch do not launch these expensive builds.\n  push:\n    branches: ['perf/compact-xaml-theme-codegen']\n    paths: ['.github/workflows/winui-nullable-operations-release-size.yml']\n\npermissions:\n  contents: read\n\nconcurrency:\n  # Different frozen source pairs use independent runners and evidence roots.\n  # Serialize repeats of one pair without cancelling another measured cohort.\n  group: winui-nullable-operations-release-size-${{ github.ref }}-${{ inputs.reference || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}-${{ inputs.candidate || '9961ef9f5fd479c54dc964648d577b14172e677f' }}\n  cancel-in-progress: false\n\njobs:\n  release-comparison:\n    name: Two complete editable releases and correctness evidence\n    runs-on: ubuntu-24.04\n    timeout-minutes: 360\n    env:\n      CARGO_TERM_COLOR: never\n      CARGO_INCREMENTAL: 0\n      RUST_BACKTRACE: 1\n    steps:\n      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\n        with:\n          fetch-depth: 0\n          persist-credentials: false\n      - name: Native build and archive dependencies\n        run: |\n          sudo apt-get update\n          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config libfontconfig1-dev libfreetype6-dev\n      - name: Rebuild, collect and validate both revisions sequentially\n        env:\n          CANDIDATE_REVISION: ${{ inputs.candidate || '9961ef9f5fd479c54dc964648d577b14172e677f' }}\n          REFERENCE_REVISION: ${{ inputs.reference || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}\n        run: |\n          python3 scripts/themes/bench/run_winui_release_comparison.py \\\n            --repository \"$GITHUB_WORKSPACE\" \\\n            --work-dir \"$RUNNER_TEMP/winui-nullable-operations-release-comparison\" \\\n            --candidate \"$CANDIDATE_REVISION\" \\\n            --reference \"$REFERENCE_REVISION\"\n      - name: Preserve complete results, inputs and failure evidence\n        if: always()\n        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4\n        with:\n          name: winui-nullable-operations-release-comparison-${{ github.run_id }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/winui-nullable-operations-release-comparison/evidence\n          # Only retained source/results are uploaded; Cargo credentials and\n          # mutable caches live outside this evidence directory.\n          include-hidden-files: true\n          if-no-files-found: error\n          compression-level: 1\n          retention-days: 14\n",
+        "path": ".github/workflows/winui-nullable-operations-release-size.yml",
+        "sha256": "bf76e0061dcaafbb558c919790f0a2a1672fec1fa79da4a357edac5094f6acb5"
+      },
+      "workflow_patch": {
+        "bytes": 3713,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/nullable-operations-production-plan-01/workflow.patch",
+        "sha256": "a0c52f9dfc8ad72be8a2456e29fd8f0158c96c6d81922bee5a29e99cef433ddf"
+      },
+      "workflow_template": {
+        "bytes": 3113,
+        "path": ".github/workflows/winui-property-capabilities-release-size.yml",
+        "sha256": "7d016d6438e64c8123460adba5415ca2bb6c30169285a04b0a7cad7d29c9b79a"
+      }
+    },
+    "identity": {
+      "bytes": 57761,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/nullable-operations-production-plan-01/prepared-01.json",
+      "sha256": "ad20d2fe42eab6c2faec366a286528044333253486b57b5981e92acdaa03d6af"
+    }
+  },
+  "original_property_capabilities_workflow_unchanged": true,
+  "performance_acceptance": false,
+  "production_acceptance": false,
+  "remaining_gates": [
+    "Fresh complete reference and candidate PGO rebuilds with original13-workload training and full editable themes.",
+    "Independent source/graph/native/ELF/resource and targeted correctness verification.",
+    "Fresh paired runtime performance and allocation acceptance, including changed nullable conversion paths.",
+    "Actual10,000,000-byte complete stripped executable budget."
+  ],
+  "schema_version": 1,
+  "scope": "Frozen separate complete-production comparison for typed local metadata and shared nullable operations, finalized after actual nullable source validation and independent evidence verification. This is a measurement plan, not a native size or throughput result.",
+  "source_gate": {
+    "artifact": {
+      "bytes": 1246243,
+      "id": 13353297516,
+      "sha256": "ccc189c48dbb391553c0b6989c1bffcd2e8eb4ed40913cd645bdf0067374db3a"
+    },
+    "ci_run": 41890523745,
+    "complete": true,
+    "distinct_tests": 441,
+    "downstream_base_controls": true,
+    "exact_four_overlaps_checked": true,
+    "fresh_winui": {
+      "construction_programs": 18,
+      "region_programs": 34
+    },
+    "independent_root_verification": {
+      "content": {
+        "actual_layout": {
+          "borrowed": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 24
+            },
+            "line_number": 932,
+            "original": {
+              "alignment": 8,
+              "bytes": 16
+            },
+            "raw_line": "nullable layout borrowed: (16, 8) -> (24, 8)"
+          },
+          "conversion": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 24
+            },
+            "line_number": 934,
+            "original": {
+              "alignment": 8,
+              "bytes": 24
+            },
+            "raw_line": "nullable layout conversion: (24, 8) -> (24, 8)"
+          },
+          "conversion map entry": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 64
+            },
+            "line_number": 937,
+            "original": {
+              "alignment": 8,
+              "bytes": 64
+            },
+            "raw_line": "nullable layout conversion map entry: (64, 8) -> (64, 8)"
+          },
+          "nullable descriptor": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 24
+            },
+            "line_number": 939,
+            "original": {
+              "alignment": 8,
+              "bytes": 40
+            },
+            "raw_line": "nullable layout nullable descriptor: (40, 8) -> (24, 8)"
+          },
+          "nullable facts": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 40
+            },
+            "line_number": 938,
+            "original": {
+              "alignment": 8,
+              "bytes": 48
+            },
+            "raw_line": "nullable layout nullable facts: (48, 8) -> (40, 8)"
+          },
+          "nullable map entry": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 56
+            },
+            "line_number": 941,
+            "original": {
+              "alignment": 8,
+              "bytes": 64
+            },
+            "raw_line": "nullable layout nullable map entry: (64, 8) -> (56, 8)"
+          },
+          "optional borrowed": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 24
+            },
+            "line_number": 933,
+            "original": {
+              "alignment": 8,
+              "bytes": 24
+            },
+            "raw_line": "nullable layout optional borrowed: (24, 8) -> (24, 8)"
+          },
+          "override routes": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 72
+            },
+            "line_number": 936,
+            "original": {
+              "alignment": 8,
+              "bytes": 72
+            },
+            "raw_line": "nullable layout override routes: (72, 8) -> (72, 8)"
+          },
+          "reference operations": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 48
+            },
+            "line_number": 940,
+            "original": {
+              "alignment": 8,
+              "bytes": 56
+            },
+            "raw_line": "nullable layout reference operations: (56, 8) -> (48, 8)"
+          },
+          "registration": {
+            "candidate": {
+              "alignment": 8,
+              "bytes": 32
+            },
+            "line_number": 935,
+            "original": {
+              "alignment": 8,
+              "bytes": 32
+            },
+            "raw_line": "nullable layout registration: (32, 8) -> (32, 8)"
+          }
+        },
+        "archive_sha256": "ccc189c48dbb391553c0b6989c1bffcd2e8eb4ed40913cd645bdf0067374db3a",
+        "artifact_id": 13353297516,
+        "command_count": 13,
+        "complete": true,
+        "distinct_test_names": 441,
+        "duplicates": {
+          "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_add_ownered_property": [
+            "property-runtime",
+            "metadata"
+          ],
+          "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class": [
+            "property-runtime",
+            "metadata"
+          ],
+          "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property": [
+            "property-runtime",
+            "metadata"
+          ],
+          "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class": [
+            "property-runtime",
+            "metadata"
+          ]
+        },
+        "existing24_conversion_tests_byte_identical": true,
+        "expanded_bytes": 7210575,
+        "failed": 0,
+        "full_release_accepted": false,
+        "generated_counts": {
+          "construction_programs": 18,
+          "region_programs": 34
+        },
+        "ignored": 0,
+        "members": {
+          "bootstrap-resources.txt": {
+            "bytes": 923,
+            "sha256": "f0c44133ecb860551c85f77cb79e3182f98bd436402cdc933fb3eaa482a17bab"
+          },
+          "bootstrap.log": {
+            "bytes": 667,
+            "sha256": "207e1c1573fbcac3a7b66b3ab98795c0633dcaf47cb971249b0f374b63852b29"
+          },
+          "coercer-registration-resources.txt": {
+            "bytes": 992,
+            "sha256": "66c897c6852915f0fbbde84e17322396dc171fdd7c4f1d8b84dcd9b607b46d9c"
+          },
+          "coercer-registration.log": {
+            "bytes": 40333,
+            "sha256": "aae46a1818db7dbb9d727d1888b84ac1eec0b933a2d6dc0ef42026cb98c8357e"
+          },
+          "coercion-oracles-resources.txt": {
+            "bytes": 1015,
+            "sha256": "b7e7a807c20d5fbdc462b07f0568ae8f7cf752267fbebba00d4888399cf744ab"
+          },
+          "coercion-oracles.log": {
+            "bytes": 44471,
+            "sha256": "c2691107a2eee1b631a33c7cd6942c47086d9978a781909e81b639ecb1bc73e3"
+          },
+          "default-coercion-oracles-resources.txt": {
+            "bytes": 998,
+            "sha256": "06b152969acafd1770516e3aff0afa8656c92d3c1a55a42f4ec0aa56ad789f65"
+          },
+          "default-coercion-oracles.log": {
+            "bytes": 40645,
+            "sha256": "289c239c2a5213e9dd00abfd3208bc6ac56bf4c61cf1545e35ce3419fa7c76b7"
+          },
+          "downstream-resources.txt": {
+            "bytes": 985,
+            "sha256": "fbc083a1f1b602834a7671accc091de8a209d0f44e42c8361ad45c377e2c5edb"
+          },
+          "downstream.log": {
+            "bytes": 11410,
+            "sha256": "256100bc3c5e9d5a9ae21c83666059d4ebf40061e0189be52b2d390436facf79"
+          },
+          "fresh-winui-resources.txt": {
+            "bytes": 937,
+            "sha256": "0210204f3bbf2dd989c90716824d307c164d01c8f3506d3008f3b4c52fc11e2e"
+          },
+          "fresh-winui.log": {
+            "bytes": 14136,
+            "sha256": "63b50ece0dc91530de644ff95be37e93318a31e2fdbea5e5b359d2a902fc3350"
+          },
+          "generated/000-out.rs": {
+            "bytes": 4867720,
+            "sha256": "0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630"
+          },
+          "inheritance-oracles-resources.txt": {
+            "bytes": 997,
+            "sha256": "e9d5e7c33cbb82bcdcbaf8de953b93f958faf255cbc8409c54fb54d75544d4c6"
+          },
+          "inheritance-oracles.log": {
+            "bytes": 40777,
+            "sha256": "681da5274e20db083a49028e8d908e7c1260f3640399c2cf339da0d60f3b7adf"
+          },
+          "installation.json": {
+            "bytes": 12208,
+            "sha256": "c8ad937948d23d80e047d849275a2e2abddd4d0820b942523447972e1a20e8bf"
+          },
+          "metadata-resources.txt": {
+            "bytes": 956,
+            "sha256": "b7746967593af94c53c47bb8a31d4858fa12346b49f82eccef1e6e29402e85a1"
+          },
+          "metadata.log": {
+            "bytes": 46506,
+            "sha256": "4b4b49c14f41f0378d139b6c4e1f8569712e49b38875f96e54db21949735f59e"
+          },
+          "nullable-oracles-resources.txt": {
+            "bytes": 1010,
+            "sha256": "f0489d1cb70febc641ae6f0247ac60586511a5a3d6ed6db16f5f3b97ecc9138a"
+          },
+          "nullable-oracles.log": {
+            "bytes": 71843,
+            "sha256": "7a610b5e5c45bef87a1d73932ee57af7664fffe7b7f90b1c1c7b1af0974315a9"
+          },
+          "property-metadata-resources.txt": {
+            "bytes": 973,
+            "sha256": "1b8802cc229bffd95c74170347fd75dccf2a6b8c1253d0ac7e6b13cf03dca76c"
+          },
+          "property-metadata.log": {
+            "bytes": 41464,
+            "sha256": "f9f1d2bf7a6a537a8c38afa5bf6d785ffc08fa50418475f0e9de9fb63e8c1307"
+          },
+          "property-registry-resources.txt": {
+            "bytes": 983,
+            "sha256": "e251e6270617e310e62d5b2e393cebe5580eee6830aab41a4c6ee78dc7b55d3f"
+          },
+          "property-registry.log": {
+            "bytes": 41479,
+            "sha256": "93b3f19ed8c87a4ffb0b7915f90c422f35b9bf46f2da1258bf4683bd6990a628"
+          },
+          "property-runtime-resources.txt": {
+            "bytes": 972,
+            "sha256": "810e384e8e6885c44b076d3bd732433f2fb807bcbce6e6f77b6d604d909a8ab9"
+          },
+          "property-runtime.log": {
+            "bytes": 71986,
+            "sha256": "886fd5c6ea46a9596d11d8d5e38f34eea6f6a8f4802fcf74b4c531730246e47d"
+          },
+          "tracked-inputs.txt": {
+            "bytes": 1722877,
+            "sha256": "8e258ca29584d9c47a3faa23c266c801ed53d4e5e562b8e08ba36981aedfe52c"
+          },
+          "validation.json": {
+            "bytes": 86720,
+            "sha256": "a7524404a40925de2591b27b29363f2d795e1df6611cd8e03baa2e5d7d02e78e"
+          },
+          "value-types-resources.txt": {
+            "bytes": 977,
+            "sha256": "5108103c172af0336edf0917a43c785b69272901611d1b3e2cdc89e2c5d55db1"
+          },
+          "value-types.log": {
+            "bytes": 42615,
+            "sha256": "11264c3f42bfca24c5512100401769720fb32f8db2790a5f3e5fe56c307562a3"
+          }
+        },
+        "old415_411_inventory_preserved": true,
+        "passing_test_executions": 445,
+        "prepared_reporter_reviewed_and_only_authenticated_artifact_pin_changed": true,
+        "producer_sha256": "410c4146f2fc7c445f18bb19bbc6b79f8b5529ea8df4a4aa575cd0bbe288178e",
+        "production_acceptance": false,
+        "raw_log_resource_hashes_verified": 26,
+        "report_sha256": "088fecdf9a2ccfaa13f98fb3830a9b8ed3bb25d7d5cee556a914c30b3cc0a468",
+        "required_test_count": 33,
+        "run_id": 41890523745,
+        "schema": 1,
+        "scope": "Independent root verification of actual retained ZIP, logs, source and report; no compiler, framework tests, native analysis or runtime timing invoked.",
+        "source": "9961ef9f5fd479c54dc964648d577b14172e677f",
+        "source_files": {
+          "src/FerroUI.Base/data/core/value_type.rs": [
+            140370,
+            "9abd80910e8990d4245a7fe055d4a1ae642bf0f7872455e60f7c6f2ea87acf0d"
+          ],
+          "src/FerroUI.Base/data/core/value_type_nullable_operation_tests.rs": [
+            21423,
+            "6f862b35c226b2da44ffbe1a43317e1244eb652aa128cc1188ee745b0f6e2d6f"
+          ]
+        },
+        "source_inventory_exact": true,
+        "source_tree": "38330ec823a999425ebfe87f5f258cfc60b4ce11",
+        "toolchain_and_producers_exact": true,
+        "tooling": "344ef52f5da639b35e80c37d6b91afd694d4a26c"
+      },
+      "identity": {
+        "bytes": 9418,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/nullable-operations-source-report-01/root-verification-01.json",
+        "sha256": "03d9b332ccea310dbd60486f46fe64afafdd12c056095ac6521bdad32bfdb173"
+      }
+    },
+    "mandatory_regressions": 33,
+    "passing_executions": 445,
+    "source": "9961ef9f5fd479c54dc964648d577b14172e677f",
+    "tooling_head": "344ef52f5da639b35e80c37d6b91afd694d4a26c",
+    "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/41890523745",
+    "validation_report": {
+      "bytes": 2887917,
+      "path": "docs/benchmarks/compiled-theme-nullable-operations-source-validation-linux-x86_64.json",
+      "sha256": "088fecdf9a2ccfaa13f98fb3830a9b8ed3bb25d7d5cee556a914c30b3cc0a468"
+    }
+  },
+  "source_pair": {
+    "candidate": "9961ef9f5fd479c54dc964648d577b14172e677f",
+    "reference": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48"
+  },
+  "source_trees": {
+    "candidate": "38330ec823a999425ebfe87f5f258cfc60b4ce11",
+    "reference": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754"
+  },
+  "workflow": {
+    "bytes": 3101,
+    "content_utf8": "name: Nullable operations editable WinUI release size\n\non:\n  workflow_dispatch:\n    inputs:\n      candidate:\n        description: 'Candidate commit (complete original-workload PGO rebuild)'\n        default: '9961ef9f5fd479c54dc964648d577b14172e677f'\n        required: true\n        type: string\n      reference:\n        description: 'Reference commit (same consumer path, toolchain and policy)'\n        default: 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48'\n        required: true\n        type: string\n  # Updating this frozen source pair starts its reviewed comparison. Ordinary\n  # source/tooling pushes on the PR branch do not launch these expensive builds.\n  push:\n    branches: ['perf/compact-xaml-theme-codegen']\n    paths: ['.github/workflows/winui-nullable-operations-release-size.yml']\n\npermissions:\n  contents: read\n\nconcurrency:\n  # Different frozen source pairs use independent runners and evidence roots.\n  # Serialize repeats of one pair without cancelling another measured cohort.\n  group: winui-nullable-operations-release-size-${{ github.ref }}-${{ inputs.reference || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}-${{ inputs.candidate || '9961ef9f5fd479c54dc964648d577b14172e677f' }}\n  cancel-in-progress: false\n\njobs:\n  release-comparison:\n    name: Two complete editable releases and correctness evidence\n    runs-on: ubuntu-24.04\n    timeout-minutes: 360\n    env:\n      CARGO_TERM_COLOR: never\n      CARGO_INCREMENTAL: 0\n      RUST_BACKTRACE: 1\n    steps:\n      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\n        with:\n          fetch-depth: 0\n          persist-credentials: false\n      - name: Native build and archive dependencies\n        run: |\n          sudo apt-get update\n          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config libfontconfig1-dev libfreetype6-dev\n      - name: Rebuild, collect and validate both revisions sequentially\n        env:\n          CANDIDATE_REVISION: ${{ inputs.candidate || '9961ef9f5fd479c54dc964648d577b14172e677f' }}\n          REFERENCE_REVISION: ${{ inputs.reference || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}\n        run: |\n          python3 scripts/themes/bench/run_winui_release_comparison.py \\\n            --repository \"$GITHUB_WORKSPACE\" \\\n            --work-dir \"$RUNNER_TEMP/winui-nullable-operations-release-comparison\" \\\n            --candidate \"$CANDIDATE_REVISION\" \\\n            --reference \"$REFERENCE_REVISION\"\n      - name: Preserve complete results, inputs and failure evidence\n        if: always()\n        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4\n        with:\n          name: winui-nullable-operations-release-comparison-${{ github.run_id }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/winui-nullable-operations-release-comparison/evidence\n          # Only retained source/results are uploaded; Cargo credentials and\n          # mutable caches live outside this evidence directory.\n          include-hidden-files: true\n          if-no-files-found: error\n          compression-level: 1\n          retention-days: 14\n",
+    "path": ".github/workflows/winui-nullable-operations-release-size.yml",
+    "sha256": "bf76e0061dcaafbb558c919790f0a2a1672fec1fa79da4a357edac5094f6acb5"
+  }
+}
