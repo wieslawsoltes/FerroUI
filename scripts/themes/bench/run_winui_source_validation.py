@@ -9,6 +9,8 @@ region runtime/grammar cases and both generated program forms. Filters narrow
 execution, not compilation. The coercion suite checks owned-value cleanup,
 metadata registration/inheritance, property behavior and downstream typed APIs.
 The inheritance suite adds inherited-change lifetime and registration checks.
+The property-capabilities suite combines those cases with default coercion and
+shared boxed delivery, then checks fresh WinUI generation as well as Controls.
 These development suites make no
 production size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,
 source identity, lockfile, logs and resource reports survive success or failure.
@@ -55,6 +57,18 @@ INHERITANCE_EXPECTED_SUMMARIES = {
     "property-registry": {"passed": 12, "failed": 0, "ignored": 0},
 }
 
+PROPERTY_CAPABILITIES_EXPECTED_SUMMARIES = {
+    **INHERITANCE_EXPECTED_SUMMARIES,
+    "coercion-oracles": {"passed": 7, "failed": 0, "ignored": 0},
+    "default-coercion-oracles": {"passed": 3, "failed": 0, "ignored": 0},
+    "metadata": {"passed": 67, "failed": 0, "ignored": 0},
+}
+
+PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS = {
+    "construction_programs": 18,
+    "region_programs": 34,
+}
+
 
 def identity(path):
     path = Path(path).resolve(strict=True)
@@ -85,7 +99,7 @@ def suite_commands(cargo, suite):
         ]
         downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
                       "-p", "ferroui-controls", "--features", "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]
-    elif suite in {"coercion", "inheritance"}:
+    elif suite in {"coercion", "inheritance", "property-capabilities"}:
         base = [*common, "-p", "ferroui-base", "--features", "compiler-metadata,hot-reload"]
         tests = [
             (label, [*base, test_filter, "--", "--test-threads=1"])
@@ -97,13 +111,18 @@ def suite_commands(cargo, suite):
                 ("metadata", "metadata::"),
             )
         ]
-        if suite == "inheritance":
+        if suite in {"inheritance", "property-capabilities"}:
             tests.insert(1, (
                 "inheritance-oracles", [*base, "property_store::effective_value::inheritance_tests::",
                                         "--", "--test-threads=1"],
             ))
             tests.insert(4, (
                 "property-registry", [*base, "tests::ferro_property_registry_tests::", "--", "--test-threads=1"],
+            ))
+        if suite == "property-capabilities":
+            tests.insert(2, (
+                "default-coercion-oracles", [*base, "property_store::value_store::default_coercion_tests::",
+                                             "--", "--test-threads=1"],
             ))
         downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
                       "-p", "ferroui-controls", "--features", "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]
@@ -129,7 +148,11 @@ def suite_commands(cargo, suite):
                       "--features", "solid-theme"]
     else:
         raise ValueError(f"unknown source validation suite: {suite}")
-    return [*tests, ("downstream", downstream)], {label for label, _ in tests}
+    commands = [*tests, ("downstream", downstream)]
+    if suite == "property-capabilities":
+        commands.append(("fresh-winui", [cargo, "check", "--locked", "--target", HOST, "--lib",
+                                          "-p", "ferroui-themes-winui", "--features", "solid-theme"]))
+    return commands, {label for label, _ in tests}
 
 
 def successful_tests(contents, label):
@@ -163,7 +186,7 @@ def main():
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--suite", choices=("metadata", "coercion", "inheritance", "control-theme", "control-theme-regions"), default="metadata")
+    parser.add_argument("--suite", choices=("metadata", "coercion", "inheritance", "control-theme", "control-theme-regions", "property-capabilities"), default="metadata")
     parser.add_argument("--required-test", action="append", default=[])
     parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
@@ -172,6 +195,8 @@ def main():
         parser.error("--revision must be a full immutable commit SHA")
     if any(not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9:]*", name) for name in args.required_test):
         parser.error("--required-test must be a Rust test path")
+    if args.suite == "property-capabilities" and (len(args.required_test) != 27 or len(set(args.required_test)) != 27):
+        parser.error("property-capabilities requires the 27 distinct frozen regression names")
     if git(source, "rev-parse", "HEAD") != args.revision:
         parser.error("source checkout does not match --revision")
     if git(source, "status", "--porcelain", "--untracked-files=all"):
@@ -231,6 +256,10 @@ def main():
         report["expected_test_summaries"] = COERCION_EXPECTED_SUMMARIES
     elif args.suite == "inheritance":
         report["expected_test_summaries"] = INHERITANCE_EXPECTED_SUMMARIES
+    elif args.suite == "property-capabilities":
+        report["expected_test_summaries"] = PROPERTY_CAPABILITIES_EXPECTED_SUMMARIES
+        report["expected_total_passed"] = 415
+        report["expected_generated_program_counts"] = PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS
     tracked = evidence / "tracked-inputs.txt"
     tracked.write_text(git(source, "ls-files", "--stage") + "\n")
     report["tracked_inputs"] = identity(tracked)
@@ -255,6 +284,10 @@ def main():
                 if missing:
                     raise RuntimeError(f"required regressions did not pass: {sorted(missing)}")
                 report["required_tests_passed"] = sorted(set(args.required_test) & passed_tests)
+                if args.suite == "property-capabilities":
+                    report["total_distinct_passed"] = len(passed_tests)
+                    if len(passed_tests) != report["expected_total_passed"]:
+                        raise RuntimeError("property-capabilities did not run exactly 415 distinct successful tests")
             log = evidence / (label + ".log")
             resources = evidence / (label + "-resources.txt")
             argv = ["/usr/bin/time", "-v", "-o", str(resources), *command]
@@ -310,24 +343,26 @@ def main():
                 report["environment"]["toolchain_path_prefix"] = str(prefix / "bin")
                 report["environment"]["toolchain_library_prefix"] = str(prefix / "lib")
                 report["environment"]["rustc"] = environment["RUSTC"]
-        if args.suite in {"control-theme", "control-theme-regions"}:
+        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities"}:
             report["generated_winui"] = collect_generated_winui(output / "target", evidence)
             if not any(row["construction_programs"] for row in report["generated_winui"]):
                 raise RuntimeError("fresh WinUI output contains no accepted ControlTheme construction programs")
-            if args.suite == "control-theme-regions":
+            if args.suite in {"control-theme-regions", "property-capabilities"}:
                 report["generated_program_counts"] = {
                     key: sum(row[key] for row in report["generated_winui"])
                     for key in ("construction_programs", "region_programs")
                 }
                 if not any(row["region_programs"] for row in report["generated_winui"]):
                     raise RuntimeError("fresh WinUI output contains no accepted Style region programs")
+                if args.suite == "property-capabilities" and report["generated_program_counts"] != PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS:
+                    raise RuntimeError("fresh WinUI output does not match the frozen 18 whole-theme and 34 Style region programs")
         report["complete"] = True
     except BaseException as error:
         report["failure"] = str(error)
         raise
     finally:
         previously_complete = report["complete"]
-        if args.suite in {"control-theme", "control-theme-regions"} and "generated_winui" not in report:
+        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities"} and "generated_winui" not in report:
             try:
                 report["generated_winui"] = collect_generated_winui(output / "target", evidence)
             except Exception as error:

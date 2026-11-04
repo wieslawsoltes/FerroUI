@@ -1,0 +1,2377 @@
+{
+  "boxed_delivery_review": {
+    "base": "4072b4d5ebec595cd2b442e2cd1d70504aa44609",
+    "branch": "perf/boxed-binding-shared-delivery-local",
+    "committed": false,
+    "compiler_invoked": false,
+    "files": [
+      {
+        "after": {
+          "bytes": 12221,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery/src/FerroUI.Base/property_store/binding_entry.rs",
+          "sha256": "d4c2b878c3ecb987de90d5d7c95eb1d82d8f370cc54df49902d2231ca067f0f4"
+        },
+        "before": {
+          "bytes": 11202,
+          "sha256": "a663279f59646363e57792eb45cca53c83f7afcab2cb7fbfef6b9d480789efef"
+        },
+        "repository_path": "src/FerroUI.Base/property_store/binding_entry.rs"
+      },
+      {
+        "after": {
+          "bytes": 902,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery/src/FerroUI.Base/property_store/boxed_binding_entry.rs",
+          "sha256": "2153d2bcaec37f5abd708db0ed0093a719ffed78362728be9a85691287112504"
+        },
+        "before": {
+          "bytes": 6181,
+          "sha256": "27189de3ef43824864dddcd5253a6d14f8a52e42014cadf3ee2c2e54dcd591da"
+        },
+        "repository_path": "src/FerroUI.Base/property_store/boxed_binding_entry.rs"
+      },
+      {
+        "after": {
+          "bytes": 1063,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery/src/FerroUI.Base/property_store/mod.rs",
+          "sha256": "b3c40f1128f0ac3fa33b00f94384553eb518ac12b04e121ac2474610aa58cbf3"
+        },
+        "before": {
+          "bytes": 1054,
+          "sha256": "229b82bbbebb14b1a12fa71a01bc7be39a1d9b89b12ed2ea968d8d1cce61733e"
+        },
+        "repository_path": "src/FerroUI.Base/property_store/mod.rs"
+      },
+      {
+        "after": {
+          "bytes": 15525,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery/src/FerroUI.Base/styled_property.rs",
+          "sha256": "0cb18bb00490a8bf684ea66b16a502275e46eacebc5d77a5cc67a5aac3db1a82"
+        },
+        "before": {
+          "bytes": 15521,
+          "sha256": "7ea432f5829a8653410876a738ee2c687bdfa34a7dafdb05b835c3cb46c9d24e"
+        },
+        "repository_path": "src/FerroUI.Base/styled_property.rs"
+      }
+    ],
+    "mechanism": "Reuse original BindingEntry<T> and UntypedObserver<T> for boxed cache/delivery while retaining non-generic ValueStore::add_boxed_binding, ImmediateValueFrame::add_boxed_binding and the erased property factory.",
+    "patch": {
+      "bytes": 11698,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery-review/prototype-01.patch",
+      "sha256": "58821dccb695b565a10c34c5c8ad88096ad60d9a961324e5eadcddd88af71f18"
+    },
+    "prior_evidence": {
+      "boxed_i32_observer_counters": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "boxed_i32_read_counters": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "profile_queries": {
+        "bytes": 3935,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-style-delivery-audit-02/profile-query.json",
+        "sha256": "69ae71e5061575db20299c2637c5063f894a8c86ed1f435220035f9e8870bb34"
+      },
+      "scope": "Exact ad shipping profile and shipping twin, not attribution of stripped measured QA binaries.",
+      "typed_i32_read_counters": [
+        62400,
+        62400,
+        0,
+        62400,
+        0
+      ],
+      "typeid_target": "Typed reader records Option<i32>::type_id 62400 times; boxed reader has no targets."
+    },
+    "published": false,
+    "regression_plan": [
+      {
+        "body_bytes": 1150,
+        "body_sha256": "f13d79d481b58a9919db913808cdc84242ed35d549266099896ee8c76e9ee4d1",
+        "executed": false,
+        "existing_unchanged": true,
+        "name": "tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error"
+      },
+      {
+        "body_bytes": 967,
+        "body_sha256": "f7f56e6fdeb2493b53662a354d5dbf52df0a1f55441248b8e542d088658e63eb",
+        "executed": false,
+        "existing_unchanged": true,
+        "name": "tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal"
+      },
+      {
+        "body_bytes": 869,
+        "body_sha256": "1d94cd6067844cb0013c1598b3fd4338b48e05693216487c75d19564d6ea1c67",
+        "executed": false,
+        "existing_unchanged": true,
+        "name": "tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box"
+      },
+      {
+        "body_bytes": 1434,
+        "body_sha256": "975093b6decc4bf336d9b503788c7a86f6cd3c30f55069600868dcf3f370bea6",
+        "executed": false,
+        "existing_unchanged": true,
+        "name": "tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive"
+      },
+      {
+        "body_bytes": 1884,
+        "body_sha256": "c6d7f75475243a076a2e652118fa6ad3d992974dfe5b3ac8f3dd84edad8d62b8",
+        "executed": false,
+        "existing_unchanged": true,
+        "name": "tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe"
+      },
+      {
+        "body_bytes": 3641,
+        "body_sha256": "0e77d976f63b0b1dba551e44c6b3f7c9fb9b0a3a460aae0a1983a441c03cbfe3",
+        "executed": false,
+        "existing_unchanged": true,
+        "name": "tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone"
+      },
+      {
+        "body_bytes": 3055,
+        "body_sha256": "839f31656b6a7d1e264919852934cc1ce31be5187c7b14346bf2c83726ba3deb",
+        "executed": false,
+        "existing_unchanged": true,
+        "name": "tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind"
+      },
+      {
+        "body_bytes": 3264,
+        "body_sha256": "74c15116a9bcf334ef4e8026f428a99a1645635cac67a42e6daba7418a894d27",
+        "executed": false,
+        "existing_unchanged": true,
+        "name": "tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding"
+      }
+    ],
+    "schema": 1,
+    "semantic_trace": [
+      "Constructing BindingSource::Untyped only moves the source Rc and installs a plain function pointer; it performs no user Clone/Drop or subscription.",
+      "BindingEntry::new performs the original typed validation-metadata lookup before Rc::new_cyclic; original field construction/drop order is unchanged.",
+      "The erased factory returns the one original typed entry Rc by coercion, with no wrapper allocation or extra strong owner.",
+      "ImmediateValueFrame retains the same entry clone before start; the source observer retains the same typed Weak.",
+      "Original subscribe clones the self Weak once, dispatches only the supplied observer constructor, calls source.subscribe, then finishes the original shared state.",
+      "Original UntypedObserver owns the incoming BoxedValue parameter across conversion, validation and set_value; its upgraded entry local drops before the input on success and unwind.",
+      "Original quiet restart, first-fallback cache, validation/error order, RefCell borrow release and source/subscription disposal bodies are exact."
+    ],
+    "size_and_performance_risks": [
+      "Generic BindingSource<T>::subscribe matches are restored; this can give back some cold-code sharing and adds the source enum discriminator/function-pointer storage to boxed entries.",
+      "The separate boxed Value<T> read/receive/drop implementations are removed; overlap with typed sources may reduce duplication, but no net size claim is made.",
+      "Both typed and boxed reads now use the same monomorphization and fresh training naturally reaches it; actual improvement is unmeasured.",
+      "Fresh whole-graph original13 training, source regressions, allocation counts/bytes, paired boxed+typed workloads and whole-app size are still required."
+    ],
+    "source_checks": {
+      "bytes": 8751,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery-review/source-checks-01.json",
+      "sha256": "1bb160caf4086fe0536a28379e504f92bf88795a7f823787e96f6f0efdae8587"
+    },
+    "status": "Frozen source-only prototype; independent review and actual source/performance/size gates pending.",
+    "tests_invoked": false,
+    "timing_invoked": false,
+    "worktree": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery"
+  },
+  "default_coercion_review": {
+    "base_revision": "bbff597167c8fe72f815dba2daffe62e1a99a4de",
+    "base_tree": "882b1704402dcc81cf56bc42b2222e7eada28a1b",
+    "costs_and_pending_gates": [
+      "One cold request tag branch and changed cold call ABI; no additional Coercion metadata pointer fields or per-value fields, allocations, unsafe, or ordinary read/write dispatch.",
+      "Up to260 factory vtables/typed create-add leaves, ordinary PartialEq standalone roots and set-default wrappers remain costs; value_equals roots already exist in bbff.",
+      "Historical nonoverlapping End+Default gross envelope234526B is not predicted savings. Fresh linked size and existing performance gates remain mandatory.",
+      "Private factory/request no-Drop and concrete layout assertions are source tests written but not executed; public downstream/API compilation also pending actual source CI."
+    ],
+    "design": [
+      "Coercion retains callback Rc plus one HRTB dispatch fn; CoercionRequest carries only borrows and plain typed operation function pointers.",
+      "Only explicit Coercion::new takes the dispatcher address; ordinary constructors, options transfer, metadata cloning and merge do not reconstruct algorithms.",
+      "Original two recoercion owned-value bodies and five existing tests are unchanged. New request/dispatch has no owned T or Rc.",
+      "End preserves Unset check before metadata; helper uses the retained uncommon callback and value_equals, retaining default through setter cleanup.",
+      "Default retains original outer metadata Rc; helper retains default/coerced/effective locals and uses ordinary PartialEq. Borrowed no-Drop factory performs exact create/add then moves its sole Rc result; creation still reloads metadata after reentry."
+    ],
+    "existing_five_test_file_unchanged_prefix": {
+      "bytes": 16984,
+      "sha256": "be1efd97e6ad0c98ff7f012e1a00340d27fcff0c95e0bf3577e70c8cc92c9dc5"
+    },
+    "expected_source_test_counts": {
+      "expected_total": 399,
+      "new_tests": 6,
+      "previous_bbff_suite": 393,
+      "scope": "Planning count only; actual registered/passed counts require source CI. Existing effective-value coercion filter grows5 to7; new ValueStore filter adds3; metadata grows66 to67."
+    },
+    "files": [
+      {
+        "bytes": 23682,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting/src/FerroUI.Base/ferro_property_metadata.rs",
+        "repository_path": "src/FerroUI.Base/ferro_property_metadata.rs",
+        "sha256": "627d7f5ada5b4d74ed8c48884f3748ba03c886ded35c2636295fabd925d5fbea"
+      },
+      {
+        "bytes": 22801,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting/src/FerroUI.Base/property_store/effective_value.rs",
+        "repository_path": "src/FerroUI.Base/property_store/effective_value.rs",
+        "sha256": "ee4b8688034e2b8fe0efdbfb1f30f5826f85a3b3c89828ed7f29a58e21a6399b"
+      },
+      {
+        "bytes": 54618,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting/src/FerroUI.Base/property_store/value_store.rs",
+        "repository_path": "src/FerroUI.Base/property_store/value_store.rs",
+        "sha256": "f2ef74b54d09df65af8f09f0f350d4ebffd47cf89299d7d2f743980610803a19"
+      },
+      {
+        "bytes": 24198,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting/src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "repository_path": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "sha256": "856e67443d159ac14f0fd309ef29714fe14f90b754c80ea9b6ed51bc5e38be01"
+      },
+      {
+        "bytes": 13916,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting/src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+        "repository_path": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+        "sha256": "4dc81cc7b8e7899c884be2ea66e416a61a26313d69ab7dce9f01a01abc99eb9d"
+      }
+    ],
+    "new_tests": [
+      "ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types",
+      "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind",
+      "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback",
+      "property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind",
+      "property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry",
+      "property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior"
+    ],
+    "original_algorithms": {
+      "bytes": 1287,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting-review/original-default-algorithms.rs",
+      "sha256": "a297c326874f208098af5ce94ba04ddd95f3151a9ca6bebec26a8753a883a4db"
+    },
+    "patch": {
+      "bytes": 35271,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting-review/prototype-01.patch",
+      "sha256": "c5d20f02fd047786229fb98dabba0594aa1d689aa99c9688aa50ad78b0385e08"
+    },
+    "production_review_patch": {
+      "bytes": 11253,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting-review/production-01.patch",
+      "sha256": "48a587c4771b1898bb58129389044a5d361656426481316428290ae468b74182"
+    },
+    "scope": "Frozen source-only prototype; no Rust compiler, tests, size or performance execution. Independent actual-source production review passed production-01; final test review pending.",
+    "source_checks": {
+      "coercion has callback plus one dispatch pointer": true,
+      "default keeps ordinary equality leaf": true,
+      "end priority check precedes metadata access": true,
+      "end retains uncommon callback": true,
+      "new Default oracle exact": true,
+      "new End oracle exact after indentation normalization": true,
+      "new production has no unsafe": true,
+      "old complete five-test file prefix unchanged": true,
+      "old oracle original_coerce_value exact": true,
+      "old oracle original_set_and_raise_core_with_base exact": true,
+      "single dispatcher address root in explicit constructor": true,
+      "unchanged effective apply_coercion": true,
+      "unchanged effective get_entry_value": true,
+      "unchanged effective new": true,
+      "unchanged effective notify_base_value_changed": true,
+      "unchanged effective notify_value_changed": true,
+      "unchanged effective set_and_raise_core": true,
+      "unchanged effective set_and_raise_core_with_base": true,
+      "unchanged effective set_coerced_default_value_and_raise": true,
+      "unchanged effective set_current_value_and_raise": true,
+      "unchanged effective set_local_value_and_raise": true,
+      "unchanged effective try_get_base_value": true,
+      "unchanged effective value": true,
+      "unchanged store add_effective_value": true,
+      "unchanged store coerce_value": true,
+      "unchanged store create_effective_value": true,
+      "unchanged store remove_effective_value": true
+    },
+    "source_directory": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting",
+    "tests_scope": [
+      "Request/ops have no Drop even for Drop-only T, Coercion/Option representation matches previous callback-plus-fn shape, public metadata naming remains Clone/PartialEq/static-unbounded.",
+      "End exact old-method oracle for equal/unequal defaults, priority short circuit, every observed Clone/Eq/coercer/Drop/notifying panic, reads/writes/priority mutation and retained uncommon callback.",
+      "Default exact old-method oracle for equal/unequal, all observed operation panics, old metadata guard through public unregister+override during coercion/equality, current metadata loaded by factory, and subsequent typed write using successor coercer.",
+      "Default creation Clone panics, duplicate insertion after reentrant write, setter notification panic, real store removal during notification, weak-only Rc observations and return-place/drop cleanup.",
+      "Separate Default ordinary-PartialEq NaN behavior and absent-coercer route; no owning test guard masks metadata/entry lifetime."
+    ]
+  },
+  "independent_boxed_delivery_review": {
+    "base": "4072b4d5ebec595cd2b442e2cd1d70504aa44609",
+    "conclusion": "No source correctness/API/rooting blocker found; source gate, allocation bytes, fresh training, whole-app size and paired performance remain required.",
+    "current_file_identity_checks": 4,
+    "exact_original_blocks_independently_verified": [
+      {
+        "anchor": "pub(crate) enum BindingSource<T: PropertyValue>",
+        "bytes": 267,
+        "sha256": "901162a310fe839d5d1d3cb3e469b13cdd96c169ce40891640cb6fbfce45c8b3"
+      },
+      {
+        "anchor": "impl<T: PropertyValue> BindingSource<T>",
+        "bytes": 491,
+        "sha256": "ab27795bbabbbf0138eb7b552ffdb1526fa8d7c38962f254a844be37d5744288"
+      },
+      {
+        "anchor": "impl Drop for BindingEntryState",
+        "bytes": 163,
+        "sha256": "c15e12ff858174595fc191035a1ce7563abed3eb456bf3b917ca97d1d2380b38"
+      },
+      {
+        "anchor": "pub(crate) struct BindingEntry<T: PropertyValue>",
+        "bytes": 335,
+        "sha256": "05374e6e4d17e46130a05630c3e23ac27761b25bf0d17c8c8d80ca8f2d57c1fa"
+      },
+      {
+        "anchor": "impl<T: PropertyValue> BindingEntry<T>",
+        "bytes": 3435,
+        "sha256": "9879f101e613c2f0b43cbc446e2cd11140a0366e2dc03df82de64cb86bede8c7"
+      },
+      {
+        "anchor": "impl<T: PropertyValue> IValueEntry for BindingEntry<T>",
+        "bytes": 946,
+        "sha256": "ca3b7cbbefd6e109c05ae6f21e09b8d66ac7eefe05d68a75c5f8e3d938c58f25"
+      },
+      {
+        "anchor": "impl<T: PropertyValue> IDisposable for BindingEntry<T>",
+        "bytes": 150,
+        "sha256": "581381790f3683d504851837979894939cf2f1ba757eb9236c7ad22ca7f462be"
+      },
+      {
+        "anchor": "impl<T: PropertyValue> IObserver<T> for TypedObserver<T>",
+        "bytes": 518,
+        "sha256": "cb0ddea87518e18c20029cd0c06fd2e761b891dd0bf00a4b43e3e6324ca8a1e6"
+      },
+      {
+        "anchor": "impl<T: PropertyValue> IObserver<BindingValue<T>> for ValueObserver<T>",
+        "bytes": 558,
+        "sha256": "6f24225b5fb36fe88964ab1574eff275425edf364697bdaf5242faae2971282a"
+      },
+      {
+        "anchor": "impl<T: PropertyValue> IObserver<BoxedValue> for UntypedObserver<T>",
+        "bytes": 615,
+        "sha256": "e39dfb49c7059a40eec793d357059f30bd061a81bf550d30fa90a916e48adb1b"
+      }
+    ],
+    "findings": [
+      "The erased factory only moves source/frame into BindingSource::Untyped and original BindingEntry::new; unsizing the returned Rc adds neither allocation nor strong clone.",
+      "Metadata is resolved before cyclic allocation as original. Entry field construction and drop order match be910; the earlier shared boxed layout differed only in private self-Weak bookkeeping order around source drop.",
+      "The new BoxedBindingValue::start calls the inherent typed startup, preserving the shared installer and quiet begin/finish protocol; a synchronous completed/error subscription is disposed exactly as before.",
+      "Observer construction is selected by a supplied function pointer in the enum. Matching all variants in subscribe does not itself name typed-source observer constructors.",
+      "The original UntypedObserver parameter remains owned for the full observer frame. Conversion/validation/set locals and upgraded entry Rc drop before incoming BoxedValue, on success and unwind.",
+      "Existing cache replacement, first fallback, validation and typed read implementations are exact original blocks; local boxed installation, ValueStore and ImmediateValueFrame are unchanged."
+    ],
+    "material_costs": [
+      "Source enum tag/observer-fn storage returns to boxed entries; allocation request count can stay two but bytes must be measured.",
+      "Generic subscription matches return, while the separate boxed Value/Observer/read implementations disappear; no net binary-size or throughput claim."
+    ],
+    "patch": {
+      "bytes": 11698,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery-review/prototype-01.patch",
+      "sha256": "58821dccb695b565a10c34c5c8ad88096ad60d9a961324e5eadcddd88af71f18"
+    },
+    "scope": "Independent read-only source review. No compiler, tests or performance execution.",
+    "unchanged_base_file_checks": 12
+  },
+  "independent_composition_review": {
+    "base": "4072b4d5ebec595cd2b442e2cd1d70504aa44609",
+    "combined_patch": {
+      "bytes": 76013,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined-review/combined-01.patch",
+      "sha256": "7afd846390ef2e2ae5e0fc6f4548b01d08594bbcca431e5cade5d765426b7d0a"
+    },
+    "diff_check": {
+      "exit": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "files": [
+      {
+        "bytes": 41492,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/ferro_property.rs",
+        "sha256": "11ca8a175d9f39b95eb2ab4d5fd3b15986e7767edd07a701d3e689592e948ecb"
+      },
+      {
+        "bytes": 23682,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/ferro_property_metadata.rs",
+        "sha256": "627d7f5ada5b4d74ed8c48884f3748ba03c886ded35c2636295fabd925d5fbea"
+      },
+      {
+        "bytes": 12221,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/property_store/binding_entry.rs",
+        "sha256": "d4c2b878c3ecb987de90d5d7c95eb1d82d8f370cc54df49902d2231ca067f0f4"
+      },
+      {
+        "bytes": 902,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/property_store/boxed_binding_entry.rs",
+        "sha256": "2153d2bcaec37f5abd708db0ed0093a719ffed78362728be9a85691287112504"
+      },
+      {
+        "bytes": 23457,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/property_store/effective_value.rs",
+        "sha256": "d3060a447c70b6e84b8047621ddd0accbc978d5a9999b65105a56acabcf3ed8d"
+      },
+      {
+        "bytes": 24198,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "sha256": "856e67443d159ac14f0fd309ef29714fe14f90b754c80ea9b6ed51bc5e38be01"
+      },
+      {
+        "bytes": 16727,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+        "sha256": "e10d15c2303ed59cbeb15eb624408172fc7d2d2d585c46996041fd6d43f872d9"
+      },
+      {
+        "bytes": 1063,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/property_store/mod.rs",
+        "sha256": "b3c40f1128f0ac3fa33b00f94384553eb518ac12b04e121ac2474610aa58cbf3"
+      },
+      {
+        "bytes": 54628,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/property_store/value_store.rs",
+        "sha256": "01b28136f2e8e45cc1f3802f060745f328babe509d0b7d1ddf7cd05bf1240d63"
+      },
+      {
+        "bytes": 13916,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+        "sha256": "4dc81cc7b8e7899c884be2ea66e416a61a26313d69ab7dce9f01a01abc99eb9d"
+      },
+      {
+        "bytes": 15525,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/styled_property.rs",
+        "sha256": "0cb18bb00490a8bf684ea66b16a502275e46eacebc5d77a5cc67a5aac3db1a82"
+      },
+      {
+        "bytes": 6601,
+        "matches_independently_composed_patch_bytes": true,
+        "repository_path": "src/FerroUI.Base/tests/ferro_property_registry_tests.rs",
+        "sha256": "1baac98743c011ddfe5ff31c847cd8724adcf4b8f45d37b6dd3b00262a7ff848"
+      }
+    ],
+    "independent_composition": "Applied frozen patch hunks in memory to exact4072 Git blobs. Each hunk required exact context at its recorded position plus prior offset, otherwise a unique exact context match. Did not use sibling index/tree as expected output.",
+    "layers": [
+      {
+        "exact_context_hunks_applied_in_memory": 19,
+        "patch": {
+          "bytes": 29554,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/inheritance-demand-rooting-review/prototype-01.patch",
+          "sha256": "f8964818fe6134536117c0f58e86b7c11736da3b4d8e0599c65c44919bdd3ead"
+        }
+      },
+      {
+        "exact_context_hunks_applied_in_memory": 11,
+        "patch": {
+          "bytes": 35271,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting-review/prototype-01.patch",
+          "sha256": "c5d20f02fd047786229fb98dabba0594aa1d689aa99c9688aa50ad78b0385e08"
+        }
+      },
+      {
+        "exact_context_hunks_applied_in_memory": 7,
+        "patch": {
+          "bytes": 11698,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery-review/prototype-01.patch",
+          "sha256": "58821dccb695b565a10c34c5c8ad88096ad60d9a961324e5eadcddd88af71f18"
+        }
+      }
+    ],
+    "limitations": [
+      "415 is a planned source-suite count, not an executed result.",
+      "No full-image or throughput acceptance; generic boxed enum/subscription/storage costs and new optional dispatch must be measured."
+    ],
+    "original_boxed_blocks_exact_against_be910": [
+      "pub(crate) enum BindingSource<T: PropertyValue>",
+      "impl<T: PropertyValue> BindingSource<T>",
+      "impl Drop for BindingEntryState",
+      "pub(crate) struct BindingEntry<T: PropertyValue>",
+      "impl<T: PropertyValue> BindingEntry<T>",
+      "impl<T: PropertyValue> IValueEntry for BindingEntry<T>",
+      "impl<T: PropertyValue> IDisposable for BindingEntry<T>",
+      "impl<T: PropertyValue> IObserver<T> for TypedObserver<T>",
+      "impl<T: PropertyValue> IObserver<BindingValue<T>> for ValueObserver<T>",
+      "impl<T: PropertyValue> IObserver<BoxedValue> for UntypedObserver<T>"
+    ],
+    "overlap_review": [
+      "EffectiveValue combines only inheritance trait-to-inherent dispatch/notifier and default/end helper/import; original coerce and set/read bodies remain frozen versions.",
+      "ValueStore combines only the frozen Default factory/route/test module with the explicit property argument on inherited dispatch; no notifying/child-walk reorder.",
+      "Default metadata dispatcher, inheritance options/property callback and all oracle test files match original frozen patch outputs.",
+      "Boxed startup/factory only unsizes the original single typed Rc; the original observer owns input until after its upgraded entry local drops, including unwind.",
+      "Non-generic ValueStore/ImmediateValueFrame boxed installation and local boxed delivery are unchanged from4072."
+    ],
+    "scope": "Independent read-only source composition review; no compiler, test, native execution, timing, commit or source edit.",
+    "status": "pass"
+  },
+  "production_acceptance": false,
+  "remaining_gates": [
+    "Actual415-test source suite with all27mandatory names and fresh full WinUI check.",
+    "Fresh matched dc93\u2192c686 complete shipping comparison with original13training launches, policy and features.",
+    "Actual boxed/typed/property/coercion performance, allocation and shipping startup checks.",
+    "The10,000,000-byte target and original-runtime throughput acceptance remain open."
+  ],
+  "root_review": {
+    "final_12_source_files_match_independent_composed_tree": true,
+    "individual_production_and_all_new_oracle_test_bodies_reviewed": true,
+    "source_only": true
+  },
+  "schema_version": 1,
+  "scope": "Frozen reviewed source composition for demand-rooted default/end coercion and restored typed boxed delivery, retaining validated inheritance and current metadata/theme construction. Actual source gate and production measurements remain pending.",
+  "shipping_profile_audit": {
+    "interpretation": "The typed cache reader has62400 observations and the separate boxed reader has zero. Restoring one typed reader/delivery identity is a source correction hypothesis; these shipping-profile observations do not attribute the exact stripped QA executable or establish recovery.",
+    "profile": {
+      "bytes": 86265984,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/c4586434742c5de5127a8acf799c21bd189abda68e935e1eb1ff7bdbcbf90b53.profdata",
+      "sha256": "c4586434742c5de5127a8acf799c21bd189abda68e935e1eb1ff7bdbcbf90b53"
+    },
+    "scope": "Source and current ad shipping twin/profile only; not attribution of the measured stripped QA executable. No compilation or timing.",
+    "selected": {
+      "boxed_i32_on_next": {
+        "address": 13509309,
+        "bytes": 874,
+        "original_profile_query_stdout": "Counters:\n  _RNvXs0_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store19boxed_binding_entryINtB5_8ObserverlEINtNtCslzfOF1TfDUj_14ferroui_system12i_observable9IObserverINtNtCs1C1lLj4PWSY_5alloc2rc2RcDNtNtB9_14ferro_property8AnyValueEL_EE7on_nextB9_:\n    Hash: 0x0c724873860a09f2\n    Counters: 11\n    Indirect Call Site Count: 0\n    Block counts: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]\n    Indirect Target Results:\nInstrumentation level: IR  entry_first = 0  instrument_loop_entries = 0\nFunctions shown: 1\nTotal functions: 234118\nMaximum function count: 24778206\nMaximum internal block count: 14925781\nTotal number of blocks: 1322913\nTotal count: 888205945\nStatistics for indirect call sites profile:\n  Total number of sites: 0\n  Total number of sites with values: 0\n  Total number of profiled values: 0\n  Value sites histogram:\n\tNumTargets, SiteCount\n",
+        "query": {
+          "command": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-profdata",
+            "show",
+            "--counts",
+            "--ic-targets",
+            "--function=_RNvXs0_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store19boxed_binding_entryINtB5_8ObserverlEINtNtCslzfOF1TfDUj_14ferroui_system12i_observable9IObserverINtNtCs1C1lLj4PWSY_5alloc2rc2RcDNtNtB9_14ferro_property8AnyValueEL_EE7on_nextB9_",
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/c4586434742c5de5127a8acf799c21bd189abda68e935e1eb1ff7bdbcbf90b53.profdata"
+          ],
+          "exit": 0,
+          "stdout": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-style-delivery-audit-02/boxed_i32_on_next.profile.stdout"
+        },
+        "symbol": "_RNvXs0_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store19boxed_binding_entryINtB5_8ObserverlEINtNtCslzfOF1TfDUj_14ferroui_system12i_observable9IObserverINtNtCs1C1lLj4PWSY_5alloc2rc2RcDNtNtB9_14ferro_property8AnyValueEL_EE7on_nextB9_"
+      },
+      "boxed_i32_try_get": {
+        "address": 13508921,
+        "bytes": 178,
+        "original_profile_query_stdout": "Counters:\n  _RNvXs3_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store19boxed_binding_entryINtB5_5ValuelENtNtB7_11value_entry11IValueEntry13try_get_valueB9_:\n    Hash: 0x0fcd5daa7824be32\n    Counters: 5\n    Indirect Call Site Count: 1\n    Block counts: [0, 0, 0, 0, 0]\n    Indirect Target Results:\nInstrumentation level: IR  entry_first = 0  instrument_loop_entries = 0\nFunctions shown: 1\nTotal functions: 234118\nMaximum function count: 24778206\nMaximum internal block count: 14925781\nTotal number of blocks: 1322913\nTotal count: 888205945\nStatistics for indirect call sites profile:\n  Total number of sites: 1\n  Total number of sites with values: 0\n  Total number of profiled values: 0\n  Value sites histogram:\n\tNumTargets, SiteCount\n",
+        "query": {
+          "command": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-profdata",
+            "show",
+            "--counts",
+            "--ic-targets",
+            "--function=_RNvXs3_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store19boxed_binding_entryINtB5_5ValuelENtNtB7_11value_entry11IValueEntry13try_get_valueB9_",
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/c4586434742c5de5127a8acf799c21bd189abda68e935e1eb1ff7bdbcbf90b53.profdata"
+          ],
+          "exit": 0,
+          "stdout": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-style-delivery-audit-02/boxed_i32_try_get.profile.stdout"
+        },
+        "symbol": "_RNvXs3_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store19boxed_binding_entryINtB5_5ValuelENtNtB7_11value_entry11IValueEntry13try_get_valueB9_"
+      },
+      "typed_i32_try_get": {
+        "address": 13328557,
+        "bytes": 187,
+        "original_profile_query_stdout": "Counters:\n  _RNvXs3_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store13binding_entryINtB5_12BindingEntrylENtNtB7_11value_entry11IValueEntry13try_get_valueB9_:\n    Hash: 0x0fcd5daa7824be32\n    Counters: 5\n    Indirect Call Site Count: 1\n    Block counts: [62400, 62400, 0, 62400, 0]\n    Indirect Target Results:\n\t[  0, ferroui_base.38e2886344ce28a5-cgu.02;_RNvXNtCsevLNFiNqfJP_4core3anyINtNtB4_6option6OptionlENtB2_3Any7type_idCs4SNpuqvcUTx_12ferroui_base,      62400 ] (100.00%)\nInstrumentation level: IR  entry_first = 0  instrument_loop_entries = 0\nFunctions shown: 1\nTotal functions: 234118\nMaximum function count: 24778206\nMaximum internal block count: 14925781\nTotal number of blocks: 1322913\nTotal count: 888205945\nStatistics for indirect call sites profile:\n  Total number of sites: 1\n  Total number of sites with values: 1\n  Total number of profiled values: 1\n  Value sites histogram:\n\tNumTargets, SiteCount\n\t1, 1\n",
+        "query": {
+          "command": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-profdata",
+            "show",
+            "--counts",
+            "--ic-targets",
+            "--function=_RNvXs3_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store13binding_entryINtB5_12BindingEntrylENtNtB7_11value_entry11IValueEntry13try_get_valueB9_",
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/c4586434742c5de5127a8acf799c21bd189abda68e935e1eb1ff7bdbcbf90b53.profdata"
+          ],
+          "exit": 0,
+          "stdout": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-style-delivery-audit-02/typed_i32_try_get.profile.stdout"
+        },
+        "symbol": "_RNvXs3_NtNtCs4SNpuqvcUTx_12ferroui_base14property_store13binding_entryINtB5_12BindingEntrylENtNtB7_11value_entry11IValueEntry13try_get_valueB9_"
+      }
+    },
+    "shipping": {
+      "bytes": 27101920,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/winui-theme-probe",
+      "sha256": "0870efcdde1e90f29e87d4c2861a5dfa3fc65a0415e6c0d85d64f41501eaada9"
+    }
+  },
+  "source": {
+    "base_revision": "4072b4d5ebec595cd2b442e2cd1d70504aa44609",
+    "branch": "perf/property-capabilities-and-shared-delivery",
+    "revision": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+    "tree": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754"
+  },
+  "source_composition_review": {
+    "base_revision": "4072b4d5ebec595cd2b442e2cd1d70504aa44609",
+    "base_tree": "39e56189d0470c111092606775161f1e3b733867",
+    "branch": "perf/runtime-demand-rooting-combined-local",
+    "checks": {
+      "all_27_mandatory_names_present_once": true,
+      "all_cached_patch_commands_exit_zero": true,
+      "all_other_tracked_paths_unchanged_from_4072": true,
+      "all_three_input_patch_hashes_exact": true,
+      "all_twelve_worktree_files_equal_independent_index_tree": true,
+      "diff_check": true,
+      "ten_disjoint_files_equal_frozen_prototypes": true,
+      "two_overlaps_exact_frozen_patch_composition": true
+    },
+    "combined_patch": {
+      "bytes": 76013,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined-review/combined-01.patch",
+      "sha256": "7afd846390ef2e2ae5e0fc6f4548b01d08594bbcca431e5cade5d765426b7d0a"
+    },
+    "composition_journal": {
+      "bytes": 10419,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined-review/composition-01.json",
+      "sha256": "16b45776c3133cfa3f0e84362f941457460e83f74e911b546709f11bac5fb251"
+    },
+    "expected_composed_tree": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754",
+    "expected_suite": {
+      "default_end_tests": 6,
+      "existing_bbff_tests": 393,
+      "expected_failed": 0,
+      "expected_ignored": 0,
+      "expected_total": 415,
+      "inheritance_tests": 4,
+      "mandatory_names": 27,
+      "registry_tests": 12,
+      "scope": "Selection planning only. Counts and execution must be confirmed by actual source CI. The8 boxed regressions are already included in307 property tests."
+    },
+    "files": [
+      {
+        "bytes": 41492,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 41492,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/inheritance-demand-rooting/src/FerroUI.Base/ferro_property.rs",
+          "sha256": "11ca8a175d9f39b95eb2ab4d5fd3b15986e7767edd07a701d3e689592e948ecb"
+        },
+        "layers": [
+          "inheritance"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/ferro_property.rs",
+        "repository_path": "src/FerroUI.Base/ferro_property.rs",
+        "sha256": "11ca8a175d9f39b95eb2ab4d5fd3b15986e7767edd07a701d3e689592e948ecb"
+      },
+      {
+        "bytes": 23682,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 23682,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting/src/FerroUI.Base/ferro_property_metadata.rs",
+          "sha256": "627d7f5ada5b4d74ed8c48884f3748ba03c886ded35c2636295fabd925d5fbea"
+        },
+        "layers": [
+          "defaults"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/ferro_property_metadata.rs",
+        "repository_path": "src/FerroUI.Base/ferro_property_metadata.rs",
+        "sha256": "627d7f5ada5b4d74ed8c48884f3748ba03c886ded35c2636295fabd925d5fbea"
+      },
+      {
+        "bytes": 12221,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 12221,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery/src/FerroUI.Base/property_store/binding_entry.rs",
+          "sha256": "d4c2b878c3ecb987de90d5d7c95eb1d82d8f370cc54df49902d2231ca067f0f4"
+        },
+        "layers": [
+          "boxed"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/property_store/binding_entry.rs",
+        "repository_path": "src/FerroUI.Base/property_store/binding_entry.rs",
+        "sha256": "d4c2b878c3ecb987de90d5d7c95eb1d82d8f370cc54df49902d2231ca067f0f4"
+      },
+      {
+        "bytes": 902,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 902,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery/src/FerroUI.Base/property_store/boxed_binding_entry.rs",
+          "sha256": "2153d2bcaec37f5abd708db0ed0093a719ffed78362728be9a85691287112504"
+        },
+        "layers": [
+          "boxed"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/property_store/boxed_binding_entry.rs",
+        "repository_path": "src/FerroUI.Base/property_store/boxed_binding_entry.rs",
+        "sha256": "2153d2bcaec37f5abd708db0ed0093a719ffed78362728be9a85691287112504"
+      },
+      {
+        "bytes": 23457,
+        "exact_composition_of_frozen_patches": true,
+        "exact_expected_tree_bytes": true,
+        "layers": [
+          "inheritance",
+          "defaults"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/property_store/effective_value.rs",
+        "repository_path": "src/FerroUI.Base/property_store/effective_value.rs",
+        "sha256": "d3060a447c70b6e84b8047621ddd0accbc978d5a9999b65105a56acabcf3ed8d"
+      },
+      {
+        "bytes": 24198,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 24198,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting/src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+          "sha256": "856e67443d159ac14f0fd309ef29714fe14f90b754c80ea9b6ed51bc5e38be01"
+        },
+        "layers": [
+          "defaults"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "repository_path": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "sha256": "856e67443d159ac14f0fd309ef29714fe14f90b754c80ea9b6ed51bc5e38be01"
+      },
+      {
+        "bytes": 16727,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 16727,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/inheritance-demand-rooting/src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+          "sha256": "e10d15c2303ed59cbeb15eb624408172fc7d2d2d585c46996041fd6d43f872d9"
+        },
+        "layers": [
+          "inheritance"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+        "repository_path": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+        "sha256": "e10d15c2303ed59cbeb15eb624408172fc7d2d2d585c46996041fd6d43f872d9"
+      },
+      {
+        "bytes": 1063,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 1063,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery/src/FerroUI.Base/property_store/mod.rs",
+          "sha256": "b3c40f1128f0ac3fa33b00f94384553eb518ac12b04e121ac2474610aa58cbf3"
+        },
+        "layers": [
+          "boxed"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/property_store/mod.rs",
+        "repository_path": "src/FerroUI.Base/property_store/mod.rs",
+        "sha256": "b3c40f1128f0ac3fa33b00f94384553eb518ac12b04e121ac2474610aa58cbf3"
+      },
+      {
+        "bytes": 54628,
+        "exact_composition_of_frozen_patches": true,
+        "exact_expected_tree_bytes": true,
+        "layers": [
+          "inheritance",
+          "defaults"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/property_store/value_store.rs",
+        "repository_path": "src/FerroUI.Base/property_store/value_store.rs",
+        "sha256": "01b28136f2e8e45cc1f3802f060745f328babe509d0b7d1ddf7cd05bf1240d63"
+      },
+      {
+        "bytes": 13916,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 13916,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting/src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+          "sha256": "4dc81cc7b8e7899c884be2ea66e416a61a26313d69ab7dce9f01a01abc99eb9d"
+        },
+        "layers": [
+          "defaults"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+        "repository_path": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+        "sha256": "4dc81cc7b8e7899c884be2ea66e416a61a26313d69ab7dce9f01a01abc99eb9d"
+      },
+      {
+        "bytes": 15525,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 15525,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery/src/FerroUI.Base/styled_property.rs",
+          "sha256": "0cb18bb00490a8bf684ea66b16a502275e46eacebc5d77a5cc67a5aac3db1a82"
+        },
+        "layers": [
+          "boxed"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/styled_property.rs",
+        "repository_path": "src/FerroUI.Base/styled_property.rs",
+        "sha256": "0cb18bb00490a8bf684ea66b16a502275e46eacebc5d77a5cc67a5aac3db1a82"
+      },
+      {
+        "bytes": 6601,
+        "exact_expected_tree_bytes": true,
+        "exact_frozen_prototype_bytes": {
+          "bytes": 6601,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/inheritance-demand-rooting/src/FerroUI.Base/tests/ferro_property_registry_tests.rs",
+          "sha256": "1baac98743c011ddfe5ff31c847cd8724adcf4b8f45d37b6dd3b00262a7ff848"
+        },
+        "layers": [
+          "inheritance"
+        ],
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/tests/ferro_property_registry_tests.rs",
+        "repository_path": "src/FerroUI.Base/tests/ferro_property_registry_tests.rs",
+        "sha256": "1baac98743c011ddfe5ff31c847cd8724adcf4b8f45d37b6dd3b00262a7ff848"
+      }
+    ],
+    "independent_index_composition_commands": [
+      {
+        "command": [
+          "git",
+          "read-tree",
+          "4072b4d5ebec595cd2b442e2cd1d70504aa44609"
+        ],
+        "exit": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "command": [
+          "git",
+          "apply",
+          "--cached",
+          "--verbose",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/inheritance-demand-rooting-review/prototype-01.patch"
+        ],
+        "exit": 0,
+        "stderr": "Checking patch src/FerroUI.Base/ferro_property.rs...\nChecking patch src/FerroUI.Base/property_store/effective_value.rs...\nChecking patch src/FerroUI.Base/property_store/value_store.rs...\nChecking patch src/FerroUI.Base/tests/ferro_property_registry_tests.rs...\nChecking patch src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs...\nApplied patch src/FerroUI.Base/ferro_property.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/effective_value.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/value_store.rs cleanly.\nApplied patch src/FerroUI.Base/tests/ferro_property_registry_tests.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs cleanly.\n",
+        "stdout": ""
+      },
+      {
+        "command": [
+          "git",
+          "apply",
+          "--cached",
+          "--verbose",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting-review/prototype-01.patch"
+        ],
+        "exit": 0,
+        "stderr": "Checking patch src/FerroUI.Base/ferro_property_metadata.rs...\nChecking patch src/FerroUI.Base/property_store/effective_value.rs...\nHunk #2 succeeded at 265 (offset 3 lines).\nHunk #3 succeeded at 516 (offset 24 lines).\nChecking patch src/FerroUI.Base/property_store/effective_value_coercion_tests.rs...\nChecking patch src/FerroUI.Base/property_store/value_store.rs...\nChecking patch src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs...\nApplied patch src/FerroUI.Base/ferro_property_metadata.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/effective_value.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/effective_value_coercion_tests.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/value_store.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs cleanly.\n",
+        "stdout": ""
+      },
+      {
+        "command": [
+          "git",
+          "apply",
+          "--cached",
+          "--verbose",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery-review/prototype-01.patch"
+        ],
+        "exit": 0,
+        "stderr": "Checking patch src/FerroUI.Base/property_store/binding_entry.rs...\nChecking patch src/FerroUI.Base/property_store/boxed_binding_entry.rs...\nChecking patch src/FerroUI.Base/property_store/mod.rs...\nChecking patch src/FerroUI.Base/styled_property.rs...\nApplied patch src/FerroUI.Base/property_store/binding_entry.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/boxed_binding_entry.rs cleanly.\nApplied patch src/FerroUI.Base/property_store/mod.rs cleanly.\nApplied patch src/FerroUI.Base/styled_property.rs cleanly.\n",
+        "stdout": ""
+      },
+      {
+        "command": [
+          "git",
+          "write-tree"
+        ],
+        "exit": 0,
+        "stderr": "",
+        "stdout": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754\n"
+      }
+    ],
+    "isolated_index": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined-review/expected.index",
+    "layers": [
+      {
+        "name": "inheritance",
+        "patch": {
+          "bytes": 29554,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/inheritance-demand-rooting-review/prototype-01.patch",
+          "sha256": "f8964818fe6134536117c0f58e86b7c11736da3b4d8e0599c65c44919bdd3ead"
+        }
+      },
+      {
+        "name": "defaults",
+        "patch": {
+          "bytes": 35271,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/coercion-default-demand-rooting-review/prototype-01.patch",
+          "sha256": "c5d20f02fd047786229fb98dabba0594aa1d689aa99c9688aa50ad78b0385e08"
+        }
+      },
+      {
+        "name": "boxed",
+        "patch": {
+          "bytes": 11698,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/boxed-binding-shared-delivery-review/prototype-01.patch",
+          "sha256": "58821dccb695b565a10c34c5c8ad88096ad60d9a961324e5eadcddd88af71f18"
+        }
+      }
+    ],
+    "overlapping_files": [
+      "src/FerroUI.Base/property_store/effective_value.rs",
+      "src/FerroUI.Base/property_store/value_store.rs"
+    ],
+    "preservation": [
+      "All original prototype worktrees and frozen patches/reviews preserved without changes.",
+      "Default request remains borrow-only, callback+one dispatch pointer, exact old two recoercion owned-value frames and original metadata guard/factory reload scopes.",
+      "Inheritance callback remains explicitly registration-rooted and owner-independent; metadata overrides do not alter it.",
+      "Original typed BindingEntry/observer blocks and incoming BoxedValue lifetime remain restored behind the shared cold installer.",
+      "Current validated metadata and ControlTheme/style-region source from4072 remains present and byte-identical.",
+      "Standalone source review does not establish net shipping size, allocation-byte parity, throughput or the10MB goal."
+    ],
+    "required_tests": [
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "name": "property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "name": "property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "name": "property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "name": "property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "name": "property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+        "name": "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+        "name": "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+        "name": "property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+        "name": "property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior"
+      },
+      {
+        "file": "src/FerroUI.Base/ferro_property.rs",
+        "name": "ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer"
+      },
+      {
+        "file": "src/FerroUI.Base/ferro_property_metadata.rs",
+        "name": "ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations"
+      },
+      {
+        "file": "src/FerroUI.Base/ferro_property_metadata.rs",
+        "name": "ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_property_registry_tests.rs",
+        "name": "tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property"
+      },
+      {
+        "file": "src/FerroUI.Base/ferro_property_metadata.rs",
+        "name": "ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "name": "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+        "name": "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+        "name": "property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+        "name": "property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry"
+      },
+      {
+        "file": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+        "name": "property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+        "name": "tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+        "name": "tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+        "name": "tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+        "name": "tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+        "name": "tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+        "name": "tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+        "name": "tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind"
+      },
+      {
+        "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+        "name": "tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding"
+      }
+    ],
+    "scope": "Frozen combined source-only composition. No Rust compilation, tests, size or performance execution; no commit or publication.",
+    "source_status": [
+      " M src/FerroUI.Base/ferro_property.rs",
+      " M src/FerroUI.Base/ferro_property_metadata.rs",
+      " M src/FerroUI.Base/property_store/binding_entry.rs",
+      " M src/FerroUI.Base/property_store/boxed_binding_entry.rs",
+      " M src/FerroUI.Base/property_store/effective_value.rs",
+      " M src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+      " M src/FerroUI.Base/property_store/mod.rs",
+      " M src/FerroUI.Base/property_store/value_store.rs",
+      " M src/FerroUI.Base/styled_property.rs",
+      " M src/FerroUI.Base/tests/ferro_property_registry_tests.rs",
+      "?? src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+      "?? src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs"
+    ],
+    "unchanged_integrated_source_bridge": [
+      {
+        "bytes": 4750,
+        "exact_4072_bytes": true,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/metadata/accessor.rs",
+        "repository_path": "src/FerroUI.Base/metadata/accessor.rs",
+        "sha256": "1f35ad8282524b724e0f965341325ad42879c8dc0eeeb8537787e87cd5c87c63"
+      },
+      {
+        "bytes": 21108,
+        "exact_4072_bytes": true,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/metadata/accessor_tests.rs",
+        "repository_path": "src/FerroUI.Base/metadata/accessor_tests.rs",
+        "sha256": "0e510507b3fc8b8d5e4f205ca6f9ac93b2dac04ed7f91dcf9aca1ecd8da090c5"
+      },
+      {
+        "bytes": 95760,
+        "exact_4072_bytes": true,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/FerroUI.Base/metadata/markup_macros.rs",
+        "repository_path": "src/FerroUI.Base/metadata/markup_macros.rs",
+        "sha256": "8eda20148a7875e9703c6ae09463288068d4adb41729ae298f26111b92424dc9"
+      },
+      {
+        "bytes": 40796,
+        "exact_4072_bytes": true,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/control_theme_programs.rs",
+        "repository_path": "src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/control_theme_programs.rs",
+        "sha256": "231a7a7356eb556bc1686faafd6f37daa884bff70a2805065c5e844027fd2309"
+      },
+      {
+        "bytes": 19605,
+        "exact_4072_bytes": true,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled/control_theme_program.rs",
+        "repository_path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled/control_theme_program.rs",
+        "sha256": "af8edaa3aac1ef6dd02e8b9430cdfdd3df41bcd64a5dce67e8ec63dcd66ca12f"
+      },
+      {
+        "bytes": 23545,
+        "exact_4072_bytes": true,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled/style_region.rs",
+        "repository_path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled/style_region.rs",
+        "sha256": "a7b93d4548d68a537ab231b82c04abdca2365e88562d5b6d943f37babde161f1"
+      }
+    ],
+    "worktree": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined"
+  },
+  "source_gate": {
+    "expected_distinct_passes": 415,
+    "expected_fresh_winui_programs": {
+      "regions": 34,
+      "whole": 18
+    },
+    "independent_review": {
+      "checks": {
+        "all_required_function_definitions_unique": true,
+        "all_three_prior_summary_maps_exact": true,
+        "both_downstream_commands_match_existing_policies": true,
+        "eight_expected_summaries_total_415": true,
+        "fresh_winui_expected_programs_18_34": true,
+        "git_diff_check": true,
+        "identity_test_parser_generated_collector_exact": true,
+        "pinned_source_exact_composed_tree_clean": true,
+        "retained_plan_matches_code_and_remains_unexecuted": true,
+        "unchanged_plan_coercion": true,
+        "unchanged_plan_control-theme": true,
+        "unchanged_plan_control-theme-regions": true,
+        "unchanged_plan_inheritance": true,
+        "unchanged_plan_metadata": true,
+        "workflow_27_exact_unique_frozen_names_and_disjoint_selection": true,
+        "workflow_bounded_trigger_readonly_pinned_actions_failure_upload": true,
+        "workflow_pin_consistent_in_four_positions": true
+      },
+      "expected_test_summaries": {
+        "coercer-registration": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 1
+        },
+        "coercion-oracles": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 7
+        },
+        "default-coercion-oracles": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 3
+        },
+        "inheritance-oracles": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 4
+        },
+        "metadata": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 67
+        },
+        "property-metadata": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 14
+        },
+        "property-registry": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 12
+        },
+        "property-runtime": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 307
+        }
+      },
+      "inputs": {
+        "patch": {
+          "bytes": 15815,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling-review/tooling-01.patch",
+          "sha256": "25bda1bce82caee2f58b78c74130380cfa71a42939af9e06e13258950cd3bc1f"
+        },
+        "plan": {
+          "bytes": 13334,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/evidence/validation.json",
+          "sha256": "5c0294bfa776c32889134f2193e24b5b09c2f1a0fa17b9042944c159dd66c550"
+        },
+        "review_manifest": {
+          "bytes": 29281,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling-review/review-01.json",
+          "sha256": "0d6dca5378dc39c20cf95187faaad55e23102b7fb012f21e0d8d69d3b27ba0e3"
+        },
+        "runner": {
+          "bytes": 21628,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling/scripts/themes/bench/run_winui_source_validation.py",
+          "sha256": "5c244e683caae21ee09bede3465db6664ae2605d2ae1093f1a0125fc96e257b0"
+        },
+        "workflow": {
+          "bytes": 6319,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling/.github/workflows/winui-property-capabilities-source-validation.yml",
+          "sha256": "838c1f94daadd5216f9c33e0427e8bb88e2826e3785f884d4cd9526ca0ce82e7"
+        }
+      },
+      "limitations": [
+        "Tests are expected counts only; source compilation and execution remain pending.",
+        "Fresh generated program counts are checked on this exact source feature plan; no production size or throughput claim."
+      ],
+      "outcome": "source_review_pass",
+      "required_tests": [
+        "property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind",
+        "property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots",
+        "property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes",
+        "property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind",
+        "property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality",
+        "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind",
+        "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry",
+        "property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts",
+        "property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior",
+        "ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer",
+        "ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations",
+        "ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides",
+        "tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property",
+        "ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types",
+        "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind",
+        "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback",
+        "property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind",
+        "property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry",
+        "property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior",
+        "tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error",
+        "tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal",
+        "tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box",
+        "tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive",
+        "tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe",
+        "tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone",
+        "tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind",
+        "tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding"
+      ],
+      "schema": 1,
+      "scope": "Read-only independent tooling review with Python AST, pure command-plan comparisons, recorded plan inspection, exact source identities and git diff check. No Rust compiler, framework test, workflow trigger, native execution or timing. Expected415/27 and18/34 remain pending runtime gates.",
+      "source_revision": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+      "source_tree": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754"
+    },
+    "plan": {
+      "bootstrap_producer": {
+        "bytes": 8676,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling/scripts/themes/bench/bootstrap_toolchain.py",
+        "sha256": "ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb"
+      },
+      "commands": [],
+      "complete": false,
+      "environment": {
+        "controlled": {
+          "CARGO_BUILD_JOBS": "1",
+          "CARGO_HOME": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/cargo-home",
+          "CARGO_INCREMENTAL": "0",
+          "CARGO_PROFILE_DEV_CODEGEN_UNITS": "128",
+          "CARGO_PROFILE_DEV_DEBUG": "0",
+          "CARGO_PROFILE_DEV_DEBUG_ASSERTIONS": "true",
+          "CARGO_PROFILE_DEV_LTO": "false",
+          "CARGO_PROFILE_DEV_OPT_LEVEL": "0",
+          "CARGO_PROFILE_TEST_CODEGEN_UNITS": "128",
+          "CARGO_PROFILE_TEST_DEBUG": "0",
+          "CARGO_PROFILE_TEST_DEBUG_ASSERTIONS": "true",
+          "CARGO_PROFILE_TEST_LTO": "false",
+          "CARGO_PROFILE_TEST_OPT_LEVEL": "0",
+          "CARGO_TARGET_DIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/target",
+          "CARGO_TERM_COLOR": "never",
+          "MALLOC_ARENA_MAX": "1",
+          "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+          "RAYON_NUM_THREADS": "1",
+          "RUST_BACKTRACE": "1",
+          "TMPDIR": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/temporary"
+        },
+        "removed_names": []
+      },
+      "expected_generated_program_counts": {
+        "construction_programs": 18,
+        "region_programs": 34
+      },
+      "expected_test_summaries": {
+        "coercer-registration": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 1
+        },
+        "coercion-oracles": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 7
+        },
+        "default-coercion-oracles": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 3
+        },
+        "inheritance-oracles": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 4
+        },
+        "metadata": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 67
+        },
+        "property-metadata": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 14
+        },
+        "property-registry": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 12
+        },
+        "property-runtime": {
+          "failed": 0,
+          "ignored": 0,
+          "passed": 307
+        }
+      },
+      "expected_total_passed": 415,
+      "lockfile_before": {
+        "bytes": 168627,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined/Cargo.lock",
+        "sha256": "c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b"
+      },
+      "plan_only": true,
+      "planned_commands": [
+        {
+          "argv": [
+            "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling/scripts/themes/bench/bootstrap_toolchain.py",
+            "--work-dir",
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain"
+          ],
+          "label": "bootstrap"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "test",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "compiler-metadata,hot-reload",
+            "property_store::effective_value::coercion_tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "label": "coercion-oracles"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "test",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "compiler-metadata,hot-reload",
+            "property_store::effective_value::inheritance_tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "label": "inheritance-oracles"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "test",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "compiler-metadata,hot-reload",
+            "property_store::value_store::default_coercion_tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "label": "default-coercion-oracles"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "test",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "compiler-metadata,hot-reload",
+            "tests::ferro_object_tests",
+            "--",
+            "--test-threads=1"
+          ],
+          "label": "property-runtime"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "test",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "compiler-metadata,hot-reload",
+            "tests::ferro_property_tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "label": "property-metadata"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "test",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "compiler-metadata,hot-reload",
+            "tests::ferro_property_registry_tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "label": "property-registry"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "test",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "compiler-metadata,hot-reload",
+            "ferro_property::styled_property_options_tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "label": "coercer-registration"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "test",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "compiler-metadata,hot-reload",
+            "metadata::",
+            "--",
+            "--test-threads=1"
+          ],
+          "label": "metadata"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "check",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-base",
+            "-p",
+            "ferroui-controls",
+            "--features",
+            "ferroui-base/compiler-metadata,ferroui-base/hot-reload"
+          ],
+          "label": "downstream"
+        },
+        {
+          "argv": [
+            "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/toolchain/install/bin/cargo",
+            "check",
+            "--locked",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+            "--lib",
+            "-p",
+            "ferroui-themes-winui",
+            "--features",
+            "solid-theme"
+          ],
+          "label": "fresh-winui"
+        }
+      ],
+      "producer": {
+        "bytes": 21628,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling/scripts/themes/bench/run_winui_source_validation.py",
+        "sha256": "5c244e683caae21ee09bede3465db6664ae2605d2ae1093f1a0125fc96e257b0"
+      },
+      "production_acceptance": false,
+      "required_metadata_tests": [],
+      "required_tests": [
+        "property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind",
+        "property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots",
+        "property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes",
+        "property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind",
+        "property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality",
+        "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind",
+        "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry",
+        "property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts",
+        "property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior",
+        "ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer",
+        "ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations",
+        "ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides",
+        "tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property",
+        "ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types",
+        "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind",
+        "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback",
+        "property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind",
+        "property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry",
+        "property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior",
+        "tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error",
+        "tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal",
+        "tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box",
+        "tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive",
+        "tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe",
+        "tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone",
+        "tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind",
+        "tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding"
+      ],
+      "revision": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+      "schema": 2,
+      "scope": "Run focused development gates against one immutable repository revision.\n\nThis compiles actual framework test crates for the selected source change. The\nmetadata suite checks Base and downstream Controls expansion; the control-theme\nsuites check the runtime, emitter and differential corpus, then type-check fresh\nWinUI output. The explicit control-theme-regions suite additionally requires the\nregion runtime/grammar cases and both generated program forms. Filters narrow\nexecution, not compilation. The coercion suite checks owned-value cleanup,\nmetadata registration/inheritance, property behavior and downstream typed APIs.\nThe inheritance suite adds inherited-change lifetime and registration checks.\nThe property-capabilities suite combines those cases with default coercion and\nshared boxed delivery, then checks fresh WinUI generation as well as Controls.\nThese development suites make no\nproduction size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,\nsource identity, lockfile, logs and resource reports survive success or failure.\n",
+      "source": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined",
+      "started_unix": 1793811064.2230792,
+      "suite": "property-capabilities",
+      "tracked_inputs": {
+        "bytes": 1721176,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/evidence/tracked-inputs.txt",
+        "sha256": "95002eb0eb93aacff2d4854b53e6123229d9c9d945813fab29011a9ce3e244cf"
+      },
+      "tree": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754"
+    },
+    "required_names": 27,
+    "review": {
+      "actual_runtime_tests": null,
+      "checks": {
+        "base_controls_check_matches_inheritance": true,
+        "development_resource_environment_exact": true,
+        "eight_disjoint_test_filters": true,
+        "exact_workflow_path_push_trigger": true,
+        "existing_five_command_plans_exact": true,
+        "existing_three_expected_summary_maps_exact": true,
+        "expected_failed": 0,
+        "expected_generated_counts": {
+          "construction_programs": 18,
+          "region_programs": 34
+        },
+        "expected_ignored": 0,
+        "expected_total_passed": 415,
+        "failure_evidence_upload": true,
+        "fresh_winui_check_matches_region_suite": true,
+        "git_diff_check": true,
+        "identity_log_and_generated_source_helpers_exact": true,
+        "one_job_read_only_permissions": true,
+        "pinned_actions_and_nonpersistent_credentials": true,
+        "python_ast": true,
+        "required_names_each_selected_once": true,
+        "required_names_exact_manifest_and_workflow": true,
+        "required_names_found_once_in_source": true,
+        "yaml_parsed": true
+      },
+      "committed": false,
+      "existing_five_suite_plans": {
+        "coercion": {
+          "commands": [
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "property_store::effective_value::coercion_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "coercion-oracles"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "tests::ferro_object_tests",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "property-runtime"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "tests::ferro_property_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "property-metadata"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "ferro_property::styled_property_options_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "coercer-registration"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "metadata::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "metadata"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "check",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "-p",
+                "ferroui-controls",
+                "--features",
+                "ferroui-base/compiler-metadata,ferroui-base/hot-reload"
+              ],
+              "label": "downstream"
+            }
+          ],
+          "exactly_unchanged": true,
+          "test_labels": [
+            "coercer-registration",
+            "coercion-oracles",
+            "metadata",
+            "property-metadata",
+            "property-runtime"
+          ]
+        },
+        "control-theme": {
+          "commands": [
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-markup-xaml",
+                "control_theme_program::tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "construction-runtime"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-markup-xaml-loader",
+                "--features",
+                "emitter",
+                "control_theme_programs::tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "construction-grammar"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-markup-xaml-tests",
+                "emitter::differential_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "emitter-differential"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "check",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-themes-winui",
+                "--features",
+                "solid-theme"
+              ],
+              "label": "downstream"
+            }
+          ],
+          "exactly_unchanged": true,
+          "test_labels": [
+            "construction-grammar",
+            "construction-runtime",
+            "emitter-differential"
+          ]
+        },
+        "control-theme-regions": {
+          "commands": [
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-markup-xaml",
+                "control_theme_program::tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "construction-runtime"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-markup-xaml",
+                "style_region::tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "region-runtime"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-markup-xaml-loader",
+                "--features",
+                "emitter",
+                "control_theme_programs::tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "construction-grammar"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-markup-xaml-loader",
+                "--features",
+                "emitter",
+                "control_theme_programs::regions::tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "region-grammar"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-markup-xaml-tests",
+                "emitter::differential_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "emitter-differential"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "check",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-themes-winui",
+                "--features",
+                "solid-theme"
+              ],
+              "label": "downstream"
+            }
+          ],
+          "exactly_unchanged": true,
+          "test_labels": [
+            "construction-grammar",
+            "construction-runtime",
+            "emitter-differential",
+            "region-grammar",
+            "region-runtime"
+          ]
+        },
+        "inheritance": {
+          "commands": [
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "property_store::effective_value::coercion_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "coercion-oracles"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "property_store::effective_value::inheritance_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "inheritance-oracles"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "tests::ferro_object_tests",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "property-runtime"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "tests::ferro_property_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "property-metadata"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "tests::ferro_property_registry_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "property-registry"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "ferro_property::styled_property_options_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "coercer-registration"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "metadata::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "metadata"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "check",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "-p",
+                "ferroui-controls",
+                "--features",
+                "ferroui-base/compiler-metadata,ferroui-base/hot-reload"
+              ],
+              "label": "downstream"
+            }
+          ],
+          "exactly_unchanged": true,
+          "test_labels": [
+            "coercer-registration",
+            "coercion-oracles",
+            "inheritance-oracles",
+            "metadata",
+            "property-metadata",
+            "property-registry",
+            "property-runtime"
+          ]
+        },
+        "metadata": {
+          "commands": [
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "metadata::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "metadata"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "ferro_object_tests::",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "object-smoke"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "test",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "--features",
+                "compiler-metadata,hot-reload",
+                "tests::ferro_object_tests",
+                "--",
+                "--test-threads=1"
+              ],
+              "label": "properties"
+            },
+            {
+              "argv": [
+                "/review/toolchain/bin/cargo",
+                "check",
+                "--locked",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--lib",
+                "-p",
+                "ferroui-base",
+                "-p",
+                "ferroui-controls",
+                "--features",
+                "ferroui-base/compiler-metadata,ferroui-base/hot-reload"
+              ],
+              "label": "downstream"
+            }
+          ],
+          "exactly_unchanged": true,
+          "test_labels": [
+            "metadata",
+            "object-smoke",
+            "properties"
+          ]
+        }
+      },
+      "files": {
+        ".github/workflows/winui-property-capabilities-source-validation.yml": {
+          "bytes": 6319,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling/.github/workflows/winui-property-capabilities-source-validation.yml",
+          "sha256": "838c1f94daadd5216f9c33e0427e8bb88e2826e3785f884d4cd9526ca0ce82e7"
+        },
+        "scripts/themes/bench/run_winui_source_validation.py": {
+          "bytes": 21628,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling/scripts/themes/bench/run_winui_source_validation.py",
+          "sha256": "5c244e683caae21ee09bede3465db6664ae2605d2ae1093f1a0125fc96e257b0"
+        }
+      },
+      "patch": {
+        "bytes": 15815,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling-review/tooling-01.patch",
+        "sha256": "25bda1bce82caee2f58b78c74130380cfa71a42939af9e06e13258950cd3bc1f"
+      },
+      "plan": {
+        "argv": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+          "-B",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling/scripts/themes/bench/run_winui_source_validation.py",
+          "--source",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined",
+          "--revision",
+          "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+          "--output",
+          "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01",
+          "--suite",
+          "property-capabilities",
+          "--plan-only",
+          "--required-test",
+          "property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind",
+          "--required-test",
+          "property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots",
+          "--required-test",
+          "property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes",
+          "--required-test",
+          "property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind",
+          "--required-test",
+          "property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality",
+          "--required-test",
+          "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind",
+          "--required-test",
+          "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry",
+          "--required-test",
+          "property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts",
+          "--required-test",
+          "property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior",
+          "--required-test",
+          "ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer",
+          "--required-test",
+          "ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations",
+          "--required-test",
+          "ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides",
+          "--required-test",
+          "tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property",
+          "--required-test",
+          "ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types",
+          "--required-test",
+          "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind",
+          "--required-test",
+          "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback",
+          "--required-test",
+          "property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind",
+          "--required-test",
+          "property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry",
+          "--required-test",
+          "property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior",
+          "--required-test",
+          "tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error",
+          "--required-test",
+          "tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal",
+          "--required-test",
+          "tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box",
+          "--required-test",
+          "tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive",
+          "--required-test",
+          "tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe",
+          "--required-test",
+          "tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone",
+          "--required-test",
+          "tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind",
+          "--required-test",
+          "tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding"
+        ],
+        "exit": 0,
+        "manifest": {
+          "bytes": 13334,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-plan-01/evidence/validation.json",
+          "sha256": "5c0294bfa776c32889134f2193e24b5b09c2f1a0fa17b9042944c159dd66c550"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling-review/plan.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 115,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling-review/plan.stdout",
+          "sha256": "e06a918469a18acdc60b978f6c8ed5ebb5036fd7ca60567683d2fc98c31c7739"
+        }
+      },
+      "production_performance": null,
+      "production_size": null,
+      "published": false,
+      "required_tests": [
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+          "filter": "coercion-oracles",
+          "name": "property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+          "filter": "coercion-oracles",
+          "name": "property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+          "filter": "coercion-oracles",
+          "name": "property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+          "filter": "coercion-oracles",
+          "name": "property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+          "filter": "coercion-oracles",
+          "name": "property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+          "filter": "inheritance-oracles",
+          "name": "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+          "filter": "inheritance-oracles",
+          "name": "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+          "filter": "inheritance-oracles",
+          "name": "property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+          "filter": "inheritance-oracles",
+          "name": "property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior"
+        },
+        {
+          "file": "src/FerroUI.Base/ferro_property.rs",
+          "filter": "coercer-registration",
+          "name": "ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer"
+        },
+        {
+          "file": "src/FerroUI.Base/ferro_property_metadata.rs",
+          "filter": "metadata",
+          "name": "ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations"
+        },
+        {
+          "file": "src/FerroUI.Base/ferro_property_metadata.rs",
+          "filter": "metadata",
+          "name": "ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_property_registry_tests.rs",
+          "filter": "property-registry",
+          "name": "tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property"
+        },
+        {
+          "file": "src/FerroUI.Base/ferro_property_metadata.rs",
+          "filter": "metadata",
+          "name": "ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+          "filter": "coercion-oracles",
+          "name": "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+          "filter": "coercion-oracles",
+          "name": "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+          "filter": "default-coercion-oracles",
+          "name": "property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+          "filter": "default-coercion-oracles",
+          "name": "property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry"
+        },
+        {
+          "file": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+          "filter": "default-coercion-oracles",
+          "name": "property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+          "filter": "property-runtime",
+          "name": "tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+          "filter": "property-runtime",
+          "name": "tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+          "filter": "property-runtime",
+          "name": "tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+          "filter": "property-runtime",
+          "name": "tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+          "filter": "property-runtime",
+          "name": "tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+          "filter": "property-runtime",
+          "name": "tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+          "filter": "property-runtime",
+          "name": "tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind"
+        },
+        {
+          "file": "src/FerroUI.Base/tests/ferro_object_tests_binding.rs",
+          "filter": "property-runtime",
+          "name": "tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding"
+        }
+      ],
+      "schema": 1,
+      "scope": "Source-gate preparation only. No Rust compiler, framework test, PGO training, native runtime or performance measurement was invoked. Planned415 passes and27 required cases are expectations, not executed results.",
+      "source_checkout": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined",
+      "source_manifest": {
+        "bytes": 24899,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-demand-rooting-combined-review/review-01.json",
+        "sha256": "b089c0f823cb67f11ba1fd196b8034871c9d2adddba7baa65571a708c83165de"
+      },
+      "source_revision": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+      "source_tree": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754",
+      "source_unchanged_before_and_after": true,
+      "tooling_base": "4072b4d5ebec595cd2b442e2cd1d70504aa44609"
+    }
+  },
+  "source_tests_executed": false
+}

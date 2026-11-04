@@ -555,6 +555,50 @@ The old inherited-change family occupies 92,151 bytes, a gross bound. The
 property/options callback pointer and safe source type check have costs. Fresh
 production size and inherited-notification throughput remain required.
 
+### Combined default coercion and boxed-delivery source
+
+The next separately frozen source cohort is
+[`c686b70c`](https://github.com/wieslawsoltes/FerroUI/commit/c686b70c60d87e0f0726de7dc60dc6fc1f123c48).
+It composes the validated inheritance implementation with default/end coercion
+and a boxed-delivery correction on the existing metadata/theme implementation.
+Independent patch replay reproduced all 37 hunks and all 12 source files;
+the two overlapping property-store files contain only the reviewed changes.
+
+Default/end coercion now uses one private `for<'a> fn(CoercionRequest<'a, T>)`
+entry alongside the original callback. Its request variants contain only
+borrows and typed function pointers, so dispatch adds no owning value or
+destructor scope and no further metadata pointer fields. Only explicit coercer
+registration takes the full algorithm's address. The old recoercion frames
+remain unchanged. End reevaluation retains its initial Unset short circuit,
+the callback held in `uncommon`, and NaN-aware `value_equals`. Default coercion
+retains ordinary `PartialEq`, the original outer metadata `Rc`, and its
+default/coerced/effective-value cleanup order. A borrowed factory reloads
+current metadata at the original point after user coercion/equality callbacks.
+Six new tests compare the old algorithms through metadata replacement,
+reentry, creation/removal, panic cleanup, NaN behavior and unbounded request
+types. The historical 234,526-byte End/Default family is a gross bound;
+factory vtables, dispatch and standalone typed operation leaves have costs.
+
+Boxed style bindings now reuse the original `BindingEntry<T>` cache and
+`UntypedObserver<T>` behind the shared non-generic installer. Ten original
+source blocks, including input ownership and cleanup, match `be910` exactly.
+The measured `ad` shipping profile has 62,400 observations and a trained
+`Option<i32>` target for the typed reader, while the separate boxed reader has
+zero. Reusing the typed reader avoids that split in implementation identity;
+it does not establish a performance recovery. Restoring the source enum can
+increase entry storage and generic subscription code, so allocation bytes and
+native size must also be measured. The eight existing boxed lifetime/restart
+regressions remain unchanged.
+
+The new `property-capabilities` gate requires 415 distinct successful tests
+and 27 named cases, then Base/Controls and a fresh WinUI `solid-theme` check
+with exactly 18 whole-theme and 34 Style region programs. The
+[combined source review and frozen plan](benchmarks/compiled-theme-property-capabilities-source-prototype-linux-x86_64.json)
+retain the exact implementation, profile-query and independent review evidence.
+Actual execution is pending. Default/end and the boxed-delivery correction
+are not yet integrated into this PR's runtime; their production size and
+performance claims remain open.
+
 ### Earlier source history
 
 The runtime and focused regression tests are committed through

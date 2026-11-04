@@ -1,0 +1,85 @@
+name: Property capabilities and shared delivery source validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Immutable combined coercion, inheritance and shared boxed delivery source commit'
+        default: 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48'
+        required: true
+        type: string
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-property-capabilities-source-validation.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-property-capabilities-source-${{ github.ref }}-${{ inputs.revision || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}
+  cancel-in-progress: false
+
+jobs:
+  source-validation:
+    name: Actual property capabilities, boxed delivery and fresh WinUI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.revision || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}
+          path: source
+          persist-credentials: false
+      - name: Native development dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config time libfontconfig1-dev libfreetype6-dev
+      - name: Compile immutable source and run property capability gates
+        env:
+          SOURCE_REVISION: ${{ inputs.revision || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}
+        run: |
+          python3 tooling/scripts/themes/bench/run_winui_source_validation.py \
+            --source "$GITHUB_WORKSPACE/source" \
+            --revision "$SOURCE_REVISION" \
+            --output "$RUNNER_TEMP/winui-property-capabilities-source-validation" \
+            --suite property-capabilities \
+            --required-test property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind \
+            --required-test property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots \
+            --required-test property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes \
+            --required-test property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind \
+            --required-test property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts \
+            --required-test property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior \
+            --required-test ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer \
+            --required-test ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations \
+            --required-test ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides \
+            --required-test tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property \
+            --required-test ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types \
+            --required-test property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind \
+            --required-test property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback \
+            --required-test property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind \
+            --required-test property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry \
+            --required-test property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior \
+            --required-test tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error \
+            --required-test tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal \
+            --required-test tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box \
+            --required-test tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive \
+            --required-test tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe \
+            --required-test tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone \
+            --required-test tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind \
+            --required-test tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding
+      - name: Preserve commands, source, results and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-property-capabilities-source-validation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-property-capabilities-source-validation/evidence
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 14
