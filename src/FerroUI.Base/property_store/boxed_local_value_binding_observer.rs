@@ -28,11 +28,14 @@ impl BoxedLocalValueBindingObserver {
         owner: &FerroObject,
         property: &'static StyledProperty<T>,
     ) -> Rc<dyn BoxedLocalBindingValue> {
-        Rc::new(Value { binding: Self::new_state(owner, property), property, default_value: RefCell::new(None) })
+        // The property is still typed here. Match typed local installation:
+        // release its metadata before capturing the owner and allocating the
+        // observer, without routing through an untyped metadata snapshot.
+        let has_data_validation = property.get_metadata_for(owner).enable_data_validation().unwrap_or(false);
+        Rc::new(Value { binding: Self::new_state(owner, has_data_validation), property, default_value: RefCell::new(None) })
     }
 
-    fn new_state(owner: &FerroObject, property: &'static FerroProperty) -> Self {
-        let has_data_validation = property.get_metadata_for(owner).enable_data_validation().unwrap_or(false);
+    fn new_state(owner: &FerroObject, has_data_validation: bool) -> Self {
         Self { state: LocalBindingState::new(owner, has_data_validation) }
     }
 
