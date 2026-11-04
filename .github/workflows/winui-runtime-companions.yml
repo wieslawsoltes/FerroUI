@@ -1,4 +1,4 @@
-name: Link frozen WinUI runtime companions
+name: Link property-capabilities WinUI runtime companions
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   link:
-    name: Link both acceptance arms and correction-reference QA
+    name: Link be acceptance arms and dc correction-reference QA
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     env:
@@ -34,7 +34,7 @@ jobs:
       - name: Record the frozen input contract
         env:
           RUNTIME_RELEASE_INPUTS: >-
-            {"schema":1,"enabled":true,"origins":{"acceptance":{"repository":"wieslawsoltes/FerroUI","repository_id":1405576478,"run_id":41815903284,"run_attempt":1,"artifact_id":13318422418,"head_sha":"5fd34166cb1f01a2d482e87030e6d9cb5d6cb1f0","head_branch":"perf/compact-xaml-theme-codegen","artifact_name":"winui-editable-release-comparison-41815903284-1","size":1261081055,"sha256":"f838b6f512a1fc5f19e22aa81d8c01b634633f0530125c89f20504ce1a4ae6a3"},"correction":{"repository":"wieslawsoltes/FerroUI","repository_id":1405576478,"run_id":41837864124,"run_attempt":1,"artifact_id":13335074330,"head_sha":"e4fc7aa9fb81c15c5b6fcfc2b599af81cc452011","head_branch":"perf/compact-xaml-theme-codegen","artifact_name":"winui-editable-release-comparison-41837864124-1","size":1257116963,"sha256":"23cdcf32361f37660735b7e60212f9d2464aa5e25bf90ff0a01c2968d1895539"}},"selection":{"reference":{"origin":"acceptance","arm":"reference","revision":"be91062df9bb018de78113c34a1967c60038f9b6","receiver_policy":"cloned"},"candidate":{"origin":"correction","arm":"candidate","revision":"ad926b4d10a68465b5bbc9fe203fa908dc785f59","receiver_policy":"borrowed"},"correction_reference":{"origin":"correction","arm":"reference","revision":"ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad","receiver_policy":"borrowed"}}}
+            {"schema":1,"enabled":true,"origins":{"acceptance":{"repository":"wieslawsoltes/FerroUI","repository_id":1405576478,"run_id":41815903284,"run_attempt":1,"artifact_id":13318422418,"head_sha":"5fd34166cb1f01a2d482e87030e6d9cb5d6cb1f0","head_branch":"perf/compact-xaml-theme-codegen","artifact_name":"winui-editable-release-comparison-41815903284-1","size":1261081055,"sha256":"f838b6f512a1fc5f19e22aa81d8c01b634633f0530125c89f20504ce1a4ae6a3"},"correction":{"repository":"wieslawsoltes/FerroUI","repository_id":1405576478,"run_id":41878008356,"run_attempt":1,"artifact_id":13354338095,"head_sha":"a263981e457c582b6e91b054a4eb2b64e4283e6e","head_branch":"perf/compact-xaml-theme-codegen","artifact_name":"winui-property-capabilities-release-comparison-41878008356-1","size":1260129929,"sha256":"62ddcfdcd814013434edc223d24f6f8b7d7956d85a5f5a1e61a42ffd86e14358"}},"selection":{"reference":{"origin":"acceptance","arm":"reference","revision":"be91062df9bb018de78113c34a1967c60038f9b6","receiver_policy":"cloned"},"candidate":{"origin":"correction","arm":"candidate","revision":"c686b70c60d87e0f0726de7dc60dc6fc1f123c48","receiver_policy":"borrowed"},"correction_reference":{"origin":"correction","arm":"reference","revision":"dc93a16d88c8d8e6aedaa852f1106a856ab5993b","receiver_policy":"borrowed"}}}
         run: |
           python3 - <<'PY'
           import json, os, pathlib
@@ -43,7 +43,7 @@ jobs:
           with open(os.environ['GITHUB_ENV'], 'a') as output:
               output.write('RUNTIME_COMPANION_CPU=' + str(min(os.sched_getaffinity(0))) + '\n')
           PY
-      - name: Verify releases, link companions and freeze native proof
+      - name: Verify frozen be dc c686 releases, link companions and freeze native proof
         id: companions
         env:
           GITHUB_TOKEN: ${{ github.token }}

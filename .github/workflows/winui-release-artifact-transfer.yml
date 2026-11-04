@@ -29,21 +29,21 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           TRANSFER_REPOSITORY: ${{ github.repository }}
           TRANSFER_REPOSITORY_ID: '1405576478'
-          TRANSFER_RUN_ID: '41860242995'
+          TRANSFER_RUN_ID: '41878008356'
           TRANSFER_RUN_ATTEMPT: '1'
-          TRANSFER_ARTIFACT_ID: '13345741974'
-          TRANSFER_HEAD_SHA: '7db37e1e462efaa00de188584d2a075efb111911'
+          TRANSFER_ARTIFACT_ID: '13354338095'
+          TRANSFER_HEAD_SHA: 'a263981e457c582b6e91b054a4eb2b64e4283e6e'
           TRANSFER_HEAD_BRANCH: 'perf/compact-xaml-theme-codegen'
-          TRANSFER_ARTIFACT_NAME: 'winui-editable-release-comparison-41860242995-1'
-          TRANSFER_SIZE: '1258921916'
-          TRANSFER_SHA256: '4c54d6f1b4c842f063482778f6ac77966135cf4aaab4b2bebc9078edfe32f4eb'
+          TRANSFER_ARTIFACT_NAME: 'winui-property-capabilities-release-comparison-41878008356-1'
+          TRANSFER_SIZE: '1260129929'
+          TRANSFER_SHA256: '62ddcfdcd814013434edc223d24f6f8b7d7956d85a5f5a1e61a42ffd86e14358'
           TRANSFER_OUTPUT: ${{ runner.temp }}/winui-artifact-transfer
         run: python3 scripts/themes/bench/split_release_artifact.py
       - name: Preserve part 1
         if: ${{ always() && steps.split.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: winui-release-13345741974-part-001-${{ github.run_id }}-${{ github.run_attempt }}
+          name: winui-release-13354338095-part-001-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/winui-artifact-transfer/parts/part-001
           compression-level: 0
           if-no-files-found: error
@@ -52,7 +52,7 @@ jobs:
         if: ${{ always() && steps.split.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: winui-release-13345741974-part-002-${{ github.run_id }}-${{ github.run_attempt }}
+          name: winui-release-13354338095-part-002-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/winui-artifact-transfer/parts/part-002
           compression-level: 0
           if-no-files-found: error
@@ -61,7 +61,7 @@ jobs:
         if: ${{ always() && steps.split.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: winui-release-13345741974-part-003-${{ github.run_id }}-${{ github.run_attempt }}
+          name: winui-release-13354338095-part-003-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/winui-artifact-transfer/parts/part-003
           compression-level: 0
           if-no-files-found: error
@@ -70,7 +70,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: winui-release-13345741974-transfer-status-${{ github.run_id }}-${{ github.run_attempt }}
+          name: winui-release-13354338095-transfer-status-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/winui-artifact-transfer/evidence
           compression-level: 0
           if-no-files-found: error
