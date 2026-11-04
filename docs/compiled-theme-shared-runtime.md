@@ -3,7 +3,7 @@
 The next release target is **10,000,000 bytes for the complete stripped Linux
 x86-64 executable**, including the editable WinUI runtime and all theme
 documents. The latest independently imported size checkpoint in this report is
-**26,986,536 bytes** at `dc93a16d`, leaving **16,986,536 bytes** to remove.
+**26,573,672 bytes** at `c686b70c`, leaving **16,573,672 bytes** to remove.
 Its matched size and targeted correctness gates passed; full release acceptance
 remains open. The earlier boxed-style performance regression described below
 requires fresh acceptance measurements on the subsequent runtime changes.
@@ -669,8 +669,67 @@ fresh PGO training, features, native/link policy, full editable themes and
 targeted correctness gates are retained. The prior construction comparison is
 unchanged. The
 [frozen production plan](benchmarks/compiled-theme-property-capabilities-production-plan-linux-x86_64.json)
-records the passed source prerequisite and independent policy review. Production
-size, allocation and fresh paired throughput for this source remain pending.
+records the passed source prerequisite and independent policy review. The
+production size comparison is now complete; allocation and fresh paired
+throughput remain pending.
+
+### Completed property-capabilities production comparison
+
+[CI run 41878008356](https://github.com/wieslawsoltes/FerroUI/actions/runs/41878008356)
+completed successfully for the immutable `dc93a16d` to `c686b70c` source pair.
+The [actual production report](benchmarks/compiled-theme-property-capabilities-production-linux-x86_64.json)
+records the independently imported complete shipping images, their original
+manifests, fresh profiles and native symbol twins.
+
+| Complete stripped executable | Bytes | SHA-256 |
+|---|---:|---|
+| Matched reference, `dc93a16d` | 27,000,320 | `9b62ae44c9fbc81074a2ae7db32a06083f2fdea87ddfe47714b2662333d8f8da` |
+| Property-capabilities candidate, `c686b70c` | 26,573,672 | `a9ddadfdc3c2ac03ba9ec041fb50567810e678077acc6c3939335af6798b3c01` |
+| **Saving against the matched reference** | **426,648 (1.58016%)** | |
+| **Remaining to 10,000,000 bytes** | **16,573,672** | |
+
+The fresh reference is 13,784 bytes larger than the earlier `dc93a16d` image.
+That same-source difference belongs to a separate build/profile cohort and
+is recorded separately from this source change's 426,648-byte saving.
+The measured pair includes both the demand-rooted property operations and
+restoration of the original typed boxed-style delivery; it does not isolate
+either mechanism's contribution.
+
+| File-backed section | Candidate minus matched reference |
+|---|---:|
+| `.text` | −360,448 bytes |
+| `.eh_frame` | −56,208 bytes |
+| `.eh_frame_hdr` | −520 bytes |
+| `.gcc_except_table` | −12,932 bytes |
+| `.data.rel.ro` | +2,040 bytes |
+| `.rodata` | +216 bytes |
+| `.relr.dyn` | +32 bytes |
+
+These allocated sections shrink by 427,820 bytes; 1,172 additional bytes in
+file gaps reduce the net saving to 426,648 bytes. The native physical
+attribution assigns 478,010 fewer code/unwind bytes to property registration,
+stores and observers, with offsets in other categories. Those category totals
+are an alternative partition of the same image and must not be added to the
+section deltas.
+
+Both arms retain their own 13 training launches and complete 54-rlib production
+graphs. All nine archive cases, 47 registry tests, compact-unwind checks and
+156 template activations passed, including the added resource value `31`.
+All 169 theme documents, all 894 FXB entries and the complete FXP remain
+identical. Fresh generated code still contains 18 whole ControlTheme programs
+and 34 Style regions. The 1,260,129,929-byte evidence ZIP was reconstructed by
+[transfer run 41895114282](https://github.com/wieslawsoltes/FerroUI/actions/runs/41895114282)
+with SHA-256 `62ddcfdcd814013434edc223d24f6f8b7d7956d85a5f5a1e61a42ffd86e14358`;
+all 16 original arm manifests and the shipping/native-twin allocated sections
+were checked after extraction.
+
+Full release acceptance remains open. The new production companions are being
+linked by [run 41895114284](https://github.com/wieslawsoltes/FerroUI/actions/runs/41895114284)
+for the fresh `be91062d` to `c686b70c` acceptance comparison and the focused
+`dc93a16d` to `c686b70c` correction comparison. The earlier performance
+regressions remain unresolved until these exact graphs pass their runtime and
+allocation gates. The later typed-local metadata, nullable operations and
+construction/core-transition changes are outside this measured source pair.
 
 ### Validated typed metadata lookup for boxed local bindings
 
