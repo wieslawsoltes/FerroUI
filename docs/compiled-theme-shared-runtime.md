@@ -379,7 +379,84 @@ real binaries and explicitly synthetic transport wrappers; these tests do not
 claim a new production link or performance result.
 [Tooling, independent review and frozen input contract](benchmarks/compiled-theme-runtime-companion-transport-tooling-linux-x86_64.json).
 
+The first [companion CI run](https://github.com/wieslawsoltes/FerroUI/actions/runs/41855481325)
+completed its 17 links, correctness and bounded PGO checks. Its data-only import
+then correctly rejected an incomplete execution snapshot: the exporter had
+updated the final native-input proof in memory but copied the persisted record
+before saving that update. The separately uploaded final status confirms that
+native inputs were unchanged; the incomplete original bundle and failed import
+remain retained. The exporter now persists the completed native check before
+copying the bundle. The strict importer is unchanged, and
+[the corrected export run](https://github.com/wieslawsoltes/FerroUI/actions/runs/41860870363)
+uses the same frozen origins, source revisions, profiles and production policy.
+No paired companion performance result is accepted from the incomplete bundle.
+
+### Fresh corrected-shipping startup comparison
+
+The unchanged shipping images from the original `be91062d` reference and the
+new `ad926b4d` correction have completed a separate fresh CPU6 startup cohort.
+Their original CI builds are explicitly distinct origins. Recorded compiler,
+native-tool, training-input, helper and policy identities match; both exact-byte
+images were staged on one local filesystem and passed loader/ABI proof, the
+impossible-font negative control and all nine archive cases before timing.
+
+| Startup-to-resource-readiness case | Pairs | Candidate/reference median [95% interval] |
+|---|---:|---:|
+| Embedded resources | 101 | 0.996856 [0.992104, 1.003704] |
+| Scalar v3 edits | 41 | 0.993226 [0.985424, 1.002816] |
+| Structural v3 edits | 41 | 0.996330 [0.981400, 1.016628] |
+| Structural v1 fallback | 21 | 1.002506 [0.987691, 1.014796] |
+
+All four intervals include parity: no regression was detected in these retained
+shared-host cohorts. Embedded readiness medians are 9.499002 ms and 9.476428 ms.
+These are fresh alternating paired launches with the original warmup, archive
+and bootstrap protocol. They stop at typed Button `ControlTheme` readiness;
+control construction, first paint and complete runtime throughput remain outside
+this measurement. The
+[corrected-shipping startup evidence](benchmarks/compiled-theme-boxed-correction-startup-linux-x86_64.json)
+retains all raw rows and internal diagnostics, original orchestration and plan,
+native/compatibility evidence and independently rechecked identities. It does
+not remove the earlier boxed-style delivery blocker or establish the pending
+construction wave's performance.
+
 ## Source checkpoint
+
+### Demand-rooted typed recoercion
+
+The next property-system prototype is frozen at
+[`bbff5971`](https://github.com/wieslawsoltes/FerroUI/commit/bbff597167c8fe72f815dba2daffe62e1a99a4de)
+on `perf/demand-rooted-coercion`. Explicit `with_coerce`/`coerce` registration
+stores the original callback together with its typed recoercion algorithm.
+Options conversion and metadata cloning/merging transfer that pair without
+naming the algorithm. This removes the unconditional reference to the heavy
+two-value algorithm from every `EffectiveValueDyn` vtable specialization.
+
+The private effective-value type declaration is unbounded so public Clone-only
+metadata can name the algorithm. Constructors and property operations keep
+their existing `PropertyValue` bounds. The algorithm still owns its values in
+the original two call frames; only equality and the existing notification
+functions are supplied as typed function pointers. `UncommonFields`, typed
+payload storage and ordinary read/write/notification method bodies are unchanged.
+There is no new allocation or unsafe cast.
+
+The historical linked `coerce_value` and `set_and_raise_core_with_base` families
+occupy 333,413 bytes, including unwind/exception data. This is a gross bound.
+Registered coercer types still need their algorithms; standalone typed leaves,
+indirect explicit-recoercion calls and one extra metadata/options function
+pointer have costs. No saving or throughput result is claimed for this prototype.
+
+Five new actual-source tests retain the old algorithms as their oracle. They
+compare eight priority/equality configurations and every observed Clone,
+equality, coercion, Drop and notifying panic point; reentrant reads/writes and
+priority changes; Clone-only metadata and callback identity/lifetimes; callback
+replacement during unwind; and NaN equality. The frozen gate also requires
+307 property tests, 14 property-metadata tests, the registration identity test,
+66 metadata tests and downstream Base/Controls checks. Its eight required
+named tests must execute before the downstream check. The
+[source review and plan](benchmarks/compiled-theme-demand-rooted-coercion-source-prototype-linux-x86_64.json)
+are complete; compiler execution and production measurement remain pending.
+
+### Earlier source history
 
 The runtime and focused regression tests are committed through
 [`6401e654`](https://github.com/wieslawsoltes/FerroUI/commit/6401e654c148a473f33358b79f5cf886d5f9d86b),

@@ -6,7 +6,9 @@ metadata suite checks Base and downstream Controls expansion; the control-theme
 suites check the runtime, emitter and differential corpus, then type-check fresh
 WinUI output. The explicit control-theme-regions suite additionally requires the
 region runtime/grammar cases and both generated program forms. Filters narrow
-execution, not compilation. These development suites make no
+execution, not compilation. The coercion suite checks owned-value cleanup,
+metadata registration/inheritance, property behavior and downstream typed APIs.
+These development suites make no
 production size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,
 source identity, lockfile, logs and resource reports survive success or failure.
 """
@@ -28,7 +30,7 @@ import time
 HERE = Path(__file__).resolve().parent
 HOST = "x86_64-unknown-linux-gnu"
 
-# Counts belong only to the explicit frozen region-validation suite. Existing
+# Counts belong only to the explicit frozen region/coercion suites. Existing
 # metadata and whole-theme command plans and acceptance rules remain unchanged.
 REGION_EXPECTED_SUMMARIES = {
     "construction-runtime": {"passed": 2, "failed": 0, "ignored": 0},
@@ -36,6 +38,14 @@ REGION_EXPECTED_SUMMARIES = {
     "construction-grammar": {"passed": 6, "failed": 0, "ignored": 0},
     "region-grammar": {"passed": 7, "failed": 0, "ignored": 0},
     "emitter-differential": {"passed": 25, "failed": 0, "ignored": 2},
+}
+
+COERCION_EXPECTED_SUMMARIES = {
+    "coercion-oracles": {"passed": 5, "failed": 0, "ignored": 0},
+    "property-runtime": {"passed": 307, "failed": 0, "ignored": 0},
+    "property-metadata": {"passed": 14, "failed": 0, "ignored": 0},
+    "coercer-registration": {"passed": 1, "failed": 0, "ignored": 0},
+    "metadata": {"passed": 66, "failed": 0, "ignored": 0},
 }
 
 
@@ -65,6 +75,20 @@ def suite_commands(cargo, suite):
             (label, [*base, test_filter, "--", "--test-threads=1"])
             for label, test_filter in (("metadata", "metadata::"), ("object-smoke", "ferro_object_tests::"),
                                        ("properties", "tests::ferro_object_tests"))
+        ]
+        downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
+                      "-p", "ferroui-controls", "--features", "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]
+    elif suite == "coercion":
+        base = [*common, "-p", "ferroui-base", "--features", "compiler-metadata,hot-reload"]
+        tests = [
+            (label, [*base, test_filter, "--", "--test-threads=1"])
+            for label, test_filter in (
+                ("coercion-oracles", "property_store::effective_value::coercion_tests::"),
+                ("property-runtime", "tests::ferro_object_tests"),
+                ("property-metadata", "tests::ferro_property_tests::"),
+                ("coercer-registration", "ferro_property::styled_property_options_tests::"),
+                ("metadata", "metadata::"),
+            )
         ]
         downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
                       "-p", "ferroui-controls", "--features", "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]
@@ -124,7 +148,7 @@ def main():
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--suite", choices=("metadata", "control-theme", "control-theme-regions"), default="metadata")
+    parser.add_argument("--suite", choices=("metadata", "coercion", "control-theme", "control-theme-regions"), default="metadata")
     parser.add_argument("--required-test", action="append", default=[])
     parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
@@ -188,6 +212,8 @@ def main():
     }
     if args.suite == "control-theme-regions":
         report["expected_test_summaries"] = REGION_EXPECTED_SUMMARIES
+    elif args.suite == "coercion":
+        report["expected_test_summaries"] = COERCION_EXPECTED_SUMMARIES
     tracked = evidence / "tracked-inputs.txt"
     tracked.write_text(git(source, "ls-files", "--stage") + "\n")
     report["tracked_inputs"] = identity(tracked)
@@ -231,10 +257,11 @@ def main():
                     contents = log.read_text()
                     row["test_summary"], passed = successful_tests(contents, label)
                     row["passed_tests"] = sorted(passed)
-                    if args.suite == "control-theme-regions" and row["test_summary"] != REGION_EXPECTED_SUMMARIES[label]:
-                        raise RuntimeError(f"{label} summary {row['test_summary']} does not match frozen region suite {REGION_EXPECTED_SUMMARIES[label]}")
+                    expected = report.get("expected_test_summaries", {}).get(label)
+                    if expected is not None and row["test_summary"] != expected:
+                        raise RuntimeError(f"{label} summary {row['test_summary']} does not match frozen {args.suite} suite {expected}")
                     passed_tests.update(passed)
-                    if label == "metadata":
+                    if label == "metadata" and args.suite == "metadata":
                         for name in args.required_test:
                             if name not in passed:
                                 raise RuntimeError(f"required metadata regression did not pass: {name}")
