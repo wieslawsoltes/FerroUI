@@ -45,6 +45,51 @@ identity. The first connector retrieval rejected the 1,261,081,055-byte evidence
 ZIP because its per-file limit is 536,870,912 bytes. Independent artifact import
 and production runtime acceptance remain pending at this checkpoint.
 
+The subsequent [artifact import checkpoint](benchmarks/compiled-theme-shared-runtime-artifact-import-linux-x86_64.json)
+records successful transport, reconstruction of the original ZIP with its
+exact SHA-256, extraction of 35,532 files, and verification of 157 relocated
+inputs. Both source snapshots contain 191 transported links; their resolved
+contents match the recorded source graph. The actual binary hashes and all
+16 recorded CI arm manifests were independently checked after extraction.
+The separate production runtime comparison is still pending at this source
+checkpoint.
+
+### Physical attribution and the next source changes
+
+The [fresh size census](benchmarks/compiled-theme-shared-runtime-size-census-linux-x86_64.json)
+reconciles the file delta exactly: code and unwind shrink by 340,888 bytes,
+read-only tables and other data add 43,456 bytes, and file-layout gaps add
+1,400 bytes. There are 445 additional physical function ranges, despite the
+smaller aggregate code; their unwind search entries account for the 3,560-byte
+index increase. These are complete physical counts, with aliased ranges counted
+once.
+
+The largest focused reduction is in styled binding installation: the selected
+route and creation families shrink from 407,583 to 162,858 bytes, including
+unwind. The two typed boxed-input delivery bodies, paired across their old and
+new names, change from 495,734 to 497,109 bytes. These diagnostic family groups
+overlap other category totals and must not be summed.
+
+Two further cold source changes are now prepared for a new matched build:
+
+- Both `ferro_class!` forms keep the same static `OnceLock` and an initialized
+  `get()` fast path. The slow path receives a `fn() -> VTable`, so its generic
+  initialization machinery depends on the table type instead of each class's
+  distinct builder function-item type. The helper preserves ordinary OnceLock
+  synchronization and retry behavior.
+- Direct properties construct `DirectPropertyBase<T>` from owner descriptors.
+  The typed owner wrappers retain their getter and setter, allocation,
+  accessor/routes installation and registration. Metadata merge, freeze and
+  temporary-drop ordering are retained.
+
+These follow-up changes have passed source review but have no compiled or size
+result at this checkpoint. The measured executable above remains `d2d2f83d`.
+The vtable initializer envelope is 142,598 bytes, before keeping builder code
+and the new shared helper; making builders address-taken can offset sharing.
+Named direct-property construction families occupy 31,729 bytes, plus copies
+embedded in other functions. Neither envelope supports a multi-megabyte claim
+or establishes progress to the 10 MB budget.
+
 ## Source checkpoint
 
 The runtime and focused regression tests are committed through
