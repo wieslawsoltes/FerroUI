@@ -2783,6 +2783,13 @@ impl<'a> Emitter<'a> {
             self.styles.program_getters(),
         ) {
             text = program;
+        } else if let Some(regions) = super::control_theme_programs::lower_regions(
+            &function,
+            &text,
+            self.selectors.program_builders(),
+            self.styles.program_getters(),
+        ) {
+            text = regions;
         }
         self.deferred_functions[slot] = text;
 

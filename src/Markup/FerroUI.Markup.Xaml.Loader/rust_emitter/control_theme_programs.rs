@@ -11,6 +11,17 @@
 use std::collections::HashMap;
 use std::fmt::Write;
 
+mod regions;
+
+pub(super) fn lower_regions<'a>(
+    function: &str,
+    source: &str,
+    selector_builders: impl IntoIterator<Item = (&'a str, usize)>,
+    property_getters: impl IntoIterator<Item = (&'a str, &'a str)>,
+) -> Option<String> {
+    regions::lower(function, source, selector_builders, property_getters)
+}
+
 const THEME: &str = "::ferroui_base::styling::ControlTheme";
 const STYLE: &str = "::ferroui_base::styling::Style";
 const BASE: &str = "::ferroui_base::styling::StyleBase";
