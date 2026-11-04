@@ -54,6 +54,7 @@ pub(super) struct BoundFrame {
 }
 
 impl BoundFrame {
+    #[inline]
     pub(super) fn publish(&self, entry: Rc<dyn IValueEntry>) {
         self.owner.values().on_binding_value_changed(&self.owner, &entry, self.frame.base().priority());
     }
@@ -71,6 +72,7 @@ impl BindingEntryState {
         }
     }
 
+    #[inline]
     pub(super) fn bound_frame(&self) -> Option<BoundFrame> {
         let frame = self.frame.upgrade()?;
         Some(BoundFrame { owner: frame.base().owner()?, frame })
@@ -98,6 +100,7 @@ impl BindingEntryState {
         matches!(self.phase.get(), SubscriptionPhase::Creating | SubscriptionPhase::Active)
     }
 
+    #[inline]
     pub(super) fn set_validation(&self, state: BindingValueType, error: Option<&BindingError>) {
         if self.has_data_validation {
             self.data_validation_state.set(state);

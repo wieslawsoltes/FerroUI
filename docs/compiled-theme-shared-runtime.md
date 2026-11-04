@@ -142,6 +142,35 @@ Named direct-property construction families occupy 31,729 bytes, plus copies
 embedded in other functions. Neither envelope supports a multi-megabyte claim
 or establishes progress to the 10 MB budget.
 
+### Boxed-binding correction under validation
+
+The reproduced boxed-delivery regression now has a separate two-file source
+correction. `BoxedBindingEntry::new<T>` reads the typed property's validation
+metadata before `Rc::new_cyclic`, then passes the boolean to the shared state
+constructor. The temporary metadata `Rc` drops before entry allocation, matching
+the baseline's construction and panic ordering. This does not establish an
+explanation for the CPU6-only installation flag.
+
+`BindingEntryState::bound_frame`, `BindingEntryState::set_validation` and
+`BoundFrame::publish` now carry ordinary `#[inline]` hints. Their bodies are
+unchanged. The owned input remains in `Observer::on_next`, `receive` borrows it,
+and the upgraded entry drops before the input on return and unwind. No cache,
+subscription, `RefCell` borrow or explicit clone/drop boundary changes.
+
+The measured reference QA's native `BindingEntry<i32>::set_value` inlines all
+three helpers. The candidate shipping image calls them out of line, but it is a
+different LTO consumer. A diagnostic reference replay matches every allocated
+code/data section and the load geometry; its GNU build-id and ELF section-table
+bookkeeping differ. Its symbols therefore support scoped reference instruction
+attribution, not full-file equality. The original stricter comparison remains
+failed, and the candidate replay received SIGKILL before producing an image.
+
+This is a bounded source experiment, not a claim that throughput is restored.
+Inlining can increase application code and unwind size, and it does not address
+the separately observed `TypeId` promotion difference. The existing production
+correctness, allocation and paired delivery gates must pass before acceptance.
+[Patch, review and retained diagnostic evidence](benchmarks/compiled-theme-boxed-binding-correction-review-linux-x86_64.json).
+
 ## Source checkpoint
 
 The runtime and focused regression tests are committed through

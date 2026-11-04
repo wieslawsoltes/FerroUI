@@ -34,8 +34,9 @@ impl BoxedBindingEntry {
         property: &'static StyledProperty<T>,
         source: Rc<dyn IObservable<BoxedValue>>,
     ) -> Rc<dyn BoxedBindingValue> {
+        let has_data_validation = property.get_metadata_for(target).enable_data_validation() == Some(true);
         Rc::new_cyclic(|this| Value {
-            binding: Self::new_state(target, frame, property, source),
+            binding: Self::new_state(frame, source, has_data_validation),
             this: this.clone(),
             property,
             value: RefCell::new(None),
@@ -44,12 +45,10 @@ impl BoxedBindingEntry {
     }
 
     fn new_state(
-        target: &FerroObject,
         frame: Weak<dyn ValueFrame>,
-        property: &'static FerroProperty,
         source: Rc<dyn IObservable<BoxedValue>>,
+        has_data_validation: bool,
     ) -> Self {
-        let has_data_validation = property.get_metadata_for(target).enable_data_validation() == Some(true);
         Self { state: BindingEntryState::new(frame, has_data_validation), source }
     }
 
