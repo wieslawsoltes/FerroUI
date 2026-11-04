@@ -1,7 +1,7 @@
 use super::{entry_ptr_eq, IValueEntry};
 use crate::data::{BindingPriority, BindingValueType};
 use crate::ferro_property::value_equals;
-use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations};
+use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations, DefaultCoercionOperations};
 use crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledPropertyMetadata};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -16,15 +16,6 @@ pub(crate) trait EffectiveValueDyn: Any {
     fn end_reevaluation(&self, owner: &FerroObject);
     /// Reads the entry as this property's Rust type, then applies it.
     fn apply_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry, priority: BindingPriority);
-    /// Raises a change notification on `owner` for a change of the value it
-    /// inherits, from `old_value` to `new_value` (either may be absent,
-    /// meaning the property's default value).
-    fn raise_inherited_value_changed(
-        &self,
-        owner: &FerroObject,
-        old_value: Option<&dyn EffectiveValueDyn>,
-        new_value: Option<&dyn EffectiveValueDyn>,
-    );
     fn remove_animation_and_raise(&self, owner: &FerroObject);
     fn coerce_value(&self, owner: &FerroObject);
     fn raise_unset(
@@ -166,6 +157,18 @@ impl dyn EffectiveValueDyn {
         self.state().property
     }
 
+    /// Uses the capability of the already-selected property, avoiding another
+    /// state projection and a typed vtable slot for non-inheriting properties.
+    pub(crate) fn raise_inherited_value_changed(
+        &self,
+        property: &'static FerroProperty,
+        owner: &FerroObject,
+        old_value: Option<&dyn EffectiveValueDyn>,
+        new_value: Option<&dyn EffectiveValueDyn>,
+    ) {
+        (property.inherited_value_changed())(self, owner, old_value, new_value);
+    }
+
     pub(crate) fn priority(&self) -> BindingPriority {
         self.state().priority.get()
     }
@@ -262,6 +265,18 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         self.set_and_raise_core_with_base(owner, value, self.state.priority.get(), base_value, self.state.base_priority.get(), operations);
     }
 
+    pub(crate) fn apply_coercion_at_end(&self, owner: &FerroObject, operations: DefaultCoercionOperations<T>) {
+        if let Some(uncommon) = &self.uncommon {
+            // Coerce the default value and raise if it differs. The default
+            // stays alive through the typed setter, including its unwind.
+            let default = self.metadata.default_value().clone();
+            let coerced = (uncommon.coerce)(owner, default.clone());
+            if !(operations.equals)(&default, &coerced) {
+                (operations.set_default)(self, owner, coerced);
+            }
+        }
+    }
+
     fn set_and_raise_core_with_base(
         &self,
         owner: &FerroObject,
@@ -316,6 +331,27 @@ impl<T: Clone + 'static> EffectiveValue<T> {
 }
 
 impl<T: PropertyValue> EffectiveValue<T> {
+    // Its address is taken only by an explicit inheritance registration.
+    // Keep the original owned-value frame: the selected source's metadata
+    // supplies defaults, then old/new clones, equality and notification run
+    // in their original order. The checked projection adds no owning handle.
+    pub(crate) fn notify_inherited_value_changed(
+        source: &dyn EffectiveValueDyn,
+        owner: &FerroObject,
+        old_value: Option<&dyn EffectiveValueDyn>,
+        new_value: Option<&dyn EffectiveValueDyn>,
+    ) {
+        let source = (source as &dyn Any).downcast_ref::<Self>().expect("inherited value has the property's Rust type");
+        debug_assert!(old_value.is_some() || new_value.is_some());
+        let default = || source.metadata.default_value().clone();
+        let o = old_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
+        let n = new_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
+        let priority = if new_value.is_some() { BindingPriority::Inherited } else { BindingPriority::Unset };
+        if !value_equals(&o, &n) {
+            owner.raise_inherited_property_changed(source.state.property, &o, &n, priority);
+        }
+    }
+
     pub fn new(owner: &FerroObject, property: &'static StyledProperty<T>, inherited: Option<&EffectiveValue<T>>) -> Self {
         let metadata = property.get_metadata_for(owner);
         let value = match inherited {
@@ -480,13 +516,12 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
 
     fn end_reevaluation(&self, owner: &FerroObject) {
         if self.state.priority.get() == BindingPriority::Unset {
-            if let Some(uncommon) = &self.uncommon {
-                // Coerce the default value and raise if it differs.
-                let default = self.metadata.default_value().clone();
-                let coerced = (uncommon.coerce)(owner, default.clone());
-                if !value_equals(&default, &coerced) {
-                    self.set_coerced_default_value_and_raise(owner, coerced);
-                }
+            // Keep the priority short circuit before even reading metadata.
+            if let Some(coercion) = self.metadata.coercion() {
+                coercion.end_reevaluation(self, owner, DefaultCoercionOperations {
+                    equals: value_equals::<T>,
+                    set_default: Self::set_coerced_default_value_and_raise,
+                });
             }
         }
     }
@@ -494,22 +529,6 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
     fn apply_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry, priority: BindingPriority) {
         let value = self.get_entry_value(entry);
         self.set_and_raise_core(owner, value, priority, false, false);
-    }
-
-    fn raise_inherited_value_changed(
-        &self,
-        owner: &FerroObject,
-        old_value: Option<&dyn EffectiveValueDyn>,
-        new_value: Option<&dyn EffectiveValueDyn>,
-    ) {
-        debug_assert!(old_value.is_some() || new_value.is_some());
-        let default = || self.metadata.default_value().clone();
-        let o = old_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
-        let n = new_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
-        let priority = if new_value.is_some() { BindingPriority::Inherited } else { BindingPriority::Unset };
-        if !value_equals(&o, &n) {
-            owner.raise_inherited_property_changed(self.state.property, &o, &n, priority);
-        }
     }
 
     fn remove_animation_and_raise(&self, owner: &FerroObject) {
@@ -552,3 +571,7 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
 #[cfg(test)]
 #[path = "effective_value_coercion_tests.rs"]
 mod coercion_tests;
+
+#[cfg(test)]
+#[path = "effective_value_inheritance_tests.rs"]
+mod inheritance_tests;

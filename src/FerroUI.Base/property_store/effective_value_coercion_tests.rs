@@ -441,3 +441,147 @@ impl<T: PropertyValue> EffectiveValue<T> {
         }
     }
 }
+
+mod end_reevaluation_tests {
+    use super::*;
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct EndOutcome {
+        observed: Outcome,
+        coerced_default: bool,
+    }
+
+    fn run_end(original: bool, delta: i32, priority: BindingPriority, injection: Option<Injection>) -> EndOutcome {
+        let owner = FerroObject::new();
+        let trace = Rc::new(Trace {
+            active: Cell::new(false), next_value: Cell::new(0),
+            counts: std::array::from_fn(|_| Cell::new(0)), events: RefCell::new(Vec::new()),
+            injection: Cell::new(injection), fired: Cell::new(false),
+            owner: owner.downgrade(), property: Cell::new(None),
+        });
+        let (coercion_trace, notifying_trace) = (trace.clone(), trace.clone());
+        let property = FerroProperty::register_with::<FerroObject, _>(
+            &unique_name(),
+            StyledPropertyOptions::new(trace.value(1))
+                .coerce(move |_, mut value: Tracked| {
+                    coercion_trace.record(Operation::Coerce, format!("{}={}", value.serial, value.number));
+                    value.number += delta;
+                    value
+                })
+                .notifying(move |_, before| notifying_trace.record(Operation::Notify, before.to_string())),
+        );
+        trace.property.set(Some(property));
+        owner.set_value(property, trace.value(10));
+        let effective = owner.values().get_effective_value(property).unwrap();
+        let typed = cast_effective_value::<Tracked>(&*effective);
+        typed.state.priority.set(priority);
+        typed.state.base_priority.set(priority);
+        trace.active.set(true);
+        let panicked = catch_unwind(AssertUnwindSafe(|| {
+            if original {
+                typed.original_end_reevaluation(&owner);
+            } else {
+                EffectiveValueDyn::end_reevaluation(typed, &owner);
+            }
+        })).is_err();
+        let uncommon = typed.uncommon.as_ref().unwrap();
+        let values = (
+            typed.value.borrow().number,
+            typed.base_value.borrow().as_ref().map(|value| value.number),
+            uncommon.uncoerced_value.borrow().number,
+            uncommon.uncoerced_base_value.borrow().number,
+        );
+        trace.active.set(false);
+        let events = trace.events.borrow().clone();
+        EndOutcome {
+            observed: Outcome {
+                panicked, fired: trace.fired.get(), events, values,
+                counts: std::array::from_fn(|index| trace.counts[index].get()),
+                priorities: (typed.state.priority.get(), typed.state.base_priority.get()),
+            },
+            coerced_default: typed.state.is_coerced_default_value.get(),
+        }
+    }
+
+    #[test]
+    fn end_reevaluation_matches_original_owned_values_reentry_and_unwind() {
+        for delta in [0, 1] {
+            for priority in [BindingPriority::Unset, BindingPriority::LocalValue] {
+                let baseline = run_end(true, delta, priority, None);
+                assert!(!baseline.observed.panicked);
+                assert_eq!(run_end(false, delta, priority, None), baseline);
+                if priority != BindingPriority::Unset {
+                    assert_eq!(baseline.observed.counts, [0; 5]);
+                }
+                for operation in Operation::ALL {
+                    for occurrence in 1..=baseline.observed.counts[operation as usize] {
+                        let injection = Some(Injection { operation, occurrence, action: Action::Panic });
+                        let expected = run_end(true, delta, priority, injection);
+                        assert!(expected.observed.panicked && expected.observed.fired, "{injection:?}");
+                        assert_eq!(run_end(false, delta, priority, injection), expected,
+                            "delta={delta}, priority={priority:?}, {injection:?}");
+                    }
+                }
+            }
+        }
+        let priority = BindingPriority::Unset;
+        let baseline = run_end(true, 1, priority, None);
+        let mut injections = vec![
+            Injection { operation: Operation::Clone, occurrence: 1, action: Action::Read },
+            Injection { operation: Operation::Clone, occurrence: 2, action: Action::Write },
+            Injection { operation: Operation::Equals, occurrence: 1, action: Action::Priorities },
+            Injection { operation: Operation::Coerce, occurrence: 1, action: Action::Write },
+            Injection { operation: Operation::Notify, occurrence: 1, action: Action::Write },
+        ];
+        injections.extend((1..=baseline.observed.counts[Operation::Drop as usize]).map(|occurrence| {
+            Injection { operation: Operation::Drop, occurrence, action: Action::Read }
+        }));
+        for injection in injections {
+            let expected = run_end(true, 1, priority, Some(injection));
+            assert!(expected.observed.fired, "{injection:?}");
+            assert_eq!(run_end(false, 1, priority, Some(injection)), expected, "{injection:?}");
+        }
+    }
+
+    #[test]
+    fn end_reevaluation_keeps_nan_and_the_retained_uncommon_callback() {
+        for original in [false, true] {
+            let owner = FerroObject::new();
+            let property = FerroProperty::register_with::<FerroObject, _>(
+                &unique_name(), StyledPropertyOptions::new(f64::NAN).coerce(|_, value| value),
+            );
+            let effective = EffectiveValue::new(&owner, property, None);
+            if original { effective.original_end_reevaluation(&owner); }
+            else { EffectiveValueDyn::end_reevaluation(&effective, &owner); }
+            assert!(effective.value().is_nan());
+            assert!(!effective.state.is_coerced_default_value.get());
+
+            let property = FerroProperty::register_with::<FerroObject, _>(
+                &unique_name(), StyledPropertyOptions::new(1_i32).coerce(|_, _| panic!("metadata callback used")),
+            );
+            let mut effective = EffectiveValue::new(&owner, property, None);
+            // The algorithm must still call the callback retained in uncommon,
+            // even though metadata supplies the demand-rooted dispatch entry.
+            effective.uncommon.as_mut().unwrap().coerce = Rc::new(|_, value| value + 5);
+            if original { effective.original_end_reevaluation(&owner); }
+            else { EffectiveValueDyn::end_reevaluation(&effective, &owner); }
+            assert_eq!(effective.value(), 6);
+        }
+    }
+
+    // Copied from bbff5971; only the oracle method name differs.
+    impl<T: PropertyValue> EffectiveValue<T> {
+        fn original_end_reevaluation(&self, owner: &FerroObject) {
+            if self.state.priority.get() == BindingPriority::Unset {
+                if let Some(uncommon) = &self.uncommon {
+                    // Coerce the default value and raise if it differs.
+                    let default = self.metadata.default_value().clone();
+                    let coerced = (uncommon.coerce)(owner, default.clone());
+                    if !value_equals(&default, &coerced) {
+                        self.set_coerced_default_value_and_raise(owner, coerced);
+                    }
+                }
+            }
+        }
+    }
+}

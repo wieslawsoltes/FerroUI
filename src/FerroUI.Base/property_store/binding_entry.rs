@@ -6,14 +6,15 @@ use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
-// A deferred typed frame entry retains the observable and its typed adapter.
-// Boxed sources use a separate, shared installation path without retaining
-// either of these typed-source subscription implementations.
+// Source installation is shared for boxed bindings, while every delivery uses
+// this typed cache. The adapter is installed by the selected overload, so a
+// boxed source does not retain the typed-source observer implementations.
 type EntryObserver<T, U> = fn(Weak<BindingEntry<T>>) -> Rc<dyn IObserver<U>>;
 
 pub(crate) enum BindingSource<T: PropertyValue> {
     Typed(Rc<dyn IObservable<T>>, EntryObserver<T, T>),
     Value(Rc<dyn IObservable<BindingValue<T>>>, EntryObserver<T, BindingValue<T>>),
+    Untyped(Rc<dyn IObservable<BoxedValue>>, EntryObserver<T, BoxedValue>),
 }
 
 impl<T: PropertyValue> BindingSource<T> {
@@ -23,6 +24,10 @@ impl<T: PropertyValue> BindingSource<T> {
 
     pub(crate) fn value(source: Rc<dyn IObservable<BindingValue<T>>>) -> Self {
         Self::Value(source, |entry| Rc::new(ValueObserver(entry)))
+    }
+
+    pub(crate) fn untyped(source: Rc<dyn IObservable<BoxedValue>>) -> Self {
+        Self::Untyped(source, |entry| Rc::new(UntypedObserver(entry)))
     }
 }
 
@@ -188,6 +193,7 @@ impl<T: PropertyValue> BindingEntry<T> {
         let subscription = match &self.source {
             BindingSource::Typed(source, observer) => source.subscribe(observer(this)),
             BindingSource::Value(source, observer) => source.subscribe(observer(this)),
+            BindingSource::Untyped(source, observer) => source.subscribe(observer(this)),
         };
         self.state.finish(subscription);
     }
@@ -318,6 +324,27 @@ struct ValueObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
 impl<T: PropertyValue> IObserver<BindingValue<T>> for ValueObserver<T> {
     fn on_next(&self, value: BindingValue<T>) {
         let Some(entry) = self.0.upgrade() else { return };
+        let value = entry.convert_and_validate(value);
+        entry.set_value(value);
+    }
+    fn on_error(&self, _error: ObservableError) {
+        if let Some(entry) = self.0.upgrade() {
+            entry.binding_completed()
+        }
+    }
+    fn on_completed(&self) {
+        if let Some(entry) = self.0.upgrade() {
+            entry.binding_completed()
+        }
+    }
+}
+
+struct UntypedObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
+
+impl<T: PropertyValue> IObserver<BoxedValue> for UntypedObserver<T> {
+    fn on_next(&self, value: BoxedValue) {
+        let Some(entry) = self.0.upgrade() else { return };
+        let value = entry.property.from_untyped(value.as_any());
         let value = entry.convert_and_validate(value);
         entry.set_value(value);
     }
