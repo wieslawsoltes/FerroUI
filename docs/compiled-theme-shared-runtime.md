@@ -423,9 +423,10 @@ construction wave's performance.
 
 ### Demand-rooted typed recoercion
 
-The next property-system prototype is frozen at
+The property-system implementation was frozen and validated at
 [`bbff5971`](https://github.com/wieslawsoltes/FerroUI/commit/bbff597167c8fe72f815dba2daffe62e1a99a4de)
-on `perf/demand-rooted-coercion`. Explicit `with_coerce`/`coerce` registration
+on `perf/demand-rooted-coercion`; its exact four source files are now integrated
+into this PR. Explicit `with_coerce`/`coerce` registration
 stores the original callback together with its typed recoercion algorithm.
 Options conversion and metadata cloning/merging transfer that pair without
 naming the algorithm. This removes the unconditional reference to the heavy
@@ -443,7 +444,7 @@ The historical linked `coerce_value` and `set_and_raise_core_with_base` families
 occupy 333,413 bytes, including unwind/exception data. This is a gross bound.
 Registered coercer types still need their algorithms; standalone typed leaves,
 indirect explicit-recoercion calls and one extra metadata/options function
-pointer have costs. No saving or throughput result is claimed for this prototype.
+pointer have costs. No saving or throughput result is claimed for this change.
 
 Five new actual-source tests retain the old algorithms as their oracle. They
 compare eight priority/equality configurations and every observed Clone,
@@ -454,7 +455,15 @@ replacement during unwind; and NaN equality. The frozen gate also requires
 66 metadata tests and downstream Base/Controls checks. Its eight required
 named tests must execute before the downstream check. The
 [source review and plan](benchmarks/compiled-theme-demand-rooted-coercion-source-prototype-linux-x86_64.json)
-are complete; compiler execution and production measurement remain pending.
+remain retained. The [actual source gate](https://github.com/wieslawsoltes/FerroUI/actions/runs/41862755982)
+passed all 393 tests, with no failures or ignored tests, all eight required named
+cases and the downstream Base/Controls check. Independent import verified the
+artifact ZIP, all 16 recorded logs/resource/installation/inventory inputs, the
+unchanged lockfile and tracked Git tree, and the exact four integrated source
+blobs. The [source validation evidence](benchmarks/compiled-theme-demand-rooted-coercion-source-validation-linux-x86_64.json)
+retains the original validation record. Fresh production size and coercion
+performance measurements remain required; the existing boxed-style delivery
+blocker is unchanged.
 
 ### Earlier source history
 

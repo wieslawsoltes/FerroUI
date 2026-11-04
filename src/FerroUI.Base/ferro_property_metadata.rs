@@ -1,4 +1,5 @@
 use crate::data::BindingMode;
+use crate::property_store::EffectiveValue;
 use crate::{FerroObject, TypeInfo};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -59,11 +60,52 @@ impl FerroPropertyMetadata {
 /// The coercion callback of a styled property.
 pub type CoerceValueCallback<T> = Rc<dyn Fn(&FerroObject, T) -> T>;
 
+/// The small typed operations used by explicit recoercion. These functions
+/// already serve ordinary typed writes; keeping them separate lets the cold
+/// two-value algorithm require only the public metadata's `Clone` bound.
+pub(crate) struct CoercionOperations<T> {
+    pub(crate) equals: fn(&T, &T) -> bool,
+    pub(crate) notify_value_changed: fn(&EffectiveValue<T>, &FerroObject, T),
+    pub(crate) notify_base_value_changed: fn(&EffectiveValue<T>, &FerroObject),
+}
+
+/// Constructed only when a caller supplies a coercer. A property without a
+/// coercer must not take the address of its heavy recoercion algorithm merely
+/// because its untyped effective-value interface supports `coerce_value`.
+pub(crate) struct Coercion<T> {
+    callback: CoerceValueCallback<T>,
+    apply: fn(&EffectiveValue<T>, &FerroObject, CoercionOperations<T>),
+}
+
+impl<T> Clone for Coercion<T> {
+    fn clone(&self) -> Self {
+        // Copy the algorithm address without cloning T or wrapping the
+        // callback: metadata continues to share the original Rc allocation.
+        Self { callback: self.callback.clone(), apply: self.apply }
+    }
+}
+
+impl<T> Coercion<T> {
+    pub(crate) fn callback(&self) -> &CoerceValueCallback<T> {
+        &self.callback
+    }
+
+    pub(crate) fn apply(&self, target: &EffectiveValue<T>, owner: &FerroObject, operations: CoercionOperations<T>) {
+        (self.apply)(target, owner, operations);
+    }
+}
+
+impl<T: Clone + 'static> Coercion<T> {
+    pub(crate) fn new(callback: CoerceValueCallback<T>) -> Self {
+        Self { callback, apply: EffectiveValue::<T>::apply_coercion }
+    }
+}
+
 /// Metadata for styled properties.
 pub struct StyledPropertyMetadata<T> {
     base: FerroPropertyMetadata,
     default_value: Option<T>,
-    coerce: Option<CoerceValueCallback<T>>,
+    coerce: Option<Coercion<T>>,
 }
 
 impl<T: Clone> Clone for StyledPropertyMetadata<T> {
@@ -96,10 +138,10 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
     }
 
     pub fn with_coerce(self, coerce: impl Fn(&FerroObject, T) -> T + 'static) -> Self {
-        self.with_coerce_callback(Rc::new(coerce))
+        self.with_registered_coercion(Coercion::new(Rc::new(coerce)))
     }
 
-    pub(crate) fn with_coerce_callback(mut self, coerce: CoerceValueCallback<T>) -> Self {
+    pub(crate) fn with_registered_coercion(mut self, coerce: Coercion<T>) -> Self {
         self.coerce = Some(coerce);
         self
     }
@@ -123,6 +165,10 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
     /// The value coercion callback, if any.
     #[inline]
     pub fn coerce_value(&self) -> Option<&CoerceValueCallback<T>> {
+        self.coerce.as_ref().map(Coercion::callback)
+    }
+
+    pub(crate) fn coercion(&self) -> Option<&Coercion<T>> {
         self.coerce.as_ref()
     }
 }
