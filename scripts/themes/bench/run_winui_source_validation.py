@@ -11,6 +11,8 @@ metadata registration/inheritance, property behavior and downstream typed APIs.
 The inheritance suite adds inherited-change lifetime and registration checks.
 The property-capabilities suite combines those cases with default coercion and
 shared boxed delivery, then checks fresh WinUI generation as well as Controls.
+The additive nullable-operations suite preserves that exact inventory, runs all
+24 existing value-type tests and requires each frozen nullable cleanup oracle.
 These development suites make no
 production size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,
 source identity, lockfile, logs and resource reports survive success or failure.
@@ -76,6 +78,78 @@ PROPERTY_CAPABILITIES_EXPECTED_OVERLAPS = {
     "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class": ["metadata", "property-runtime"],
     "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property": ["metadata", "property-runtime"],
     "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class": ["metadata", "property-runtime"],
+}
+
+
+# Additive nullable gate: these complete name sets are frozen with the reviewed source.
+NULLABLE_PROPERTY_REQUIRED_TESTS = (
+    'property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind',
+    'property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots',
+    'property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes',
+    'property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind',
+    'property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality',
+    'property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind',
+    'property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry',
+    'property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts',
+    'property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior',
+    'ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer',
+    'ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations',
+    'ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides',
+    'tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property',
+    'ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types',
+    'property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind',
+    'property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback',
+    'property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind',
+    'property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry',
+    'property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior',
+    'tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error',
+    'tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal',
+    'tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box',
+    'tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive',
+    'tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe',
+    'tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone',
+    'tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind',
+    'tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding',
+)
+
+NULLABLE_VALUE_TYPE_TESTS = (
+    'data::core::value_type::tests::nullable_batches_install_typed_casts_in_declaration_order',
+    'data::core::value_type::tests::registering_a_reference_twice_preserves_a_custom_handle_cast',
+    'data::core::value_type::tests::replacing_one_conversion_route_preserves_the_other_registered_views',
+    'data::core::value_type::tests::registered_numeric_conversions_keep_exact_target_types_and_checked_edges',
+    'data::core::value_type::tests::registered_casts_of_reference_types_apply_to_every_form',
+    'data::core::value_type::tests::reference_casts_make_nothing_else_assignable',
+    'data::core::value_type::tests::reference_object_is_the_object_form_of_a_handle',
+    'data::core::value_type::tests::borrowed_and_boxed_casts_share_the_callback_and_allow_reentrant_lookup',
+    'data::core::value_type::tests::enumerations_convert_to_numbers_and_numbers_to_enumerations',
+    'data::core::value_type::tests::values_without_a_display_form_print_the_full_name_of_their_type',
+    'data::core::value_type::tests::types_print_their_full_name',
+    'data::core::value_type::tests::a_number_becomes_text_as_the_culture_formats_it',
+    'data::core::value_type::tests::text_becomes_a_number_as_the_culture_writes_it',
+    'data::core::value_type::tests::every_number_converts_to_every_numeric_type',
+    'data::core::value_type::tests::floating_point_numbers_and_decimals_convert_to_each_other',
+    'data::core::value_type::tests::a_decimal_converts_to_an_integer_rounded_and_in_range',
+    'data::core::value_type::tests::numbers_convert_between_the_other_types_as_the_runtime_converts_them',
+    'data::core::value_type::tests::booleans_and_numbers_convert_to_each_other',
+    'data::core::value_type::tests::characters_and_integers_convert_to_each_other',
+    'data::core::value_type::tests::numbers_and_text_convert_to_each_other',
+    'data::core::value_type::tests::the_implicit_conversions_of_numbers_are_those_of_the_language',
+    'data::core::value_type::tests::the_implicit_conversions_of_a_character_and_of_a_boolean_are_those_of_the_table',
+    'data::core::value_type::tests::values_are_ordered_with_the_right_operand_converted_to_the_type_of_the_left_one',
+    'data::core::value_type::tests::registered_orderings_compare_values_of_the_type',
+)
+NULLABLE_OPERATION_TESTS = (
+    'data::core::value_type::nullable_operation_tests::ordinary_nullable_operations_match_original_cleanup_oracles',
+    'data::core::value_type::nullable_operation_tests::nullable_operations_preserve_nested_exact_types_and_nulls',
+    'data::core::value_type::nullable_operation_tests::nullable_clone_reentry_preserves_current_snapshot_and_later_overrides',
+    'data::core::value_type::nullable_operation_tests::nullable_registration_keeps_borrowed_cast_and_conversion_views_independent',
+    'data::core::value_type::nullable_operation_tests::reference_nullable_operations_keep_non_clone_identity_and_registration_order',
+    'data::core::value_type::nullable_operation_tests::nullable_operation_layout_keeps_enclosing_registrations_compact',
+)
+NULLABLE_EXPECTED_SUMMARIES = {
+    **PROPERTY_CAPABILITIES_EXPECTED_SUMMARIES,
+    "value-types": {"passed": len(NULLABLE_VALUE_TYPE_TESTS), "failed": 0, "ignored": 0},
+    "nullable-oracles": {"passed": len(NULLABLE_OPERATION_TESTS), "failed": 0, "ignored": 0},
 }
 
 
@@ -210,6 +284,58 @@ def property_capabilities_inventory(rows, required_tests):
             "repeated_test_executions": executions - len(observed), "test_name_overlaps": overlaps}
 
 
+def nullable_suite_commands(cargo):
+    """Extend the unchanged property-capability plan with two fixed filters."""
+    if not NULLABLE_OPERATION_TESTS:
+        raise ValueError("Nullable oracle names must be frozen before this suite can execute")
+    commands, labels = suite_commands(cargo, "property-capabilities")
+    template = commands[0][1]
+    assert template[-2:] == ["--", "--test-threads=1"]
+    additions = [
+        ("value-types", [*template[:-3], "data::core::value_type::tests::", *template[-2:]]),
+        ("nullable-oracles", [*template[:-3], "data::core::value_type::nullable_operation_tests::", *template[-2:], "--show-output"]),
+    ]
+    assert [label for label, _ in commands[-2:]] == ["downstream", "fresh-winui"]
+    return [*commands[:-2], *additions, *commands[-2:]], labels | {label for label, _ in additions}
+
+
+def nullable_operation_inventory(rows, required_tests):
+    """Keep the original 415/411 proof and independently verify both added sets."""
+    if not NULLABLE_OPERATION_TESTS:
+        raise RuntimeError("Nullable oracle names have not been frozen")
+    labels = [row["label"] for row in rows]
+    if len(labels) != len(NULLABLE_EXPECTED_SUMMARIES) or set(labels) != set(NULLABLE_EXPECTED_SUMMARIES):
+        raise RuntimeError("nullable-operations requires all ten exact test phases")
+    expected_required = {*NULLABLE_PROPERTY_REQUIRED_TESTS, *NULLABLE_OPERATION_TESTS}
+    if len(required_tests) != len(expected_required) or set(required_tests) != expected_required:
+        raise RuntimeError("nullable-operations requires exactly the original 27 and every frozen nullable oracle")
+    base_rows = [row for row in rows if row["label"] in PROPERTY_CAPABILITIES_EXPECTED_SUMMARIES]
+    preserved = property_capabilities_inventory(base_rows, list(NULLABLE_PROPERTY_REQUIRED_TESTS))
+    base_names = {name for row in base_rows for name in row["passed_tests"]}
+    observed = set(base_names)
+    for label, expected_names in (("value-types", NULLABLE_VALUE_TYPE_TESTS), ("nullable-oracles", NULLABLE_OPERATION_TESTS)):
+        row, = [item for item in rows if item["label"] == label]
+        names = row["passed_tests"]
+        if row.get("complete") is not True or row.get("exit") != 0 or row.get("test_summary") != NULLABLE_EXPECTED_SUMMARIES[label]:
+            raise RuntimeError(f"{label} does not match its exact completed nullable summary")
+        if len(names) != len(expected_names) or len(set(names)) != len(names) or set(names) != set(expected_names):
+            raise RuntimeError(f"{label} differs from its complete frozen test-name set")
+        if observed.intersection(names):
+            raise RuntimeError(f"{label} unexpectedly overlaps another test phase")
+        observed.update(names)
+    if not set(required_tests) <= observed:
+        raise RuntimeError("A mandatory nullable regression did not pass")
+    executions = preserved["total_passed_executions"] + len(NULLABLE_VALUE_TYPE_TESTS) + len(NULLABLE_OPERATION_TESTS)
+    distinct = preserved["total_distinct_passed"] + len(NULLABLE_VALUE_TYPE_TESTS) + len(NULLABLE_OPERATION_TESTS)
+    if len(observed) != distinct:
+        raise RuntimeError("Nullable distinct-name accounting differs")
+    return {"total_passed_executions": executions, "total_distinct_passed": distinct,
+            "repeated_test_executions": 4, "test_name_overlaps": preserved["test_name_overlaps"],
+            "preserved_property_capabilities_inventory": preserved,
+            "additional_value_type_tests": sorted(NULLABLE_VALUE_TYPE_TESTS),
+            "additional_nullable_oracles": sorted(NULLABLE_OPERATION_TESTS)}
+
+
 def collect_generated_winui(target, evidence):
     generated = []
     for path in sorted(target.rglob("compiled_xaml.rs")):
@@ -231,7 +357,7 @@ def main():
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--suite", choices=("metadata", "coercion", "inheritance", "control-theme", "control-theme-regions", "property-capabilities"), default="metadata")
+    parser.add_argument("--suite", choices=("metadata", "coercion", "inheritance", "control-theme", "control-theme-regions", "property-capabilities", "nullable-operations"), default="metadata")
     parser.add_argument("--required-test", action="append", default=[])
     parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
@@ -242,6 +368,12 @@ def main():
         parser.error("--required-test must be a Rust test path")
     if args.suite == "property-capabilities" and (len(args.required_test) != 27 or len(set(args.required_test)) != 27):
         parser.error("property-capabilities requires the 27 distinct frozen regression names")
+    if args.suite == "nullable-operations":
+        expected_required = {*NULLABLE_PROPERTY_REQUIRED_TESTS, *NULLABLE_OPERATION_TESTS}
+        if not NULLABLE_OPERATION_TESTS:
+            parser.error("Nullable oracle names must be frozen before this suite can execute")
+        if len(args.required_test) != len(expected_required) or set(args.required_test) != expected_required:
+            parser.error("nullable-operations requires exactly the original 27 and all frozen nullable oracle names")
     if git(source, "rev-parse", "HEAD") != args.revision:
         parser.error("source checkout does not match --revision")
     if git(source, "status", "--porcelain", "--untracked-files=all"):
@@ -282,7 +414,7 @@ def main():
                        "--work-dir", str(output / "toolchain")]),
     ]
     cargo = str(prefix / "bin/cargo")
-    planned, test_labels = suite_commands(cargo, args.suite)
+    planned, test_labels = nullable_suite_commands(cargo) if args.suite == "nullable-operations" else suite_commands(cargo, args.suite)
     commands.extend(planned)
     report = {
         "schema": 2, "scope": __doc__, "suite": args.suite, "revision": args.revision,
@@ -307,6 +439,13 @@ def main():
         report["expected_total_distinct_passed"] = 411
         report["expected_name_overlaps"] = PROPERTY_CAPABILITIES_EXPECTED_OVERLAPS
         report["expected_generated_program_counts"] = PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS
+    elif args.suite == "nullable-operations":
+        report["expected_test_summaries"] = NULLABLE_EXPECTED_SUMMARIES
+        report["expected_total_passed"] = 415 + len(NULLABLE_VALUE_TYPE_TESTS) + len(NULLABLE_OPERATION_TESTS)
+        report["expected_total_distinct_passed"] = 411 + len(NULLABLE_VALUE_TYPE_TESTS) + len(NULLABLE_OPERATION_TESTS)
+        report["expected_name_overlaps"] = PROPERTY_CAPABILITIES_EXPECTED_OVERLAPS
+        report["expected_generated_program_counts"] = PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS
+        report["expected_additional_test_names"] = {"value-types": list(NULLABLE_VALUE_TYPE_TESTS), "nullable-oracles": list(NULLABLE_OPERATION_TESTS)}
     tracked = evidence / "tracked-inputs.txt"
     tracked.write_text(git(source, "ls-files", "--stage") + "\n")
     report["tracked_inputs"] = identity(tracked)
@@ -334,6 +473,9 @@ def main():
                 if args.suite == "property-capabilities":
                     report.update(property_capabilities_inventory(
                         [row for row in report["commands"] if "test_summary" in row], args.required_test))
+                elif args.suite == "nullable-operations":
+                    report.update(nullable_operation_inventory(
+                        [row for row in report["commands"] if "test_summary" in row], args.required_test))
             log = evidence / (label + ".log")
             resources = evidence / (label + "-resources.txt")
             argv = ["/usr/bin/time", "-v", "-o", str(resources), *command]
@@ -351,7 +493,7 @@ def main():
                     raise RuntimeError(f"{label} exited {row['exit']}; see {log}")
                 if label in test_labels:
                     contents = log.read_text()
-                    parse_tests = successful_property_capabilities_tests if args.suite == "property-capabilities" else successful_tests
+                    parse_tests = successful_property_capabilities_tests if args.suite in {"property-capabilities", "nullable-operations"} else successful_tests
                     row["test_summary"], passed = parse_tests(contents, label)
                     row["passed_tests"] = sorted(passed)
                     expected = report.get("expected_test_summaries", {}).get(label)
@@ -390,18 +532,18 @@ def main():
                 report["environment"]["toolchain_path_prefix"] = str(prefix / "bin")
                 report["environment"]["toolchain_library_prefix"] = str(prefix / "lib")
                 report["environment"]["rustc"] = environment["RUSTC"]
-        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities"}:
+        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities", "nullable-operations"}:
             report["generated_winui"] = collect_generated_winui(output / "target", evidence)
             if not any(row["construction_programs"] for row in report["generated_winui"]):
                 raise RuntimeError("fresh WinUI output contains no accepted ControlTheme construction programs")
-            if args.suite in {"control-theme-regions", "property-capabilities"}:
+            if args.suite in {"control-theme-regions", "property-capabilities", "nullable-operations"}:
                 report["generated_program_counts"] = {
                     key: sum(row[key] for row in report["generated_winui"])
                     for key in ("construction_programs", "region_programs")
                 }
                 if not any(row["region_programs"] for row in report["generated_winui"]):
                     raise RuntimeError("fresh WinUI output contains no accepted Style region programs")
-                if args.suite == "property-capabilities" and report["generated_program_counts"] != PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS:
+                if args.suite in {"property-capabilities", "nullable-operations"} and report["generated_program_counts"] != PROPERTY_CAPABILITIES_EXPECTED_PROGRAMS:
                     raise RuntimeError("fresh WinUI output does not match the frozen 18 whole-theme and 34 Style region programs")
         report["complete"] = True
     except BaseException as error:
@@ -409,7 +551,7 @@ def main():
         raise
     finally:
         previously_complete = report["complete"]
-        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities"} and "generated_winui" not in report:
+        if args.suite in {"control-theme", "control-theme-regions", "property-capabilities", "nullable-operations"} and "generated_winui" not in report:
             try:
                 report["generated_winui"] = collect_generated_winui(output / "target", evidence)
             except Exception as error:
