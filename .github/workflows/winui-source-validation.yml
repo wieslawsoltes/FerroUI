@@ -1,0 +1,60 @@
+name: Focused WinUI source validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Immutable source commit for development correctness gates'
+        default: '81e50934f1f0951853734c2296cb90c3cb05e946'
+        required: true
+        type: string
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-source-validation.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-source-validation-${{ github.ref }}-${{ inputs.revision || '81e50934f1f0951853734c2296cb90c3cb05e946' }}
+  cancel-in-progress: false
+
+jobs:
+  source-validation:
+    name: Actual Base tests and downstream metadata expansion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.revision || '81e50934f1f0951853734c2296cb90c3cb05e946' }}
+          path: source
+          persist-credentials: false
+      - name: Native development dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config time
+      - name: Compile immutable source and run focused gates
+        env:
+          SOURCE_REVISION: ${{ inputs.revision || '81e50934f1f0951853734c2296cb90c3cb05e946' }}
+        run: |
+          python3 tooling/scripts/themes/bench/run_winui_source_validation.py \
+            --source "$GITHUB_WORKSPACE/source" \
+            --revision "$SOURCE_REVISION" \
+            --output "$RUNNER_TEMP/winui-source-validation" \
+            --required-test metadata::accessor_tests::getter_callable_lives_through_result_conversion_and_unwind \
+            --required-test metadata::accessor_tests::accessor_expressions_follow_arity_receiver_and_value_checks \
+            --required-test metadata::accessor_tests::setter_callable_errors_and_panics_keep_argument_cleanup_order
+      - name: Preserve commands, inputs, results and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-source-validation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-source-validation/evidence
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 14

@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+"""Run focused development gates against one immutable repository revision.
+
+This compiles the actual Base unit-test crate and downstream Controls metadata.
+The test filters narrow execution, not compilation. It makes no production size,
+throughput, PGO or shipping-acceptance claim. Toolchain, commands, source identity,
+lockfile, logs and GNU time resource reports are retained on success or failure.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import time
+
+
+HERE = Path(__file__).resolve().parent
+HOST = "x86_64-unknown-linux-gnu"
+
+
+def identity(path):
+    path = Path(path).resolve(strict=True)
+    with path.open("rb") as stream:
+        digest = hashlib.file_digest(stream, "sha256").hexdigest()
+    return {"path": str(path), "bytes": path.stat().st_size, "sha256": digest}
+
+
+def save(path, value):
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+    temporary.replace(path)
+
+
+def git(source, *arguments):
+    return subprocess.check_output(["git", "-C", str(source), *arguments], text=True).strip()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", required=True, type=Path)
+    parser.add_argument("--revision", required=True)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--required-test", action="append", default=[])
+    parser.add_argument("--plan-only", action="store_true")
+    args = parser.parse_args()
+    source = args.source.resolve(strict=True)
+    if not re.fullmatch(r"[0-9a-f]{40}", args.revision):
+        parser.error("--revision must be a full immutable commit SHA")
+    if any(not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9:]*", name) for name in args.required_test):
+        parser.error("--required-test must be a Rust test path")
+    if git(source, "rev-parse", "HEAD") != args.revision:
+        parser.error("source checkout does not match --revision")
+    if git(source, "status", "--porcelain", "--untracked-files=all"):
+        parser.error("source checkout has modified or untracked inputs")
+    output = args.output.resolve()
+    if output.exists() or output.is_relative_to(source):
+        parser.error("use a fresh output directory outside the source checkout")
+    evidence = output / "evidence"
+    evidence.mkdir(parents=True)
+    temporary = output / "temporary"
+    temporary.mkdir()
+    prefix = output / "toolchain/install"
+    environment = os.environ.copy()
+    removed = []
+    for key in list(environment):
+        if key.startswith(("CARGO_PROFILE_", "FERROUI_PGO_")) or key in {
+            "RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS", "RUSTC", "RUSTC_WRAPPER",
+            "RUSTC_WORKSPACE_WRAPPER", "RUSTC_BOOTSTRAP", "LLVM_PROFILE_FILE",
+        }:
+            removed.append(key)
+            del environment[key]
+    controlled = {
+        "TMPDIR": str(temporary), "CARGO_HOME": str(output / "cargo-home"),
+        "CARGO_TARGET_DIR": str(output / "target"), "CARGO_BUILD_JOBS": "1",
+        "CARGO_INCREMENTAL": "0", "RAYON_NUM_THREADS": "1", "MALLOC_ARENA_MAX": "1",
+        "MALLOC_CONF": "narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+        "CARGO_TERM_COLOR": "never", "RUST_BACKTRACE": "1",
+        "CARGO_PROFILE_DEV_OPT_LEVEL": "0", "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_DEV_DEBUG_ASSERTIONS": "true",
+        "CARGO_PROFILE_DEV_CODEGEN_UNITS": "128", "CARGO_PROFILE_DEV_LTO": "false",
+        "CARGO_PROFILE_TEST_OPT_LEVEL": "0", "CARGO_PROFILE_TEST_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG_ASSERTIONS": "true",
+        "CARGO_PROFILE_TEST_CODEGEN_UNITS": "128", "CARGO_PROFILE_TEST_LTO": "false",
+    }
+    environment.update(controlled)
+    commands = [
+        ("bootstrap", [sys.executable, str(HERE / "bootstrap_toolchain.py"),
+                       "--work-dir", str(output / "toolchain")]),
+    ]
+    cargo = str(prefix / "bin/cargo")
+    common = [cargo, "test", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
+              "--features", "compiler-metadata,hot-reload"]
+    for label, test_filter in (("metadata", "metadata::"), ("object-smoke", "ferro_object_tests::"),
+                               ("properties", "tests::ferro_object_tests")):
+        commands.append((label, [*common, test_filter, "--", "--test-threads=1"]))
+    commands.append(("downstream", [cargo, "check", "--locked", "--target", HOST, "--lib",
+                     "-p", "ferroui-base", "-p", "ferroui-controls", "--features",
+                     "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]))
+    report = {
+        "schema": 1, "scope": __doc__, "revision": args.revision,
+        "tree": git(source, "rev-parse", "HEAD^{tree}"), "source": str(source),
+        "producer": identity(__file__), "bootstrap_producer": identity(HERE / "bootstrap_toolchain.py"),
+        "lockfile_before": identity(source / "Cargo.lock"), "commands": [],
+        "environment": {"removed_names": sorted(removed), "controlled": controlled},
+        "started_unix": time.time(), "complete": False, "plan_only": args.plan_only,
+        "production_acceptance": False,
+        "required_metadata_tests": args.required_test,
+    }
+    tracked = evidence / "tracked-inputs.txt"
+    tracked.write_text(git(source, "ls-files", "--stage") + "\n")
+    report["tracked_inputs"] = identity(tracked)
+    manifest = evidence / "validation.json"
+    save(manifest, report)
+    if args.plan_only:
+        report["planned_commands"] = [{"label": label, "argv": command} for label, command in commands]
+        save(manifest, report)
+        print(manifest)
+        return
+    def interrupted(signum, _frame):
+        raise InterruptedError(f"Source validation interrupted by signal {signum}")
+
+    previous_sigterm = signal.signal(signal.SIGTERM, interrupted)
+    try:
+        for label, command in commands:
+            log = evidence / (label + ".log")
+            resources = evidence / (label + "-resources.txt")
+            argv = ["/usr/bin/time", "-v", "-o", str(resources), *command]
+            row = {"label": label, "argv": argv, "cwd": str(source), "started_unix": time.time(), "complete": False}
+            report["commands"].append(row)
+            save(manifest, report)
+            print(f"START {label}", flush=True)
+            process = None
+            try:
+                with log.open("w") as stream:
+                    process = subprocess.Popen(argv, cwd=source, env=environment, stdout=stream,
+                                               stderr=subprocess.STDOUT, start_new_session=True)
+                    row["exit"] = process.wait()
+                if row["exit"]:
+                    raise RuntimeError(f"{label} exited {row['exit']}; see {log}")
+                if label in {"metadata", "object-smoke", "properties"}:
+                    contents = log.read_text()
+                    summaries = re.findall(r"test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored;", contents)
+                    if len(summaries) != 1 or int(summaries[0][0]) == 0 or int(summaries[0][1]) != 0:
+                        raise RuntimeError(f"{label} did not report one nonempty successful test suite")
+                    row["test_summary"] = dict(zip(("passed", "failed", "ignored"), map(int, summaries[0])))
+                    if label == "metadata":
+                        for name in args.required_test:
+                            if not re.search(r"(?m)^test " + re.escape(name) + r" \.\.\. ok$", contents):
+                                raise RuntimeError(f"required metadata regression did not pass: {name}")
+                row["complete"] = True
+            finally:
+                if process is not None and process.poll() is None:
+                    os.killpg(process.pid, signal.SIGTERM)
+                    try:
+                        process.wait(timeout=15)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGKILL)
+                        process.wait()
+                    row["exit"] = process.returncode
+                row["finished_unix"] = time.time()
+                if log.exists():
+                    row["log"] = identity(log)
+                if resources.exists():
+                    row["resources"] = identity(resources)
+                save(manifest, report)
+                print(f"END {label}: exit={row.get('exit')} complete={row['complete']}", flush=True)
+            if label == "bootstrap":
+                installation = output / "toolchain/installation.json"
+                shutil.copy2(installation, evidence / "installation.json")
+                report["toolchain"] = identity(evidence / "installation.json")
+                environment["RUSTC"] = str(prefix / "bin/rustc")
+                environment["PATH"] = str(prefix / "bin") + os.pathsep + environment["PATH"]
+                environment["LD_LIBRARY_PATH"] = str(prefix / "lib") + (
+                    os.pathsep + environment["LD_LIBRARY_PATH"] if environment.get("LD_LIBRARY_PATH") else "")
+                report["environment"]["toolchain_path_prefix"] = str(prefix / "bin")
+                report["environment"]["toolchain_library_prefix"] = str(prefix / "lib")
+                report["environment"]["rustc"] = environment["RUSTC"]
+        report["complete"] = True
+    except BaseException as error:
+        report["failure"] = str(error)
+        raise
+    finally:
+        previously_complete = report["complete"]
+        try:
+            report["source_after"] = {
+                "head": git(source, "rev-parse", "HEAD"), "tree": git(source, "rev-parse", "HEAD^{tree}"),
+                "status": git(source, "status", "--porcelain", "--untracked-files=all"),
+                "lockfile": identity(source / "Cargo.lock"),
+            }
+            after = report["source_after"]
+            report["source_unchanged"] = (after["head"] == report["revision"] and after["tree"] == report["tree"]
+                                          and not after["status"] and after["lockfile"] == report["lockfile_before"])
+        except Exception as error:
+            report["source_verification_error"] = str(error)
+            report["source_unchanged"] = False
+        if not report["source_unchanged"]:
+            report["complete"] = False
+            report.setdefault("failure", "Source identity changed or could not be verified after execution")
+        report["finished_unix"] = time.time()
+        save(manifest, report)
+        signal.signal(signal.SIGTERM, previous_sigterm)
+        if previously_complete and not report["source_unchanged"]:
+            raise RuntimeError(report["failure"])
+    print(manifest)
+
+
+if __name__ == "__main__":
+    main()
