@@ -8,7 +8,7 @@ use crate::data::BindingPriority;
 use crate::reactive::{
     IDisposable, IObservable, IObserver, ObservableError, SingleSubscriberObservableBase, Subscription,
 };
-use crate::{Ref, Visual, WeakRef};
+use crate::{FerroProperty, Ref, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::{Rc, Weak};
@@ -78,6 +78,34 @@ struct StepObserver<A: Animator>(Rc<AnimationInstance<A>>);
 impl<A: Animator> IObserver<TimeSpan> for StepObserver<A> {
     fn on_next(&self, value: TimeSpan) {
         self.0.step(value);
+    }
+}
+
+// Visibility, detachment and base-property changes are infrequent lifecycle
+// events. Their subscriptions can share code without adding dispatch to the
+// frame observer or moving the typed values out of this instance.
+trait AnimationActions {
+    fn weak_actions(&self) -> Weak<dyn AnimationActions>;
+    fn property(&self) -> Option<&'static FerroProperty>;
+    fn complete(&self);
+    fn update_neutral_value(&self);
+}
+
+impl<A: Animator> AnimationActions for AnimationInstance<A> {
+    fn weak_actions(&self) -> Weak<dyn AnimationActions> {
+        self.this.clone()
+    }
+
+    fn property(&self) -> Option<&'static FerroProperty> {
+        self.animator.base().property()
+    }
+
+    fn complete(&self) {
+        self.do_complete(false);
+    }
+
+    fn update_neutral_value(&self) {
+        AnimationInstance::update_neutral_value(self);
     }
 }
 
@@ -208,25 +236,13 @@ impl<A: Animator> AnimationInstance<A> {
             self.apply_final_fill(value);
         }
 
-        let property_changed_sub = self.property_changed_sub.borrow_mut().take();
-        if let Some(subscription) = property_changed_sub {
-            subscription.dispose();
-        }
-        timer_sub.dispose();
-
-        let visibility_changed_sub = self.visibility_changed_sub.borrow_mut().take();
-        if let Some(subscription) = visibility_changed_sub {
-            subscription.dispose();
-        }
-        let detached_sub = self.detached_sub.borrow_mut().take();
-        if let Some(subscription) = detached_sub {
-            subscription.dispose();
-        }
-
-        let clock = self.clock.borrow().clone();
-        if let Some(clock) = clock {
-            clock.set_play_state(PlayState::Stop);
-        }
+        finish_unsubscribe(
+            &self.property_changed_sub,
+            timer_sub,
+            &self.visibility_changed_sub,
+            &self.detached_sub,
+            &self.clock,
+        );
     }
 
     fn subscribed(&self) {
@@ -238,56 +254,19 @@ impl<A: Animator> AnimationInstance<A> {
         let timer_sub = clock.subscribe(Rc::new(StepObserver(this)));
         *self.timer_sub.borrow_mut() = Some(Subscription::new(timer_sub));
 
-        if let Some(visual) = self.visual_target.as_ref().and_then(WeakRef::upgrade) {
-            if self.should_pause_on_invisible {
-                let weak_clock = Rc::downgrade(&clock);
-                let weak_visual = visual.downgrade();
-                let subscription = visual.is_effectively_visible_changed(move || {
-                    let (Some(clock), Some(visual)) = (weak_clock.upgrade(), weak_visual.upgrade())
-                    else {
-                        return;
-                    };
-                    if clock.play_state() == PlayState::Stop {
-                        return;
-                    }
-                    if visual.is_effectively_visible() {
-                        if clock.play_state() == PlayState::Pause {
-                            clock.set_play_state(PlayState::Run);
-                        }
-                    } else if clock.play_state() == PlayState::Run {
-                        clock.set_play_state(PlayState::Pause);
-                    }
-                });
-                *self.visibility_changed_sub.borrow_mut() = Some(subscription);
-
-                // If already invisible when animation starts, pause immediately.
-                if !visual.is_effectively_visible() {
-                    clock.set_play_state(PlayState::Pause);
-                }
-            }
-
-            // Stop and dispose the animation when detached from the visual tree.
-            let this = self.this.clone();
-            let subscription = visual.detached_from_visual_tree(move |_| {
-                if let Some(this) = this.upgrade() {
-                    this.do_complete(false);
-                }
-            });
-            *self.detached_sub.borrow_mut() = Some(subscription);
-        }
-
-        if let Some(control) = self.target_control.upgrade() {
-            let this = self.this.clone();
-            let property = self.animator.base().property();
-            let subscription = control.property_changed(move |e| {
-                if Some(e.property()) == property && e.priority() > BindingPriority::Animation {
-                    if let Some(this) = this.upgrade() {
-                        this.update_neutral_value();
-                    }
-                }
-            });
-            *self.property_changed_sub.borrow_mut() = Some(Subscription::new(subscription));
-        }
+        subscribe_visual(
+            self.visual_target.as_ref(),
+            &clock,
+            self.should_pause_on_invisible,
+            self,
+            &self.visibility_changed_sub,
+            &self.detached_sub,
+        );
+        subscribe_property(
+            &self.target_control,
+            self,
+            &self.property_changed_sub,
+        );
         self.update_neutral_value();
     }
 
@@ -644,6 +623,104 @@ impl<A: Animator> AnimationInstance<A> {
             None => control.get_value(property),
         };
         *self.neutral_value.borrow_mut() = value;
+    }
+}
+
+#[inline(never)]
+fn finish_unsubscribe(
+    property_changed_sub: &RefCell<Option<Subscription>>,
+    timer_sub: Subscription,
+    visibility_changed_sub: &RefCell<Option<Subscription>>,
+    detached_sub: &RefCell<Option<Subscription>>,
+    clock: &RefCell<Option<Rc<Clock>>>,
+) {
+    // Take each guard immediately before disposing it, in the original order.
+    // Destructors and completion handlers may reenter the animation; no RefCell
+    // guard may survive one of these calls.
+    let property_changed_sub = property_changed_sub.borrow_mut().take();
+    if let Some(subscription) = property_changed_sub {
+        subscription.dispose();
+    }
+    timer_sub.dispose();
+
+    let visibility_changed_sub = visibility_changed_sub.borrow_mut().take();
+    if let Some(subscription) = visibility_changed_sub {
+        subscription.dispose();
+    }
+    let detached_sub = detached_sub.borrow_mut().take();
+    if let Some(subscription) = detached_sub {
+        subscription.dispose();
+    }
+
+    let clock = clock.borrow().clone();
+    if let Some(clock) = clock {
+        clock.set_play_state(PlayState::Stop);
+    }
+}
+
+#[inline(never)]
+fn subscribe_visual(
+    visual_target: Option<&WeakRef<Visual>>,
+    clock: &Rc<Clock>,
+    should_pause_on_invisible: bool,
+    actions: &dyn AnimationActions,
+    visibility_changed_sub: &RefCell<Option<Subscription>>,
+    detached_sub: &RefCell<Option<Subscription>>,
+) {
+    let Some(visual) = visual_target.and_then(WeakRef::upgrade) else {
+        return;
+    };
+    if should_pause_on_invisible {
+        let weak_clock = Rc::downgrade(clock);
+        let weak_visual = visual.downgrade();
+        let subscription = visual.is_effectively_visible_changed(move || {
+            let (Some(clock), Some(visual)) = (weak_clock.upgrade(), weak_visual.upgrade()) else {
+                return;
+            };
+            if clock.play_state() == PlayState::Stop {
+                return;
+            }
+            if visual.is_effectively_visible() {
+                if clock.play_state() == PlayState::Pause {
+                    clock.set_play_state(PlayState::Run);
+                }
+            } else if clock.play_state() == PlayState::Run {
+                clock.set_play_state(PlayState::Pause);
+            }
+        });
+        *visibility_changed_sub.borrow_mut() = Some(subscription);
+
+        if !visual.is_effectively_visible() {
+            clock.set_play_state(PlayState::Pause);
+        }
+    }
+
+    let this = actions.weak_actions();
+    let subscription = visual.detached_from_visual_tree(move |_| {
+        if let Some(this) = this.upgrade() {
+            this.complete();
+        }
+    });
+    *detached_sub.borrow_mut() = Some(subscription);
+}
+
+#[inline(never)]
+fn subscribe_property(
+    target_control: &WeakRef<Animatable>,
+    actions: &dyn AnimationActions,
+    property_changed_sub: &RefCell<Option<Subscription>>,
+) {
+    if let Some(control) = target_control.upgrade() {
+        let this = actions.weak_actions();
+        let property = actions.property();
+        let subscription = control.property_changed(move |e| {
+            if Some(e.property()) == property && e.priority() > BindingPriority::Animation {
+                if let Some(this) = this.upgrade() {
+                    this.update_neutral_value();
+                }
+            }
+        });
+        *property_changed_sub.borrow_mut() = Some(Subscription::new(subscription));
     }
 }
 

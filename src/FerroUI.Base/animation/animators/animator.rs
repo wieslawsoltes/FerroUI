@@ -164,12 +164,7 @@ pub(crate) fn apply_with_visual<A: Animator>(
         should_pause_on_invisible,
         visual_target,
     ));
-    let subscription = match_.subscribe(subject.clone());
-    let subject: Rc<dyn IDisposable> = subject;
-    Rc::new(CompositeDisposable::from_disposables([
-        subscription,
-        subject,
-    ]))
+    crate::animation::dispose_animation_instance_subject::subscribe(subject, match_)
 }
 
 /// Runs the animation once: creates the instance that produces the values
