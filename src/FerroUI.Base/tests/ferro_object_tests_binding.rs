@@ -1112,10 +1112,24 @@ fn boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe() {
     assert_eq!(target.get_value(property), 11);
     assert_eq!(source.subscriber_count(), 1);
 
+    // A local value masks the effective value without replacing the style
+    // entry, so the original subscription remains active.
     target.set_value(property, 29);
-    assert_eq!(source.subscriber_count(), 0);
-    property.override_metadata::<Class2>(StyledPropertyMetadata::new(Some(47)));
+    assert_eq!(source.subscriber_count(), 1);
+    assert_eq!(target.get_value(property), 29);
     target.clear_value(property);
+    assert_eq!(source.subscriber_count(), 1);
+    assert_eq!(target.get_value(property), 11);
+
+    // A higher-priority frame replaces the active entry and actually
+    // unsubscribes it. Disposing that frame exercises the quiet restart.
+    let masking = target
+        .set_value_with_priority(property, 29, BindingPriority::Template)
+        .expect("a template value has a disposal handle");
+    assert_eq!(source.subscriber_count(), 0);
+    assert_eq!(target.get_value(property), 29);
+    property.override_metadata::<Class2>(StyledPropertyMetadata::new(Some(47)));
+    masking.dispose();
 
     assert_eq!(source.subscriber_count(), 1);
     assert_eq!(target.get_value(property), 11);

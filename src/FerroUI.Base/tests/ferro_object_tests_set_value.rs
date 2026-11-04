@@ -188,7 +188,13 @@ fn untyped_conversion_temporary_drops_before_validation_or_coercion() {
                 assert_eq!(writes.get(), 1);
             } else {
                 assert_eq!(target.get_value(styled).number, 29);
-                assert!(validations.get() > 0);
+                // SetCurrentValue retains the original route's validation
+                // bypass; both setter routes still apply coercion.
+                if current {
+                    assert_eq!(validations.get(), 0);
+                } else {
+                    assert!(validations.get() > 0);
+                }
                 assert!(coercions.get() > 0);
             }
         }
