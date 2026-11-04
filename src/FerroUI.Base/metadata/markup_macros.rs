@@ -548,9 +548,10 @@ macro_rules! __ferro_markup_events {
             arguments: &[$($crate::data::core::ValueType::of::<$argument>),*],
             add: |arguments| {
                 let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
-                let this = arguments.next::<$this>()?;
+                let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+                let this: &$this = &this;
                 let handler = arguments.next::<$crate::metadata::MarkupDelegate>()?;
-                ::std::result::Result::Ok($crate::metadata::MarkupEvent::subscription_value(($add)(&this, handler)))
+                ::std::result::Result::Ok($crate::metadata::MarkupEvent::subscription_value(($add)(this, handler)))
             },
         },] $($($rest)*)?)
     };
@@ -560,9 +561,10 @@ macro_rules! __ferro_markup_events {
             arguments: &[$($crate::data::core::ValueType::of::<$argument>),*],
             add: |arguments| {
                 let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
-                let this = arguments.next::<$this>()?;
+                let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+                let this: &$this = &this;
                 let handler = arguments.next::<$crate::metadata::MarkupDelegate>()?;
-                let subscription = $crate::metadata::markup_result(($add)(&this, handler))?;
+                let subscription = $crate::metadata::markup_result(($add)(this, handler))?;
                 ::std::result::Result::Ok($crate::metadata::MarkupEvent::subscription_value(subscription))
             },
         },] $($($rest)*)?)
@@ -688,6 +690,17 @@ macro_rules! __ferro_markup_unit {
 
 #[doc(hidden)]
 #[macro_export]
+macro_rules! __ferro_markup_receiver {
+    ($this:ty, $arguments:ident) => {{
+        #[allow(unused_imports)]
+        use $crate::metadata::receiver::{OwnedMarkupReceiverFallback as _, SharedMarkupReceiver as _};
+        let probe = &&$crate::metadata::receiver::MarkupReceiverProbe::<$this>::new();
+        probe.markup_receiver(&mut $arguments)
+    }};
+}
+
+#[doc(hidden)]
+#[macro_export]
 macro_rules! __ferro_markup_getter {
     ($this:ty, $type_:ty;) => {
         ::std::option::Option::None
@@ -695,16 +708,18 @@ macro_rules! __ferro_markup_getter {
     ($this:ty, $type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
             let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
-            let this = arguments.next::<$this>()?;
-            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)(&this)))
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
+            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)(this)))
         })
     };
     ($this:ty, $type_:ty; try_get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
             let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
-                $crate::metadata::markup_result(($get)(&this))?,
+                $crate::metadata::markup_result(($get)(this))?,
             ))
         })
     };
@@ -725,18 +740,20 @@ macro_rules! __ferro_markup_setter {
     ($this:ty, $type_:ty; set: $set:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
             let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             let value = arguments.next::<$type_>()?;
-            let _ = ($set)(&this, value);
+            let _ = ($set)(this, value);
             ::std::result::Result::Ok(::std::option::Option::None)
         })
     };
     ($this:ty, $type_:ty; try_set: $set:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
             let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             let value = arguments.next::<$type_>()?;
-            let _ = $crate::metadata::markup_result(($set)(&this, value))?;
+            let _ = $crate::metadata::markup_result(($set)(this, value))?;
             ::std::result::Result::Ok(::std::option::Option::None)
         })
     };
@@ -1519,9 +1536,10 @@ macro_rules! __ferro_markup_method {
                     arguments,
                     1 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
                 )?;
-                let this = arguments.next::<$this>()?;
+                let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+                let this: &$this = &this;
                 $crate::__ferro_markup_method_result!(
-                    $try_ ($($return_)?) ($call)(&this $(, arguments.next::<$parameter>()?)*)
+                    $try_ ($($return_)?) ($call)(this $(, arguments.next::<$parameter>()?)*)
                 )
             },
             attributes: $crate::__ferro_markup_attributes!([] $($attributes)*),
@@ -1622,9 +1640,10 @@ macro_rules! __ferro_markup_indexer_getter {
                 arguments,
                 1 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
             )?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
-                ($get)(&this $(, arguments.next::<$parameter>()?)*),
+                ($get)(this $(, arguments.next::<$parameter>()?)*),
             ))
         })
     };
@@ -1634,9 +1653,10 @@ macro_rules! __ferro_markup_indexer_getter {
                 arguments,
                 1 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
             )?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
-                $crate::metadata::markup_result(($get)(&this $(, arguments.next::<$parameter>()?)*))?,
+                $crate::metadata::markup_result(($get)(this $(, arguments.next::<$parameter>()?)*))?,
             ))
         })
     };
@@ -1660,8 +1680,9 @@ macro_rules! __ferro_markup_indexer_setter {
                 arguments,
                 2 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
             )?;
-            let this = arguments.next::<$this>()?;
-            let _ = ($set)(&this $(, arguments.next::<$parameter>()?)*, arguments.next::<$type_>()?);
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
+            let _ = ($set)(this $(, arguments.next::<$parameter>()?)*, arguments.next::<$type_>()?);
             ::std::result::Result::Ok(::std::option::Option::None)
         })
     };
@@ -1671,9 +1692,10 @@ macro_rules! __ferro_markup_indexer_setter {
                 arguments,
                 2 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
             )?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             let _ = $crate::metadata::markup_result(
-                ($set)(&this $(, arguments.next::<$parameter>()?)*, arguments.next::<$type_>()?),
+                ($set)(this $(, arguments.next::<$parameter>()?)*, arguments.next::<$type_>()?),
             )?;
             ::std::result::Result::Ok(::std::option::Option::None)
         })

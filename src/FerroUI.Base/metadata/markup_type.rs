@@ -353,6 +353,31 @@ impl<'a> MarkupArguments<'a> {
         from_markup_value::<T>(value).ok_or_else(|| Self::argument_error(index, std::any::type_name::<T>(), value))
     }
 
+    /// Borrows an exact shared handle, or converts it with the same casts
+    /// and diagnostics as an owned argument. The declaration-time receiver
+    /// probe limits this to carriers whose clone only shares ownership.
+    pub(super) fn shared_receiver<T: Clone + 'static>(&mut self) -> Result<std::borrow::Cow<'a, T>, MarkupInvokeError> {
+        let index = self.next;
+        self.next += 1;
+        let value = &self.arguments[index];
+        if let Some(exact) = value.as_ref().and_then(|value| value.downcast_ref::<T>()) {
+            return Ok(std::borrow::Cow::Borrowed(exact));
+        }
+        // The exact-type check already failed. Do not call `from_markup_value`
+        // and repeat it: only the untyped-handle shortcut and conversion tail
+        // remain. No registry borrow is held when the accessor is invoked.
+        let converted = match value {
+            Some(boxed) if TypeId::of::<T>() == TypeId::of::<BoxedValue>() => {
+                (boxed as &dyn Any).downcast_ref::<T>().cloned()
+            }
+            _ => coerce_markup_argument(value, ValueType::of::<T>())
+                .and_then(|converted| converted.downcast_ref::<T>().cloned()),
+        };
+        converted
+            .map(std::borrow::Cow::Owned)
+            .ok_or_else(|| Self::argument_error(index, std::any::type_name::<T>(), value))
+    }
+
     /// The error of an argument that is not assignable to the type asked for.
     #[cold]
     fn argument_error(index: usize, expected: &'static str, value: &MarkupValue) -> MarkupInvokeError {
