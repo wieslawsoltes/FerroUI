@@ -1,0 +1,1831 @@
+{
+  "acceptance": {
+    "candidate_role": "candidate",
+    "interval_observation_counts": {
+      "faster_interval": 10,
+      "includes_parity": 20,
+      "slower_interval": 14
+    },
+    "lane_count": 44,
+    "manifest": {
+      "bytes": 14186,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-acceptance-cpu6-01/result.json",
+      "sha256": "6a86af0b8d97cbf0779d01ca66ec95be7881a7db504775ef11ab489741c5d57f"
+    },
+    "reference_role": "reference",
+    "suites": {
+      "bindings": {
+        "lanes": {
+          "local_install": {
+            "bootstrap_95_percent": [
+              1.1580365021130359,
+              1.2185751090510777
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 179.93133333333333,
+            "candidate_over_reference": 1.1941793701132892,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              120000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 150.45675
+          },
+          "local_notify": {
+            "bootstrap_95_percent": [
+              0.9467023274524085,
+              0.9831715162458435
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 36.9729,
+            "candidate_over_reference": 0.9639627258533083,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 36.582825
+          },
+          "style_install": {
+            "bootstrap_95_percent": [
+              1.0680373402564551,
+              1.0798724060769085
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 225.27708333333334,
+            "candidate_over_reference": 1.0732881116691577,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              120000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 203.28433333333334
+          },
+          "style_notify": {
+            "bootstrap_95_percent": [
+              1.123895420560006,
+              1.2569324928803702
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 77.903925,
+            "candidate_over_reference": 1.1384005338860173,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 69.22955
+          },
+          "typed_context": {
+            "bootstrap_95_percent": [
+              0.9273757897043902,
+              0.9706445054491688
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 368.7459166666667,
+            "candidate_over_reference": 0.946615186762787,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              786000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 357.5885
+          },
+          "typed_notify": {
+            "bootstrap_95_percent": [
+              0.9645652117157502,
+              1.0320311852107071
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 240.01308333333333,
+            "candidate_over_reference": 0.9782456420112847,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              786000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 224.54933333333332
+          },
+          "typed_writeback": {
+            "bootstrap_95_percent": [
+              0.9674570183743396,
+              1.008205597479881
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 313.19675,
+            "candidate_over_reference": 0.9924732726956861,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              786000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 302.0034166666667
+          }
+        },
+        "record": {
+          "bytes": 165093,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-acceptance-cpu6-01/bindings/measurement.json",
+          "sha256": "75e13a48f4b165eb97dfc61eab4f5f2c6e098bd6a24a1b28e703f48d837ac5b9"
+        },
+        "training_scope": "Held out from the original thirteen-launch PGO training protocol.",
+        "warmups": 3
+      },
+      "cold": {
+        "lanes": {
+          "local_conversion": {
+            "bootstrap_95_percent": [
+              1.0083050649695042,
+              1.0847371535155241
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 88.4118,
+            "candidate_over_reference": 1.036919600719402,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 83.747125
+          },
+          "local_notification": {
+            "bootstrap_95_percent": [
+              0.9855785287819282,
+              1.0805969596686116
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 60.382675,
+            "candidate_over_reference": 1.024143321477724,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 58.48135
+          },
+          "style_conversion": {
+            "bootstrap_95_percent": [
+              1.1310054977777113,
+              1.206439854091397
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 131.34955,
+            "candidate_over_reference": 1.1530974652755583,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 113.32855
+          },
+          "style_notification": {
+            "bootstrap_95_percent": [
+              1.1607753313084552,
+              1.2634377194063766
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 111.026125,
+            "candidate_over_reference": 1.2102429987891283,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 88.9621
+          }
+        },
+        "record": {
+          "bytes": 124775,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-acceptance-cpu6-01/cold/measurement.json",
+          "sha256": "4dbe5d8e49a57ec8e5276e598a8c522ebdbed2ba380a289b48054a4ea97786c6"
+        },
+        "training_scope": "Held out from the original thirteen-launch PGO training protocol.",
+        "warmups": 3
+      },
+      "getters": {
+        "lanes": {
+          "success": {
+            "bootstrap_95_percent": [
+              0.9737232042985001,
+              1.0165242775784178
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 80.13427272727273,
+            "candidate_over_reference": 0.9879807362476322,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              440000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 74.82445454545454
+          },
+          "wrong-arity": {
+            "bootstrap_95_percent": [
+              1.0009212351216585,
+              1.0260512660979528
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 11.393942857142857,
+            "candidate_over_reference": 1.0122147341768755,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              3080000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 11.114423701298701
+          },
+          "wrong-type": {
+            "bootstrap_95_percent": [
+              0.9428361496019367,
+              1.0124636661771138
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 79.11790151515152,
+            "candidate_over_reference": 0.9971252019278187,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              132000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 79.85601515151515
+          }
+        },
+        "record": {
+          "bytes": 107815,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-acceptance-cpu6-01/getters.json",
+          "sha256": "b0af149f105def4d6d6af985d4a09d069f3b2b6fe2e1332a2c2198010c8fa2a1"
+        },
+        "training_scope": "Held out from the original thirteen-launch PGO training protocol.",
+        "warmups": 2
+      },
+      "keyframes": {
+        "lanes": {
+          "alternate": {
+            "bootstrap_95_percent": [
+              1.0013298051426267,
+              1.0965099118309707
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 238.75508333333335,
+            "candidate_over_reference": 1.0315961998214462,
+            "interval_observation": "slower_interval",
+            "metric": "wall ns/operation (unchanged keyframe workload)",
+            "observed_checksum_values": [
+              4599955.0
+            ],
+            "operations_per_process": [
+              24000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 176.05566666666667
+          },
+          "attach": {
+            "bootstrap_95_percent": [
+              1.0143843065255775,
+              1.0470173312372602
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 3631.491,
+            "candidate_over_reference": 1.0267597824618278,
+            "interval_observation": "slower_interval",
+            "metric": "wall ns/operation (unchanged keyframe workload)",
+            "observed_checksum_values": [
+              199500.0
+            ],
+            "operations_per_process": [
+              1000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 3566.213
+          },
+          "normal": {
+            "bootstrap_95_percent": [
+              0.9905043209735145,
+              1.0308287205021585
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 263.55370833333336,
+            "candidate_over_reference": 1.0103355155895877,
+            "interval_observation": "includes_parity",
+            "metric": "wall ns/operation (unchanged keyframe workload)",
+            "observed_checksum_values": [
+              4788000.0
+            ],
+            "operations_per_process": [
+              24000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 257.58475
+          },
+          "reverse": {
+            "bootstrap_95_percent": [
+              0.9999953530794341,
+              1.031052968055672
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 260.027625,
+            "candidate_over_reference": 1.0192423980127945,
+            "interval_observation": "includes_parity",
+            "metric": "wall ns/operation (unchanged keyframe workload)",
+            "observed_checksum_values": [
+              4812000.0
+            ],
+            "operations_per_process": [
+              24000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 256.42341666666664
+          }
+        },
+        "record": {
+          "bytes": 134783,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-acceptance-cpu6-01/keyframes.json",
+          "sha256": "936a4bda895af7a3f3d7f6182ae68dce48e8cc5fd8cd5da8a8d7fa746b45af38"
+        },
+        "training_scope": "Held out from the original thirteen-launch PGO training protocol.",
+        "warmups": 2
+      },
+      "mixed": {
+        "lanes": {
+          "coerce_scoped_local": {
+            "bootstrap_95_percent": [
+              0.9044243348061822,
+              1.0503169976522893
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 12.75695,
+            "candidate_over_reference": 1.0017791206555475,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              140000
+            ],
+            "operations_per_process": [
+              20000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 17.29265
+          },
+          "get_derived_default": {
+            "bootstrap_95_percent": [
+              1.0002214092359667,
+              1.0516122679570148
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 8.791105,
+            "candidate_over_reference": 1.0278700231209832,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              5800000
+            ],
+            "operations_per_process": [
+              200000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 8.47964
+          },
+          "get_effective_local": {
+            "bootstrap_95_percent": [
+              0.9841332255368214,
+              1.0444840021767001
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 5.681435,
+            "candidate_over_reference": 0.9978476189357869,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              20325000
+            ],
+            "operations_per_process": [
+              200000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 5.38715
+          },
+          "get_mixed_hosts": {
+            "bootstrap_95_percent": [
+              0.9045729662461919,
+              1.011113568029682
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 9.996895,
+            "candidate_over_reference": 0.9873919622173298,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              5425000
+            ],
+            "operations_per_process": [
+              200000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 11.842135
+          },
+          "get_plain": {
+            "bootstrap_95_percent": [
+              0.9808532992157423,
+              1.0245045157078236
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 4.687215,
+            "candidate_over_reference": 1.01209036078172,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              3400000
+            ],
+            "operations_per_process": [
+              200000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 5.54293
+          },
+          "metadata_cached_override": {
+            "bootstrap_95_percent": [
+              1.0020363518558157,
+              1.0381312405658665
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 5.44213,
+            "candidate_over_reference": 1.014913803718245,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              5800000
+            ],
+            "operations_per_process": [
+              200000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 5.153855
+          },
+          "metadata_default": {
+            "bootstrap_95_percent": [
+              0.9810575841623563,
+              1.0108608044581087
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 4.157625,
+            "candidate_over_reference": 0.9942120857776191,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              3400000
+            ],
+            "operations_per_process": [
+              200000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 4.506295
+          },
+          "metadata_scoped": {
+            "bootstrap_95_percent": [
+              0.9785413611715184,
+              1.0505894183749163
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 5.526555,
+            "candidate_over_reference": 1.0093991645656424,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              3400000
+            ],
+            "operations_per_process": [
+              200000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 5.681085
+          },
+          "mixed_75read_25write": {
+            "bootstrap_95_percent": [
+              0.9982047315829871,
+              1.0334504281409935
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 14.070595,
+            "candidate_over_reference": 1.013885216061209,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              29693725
+            ],
+            "operations_per_process": [
+              200000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 14.59472
+          },
+          "style_binding_emit_read": {
+            "bootstrap_95_percent": [
+              0.9677899213176874,
+              1.0272655956141121
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 57.81435,
+            "candidate_over_reference": 1.0004345100278706,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              10099440
+            ],
+            "operations_per_process": [
+              20000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 66.8498
+          },
+          "style_set_read_dispose": {
+            "bootstrap_95_percent": [
+              0.861652028288515,
+              0.9852186440887039
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 141.9688,
+            "candidate_over_reference": 0.9070884258778491,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              10679440
+            ],
+            "operations_per_process": [
+              20000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 167.10365
+          }
+        },
+        "record": {
+          "bytes": 209310,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-acceptance-cpu6-01/mixed/measurement.json",
+          "sha256": "ead6344da9d09a43b8139956628718800a9f6da873b59ce72fae3f75c994d0d1"
+        },
+        "training_scope": "Original eleven-lane workload was included in each arm's original PGO training.",
+        "warmups": 3
+      },
+      "receivers": {
+        "lanes": {
+          "converted-get": {
+            "bootstrap_95_percent": [
+              0.9913760298437128,
+              1.044174376900567
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 123.17818666666666,
+            "candidate_over_reference": 0.9981916991521002,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              150000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 115.93049333333333
+          },
+          "rc-get": {
+            "bootstrap_95_percent": [
+              0.9305557444488844,
+              0.9881079267674737
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 64.8936925,
+            "candidate_over_reference": 0.9710206156146461,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              400000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 72.269945
+          },
+          "rc-method": {
+            "bootstrap_95_percent": [
+              0.9457434415547309,
+              0.9848366968451404
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 85.4618975,
+            "candidate_over_reference": 0.9782068147359984,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              400000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 105.47454
+          },
+          "rc-set": {
+            "bootstrap_95_percent": [
+              1.006301514563964,
+              1.0210510077403108
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 19.937106666666665,
+            "candidate_over_reference": 1.011953428587663,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              600000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 26.750148333333332
+          },
+          "ref-get": {
+            "bootstrap_95_percent": [
+              0.9691097440140282,
+              0.9988857834445115
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 61.469535,
+            "candidate_over_reference": 0.9873703884551488,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              400000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 66.1859625
+          },
+          "ref-set": {
+            "bootstrap_95_percent": [
+              0.9552835738021709,
+              1.0521992490697558
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 18.41745,
+            "candidate_over_reference": 0.9861843988463544,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              600000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 19.438531666666666
+          },
+          "wrong-arity": {
+            "bootstrap_95_percent": [
+              0.9998160975257145,
+              1.0334501588392486
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 11.32017,
+            "candidate_over_reference": 1.0191674749701376,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              1000000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 10.992284
+          },
+          "wrong-type": {
+            "bootstrap_95_percent": [
+              0.932183615459675,
+              0.9702125020202638
+            ],
+            "bootstrap_method_source": "original-bundle/tooling/prepare_callable_validation.py and compare_registration.py, embedded verbatim",
+            "candidate_median_ns_per_operation": 86.89417333333333,
+            "candidate_over_reference": 0.9617956454659945,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [],
+            "operations_per_process": [
+              150000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 93.12034666666666
+          }
+        },
+        "record": {
+          "bytes": 273115,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-acceptance-cpu6-01/receivers.json",
+          "sha256": "4adbaa7f58fd8d92bde0511097f3d0d3f6b12e42ea9cb66fc6cbc005205faaa1"
+        },
+        "training_scope": "Held out from the original thirteen-launch PGO training protocol.",
+        "warmups": 2
+      },
+      "setters": {
+        "lanes": {
+          "direct_current": {
+            "bootstrap_95_percent": [
+              0.9869054495082773,
+              1.0950978518279582
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 25.322544444444443,
+            "candidate_over_reference": 0.9991987954549334,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              null
+            ],
+            "operations_per_process": [
+              90000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 27.403255555555557
+          },
+          "direct_markers": {
+            "bootstrap_95_percent": [
+              0.929703401408753,
+              0.9643537148545226
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 19.951966666666667,
+            "candidate_over_reference": 0.9445433061355167,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              null
+            ],
+            "operations_per_process": [
+              90000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 18.621211111111112
+          },
+          "direct_set": {
+            "bootstrap_95_percent": [
+              0.9595272541224498,
+              0.987603758479754
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 26.07627777777778,
+            "candidate_over_reference": 0.9706215236703312,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              null
+            ],
+            "operations_per_process": [
+              90000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 31.701744444444444
+          },
+          "numeric_conversion": {
+            "bootstrap_95_percent": [
+              0.9773400700711887,
+              1.0177183435413841
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 84.66227777777777,
+            "candidate_over_reference": 0.9922518208012393,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              null
+            ],
+            "operations_per_process": [
+              90000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 85.60112222222222
+          },
+          "styled_current": {
+            "bootstrap_95_percent": [
+              0.914483409943186,
+              0.9952853362921666
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 33.96666666666667,
+            "candidate_over_reference": 0.9851408364519393,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              null
+            ],
+            "operations_per_process": [
+              90000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 34.576677777777775
+          },
+          "styled_markers": {
+            "bootstrap_95_percent": [
+              1.027501752464128,
+              1.1774553050608305
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 12.358688888888889,
+            "candidate_over_reference": 1.0684280405428526,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              null
+            ],
+            "operations_per_process": [
+              90000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 10.268133333333333
+          },
+          "styled_set": {
+            "bootstrap_95_percent": [
+              1.0151021603935584,
+              1.0411614256603596
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 28.886,
+            "candidate_over_reference": 1.0313678485986963,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              null
+            ],
+            "operations_per_process": [
+              90000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 26.96171111111111
+          }
+        },
+        "record": {
+          "bytes": 164547,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-acceptance-cpu6-01/setters/measurement.json",
+          "sha256": "6372edd5d369c57a461fb6e2089b1522b8ca0bc502c3838b79cb280af1772aa4"
+        },
+        "training_scope": "Held out from the original thirteen-launch PGO training protocol.",
+        "warmups": 3
+      }
+    }
+  },
+  "additional_correctness": {
+    "acceptance_arms_each": {
+      "animation_tests": 44,
+      "getter_error_checks_in_fixture": 352,
+      "getter_outputs": 88,
+      "keyframe_checksum_lanes": 4,
+      "receiver_cases": 8
+    },
+    "local_commands": 20,
+    "native_compatible_images": 17
+  },
+  "allocations": {
+    "animation": {
+      "candidate": {
+        "record": {
+          "bytes": 3000,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-03/candidate-animation-allocations.json",
+          "sha256": "a2b5cfca70c6c3bd76534ce26bd71e7012b14af244be5c0a725c5e78be185648"
+        },
+        "samples": [
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6864
+          }
+        ]
+      },
+      "reference": {
+        "record": {
+          "bytes": 3000,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-03/reference-animation-allocations.json",
+          "sha256": "89e1dc579b7477c3c3e0f463af178dcd9c08ec9130b3ca766a62aa8689afd124"
+        },
+        "samples": [
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          },
+          {
+            "allocation_requests": 34,
+            "requested_bytes": 6848
+          }
+        ]
+      },
+      "request_delta": 0,
+      "requested_byte_delta": 16,
+      "scope": "Sixteen stable warmed attachment samples; includes creation of the match observable plus Animation::apply, excludes verification/disposal. It is not a per-frame or arbitrary application allocation claim."
+    },
+    "property": {
+      "candidate": [
+        {
+          "local_install": {
+            "checksum": 120000,
+            "operations": 12000,
+            "requested_bytes": 3552000,
+            "requests": 36000
+          },
+          "local_notify": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 176,
+            "requests": 1
+          },
+          "style_install": {
+            "checksum": 120000,
+            "operations": 12000,
+            "requested_bytes": 5952000,
+            "requests": 60000
+          },
+          "style_notify": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 176,
+            "requests": 1
+          }
+        },
+        {
+          "local_conversion": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 960176,
+            "requests": 40001
+          },
+          "local_notification": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 176,
+            "requests": 1
+          },
+          "style_conversion": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 960176,
+            "requests": 40001
+          },
+          "style_notification": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 176,
+            "requests": 1
+          }
+        }
+      ],
+      "reference": [
+        {
+          "local_install": {
+            "checksum": 120000,
+            "operations": 12000,
+            "requested_bytes": 3552000,
+            "requests": 36000
+          },
+          "local_notify": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 176,
+            "requests": 1
+          },
+          "style_install": {
+            "checksum": 120000,
+            "operations": 12000,
+            "requested_bytes": 6144000,
+            "requests": 60000
+          },
+          "style_notify": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 176,
+            "requests": 1
+          }
+        },
+        {
+          "local_conversion": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 960176,
+            "requests": 40001
+          },
+          "local_notification": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 176,
+            "requests": 1
+          },
+          "style_conversion": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 960176,
+            "requests": 40001
+          },
+          "style_notification": {
+            "checksum": 400000,
+            "operations": 40000,
+            "requested_bytes": 176,
+            "requests": 1
+          }
+        }
+      ],
+      "scope": "Exact count-only fixture windows; reference and candidate counts below are not timing or live memory. Notification windows each record one request /176 B, retained without subtraction or source attribution. Across40000 deliveries each conversion window records40001 requests /960176 B. Style installation has equal five requests per iteration and16 B fewer requested bytes per iteration, computed from the complete12000-operation counts."
+    }
+  },
+  "cohort": "Newly linked frozen-graph companions built serially on one CI native host, then run locally on CPU6. Both arms use the same newly linked native cohort; prior locally linked results are neither replaced nor combined.",
+  "complete": true,
+  "complete_evidence": {
+    "all_measurement_rows_and_original_producers_embedded": true,
+    "compressed_bytes": 3989121,
+    "compressed_sha256": "25c5bb28cb7484f0693d1e2f69bd71c0cfee11718bddf49283cbccf9e50a2a77",
+    "encoding": "gzip of the exact UTF-8 complete report; gzip mtime=0",
+    "path": "compiled-theme-boxed-correction-runtime-linux-x86_64-evidence.json.gz",
+    "source_locations": 1869,
+    "uncompressed_bytes": 19724553,
+    "uncompressed_sha256": "7a698f4122d112dbe36e477271178b054271a96e7e3798b81b92c917b2f99bf2",
+    "unique_embedded_utf8_inputs": 863
+  },
+  "correction": {
+    "candidate_role": "candidate",
+    "interval_observation_counts": {
+      "faster_interval": 3,
+      "includes_parity": 6,
+      "slower_interval": 2
+    },
+    "lane_count": 11,
+    "manifest": {
+      "bytes": 5483,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-correction-cpu6-01/result.json",
+      "sha256": "c80437c68f0def0a9d0efd721996f00055b23b13d07cf2739f24c1939f2ef610"
+    },
+    "reference_role": "correction_reference",
+    "suites": {
+      "bindings": {
+        "lanes": {
+          "local_install": {
+            "bootstrap_95_percent": [
+              1.0085386111053802,
+              1.1008138613614964
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 244.63833333333332,
+            "candidate_over_reference": 1.0568560125275388,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              120000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 234.96225
+          },
+          "local_notify": {
+            "bootstrap_95_percent": [
+              0.9497861809869913,
+              1.0229499091627925
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 47.06515,
+            "candidate_over_reference": 0.9875901359142892,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 47.1022
+          },
+          "style_install": {
+            "bootstrap_95_percent": [
+              0.90870485156402,
+              0.9475354379231076
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 331.4864166666667,
+            "candidate_over_reference": 0.9379212590273939,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              120000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 357.32975
+          },
+          "style_notify": {
+            "bootstrap_95_percent": [
+              0.9481236122252562,
+              1.0020811980925748
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 107.393475,
+            "candidate_over_reference": 0.9745855798261271,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 110.4137
+          },
+          "typed_context": {
+            "bootstrap_95_percent": [
+              0.9481393284081272,
+              1.0708948413697559
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 541.9623333333333,
+            "candidate_over_reference": 0.967316143584957,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              786000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 545.3205833333334
+          },
+          "typed_notify": {
+            "bootstrap_95_percent": [
+              0.9692346652356749,
+              1.0377374061898808
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 308.34541666666667,
+            "candidate_over_reference": 1.0174626986821538,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              786000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 302.2129166666667
+          },
+          "typed_writeback": {
+            "bootstrap_95_percent": [
+              0.9722915303459397,
+              1.0588422337205707
+            ],
+            "bootstrap_draws": 9000,
+            "bootstrap_seed": 8676,
+            "candidate_median_ns_per_operation": 438.00625,
+            "candidate_over_reference": 1.032320471556028,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              786000
+            ],
+            "operations_per_process": [
+              12000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 418.48816666666664
+          }
+        },
+        "record": {
+          "bytes": 165096,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-correction-cpu6-01/bindings/measurement.json",
+          "sha256": "9a8ae7f9858e7efb79fd0bb21d6f43d474b20bcbc3bf3db07ae1f22b9487e652"
+        },
+        "training_scope": "Held out from the original thirteen-launch PGO training protocol.",
+        "warmups": 3
+      },
+      "cold": {
+        "lanes": {
+          "local_conversion": {
+            "bootstrap_95_percent": [
+              0.990320783801437,
+              1.003106927519123
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 119.0155,
+            "candidate_over_reference": 0.9985560390947843,
+            "interval_observation": "includes_parity",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 119.22505
+          },
+          "local_notification": {
+            "bootstrap_95_percent": [
+              1.0028727206326435,
+              1.0187476596909366
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 89.56475,
+            "candidate_over_reference": 1.009475839878782,
+            "interval_observation": "slower_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 88.89
+          },
+          "style_conversion": {
+            "bootstrap_95_percent": [
+              0.941933171276766,
+              0.9633431394529045
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 185.1169,
+            "candidate_over_reference": 0.9534156697696972,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 194.237925
+          },
+          "style_notification": {
+            "bootstrap_95_percent": [
+              0.9764908910936264,
+              0.9986203085178769
+            ],
+            "bootstrap_draws": 7000,
+            "bootstrap_seed": 9961,
+            "candidate_median_ns_per_operation": 152.475425,
+            "candidate_over_reference": 0.9906156488226652,
+            "interval_observation": "faster_interval",
+            "metric": "thread CPU ns/operation",
+            "observed_checksum_values": [
+              400000
+            ],
+            "operations_per_process": [
+              40000
+            ],
+            "pairs": 31,
+            "reference_median_ns_per_operation": 155.609325
+          }
+        },
+        "record": {
+          "bytes": 124850,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-correction-cpu6-01/cold/measurement.json",
+          "sha256": "524d8afe7b1a71c77e433d1514c5e7ccd4cd10acee58055f318c281ff80884a8"
+        },
+        "training_scope": "Held out from the original thirteen-launch PGO training protocol.",
+        "warmups": 3
+      }
+    }
+  },
+  "correctness": {
+    "candidate": {
+      "qa": {
+        "failed": 0,
+        "ignored": 3,
+        "passed": 347
+      },
+      "qa_record": {
+        "bytes": 35539,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-03/candidate-correctness/check.json",
+        "sha256": "85e6bf7618c4516d158137637dad3fc162fa58fbf7efd01470b6a3bcbae801a1"
+      },
+      "registered": 350,
+      "targeted_record": {
+        "bytes": 45084,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-03/candidate-regressions/check.json",
+        "sha256": "cedac8cfd33ee4279de963c8c32ecc34c8d8cbb06e76df4ed336c49d3836c961"
+      },
+      "targeted_regressions": 9
+    },
+    "correction_reference": {
+      "qa": {
+        "failed": 0,
+        "ignored": 3,
+        "passed": 347
+      },
+      "qa_record": {
+        "bytes": 35627,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-03/correction_reference-correctness/check.json",
+        "sha256": "b85d3afd81951a204b9e138d8c9a3b4370fb0fb5d48dedb2d63b9949aac3c6a4"
+      },
+      "registered": 350,
+      "targeted_record": {
+        "bytes": 45435,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-03/correction_reference-regressions/check.json",
+        "sha256": "b5a65553ca882f7c0eaa29c94d4f1b80290c3db9ca7f3d5b1ef23ed8253c768f"
+      },
+      "targeted_regressions": 9
+    },
+    "reference": {
+      "qa": {
+        "failed": 0,
+        "ignored": 3,
+        "passed": 347
+      },
+      "qa_record": {
+        "bytes": 35539,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-03/reference-correctness/check.json",
+        "sha256": "3dd03bfd5756dd678e39ba75564a6fee49b64723bbf4644795a0a6ee113ecba4"
+      },
+      "registered": 350,
+      "targeted_record": {
+        "bytes": 45084,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-03/reference-regressions/check.json",
+        "sha256": "367dd4870c288345bdf54e57b757b3392959d91354b54360bcae2e466054d8ce"
+      },
+      "targeted_regressions": 9
+    }
+  },
+  "failures_preserved": [
+    {
+      "error": {
+        "message": "Native execution policy association differs",
+        "type": "RuntimeError"
+      },
+      "kind": "remote_export_snapshot_missing_final_native_proof",
+      "original_import": {
+        "bytes": 1450,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-01/import.json",
+        "sha256": "300308020ea79e41e2af4ec364d13d7da33f213620358b411a77cee80e4f52d7"
+      },
+      "repair": "Persist terminal native snapshot before exporting the bundle; repeat the same17 companion links on CI. Original failed bundle/import remain unchanged.",
+      "run": 41855481325
+    },
+    {
+      "added_files_preserved": [
+        {
+          "bytes": 35726,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-02/original-bundle/tooling/__pycache__/attribute_codegen.cpython-312.pyc",
+          "sha256": "e75f196bc01ccc047dac48915dfe963e9b9347326892e5c5885f605663c3e651"
+        },
+        {
+          "bytes": 15732,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-02/original-bundle/tooling/__pycache__/attribute_runtime.cpython-312.pyc",
+          "sha256": "78c02b330bb6ca6e1f5e26d9a7b75ae79874fd5c24eae3e173321a52e4352b6f"
+        },
+        {
+          "bytes": 13749,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-02/original-bundle/tooling/__pycache__/compact_unwind.cpython-312.pyc",
+          "sha256": "88c8f37442a680876e3353c6545a30ed67a606e0877dce93fe88dec8fecbbb2f"
+        },
+        {
+          "bytes": 12668,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-02/original-bundle/tooling/__pycache__/compact_unwind_link.cpython-312.pyc",
+          "sha256": "bf992ce49d575925b2ce49d9d3a106644e098640ef8999574e1abe7912d60931"
+        },
+        {
+          "bytes": 25309,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-02/original-bundle/tooling/__pycache__/compare_registration.cpython-312.pyc",
+          "sha256": "9d951696aeb11aa1335cfdb6d5a93654dac039c4193f585afd3b7c0447a90c68"
+        },
+        {
+          "bytes": 52276,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-02/original-bundle/tooling/__pycache__/prepare_property_validation.cpython-312.pyc",
+          "sha256": "b5d38434b8f85ae575da1f53bff874da2ca11e9294712bacae4e93e7cccac92f"
+        }
+      ],
+      "all_twenty_fixture_commands_exit_zero": true,
+      "check": {
+        "bytes": 157047,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-local-check-02/result.json",
+        "sha256": "452e8abd345b9d62db23b1314c48de086798bbc9c01a06cdd8d20483fe79fda9"
+      },
+      "error": {
+        "message": "Bundle contains missing or unrecorded files",
+        "type": "RuntimeError"
+      },
+      "kind": "local_python_bytecode_inventory_mutation",
+      "original_import": {
+        "bytes": 47243,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-02/import.json",
+        "sha256": "4690949ab0164952c58b8fe2fa491e330097077331ec12bd863a111b0637c24e"
+      },
+      "repair": "Disable Python bytecode emission before loading frozen modules and in child environments; import03 is a fresh extraction of the same exact unchanged second remote bundle. Strict verifier unchanged; no new links or training for this repair."
+    }
+  ],
+  "full_release_accepted": false,
+  "independent_publication_review": {
+    "all_1869_recorded_byte_counts_verified": true,
+    "all_55_paired_medians_recomputed_from_31_pairs_each": true,
+    "all_55_ratios_and_intervals_match_original_measurements": true,
+    "all_863_embedded_content_hashes_verified": true,
+    "lossless_compression_round_trip_verified": true,
+    "runtime_or_bootstrap_rerun": false,
+    "signed_download_urls_and_credential_values_detected": false
+  },
+  "independent_summary_review": {
+    "bytes": 455,
+    "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-root-summary-check-01.json",
+    "sha256": "521b1e5a5e093f3b623002410538de01b6332d38cfb97ab30fa0cfbb6c86d8a4"
+  },
+  "outcome": "Current be910 to ad926 acceptance remains blocked by boxed installation/delivery throughput and additional observed slower intervals. The smaller ab595 to ad926 correction is retained separately and is not overall acceptance.",
+  "pgo": {
+    "accepted": true,
+    "complete": true,
+    "limits": {
+      "historical_entry_counts_are_not_thresholds": true,
+      "maximum_disassembled_members_per_arm": 2,
+      "throughput_and_final_native_layout": "Not established by this check."
+    },
+    "record": {
+      "bytes": 276678,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/runtime-companion-import-03/original-bundle/pgo-acceptance/result.json",
+      "sha256": "3c0dd85d697e6fc3c2de8181422b25c811ca5a246ebece7f28882bf01ae5db56"
+    },
+    "scope": "Inspect selected PGO acceptance in the two imported production Base libraries.\n\nThis is a bounded read-only code-generation check, not training or a throughput\nresult. At most two archive members per arm are disassembled. Current profile\nkeys and genuine optimized entry metadata are required; historical entry counts\nare not acceptance thresholds because optimization can adjust those counts.\n"
+  },
+  "protocol": {
+    "all_original_raw_rows_and_orders_embedded": true,
+    "all_return_codes_and_correctness_signatures_validated": true,
+    "callable_warmup_rounds": 2,
+    "compiler_or_benchmark_executed_by_reporter": false,
+    "cpu": 6,
+    "framework_recompilation": false,
+    "measured_pairs_per_lane": 31,
+    "new_training": false,
+    "paired_medians_crosschecked": true,
+    "property_warmups": 3,
+    "ratio_definition": "Median of within-pair candidate/reference durations. It need not equal the ratio of separately reported marginal medians.",
+    "raw_statistics_copied_without_bootstrap_rerun": true
+  },
+  "qualifications": [
+    "The eleven mixed-property lanes were in the original thirteen-launch PGO workload. Other companion lanes here were held out; all execution directs profile output to /dev/null.",
+    "Intervals are per-lane observations from this single CPU6 cohort, with no multiplicity adjustment. Small slower intervals are retained as flags, not asserted universal causal regressions.",
+    "Shared-host activity and bimodal durations are preserved in raw rows/host records. Other team compiler/inspection activity was paused during timing; global host idleness is not claimed.",
+    "This report does not measure the shipping executable, construction, paint, or startup. The separately published shipping readiness cohort remains a separate result.",
+    "Successful public API tests, native loader proof and selected PGO acceptance are bounded checks, not universal behavioral equivalence.",
+    "No exact symbolized companion twin was captured. Shipping symbol twins cannot be silently treated as the measured QA code.",
+    "Original build/source/graph/host/tool/profile manifests and raw producers are preserved in the text appendix. Binary/profile contents remain separate authenticated artifacts."
+  ],
+  "schema": 1,
+  "selected_inputs": {
+    "candidate": {
+      "base": {
+        "bytes": 209840954,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/graph/libferroui_base-28df41db581ef6ea.rlib",
+        "sha256": "28df41e9eec570df8ff5627e8d19548c8ead48d1779fade406f5dff83f0c6f2e"
+      },
+      "compiler_record": {
+        "bytes": 5146,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/base/compiler.json",
+        "sha256": "71b0a56df58e1d169d3b8442c786920f29a352c64eefe7d9a81dd25413b1d8a7"
+      },
+      "full_release_build": {
+        "bytes": 204026,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/build.json",
+        "sha256": "a4910a6c45b529059f8f6836e3c2dccc1cc9e05c132d33b0d323ca6617ed3f88"
+      },
+      "graph_inventory": {
+        "bytes": 5947,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/graph/hashes.json",
+        "sha256": "9570195a0a2dd9e4563506e1448de7c816d583e852bf1694cc6897d329b3350d"
+      },
+      "host_inventory": {
+        "bytes": 543,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/host-deps/hashes.json",
+        "sha256": "10443a321c680691b7e57ec9878c7e8203cfbdbe25eb0972ac153c9979eadd2e"
+      },
+      "origin_import": {
+        "bytes": 320836,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-boxed-correction-import-01/import.json",
+        "sha256": "b117f25390b4da3a4defeb2726a677ff9b7b906a552ff12aa2f3dec40dc72658"
+      },
+      "profile": {
+        "bytes": 86265984,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/c4586434742c5de5127a8acf799c21bd189abda68e935e1eb1ff7bdbcbf90b53.profdata",
+        "sha256": "c4586434742c5de5127a8acf799c21bd189abda68e935e1eb1ff7bdbcbf90b53"
+      },
+      "selection": {
+        "arm": "candidate",
+        "origin": "correction",
+        "receiver_policy": "borrowed",
+        "revision": "ad926b4d10a68465b5bbc9fe203fa908dc785f59"
+      },
+      "shipping_identity_for_context_only": {
+        "bytes": 27101920,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/winui-theme-probe",
+        "sha256": "0870efcdde1e90f29e87d4c2861a5dfa3fc65a0415e6c0d85d64f41501eaada9"
+      },
+      "source_directory": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/source",
+      "source_manifest": {
+        "bytes": 2810240,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/candidate/release/source.json",
+        "sha256": "28af36fae4c6231d94dc277ed98fee40cf3ed04ea57492a768cc87b6e9052b91"
+      }
+    },
+    "correction_reference": {
+      "base": {
+        "bytes": 209850254,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/graph/libferroui_base-2b71c879d9e854b7.rlib",
+        "sha256": "133fdc76e0d1a8c024f731a4de0427f6cd103d9ed4188f9bbca8ce03cdbf309e"
+      },
+      "compiler_record": {
+        "bytes": 5145,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/base/compiler.json",
+        "sha256": "43129c8e7a55680de4f77d8c06afd257bc0fdbac83efaa784aec45cd791d0731"
+      },
+      "full_release_build": {
+        "bytes": 201689,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/build.json",
+        "sha256": "aa7a6348af047c3117d903c8cfcbb9dfc6fe6362ece521023affc54422d0c557"
+      },
+      "graph_inventory": {
+        "bytes": 5947,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/graph/hashes.json",
+        "sha256": "844b3e84cd63fa40e39693fd7359d4350caa201e2a457798d4d9b5f32aeaa338"
+      },
+      "host_inventory": {
+        "bytes": 543,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/host-deps/hashes.json",
+        "sha256": "10443a321c680691b7e57ec9878c7e8203cfbdbe25eb0972ac153c9979eadd2e"
+      },
+      "origin_import": {
+        "bytes": 320836,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-boxed-correction-import-01/import.json",
+        "sha256": "b117f25390b4da3a4defeb2726a677ff9b7b906a552ff12aa2f3dec40dc72658"
+      },
+      "profile": {
+        "bytes": 86253752,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/89f93df05cf45689ef884c9849bb97dce91e3387f83e9bab4131f074be8b99b7.profdata",
+        "sha256": "89f93df05cf45689ef884c9849bb97dce91e3387f83e9bab4131f074be8b99b7"
+      },
+      "selection": {
+        "arm": "reference",
+        "origin": "correction",
+        "receiver_policy": "borrowed",
+        "revision": "ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad"
+      },
+      "shipping_identity_for_context_only": {
+        "bytes": 27065536,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/winui-theme-probe",
+        "sha256": "4fdf8011516fdcd7c98a906a649a781071c4a200b4efafcf65db75036e069504"
+      },
+      "source_directory": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/source",
+      "source_manifest": {
+        "bytes": 2809839,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41837864124/reference/release/source.json",
+        "sha256": "87b31c2b4a584f400c10188cd0e88e119ad36fe94e943716676eea4f25fff4fb"
+      }
+    },
+    "reference": {
+      "base": {
+        "bytes": 213564062,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/graph/libferroui_base-8871b5d1e13e29b3.rlib",
+        "sha256": "605dcc341745c3fbc2bac5ab23d6f0906ade634d11b295ff7954cbb29f0dc492"
+      },
+      "compiler_record": {
+        "bytes": 5146,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/base/compiler.json",
+        "sha256": "b21d2c4b8a363fc1c76184acf40b33052cdde15d92ca59c8abf19f801f2c6fe8"
+      },
+      "full_release_build": {
+        "bytes": 162768,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/build.json",
+        "sha256": "9627742002bfb5e244a65f5e55665629f620981831f22dd33bedb1e86446024a"
+      },
+      "graph_inventory": {
+        "bytes": 5947,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/graph/hashes.json",
+        "sha256": "687323f73d0d4af5ea67a77700a87e02972b9ca97d0024e01917fcb30ea5255a"
+      },
+      "host_inventory": {
+        "bytes": 543,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/host-deps/hashes.json",
+        "sha256": "10443a321c680691b7e57ec9878c7e8203cfbdbe25eb0972ac153c9979eadd2e"
+      },
+      "origin_import": {
+        "bytes": 320818,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-import-01/import.json",
+        "sha256": "ced1ff5b4754ac4d2d1a47ca595d932c15f3cb3b6fa6fb2d97008f0d8eec9f89"
+      },
+      "profile": {
+        "bytes": 88408320,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/e0708840e6064c7a7e52c183deb0ca24d3448299a46af64897070d2b72b77c6c.profdata",
+        "sha256": "e0708840e6064c7a7e52c183deb0ca24d3448299a46af64897070d2b72b77c6c"
+      },
+      "selection": {
+        "arm": "reference",
+        "origin": "acceptance",
+        "receiver_policy": "cloned",
+        "revision": "be91062df9bb018de78113c34a1967c60038f9b6"
+      },
+      "shipping_identity_for_context_only": {
+        "bytes": 27437360,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/winui-theme-probe",
+        "sha256": "7d7c2b3a4efc863f3bbd8f2139eeb61f2bfb65f07083674a43090f56fe5a844e"
+      },
+      "source_directory": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/source",
+      "source_manifest": {
+        "bytes": 2804417,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41815903284/reference/release/source.json",
+        "sha256": "c507346d30b152c088513f6cfd704b161e01a05dd07ee55b8c4c2ed792b97afa"
+      }
+    }
+  }
+}

@@ -391,6 +391,58 @@ copying the bundle. The strict importer is unchanged, and
 uses the same frozen origins, source revisions, profiles and production policy.
 No paired companion performance result is accepted from the incomplete bundle.
 
+The corrected run completed successfully and reproduces all 17 earlier
+companion executable byte counts and hashes. Strict import passed. Its first
+local execution passed all 20 correctness commands but correctly failed the
+final inventory because Python emitted six bytecode files into the frozen
+tooling directory. The executor now disables bytecode writes in the parent and
+child environments. A fresh extraction and complete local rerun passed with
+unchanged inventory; the strict verifier and both failed attempts are retained.
+
+### Fresh corrected-runtime throughput
+
+The newly CI-linked companions completed a fresh CPU6 comparison of the
+original `be91062d` runtime against `ad926b4d`, plus a separate focused
+`ab595dd9` versus `ad926b4d` correction cohort. Each lane retains 31 measured
+pairs, the original property/callable warmups, alternating arm order, checksums
+and bootstrap recipe. No training workload was added. These results do not
+replace or pool the earlier locally linked observations.
+
+| Lane | Full acceptance: ad / be [95% interval] | Focused correction: ad / ab [95% interval] |
+|---|---:|---:|
+| Boxed style notify | 1.138401 [1.123895, 1.256932] | 0.974586 [0.948124, 1.002081] |
+| Boxed style conversion | 1.153097 [1.131005, 1.206440] | 0.953416 [0.941933, 0.963343] |
+| Boxed style notification | 1.210243 [1.160775, 1.263438] | 0.990616 [0.976491, 0.998620] |
+| Boxed style installation | 1.073288 [1.068037, 1.079872] | 0.937921 [0.908705, 0.947535] |
+| Boxed local installation | 1.194179 [1.158037, 1.218575] | 1.056856 [1.008539, 1.100814] |
+
+The correction improves several paths relative to `ab595dd9`; the complete
+runtime still fails acceptance against `be91062d`. All 44 acceptance and 11
+correction lanes are retained, including smaller setter, metadata and animation
+flags and faster typed/direct paths. Fourteen acceptance intervals lie above
+parity, ten below and twenty include parity. These are within-pair ratios;
+they need not equal ratios of the separately reported marginal medians.
+Shared-host duration variation remains visible in every raw row.
+
+Each of the three property/binding arms passed 347 tests with zero failures
+and three existing ignored cases, plus nine focused regressions. Both full
+acceptance arms passed eight receiver cases, 88 getter outputs, 44 animation
+tests and four keyframe checks. Native compatibility passed for all 17 images,
+and the bounded profile audit remained accepted. Warm animation attachment
+retains 34 allocation requests but changes 6,848 to 6,864 bytes (+16); property
+style installation retains its separately recorded 16-byte reduction per
+iteration. These allocation scopes are not combined.
+
+The [complete runtime summary](benchmarks/compiled-theme-boxed-correction-runtime-linux-x86_64.json)
+records every lane and links the
+[lossless raw evidence](benchmarks/compiled-theme-boxed-correction-runtime-linux-x86_64-evidence.json.gz).
+The latter expands to the exact 19,724,553-byte JSON report with SHA-256
+`7a698f4122d112dbe36e477271178b054271a96e7e3798b81b92c917b2f99bf2`.
+It retains 863 unique original UTF-8 inputs across 1,869 recorded locations,
+including samples, producers, fixture sources, input/profile/native manifests,
+correctness logs and failed attempts. Its packaging has no relationship to
+the executable-size measurement. Full release acceptance remains false.
+
 ### Fresh corrected-shipping startup comparison
 
 The unchanged shipping images from the original `be91062d` reference and the
@@ -467,8 +519,9 @@ blocker is unchanged.
 
 ### Demand-rooted inherited-change notifications
 
-The next separate source prototype is frozen at
+The inherited-change implementation was frozen and validated at
 [`c7062ec9`](https://github.com/wieslawsoltes/FerroUI/commit/c7062ec91550590d5dedc790a736e13e333a5b17).
+Its exact five source files are now integrated into this PR.
 An explicit `StyledPropertyOptions::inherits` call supplies a private typed
 notification callback in the common property header. Both registration cores
 install it before publishing the property; added owners copy it. Removing the
@@ -489,8 +542,14 @@ and test reviews passed. The separate source gate requires 409 passes: the
 393-test coercion/property/metadata coverage, four inheritance cases and all
 12 registry cases, with 13 required names and downstream Base/Controls checks.
 Its [prototype and frozen plan](benchmarks/compiled-theme-demand-rooted-inheritance-source-prototype-linux-x86_64.json)
-retain the exact source identities and reviews. Compilation is pending and
-the source is not yet integrated into this PR's runtime.
+retain the exact source identities and reviews. The
+[actual source gate](https://github.com/wieslawsoltes/FerroUI/actions/runs/41868119838)
+passed all 409 cases, with zero failures or ignored tests, all 13 required
+names and downstream Base/Controls compilation. The
+[source validation evidence](benchmarks/compiled-theme-demand-rooted-inheritance-source-validation-linux-x86_64.json)
+retains the original validation and exact source bytes. Independent verification
+covered all 21 ZIP members, all 20 recorded log/resource/installation/inventory
+inputs, the unchanged source tree and lockfile, and the five integrated blobs.
 
 The old inherited-change family occupies 92,151 bytes, a gross bound. The
 property/options callback pointer and safe source type check have costs. Fresh
