@@ -3,9 +3,10 @@
 The next release target is **10,000,000 bytes for the complete stripped Linux
 x86-64 executable**, including the editable WinUI runtime and all theme
 documents. The latest independently imported size checkpoint in this report is
-**27,101,920 bytes** at `ad926b4d`, leaving **17,101,920 bytes** to remove.
+**26,986,536 bytes** at `dc93a16d`, leaving **16,986,536 bytes** to remove.
 Its matched size and targeted correctness gates passed; full release acceptance
-remains blocked by the boxed-style performance regression described below.
+remains open. The earlier boxed-style performance regression described below
+requires fresh acceptance measurements on the subsequent runtime changes.
 The earlier **27,406,416-byte** stage5 checkpoint remains documented in
 [the architecture report](compiled-theme-rust-architecture.md). Each shipping-size
 comparison below uses fresh profiles and complete executable measurements;
@@ -355,7 +356,46 @@ resource log and the generated WinUI file, and identifies all six integrated
 source files. The production comparison is pinned to `ad926b4d` as reference
 and `dc93a16d` as candidate. Both arms use the original 13-workload training,
 features, compilation paths, native/link policy and complete editable executable.
-Its measured size and runtime acceptance remain pending.
+Its completed size result is recorded below; production runtime acceptance
+remains separate.
+
+### Completed construction production comparison
+
+[CI run 41860242995](https://github.com/wieslawsoltes/FerroUI/actions/runs/41860242995)
+completed the frozen `ad926b4d` to `dc93a16d` comparison with fresh original-workload
+profiles for both arms. The exact original artifact was authenticated,
+reassembled and imported. The
+[construction production evidence](benchmarks/compiled-theme-construction-production-linux-x86_64.json)
+verifies all 16 arm manifests, both complete 54-library graphs and profiles,
+the 13 changed source files, generated resources, shipping images and symbolized
+twins. Independent ELF parsing reproduces every allocated section delta and
+the complete file-size reconciliation.
+
+| Complete stripped executable | Bytes | SHA-256 |
+|---|---:|---|
+| Fresh matched reference, `ad926b4d` | 27,102,192 | `f09602b6b4bfa07e5e711dbb9a97b569747885a2a1aaa5286ef0973677e0b141` |
+| Metadata and construction candidate, `dc93a16d` | **26,986,536** | `b9ea3f863bd1215f73de3e4d0b9f59cdb7cd70bfea742956739a042d0cc67db0` |
+| **Saving against this matched reference** | **115,656 (0.427%)** | |
+| **Remaining to 10,000,000 bytes** | **16,986,536** | |
+
+The combined changes remove 167,568 `.text` bytes and 9,516 exception-table
+bytes. Their costs include 24,328 additional `.rodata` bytes, 18,352
+`.data.rel.ro` bytes, 13,204 unwind-frame bytes, 8,688 unwind-index bytes and
+296 relative-relocation bytes; `.data` decreases by 8 bytes. Allocated
+file-backed sections therefore decrease by 112,224 bytes, and actual layout
+gaps decrease by 3,432 bytes. Headers and nonallocated section contents are
+unchanged. This is the combined result of metadata preparation, whole-theme
+programs and Style regions; it does not isolate an individual mechanism's saving.
+
+The fresh same-source `ad926b4d` reference is 272 bytes larger than the preceding
+cohort's candidate. It has distinct profile and binary identities; that variation
+is not attributed to these source changes. Both arms retain all 169 source
+documents, 894 FXB files and the identical complete FXP archive. Production
+generation contains the validated 18 whole-theme and 34 region programs. Both
+arms pass all nine archive cases and the negative control, 47 registry tests,
+compact unwinding and 156 template activations, including resource value `31`.
+The 10 MB target and paired runtime acceptance remain open. Subsequent property
+capability changes are outside this measured source pair.
 
 ### Remote companion linking and subsequent local measurement
 
