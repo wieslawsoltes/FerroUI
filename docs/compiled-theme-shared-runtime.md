@@ -2,7 +2,7 @@
 
 The next release target is **10,000,000 bytes for the complete stripped Linux
 x86-64 executable**, including the editable WinUI runtime and all theme
-documents. The latest completed size checkpoint in this report is
+documents. The latest independently imported size checkpoint in this report is
 **27,065,600 bytes** at `ab595dd9`, leaving **17,065,600 bytes** to remove.
 Its matched size and targeted correctness gates passed; full release acceptance
 remains blocked by the boxed-style performance regression described below.
@@ -298,8 +298,48 @@ accepted, and unsupported factories keep their original generated Rust.
 
 These source checks do not replace the pending full-size and production
 performance comparisons. The separate two-role style-region extension is not
-covered by either completed run. The latest measured shipping result in this
-report remains the `ab595dd9` cold-initialization cohort above.
+covered by either completed run. Its combined source is frozen at
+[`dc93a16d`](https://github.com/wieslawsoltes/FerroUI/commit/dc93a16d88c8d8e6aedaa852f1106a856ab5993b),
+including the validated metadata and whole-factory changes. Its executed
+standalone grammar gate passed all 13 cases. Running the actual parsers over
+the retained generated source accepts 18 whole factories first, then 34 regions
+across 24 additional factories, with 1,217 instructions and 332 local slots.
+Each region keeps unsupported operations in place, borrows one original parent,
+and retains its reversed two-role local array in the caller's original scope.
+
+The corresponding 24 enclosing native functions occupy 316,624 bytes, including
+unwind and exception data. That is a gross scope bound: the regions cover only
+parts of those functions, and instruction tables and shared helpers have their
+own costs. It is not a predicted saving. The new actual-source gate requires
+all 21 named regressions, exact runtime/grammar/differential summaries and fresh
+WinUI generation with both program forms. Its result is pending.
+[Source, grammar, coverage and gate plan](benchmarks/compiled-theme-style-region-source-prototype-linux-x86_64.json).
+
+### Remote companion linking and subsequent local measurement
+
+The boxed-correction CI comparison completed successfully. Its console records
+27,065,536 bytes for the freshly rebuilt `ab595dd9` reference and 27,101,920
+bytes for `ad926b4d`: a 36,384-byte increase. The original evidence artifact is
+frozen for transport and independent import. This new reference is a separate
+build from the 27,065,600-byte cold-cohort candidate above. The correction's
+performance remains unresolved.
+
+The companion pipeline downloads the exact original release artifacts and
+links all eight reference and eight candidate companions together on one CI
+native environment, plus a separate `ab595dd9` QA companion for correction
+attribution. It uses the existing fixtures, profiles and production producers,
+without retraining or timing on that runner. The previous local-linked reference
+is not mixed into this new cohort. Compiler, CRT and native-link inputs are
+recorded around the sequence; the bounded PGO audit remains required.
+
+A bounded bundle transports executable bytes, exact fixtures and original
+records. Data-only import verifies their source/profile associations and makes
+separate runtime views whose changes are limited to file locators. Local ELF
+and loader proof precedes checks and fresh paired measurements. Shipping startup
+remains a separate required gate. Thirteen importer checks passed using retained
+real binaries and explicitly synthetic transport wrappers; these tests do not
+claim a new production link or performance result.
+[Tooling, independent review and frozen input contract](benchmarks/compiled-theme-runtime-companion-transport-tooling-linux-x86_64.json).
 
 ## Source checkpoint
 

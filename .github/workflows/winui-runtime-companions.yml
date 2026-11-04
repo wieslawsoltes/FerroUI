@@ -1,0 +1,80 @@
+name: Link frozen WinUI runtime companions
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-runtime-companions.yml']
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: winui-runtime-companions-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  link:
+    name: Link both acceptance arms and correction-reference QA
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      CARGO_TERM_COLOR: never
+      CARGO_INCREMENTAL: 0
+      RUST_BACKTRACE: 1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Native runtime and link dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential pkg-config libfontconfig1-dev libfreetype6-dev libxkbcommon-dev
+      - name: Record the frozen input contract
+        env:
+          RUNTIME_RELEASE_INPUTS: >-
+            {"schema":1,"enabled":true,"origins":{"acceptance":{"repository":"wieslawsoltes/FerroUI","repository_id":1405576478,"run_id":41815903284,"run_attempt":1,"artifact_id":13318422418,"head_sha":"5fd34166cb1f01a2d482e87030e6d9cb5d6cb1f0","head_branch":"perf/compact-xaml-theme-codegen","artifact_name":"winui-editable-release-comparison-41815903284-1","size":1261081055,"sha256":"f838b6f512a1fc5f19e22aa81d8c01b634633f0530125c89f20504ce1a4ae6a3"},"correction":{"repository":"wieslawsoltes/FerroUI","repository_id":1405576478,"run_id":41837864124,"run_attempt":1,"artifact_id":13335074330,"head_sha":"e4fc7aa9fb81c15c5b6fcfc2b599af81cc452011","head_branch":"perf/compact-xaml-theme-codegen","artifact_name":"winui-editable-release-comparison-41837864124-1","size":1257116963,"sha256":"23cdcf32361f37660735b7e60212f9d2464aa5e25bf90ff0a01c2968d1895539"}},"selection":{"reference":{"origin":"acceptance","arm":"reference","revision":"be91062df9bb018de78113c34a1967c60038f9b6","receiver_policy":"cloned"},"candidate":{"origin":"correction","arm":"candidate","revision":"ad926b4d10a68465b5bbc9fe203fa908dc785f59","receiver_policy":"borrowed"},"correction_reference":{"origin":"correction","arm":"reference","revision":"ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad","receiver_policy":"borrowed"}}}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          contract = pathlib.Path(os.environ['RUNNER_TEMP']) / 'runtime-companion-inputs.json'
+          contract.write_text(json.dumps(json.loads(os.environ['RUNTIME_RELEASE_INPUTS']), indent=2) + '\n')
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write('RUNTIME_COMPANION_CPU=' + str(min(os.sched_getaffinity(0))) + '\n')
+          PY
+      - name: Verify releases and link unchanged production companions
+        id: companions
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          python3 scripts/themes/bench/link_winui_runtime_artifacts.py
+          --configuration "$RUNNER_TEMP/runtime-companion-inputs.json"
+          --cpu "$RUNTIME_COMPANION_CPU"
+          --output "$RUNNER_TEMP/runtime-companion-links"
+      - name: Upload bounded runtime bundle
+        if: ${{ always() && steps.companions.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-runtime-companions-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/runtime-companion-links/export
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14
+      - name: Retain commands, provenance and concrete failure logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-runtime-companion-status-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/runtime-companion-links/evidence
+            ${{ runner.temp }}/runtime-companion-links/*-download/evidence
+            ${{ runner.temp }}/runtime-companion-links/runtime/**/build.json
+            ${{ runner.temp }}/runtime-companion-links/runtime/**/build.log
+            ${{ runner.temp }}/runtime-companion-links/runtime/**/compiler.stderr
+            ${{ runner.temp }}/runtime-companion-links/correction-reference/**/build.json
+            ${{ runner.temp }}/runtime-companion-links/correction-reference/**/compiler.stderr
+            ${{ runner.temp }}/runtime-companion-links/pgo-acceptance/result.json
+          compression-level: 6
+          if-no-files-found: warn
+          retention-days: 14

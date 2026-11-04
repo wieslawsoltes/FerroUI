@@ -3,8 +3,10 @@
 
 This compiles actual framework test crates for the selected source change. The
 metadata suite checks Base and downstream Controls expansion; the control-theme
-suite checks the runtime, emitter and differential corpus, then type-checks fresh
-WinUI output. Filters narrow execution, not compilation. Neither suite makes a
+suites check the runtime, emitter and differential corpus, then type-check fresh
+WinUI output. The explicit control-theme-regions suite additionally requires the
+region runtime/grammar cases and both generated program forms. Filters narrow
+execution, not compilation. These development suites make no
 production size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,
 source identity, lockfile, logs and resource reports survive success or failure.
 """
@@ -25,6 +27,16 @@ import time
 
 HERE = Path(__file__).resolve().parent
 HOST = "x86_64-unknown-linux-gnu"
+
+# Counts belong only to the explicit frozen region-validation suite. Existing
+# metadata and whole-theme command plans and acceptance rules remain unchanged.
+REGION_EXPECTED_SUMMARIES = {
+    "construction-runtime": {"passed": 2, "failed": 0, "ignored": 0},
+    "region-runtime": {"passed": 3, "failed": 0, "ignored": 0},
+    "construction-grammar": {"passed": 6, "failed": 0, "ignored": 0},
+    "region-grammar": {"passed": 7, "failed": 0, "ignored": 0},
+    "emitter-differential": {"passed": 25, "failed": 0, "ignored": 2},
+}
 
 
 def identity(path):
@@ -56,7 +68,7 @@ def suite_commands(cargo, suite):
         ]
         downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-base",
                       "-p", "ferroui-controls", "--features", "ferroui-base/compiler-metadata,ferroui-base/hot-reload"]
-    else:
+    elif suite in {"control-theme", "control-theme-regions"}:
         tests = [
             ("construction-runtime", [*common, "-p", "ferroui-markup-xaml",
                                        "control_theme_program::tests::", "--", "--test-threads=1"]),
@@ -65,8 +77,19 @@ def suite_commands(cargo, suite):
             ("emitter-differential", [*common, "-p", "ferroui-markup-xaml-tests",
                                       "emitter::differential_tests::", "--", "--test-threads=1"]),
         ]
+        if suite == "control-theme-regions":
+            tests.insert(1, (
+                "region-runtime", [*common, "-p", "ferroui-markup-xaml",
+                                   "style_region::tests::", "--", "--test-threads=1"],
+            ))
+            tests.insert(3, (
+                "region-grammar", [*common, "-p", "ferroui-markup-xaml-loader", "--features", "emitter",
+                                   "control_theme_programs::regions::tests::", "--", "--test-threads=1"],
+            ))
         downstream = [cargo, "check", "--locked", "--target", HOST, "--lib", "-p", "ferroui-themes-winui",
                       "--features", "solid-theme"]
+    else:
+        raise ValueError(f"unknown source validation suite: {suite}")
     return [*tests, ("downstream", downstream)], {label for label, _ in tests}
 
 
@@ -85,7 +108,9 @@ def collect_generated_winui(target, evidence):
     for path in sorted(target.rglob("compiled_xaml.rs")):
         if any(part.startswith("ferroui-themes-winui-") for part in path.parts):
             row = identity(path)
-            row["construction_programs"] = path.read_text().count("rt::control_theme_program::run(")
+            contents = path.read_text()
+            row["construction_programs"] = contents.count("rt::control_theme_program::run(")
+            row["region_programs"] = contents.count("rt::style_region::run(")
             retained = evidence / "generated" / f"{len(generated):03d}-{path.parent.parent.name}.rs"
             retained.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, retained)
@@ -99,7 +124,7 @@ def main():
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--suite", choices=("metadata", "control-theme"), default="metadata")
+    parser.add_argument("--suite", choices=("metadata", "control-theme", "control-theme-regions"), default="metadata")
     parser.add_argument("--required-test", action="append", default=[])
     parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
@@ -161,6 +186,8 @@ def main():
         "required_tests": args.required_test,
         "required_metadata_tests": args.required_test if args.suite == "metadata" else [],
     }
+    if args.suite == "control-theme-regions":
+        report["expected_test_summaries"] = REGION_EXPECTED_SUMMARIES
     tracked = evidence / "tracked-inputs.txt"
     tracked.write_text(git(source, "ls-files", "--stage") + "\n")
     report["tracked_inputs"] = identity(tracked)
@@ -204,6 +231,8 @@ def main():
                     contents = log.read_text()
                     row["test_summary"], passed = successful_tests(contents, label)
                     row["passed_tests"] = sorted(passed)
+                    if args.suite == "control-theme-regions" and row["test_summary"] != REGION_EXPECTED_SUMMARIES[label]:
+                        raise RuntimeError(f"{label} summary {row['test_summary']} does not match frozen region suite {REGION_EXPECTED_SUMMARIES[label]}")
                     passed_tests.update(passed)
                     if label == "metadata":
                         for name in args.required_test:
@@ -237,17 +266,24 @@ def main():
                 report["environment"]["toolchain_path_prefix"] = str(prefix / "bin")
                 report["environment"]["toolchain_library_prefix"] = str(prefix / "lib")
                 report["environment"]["rustc"] = environment["RUSTC"]
-        if args.suite == "control-theme":
+        if args.suite in {"control-theme", "control-theme-regions"}:
             report["generated_winui"] = collect_generated_winui(output / "target", evidence)
             if not any(row["construction_programs"] for row in report["generated_winui"]):
                 raise RuntimeError("fresh WinUI output contains no accepted ControlTheme construction programs")
+            if args.suite == "control-theme-regions":
+                report["generated_program_counts"] = {
+                    key: sum(row[key] for row in report["generated_winui"])
+                    for key in ("construction_programs", "region_programs")
+                }
+                if not any(row["region_programs"] for row in report["generated_winui"]):
+                    raise RuntimeError("fresh WinUI output contains no accepted Style region programs")
         report["complete"] = True
     except BaseException as error:
         report["failure"] = str(error)
         raise
     finally:
         previously_complete = report["complete"]
-        if args.suite == "control-theme" and "generated_winui" not in report:
+        if args.suite in {"control-theme", "control-theme-regions"} and "generated_winui" not in report:
             try:
                 report["generated_winui"] = collect_generated_winui(output / "target", evidence)
             except Exception as error:

@@ -1,0 +1,80 @@
+name: ControlTheme and Style region source validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Immutable combined metadata, ControlTheme and Style region source commit'
+        default: 'dc93a16d88c8d8e6aedaa852f1106a856ab5993b'
+        required: true
+        type: string
+
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-region-source-validation.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-region-source-validation-${{ github.ref }}-${{ inputs.revision || 'dc93a16d88c8d8e6aedaa852f1106a856ab5993b' }}
+  cancel-in-progress: false
+
+jobs:
+  source-validation:
+    name: Actual whole-theme and region lifetimes, emitter and fresh WinUI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.revision || 'dc93a16d88c8d8e6aedaa852f1106a856ab5993b' }}
+          path: source
+          persist-credentials: false
+      - name: Native development dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config time libfontconfig1-dev libfreetype6-dev
+      - name: Compile immutable source and run whole-theme and region gates
+        env:
+          SOURCE_REVISION: ${{ inputs.revision || 'dc93a16d88c8d8e6aedaa852f1106a856ab5993b' }}
+        run: |
+          python3 tooling/scripts/themes/bench/run_winui_source_validation.py \
+            --source "$GITHUB_WORKSPACE/source" \
+            --revision "$SOURCE_REVISION" \
+            --output "$RUNNER_TEMP/winui-region-source-validation" \
+            --suite control-theme-regions \
+            --required-test xaml_il::runtime::compiled::control_theme_program::tests::caller_owned_locals_match_original_cleanup_on_error_unwind_and_panicking_drop \
+            --required-test xaml_il::runtime::compiled::control_theme_program::tests::returned_theme_payload_matches_original_return_place_cleanup \
+            --required-test rust_emitter::control_theme_programs::tests::complete_nested_factory_keeps_local_order_and_lazy_imports \
+            --required-test rust_emitter::control_theme_programs::tests::every_stored_role_must_already_be_present_in_the_resource \
+            --required-test rust_emitter::control_theme_programs::tests::selector_arrays_move_each_local_once_in_original_order \
+            --required-test rust_emitter::control_theme_programs::tests::unknown_lifecycle_statements_decline_the_whole_function \
+            --required-test rust_emitter::control_theme_programs::tests::borrowed_nonprimitive_temporaries_do_not_move_into_leaf_callbacks \
+            --required-test rust_emitter::control_theme_programs::tests::imports_of_other_resources_are_not_rooted_by_the_shared_program \
+            --required-test emitter::differential_tests::complete_control_theme_construction_program_keeps_unsupported_resource_and_visual_factories \
+            --required-test emitter::differential_tests::a_theme_without_template_locals_does_not_import_the_shared_drop_roles \
+            --required-test xaml_il::runtime::compiled::style_region::tests::regions_preserve_interleaved_local_and_return_payload_cleanup \
+            --required-test xaml_il::runtime::compiled::style_region::tests::regions_preserve_parent_stack_and_lazy_import_order_on_value_panic \
+            --required-test xaml_il::runtime::compiled::style_region::tests::region_dynamic_runs_preserve_getter_order_and_parent_visibility \
+            --required-test rust_emitter::control_theme_programs::regions::tests::regions_stay_between_original_declarations_and_share_only_lazy_imports \
+            --required-test rust_emitter::control_theme_programs::regions::tests::sixteen_statements_is_a_deterministic_minimum \
+            --required-test rust_emitter::control_theme_programs::regions::tests::later_use_moves_borrows_reassignment_and_scope_boundaries_decline \
+            --required-test rust_emitter::control_theme_programs::regions::tests::both_stored_roles_are_required_even_when_a_helper_constructs_one \
+            --required-test rust_emitter::control_theme_programs::regions::tests::rejected_prefixes_cannot_contribute_imports_to_a_later_region \
+            --required-test rust_emitter::control_theme_programs::regions::tests::external_parent_changes_split_regions_without_capturing_or_cloning_it \
+            --required-test rust_emitter::control_theme_programs::regions::tests::parent_stack_must_balance_inside_each_region_and_unsupported_text_is_exact \
+            --required-test emitter::differential_tests::style_regions_keep_resource_statements_and_share_imports_within_one_factory
+      - name: Preserve commands, source, results and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-region-source-validation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-region-source-validation/evidence
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 14
