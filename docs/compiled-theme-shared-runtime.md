@@ -13,7 +13,10 @@ against that budget.
 
 The runtime and focused regression tests are committed through
 [`6401e654`](https://github.com/wieslawsoltes/FerroUI/commit/6401e654c148a473f33358b79f5cf886d5f9d86b),
-on the existing PR branch. The reference revision is
+with test-only corrections through
+[`d2d2f83d`](https://github.com/wieslawsoltes/FerroUI/commit/d2d2f83d606f547b4ebda2323a145b14ca8379ad).
+The production comparison freezes that revision on the existing PR branch.
+The reference revision is
 `be91062df9bb018de78113c34a1967c60038f9b6`. The source phase does not merge current
 main into the measured cohort.
 
@@ -96,6 +99,41 @@ The initial normal-library check passed with Rust 1.99.0 and LLVM 23.1.1, using
 `markup-functions`. Independent source review found no API, ownership or
 reentrancy blocker. These checks do not certify runtime behavior or release size.
 
+The development Base library subsequently built successfully with debug
+assertions, `hot-reload` and `markup-functions`. All 1,683 Base source hashes
+remained unchanged during compilation. The library uses `opt-level=0`, 128
+codegen units and bitcode emission; development companions use ThinLTO. This
+combination bounds compilation memory while exercising the actual runtime
+implementation. It is not the production optimization policy and supplies no
+release-size or throughput result.
+
+The completed development checks are:
+
+| Check | Actual result |
+|---|---|
+| Property and binding correctness | 348 passed, 0 failed, 3 ignored; all nine new regressions and the debug hot-reload rollback case passed |
+| Metadata receiver ownership and callbacks | 8 checks passed |
+| Generated getters | 88 getter results and 352 associated argument-diagnostic assertions passed |
+| Animation iteration, style and preview | 44 tests passed |
+| Animation frame checksums | Normal, reverse, alternate and attachment modes passed |
+| Animation attachment allocation observations | 16 rows, each with 34 allocation requests and 6,960 requested bytes; no reference parity claim |
+| Property registration | 47 tests passed |
+| Ordinary unwinding | Typed panic payload, nested destructor order, property-store reuse and binding reuse passed |
+
+The animation allocation rows report requested bytes, not retained memory or
+allocator overhead. The unwind check uses ordinary development unwind tables;
+the separately linked production compact-unwind check remains required.
+
+[Development evidence](benchmarks/compiled-theme-shared-runtime-development-linux-x86_64.json)
+records the actual logs, immutable fixture identities and the bridge from all
+20 changed runtime files to the successful Base build. It also preserves the
+earlier unsuccessful attempts. The final property fixture corrects two
+assumptions about unchanged behavior: a local write masks an existing style
+binding without unsubscribing it, and `set_current_value` applies coercion
+without invoking validation. A template-priority lease now exercises the real
+unsubscribe/resubscribe transition. Conversion-temporary destruction assertions
+remain inside the validation, coercion and direct-setter callbacks.
+
 The remaining gates use real Base libraries and separately recorded fixtures:
 
 | Area | Evidence required |
@@ -118,11 +156,64 @@ relocations, compact unwind and panic unwinding.
 ## Reproduction helpers
 
 The existing [profile driver](../scripts/themes/bench/profile_winui.py) remains
-the release producer. The
+the source of the release training and link policy. The
 [toolchain bootstrap](../scripts/themes/bench/bootstrap_toolchain.py) installs
 checksummed official components into an explicitly selected benchmark work
 directory. It records compiler and LLVM identities without changing a system
 toolchain.
+
+The [whole-graph replay driver](../scripts/themes/bench/rebuild_winui_pgo.py)
+executes that policy for one frozen revision. It preserves the original thirteen
+training launches and verifies the three training-source hashes and shipping
+entry-point hash. Cargo's retained ThinLTO profile makes library dependencies
+emit bitcode; the recorder verifies that actual compiler option. Final shipping
+code uses the original `opt-z`, FatLTO and one-codegen-unit link policy. A
+separate small PGO interoperability check establishes that profile counts can
+reach an upstream bitcode library; it does not predict the full application's
+memory use or performance.
+
+Each revision has a separate result directory containing immutable source,
+training inputs, dependency libraries, manifests, compiler records and its own
+profile. The compiler, native driver and LLVM tools are identified by content
+hash. Both revisions use the same disposable compilation checkout, consumer
+directory and target directory, preventing an accidental path-policy change
+between arms. Extracted source snapshots remain available after the compilation
+checkout changes revision.
+
+For example, with a clean frozen checkout and the checksummed toolchain already
+installed:
+
+```sh
+python3 scripts/themes/bench/rebuild_winui_pgo.py \
+  --source /path/to/measurement-checkout \
+  --work-dir /path/to/evidence/candidate \
+  --shared-work /path/to/shared-build \
+  --toolchain-prefix /path/to/rust-1.99.0 \
+  --cargo-home /path/to/cargo-cache \
+  --cpus 4
+
+python3 scripts/themes/bench/collect_winui_pgo.py \
+  --build /path/to/evidence/candidate/build.json \
+  --attribute
+```
+
+Choose a CPU permitted by the host. Run
+[artifact collection](../scripts/themes/bench/collect_winui_pgo.py) before
+switching the disposable checkout to the reference. It verifies the source,
+profile and library association, copies generated XAML/FXB/FXP artifacts, and
+relinks preserved native objects into a symbol-bearing companion. Every
+allocated section except the build-ID note, and the executable entry point,
+must match the shipping binary before that companion can supply attribution.
+The shipping executable's bytes remain unchanged. Reuse the same compilation
+paths for the reference, with a fresh reference result directory and a freshly
+trained reference profile.
+
+The [template validation producer](../scripts/themes/bench/prepare_template_validation.py)
+retains the four original control factories, loader paths, font assertions and
+visual-tree expectations. Its structural case additionally requires the edited
+archive's `AdditionalEditProbe` resource to equal `31.0`. The complete release
+gate requires 156 activations across embedded, scalar-edit and structural-edit
+archives. Preparing the fixture does not count as executing that gate.
 
 The [runtime validation driver](../scripts/themes/bench/validate_runtime_release.py)
 materializes retained public registry/unwind fixtures with verified source
