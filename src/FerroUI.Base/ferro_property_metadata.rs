@@ -1,5 +1,5 @@
 use crate::data::BindingMode;
-use crate::property_store::EffectiveValue;
+use crate::property_store::{EffectiveValue, UncommonFields};
 use crate::{FerroObject, TypeInfo};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -102,6 +102,15 @@ enum CoercionRequest<'a, T> {
         factory: &'a dyn DefaultEffectiveValueFactory<T>,
         operations: DefaultCoercionOperations<T>,
     },
+    TypeSafeMetadata {
+        metadata: &'a Rc<StyledPropertyMetadata<T>>,
+        result: &'a mut Option<Rc<StyledPropertyMetadata<T>>>,
+    },
+    InitializeUncommon {
+        callback: &'a CoerceValueCallback<T>,
+        value: &'a T,
+        result: &'a mut Option<UncommonFields<T>>,
+    },
 }
 
 /// Constructed only when a caller supplies a coercer. A property without a
@@ -147,6 +156,24 @@ impl<T> Coercion<T> {
     ) {
         (self.apply)(CoercionRequest::Default { coercion: self, metadata, owner, factory, operations });
     }
+
+    fn type_safe_metadata(&self, metadata: &Rc<StyledPropertyMetadata<T>>) -> Rc<StyledPropertyMetadata<T>> {
+        let mut result = None;
+        (self.apply)(CoercionRequest::TypeSafeMetadata { metadata, result: &mut result });
+        result.expect("coercion dispatch returns type-safe metadata")
+    }
+
+    pub(crate) fn initialize_uncommon(&self, value: &T) -> UncommonFields<T> {
+        let mut result = None;
+        // Borrow the callback here. Its original Rc clone belongs inside the
+        // initializer, before either value clone, including partial unwind.
+        (self.apply)(CoercionRequest::InitializeUncommon {
+            callback: &self.callback,
+            value,
+            result: &mut result,
+        });
+        result.expect("coercion dispatch initializes uncommon fields")
+    }
 }
 
 impl<T: Clone + 'static> Coercion<T> {
@@ -162,6 +189,14 @@ impl<T: Clone + 'static> Coercion<T> {
             }
             CoercionRequest::Default { coercion, metadata, owner, factory, operations } => {
                 coercion.apply_default(metadata, owner, factory, operations);
+            }
+            CoercionRequest::TypeSafeMetadata { metadata, result } => {
+                // The public implementation keeps its original owned copy
+                // frame; only explicit coercer construction roots this call.
+                *result = Some(StyledPropertyMetadata::generate_type_safe_metadata(metadata));
+            }
+            CoercionRequest::InitializeUncommon { callback, value, result } => {
+                *result = Some(UncommonFields::new(callback, value));
             }
         }
     }
@@ -204,9 +239,43 @@ mod coercion_request_tests {
             CoerceValueCallback<T>,
             fn(&EffectiveValue<T>, &FerroObject, CoercionOperations<T>),
         );
+        // Preserve the exact pre-construction request representation as an
+        // independent mirror; the two new variants contain only borrows.
+        #[allow(dead_code)]
+        enum OriginalRequest<'a, T> {
+            Recoerce {
+                target: &'a EffectiveValue<T>,
+                owner: &'a FerroObject,
+                operations: CoercionOperations<T>,
+            },
+            EndReevaluation {
+                target: &'a EffectiveValue<T>,
+                owner: &'a FerroObject,
+                operations: DefaultCoercionOperations<T>,
+            },
+            Default {
+                coercion: &'a OriginalDispatch<T>,
+                metadata: &'a StyledPropertyMetadata<T>,
+                owner: &'a FerroObject,
+                factory: &'a dyn DefaultEffectiveValueFactory<T>,
+                operations: DefaultCoercionOperations<T>,
+            },
+        }
+        #[allow(dead_code)]
+        struct OriginalDispatch<T> {
+            callback: CoerceValueCallback<T>,
+            apply: for<'a> fn(OriginalRequest<'a, T>),
+        }
         assert_eq!(size_of::<Coercion<DropOnly>>(), size_of::<Original<DropOnly>>());
         assert_eq!(align_of::<Coercion<DropOnly>>(), align_of::<Original<DropOnly>>());
         assert_eq!(size_of::<Option<Coercion<DropOnly>>>(), size_of::<Option<Original<DropOnly>>>());
+        assert_eq!(size_of::<Coercion<DropOnly>>(), size_of::<OriginalDispatch<DropOnly>>());
+        assert_eq!(align_of::<Coercion<DropOnly>>(), align_of::<OriginalDispatch<DropOnly>>());
+        assert_eq!(size_of::<Option<Coercion<DropOnly>>>(), size_of::<Option<OriginalDispatch<DropOnly>>>());
+        assert_eq!(align_of::<Option<Coercion<DropOnly>>>(), align_of::<Option<OriginalDispatch<DropOnly>>>());
+        assert!(size_of::<CoercionRequest<'_, DropOnly>>() <= size_of::<OriginalRequest<'_, DropOnly>>());
+        assert_eq!(align_of::<CoercionRequest<'_, DropOnly>>(), align_of::<OriginalRequest<'_, DropOnly>>());
+        assert!(!needs_drop::<OriginalRequest<'_, DropOnly>>());
         assert!(!needs_drop::<CoercionRequest<'_, DropOnly>>());
         assert!(!needs_drop::<CoercionOperations<DropOnly>>());
         assert!(!needs_drop::<DefaultCoercionOperations<DropOnly>>());
@@ -220,6 +289,10 @@ mod coercion_request_tests {
         assert!(borrowed(&local).is_none());
     }
 }
+
+#[cfg(test)]
+#[path = "ferro_property_metadata_construction_oracles.rs"]
+pub(crate) mod construction_oracles;
 
 /// Metadata for styled properties.
 pub struct StyledPropertyMetadata<T> {
@@ -338,6 +411,28 @@ pub trait PropertyMetadata: Sized + 'static {
     /// Returns metadata that is safe to use for any host type: a copy without
     /// host-specific callbacks.
     fn generate_type_safe_metadata(this: &Rc<Self>) -> Rc<Self>;
+}
+
+// Only MetadataTable::new uses this after freezing its owned metadata. Keep
+// the public generation method independent: callers may supply unfrozen
+// metadata, which must still make a frozen copy even without a coercer.
+pub(crate) trait FrozenPropertyMetadata: PropertyMetadata {
+    fn generate_frozen_type_safe_metadata(this: &Rc<Self>) -> Rc<Self>;
+}
+
+impl<T: Clone + 'static> FrozenPropertyMetadata for StyledPropertyMetadata<T> {
+    fn generate_frozen_type_safe_metadata(this: &Rc<Self>) -> Rc<Self> {
+        match this.coercion() {
+            Some(coercion) => coercion.type_safe_metadata(this),
+            None => this.clone(),
+        }
+    }
+}
+
+impl<T: Clone + 'static> FrozenPropertyMetadata for DirectPropertyMetadata<T> {
+    fn generate_frozen_type_safe_metadata(this: &Rc<Self>) -> Rc<Self> {
+        this.clone()
+    }
 }
 
 impl<T: Clone + 'static> PropertyMetadata for StyledPropertyMetadata<T> {
@@ -503,10 +598,13 @@ fn inherited_metadata_index(hosts: &[&'static TypeInfo], host: &'static TypeInfo
 }
 
 impl<M: PropertyMetadata> MetadataTable<M> {
-    pub fn new(host_type: &'static TypeInfo, mut metadata: M) -> Self {
+    pub fn new(host_type: &'static TypeInfo, mut metadata: M) -> Self
+    where
+        M: FrozenPropertyMetadata,
+    {
         metadata.freeze();
         let metadata = Rc::new(metadata);
-        let default_metadata = M::generate_type_safe_metadata(&metadata);
+        let default_metadata = M::generate_frozen_type_safe_metadata(&metadata);
         Self {
             default_metadata,
             inner: RefCell::new(MetadataEntries::Single(Some((host_type, metadata)))),

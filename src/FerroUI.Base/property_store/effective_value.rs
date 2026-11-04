@@ -26,10 +26,22 @@ pub(crate) trait EffectiveValueDyn: Any {
     );
 }
 
-struct UncommonFields<T> {
+pub(crate) struct UncommonFields<T> {
     coerce: CoerceValueCallback<T>,
     uncoerced_value: RefCell<T>,
     uncoerced_base_value: RefCell<T>,
+}
+
+impl<T: Clone> UncommonFields<T> {
+    pub(crate) fn new(coerce: &CoerceValueCallback<T>, value: &T) -> Self {
+        // Preserve the original map closure's initialization and partial-drop
+        // order. In particular, the callback is cloned before either T clone.
+        Self {
+            coerce: coerce.clone(),
+            uncoerced_value: RefCell::new(value.clone()),
+            uncoerced_base_value: RefCell::new(value.clone()),
+        }
+    }
 }
 
 /// Entry selection and subscription lifetime are identical for every styled
@@ -358,11 +370,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             Some(inherited) => inherited.value(),
             None => metadata.default_value().clone(),
         };
-        let uncommon = metadata.coerce_value().map(|coerce| UncommonFields {
-            coerce: coerce.clone(),
-            uncoerced_value: RefCell::new(value.clone()),
-            uncoerced_base_value: RefCell::new(value.clone()),
-        });
+        let uncommon = metadata.coercion().map(|coercion| coercion.initialize_uncommon(&value));
         Self {
             metadata,
             state: EffectiveValueState::new(property),
@@ -575,3 +583,7 @@ mod coercion_tests;
 #[cfg(test)]
 #[path = "effective_value_inheritance_tests.rs"]
 mod inheritance_tests;
+
+#[cfg(test)]
+#[path = "effective_value_construction_tests.rs"]
+mod construction_tests;
