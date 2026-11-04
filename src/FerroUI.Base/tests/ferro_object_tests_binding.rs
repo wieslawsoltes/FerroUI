@@ -1114,7 +1114,7 @@ fn boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe() {
 
     target.set_value(property, 29);
     assert_eq!(source.subscriber_count(), 0);
-    property.override_metadata(Class2::TYPE, StyledPropertyMetadata::new(Some(47)));
+    property.override_metadata::<Class2>(StyledPropertyMetadata::new(Some(47)));
     target.clear_value(property);
 
     assert_eq!(source.subscriber_count(), 1);
