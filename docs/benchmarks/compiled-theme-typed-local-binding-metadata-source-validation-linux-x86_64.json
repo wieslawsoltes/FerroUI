@@ -1,0 +1,1018 @@
+{
+  "artifact": {
+    "archive": {
+      "bytes": 1229566,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/winui-local-binding-metadata-source-validation-41882170321-1.zip",
+      "sha256": "5407a5897a3acd5de3877d7f0935d56666d029ac9502e1b03bdb4b49d1d0e423"
+    },
+    "expanded_bytes": 7079091,
+    "file_count": 26,
+    "members": {
+      "bootstrap-resources.txt": {
+        "bytes": 926,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/bootstrap-resources.txt",
+        "sha256": "2af50317a7f7fb795b680017c2ffde0dbfe4724a6f404ca9bf911da65c74a1fb"
+      },
+      "bootstrap.log": {
+        "bytes": 670,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/bootstrap.log",
+        "sha256": "06cdeff9b2626926d93ec4d0df6ab0d6619d7f0463b797134edada03a0409903"
+      },
+      "coercer-registration-resources.txt": {
+        "bytes": 995,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/coercer-registration-resources.txt",
+        "sha256": "0be761bc7578f835e903f4800d1adf3b6ad4c197a540323ec73d9d9bd794c7bb"
+      },
+      "coercer-registration.log": {
+        "bytes": 40336,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/coercer-registration.log",
+        "sha256": "13fa6e88d6ffad13f32444587938788a9e85f6b6a9387b4d5a605dee952a2335"
+      },
+      "coercion-oracles-resources.txt": {
+        "bytes": 1020,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/coercion-oracles-resources.txt",
+        "sha256": "f84261ea27dd8c362fb5ae13052f2fecf12cb617dedd324ebc819ce6ec4bebb6"
+      },
+      "coercion-oracles.log": {
+        "bytes": 44474,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/coercion-oracles.log",
+        "sha256": "bcd1cb0e9bc07db7eb5e58089d76b27ed393690fd3a55ae70f006966a8fcd5ac"
+      },
+      "default-coercion-oracles-resources.txt": {
+        "bytes": 1001,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/default-coercion-oracles-resources.txt",
+        "sha256": "e027ea0ffb08b72c3e5e620fe54128e24ebee9eac5b748e30707f28eab0e0542"
+      },
+      "default-coercion-oracles.log": {
+        "bytes": 40648,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/default-coercion-oracles.log",
+        "sha256": "2e9b95d9a6e408fe68538ba187d38859e03c456c9bfae510b6409a888c64692d"
+      },
+      "downstream-resources.txt": {
+        "bytes": 989,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/downstream-resources.txt",
+        "sha256": "89064b778d43fc4be52af5bccc1f769ec4465fb4c7a4baee13101b974ae1d384"
+      },
+      "downstream.log": {
+        "bytes": 11410,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/downstream.log",
+        "sha256": "d77d9c7e5fd5ecc9cc9ca2385c8fc76e408633cbcac2473a147d8960c39c6a4e"
+      },
+      "fresh-winui-resources.txt": {
+        "bytes": 940,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/fresh-winui-resources.txt",
+        "sha256": "793b5f2c742daa59083ab889ab92f469f1406afdb2287aaf234d10f2ff4e490d"
+      },
+      "fresh-winui.log": {
+        "bytes": 14136,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/fresh-winui.log",
+        "sha256": "370d6e5ace01e07ba03d2c9d13deda6e13c28e00ffed17151cff9038e1ba8685"
+      },
+      "generated/000-out.rs": {
+        "bytes": 4867720,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/generated/000-out.rs",
+        "sha256": "0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630"
+      },
+      "inheritance-oracles-resources.txt": {
+        "bytes": 1000,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/inheritance-oracles-resources.txt",
+        "sha256": "5fde3349e153382cdb3fb2dab1a3eaa8876dff05afdaad69abec8871c11dfcf2"
+      },
+      "inheritance-oracles.log": {
+        "bytes": 40780,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/inheritance-oracles.log",
+        "sha256": "17bbe61e4ae1617f94a0b39ca11de6bbd6e5e1bb98df3b557050625a86d57d21"
+      },
+      "installation.json": {
+        "bytes": 12301,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/installation.json",
+        "sha256": "d2c7a67f1356a941f7c131e99e911a4149e8dbc09933169a6c8db606dcb8750a"
+      },
+      "metadata-resources.txt": {
+        "bytes": 959,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/metadata-resources.txt",
+        "sha256": "bfa5fe9275731ce0a37161fe9e74aaaaad384aa2491abb68ada0749905f6cad1"
+      },
+      "metadata.log": {
+        "bytes": 46509,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/metadata.log",
+        "sha256": "268df7f6e0b2c4b59d1a39dbe95a1df52f84ba0d51ff4914db772b37a14e1a98"
+      },
+      "property-metadata-resources.txt": {
+        "bytes": 977,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-metadata-resources.txt",
+        "sha256": "afcaa4113c83a2880b2a0bead890f299fa11f4858f93f0979480bfdc52667964"
+      },
+      "property-metadata.log": {
+        "bytes": 41467,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-metadata.log",
+        "sha256": "16707c43f29c2203d5152f1771ce906f3e196f75e382349eb019cc576da1e565"
+      },
+      "property-registry-resources.txt": {
+        "bytes": 985,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-registry-resources.txt",
+        "sha256": "208c0fe1ad2dccb9e42e69644c8e5e8dc9c042a825e9cebd557440ee777bdb8a"
+      },
+      "property-registry.log": {
+        "bytes": 41482,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-registry.log",
+        "sha256": "a37ae5b10f4b943c65eafa301b1d2c589d5bf17fec2d3c4ef39ed9b25606ed40"
+      },
+      "property-runtime-resources.txt": {
+        "bytes": 976,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-runtime-resources.txt",
+        "sha256": "cca2586ff6b635dad9f3ee8b886accd0fe502a797791a54896db88b89feab130"
+      },
+      "property-runtime.log": {
+        "bytes": 71989,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-runtime.log",
+        "sha256": "648e61cb341291780a26574cf4761f2a338e0fb9d3ee9857498588fbd29c5b3d"
+      },
+      "tracked-inputs.txt": {
+        "bytes": 1722496,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/tracked-inputs.txt",
+        "sha256": "e8c98fc912a1a296607aa3e8d34a64d637840d31354ab014b7f961d78d98b555"
+      },
+      "validation.json": {
+        "bytes": 71905,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/validation.json",
+        "sha256": "599b6c86612ad680a6597ba88e117e11218d60a3c0706abfa11033704ab46f5e"
+      }
+    },
+    "metadata": {
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/13349319524/zip",
+      "created_at": "2026-11-04T18:06:36Z",
+      "digest": "sha256:5407a5897a3acd5de3877d7f0935d56666d029ac9502e1b03bdb4b49d1d0e423",
+      "expired": false,
+      "expires_at": "2026-11-18T18:06:34Z",
+      "id": 13349319524,
+      "name": "winui-local-binding-metadata-source-validation-41882170321-1",
+      "size_in_bytes": 1229566,
+      "updated_at": "2026-11-04T18:06:36Z",
+      "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/13349319524",
+      "workflow_run": {
+        "head_branch": "perf/compact-xaml-theme-codegen",
+        "head_repository_id": 1405576478,
+        "head_sha": "18c8aaf636c049bccab98f03c4de532319018cd1",
+        "id": 41882170321,
+        "repository_id": 1405576478
+      }
+    }
+  },
+  "checks": {
+    "all_log_resource_hashes_verified": true,
+    "command_plan_unchanged_from_prior_source_gate": true,
+    "downstream_base_controls": true,
+    "exact_duplicate_names_and_phases": {
+      "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_add_ownered_property": [
+        "property-runtime",
+        "metadata"
+      ],
+      "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class": [
+        "property-runtime",
+        "metadata"
+      ],
+      "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property": [
+        "property-runtime",
+        "metadata"
+      ],
+      "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class": [
+        "property-runtime",
+        "metadata"
+      ]
+    },
+    "exact_frozen_commands_verified": true,
+    "failed": 0,
+    "fresh_winui_typecheck": true,
+    "generated_program_counts": {
+      "construction_programs": 18,
+      "region_programs": 34
+    },
+    "ignored": 0,
+    "lockfile_unchanged": true,
+    "mandatory_test_count": 27,
+    "mandatory_tests_passed": [
+      "ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer",
+      "ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types",
+      "ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations",
+      "ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides",
+      "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback",
+      "property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind",
+      "property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes",
+      "property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind",
+      "property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality",
+      "property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind",
+      "property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots",
+      "property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior",
+      "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry",
+      "property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind",
+      "property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts",
+      "property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry",
+      "property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind",
+      "property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior",
+      "tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind",
+      "tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box",
+      "tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error",
+      "tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe",
+      "tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal",
+      "tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding",
+      "tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone",
+      "tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive",
+      "tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property"
+    ],
+    "passing_test_executions": 415,
+    "test_summaries": {
+      "coercer-registration": {
+        "failed": 0,
+        "ignored": 0,
+        "passed": 1
+      },
+      "coercion-oracles": {
+        "failed": 0,
+        "ignored": 0,
+        "passed": 7
+      },
+      "default-coercion-oracles": {
+        "failed": 0,
+        "ignored": 0,
+        "passed": 3
+      },
+      "inheritance-oracles": {
+        "failed": 0,
+        "ignored": 0,
+        "passed": 4
+      },
+      "metadata": {
+        "failed": 0,
+        "ignored": 0,
+        "passed": 67
+      },
+      "property-metadata": {
+        "failed": 0,
+        "ignored": 0,
+        "passed": 14
+      },
+      "property-registry": {
+        "failed": 0,
+        "ignored": 0,
+        "passed": 12
+      },
+      "property-runtime": {
+        "failed": 0,
+        "ignored": 0,
+        "passed": 307
+      }
+    },
+    "tracked_inventory_matches_frozen_tree": true,
+    "unique_passing_test_names": 411
+  },
+  "ci": {
+    "conclusion": "success",
+    "created_at": "2026-11-04T17:57:39Z",
+    "head_branch": "perf/compact-xaml-theme-codegen",
+    "head_sha": "18c8aaf636c049bccab98f03c4de532319018cd1",
+    "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/41882170321",
+    "id": 41882170321,
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-11-04T18:06:40Z"
+  },
+  "complete": true,
+  "frozen_producers": {
+    "bootstrap": {
+      "bytes": 8676,
+      "path": "/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/bootstrap_toolchain.py",
+      "sha256": "ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb"
+    },
+    "runner": {
+      "bytes": 24741,
+      "path": "/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/run_winui_source_validation.py",
+      "sha256": "fd9ef36b8f518a516561cf68639e601f84b0534d67f3b34aeba440ed4713dedf"
+    },
+    "workflow": {
+      "bytes": 6436,
+      "content_utf8": "name: Typed local binding metadata source validation\n\non:\n  workflow_dispatch:\n    inputs:\n      revision:\n        description: 'Immutable typed local binding metadata source commit'\n        default: '2291f8bf32d8d013d1885504aa6b8260edd3e4bc'\n        required: true\n        type: string\n  push:\n    branches: ['perf/compact-xaml-theme-codegen']\n    paths: ['.github/workflows/winui-local-binding-metadata-source-validation.yml']\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: winui-local-binding-metadata-source-${{ github.ref }}-${{ inputs.revision || '2291f8bf32d8d013d1885504aa6b8260edd3e4bc' }}\n  cancel-in-progress: false\n\njobs:\n  source-validation:\n    name: Typed local metadata, property behavior and fresh WinUI\n    runs-on: ubuntu-24.04\n    timeout-minutes: 120\n    steps:\n      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\n        with:\n          path: tooling\n          persist-credentials: false\n      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\n        with:\n          ref: ${{ inputs.revision || '2291f8bf32d8d013d1885504aa6b8260edd3e4bc' }}\n          path: source\n          persist-credentials: false\n      - name: Native development dependencies\n        run: |\n          sudo apt-get update\n          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config time libfontconfig1-dev libfreetype6-dev\n      # 415 passing executions, 411 distinct names, exactly four known overlaps;\n      # the existing suite and all 27 mandatory regression names are unchanged.\n      - name: Compile immutable source and check typed local metadata\n        env:\n          SOURCE_REVISION: ${{ inputs.revision || '2291f8bf32d8d013d1885504aa6b8260edd3e4bc' }}\n        run: |\n          python3 tooling/scripts/themes/bench/run_winui_source_validation.py \\\n            --source \"$GITHUB_WORKSPACE/source\" \\\n            --revision \"$SOURCE_REVISION\" \\\n            --output \"$RUNNER_TEMP/winui-local-binding-metadata-source-validation\" \\\n            --suite property-capabilities \\\n            --required-test property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind \\\n            --required-test property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots \\\n            --required-test property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes \\\n            --required-test property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind \\\n            --required-test property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality \\\n            --required-test property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind \\\n            --required-test property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry \\\n            --required-test property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts \\\n            --required-test property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior \\\n            --required-test ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer \\\n            --required-test ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations \\\n            --required-test ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides \\\n            --required-test tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property \\\n            --required-test ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types \\\n            --required-test property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind \\\n            --required-test property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback \\\n            --required-test property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind \\\n            --required-test property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry \\\n            --required-test property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior \\\n            --required-test tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error \\\n            --required-test tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal \\\n            --required-test tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box \\\n            --required-test tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive \\\n            --required-test tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe \\\n            --required-test tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone \\\n            --required-test tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind \\\n            --required-test tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding\n      - name: Preserve commands, source, results and failure evidence\n        if: always()\n        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4\n        with:\n          name: winui-local-binding-metadata-source-validation-${{ github.run_id }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/winui-local-binding-metadata-source-validation/evidence\n          if-no-files-found: error\n          compression-level: 1\n          retention-days: 14\n",
+      "sha256": "d1f12451a911e5b84cf4adf5d84409317289d6d79a56447e768540c44da6b576"
+    }
+  },
+  "full_release_accepted": false,
+  "generated_winui": [
+    {
+      "observed_counts": {
+        "construction_programs": 18,
+        "region_programs": 34
+      },
+      "original": {
+        "bytes": 4867720,
+        "construction_programs": 18,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/target/x86_64-unknown-linux-gnu/debug/build/ferroui-themes-winui-5af1db63c2b4b6a5/out/xaml/compiled_xaml.rs",
+        "region_programs": 34,
+        "retained": {
+          "bytes": 4867720,
+          "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/generated/000-out.rs",
+          "sha256": "0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630"
+        },
+        "sha256": "0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630"
+      },
+      "retained": {
+        "bytes": 4867720,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/generated/000-out.rs",
+        "sha256": "0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630"
+      }
+    }
+  ],
+  "original_validation": {
+    "content_utf8": "{\n  \"bootstrap_producer\": {\n    \"bytes\": 8676,\n    \"path\": \"/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/bootstrap_toolchain.py\",\n    \"sha256\": \"ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb\"\n  },\n  \"commands\": [\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/bootstrap-resources.txt\",\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/bootstrap_toolchain.py\",\n        \"--work-dir\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815111.8541791,\n      \"label\": \"bootstrap\",\n      \"log\": {\n        \"bytes\": 670,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/bootstrap.log\",\n        \"sha256\": \"06cdeff9b2626926d93ec4d0df6ab0d6619d7f0463b797134edada03a0409903\"\n      },\n      \"resources\": {\n        \"bytes\": 926,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/bootstrap-resources.txt\",\n        \"sha256\": \"2af50317a7f7fb795b680017c2ffde0dbfe4724a6f404ca9bf911da65c74a1fb\"\n      },\n      \"started_unix\": 1793815100.0941224\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercion-oracles-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"--features\",\n        \"compiler-metadata,hot-reload\",\n        \"property_store::effective_value::coercion_tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815293.7457135,\n      \"label\": \"coercion-oracles\",\n      \"log\": {\n        \"bytes\": 44474,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercion-oracles.log\",\n        \"sha256\": \"bcd1cb0e9bc07db7eb5e58089d76b27ed393690fd3a55ae70f006966a8fcd5ac\"\n      },\n      \"passed_tests\": [\n        \"property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback\",\n        \"property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind\",\n        \"property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes\",\n        \"property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind\",\n        \"property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality\",\n        \"property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind\",\n        \"property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots\"\n      ],\n      \"resources\": {\n        \"bytes\": 1020,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercion-oracles-resources.txt\",\n        \"sha256\": \"f84261ea27dd8c362fb5ae13052f2fecf12cb617dedd324ebc819ce6ec4bebb6\"\n      },\n      \"started_unix\": 1793815111.855386,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 7\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/inheritance-oracles-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"--features\",\n        \"compiler-metadata,hot-reload\",\n        \"property_store::effective_value::inheritance_tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815293.9556744,\n      \"label\": \"inheritance-oracles\",\n      \"log\": {\n        \"bytes\": 40780,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/inheritance-oracles.log\",\n        \"sha256\": \"17bbe61e4ae1617f94a0b39ca11de6bbd6e5e1bb98df3b557050625a86d57d21\"\n      },\n      \"passed_tests\": [\n        \"property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior\",\n        \"property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry\",\n        \"property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind\",\n        \"property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts\"\n      ],\n      \"resources\": {\n        \"bytes\": 1000,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/inheritance-oracles-resources.txt\",\n        \"sha256\": \"5fde3349e153382cdb3fb2dab1a3eaa8876dff05afdaad69abec8871c11dfcf2\"\n      },\n      \"started_unix\": 1793815293.7465677,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 4\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/default-coercion-oracles-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"--features\",\n        \"compiler-metadata,hot-reload\",\n        \"property_store::value_store::default_coercion_tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815294.166637,\n      \"label\": \"default-coercion-oracles\",\n      \"log\": {\n        \"bytes\": 40648,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/default-coercion-oracles.log\",\n        \"sha256\": \"2e9b95d9a6e408fe68538ba187d38859e03c456c9bfae510b6409a888c64692d\"\n      },\n      \"passed_tests\": [\n        \"property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry\",\n        \"property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind\",\n        \"property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior\"\n      ],\n      \"resources\": {\n        \"bytes\": 1001,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/default-coercion-oracles-resources.txt\",\n        \"sha256\": \"e027ea0ffb08b72c3e5e620fe54128e24ebee9eac5b748e30707f28eab0e0542\"\n      },\n      \"started_unix\": 1793815293.956552,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 3\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-runtime-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"--features\",\n        \"compiler-metadata,hot-reload\",\n        \"tests::ferro_object_tests\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815294.408918,\n      \"label\": \"property-runtime\",\n      \"log\": {\n        \"bytes\": 71989,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-runtime.log\",\n        \"sha256\": \"648e61cb341291780a26574cf4761f2a338e0fb9d3ee9857498588fbd29c5b3d\"\n      },\n      \"passed_tests\": [\n        \"tests::ferro_object_tests_add_owner::add_ownered_property_retains_default_value\",\n        \"tests::ferro_object_tests_attached::add_ownered_property_retains_default_value\",\n        \"tests::ferro_object_tests_binding::bind_does_not_throw_exception_for_unregistered_property\",\n        \"tests::ferro_object_tests_binding::bind_ignores_invalid_value_type\",\n        \"tests::ferro_object_tests_binding::bind_non_generic_can_set_null_on_reference_type\",\n        \"tests::ferro_object_tests_binding::bind_non_generic_sets_current_value\",\n        \"tests::ferro_object_tests_binding::bind_raises_property_changed\",\n        \"tests::ferro_object_tests_binding::bind_sets_current_value\",\n        \"tests::ferro_object_tests_binding::bind_sets_subsequent_value\",\n        \"tests::ferro_object_tests_binding::binding_error_reverts_to_default_value\",\n        \"tests::ferro_object_tests_binding::binding_error_with_fallback_value_causes_target_update\",\n        \"tests::ferro_object_tests_binding::binding_producing_unset_value_does_not_cause_unsubscribe\",\n        \"tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind\",\n        \"tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box\",\n        \"tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error\",\n        \"tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe\",\n        \"tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal\",\n        \"tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding\",\n        \"tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone\",\n        \"tests::ferro_object_tests_binding::completing_animation_binding_reverts_to_set_local_value\",\n        \"tests::ferro_object_tests_binding::completing_animation_binding_reverts_to_set_local_value_with_style_value\",\n        \"tests::ferro_object_tests_binding::completing_local_value_binding_raises_property_changed\",\n        \"tests::ferro_object_tests_binding::completing_local_value_binding_reverts_to_default_value_even_when_local_value_set_earlier\",\n        \"tests::ferro_object_tests_binding::completing_local_value_binding_with_style_binding_raises_property_changed\",\n        \"tests::ferro_object_tests_binding::completing_second_local_value_binding_doesnt_revert_to_first\",\n        \"tests::ferro_object_tests_binding::completing_style_binding_raises_property_changed\",\n        \"tests::ferro_object_tests_binding::completing_style_trigger_binding_reverts_to_style_binding\",\n        \"tests::ferro_object_tests_binding::data_validation_error_does_not_cause_target_update\",\n        \"tests::ferro_object_tests_binding::data_validation_error_with_fallback_value_causes_target_update\",\n        \"tests::ferro_object_tests_binding::disposing_completed_binding_does_not_throw\",\n        \"tests::ferro_object_tests_binding::disposing_local_value_binding_raises_property_changed\",\n        \"tests::ferro_object_tests_binding::disposing_local_value_binding_should_not_revert_to_set_local_value\",\n        \"tests::ferro_object_tests_binding::is_animating_on_property_with_animation_binding_returns_true\",\n        \"tests::ferro_object_tests_binding::is_animating_on_property_with_animation_value_returns_true\",\n        \"tests::ferro_object_tests_binding::is_animating_on_property_with_local_value_and_animation_binding_returns_true\",\n        \"tests::ferro_object_tests_binding::is_animating_on_property_with_no_value_returns_false\",\n        \"tests::ferro_object_tests_binding::is_animating_on_property_with_non_animation_binding_returns_false\",\n        \"tests::ferro_object_tests_binding::is_animating_returns_true_when_animated_value_is_same_as_local_value\",\n        \"tests::ferro_object_tests_binding::local_binding_overwrites_local_value\",\n        \"tests::ferro_object_tests_binding::local_value_bind_generic_to_value_type_accepts_unset_value\",\n        \"tests::ferro_object_tests_binding::local_value_bind_non_generic_to_value_type_accepts_do_nothing\",\n        \"tests::ferro_object_tests_binding::local_value_bind_non_generic_to_value_type_accepts_unset_value\",\n        \"tests::ferro_object_tests_binding::local_value_binding_is_not_unsubscribed_when_local_value_is_set\",\n        \"tests::ferro_object_tests_binding::local_value_binding_should_override_style_binding\",\n        \"tests::ferro_object_tests_binding::observable_is_not_unsubscribed_when_animation_binding_is_added\",\n        \"tests::ferro_object_tests_binding::observable_is_not_unsubscribed_when_animation_value_is_set\",\n        \"tests::ferro_object_tests_binding::observable_is_unsubscribed_when_new_binding_of_higher_priority_is_added\",\n        \"tests::ferro_object_tests_binding::observable_is_unsubscribed_when_new_binding_of_same_priority_is_added\",\n        \"tests::ferro_object_tests_binding::observable_is_unsubscribed_when_new_value_of_higher_priority_is_added\",\n        \"tests::ferro_object_tests_binding::observable_is_unsubscribed_when_new_value_of_same_priority_is_added\",\n        \"tests::ferro_object_tests_binding::observable_is_unsubscribed_when_subscription_disposed\",\n        \"tests::ferro_object_tests_binding::one_time_binding_ignores_binding_errors\",\n        \"tests::ferro_object_tests_binding::one_time_binding_ignores_unset_value\",\n        \"tests::ferro_object_tests_binding::produces_correct_values_and_base_values_with_multiple_animation_bindings\",\n        \"tests::ferro_object_tests_binding::property_changed_not_raised_when_value_unchanged\",\n        \"tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive\",\n        \"tests::ferro_object_tests_binding::second_local_value_binding_unsubscribes_first\",\n        \"tests::ferro_object_tests_binding::setting_local_value_overrides_binding_until_binding_produces_next_value\",\n        \"tests::ferro_object_tests_binding::setting_style_value_overrides_binding_permanently\",\n        \"tests::ferro_object_tests_binding::style_bind_non_generic_to_value_type_accepts_do_nothing\",\n        \"tests::ferro_object_tests_binding::style_bind_non_generic_to_value_type_accepts_unset_value\",\n        \"tests::ferro_object_tests_binding::style_binding_overrides_default_value\",\n        \"tests::ferro_object_tests_binding::style_binding_should_not_override_local_value_binding\",\n        \"tests::ferro_object_tests_binding::this_operator_binds_one_time\",\n        \"tests::ferro_object_tests_binding::this_operator_binds_one_way\",\n        \"tests::ferro_object_tests_binding::this_operator_binds_two_way\",\n        \"tests::ferro_object_tests_binding::this_operator_doesnt_accept_observable\",\n        \"tests::ferro_object_tests_binding::this_operator_returns_value_property\",\n        \"tests::ferro_object_tests_binding::this_operator_sets_value_property\",\n        \"tests::ferro_object_tests_binding::to_binding_binds_values_of_observable\",\n        \"tests::ferro_object_tests_binding::two_way_binding_with_priority_works\",\n        \"tests::ferro_object_tests_binding::two_way_separate_binding_works\",\n        \"tests::ferro_object_tests_binding_two_way::set_value_should_not_cause_stack_overflow_and_have_correct_values\",\n        \"tests::ferro_object_tests_binding_two_way::two_way_binding_should_not_call_setter_on_creation\",\n        \"tests::ferro_object_tests_binding_two_way::two_way_binding_should_not_call_setter_on_creation_indexer\",\n        \"tests::ferro_object_tests_binding_two_way::two_way_binding_should_not_fail_with_null_data_context\",\n        \"tests::ferro_object_tests_binding_two_way::two_way_binding_should_not_fail_with_null_data_context_indexer\",\n        \"tests::ferro_object_tests_binding_two_way::two_way_binding_should_update_source\",\n        \"tests::ferro_object_tests_coercion::clear_value_respects_coerced_default_value\",\n        \"tests::ferro_object_tests_coercion::coerce_value_calls_coerce_callback_only_once\",\n        \"tests::ferro_object_tests_coercion::coerce_value_raises_property_changed\",\n        \"tests::ferro_object_tests_coercion::coerce_value_raises_property_changed_core_for_base_value\",\n        \"tests::ferro_object_tests_coercion::coerce_value_updates_base_value\",\n        \"tests::ferro_object_tests_coercion::coerce_value_updates_inherited_value\",\n        \"tests::ferro_object_tests_coercion::coerce_value_updates_value\",\n        \"tests::ferro_object_tests_coercion::coerced_value_can_be_restored_from_previously_active_binding\",\n        \"tests::ferro_object_tests_coercion::coerced_value_can_be_restored_if_limit_changed\",\n        \"tests::ferro_object_tests_coercion::coerces_bound_value\",\n        \"tests::ferro_object_tests_coercion::coerces_set_value\",\n        \"tests::ferro_object_tests_coercion::coerces_set_value_attached\",\n        \"tests::ferro_object_tests_coercion::coerces_set_value_attached_on_class_not_derived_from_owner\",\n        \"tests::ferro_object_tests_coercion::coercion_can_be_overridden\",\n        \"tests::ferro_object_tests_coercion::deactivating_style_respects_coerced_default_value\",\n        \"tests::ferro_object_tests_coercion::default_value_can_be_coerced\",\n        \"tests::ferro_object_tests_coercion::default_value_is_coerced_only_once\",\n        \"tests::ferro_object_tests_coercion::if_initial_state_has_coerced_default_value_then_coerce_value_must_be_called\",\n        \"tests::ferro_object_tests_coercion::second_coerce_of_default_value_is_passed_uncoerced_value\",\n        \"tests::ferro_object_tests_data_validation::direct_property_tests::binding_non_validated_property_does_not_call_update_data_validation\",\n        \"tests::ferro_object_tests_data_validation::direct_property_tests::binding_overridden_validated_property_calls_update_data_validation\",\n        \"tests::ferro_object_tests_data_validation::direct_property_tests::binding_validated_property_calls_update_data_validation\",\n        \"tests::ferro_object_tests_data_validation::direct_property_tests::binding_validated_property_calls_update_data_validation_untyped\",\n        \"tests::ferro_object_tests_data_validation::direct_property_tests::binding_validated_property_calls_update_data_validation_untyped_notification\",\n        \"tests::ferro_object_tests_data_validation::direct_property_tests::bound_validated_string_property_can_be_set_to_null\",\n        \"tests::ferro_object_tests_data_validation::direct_property_tests::completing_binding_clears_data_validation\",\n        \"tests::ferro_object_tests_data_validation::direct_property_tests::disposing_binding_subscription_clears_data_validation\",\n        \"tests::ferro_object_tests_data_validation::styled_property_tests::binding_non_validated_property_does_not_call_update_data_validation\",\n        \"tests::ferro_object_tests_data_validation::styled_property_tests::binding_overridden_validated_property_calls_update_data_validation\",\n        \"tests::ferro_object_tests_data_validation::styled_property_tests::binding_validated_property_calls_update_data_validation\",\n        \"tests::ferro_object_tests_data_validation::styled_property_tests::binding_validated_property_calls_update_data_validation_untyped\",\n        \"tests::ferro_object_tests_data_validation::styled_property_tests::binding_validated_property_calls_update_data_validation_untyped_notification\",\n        \"tests::ferro_object_tests_data_validation::styled_property_tests::bound_validated_string_property_can_be_set_to_null\",\n        \"tests::ferro_object_tests_data_validation::styled_property_tests::completing_binding_clears_data_validation\",\n        \"tests::ferro_object_tests_data_validation::styled_property_tests::disposing_binding_subscription_clears_data_validation\",\n        \"tests::ferro_object_tests_direct::add_owner_can_override_default_binding_mode\",\n        \"tests::ferro_object_tests_direct::add_owner_should_inherit_default_binding_mode\",\n        \"tests::ferro_object_tests_direct::bind_binds_add_ownered_property_value\",\n        \"tests::ferro_object_tests_direct::bind_binds_add_ownered_property_value_non_generic\",\n        \"tests::ferro_object_tests_direct::bind_binds_property_value\",\n        \"tests::ferro_object_tests_direct::bind_binds_property_value_non_generic\",\n        \"tests::ferro_object_tests_direct::bind_handles_wrong_type\",\n        \"tests::ferro_object_tests_direct::bind_handles_wrong_value_type\",\n        \"tests::ferro_object_tests_direct::bind_non_generic_accepts_unset_value\",\n        \"tests::ferro_object_tests_direct::bind_raises_property_changed\",\n        \"tests::ferro_object_tests_direct::binding_error_reverts_to_default_value\",\n        \"tests::ferro_object_tests_direct::binding_error_with_fallback_value_causes_target_update\",\n        \"tests::ferro_object_tests_direct::binding_error_with_fallback_value_causes_target_update_2\",\n        \"tests::ferro_object_tests_direct::clear_value_raises_property_changed\",\n        \"tests::ferro_object_tests_direct::clear_value_restores_default_value\",\n        \"tests::ferro_object_tests_direct::data_validation_error_does_not_cause_target_update\",\n        \"tests::ferro_object_tests_direct::data_validation_error_with_fallback_value_causes_target_update\",\n        \"tests::ferro_object_tests_direct::get_observable_returns_values\",\n        \"tests::ferro_object_tests_direct::get_value_gets_default_value\",\n        \"tests::ferro_object_tests_direct::get_value_gets_value_non_generic\",\n        \"tests::ferro_object_tests_direct::get_value_gets_value_on_add_ownered_property\",\n        \"tests::ferro_object_tests_direct::get_value_gets_value_on_add_ownered_property_using_original\",\n        \"tests::ferro_object_tests_direct::get_value_gets_value_on_add_ownered_property_using_original_non_generic\",\n        \"tests::ferro_object_tests_direct::get_value_on_unregistered_property_throws_exception\",\n        \"tests::ferro_object_tests_direct::property_changed_not_raised_when_value_unchanged\",\n        \"tests::ferro_object_tests_direct::read_only_property_cannot_be_bound\",\n        \"tests::ferro_object_tests_direct::read_only_property_cannot_be_bound_non_generic\",\n        \"tests::ferro_object_tests_direct::read_only_property_cannot_be_set\",\n        \"tests::ferro_object_tests_direct::read_only_property_cannot_be_set_non_generic\",\n        \"tests::ferro_object_tests_direct::set_value_non_generic_coerces_unset_value_to_default_value\",\n        \"tests::ferro_object_tests_direct::set_value_on_unregistered_property_throws_exception\",\n        \"tests::ferro_object_tests_direct::set_value_raises_changed\",\n        \"tests::ferro_object_tests_direct::set_value_raises_property_changed\",\n        \"tests::ferro_object_tests_direct::set_value_sets_value\",\n        \"tests::ferro_object_tests_direct::set_value_sets_value_non_generic\",\n        \"tests::ferro_object_tests_direct::set_value_sets_value_on_add_ownered_property_using_original\",\n        \"tests::ferro_object_tests_direct::set_value_sets_value_on_add_ownered_property_using_original_non_generic\",\n        \"tests::ferro_object_tests_direct::set_value_should_not_cause_stack_overflow_and_have_correct_values\",\n        \"tests::ferro_object_tests_direct::set_value_untyped_converts_a_value_implicitly\",\n        \"tests::ferro_object_tests_direct::set_value_untyped_refuses_a_value_without_an_implicit_conversion\",\n        \"tests::ferro_object_tests_direct::setting_object_property_to_do_nothing_does_nothing\",\n        \"tests::ferro_object_tests_direct::setting_object_property_to_unset_value_reverts_to_default_value\",\n        \"tests::ferro_object_tests_direct::unset_value_is_used_on_add_ownered_property\",\n        \"tests::ferro_object_tests_get_observable::get_binding_observable_returns_binding_values\",\n        \"tests::ferro_object_tests_get_observable::get_binding_observable_untyped_with_converter_returns_converted_binding_values\",\n        \"tests::ferro_object_tests_get_observable::get_observable_dispose_stops_property_changes\",\n        \"tests::ferro_object_tests_get_observable::get_observable_returns_initial_value\",\n        \"tests::ferro_object_tests_get_observable::get_observable_returns_property_change\",\n        \"tests::ferro_object_tests_get_observable::get_observable_returns_property_change_only_for_correct_property\",\n        \"tests::ferro_object_tests_get_observable::get_observable_with_converter_and_untyped_return_values\",\n        \"tests::ferro_object_tests_get_observable::get_property_changed_observable_fires_only_for_the_property_and_supports_class_handlers\",\n        \"tests::ferro_object_tests_get_observable::observable_does_not_keep_the_object_alive\",\n        \"tests::ferro_object_tests_get_observable::typed_accessors_route_by_property_kind\",\n        \"tests::ferro_object_tests_get_value::get_base_value_ignores_default_value\",\n        \"tests::ferro_object_tests_get_value::get_base_value_returns_local_value\",\n        \"tests::ferro_object_tests_get_value::get_base_value_returns_style_value\",\n        \"tests::ferro_object_tests_get_value::get_base_value_returns_style_value_set_via_untyped_setters\",\n        \"tests::ferro_object_tests_get_value::get_value_doesnt_throw_exception_for_unregistered_property\",\n        \"tests::ferro_object_tests_get_value::get_value_returns_bound_value\",\n        \"tests::ferro_object_tests_get_value::get_value_returns_default_value\",\n        \"tests::ferro_object_tests_get_value::get_value_returns_inherited_value\",\n        \"tests::ferro_object_tests_get_value::get_value_returns_overridden_default_value\",\n        \"tests::ferro_object_tests_get_value::get_value_returns_set_value\",\n        \"tests::ferro_object_tests_inheritance::changing_inheritance_parent_raises_the_changes_of_one_property_over_the_subtree_before_the_next_property\",\n        \"tests::ferro_object_tests_inheritance::changing_inheritance_parent_stops_at_a_local_value_for_that_property_only\",\n        \"tests::ferro_object_tests_inheritance::clear_value_clears_inherited_value\",\n        \"tests::ferro_object_tests_inheritance::clear_value_on_child_raises_property_changed_with_inherited_parent_value\",\n        \"tests::ferro_object_tests_inheritance::clear_value_on_parent_raises_property_changed_on_child\",\n        \"tests::ferro_object_tests_inheritance::clear_value_on_parent_raises_property_changed_on_child_with_inherited_grandparent_value\",\n        \"tests::ferro_object_tests_inheritance::clearing_value_in_inheritance_parent_raises_property_changed\",\n        \"tests::ferro_object_tests_inheritance::get_value_returns_inherited_value_1\",\n        \"tests::ferro_object_tests_inheritance::get_value_returns_inherited_value_2\",\n        \"tests::ferro_object_tests_inheritance::handler_of_an_inherited_change_can_change_the_inheritance_parent_of_another_subtree\",\n        \"tests::ferro_object_tests_inheritance::property_changed_is_raised_in_parent_before_child\",\n        \"tests::ferro_object_tests_inheritance::reparenting_raises_property_changed_for_old_and_new_inherited_values\",\n        \"tests::ferro_object_tests_inheritance::reparenting_raises_property_changed_on_grand_child_for_old_and_new_inherited_values\",\n        \"tests::ferro_object_tests_inheritance::reparenting_retains_inherited_property_set_on_child\",\n        \"tests::ferro_object_tests_inheritance::setting_inheritance_parent_doesnt_raise_property_changed_when_local_value_set\",\n        \"tests::ferro_object_tests_inheritance::setting_inheritance_parent_raises_property_changed_for_attached_property_when_parent_has_value_set\",\n        \"tests::ferro_object_tests_inheritance::setting_inheritance_parent_raises_property_changed_when_parent_and_grandparent_has_value_set\",\n        \"tests::ferro_object_tests_inheritance::setting_inheritance_parent_raises_property_changed_when_parent_has_value_set\",\n        \"tests::ferro_object_tests_inheritance::setting_value_in_inheritance_parent_raises_property_changed\",\n        \"tests::ferro_object_tests_inheritance::setting_value_of_attached_property_in_inheritance_parent_raises_property_changed\",\n        \"tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_add_ownered_property\",\n        \"tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class\",\n        \"tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property\",\n        \"tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class\",\n        \"tests::ferro_object_tests_multi_binding::should_update\",\n        \"tests::ferro_object_tests_multi_binding::should_update_when_null_value_in_bindings\",\n        \"tests::ferro_object_tests_multi_binding::should_update_when_null_value_in_bindings_with_string_format\",\n        \"tests::ferro_object_tests_multi_binding::should_update_with_multiple_bindings\",\n        \"tests::ferro_object_tests_notification_order::change_is_raised_to_the_overrides_then_the_property_subscribers_then_the_object_handlers\",\n        \"tests::ferro_object_tests_notification_order::change_made_by_a_property_subscriber_is_raised_completely_before_the_next_subscriber\",\n        \"tests::ferro_object_tests_notification_order::change_of_a_base_value_is_raised_to_the_core_override_only\",\n        \"tests::ferro_object_tests_notification_order::change_of_the_same_property_made_by_a_handler_reaches_later_handlers_first\",\n        \"tests::ferro_object_tests_notification_order::class_handler_is_called_for_objects_of_its_class_only\",\n        \"tests::ferro_object_tests_notification_order::handler_added_inside_a_nested_change_is_called_for_neither_change\",\n        \"tests::ferro_object_tests_notification_order::inherited_change_is_raised_completely_on_an_object_before_its_children\",\n        \"tests::ferro_object_tests_notification_order::inherited_change_stops_at_an_object_that_sets_the_property\",\n        \"tests::ferro_object_tests_notification_order::object_handlers_called_for_a_change_are_the_ones_there_were_when_it_began\",\n        \"tests::ferro_object_tests_notification_order::property_subscribers_called_for_a_change_are_the_ones_there_were_when_it_began\",\n        \"tests::ferro_object_tests_on_property_changed::on_property_changed_core_is_called_on_non_effective_property_binding_value_change\",\n        \"tests::ferro_object_tests_on_property_changed::on_property_changed_core_is_called_on_non_effective_property_value_change\",\n        \"tests::ferro_object_tests_on_property_changed::on_property_changed_core_is_called_on_property_change\",\n        \"tests::ferro_object_tests_on_property_changed::on_property_changed_is_called_only_for_effective_value_changes\",\n        \"tests::ferro_object_tests_reentrancy::coercion_callback_can_read_the_object\",\n        \"tests::ferro_object_tests_reentrancy::completing_direct_binding_clears_data_validation\",\n        \"tests::ferro_object_tests_reentrancy::direct_binding_can_be_disposed_from_handler\",\n        \"tests::ferro_object_tests_reentrancy::direct_property_handler_can_set_the_property_again\",\n        \"tests::ferro_object_tests_reentrancy::dropped_inheritance_children_are_forgotten\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_add_a_binding_to_the_changing_property\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_add_and_remove_handlers\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_clear_the_changing_property\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_dispose_other_values_in_the_same_frame\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_dispose_the_local_binding_that_produced_the_value\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_dispose_the_style_binding_that_produced_the_value\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_rebind_when_a_binding_completes\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_set_inheritance_parent_of_other_objects\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_set_other_properties_and_priorities\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_set_the_changing_property_again\",\n        \"tests::ferro_object_tests_reentrancy::handler_can_set_the_property_while_it_is_being_cleared\",\n        \"tests::ferro_object_tests_reentrancy::inherited_change_handler_on_child_can_detach_and_reattach\",\n        \"tests::ferro_object_tests_reentrancy::inherited_change_handler_on_child_can_set_and_clear_local_value\",\n        \"tests::ferro_object_tests_reentrancy::inherited_change_handler_on_parent_can_change_the_value_again\",\n        \"tests::ferro_object_tests_reentrancy::invalid_priorities_are_rejected\",\n        \"tests::ferro_object_tests_reentrancy::invalid_style_binding_value_is_reported_as_binding_error_with_fallback\",\n        \"tests::ferro_object_tests_reentrancy::observable_subscriber_can_unsubscribe_and_set_during_notification\",\n        \"tests::ferro_object_tests_reentrancy::removing_a_validated_style_binding_restores_inheritance_before_clearing_validation\",\n        \"tests::ferro_object_tests_reentrancy::source_completing_during_notification_of_its_own_value\",\n        \"tests::ferro_object_tests_reentrancy::source_emitting_during_notification_of_its_own_value\",\n        \"tests::ferro_object_tests_reentrancy::value_whose_drop_reads_the_property_does_not_trip_the_store\",\n        \"tests::ferro_object_tests_set_current_value::animation_binding_overrides_current_value_with_local_value_priority\",\n        \"tests::ferro_object_tests_set_current_value::animation_value_overrides_current_value_with_local_value_priority\",\n        \"tests::ferro_object_tests_set_current_value::binding_overrides_current_value_with_unset_priority\",\n        \"tests::ferro_object_tests_set_current_value::clear_value_clears_current_value_with_inherited_priority\",\n        \"tests::ferro_object_tests_set_current_value::clear_value_clears_current_value_with_local_value_priority\",\n        \"tests::ferro_object_tests_set_current_value::clear_value_clears_current_value_with_style_priority\",\n        \"tests::ferro_object_tests_set_current_value::clear_value_clears_current_value_with_unset_priority\",\n        \"tests::ferro_object_tests_set_current_value::current_value_is_replaced_by_binding_value\",\n        \"tests::ferro_object_tests_set_current_value::current_value_is_replaced_by_new_style_activation_1\",\n        \"tests::ferro_object_tests_set_current_value::current_value_is_replaced_by_new_style_activation_2\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_can_be_coerced\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_is_inherited\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_overrides_existing_value\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_overrides_inherited_value\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_persists_when_toggling_style_1\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_persists_when_toggling_style_2\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_persists_when_toggling_style_3\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_sets_unset_value\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_sets_unset_value_untyped\",\n        \"tests::ferro_object_tests_set_current_value::set_current_value_unset_clears_current_value\",\n        \"tests::ferro_object_tests_set_current_value::set_value_overrides_current_value_with_unset_priority\",\n        \"tests::ferro_object_tests_set_current_value::style_trigger_binding_overrides_current_value_with_style_priority\",\n        \"tests::ferro_object_tests_set_current_value::style_trigger_value_overrides_current_value_with_style_priority\",\n        \"tests::ferro_object_tests_set_value::clear_value_clears_value\",\n        \"tests::ferro_object_tests_set_value::clear_value_raises_property_changed\",\n        \"tests::ferro_object_tests_set_value::clear_value_resets_value_to_style_value\",\n        \"tests::ferro_object_tests_set_value::disposing_animation_set_value_reverts_to_previous_local_value\",\n        \"tests::ferro_object_tests_set_value::disposing_style_set_value_reverts_to_default_value\",\n        \"tests::ferro_object_tests_set_value::disposing_style_set_value_reverts_to_previous_style_value\",\n        \"tests::ferro_object_tests_set_value::is_set_returns_false_for_cleared_property\",\n        \"tests::ferro_object_tests_set_value::is_set_returns_false_for_set_property\",\n        \"tests::ferro_object_tests_set_value::is_set_returns_false_for_unset_property\",\n        \"tests::ferro_object_tests_set_value::set_value_allows_setting_unregistered_attached_property\",\n        \"tests::ferro_object_tests_set_value::set_value_allows_setting_unregistered_property\",\n        \"tests::ferro_object_tests_set_value::set_value_animation_overrides_local_value\",\n        \"tests::ferro_object_tests_set_value::set_value_can_convert_to_nullable\",\n        \"tests::ferro_object_tests_set_value::set_value_doesnt_raise_property_changed_if_value_not_changed\",\n        \"tests::ferro_object_tests_set_value::set_value_doesnt_raise_property_changed_if_value_not_changed_from_default\",\n        \"tests::ferro_object_tests_set_value::set_value_local_value_overrides_style\",\n        \"tests::ferro_object_tests_set_value::set_value_of_integer_on_double_property_works\",\n        \"tests::ferro_object_tests_set_value::set_value_raises_property_changed\",\n        \"tests::ferro_object_tests_set_value::set_value_respects_implicit_conversions\",\n        \"tests::ferro_object_tests_set_value::set_value_respects_priority\",\n        \"tests::ferro_object_tests_set_value::set_value_sets_attached_value\",\n        \"tests::ferro_object_tests_set_value::set_value_sets_value\",\n        \"tests::ferro_object_tests_set_value::set_value_style_doesnt_override_local_value\",\n        \"tests::ferro_object_tests_set_value::set_value_style_priority_raises_property_changed\",\n        \"tests::ferro_object_tests_set_value::set_value_throws_exception_for_invalid_value_type\",\n        \"tests::ferro_object_tests_set_value::setting_object_property_to_do_nothing_does_nothing\",\n        \"tests::ferro_object_tests_set_value::setting_object_property_to_unset_value_reverts_to_default_value\",\n        \"tests::ferro_object_tests_set_value::setting_unset_value_reverts_to_default_value\",\n        \"tests::ferro_object_tests_set_value::untyped_conversion_releases_its_temporary_when_value_clone_panics\",\n        \"tests::ferro_object_tests_set_value::untyped_conversion_temporary_drops_before_validation_or_coercion\",\n        \"tests::ferro_object_tests_set_value::untyped_markers_preserve_style_and_direct_priority_rules\",\n        \"tests::ferro_object_tests_validation::metadata_override_throws_if_default_value_fails_validation\",\n        \"tests::ferro_object_tests_validation::registration_throws_if_default_value_fails_validation\",\n        \"tests::ferro_object_tests_validation::reverts_to_default_value_even_in_presence_of_other_bindings\",\n        \"tests::ferro_object_tests_validation::reverts_to_default_value_if_local_value_binding_fails_validation\",\n        \"tests::ferro_object_tests_validation::reverts_to_default_value_if_style_binding_fails_validation\",\n        \"tests::ferro_object_tests_validation::reverts_to_default_value_if_style_binding_fails_validation_2\",\n        \"tests::ferro_object_tests_validation::reverts_to_default_value_if_style_binding_fails_validation_3\",\n        \"tests::ferro_object_tests_validation::set_value_throws_if_fails_validation\",\n        \"tests::ferro_object_tests_validation::set_value_throws_if_fails_validation_attached\"\n      ],\n      \"resources\": {\n        \"bytes\": 976,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-runtime-resources.txt\",\n        \"sha256\": \"cca2586ff6b635dad9f3ee8b886accd0fe502a797791a54896db88b89feab130\"\n      },\n      \"started_unix\": 1793815294.1675184,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 307\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-metadata-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"--features\",\n        \"compiler-metadata,hot-reload\",\n        \"tests::ferro_property_tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815294.6065683,\n      \"label\": \"property-metadata\",\n      \"log\": {\n        \"bytes\": 41467,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-metadata.log\",\n        \"sha256\": \"16707c43f29c2203d5152f1771ce906f3e196f75e382349eb019cc576da1e565\"\n      },\n      \"passed_tests\": [\n        \"tests::ferro_property_tests::boxed_value_accessors_describe_the_contents_with_the_trait_in_scope\",\n        \"tests::ferro_property_tests::changed_observable_fired\",\n        \"tests::ferro_property_tests::changed_observable_fired_only_on_effective_value_change\",\n        \"tests::ferro_property_tests::constructor_sets_properties\",\n        \"tests::ferro_property_tests::default_metadata_cannot_be_changed_after_property_initialization\",\n        \"tests::ferro_property_tests::get_metadata_returns_overridden_value\",\n        \"tests::ferro_property_tests::get_metadata_returns_supplied_value\",\n        \"tests::ferro_property_tests::get_metadata_returns_supplied_value_for_derived_class\",\n        \"tests::ferro_property_tests::get_metadata_returns_type_safe_metadata_for_unrelated_class\",\n        \"tests::ferro_property_tests::name_cannot_contain_periods\",\n        \"tests::ferro_property_tests::notify_fired_only_on_effective_value_change\",\n        \"tests::ferro_property_tests::overridden_metadata_cannot_be_changed_after_override_metadata\",\n        \"tests::ferro_property_tests::override_metadata_should_merge_values\",\n        \"tests::ferro_property_tests::property_metadata_binding_mode_default_returns_one_way\"\n      ],\n      \"resources\": {\n        \"bytes\": 977,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-metadata-resources.txt\",\n        \"sha256\": \"afcaa4113c83a2880b2a0bead890f299fa11f4858f93f0979480bfdc52667964\"\n      },\n      \"started_unix\": 1793815294.4099996,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 14\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-registry-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"--features\",\n        \"compiler-metadata,hot-reload\",\n        \"tests::ferro_property_registry_tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815294.7910182,\n      \"label\": \"property-registry\",\n      \"log\": {\n        \"bytes\": 41482,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-registry.log\",\n        \"sha256\": \"a37ae5b10f4b943c65eafa301b1d2c589d5bf17fec2d3c4ef39ed9b25606ed40\"\n      },\n      \"passed_tests\": [\n        \"tests::ferro_property_registry_tests::find_registered_doesnt_find_non_add_ownered_attached_property\",\n        \"tests::ferro_property_registry_tests::find_registered_doesnt_find_nonregistered_property\",\n        \"tests::ferro_property_registry_tests::find_registered_finds_add_ownered_attached_property\",\n        \"tests::ferro_property_registry_tests::find_registered_finds_property\",\n        \"tests::ferro_property_registry_tests::find_registered_finds_unqualified_attached_property_on_registering_type\",\n        \"tests::ferro_property_registry_tests::get_registered_attached_returns_registered_properties\",\n        \"tests::ferro_property_registry_tests::get_registered_attached_returns_registered_properties_for_base_types\",\n        \"tests::ferro_property_registry_tests::get_registered_returns_registered_properties\",\n        \"tests::ferro_property_registry_tests::get_registered_returns_registered_properties_for_base_types\",\n        \"tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property\",\n        \"tests::ferro_property_registry_tests::unregister_by_module_removes_metadata_of_types\",\n        \"tests::ferro_property_registry_tests::unregister_removes_metadata_of_type\"\n      ],\n      \"resources\": {\n        \"bytes\": 985,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-registry-resources.txt\",\n        \"sha256\": \"208c0fe1ad2dccb9e42e69644c8e5e8dc9c042a825e9cebd557440ee777bdb8a\"\n      },\n      \"started_unix\": 1793815294.6076868,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 12\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercer-registration-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"--features\",\n        \"compiler-metadata,hot-reload\",\n        \"ferro_property::styled_property_options_tests::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815294.9768705,\n      \"label\": \"coercer-registration\",\n      \"log\": {\n        \"bytes\": 40336,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercer-registration.log\",\n        \"sha256\": \"13fa6e88d6ffad13f32444587938788a9e85f6b6a9387b4d5a605dee952a2335\"\n      },\n      \"passed_tests\": [\n        \"ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer\"\n      ],\n      \"resources\": {\n        \"bytes\": 995,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercer-registration-resources.txt\",\n        \"sha256\": \"0be761bc7578f835e903f4800d1adf3b6ad4c197a540323ec73d9d9bd794c7bb\"\n      },\n      \"started_unix\": 1793815294.792065,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 1\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/metadata-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"test\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"--features\",\n        \"compiler-metadata,hot-reload\",\n        \"metadata::\",\n        \"--\",\n        \"--test-threads=1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815295.215141,\n      \"label\": \"metadata\",\n      \"log\": {\n        \"bytes\": 46509,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/metadata.log\",\n        \"sha256\": \"268df7f6e0b2c4b59d1a39dbe95a1df52f84ba0d51ff4914db772b37a14e1a98\"\n      },\n      \"passed_tests\": [\n        \"ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types\",\n        \"ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations\",\n        \"ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides\",\n        \"metadata::accessor_tests::accessor_expressions_follow_arity_receiver_and_value_checks\",\n        \"metadata::accessor_tests::getter_callable_lives_through_result_conversion_and_unwind\",\n        \"metadata::accessor_tests::setter_callable_errors_and_panics_keep_argument_cleanup_order\",\n        \"metadata::markup_type_tests::add_child_handles_made_from_one_object_are_equal\",\n        \"metadata::markup_type_tests::assemblies_state_their_xml_namespaces\",\n        \"metadata::markup_type_tests::attached_properties_state_their_host_type\",\n        \"metadata::markup_type_tests::attribute_arguments_can_be_floating_point_numbers\",\n        \"metadata::markup_type_tests::attribute_arguments_may_be_arrays\",\n        \"metadata::markup_type_tests::attributes_carry_positional_and_named_arguments\",\n        \"metadata::markup_type_tests::base_crate_registers_its_assembly\",\n        \"metadata::markup_type_tests::base_types_are_walked_through_their_metadata\",\n        \"metadata::markup_type_tests::binding_accessors_find_the_notifier_of_a_metadata_view_model\",\n        \"metadata::markup_type_tests::class_constructor_with_arguments_returns_the_handle\",\n        \"metadata::markup_type_tests::class_info_parts_combine_in_any_order\",\n        \"metadata::markup_type_tests::class_markup_is_reached_from_the_runtime_type\",\n        \"metadata::markup_type_tests::class_members_are_invoked_on_an_object_held_through_a_base_handle\",\n        \"metadata::markup_type_tests::class_members_are_invoked_on_base_handles_of_objects_of_the_class\",\n        \"metadata::markup_type_tests::class_members_are_invoked_on_handles_of_derived_classes\",\n        \"metadata::markup_type_tests::class_without_markup_declares_none_and_inherits_the_content_property\",\n        \"metadata::markup_type_tests::classes_are_found_by_the_type_of_their_handles\",\n        \"metadata::markup_type_tests::constructor_parameters_carry_names_and_attributes\",\n        \"metadata::markup_type_tests::constructors_are_invoked_with_converted_arguments\",\n        \"metadata::markup_type_tests::delegates_of_declared_methods_know_their_method_and_target\",\n        \"metadata::markup_type_tests::enumeration_members_can_be_renamed\",\n        \"metadata::markup_type_tests::enumerations_convert_numeric_values\",\n        \"metadata::markup_type_tests::enumerations_list_their_members\",\n        \"metadata::markup_type_tests::events_return_their_subscription\",\n        \"metadata::markup_type_tests::events_subscribe_untyped_handlers\",\n        \"metadata::markup_type_tests::events_without_arguments_invoke_the_handler_with_none\",\n        \"metadata::markup_type_tests::fallible_members_report_failure_instead_of_panicking\",\n        \"metadata::markup_type_tests::flags_enumerations_list_their_bits\",\n        \"metadata::markup_type_tests::global_value_registrations_reach_every_thread\",\n        \"metadata::markup_type_tests::indexers_are_declared_and_invoked_with_their_arguments\",\n        \"metadata::markup_type_tests::invokers_check_argument_count_and_types\",\n        \"metadata::markup_type_tests::members_of_a_value_are_found_on_its_registered_type_and_base_types\",\n        \"metadata::markup_type_tests::members_of_an_object_are_found_on_its_class_and_base_classes\",\n        \"metadata::markup_type_tests::methods_carry_attributes_in_every_form\",\n        \"metadata::markup_type_tests::numeric_enum_factory_is_explicit_compiler_metadata_and_empty_by_default\",\n        \"metadata::markup_type_tests::parse_converts_text_and_reports_failure\",\n        \"metadata::markup_type_tests::properties_methods_and_fields_of_a_value_type\",\n        \"metadata::markup_type_tests::reference_objects_cast_to_contract_handles_through_the_box\",\n        \"metadata::markup_type_tests::reference_type_members_work_through_its_handle\",\n        \"metadata::markup_type_tests::registered_properties_take_attributes_without_being_declared\",\n        \"metadata::markup_type_tests::registered_types_are_found_by_name_and_by_handle\",\n        \"metadata::markup_type_tests::service_provider_returns_services_by_handle_type\",\n        \"metadata::markup_type_tests::static_properties_are_not_static_fields\",\n        \"metadata::markup_type_tests::static_types_link_their_metadata_to_the_runtime_type\",\n        \"metadata::markup_type_tests::the_root_class_carries_its_markup_metadata\",\n        \"metadata::markup_type_tests::untyped_properties_take_any_value_and_null\",\n        \"metadata::markup_type_tests::value_type_states_its_kind_name_and_handle\",\n        \"metadata::markup_type_tests::values_convert_to_and_from_their_untyped_form\",\n        \"metadata::markup_type_tests::view_models_expose_property_change_notifications\",\n        \"metadata::receiver_tests::all_instance_member_forms_keep_the_typed_receiver_and_allow_reentry\",\n        \"metadata::receiver_tests::boxed_receiver_preserves_outer_box_shortcut_and_exact_nested_identity\",\n        \"metadata::receiver_tests::converted_shared_receiver_owns_its_handle_and_releases_registry_borrows\",\n        \"metadata::receiver_tests::custom_clone_keeps_its_value_side_effects_order_and_unwind_cleanup\",\n        \"metadata::receiver_tests::exact_shared_receiver_is_borrowed_for_the_call\",\n        \"metadata::receiver_tests::object_receivers_accept_exact_and_base_handles_and_reject_wrong_or_null_values\",\n        \"metadata::receiver_tests::public_argument_conversion_still_clones_shared_handles\",\n        \"metadata::receiver_tests::shared_receiver_cleanup_survives_exact_and_converted_callback_panics\",\n        \"tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_add_ownered_property\",\n        \"tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class\",\n        \"tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property\",\n        \"tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class\"\n      ],\n      \"resources\": {\n        \"bytes\": 959,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/metadata-resources.txt\",\n        \"sha256\": \"bfa5fe9275731ce0a37161fe9e74aaaaad384aa2491abb68ada0749905f6cad1\"\n      },\n      \"started_unix\": 1793815294.9779568,\n      \"test_summary\": {\n        \"failed\": 0,\n        \"ignored\": 0,\n        \"passed\": 67\n      }\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/downstream-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"check\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-base\",\n        \"-p\",\n        \"ferroui-controls\",\n        \"--features\",\n        \"ferroui-base/compiler-metadata,ferroui-base/hot-reload\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815374.1234562,\n      \"label\": \"downstream\",\n      \"log\": {\n        \"bytes\": 11410,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/downstream.log\",\n        \"sha256\": \"d77d9c7e5fd5ecc9cc9ca2385c8fc76e408633cbcac2473a147d8960c39c6a4e\"\n      },\n      \"resources\": {\n        \"bytes\": 989,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/downstream-resources.txt\",\n        \"sha256\": \"89064b778d43fc4be52af5bccc1f769ec4465fb4c7a4baee13101b974ae1d384\"\n      },\n      \"started_unix\": 1793815295.2164254\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/time\",\n        \"-v\",\n        \"-o\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/fresh-winui-resources.txt\",\n        \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo\",\n        \"check\",\n        \"--locked\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--lib\",\n        \"-p\",\n        \"ferroui-themes-winui\",\n        \"--features\",\n        \"solid-theme\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/FerroUI/FerroUI/source\",\n      \"exit\": 0,\n      \"finished_unix\": 1793815594.698324,\n      \"label\": \"fresh-winui\",\n      \"log\": {\n        \"bytes\": 14136,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/fresh-winui.log\",\n        \"sha256\": \"370d6e5ace01e07ba03d2c9d13deda6e13c28e00ffed17151cff9038e1ba8685\"\n      },\n      \"resources\": {\n        \"bytes\": 940,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/fresh-winui-resources.txt\",\n        \"sha256\": \"793b5f2c742daa59083ab889ab92f469f1406afdb2287aaf234d10f2ff4e490d\"\n      },\n      \"started_unix\": 1793815374.1246743\n    }\n  ],\n  \"complete\": true,\n  \"environment\": {\n    \"controlled\": {\n      \"CARGO_BUILD_JOBS\": \"1\",\n      \"CARGO_HOME\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/cargo-home\",\n      \"CARGO_INCREMENTAL\": \"0\",\n      \"CARGO_PROFILE_DEV_CODEGEN_UNITS\": \"128\",\n      \"CARGO_PROFILE_DEV_DEBUG\": \"0\",\n      \"CARGO_PROFILE_DEV_DEBUG_ASSERTIONS\": \"true\",\n      \"CARGO_PROFILE_DEV_LTO\": \"false\",\n      \"CARGO_PROFILE_DEV_OPT_LEVEL\": \"0\",\n      \"CARGO_PROFILE_TEST_CODEGEN_UNITS\": \"128\",\n      \"CARGO_PROFILE_TEST_DEBUG\": \"0\",\n      \"CARGO_PROFILE_TEST_DEBUG_ASSERTIONS\": \"true\",\n      \"CARGO_PROFILE_TEST_LTO\": \"false\",\n      \"CARGO_PROFILE_TEST_OPT_LEVEL\": \"0\",\n      \"CARGO_TARGET_DIR\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/target\",\n      \"CARGO_TERM_COLOR\": \"never\",\n      \"MALLOC_ARENA_MAX\": \"1\",\n      \"MALLOC_CONF\": \"narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false\",\n      \"RAYON_NUM_THREADS\": \"1\",\n      \"RUST_BACKTRACE\": \"1\",\n      \"TMPDIR\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/temporary\"\n    },\n    \"removed_names\": [],\n    \"rustc\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/rustc\",\n    \"toolchain_library_prefix\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/lib\",\n    \"toolchain_path_prefix\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin\"\n  },\n  \"expected_generated_program_counts\": {\n    \"construction_programs\": 18,\n    \"region_programs\": 34\n  },\n  \"expected_name_overlaps\": {\n    \"tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_add_ownered_property\": [\n      \"metadata\",\n      \"property-runtime\"\n    ],\n    \"tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class\": [\n      \"metadata\",\n      \"property-runtime\"\n    ],\n    \"tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property\": [\n      \"metadata\",\n      \"property-runtime\"\n    ],\n    \"tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class\": [\n      \"metadata\",\n      \"property-runtime\"\n    ]\n  },\n  \"expected_test_summaries\": {\n    \"coercer-registration\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 1\n    },\n    \"coercion-oracles\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 7\n    },\n    \"default-coercion-oracles\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 3\n    },\n    \"inheritance-oracles\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 4\n    },\n    \"metadata\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 67\n    },\n    \"property-metadata\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 14\n    },\n    \"property-registry\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 12\n    },\n    \"property-runtime\": {\n      \"failed\": 0,\n      \"ignored\": 0,\n      \"passed\": 307\n    }\n  },\n  \"expected_total_distinct_passed\": 411,\n  \"expected_total_passed\": 415,\n  \"finished_unix\": 1793815594.7646866,\n  \"generated_program_counts\": {\n    \"construction_programs\": 18,\n    \"region_programs\": 34\n  },\n  \"generated_winui\": [\n    {\n      \"bytes\": 4867720,\n      \"construction_programs\": 18,\n      \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/target/x86_64-unknown-linux-gnu/debug/build/ferroui-themes-winui-5af1db63c2b4b6a5/out/xaml/compiled_xaml.rs\",\n      \"region_programs\": 34,\n      \"retained\": {\n        \"bytes\": 4867720,\n        \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/generated/000-out.rs\",\n        \"sha256\": \"0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630\"\n      },\n      \"sha256\": \"0e6c500adf2f388b60c120f2cb7c41f161b176d8bdcaf241c3785ddc55df6630\"\n    }\n  ],\n  \"lockfile_before\": {\n    \"bytes\": 168627,\n    \"path\": \"/home/runner/work/FerroUI/FerroUI/source/Cargo.lock\",\n    \"sha256\": \"c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b\"\n  },\n  \"plan_only\": false,\n  \"producer\": {\n    \"bytes\": 24741,\n    \"path\": \"/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/run_winui_source_validation.py\",\n    \"sha256\": \"fd9ef36b8f518a516561cf68639e601f84b0534d67f3b34aeba440ed4713dedf\"\n  },\n  \"production_acceptance\": false,\n  \"repeated_test_executions\": 4,\n  \"required_metadata_tests\": [],\n  \"required_tests\": [\n    \"property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind\",\n    \"property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots\",\n    \"property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes\",\n    \"property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind\",\n    \"property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality\",\n    \"property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind\",\n    \"property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry\",\n    \"property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts\",\n    \"property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior\",\n    \"ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer\",\n    \"ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations\",\n    \"ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides\",\n    \"tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property\",\n    \"ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types\",\n    \"property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind\",\n    \"property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback\",\n    \"property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind\",\n    \"property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry\",\n    \"property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior\",\n    \"tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error\",\n    \"tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal\",\n    \"tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box\",\n    \"tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive\",\n    \"tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe\",\n    \"tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone\",\n    \"tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind\",\n    \"tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding\"\n  ],\n  \"required_tests_passed\": [\n    \"ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer\",\n    \"ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types\",\n    \"ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations\",\n    \"ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides\",\n    \"property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback\",\n    \"property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind\",\n    \"property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes\",\n    \"property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind\",\n    \"property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality\",\n    \"property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind\",\n    \"property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots\",\n    \"property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior\",\n    \"property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry\",\n    \"property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind\",\n    \"property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts\",\n    \"property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry\",\n    \"property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind\",\n    \"property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior\",\n    \"tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind\",\n    \"tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box\",\n    \"tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error\",\n    \"tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe\",\n    \"tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal\",\n    \"tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding\",\n    \"tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone\",\n    \"tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive\",\n    \"tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property\"\n  ],\n  \"revision\": \"2291f8bf32d8d013d1885504aa6b8260edd3e4bc\",\n  \"schema\": 2,\n  \"scope\": \"Run focused development gates against one immutable repository revision.\\n\\nThis compiles actual framework test crates for the selected source change. The\\nmetadata suite checks Base and downstream Controls expansion; the control-theme\\nsuites check the runtime, emitter and differential corpus, then type-check fresh\\nWinUI output. The explicit control-theme-regions suite additionally requires the\\nregion runtime/grammar cases and both generated program forms. Filters narrow\\nexecution, not compilation. The coercion suite checks owned-value cleanup,\\nmetadata registration/inheritance, property behavior and downstream typed APIs.\\nThe inheritance suite adds inherited-change lifetime and registration checks.\\nThe property-capabilities suite combines those cases with default coercion and\\nshared boxed delivery, then checks fresh WinUI generation as well as Controls.\\nThese development suites make no\\nproduction size, throughput, PGO or shipping-acceptance claim. Toolchain, commands,\\nsource identity, lockfile, logs and resource reports survive success or failure.\\n\",\n  \"source\": \"/home/runner/work/FerroUI/FerroUI/source\",\n  \"source_after\": {\n    \"head\": \"2291f8bf32d8d013d1885504aa6b8260edd3e4bc\",\n    \"lockfile\": {\n      \"bytes\": 168627,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/source/Cargo.lock\",\n      \"sha256\": \"c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b\"\n    },\n    \"status\": \"\",\n    \"tree\": \"2be55ff293540508e33fcd718eb96d2f501a8ef6\"\n  },\n  \"source_unchanged\": true,\n  \"started_unix\": 1793815100.083195,\n  \"suite\": \"property-capabilities\",\n  \"test_name_overlaps\": {\n    \"tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_add_ownered_property\": [\n      \"metadata\",\n      \"property-runtime\"\n    ],\n    \"tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class\": [\n      \"metadata\",\n      \"property-runtime\"\n    ],\n    \"tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property\": [\n      \"metadata\",\n      \"property-runtime\"\n    ],\n    \"tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class\": [\n      \"metadata\",\n      \"property-runtime\"\n    ]\n  },\n  \"toolchain\": {\n    \"bytes\": 12301,\n    \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/installation.json\",\n    \"sha256\": \"d2c7a67f1356a941f7c131e99e911a4149e8dbc09933169a6c8db606dcb8750a\"\n  },\n  \"total_distinct_passed\": 411,\n  \"total_passed_executions\": 415,\n  \"tracked_inputs\": {\n    \"bytes\": 1722496,\n    \"path\": \"/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/tracked-inputs.txt\",\n    \"sha256\": \"e8c98fc912a1a296607aa3e8d34a64d637840d31354ab014b7f961d78d98b555\"\n  },\n  \"tree\": \"2be55ff293540508e33fcd718eb96d2f501a8ef6\"\n}\n",
+    "identity": {
+      "bytes": 71905,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/validation.json",
+      "sha256": "599b6c86612ad680a6597ba88e117e11218d60a3c0706abfa11033704ab46f5e"
+    }
+  },
+  "prior_source_gate": {
+    "ci": {
+      "conclusion": "success",
+      "created_at": "2026-11-04T17:09:08Z",
+      "head_branch": "perf/compact-xaml-theme-codegen",
+      "head_sha": "741183c8f955cdc82b0e60ca14de250eb401969a",
+      "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/41874724028",
+      "id": 41874724028,
+      "run_attempt": 1,
+      "status": "completed",
+      "updated_at": "2026-11-04T17:20:21Z"
+    },
+    "counts_not_added_to_current_run": true,
+    "relationship": "Its runtime/dependency source is byte-identical to the current source parent. The current run tests the one-file change separately; the prior count-check failure remains preserved in that original report.",
+    "report": {
+      "bytes": 462135,
+      "path": "/workspace/scratch/6f70b20c54b6/FerroUI/docs/benchmarks/compiled-theme-property-capabilities-source-validation-linux-x86_64.json",
+      "sha256": "b09d8597f7bf5fbb45797de033df993d0b8967fe7b4cf3b132b676a853381968"
+    },
+    "required_names_and_all_unique_test_names_unchanged": true,
+    "runner_bytes_identical": true,
+    "source_revision": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48"
+  },
+  "production_acceptance": false,
+  "remaining_gates": [
+    "A fresh matching production profile and graph are required before any size or throughput claim for this one-file source change.",
+    "The ongoing dc93-to-c686 production cohort and its planned acceptance companions exclude this later metadata lookup change.",
+    "Prior measured runtime regressions remain retained until actual matching paired production evidence resolves them."
+  ],
+  "report_producer": {
+    "bytes": 18291,
+    "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/typed-local-binding-metadata-source-report-01/prepare_report.py",
+    "sha256": "8ed92b3d95e415d78045228daee33d5650791576c07523fb07967eb5835c69ac"
+  },
+  "resource_records": {
+    "bootstrap": {
+      "max_resident_set_kib": 156136,
+      "record": {
+        "bytes": 926,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/bootstrap-resources.txt",
+        "sha256": "2af50317a7f7fb795b680017c2ffde0dbfe4724a6f404ca9bf911da65c74a1fb"
+      }
+    },
+    "coercer-registration": {
+      "max_resident_set_kib": 84392,
+      "record": {
+        "bytes": 995,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercer-registration-resources.txt",
+        "sha256": "0be761bc7578f835e903f4800d1adf3b6ad4c197a540323ec73d9d9bd794c7bb"
+      }
+    },
+    "coercion-oracles": {
+      "max_resident_set_kib": 5161184,
+      "record": {
+        "bytes": 1020,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercion-oracles-resources.txt",
+        "sha256": "f84261ea27dd8c362fb5ae13052f2fecf12cb617dedd324ebc819ce6ec4bebb6"
+      }
+    },
+    "default-coercion-oracles": {
+      "max_resident_set_kib": 84012,
+      "record": {
+        "bytes": 1001,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/default-coercion-oracles-resources.txt",
+        "sha256": "e027ea0ffb08b72c3e5e620fe54128e24ebee9eac5b748e30707f28eab0e0542"
+      }
+    },
+    "downstream": {
+      "max_resident_set_kib": 2261372,
+      "record": {
+        "bytes": 989,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/downstream-resources.txt",
+        "sha256": "89064b778d43fc4be52af5bccc1f769ec4465fb4c7a4baee13101b974ae1d384"
+      }
+    },
+    "fresh-winui": {
+      "max_resident_set_kib": 3012672,
+      "record": {
+        "bytes": 940,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/fresh-winui-resources.txt",
+        "sha256": "793b5f2c742daa59083ab889ab92f469f1406afdb2287aaf234d10f2ff4e490d"
+      }
+    },
+    "inheritance-oracles": {
+      "max_resident_set_kib": 84132,
+      "record": {
+        "bytes": 1000,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/inheritance-oracles-resources.txt",
+        "sha256": "5fde3349e153382cdb3fb2dab1a3eaa8876dff05afdaad69abec8871c11dfcf2"
+      }
+    },
+    "metadata": {
+      "max_resident_set_kib": 84368,
+      "record": {
+        "bytes": 959,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/metadata-resources.txt",
+        "sha256": "bfa5fe9275731ce0a37161fe9e74aaaaad384aa2491abb68ada0749905f6cad1"
+      }
+    },
+    "property-metadata": {
+      "max_resident_set_kib": 84476,
+      "record": {
+        "bytes": 977,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-metadata-resources.txt",
+        "sha256": "afcaa4113c83a2880b2a0bead890f299fa11f4858f93f0979480bfdc52667964"
+      }
+    },
+    "property-registry": {
+      "max_resident_set_kib": 84344,
+      "record": {
+        "bytes": 985,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-registry-resources.txt",
+        "sha256": "208c0fe1ad2dccb9e42e69644c8e5e8dc9c042a825e9cebd557440ee777bdb8a"
+      }
+    },
+    "property-runtime": {
+      "max_resident_set_kib": 84344,
+      "record": {
+        "bytes": 976,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-runtime-resources.txt",
+        "sha256": "cca2586ff6b635dad9f3ee8b886accd0fe502a797791a54896db88b89feab130"
+      }
+    }
+  },
+  "resource_scope": "Descriptive command maxima retained from /usr/bin/time; no controlled build performance or memory improvement claim.",
+  "schema_version": 1,
+  "scope": "Actual frozen one-file typed-local-binding metadata development-source validation using the unchanged415-execution/411-name protocol. No production size, throughput, allocation, or universal equivalence claim.",
+  "source": {
+    "no_source_files_written_by_reporter": true,
+    "parent": "a263981e457c582b6e91b054a4eb2b64e4283e6e",
+    "revision": "2291f8bf32d8d013d1885504aa6b8260edd3e4bc",
+    "source_files": [
+      {
+        "bytes": 4735,
+        "content_utf8": "use super::local_value_binding_observer::{ClearValidation, LocalBindingState};\nuse crate::data::BindingValueType;\nuse crate::reactive::{IDisposable, IObservable, IObserver, ObservableError};\nuse crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty};\nuse std::cell::RefCell;\nuse std::rc::{Rc, Weak};\n\n/// Only cold installation needs dynamic dispatch; each event upgrades a\n/// typed weak reference and updates the original inline value cache.\npub(crate) trait BoxedLocalBindingValue: IDisposable {\n    fn binding(&self) -> &BoxedLocalValueBindingObserver;\n    fn observer(self: Rc<Self>) -> Rc<dyn IObserver<BoxedValue>>;\n}\n\nimpl dyn BoxedLocalBindingValue {\n    pub(crate) fn start(self: &Rc<Self>, source: Rc<dyn IObservable<BoxedValue>>) {\n        let observer = self.clone().observer();\n        self.binding().state.started(source.subscribe(observer));\n    }\n}\n\npub(crate) struct BoxedLocalValueBindingObserver {\n    state: LocalBindingState,\n}\n\nimpl BoxedLocalValueBindingObserver {\n    pub(crate) fn new<T: PropertyValue>(\n        owner: &FerroObject,\n        property: &'static StyledProperty<T>,\n    ) -> Rc<dyn BoxedLocalBindingValue> {\n        // The property is still typed here. Match typed local installation:\n        // release its metadata before capturing the owner and allocating the\n        // observer, without routing through an untyped metadata snapshot.\n        let has_data_validation = property.get_metadata_for(owner).enable_data_validation().unwrap_or(false);\n        Rc::new(Value { binding: Self::new_state(owner, has_data_validation), property, default_value: RefCell::new(None) })\n    }\n\n    fn new_state(owner: &FerroObject, has_data_validation: bool) -> Self {\n        Self { state: LocalBindingState::new(owner, has_data_validation) }\n    }\n\n    fn completed(&self, property: &'static FerroProperty, this: &dyn IDisposable) {\n        self.state.completed(property, this, ClearValidation::BeforeRemoval);\n    }\n\n    fn dispose(&self, property: &'static FerroProperty, this: &dyn IDisposable) {\n        self.state.detach();\n        self.completed(property, this);\n    }\n}\n\nstruct Observer<T: PropertyValue>(Weak<Value<T>>);\n\nimpl<T: PropertyValue> IObserver<BoxedValue> for Observer<T> {\n    fn on_next(&self, value: BoxedValue) {\n        if let Some(binding) = self.0.upgrade() {\n            // Retain the owned input until the upgraded binding drops. An\n            // input destructor can reenter this observer, also on unwind.\n            binding.receive(&value);\n        }\n    }\n\n    fn on_error(&self, _error: ObservableError) {\n        self.on_completed();\n    }\n\n    fn on_completed(&self) {\n        if let Some(binding) = self.0.upgrade() {\n            binding.binding.completed(binding.property, &*binding);\n        }\n    }\n}\n\nstruct Value<T: PropertyValue> {\n    // Dispose the subscription before releasing the cached fallback value.\n    binding: BoxedLocalValueBindingObserver,\n    property: &'static StyledProperty<T>,\n    default_value: RefCell<Option<T>>,\n}\n\nimpl<T: PropertyValue> BoxedLocalBindingValue for Value<T> {\n    fn binding(&self) -> &BoxedLocalValueBindingObserver {\n        &self.binding\n    }\n\n    fn observer(self: Rc<Self>) -> Rc<dyn IObserver<BoxedValue>> {\n        let this = Rc::downgrade(&self);\n        // Installation's temporary Rc is needed only to construct the typed\n        // weak observer. Release it before allocating or subscribing: a source\n        // may deliver and dispose the binding synchronously during subscribe.\n        drop(self);\n        Rc::new(Observer(this))\n    }\n}\n\nimpl<T: PropertyValue> Value<T> {\n    fn receive(&self, value: &BoxedValue) {\n        // Conversion precedes the owner upgrade, as it can reenter user code\n        // and release the owner. No input box is retained by the typed cache.\n        let value = self.property.from_untyped(value.as_any());\n        let kind = value.value_type();\n        if kind == BindingValueType::DO_NOTHING {\n            return;\n        }\n        let Some(owner) = self.binding.state.owner.upgrade() else { return };\n        let (value, error) = value.into_value_and_error();\n        let value = match value {\n            Some(v) if self.property.is_valid(&v) => Some(v),\n            None if kind == BindingValueType::DATA_VALIDATION_ERROR => None,\n            _ => Some(self.property.binding_default(&owner, &self.default_value)),\n        };\n        if let Some(v) = value {\n            owner.values().set_local_value(&owner, self.property, v);\n        }\n        self.binding.state.validate(&owner, self.property, kind, error);\n    }\n}\n\nimpl<T: PropertyValue> IDisposable for Value<T> {\n    fn dispose(&self) {\n        self.binding.dispose(self.property, self);\n    }\n}\n",
+        "git_blob": "53211567078fd26fb4d8520881452b42741666f4",
+        "parent": {
+          "bytes": 4501,
+          "content_utf8": "use super::local_value_binding_observer::{ClearValidation, LocalBindingState};\nuse crate::data::BindingValueType;\nuse crate::reactive::{IDisposable, IObservable, IObserver, ObservableError};\nuse crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty};\nuse std::cell::RefCell;\nuse std::rc::{Rc, Weak};\n\n/// Only cold installation needs dynamic dispatch; each event upgrades a\n/// typed weak reference and updates the original inline value cache.\npub(crate) trait BoxedLocalBindingValue: IDisposable {\n    fn binding(&self) -> &BoxedLocalValueBindingObserver;\n    fn observer(self: Rc<Self>) -> Rc<dyn IObserver<BoxedValue>>;\n}\n\nimpl dyn BoxedLocalBindingValue {\n    pub(crate) fn start(self: &Rc<Self>, source: Rc<dyn IObservable<BoxedValue>>) {\n        let observer = self.clone().observer();\n        self.binding().state.started(source.subscribe(observer));\n    }\n}\n\npub(crate) struct BoxedLocalValueBindingObserver {\n    state: LocalBindingState,\n}\n\nimpl BoxedLocalValueBindingObserver {\n    pub(crate) fn new<T: PropertyValue>(\n        owner: &FerroObject,\n        property: &'static StyledProperty<T>,\n    ) -> Rc<dyn BoxedLocalBindingValue> {\n        Rc::new(Value { binding: Self::new_state(owner, property), property, default_value: RefCell::new(None) })\n    }\n\n    fn new_state(owner: &FerroObject, property: &'static FerroProperty) -> Self {\n        let has_data_validation = property.get_metadata_for(owner).enable_data_validation().unwrap_or(false);\n        Self { state: LocalBindingState::new(owner, has_data_validation) }\n    }\n\n    fn completed(&self, property: &'static FerroProperty, this: &dyn IDisposable) {\n        self.state.completed(property, this, ClearValidation::BeforeRemoval);\n    }\n\n    fn dispose(&self, property: &'static FerroProperty, this: &dyn IDisposable) {\n        self.state.detach();\n        self.completed(property, this);\n    }\n}\n\nstruct Observer<T: PropertyValue>(Weak<Value<T>>);\n\nimpl<T: PropertyValue> IObserver<BoxedValue> for Observer<T> {\n    fn on_next(&self, value: BoxedValue) {\n        if let Some(binding) = self.0.upgrade() {\n            // Retain the owned input until the upgraded binding drops. An\n            // input destructor can reenter this observer, also on unwind.\n            binding.receive(&value);\n        }\n    }\n\n    fn on_error(&self, _error: ObservableError) {\n        self.on_completed();\n    }\n\n    fn on_completed(&self) {\n        if let Some(binding) = self.0.upgrade() {\n            binding.binding.completed(binding.property, &*binding);\n        }\n    }\n}\n\nstruct Value<T: PropertyValue> {\n    // Dispose the subscription before releasing the cached fallback value.\n    binding: BoxedLocalValueBindingObserver,\n    property: &'static StyledProperty<T>,\n    default_value: RefCell<Option<T>>,\n}\n\nimpl<T: PropertyValue> BoxedLocalBindingValue for Value<T> {\n    fn binding(&self) -> &BoxedLocalValueBindingObserver {\n        &self.binding\n    }\n\n    fn observer(self: Rc<Self>) -> Rc<dyn IObserver<BoxedValue>> {\n        let this = Rc::downgrade(&self);\n        // Installation's temporary Rc is needed only to construct the typed\n        // weak observer. Release it before allocating or subscribing: a source\n        // may deliver and dispose the binding synchronously during subscribe.\n        drop(self);\n        Rc::new(Observer(this))\n    }\n}\n\nimpl<T: PropertyValue> Value<T> {\n    fn receive(&self, value: &BoxedValue) {\n        // Conversion precedes the owner upgrade, as it can reenter user code\n        // and release the owner. No input box is retained by the typed cache.\n        let value = self.property.from_untyped(value.as_any());\n        let kind = value.value_type();\n        if kind == BindingValueType::DO_NOTHING {\n            return;\n        }\n        let Some(owner) = self.binding.state.owner.upgrade() else { return };\n        let (value, error) = value.into_value_and_error();\n        let value = match value {\n            Some(v) if self.property.is_valid(&v) => Some(v),\n            None if kind == BindingValueType::DATA_VALIDATION_ERROR => None,\n            _ => Some(self.property.binding_default(&owner, &self.default_value)),\n        };\n        if let Some(v) = value {\n            owner.values().set_local_value(&owner, self.property, v);\n        }\n        self.binding.state.validate(&owner, self.property, kind, error);\n    }\n}\n\nimpl<T: PropertyValue> IDisposable for Value<T> {\n    fn dispose(&self) {\n        self.binding.dispose(self.property, self);\n    }\n}\n",
+          "git_blob": "a2ac6348f6ce09b31cb65904f7c6e122634c2416",
+          "revision": "a263981e457c582b6e91b054a4eb2b64e4283e6e",
+          "sha256": "d5f280562aff4f858d9593937bac49bacd1e12cf37bb06ed8a4bc6e92f5a1a61"
+        },
+        "path": "src/FerroUI.Base/property_store/boxed_local_value_binding_observer.rs",
+        "sha256": "0a9dceef14430592eff5b91841234fe0cccee97027a6eac5a9bc39bf81ad812f",
+        "test_only": false
+      }
+    ],
+    "source_unchanged": true,
+    "tree": "2be55ff293540508e33fcd718eb96d2f501a8ef6"
+  },
+  "toolchain": {
+    "content": {
+      "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+      "channel_date": "2026-10-01",
+      "compiler": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+      "components": {
+        "cargo": {
+          "download": {
+            "bytes": 10954432,
+            "command": [
+              "curl",
+              "--fail",
+              "--location",
+              "--connect-timeout",
+              "15",
+              "--max-time",
+              "300",
+              "--retry",
+              "3",
+              "--retry-delay",
+              "1",
+              "--silent",
+              "--show-error",
+              "https://static.rust-lang.org/dist/2026-10-01/cargo-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+              "--output",
+              "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/cargo-1.99.0-x86_64-unknown-linux-gnu.tar.xz.download"
+            ],
+            "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/cargo-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+            "reused": false,
+            "sha256": "d7674918d28093097614cd9728b6ca60db9ea3038f640f0bd1e9a4188c7568ce",
+            "url": "https://static.rust-lang.org/dist/2026-10-01/cargo-1.99.0-x86_64-unknown-linux-gnu.tar.xz"
+          },
+          "expected_sha256": "d7674918d28093097614cd9728b6ca60db9ea3038f640f0bd1e9a4188c7568ce",
+          "installation": {
+            "command": [
+              "sh",
+              "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/cargo-7hdbsgfw/cargo-1.99.0-x86_64-unknown-linux-gnu/install.sh",
+              "--prefix=/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install",
+              "--disable-ldconfig"
+            ],
+            "log": {
+              "bytes": 213,
+              "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install-cargo.log",
+              "sha256": "bd7a14a24631e3adbe367ae2e65771478c673a63594ba913235f228df9519c8b"
+            },
+            "returncode": 0
+          },
+          "url": "https://static.rust-lang.org/dist/2026-10-01/cargo-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+          "version": "0.100.0 (5f94df478 2026-08-27)"
+        },
+        "llvm-tools-preview": {
+          "download": {
+            "bytes": 41019060,
+            "command": [
+              "curl",
+              "--fail",
+              "--location",
+              "--connect-timeout",
+              "15",
+              "--max-time",
+              "300",
+              "--retry",
+              "3",
+              "--retry-delay",
+              "1",
+              "--silent",
+              "--show-error",
+              "https://static.rust-lang.org/dist/2026-10-01/llvm-tools-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+              "--output",
+              "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/llvm-tools-1.99.0-x86_64-unknown-linux-gnu.tar.xz.download"
+            ],
+            "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/llvm-tools-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+            "reused": false,
+            "sha256": "91a6db5668c08ee68e330e5b0fda27c11b79b90592627e89f7c5db12af2ff0ba",
+            "url": "https://static.rust-lang.org/dist/2026-10-01/llvm-tools-1.99.0-x86_64-unknown-linux-gnu.tar.xz"
+          },
+          "expected_sha256": "91a6db5668c08ee68e330e5b0fda27c11b79b90592627e89f7c5db12af2ff0ba",
+          "installation": {
+            "command": [
+              "sh",
+              "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/llvm-tools-preview-i2n0sa7i/llvm-tools-1.99.0-x86_64-unknown-linux-gnu/install.sh",
+              "--prefix=/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install",
+              "--disable-ldconfig"
+            ],
+            "log": {
+              "bytes": 231,
+              "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install-llvm-tools-preview.log",
+              "sha256": "036e75cd9524c527890bb62797cfacb50e62b46bdac850e047de4466633727f8"
+            },
+            "returncode": 0
+          },
+          "url": "https://static.rust-lang.org/dist/2026-10-01/llvm-tools-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+          "version": "1.99.0 (b940084d7 2026-09-28)"
+        },
+        "rust-std": {
+          "download": {
+            "bytes": 31598812,
+            "command": [
+              "curl",
+              "--fail",
+              "--location",
+              "--connect-timeout",
+              "15",
+              "--max-time",
+              "300",
+              "--retry",
+              "3",
+              "--retry-delay",
+              "1",
+              "--silent",
+              "--show-error",
+              "https://static.rust-lang.org/dist/2026-10-01/rust-std-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+              "--output",
+              "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/rust-std-1.99.0-x86_64-unknown-linux-gnu.tar.xz.download"
+            ],
+            "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/rust-std-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+            "reused": false,
+            "sha256": "3e58dff2d0b72196b5ea4e90536e174d400de88564a52694686b81e091169933",
+            "url": "https://static.rust-lang.org/dist/2026-10-01/rust-std-1.99.0-x86_64-unknown-linux-gnu.tar.xz"
+          },
+          "expected_sha256": "3e58dff2d0b72196b5ea4e90536e174d400de88564a52694686b81e091169933",
+          "installation": {
+            "command": [
+              "sh",
+              "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/rust-std-5ide2_yg/rust-std-1.99.0-x86_64-unknown-linux-gnu/install.sh",
+              "--prefix=/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install",
+              "--disable-ldconfig"
+            ],
+            "log": {
+              "bytes": 244,
+              "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install-rust-std.log",
+              "sha256": "30ddefc096f32add22fc9398581f706de825fac1655454c5d12ded4aed26f011"
+            },
+            "returncode": 0
+          },
+          "url": "https://static.rust-lang.org/dist/2026-10-01/rust-std-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+          "version": "1.99.0 (b940084d7 2026-09-28)"
+        },
+        "rustc": {
+          "download": {
+            "bytes": 84044652,
+            "command": [
+              "curl",
+              "--fail",
+              "--location",
+              "--connect-timeout",
+              "15",
+              "--max-time",
+              "300",
+              "--retry",
+              "3",
+              "--retry-delay",
+              "1",
+              "--silent",
+              "--show-error",
+              "https://static.rust-lang.org/dist/2026-10-01/rustc-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+              "--output",
+              "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/rustc-1.99.0-x86_64-unknown-linux-gnu.tar.xz.download"
+            ],
+            "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/rustc-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+            "reused": false,
+            "sha256": "77171ba2a0345fdf2abc4fedda55d6de078dae7a68527c28be8c77dcc9604bd5",
+            "url": "https://static.rust-lang.org/dist/2026-10-01/rustc-1.99.0-x86_64-unknown-linux-gnu.tar.xz"
+          },
+          "expected_sha256": "77171ba2a0345fdf2abc4fedda55d6de078dae7a68527c28be8c77dcc9604bd5",
+          "installation": {
+            "command": [
+              "sh",
+              "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/rustc-qxplh96n/rustc-1.99.0-x86_64-unknown-linux-gnu/install.sh",
+              "--prefix=/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install",
+              "--disable-ldconfig"
+            ],
+            "log": {
+              "bytes": 213,
+              "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install-rustc.log",
+              "sha256": "3134ac11a3239126345236d6b8e63afe9acadac1742ba0713859c91c4b9b0f5a"
+            },
+            "returncode": 0
+          },
+          "url": "https://static.rust-lang.org/dist/2026-10-01/rustc-1.99.0-x86_64-unknown-linux-gnu.tar.xz",
+          "version": "1.99.0 (b940084d7 2026-09-28)"
+        }
+      },
+      "executables": {
+        "cargo": {
+          "bytes": 36160240,
+          "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/cargo",
+          "sha256": "e951141cc55a6cd7b9876d187bd30a3720e6086b99413af95e3b8de1cdd72f14"
+        },
+        "llvm-ar": {
+          "bytes": 136488,
+          "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-ar",
+          "sha256": "f03da79d74e956137f887893dc06ac51c28da84a0e43ebb5720b71dbef9866b8"
+        },
+        "llvm-dis": {
+          "bytes": 60776,
+          "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-dis",
+          "sha256": "804ee3e74d97e52dc00c7fd9c3e273d51acd552a733d2a10d14329795d51f446"
+        },
+        "llvm-nm": {
+          "bytes": 221616,
+          "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-nm",
+          "sha256": "f425140d39d54aa76e0ae36680b4198a905947fc92ac6d175204f723bf6a6a69"
+        },
+        "llvm-profdata": {
+          "bytes": 630592,
+          "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-profdata",
+          "sha256": "d70a42ea1a575e6c55878aa2b46b9b1dd7b3c97ca24fac52fa07ce1f260a5ada"
+        },
+        "rust-lld": {
+          "bytes": 11879600,
+          "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld",
+          "sha256": "4739514e3484915747c34b35007cd990235cc6b490b2d0525a61ac402ca16af9"
+        },
+        "rustc": {
+          "bytes": 647376,
+          "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install/bin/rustc",
+          "sha256": "f3834d26669b03f6855fa54bd2381443123e860167bc0c7a8dd137e5cf6e5e4f"
+        }
+      },
+      "finished_unix": 1793815111.840303,
+      "host": "x86_64-unknown-linux-gnu",
+      "llvm_profdata": "LLVM (http://llvm.org/):\n  LLVM version 23.1.1-rust-1.99.0-stable\n  Optimized build.",
+      "manifest": {
+        "bytes": 943486,
+        "command": [
+          "curl",
+          "--fail",
+          "--location",
+          "--connect-timeout",
+          "15",
+          "--max-time",
+          "300",
+          "--retry",
+          "3",
+          "--retry-delay",
+          "1",
+          "--silent",
+          "--show-error",
+          "https://static.rust-lang.org/dist/channel-rust-1.99.0.toml",
+          "--output",
+          "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/channel-rust-1.99.0.toml.download"
+        ],
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/dist/channel-rust-1.99.0.toml",
+        "reused": false,
+        "sha256": "ce6dddc886364f8d786514771212cebe9b731ba82d6b859951c6b0ccc516b6a2",
+        "url": "https://static.rust-lang.org/dist/channel-rust-1.99.0.toml"
+      },
+      "prefix": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/install",
+      "producer": {
+        "bytes": 8676,
+        "path": "/home/runner/work/FerroUI/FerroUI/tooling/scripts/themes/bench/bootstrap_toolchain.py",
+        "sha256": "ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb"
+      },
+      "repository_compilation": false,
+      "scope": "Install a checksummed, isolated Rust toolchain for the native theme benchmarks.\n\nThis downloads official binary components; it does not compile the repository,\nrun rustup, change the user's shell, or modify a system installation. Keep the\nwork directory on a filesystem with room for the downloaded and installed\ncomponents, rather than in an automatically cleaned temporary directory.\n\n    python3 scripts/themes/bench/bootstrap_toolchain.py         --work-dir /path/to/benchmark-cache/toolchain\n",
+      "shell_environment": {
+        "bytes": 594,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/toolchain/environment.sh",
+        "sha256": "1e61dee5abad4331735c3c224e517f1521e076fdfeb687efab2d26f478c2d503"
+      },
+      "started_unix": 1793815100.5909379
+    },
+    "installation": {
+      "bytes": 12301,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/installation.json",
+      "sha256": "d2c7a67f1356a941f7c131e99e911a4149e8dbc09933169a6c8db606dcb8750a"
+    }
+  },
+  "verified_command_inputs": [
+    {
+      "local": {
+        "bytes": 670,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/bootstrap.log",
+        "sha256": "06cdeff9b2626926d93ec4d0df6ab0d6619d7f0463b797134edada03a0409903"
+      },
+      "original": {
+        "bytes": 670,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/bootstrap.log",
+        "sha256": "06cdeff9b2626926d93ec4d0df6ab0d6619d7f0463b797134edada03a0409903"
+      }
+    },
+    {
+      "local": {
+        "bytes": 926,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/bootstrap-resources.txt",
+        "sha256": "2af50317a7f7fb795b680017c2ffde0dbfe4724a6f404ca9bf911da65c74a1fb"
+      },
+      "original": {
+        "bytes": 926,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/bootstrap-resources.txt",
+        "sha256": "2af50317a7f7fb795b680017c2ffde0dbfe4724a6f404ca9bf911da65c74a1fb"
+      }
+    },
+    {
+      "local": {
+        "bytes": 44474,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/coercion-oracles.log",
+        "sha256": "bcd1cb0e9bc07db7eb5e58089d76b27ed393690fd3a55ae70f006966a8fcd5ac"
+      },
+      "original": {
+        "bytes": 44474,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercion-oracles.log",
+        "sha256": "bcd1cb0e9bc07db7eb5e58089d76b27ed393690fd3a55ae70f006966a8fcd5ac"
+      }
+    },
+    {
+      "local": {
+        "bytes": 1020,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/coercion-oracles-resources.txt",
+        "sha256": "f84261ea27dd8c362fb5ae13052f2fecf12cb617dedd324ebc819ce6ec4bebb6"
+      },
+      "original": {
+        "bytes": 1020,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercion-oracles-resources.txt",
+        "sha256": "f84261ea27dd8c362fb5ae13052f2fecf12cb617dedd324ebc819ce6ec4bebb6"
+      }
+    },
+    {
+      "local": {
+        "bytes": 40780,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/inheritance-oracles.log",
+        "sha256": "17bbe61e4ae1617f94a0b39ca11de6bbd6e5e1bb98df3b557050625a86d57d21"
+      },
+      "original": {
+        "bytes": 40780,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/inheritance-oracles.log",
+        "sha256": "17bbe61e4ae1617f94a0b39ca11de6bbd6e5e1bb98df3b557050625a86d57d21"
+      }
+    },
+    {
+      "local": {
+        "bytes": 1000,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/inheritance-oracles-resources.txt",
+        "sha256": "5fde3349e153382cdb3fb2dab1a3eaa8876dff05afdaad69abec8871c11dfcf2"
+      },
+      "original": {
+        "bytes": 1000,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/inheritance-oracles-resources.txt",
+        "sha256": "5fde3349e153382cdb3fb2dab1a3eaa8876dff05afdaad69abec8871c11dfcf2"
+      }
+    },
+    {
+      "local": {
+        "bytes": 40648,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/default-coercion-oracles.log",
+        "sha256": "2e9b95d9a6e408fe68538ba187d38859e03c456c9bfae510b6409a888c64692d"
+      },
+      "original": {
+        "bytes": 40648,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/default-coercion-oracles.log",
+        "sha256": "2e9b95d9a6e408fe68538ba187d38859e03c456c9bfae510b6409a888c64692d"
+      }
+    },
+    {
+      "local": {
+        "bytes": 1001,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/default-coercion-oracles-resources.txt",
+        "sha256": "e027ea0ffb08b72c3e5e620fe54128e24ebee9eac5b748e30707f28eab0e0542"
+      },
+      "original": {
+        "bytes": 1001,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/default-coercion-oracles-resources.txt",
+        "sha256": "e027ea0ffb08b72c3e5e620fe54128e24ebee9eac5b748e30707f28eab0e0542"
+      }
+    },
+    {
+      "local": {
+        "bytes": 71989,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-runtime.log",
+        "sha256": "648e61cb341291780a26574cf4761f2a338e0fb9d3ee9857498588fbd29c5b3d"
+      },
+      "original": {
+        "bytes": 71989,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-runtime.log",
+        "sha256": "648e61cb341291780a26574cf4761f2a338e0fb9d3ee9857498588fbd29c5b3d"
+      }
+    },
+    {
+      "local": {
+        "bytes": 976,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-runtime-resources.txt",
+        "sha256": "cca2586ff6b635dad9f3ee8b886accd0fe502a797791a54896db88b89feab130"
+      },
+      "original": {
+        "bytes": 976,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-runtime-resources.txt",
+        "sha256": "cca2586ff6b635dad9f3ee8b886accd0fe502a797791a54896db88b89feab130"
+      }
+    },
+    {
+      "local": {
+        "bytes": 41467,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-metadata.log",
+        "sha256": "16707c43f29c2203d5152f1771ce906f3e196f75e382349eb019cc576da1e565"
+      },
+      "original": {
+        "bytes": 41467,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-metadata.log",
+        "sha256": "16707c43f29c2203d5152f1771ce906f3e196f75e382349eb019cc576da1e565"
+      }
+    },
+    {
+      "local": {
+        "bytes": 977,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-metadata-resources.txt",
+        "sha256": "afcaa4113c83a2880b2a0bead890f299fa11f4858f93f0979480bfdc52667964"
+      },
+      "original": {
+        "bytes": 977,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-metadata-resources.txt",
+        "sha256": "afcaa4113c83a2880b2a0bead890f299fa11f4858f93f0979480bfdc52667964"
+      }
+    },
+    {
+      "local": {
+        "bytes": 41482,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-registry.log",
+        "sha256": "a37ae5b10f4b943c65eafa301b1d2c589d5bf17fec2d3c4ef39ed9b25606ed40"
+      },
+      "original": {
+        "bytes": 41482,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-registry.log",
+        "sha256": "a37ae5b10f4b943c65eafa301b1d2c589d5bf17fec2d3c4ef39ed9b25606ed40"
+      }
+    },
+    {
+      "local": {
+        "bytes": 985,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/property-registry-resources.txt",
+        "sha256": "208c0fe1ad2dccb9e42e69644c8e5e8dc9c042a825e9cebd557440ee777bdb8a"
+      },
+      "original": {
+        "bytes": 985,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/property-registry-resources.txt",
+        "sha256": "208c0fe1ad2dccb9e42e69644c8e5e8dc9c042a825e9cebd557440ee777bdb8a"
+      }
+    },
+    {
+      "local": {
+        "bytes": 40336,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/coercer-registration.log",
+        "sha256": "13fa6e88d6ffad13f32444587938788a9e85f6b6a9387b4d5a605dee952a2335"
+      },
+      "original": {
+        "bytes": 40336,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercer-registration.log",
+        "sha256": "13fa6e88d6ffad13f32444587938788a9e85f6b6a9387b4d5a605dee952a2335"
+      }
+    },
+    {
+      "local": {
+        "bytes": 995,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/coercer-registration-resources.txt",
+        "sha256": "0be761bc7578f835e903f4800d1adf3b6ad4c197a540323ec73d9d9bd794c7bb"
+      },
+      "original": {
+        "bytes": 995,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/coercer-registration-resources.txt",
+        "sha256": "0be761bc7578f835e903f4800d1adf3b6ad4c197a540323ec73d9d9bd794c7bb"
+      }
+    },
+    {
+      "local": {
+        "bytes": 46509,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/metadata.log",
+        "sha256": "268df7f6e0b2c4b59d1a39dbe95a1df52f84ba0d51ff4914db772b37a14e1a98"
+      },
+      "original": {
+        "bytes": 46509,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/metadata.log",
+        "sha256": "268df7f6e0b2c4b59d1a39dbe95a1df52f84ba0d51ff4914db772b37a14e1a98"
+      }
+    },
+    {
+      "local": {
+        "bytes": 959,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/metadata-resources.txt",
+        "sha256": "bfa5fe9275731ce0a37161fe9e74aaaaad384aa2491abb68ada0749905f6cad1"
+      },
+      "original": {
+        "bytes": 959,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/metadata-resources.txt",
+        "sha256": "bfa5fe9275731ce0a37161fe9e74aaaaad384aa2491abb68ada0749905f6cad1"
+      }
+    },
+    {
+      "local": {
+        "bytes": 11410,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/downstream.log",
+        "sha256": "d77d9c7e5fd5ecc9cc9ca2385c8fc76e408633cbcac2473a147d8960c39c6a4e"
+      },
+      "original": {
+        "bytes": 11410,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/downstream.log",
+        "sha256": "d77d9c7e5fd5ecc9cc9ca2385c8fc76e408633cbcac2473a147d8960c39c6a4e"
+      }
+    },
+    {
+      "local": {
+        "bytes": 989,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/downstream-resources.txt",
+        "sha256": "89064b778d43fc4be52af5bccc1f769ec4465fb4c7a4baee13101b974ae1d384"
+      },
+      "original": {
+        "bytes": 989,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/downstream-resources.txt",
+        "sha256": "89064b778d43fc4be52af5bccc1f769ec4465fb4c7a4baee13101b974ae1d384"
+      }
+    },
+    {
+      "local": {
+        "bytes": 14136,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/fresh-winui.log",
+        "sha256": "370d6e5ace01e07ba03d2c9d13deda6e13c28e00ffed17151cff9038e1ba8685"
+      },
+      "original": {
+        "bytes": 14136,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/fresh-winui.log",
+        "sha256": "370d6e5ace01e07ba03d2c9d13deda6e13c28e00ffed17151cff9038e1ba8685"
+      }
+    },
+    {
+      "local": {
+        "bytes": 940,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-run-41882170321/evidence/fresh-winui-resources.txt",
+        "sha256": "793b5f2c742daa59083ab889ab92f469f1406afdb2287aaf234d10f2ff4e490d"
+      },
+      "original": {
+        "bytes": 940,
+        "path": "/home/runner/work/_temp/winui-local-binding-metadata-source-validation/evidence/fresh-winui-resources.txt",
+        "sha256": "793b5f2c742daa59083ab889ab92f469f1406afdb2287aaf234d10f2ff4e490d"
+      }
+    }
+  ]
+}

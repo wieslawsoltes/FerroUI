@@ -672,6 +672,37 @@ unchanged. The
 records the passed source prerequisite and independent policy review. Production
 size, allocation and fresh paired throughput for this source remain pending.
 
+### Validated typed metadata lookup for boxed local bindings
+
+The additional local-binding source is frozen at
+[`2291f8bf`](https://github.com/wieslawsoltes/FerroUI/commit/2291f8bf32d8d013d1885504aa6b8260edd3e4bc).
+Its single-file change keeps the property typed while reading
+`enable_data_validation`, then passes the resulting boolean into the shared
+installation state. This uses the same lookup expression as the original
+`LocalValueBindingObserver<T>` and avoids the erased metadata dispatch and base
+metadata snapshot. Both lookups select metadata for the owner's runtime type.
+The metadata temporary is released before capturing the weak owner or allocating
+the observer; a lookup panic occurs before either operation. Subscription,
+delivery, fallback storage, disposal and the public API remain unchanged.
+
+[CI run 41882170321](https://github.com/wieslawsoltes/FerroUI/actions/runs/41882170321)
+passed the unchanged source gate: 415 successful executions, 411 distinct tests,
+the exact four known overlaps, zero failed or ignored, and all 27 mandatory
+cases. Downstream Base/Controls and fresh WinUI checks passed, with 18 whole-theme
+and 34 region programs. The
+[source-validation evidence](benchmarks/compiled-theme-typed-local-binding-metadata-source-validation-linux-x86_64.json)
+retains the original validation, exact one-file source, all 11 commands and
+authenticated artifact identity. Independent verification covered all 26 ZIP
+members, all 22 command log/resource hashes, the complete tracked source
+inventory, toolchain inputs, raw test names and generated program counts.
+
+This source correction is integrated exactly as validated. It is a separate
+performance hypothesis: no new executable size, allocation or throughput result
+is attributed to it. The already-running `dc93a16d` to `c686b70c` production
+comparison keeps its original source pair and excludes this later change.
+The earlier measured runtime regressions remain open until fresh matching
+production evidence resolves them.
+
 ### Earlier source history
 
 The runtime and focused regression tests are committed through
