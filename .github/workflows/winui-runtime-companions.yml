@@ -43,7 +43,7 @@ jobs:
           with open(os.environ['GITHUB_ENV'], 'a') as output:
               output.write('RUNTIME_COMPANION_CPU=' + str(min(os.sched_getaffinity(0))) + '\n')
           PY
-      - name: Verify releases and link unchanged production companions
+      - name: Verify releases, link companions and freeze native proof
         id: companions
         env:
           GITHUB_TOKEN: ${{ github.token }}

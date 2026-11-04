@@ -303,6 +303,8 @@ class LinkJob:
         for expected in self.report["tooling_helpers"].values():
             require(identity(expected["path"]) == expected, "Tooling helper changed")
         require(identity(self.args.configuration) == self.report["configuration"], "Configuration changed")
+        # Export snapshots the persisted execution record; include the final native check.
+        self.persist()
         self.export_bundle(compared)
         self.report["complete"] = True
         self.persist()
