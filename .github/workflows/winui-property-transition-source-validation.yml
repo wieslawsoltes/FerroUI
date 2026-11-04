@@ -1,0 +1,103 @@
+name: Property transition source validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Immutable shared property transition source commit'
+        default: '5268d4dc296ba0ab1fa841b44f94c07b4123fd9d'
+        required: true
+        type: string
+  push:
+    branches: ['perf/compact-xaml-theme-codegen']
+    paths: ['.github/workflows/winui-property-transition-source-validation.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-property-transition-source-${{ github.ref }}-${{ inputs.revision || '5268d4dc296ba0ab1fa841b44f94c07b4123fd9d' }}
+  cancel-in-progress: false
+
+jobs:
+  source-validation:
+    name: Shared property transitions, lifetime oracles and fresh WinUI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.revision || '5268d4dc296ba0ab1fa841b44f94c07b4123fd9d' }}
+          path: source
+          persist-credentials: false
+      - name: Native development dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config time libfontconfig1-dev libfreetype6-dev
+      # Preserve construction's 450 executions / 446 distinct names and exact four overlaps.
+      # Add four transition oracles: 454 / 450 total and 42 mandatory names.
+      # Run only the reviewed immutable shared property transition revision.
+      - name: Compile immutable source and check property transitions
+        env:
+          SOURCE_REVISION: ${{ inputs.revision || '5268d4dc296ba0ab1fa841b44f94c07b4123fd9d' }}
+        run: |
+          python3 tooling/scripts/themes/bench/run_winui_source_validation.py \
+            --source "$GITHUB_WORKSPACE/source" \
+            --revision "$SOURCE_REVISION" \
+            --output "$RUNNER_TEMP/winui-property-transition-source-validation" \
+            --suite property-transition \
+            --required-test property_store::effective_value::coercion_tests::recoercion_matches_original_owned_value_frames_and_unwind \
+            --required-test property_store::effective_value::coercion_tests::recoercion_matches_original_reentrant_reads_writes_and_priority_snapshots \
+            --required-test property_store::effective_value::coercion_tests::metadata_coercion_keeps_clone_only_api_and_callback_pair_lifetimes \
+            --required-test property_store::effective_value::coercion_tests::metadata_replacement_matches_original_callback_drop_unwind \
+            --required-test property_store::effective_value::coercion_tests::recoercion_keeps_nan_equality \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notification_matches_original_values_defaults_and_unwind \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notification_matches_original_clone_equality_and_handler_reentry \
+            --required-test property_store::effective_value::inheritance_tests::inherited_notifications_keep_source_metadata_across_overrides_and_attached_hosts \
+            --required-test property_store::effective_value::inheritance_tests::explicit_inheritance_registration_and_opt_out_keep_public_behavior \
+            --required-test ferro_property::styled_property_options_tests::registration_transfers_the_original_coercer \
+            --required-test ferro_property_metadata::metadata_table_tests::colliding_cache_entries_follow_replaced_and_removed_registrations \
+            --required-test ferro_property_metadata::metadata_table_tests::unregister_invalidates_inherited_and_relocated_overrides \
+            --required-test tests::ferro_property_registry_tests::registered_properties_count_reflects_newly_added_attached_property \
+            --required-test ferro_property_metadata::coercion_request_tests::borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types \
+            --required-test property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_matches_original_owned_values_reentry_and_unwind \
+            --required-test property_store::effective_value::coercion_tests::end_reevaluation_tests::end_reevaluation_keeps_nan_and_the_retained_uncommon_callback \
+            --required-test property_store::value_store::default_coercion_tests::default_coercion_matches_original_metadata_values_factory_and_unwind \
+            --required-test property_store::value_store::default_coercion_tests::default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reentry \
+            --required-test property_store::value_store::default_coercion_tests::default_coercion_retains_partial_eq_nan_and_absent_callback_behavior \
+            --required-test tests::ferro_object_tests_binding::boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error \
+            --required-test tests::ferro_object_tests_binding::boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal \
+            --required-test tests::ferro_object_tests_binding::boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box \
+            --required-test tests::ferro_object_tests_binding::retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive \
+            --required-test tests::ferro_object_tests_binding::boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe \
+            --required-test tests::ferro_object_tests_binding::boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone \
+            --required-test tests::ferro_object_tests_binding::boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind \
+            --required-test tests::ferro_object_tests_binding::boxed_input_drop_runs_after_the_delivery_releases_its_binding \
+            --required-test data::core::value_type::nullable_operation_tests::ordinary_nullable_operations_match_original_cleanup_oracles \
+            --required-test data::core::value_type::nullable_operation_tests::nullable_operations_preserve_nested_exact_types_and_nulls \
+            --required-test data::core::value_type::nullable_operation_tests::nullable_clone_reentry_preserves_current_snapshot_and_later_overrides \
+            --required-test data::core::value_type::nullable_operation_tests::nullable_registration_keeps_borrowed_cast_and_conversion_views_independent \
+            --required-test data::core::value_type::nullable_operation_tests::reference_nullable_operations_keep_non_clone_identity_and_registration_order \
+            --required-test data::core::value_type::nullable_operation_tests::nullable_operation_layout_keeps_enclosing_registrations_compact \
+            --required-test property_store::effective_value::construction_tests::frozen_metadata_construction_matches_original_owned_frames_and_unwind \
+            --required-test property_store::effective_value::construction_tests::public_type_safe_metadata_keeps_unfrozen_clone_only_behavior \
+            --required-test property_store::effective_value::construction_tests::frozen_metadata_generation_keeps_reentrant_input_ownership \
+            --required-test property_store::effective_value::construction_tests::effective_construction_matches_original_default_and_inherited_frames \
+            --required-test property_store::effective_value::construction_tests::effective_construction_keeps_metadata_snapshot_during_clone_reentry \
+            --required-test property_store::effective_value::transition_tests::shared_write_matches_original_operations_and_unwind \
+            --required-test property_store::effective_value::transition_tests::shared_write_keeps_live_priority_reads_under_reentry \
+            --required-test property_store::effective_value::transition_tests::shared_notification_keeps_snapshot_lifetimes_and_unwind \
+            --required-test property_store::effective_value::transition_tests::borrowed_transition_frames_keep_storage_layout_and_nan_semantics
+      - name: Preserve commands, source, results and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-property-transition-source-validation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/winui-property-transition-source-validation/evidence
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 14
