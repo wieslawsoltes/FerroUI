@@ -699,18 +699,17 @@ macro_rules! __ferro_markup_receiver {
     }};
 }
 
-// Select the existing receiver policy at the concrete declaration, then
-// share the complete property adapter by its typed signature. The callback
-// wrapper defers evaluation of the user's callable expression until after
-// the same count, receiver and value conversions as the original invoker.
+// Select the existing receiver policy at the concrete declaration. Getter
+// preparation returns its receiver to the original thunk's local scope;
+// setter callbacks retain their complete original expression statement.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __ferro_markup_accessor {
-    ($this:ty, $operation:ident, $arguments:ident, $call:expr) => {{
+    ($this:ty, $operation:ident, $arguments:ident) => {{
         #[allow(unused_imports)]
         use $crate::metadata::accessor::{OwnedMarkupAccessorFallback as _, SharedMarkupAccessor as _};
         let probe = &&$crate::metadata::receiver::MarkupReceiverProbe::<$this>::new();
-        probe.$operation($arguments, $call)
+        probe.$operation($arguments)
     }};
     ($this:ty, $value:ty, $operation:ident, $arguments:ident, $call:expr) => {{
         #[allow(unused_imports)]
@@ -728,20 +727,18 @@ macro_rules! __ferro_markup_getter {
     };
     ($this:ty, $type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            $crate::__ferro_markup_accessor!(
-                $this, invoke_getter, arguments,
-                |this| ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)(this)))
-            )
+            let this = $crate::__ferro_markup_accessor!($this, prepare_getter, arguments)?;
+            let this: &$this = &this;
+            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)(this)))
         })
     };
     ($this:ty, $type_:ty; try_get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            $crate::__ferro_markup_accessor!(
-                $this, invoke_getter, arguments,
-                |this| ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
-                    $crate::metadata::markup_result(($get)(this))?,
-                ))
-            )
+            let this = $crate::__ferro_markup_accessor!($this, prepare_getter, arguments)?;
+            let this: &$this = &this;
+            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
+                $crate::metadata::markup_result(($get)(this))?,
+            ))
         })
     };
     ($this:ty, $type_:ty; set: $set:expr $(, $($rest:tt)*)?) => {

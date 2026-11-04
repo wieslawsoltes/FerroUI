@@ -11,7 +11,7 @@ use std::fmt;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PanicAt {
     Never,
     ArgumentClone,
@@ -19,6 +19,7 @@ enum PanicAt {
     SetterCall,
     ResultClone,
     CallableDrop,
+    IgnoredResultDrop,
 }
 
 crate::ferro_thread_local! {
@@ -144,6 +145,7 @@ struct IgnoredResult;
 impl Drop for IgnoredResult {
     fn drop(&mut self) {
         event("ignored result drop");
+        assert!(PANIC_AT.with(Cell::get) != PanicAt::IgnoredResultDrop, "ignored result drop panic");
     }
 }
 
@@ -235,14 +237,108 @@ crate::ferro_markup_type!(struct InvocationReceiver {
     ],
 });
 
+// The leaf bodies below are copied from the original emitter macros. Keep
+// their expression and local scopes: a handwritten function is a useful
+// cross-check, but is not a substitute for the original macro-shaped closure.
+macro_rules! original_getter_macro {
+    ($this:ty, $type_:ty;) => {
+        ::std::option::Option::None
+    };
+    ($this:ty, $type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
+        ::std::option::Option::Some(|arguments| {
+            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
+            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)(this)))
+        })
+    };
+    ($this:ty, $type_:ty; try_get: $get:expr $(, $($rest:tt)*)?) => {
+        ::std::option::Option::Some(|arguments| {
+            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
+            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
+                $crate::metadata::markup_result(($get)(this))?,
+            ))
+        })
+    };
+    ($this:ty, $type_:ty; set: $set:expr $(, $($rest:tt)*)?) => {
+        original_getter_macro!($this, $type_; $($($rest)*)?)
+    };
+    ($this:ty, $type_:ty; try_set: $set:expr $(, $($rest:tt)*)?) => {
+        original_getter_macro!($this, $type_; $($($rest)*)?)
+    };
+}
+
+
+macro_rules! original_setter_macro {
+    ($this:ty, $type_:ty;) => {
+        ::std::option::Option::None
+    };
+    ($this:ty, $type_:ty; set: $set:expr $(, $($rest:tt)*)?) => {
+        ::std::option::Option::Some(|arguments| {
+            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
+            let value = arguments.next::<$type_>()?;
+            let _ = ($set)(this, value);
+            ::std::result::Result::Ok(::std::option::Option::None)
+        })
+    };
+    ($this:ty, $type_:ty; try_set: $set:expr $(, $($rest:tt)*)?) => {
+        ::std::option::Option::Some(|arguments| {
+            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
+            let value = arguments.next::<$type_>()?;
+            let _ = $crate::metadata::markup_result(($set)(this, value))?;
+            ::std::result::Result::Ok(::std::option::Option::None)
+        })
+    };
+    ($this:ty, $type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
+        original_setter_macro!($this, $type_; $($($rest)*)?)
+    };
+    ($this:ty, $type_:ty; try_get: $get:expr $(, $($rest:tt)*)?) => {
+        original_setter_macro!($this, $type_; $($($rest)*)?)
+    };
+}
+
+
+macro_rules! original_static_getter_macro {
+    ($type_:ty;) => {
+        ::std::option::Option::None
+    };
+    ($type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
+        ::std::option::Option::Some(|arguments| {
+            $crate::metadata::MarkupArguments::new(arguments, 0)?;
+            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)()))
+        })
+    };
+    ($type_:ty; try_get: $get:expr $(, $($rest:tt)*)?) => {
+        ::std::option::Option::Some(|arguments| {
+            $crate::metadata::MarkupArguments::new(arguments, 0)?;
+            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
+                $crate::metadata::markup_result(($get)())?,
+            ))
+        })
+    };
+    ($type_:ty; set: $set:expr $(, $($rest:tt)*)?) => {
+        original_static_getter_macro!($type_; $($($rest)*)?)
+    };
+    ($type_:ty; try_set: $set:expr $(, $($rest:tt)*)?) => {
+        original_static_getter_macro!($type_; $($($rest)*)?)
+    };
+}
+
+
 fn setters() -> [MarkupInvoke; 2] {
     let markup = <InvocationReceiver as MarkupTyped>::MARKUP;
     [markup.find_property("Value").unwrap().set.unwrap(), markup.find_property("CheckedValue").unwrap().set.unwrap()]
 }
 
-// Keep the original getter expressions as an oracle for the exceptional
-// return-place cleanup when the callable's destructor itself panics. These
-// use public APIs and the original owned receiver path, not adapter helpers.
+// Also compare handwritten functions with the original macro-shaped closures
+// in every mode. The candidate must match both before a scope change is accepted.
+// These use public APIs and the original owned receiver path, not adapter helpers.
 fn original_getter(arguments: &[MarkupValue]) -> Result<MarkupValue, MarkupInvokeError> {
     let mut arguments = MarkupArguments::new(arguments, 1)?;
     let this = arguments.next::<InvocationReceiver>()?;
@@ -267,46 +363,98 @@ fn original_checked_static_getter(arguments: &[MarkupValue]) -> Result<MarkupVal
     Ok(into_markup_value::<Option<Returned>>(markup_result((checked_static_getter_expression())())?))
 }
 
+fn original_getters() -> [MarkupInvoke; 4] {
+    [
+        original_getter_macro!(InvocationReceiver, Option<Returned>; get: getter_expression()).unwrap(),
+        original_getter_macro!(InvocationReceiver, Option<Returned>; try_get: checked_getter_expression()).unwrap(),
+        original_static_getter_macro!(Option<Returned>; get: static_getter_expression()).unwrap(),
+        original_static_getter_macro!(Option<Returned>; try_get: checked_static_getter_expression()).unwrap(),
+    ]
+}
+
+fn setter_cases() -> [(MarkupInvoke, MarkupInvoke); 2] {
+    let current = setters();
+    [
+        (current[0], original_setter_macro!(InvocationReceiver, SetterArgument; set: setter_expression()).unwrap()),
+        (current[1], original_setter_macro!(InvocationReceiver, SetterArgument; try_set: checked_setter_expression()).unwrap()),
+    ]
+}
+
+fn observe_getter(
+    invoke: MarkupInvoke,
+    arguments: &[MarkupValue],
+    panic_at: PanicAt,
+    expected_receivers: usize,
+) -> (bool, Vec<&'static str>, Vec<&'static str>) {
+    reset(panic_at, expected_receivers);
+    let outcome = catch_unwind(AssertUnwindSafe(|| invoke(arguments)));
+    let panicked = outcome.is_err();
+    let before_result_drop = events();
+    assert_eq!(panicked, panic_at != PanicAt::Never);
+    if let Ok(result) = outcome {
+        let result = result.unwrap();
+        assert!(result.as_ref().unwrap().as_any().downcast_ref::<Returned>().unwrap().cloned);
+        drop(result);
+    }
+    assert_eq!(LIVE_RECEIVERS.with(Cell::get), 0);
+    assert_eq!(LIVE_CALLABLES.with(Cell::get), 0);
+    (panicked, before_result_drop, events())
+}
+
+#[derive(Debug, PartialEq)]
+enum SetterOutcome {
+    Success,
+    Error(MarkupInvokeError),
+    Panic,
+}
+
+fn observe_setter(
+    invoke: MarkupInvoke,
+    arguments: &[MarkupValue],
+    panic_at: PanicAt,
+    return_error: bool,
+) -> (SetterOutcome, Vec<&'static str>) {
+    reset(panic_at, 1);
+    SETTER_ERROR.with(|value| value.set(return_error));
+    let outcome = match catch_unwind(AssertUnwindSafe(|| invoke(arguments))) {
+        Ok(Ok(value)) => {
+            assert_eq!(value, None);
+            SetterOutcome::Success
+        }
+        Ok(Err(error)) => SetterOutcome::Error(error),
+        Err(_) => SetterOutcome::Panic,
+    };
+    assert_eq!(LIVE_RECEIVERS.with(Cell::get), 0);
+    assert_eq!(LIVE_CALLABLES.with(Cell::get), 0);
+    (outcome, events())
+}
+
 #[test]
 fn getter_callable_lives_through_result_conversion_and_unwind() {
     ValueTypes::register_nullable::<Returned>();
     let markup = <InvocationReceiver as MarkupTyped>::MARKUP;
     let receiver = boxed(InvocationReceiver { cloned: false });
-    let getters = [
-        (true, markup.find_property("Returned").unwrap().get.unwrap(), original_getter as MarkupInvoke),
-        (true, markup.find_property("CheckedReturned").unwrap().get.unwrap(), original_checked_getter as MarkupInvoke),
-        (false, markup.static_properties[0].get.unwrap(), original_static_getter as MarkupInvoke),
-        (false, markup.static_properties[1].get.unwrap(), original_checked_static_getter as MarkupInvoke),
+    let current = [
+        markup.find_property("Returned").unwrap().get.unwrap(),
+        markup.find_property("CheckedReturned").unwrap().get.unwrap(),
+        markup.static_properties[0].get.unwrap(),
+        markup.static_properties[1].get.unwrap(),
     ];
-    for (instance, get, original) in getters {
+    let original = original_getters();
+    let handwritten: [MarkupInvoke; 4] = [
+        original_getter, original_checked_getter,
+        original_static_getter, original_checked_static_getter,
+    ];
+    for index in 0..current.len() {
+        let instance = index < 2;
         let arguments = if instance { vec![receiver.clone()] } else { Vec::new() };
-        for panic_result in [false, true] {
-            reset(if panic_result { PanicAt::ResultClone } else { PanicAt::Never }, usize::from(instance));
-            let outcome = catch_unwind(AssertUnwindSafe(|| get(&arguments)));
-            let mut expected = if instance { vec!["receiver clone"] } else { Vec::new() };
-            expected.extend(["callable expression", "getter call", "result clone", "result original drop", "callable drop"]);
-            if instance { expected.push("receiver drop"); }
-            assert_eq!(events(), expected);
-            if panic_result {
-                assert!(outcome.is_err());
-            } else {
-                let result = outcome.unwrap().unwrap();
-                assert!(result.as_ref().unwrap().as_any().is::<Returned>());
-                drop(result);
-                expected.push("result clone drop");
-                assert_eq!(events(), expected);
-            }
-            assert_eq!(LIVE_RECEIVERS.with(Cell::get), 0);
-            assert_eq!(LIVE_CALLABLES.with(Cell::get), 0);
+        for panic_at in [PanicAt::Never, PanicAt::ResultClone, PanicAt::CallableDrop] {
+            let original = observe_getter(original[index], &arguments, panic_at, usize::from(instance));
+            let handwritten = observe_getter(handwritten[index], &arguments, panic_at, usize::from(instance));
+            assert_eq!(handwritten, original, "original macro/function scope, getter {index}, {panic_at:?}");
+            let actual = observe_getter(current[index], &arguments, panic_at, usize::from(instance));
+            assert_eq!(actual, original, "generated getter {index}, {panic_at:?}");
         }
-        reset(PanicAt::CallableDrop, usize::from(instance));
-        assert!(catch_unwind(AssertUnwindSafe(|| original(&arguments))).is_err());
-        let original_cleanup = events();
-        reset(PanicAt::CallableDrop, usize::from(instance));
-        assert!(catch_unwind(AssertUnwindSafe(|| get(&arguments))).is_err());
-        assert_eq!(events(), original_cleanup);
-        assert_eq!(LIVE_RECEIVERS.with(Cell::get), 0);
-        assert_eq!(LIVE_CALLABLES.with(Cell::get), 0);
     }
 }
 
@@ -326,17 +474,30 @@ fn accessor_expressions_follow_arity_receiver_and_value_checks() {
         assert_eq!((property.get.unwrap())(&[None]), Err(MarkupInvokeError::ArgumentCount { expected: 0, actual: 1 }));
         assert!(events().is_empty());
     }
-    for set in setters() {
-        reset(PanicAt::Never, 1);
-        assert_eq!(set(&[]), Err(MarkupInvokeError::ArgumentCount { expected: 2, actual: 0 }));
-        assert!(matches!(set(&[boxed(5i32), value.clone()]), Err(MarkupInvokeError::Argument { index: 0, .. })));
-        assert!(events().is_empty());
-        assert!(matches!(set(&[receiver.clone(), boxed(5i32)]), Err(MarkupInvokeError::Argument { index: 1, .. })));
-        assert_eq!(events(), ["receiver clone", "receiver drop"]);
-
-        reset(PanicAt::Never, 1);
-        assert_eq!(set(&[receiver.clone(), value.clone()]).unwrap(), None);
-        assert_eq!(events(), [
+    for (current, original) in setter_cases() {
+        for arguments in [vec![], vec![boxed(5i32), value.clone()], vec![receiver.clone(), boxed(5i32)]] {
+            let expected = observe_setter(original, &arguments, PanicAt::Never, false);
+            let actual = observe_setter(current, &arguments, PanicAt::Never, false);
+            assert_eq!(actual, expected);
+            if arguments.is_empty() {
+                assert_eq!(actual, (
+                    SetterOutcome::Error(MarkupInvokeError::ArgumentCount { expected: 2, actual: 0 }),
+                    vec![],
+                ));
+            } else if arguments[0].as_ref().unwrap().as_any().is::<i32>() {
+                assert!(matches!(actual.0, SetterOutcome::Error(MarkupInvokeError::Argument { index: 0, .. })));
+                assert!(actual.1.is_empty());
+            } else {
+                assert!(matches!(actual.0, SetterOutcome::Error(MarkupInvokeError::Argument { index: 1, .. })));
+                assert_eq!(actual.1, ["receiver clone", "receiver drop"]);
+            }
+        }
+        let arguments = [receiver.clone(), value.clone()];
+        let expected = observe_setter(original, &arguments, PanicAt::Never, false);
+        let actual = observe_setter(current, &arguments, PanicAt::Never, false);
+        assert_eq!(actual, expected);
+        assert_eq!(actual.0, SetterOutcome::Success);
+        assert_eq!(actual.1, [
             "receiver clone", "argument clone", "callable expression", "setter call",
             "argument drop", "ignored result drop", "callable drop", "receiver drop",
         ]);
@@ -346,28 +507,23 @@ fn accessor_expressions_follow_arity_receiver_and_value_checks() {
 #[test]
 fn setter_callable_errors_and_panics_keep_argument_cleanup_order() {
     let arguments = [boxed(InvocationReceiver { cloned: false }), boxed(SetterArgument { cloned: false })];
-    for set in setters() {
-        for (panic_at, expected) in [
-            (PanicAt::ArgumentClone, vec!["receiver clone", "argument clone", "receiver drop"]),
-            (PanicAt::SetterExpression, vec![
-                "receiver clone", "argument clone", "callable expression", "argument drop", "receiver drop",
-            ]),
-            (PanicAt::SetterCall, vec![
-                "receiver clone", "argument clone", "callable expression", "setter call",
-                "argument drop", "callable drop", "receiver drop",
-            ]),
+    for (current, original) in setter_cases() {
+        for panic_at in [
+            PanicAt::ArgumentClone, PanicAt::SetterExpression, PanicAt::SetterCall,
+            PanicAt::CallableDrop, PanicAt::IgnoredResultDrop,
         ] {
-            reset(panic_at, 1);
-            assert!(catch_unwind(AssertUnwindSafe(|| set(&arguments))).is_err());
-            assert_eq!(events(), expected);
-            assert_eq!(LIVE_RECEIVERS.with(Cell::get), 0);
-            assert_eq!(LIVE_CALLABLES.with(Cell::get), 0);
+            let expected = observe_setter(original, &arguments, panic_at, false);
+            let actual = observe_setter(current, &arguments, panic_at, false);
+            assert_eq!(actual, expected, "setter cleanup, {panic_at:?}");
+            assert_eq!(actual.0, SetterOutcome::Panic);
         }
     }
-    reset(PanicAt::Never, 1);
-    SETTER_ERROR.with(|value| value.set(true));
-    assert_eq!(setters()[1](&arguments), Err(MarkupInvokeError::Failed("invocation failed".into())));
-    assert_eq!(events(), [
+    let (current, original) = setter_cases()[1];
+    let expected = observe_setter(original, &arguments, PanicAt::Never, true);
+    let actual = observe_setter(current, &arguments, PanicAt::Never, true);
+    assert_eq!(actual, expected);
+    assert_eq!(actual.0, SetterOutcome::Error(MarkupInvokeError::Failed("invocation failed".into())));
+    assert_eq!(actual.1, [
         "receiver clone", "argument clone", "callable expression", "setter call", "argument drop",
         "error display", "error drop", "callable drop", "receiver drop",
     ]);

@@ -1,13 +1,17 @@
 //! Shared typed adapters for generated property invokers.
 //!
 //! A metadata member still owns its public `MarkupInvoke` function pointer.
-//! That small entry passes a typed callback to the adapter for its receiver
-//! and value types. The callback is ordinary data, not another generic type,
-//! so different members share argument handling and receiver cleanup. Getter
-//! callbacks keep the complete result-conversion expression: a temporary
-//! callable may have a destructor that must run after boxing its result.
-//! This introduces an indirect typed call;
-//! it does not erase a payload, allocate an invocation frame or change the
+//! Getters share receiver preparation, then keep that receiver and the entire
+//! original result expression in the member's own thunk. A temporary callable
+//! in a tail expression can outlive local variables; placing it in a separate
+//! callback would change its cleanup order relative to an owned receiver.
+//!
+//! Setters pass a typed callback containing the original complete statement.
+//! That callback is ordinary data, not another generic type, so members share
+//! argument handling and receiver cleanup. Static getters likewise share their
+//! arity check and keep the complete result expression in a callback. These
+//! callback paths introduce an indirect typed call; getter receiver preparation
+//! does not. None erases a payload, allocates an invocation frame or changes the
 //! typed functions used by generated native markup.
 //!
 //! Keep owned and shared receivers separate. In particular, an arbitrary
@@ -16,21 +20,18 @@
 
 use super::receiver::{MarkupReceiverProbe, OwnedMarkupReceiverFallback, SharedMarkupReceiver};
 use super::{MarkupArguments, MarkupInvokeError, MarkupValue};
+use std::borrow::Cow;
 
 /// Property invokers whose exact receiver is a shared framework handle.
 #[doc(hidden)]
 pub trait SharedMarkupAccessor<This: Clone + 'static>: SharedMarkupReceiver<This> {
     #[inline(never)]
-    fn invoke_getter(
+    fn prepare_getter<'a>(
         &self,
-        arguments: &[MarkupValue],
-        get: fn(&This) -> Result<MarkupValue, MarkupInvokeError>,
-    ) -> Result<MarkupValue, MarkupInvokeError> {
+        arguments: &'a [MarkupValue],
+    ) -> Result<Cow<'a, This>, MarkupInvokeError> {
         let mut arguments = MarkupArguments::new(arguments, 1)?;
-        let this = SharedMarkupReceiver::markup_receiver(self, &mut arguments)?;
-        // The receiver remains alive through return conversion, including a
-        // conversion callback or a panic while boxing the result.
-        get(&this)
+        SharedMarkupReceiver::markup_receiver(self, &mut arguments)
     }
 
     #[inline(never)]
@@ -71,14 +72,12 @@ where
 #[doc(hidden)]
 pub trait OwnedMarkupAccessorFallback<This: Clone + 'static>: OwnedMarkupReceiverFallback<This> {
     #[inline(never)]
-    fn invoke_getter(
+    fn prepare_getter(
         &self,
         arguments: &[MarkupValue],
-        get: fn(&This) -> Result<MarkupValue, MarkupInvokeError>,
-    ) -> Result<MarkupValue, MarkupInvokeError> {
+    ) -> Result<This, MarkupInvokeError> {
         let mut arguments = MarkupArguments::new(arguments, 1)?;
-        let this = OwnedMarkupReceiverFallback::markup_receiver(self, &mut arguments)?;
-        get(&this)
+        OwnedMarkupReceiverFallback::markup_receiver(self, &mut arguments)
     }
 
     #[inline(never)]
