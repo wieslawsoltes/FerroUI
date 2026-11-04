@@ -65,6 +65,12 @@ pub(super) struct SelectorPlans {
 }
 
 impl SelectorPlans {
+    pub(super) fn program_builders(&self) -> impl Iterator<Item = (&str, usize)> {
+        self.shapes.iter().filter_map(|((seed, shape), name)| {
+            (!seed).then(|| (name.as_str(), shape.iter().map(|op| op.parameters().len()).sum()))
+        })
+    }
+
     /// Fold the setup of a child Style into its already-interned selector shape.
     /// Only rootless linear plans qualify: all their operands are literals or
     /// static type references, so no user execution moves across Style creation.

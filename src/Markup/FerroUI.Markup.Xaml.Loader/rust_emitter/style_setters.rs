@@ -24,6 +24,10 @@ pub(super) struct StyleSetters {
 }
 
 impl StyleSetters {
+    pub(super) fn program_getters(&self) -> impl Iterator<Item = (&str, &str)> {
+        self.getters.iter().map(|(expression, name)| (expression.as_str(), name.as_str()))
+    }
+
     pub(super) fn getter_name(&self, expression: &str) -> Option<&str> {
         self.getters.get(expression).map(String::as_str)
     }

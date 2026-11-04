@@ -7,6 +7,8 @@ mod markup_assembly;
 mod markup_macros;
 mod markup_type;
 #[doc(hidden)]
+pub mod accessor;
+#[doc(hidden)]
 pub mod receiver;
 pub mod members;
 #[cfg(feature = "compiler-metadata")]
@@ -34,3 +36,5 @@ pub use service_provider::{service, EmptyServiceProvider, IServiceProvider};
 mod markup_type_tests;
 #[cfg(test)]
 mod receiver_tests;
+#[cfg(test)]
+mod accessor_tests;

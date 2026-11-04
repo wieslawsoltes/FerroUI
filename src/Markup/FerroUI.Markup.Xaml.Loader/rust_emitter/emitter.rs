@@ -2776,6 +2776,14 @@ impl<'a> Emitter<'a> {
             }
         }
         text.push_str("}\n");
+        if let Some(program) = super::control_theme_programs::lower(
+            &function,
+            &text,
+            self.selectors.program_builders(),
+            self.styles.program_getters(),
+        ) {
+            text = program;
+        }
         self.deferred_functions[slot] = text;
 
         // The context of the declaration is given to the customisation.

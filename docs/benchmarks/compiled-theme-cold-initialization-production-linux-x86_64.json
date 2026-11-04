@@ -1,0 +1,2494 @@
+{
+  "arms": {
+    "candidate": {
+      "base": {
+        "bytes": 209850350,
+        "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/graph/libferroui_base-c9f1bf6f075add34.rlib",
+        "sha256": "dd5329257a72d5e811b47e0757c27c644283b04f30e38087a125032253aabaff"
+      },
+      "checks": {
+        "archive_compatibility": {
+          "cases": {
+            "embedded": {
+              "archive": null,
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                14
+              ],
+              "stderr": "",
+              "stdout": "6413810 6616289\n"
+            },
+            "installed": {
+              "archive": {
+                "bytes": 296347,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/generated/winui.fxp",
+                "sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/generated/winui.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                14
+              ],
+              "stderr": "",
+              "stdout": "6754367 6906832\n"
+            },
+            "scalar-v1": {
+              "archive": {
+                "bytes": 432443,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/scalar-v1.fxp",
+                "sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/scalar-v1.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                17
+              ],
+              "stderr": "",
+              "stdout": "23923414 24068004\n"
+            },
+            "scalar-v2": {
+              "archive": {
+                "bytes": 245376,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/scalar-v2.fxp",
+                "sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/scalar-v2.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                17
+              ],
+              "stderr": "",
+              "stdout": "26510331 26648920\n"
+            },
+            "scalar-v3": {
+              "archive": {
+                "bytes": 296352,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/scalar-v3.fxp",
+                "sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/scalar-v3.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                17
+              ],
+              "stderr": "",
+              "stdout": "9524396 9668425\n"
+            },
+            "struct-v1": {
+              "archive": {
+                "bytes": 432482,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/struct-v1.fxp",
+                "sha256": "57ddeb14d5960f6a882749781f1d260f56454cbb16a19ced8b1a0b71307253d3"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/struct-v1.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                19,
+                29
+              ],
+              "stderr": "",
+              "stdout": "1320142214 1321026937\n"
+            },
+            "struct-v2": {
+              "archive": {
+                "bytes": 245452,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/struct-v2.fxp",
+                "sha256": "5a4a552eab2458460f0f866c74607b2a16ca4fda24dad19127c24f39327fc5e7"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/struct-v2.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                19,
+                29
+              ],
+              "stderr": "",
+              "stdout": "1327127242 1328025231\n"
+            },
+            "struct-v3": {
+              "archive": {
+                "bytes": 296395,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/struct-v3.fxp",
+                "sha256": "5716161c4a91ece21060c32d3a9eaf40aaacdfdf25aec7ba76770bbf357f09c7"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/struct-v3.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                19,
+                29
+              ],
+              "stderr": "",
+              "stdout": "1308646363 1309540735\n"
+            },
+            "two-edits-v3": {
+              "archive": {
+                "bytes": 296359,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/two-edits-v3.fxp",
+                "sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/two-edits-v3.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                19,
+                17
+              ],
+              "stderr": "",
+              "stdout": "1310201931 1311110790\n"
+            }
+          },
+          "complete": true,
+          "negative_control": {
+            "command": [
+              "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe"
+            ],
+            "exit": 101,
+            "expected_normal_font": 999973,
+            "stderr": "\nthread 'main' (15115) panicked at main.rs:78:17:\nassertion `left == right` failed: FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE\n  left: Some(14.0)\n right: Some(999973.0)\nstack backtrace:\nnote: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.\n",
+            "stdout": "6726525 6896623\n"
+          }
+        },
+        "compact_unwind": {
+          "compile_exit": 0,
+          "complete": true,
+          "inputs_unchanged": true,
+          "run_command": [
+            "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/unwind/unwind"
+          ],
+          "run_exit": 0,
+          "stderr": "",
+          "stdout": "typed payload, nested cleanup, property-store reuse and binding reuse: ok\n"
+        },
+        "registry": {
+          "compile_exit": 0,
+          "complete": true,
+          "counts": {
+            "failed": 0,
+            "ignored": 0,
+            "passed": 47
+          },
+          "inputs_unchanged": true,
+          "run_command": [
+            "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/registry/registry",
+            "--test-threads=1"
+          ],
+          "run_exit": 0,
+          "stderr": "",
+          "stdout": "\nrunning 47 tests\ntest class_registration_tests::a_base_handle_converts_down_only_when_the_object_is_of_the_class ... ok\ntest class_registration_tests::a_class_without_declarations_lists_the_properties_of_its_bases ... ok\ntest class_registration_tests::a_lookup_runs_the_static_constructor_of_a_class_that_has_no_instance ... ok\ntest class_registration_tests::a_type_becomes_known_by_name_when_it_is_initialised ... ok\ntest class_registration_tests::a_type_found_by_name_can_be_inspected_and_instantiated_without_naming_the_class ... ok\ntest class_registration_tests::assign_binding_is_a_flag_of_the_property_definition ... ok\ntest class_registration_tests::attached_properties_of_a_static_type_are_found_by_owner_and_name ... ok\ntest class_registration_tests::calling_an_accessor_first_registers_the_whole_class_in_declaration_order ... ok\ntest class_registration_tests::derived_handles_convert_to_base_handles_without_explicit_registration ... ok\ntest class_registration_tests::direct_and_attached_properties_are_listed_before_any_instance_exists ... ok\ntest class_registration_tests::every_type_of_this_crate_initialises_and_has_a_namespace ... ok\ntest class_registration_tests::explicit_interface_expression_is_evaluated_once_per_registration ... ok\ntest class_registration_tests::handles_convert_to_the_interfaces_their_class_declares ... ok\ntest class_registration_tests::namespaces_are_declared_per_module_and_types_are_found_by_namespace_and_name ... ok\ntest class_registration_tests::objects_do_not_convert_to_interfaces_their_class_does_not_declare ... ok\ntest class_registration_tests::old_form_classes_get_their_handle_casts_and_are_known_by_name ... ok\ntest class_registration_tests::old_form_classes_keep_registering_lazily ... ok\ntest class_registration_tests::properties_are_found_by_name_before_any_instance_exists ... ok\ntest class_registration_tests::properties_are_registered_in_declaration_order ... ok\ntest class_registration_tests::properties_declared_in_parts_are_registered_with_the_class ... ok\ntest class_registration_tests::register_types_lists_every_type_declared_in_the_sources ... ok\ntest class_registration_tests::static_constructors_run_again_on_another_thread ... ok\ntest class_registration_tests::static_constructors_run_once_per_thread_base_class_first ... ok\ntest class_registration_tests::static_interface_entries_preserve_most_derived_selection_and_replacement ... ok\ntest class_registration_tests::the_default_constructor_creates_an_instance_of_the_class ... ok\ntest class_registration_tests::the_most_derived_declaration_of_an_interface_converts ... ok\ntest class_registration_tests::the_types_of_this_crate_are_found_by_namespace_and_name ... ok\ntest class_registration_tests::type_metadata_is_data_of_the_runtime_type ... ok\ntest class_registration_tests::upcast_handles_share_allocation_identity_and_hash_across_owners ... ok\ntest element_ref_registration_tests::captured_conversion_replacement_preserves_existing_assignability_and_borrowed_casts ... ok\ntest element_ref_registration_tests::expired_elements_fail_strong_conversion_but_produce_nullable_null ... ok\ntest element_ref_registration_tests::live_handles_keep_identity_in_boxed_borrowed_and_nullable_conversions ... ok\ntest element_ref_registration_tests::nullable_sources_and_null_values_preserve_exact_destination_types ... ok\ntest element_ref_registration_tests::root_conversion_checks_runtime_subclass_before_constructing_element_reference ... ok\ntest element_ref_registration_tests::root_element_registration_keeps_overlapping_cast_and_borrowed_routes ... ok\ntest element_ref_registration_tests::root_nullable_override_and_reregistration_keep_conversion_views_independent ... ok\ntest nullable_registration_tests::nullable_batches_install_typed_casts_in_declaration_order ... ok\ntest nullable_registration_tests::registering_a_reference_twice_preserves_a_custom_handle_cast ... ok\ntest virtual_dispatch_tests::call_reaches_the_most_derived_override_and_each_base_once ... ok\ntest virtual_dispatch_tests::call_through_a_base_class_reaches_the_same_override ... ok\ntest virtual_dispatch_tests::constructed_runs_the_override_of_the_class_once ... ok\ntest virtual_dispatch_tests::fully_inherited_tables_keep_their_own_identity_and_dynamic_type ... ok\ntest virtual_dispatch_tests::implementation_states_the_members_it_overrides ... ok\ntest virtual_dispatch_tests::override_in_the_middle_is_inherited_by_the_classes_below_it ... ok\ntest virtual_dispatch_tests::property_change_reaches_the_overrides_through_every_form_of_class ... ok\ntest virtual_dispatch_tests::slot_is_not_taken_from_a_base_class_that_has_no_such_member ... ok\ntest virtual_dispatch_tests::slot_of_a_member_stated_as_not_overridden_is_the_slot_of_the_base_class ... ok\n\ntest result: ok. 47 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s\n\n"
+        },
+        "templates": {
+          "additional_edit_probe": 31,
+          "cases": {
+            "embedded": {
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-build/template-correctness"
+              ],
+              "environment": {
+                "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE": "14",
+                "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": "14",
+                "FERROUI_TEMPLATE_ARCHIVE_CASE": "embedded"
+              },
+              "exit_code": 0,
+              "stderr": {
+                "extracted_relative_path": "candidate/templates-check/embedded.stderr",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 0,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/templates-check/embedded.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "original": {
+                  "bytes": 0,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check/embedded.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "utf8": ""
+              },
+              "stdout": {
+                "extracted_relative_path": "candidate/templates-check/embedded.stdout",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 63,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/templates-check/embedded.stdout",
+                  "sha256": "cc4c451b1c128c5b003dcfc4cacbba62ca5eeaeefc822f741a292c54a85a8b83"
+                },
+                "original": {
+                  "bytes": 63,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check/embedded.stdout",
+                  "sha256": "cc4c451b1c128c5b003dcfc4cacbba62ca5eeaeefc822f741a292c54a85a8b83"
+                },
+                "utf8": "Button 2 13\nScrollViewer 8 13\nNavigationView 26 13\nSlider 2 13\n"
+              },
+              "verified": {
+                "activations": 52,
+                "controls": {
+                  "Button": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  },
+                  "NavigationView": {
+                    "activations": 13,
+                    "nodes_including_control": 26
+                  },
+                  "ScrollViewer": {
+                    "activations": 13,
+                    "nodes_including_control": 8
+                  },
+                  "Slider": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  }
+                },
+                "fixed_added_resource_assertion_passed": null
+              }
+            },
+            "scalar": {
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-build/template-correctness",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/scalar-v3.fxp"
+              ],
+              "environment": {
+                "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE": "17",
+                "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": "14",
+                "FERROUI_TEMPLATE_ARCHIVE_CASE": "scalar"
+              },
+              "exit_code": 0,
+              "stderr": {
+                "extracted_relative_path": "candidate/templates-check/scalar.stderr",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 0,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/templates-check/scalar.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "original": {
+                  "bytes": 0,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check/scalar.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "utf8": ""
+              },
+              "stdout": {
+                "extracted_relative_path": "candidate/templates-check/scalar.stdout",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 63,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/templates-check/scalar.stdout",
+                  "sha256": "cc4c451b1c128c5b003dcfc4cacbba62ca5eeaeefc822f741a292c54a85a8b83"
+                },
+                "original": {
+                  "bytes": 63,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check/scalar.stdout",
+                  "sha256": "cc4c451b1c128c5b003dcfc4cacbba62ca5eeaeefc822f741a292c54a85a8b83"
+                },
+                "utf8": "Button 2 13\nScrollViewer 8 13\nNavigationView 26 13\nSlider 2 13\n"
+              },
+              "verified": {
+                "activations": 52,
+                "controls": {
+                  "Button": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  },
+                  "NavigationView": {
+                    "activations": 13,
+                    "nodes_including_control": 26
+                  },
+                  "ScrollViewer": {
+                    "activations": 13,
+                    "nodes_including_control": 8
+                  },
+                  "Slider": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  }
+                },
+                "fixed_added_resource_assertion_passed": null
+              }
+            },
+            "structural": {
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-build/template-correctness",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/struct-v3.fxp"
+              ],
+              "environment": {
+                "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE": "29",
+                "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": "19",
+                "FERROUI_TEMPLATE_ARCHIVE_CASE": "structural"
+              },
+              "exit_code": 0,
+              "stderr": {
+                "extracted_relative_path": "candidate/templates-check/structural.stderr",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 0,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/templates-check/structural.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "original": {
+                  "bytes": 0,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check/structural.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "utf8": ""
+              },
+              "stdout": {
+                "extracted_relative_path": "candidate/templates-check/structural.stdout",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 98,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/templates-check/structural.stdout",
+                  "sha256": "c0063d91f01ed87fc6b311164cedb1244278b7c668cb41751cd4903e3a969f28"
+                },
+                "original": {
+                  "bytes": 98,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check/structural.stdout",
+                  "sha256": "c0063d91f01ed87fc6b311164cedb1244278b7c668cb41751cd4903e3a969f28"
+                },
+                "utf8": "EDITABILITY AdditionalEditProbe 31\nButton 2 13\nScrollViewer 8 13\nNavigationView 26 13\nSlider 2 13\n"
+              },
+              "verified": {
+                "activations": 52,
+                "controls": {
+                  "Button": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  },
+                  "NavigationView": {
+                    "activations": 13,
+                    "nodes_including_control": 26
+                  },
+                  "ScrollViewer": {
+                    "activations": 13,
+                    "nodes_including_control": 8
+                  },
+                  "Slider": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  }
+                },
+                "fixed_added_resource_assertion_passed": true
+              }
+            }
+          },
+          "complete": true,
+          "total_activations": 156
+        }
+      },
+      "elf_accounting": {
+        "allocated_sections": {
+          ".bss": {
+            "address": 27284008,
+            "allocated_bytes": 232,
+            "file_bytes": 0,
+            "flags": 3,
+            "offset": 27062824,
+            "sha256": null,
+            "type": 8
+          },
+          ".cfi_reserve": {
+            "address": 7404664,
+            "allocated_bytes": 210520,
+            "file_bytes": 0,
+            "flags": 2,
+            "offset": 7404664,
+            "sha256": null,
+            "type": 8
+          },
+          ".data": {
+            "address": 27088120,
+            "allocated_bytes": 195888,
+            "file_bytes": 195888,
+            "flags": 3,
+            "offset": 26866936,
+            "sha256": "8db7f8f629fdf310c8ebc7d351f4ad5a6cb3346db723c7ecf62433fe24bbea93",
+            "type": 1
+          },
+          ".data.rel.ro": {
+            "address": 25302120,
+            "allocated_bytes": 1780432,
+            "file_bytes": 1780432,
+            "flags": 3,
+            "offset": 25085032,
+            "sha256": "1606ad0709e0196b354ff2bf70633ac749d6ce0660d32eebb8c39ec4771efc22",
+            "type": 1
+          },
+          ".dynamic": {
+            "address": 27082552,
+            "allocated_bytes": 496,
+            "file_bytes": 496,
+            "flags": 3,
+            "offset": 26865464,
+            "sha256": "336a2473c99828a0f1daed2a7fb149ceb26d39fb301f00f3d3dcbdf9935c60d9",
+            "type": 6
+          },
+          ".dynstr": {
+            "address": 3900,
+            "allocated_bytes": 1333,
+            "file_bytes": 1333,
+            "flags": 2,
+            "offset": 3900,
+            "sha256": "509d0c31264a36b33b649953514d33b263a8a144b6c996bcad08c003cad3242a",
+            "type": 3
+          },
+          ".dynsym": {
+            "address": 832,
+            "allocated_bytes": 2448,
+            "file_bytes": 2448,
+            "flags": 2,
+            "offset": 832,
+            "sha256": "f3c8f08a87bb22c09d00721245b5402515f21104268f3a6ca1272b5b4c9d46a0",
+            "type": 11
+          },
+          ".eh_frame": {
+            "address": 3409368,
+            "allocated_bytes": 3995296,
+            "file_bytes": 3995296,
+            "flags": 2,
+            "offset": 3409368,
+            "sha256": "c059b87729afb3cf1a150a9bf68c94e78199a502e68eaf60fa8661adc5c310c9",
+            "type": 1
+          },
+          ".eh_frame_hdr": {
+            "address": 2785832,
+            "allocated_bytes": 623532,
+            "file_bytes": 623532,
+            "flags": 2,
+            "offset": 2785832,
+            "sha256": "78610189c757169bdf3c61b7cac796064483a61dff36dc79b5c6a27a603ee132",
+            "type": 1
+          },
+          ".fini": {
+            "address": 25295188,
+            "allocated_bytes": 13,
+            "file_bytes": 13,
+            "flags": 6,
+            "offset": 25082196,
+            "sha256": "6a4f3e5efc7c1f7ee7d6f21afd9ed040ba1d7f0b97bb12b016f5b176cc558bd8",
+            "type": 1
+          },
+          ".fini_array": {
+            "address": 25302096,
+            "allocated_bytes": 8,
+            "file_bytes": 8,
+            "flags": 3,
+            "offset": 25085008,
+            "sha256": "9790732ccc862a0b919301f5d7f85c0c15e01a14159877ac9502f2f49e8942bd",
+            "type": 15
+          },
+          ".gcc_except_table": {
+            "address": 36024,
+            "allocated_bytes": 1009340,
+            "file_bytes": 1009340,
+            "flags": 2,
+            "offset": 36024,
+            "sha256": "5843b46cecb354e97ee5c3ce36392f37b963e9965d12df5f14092a37af2e464b",
+            "type": 1
+          },
+          ".gnu.hash": {
+            "address": 3872,
+            "allocated_bytes": 28,
+            "file_bytes": 28,
+            "flags": 2,
+            "offset": 3872,
+            "sha256": "3b4404322f35f272022ad4b8a583cbc54b6428d2816c81cb9ea1742ae6d96dc1",
+            "type": 1879048182
+          },
+          ".gnu.version": {
+            "address": 3280,
+            "allocated_bytes": 204,
+            "file_bytes": 204,
+            "flags": 2,
+            "offset": 3280,
+            "sha256": "60046cd997d40a8de787349c32a3842ca754270e4e9bc381d7ef327869bef576",
+            "type": 1879048191
+          },
+          ".gnu.version_r": {
+            "address": 3484,
+            "allocated_bytes": 384,
+            "file_bytes": 384,
+            "flags": 2,
+            "offset": 3484,
+            "sha256": "46fa6b39bbd480f15ace95962ab7aa5b8df3f7e894013e0b0075458fe397bf30",
+            "type": 1879048190
+          },
+          ".got": {
+            "address": 27083048,
+            "allocated_bytes": 936,
+            "file_bytes": 936,
+            "flags": 3,
+            "offset": 26865960,
+            "sha256": "537f72ed26b5bd9c7adafe92257f9502d0cd7597e20d908f02e5184574d4ad73",
+            "type": 1
+          },
+          ".got.plt": {
+            "address": 27083984,
+            "allocated_bytes": 40,
+            "file_bytes": 40,
+            "flags": 3,
+            "offset": 26866896,
+            "sha256": "09faa966974ae0fa2c0f59df4d2946f6f9b3c1aeadd8197c06d43e5baac38dab",
+            "type": 1
+          },
+          ".init": {
+            "address": 25295160,
+            "allocated_bytes": 27,
+            "file_bytes": 27,
+            "flags": 6,
+            "offset": 25082168,
+            "sha256": "2865be8c14f223c790da21f504ecb100961e227d5064f1ce8dbe86a0d58c18a9",
+            "type": 1
+          },
+          ".init_array": {
+            "address": 25302104,
+            "allocated_bytes": 16,
+            "file_bytes": 16,
+            "flags": 2097155,
+            "offset": 25085016,
+            "sha256": "5a7463aa03c7dcafe49d262adc7bb20af09a073ed79ea86a20333977442cfe2e",
+            "type": 14
+          },
+          ".interp": {
+            "address": 736,
+            "allocated_bytes": 28,
+            "file_bytes": 28,
+            "flags": 2,
+            "offset": 736,
+            "sha256": "9097c98ea70f6f3b01d50145eb72bf55ad1f4e9713bccf27bd6405d6254eed00",
+            "type": 1
+          },
+          ".note.ABI-tag": {
+            "address": 764,
+            "allocated_bytes": 32,
+            "file_bytes": 32,
+            "flags": 2,
+            "offset": 764,
+            "sha256": "6e48317ad93a8ac2dc04321465ede06d1274543fc8ab172e68171a9d684bb313",
+            "type": 7
+          },
+          ".note.gnu.build-id": {
+            "address": 796,
+            "allocated_bytes": 36,
+            "file_bytes": 36,
+            "flags": 2,
+            "offset": 796,
+            "sha256": "8d4b5d44fb55e1095a2517a90436f2a0c361deed83fe6e4db7e483ecd856b5ee",
+            "type": 7
+          },
+          ".plt": {
+            "address": 25295216,
+            "allocated_bytes": 48,
+            "file_bytes": 48,
+            "flags": 6,
+            "offset": 25082224,
+            "sha256": "ec12c85110dc0dd8d531dc42b5a2c75b31b9576914bd024c8778683cc9361bcb",
+            "type": 1
+          },
+          ".rela.dyn": {
+            "address": 5240,
+            "allocated_bytes": 2400,
+            "file_bytes": 2400,
+            "flags": 2,
+            "offset": 5240,
+            "sha256": "fbcac53bb38ceb1b4596a560b70aaac02e4cf34a595a8982d7991f1401e1959c",
+            "type": 4
+          },
+          ".rela.plt": {
+            "address": 35976,
+            "allocated_bytes": 48,
+            "file_bytes": 48,
+            "flags": 66,
+            "offset": 35976,
+            "sha256": "aa2e435f3b8ec4b4da046ceac57baaf8c6c1b4a842d3f1e45407fc86816a7536",
+            "type": 4
+          },
+          ".relr.dyn": {
+            "address": 7640,
+            "allocated_bytes": 28336,
+            "file_bytes": 28336,
+            "flags": 2,
+            "offset": 7640,
+            "sha256": "70d98079040058b6424ac3769c0c66b2e8419ecebc4d271f7d71a3ae97d9ae74",
+            "type": 19
+          },
+          ".relro_padding": {
+            "address": 27084024,
+            "allocated_bytes": 2824,
+            "file_bytes": 0,
+            "flags": 3,
+            "offset": 26866936,
+            "sha256": null,
+            "type": 8
+          },
+          ".rodata": {
+            "address": 1045376,
+            "allocated_bytes": 1740456,
+            "file_bytes": 1740456,
+            "flags": 50,
+            "offset": 1045376,
+            "sha256": "75bd0ed560b7384b3a719dd9880728b87beeb0bd7a700e473692638ca4c68795",
+            "type": 1
+          },
+          ".tbss": {
+            "address": 25302096,
+            "allocated_bytes": 17536,
+            "file_bytes": 0,
+            "flags": 1027,
+            "offset": 25085008,
+            "sha256": null,
+            "type": 8
+          },
+          ".tdata": {
+            "address": 25299360,
+            "allocated_bytes": 2736,
+            "file_bytes": 2736,
+            "flags": 1027,
+            "offset": 25082272,
+            "sha256": "3c34139351b8fc4c977e894e4c208ce8bb1bf8e5ab80d40ffe0b79952260167b",
+            "type": 1
+          },
+          ".text": {
+            "address": 7619280,
+            "allocated_bytes": 17675877,
+            "file_bytes": 17675877,
+            "flags": 6,
+            "offset": 7406288,
+            "sha256": "fc81a798fdc925a9fac6f3856f8361a90ba3e1dbb71a094c51586bf125840498",
+            "type": 1
+          },
+          ".tm_clone_table": {
+            "address": 27088120,
+            "allocated_bytes": 0,
+            "file_bytes": 0,
+            "flags": 3,
+            "offset": 26866936,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "type": 1
+          }
+        },
+        "binary": {
+          "bytes": 27065600,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/release/winui-theme-probe",
+          "sha256": "9725868b49f59c6d8cdf02785adb5fbabd6be340d84557271d7d1d3e7149c52e"
+        },
+        "complete_file_accounted": true,
+        "entry_point": 10539008,
+        "file_gap_ranges": [
+          {
+            "bytes": 4,
+            "offset": 3868
+          },
+          {
+            "bytes": 7,
+            "offset": 5233
+          },
+          {
+            "bytes": 12,
+            "offset": 1045364
+          },
+          {
+            "bytes": 4,
+            "offset": 3409364
+          },
+          {
+            "bytes": 1624,
+            "offset": 7404664
+          },
+          {
+            "bytes": 3,
+            "offset": 25082165
+          },
+          {
+            "bytes": 1,
+            "offset": 25082195
+          },
+          {
+            "bytes": 15,
+            "offset": 25082209
+          },
+          {
+            "bytes": 6,
+            "offset": 27063354
+          }
+        ],
+        "file_parts": {
+          "allocated_file_sections": 27060418,
+          "elf_header": 64,
+          "file_gaps": 1676,
+          "nonallocated_file_sections": 530,
+          "program_headers": 672,
+          "section_headers": 2240
+        },
+        "nonallocated_sections": {
+          ".comment": {
+            "address": 0,
+            "allocated_bytes": 184,
+            "file_bytes": 184,
+            "flags": 48,
+            "offset": 27062824,
+            "sha256": "b92bb350588f99cb6ffbf71e5fe0c2a035eaf450f2bd297a87a29b14d2d4f220",
+            "type": 1
+          },
+          ".shstrtab": {
+            "address": 0,
+            "allocated_bytes": 346,
+            "file_bytes": 346,
+            "flags": 0,
+            "offset": 27063008,
+            "sha256": "6055c8796221524b77865c5cac622343eab814661a79e4b7e0a42a64413321f9",
+            "type": 3
+          }
+        }
+      },
+      "graph": {
+        "inventory_sha256": "82ad404c187c56bbe1f1bfaeb96b618e3464b7c21fc71485831d538b3cf3e6ab",
+        "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/graph",
+        "rlibs": 54,
+        "scope": "Complete freshly profiled optimized WinUI target dependency closure.",
+        "verification_scope": "Exact graph identity is retained by the separately hashed completed import; this report does not rehash all library archives."
+      },
+      "profile": {
+        "extracted_relative_path": "candidate/release/a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525.profdata",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 86253672,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/release/a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525.profdata",
+          "sha256": "a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525"
+        },
+        "original": {
+          "bytes": 86253672,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525.profdata",
+          "sha256": "a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525"
+        }
+      },
+      "profile_policy": "Original 13 profile_winui training launches only; each revision trains a fresh profile.",
+      "revision": "ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad",
+      "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+      "shipping": {
+        "extracted_relative_path": "candidate/release/winui-theme-probe",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 27065600,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/release/winui-theme-probe",
+          "sha256": "9725868b49f59c6d8cdf02785adb5fbabd6be340d84557271d7d1d3e7149c52e"
+        },
+        "original": {
+          "bytes": 27065600,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe",
+          "sha256": "9725868b49f59c6d8cdf02785adb5fbabd6be340d84557271d7d1d3e7149c52e"
+        }
+      },
+      "source_manifest": {
+        "extracted_relative_path": "candidate/release/source.json",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 2809839,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/release/source.json",
+          "sha256": "d384679b8ae924a2c7a7730c6b8fe967276bb764962ba258fce89693b205e527"
+        },
+        "original": {
+          "bytes": 2809839,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/source.json",
+          "sha256": "d384679b8ae924a2c7a7730c6b8fe967276bb764962ba258fce89693b205e527"
+        }
+      },
+      "source_tree": "644de7c67d8222a11c807fd8208f5a13dd793354",
+      "training_launches": [
+        {
+          "label": "train-00-startup",
+          "lane": "startup",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-00-startup.log",
+            "sha256": "e12ac1ba3e10ea403d949c0e5d42bf2bca3330ac2b69fc71a2fda725d2601f75"
+          },
+          "returncode": 0,
+          "round": 0
+        },
+        {
+          "label": "train-01-templates",
+          "lane": "templates",
+          "log_identity": {
+            "bytes": 88,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-01-templates.log",
+            "sha256": "61855aa26cf86086a1b8326f25540c31f63826c6d64fd4a7ec63abe196282cb9"
+          },
+          "returncode": 0,
+          "round": 0
+        },
+        {
+          "label": "train-02-property",
+          "lane": "property",
+          "log_identity": {
+            "bytes": 551,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-02-property.log",
+            "sha256": "0149a1e9a0d344f623979d8be755a137e8387302290b362b83ab107390ab9a42"
+          },
+          "returncode": 0,
+          "round": 0
+        },
+        {
+          "label": "train-03-edit",
+          "lane": "edit",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-03-edit.log",
+            "sha256": "85906912a7df61a57c665ec97dd2fda9aabb5587bde09f3622be5ef26be2718d"
+          },
+          "returncode": 0,
+          "round": 0
+        },
+        {
+          "label": "train-04-startup",
+          "lane": "startup",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-04-startup.log",
+            "sha256": "5a56b7e9a68c8dd832eb218c1d9d10a58ca2e7d7ffaaf95b5f8a2a6437a42389"
+          },
+          "returncode": 0,
+          "round": 1
+        },
+        {
+          "label": "train-05-templates",
+          "lane": "templates",
+          "log_identity": {
+            "bytes": 88,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-05-templates.log",
+            "sha256": "bc989c7d3b2f221e3107cd532bb4f4daddbff379defcfb15ec35c05367a5de62"
+          },
+          "returncode": 0,
+          "round": 1
+        },
+        {
+          "label": "train-06-property",
+          "lane": "property",
+          "log_identity": {
+            "bytes": 549,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-06-property.log",
+            "sha256": "c5f59e46b38f12d890ee685c83cf6fcce86d172970676b14c78a34c10aa4e09f"
+          },
+          "returncode": 0,
+          "round": 1
+        },
+        {
+          "label": "train-07-edit",
+          "lane": "edit",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-07-edit.log",
+            "sha256": "eff68b53f246cbc8d2052c9e3e87d94d04c988861ef5eb803b0499850cdf81a8"
+          },
+          "returncode": 0,
+          "round": 1
+        },
+        {
+          "label": "train-08-startup",
+          "lane": "startup",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-08-startup.log",
+            "sha256": "fa2265feb8b90d2149dc1e0e06c09ed661b2edd444ded66f780cbee5e106ecca"
+          },
+          "returncode": 0,
+          "round": 2
+        },
+        {
+          "label": "train-09-templates",
+          "lane": "templates",
+          "log_identity": {
+            "bytes": 88,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-09-templates.log",
+            "sha256": "e3f0c58082eda823b3fa3aaa45b57c131032363550c8b40818ada817f80139f7"
+          },
+          "returncode": 0,
+          "round": 2
+        },
+        {
+          "label": "train-10-property",
+          "lane": "property",
+          "log_identity": {
+            "bytes": 549,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-10-property.log",
+            "sha256": "bd37f31030a6adf473ed093f53c7a3a10c054a6e9fa14b69cc839b4b258c5922"
+          },
+          "returncode": 0,
+          "round": 2
+        },
+        {
+          "label": "train-11-edit",
+          "lane": "edit",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-11-edit.log",
+            "sha256": "a0b3791514b26ff046f7797fb51ac04ed07142198a1e799def45a709ad63ecdd"
+          },
+          "returncode": 0,
+          "round": 2
+        },
+        {
+          "label": "train-12-structure",
+          "lane": "structure",
+          "log_identity": {
+            "bytes": 22,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/train-12-structure.log",
+            "sha256": "7076b2789afd942d5f7e6bb2102c55c94dd086619c7746b4a4d3e55c2c67e304"
+          },
+          "returncode": 0,
+          "round": null
+        }
+      ]
+    },
+    "reference": {
+      "base": {
+        "bytes": 210464160,
+        "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/graph/libferroui_base-a6983823d9c4af60.rlib",
+        "sha256": "0b69fd5f03ac922b74510d308b4dd9414907220ab74c9af77d96f2df4c24f7cc"
+      },
+      "checks": {
+        "archive_compatibility": {
+          "cases": {
+            "embedded": {
+              "archive": null,
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                14
+              ],
+              "stderr": "",
+              "stdout": "5896128 6042923\n"
+            },
+            "installed": {
+              "archive": {
+                "bytes": 296347,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/generated/winui.fxp",
+                "sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/generated/winui.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                14
+              ],
+              "stderr": "",
+              "stdout": "6263624 6414055\n"
+            },
+            "scalar-v1": {
+              "archive": {
+                "bytes": 432443,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/scalar-v1.fxp",
+                "sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/scalar-v1.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                17
+              ],
+              "stderr": "",
+              "stdout": "24264561 24407859\n"
+            },
+            "scalar-v2": {
+              "archive": {
+                "bytes": 245376,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/scalar-v2.fxp",
+                "sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/scalar-v2.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                17
+              ],
+              "stderr": "",
+              "stdout": "26171265 26314402\n"
+            },
+            "scalar-v3": {
+              "archive": {
+                "bytes": 296352,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/scalar-v3.fxp",
+                "sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/scalar-v3.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                14,
+                17
+              ],
+              "stderr": "",
+              "stdout": "9027849 9158283\n"
+            },
+            "struct-v1": {
+              "archive": {
+                "bytes": 432482,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/struct-v1.fxp",
+                "sha256": "57ddeb14d5960f6a882749781f1d260f56454cbb16a19ced8b1a0b71307253d3"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/struct-v1.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                19,
+                29
+              ],
+              "stderr": "",
+              "stdout": "1288361339 1289232767\n"
+            },
+            "struct-v2": {
+              "archive": {
+                "bytes": 245452,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/struct-v2.fxp",
+                "sha256": "5a4a552eab2458460f0f866c74607b2a16ca4fda24dad19127c24f39327fc5e7"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/struct-v2.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                19,
+                29
+              ],
+              "stderr": "",
+              "stdout": "1301431512 1302300526\n"
+            },
+            "struct-v3": {
+              "archive": {
+                "bytes": 296395,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/struct-v3.fxp",
+                "sha256": "5716161c4a91ece21060c32d3a9eaf40aaacdfdf25aec7ba76770bbf357f09c7"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/struct-v3.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                19,
+                29
+              ],
+              "stderr": "",
+              "stdout": "1267195858 1268089628\n"
+            },
+            "two-edits-v3": {
+              "archive": {
+                "bytes": 296359,
+                "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/two-edits-v3.fxp",
+                "sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+              },
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/two-edits-v3.fxp"
+              ],
+              "exit": 0,
+              "font": [
+                19,
+                17
+              ],
+              "stderr": "",
+              "stdout": "1283025719 1283927885\n"
+            }
+          },
+          "complete": true,
+          "negative_control": {
+            "command": [
+              "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe"
+            ],
+            "exit": 101,
+            "expected_normal_font": 999973,
+            "stderr": "\nthread 'main' (9515) panicked at main.rs:78:17:\nassertion `left == right` failed: FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE\n  left: Some(14.0)\n right: Some(999973.0)\nstack backtrace:\nnote: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.\n",
+            "stdout": "6339877 6493614\n"
+          }
+        },
+        "compact_unwind": {
+          "compile_exit": 0,
+          "complete": true,
+          "inputs_unchanged": true,
+          "run_command": [
+            "/home/runner/work/_temp/winui-release-comparison/evidence/reference/unwind/unwind"
+          ],
+          "run_exit": 0,
+          "stderr": "",
+          "stdout": "typed payload, nested cleanup, property-store reuse and binding reuse: ok\n"
+        },
+        "registry": {
+          "compile_exit": 0,
+          "complete": true,
+          "counts": {
+            "failed": 0,
+            "ignored": 0,
+            "passed": 47
+          },
+          "inputs_unchanged": true,
+          "run_command": [
+            "/home/runner/work/_temp/winui-release-comparison/evidence/reference/registry/registry",
+            "--test-threads=1"
+          ],
+          "run_exit": 0,
+          "stderr": "",
+          "stdout": "\nrunning 47 tests\ntest class_registration_tests::a_base_handle_converts_down_only_when_the_object_is_of_the_class ... ok\ntest class_registration_tests::a_class_without_declarations_lists_the_properties_of_its_bases ... ok\ntest class_registration_tests::a_lookup_runs_the_static_constructor_of_a_class_that_has_no_instance ... ok\ntest class_registration_tests::a_type_becomes_known_by_name_when_it_is_initialised ... ok\ntest class_registration_tests::a_type_found_by_name_can_be_inspected_and_instantiated_without_naming_the_class ... ok\ntest class_registration_tests::assign_binding_is_a_flag_of_the_property_definition ... ok\ntest class_registration_tests::attached_properties_of_a_static_type_are_found_by_owner_and_name ... ok\ntest class_registration_tests::calling_an_accessor_first_registers_the_whole_class_in_declaration_order ... ok\ntest class_registration_tests::derived_handles_convert_to_base_handles_without_explicit_registration ... ok\ntest class_registration_tests::direct_and_attached_properties_are_listed_before_any_instance_exists ... ok\ntest class_registration_tests::every_type_of_this_crate_initialises_and_has_a_namespace ... ok\ntest class_registration_tests::explicit_interface_expression_is_evaluated_once_per_registration ... ok\ntest class_registration_tests::handles_convert_to_the_interfaces_their_class_declares ... ok\ntest class_registration_tests::namespaces_are_declared_per_module_and_types_are_found_by_namespace_and_name ... ok\ntest class_registration_tests::objects_do_not_convert_to_interfaces_their_class_does_not_declare ... ok\ntest class_registration_tests::old_form_classes_get_their_handle_casts_and_are_known_by_name ... ok\ntest class_registration_tests::old_form_classes_keep_registering_lazily ... ok\ntest class_registration_tests::properties_are_found_by_name_before_any_instance_exists ... ok\ntest class_registration_tests::properties_are_registered_in_declaration_order ... ok\ntest class_registration_tests::properties_declared_in_parts_are_registered_with_the_class ... ok\ntest class_registration_tests::register_types_lists_every_type_declared_in_the_sources ... ok\ntest class_registration_tests::static_constructors_run_again_on_another_thread ... ok\ntest class_registration_tests::static_constructors_run_once_per_thread_base_class_first ... ok\ntest class_registration_tests::static_interface_entries_preserve_most_derived_selection_and_replacement ... ok\ntest class_registration_tests::the_default_constructor_creates_an_instance_of_the_class ... ok\ntest class_registration_tests::the_most_derived_declaration_of_an_interface_converts ... ok\ntest class_registration_tests::the_types_of_this_crate_are_found_by_namespace_and_name ... ok\ntest class_registration_tests::type_metadata_is_data_of_the_runtime_type ... ok\ntest class_registration_tests::upcast_handles_share_allocation_identity_and_hash_across_owners ... ok\ntest element_ref_registration_tests::captured_conversion_replacement_preserves_existing_assignability_and_borrowed_casts ... ok\ntest element_ref_registration_tests::expired_elements_fail_strong_conversion_but_produce_nullable_null ... ok\ntest element_ref_registration_tests::live_handles_keep_identity_in_boxed_borrowed_and_nullable_conversions ... ok\ntest element_ref_registration_tests::nullable_sources_and_null_values_preserve_exact_destination_types ... ok\ntest element_ref_registration_tests::root_conversion_checks_runtime_subclass_before_constructing_element_reference ... ok\ntest element_ref_registration_tests::root_element_registration_keeps_overlapping_cast_and_borrowed_routes ... ok\ntest element_ref_registration_tests::root_nullable_override_and_reregistration_keep_conversion_views_independent ... ok\ntest nullable_registration_tests::nullable_batches_install_typed_casts_in_declaration_order ... ok\ntest nullable_registration_tests::registering_a_reference_twice_preserves_a_custom_handle_cast ... ok\ntest virtual_dispatch_tests::call_reaches_the_most_derived_override_and_each_base_once ... ok\ntest virtual_dispatch_tests::call_through_a_base_class_reaches_the_same_override ... ok\ntest virtual_dispatch_tests::constructed_runs_the_override_of_the_class_once ... ok\ntest virtual_dispatch_tests::fully_inherited_tables_keep_their_own_identity_and_dynamic_type ... ok\ntest virtual_dispatch_tests::implementation_states_the_members_it_overrides ... ok\ntest virtual_dispatch_tests::override_in_the_middle_is_inherited_by_the_classes_below_it ... ok\ntest virtual_dispatch_tests::property_change_reaches_the_overrides_through_every_form_of_class ... ok\ntest virtual_dispatch_tests::slot_is_not_taken_from_a_base_class_that_has_no_such_member ... ok\ntest virtual_dispatch_tests::slot_of_a_member_stated_as_not_overridden_is_the_slot_of_the_base_class ... ok\n\ntest result: ok. 47 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s\n\n"
+        },
+        "templates": {
+          "additional_edit_probe": 31,
+          "cases": {
+            "embedded": {
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-build/template-correctness"
+              ],
+              "environment": {
+                "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE": "14",
+                "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": "14",
+                "FERROUI_TEMPLATE_ARCHIVE_CASE": "embedded"
+              },
+              "exit_code": 0,
+              "stderr": {
+                "extracted_relative_path": "reference/templates-check/embedded.stderr",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 0,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/templates-check/embedded.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "original": {
+                  "bytes": 0,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check/embedded.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "utf8": ""
+              },
+              "stdout": {
+                "extracted_relative_path": "reference/templates-check/embedded.stdout",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 63,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/templates-check/embedded.stdout",
+                  "sha256": "cc4c451b1c128c5b003dcfc4cacbba62ca5eeaeefc822f741a292c54a85a8b83"
+                },
+                "original": {
+                  "bytes": 63,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check/embedded.stdout",
+                  "sha256": "cc4c451b1c128c5b003dcfc4cacbba62ca5eeaeefc822f741a292c54a85a8b83"
+                },
+                "utf8": "Button 2 13\nScrollViewer 8 13\nNavigationView 26 13\nSlider 2 13\n"
+              },
+              "verified": {
+                "activations": 52,
+                "controls": {
+                  "Button": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  },
+                  "NavigationView": {
+                    "activations": 13,
+                    "nodes_including_control": 26
+                  },
+                  "ScrollViewer": {
+                    "activations": 13,
+                    "nodes_including_control": 8
+                  },
+                  "Slider": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  }
+                },
+                "fixed_added_resource_assertion_passed": null
+              }
+            },
+            "scalar": {
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-build/template-correctness",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/scalar-v3.fxp"
+              ],
+              "environment": {
+                "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE": "17",
+                "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": "14",
+                "FERROUI_TEMPLATE_ARCHIVE_CASE": "scalar"
+              },
+              "exit_code": 0,
+              "stderr": {
+                "extracted_relative_path": "reference/templates-check/scalar.stderr",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 0,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/templates-check/scalar.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "original": {
+                  "bytes": 0,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check/scalar.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "utf8": ""
+              },
+              "stdout": {
+                "extracted_relative_path": "reference/templates-check/scalar.stdout",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 63,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/templates-check/scalar.stdout",
+                  "sha256": "cc4c451b1c128c5b003dcfc4cacbba62ca5eeaeefc822f741a292c54a85a8b83"
+                },
+                "original": {
+                  "bytes": 63,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check/scalar.stdout",
+                  "sha256": "cc4c451b1c128c5b003dcfc4cacbba62ca5eeaeefc822f741a292c54a85a8b83"
+                },
+                "utf8": "Button 2 13\nScrollViewer 8 13\nNavigationView 26 13\nSlider 2 13\n"
+              },
+              "verified": {
+                "activations": 52,
+                "controls": {
+                  "Button": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  },
+                  "NavigationView": {
+                    "activations": 13,
+                    "nodes_including_control": 26
+                  },
+                  "ScrollViewer": {
+                    "activations": 13,
+                    "nodes_including_control": 8
+                  },
+                  "Slider": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  }
+                },
+                "fixed_added_resource_assertion_passed": null
+              }
+            },
+            "structural": {
+              "command": [
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-build/template-correctness",
+                "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/struct-v3.fxp"
+              ],
+              "environment": {
+                "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE": "29",
+                "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": "19",
+                "FERROUI_TEMPLATE_ARCHIVE_CASE": "structural"
+              },
+              "exit_code": 0,
+              "stderr": {
+                "extracted_relative_path": "reference/templates-check/structural.stderr",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 0,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/templates-check/structural.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "original": {
+                  "bytes": 0,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check/structural.stderr",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                "utf8": ""
+              },
+              "stdout": {
+                "extracted_relative_path": "reference/templates-check/structural.stdout",
+                "matches_recorded_identity": true,
+                "observed": {
+                  "bytes": 98,
+                  "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/templates-check/structural.stdout",
+                  "sha256": "c0063d91f01ed87fc6b311164cedb1244278b7c668cb41751cd4903e3a969f28"
+                },
+                "original": {
+                  "bytes": 98,
+                  "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check/structural.stdout",
+                  "sha256": "c0063d91f01ed87fc6b311164cedb1244278b7c668cb41751cd4903e3a969f28"
+                },
+                "utf8": "EDITABILITY AdditionalEditProbe 31\nButton 2 13\nScrollViewer 8 13\nNavigationView 26 13\nSlider 2 13\n"
+              },
+              "verified": {
+                "activations": 52,
+                "controls": {
+                  "Button": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  },
+                  "NavigationView": {
+                    "activations": 13,
+                    "nodes_including_control": 26
+                  },
+                  "ScrollViewer": {
+                    "activations": 13,
+                    "nodes_including_control": 8
+                  },
+                  "Slider": {
+                    "activations": 13,
+                    "nodes_including_control": 2
+                  }
+                },
+                "fixed_added_resource_assertion_passed": true
+              }
+            }
+          },
+          "complete": true,
+          "total_activations": 156
+        }
+      },
+      "elf_accounting": {
+        "allocated_sections": {
+          ".bss": {
+            "address": 27359816,
+            "allocated_bytes": 232,
+            "file_bytes": 0,
+            "flags": 3,
+            "offset": 27138632,
+            "sha256": null,
+            "type": 8
+          },
+          ".cfi_reserve": {
+            "address": 7416648,
+            "allocated_bytes": 211104,
+            "file_bytes": 0,
+            "flags": 2,
+            "offset": 7416648,
+            "sha256": null,
+            "type": 8
+          },
+          ".data": {
+            "address": 27163936,
+            "allocated_bytes": 195880,
+            "file_bytes": 195880,
+            "flags": 3,
+            "offset": 26942752,
+            "sha256": "e80863c7da7696d294952155f2fde0d488b0ce679ad467f7634ee5a9395a90a8",
+            "type": 1
+          },
+          ".data.rel.ro": {
+            "address": 25363672,
+            "allocated_bytes": 1794696,
+            "file_bytes": 1794696,
+            "flags": 3,
+            "offset": 25146584,
+            "sha256": "ffc5b8d8430696ee6947ee703872961936cb26c1ea3597494fa23902a86b8068",
+            "type": 1
+          },
+          ".dynamic": {
+            "address": 27158368,
+            "allocated_bytes": 496,
+            "file_bytes": 496,
+            "flags": 3,
+            "offset": 26941280,
+            "sha256": "868cf47f58e189f7eaa55a5c31767984a0cf7fa502c8568ef360d6c686552e78",
+            "type": 6
+          },
+          ".dynstr": {
+            "address": 3900,
+            "allocated_bytes": 1333,
+            "file_bytes": 1333,
+            "flags": 2,
+            "offset": 3900,
+            "sha256": "971d5b6db991b0ec87737277998b7b4e8b66aa4719d2680cde47584be92be2f5",
+            "type": 3
+          },
+          ".dynsym": {
+            "address": 832,
+            "allocated_bytes": 2448,
+            "file_bytes": 2448,
+            "flags": 2,
+            "offset": 832,
+            "sha256": "163306d179a8889c354d3a83d7c8fdd1ed74c616c81718639f84bc727388ff7d",
+            "type": 11
+          },
+          ".eh_frame": {
+            "address": 3409624,
+            "allocated_bytes": 4007024,
+            "file_bytes": 4007024,
+            "flags": 2,
+            "offset": 3409624,
+            "sha256": "7cfb42f5b915469b7918b22bef29a720a179321abec5b9ef94710f27277e81c1",
+            "type": 1
+          },
+          ".eh_frame_hdr": {
+            "address": 2783968,
+            "allocated_bytes": 625652,
+            "file_bytes": 625652,
+            "flags": 2,
+            "offset": 2783968,
+            "sha256": "b004854b824102cb7a836b957bd5d17eac750aa2e09d21687490ae8dada2cd64",
+            "type": 1
+          },
+          ".fini": {
+            "address": 25356740,
+            "allocated_bytes": 13,
+            "file_bytes": 13,
+            "flags": 6,
+            "offset": 25143748,
+            "sha256": "6a4f3e5efc7c1f7ee7d6f21afd9ed040ba1d7f0b97bb12b016f5b176cc558bd8",
+            "type": 1
+          },
+          ".fini_array": {
+            "address": 25363648,
+            "allocated_bytes": 8,
+            "file_bytes": 8,
+            "flags": 3,
+            "offset": 25146560,
+            "sha256": "cbe34dee40481da73887d31d6924395edf72892385d0678847657e3528217564",
+            "type": 15
+          },
+          ".gcc_except_table": {
+            "address": 36248,
+            "allocated_bytes": 1007428,
+            "file_bytes": 1007428,
+            "flags": 2,
+            "offset": 36248,
+            "sha256": "68777e156003e5adaf58fc79e658fd1697b2b5c583655aa3f040ba1e125e29d2",
+            "type": 1
+          },
+          ".gnu.hash": {
+            "address": 3872,
+            "allocated_bytes": 28,
+            "file_bytes": 28,
+            "flags": 2,
+            "offset": 3872,
+            "sha256": "3b4404322f35f272022ad4b8a583cbc54b6428d2816c81cb9ea1742ae6d96dc1",
+            "type": 1879048182
+          },
+          ".gnu.version": {
+            "address": 3280,
+            "allocated_bytes": 204,
+            "file_bytes": 204,
+            "flags": 2,
+            "offset": 3280,
+            "sha256": "f7c19d557ae817fb002458a6abf0c0e9c737ebab2a541ba7385564274c7eec67",
+            "type": 1879048191
+          },
+          ".gnu.version_r": {
+            "address": 3484,
+            "allocated_bytes": 384,
+            "file_bytes": 384,
+            "flags": 2,
+            "offset": 3484,
+            "sha256": "46fa6b39bbd480f15ace95962ab7aa5b8df3f7e894013e0b0075458fe397bf30",
+            "type": 1879048190
+          },
+          ".got": {
+            "address": 27158864,
+            "allocated_bytes": 936,
+            "file_bytes": 936,
+            "flags": 3,
+            "offset": 26941776,
+            "sha256": "679357aa1a771c7fce5a4cb1374b47b0f7aaa002556201eae8403c87c6411ae1",
+            "type": 1
+          },
+          ".got.plt": {
+            "address": 27159800,
+            "allocated_bytes": 40,
+            "file_bytes": 40,
+            "flags": 3,
+            "offset": 26942712,
+            "sha256": "07bc61691bf9840021d9295e737079f10226c01dc41533d4be9293ac4c5cb86a",
+            "type": 1
+          },
+          ".init": {
+            "address": 25356712,
+            "allocated_bytes": 27,
+            "file_bytes": 27,
+            "flags": 6,
+            "offset": 25143720,
+            "sha256": "9190dc2f1933affa413cebf539c654897f0040c8fa62696c9d752a8f1f2c7925",
+            "type": 1
+          },
+          ".init_array": {
+            "address": 25363656,
+            "allocated_bytes": 16,
+            "file_bytes": 16,
+            "flags": 2097155,
+            "offset": 25146568,
+            "sha256": "c24d586fa4abfdd7177e5c29817cff0d0c31c88644766b3d21b3656c89f0203b",
+            "type": 14
+          },
+          ".interp": {
+            "address": 736,
+            "allocated_bytes": 28,
+            "file_bytes": 28,
+            "flags": 2,
+            "offset": 736,
+            "sha256": "9097c98ea70f6f3b01d50145eb72bf55ad1f4e9713bccf27bd6405d6254eed00",
+            "type": 1
+          },
+          ".note.ABI-tag": {
+            "address": 764,
+            "allocated_bytes": 32,
+            "file_bytes": 32,
+            "flags": 2,
+            "offset": 764,
+            "sha256": "6e48317ad93a8ac2dc04321465ede06d1274543fc8ab172e68171a9d684bb313",
+            "type": 7
+          },
+          ".note.gnu.build-id": {
+            "address": 796,
+            "allocated_bytes": 36,
+            "file_bytes": 36,
+            "flags": 2,
+            "offset": 796,
+            "sha256": "333cc3e7cf66b0a970c3489557ae68c0163ef94e5cbb346fca3bade7d3a92193",
+            "type": 7
+          },
+          ".plt": {
+            "address": 25356768,
+            "allocated_bytes": 48,
+            "file_bytes": 48,
+            "flags": 6,
+            "offset": 25143776,
+            "sha256": "86a78d76b1f6dd26ef43fa28dcad18a70e7578adbdd7a52358a752789fa52255",
+            "type": 1
+          },
+          ".rela.dyn": {
+            "address": 5240,
+            "allocated_bytes": 2400,
+            "file_bytes": 2400,
+            "flags": 2,
+            "offset": 5240,
+            "sha256": "8b571a4ded1aceb41064a53c80153e918aac69295a1e28b4e2788fa06072a4de",
+            "type": 4
+          },
+          ".rela.plt": {
+            "address": 36200,
+            "allocated_bytes": 48,
+            "file_bytes": 48,
+            "flags": 66,
+            "offset": 36200,
+            "sha256": "9f2fff406d0c208c73868b6bb960acd0dfcf2d8b4e0145ffdcae5a2c6ca9eb09",
+            "type": 4
+          },
+          ".relr.dyn": {
+            "address": 7640,
+            "allocated_bytes": 28560,
+            "file_bytes": 28560,
+            "flags": 2,
+            "offset": 7640,
+            "sha256": "5b7b27aab35819f55ee0518205b1c1a5917fd42568c2e96a091500ea05a3a78f",
+            "type": 19
+          },
+          ".relro_padding": {
+            "address": 27159840,
+            "allocated_bytes": 736,
+            "file_bytes": 0,
+            "flags": 3,
+            "offset": 26942752,
+            "sha256": null,
+            "type": 8
+          },
+          ".rodata": {
+            "address": 1043680,
+            "allocated_bytes": 1740288,
+            "file_bytes": 1740288,
+            "flags": 50,
+            "offset": 1043680,
+            "sha256": "106cca0868145e41505fbe5cc7deea7097c6d951a08035b1776b11fec42e71af",
+            "type": 1
+          },
+          ".tbss": {
+            "address": 25363648,
+            "allocated_bytes": 17544,
+            "file_bytes": 0,
+            "flags": 1027,
+            "offset": 25146560,
+            "sha256": null,
+            "type": 8
+          },
+          ".tdata": {
+            "address": 25360912,
+            "allocated_bytes": 2736,
+            "file_bytes": 2736,
+            "flags": 1027,
+            "offset": 25143824,
+            "sha256": "6d4c0969ebef5c672b2b9e0d1730dde5c1f4b4caf14199ae64beb622630ae24f",
+            "type": 1
+          },
+          ".text": {
+            "address": 7631856,
+            "allocated_bytes": 17724853,
+            "file_bytes": 17724853,
+            "flags": 6,
+            "offset": 7418864,
+            "sha256": "e58c1385cdf8854744955980a744b8d5fd1248c2181e69586ab1263389e6afb2",
+            "type": 1
+          },
+          ".tm_clone_table": {
+            "address": 27163936,
+            "allocated_bytes": 0,
+            "file_bytes": 0,
+            "flags": 3,
+            "offset": 26942752,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "type": 1
+          }
+        },
+        "binary": {
+          "bytes": 27141408,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/release/winui-theme-probe",
+          "sha256": "e49128877da4d0e0ff9683313b87e5542e416a2c103a696335947f63510a718b"
+        },
+        "complete_file_accounted": true,
+        "entry_point": 10547856,
+        "file_gap_ranges": [
+          {
+            "bytes": 4,
+            "offset": 3868
+          },
+          {
+            "bytes": 7,
+            "offset": 5233
+          },
+          {
+            "bytes": 4,
+            "offset": 1043676
+          },
+          {
+            "bytes": 4,
+            "offset": 3409620
+          },
+          {
+            "bytes": 2216,
+            "offset": 7416648
+          },
+          {
+            "bytes": 3,
+            "offset": 25143717
+          },
+          {
+            "bytes": 1,
+            "offset": 25143747
+          },
+          {
+            "bytes": 15,
+            "offset": 25143761
+          },
+          {
+            "bytes": 6,
+            "offset": 27139162
+          }
+        ],
+        "file_parts": {
+          "allocated_file_sections": 27135642,
+          "elf_header": 64,
+          "file_gaps": 2260,
+          "nonallocated_file_sections": 530,
+          "program_headers": 672,
+          "section_headers": 2240
+        },
+        "nonallocated_sections": {
+          ".comment": {
+            "address": 0,
+            "allocated_bytes": 184,
+            "file_bytes": 184,
+            "flags": 48,
+            "offset": 27138632,
+            "sha256": "b92bb350588f99cb6ffbf71e5fe0c2a035eaf450f2bd297a87a29b14d2d4f220",
+            "type": 1
+          },
+          ".shstrtab": {
+            "address": 0,
+            "allocated_bytes": 346,
+            "file_bytes": 346,
+            "flags": 0,
+            "offset": 27138816,
+            "sha256": "6055c8796221524b77865c5cac622343eab814661a79e4b7e0a42a64413321f9",
+            "type": 3
+          }
+        }
+      },
+      "graph": {
+        "inventory_sha256": "eed39f6ba2fb76f45cf4351dae1020aece17042a28e45055da900e472aa46834",
+        "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/graph",
+        "rlibs": 54,
+        "scope": "Complete freshly profiled optimized WinUI target dependency closure.",
+        "verification_scope": "Exact graph identity is retained by the separately hashed completed import; this report does not rehash all library archives."
+      },
+      "profile": {
+        "extracted_relative_path": "reference/release/4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43.profdata",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 86611016,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/release/4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43.profdata",
+          "sha256": "4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43"
+        },
+        "original": {
+          "bytes": 86611016,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43.profdata",
+          "sha256": "4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43"
+        }
+      },
+      "profile_policy": "Original 13 profile_winui training launches only; each revision trains a fresh profile.",
+      "revision": "d2d2f83d606f547b4ebda2323a145b14ca8379ad",
+      "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+      "shipping": {
+        "extracted_relative_path": "reference/release/winui-theme-probe",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 27141408,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/release/winui-theme-probe",
+          "sha256": "e49128877da4d0e0ff9683313b87e5542e416a2c103a696335947f63510a718b"
+        },
+        "original": {
+          "bytes": 27141408,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe",
+          "sha256": "e49128877da4d0e0ff9683313b87e5542e416a2c103a696335947f63510a718b"
+        }
+      },
+      "source_manifest": {
+        "extracted_relative_path": "reference/release/source.json",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 2807303,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/release/source.json",
+          "sha256": "3e325872af858f2490a168ad77e6b5bc33093ed770d7ce1bc6d559e3f1fe2e8a"
+        },
+        "original": {
+          "bytes": 2807303,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/source.json",
+          "sha256": "3e325872af858f2490a168ad77e6b5bc33093ed770d7ce1bc6d559e3f1fe2e8a"
+        }
+      },
+      "source_tree": "a28e609f5331f8d6c009f616d01053e7352dd34c",
+      "training_launches": [
+        {
+          "label": "train-00-startup",
+          "lane": "startup",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-00-startup.log",
+            "sha256": "bb2ec4b780e9d4fe71d2ee2b0e3911829ca2f051ac3764777bfc2f9a93d90886"
+          },
+          "returncode": 0,
+          "round": 0
+        },
+        {
+          "label": "train-01-templates",
+          "lane": "templates",
+          "log_identity": {
+            "bytes": 88,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-01-templates.log",
+            "sha256": "ea3ea3887dbedb699da4ba69eb1f4bbb37b6d8e43f828bb56fc1411873216e6c"
+          },
+          "returncode": 0,
+          "round": 0
+        },
+        {
+          "label": "train-02-property",
+          "lane": "property",
+          "log_identity": {
+            "bytes": 549,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-02-property.log",
+            "sha256": "4bca6697601442db45ed9ec651d35205b1907ad7e360c23bde6441ca073ddc78"
+          },
+          "returncode": 0,
+          "round": 0
+        },
+        {
+          "label": "train-03-edit",
+          "lane": "edit",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-03-edit.log",
+            "sha256": "03ca0022a57edf74459212abafa14e746708809695d731b770902059dc322beb"
+          },
+          "returncode": 0,
+          "round": 0
+        },
+        {
+          "label": "train-04-startup",
+          "lane": "startup",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-04-startup.log",
+            "sha256": "7fbe0c8283e4bafe497920844eef932bebee3c44d08e618588a48746bf3e0557"
+          },
+          "returncode": 0,
+          "round": 1
+        },
+        {
+          "label": "train-05-templates",
+          "lane": "templates",
+          "log_identity": {
+            "bytes": 88,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-05-templates.log",
+            "sha256": "5aa75ecdf17c21fad78b85802a58a0ea3cdfa2932485b49f59d96b7af7a9a8e3"
+          },
+          "returncode": 0,
+          "round": 1
+        },
+        {
+          "label": "train-06-property",
+          "lane": "property",
+          "log_identity": {
+            "bytes": 549,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-06-property.log",
+            "sha256": "d0dfbb0d94fb1226477dd1af817a4e4b01bc72fca4355160e15f6776b95db4cb"
+          },
+          "returncode": 0,
+          "round": 1
+        },
+        {
+          "label": "train-07-edit",
+          "lane": "edit",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-07-edit.log",
+            "sha256": "259ce63d458a5dd34b935970558065129e9e39348e06f1c52a32301c030988bf"
+          },
+          "returncode": 0,
+          "round": 1
+        },
+        {
+          "label": "train-08-startup",
+          "lane": "startup",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-08-startup.log",
+            "sha256": "7969d418e5630c81819f599a88c58b9ad9a82ec18b0c6e991f50d4d00ec4b690"
+          },
+          "returncode": 0,
+          "round": 2
+        },
+        {
+          "label": "train-09-templates",
+          "lane": "templates",
+          "log_identity": {
+            "bytes": 88,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-09-templates.log",
+            "sha256": "a88e271b7c94359ca7911fdee892f663c3ed1de947b20232df7c7eb08a8ab412"
+          },
+          "returncode": 0,
+          "round": 2
+        },
+        {
+          "label": "train-10-property",
+          "lane": "property",
+          "log_identity": {
+            "bytes": 549,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-10-property.log",
+            "sha256": "ecf6e9fa74640c3ef75bc311db88e04a5b83f57bc01fc56ed1fba9a9ba4f1dc1"
+          },
+          "returncode": 0,
+          "round": 2
+        },
+        {
+          "label": "train-11-edit",
+          "lane": "edit",
+          "log_identity": {
+            "bytes": 18,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-11-edit.log",
+            "sha256": "d07d782f14e2322f4dea11ccb416bcc37d4cbd3aba72d39e64796fe6dabfd887"
+          },
+          "returncode": 0,
+          "round": 2
+        },
+        {
+          "label": "train-12-structure",
+          "lane": "structure",
+          "log_identity": {
+            "bytes": 22,
+            "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/train-12-structure.log",
+            "sha256": "01dbc58cdc1ad420e7234e0179b5bd77a81bf116aaf6cb4e67edcddc219be91f"
+          },
+          "returncode": 0,
+          "round": null
+        }
+      ]
+    }
+  },
+  "artifact": {
+    "created_at": "2026-11-04T14:22:44Z",
+    "digest": "sha256:a02717012b453870e0ee7f2db18abb853ccfa92ec419ce6080112c58547294f9",
+    "id": 13331956801,
+    "name": "winui-editable-release-comparison-41830662707-1",
+    "size_in_bytes": 1256480485,
+    "updated_at": "2026-11-04T14:22:44Z",
+    "workflow_run": {
+      "head_branch": "perf/compact-xaml-theme-codegen",
+      "head_repository_id": 1405576478,
+      "head_sha": "b39af10eee1fcdcf0ff559beabf7ec7d9bb6e39f",
+      "id": 41830662707,
+      "repository_id": 1405576478
+    }
+  },
+  "ci": {
+    "conclusion": "success",
+    "created_at": "2026-11-04T12:35:59Z",
+    "head_branch": "perf/compact-xaml-theme-codegen",
+    "head_sha": "b39af10eee1fcdcf0ff559beabf7ec7d9bb6e39f",
+    "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/41830662707",
+    "id": 41830662707,
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-11-04T14:22:50Z"
+  },
+  "cohort_distinction": {
+    "current_d2_bytes": 27141408,
+    "interpretation": "Each cohort freshly trained and linked its own reference. The 80-byte difference is observed same-source cohort variation; it is not assigned to the cold source changes. The 75,808-byte saving uses only this cohort's own reference.",
+    "prior_ci_run": 41815903284,
+    "prior_d2_bytes": 27141328,
+    "prior_d2_sha256": "84b2f636324f3dc2222f39d64c4e36dd3c8103efd15e3d3fc5151d1e87b8c2a6",
+    "same_source_different_cohort_bytes": 80
+  },
+  "comparison": {
+    "candidate_bytes": 27065600,
+    "candidate_minus_reference_bytes": -75808,
+    "meets_10mb_target": false,
+    "reference_bytes": 27141408,
+    "remaining_to_budget_bytes": 17065600,
+    "section_file_byte_deltas": {
+      ".bss": 0,
+      ".cfi_reserve": 0,
+      ".data": 8,
+      ".data.rel.ro": -14264,
+      ".dynamic": 0,
+      ".dynstr": 0,
+      ".dynsym": 0,
+      ".eh_frame": -11728,
+      ".eh_frame_hdr": -2120,
+      ".fini": 0,
+      ".fini_array": 0,
+      ".gcc_except_table": 1912,
+      ".gnu.hash": 0,
+      ".gnu.version": 0,
+      ".gnu.version_r": 0,
+      ".got": 0,
+      ".got.plt": 0,
+      ".init": 0,
+      ".init_array": 0,
+      ".interp": 0,
+      ".note.ABI-tag": 0,
+      ".note.gnu.build-id": 0,
+      ".plt": 0,
+      ".rela.dyn": 0,
+      ".rela.plt": 0,
+      ".relr.dyn": -224,
+      ".relro_padding": 0,
+      ".rodata": 168,
+      ".tbss": 0,
+      ".tdata": 0,
+      ".text": -48976,
+      ".tm_clone_table": 0
+    }
+  },
+  "complete_size_and_targeted_correctness": true,
+  "file_reconciliation": {
+    "candidate_minus_reference": {
+      "allocated_file_sections": -75224,
+      "elf_header": 0,
+      "file_gaps": -584,
+      "nonallocated_file_sections": 0,
+      "program_headers": 0,
+      "section_headers": 0
+    },
+    "nobits_scope": "NOBITS allocated sections, including .cfi_reserve/.tbss/.relro_padding, contribute zero section file bytes. Actual gaps are counted from disjoint file intervals, not virtual addresses.",
+    "section_file_byte_deltas": {
+      ".bss": 0,
+      ".cfi_reserve": 0,
+      ".data": 8,
+      ".data.rel.ro": -14264,
+      ".dynamic": 0,
+      ".dynstr": 0,
+      ".dynsym": 0,
+      ".eh_frame": -11728,
+      ".eh_frame_hdr": -2120,
+      ".fini": 0,
+      ".fini_array": 0,
+      ".gcc_except_table": 1912,
+      ".gnu.hash": 0,
+      ".gnu.version": 0,
+      ".gnu.version_r": 0,
+      ".got": 0,
+      ".got.plt": 0,
+      ".init": 0,
+      ".init_array": 0,
+      ".interp": 0,
+      ".note.ABI-tag": 0,
+      ".note.gnu.build-id": 0,
+      ".plt": 0,
+      ".rela.dyn": 0,
+      ".rela.plt": 0,
+      ".relr.dyn": -224,
+      ".relro_padding": 0,
+      ".rodata": 168,
+      ".tbss": 0,
+      ".tdata": 0,
+      ".text": -48976,
+      ".tm_clone_table": 0
+    },
+    "total_delta": -75808
+  },
+  "full_release_acceptance": false,
+  "independent_verification": {
+    "additional_inputs_verified": "Both fresh profiles, source manifests, each template stdout/stderr file and all allocated file-backed ELF section hashes.",
+    "extracted_evidence_root": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707",
+    "manifest_checks": [
+      {
+        "arm": "reference",
+        "extracted_relative_path": "reference/archives/archives.json",
+        "kind": "archives",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 52334,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/archives/archives.json",
+          "sha256": "829f056e40ee8338b394cab6a3f730e3642ca6f93255133963dabf80c4399cb1"
+        },
+        "original": {
+          "bytes": 52334,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/archives.json",
+          "sha256": "829f056e40ee8338b394cab6a3f730e3642ca6f93255133963dabf80c4399cb1"
+        }
+      },
+      {
+        "arm": "reference",
+        "extracted_relative_path": "reference/release/artifacts.json",
+        "kind": "artifacts",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 21682,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/release/artifacts.json",
+          "sha256": "7e15b20a296726e9fb46ec2fed8509e2ecbddbbc7c40349034d7280ce2f4128b"
+        },
+        "original": {
+          "bytes": 21682,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/artifacts.json",
+          "sha256": "7e15b20a296726e9fb46ec2fed8509e2ecbddbbc7c40349034d7280ce2f4128b"
+        }
+      },
+      {
+        "arm": "reference",
+        "extracted_relative_path": "reference/release/base/manifest.json",
+        "kind": "base",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 2165,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/release/base/manifest.json",
+          "sha256": "cf5394ae33ac51dd95621985a45458e0beeb94b93f5c8261c2bccb9195359a87"
+        },
+        "original": {
+          "bytes": 2165,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/base/manifest.json",
+          "sha256": "cf5394ae33ac51dd95621985a45458e0beeb94b93f5c8261c2bccb9195359a87"
+        }
+      },
+      {
+        "arm": "reference",
+        "extracted_relative_path": "reference/release/build.json",
+        "kind": "build",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 208825,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/release/build.json",
+          "sha256": "14eb510ed51d96cbc5a4a168d9c3e44719759ab71f42ac48111245c1fe74bac2"
+        },
+        "original": {
+          "bytes": 208825,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/build.json",
+          "sha256": "14eb510ed51d96cbc5a4a168d9c3e44719759ab71f42ac48111245c1fe74bac2"
+        }
+      },
+      {
+        "arm": "reference",
+        "extracted_relative_path": "reference/compatibility.json",
+        "kind": "compatibility",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 9254,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/compatibility.json",
+          "sha256": "41c9156065c45a57df2bf019d699854da9612632315055358ab9b1a979c6beec"
+        },
+        "original": {
+          "bytes": 9254,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/compatibility.json",
+          "sha256": "41c9156065c45a57df2bf019d699854da9612632315055358ab9b1a979c6beec"
+        }
+      },
+      {
+        "arm": "reference",
+        "extracted_relative_path": "reference/registry/result.json",
+        "kind": "registry",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 27398,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/registry/result.json",
+          "sha256": "067c2f1f7d712ef3c1841277b2836c6edba130f72bfb892d3976b7a9bbed7de5"
+        },
+        "original": {
+          "bytes": 27398,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/registry/result.json",
+          "sha256": "067c2f1f7d712ef3c1841277b2836c6edba130f72bfb892d3976b7a9bbed7de5"
+        }
+      },
+      {
+        "arm": "reference",
+        "extracted_relative_path": "reference/templates-check/check.json",
+        "kind": "templates",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 6307,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/templates-check/check.json",
+          "sha256": "5370c0f92a24dd4110fd42916936577be560b0d143e6192b11b16f18c9906cbc"
+        },
+        "original": {
+          "bytes": 6307,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check/check.json",
+          "sha256": "5370c0f92a24dd4110fd42916936577be560b0d143e6192b11b16f18c9906cbc"
+        }
+      },
+      {
+        "arm": "reference",
+        "extracted_relative_path": "reference/unwind/result.json",
+        "kind": "unwind",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 22864,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/reference/unwind/result.json",
+          "sha256": "b97f66cb520f6c5a96054362d6f309259089897cd8f7a8b4933284cf37cfeabd"
+        },
+        "original": {
+          "bytes": 22864,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/reference/unwind/result.json",
+          "sha256": "b97f66cb520f6c5a96054362d6f309259089897cd8f7a8b4933284cf37cfeabd"
+        }
+      },
+      {
+        "arm": "candidate",
+        "extracted_relative_path": "candidate/archives/archives.json",
+        "kind": "archives",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 52334,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/archives/archives.json",
+          "sha256": "d2deef8154b4bb2e96453df9e5bf76010650c37076ab19d9df7a4f47b573e66a"
+        },
+        "original": {
+          "bytes": 52334,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/archives.json",
+          "sha256": "d2deef8154b4bb2e96453df9e5bf76010650c37076ab19d9df7a4f47b573e66a"
+        }
+      },
+      {
+        "arm": "candidate",
+        "extracted_relative_path": "candidate/release/artifacts.json",
+        "kind": "artifacts",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 21687,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/release/artifacts.json",
+          "sha256": "4b977f46a7bc741b0f6c40238c941571cac5bd2dc7c47b02be1572f59d4059cd"
+        },
+        "original": {
+          "bytes": 21687,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/artifacts.json",
+          "sha256": "4b977f46a7bc741b0f6c40238c941571cac5bd2dc7c47b02be1572f59d4059cd"
+        }
+      },
+      {
+        "arm": "candidate",
+        "extracted_relative_path": "candidate/release/base/manifest.json",
+        "kind": "base",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 2165,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/release/base/manifest.json",
+          "sha256": "06b239c81aaf63c82e4a2905c9285a5a8c835243373b6d656ee2f6e1ed4c8205"
+        },
+        "original": {
+          "bytes": 2165,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/base/manifest.json",
+          "sha256": "06b239c81aaf63c82e4a2905c9285a5a8c835243373b6d656ee2f6e1ed4c8205"
+        }
+      },
+      {
+        "arm": "candidate",
+        "extracted_relative_path": "candidate/release/build.json",
+        "kind": "build",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 208205,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/release/build.json",
+          "sha256": "ddd50b47b749e3374b56ba551e1be8d5443c791026e935d3cace818a4941bde4"
+        },
+        "original": {
+          "bytes": 208205,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/build.json",
+          "sha256": "ddd50b47b749e3374b56ba551e1be8d5443c791026e935d3cace818a4941bde4"
+        }
+      },
+      {
+        "arm": "candidate",
+        "extracted_relative_path": "candidate/compatibility.json",
+        "kind": "compatibility",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 9256,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/compatibility.json",
+          "sha256": "bec8a4f937ff9f900094e412583fdc3adec8f3a68d7c3a1708fb03bdefd237ed"
+        },
+        "original": {
+          "bytes": 9256,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/compatibility.json",
+          "sha256": "bec8a4f937ff9f900094e412583fdc3adec8f3a68d7c3a1708fb03bdefd237ed"
+        }
+      },
+      {
+        "arm": "candidate",
+        "extracted_relative_path": "candidate/registry/result.json",
+        "kind": "registry",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 27397,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/registry/result.json",
+          "sha256": "fdf112b96abe3deb12f3db4db4f88c7a68d3df515f6a802af060f7992186e792"
+        },
+        "original": {
+          "bytes": 27397,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/registry/result.json",
+          "sha256": "fdf112b96abe3deb12f3db4db4f88c7a68d3df515f6a802af060f7992186e792"
+        }
+      },
+      {
+        "arm": "candidate",
+        "extracted_relative_path": "candidate/templates-check/check.json",
+        "kind": "templates",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 6306,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/templates-check/check.json",
+          "sha256": "e763fbf39182c2a7b14aabf78254c49b1c738edf100c51d64dba43b08d94d09c"
+        },
+        "original": {
+          "bytes": 6306,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check/check.json",
+          "sha256": "e763fbf39182c2a7b14aabf78254c49b1c738edf100c51d64dba43b08d94d09c"
+        }
+      },
+      {
+        "arm": "candidate",
+        "extracted_relative_path": "candidate/unwind/result.json",
+        "kind": "unwind",
+        "matches_recorded_identity": true,
+        "observed": {
+          "bytes": 22864,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/candidate/unwind/result.json",
+          "sha256": "30e275df5740c6a488ded0fdc36ebea1b76698dc08e38df27d01696dc2d4e978"
+        },
+        "original": {
+          "bytes": 22864,
+          "path": "/home/runner/work/_temp/winui-release-comparison/evidence/candidate/unwind/result.json",
+          "sha256": "30e275df5740c6a488ded0fdc36ebea1b76698dc08e38df27d01696dc2d4e978"
+        }
+      }
+    ],
+    "no_builds_or_benchmark_processes_executed": true,
+    "old_evidence_root": "/home/runner/work/_temp/winui-release-comparison/evidence",
+    "original_arm_manifests_verified": 16,
+    "path_mapping": "PurePosixPath(original_path).relative_to(old_evidence_root), joined beneath the extracted root; original manifests are unchanged.",
+    "policy_equality_checked": [
+      "exact rustc -vV",
+      "shipping consumer hash",
+      "helper input hashes",
+      "training source hashes",
+      "tool hashes",
+      "13-workload lane sequence",
+      "profile policy"
+    ],
+    "shipping_executables_verified": 2
+  },
+  "original_comparison": {
+    "identity": {
+      "bytes": 71030,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707/comparison.json",
+      "sha256": "e530726f130bdd2fc993dc19551554a4702b0927f71e8a74125ab64b9dfc700d"
+    },
+    "preservation": "Exact original UTF-8 contents, including whitespace/newlines; no recorded path or value was rewritten.",
+    "utf8": "{\n  \"arms\": {\n    \"candidate\": {\n      \"additional_edit_probe\": 31,\n      \"archive_cases\": 9,\n      \"binary\": {\n        \"bytes\": 27065600,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe\",\n        \"sha256\": \"9725868b49f59c6d8cdf02785adb5fbabd6be340d84557271d7d1d3e7149c52e\"\n      },\n      \"compact_unwind_passed\": true,\n      \"complete\": true,\n      \"disposable_target_removed_after_collection_and_validation\": true,\n      \"graph\": {\n        \"inventory_sha256\": \"82ad404c187c56bbe1f1bfaeb96b618e3464b7c21fc71485831d538b3cf3e6ab\",\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/graph\",\n        \"rlibs\": 54,\n        \"scope\": \"Complete freshly profiled optimized WinUI target dependency closure.\"\n      },\n      \"manifests\": {\n        \"archives\": {\n          \"bytes\": 52334,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/archives.json\",\n          \"sha256\": \"d2deef8154b4bb2e96453df9e5bf76010650c37076ab19d9df7a4f47b573e66a\"\n        },\n        \"artifacts\": {\n          \"bytes\": 21687,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/artifacts.json\",\n          \"sha256\": \"4b977f46a7bc741b0f6c40238c941571cac5bd2dc7c47b02be1572f59d4059cd\"\n        },\n        \"base\": {\n          \"bytes\": 2165,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/base/manifest.json\",\n          \"sha256\": \"06b239c81aaf63c82e4a2905c9285a5a8c835243373b6d656ee2f6e1ed4c8205\"\n        },\n        \"build\": {\n          \"bytes\": 208205,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/build.json\",\n          \"sha256\": \"ddd50b47b749e3374b56ba551e1be8d5443c791026e935d3cace818a4941bde4\"\n        },\n        \"compatibility\": {\n          \"bytes\": 9256,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/compatibility.json\",\n          \"sha256\": \"bec8a4f937ff9f900094e412583fdc3adec8f3a68d7c3a1708fb03bdefd237ed\"\n        },\n        \"registry\": {\n          \"bytes\": 27397,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/registry/result.json\",\n          \"sha256\": \"fdf112b96abe3deb12f3db4db4f88c7a68d3df515f6a802af060f7992186e792\"\n        },\n        \"templates\": {\n          \"bytes\": 6306,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check/check.json\",\n          \"sha256\": \"e763fbf39182c2a7b14aabf78254c49b1c738edf100c51d64dba43b08d94d09c\"\n        },\n        \"unwind\": {\n          \"bytes\": 22864,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/unwind/result.json\",\n          \"sha256\": \"30e275df5740c6a488ded0fdc36ebea1b76698dc08e38df27d01696dc2d4e978\"\n        }\n      },\n      \"packer\": {\n        \"bytes\": 941848,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/ferroui-fxd\",\n        \"sha256\": \"081d35d167dd99b53a24cf531a7b6712247808d0d576b4b25617e6009d6b16fc\"\n      },\n      \"profile\": {\n        \"bytes\": 86253672,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525.profdata\",\n        \"sha256\": \"a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525\"\n      },\n      \"registry_passed\": 47,\n      \"revision\": \"ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad\",\n      \"sections\": {\n        \".bss\": {\n          \"address\": 27284008,\n          \"allocated_bytes\": 232,\n          \"file_bytes\": 0,\n          \"flags\": 3,\n          \"sha256\": null,\n          \"type\": 8\n        },\n        \".cfi_reserve\": {\n          \"address\": 7404664,\n          \"allocated_bytes\": 210520,\n          \"file_bytes\": 0,\n          \"flags\": 2,\n          \"sha256\": null,\n          \"type\": 8\n        },\n        \".data\": {\n          \"address\": 27088120,\n          \"allocated_bytes\": 195888,\n          \"file_bytes\": 195888,\n          \"flags\": 3,\n          \"sha256\": \"8db7f8f629fdf310c8ebc7d351f4ad5a6cb3346db723c7ecf62433fe24bbea93\",\n          \"type\": 1\n        },\n        \".data.rel.ro\": {\n          \"address\": 25302120,\n          \"allocated_bytes\": 1780432,\n          \"file_bytes\": 1780432,\n          \"flags\": 3,\n          \"sha256\": \"1606ad0709e0196b354ff2bf70633ac749d6ce0660d32eebb8c39ec4771efc22\",\n          \"type\": 1\n        },\n        \".dynamic\": {\n          \"address\": 27082552,\n          \"allocated_bytes\": 496,\n          \"file_bytes\": 496,\n          \"flags\": 3,\n          \"sha256\": \"336a2473c99828a0f1daed2a7fb149ceb26d39fb301f00f3d3dcbdf9935c60d9\",\n          \"type\": 6\n        },\n        \".dynstr\": {\n          \"address\": 3900,\n          \"allocated_bytes\": 1333,\n          \"file_bytes\": 1333,\n          \"flags\": 2,\n          \"sha256\": \"509d0c31264a36b33b649953514d33b263a8a144b6c996bcad08c003cad3242a\",\n          \"type\": 3\n        },\n        \".dynsym\": {\n          \"address\": 832,\n          \"allocated_bytes\": 2448,\n          \"file_bytes\": 2448,\n          \"flags\": 2,\n          \"sha256\": \"f3c8f08a87bb22c09d00721245b5402515f21104268f3a6ca1272b5b4c9d46a0\",\n          \"type\": 11\n        },\n        \".eh_frame\": {\n          \"address\": 3409368,\n          \"allocated_bytes\": 3995296,\n          \"file_bytes\": 3995296,\n          \"flags\": 2,\n          \"sha256\": \"c059b87729afb3cf1a150a9bf68c94e78199a502e68eaf60fa8661adc5c310c9\",\n          \"type\": 1\n        },\n        \".eh_frame_hdr\": {\n          \"address\": 2785832,\n          \"allocated_bytes\": 623532,\n          \"file_bytes\": 623532,\n          \"flags\": 2,\n          \"sha256\": \"78610189c757169bdf3c61b7cac796064483a61dff36dc79b5c6a27a603ee132\",\n          \"type\": 1\n        },\n        \".fini\": {\n          \"address\": 25295188,\n          \"allocated_bytes\": 13,\n          \"file_bytes\": 13,\n          \"flags\": 6,\n          \"sha256\": \"6a4f3e5efc7c1f7ee7d6f21afd9ed040ba1d7f0b97bb12b016f5b176cc558bd8\",\n          \"type\": 1\n        },\n        \".fini_array\": {\n          \"address\": 25302096,\n          \"allocated_bytes\": 8,\n          \"file_bytes\": 8,\n          \"flags\": 3,\n          \"sha256\": \"9790732ccc862a0b919301f5d7f85c0c15e01a14159877ac9502f2f49e8942bd\",\n          \"type\": 15\n        },\n        \".gcc_except_table\": {\n          \"address\": 36024,\n          \"allocated_bytes\": 1009340,\n          \"file_bytes\": 1009340,\n          \"flags\": 2,\n          \"sha256\": \"5843b46cecb354e97ee5c3ce36392f37b963e9965d12df5f14092a37af2e464b\",\n          \"type\": 1\n        },\n        \".gnu.hash\": {\n          \"address\": 3872,\n          \"allocated_bytes\": 28,\n          \"file_bytes\": 28,\n          \"flags\": 2,\n          \"sha256\": \"3b4404322f35f272022ad4b8a583cbc54b6428d2816c81cb9ea1742ae6d96dc1\",\n          \"type\": 1879048182\n        },\n        \".gnu.version\": {\n          \"address\": 3280,\n          \"allocated_bytes\": 204,\n          \"file_bytes\": 204,\n          \"flags\": 2,\n          \"sha256\": \"60046cd997d40a8de787349c32a3842ca754270e4e9bc381d7ef327869bef576\",\n          \"type\": 1879048191\n        },\n        \".gnu.version_r\": {\n          \"address\": 3484,\n          \"allocated_bytes\": 384,\n          \"file_bytes\": 384,\n          \"flags\": 2,\n          \"sha256\": \"46fa6b39bbd480f15ace95962ab7aa5b8df3f7e894013e0b0075458fe397bf30\",\n          \"type\": 1879048190\n        },\n        \".got\": {\n          \"address\": 27083048,\n          \"allocated_bytes\": 936,\n          \"file_bytes\": 936,\n          \"flags\": 3,\n          \"sha256\": \"537f72ed26b5bd9c7adafe92257f9502d0cd7597e20d908f02e5184574d4ad73\",\n          \"type\": 1\n        },\n        \".got.plt\": {\n          \"address\": 27083984,\n          \"allocated_bytes\": 40,\n          \"file_bytes\": 40,\n          \"flags\": 3,\n          \"sha256\": \"09faa966974ae0fa2c0f59df4d2946f6f9b3c1aeadd8197c06d43e5baac38dab\",\n          \"type\": 1\n        },\n        \".init\": {\n          \"address\": 25295160,\n          \"allocated_bytes\": 27,\n          \"file_bytes\": 27,\n          \"flags\": 6,\n          \"sha256\": \"2865be8c14f223c790da21f504ecb100961e227d5064f1ce8dbe86a0d58c18a9\",\n          \"type\": 1\n        },\n        \".init_array\": {\n          \"address\": 25302104,\n          \"allocated_bytes\": 16,\n          \"file_bytes\": 16,\n          \"flags\": 2097155,\n          \"sha256\": \"5a7463aa03c7dcafe49d262adc7bb20af09a073ed79ea86a20333977442cfe2e\",\n          \"type\": 14\n        },\n        \".interp\": {\n          \"address\": 736,\n          \"allocated_bytes\": 28,\n          \"file_bytes\": 28,\n          \"flags\": 2,\n          \"sha256\": \"9097c98ea70f6f3b01d50145eb72bf55ad1f4e9713bccf27bd6405d6254eed00\",\n          \"type\": 1\n        },\n        \".note.ABI-tag\": {\n          \"address\": 764,\n          \"allocated_bytes\": 32,\n          \"file_bytes\": 32,\n          \"flags\": 2,\n          \"sha256\": \"6e48317ad93a8ac2dc04321465ede06d1274543fc8ab172e68171a9d684bb313\",\n          \"type\": 7\n        },\n        \".note.gnu.build-id\": {\n          \"address\": 796,\n          \"allocated_bytes\": 36,\n          \"file_bytes\": 36,\n          \"flags\": 2,\n          \"sha256\": \"8d4b5d44fb55e1095a2517a90436f2a0c361deed83fe6e4db7e483ecd856b5ee\",\n          \"type\": 7\n        },\n        \".plt\": {\n          \"address\": 25295216,\n          \"allocated_bytes\": 48,\n          \"file_bytes\": 48,\n          \"flags\": 6,\n          \"sha256\": \"ec12c85110dc0dd8d531dc42b5a2c75b31b9576914bd024c8778683cc9361bcb\",\n          \"type\": 1\n        },\n        \".rela.dyn\": {\n          \"address\": 5240,\n          \"allocated_bytes\": 2400,\n          \"file_bytes\": 2400,\n          \"flags\": 2,\n          \"sha256\": \"fbcac53bb38ceb1b4596a560b70aaac02e4cf34a595a8982d7991f1401e1959c\",\n          \"type\": 4\n        },\n        \".rela.plt\": {\n          \"address\": 35976,\n          \"allocated_bytes\": 48,\n          \"file_bytes\": 48,\n          \"flags\": 66,\n          \"sha256\": \"aa2e435f3b8ec4b4da046ceac57baaf8c6c1b4a842d3f1e45407fc86816a7536\",\n          \"type\": 4\n        },\n        \".relr.dyn\": {\n          \"address\": 7640,\n          \"allocated_bytes\": 28336,\n          \"file_bytes\": 28336,\n          \"flags\": 2,\n          \"sha256\": \"70d98079040058b6424ac3769c0c66b2e8419ecebc4d271f7d71a3ae97d9ae74\",\n          \"type\": 19\n        },\n        \".relro_padding\": {\n          \"address\": 27084024,\n          \"allocated_bytes\": 2824,\n          \"file_bytes\": 0,\n          \"flags\": 3,\n          \"sha256\": null,\n          \"type\": 8\n        },\n        \".rodata\": {\n          \"address\": 1045376,\n          \"allocated_bytes\": 1740456,\n          \"file_bytes\": 1740456,\n          \"flags\": 50,\n          \"sha256\": \"75bd0ed560b7384b3a719dd9880728b87beeb0bd7a700e473692638ca4c68795\",\n          \"type\": 1\n        },\n        \".tbss\": {\n          \"address\": 25302096,\n          \"allocated_bytes\": 17536,\n          \"file_bytes\": 0,\n          \"flags\": 1027,\n          \"sha256\": null,\n          \"type\": 8\n        },\n        \".tdata\": {\n          \"address\": 25299360,\n          \"allocated_bytes\": 2736,\n          \"file_bytes\": 2736,\n          \"flags\": 1027,\n          \"sha256\": \"3c34139351b8fc4c977e894e4c208ce8bb1bf8e5ab80d40ffe0b79952260167b\",\n          \"type\": 1\n        },\n        \".text\": {\n          \"address\": 7619280,\n          \"allocated_bytes\": 17675877,\n          \"file_bytes\": 17675877,\n          \"flags\": 6,\n          \"sha256\": \"fc81a798fdc925a9fac6f3856f8361a90ba3e1dbb71a094c51586bf125840498\",\n          \"type\": 1\n        },\n        \".tm_clone_table\": {\n          \"address\": 27088120,\n          \"allocated_bytes\": 0,\n          \"file_bytes\": 0,\n          \"flags\": 3,\n          \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n          \"type\": 1\n        }\n      },\n      \"template_activations\": 156\n    },\n    \"reference\": {\n      \"additional_edit_probe\": 31,\n      \"archive_cases\": 9,\n      \"binary\": {\n        \"bytes\": 27141408,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe\",\n        \"sha256\": \"e49128877da4d0e0ff9683313b87e5542e416a2c103a696335947f63510a718b\"\n      },\n      \"compact_unwind_passed\": true,\n      \"complete\": true,\n      \"disposable_target_removed_after_collection_and_validation\": true,\n      \"graph\": {\n        \"inventory_sha256\": \"eed39f6ba2fb76f45cf4351dae1020aece17042a28e45055da900e472aa46834\",\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/graph\",\n        \"rlibs\": 54,\n        \"scope\": \"Complete freshly profiled optimized WinUI target dependency closure.\"\n      },\n      \"manifests\": {\n        \"archives\": {\n          \"bytes\": 52334,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/archives.json\",\n          \"sha256\": \"829f056e40ee8338b394cab6a3f730e3642ca6f93255133963dabf80c4399cb1\"\n        },\n        \"artifacts\": {\n          \"bytes\": 21682,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/artifacts.json\",\n          \"sha256\": \"7e15b20a296726e9fb46ec2fed8509e2ecbddbbc7c40349034d7280ce2f4128b\"\n        },\n        \"base\": {\n          \"bytes\": 2165,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/base/manifest.json\",\n          \"sha256\": \"cf5394ae33ac51dd95621985a45458e0beeb94b93f5c8261c2bccb9195359a87\"\n        },\n        \"build\": {\n          \"bytes\": 208825,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/build.json\",\n          \"sha256\": \"14eb510ed51d96cbc5a4a168d9c3e44719759ab71f42ac48111245c1fe74bac2\"\n        },\n        \"compatibility\": {\n          \"bytes\": 9254,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/compatibility.json\",\n          \"sha256\": \"41c9156065c45a57df2bf019d699854da9612632315055358ab9b1a979c6beec\"\n        },\n        \"registry\": {\n          \"bytes\": 27398,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/registry/result.json\",\n          \"sha256\": \"067c2f1f7d712ef3c1841277b2836c6edba130f72bfb892d3976b7a9bbed7de5\"\n        },\n        \"templates\": {\n          \"bytes\": 6307,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check/check.json\",\n          \"sha256\": \"5370c0f92a24dd4110fd42916936577be560b0d143e6192b11b16f18c9906cbc\"\n        },\n        \"unwind\": {\n          \"bytes\": 22864,\n          \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/unwind/result.json\",\n          \"sha256\": \"b97f66cb520f6c5a96054362d6f309259089897cd8f7a8b4933284cf37cfeabd\"\n        }\n      },\n      \"packer\": {\n        \"bytes\": 941848,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/ferroui-fxd\",\n        \"sha256\": \"081d35d167dd99b53a24cf531a7b6712247808d0d576b4b25617e6009d6b16fc\"\n      },\n      \"profile\": {\n        \"bytes\": 86611016,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43.profdata\",\n        \"sha256\": \"4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43\"\n      },\n      \"registry_passed\": 47,\n      \"revision\": \"d2d2f83d606f547b4ebda2323a145b14ca8379ad\",\n      \"sections\": {\n        \".bss\": {\n          \"address\": 27359816,\n          \"allocated_bytes\": 232,\n          \"file_bytes\": 0,\n          \"flags\": 3,\n          \"sha256\": null,\n          \"type\": 8\n        },\n        \".cfi_reserve\": {\n          \"address\": 7416648,\n          \"allocated_bytes\": 211104,\n          \"file_bytes\": 0,\n          \"flags\": 2,\n          \"sha256\": null,\n          \"type\": 8\n        },\n        \".data\": {\n          \"address\": 27163936,\n          \"allocated_bytes\": 195880,\n          \"file_bytes\": 195880,\n          \"flags\": 3,\n          \"sha256\": \"e80863c7da7696d294952155f2fde0d488b0ce679ad467f7634ee5a9395a90a8\",\n          \"type\": 1\n        },\n        \".data.rel.ro\": {\n          \"address\": 25363672,\n          \"allocated_bytes\": 1794696,\n          \"file_bytes\": 1794696,\n          \"flags\": 3,\n          \"sha256\": \"ffc5b8d8430696ee6947ee703872961936cb26c1ea3597494fa23902a86b8068\",\n          \"type\": 1\n        },\n        \".dynamic\": {\n          \"address\": 27158368,\n          \"allocated_bytes\": 496,\n          \"file_bytes\": 496,\n          \"flags\": 3,\n          \"sha256\": \"868cf47f58e189f7eaa55a5c31767984a0cf7fa502c8568ef360d6c686552e78\",\n          \"type\": 6\n        },\n        \".dynstr\": {\n          \"address\": 3900,\n          \"allocated_bytes\": 1333,\n          \"file_bytes\": 1333,\n          \"flags\": 2,\n          \"sha256\": \"971d5b6db991b0ec87737277998b7b4e8b66aa4719d2680cde47584be92be2f5\",\n          \"type\": 3\n        },\n        \".dynsym\": {\n          \"address\": 832,\n          \"allocated_bytes\": 2448,\n          \"file_bytes\": 2448,\n          \"flags\": 2,\n          \"sha256\": \"163306d179a8889c354d3a83d7c8fdd1ed74c616c81718639f84bc727388ff7d\",\n          \"type\": 11\n        },\n        \".eh_frame\": {\n          \"address\": 3409624,\n          \"allocated_bytes\": 4007024,\n          \"file_bytes\": 4007024,\n          \"flags\": 2,\n          \"sha256\": \"7cfb42f5b915469b7918b22bef29a720a179321abec5b9ef94710f27277e81c1\",\n          \"type\": 1\n        },\n        \".eh_frame_hdr\": {\n          \"address\": 2783968,\n          \"allocated_bytes\": 625652,\n          \"file_bytes\": 625652,\n          \"flags\": 2,\n          \"sha256\": \"b004854b824102cb7a836b957bd5d17eac750aa2e09d21687490ae8dada2cd64\",\n          \"type\": 1\n        },\n        \".fini\": {\n          \"address\": 25356740,\n          \"allocated_bytes\": 13,\n          \"file_bytes\": 13,\n          \"flags\": 6,\n          \"sha256\": \"6a4f3e5efc7c1f7ee7d6f21afd9ed040ba1d7f0b97bb12b016f5b176cc558bd8\",\n          \"type\": 1\n        },\n        \".fini_array\": {\n          \"address\": 25363648,\n          \"allocated_bytes\": 8,\n          \"file_bytes\": 8,\n          \"flags\": 3,\n          \"sha256\": \"cbe34dee40481da73887d31d6924395edf72892385d0678847657e3528217564\",\n          \"type\": 15\n        },\n        \".gcc_except_table\": {\n          \"address\": 36248,\n          \"allocated_bytes\": 1007428,\n          \"file_bytes\": 1007428,\n          \"flags\": 2,\n          \"sha256\": \"68777e156003e5adaf58fc79e658fd1697b2b5c583655aa3f040ba1e125e29d2\",\n          \"type\": 1\n        },\n        \".gnu.hash\": {\n          \"address\": 3872,\n          \"allocated_bytes\": 28,\n          \"file_bytes\": 28,\n          \"flags\": 2,\n          \"sha256\": \"3b4404322f35f272022ad4b8a583cbc54b6428d2816c81cb9ea1742ae6d96dc1\",\n          \"type\": 1879048182\n        },\n        \".gnu.version\": {\n          \"address\": 3280,\n          \"allocated_bytes\": 204,\n          \"file_bytes\": 204,\n          \"flags\": 2,\n          \"sha256\": \"f7c19d557ae817fb002458a6abf0c0e9c737ebab2a541ba7385564274c7eec67\",\n          \"type\": 1879048191\n        },\n        \".gnu.version_r\": {\n          \"address\": 3484,\n          \"allocated_bytes\": 384,\n          \"file_bytes\": 384,\n          \"flags\": 2,\n          \"sha256\": \"46fa6b39bbd480f15ace95962ab7aa5b8df3f7e894013e0b0075458fe397bf30\",\n          \"type\": 1879048190\n        },\n        \".got\": {\n          \"address\": 27158864,\n          \"allocated_bytes\": 936,\n          \"file_bytes\": 936,\n          \"flags\": 3,\n          \"sha256\": \"679357aa1a771c7fce5a4cb1374b47b0f7aaa002556201eae8403c87c6411ae1\",\n          \"type\": 1\n        },\n        \".got.plt\": {\n          \"address\": 27159800,\n          \"allocated_bytes\": 40,\n          \"file_bytes\": 40,\n          \"flags\": 3,\n          \"sha256\": \"07bc61691bf9840021d9295e737079f10226c01dc41533d4be9293ac4c5cb86a\",\n          \"type\": 1\n        },\n        \".init\": {\n          \"address\": 25356712,\n          \"allocated_bytes\": 27,\n          \"file_bytes\": 27,\n          \"flags\": 6,\n          \"sha256\": \"9190dc2f1933affa413cebf539c654897f0040c8fa62696c9d752a8f1f2c7925\",\n          \"type\": 1\n        },\n        \".init_array\": {\n          \"address\": 25363656,\n          \"allocated_bytes\": 16,\n          \"file_bytes\": 16,\n          \"flags\": 2097155,\n          \"sha256\": \"c24d586fa4abfdd7177e5c29817cff0d0c31c88644766b3d21b3656c89f0203b\",\n          \"type\": 14\n        },\n        \".interp\": {\n          \"address\": 736,\n          \"allocated_bytes\": 28,\n          \"file_bytes\": 28,\n          \"flags\": 2,\n          \"sha256\": \"9097c98ea70f6f3b01d50145eb72bf55ad1f4e9713bccf27bd6405d6254eed00\",\n          \"type\": 1\n        },\n        \".note.ABI-tag\": {\n          \"address\": 764,\n          \"allocated_bytes\": 32,\n          \"file_bytes\": 32,\n          \"flags\": 2,\n          \"sha256\": \"6e48317ad93a8ac2dc04321465ede06d1274543fc8ab172e68171a9d684bb313\",\n          \"type\": 7\n        },\n        \".note.gnu.build-id\": {\n          \"address\": 796,\n          \"allocated_bytes\": 36,\n          \"file_bytes\": 36,\n          \"flags\": 2,\n          \"sha256\": \"333cc3e7cf66b0a970c3489557ae68c0163ef94e5cbb346fca3bade7d3a92193\",\n          \"type\": 7\n        },\n        \".plt\": {\n          \"address\": 25356768,\n          \"allocated_bytes\": 48,\n          \"file_bytes\": 48,\n          \"flags\": 6,\n          \"sha256\": \"86a78d76b1f6dd26ef43fa28dcad18a70e7578adbdd7a52358a752789fa52255\",\n          \"type\": 1\n        },\n        \".rela.dyn\": {\n          \"address\": 5240,\n          \"allocated_bytes\": 2400,\n          \"file_bytes\": 2400,\n          \"flags\": 2,\n          \"sha256\": \"8b571a4ded1aceb41064a53c80153e918aac69295a1e28b4e2788fa06072a4de\",\n          \"type\": 4\n        },\n        \".rela.plt\": {\n          \"address\": 36200,\n          \"allocated_bytes\": 48,\n          \"file_bytes\": 48,\n          \"flags\": 66,\n          \"sha256\": \"9f2fff406d0c208c73868b6bb960acd0dfcf2d8b4e0145ffdcae5a2c6ca9eb09\",\n          \"type\": 4\n        },\n        \".relr.dyn\": {\n          \"address\": 7640,\n          \"allocated_bytes\": 28560,\n          \"file_bytes\": 28560,\n          \"flags\": 2,\n          \"sha256\": \"5b7b27aab35819f55ee0518205b1c1a5917fd42568c2e96a091500ea05a3a78f\",\n          \"type\": 19\n        },\n        \".relro_padding\": {\n          \"address\": 27159840,\n          \"allocated_bytes\": 736,\n          \"file_bytes\": 0,\n          \"flags\": 3,\n          \"sha256\": null,\n          \"type\": 8\n        },\n        \".rodata\": {\n          \"address\": 1043680,\n          \"allocated_bytes\": 1740288,\n          \"file_bytes\": 1740288,\n          \"flags\": 50,\n          \"sha256\": \"106cca0868145e41505fbe5cc7deea7097c6d951a08035b1776b11fec42e71af\",\n          \"type\": 1\n        },\n        \".tbss\": {\n          \"address\": 25363648,\n          \"allocated_bytes\": 17544,\n          \"file_bytes\": 0,\n          \"flags\": 1027,\n          \"sha256\": null,\n          \"type\": 8\n        },\n        \".tdata\": {\n          \"address\": 25360912,\n          \"allocated_bytes\": 2736,\n          \"file_bytes\": 2736,\n          \"flags\": 1027,\n          \"sha256\": \"6d4c0969ebef5c672b2b9e0d1730dde5c1f4b4caf14199ae64beb622630ae24f\",\n          \"type\": 1\n        },\n        \".text\": {\n          \"address\": 7631856,\n          \"allocated_bytes\": 17724853,\n          \"file_bytes\": 17724853,\n          \"flags\": 6,\n          \"sha256\": \"e58c1385cdf8854744955980a744b8d5fd1248c2181e69586ab1263389e6afb2\",\n          \"type\": 1\n        },\n        \".tm_clone_table\": {\n          \"address\": 27163936,\n          \"allocated_bytes\": 0,\n          \"file_bytes\": 0,\n          \"flags\": 3,\n          \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n          \"type\": 1\n        }\n      },\n      \"template_activations\": 156\n    }\n  },\n  \"commands\": [\n    {\n      \"argv\": [\n        \"git\",\n        \"clone\",\n        \"--shared\",\n        \"--no-checkout\",\n        \"/home/runner/work/FerroUI/FerroUI\",\n        \"/home/runner/work/_temp/winui-release-comparison/checkout\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793795792.2295513,\n      \"label\": \"checkout-create\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/checkout-create.log\",\n      \"output\": {\n        \"bytes\": 82,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/checkout-create.log\",\n        \"sha256\": \"fdf156534897ccbc45a996684eeb3c1074e751358bd484f14a6962e2e9db16e7\"\n      },\n      \"started_unix\": 1793795792.2157097\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/bootstrap_toolchain.py\",\n        \"--work-dir\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain\",\n        \"--version\",\n        \"1.99.0\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793795807.4158325,\n      \"label\": \"toolchain\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/toolchain.log\",\n      \"output\": {\n        \"bytes\": 648,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/toolchain.log\",\n        \"sha256\": \"f9b1aeb6e317041d8211348d003ccc1fb9a14888d4da42241322ada8a3e6a158\"\n      },\n      \"started_unix\": 1793795792.2303889\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_template_validation.py\",\n        \"materialize\",\n        \"--source-root\",\n        \"/home/runner/work/FerroUI/FerroUI\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/template-fixture\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793795807.5932767,\n      \"label\": \"template-fixture\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/template-fixture.log\",\n      \"output\": {\n        \"bytes\": 88,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/template-fixture.log\",\n        \"sha256\": \"ad7ee5fcd1aff337ffd79ba33353738e9937835e68cf8ec5342fb1fe33fcce12\"\n      },\n      \"started_unix\": 1793795807.419249\n    },\n    {\n      \"argv\": [\n        \"git\",\n        \"checkout\",\n        \"--detach\",\n        \"d2d2f83d606f547b4ebda2323a145b14ca8379ad\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793795809.1790879,\n      \"label\": \"reference-checkout\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-checkout.log\",\n      \"output\": {\n        \"bytes\": 99,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-checkout.log\",\n        \"sha256\": \"56594d9a66f9b841f411cfb2580c8e4878583ee42cef9fcaac74f2218324ffbc\"\n      },\n      \"started_unix\": 1793795807.5948143\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_portable_packer.py\",\n        \"materialize\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/packer-source\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793795809.3326764,\n      \"label\": \"reference-packer-source\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-source.log\",\n      \"output\": {\n        \"bytes\": 103,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-source.log\",\n        \"sha256\": \"e0fffedc6039e1aecbb5504fe25d9afde194d45cca6a514599b6166db679b2e7\"\n      },\n      \"started_unix\": 1793795809.1800456\n    },\n    {\n      \"argv\": [\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/cargo\",\n        \"fetch\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/packer-source\",\n      \"exit\": 0,\n      \"extra_environment\": {\n        \"CARGO_PROFILE_RELEASE_CODEGEN_UNITS\": \"16\",\n        \"CARGO_PROFILE_RELEASE_DEBUG\": \"0\",\n        \"CARGO_PROFILE_RELEASE_LTO\": \"thin\",\n        \"CARGO_PROFILE_RELEASE_OPT_LEVEL\": \"s\",\n        \"CARGO_PROFILE_RELEASE_PANIC\": \"unwind\",\n        \"CARGO_TARGET_DIR\": \"/home/runner/work/_temp/winui-release-comparison/shared/packer-target\"\n      },\n      \"finished_unix\": 1793795809.5057733,\n      \"label\": \"reference-packer-fetch\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-fetch.log\",\n      \"output\": {\n        \"bytes\": 262,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-fetch.log\",\n        \"sha256\": \"980d3820f3a0b60c89be3fb054f6e87c00de9150761b2b3479853c8888f042e5\"\n      },\n      \"started_unix\": 1793795809.3337476\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_portable_packer.py\",\n        \"verify-lock\",\n        \"--manifest\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/packer-source/materialization.json\",\n        \"--out\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/packer-lock-before.json\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793795809.6019564,\n      \"label\": \"reference-packer-lock-before\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-lock-before.log\",\n      \"output\": {\n        \"bytes\": 92,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-lock-before.log\",\n        \"sha256\": \"d03b016aced40cafe4af280e2579cd696961b617b4a87860fe2685abef657283\"\n      },\n      \"started_unix\": 1793795809.506715\n    },\n    {\n      \"argv\": [\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/cargo\",\n        \"build\",\n        \"--locked\",\n        \"--release\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--bin\",\n        \"ferroui-fxd\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/packer-source\",\n      \"exit\": 0,\n      \"extra_environment\": {\n        \"CARGO_NET_OFFLINE\": \"true\",\n        \"CARGO_PROFILE_RELEASE_CODEGEN_UNITS\": \"16\",\n        \"CARGO_PROFILE_RELEASE_DEBUG\": \"0\",\n        \"CARGO_PROFILE_RELEASE_LTO\": \"thin\",\n        \"CARGO_PROFILE_RELEASE_OPT_LEVEL\": \"s\",\n        \"CARGO_PROFILE_RELEASE_PANIC\": \"unwind\",\n        \"CARGO_TARGET_DIR\": \"/home/runner/work/_temp/winui-release-comparison/shared/packer-target\"\n      },\n      \"finished_unix\": 1793795825.9006822,\n      \"label\": \"reference-packer-build\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-build.log\",\n      \"output\": {\n        \"bytes\": 532,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-build.log\",\n        \"sha256\": \"16e333f9f12ee3ba9c0e818c5bba79d0f70e0f7cca457e5b0b5f2494e209a23c\"\n      },\n      \"started_unix\": 1793795809.6029904\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_portable_packer.py\",\n        \"verify-lock\",\n        \"--manifest\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/packer-source/materialization.json\",\n        \"--out\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/packer-lock-after.json\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793795825.9950418,\n      \"label\": \"reference-packer-lock-after\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-lock-after.log\",\n      \"output\": {\n        \"bytes\": 91,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-lock-after.log\",\n        \"sha256\": \"1c6cacfc4272a72ca198b50791daa4364f1b72bfc38093eef84a0b99c4de5af4\"\n      },\n      \"started_unix\": 1793795825.9017656\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n        \"archives\",\n        \"--packer\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/ferroui-fxd\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/packer-check\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793795827.8876452,\n      \"label\": \"reference-packer-archives\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-archives.log\",\n      \"output\": {\n        \"bytes\": 156,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-packer-archives.log\",\n        \"sha256\": \"54c90c9df9214a519aee7f8cee71633e0b2b4c5d0b75cbf42320eff93f99e9bb\"\n      },\n      \"started_unix\": 1793795825.9981952\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/rebuild_winui_pgo.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n        \"--work-dir\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release\",\n        \"--shared-work\",\n        \"/home/runner/work/_temp/winui-release-comparison/shared\",\n        \"--toolchain-prefix\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install\",\n        \"--cargo-home\",\n        \"/home/runner/work/_temp/winui-release-comparison/cargo-home\",\n        \"--packer\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/ferroui-fxd\",\n        \"--cpus\",\n        \"0\",\n        \"--min-free-mib\",\n        \"4096\",\n        \"--min-available-mib\",\n        \"512\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798276.2631752,\n      \"label\": \"reference-release\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-release.log\",\n      \"output\": {\n        \"bytes\": 2039,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-release.log\",\n        \"sha256\": \"5b4348bd5ad552b53f0a86b198ea67e8f205fae3ed5b0ad725a21756f3d57b34\"\n      },\n      \"started_unix\": 1793795827.890427\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/collect_winui_pgo.py\",\n        \"--build\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/build.json\",\n        \"--attribute\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798290.5345118,\n      \"label\": \"reference-collect\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-collect.log\",\n      \"output\": {\n        \"bytes\": 1837,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-collect.log\",\n        \"sha256\": \"fc6ecd7893072812ba36833cd5544aa2b004664a2912e25f477417021836b05e\"\n      },\n      \"started_unix\": 1793798276.2835581\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/source\",\n        \"archives\",\n        \"--packer\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/ferroui-fxd\",\n        \"--installed\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/generated/winui.fxp\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798292.385693,\n      \"label\": \"reference-archives\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-archives.log\",\n      \"output\": {\n        \"bytes\": 152,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-archives.log\",\n        \"sha256\": \"9f6dcdee985f7241cc94d82843269c5fd79b468eb89fffd3e0db3ee2528bdf9d\"\n      },\n      \"started_unix\": 1793798290.53755\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"compat\",\n        \"--executable\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/winui-theme-probe\",\n        \"--archives\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/archives.json\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/compatibility.json\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798297.8824546,\n      \"label\": \"reference-compatibility\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-compatibility.log\",\n      \"output\": {\n        \"bytes\": 160,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-compatibility.log\",\n        \"sha256\": \"7c7627a91a9bc8078e417b1bab3bc67e94501784c87632d7dfeb82874776c1b3\"\n      },\n      \"started_unix\": 1793798292.3879771\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/source\",\n        \"registry\",\n        \"--base\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/graph/libferroui_base-a6983823d9c4af60.rlib\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/graph\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/host-deps\",\n        \"--profile\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43.profdata\",\n        \"--rustc\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/rustc\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/registry\",\n        \"--dev-lto\",\n        \"thin\",\n        \"--dev-opt-level\",\n        \"1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798441.179226,\n      \"label\": \"reference-registry\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-registry.log\",\n      \"output\": {\n        \"bytes\": 205,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-registry.log\",\n        \"sha256\": \"3974bd5be9e9070ff92431aa239358e8d07a849204ca17e34cb76d2fb3f20421\"\n      },\n      \"started_unix\": 1793798297.8837488\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/source\",\n        \"unwind\",\n        \"--base\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/graph/libferroui_base-a6983823d9c4af60.rlib\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/graph\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/host-deps\",\n        \"--profile\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43.profdata\",\n        \"--rustc\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/rustc\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/unwind\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798488.271635,\n      \"label\": \"reference-unwind\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-unwind.log\",\n      \"output\": {\n        \"bytes\": 148,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-unwind.log\",\n        \"sha256\": \"7314da94dabd2840f22117e76c6b0038090b37f7970c75c24161392cd3e82f43\"\n      },\n      \"started_unix\": 1793798441.1808062\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_template_validation.py\",\n        \"build\",\n        \"--fixture\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/template-fixture/fixture.json\",\n        \"--graph\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/graph\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/host-deps\",\n        \"--profile\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/release/4e93646613b82d345dc332a06e5261e90a37840c723fc694a74d89e65c50af43.profdata\",\n        \"--rustc\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/rustc\",\n        \"--cpu\",\n        \"0\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-build\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798945.1684465,\n      \"label\": \"reference-templates-build\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-templates-build.log\",\n      \"output\": {\n        \"bytes\": 95,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-templates-build.log\",\n        \"sha256\": \"790bf067b92183023698b9fb9fa7947c677457d8547b0b8b2eb1fae5669cf1f5\"\n      },\n      \"started_unix\": 1793798488.2730215\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_template_validation.py\",\n        \"check\",\n        \"--build\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-build/build.json\",\n        \"--scalar-archive\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/scalar-v3.fxp\",\n        \"--structural-archive\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/archives/struct-v3.fxp\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/reference/templates-check\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798946.842644,\n      \"label\": \"reference-templates-check\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-templates-check.log\",\n      \"output\": {\n        \"bytes\": 95,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/reference-templates-check.log\",\n        \"sha256\": \"b92756ce80920881b00b4c3472cc882f160d50fb687e8378189580049fcccdc6\"\n      },\n      \"started_unix\": 1793798945.1696754\n    },\n    {\n      \"argv\": [\n        \"git\",\n        \"checkout\",\n        \"--detach\",\n        \"ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798947.5101702,\n      \"label\": \"candidate-checkout\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-checkout.log\",\n      \"output\": {\n        \"bytes\": 189,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-checkout.log\",\n        \"sha256\": \"d52c8141c703bcca3c6ff0211615d25fd5864be8c04f4f13ac368a8a00198a66\"\n      },\n      \"started_unix\": 1793798947.4357033\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_portable_packer.py\",\n        \"materialize\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/packer-source\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798947.663468,\n      \"label\": \"candidate-packer-source\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-source.log\",\n      \"output\": {\n        \"bytes\": 103,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-source.log\",\n        \"sha256\": \"65d0fa08d6111739a81483d72b4798a9ba7fef84b0f0055892d7cda49a4f9ebe\"\n      },\n      \"started_unix\": 1793798947.5117095\n    },\n    {\n      \"argv\": [\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/cargo\",\n        \"fetch\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/packer-source\",\n      \"exit\": 0,\n      \"extra_environment\": {\n        \"CARGO_PROFILE_RELEASE_CODEGEN_UNITS\": \"16\",\n        \"CARGO_PROFILE_RELEASE_DEBUG\": \"0\",\n        \"CARGO_PROFILE_RELEASE_LTO\": \"thin\",\n        \"CARGO_PROFILE_RELEASE_OPT_LEVEL\": \"s\",\n        \"CARGO_PROFILE_RELEASE_PANIC\": \"unwind\",\n        \"CARGO_TARGET_DIR\": \"/home/runner/work/_temp/winui-release-comparison/shared/packer-target\"\n      },\n      \"finished_unix\": 1793798947.6930764,\n      \"label\": \"candidate-packer-fetch\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-fetch.log\",\n      \"output\": {\n        \"bytes\": 0,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-fetch.log\",\n        \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n      },\n      \"started_unix\": 1793798947.665174\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_portable_packer.py\",\n        \"verify-lock\",\n        \"--manifest\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/packer-source/materialization.json\",\n        \"--out\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/packer-lock-before.json\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798947.7882404,\n      \"label\": \"candidate-packer-lock-before\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-lock-before.log\",\n      \"output\": {\n        \"bytes\": 92,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-lock-before.log\",\n        \"sha256\": \"4df77d23d8b983bc0c38d54173f3a168676d02d5a0656dabe7dbb2b057897a9d\"\n      },\n      \"started_unix\": 1793798947.6946604\n    },\n    {\n      \"argv\": [\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/cargo\",\n        \"build\",\n        \"--locked\",\n        \"--release\",\n        \"--target\",\n        \"x86_64-unknown-linux-gnu\",\n        \"--bin\",\n        \"ferroui-fxd\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/packer-source\",\n      \"exit\": 0,\n      \"extra_environment\": {\n        \"CARGO_NET_OFFLINE\": \"true\",\n        \"CARGO_PROFILE_RELEASE_CODEGEN_UNITS\": \"16\",\n        \"CARGO_PROFILE_RELEASE_DEBUG\": \"0\",\n        \"CARGO_PROFILE_RELEASE_LTO\": \"thin\",\n        \"CARGO_PROFILE_RELEASE_OPT_LEVEL\": \"s\",\n        \"CARGO_PROFILE_RELEASE_PANIC\": \"unwind\",\n        \"CARGO_TARGET_DIR\": \"/home/runner/work/_temp/winui-release-comparison/shared/packer-target\"\n      },\n      \"finished_unix\": 1793798960.9799669,\n      \"label\": \"candidate-packer-build\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-build.log\",\n      \"output\": {\n        \"bytes\": 323,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-build.log\",\n        \"sha256\": \"5f58c278733b68db5bda6c7b70db3e6a358c5989e1010775c4277c1923dcc1cd\"\n      },\n      \"started_unix\": 1793798947.789886\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_portable_packer.py\",\n        \"verify-lock\",\n        \"--manifest\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/packer-source/materialization.json\",\n        \"--out\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/packer-lock-after.json\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798961.0727642,\n      \"label\": \"candidate-packer-lock-after\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-lock-after.log\",\n      \"output\": {\n        \"bytes\": 91,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-lock-after.log\",\n        \"sha256\": \"02d3b1de1a82447d490a37341ecaa452c0d409a359a8ee71eb1ca693958ab416\"\n      },\n      \"started_unix\": 1793798960.9816306\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n        \"archives\",\n        \"--packer\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/ferroui-fxd\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/packer-check\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793798962.931983,\n      \"label\": \"candidate-packer-archives\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-archives.log\",\n      \"output\": {\n        \"bytes\": 156,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-packer-archives.log\",\n        \"sha256\": \"e67b4112222c29d5c445b044fb766869165ca09a8cabc6ee4c5506f4ea5f2ec5\"\n      },\n      \"started_unix\": 1793798961.0766187\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/rebuild_winui_pgo.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n        \"--work-dir\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release\",\n        \"--shared-work\",\n        \"/home/runner/work/_temp/winui-release-comparison/shared\",\n        \"--toolchain-prefix\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install\",\n        \"--cargo-home\",\n        \"/home/runner/work/_temp/winui-release-comparison/cargo-home\",\n        \"--packer\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/ferroui-fxd\",\n        \"--cpus\",\n        \"0\",\n        \"--min-free-mib\",\n        \"4096\",\n        \"--min-available-mib\",\n        \"512\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793801399.0775702,\n      \"label\": \"candidate-release\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-release.log\",\n      \"output\": {\n        \"bytes\": 2043,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-release.log\",\n        \"sha256\": \"b63fb261fbbc3beb7545de02e9b63a4dbb38e6e9d38c2fde8e485ad4b4a17f28\"\n      },\n      \"started_unix\": 1793798962.9354591\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/collect_winui_pgo.py\",\n        \"--build\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/build.json\",\n        \"--attribute\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793801412.5258005,\n      \"label\": \"candidate-collect\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-collect.log\",\n      \"output\": {\n        \"bytes\": 1838,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-collect.log\",\n        \"sha256\": \"f3f052b022514cda09573673c0e58dfdf95d4a043614b065ea9a752ac45cb895\"\n      },\n      \"started_unix\": 1793801399.096264\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/source\",\n        \"archives\",\n        \"--packer\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/ferroui-fxd\",\n        \"--installed\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/generated/winui.fxp\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793801414.3970222,\n      \"label\": \"candidate-archives\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-archives.log\",\n      \"output\": {\n        \"bytes\": 152,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-archives.log\",\n        \"sha256\": \"aeee75592b208f8194c3363bcc9b57854f94daa02b22dbc74212a50dd79d7467\"\n      },\n      \"started_unix\": 1793801412.5293114\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"compat\",\n        \"--executable\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/winui-theme-probe\",\n        \"--archives\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/archives.json\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/compatibility.json\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793801420.03551,\n      \"label\": \"candidate-compatibility\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-compatibility.log\",\n      \"output\": {\n        \"bytes\": 160,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-compatibility.log\",\n        \"sha256\": \"6bae6555aee6f636b86f45f24bc1d339d334d2c02d1e8c47ab0356b1b9aeff60\"\n      },\n      \"started_unix\": 1793801414.3999658\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/source\",\n        \"registry\",\n        \"--base\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/graph/libferroui_base-c9f1bf6f075add34.rlib\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/graph\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/host-deps\",\n        \"--profile\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525.profdata\",\n        \"--rustc\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/rustc\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/registry\",\n        \"--dev-lto\",\n        \"thin\",\n        \"--dev-opt-level\",\n        \"1\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793801566.213949,\n      \"label\": \"candidate-registry\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-registry.log\",\n      \"output\": {\n        \"bytes\": 205,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-registry.log\",\n        \"sha256\": \"2663290f6c79993d9e4f48e6bd564c1197c8ecd3ea013ae8208c64b52cb30524\"\n      },\n      \"started_unix\": 1793801420.0376039\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n        \"--source\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/source\",\n        \"unwind\",\n        \"--base\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/graph/libferroui_base-c9f1bf6f075add34.rlib\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/graph\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/host-deps\",\n        \"--profile\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525.profdata\",\n        \"--rustc\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/rustc\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/unwind\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793801616.2807214,\n      \"label\": \"candidate-unwind\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-unwind.log\",\n      \"output\": {\n        \"bytes\": 148,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-unwind.log\",\n        \"sha256\": \"6c3db501c8f27dcc66fbf38c2fcb09bde1ca2e3de015bd2c06d2b0c042706968\"\n      },\n      \"started_unix\": 1793801566.2161646\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_template_validation.py\",\n        \"build\",\n        \"--fixture\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/template-fixture/fixture.json\",\n        \"--graph\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/graph\",\n        \"--dependency\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/host-deps\",\n        \"--profile\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/release/a7a2fbd9135973c38d8bc11106b17f7a0b8b3cae15f7b02921402d60f838f525.profdata\",\n        \"--rustc\",\n        \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/rustc\",\n        \"--cpu\",\n        \"0\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-build\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793802075.4632432,\n      \"label\": \"candidate-templates-build\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-templates-build.log\",\n      \"output\": {\n        \"bytes\": 95,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-templates-build.log\",\n        \"sha256\": \"4c19779cc9bcc97404104973a787c6479a52cf9a98c0754f119d2e0a85f28119\"\n      },\n      \"started_unix\": 1793801616.2827342\n    },\n    {\n      \"argv\": [\n        \"/usr/bin/python3\",\n        \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_template_validation.py\",\n        \"check\",\n        \"--build\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-build/build.json\",\n        \"--scalar-archive\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/scalar-v3.fxp\",\n        \"--structural-archive\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/archives/struct-v3.fxp\",\n        \"--output\",\n        \"/home/runner/work/_temp/winui-release-comparison/evidence/candidate/templates-check\"\n      ],\n      \"complete\": true,\n      \"cwd\": \"/home/runner/work/_temp/winui-release-comparison\",\n      \"exit\": 0,\n      \"extra_environment\": {},\n      \"finished_unix\": 1793802077.0759726,\n      \"label\": \"candidate-templates-check\",\n      \"log\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-templates-check.log\",\n      \"output\": {\n        \"bytes\": 95,\n        \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/logs/candidate-templates-check.log\",\n        \"sha256\": \"ba5096dbb3d0372a66a70633e8aaa42c90c6112dbb39d217e1039b9573945237\"\n      },\n      \"started_unix\": 1793802075.465065\n    }\n  ],\n  \"comparison\": {\n    \"candidate_bytes\": 27065600,\n    \"candidate_minus_reference_bytes\": -75808,\n    \"meets_10mb_target\": false,\n    \"reference_bytes\": 27141408,\n    \"remaining_to_budget_bytes\": 17065600,\n    \"section_file_byte_deltas\": {\n      \".bss\": 0,\n      \".cfi_reserve\": 0,\n      \".data\": 8,\n      \".data.rel.ro\": -14264,\n      \".dynamic\": 0,\n      \".dynstr\": 0,\n      \".dynsym\": 0,\n      \".eh_frame\": -11728,\n      \".eh_frame_hdr\": -2120,\n      \".fini\": 0,\n      \".fini_array\": 0,\n      \".gcc_except_table\": 1912,\n      \".gnu.hash\": 0,\n      \".gnu.version\": 0,\n      \".gnu.version_r\": 0,\n      \".got\": 0,\n      \".got.plt\": 0,\n      \".init\": 0,\n      \".init_array\": 0,\n      \".interp\": 0,\n      \".note.ABI-tag\": 0,\n      \".note.gnu.build-id\": 0,\n      \".plt\": 0,\n      \".rela.dyn\": 0,\n      \".rela.plt\": 0,\n      \".relr.dyn\": -224,\n      \".relro_padding\": 0,\n      \".rodata\": 168,\n      \".tbss\": 0,\n      \".tdata\": 0,\n      \".text\": -48976,\n      \".tm_clone_table\": 0\n    }\n  },\n  \"compile_source_path\": \"/home/runner/work/_temp/winui-release-comparison/checkout\",\n  \"complete\": true,\n  \"consumer_path\": \"/home/runner/work/_temp/winui-release-comparison/shared/consumer\",\n  \"cpu_affinity\": [\n    0\n  ],\n  \"environment\": {\n    \"controlled\": {\n      \"CARGO_BUILD_JOBS\": \"1\",\n      \"CARGO_HOME\": \"/home/runner/work/_temp/winui-release-comparison/cargo-home\",\n      \"CARGO_INCREMENTAL\": \"0\",\n      \"CARGO_TERM_COLOR\": \"never\",\n      \"LLVM_PROFILE_FILE\": \"/dev/null\",\n      \"MALLOC_ARENA_MAX\": \"1\",\n      \"RAYON_NUM_THREADS\": \"1\",\n      \"TMPDIR\": \"/home/runner/work/_temp/winui-release-comparison/temporary\"\n    },\n    \"removed_variable_names\": [],\n    \"toolchain\": {\n      \"LD_LIBRARY_PATH\": \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/lib\",\n      \"PATH\": \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin:/home/runner/work/_temp/winui-release-comparison/toolchain/install/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld:/snap/bin:/home/runner/.local/bin:/opt/pipx_bin:/home/runner/.cargo/bin:/home/runner/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/runner/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\",\n      \"RUSTC\": \"/home/runner/work/_temp/winui-release-comparison/toolchain/install/bin/rustc\"\n    }\n  },\n  \"finished_unix\": 1793802077.6639102,\n  \"order\": [\n    \"reference\",\n    \"candidate\"\n  ],\n  \"performance\": \"Not measured: no throughput, allocation, startup or build-time parity claim.\",\n  \"producer_inputs\": {\n    \"attribute_codegen.py\": {\n      \"bytes\": 23369,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/attribute_codegen.py\",\n      \"sha256\": \"24324f87bdcc073afdb67e09f1afac0cc85d0f3ecf9a97083b3aab77979e57ff\"\n    },\n    \"attribute_runtime.py\": {\n      \"bytes\": 11346,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/attribute_runtime.py\",\n      \"sha256\": \"58ba05dcbc2f6a9c1ce5fb2956bd61f04deae707c124e836b8861316a3f9d3aa\"\n    },\n    \"bootstrap_toolchain.py\": {\n      \"bytes\": 8676,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/bootstrap_toolchain.py\",\n      \"sha256\": \"ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb\"\n    },\n    \"collect_winui_pgo.py\": {\n      \"bytes\": 11471,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/collect_winui_pgo.py\",\n      \"sha256\": \"e3efb1dd203930a70ca162c29371af3544c9e0f2677aec7b45d367e39ca374a6\"\n    },\n    \"compact_unwind.py\": {\n      \"bytes\": 9421,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/compact_unwind.py\",\n      \"sha256\": \"ea42ad02f5c0d8ca158a50c2b43a95e7e1697f91600b9108b78873026c0c5711\"\n    },\n    \"compact_unwind_link.py\": {\n      \"bytes\": 7203,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/compact_unwind_link.py\",\n      \"sha256\": \"36477e1afabf3be1822871acdd1316f11a390adebb8f0671244c73bc87e91b5a\"\n    },\n    \"compare_registration.py\": {\n      \"bytes\": 19624,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/compare_registration.py\",\n      \"sha256\": \"23210562b8c328b63d0e7c3328f1c4aac4223ecb35ee55bf48b0dd6e4238583d\"\n    },\n    \"measure.py\": {\n      \"bytes\": 21863,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/measure.py\",\n      \"sha256\": \"9e3c5a517ce63f7d8243b7c2fdfb5669838fbbe6855a37650cb44425528c6495\"\n    },\n    \"pgo_templates.rs\": {\n      \"bytes\": 2014,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/pgo_templates.rs\",\n      \"sha256\": \"37824fc1775d438a62d01406f115096408e60b032dc91589483dc7b8b4fa34e2\"\n    },\n    \"prepare_portable_packer.py\": {\n      \"bytes\": 11754,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_portable_packer.py\",\n      \"sha256\": \"72da1e3b090ca1bf1150269c31339d6a160b3b538d1ae4299b689449ef9c5ba2\"\n    },\n    \"prepare_template_validation.py\": {\n      \"bytes\": 19806,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/prepare_template_validation.py\",\n      \"sha256\": \"6db804622fc6d885fe67add4bd04ff0d5531807aa0062b1ec886bc5f3829906f\"\n    },\n    \"profile_winui.py\": {\n      \"bytes\": 11372,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/profile_winui.py\",\n      \"sha256\": \"9abbf0142e12891cb722833d661ec98f3919454ac3d87fa3e30fe0a275f55d93\"\n    },\n    \"rebuild_winui_pgo.py\": {\n      \"bytes\": 31189,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/rebuild_winui_pgo.py\",\n      \"sha256\": \"dea852e85365c09511b9fc729546e03771b3c2166e0f6fd0cdd4ebff244a77ab\"\n    },\n    \"run_winui_release_comparison.py\": {\n      \"bytes\": 23250,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/run_winui_release_comparison.py\",\n      \"sha256\": \"76fb9d46495d2880be2f8b6ca1b55bf74e238df418b3c7b8e5fffc1ff448cfc1\"\n    },\n    \"template_structural_resource.rs\": {\n      \"bytes\": 833,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/template_structural_resource.rs\",\n      \"sha256\": \"580437fe767f2029ceb036be21b6732f033c44037d0e22970059d517a75c8e91\"\n    },\n    \"validate_runtime_release.py\": {\n      \"bytes\": 22158,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/validate_runtime_release.py\",\n      \"sha256\": \"754ab07ccd12399179238b6965969606d9d2e0ce7f08d296034763cb0cfada75\"\n    },\n    \"winui.rs\": {\n      \"bytes\": 3657,\n      \"path\": \"/home/runner/work/FerroUI/FerroUI/scripts/themes/bench/winui.rs\",\n      \"sha256\": \"8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269\"\n    }\n  },\n  \"release_acceptance\": \"Pending the full property, binding, metadata and animation correctness/performance gates; this size and targeted correctness comparison is not full release acceptance.\",\n  \"requested_revisions\": {\n    \"candidate\": \"ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad\",\n    \"reference\": \"d2d2f83d606f547b4ebda2323a145b14ca8379ad\"\n  },\n  \"resolved_revisions\": {\n    \"candidate\": \"ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad\",\n    \"reference\": \"d2d2f83d606f547b4ebda2323a145b14ca8379ad\"\n  },\n  \"schema_version\": 1,\n  \"scope\": \"Compare two complete editable WinUI releases in one disposable compile path.\\n\\nEach revision trains its own original thirteen-workload PGO profile. Collection\\nand archive/template correctness finish before the checkout or target is reused.\\nThis orchestrator measures shipping bytes, not throughput or build performance.\\nCompiler identities, profiles, graphs, commands and failures retain their existing\\nproducer manifests under --work-dir/evidence. No runtime source is overlaid.\\n\",\n  \"shipping_budget_bytes\": 10000000,\n  \"started_unix\": 1793795792.2040105,\n  \"target_path\": \"/home/runner/work/_temp/winui-release-comparison/shared/target\",\n  \"toolchain\": {\n    \"bytes\": 11612,\n    \"path\": \"/home/runner/work/_temp/winui-release-comparison/evidence/toolchain.json\",\n    \"sha256\": \"24aa69e2cf63f747fd39a9ee43ee3635e73e7eed7918701a116ac417318dd811\"\n  },\n  \"tooling_head\": \"b39af10eee1fcdcf0ff559beabf7ec7d9bb6e39f\"\n}\n"
+  },
+  "performance": {
+    "evidence": "compiled-theme-shared-runtime-production-linux-x86_64.json",
+    "known_blocker": "The prior be91062d/d2d2f83d paired cohort reproduced boxed style delivery regression on CPU6 and CPU7. This cold-cohort size/correctness result does not resolve that blocker.",
+    "status": "pending"
+  },
+  "remaining_gates": [
+    "Paired property/binding, receiver/getter and animation correctness/allocation/throughput on the selected final graph; preserve the known boxed-style regression until measured correction passes.",
+    "Metadata preparation and the whole-factory ControlTheme prototype have separately completed actual-source development gates (compiled-theme-construction-source-validation-linux-x86_64.json). Their paired production performance/full shipping size, and the separate style-region extension, are not established by this cold-cohort result.",
+    "The 10,000,000-byte shipping target remains unmet by 17,065,600 bytes."
+  ],
+  "report_producer": {
+    "bytes": 18613,
+    "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/cold-initialization-report-01/prepare_report.py",
+    "sha256": "16bb9b27f201359b3cbc8ca45c01b01d262be634f845f8c10a8c7f690e04e73a"
+  },
+  "saving_percent_of_matched_reference": 0.2793075436616995,
+  "schema_version": 1,
+  "scope": "Completed matched production shipping-size and targeted correctness comparison for cold initialization only. No paired throughput, startup, allocation or full release-acceptance claim.",
+  "source_changes": {
+    "src/FerroUI.Base/direct_property.rs": {
+      "candidate": {
+        "bytes": 12974,
+        "revision": "ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad",
+        "sha256": "3d992cb6185fdaefb13676a8860d676007f2172b8768fdc22583f028adab9571"
+      },
+      "reference": {
+        "bytes": 12240,
+        "revision": "d2d2f83d606f547b4ebda2323a145b14ca8379ad",
+        "sha256": "c26d542de955e6f67ff594aa333c0b2a0ff5802711634dc1d78b5fd29320df70"
+      }
+    },
+    "src/FerroUI.Base/lib.rs": {
+      "candidate": {
+        "bytes": 4950,
+        "revision": "ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad",
+        "sha256": "bc4214337bd1f09f168ea784987aadaf3f276d0be88698d787a925d63b5fc71f"
+      },
+      "reference": {
+        "bytes": 4935,
+        "revision": "d2d2f83d606f547b4ebda2323a145b14ca8379ad",
+        "sha256": "5195ae7d6987922e345fcfd6b01a5fbe92e3425dd5615a77d94486569b75e806"
+      }
+    },
+    "src/FerroUI.Base/type_system.rs": {
+      "candidate": {
+        "bytes": 63865,
+        "revision": "ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad",
+        "sha256": "8283aaa3ecf48a6dbd0736c108dba06afc53d3519bb1e21382635f866a42cc34"
+      },
+      "reference": {
+        "bytes": 62799,
+        "revision": "d2d2f83d606f547b4ebda2323a145b14ca8379ad",
+        "sha256": "a61adc4f72f143e2aa1def25d2b6180bb95d63dcbf90b9c6c473a5a59296dcca"
+      }
+    }
+  },
+  "source_mechanisms": [
+    "ferro_class! retains its per-class static OnceLock and initialized get fast path; the cold slow initializer accepts fn()->VTable so its generic Once initialization depends on the VTable type instead of the owner-specific function-item type.",
+    "DirectPropertyBase<T> owns shared cold construction and added-owner metadata setup, while typed owner wrappers retain getter/setter, allocation, routes and registration. No notification/set/get hot path is erased."
+  ],
+  "transport_and_import": {
+    "extraction": {
+      "bytes": 4055981678,
+      "complete": true,
+      "directory": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-release-41830662707",
+      "executable_bits_changed": false,
+      "files": 35563,
+      "original": {
+        "bytes": 1256480485,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-transfer-41847907483/original-evidence.zip",
+        "sha256": "a02717012b453870e0ee7f2db18abb853ccfa92ec419ce6080112c58547294f9"
+      }
+    },
+    "extraction_manifest": {
+      "bytes": 435,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-transfer-41847907483/extraction.json",
+      "sha256": "7ebbafa5525e0d36e8f6b00fd883ebc2fbe56b3ce110f4cf845282b07a4f5b8b"
+    },
+    "flattened_source_links": {
+      "candidate": 191,
+      "reference": 191
+    },
+    "import_complete": true,
+    "import_manifest": {
+      "bytes": 320828,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-cold-release-import-01/import.json",
+      "sha256": "f8d006ee5ccd90841428799afd5cb41247b02a17ed739abc05d863030e6c6380"
+    },
+    "original_artifact_metadata": {
+      "bytes": 748,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-transfer-41847907483/verified-status/artifact.json",
+      "sha256": "cd73d42f0ac5fe196f8b6dacf247cc16d079c3472e892a0ea16dff65d8dd3aa4"
+    },
+    "original_manifests_modified": false,
+    "original_run_metadata": {
+      "bytes": 13278,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-transfer-41847907483/verified-status/run.json",
+      "sha256": "3fa46fa7a7dd72192612bf6efd11c9c53234b850e48fe75f18e0e8b07144d66d"
+    },
+    "part_identities": [
+      {
+        "bytes": 469762048,
+        "directory": "part-001",
+        "file": "release-evidence.zip.part-001",
+        "number": 1,
+        "offset": 0,
+        "sha256": "3d1b2e0101b5612d0a63a9b42ee3638b3101cfebd7a1454d5aa009385e3c82b4"
+      },
+      {
+        "bytes": 469762048,
+        "directory": "part-002",
+        "file": "release-evidence.zip.part-002",
+        "number": 2,
+        "offset": 469762048,
+        "sha256": "eb48522081ec3e39c8192abaf708c27c7c69c0d5f5892c6d64b9a2c10399bee6"
+      },
+      {
+        "bytes": 316956389,
+        "directory": "part-003",
+        "file": "release-evidence.zip.part-003",
+        "number": 3,
+        "offset": 939524096,
+        "sha256": "81542e701b51841ac600715d6d5918a9bca2349d128e0d972e101440529109b6"
+      }
+    ],
+    "reassembled_original_zip": {
+      "bytes": 1256480485,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-transfer-41847907483/original-evidence.zip",
+      "sha256": "a02717012b453870e0ee7f2db18abb853ccfa92ec419ce6080112c58547294f9"
+    },
+    "reassembly_manifest": {
+      "bytes": 2782,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-transfer-41847907483/reassembly.json",
+      "sha256": "462ba8355a349fea8e52a624bca23f7fee10c1ccb722d76ee988694da0417bcb"
+    },
+    "relocation_count": 157,
+    "scope": "Completed transport/reassembly/extraction and graph import are separately retained. This report independently rehashes their small records, not the 1.25 GB ZIP or all imported rlibs a second time.",
+    "transfer_manifest": {
+      "bytes": 3332,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/ci-transfer-41847907483/verified-status/transfer.json",
+      "sha256": "6e21adb1ce1227816d0353bd279f41b3654b02cee44a7b5bcc9cb2a7dd00af26"
+    },
+    "transfer_run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/41847907483"
+  }
+}

@@ -2,14 +2,19 @@
 
 The next release target is **10,000,000 bytes for the complete stripped Linux
 x86-64 executable**, including the editable WinUI runtime and all theme
-documents. The last validated shipping result remains **27,406,416 bytes** at
-the stage5 checkpoint documented in
-[the architecture report](compiled-theme-rust-architecture.md). The source
-changes described here require a fresh profile and full executable measurement;
-fixture savings and the compressed distribution size do not establish progress
-against that budget.
+documents. The latest completed size checkpoint in this report is
+**27,065,600 bytes** at `ab595dd9`, leaving **17,065,600 bytes** to remove.
+Its matched size and targeted correctness gates passed; full release acceptance
+remains blocked by the boxed-style performance regression described below.
+The earlier **27,406,416-byte** stage5 checkpoint remains documented in
+[the architecture report](compiled-theme-rust-architecture.md). Each shipping-size
+comparison below uses fresh profiles and complete executable measurements;
+fixture savings and compressed distribution sizes do not establish progress
+against the shipping budget.
 
-## Completed CI size comparison
+## Completed CI size comparisons
+
+### Shared-runtime cohort
 
 [CI run 41815903284](https://github.com/wieslawsoltes/FerroUI/actions/runs/41815903284)
 completed successfully on 2026-11-04 using the frozen source pair below and a
@@ -122,7 +127,8 @@ unwind. The two typed boxed-input delivery bodies, paired across their old and
 new names, change from 495,734 to 497,109 bytes. These diagnostic family groups
 overlap other category totals and must not be summed.
 
-Two further cold source changes are now prepared for a new matched build:
+Two further cold source changes were frozen at
+[`ab595dd9`](https://github.com/wieslawsoltes/FerroUI/commit/ab595dd9646d2e2e708f833bc17b7d1c4c5af4ad):
 
 - Both `ferro_class!` forms keep the same static `OnceLock` and an initialized
   `get()` fast path. The slow path receives a `fn() -> VTable`, so its generic
@@ -134,13 +140,64 @@ Two further cold source changes are now prepared for a new matched build:
   accessor/routes installation and registration. Metadata merge, freeze and
   temporary-drop ordering are retained.
 
-These follow-up changes have passed source review but have no compiled or size
-result at this checkpoint. The measured executable above remains `d2d2f83d`.
-The vtable initializer envelope is 142,598 bytes, before keeping builder code
-and the new shared helper; making builders address-taken can offset sharing.
-Named direct-property construction families occupy 31,729 bytes, plus copies
-embedded in other functions. Neither envelope supports a multi-megabyte claim
-or establishes progress to the 10 MB budget.
+The preceding census gave a 142,598-byte gross vtable-initializer envelope,
+before retaining builder code and the new shared helper. Named direct-property
+construction families occupied 31,729 bytes, plus copies embedded in other
+functions. Those envelopes were experiment bounds, not predicted savings.
+
+### Completed cold-initialization cohort
+
+[CI run 41830662707](https://github.com/wieslawsoltes/FerroUI/actions/runs/41830662707)
+completed the separate `d2d2f83d` to `ab595dd9` comparison on 2026-11-04.
+Each arm trained a fresh profile with the same original 13 workloads and built
+the complete 54-library target graph in the same checkout, consumer and target
+paths. The
+[cold-initialization production evidence](benchmarks/compiled-theme-cold-initialization-production-linux-x86_64.json)
+preserves the original comparison byte for byte, the artifact and import
+identities, independent hashes of all 16 arm manifests and both executables,
+and a complete ELF file accounting.
+
+| Complete stripped executable | Bytes | SHA-256 |
+|---|---:|---|
+| Fresh matched reference, `d2d2f83d` | 27,141,408 | `e49128877da4d0e0ff9683313b87e5542e416a2c103a696335947f63510a718b` |
+| Cold-initialization candidate, `ab595dd9` | 27,065,600 | `9725868b49f59c6d8cdf02785adb5fbabd6be340d84557271d7d1d3e7149c52e` |
+| **Saving against this matched reference** | **75,808 (0.27931%)** | |
+| **Remaining to 10,000,000 bytes** | **17,065,600** | |
+
+The new `d2d2f83d` reference is **80 bytes larger** than the same-source
+27,141,328-byte image in the preceding cohort. It has a different fresh profile
+and binary identity. The 75,808-byte saving uses the new cohort's own reference;
+the 80-byte difference is retained as observed cohort variation and is not
+attributed to the source change or silently removed by combining the cohorts.
+
+| File component | Candidate minus matched reference |
+|---|---:|
+| `.text` | −48,976 bytes |
+| `.data.rel.ro` | −14,264 bytes |
+| `.eh_frame` | −11,728 bytes |
+| `.eh_frame_hdr` | −2,120 bytes |
+| `.gcc_except_table` | +1,912 bytes |
+| `.relr.dyn` | −224 bytes |
+| `.rodata` | +168 bytes |
+| `.data` | +8 bytes |
+| File-layout gaps | −584 bytes |
+| **Complete file** | **−75,808 bytes** |
+
+Allocated file-backed sections account for −75,224 bytes. Nonallocated section
+contents and ELF/program/section headers are unchanged in size; actual gaps
+between file intervals account for the remaining −584 bytes. `NOBITS` reserves
+and virtual-memory padding contribute no section file bytes. This reconciles
+the stripped executable itself rather than summing overlapping symbol families.
+
+Both arms passed all nine archive cases and rejected the impossible-resource
+negative control. Each passed 47 registry tests, the production compact-unwind
+check, and 156 real template activations across Button, ScrollViewer,
+NavigationView and Slider. The structural archive explicitly resolved
+`AdditionalEditProbe` to `31`. These are size and targeted correctness results.
+The paired property/binding, receiver/getter, animation, allocation and startup
+acceptance work for the selected final graph remains separate. The earlier
+boxed-style delivery regression is still a release blocker, and the 10 MB
+target is not met.
 
 ### Boxed-binding correction under validation
 
@@ -175,9 +232,12 @@ correctness, allocation and paired delivery gates must pass before acceptance.
 
 The boxed correction is committed at
 [`ad926b4d`](https://github.com/wieslawsoltes/FerroUI/commit/ad926b4d10a68465b5bbc9fe203fa908dc785f59).
-Its separate CI comparison freezes `ab595dd9` as reference. The earlier cold
-initialization comparison remains a separate `d2d2f83d` to `ab595dd9` cohort.
-Neither running comparison establishes a new size or throughput result yet.
+Its separate CI comparison freezes `ab595dd9` as reference. It is evaluated
+independently of the completed `d2d2f83d` to `ab595dd9` cold-initialization
+cohort above; that cohort's size result does not validate the boxed correction's
+throughput. The metadata receiver-preparation and ControlTheme/style-region
+prototypes also retain separate actual-source correctness gates. No shipping
+size or performance result from those prototypes is included in this report.
 
 The runtime importer now supports a derived arm selection across completed CI
 imports. Each arm retains its original comparison, source, graph, profile and
@@ -206,13 +266,50 @@ python3 scripts/themes/bench/run_winui_runtime_comparison.py compose \
   --output /evidence/acceptance-selection
 ```
 
+### Completed construction source-validation gates
+
+The next construction changes have passed their separate actual-source
+development gates, recorded in the
+[construction source-validation evidence](benchmarks/compiled-theme-construction-source-validation-linux-x86_64.json).
+These runs compile the actual repository source and tests; they do not measure
+an optimized shipping executable or establish paired throughput.
+
+Metadata preparation at `50d7caef` passed
+[CI run 41850078862](https://github.com/wieslawsoltes/FerroUI/actions/runs/41850078862):
+66 metadata tests, 16 object-smoke tests and 307 property tests, with no failures
+or ignored tests. All three focused accessor oracles executed, downstream Base
+and Controls checks passed, and the frozen source stayed unchanged. Getters
+share receiver preparation while retaining the owned receiver and complete
+callable/result expression in the original thunk. This keeps custom cloning and
+temporary cleanup in their original scopes. Setter and static-accessor helpers
+retain the checked argument and invocation order. The earlier failed cleanup
+oracle and the later test-only function-pointer coercion failure remain in the
+evidence; their results are not counted as passes.
+
+The whole-factory ControlTheme prototype at `af8a87ff` passed
+[CI run 41847594355](https://github.com/wieslawsoltes/FerroUI/actions/runs/41847594355):
+two runtime cleanup tests, six source-grammar tests and 24 differential tests,
+with two pre-existing differential cases ignored. All ten required new cases
+executed. A fresh WinUI check generated 18 construction programs. Per-factory
+operation and import tables share typed construction helpers; the caller owns
+the local array in reverse declaration order so Rust retains the original
+cleanup order. Only complete factories already using all six stored roles are
+accepted, and unsupported factories keep their original generated Rust.
+
+These source checks do not replace the pending full-size and production
+performance comparisons. The separate two-role style-region extension is not
+covered by either completed run. The latest measured shipping result in this
+report remains the `ab595dd9` cold-initialization cohort above.
+
 ## Source checkpoint
 
 The runtime and focused regression tests are committed through
 [`6401e654`](https://github.com/wieslawsoltes/FerroUI/commit/6401e654c148a473f33358b79f5cf886d5f9d86b),
 with test-only corrections through
 [`d2d2f83d`](https://github.com/wieslawsoltes/FerroUI/commit/d2d2f83d606f547b4ebda2323a145b14ca8379ad).
-The production comparison freezes that revision on the existing PR branch.
+The first shared-runtime production comparison froze that revision on the
+existing PR branch. The completed cold-initialization comparison then measured
+it against `ab595dd9`, as recorded above.
 The reference revision is
 `be91062df9bb018de78113c34a1967c60038f9b6`. The source phase does not merge current
 main into the measured cohort.
