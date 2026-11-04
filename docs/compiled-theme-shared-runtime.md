@@ -54,6 +54,58 @@ contents match the recorded source graph. The actual binary hashes and all
 The separate production runtime comparison is still pending at this source
 checkpoint.
 
+### Completed production checks and the remaining regression
+
+The subsequent [production runtime evidence](benchmarks/compiled-theme-shared-runtime-production-linux-x86_64.json)
+completes that comparison for the exact imported `be91062d` and `d2d2f83d`
+graphs. All 16 production companion links succeeded. Both arms passed 347
+property tests (three timing cases ignored), all nine focused regressions,
+eight receiver checks, 88 getter outputs, 44 animation tests and all four
+keyframe checks. The unchanged shipping executables passed local loader checks
+and the nine archive cases. Input identities were rechecked after the run.
+
+The bounded PGO audit accepted all six selected root functions, including
+notification entry count 14,164 on both arms and two retained target promotions.
+This rules out the previously observed loss of those root keys; it is not an
+audit of every profile record or every specialized binding body.
+
+**Performance acceptance is blocked by boxed style delivery.** The following
+ratios are paired candidate/reference medians with their original 95% bootstrap
+intervals. Each boxed-binding cohort uses 31 measured pairs and three warmups;
+the CPU7 confirmation uses the same executables and unchanged workloads.
+
+| Boxed binding lane | CPU6 ratio [95% interval] | CPU7 ratio [95% interval] |
+|---|---:|---:|
+| Style notification | 1.13077 [1.12656, 1.13727] | 1.17237 [1.13761, 1.23521] |
+| Style implicit conversion | 1.11648 [1.10424, 1.12421] | 1.14891 [1.13131, 1.24773] |
+| Style `BindingNotification` | 1.09477 [1.09028, 1.11454] | 1.15771 [1.09146, 1.20733] |
+| Style installation | 1.21471 [1.21129, 1.21830] | 0.99091 [0.95141, 1.01947] |
+
+The CPU7 reference/reference control for style notification is 1.00080
+[0.99467, 1.03063]. Other control lanes show shared-host/order variability;
+the cohorts are not pooled and no universal control correction is applied.
+The installation flag remains recorded but did not reproduce on CPU7. The
+typed mixed style lane uses `LightweightSubject<i32>` on a derived host; its
+near parity does not establish parity for `bind_property_untyped` with boxed
+sources on a root `FerroObject`.
+
+The evidence preserves all 44 CPU6 companion metrics, 20 startup diagnostics,
+the CPU7 confirmation and the control. CPU6 startup-to-resource-readiness
+ratios are 0.98631 [0.97510, 0.99829] for embedded resources, 0.99418
+[0.98037, 1.00444] for scalar edits, 0.99635 [0.98590, 1.01578] for structural
+v3 edits and 0.99763 [0.98380, 1.00822] for the v1 interpreter fallback.
+This measures typed Button `ControlTheme` readiness, not construction or paint.
+
+Allocation counts match. Styled binding installation requests 16 fewer bytes
+per operation. Animation attachment keeps 34 allocation requests per sample
+but increases requested bytes from 6,848 to 6,864. These costs are retained
+separately from timing and from the measured full-executable size saving.
+
+The source follow-up is investigating typed metadata lookup before allocation
+and hot helper inlining. These remain hypotheses/corrections under evaluation;
+the production result above does not establish their performance or accept
+the `d2d2f83d` runtime as throughput-equivalent.
+
 ### Physical attribution and the next source changes
 
 The [fresh size census](benchmarks/compiled-theme-shared-runtime-size-census-linux-x86_64.json)
