@@ -407,6 +407,8 @@ def verify_imported(path):
 class Execution:
     def __init__(self, args):
         self.args = args
+        # Frozen helpers are evidence inputs; imports must not write into their bundle.
+        sys.dont_write_bytecode = True
         self.imported = verify_imported(args.import_manifest)
         require(args.cpu in os.sched_getaffinity(0), "Select an allowed CPU")
         self.work = args.output.resolve()
@@ -414,9 +416,10 @@ class Execution:
         (self.work / "logs").mkdir()
         (self.work / "tmp").mkdir()
         self.env = {k: v for k, v in os.environ.items() if k not in {"LD_PRELOAD", "LD_AUDIT", "LLVM_PROFILE_FILE", "RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS"} and not k.startswith(("FERROUI_PGO_", "FERROUI_BENCH_EXPECT_"))}
-        self.env.update(TMPDIR=str(self.work / "tmp"), LLVM_PROFILE_FILE=os.devnull, RAYON_NUM_THREADS="1", MALLOC_ARENA_MAX="1")
+        self.env.update(TMPDIR=str(self.work / "tmp"), LLVM_PROFILE_FILE=os.devnull, RAYON_NUM_THREADS="1", MALLOC_ARENA_MAX="1", PYTHONDONTWRITEBYTECODE="1")
         self.report = {"schema": 1, "scope": __doc__, "complete": False, "full_release_accepted": False, "import": identity(args.import_manifest), "producer": identity(__file__), "commands": [], "cpu": args.cpu,
-                       "cohort": "Newly CI-linked companions on both arms, executed on this local host; original local-link results remain separate.", "shipping_startup": "Separate validation remains required; this companion producer does not measure the shipping application."}
+                       "cohort": "Newly CI-linked companions on both arms, executed on this local host; original local-link results remain separate.", "shipping_startup": "Separate validation remains required; this companion producer does not measure the shipping application.",
+                       "python_bytecode_policy": {"parent_dont_write_bytecode": sys.dont_write_bytecode, "child_environment": {"PYTHONDONTWRITEBYTECODE": self.env["PYTHONDONTWRITEBYTECODE"]}}}
         self.persist()
 
     def persist(self): save(self.work / "result.json", self.report)
