@@ -1,0 +1,2171 @@
+{
+  "current_main_before": "4eb3ae09f4e955fba4a2db4be3c72afd1b4e9a39",
+  "current_main_policy_inputs_rechecked": [
+    {
+      "git_blob": "bb6a353a8d7b86a4504869caf8179787727d6b11",
+      "path": "scripts/themes/bench/run_winui_release_comparison.py",
+      "sha256": "76fb9d46495d2880be2f8b6ca1b55bf74e238df418b3c7b8e5fffc1ff448cfc1"
+    },
+    {
+      "git_blob": "8c796fa45edb74f2ab75110bd4d1c8b679805c67",
+      "path": "scripts/themes/bench/bootstrap_toolchain.py",
+      "sha256": "ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb"
+    },
+    {
+      "git_blob": "18bc2d2c3b2c925c3b9b968ae5337b208382b210",
+      "path": "scripts/themes/bench/rebuild_winui_pgo.py",
+      "sha256": "dea852e85365c09511b9fc729546e03771b3c2166e0f6fd0cdd4ebff244a77ab"
+    },
+    {
+      "git_blob": "13046212d20145488ded0792715c272f112bf266",
+      "path": "scripts/themes/bench/collect_winui_pgo.py",
+      "sha256": "e3efb1dd203930a70ca162c29371af3544c9e0f2677aec7b45d367e39ca374a6"
+    },
+    {
+      "git_blob": "4daadcc4840dacb91a5eee393c87876e3dd6e9cd",
+      "path": "scripts/themes/bench/prepare_portable_packer.py",
+      "sha256": "72da1e3b090ca1bf1150269c31339d6a160b3b538d1ae4299b689449ef9c5ba2"
+    },
+    {
+      "git_blob": "fbb2d930e798ed167a0b5a1db0af3bf96601b505",
+      "path": "scripts/themes/bench/validate_runtime_release.py",
+      "sha256": "754ab07ccd12399179238b6965969606d9d2e0ce7f08d296034763cb0cfada75"
+    },
+    {
+      "git_blob": "234f22ea31aabd17cd098bbeb03f22fc93b0a624",
+      "path": "scripts/themes/bench/prepare_template_validation.py",
+      "sha256": "6db804622fc6d885fe67add4bd04ff0d5531807aa0062b1ec886bc5f3829906f"
+    },
+    {
+      "git_blob": "f55bc457c5817e251bcbe1dfb263598e3394c4bb",
+      "path": "scripts/themes/bench/template_structural_resource.rs",
+      "sha256": "580437fe767f2029ceb036be21b6732f033c44037d0e22970059d517a75c8e91"
+    },
+    {
+      "git_blob": "f68593c78e338dc12ab6d29d003efb4745b621b0",
+      "path": "scripts/themes/bench/profile_winui.py",
+      "sha256": "9abbf0142e12891cb722833d661ec98f3919454ac3d87fa3e30fe0a275f55d93"
+    },
+    {
+      "git_blob": "29671bfabbe52f4650a60b3ade1ef591fee90a70",
+      "path": "scripts/themes/bench/winui.rs",
+      "sha256": "8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269"
+    },
+    {
+      "git_blob": "53e44d4bb3dafd9be6687c6adc77ca6659b9038e",
+      "path": "scripts/themes/bench/pgo_templates.rs",
+      "sha256": "37824fc1775d438a62d01406f115096408e60b032dc91589483dc7b8b4fa34e2"
+    },
+    {
+      "git_blob": "29c6d6d64492053bbff21eef7a852ff9cd34a477",
+      "path": "scripts/themes/bench/compact_unwind.py",
+      "sha256": "ea42ad02f5c0d8ca158a50c2b43a95e7e1697f91600b9108b78873026c0c5711"
+    },
+    {
+      "git_blob": "d55ec6b2559c9ac1cd74215691da3e182ff87a43",
+      "path": "scripts/themes/bench/compact_unwind_link.py",
+      "sha256": "36477e1afabf3be1822871acdd1316f11a390adebb8f0671244c73bc87e91b5a"
+    },
+    {
+      "git_blob": "f165a8da76d2a38c9da73a49ae975b84c89277c7",
+      "path": "scripts/themes/bench/attribute_codegen.py",
+      "sha256": "24324f87bdcc073afdb67e09f1afac0cc85d0f3ecf9a97083b3aab77979e57ff"
+    },
+    {
+      "git_blob": "ed2ab6e0bfbafc5e74b81681e41e19f516386e3d",
+      "path": "scripts/themes/bench/attribute_runtime.py",
+      "sha256": "58ba05dcbc2f6a9c1ce5fb2956bd61f04deae707c124e836b8861316a3f9d3aa"
+    },
+    {
+      "git_blob": "c476b5410024ca855c1a32300e281605b05db54e",
+      "path": "scripts/themes/bench/compare_registration.py",
+      "sha256": "23210562b8c328b63d0e7c3328f1c4aac4223ecb35ee55bf48b0dd6e4238583d"
+    },
+    {
+      "git_blob": "c7c684c00f36672b832a0a963558ef98dd2db4a2",
+      "path": "scripts/themes/bench/measure.py",
+      "sha256": "9e3c5a517ce63f7d8243b7c2fdfb5669838fbbe6855a37650cb44425528c6495"
+    },
+    {
+      "git_blob": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+      "path": "Cargo.lock",
+      "sha256": "c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b"
+    },
+    {
+      "git_blob": "6e2c4f9c54a6bfdb5e3114e631230b220477f0cb",
+      "path": "Cargo.toml",
+      "sha256": "4ff8555c1b499522ed964cc57d9b8ab9e6424fa0ea6c731d5c66444baaf2204f"
+    },
+    {
+      "git_blob": "9d229fbc1be5430539032cb25909950366956517",
+      "path": "docs/benchmarks/compiled-theme-binding-dispatch-linux-x86_64.json",
+      "sha256": "091a06798299bb2972b4b6d5ce5624f500a2dab4b24a7418bf755b58afd19079"
+    }
+  ],
+  "full_release_comparison_complete": false,
+  "independent_workflow_review": {
+    "content": {
+      "checks": {
+        "active_ad_to_dc_workflow_unchanged_in_worktree_and_main": true,
+        "all_17_producers_plus_manifest_lock_and_training_corpus_byte_identical": true,
+        "all_216_Cargo_manifest_lock_modes_and_blobs_identical": true,
+        "all_declared_source_pair_bytes_and_hashes_verified": true,
+        "exact_workflow_copy_under_only_six_pin_and_isolation_substitutions": true,
+        "git_diff_check": true,
+        "metadata_theme_region_and_winui_sources_unchanged_between_arms": true,
+        "only_new_workflow_untracked_no_modified_sources": true,
+        "pins_trigger_timeout_permissions_pinned_actions_and_failure_upload": true,
+        "shipping_and_original_training_identity_guards_unchanged": true,
+        "source_delta_exact_12_reviewed_Base_files_8_production_4_test": true
+      },
+      "inputs": {
+        "active_workflow": {
+          "bytes": 2990,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-tooling/.github/workflows/winui-release-size.yml",
+          "sha256": "52c5bf94f22bdb3466fd804e94a011421dd69d3831df9e110f30c0cad166abc0"
+        },
+        "manifest": {
+          "bytes": 63766,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-workflow-review/review-01.json",
+          "sha256": "3888c8fbc5620f20205d2123479e714735a33204f15e3f414679c7d35d99e074"
+        },
+        "patch": {
+          "bytes": 3534,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-workflow-review/workflow-01.patch",
+          "sha256": "a07033744fa86b68589ae10029a6583c9f98a923ed3c52c3f8783ebab639507b"
+        },
+        "source_pair_patch": {
+          "bytes": 104128,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-workflow-review/source-pair.patch",
+          "sha256": "20061b1a288522a23987a61b6cda7a46066d01d706f7680d4070792308baf0d1"
+        },
+        "workflow": {
+          "bytes": 3113,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-tooling/.github/workflows/winui-property-capabilities-release-size.yml",
+          "sha256": "7d016d6438e64c8123460adba5415ca2bb6c30169285a04b0a7cad7d29c9b79a"
+        }
+      },
+      "limitations": [
+        "Actual combined source gate completion must be verified before publication; this is a reviewed external prerequisite, not an automatic dependency in this workflow.",
+        "No new size or performance result exists from this preparation. The unchanged workflow measures shipping size and targeted correctness, not runtime throughput acceptance.",
+        "54 target rlibs remains an expected historical count; actual graph inventory is an execution result."
+      ],
+      "outcome": "source_review_pass",
+      "pair": {
+        "candidate": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+        "reference": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b"
+      },
+      "schema": 1,
+      "scope": "Independent read-only workflow/source/policy review. No producer, compiler, PGO training, source test, native execution, timing or workflow trigger. The new workflow is ready only after root verifies the exact candidate415/27 source gate.",
+      "unchanged_pipeline": {
+        "actual_shipping_Loader_Base_graph": true,
+        "additional_edit_probe": 31,
+        "archive_cases": 9,
+        "collection_and_all_correctness_before_target_cleanup_and_source_switch": true,
+        "complete_fresh_target_and_host_dependency_graphs": true,
+        "features": "ferroui-themes-winui/solid-theme,retain-archive",
+        "fresh_profile_per_arm": true,
+        "isolated_packer_tool_only": true,
+        "ordinary_unwind_with_existing_compact_unwind_transform": true,
+        "registry_passed": 47,
+        "shared_compile_source_consumer_target_paths_within_pair": true,
+        "template_activations": 156,
+        "training_launches": 13
+      }
+    },
+    "identity": {
+      "bytes": 3741,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-workflow-review/independent-review-callable-01.json",
+      "sha256": "746b805c1529d7a2895d4b8c2c35109a9fd4755330aaff9950352a5098950017"
+    }
+  },
+  "original_construction_workflow_unchanged": true,
+  "original_preparation": {
+    "content": {
+      "all_cargo_manifests_and_locks_identical": {
+        "count": 216,
+        "entries": [
+          {
+            "blob": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "Cargo.lock"
+          },
+          {
+            "blob": "6e2c4f9c54a6bfdb5e3114e631230b220477f0cb",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "Cargo.toml"
+          },
+          {
+            "blob": "4cf6a17fc07d3181de4fbf37b13a76fbe3f34a2f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "external/XamlX/src/XamlX/Cargo.toml"
+          },
+          {
+            "blob": "1ccba73e78e50744fcd0746bd2100fbd992f2639",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/AppWithoutLifetime/Cargo.toml"
+          },
+          {
+            "blob": "e327916d5abb1301033d48b146409577da679927",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/BehaviorsGallery/Cargo.toml"
+          },
+          {
+            "blob": "2984d86d50dfa8f360a49f5e4e97064203b623ba",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/BindingDemo/Cargo.toml"
+          },
+          {
+            "blob": "58998381600e06f2c17159b48d7630f50f28395f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ChartsDemo/Cargo.toml"
+          },
+          {
+            "blob": "624b07e362812761057804e838dc061a973854c1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog.Android/Cargo.toml"
+          },
+          {
+            "blob": "d1454b53b36b69c0240b50ea84ebaa2bf81241f1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog.Browser/Cargo.toml"
+          },
+          {
+            "blob": "f94b8d5245f1f6923ae4cc8a996d7b72f6587262",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog.Desktop/Cargo.toml"
+          },
+          {
+            "blob": "9dd93d69deb978c1db1d2a0a2be04a1ef299d8ca",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog.iOS/Cargo.toml"
+          },
+          {
+            "blob": "9bc103c0394855bdb49ad26f272a601f5e0e76cc",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlCatalog/Cargo.toml"
+          },
+          {
+            "blob": "bc2b2d50e7b8b26d2cf1dcc505e260a62cf814a8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ControlGallery.WinUI/Cargo.toml"
+          },
+          {
+            "blob": "d99c9910c585db027ed594e03092baed95ef5b4c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/DesignerStudio/Cargo.toml"
+          },
+          {
+            "blob": "77d45edfc91279855ad5f35fae772645acabf92f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/Dock/FerroDockReactiveUISample/Cargo.toml"
+          },
+          {
+            "blob": "537f2cf37a5b4d36bdd7ba1d1805eac4ee8f74a0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/GpuInterop/Cargo.toml"
+          },
+          {
+            "blob": "b91de6b20d9000264ddb8eeb6fcada8e2bb16f49",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld.Builders/Cargo.toml"
+          },
+          {
+            "blob": "a99cfdc0da9f547e339b07faf18187ad53875aaa",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld.ComponentHost/Cargo.toml"
+          },
+          {
+            "blob": "b3fcf3004dcc1e375d080031cd79830cfcb91f84",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld.Hooks/Cargo.toml"
+          },
+          {
+            "blob": "190d50bf2d96d5f9493d65e0d7b3449b280d171b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld.Macros/Cargo.toml"
+          },
+          {
+            "blob": "7b6c27f9179994c95be7227e8b41e36796fc9bdb",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HelloWorld/Cargo.toml"
+          },
+          {
+            "blob": "fe1e114a51a562ef7eda18ba56bc0348aebb864a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/HotReload/Cargo.toml"
+          },
+          {
+            "blob": "5bd1453a382b2bb93db69d5d671c0623a7877409",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/IntegrationTestApp/Cargo.toml"
+          },
+          {
+            "blob": "21c1039295812ae60c31a95020f1bc8e0619651b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/LiveChartsDemo/Cargo.toml"
+          },
+          {
+            "blob": "7ba1a9962fb2a3d82cdb6930278139f48d72dec3",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/MaterialThemeGallery/Cargo.toml"
+          },
+          {
+            "blob": "c3ca99d4a2f1e1b2b8ff21638608df5fd070b7ba",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/MiniMvvm/Cargo.toml"
+          },
+          {
+            "blob": "e101ecc866c31f1250d476b21049a9409b834157",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/PlatformSanityChecks/Cargo.toml"
+          },
+          {
+            "blob": "349cc04c663dbccd67f72d59340269b42fc296d1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ProTranslateDemo/Cargo.toml"
+          },
+          {
+            "blob": "7ee6554948efa889c649a435ca58ddf27a4bc194",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ReactiveDemo/Cargo.toml"
+          },
+          {
+            "blob": "ee8687d5773653af320ed34b394fa9039a36e7c0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ReactiveDemoComponents/Cargo.toml"
+          },
+          {
+            "blob": "719e5b49430f451e4c8271e17a58cc820f50c178",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ReactiveUIExample/Cargo.toml"
+          },
+          {
+            "blob": "084e20f025c7ab364e493853c703d14da7998dd5",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/RenderDemo/Cargo.toml"
+          },
+          {
+            "blob": "e44a036aaea3b67c1c5ab544aac7c16b1fe114e1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SafeAreaDemo.Android/Cargo.toml"
+          },
+          {
+            "blob": "7e777617e5aaec01984985fe3c21ec2f6e3221cf",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SafeAreaDemo.Desktop/Cargo.toml"
+          },
+          {
+            "blob": "5b2b99a6ae0a57b4c9bb77c28b2101975919692a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SafeAreaDemo.iOS/Cargo.toml"
+          },
+          {
+            "blob": "f17102523125a7395c830f7a6331a03333c76685",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SafeAreaDemo/Cargo.toml"
+          },
+          {
+            "blob": "82246661b8afa0a797dd3c1c4fe00d55fd3f32d6",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SampleBuild/Cargo.toml"
+          },
+          {
+            "blob": "d558d3ae60f65cbaa7e7f051e4e819241b907ee7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SampleControls/Cargo.toml"
+          },
+          {
+            "blob": "11edec91e0cc96aad0685ff8008986313c83ed28",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SampleSupport/Cargo.toml"
+          },
+          {
+            "blob": "d83ed06b54b82a929c175d2fe6982994f2eff50a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SampleTesting/Cargo.toml"
+          },
+          {
+            "blob": "4f77ad8553f175a203497d961577fc4efe8652eb",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/Sandbox/Cargo.toml"
+          },
+          {
+            "blob": "1260aba49b1f3c627abe612ab5224b0dd87373ee",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Cells/Cargo.toml"
+          },
+          {
+            "blob": "1cd731c13804e70b5fe476f8eeea028c8e58afb3",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/CircleDrawer/Cargo.toml"
+          },
+          {
+            "blob": "31b2e37e9066b49dd08a7413cdade2d97f3668c5",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Counter/Cargo.toml"
+          },
+          {
+            "blob": "48626f6f38ab317b83b6e33d16e1eb142a517b10",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Crud/Cargo.toml"
+          },
+          {
+            "blob": "ad8aeb40f0845b1daf42d34ad95024fa3405cf73",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/FlightBooker/Cargo.toml"
+          },
+          {
+            "blob": "35bc7019d4f92bec3a18ace9d0bbfe698a5f1ed8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Temperature/Cargo.toml"
+          },
+          {
+            "blob": "d95d3f39ddf3ad8df3a503e89763ed787b436284",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Builders/Timer/Cargo.toml"
+          },
+          {
+            "blob": "8f9ff0875aded58ac20c238e71f4e4d8ba27ebd2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Cells/Cargo.toml"
+          },
+          {
+            "blob": "1e09545924a087a1b4d72a9df314301197a08d51",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/CircleDrawer/Cargo.toml"
+          },
+          {
+            "blob": "4fc76e17660f25daa51393aecf1516371bd16e03",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Counter/Cargo.toml"
+          },
+          {
+            "blob": "c563f62236e31ae2ade9d77e62cf44c2ecfda77d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Crud/Cargo.toml"
+          },
+          {
+            "blob": "c2a3245148f8d0c91807b10161cacf379b003e3b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/FlightBooker/Cargo.toml"
+          },
+          {
+            "blob": "e7cfb2c9db4823852981ab400d388b9fc868235f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Temperature/Cargo.toml"
+          },
+          {
+            "blob": "3e8ce174628b48432068c37b7ffa7870d2ed01c3",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Hooks/Timer/Cargo.toml"
+          },
+          {
+            "blob": "9daef86ea2cb6049987869889983f06df3ee6dd1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Cells/Cargo.toml"
+          },
+          {
+            "blob": "ff99f12a7ab12a191d247518730a4b8d74598068",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/CircleDrawer/Cargo.toml"
+          },
+          {
+            "blob": "4147d78009c40b45250f104a63b19931205595b9",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Counter/Cargo.toml"
+          },
+          {
+            "blob": "c2f00d99123d9b2c92ae8ff072182aea49fb6ee7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Crud/Cargo.toml"
+          },
+          {
+            "blob": "d6c6503594e4abdd29d1fd4cc1a77748ba9ac492",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/FlightBooker/Cargo.toml"
+          },
+          {
+            "blob": "7faca54f66f98b3abdece9cfbaf6f78cbbff3755",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Temperature/Cargo.toml"
+          },
+          {
+            "blob": "82ebda7951246c066fddb765f2cd8cb44ca10790",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Macros/Timer/Cargo.toml"
+          },
+          {
+            "blob": "29860d3ea98ed4a311eb61ba0395758b59aa2b89",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Model/Cargo.toml"
+          },
+          {
+            "blob": "db3782ecac20b913f92202ccd70befc44bf8e868",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SevenGuis/Tests/Cargo.toml"
+          },
+          {
+            "blob": "72d1a1baf7a0fa708bc9294649f3d57b7278c1b2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/SingleProjectSandbox/Cargo.toml"
+          },
+          {
+            "blob": "2e7c92a44046ada0437ebcb1670822960b6edcd2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/StaticViewLocatorDemo/Cargo.toml"
+          },
+          {
+            "blob": "9fc12373e898222a5d12650b772fde0597828f65",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/TextTestApp/Cargo.toml"
+          },
+          {
+            "blob": "87248d7846c1bb13648d9af19b15508f46c3e6ca",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/TodoMvc/Cargo.toml"
+          },
+          {
+            "blob": "832762fcee7905dd8a79b6202758aa51e67d0d6a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/TreeDataGridDemo/Cargo.toml"
+          },
+          {
+            "blob": "86a32877fd170d7403c8aedb0c4d5680374ba4a4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ViewGallery/Cargo.toml"
+          },
+          {
+            "blob": "8118e39324aa23720d34619a54bffa0a1246216d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/ViewInterop/Cargo.toml"
+          },
+          {
+            "blob": "399f426a387a34eb70df4905888df22b9a881040",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/VirtualizationDemo/Cargo.toml"
+          },
+          {
+            "blob": "9c81512d388dfb6d8a7f3bae230cad2bffd21ab2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/WinUIEmbedSample/Cargo.toml"
+          },
+          {
+            "blob": "822e25df6fad0cbf617c89adac7fc3c3f9bc0096",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/WinUIGallery/Cargo.toml"
+          },
+          {
+            "blob": "7e0a4f2999f5811d10c12a9a1a0c38ac05f47a35",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/WinUIThemeGallery/Cargo.toml"
+          },
+          {
+            "blob": "5e2464ff8750a63a78f87ba630d7d77faa660819",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "samples/XEmbedSample/Cargo.toml"
+          },
+          {
+            "blob": "ed046b1e9d366c244e4b4f63bce21ce78cba0cb7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Android/FerroUI.Android/Cargo.toml"
+          },
+          {
+            "blob": "7146a550575fc40ea576c453691278aedf11b763",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Behaviors.Animations/Cargo.toml"
+          },
+          {
+            "blob": "093f34a2e4246739a64fe860679ea42ee1a8a136",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Behaviors/Cargo.toml"
+          },
+          {
+            "blob": "ff868abaff16619394e505e0b207289bbbc4637a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.Custom/Cargo.toml"
+          },
+          {
+            "blob": "56213666a98c5b66b81028ad53417b729c45aa82",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop/Cargo.toml"
+          },
+          {
+            "blob": "9b7086da75698e09c8c18dc817fa5dacbb4cfe5d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.Draggable/Cargo.toml"
+          },
+          {
+            "blob": "0ea2f8267680a18dec1cc022bf4d2cb1bb78ea7c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.Events/Cargo.toml"
+          },
+          {
+            "blob": "c35d9425c0dfa25d5abe4ba6b373373ef8ee7cd4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI/Cargo.toml"
+          },
+          {
+            "blob": "149e78bd9996e419d9f13965750098dd8598af69",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions.Responsive/Cargo.toml"
+          },
+          {
+            "blob": "c52a372cbebad7e3b43894ab946c3dbd4aa32fe2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactions/Cargo.toml"
+          },
+          {
+            "blob": "feee2a7e1e7218c5ba834c852eded348f7b07a98",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Behaviors/FerroUI.Xaml.Interactivity/Cargo.toml"
+          },
+          {
+            "blob": "0f8d288f761d600d123895b7f5274820ca168d32",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Browser/FerroUI.Browser/Cargo.toml"
+          },
+          {
+            "blob": "98fff826a2f3b0801ac9c13eaa795199490e0ddc",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.DeferredContentControl/Cargo.toml"
+          },
+          {
+            "blob": "df954fc8f7102105ea8d9799bf4a1f979a99f26d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.ProportionalStackPanel/Cargo.toml"
+          },
+          {
+            "blob": "fa364eb5151811e547a928065ed8ceebe283b7c4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.Recycling.Model.Ferro/Cargo.toml"
+          },
+          {
+            "blob": "0fac56933a8b2bcca626e97cf1d38fa1cb0e7d5d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.Recycling.Model/Cargo.toml"
+          },
+          {
+            "blob": "cf4c6cda7be78e79c25c780efc319f758fc5e342",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Controls.Recycling/Cargo.toml"
+          },
+          {
+            "blob": "67c3840f7720f2a42f5b229a7cee47c8988b47db",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro.Diagnostics/Cargo.toml"
+          },
+          {
+            "blob": "038a6b1cfbb8cc2349ac6b223e73ff97265c4aff",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro.Themes.Browser/Cargo.toml"
+          },
+          {
+            "blob": "f8a9e952fd010f4951fbf675005c4d58cfcbde7d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro.Themes.Fluent/Cargo.toml"
+          },
+          {
+            "blob": "249c125e24e92c22d647adfdc8be7f64c6b28b12",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro.Themes.Simple/Cargo.toml"
+          },
+          {
+            "blob": "81afcb358cf10a02f71906a54106d2fd703f3477",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Ferro/Cargo.toml"
+          },
+          {
+            "blob": "5d3a37145005e31fd33a4c970eb0ccc648ae4d95",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.MarkupExtension/Cargo.toml"
+          },
+          {
+            "blob": "514f4c63bcab3cd65b6344826434fc416301bad6",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.Ferro/Cargo.toml"
+          },
+          {
+            "blob": "477990967b09ea231191069e1c9bade4172edaaf",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.ReactiveUI.Ferro/Cargo.toml"
+          },
+          {
+            "blob": "4c98815253546d95f654fffebebb38d8407d389d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.ReactiveUI.Services.Ferro/Cargo.toml"
+          },
+          {
+            "blob": "17f5c330b03069ad177dd8ffa46677f141cc2677",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.ReactiveUI.Services/Cargo.toml"
+          },
+          {
+            "blob": "a8c9ab4a9f1d0c0fd071f33188e18a2aca73f2c4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model.ReactiveUI/Cargo.toml"
+          },
+          {
+            "blob": "c9c7ebf499b265e376076c86d92049a94d087761",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Model/Cargo.toml"
+          },
+          {
+            "blob": "45dedd2fedc069ee1e739f440b39e5978c591411",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Runtime/Cargo.toml"
+          },
+          {
+            "blob": "64d407316418fd98902ab0c9c9095846e8a31b4b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust/Cargo.toml"
+          },
+          {
+            "blob": "f8e27a4466d6a1d1da762ba22c6f03e11ab64191",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Serializer.SystemTextJson.Generators/Cargo.toml"
+          },
+          {
+            "blob": "56de055071b9096c6c83e8e44f0274f9ecb80b9f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI/Cargo.toml"
+          },
+          {
+            "blob": "7ab021bb47e9487802c3a2f5ab496c3293a85c87",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Serializer.SystemTextJson/Cargo.toml"
+          },
+          {
+            "blob": "45e8fe3491ca2f611a855ef3bae7c32f1ef07cdd",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Dock/FerroDock.Settings/Cargo.toml"
+          },
+          {
+            "blob": "0e70078582760df62155240e245e3ba5ff0bda86",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Base/Cargo.toml"
+          },
+          {
+            "blob": "6153c884c8271c26ef7a8810738d7579b1b80f64",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Build.Scan/Cargo.toml"
+          },
+          {
+            "blob": "91b41dbf2d42d093d702360ad8a4f3544ae758d8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Build.Tasks/Cargo.toml"
+          },
+          {
+            "blob": "524ed4aca498b3c7a1136a5a04ed6528bca2ec74",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.Charts/Cargo.toml"
+          },
+          {
+            "blob": "7b48e331ae1883ddcf4355eaaf1b3b0877744905",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.ColorPicker/Cargo.toml"
+          },
+          {
+            "blob": "2c1aa30f87cb2825ae66b539024788ca813cf5c6",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.Inking/Cargo.toml"
+          },
+          {
+            "blob": "f220458021e9889004650345242e7f60cc36c19d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.LiveCharts/Cargo.toml"
+          },
+          {
+            "blob": "f8e86d24a9422938021e2d2163ff499fea911f90",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls.Repeater/Cargo.toml"
+          },
+          {
+            "blob": "83898e5cafded61c3f8b4ee2f1b35b76f98f2ab2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Controls/Cargo.toml"
+          },
+          {
+            "blob": "e7b9bbe1c8a7ff5357408d75fb5d68f0906b1fdc",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.DependencyInjection/Cargo.toml"
+          },
+          {
+            "blob": "a96273411c57577af895acbb12a738ed13ed9b8c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Animation/Cargo.toml"
+          },
+          {
+            "blob": "6204d126d54ef75a164f9ce10bb6e56b1abedf17",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Collaboration.Host/Cargo.toml"
+          },
+          {
+            "blob": "da6f1e4f019cd28a8776010d16989c1d2270ef76",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Collaboration/Cargo.toml"
+          },
+          {
+            "blob": "f7153684c6458881a441cd82eaefdec8a3a3f1c1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Core/Cargo.toml"
+          },
+          {
+            "blob": "a11c77975d43092c8ab1168bf8673235d87457aa",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Language/Cargo.toml"
+          },
+          {
+            "blob": "273543bb24e903967ff4249ef2457bf197a15d17",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Project/Cargo.toml"
+          },
+          {
+            "blob": "b72de311f02e8ee777587348fd2582992be40abf",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer.Tools/Cargo.toml"
+          },
+          {
+            "blob": "aabb75da7642e69639c5bc0e3583f2a3320e1f88",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Designer/Cargo.toml"
+          },
+          {
+            "blob": "00204472f33c5c8eb709e7a2bd34636d43f46672",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.DesignerSupport/Cargo.toml"
+          },
+          {
+            "blob": "d82f8c3567dfd036897d6f9d66c17611ac24df12",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Desktop/Cargo.toml"
+          },
+          {
+            "blob": "b1f582a2f6c8915dd2832025672882a8eb23c65a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.DevTools/Cargo.toml"
+          },
+          {
+            "blob": "153640f09bc4bf97bb9077561344b5d74536a897",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Diagnostics/Cargo.toml"
+          },
+          {
+            "blob": "1e651d90aeacd1a5ef5f61d3b9693bfbc8883a86",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Dialogs/Cargo.toml"
+          },
+          {
+            "blob": "b2ee098cae2587d1226704d133a3654fb156d712",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.DynamicData/Cargo.toml"
+          },
+          {
+            "blob": "99f0260d742acd957518dc83ff6be5d778b88114",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Fonts.Inter/Cargo.toml"
+          },
+          {
+            "blob": "1c8e5972c5f5d27a693a3dbba110a5687d6e3268",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.FreeDesktop/Cargo.toml"
+          },
+          {
+            "blob": "f647a25ce060ce13e2d56ddbccde0a88b2574880",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.HotPatch/Cargo.toml"
+          },
+          {
+            "blob": "6cc2eb985f5da75e098d54baaec84c191242424b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.HotReload/Cargo.toml"
+          },
+          {
+            "blob": "8edb23e6b3a241a6707d9699ff73f08e79eac05b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Inspect/Cargo.toml"
+          },
+          {
+            "blob": "95fd76a3ca621b8c96f171f161f867ce8015d6a8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.LiveCharts/Cargo.toml"
+          },
+          {
+            "blob": "caeff6779bf7c94e9369f58a996bd904432add1c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Mcp/Cargo.toml"
+          },
+          {
+            "blob": "7fb7ab1debf506b5baff24b649defb0d31a944eb",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Metal/Cargo.toml"
+          },
+          {
+            "blob": "17dba9068d4f8c582c48d5bcc53b311988f54f64",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.MicroCom/Cargo.toml"
+          },
+          {
+            "blob": "f95a9e5d1c265e53161ed8f8fddd40d5365d946e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Native/Cargo.toml"
+          },
+          {
+            "blob": "af37e9dc83b65f318825f740e67378d027086179",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.OpenGL/Cargo.toml"
+          },
+          {
+            "blob": "a84b370a279ac367fef9fe55b4a0c7ae58c7681f",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Reactive.Testing/Cargo.toml"
+          },
+          {
+            "blob": "9333b8b47cb97c8676f23c9a6ca4994ded1d13bf",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Reactive/Cargo.toml"
+          },
+          {
+            "blob": "6ed134e0a85713ac1b36f07fbb52ec9d3c860473",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.ReactiveUI.Controls/Cargo.toml"
+          },
+          {
+            "blob": "abec3e79e75aa3106badec6f7e52b3666ecb6fc1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.ReactiveUI.Testing/Cargo.toml"
+          },
+          {
+            "blob": "dfbbb334216f70f110a37205fb2d9dc2647071a7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.ReactiveUI/Cargo.toml"
+          },
+          {
+            "blob": "60344c7f209920836c1392b4e606e215555140be",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Remote.Protocol/Cargo.toml"
+          },
+          {
+            "blob": "ba88619f539ed4aafeadccbc98176d82306a966c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Splat/Cargo.toml"
+          },
+          {
+            "blob": "3c63e4092408e719dec0e579e6461792482266d0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.System/Cargo.toml"
+          },
+          {
+            "blob": "c0c4ac9b3986b619ee87f1cdda1d19d1f370c9b9",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.Fluent/Cargo.toml"
+          },
+          {
+            "blob": "27b0255946864540d2cfdf5e4b9343b51c881912",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.MacOS/Cargo.toml"
+          },
+          {
+            "blob": "cb909ba2d2e211d9abcca34eace6d4326f72544b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.Material/Cargo.toml"
+          },
+          {
+            "blob": "ae8734c1d28e520fbab767499499404e2c677bc5",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.Simple/Cargo.toml"
+          },
+          {
+            "blob": "f5904bf0a1fd53c10aad5ae1954bed89eb95a06a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Themes.WinUI/Cargo.toml"
+          },
+          {
+            "blob": "c5c5ad5cb4c7049231d94f86c7724a90848aaec2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.View.Macros/Cargo.toml"
+          },
+          {
+            "blob": "c76200a38fe464212cea9155f31b6e96355fad6d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.View/Cargo.toml"
+          },
+          {
+            "blob": "002e40598b0934e1ae112b8d61c72ee068d9385a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Vulkan/Cargo.toml"
+          },
+          {
+            "blob": "4adb9ecdc945a1bc87d29aa66c0bc5348bd46058",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.Wayland/Cargo.toml"
+          },
+          {
+            "blob": "acc17c21ebbeaf95e9934c90e520417237998db8",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI.X11/Cargo.toml"
+          },
+          {
+            "blob": "ce2892881846d544dcd049567c8304cfa1cb4017",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/FerroUI/Cargo.toml"
+          },
+          {
+            "blob": "cc90266269e2a8055ea75171e858aefb09c39605",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/HarfBuzz/FerroUI.HarfBuzz/Cargo.toml"
+          },
+          {
+            "blob": "62562e976a0a8559649a1e5d6c2c404027b31884",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Headless/FerroUI.Headless.Vnc/Cargo.toml"
+          },
+          {
+            "blob": "94b4bae6c40b309eac1873786155e8f119a806d1",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Headless/FerroUI.Headless/Cargo.toml"
+          },
+          {
+            "blob": "91e82a767e5091a2b21ae6d28279182959851ec7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Linux/FerroUI.LinuxFramebuffer/Cargo.toml"
+          },
+          {
+            "blob": "187653182f8ae287ff7fe71e21be7b278ee7c314",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Markup.Xaml.Loader/Cargo.toml"
+          },
+          {
+            "blob": "28e7a9cca89d0b22ee254573418bdb9aee03d1e2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/Cargo.toml"
+          },
+          {
+            "blob": "a800976f1cff2e8a08cbeca82a6904d5b8ed72b2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Markup.Xaml/Cargo.toml"
+          },
+          {
+            "blob": "0fca2cb127d98707a523ed98fc5c3ad5c4460b23",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Markup/Cargo.toml"
+          },
+          {
+            "blob": "2efc823f949ad8de84e034ff657d0ddc64d3f0a0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Markup/FerroUI.Xaml.Binary/Cargo.toml"
+          },
+          {
+            "blob": "54dcba8913b3e4815f9d6f71d9b160e050fe312c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Pretext/FerroUI.Pretext.Contracts/Cargo.toml"
+          },
+          {
+            "blob": "da9b69dccd163bb03faba151c5a202c4a87acbab",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Pretext/FerroUI.Pretext.Layout/Cargo.toml"
+          },
+          {
+            "blob": "3f2a6b898c9472d5589bd5ab71193f0d6fc228a2",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Pretext/FerroUI.Pretext.Media/Cargo.toml"
+          },
+          {
+            "blob": "1b90858c25b72771639b53a812844f3041e2a73b",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Pretext/FerroUI.Pretext/Cargo.toml"
+          },
+          {
+            "blob": "5c62485f1eb89c054faa577b88786b5657df6f46",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate.Build/Cargo.toml"
+          },
+          {
+            "blob": "29b72172d42da75ca0b31d80f2135dd758b61800",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate.Core/Cargo.toml"
+          },
+          {
+            "blob": "3ba26b623ae49b5fdd0c2628f435d743ab44f967",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate.Formats/Cargo.toml"
+          },
+          {
+            "blob": "c2834dfcbb3146f65997e381a7a2016bb5ed4d30",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate.Studio/Cargo.toml"
+          },
+          {
+            "blob": "9daa5645df752a4c4ad6e34aa34dd6a7ddc80b34",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/ProTranslate/FerroUI.ProTranslate/Cargo.toml"
+          },
+          {
+            "blob": "76c61fd933d20a91d9051e587cad7d61c6ddb850",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Skia/FerroUI.Skia/Cargo.toml"
+          },
+          {
+            "blob": "ac63d0fc6dfedd538c4405a1391f5e304a9bb50d",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/StaticViewLocator/FerroUI.StaticViewLocator.Build/Cargo.toml"
+          },
+          {
+            "blob": "bf8efdde0fd0546b8e4c1221c6be9a7f59888700",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros/Cargo.toml"
+          },
+          {
+            "blob": "d3174d466df834a66fe1c300097a3ef308ac4944",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/StaticViewLocator/FerroUI.StaticViewLocator/Cargo.toml"
+          },
+          {
+            "blob": "1c4d7c0417e95e8bd44ac4ae15aea151ca8aab84",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid/Cargo.toml"
+          },
+          {
+            "blob": "bae9a88cce4f2305f2c4d412d0da53c9deb93132",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/TreeDataGrid/FerroUI.TreeDataGrid.Core/Cargo.toml"
+          },
+          {
+            "blob": "374a6fd0f03547c05f15b6568f199a2676c6c667",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Vello/FerroUI.Vello/Cargo.toml"
+          },
+          {
+            "blob": "49967ed6d371377ab53b084b04b2a907c212de3a",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Windows/FerroUI.Win32/Cargo.toml"
+          },
+          {
+            "blob": "1c351ce9f23c1bed0e0162fc20caa1cbfc74e4bd",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/Windows/FerroUI.WinUI/Cargo.toml"
+          },
+          {
+            "blob": "234368d108b45022147304930a2358730051b72e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/iOS/FerroUI.iOS/Cargo.toml"
+          },
+          {
+            "blob": "3119c176d5d54082a6e68162f8ded59ed989f7e7",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/tools/MicroCom.CodeGenerator/Cargo.toml"
+          },
+          {
+            "blob": "2237f2a55f9db003af817a6b6ff5b07dcf654e06",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "src/tools/RichTextOracle/Cargo.toml"
+          },
+          {
+            "blob": "53047ee47b6b9e303b42666d9dfe9d792fde7f61",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/Dock/FerroDock.Markup.Tests/Cargo.toml"
+          },
+          {
+            "blob": "307f39a73948d092e4fbcdca1bc387e2d2a34a7c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/Dock/FerroDock.Serializer.Generated.Tests/Cargo.toml"
+          },
+          {
+            "blob": "0f83bf4ec45e22daf2aec02677b01cdaf7cc4d8c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/Dock/FerroDock.Settings.Markup.Tests/Cargo.toml"
+          },
+          {
+            "blob": "44f770841f2190c78155a33e6742bad8f85c8e52",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.Benchmarks/Cargo.toml"
+          },
+          {
+            "blob": "b8cf2b87b222c290881062634d8b24d74c92af11",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.DependencyInjection.Tests/Cargo.toml"
+          },
+          {
+            "blob": "f3b03427dcf192755c9e268b9561e2dc77fa3524",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.DesignerSupport.Tests/Cargo.toml"
+          },
+          {
+            "blob": "29a2be1855bd6dbb481fc15f63fd6925dcc57cd4",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.DynamicData.Tests/Cargo.toml"
+          },
+          {
+            "blob": "a90e4c970f4d764c296f5e166aa21444f62af63e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.IntegrationTests.Appium/Cargo.toml"
+          },
+          {
+            "blob": "38fb41052a8aaec971f7db3fcb51810963ba3fad",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.IntegrationTests.Win32/Cargo.toml"
+          },
+          {
+            "blob": "a5efe5d11ebcf7cd2883b656104be3e270df57b3",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.LeakTests/Cargo.toml"
+          },
+          {
+            "blob": "142ae60daa07361c276d2b9e7148d65687ecdbce",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.Markup.Xaml.UnitTests/Cargo.toml"
+          },
+          {
+            "blob": "c1ba2cf5e5926c425ba6c784b93a70c66531a794",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.Reactive.Tests/Cargo.toml"
+          },
+          {
+            "blob": "72386e76003d986011de89bc2323d10ff17e31fa",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.ReactiveUI.Testing.Tests/Cargo.toml"
+          },
+          {
+            "blob": "2ed3d91647bcd3cad9eaca9b37d126900d6e3472",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.ReactiveUI.Tests/Cargo.toml"
+          },
+          {
+            "blob": "8e36cb8fb8320cd3147af3f71827b9354c97bc6c",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.RenderBackends.Comparison/Cargo.toml"
+          },
+          {
+            "blob": "320c26899b1d74966a2f12486575559e20e347cd",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.RenderTests/Cargo.toml"
+          },
+          {
+            "blob": "3009046011a0372ee3560e255591344bdb67d245",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.Splat.Tests/Cargo.toml"
+          },
+          {
+            "blob": "9b322bb04b548ec5707f0bbbeaf5fc03437ef6f0",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.StaticViewLocator.Tests/Cargo.toml"
+          },
+          {
+            "blob": "724c6bf500b781e525c068f0d9939a973cfd228e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/FerroUI.TreeDataGrid.Benchmarks/Cargo.toml"
+          },
+          {
+            "blob": "24d4234b7181d9c4492d248dfeb405d677eeb037",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/XamlIncludeFixture/Application/Cargo.toml"
+          },
+          {
+            "blob": "75cb8cb315628c5a3dbcfd5f9fb1db0d649bf26e",
+            "kind": "blob",
+            "mode": "100644",
+            "path": "tests/XamlIncludeFixture/Theme/Cargo.toml"
+          }
+        ]
+      },
+      "checks": {
+        "all17producer_blobs_equal_between_source_arms_and_tooling": true,
+        "all_dependency_manifest_blobs_equal": true,
+        "exact_copy_under_declared_substitutions": true,
+        "failure_upload_always": true,
+        "git_diff_check": true,
+        "lock_and_training_corpus_equal": true,
+        "no_workload_policy_or_flag_changes": true,
+        "old_active_workflow_untouched": true,
+        "one_job_contents_read_only": true,
+        "pinned_actions_nonpersistent_credentials": true,
+        "source_changes_confined_to_declared12BaseFiles": true,
+        "yaml_parse": true
+      },
+      "committed": false,
+      "compile_paths": {
+        "consumer": "<new work root>/shared/consumer reused sequentially",
+        "source": "<new work root>/checkout reused sequentially",
+        "target": "<new work root>/shared/target; collection and validation finish before deletion and source switch"
+      },
+      "compiled_or_measured": false,
+      "copy_transforms": [
+        {
+          "after": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+          "before": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b",
+          "occurrences": 3
+        },
+        {
+          "after": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b",
+          "before": "ad926b4d10a68465b5bbc9fe203fa908dc785f59",
+          "occurrences": 3
+        },
+        {
+          "after": "Property capabilities editable WinUI release size",
+          "before": "Editable WinUI release size",
+          "occurrences": 1
+        },
+        {
+          "after": "winui-property-capabilities-release-size",
+          "before": "winui-release-size",
+          "occurrences": 2
+        },
+        {
+          "after": "winui-property-capabilities-release-comparison",
+          "before": "winui-release-comparison",
+          "occurrences": 2
+        },
+        {
+          "after": "winui-property-capabilities-release-comparison",
+          "before": "winui-editable-release-comparison",
+          "occurrences": 1
+        }
+      ],
+      "only_workflow_changes": "Frozen arm SHAs, display name, exact new workflow-path trigger, distinct concurrency group, work/evidence root and artifact name. All commands, flags, actions, resource policies and validation producers remain unchanged.",
+      "original_active_workflow": {
+        "bytes": 2990,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-tooling/.github/workflows/winui-release-size.yml",
+        "relative_path": ".github/workflows/winui-release-size.yml",
+        "sha256": "52c5bf94f22bdb3466fd804e94a011421dd69d3831df9e110f30c0cad166abc0",
+        "unchanged": true
+      },
+      "pair": {
+        "candidate": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+        "reference": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b"
+      },
+      "patch": {
+        "bytes": 3534,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-workflow-review/workflow-01.patch",
+        "sha256": "a07033744fa86b68589ae10029a6583c9f98a923ed3c52c3f8783ebab639507b"
+      },
+      "pipeline": {
+        "cargo_release": {
+          "codegen_units": 16,
+          "debug": 0,
+          "debug_assertions": false,
+          "lto": "thin",
+          "opt_level": "s",
+          "overflow_checks": false,
+          "panic": "unwind"
+        },
+        "collection_before_switch": [
+          "shipping ELF and symbolized ELF",
+          "complete library graph and host proc macros",
+          "raw and merged profiles",
+          "source snapshot/archive",
+          "compiler/native link records and inputs",
+          "generated WinUI and retained archive",
+          "physical native attribution"
+        ],
+        "complete_library_graph": {
+          "expected_rlibs": 54,
+          "policy": "Preserve complete freshly profiled target dependency closure and host proc macros from Cargo messages, with exact inventory hashes. This is the unchanged producer policy; actual count remains an output to verify after execution. Source pair has identical complete Cargo manifest/lock inventory."
+        },
+        "correctness": {
+          "additional_edit_probe": 31,
+          "archive_cases": 9,
+          "compact_unwind_smoke": true,
+          "registry_passed": 47,
+          "template_activations": 156
+        },
+        "features": "ferroui-themes-winui/solid-theme,retain-archive",
+        "final_link": [
+          "-Clink-arg=-fuse-ld=lld",
+          "-Clink-arg=-Wl,--icf=safe",
+          "-Clink-arg=-Wl,-z,pack-relative-relocs",
+          "-Cstrip=symbols",
+          "-Clto=fat",
+          "-Ccodegen-units=1",
+          "-Clinker=<same source path>/scripts/themes/bench/compact_unwind_link.py"
+        ],
+        "packer": "Each arm builds an isolated exact-source packer used only through --packer; shipping keeps actual Loader/Base graph.",
+        "performance": "Not measured by this workflow. Original paired runtime correctness/performance gates remain required separately.",
+        "profile_use_target": [
+          "-Cprofile-use=<own freshly merged profile>",
+          "-Cllvm-args=--addrsig",
+          "-Copt-level=z"
+        ],
+        "release_acceptance": "Size plus targeted correctness only; no full release acceptance or 10 MB claim before actual results.",
+        "shipping_budget_bytes": 10000000,
+        "shipping_main_sha256": "8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269",
+        "target": "x86_64-unknown-linux-gnu",
+        "toolchain_version": "1.99.0",
+        "training": {
+          "canonical_archive_guards": {
+            "installed": [
+              296347,
+              "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+            ],
+            "scalar-v3": [
+              296352,
+              "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+            ],
+            "two-edits-v3": [
+              296359,
+              "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+            ]
+          },
+          "final_lane": "structure",
+          "fresh_profile_per_arm": true,
+          "lanes_per_round": [
+            "startup",
+            "templates",
+            "property",
+            "edit"
+          ],
+          "rounds": 3,
+          "total_launches": 13
+        },
+        "training_input_sha256": {
+          "main.rs": "d9c9306b8de920a2b6fc72b9db9409937cf343b3c547b0e3fcd75badcfc54bcd",
+          "property_work.rs": "9e04adc991cf9342de2fb0846fa03ac72e372b2937b0e01a2e5d7b86d3e57970",
+          "template_work.rs": "37824fc1775d438a62d01406f115096408e60b032dc91589483dc7b8b4fa34e2"
+        }
+      },
+      "policy_training_and_producer_blobs": [
+        {
+          "bytes": 23250,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "bb6a353a8d7b86a4504869caf8179787727d6b11",
+            "reference": "bb6a353a8d7b86a4504869caf8179787727d6b11",
+            "tooling": "bb6a353a8d7b86a4504869caf8179787727d6b11"
+          },
+          "relative_path": "scripts/themes/bench/run_winui_release_comparison.py",
+          "sha256": "76fb9d46495d2880be2f8b6ca1b55bf74e238df418b3c7b8e5fffc1ff448cfc1"
+        },
+        {
+          "bytes": 8676,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "8c796fa45edb74f2ab75110bd4d1c8b679805c67",
+            "reference": "8c796fa45edb74f2ab75110bd4d1c8b679805c67",
+            "tooling": "8c796fa45edb74f2ab75110bd4d1c8b679805c67"
+          },
+          "relative_path": "scripts/themes/bench/bootstrap_toolchain.py",
+          "sha256": "ad5ac77a782fb35461ae05a21b51986c11f791a48b5bb4ec7771c16391bf6beb"
+        },
+        {
+          "bytes": 31189,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "18bc2d2c3b2c925c3b9b968ae5337b208382b210",
+            "reference": "18bc2d2c3b2c925c3b9b968ae5337b208382b210",
+            "tooling": "18bc2d2c3b2c925c3b9b968ae5337b208382b210"
+          },
+          "relative_path": "scripts/themes/bench/rebuild_winui_pgo.py",
+          "sha256": "dea852e85365c09511b9fc729546e03771b3c2166e0f6fd0cdd4ebff244a77ab"
+        },
+        {
+          "bytes": 11471,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "13046212d20145488ded0792715c272f112bf266",
+            "reference": "13046212d20145488ded0792715c272f112bf266",
+            "tooling": "13046212d20145488ded0792715c272f112bf266"
+          },
+          "relative_path": "scripts/themes/bench/collect_winui_pgo.py",
+          "sha256": "e3efb1dd203930a70ca162c29371af3544c9e0f2677aec7b45d367e39ca374a6"
+        },
+        {
+          "bytes": 11754,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "4daadcc4840dacb91a5eee393c87876e3dd6e9cd",
+            "reference": "4daadcc4840dacb91a5eee393c87876e3dd6e9cd",
+            "tooling": "4daadcc4840dacb91a5eee393c87876e3dd6e9cd"
+          },
+          "relative_path": "scripts/themes/bench/prepare_portable_packer.py",
+          "sha256": "72da1e3b090ca1bf1150269c31339d6a160b3b538d1ae4299b689449ef9c5ba2"
+        },
+        {
+          "bytes": 22158,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "fbb2d930e798ed167a0b5a1db0af3bf96601b505",
+            "reference": "fbb2d930e798ed167a0b5a1db0af3bf96601b505",
+            "tooling": "fbb2d930e798ed167a0b5a1db0af3bf96601b505"
+          },
+          "relative_path": "scripts/themes/bench/validate_runtime_release.py",
+          "sha256": "754ab07ccd12399179238b6965969606d9d2e0ce7f08d296034763cb0cfada75"
+        },
+        {
+          "bytes": 19806,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "234f22ea31aabd17cd098bbeb03f22fc93b0a624",
+            "reference": "234f22ea31aabd17cd098bbeb03f22fc93b0a624",
+            "tooling": "234f22ea31aabd17cd098bbeb03f22fc93b0a624"
+          },
+          "relative_path": "scripts/themes/bench/prepare_template_validation.py",
+          "sha256": "6db804622fc6d885fe67add4bd04ff0d5531807aa0062b1ec886bc5f3829906f"
+        },
+        {
+          "bytes": 833,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "f55bc457c5817e251bcbe1dfb263598e3394c4bb",
+            "reference": "f55bc457c5817e251bcbe1dfb263598e3394c4bb",
+            "tooling": "f55bc457c5817e251bcbe1dfb263598e3394c4bb"
+          },
+          "relative_path": "scripts/themes/bench/template_structural_resource.rs",
+          "sha256": "580437fe767f2029ceb036be21b6732f033c44037d0e22970059d517a75c8e91"
+        },
+        {
+          "bytes": 11372,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "f68593c78e338dc12ab6d29d003efb4745b621b0",
+            "reference": "f68593c78e338dc12ab6d29d003efb4745b621b0",
+            "tooling": "f68593c78e338dc12ab6d29d003efb4745b621b0"
+          },
+          "relative_path": "scripts/themes/bench/profile_winui.py",
+          "sha256": "9abbf0142e12891cb722833d661ec98f3919454ac3d87fa3e30fe0a275f55d93"
+        },
+        {
+          "bytes": 3657,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "29671bfabbe52f4650a60b3ade1ef591fee90a70",
+            "reference": "29671bfabbe52f4650a60b3ade1ef591fee90a70",
+            "tooling": "29671bfabbe52f4650a60b3ade1ef591fee90a70"
+          },
+          "relative_path": "scripts/themes/bench/winui.rs",
+          "sha256": "8a1325ededc43128ad7be5cb8d5c3f4975865ec582ef2ac8bc9fea62cd1bb269"
+        },
+        {
+          "bytes": 2014,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "53e44d4bb3dafd9be6687c6adc77ca6659b9038e",
+            "reference": "53e44d4bb3dafd9be6687c6adc77ca6659b9038e",
+            "tooling": "53e44d4bb3dafd9be6687c6adc77ca6659b9038e"
+          },
+          "relative_path": "scripts/themes/bench/pgo_templates.rs",
+          "sha256": "37824fc1775d438a62d01406f115096408e60b032dc91589483dc7b8b4fa34e2"
+        },
+        {
+          "bytes": 9421,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "29c6d6d64492053bbff21eef7a852ff9cd34a477",
+            "reference": "29c6d6d64492053bbff21eef7a852ff9cd34a477",
+            "tooling": "29c6d6d64492053bbff21eef7a852ff9cd34a477"
+          },
+          "relative_path": "scripts/themes/bench/compact_unwind.py",
+          "sha256": "ea42ad02f5c0d8ca158a50c2b43a95e7e1697f91600b9108b78873026c0c5711"
+        },
+        {
+          "bytes": 7203,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "d55ec6b2559c9ac1cd74215691da3e182ff87a43",
+            "reference": "d55ec6b2559c9ac1cd74215691da3e182ff87a43",
+            "tooling": "d55ec6b2559c9ac1cd74215691da3e182ff87a43"
+          },
+          "relative_path": "scripts/themes/bench/compact_unwind_link.py",
+          "sha256": "36477e1afabf3be1822871acdd1316f11a390adebb8f0671244c73bc87e91b5a"
+        },
+        {
+          "bytes": 23369,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "f165a8da76d2a38c9da73a49ae975b84c89277c7",
+            "reference": "f165a8da76d2a38c9da73a49ae975b84c89277c7",
+            "tooling": "f165a8da76d2a38c9da73a49ae975b84c89277c7"
+          },
+          "relative_path": "scripts/themes/bench/attribute_codegen.py",
+          "sha256": "24324f87bdcc073afdb67e09f1afac0cc85d0f3ecf9a97083b3aab77979e57ff"
+        },
+        {
+          "bytes": 11346,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "ed2ab6e0bfbafc5e74b81681e41e19f516386e3d",
+            "reference": "ed2ab6e0bfbafc5e74b81681e41e19f516386e3d",
+            "tooling": "ed2ab6e0bfbafc5e74b81681e41e19f516386e3d"
+          },
+          "relative_path": "scripts/themes/bench/attribute_runtime.py",
+          "sha256": "58ba05dcbc2f6a9c1ce5fb2956bd61f04deae707c124e836b8861316a3f9d3aa"
+        },
+        {
+          "bytes": 19624,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "c476b5410024ca855c1a32300e281605b05db54e",
+            "reference": "c476b5410024ca855c1a32300e281605b05db54e",
+            "tooling": "c476b5410024ca855c1a32300e281605b05db54e"
+          },
+          "relative_path": "scripts/themes/bench/compare_registration.py",
+          "sha256": "23210562b8c328b63d0e7c3328f1c4aac4223ecb35ee55bf48b0dd6e4238583d"
+        },
+        {
+          "bytes": 21863,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "c7c684c00f36672b832a0a963558ef98dd2db4a2",
+            "reference": "c7c684c00f36672b832a0a963558ef98dd2db4a2",
+            "tooling": "c7c684c00f36672b832a0a963558ef98dd2db4a2"
+          },
+          "relative_path": "scripts/themes/bench/measure.py",
+          "sha256": "9e3c5a517ce63f7d8243b7c2fdfb5669838fbbe6855a37650cb44425528c6495"
+        },
+        {
+          "bytes": 168627,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+            "reference": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57",
+            "tooling": "553ed4fc7acfa3a16b3fa074b1a5701762db8b57"
+          },
+          "relative_path": "Cargo.lock",
+          "sha256": "c24279c32025678a68d038b88cf3eb1501075d05fcb1a11ea8e6fe341a5a687b"
+        },
+        {
+          "bytes": 33071,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "6e2c4f9c54a6bfdb5e3114e631230b220477f0cb",
+            "reference": "6e2c4f9c54a6bfdb5e3114e631230b220477f0cb",
+            "tooling": "6e2c4f9c54a6bfdb5e3114e631230b220477f0cb"
+          },
+          "relative_path": "Cargo.toml",
+          "sha256": "4ff8555c1b499522ed964cc57d9b8ab9e6424fa0ea6c731d5c66444baaf2204f"
+        },
+        {
+          "bytes": 38223,
+          "equal": true,
+          "git_blobs": {
+            "candidate": "9d229fbc1be5430539032cb25909950366956517",
+            "reference": "9d229fbc1be5430539032cb25909950366956517",
+            "tooling": "9d229fbc1be5430539032cb25909950366956517"
+          },
+          "relative_path": "docs/benchmarks/compiled-theme-binding-dispatch-linux-x86_64.json",
+          "sha256": "091a06798299bb2972b4b6d5ce5624f500a2dab4b24a7418bf755b58afd19079"
+        }
+      ],
+      "prepared_workflow": {
+        "bytes": 3113,
+        "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-tooling/.github/workflows/winui-property-capabilities-release-size.yml",
+        "relative_path": ".github/workflows/winui-property-capabilities-release-size.yml",
+        "sha256": "7d016d6438e64c8123460adba5415ca2bb6c30169285a04b0a7cad7d29c9b79a"
+      },
+      "prerequisite": {
+        "candidate": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+        "expected_distinct_passed": 415,
+        "fresh_generated_programs": {
+          "construction_programs": 18,
+          "region_programs": 34
+        },
+        "required_tests": 27,
+        "source_gate_preparation": {
+          "bytes": 29281,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-source-tooling-review/review-01.json",
+          "sha256": "0d6dca5378dc39c20cf95187faaad55e23102b7fb012f21e0d8d69d3b27ba0e3"
+        },
+        "source_suite": "property-capabilities",
+        "status": "Not yet independently verified complete in this preparation; root must verify the actual415-source gate before publication."
+      },
+      "producer_invoked": false,
+      "published_or_triggered": false,
+      "runtime_source_scope": {
+        "description": "Only the new Base property-capability wave: explicit recoercion, end/default coercion and inheritance demand rooting, plus original shared typed boxed-delivery restoration. Previously validated metadata invocation and ControlTheme/Style region source remains unchanged.",
+        "exact_source_pair_patch": {
+          "bytes": 104128,
+          "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-workflow-review/source-pair.patch",
+          "sha256": "20061b1a288522a23987a61b6cda7a46066d01d706f7680d4070792308baf0d1"
+        },
+        "files": [
+          {
+            "arms": {
+              "candidate": {
+                "blob": "7bfa9730210d708e56e6d5502419ec7555dc4791",
+                "bytes": 41492,
+                "sha256": "11ca8a175d9f39b95eb2ab4d5fd3b15986e7767edd07a701d3e689592e948ecb"
+              },
+              "reference": {
+                "blob": "f261052be025c6ad294b188da3e3adebcb782f63",
+                "bytes": 39297,
+                "sha256": "ca35fc42e561c04b476a8abdcfd53df6a83021df35f0766b07935acb96404cb3"
+              }
+            },
+            "path": "src/FerroUI.Base/ferro_property.rs",
+            "scope": "production"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "fe663da8ea069a6ab1f3e24ac57e98332d42f70b",
+                "bytes": 23682,
+                "sha256": "627d7f5ada5b4d74ed8c48884f3748ba03c886ded35c2636295fabd925d5fbea"
+              },
+              "reference": {
+                "blob": "2de4d413795d1564457303a2fe7ed1b03d4068ac",
+                "bytes": 17078,
+                "sha256": "69a5e19248e70a813ff64fdb36794e17ecbdeff85c3d63e90f6d2e13d8c7dfb6"
+              }
+            },
+            "path": "src/FerroUI.Base/ferro_property_metadata.rs",
+            "scope": "production"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "0068c045c6f5b5beb4e3c35efb4226d864d54675",
+                "bytes": 12221,
+                "sha256": "d4c2b878c3ecb987de90d5d7c95eb1d82d8f370cc54df49902d2231ca067f0f4"
+              },
+              "reference": {
+                "blob": "a6e3d50991d8d34ec49eb86074d5479a69b718b5",
+                "bytes": 11202,
+                "sha256": "a663279f59646363e57792eb45cca53c83f7afcab2cb7fbfef6b9d480789efef"
+              }
+            },
+            "path": "src/FerroUI.Base/property_store/binding_entry.rs",
+            "scope": "production"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "5de832d43d613996933ec52e9748ca89c7cad744",
+                "bytes": 902,
+                "sha256": "2153d2bcaec37f5abd708db0ed0093a719ffed78362728be9a85691287112504"
+              },
+              "reference": {
+                "blob": "709fd53e819ba0be469a031856aa96346008bf74",
+                "bytes": 6181,
+                "sha256": "27189de3ef43824864dddcd5253a6d14f8a52e42014cadf3ee2c2e54dcd591da"
+              }
+            },
+            "path": "src/FerroUI.Base/property_store/boxed_binding_entry.rs",
+            "scope": "production"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "28ecce017bb720198e454771b345b538e9c84d18",
+                "bytes": 23457,
+                "sha256": "d3060a447c70b6e84b8047621ddd0accbc978d5a9999b65105a56acabcf3ed8d"
+              },
+              "reference": {
+                "blob": "4acdaec0abf95894ae6111be075f248cb55a61c7",
+                "bytes": 20875,
+                "sha256": "fd387497ad311e05bf09ad58fdce6e12883265640d56d740a32dfc9bc184c16e"
+              }
+            },
+            "path": "src/FerroUI.Base/property_store/effective_value.rs",
+            "scope": "production"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "4678734223f477bb3d2863a7124be4104857d181",
+                "bytes": 24198,
+                "sha256": "856e67443d159ac14f0fd309ef29714fe14f90b754c80ea9b6ed51bc5e38be01"
+              },
+              "reference": null
+            },
+            "path": "src/FerroUI.Base/property_store/effective_value_coercion_tests.rs",
+            "scope": "test"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "fdb3b36a7435a646e4ca878274973e72d62b5824",
+                "bytes": 16727,
+                "sha256": "e10d15c2303ed59cbeb15eb624408172fc7d2d2d585c46996041fd6d43f872d9"
+              },
+              "reference": null
+            },
+            "path": "src/FerroUI.Base/property_store/effective_value_inheritance_tests.rs",
+            "scope": "test"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "0a7617e84928e394c9badfd44e628502acb1d984",
+                "bytes": 1063,
+                "sha256": "b3c40f1128f0ac3fa33b00f94384553eb518ac12b04e121ac2474610aa58cbf3"
+              },
+              "reference": {
+                "blob": "b01bf0c93c2a4d5bcde1dcf216c14357dd891a9d",
+                "bytes": 1054,
+                "sha256": "229b82bbbebb14b1a12fa71a01bc7be39a1d9b89b12ed2ea968d8d1cce61733e"
+              }
+            },
+            "path": "src/FerroUI.Base/property_store/mod.rs",
+            "scope": "production"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "8a283d929b8ee9345ae64c6bf488cb545f8e5f08",
+                "bytes": 54628,
+                "sha256": "01b28136f2e8e45cc1f3802f060745f328babe509d0b7d1ddf7cd05bf1240d63"
+              },
+              "reference": {
+                "blob": "65c47c1a6b354a265d7b5ebe402318c799a8e901",
+                "bytes": 53454,
+                "sha256": "999b507ae0447e6c7bb61501217118983a7881faa75a2807259065066ab8ab9e"
+              }
+            },
+            "path": "src/FerroUI.Base/property_store/value_store.rs",
+            "scope": "production"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "b2e031d99f303517046ebbcad7dc9859475ea1a7",
+                "bytes": 13916,
+                "sha256": "4dc81cc7b8e7899c884be2ea66e416a61a26313d69ab7dce9f01a01abc99eb9d"
+              },
+              "reference": null
+            },
+            "path": "src/FerroUI.Base/property_store/value_store_default_coercion_tests.rs",
+            "scope": "test"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "3ed832c44b74a06fdc33ccd67ae9398a6f3b9263",
+                "bytes": 15525,
+                "sha256": "0cb18bb00490a8bf684ea66b16a502275e46eacebc5d77a5cc67a5aac3db1a82"
+              },
+              "reference": {
+                "blob": "65a90ab6466abdb77ff4bfb15aa6196e963a84ac",
+                "bytes": 15521,
+                "sha256": "7ea432f5829a8653410876a738ee2c687bdfa34a7dafdb05b835c3cb46c9d24e"
+              }
+            },
+            "path": "src/FerroUI.Base/styled_property.rs",
+            "scope": "production"
+          },
+          {
+            "arms": {
+              "candidate": {
+                "blob": "b974519781384a54dc6f241425fad6049f6e4880",
+                "bytes": 6601,
+                "sha256": "1baac98743c011ddfe5ff31c847cd8724adcf4b8f45d37b6dd3b00262a7ff848"
+              },
+              "reference": {
+                "blob": "5235abcf8ab2e9ebb5011a93c6a3b4bda06be1be",
+                "bytes": 6475,
+                "sha256": "140aea44b65802391b2b4185823e9ac5c0f9334cc74e96a0d9696c2fc1121fed"
+              }
+            },
+            "path": "src/FerroUI.Base/tests/ferro_property_registry_tests.rs",
+            "scope": "test"
+          }
+        ],
+        "production_files": 8,
+        "test_files": 4
+      },
+      "schema": 1,
+      "scope": "Prepared full-production comparison workflow only. No producer, compiler, PGO training, shipping executable, test companion or benchmark was executed. Publication remains gated on the exact candidate property-capabilities source validation.",
+      "source_trees": {
+        "candidate": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754",
+        "reference": "39bde5869ab448b5868d61e2bc2184032df159d5"
+      },
+      "tooling_base": "af0f5eca63b814a81077e1b16fe43799c7542cc9"
+    },
+    "identity": {
+      "bytes": 63766,
+      "path": "/workspace/scratch/6f70b20c54b6/ferro-build-recovery/property-capabilities-release-workflow-review/review-01.json",
+      "sha256": "3888c8fbc5620f20205d2123479e714735a33204f15e3f414679c7d35d99e074"
+    }
+  },
+  "prerequisite_correction": "The retained original workflow review incorrectly described415 executions as415 distinct tests. The actual accepted rerun requires415 successful executions,411 distinct names,exactly four named overlaps in the two original phases,and all27 mandatory cases. Every original suite/filter/count is retained; the failed earlier run remains recorded.",
+  "production_acceptance": false,
+  "remaining_gates": [
+    "Fresh complete reference and candidate PGO rebuilds with the original13-workload training and full editable themes.",
+    "Independent source/graph/native/ELF/resource and targeted correctness verification.",
+    "Fresh paired runtime performance and allocation acceptance on the final graph.",
+    "Actual10,000,000-byte shipping budget."
+  ],
+  "schema_version": 1,
+  "scope": "Frozen separate full-production comparison of demand-rooted property capabilities and restored typed boxed style delivery, published only after actual combined source validation passed. This is a measurement plan, not a native size or throughput result.",
+  "source_gate": {
+    "ci_run": 41874724028,
+    "complete": true,
+    "distinct_tests": 411,
+    "downstream_base_controls": true,
+    "exact_four_overlaps_checked": true,
+    "fresh_winui": {
+      "construction_programs": 18,
+      "region_programs": 34
+    },
+    "independent_root_verification": {
+      "all22_command_input_hashes_verified": true,
+      "all26_members_exact": true,
+      "artifact_zip_verified": true,
+      "ci_run": 41874724028,
+      "distinct_tests": 411,
+      "exact_overlaps": {
+        "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_add_ownered_property": [
+          "metadata",
+          "property-runtime"
+        ],
+        "tests::ferro_object_tests_metadata::default_value_can_be_overridden_in_derived_class": [
+          "metadata",
+          "property-runtime"
+        ],
+        "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_add_ownered_property": [
+          "metadata",
+          "property-runtime"
+        ],
+        "tests::ferro_object_tests_metadata::unset_value_can_be_overridden_in_derived_class": [
+          "metadata",
+          "property-runtime"
+        ]
+      },
+      "generated_counts": {
+        "construction_programs": 18,
+        "region_programs": 34
+      },
+      "lockfile_verified": true,
+      "passing_executions": 415,
+      "required_regressions": 27,
+      "source": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+      "validation_sha256": "3259ec9718c1d1fa1666bf0b750bc780766cfaa9ebf4eb0aa6b0bd8120cdfdb9"
+    },
+    "mandatory_regressions": 27,
+    "passing_executions": 415,
+    "source": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+    "tooling_head": "741183c8f955cdc82b0e60ca14de250eb401969a",
+    "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/41874724028",
+    "validation_report": {
+      "bytes": 462135,
+      "path": "docs/benchmarks/compiled-theme-property-capabilities-source-validation-linux-x86_64.json",
+      "sha256": "b09d8597f7bf5fbb45797de033df993d0b8967fe7b4cf3b132b676a853381968"
+    }
+  },
+  "source_pair": {
+    "candidate": "c686b70c60d87e0f0726de7dc60dc6fc1f123c48",
+    "reference": "dc93a16d88c8d8e6aedaa852f1106a856ab5993b"
+  },
+  "source_trees": {
+    "candidate": "ca7a90ed01c2811b2c0ec8eef85b4564ee8ef754",
+    "reference": "39bde5869ab448b5868d61e2bc2184032df159d5"
+  },
+  "workflow": {
+    "bytes": 3113,
+    "content_utf8": "name: Property capabilities editable WinUI release size\n\non:\n  workflow_dispatch:\n    inputs:\n      candidate:\n        description: 'Candidate commit (complete original-workload PGO rebuild)'\n        default: 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48'\n        required: true\n        type: string\n      reference:\n        description: 'Reference commit (same consumer path, toolchain and policy)'\n        default: 'dc93a16d88c8d8e6aedaa852f1106a856ab5993b'\n        required: true\n        type: string\n  # Updating this frozen source pair starts its reviewed comparison. Ordinary\n  # source/tooling pushes on the PR branch do not launch these expensive builds.\n  push:\n    branches: ['perf/compact-xaml-theme-codegen']\n    paths: ['.github/workflows/winui-property-capabilities-release-size.yml']\n\npermissions:\n  contents: read\n\nconcurrency:\n  # Different frozen source pairs use independent runners and evidence roots.\n  # Serialize repeats of one pair without cancelling another measured cohort.\n  group: winui-property-capabilities-release-size-${{ github.ref }}-${{ inputs.reference || 'dc93a16d88c8d8e6aedaa852f1106a856ab5993b' }}-${{ inputs.candidate || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}\n  cancel-in-progress: false\n\njobs:\n  release-comparison:\n    name: Two complete editable releases and correctness evidence\n    runs-on: ubuntu-24.04\n    timeout-minutes: 360\n    env:\n      CARGO_TERM_COLOR: never\n      CARGO_INCREMENTAL: 0\n      RUST_BACKTRACE: 1\n    steps:\n      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\n        with:\n          fetch-depth: 0\n          persist-credentials: false\n      - name: Native build and archive dependencies\n        run: |\n          sudo apt-get update\n          sudo apt-get install -y build-essential binutils curl xz-utils pkg-config libfontconfig1-dev libfreetype6-dev\n      - name: Rebuild, collect and validate both revisions sequentially\n        env:\n          CANDIDATE_REVISION: ${{ inputs.candidate || 'c686b70c60d87e0f0726de7dc60dc6fc1f123c48' }}\n          REFERENCE_REVISION: ${{ inputs.reference || 'dc93a16d88c8d8e6aedaa852f1106a856ab5993b' }}\n        run: |\n          python3 scripts/themes/bench/run_winui_release_comparison.py \\\n            --repository \"$GITHUB_WORKSPACE\" \\\n            --work-dir \"$RUNNER_TEMP/winui-property-capabilities-release-comparison\" \\\n            --candidate \"$CANDIDATE_REVISION\" \\\n            --reference \"$REFERENCE_REVISION\"\n      - name: Preserve complete results, inputs and failure evidence\n        if: always()\n        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4\n        with:\n          name: winui-property-capabilities-release-comparison-${{ github.run_id }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/winui-property-capabilities-release-comparison/evidence\n          # Only retained source/results are uploaded; Cargo credentials and\n          # mutable caches live outside this evidence directory.\n          include-hidden-files: true\n          if-no-files-found: error\n          compression-level: 1\n          retention-days: 14\n",
+    "path": ".github/workflows/winui-property-capabilities-release-size.yml",
+    "sha256": "7d016d6438e64c8123460adba5415ca2bb6c30169285a04b0a7cad7d29c9b79a"
+  }
+}

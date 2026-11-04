@@ -13,7 +13,7 @@ mod value_frame;
 mod value_store;
 
 pub(crate) use binding_entry::{BindingEntry, BindingSource};
-pub(crate) use boxed_binding_entry::{BoxedBindingEntry, BoxedBindingValue};
+pub(crate) use boxed_binding_entry::{create_boxed_binding_entry, BoxedBindingValue};
 pub(crate) use boxed_local_value_binding_observer::{BoxedLocalBindingValue, BoxedLocalValueBindingObserver};
 pub(crate) use effective_value::{EffectiveValue, EffectiveValueDyn};
 pub(crate) use frame_priority::{FramePriority, FrameType};

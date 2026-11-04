@@ -374,7 +374,7 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         source: Rc<dyn IObservable<BoxedValue>>,
     ) -> Rc<dyn crate::property_store::BoxedBindingValue> {
-        crate::property_store::BoxedBindingEntry::new(o, frame, self, source)
+        crate::property_store::create_boxed_binding_entry(o, frame, self, source)
     }
 }
 

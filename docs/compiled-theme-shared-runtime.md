@@ -595,9 +595,9 @@ The old inherited-change family occupies 92,151 bytes, a gross bound. The
 property/options callback pointer and safe source type check have costs. Fresh
 production size and inherited-notification throughput remain required.
 
-### Combined default coercion and boxed-delivery source
+### Validated default coercion and boxed-delivery source
 
-The next separately frozen source cohort is
+The integrated source is frozen at
 [`c686b70c`](https://github.com/wieslawsoltes/FerroUI/commit/c686b70c60d87e0f0726de7dc60dc6fc1f123c48).
 It composes the validated inheritance implementation with default/end coercion
 and a boxed-delivery correction on the existing metadata/theme implementation.
@@ -645,9 +645,32 @@ distinct tests. The retained
 [inventory correction evidence](benchmarks/compiled-theme-property-capabilities-source-inventory-correction-linux-x86_64.json)
 records that failure and its exact four overlaps. The corrected gate retains
 every original filter, per-suite count and mandatory case and reruns the same
-immutable source. Its downstream checks remain pending. Default/end and the
-boxed-delivery correction are not yet integrated into this PR's runtime;
-their production size and performance claims remain open.
+immutable source.
+
+[CI run 41874724028](https://github.com/wieslawsoltes/FerroUI/actions/runs/41874724028)
+completed successfully: 415 passing executions, 411 distinct tests, zero failed
+or ignored, the exact four repeated identities/phases and all 27 mandatory cases.
+Both downstream Base/Controls and fresh WinUI checks passed, with 18 whole-theme
+and 34 region programs. The
+[actual source-validation evidence](benchmarks/compiled-theme-property-capabilities-source-validation-linux-x86_64.json)
+verifies all 26 artifact members, all 11 exact commands, toolchain installation,
+unchanged source and lockfile, and the complete 12-file source union. Independent
+verification reproduced the raw test inventory, generated counts and all 22
+command log/resource hashes. The nine remaining implementation/test files are
+integrated byte-for-byte; the other three already matched the validated source.
+
+The separate full production workflow now freezes `dc93a16d` as reference and
+`c686b70c` as candidate. Its eight implementation files and four test files
+contain the property capability and shared boxed-delivery changes; metadata
+invocation, whole-theme and Style-region source remain identical across arms.
+All 17 producer/helper blobs, the original training corpus and all 216 Cargo
+manifest/lockfile blobs match across the source pair. The existing 13-workload
+fresh PGO training, features, native/link policy, full editable themes and
+targeted correctness gates are retained. The prior construction comparison is
+unchanged. The
+[frozen production plan](benchmarks/compiled-theme-property-capabilities-production-plan-linux-x86_64.json)
+records the passed source prerequisite and independent policy review. Production
+size, allocation and fresh paired throughput for this source remain pending.
 
 ### Earlier source history
 
