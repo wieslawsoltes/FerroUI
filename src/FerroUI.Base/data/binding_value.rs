@@ -90,7 +90,7 @@ pub struct BindingValue<T> {
 }
 
 impl<T> BindingValue<T> {
-    pub(super) fn from_notification_parts(
+    pub(crate) fn from_notification_parts(
         type_: BindingValueType,
         value: Option<T>,
         error: Option<BindingError>,

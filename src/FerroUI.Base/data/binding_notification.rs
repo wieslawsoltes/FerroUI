@@ -1,6 +1,7 @@
 use crate::data::core::ValueTypes;
 use crate::data::{BindingError, BindingOperations, BindingValueType};
 use crate::{BoxedValue, DoNothingType, FerroProperty, UnsetValueType};
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::Rc;
@@ -215,10 +216,10 @@ impl BindingNotification {
     // Only copying the payload needs the destination Rust type. Keep the
     // error policy, including aggregation for an invalid fallback, shared
     // across all property types. The callback runs outside any RefCell borrow.
-    fn resolve_binding_value(
+    pub(crate) fn resolve_binding_value(
         &self,
         target_type: &str,
-        copy_value: &mut dyn FnMut(&BoxedValue) -> bool,
+        copy_value: &mut dyn FnMut(&dyn Any) -> bool,
     ) -> (BindingValueType, Option<BindingError>) {
         let error = self.error();
         let error_type = self.error_type();
@@ -228,7 +229,7 @@ impl BindingNotification {
         }
 
         let value = self.value();
-        if value.as_ref().is_some_and(copy_value) {
+        if value.as_ref().is_some_and(|value| copy_value(value.as_any())) {
             if error_type != BindingErrorType::None && error.is_some() {
                 return (error_type.to_binding_value_type() | BindingValueType::HAS_VALUE, error);
             }

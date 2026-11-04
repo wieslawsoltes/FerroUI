@@ -10,7 +10,7 @@ use crate::diagnostics::{
 };
 use crate::data::{BindingExpressionBase, BindingPriority, BindingValueType};
 use crate::reactive::{IDisposable, IObservable};
-use crate::{DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
+use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -179,6 +179,33 @@ impl ValueStore {
             let effective = self.get_effective_value(property);
             let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
             let result = frame.add_binding(property, frame_source(source));
+            if effective.is_none_or(|e| priority <= e.priority()) {
+                result.start();
+            }
+            result
+        }
+    }
+
+    /// Installs a boxed source without specializing subscription ownership and
+    /// priority selection for every property value type. The typed routes only
+    /// construct the inline cache and its weak observer.
+    pub fn add_boxed_binding(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        source: Rc<dyn IObservable<BoxedValue>>,
+        priority: BindingPriority,
+    ) -> Rc<dyn IDisposable> {
+        if priority == BindingPriority::LocalValue {
+            let observer = property.routes().route_create_boxed_local_binding(owner);
+            self.dispose_existing_local_value_binding(property);
+            self.set_local_value_binding(property, observer.clone());
+            observer.start(source);
+            observer
+        } else {
+            let effective = self.get_effective_value(property);
+            let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
+            let result = frame.add_boxed_binding(property, source);
             if effective.is_none_or(|e| priority <= e.priority()) {
                 result.start();
             }

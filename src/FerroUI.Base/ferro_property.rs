@@ -173,6 +173,33 @@ impl fmt::Display for DoNothingType {
 /// raised on an object (`true` before, `false` after).
 pub type NotifyingCallback = Box<dyn Fn(&FerroObject, bool)>;
 
+/// Only the payload copy depends on T. Keep implicit conversion lookup and
+/// the converted box's ownership in one cold implementation.
+pub(crate) fn convert_property_value<T: PropertyValue>(property: &FerroProperty, value: &dyn Any) -> Option<T> {
+    let mut typed = None;
+    copy_converted_property_value(property, value, &mut |value| {
+        typed = value.downcast_ref::<T>().cloned();
+        typed.is_some()
+    });
+    typed
+}
+
+#[inline(never)]
+pub(crate) fn copy_converted_property_value(
+    property: &FerroProperty,
+    value: &dyn Any,
+    copy_value: &mut dyn FnMut(&dyn Any) -> bool,
+) -> bool {
+    let Some(converted) = crate::data::core::ValueTypes::try_convert_implicit(value, property.property_type()) else {
+        return false;
+    };
+    let copied = copy_value(converted.as_any());
+    // A converter's temporary may have an observable destructor. Release it
+    // before validation, coercion or publication; it also drops if Clone panics.
+    drop(converted);
+    copied
+}
+
 /// Untyped operations that a property routes to its typed implementation.
 pub(crate) trait PropertyRoutes {
     fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn>;
@@ -203,6 +230,14 @@ pub(crate) trait PropertyRoutes {
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into a box of its own. `None` if it has a different type.
     fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
+    /// Creates the typed cache for shared local boxed-source installation.
+    /// Direct properties keep their own binding path.
+    fn route_create_boxed_local_binding(
+        &'static self,
+        _owner: &FerroObject,
+    ) -> Rc<dyn crate::property_store::BoxedLocalBindingValue> {
+        panic!("not supported for direct properties");
+    }
     /// Creates a value entry for `frame` that reads its values from `source`.
     /// Only supported by styled properties.
     fn route_create_binding_entry(
@@ -210,7 +245,7 @@ pub(crate) trait PropertyRoutes {
         o: &FerroObject,
         frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn IValueEntry>;
+    ) -> Rc<dyn crate::property_store::BoxedBindingValue>;
 }
 
 type ChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);

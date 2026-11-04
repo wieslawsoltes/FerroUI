@@ -6,15 +6,14 @@ use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
-// A deferred frame entry retains the observable and the adapter chosen by the
-// binding overload. A boxed-only property can resubscribe without retaining
-// its typed and BindingValue observer implementations in the executable.
+// A deferred typed frame entry retains the observable and its typed adapter.
+// Boxed sources use a separate, shared installation path without retaining
+// either of these typed-source subscription implementations.
 type EntryObserver<T, U> = fn(Weak<BindingEntry<T>>) -> Rc<dyn IObserver<U>>;
 
 pub(crate) enum BindingSource<T: PropertyValue> {
     Typed(Rc<dyn IObservable<T>>, EntryObserver<T, T>),
     Value(Rc<dyn IObservable<BindingValue<T>>>, EntryObserver<T, BindingValue<T>>),
-    Untyped(Rc<dyn IObservable<BoxedValue>>, EntryObserver<T, BoxedValue>),
 }
 
 impl<T: PropertyValue> BindingSource<T> {
@@ -24,10 +23,6 @@ impl<T: PropertyValue> BindingSource<T> {
 
     pub(crate) fn value(source: Rc<dyn IObservable<BindingValue<T>>>) -> Self {
         Self::Value(source, |entry| Rc::new(ValueObserver(entry)))
-    }
-
-    pub(crate) fn untyped(source: Rc<dyn IObservable<BoxedValue>>) -> Self {
-        Self::Untyped(source, |entry| Rc::new(UntypedObserver(entry)))
     }
 }
 
@@ -43,7 +38,7 @@ enum SubscriptionPhase {
 
 /// Subscription and validation belong to the binding, regardless of its
 /// property's Rust value type. Keep their reentrant transitions in one place.
-struct BindingEntryState {
+pub(super) struct BindingEntryState {
     // The phase is readable while subscribing or disposing synchronously.
     phase: Cell<SubscriptionPhase>,
     subscription: Cell<Option<Rc<dyn IDisposable>>>,
@@ -53,19 +48,19 @@ struct BindingEntryState {
     data_validation_error: RefCell<Option<BindingError>>,
 }
 
-struct BoundFrame {
-    owner: Ref<FerroObject>,
+pub(super) struct BoundFrame {
+    pub(super) owner: Ref<FerroObject>,
     frame: Rc<dyn ValueFrame>,
 }
 
 impl BoundFrame {
-    fn publish(&self, entry: Rc<dyn IValueEntry>) {
+    pub(super) fn publish(&self, entry: Rc<dyn IValueEntry>) {
         self.owner.values().on_binding_value_changed(&self.owner, &entry, self.frame.base().priority());
     }
 }
 
 impl BindingEntryState {
-    fn new(frame: Weak<dyn ValueFrame>, has_data_validation: bool) -> Self {
+    pub(super) fn new(frame: Weak<dyn ValueFrame>, has_data_validation: bool) -> Self {
         Self {
             phase: Cell::new(SubscriptionPhase::Idle),
             subscription: Cell::new(None),
@@ -76,12 +71,12 @@ impl BindingEntryState {
         }
     }
 
-    fn bound_frame(&self) -> Option<BoundFrame> {
+    pub(super) fn bound_frame(&self) -> Option<BoundFrame> {
         let frame = self.frame.upgrade()?;
         Some(BoundFrame { owner: frame.base().owner()?, frame })
     }
 
-    fn begin(&self, publish: bool) -> bool {
+    pub(super) fn begin(&self, publish: bool) -> bool {
         if self.phase.get() != SubscriptionPhase::Idle {
             return false;
         }
@@ -89,7 +84,7 @@ impl BindingEntryState {
         true
     }
 
-    fn finish(&self, subscription: Rc<dyn IDisposable>) {
+    pub(super) fn finish(&self, subscription: Rc<dyn IDisposable>) {
         // A synchronous source may have completed during subscribe.
         if self.phase.get() == SubscriptionPhase::Idle {
             subscription.dispose();
@@ -99,30 +94,30 @@ impl BindingEntryState {
         }
     }
 
-    fn publishes(&self) -> bool {
+    pub(super) fn publishes(&self) -> bool {
         matches!(self.phase.get(), SubscriptionPhase::Creating | SubscriptionPhase::Active)
     }
 
-    fn set_validation(&self, state: BindingValueType, error: Option<&BindingError>) {
+    pub(super) fn set_validation(&self, state: BindingValueType, error: Option<&BindingError>) {
         if self.has_data_validation {
             self.data_validation_state.set(state);
             *self.data_validation_error.borrow_mut() = error.cloned();
         }
     }
 
-    fn validation(&self) -> Option<(BindingValueType, Option<BindingError>)> {
+    pub(super) fn validation(&self) -> Option<(BindingValueType, Option<BindingError>)> {
         self.has_data_validation
             .then(|| (self.data_validation_state.get(), self.data_validation_error.borrow().clone()))
     }
 
-    fn unsubscribe(&self) {
+    pub(super) fn unsubscribe(&self) {
         self.phase.set(SubscriptionPhase::Idle);
         if let Some(s) = self.subscription.take() {
             s.dispose();
         }
     }
 
-    fn completed(&self, property: &'static FerroProperty) {
+    pub(super) fn completed(&self, property: &'static FerroProperty) {
         self.phase.set(SubscriptionPhase::Idle);
         drop(self.subscription.take());
         if let Some(frame) = self.frame.upgrade() {
@@ -190,7 +185,6 @@ impl<T: PropertyValue> BindingEntry<T> {
         let subscription = match &self.source {
             BindingSource::Typed(source, observer) => source.subscribe(observer(this)),
             BindingSource::Value(source, observer) => source.subscribe(observer(this)),
-            BindingSource::Untyped(source, observer) => source.subscribe(observer(this)),
         };
         self.state.finish(subscription);
     }
@@ -292,7 +286,7 @@ impl<T: PropertyValue> IDisposable for BindingEntry<T> {
 /// The error of a value that fails the validation of the property (compiled
 /// once, not per value type).
 #[cold]
-fn invalid_value_error(property: &FerroProperty) -> BindingError {
+pub(super) fn invalid_value_error(property: &FerroProperty) -> BindingError {
     BindingError::message(format!("The value is not valid for property '{}'.", property.name()))
 }
 
@@ -321,27 +315,6 @@ struct ValueObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
 impl<T: PropertyValue> IObserver<BindingValue<T>> for ValueObserver<T> {
     fn on_next(&self, value: BindingValue<T>) {
         let Some(entry) = self.0.upgrade() else { return };
-        let value = entry.convert_and_validate(value);
-        entry.set_value(value);
-    }
-    fn on_error(&self, _error: ObservableError) {
-        if let Some(entry) = self.0.upgrade() {
-            entry.binding_completed()
-        }
-    }
-    fn on_completed(&self) {
-        if let Some(entry) = self.0.upgrade() {
-            entry.binding_completed()
-        }
-    }
-}
-
-struct UntypedObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
-
-impl<T: PropertyValue> IObserver<BoxedValue> for UntypedObserver<T> {
-    fn on_next(&self, value: BoxedValue) {
-        let Some(entry) = self.0.upgrade() else { return };
-        let value = entry.property.from_untyped(value.as_any());
         let value = entry.convert_and_validate(value);
         entry.set_value(value);
     }

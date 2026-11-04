@@ -6,33 +6,33 @@ use std::rc::{Rc, Weak};
 
 /// The source keeps its observer weakly. The value store holds the observer
 /// for the binding lifetime, and its subscription guard detaches on drop.
-struct LocalBindingState {
+pub(super) struct LocalBindingState {
     // Release the source while the remaining observer fields are still alive.
     subscription: RefCell<Option<Subscription>>,
-    owner: WeakRef<FerroObject>,
+    pub(super) owner: WeakRef<FerroObject>,
     has_data_validation: bool,
 }
 
-enum ClearValidation {
+pub(super) enum ClearValidation {
     BeforeRemoval,
     AfterRemoval,
     Keep,
 }
 
 impl LocalBindingState {
-    fn new(owner: &FerroObject, has_data_validation: bool) -> Self {
+    pub(super) fn new(owner: &FerroObject, has_data_validation: bool) -> Self {
         Self { subscription: RefCell::new(None), owner: owner.to_weak(), has_data_validation }
     }
 
-    fn started(&self, subscription: Rc<dyn IDisposable>) {
+    pub(super) fn started(&self, subscription: Rc<dyn IDisposable>) {
         self.subscription.replace(Some(Subscription::new(subscription)));
     }
 
-    fn detach(&self) {
+    pub(super) fn detach(&self) {
         drop(self.subscription.take());
     }
 
-    fn validate(
+    pub(super) fn validate(
         &self,
         owner: &FerroObject,
         property: &'static FerroProperty,
@@ -44,7 +44,7 @@ impl LocalBindingState {
         }
     }
 
-    fn completed(&self, property: &'static FerroProperty, this: &dyn IDisposable, clear: ClearValidation) {
+    pub(super) fn completed(&self, property: &'static FerroProperty, this: &dyn IDisposable, clear: ClearValidation) {
         let Some(owner) = self.owner.upgrade() else { return };
         if matches!(clear, ClearValidation::BeforeRemoval) {
             self.validate(&owner, property, BindingValueType::UNSET_VALUE, None);
@@ -80,10 +80,6 @@ impl<T: PropertyValue> LocalValueBindingObserver<T> {
 
     pub(crate) fn start_value(self: &Rc<Self>, source: Rc<dyn IObservable<BindingValue<T>>>) {
         self.state.started(source.subscribe(Rc::new(Value(Rc::downgrade(self)))));
-    }
-
-    pub(crate) fn start_untyped(self: &Rc<Self>, source: Rc<dyn IObservable<BoxedValue>>) {
-        self.state.started(source.subscribe(Rc::new(Untyped(Rc::downgrade(self)))));
     }
 
     fn completed(&self) {
@@ -149,25 +145,6 @@ impl<T: PropertyValue> IObserver<BindingValue<T>> for Value<T> {
     fn on_next(&self, value: BindingValue<T>) {
         if let Some(observer) = self.0.upgrade() {
             observer.next_value(value)
-        }
-    }
-    fn on_error(&self, _error: ObservableError) {
-        if let Some(observer) = self.0.upgrade() {
-            observer.completed()
-        }
-    }
-    fn on_completed(&self) {
-        if let Some(observer) = self.0.upgrade() {
-            observer.completed()
-        }
-    }
-}
-
-struct Untyped<T: PropertyValue>(Weak<LocalValueBindingObserver<T>>);
-impl<T: PropertyValue> IObserver<BoxedValue> for Untyped<T> {
-    fn on_next(&self, value: BoxedValue) {
-        if let Some(observer) = self.0.upgrade() {
-            observer.next_value(observer.property.from_untyped(value.as_any()))
         }
     }
     fn on_error(&self, _error: ObservableError) {

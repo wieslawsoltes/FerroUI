@@ -720,9 +720,7 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(
-            self, property, source, priority, LocalValueBindingObserver::start_untyped, BindingSource::untyped,
-        )
+        self.values.add_boxed_binding(self, property, source, priority)
     }
 
     /// Coerces the specified property.

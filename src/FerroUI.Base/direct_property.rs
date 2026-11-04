@@ -1,5 +1,5 @@
 use crate::data::{BindingPriority, BindingValue};
-use crate::ferro_property::{FerroPropertyInit, PropertyRoutes};
+use crate::ferro_property::{convert_property_value, FerroPropertyInit, PropertyRoutes};
 use crate::ferro_property_metadata::MetadataTable;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
@@ -38,16 +38,6 @@ impl<T: PropertyValue> Deref for DirectPropertyBase<T> {
 }
 
 impl<T: PropertyValue> DirectPropertyBase<T> {
-    /// Converts an untyped value of another type to the value type of the
-    /// property with the implicit conversions of the managed original
-    /// (the `TryConvert` of the property, see
-    /// [`ValueTypes::try_convert_implicit`](crate::data::core::ValueTypes::try_convert_implicit)).
-    fn convert_untyped(value: &dyn Any) -> Option<T> {
-        let converted = crate::data::core::ValueTypes::try_convert_implicit(value, std::any::TypeId::of::<T>())?;
-        let converted: &dyn crate::AnyValue = &*converted;
-        converted.downcast_ref::<T>().cloned()
-    }
-
     /// The untyped base of the property.
     #[inline]
     pub fn as_property(&'static self) -> &'static FerroProperty {
@@ -155,7 +145,7 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         } else if value.is::<DoNothingType>() {
         } else if let Some(v) = value.downcast_ref::<T>() {
             o.set_direct_value(this, v.clone());
-        } else if let Some(v) = Self::convert_untyped(value) {
+        } else if let Some(v) = convert_property_value::<T>(self, value) {
             o.set_direct_value(this, v);
         } else {
             self.invalid_value();
@@ -231,7 +221,7 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         _o: &FerroObject,
         _frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         _source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn IValueEntry> {
+    ) -> Rc<dyn crate::property_store::BoxedBindingValue> {
         panic!("direct properties have no value entries");
     }
 }
