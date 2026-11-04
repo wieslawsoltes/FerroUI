@@ -21,18 +21,13 @@ import subprocess
 import time
 
 from measure import elf_sections, measure_commands
+from compare_registration import dependency_artifacts, executable_identity, native_linker_identity
 
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 HOST = "x86_64-unknown-linux-gnu"
 EVIDENCE = "docs/benchmarks/compiled-theme-rust-idioms-linux-x86_64.json"
-TRAINING_VARIABLES = (
-    "LLVM_PROFILE_FILE", "FERROUI_PGO_TRAIN",
-    "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE", "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE",
-)
-
-
 def identity(path: Path) -> dict:
     path = path.resolve()
     with path.open("rb") as stream:
@@ -49,9 +44,37 @@ def save(path: Path, value: dict) -> None:
 
 def clean_environment() -> dict:
     environment = os.environ.copy()
-    for name in TRAINING_VARIABLES:
-        environment.pop(name, None)
+    for name in list(environment):
+        if name in {"LLVM_PROFILE_FILE", "RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS"} or name.startswith(("FERROUI_PGO_", "FERROUI_BENCH_EXPECT_")):
+            environment.pop(name, None)
+    environment["LLVM_PROFILE_FILE"] = "/dev/null"
     return environment
+
+
+def temporary_directory(output: Path) -> Path:
+    temporary = output / "runtime-tmp"
+    temporary.mkdir(parents=True, exist_ok=True)
+    if temporary.stat().st_uid != os.getuid() or temporary.resolve().parent != output.resolve():
+        raise ValueError("Temporary directory must be owned and contained in the output directory")
+    return temporary.resolve()
+
+
+def link_inputs(args: argparse.Namespace, fixtures: dict, compiler: dict, linker: dict) -> dict:
+    tools = {"rustc": identity(Path(compiler["invoked_as"])),
+             "cc": identity(Path(linker["cc"]["invoked_as"])),
+             "lld": identity(Path(linker["lld"]["invoked_as"]))}
+    if "backend" in linker["lld"]:
+        tools["lld_backend"] = identity(Path(linker["lld"]["backend"]["path"]))
+    return {
+        "sources": [identity(Path(item["path"])) for item in fixtures["files"]],
+        "base": identity(args.base),
+        "profile": identity(args.profile) if args.profile else None,
+        "dependencies": {str(path.resolve()): dependency_artifacts(path.resolve()) for path in args.dependency},
+        "tools": tools,
+        "helpers": [identity(HERE / name) for name in
+                    ("validate_runtime_release.py", "compact_unwind_link.py", "compact_unwind.py",
+                     "attribute_codegen.py", "attribute_runtime.py", "compare_registration.py", "measure.py")],
+    }
 
 
 def retained_source(evidence: dict, location: str) -> str:
@@ -94,18 +117,33 @@ def materialize_fixtures(source: Path, output: Path) -> dict:
 
 def compile_fixture(args: argparse.Namespace) -> dict:
     output = args.output.resolve()
+    if (output / "result.json").exists() or (output / args.command).exists():
+        raise ValueError("Fixture compilation requires a fresh output directory")
     fixtures = materialize_fixtures(args.source.resolve(), output / "sources")
     entry = output / "sources" / (args.command + ".rs")
     executable = output / args.command
-    command = [args.rustc, str(entry), "--edition=2021", "--crate-name", "runtime_" + args.command,
+    environment = clean_environment()
+    environment.update(
+        CARGO_MANIFEST_DIR=str(args.source.resolve() / "src/FerroUI.Base"),
+        TMPDIR=str(temporary_directory(output)), RAYON_NUM_THREADS="1", MALLOC_ARENA_MAX="1",
+        MALLOC_CONF="narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,background_thread:false,retain:false",
+    )
+    compiler = executable_identity(args.rustc, environment)
+    compiler["verbose_version"] = subprocess.check_output([compiler["invoked_as"], "-vV"], env=environment, text=True)
+    if f"host: {HOST}" not in compiler["verbose_version"]:
+        raise ValueError(f"This link policy requires native {HOST}")
+    linker = native_linker_identity(compiler["invoked_as"], HOST, environment)
+    inputs = link_inputs(args, fixtures, compiler, linker)
+    command = [compiler["invoked_as"], str(entry), "--edition=2021", "--crate-name", "runtime_" + args.command,
                "--target", HOST, "-Cpanic=unwind", "-Cstrip=symbols", "--extern",
                "ferroui_base=" + str(args.base.resolve()), "-o", str(executable),
                "-Clink-arg=-fuse-ld=lld"]
     for directory in args.dependency:
         command.append("-Ldependency=" + str(directory.resolve()))
     if args.command == "registry":
-        command += ["--test", "-Copt-level=1", "-Clto=off", "-Ccodegen-units=16",
-                    "-Clink-arg=-Wl,--threads=1"]
+        command += ["--test", "-Copt-level=" + args.dev_opt_level, "-Clto=" + args.dev_lto,
+                    "-Cdebug-assertions=yes", "-Ccodegen-units=16",
+                    "-Clink-arg=-Wl,--threads=1", "-Clinker=" + linker["cc"]["invoked_as"]]
     else:
         if args.profile is None:
             raise ValueError("unwind requires the matching production graph and --profile")
@@ -115,15 +153,22 @@ def compile_fixture(args: argparse.Namespace) -> dict:
                     "-Clinker=" + str(args.source.resolve() / "scripts/themes/bench/compact_unwind_link.py")]
     report = {"kind": args.command + " fixture", "fixtures": fixtures, "base": identity(args.base),
               "profile": identity(args.profile) if args.profile else None, "command": command,
+              "inputs": inputs, "compiler": compiler, "linker": linker, "complete": False,
+              "development_options": {"lto": args.dev_lto, "opt_level": args.dev_opt_level}
+              if args.command == "registry" else None,
+              "controlled_environment": {name: environment[name] for name in
+                                         ("PATH", "FERROUI_CC", "TMPDIR", "LLVM_PROFILE_FILE", "RAYON_NUM_THREADS", "MALLOC_ARENA_MAX", "MALLOC_CONF")},
               "scope": "Companion linked against the supplied real Base library; not a shipping size measurement."}
     report_path = output / "result.json"
-    environment = clean_environment()
-    environment["CARGO_MANIFEST_DIR"] = str(args.source.resolve() / "src/FerroUI.Base")
+    save(report_path, report)
     start = time.monotonic()
     with (output / "build.log").open("w") as log:
         built = subprocess.run(command, env=environment, stdout=log, stderr=log)
     report.update(compile_exit=built.returncode, compile_seconds=time.monotonic() - start)
+    report["inputs_unchanged"] = inputs == link_inputs(args, fixtures, compiler, linker)
     save(report_path, report)
+    if not report["inputs_unchanged"]:
+        raise RuntimeError("Fixture source or production graph changed during compilation")
     built.check_returncode()
     report["executable"] = identity(executable)
     report["sections"] = elf_sections(executable)
@@ -137,8 +182,10 @@ def compile_fixture(args: argparse.Namespace) -> dict:
         report["counts"] = dict(zip(("passed", "failed", "ignored"), map(int, match.groups())))
     save(report_path, report)
     result.check_returncode()
-    if args.command == "registry" and report.get("counts", {}).get("passed") != 47:
+    if args.command == "registry" and report.get("counts") != {"passed": 47, "failed": 0, "ignored": 0}:
         raise RuntimeError("Registry fixture coverage changed; inspect the recorded test list")
+    report["complete"] = True
+    save(report_path, report)
     return report
 
 
@@ -204,22 +251,40 @@ def archive_manifest(path: Path) -> dict:
 def compatibility(args: argparse.Namespace) -> dict:
     archives = archive_manifest(args.archives)
     report = {"producer": identity(Path(__file__)), "executable": identity(args.executable),
-              "shipping_budget_bytes": 10_000_000, "sections": elf_sections(args.executable), "cases": {}}
+              "shipping_budget_bytes": 10_000_000, "sections": elf_sections(args.executable), "cases": {},
+              "complete": False, "structural_scope": "Font values after an insertion plus a scalar edit; the inserted resource itself is not separately queried."}
     report["remaining_to_budget_bytes"] = max(0, report["executable"]["bytes"] - 10_000_000)
+    environment = clean_environment()
+    environment["TMPDIR"] = str(temporary_directory(args.output.resolve().parent))
+    # Without retain-archive, winui.rs ignores both the archive argument and
+    # EXPECT variables. An impossible expected value must be rejected before
+    # successful exits can count as editable-runtime correctness evidence.
+    negative_command = [str(args.executable.resolve())]
+    negative_environment = {**environment, "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": "999973"}
+    negative = subprocess.run(negative_command, env=negative_environment, capture_output=True, text=True)
+    report["expectation_negative_control"] = {"command": negative_command, "expected_normal_font": 999973,
+                                               "exit": negative.returncode, "stdout": negative.stdout, "stderr": negative.stderr}
+    save(args.output, report)
+    if negative.returncode == 0 or "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE" not in negative.stderr:
+        raise RuntimeError("Executable did not reject the impossible expected resource value")
     for label, case in archives["cases"].items():
         normal, compact = case["font"]
         command = [str(args.executable.resolve())]
         if case["archive"]:
             command.append(case["archive"]["path"])
-        environment = {**clean_environment(), "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": str(normal),
-                       "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE": str(compact)}
-        result = subprocess.run(command, env=environment, capture_output=True, text=True)
+        case_environment = {**environment, "FERROUI_BENCH_EXPECT_NORMAL_FONT_SIZE": str(normal),
+                            "FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE": str(compact)}
+        result = subprocess.run(command, env=case_environment, capture_output=True, text=True)
         report["cases"][label] = {**case, "command": command, "exit": result.returncode,
                                   "stdout": result.stdout, "stderr": result.stderr}
         save(args.output, report)
         result.check_returncode()
     if len(report["cases"]) != 9:
         raise ValueError("All nine cases, including --installed, are required for the release check")
+    if identity(args.executable) != report["executable"] or archive_manifest(args.archives) != archives:
+        raise RuntimeError("Executable or archive inputs changed during validation")
+    report["complete"] = True
+    save(args.output, report)
     return report
 
 
@@ -236,21 +301,30 @@ def startup(args: argparse.Namespace) -> dict:
     if reference.stat().st_dev != candidate.stat().st_dev:
         raise ValueError("Place both measured executables on the same filesystem")
     report = {"producer": identity(Path(__file__)), "reference": identity(reference),
-              "candidate": identity(candidate), "cpu": args.cpu, "cases": {},
+              "candidate": identity(candidate), "cpu": args.cpu, "cases": {}, "complete": False,
               "protocol": "Alternating process order, warm launches, no expected-value or training work in timed children; shared host, no isolation claim.",
-              "scope": "Process spawn to flushed first typed Button readiness. First painted frame is not measured."}
+              "scope": "Process spawn to flushed typed Button ControlTheme readiness. No Button control or first painted frame is measured."}
     original_affinity = os.sched_getaffinity(0)
-    original_environment = {name: os.environ.get(name) for name in TRAINING_VARIABLES}
+    original_environment = os.environ.copy()
+    save(args.output, report)
     try:
         os.sched_setaffinity(0, {args.cpu})
-        for name in TRAINING_VARIABLES:
-            os.environ.pop(name, None)
+        environment = clean_environment()
+        environment["TMPDIR"] = str(temporary_directory(args.output.resolve().parent))
+        os.environ.clear()
+        os.environ.update(environment)
         for label, pairs in (("embedded", args.embedded_pairs), ("scalar-v3", 41),
                              ("struct-v3", 41), ("struct-v1", 21)):
             case = archives["cases"][label]
             extra = [case["archive"]["path"]] if case["archive"] else []
             commands = {"reference": [str(reference), *extra], "candidate": [str(candidate), *extra]}
-            rows = measure_commands(commands, pairs)
+            report["cases"][label] = {"expected_pairs": pairs, "commands": commands, "complete": False}
+
+            def checkpoint(rows: dict) -> None:
+                report["cases"][label].update(samples=rows, completed_pairs=len(rows["candidate"]))
+                save(args.output, report)
+
+            rows = measure_commands(commands, pairs, on_pair=checkpoint)
             diagnostics = {}
             for metric in ("create_ns", "button_lookup_ns", "create_and_button_ns", "process_ready_ns", "process_ns"):
                 values = {side: [row[metric] for row in samples] for side, samples in rows.items()}
@@ -259,16 +333,17 @@ def startup(args: argparse.Namespace) -> dict:
                     "p95_ns": {side: sorted(samples)[math.ceil(.95 * len(samples)) - 1] for side, samples in values.items()},
                     "paired_ratio_95_interval": paired_interval(values["candidate"], values["reference"]),
                 }
-            report["cases"][label] = {"pairs": pairs, "commands": commands, "samples": rows, "diagnostics": diagnostics}
+            report["cases"][label].update(pairs=pairs, samples=rows, diagnostics=diagnostics, complete=True)
             save(args.output, report)
             print(label, diagnostics["process_ready_ns"], flush=True)
     finally:
         os.sched_setaffinity(0, original_affinity)
-        for name, value in original_environment.items():
-            if value is None:
-                os.environ.pop(name, None)
-            else:
-                os.environ[name] = value
+        os.environ.clear()
+        os.environ.update(original_environment)
+    if identity(reference) != report["reference"] or identity(candidate) != report["candidate"] or archive_manifest(args.archives) != archives:
+        raise RuntimeError("Executable or archive inputs changed during timing")
+    report["complete"] = True
+    save(args.output, report)
     return report
 
 
@@ -285,6 +360,9 @@ def main() -> None:
         command.add_argument("--profile", type=Path)
         command.add_argument("--rustc", default="rustc")
         command.add_argument("--output", type=Path, required=True)
+        if name == "registry":
+            command.add_argument("--dev-lto", choices=("off", "thin"), default="off")
+            command.add_argument("--dev-opt-level", choices=("0", "1"), default="1")
     archive = subcommands.add_parser("archives")
     archive.add_argument("--packer", type=Path, required=True)
     archive.add_argument("--installed", type=Path)

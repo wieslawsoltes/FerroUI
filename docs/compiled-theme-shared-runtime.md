@@ -35,8 +35,8 @@ the sole input owner directly to a retained observer, covering local and styled
 bindings both with successful conversion and with a conversion panic.
 
 Subscription guards retain their previous destruction order, before the source
-and typed cache. Cached values are replaced outside an active `RefCell` guard
-before an old value's destructor can run. A cached fallback remains associated
+and typed cache. Replacing a cached value releases the `RefCell` guard before
+the old value's destructor runs. A cached fallback remains associated
 with the binding across hiding, unsubscribe and resubscribe.
 
 ### Property conversion
@@ -130,6 +130,8 @@ hashes, links them against an explicitly supplied real Base library, builds the
 editable archive cases, and records paired startup samples. Its subcommands are
 `fixtures`, `registry`, `unwind`, `archives`, `compat` and `startup`. `unwind`
 requires the matching production profile; fixture binaries never count toward
-the shipping executable budget. Startup measures readiness of the first typed
-Button and records internal create/lookup clocks separately. It does not measure
-the first painted frame.
+the shipping executable budget. Startup measures typed Button `ControlTheme`
+readiness and records internal create/lookup clocks separately. It instantiates
+no Button control and does not measure the first painted frame. The archive
+check first rejects an impossible expected resource value, so a probe that
+omits editable archive support cannot pass merely by ignoring its arguments.

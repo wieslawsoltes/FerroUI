@@ -74,7 +74,7 @@ def measure_launches(executables, rounds):
     return measure_commands({path: [path] for path in executables}, rounds)
 
 
-def measure_commands(commands, rounds):
+def measure_commands(commands, rounds, on_pair=None):
     # Rotate each executable through first and last positions so slow drift
     # during the run does not systematically favor the candidate or baseline.
     executables = list(commands)
@@ -99,6 +99,8 @@ def measure_commands(commands, rounds):
                 "create_ns": create, "button_lookup_ns": lookup - create, "create_and_button_ns": lookup,
                 "process_ready_ns": ready, "process_ns": elapsed,
             })
+        if on_pair is not None:
+            on_pair(samples)
     return samples
 
 
