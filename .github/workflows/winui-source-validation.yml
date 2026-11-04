@@ -5,7 +5,7 @@ on:
     inputs:
       revision:
         description: 'Immutable source commit for development correctness gates'
-        default: '12babbcebca79a59b5b3aba8a57fcfda773d80b4'
+        default: '50d7caef84c43ce671660d84ff5d5c9c07927c49'
         required: true
         type: string
   push:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: winui-source-validation-${{ github.ref }}-${{ inputs.revision || '12babbcebca79a59b5b3aba8a57fcfda773d80b4' }}
+  group: winui-source-validation-${{ github.ref }}-${{ inputs.revision || '50d7caef84c43ce671660d84ff5d5c9c07927c49' }}
   cancel-in-progress: false
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ inputs.revision || '12babbcebca79a59b5b3aba8a57fcfda773d80b4' }}
+          ref: ${{ inputs.revision || '50d7caef84c43ce671660d84ff5d5c9c07927c49' }}
           path: source
           persist-credentials: false
       - name: Native development dependencies
@@ -40,7 +40,7 @@ jobs:
           sudo apt-get install -y build-essential binutils curl xz-utils pkg-config time
       - name: Compile immutable source and run focused gates
         env:
-          SOURCE_REVISION: ${{ inputs.revision || '12babbcebca79a59b5b3aba8a57fcfda773d80b4' }}
+          SOURCE_REVISION: ${{ inputs.revision || '50d7caef84c43ce671660d84ff5d5c9c07927c49' }}
         run: |
           python3 tooling/scripts/themes/bench/run_winui_source_validation.py \
             --source "$GITHUB_WORKSPACE/source" \
