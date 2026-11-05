@@ -1,8 +1,11 @@
-//! Pie, doughnut and radial gauge measurement.
+//! Pie, doughnut and radial gauge measurement, and the angular gauge visuals of a pie chart
+//! (`AngularTicksVisual`, `NeedleVisual`).
 
 use crate::axis::format_number;
+use crate::labelers::{Labeler, Labelers};
 use crate::scene::*;
 use crate::series::{PolarLabelsPosition, RadialAlignment, Series};
+use ferroui_base::media::Color;
 use ferroui_base::{Point, Rect, Size};
 use std::collections::BTreeMap;
 use std::f64::consts::FRAC_PI_2;
@@ -15,6 +18,9 @@ pub struct PieOptions {
     pub min_value: f64,
     pub max_value: Option<f64>,
     pub clockwise: bool,
+    /// The visual elements of the chart (`VisualElements`): the ticks and needles of an angular
+    /// gauge, drawn over the slices and under their data labels.
+    pub visual_elements: Vec<PieVisual>,
 }
 impl Default for PieOptions {
     fn default() -> Self {
@@ -25,6 +31,78 @@ impl Default for PieOptions {
             min_value: 0.0,
             max_value: None,
             clockwise: true,
+            visual_elements: Vec::new(),
+        }
+    }
+}
+
+/// The paint of the ticks, labels and needle of an angular gauge in the source's light theme
+/// (the `BaseNeedleVisual` and `BaseAngularTicksVisual` rules).
+pub const GAUGE_VISUAL_COLOR: Color = Color::from_rgb(30, 30, 30);
+
+/// A visual element of a pie chart.
+#[derive(Clone, Debug, PartialEq)]
+pub enum PieVisual {
+    AngularTicks(AngularTicks),
+    Needle(Needle),
+}
+
+/// The ticks of an angular gauge (`AngularTicksVisual`): an arc over the range of the chart,
+/// a tick and a label at each step of ten nice separations of the range, and four sub-ticks
+/// between two ticks.
+#[derive(Clone, Debug, PartialEq)]
+pub struct AngularTicks {
+    /// The stroke of the arc and the ticks (`Stroke`); `None` draws none.
+    pub stroke: Option<Color>,
+    pub stroke_width: f64,
+    /// The paint of the labels (`LabelsPaint`); `None` draws none.
+    pub labels_color: Option<Color>,
+    /// What the diameter of the arc is short of the draw margin (`OuterOffset`).
+    pub outer_offset: f64,
+    /// How far inside the draw margin the labels are (`LabelsOuterOffset`).
+    pub labels_outer_offset: f64,
+    /// The length of a tick (`TicksLength`); a sub-tick is half of it.
+    pub ticks_length: f64,
+    pub labels_size: f64,
+    /// The label of a tick (`Labeler`); `None` is the source's default,
+    /// [`Labelers::six_representative_digits`].
+    pub labeler: Option<Labeler>,
+}
+impl Default for AngularTicks {
+    fn default() -> Self {
+        Self {
+            stroke: Some(GAUGE_VISUAL_COLOR),
+            stroke_width: 1.0,
+            labels_color: Some(GAUGE_VISUAL_COLOR),
+            outer_offset: 0.0,
+            labels_outer_offset: 0.0,
+            ticks_length: 0.0,
+            labels_size: 12.0,
+            labeler: None,
+        }
+    }
+}
+
+/// The needle of an angular gauge (`NeedleVisual` with `NeedleGeometry`): a triangle from the
+/// centre of the chart to 45% of its smaller side, pointing at `value` in the range of the
+/// chart, over a circle of its half width at the centre.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Needle {
+    pub value: f64,
+    /// The width of the base of the needle (`Width`, 20 in the theme).
+    pub width: f64,
+    /// The offset of the needle (`Translate`).
+    pub translate: Point,
+    /// The paint of the needle (`Fill`); `None` draws none.
+    pub fill: Option<Color>,
+}
+impl Default for Needle {
+    fn default() -> Self {
+        Self {
+            value: 0.0,
+            width: 20.0,
+            translate: Point::new(0.0, 0.0),
+            fill: Some(GAUGE_VISUAL_COLOR),
         }
     }
 }
@@ -265,6 +343,8 @@ impl PieChartEngine {
         // Gauge backgrounds have source ZIndex -1 and must stay behind their
         // values even when the builder appends them at the end of the collection.
         slices.sort_by_key(|slice| !series[slice.series].is_fill_series);
+        // The data labels go over the slices and the visual elements (their paint z-index).
+        let mut labels = Vec::new();
         for slice in slices {
             let si = slice.series;
             let s = &series[si];
@@ -320,7 +400,7 @@ impl PieChartEngine {
             if s.data_labels {
                 let measured = label_sizes[si][slice.point];
                 let (location, anchor, rotation) = label_position(center, &slice, s, measured);
-                scene.primitives.push(
+                labels.push(
                     Primitive::new(
                         Geometry::Text {
                             origin: Point::new(location.x, location.y - measured.height * 0.5),
@@ -335,8 +415,218 @@ impl PieChartEngine {
                 );
             }
         }
+        let max_value = options.max_value.unwrap_or_else(|| {
+            totals
+                .values()
+                .copied()
+                .fold(0.0_f64, f64::max)
+                .max(options.min_value + 1.0)
+        });
+        // The ticks (z-index 998) are under the needles (999), whatever their order.
+        for visual in &options.visual_elements {
+            if let PieVisual::AngularTicks(ticks) = visual {
+                draw_angular_ticks(&mut scene, ticks, options, max_value, &mut measure_text)?;
+            }
+        }
+        for visual in &options.visual_elements {
+            if let PieVisual::Needle(needle) = visual {
+                draw_needle(&mut scene, needle, options, max_value)?;
+            }
+        }
+        scene.primitives.extend(labels);
         Ok(scene)
     }
+}
+
+/// `BaseAngularTicksVisual.Measure`.
+fn draw_angular_ticks(
+    scene: &mut Scene,
+    ticks: &AngularTicks,
+    options: &PieOptions,
+    max: f64,
+    measure_text: &mut impl FnMut(&str, f64) -> Size,
+) -> Result<(), ChartError> {
+    if ![
+        ticks.stroke_width,
+        ticks.outer_offset,
+        ticks.labels_outer_offset,
+        ticks.ticks_length,
+        ticks.labels_size,
+    ]
+    .iter()
+    .all(|v| v.is_finite())
+    {
+        return Err(ChartError::InvalidData(
+            "the dimensions of angular ticks must be finite".into(),
+        ));
+    }
+    let plot = scene.plot_bounds;
+    let h = plot.width.min(plot.height);
+    let center = Point::new(plot.x + plot.width * 0.5, plot.y + plot.height * 0.5);
+    let initial_rotation = options.initial_rotation.trunc();
+    let sweep = options.max_angle - 0.1;
+    let outer_radius = h * 0.5;
+    let ticks_diameter = h - ticks.outer_offset;
+    let ticks_radius = ticks_diameter * 0.5;
+    let inner_radius = ticks_radius - ticks.ticks_length;
+    let subtick_inner_radius = ticks_radius - ticks.ticks_length * 0.5;
+    let labels_radius = outer_radius - ticks.labels_outer_offset;
+    let min = options.min_value;
+    let mut range = max - min;
+    if range == 0.0 {
+        range = min;
+    }
+    // Ten separations of the range, at the nice step of their magnitude.
+    let minimum = range / 10.0;
+    let magnitude = 10f64.powf((minimum.ln() / 10f64.ln()).floor());
+    let residual = minimum / magnitude;
+    let tick = if residual > 5.0 {
+        10.0 * magnitude
+    } else if residual > 2.0 {
+        5.0 * magnitude
+    } else if residual > 1.0 {
+        2.0 * magnitude
+    } else {
+        magnitude
+    };
+    if !(tick.is_finite() && tick > 0.0 && range.is_finite() && range != 0.0) {
+        return Ok(());
+    }
+    let stroke = ticks
+        .stroke
+        .map(|color| PaintStyle::stroke(color, ticks.stroke_width.max(0.0)));
+    if let Some(style) = &stroke {
+        if ticks_radius > 0.0 && sweep > 0.0 {
+            let start = initial_rotation.to_radians();
+            let mut path = vec![PathCommand::MoveTo(Point::new(
+                center.x + start.cos() * ticks_radius,
+                center.y + start.sin() * ticks_radius,
+            ))];
+            append_arc(&mut path, center, ticks_radius, start, sweep.to_radians());
+            scene
+                .primitives
+                .push(Primitive::new(Geometry::Path(path), style.clone()));
+        }
+    }
+    let at = |angle: f64, radius: f64| {
+        Point::new(
+            center.x + angle.cos() * radius,
+            center.y + angle.sin() * radius,
+        )
+    };
+    let beta_of = |value: f64| ((value - min) / range * sweep + initial_rotation).to_radians();
+    let mut labels = Vec::new();
+    let mut i = (min / tick).trunc() * tick - tick;
+    // The source steps by addition; the count guards a step below the precision of the range.
+    for _ in 0..10_000 {
+        if i > max {
+            break;
+        }
+        let beta = beta_of(i);
+        let next_beta = beta_of(i + tick);
+        // A tick before the minimum is hidden (its opacity is 0), and so is a sub-tick before it.
+        let visible = i >= min;
+        if let Some(style) = &stroke {
+            if visible {
+                scene.primitives.push(Primitive::new(
+                    Geometry::Line {
+                        start: at(beta, inner_radius),
+                        end: at(beta, ticks_radius),
+                    },
+                    style.clone(),
+                ));
+            }
+            if i + tick <= max {
+                for j in 0..4 {
+                    let fraction = (j + 1) as f64 / 5.0;
+                    if i + tick * fraction < min {
+                        continue;
+                    }
+                    let alpha = beta + (next_beta - beta) * fraction;
+                    scene.primitives.push(Primitive::new(
+                        Geometry::Line {
+                            start: at(alpha, ticks_radius),
+                            end: at(alpha, subtick_inner_radius),
+                        },
+                        style.clone(),
+                    ));
+                }
+            }
+        }
+        if let (Some(color), true) = (ticks.labels_color, visible) {
+            let text = match &ticks.labeler {
+                Some(labeler) => labeler.label(i),
+                None => Labelers::six_representative_digits(i),
+            };
+            let size = measure_text(&text, ticks.labels_size);
+            let location = at(beta, labels_radius);
+            if !text.is_empty() && size.height.is_finite() {
+                labels.push(Primitive::new(
+                    Geometry::Text {
+                        origin: Point::new(location.x, location.y - size.height * 0.5),
+                        text,
+                        size: ticks.labels_size,
+                        rotation: 0.0,
+                        anchor: TextAnchor::Center,
+                    },
+                    PaintStyle::fill(color),
+                ));
+            }
+        }
+        i += tick;
+    }
+    // The labels follow the arc and the ticks, so they read on top.
+    scene.primitives.extend(labels);
+    Ok(())
+}
+
+/// `BaseNeedleVisual.Measure` with `NeedleGeometry.Draw`: the needle rotates about the centre by
+/// the initial rotation and the angle of its value (`RotateTransform`, less the 90 degrees of a
+/// geometry that points down).
+fn draw_needle(
+    scene: &mut Scene,
+    needle: &Needle,
+    options: &PieOptions,
+    max: f64,
+) -> Result<(), ChartError> {
+    if ![needle.value, needle.width, needle.translate.x, needle.translate.y]
+        .iter()
+        .all(|v| v.is_finite())
+    {
+        return Err(ChartError::InvalidData(
+            "the value and dimensions of a needle must be finite".into(),
+        ));
+    }
+    let Some(color) = needle.fill else {
+        return Ok(());
+    };
+    let plot = scene.plot_bounds;
+    let center = Point::new(
+        plot.x + plot.width * 0.5 + needle.translate.x,
+        plot.y + plot.height * 0.5 + needle.translate.y,
+    );
+    let radius = plot.width.min(plot.height) * 0.45;
+    let p = (needle.value - options.min_value) / (max - options.min_value);
+    if !p.is_finite() {
+        return Ok(());
+    }
+    let rotation = (options.initial_rotation.trunc() + p * options.max_angle - 90.0).to_radians();
+    let (sin, cos) = rotation.sin_cos();
+    let rotate =
+        |x: f64, y: f64| Point::new(center.x + x * cos - y * sin, center.y + x * sin + y * cos);
+    let w = needle.width * 0.5;
+    let style = PaintStyle::fill(color);
+    scene.primitives.push(Primitive::new(
+        Geometry::Polygon(vec![rotate(0.0, radius), rotate(-w, 0.0), rotate(w, 0.0)]),
+        style.clone(),
+    ));
+    if w > 0.0 {
+        scene.primitives.push(Primitive::new(
+            Geometry::Ellipse(Rect::new(center.x - w, center.y - w, w * 2.0, w * 2.0)),
+            style,
+        ));
+    }
+    Ok(())
 }
 
 #[derive(Clone, Copy)]
@@ -925,5 +1215,131 @@ mod tests {
                 assert_eq!(sweep, if hit.id.series == 0 { 270.0 } else { 90.0 });
             }
         }
+    }
+
+    /// The sections, ticks and needle of the source's `AngularGaugeTests` (the Pies/AngularGauge
+    /// sample): `GaugeGenerator.BuildAngularGaugeSections` of 60, 30 and 10 with an outer offset of
+    /// 130 and a radial width of 20, the ticks of the test and a needle at 45.
+    fn angular_gauge(needle: f64) -> (Vec<Series>, PieOptions) {
+        let mut series: Vec<_> = [60.0, 30.0, 10.0]
+            .into_iter()
+            .map(|value| {
+                let mut s = series(value);
+                s.is_gauge = true;
+                s.is_relative_to_min_value = true;
+                s.hover_push_out = 0.0;
+                s.outer_radius_offset = 130.0;
+                s.max_radial_column_width = 20.0;
+                s
+            })
+            .collect();
+        let mut background = Series::from_values(SeriesKind::Pie, [0.0, 0.0, 0.0]);
+        background.is_gauge = true;
+        background.is_fill_series = true;
+        series.push(background);
+        let options = PieOptions {
+            initial_rotation: -225.0,
+            max_angle: 270.0,
+            min_value: 0.0,
+            max_value: Some(100.0),
+            visual_elements: vec![
+                PieVisual::AngularTicks(AngularTicks {
+                    labeler: Some(Labeler::new(|value| format!("{value:.1}"))),
+                    labels_size: 16.0,
+                    labels_outer_offset: 15.0,
+                    outer_offset: 65.0,
+                    ticks_length: 20.0,
+                    ..AngularTicks::default()
+                }),
+                PieVisual::Needle(Needle {
+                    value: needle,
+                    ..Needle::default()
+                }),
+            ],
+            ..PieOptions::default()
+        };
+        (series, options)
+    }
+
+    #[test]
+    fn angular_gauge_ticks_and_needle_follow_the_source_visuals() {
+        let (series, options) = angular_gauge(45.0);
+        let measured = PieChartEngine::measure_with_labels(
+            Size::new(600.0, 600.0),
+            &series,
+            &options,
+            |_, _| Size::new(30.0, 16.0),
+        )
+        .unwrap();
+        // The sections stack along the 270 degrees of the range from -225.
+        let sweeps: Vec<_> = measured.hits.iter().map(|hit| sector(hit).4).collect();
+        assert_eq!(sweeps.len(), 3);
+        for (sweep, expected) in sweeps.iter().zip([162.0, 81.0, 27.0]) {
+            assert!((sweep - expected).abs() < 1e-9, "{sweeps:?}");
+        }
+        let lines: Vec<_> = measured
+            .primitives
+            .iter()
+            .filter_map(|p| match p.geometry {
+                Geometry::Line { start, end } => Some((start, end)),
+                _ => None,
+            })
+            .collect();
+        // Eleven ticks from 0 to 100 and four sub-ticks in each of their ten intervals; the tick
+        // and the sub-ticks before the minimum are hidden.
+        assert_eq!(lines.len(), 11 + 40);
+        let labels: Vec<_> = measured
+            .primitives
+            .iter()
+            .filter_map(|p| match &p.geometry {
+                Geometry::Text { text, .. } => Some(text.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(labels.first(), Some(&"0.0"));
+        assert_eq!(labels.last(), Some(&"100.0"));
+        assert_eq!(labels.len(), 11);
+        let center = Point::new(300.0, 300.0);
+        // The first tick is at the initial rotation, from the inner radius to the arc (the
+        // diameter less the outer offset).
+        let (start, end) = lines[0];
+        let angle = (-225.0_f64).to_radians();
+        let radius = (600.0 - 65.0) * 0.5;
+        assert!((end.x - (center.x + angle.cos() * radius)).abs() < 1e-9);
+        assert!((end.y - (center.y + angle.sin() * radius)).abs() < 1e-9);
+        assert!(((start.x - center.x).hypot(start.y - center.y) - (radius - 20.0)).abs() < 1e-9);
+        // The needle points at its value, 45% of the smaller side long, and is drawn last but
+        // for the data labels.
+        let needle = measured
+            .primitives
+            .iter()
+            .find_map(|p| match &p.geometry {
+                Geometry::Polygon(points) => Some(points.clone()),
+                _ => None,
+            })
+            .expect("the needle");
+        let angle = (-225.0 + 0.45 * 270.0_f64).to_radians();
+        assert!((needle[0].x - (center.x + angle.cos() * 270.0)).abs() < 1e-9);
+        assert!((needle[0].y - (center.y + angle.sin() * 270.0)).abs() < 1e-9);
+        assert!(((needle[1].x - needle[2].x).hypot(needle[1].y - needle[2].y) - 20.0).abs() < 1e-9);
+        assert!(matches!(
+            measured.primitives.last().unwrap().geometry,
+            Geometry::Ellipse(_)
+        ));
+        // At the minimum the needle points at the start of the range.
+        let (series, options) = angular_gauge(0.0);
+        let measured =
+            PieChartEngine::measure(Size::new(600.0, 600.0), &series, &options).unwrap();
+        let needle = measured
+            .primitives
+            .iter()
+            .find_map(|p| match &p.geometry {
+                Geometry::Polygon(points) => Some(points[0]),
+                _ => None,
+            })
+            .unwrap();
+        let angle = (-225.0_f64).to_radians();
+        assert!((needle.x - (center.x + angle.cos() * 270.0)).abs() < 1e-9);
+        assert!((needle.y - (center.y + angle.sin() * 270.0)).abs() < 1e-9);
     }
 }

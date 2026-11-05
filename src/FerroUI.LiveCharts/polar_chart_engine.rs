@@ -7,7 +7,7 @@
 //! while zero always points at `initial_rotation`. The inverse uses atan2 and corrects the
 //! source's quadrant and nonzero-minimum defects.
 
-use crate::axis::{format_number, Axis, AxisScale, POLAR_LABELS_PADDING};
+use crate::axis::{format_number, Axis, AxisScale, POLAR_LABELS_BACKGROUND, POLAR_LABELS_PADDING};
 use crate::kernel::line_spline_math::control_points;
 use crate::measure::AxisTick;
 use crate::scene::*;
@@ -377,7 +377,7 @@ impl PolarChartEngine {
                                 s.geometry_size,
                                 s.geometry_size,
                             )),
-                            s.style(si, true),
+                            s.marker_style(si),
                         )
                         .identified(id),
                     );
@@ -753,6 +753,7 @@ fn draw_axes(
 ) {
     let outer = m.scene.plot_bounds.width.min(m.scene.plot_bounds.height) * 0.5;
     let inner = o.inner_radius.min(outer);
+    let mut labels = Vec::new();
     for (i, axis) in radius_axes.iter().enumerate().filter(|(_, a)| a.visible) {
         let scaler = m.scaler(0, i).unwrap();
         for value in polar_ticks(scaler.radius, axis, m.scene.size, o, false) {
@@ -777,16 +778,16 @@ fn draw_axes(
             }
             let size = text_size(measure_text, &text, axis.text_size);
             let position = at_radius(m.center, axis.labels_angle, radius);
-            m.scene.primitives.push(Primitive::new(
+            let origin = Point::new(position.x, position.y - size.height * 0.5);
+            let rotation =
+                polar_label_rotation(axis.labels_rotation, scaler.get_angle(value), false);
+            labels.extend(label_background(axis, origin, size, rotation));
+            labels.push(Primitive::new(
                 Geometry::Text {
-                    origin: Point::new(position.x, position.y - size.height * 0.5),
+                    origin,
                     text,
                     size: axis.text_size,
-                    rotation: polar_label_rotation(
-                        axis.labels_rotation,
-                        scaler.get_angle(value),
-                        false,
-                    ),
+                    rotation,
                     anchor: TextAnchor::Center,
                 },
                 PaintStyle::fill(axis.labels_color),
@@ -810,18 +811,47 @@ fn draw_axes(
                 continue;
             }
             let size = text_size(measure_text, &text, axis.text_size);
-            m.scene.primitives.push(Primitive::new(
+            let origin = Point::new(end.x, end.y - size.height * 0.5);
+            let rotation = polar_label_rotation(axis.labels_rotation, angle, true);
+            labels.extend(label_background(axis, origin, size, rotation));
+            labels.push(Primitive::new(
                 Geometry::Text {
-                    origin: Point::new(end.x, end.y - size.height * 0.5),
+                    origin,
                     text,
                     size: axis.text_size,
-                    rotation: polar_label_rotation(axis.labels_rotation, angle, true),
+                    rotation,
                     anchor: TextAnchor::Center,
                 },
                 PaintStyle::fill(axis.labels_color),
             ));
         }
     }
+    // The labels of every axis go over the separators of every axis (the source's paint
+    // z-indexes), each over its background.
+    m.scene.primitives.extend(labels);
+}
+/// The background of a polar axis label (`LabelsBackground`, white by default; the label
+/// geometry fills the rectangle of its text and `LabelsPadding` before the text): a rectangle
+/// about the label, turned with it about the point the native text turns about.
+fn label_background(axis: &Axis, origin: Point, size: Size, rotation: f64) -> Option<Primitive> {
+    let color = axis.labels_background.unwrap_or(POLAR_LABELS_BACKGROUND);
+    if color.a == 0 || size.width <= 0.0 || size.height <= 0.0 {
+        return None;
+    }
+    let padding = axis.labels_padding_or(POLAR_LABELS_PADDING);
+    let (left, right) = (-size.width * 0.5 - padding, size.width * 0.5 + padding);
+    let (top, bottom) = (-padding, size.height + padding);
+    let (sin, cos) = rotation.to_radians().sin_cos();
+    let turn = |x: f64, y: f64| Point::new(origin.x + x * cos - y * sin, origin.y + x * sin + y * cos);
+    Some(Primitive::new(
+        Geometry::Polygon(vec![
+            turn(left, top),
+            turn(right, top),
+            turn(right, bottom),
+            turn(left, bottom),
+        ]),
+        PaintStyle::fill(color),
+    ))
 }
 fn text_size(measure: &mut impl FnMut(&str, f64) -> Size, text: &str, size: f64) -> Size {
     let measured = measure(text, size);
@@ -1422,5 +1452,80 @@ mod tests {
         )
         .unwrap();
         assert_eq!(restored.scene.hits.len(), 3);
+    }
+    #[test]
+    fn labels_have_their_background_over_the_separators_and_markers_their_paints() {
+        use ferroui_base::media::Color;
+        let mut s = Series::from_values(SeriesKind::PolarLine, [1.0, 2.0, 3.0]);
+        s.geometry_fill = Some(Color::from_rgb(250, 250, 250));
+        s.geometry_stroke = Some(Color::from_rgb(1, 2, 3));
+        let radius = Axis {
+            labels_padding: Some(3.0),
+            ..Axis::default()
+        };
+        let measure = |radius: &Axis| {
+            PolarChartEngine::measure_with_axes_and_labels(
+                Size::new(300.0, 300.0),
+                std::slice::from_ref(&s),
+                &[],
+                std::slice::from_ref(radius),
+                &full_options(),
+                |_, _| Size::new(20.0, 10.0),
+            )
+            .unwrap()
+        };
+        let m = measure(&radius);
+        let primitives = &m.scene.primitives;
+        let backgrounds: Vec<_> = primitives
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| matches!(p.geometry, Geometry::Polygon(_)))
+            .collect();
+        let texts = primitives
+            .iter()
+            .filter(|p| p.id.is_none() && matches!(p.geometry, Geometry::Text { .. }))
+            .count();
+        // A white background under each axis label, after every separator.
+        assert_eq!(backgrounds.len(), texts);
+        assert!(texts > 0);
+        let last_separator = primitives
+            .iter()
+            .rposition(|p| {
+                p.id.is_none() && matches!(p.geometry, Geometry::Line { .. } | Geometry::Ellipse(_))
+            })
+            .unwrap();
+        assert!(backgrounds.iter().all(|(index, _)| *index > last_separator));
+        let (index, background) = backgrounds[0];
+        assert_eq!(background.style.fill, Some(POLAR_LABELS_BACKGROUND));
+        let Geometry::Polygon(corners) = &background.geometry else {
+            unreachable!()
+        };
+        let Geometry::Text { origin, rotation, .. } = primitives[index + 1].geometry else {
+            panic!("the label follows its background")
+        };
+        if rotation == 0.0 {
+            assert_point(corners[0], Point::new(origin.x - 13.0, origin.y - 3.0));
+            assert_point(corners[2], Point::new(origin.x + 13.0, origin.y + 13.0));
+        }
+        // A transparent background draws none.
+        let clear = measure(&Axis {
+            labels_background: Some(Color::from_argb(0, 0, 0, 0)),
+            ..radius.clone()
+        });
+        let polygons = |m: &PolarMeasurement| {
+            m.scene
+                .primitives
+                .iter()
+                .filter(|p| matches!(p.geometry, Geometry::Polygon(_)))
+                .count()
+        };
+        assert!(polygons(&clear) < polygons(&m));
+        // GeometryFill and GeometryStroke paint the markers.
+        let marker = primitives
+            .iter()
+            .find(|p| matches!(p.geometry, Geometry::Ellipse(_)) && p.id.is_some())
+            .unwrap();
+        assert_eq!(marker.style.fill, Some(Color::from_rgb(250, 250, 250)));
+        assert_eq!(marker.style.stroke, Some(Color::from_rgb(1, 2, 3)));
     }
 }
