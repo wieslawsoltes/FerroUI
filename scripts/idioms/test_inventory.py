@@ -106,6 +106,15 @@ class PatternTests(unittest.TestCase):
             self.assertIn("removed after 0.5", directions[key])
         self.assertIn("target shape", directions["cancellation_token"])
 
+    def test_directions_of_the_signature_types(self):
+        directions = {key: direction for key, _, _, _, direction in inventory.PATTERNS}
+        self.assertIn("removed after 0.5", directions["time_span"])
+        self.assertIn("SystemTime", directions["date_time"])
+        self.assertIn("formatting parameter", directions["culture_info"])
+        self.assertIn("UriRef", directions["uri"])
+        self.assertIn("SlotOrderMap", directions["dictionary"])
+        self.assertEqual(count("signed_duration", "SignedDuration::ZERO; TimeSpan::ZERO"), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
