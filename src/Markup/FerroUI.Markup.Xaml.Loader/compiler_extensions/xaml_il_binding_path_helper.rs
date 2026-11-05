@@ -1037,6 +1037,8 @@ pub enum XamlIlBindingPathElementNode {
     TypeCast(Rc<TypeCastPathElementNode>),
     /// A function of `{x:Bind}` (not a node of upstream).
     XBindFunction(Rc<XBindFunctionPathElementNode>),
+    /// The method an event binding of `{x:Bind}` calls (not a node of upstream).
+    XBindEventHandler(Rc<XBindEventHandlerPathElementNode>),
 }
 
 impl XamlIlBindingPathElementNode {
@@ -1059,6 +1061,7 @@ impl XamlIlBindingPathElementNode {
             XamlIlBindingPathElementNode::ArrayIndexer(e) => e.type_(),
             XamlIlBindingPathElementNode::TypeCast(e) => e.type_.clone(),
             XamlIlBindingPathElementNode::XBindFunction(e) => e.type_(),
+            XamlIlBindingPathElementNode::XBindEventHandler(e) => e.method.return_type(),
         }
     }
 
@@ -1100,6 +1103,7 @@ impl XamlIlBindingPathElementNode {
             XamlIlBindingPathElementNode::ArrayIndexer(_) => "XamlIlArrayIndexerPathElementNode",
             XamlIlBindingPathElementNode::TypeCast(_) => "TypeCastPathElementNode",
             XamlIlBindingPathElementNode::XBindFunction(_) => "XBindFunctionPathElementNode",
+            XamlIlBindingPathElementNode::XBindEventHandler(_) => "XBindEventHandlerPathElementNode",
         }
     }
 }
@@ -1578,6 +1582,22 @@ impl XBindFunctionPathElementNode {
     pub fn type_(&self) -> Rc<dyn IXamlType> {
         self.method.return_type()
     }
+}
+
+/// The method an event binding of `{x:Bind}` calls (docs/porting/x-bind.md, step X4; not a node
+/// of upstream): the last element of a path, `OnClick` on the root source, `Model.OnClick` on the
+/// value of the path before it, or `local:Handlers.OnClick` (a static method). The compiler
+/// checked it against the signature of the event (WinUI's `BoundEventAssignment`): no
+/// parameters, or as many as the event passes, each accepting the argument of the event.
+///
+/// A back end builds `builder.event_handler(name, invoke)`: the Rust emitter writes
+/// `rt::path_event_handler` (`rt::path_static_event_handler`) with a closure over the typed
+/// function of the declared method, the run-time loader invokes the method through its invoker.
+pub struct XBindEventHandlerPathElementNode {
+    pub method: Rc<dyn IXamlMethod>,
+    /// The type the method is looked up on: the type of the owner, or the type of a static
+    /// method.
+    pub owner_type: Rc<dyn IXamlType>,
 }
 
 /// An argument of a function of `{x:Bind}`.

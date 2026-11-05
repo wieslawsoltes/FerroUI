@@ -1,0 +1,13 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            Tag="root tag">
+  <TextBlock x:Name="always" Text="{x:Bind Tag}" />
+  <Border x:Name="lazy" x:Load="False">
+    <TextBlock x:Name="lazyText" Text="{x:Bind Tag, Mode=OneWay}" />
+  </Border>
+  <Border x:Name="bound" x:Load="{x:Bind IsEnabled, Mode=OneWay}">
+    <TextBlock Text="{x:Bind Tag, Mode=OneWay}" />
+  </Border>
+  <TextBlock x:Name="later" x:DeferLoadStrategy="Lazy" Text="{x:Bind Tag}" />
+  <TextBlock x:Name="eager" x:Load="True" Text="created with the document" />
+</StackPanel>

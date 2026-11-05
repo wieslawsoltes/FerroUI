@@ -86,7 +86,25 @@ class PatternTests(unittest.TestCase):
     def test_names_are_whole_words(self):
         self.assertEqual(count("dictionary", "let d: ResourceDictionary = Dictionary::new();"), 1)
         self.assertEqual(count("task", "Task<u32> TaskCompletionSource<u32>"), 1)
-        self.assertEqual(count("cancellation_token", "CancellationTokenSource CancellationToken"), 2)
+        self.assertEqual(count("cancellation_token", "CancellationTokenSource CancellationToken"), 1)
+
+    def test_async_types(self):
+        text = ("let t: CancellationToken; let s: CancellationTokenSource; "
+                "let r: CancellationTokenRegistration; let l: LocalCancellationTokenRegistration;")
+        self.assertEqual(count("cancellation_token", text), 1)
+        self.assertEqual(count("cancellation_token_source", text), 3)
+        self.assertEqual(count("synchronization_context",
+                               "dyn SynchronizationContext; SynchronizationContextScheduler::new(); "
+                               "FerroSynchronizationContext::current()"), 1)
+        self.assertEqual(count("task_completion_source", "TaskCompletionSource::new()"), 1)
+        self.assertEqual(count("task", "Task<u32>; DispatcherTask<u32>; JoinHandle<u32>"), 1)
+
+    def test_directions_of_the_async_types(self):
+        directions = {key: direction for key, _, _, _, direction in inventory.PATTERNS}
+        for key in ("task", "task_completion_source", "synchronization_context",
+                    "cancellation_token_source"):
+            self.assertIn("removed after 0.5", directions[key])
+        self.assertIn("target shape", directions["cancellation_token"])
 
 
 if __name__ == "__main__":
