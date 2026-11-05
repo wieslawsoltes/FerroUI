@@ -10,7 +10,11 @@
 //!   ([`CustomEffect::shader`]): SkSL drawn by Skia on every surface, WGSL
 //!   for Vello (drawn from step E5 on) (docs/porting/custom-effects.md);
 //! - two page transitions as runtime shader effects that sample images
-//!   (E6): its dissolve, and a reveal through a mask.
+//!   (E6): its dissolve, and a reveal through a mask;
+//! - its interactive shader effects (E7): the pointer spotlight, the
+//!   reactive grid, the water ripple and the burning flame, each a runtime
+//!   shader effect and an interactive effect class that changes it from the
+//!   pointer input of its host ([`IEffectInputHandler`](super::IEffectInputHandler)).
 //!
 //! They are registered with [`CustomEffectRegistry`] the first time the
 //! registry is used ([`register_library_effects`]), so that effect strings
@@ -35,9 +39,15 @@ use crate::rendering::composition::effects::{
 use crate::Thickness;
 use std::sync::Once;
 
+mod interactive;
 mod shaders;
 mod transitions;
 
+pub use interactive::{
+    BurningFlameShaderEffect, InteractiveBurningFlameEffect, InteractivePointerSpotlightEffect,
+    InteractiveReactiveGridEffect, InteractiveWaterRippleEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect,
+    RippleWave, WaterRippleShaderEffect,
+};
 pub use shaders::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
 pub use transitions::{DissolveTransitionEffect, MaskTransitionEffect};
 
@@ -61,6 +71,10 @@ pub fn register_library_effects() {
         let _ = CustomEffectRegistry::register::<SpotlightShaderEffect>();
         let _ = CustomEffectRegistry::register::<DissolveTransitionEffect>();
         let _ = CustomEffectRegistry::register::<MaskTransitionEffect>();
+        let _ = CustomEffectRegistry::register::<PointerSpotlightShaderEffect>();
+        let _ = CustomEffectRegistry::register::<ReactiveGridShaderEffect>();
+        let _ = CustomEffectRegistry::register::<WaterRippleShaderEffect>();
+        let _ = CustomEffectRegistry::register::<BurningFlameShaderEffect>();
     });
 }
 

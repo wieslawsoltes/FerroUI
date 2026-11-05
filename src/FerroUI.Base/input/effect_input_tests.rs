@@ -9,6 +9,9 @@
 //! and the water ripple makes ripples and stops animating when it is detached.
 
 use super::*;
+use crate::media::effects::library::{
+    InteractiveBurningFlameEffect, InteractivePointerSpotlightEffect, InteractiveWaterRippleEffect,
+};
 use crate::media::effects::{
     CustomEffect, CustomEffectClass, Effect, EffectHostContext, EffectParameterValue, IEffect, IEffectInputHandler,
     ImmutableBlurEffect, ImmutableCustomEffect,
@@ -389,4 +392,101 @@ fn positions_are_those_of_the_host_normalized_and_in_the_coordinates_of_the_prog
     let context = EffectHostContext::new(&attached, &empty);
     assert_eq!(Point::new(3.0, 4.0), context.normalize(Point::new(3.0, 4.0), false));
     assert_eq!(1.0, context.layer_scale(), "not in a visual tree");
+}
+
+#[test]
+fn the_pointer_spotlight_follows_the_pointer_and_captures_it_while_pressed() {
+    let device = MouseDevice::new();
+    let tree = pointer_tree();
+    let spotlight = InteractivePointerSpotlightEffect::new();
+    tree.border.set_effect(Some(spotlight.clone().into()));
+    let border: Ref<InputElement> = tree.border.clone().upcast();
+
+    tree.root.host.mouse_move(&device, Point::new(125.0, 150.0));
+    let value = spotlight.value();
+    assert!(value.is_pointer_over && !value.is_pressed);
+    assert_eq!((0.25, 0.75), (value.pointer_x, value.pointer_y));
+
+    tree.root.host.pointer(&device, RawPointerEventType::LeftButtonDown, OVER_DECORATOR, 0);
+    assert!(spotlight.value().is_pressed);
+    assert_eq!(Some(border), device.pointer().captured());
+    // Dragged out of the host, the position is clamped to its side.
+    tree.root.host.mouse_move(&device, OVER_CANVAS);
+    assert_eq!(0.0, spotlight.value().pointer_x);
+    tree.root.host.pointer(&device, RawPointerEventType::LeftButtonUp, OVER_CANVAS, 1);
+    assert!(!spotlight.value().is_pressed);
+    assert!(device.pointer().captured().is_none());
+
+    tree.root.host.pointer(&device, RawPointerEventType::LeaveWindow, Point::new(-1.0, -1.0), 2);
+    assert!(!spotlight.value().is_pointer_over);
+}
+
+#[test]
+fn the_burn_away_button_takes_the_press_its_button_handled() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let device = MouseDevice::new();
+    let tree = pointer_tree();
+    // The button handles its press, as a button does.
+    tree.border.pointer_pressed(|_, e| e.set_handled(true));
+    tree.canvas.pointer_pressed(|_, e| e.set_handled(true));
+    let flame = InteractiveBurningFlameEffect::new();
+    tree.border.set_effect(Some(flame.clone().into()));
+    let spotlight = InteractivePointerSpotlightEffect::new();
+    tree.canvas.set_effect(Some(spotlight.clone().into()));
+
+    tree.root.host.pointer(&device, RawPointerEventType::LeftButtonDown, Point::new(150.0, 100.0), 0);
+    let value = flame.value();
+    assert!(value.is_pressed);
+    assert_eq!(1.0, value.burn_amount);
+    assert_eq!((0.5, 0.5), (value.ignition_x, value.ignition_y));
+    assert!(flame.is_animating(), "the flame burns on the frames of the animation clock");
+    tree.root.host.pointer(&device, RawPointerEventType::LeftButtonUp, Point::new(150.0, 100.0), 1);
+    assert!(!flame.value().is_pressed);
+
+    // The spotlight does not take handled presses.
+    tree.root.host.pointer(&device, RawPointerEventType::LeftButtonDown, OVER_CANVAS, 2);
+    assert!(!spotlight.value().is_pressed);
+    tree.root.host.pointer(&device, RawPointerEventType::LeftButtonUp, OVER_CANVAS, 3);
+
+    // Detached, the flame stops.
+    tree.border.set_effect(None);
+    assert!(!flame.is_animating());
+}
+
+#[test]
+fn the_water_ripple_makes_ripples_where_the_pointer_is_pressed_dragged_and_released() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let device = MouseDevice::new();
+    let tree = pointer_tree();
+    let ripple = InteractiveWaterRippleEffect::new();
+    tree.border.set_effect(Some(ripple.clone().into()));
+
+    tree.root.host.mouse_move(&device, Point::new(150.0, 100.0));
+    tree.root.host.pointer(&device, RawPointerEventType::LeftButtonDown, Point::new(150.0, 100.0), 0);
+    let value = ripple.value();
+    assert!(value.is_pressed);
+    assert_eq!(Point::new(0.5, 0.5), value.ripples[0].center);
+    assert_eq!(1.0, value.ripples[0].strength);
+    assert!(ripple.is_animating());
+
+    // A short drag makes no ripple, a longer one does.
+    tree.root.host.mouse_move(&device, Point::new(152.0, 100.0));
+    assert_eq!(Point::new(0.5, 0.5), ripple.value().ripples[0].center);
+    tree.root.host.mouse_move(&device, Point::new(170.0, 100.0));
+    let value = ripple.value();
+    assert_eq!(Point::new(0.7, 0.5), value.ripples[0].center);
+    assert_eq!(0.45, value.ripples[0].strength);
+    assert_eq!(Point::new(0.5, 0.5), value.ripples[1].center);
+
+    tree.root.host.pointer(&device, RawPointerEventType::LeftButtonUp, Point::new(170.0, 100.0), 1);
+    let value = ripple.value();
+    assert!(!value.is_pressed);
+    assert_eq!(0.55, value.ripples[0].strength);
+    assert_eq!(3, value.ripples.iter().filter(|ripple| ripple.is_active()).count());
+
+    // Detached, it stops animating; attached again, it starts without ripples.
+    tree.border.set_effect(None);
+    assert!(!ripple.is_animating());
+    tree.border.set_effect(Some(ripple.clone().into()));
+    assert!(!ripple.value().has_active_ripples());
 }

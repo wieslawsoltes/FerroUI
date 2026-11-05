@@ -23,6 +23,8 @@ mod i_blur_effect;
 mod i_drop_shadow_effect;
 mod i_effect;
 mod immutable_luminance_to_alpha_effect;
+#[cfg(test)]
+mod interactive_effect_tests;
 pub mod library;
 #[cfg(test)]
 mod library_tests;
