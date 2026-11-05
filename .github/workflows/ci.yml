@@ -72,6 +72,13 @@ jobs:
             echo "::error::the files above name the upstream project; only docs/, scripts/ and NOTICE.md may"
             exit 1
           fi
+      # A merge resolved by hand can leave a conflict marker behind, most often in the CHANGELOG.
+      - name: No leftover merge conflict markers
+        run: |
+          if git grep -n -I -E '^(<<<<<<< |>>>>>>> |=======$)'; then
+            echo "::error::the lines above are merge conflict markers"
+            exit 1
+          fi
       # The composition property blocks are written by a script: a change made to them by hand
       # is lost at the next regeneration, so it has to be made in the script.
       - name: Generated composition code is up to date
