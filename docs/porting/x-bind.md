@@ -219,8 +219,9 @@ invokers of the run-time type system (`runtime/framework/binding_path.rs`), then
   (`Visual::attached_to_visual_tree`), the counterpart of `Loading`: after construction, and after
   code-behind has set what the bindings read. Each attach initializes (a no-op when initialized);
   after `StopTracking` the next attach reads again, as WinUI's `Loading` does. A root that is not a
-  visual, or that is already in a tree when its document is built (a populated live root, hot
-  reload), is initialized by calling `initialize`.
+  visual is initialized by calling `initialize`; a root that is already in a tree when a document
+  populates it (a populated live root, a designer, hot reload) is initialized, or updated, by the
+  population (section 3.13).
 - **Templates.** A template instance is updated when its data context changes to an item
   (WinUI's `DataContextChangedHandler`): a recycled container reads its new item, `OneTime`
   included. An item that is not of the `x:DataType` is a diagnostic. The instance keeps the
@@ -525,6 +526,68 @@ of their forms (`BasicTests`, `TwoWayTests` in X1; `FunctionTests`, `CastingTest
   be unloaded (WinUI's `UnloadObject` from code-behind has no counterpart yet). A placeholder
   that has no parent when its `Load` becomes true loads on `load` or `find_name`.
 
+### 3.13 Class documents, populated roots, hot reload and the gallery (X7)
+
+- **The accessor of a class document.** The class file the Rust emitter writes for a class
+  document (`rust_emitter::generate_class_file_with`) has, when the document of the class uses
+  x:Bind, an inherent method of the class, WinUI's `this.Bindings`:
+
+  ```rust
+  impl crate::pages::MyPage {
+      pub fn bindings(&self) -> ::core::option::Option<::std::rc::Rc<::ferroui_markup_xaml::markup_extensions::XBindings>> {
+          ::ferroui_markup_xaml::markup_extensions::XBindings::get_for_root(self)
+      }
+  }
+  ```
+
+  It is `None` until the document has populated the instance, or when its x:Bind are all inside
+  templates (each template instance has bindings of its own). A document without x:Bind adds no
+  API. The class file is a module of the crate of the class, so the method is an ordinary
+  inherent method there; a class whose own code has a `bindings` method cannot use x:Bind in its
+  document. The run-time loader generates no code: a class loaded at run time calls
+  `XBindings::get_for_root(&page)`.
+- **Populated roots.** `XBindings::update_populated(root)` is what the bindings of a root need
+  after a document populated it again, or populated it while it is live: initialized bindings are
+  read again (`Update`, `OneTime` included, and the bindings the document added), the bindings of a
+  root that is already attached to a visual tree (a `Window`: already active) are initialized, as
+  no attach is coming, and any other root waits for its attach. The root of a template instance
+  is left to its data context or its container. The run-time loader calls it after it populates a
+  root instance (`FerroRuntimeXamlLoader::load` with a root, a designer's preview, the populate
+  override of a hot reload session); the first population of a class under construction is not
+  live and waits for its attach as before. A binding that cannot be read is a diagnostic of the
+  bindings, not a load error.
+- **Hot reload.** A component or panel reload (`ComponentReloadTarget`, `PanelReloadTarget`)
+  populates a detached candidate root and moves its content into the preserved root. When the
+  markup has x:Bind (`{x:Bind}` or `{XBind}` in an attribute value), the candidate is compiled
+  against the preserved root as its code-behind (`ReloadCodeBehind`, the service the reload of
+  event handlers uses), so a path resolves against the class of the live root, and
+  `XBindExtension::provide_value` registers the bindings of the document root with the live
+  root's `XBindings` instead of the candidate's. Once the new content and its name scope are in
+  place, the commit calls `update_populated` on the live root, and the rollback calls it again
+  after the previous content is back. A revision whose path does not resolve is a failed reload
+  and keeps the content. Template scopes are not redirected: their instances read their items.
+  Limitations: the bindings of the previous content stay registered with the root until that
+  content is released (an `Update` reads them too), and an x:Bind of an event counts as an event
+  of the document, which a reload accepts only with `with_owned_handlers`, as for every handler.
+- **The WinUI Gallery** (#418). Its native pages are FerroUI XAML loaded by the run-time loader;
+  the pages whose source binds with x:Bind and whose paths name elements of the page keep it:
+  `Binding` (`SizeSlider.Value`, `NameInput.Text`), `InfoBar` (five `TwoWay` bindings to the
+  InfoBars), `Popup` (offsets and light dismiss), `ProgressRing`, `RatingControl` (`OneWay` and
+  the `TwoWay` placeholder), `RichTextBlock` (the overflow targets, element values), `Spacing`,
+  `SplitView`, `TitleBar` and the TitleBar sample window (`navFrame.CanGoBack`). `examples::create`
+  initializes the bindings of a page once it is wired, as WinUI's `Loading` follows the
+  constructor; the windows are initialized when they are shown. The pages whose x:Bind reads
+  code-behind models the port writes in Rust keep their adaptation: `{Binding}` over the markup
+  types of their sample module (`ItemsRepeater`, `NavigationView`), or values set by the Rust
+  code-behind (the chart and colour picker pages, and `TargetInkCanvas` of the InkToolbar, which
+  the code-behind needs before it wires the toolbar). The models are crate-private Rust types
+  without a XAML namespace, which an `x:DataType` would need. The WinUI preview of the catalog runs WinUI's x:Bind through the importer onto the core;
+  most samples name code-behind members a wrapped fragment does not have, which is a compile
+  diagnostic of the preview. Tests: `samples/WinUIGallery/x_bind_tests.rs`.
+- **The calculator** (#443) has no sample yet. Its x:Bind (for example
+  `ControlSizeTrigger Source="{x:Bind Root}"`, [winui-calculator-gaps.md](winui-calculator-gaps.md))
+  are forms of the core; its pages load on it when the sample is written.
+
 ## 4. Steps
 
 | Step | Content | Public API | Risk | Guard tests |
@@ -536,7 +599,7 @@ of their forms (`BasicTests`, `TwoWayTests` in X1; `FunctionTests`, `CastingTest
 | X4 | Event binding: `Click="{x:Bind Model.OnClick}"`, a method with the event's signature, none, or a base signature; the emitter writes a typed handler, the interpreter an invoker; the handler reads its path when the event is raised, as WinUI's does. **Done** (section 3.11) | additions | medium: the event assignment path of the compiler (`FerroXamlIlTransformRoutedEvent`) gains a binding form | `EventTests` behaviours; the signature diagnostic |
 | X5 | `x:DefaultBindMode` (element and subtree); `x:Phase` through `IDataTemplateComponent` (`XBindings` implements `ProcessBindings` and `Recycle`; the contract moves from `ferroui-controls-repeater` to `ferroui-controls` so that the markup library can implement it, with a re-export); `x:Load`; x:Bind in a `ControlTemplate` with `TargetType`; `Window` roots on `Activated`. **Done** (section 3.12) | additions (`DeferredElement`, `XamlBindingHelper`, `XBindExtension::Phase` and `TargetType`); a moved trait (re-exported) | medium: phasing touches ItemsRepeater recycling | `PhasingTests` and `ListAndTemplateTests` behaviours; deferred load; the template root |
 | X6 | The WinUI importer onto the core: x:Bind kept as written, validation only for forms WinUI rejects; the adapter and its diagnostics removed; `winui-controls.md` 10.6 rows updated; the WinUI compiled fixture regenerated. **Done** (section 3.6) | removals in `ferroui-markup-xaml-winui` (a preview release) | medium: the Gallery and calculator pages that use x:Bind move to the core | the WinUI crate's compiled tests on the core; the importer's remaining diagnostics |
-| X7 | Validation and documentation: the WinUI Gallery (#418) and calculator (#443) pages that use x:Bind load and run without the adapter; hot reload calls `update` on a repopulated root; migration notes; the typed accessor of the bindings of a class document (`MyPage::bindings()`, section 6) | additions | low | gallery and calculator tests; hot reload test |
+| X7 | Validation and documentation: the WinUI Gallery (#418) and calculator (#443) pages that use x:Bind load and run without the adapter; hot reload calls `update` on a repopulated root; migration notes; the typed accessor of the bindings of a class document (`MyPage::bindings()`, section 6). **Done** (section 3.13, section 8; the calculator sample does not exist yet) | additions (`XBindings::update_populated`; the generated `bindings()` of a class) | low | `samples/WinUIGallery/x_bind_tests.rs`; the hot reload test `component_reload_updates_the_x_bind_bindings_of_the_preserved_root`; `x_bind_extension_tests.rs` on `x_bind_class.xaml` (both back ends, through the accessor) and on a root populated again |
 
 ## 5. Not in scope
 
@@ -561,7 +624,8 @@ Decided on the merits:
   the same transformer.
 - **Classless documents bind to their root element.** A superset of WinUI (section 3.2).
 - **Initialization on attach to a visual tree** stands for `Loading` (the framework has no
-  `Loading` event); hot reload and live roots call `initialize` (X7 wires hot reload).
+  `Loading` event); a root that a document populates while it is live is initialized, or
+  updated, by the population (X7, section 3.13).
 - **A template instance keeps its name scope** (section 3.5), so named elements work in templates;
   the scope holds the root weakly (it is the scope's owner), so there is no cycle.
 - **The adapter is removed in X6, not kept as a compatibility layer.** The importer is opt-in and
@@ -576,7 +640,13 @@ Decided (2026-11-03, on the merits, as the owner asked for the open decisions of
 - **A typed accessor of the bindings for class documents** is generated in X7:
   `MyPage::bindings()` returns the root's `XBindings`, as WinUI's `this.Bindings`. It is a thin
   generated method over `XBindings::get_for_root`, emitted only for class documents that use
-  x:Bind, so documents without x:Bind gain no API.
+  x:Bind, so documents without x:Bind gain no API. Done in X7: it returns
+  `Option<Rc<XBindings>>`, as the bindings exist only once the document has populated the
+  instance and only for an x:Bind of its root (section 3.13).
+- **Hot reload binds the reloaded markup to the preserved root** (X7): the candidate of a
+  component or panel reload is compiled against the live root as its code-behind, and its
+  bindings of the document root are the live root's, updated after the commit. Binding them to
+  the detached candidate would read a root that is not shown and is dropped after the commit.
 
 ## 7. Status
 
@@ -590,4 +660,56 @@ Decided (2026-11-03, on the merits, as the owner asked for the open decisions of
 - **X6** (the WinUI importer onto the core) is done: section 3.6. WinUI documents keep their
   x:Bind and its directives, and the core compiles them as it compiles native FerroUI documents;
   the adapter of `ferroui-markup-xaml-winui`, `WXAML2004` and the event-target table are removed,
-  and `WXAML1007` remains for the `Reject` policy and a nested x:Bind. The next step is X7.
+  and `WXAML1007` remains for the `Reject` policy and a nested x:Bind.
+- **X7** (validation and documentation) is done: section 3.13 and section 8. The accessor of the
+  bindings of a class document, the update of populated and reloaded roots, the gallery pages
+  and previews on the core, and the migration notes.
+
+**#525 is done**: `{x:Bind}` is one compiled-binding core for FerroUI XAML and WinUI XAML, in the
+run-time loader and the Rust emitter. What remains outside it is listed in section 5 and the
+deviations in sections 3.9 to 3.13.
+
+## 8. Migration
+
+### 8.1 From the WinUI adapter (before X6)
+
+| Before | Now |
+|---|---|
+| `WinUIXamlOptions { x_bind: WinUIXBindPolicy::PropertyPathsWithExplicitLifecycle, .. }` | `WinUIXBindPolicy::Compile`, the default |
+| `{fui:WinUIBind Path=..., Scope=..., SourceLine=...}` in a migrated document | `{x:Bind ...}` as WinUI writes it, kept by the importer |
+| `WinUIBindings::get_for_root(&root)`, `initialize`, `update`, `stop_tracking` | `XBindings::get_for_root(&root)` of `ferroui_markup_xaml::markup_extensions`, the same members; a class document: `page.bindings()` |
+| The host initializes a root after construction | Nothing: the root is initialized when it is attached to a visual tree (a window when activated); a host that needs the values earlier calls `initialize` |
+| The host initializes a template instance after its data context is set | Nothing: the instance reads its item when its data context changes; a container drives it with `IDataTemplateComponent` |
+| `WXAML2004` (the host drives the lifecycle) | Removed |
+| `WXAML1007` for functions, casts, indexers, converters, substitute values, `BindBack`, events, `x:Phase`, `x:Load`, control templates | Compiled; WinUI's own errors are compile or load errors with WinUI's messages (section 3.7) |
+| A path looked up by name at run time; a wrong path is a run-time diagnostic | A path compiled to typed accessors; a wrong path is a compile error |
+
+### 8.2 From `{Binding}` and `{CompiledBinding}`
+
+| `{Binding}` / `{CompiledBinding}` | `{x:Bind}` |
+|---|---|
+| The source is the `DataContext` (or `ElementName`, `RelativeSource`, `Source`) | The source is the root of the document (its class with `x:Class`, else its root element), or the item of a `DataTemplate` with `x:DataType`, or the templated control of a `ControlTemplate` with `TargetType` |
+| `{Binding #name.Text}`, `{Binding Text, ElementName=name}` | `{x:Bind name.Text}`: a first step that is an `x:Name` of the document is the element |
+| The default mode is the target property's (often `OneWay`, `TwoWay` for editable properties) | `OneTime`, unless `Mode` or an `x:DefaultBindMode` around it says otherwise |
+| Values follow the source from the start | The bindings of a root read when they are initialized (on attach), and `OneTime` again on `Update` |
+| `x:CompileBindings` and `x:DataType` choose compiled or reflection paths | Always compiled; a member that does not resolve is an error |
+| `$parent`, `$self`, `#name`, `!`, `^` | Not x:Bind syntax (an error); WinUI's grammar instead: casts, indexers, `path.(Owner.Prop)`, static `ns:Type.Member`, functions and `BindBack` |
+| `Converter`, `ConverterParameter`, `FallbackValue`, `TargetNullValue`, `UpdateSourceTrigger` | The same names; `ConverterLanguage` instead of `ConverterCulture`; `UpdateSourceTrigger` needs `TwoWay`, `Explicit` is an error; `TextBox.Text` writes back on `LostFocus` by default |
+| A command property for a click (`Command="{Binding Save}"`) | Also an event bound to a method: `Click="{x:Bind Save}"` |
+| `StringFormat`, `Delay`, `Priority`, `BindsDirectlyToSource` | No counterpart; a function formats (`{x:Bind Format(Title)}`) |
+| In a `Style` | An error (`Cannot use x:Bind in Styles`) |
+
+A FerroUI document can mix both: `{Binding}` for data-context bindings, `{x:Bind}` for the
+document's own members and named elements. Moving a binding of a named element is mechanical
+(`{Binding #Slider.Value, Mode=OneWay}` to `{x:Bind Slider.Value, Mode=OneWay}`); the mode must be
+written where the default was not `OneTime`, and a host that reads a target before the root is
+attached initializes the bindings first (the WinUI Gallery does it once a page is wired).
+
+### 8.3 Differences from WinUI
+
+The behaviours that differ from WinUI's generated code are listed where they are implemented:
+a classless document and an attached first step (section 3.2), initialization on attach and by
+population instead of `Loading` (sections 3.5 and 3.13), casts, static members and `Visibility`
+(section 3.9), converters needed for types (section 3.10), the lifetime of event handlers and
+delegate properties (section 3.11), phasing through `IsVisible`, `x:Load` on a control template
+root and `UnloadObject` (section 3.12), and the accessor of a class (section 3.13).

@@ -589,7 +589,7 @@ pub(crate) fn open_drag_regions_window(opener: &Ref<Control>) -> Result<Ref<Wind
 }
 
 /// `new TitleBarWindow()` and `Activate()`: the title bar's back button follows the frame's
-/// CanGoBack (a Binding in the markup), its pane toggle button opens and closes the navigation
+/// CanGoBack (the source's x:Bind in the markup, initialized when the window is shown), its pane toggle button opens and closes the navigation
 /// pane, and the navigation view's selection navigates the frame.
 pub(crate) fn open_title_bar_window(opener: &Ref<Control>) -> Result<Ref<Window>, XamlLoadError> {
     let (window, content) = title_bar_window(include_str!("Pages/TitleBarWindow.xaml"), "TitleBarWindow", opener)?;

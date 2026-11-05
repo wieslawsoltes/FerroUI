@@ -76,3 +76,6 @@ mod ink_samples_tests;
 
 #[cfg(test)]
 mod chart_samples_tests;
+
+#[cfg(test)]
+mod x_bind_tests;

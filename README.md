@@ -525,6 +525,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
 - [Deviations](docs/porting/DEVIATIONS.md): every place where the port differs from upstream, and why.
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
+- [x:Bind](docs/porting/x-bind.md): compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML in the run-time loader and the Rust emitter, its lifecycle, hot reload and the migration from `{Binding}` and the former WinUI adapter.
 - [LiveCharts2 port](docs/porting/livecharts2.md): the landing plan, the accounting of every upstream source, API member and test, and the [compiled sample](samples/LiveChartsDemo/README.md).
 - [WinUI Charts port](docs/porting/winui-charts.md): the published-contract boundary, native implementation, complete source/test mapping, adaptations and [compiled sample](samples/ChartsDemo/README.md).
 - [WinUI controls](docs/porting/winui-controls.md): the plan, inventory and rules of the native ports of WinUI 3 controls (icons, InfoBar, NumberBox, NavigationView and others), the WinUI-only templates, the symbol font and the two navigation models.

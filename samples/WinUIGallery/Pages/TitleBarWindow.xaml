@@ -1,15 +1,15 @@
 <!-- Ported from TitleBarWindow.xaml of the pinned WinUI Gallery (14061eea,
      SampleSupport/SamplePages); see ../NOTICE.md. The content of the sample window; the window
      (its Mica backdrop, ExtendsContentIntoTitleBar) and the handlers are in Rust
-     (window_samples.rs), and the x:Bind of IsBackButtonVisible to the frame's CanGoBack is a
-     Binding. The ImageIconSource is a PathIconSource and the PersonPicture a composed circle
+     (window_samples.rs); IsBackButtonVisible keeps the source's x:Bind to the frame's CanGoBack,
+     compiled by the x:Bind core (#525). The ImageIconSource is a PathIconSource and the PersonPicture a composed circle
      with the initials. The pages of the frame are the NavigationView sample pages of the
      gallery. -->
 <Grid xmlns="https://github.com/ferroui"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       x:Name="TitleBarWindowRoot" RowDefinitions="Auto,*">
   <TitleBar x:Name="titleBar" Title="WinUI Gallery" Subtitle="TitleBar sample"
-            IsBackButtonVisible="{Binding #navFrame.CanGoBack, Mode=OneWay}"
+            IsBackButtonVisible="{x:Bind navFrame.CanGoBack, Mode=OneWay}"
             IsPaneToggleButtonVisible="True">
     <TitleBar.Resources>
       <!-- Make TitleBar.Content stretch (default is Center). -->

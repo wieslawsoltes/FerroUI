@@ -19,10 +19,18 @@
 //! with a bound `x:Load` in it, and a window initialized when it is activated.
 //! The diagnostics are load errors of the one and compile errors of the other.
 //!
+//! Step X7: a class document (`x:Class`, `x_bind/x_bind_class.xaml`) gets the generated accessor
+//! of the bindings of its root (`XBindPage::bindings()`, WinUI's `this.Bindings`), used here to
+//! initialize, update and stop them; and a root populated again (a designer, hot reload) reads the
+//! new markup at once when its bindings are initialized, or is initialized when it is live.
+//!
 //! The emitter's output, `x_bind/x_bind.generated.rs`, is checked in, compiled with the tests and
 //! compared with the current compiler. Regenerate it after reviewing a compiler change:
 //! `cargo test -p ferroui-markup-xaml-tests --lib
 //! markup_extensions::x_bind_extension_tests::regenerate_x_bind_fixture -- --ignored --exact`
+//! The class file of `x_bind_class.xaml`, `x_bind/x_bind_class.generated.rs`, likewise:
+//! `cargo test -p ferroui-markup-xaml-tests --lib
+//! markup_extensions::x_bind_extension_tests::regenerate_x_bind_class_fixture -- --ignored --exact`
 
 use std::rc::Rc;
 
@@ -35,16 +43,24 @@ use ferroui_controls::{Border, Button, ContentControl, Control, StackPanel, Text
 use ferroui_markup_xaml::markup_extensions::{DeferredElement, XBindings};
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
-use ferroui_markup_xaml_loader::rust_emitter::generate_file;
+use ferroui_markup_xaml_loader::rust_emitter::{generate_class_file_with, generate_file, ClassGroup, EmitterHost, TransformOptions};
 
 use crate::support::app::styled_window_application;
-use crate::support::loader::{describe, parse, try_parse};
+use crate::support::helpers::boxed;
+use crate::support::loader::{describe, load_with_root, parse, try_parse};
 use crate::support::x_bind::{XBindHelpers, XBindModel, XBindPage, XBindTagConverter};
 
 #[allow(dead_code)]
 #[rustfmt::skip]
 #[path = "x_bind/x_bind.generated.rs"]
 mod generated;
+
+/// The class file of `x_bind_class.xaml` (step X7): `populate` and the `bindings()` accessor of
+/// `XBindPage`.
+#[allow(dead_code)]
+#[rustfmt::skip]
+#[path = "x_bind/x_bind_class.generated.rs"]
+mod class_generated;
 
 const ROOT: &str = include_str!("x_bind/x_bind_root.xaml");
 const TEMPLATE: &str = include_str!("x_bind/x_bind_template.xaml");
@@ -57,6 +73,11 @@ const PHASES: &str = include_str!("x_bind/x_bind_phases.xaml");
 const LOAD: &str = include_str!("x_bind/x_bind_load.xaml");
 const CONTROL_TEMPLATE: &str = include_str!("x_bind/x_bind_control_template.xaml");
 const WINDOW: &str = include_str!("x_bind/x_bind_window.xaml");
+const CLASS: &str = include_str!("x_bind/x_bind_class.xaml");
+
+/// The class of `x_bind_class.xaml`, and the URI of its document.
+const CLASS_NAME: &str = "FerroUI.Markup.Xaml.UnitTests.XBindPage";
+const CLASS_URI: &str = "ferres://FerroUI.Markup.Xaml.UnitTests/x_bind_class.xaml";
 
 const ASSEMBLY: &str = "FerroUI.XBind.Fixture";
 const ROOT_URI: &str = "ferres://FerroUI.XBind.Fixture/";
@@ -1133,6 +1154,156 @@ fn interpreted_window_is_initialized_when_activated() {
 fn compiled_window_is_initialized_when_activated() {
     let _app = styled_window_application();
     assert_window_behavior(compiled_window());
+}
+
+// --- the accessor of a class document and populated roots (step X7) -----------------------
+
+/// The generated `bindings()` of a class document is the `XBindings` of the instance (WinUI's
+/// `this.Bindings`): code-behind sets what the bindings read, then initializes, updates and stops
+/// them through it.
+fn assert_class_behavior(page: Ref<XBindPage>) {
+    let bindings = page.bindings().expect("the accessor gives the bindings of the root of the class document");
+    assert!(Rc::ptr_eq(&bindings, &XBindings::get_for_root(&page).unwrap()));
+    assert_eq!(bindings.binding_count(), 3);
+    assert_eq!(bindings.event_binding_count(), 1);
+    assert!(!bindings.is_initialized());
+    let scope = NameScope::get_name_scope(&page).expect("the instance owns the name scope of its document");
+    let text_block = |name: &str| scope.find_as::<TextBlock>(name).unwrap_or_else(|| panic!("the text block {name}"));
+    let (title, model, formatted) = (text_block("title"), text_block("model"), text_block("formatted"));
+    let clicked = scope.find_as::<Button>("clicked").expect("the button");
+
+    page.set_title("Ada");
+    page.bindings().unwrap().initialize().unwrap_or_else(|errors| panic!("{errors}"));
+    assert!(bindings.is_initialized());
+    assert_eq!(text(&title).as_deref(), Some("Ada"));
+    assert_eq!(text(&model).as_deref(), Some("Grace"));
+    assert_eq!(text(&formatted).as_deref(), Some("Title: Ada"));
+    click(&clicked);
+    assert_eq!(page.clicks(), ["no arguments"]);
+
+    // OneWay follows the class and its model; the OneTime function waits for Update.
+    page.set_title("Lovelace");
+    page.model().set_name("Hopper");
+    assert_eq!(text(&title).as_deref(), Some("Lovelace"));
+    assert_eq!(text(&model).as_deref(), Some("Hopper"));
+    assert_eq!(text(&formatted).as_deref(), Some("Title: Ada"));
+    page.bindings().unwrap().update().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(text(&formatted).as_deref(), Some("Title: Lovelace"));
+
+    // StopTracking releases the sources and the handler.
+    page.bindings().unwrap().stop_tracking();
+    assert!(!bindings.is_initialized());
+    page.set_title("Stopped");
+    assert_eq!(text(&title).as_deref(), Some("Lovelace"));
+    click(&clicked);
+    assert_eq!(page.clicks(), ["no arguments"]);
+    assert!(bindings.diagnostics().is_empty(), "{:?}", bindings.diagnostics());
+}
+
+#[test]
+fn interpreted_class_document_bindings_through_the_generated_accessor() {
+    let _app = styled_window_application();
+    let page = XBindPage::new();
+    assert!(page.bindings().is_none(), "nothing has populated the instance");
+    load_with_root(CLASS, Some(&crate::ASSEMBLY), boxed(page.clone()));
+    assert_class_behavior(page);
+}
+
+#[test]
+fn compiled_class_document_bindings_through_the_generated_accessor() {
+    let _app = styled_window_application();
+    let page = XBindPage::new();
+    assert!(page.bindings().is_none(), "nothing has populated the instance");
+    class_generated::populate(None, &page).unwrap_or_else(|error| panic!("{error}"));
+    assert_class_behavior(page);
+}
+
+/// A root populated again (a designer, a hot reload that populates a live root) reads the new
+/// markup at once when its bindings are initialized, `OneTime` included, and keeps its
+/// `XBindings`; a root that is not in a visual tree waits for its attach, and one that already
+/// is in a tree is initialized by the population, as no attach is coming.
+#[test]
+fn a_root_populated_again_reads_the_new_markup_and_a_live_root_is_initialized() {
+    let _app = styled_window_application();
+    let first = "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock Text='{x:Bind Tag}'/></StackPanel>";
+    let second = "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock Text='{x:Bind Tag, Mode=OneWay}'/><TextBlock Text='{x:Bind Tag}'/></StackPanel>";
+    let block = |root: &Ref<StackPanel>, index: usize| root.children().get(index).cast::<TextBlock>().unwrap();
+
+    let root = StackPanel::new();
+    set_tag(&root, "first");
+    load_with_root(first, None, boxed(root.clone()));
+    let bindings = XBindings::get_for_root(&root).unwrap();
+    assert!(!bindings.is_initialized(), "a root that is not in a visual tree waits for its attach");
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(block(&root, 0).text().as_deref(), Some("first"));
+
+    set_tag(&root, "second");
+    root.children().clear();
+    load_with_root(second, None, boxed(root.clone()));
+    assert!(Rc::ptr_eq(&XBindings::get_for_root(&root).unwrap(), &bindings), "the root keeps its bindings");
+    assert_eq!(block(&root, 0).text().as_deref(), Some("second"));
+    assert_eq!(block(&root, 1).text().as_deref(), Some("second"));
+    set_tag(&root, "third");
+    assert_eq!(block(&root, 0).text().as_deref(), Some("third"));
+    assert_eq!(block(&root, 1).text().as_deref(), Some("second"));
+
+    let live = StackPanel::new();
+    set_tag(&live, "in a window");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(live.clone())));
+    window.show();
+    assert!(live.is_attached_to_visual_tree());
+    load_with_root(first, None, boxed(live.clone()));
+    assert!(XBindings::get_for_root(&live).unwrap().is_initialized());
+    assert_eq!(block(&live, 0).text().as_deref(), Some("in a window"));
+    window.close();
+}
+
+/// The class file of `xaml` as the document of `XBindPage`, through the run-time host.
+fn emitted_class_file(xaml: &str) -> String {
+    crate::register_types();
+    let host = EmitterHost::runtime(&[]).unwrap_or_else(|error| panic!("the run-time type system: {}", error.message()));
+    let class = host.type_system.find_type(CLASS_NAME).unwrap_or_else(|| panic!("the host has no type {CLASS_NAME}"));
+    let documents = [("x_bind_class.xaml".to_string(), xaml.to_string(), Some(CLASS_URI.to_string()))];
+    let module_path = "::ferroui_markup_xaml_tests::markup_extensions::x_bind_extension_tests::class_generated";
+    let group = ClassGroup { class, documents: &documents, constructor: None, module_path };
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&crate::ASSEMBLY);
+    generate_class_file_with(&host, &group, &TransformOptions::of(&configuration))
+        .unwrap_or_else(|reason| panic!("the class document is not eligible: {reason}"))
+        .source
+}
+
+/// Only a class document that uses `x:Bind` gets the accessor: a document without it adds no API
+/// to its class.
+#[test]
+fn the_accessor_is_generated_only_for_a_class_document_with_x_bind() {
+    let _app = styled_window_application();
+    let with_x_bind = emitted_class_file(CLASS);
+    assert!(with_x_bind.contains("impl crate::support::x_bind::XBindPage {"), "{with_x_bind}");
+    assert!(with_x_bind.contains("pub fn bindings(&self) -> ::core::option::Option<::std::rc::Rc<::ferroui_markup_xaml::markup_extensions::XBindings>>"));
+    let without = emitted_class_file(
+        "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.XBindPage'><TextBlock Text='no x:Bind'/></Panel>",
+    );
+    assert!(!without.contains("fn bindings"), "{without}");
+}
+
+#[test]
+fn generated_x_bind_class_fixture_matches_the_current_compiler() {
+    let _app = styled_window_application();
+    assert_eq!(
+        include_str!("x_bind/x_bind_class.generated.rs"),
+        emitted_class_file(CLASS),
+        "regenerate the class fixture with the command in the header of this module"
+    );
+}
+
+#[test]
+#[ignore = "updates the checked-in class fixture; run explicitly after reviewing compiler changes"]
+fn regenerate_x_bind_class_fixture() {
+    let _app = styled_window_application();
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("markup_extensions/x_bind/x_bind_class.generated.rs");
+    std::fs::write(path, emitted_class_file(CLASS)).unwrap();
 }
 
 // --- diagnostics --------------------------------------------------------------------------

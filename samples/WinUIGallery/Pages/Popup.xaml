@@ -1,12 +1,14 @@
-<!-- Adapted from Samples/Popup/PopupOffsetPositioning.txt; see ../NOTICE.md. -->
+<!-- Adapted from Samples/Popup/PopupOffsetPositioning.txt; see ../NOTICE.md. The offsets and the
+     light-dismiss option keep the source's OneWay x:Bind, compiled by the x:Bind core (#525); the
+     placement target, which the source sets in code, is a Binding to the button. -->
 <StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
   <TextBlock Text="Popup with offset positioning" FontSize="18"/>
   <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
     <Button x:Name="ShowPopup" Content="Show Popup (using Offset)"/>
     <Popup x:Name="StandardPopup" PlacementTarget="{Binding #ShowPopup, Mode=OneWay}" Placement="Bottom"
-           VerticalOffset="{Binding #VerticalOffset.Value, Mode=OneWay}"
-           HorizontalOffset="{Binding #HorizontalOffset.Value, Mode=OneWay}"
-           IsLightDismissEnabled="{Binding #LightDismiss.IsChecked, Mode=OneWay}">
+           VerticalOffset="{x:Bind VerticalOffset.Value, Mode=OneWay}"
+           HorizontalOffset="{x:Bind HorizontalOffset.Value, Mode=OneWay}"
+           IsLightDismissEnabled="{x:Bind LightDismiss.IsChecked, Mode=OneWay}">
       <Border Padding="20" CornerRadius="8" Width="200" Height="160" BorderThickness="1" BorderBrush="Gray" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
           <TextBlock Text="Simple Popup" FontSize="16" HorizontalAlignment="Center"/>

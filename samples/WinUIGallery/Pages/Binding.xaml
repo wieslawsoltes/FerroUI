@@ -1,4 +1,5 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. The element bindings are
+     the source's OneWay x:Bind, compiled by the x:Bind core (#525). -->
 <StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Slider x:Name="SizeSlider" Minimum="12" Maximum="36" Value="20" Width="300" HorizontalAlignment="Left"/><TextBlock FontSize="{Binding #SizeSlider.Value, Mode=OneWay}" Text="Text size follows the slider"/><TextBox x:Name="NameInput" Text="FerroUI" Width="300" HorizontalAlignment="Left"/><TextBlock Text="{Binding #NameInput.Text, Mode=OneWay}"/>
+  <Slider x:Name="SizeSlider" Minimum="12" Maximum="36" Value="20" Width="300" HorizontalAlignment="Left"/><TextBlock FontSize="{x:Bind SizeSlider.Value, Mode=OneWay}" Text="Text size follows the slider"/><TextBox x:Name="NameInput" Text="FerroUI" Width="300" HorizontalAlignment="Left"/><TextBlock Text="{x:Bind NameInput.Text, Mode=OneWay}"/>
 </StackPanel>

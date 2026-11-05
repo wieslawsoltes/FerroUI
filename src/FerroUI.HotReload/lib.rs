@@ -42,6 +42,7 @@ mod manifest;
 mod state;
 pub use identity::KEY_NAMESPACE;
 mod watcher;
+mod x_bind;
 pub use content::ContentReloadTarget;
 pub use contract::DocumentContract;
 use ferroui_markup_xaml::source_overlay::{with_sources, Sources};

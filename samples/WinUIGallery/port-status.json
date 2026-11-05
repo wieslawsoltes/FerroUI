@@ -249,7 +249,7 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         }
       ],
-      "notes": "Element-name binding is explicitly ported to a normal shared Binding with an explicit mode. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The element bindings are the source OneWay x:Bind, compiled by the x:Bind core. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": []
     },
     "Border": {
@@ -780,7 +780,7 @@
           "name": "infobar_examples_keep_source_severity_message_action_and_options"
         }
       ],
-      "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
+      "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsChange.txt",
@@ -796,7 +796,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
         },
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarLongShort.txt",
@@ -812,7 +812,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
         },
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsDisplay.txt",
@@ -828,7 +828,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
         }
       ]
     },
@@ -1351,7 +1351,7 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         }
       ],
-      "notes": "Native element binding changes StackPanel spacing interactively. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Native element x:Bind (the compiled x:Bind core) changes StackPanel spacing interactively. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": []
     },
     "SplitButton": {
@@ -1381,7 +1381,7 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         }
       ],
-      "notes": "Native SplitView uses explicit IsPaneOpen binding to a ToggleButton; no x:Bind rewrite is assumed. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Native SplitView binds IsPaneOpen to a ToggleButton with x:Bind, compiled by the x:Bind core. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": []
     },
     "StackPanel": {
@@ -1714,7 +1714,7 @@
           "name": "feedback_pages_and_callbacks_release_their_native_controls"
         }
       ],
-      "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers and ordinary Binding explicitly replace source C# handlers and x:Bind. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending.",
+      "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers replace the source C# handlers; the options keep the source x:Bind, compiled by the x:Bind core. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/RatingControl/RatingControlSimple.txt",
@@ -1730,7 +1730,7 @@
               "name": "rating_page_changes_caption_only_for_user_changes_and_obeys_clear_and_readonly"
             }
           ],
-          "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers and ordinary Binding explicitly replace source C# handlers and x:Bind. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending."
+          "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers replace the source C# handlers; the options keep the source x:Bind, compiled by the x:Bind core. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending."
         },
         {
           "source": "WinUIGallery/Samples/RatingControl/RatingControlPlaceholder.txt",
@@ -1746,7 +1746,7 @@
               "name": "rating_page_tracks_fractional_placeholder_in_both_directions"
             }
           ],
-          "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers and ordinary Binding explicitly replace source C# handlers and x:Bind. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending."
+          "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers replace the source C# handlers; the options keep the source x:Bind, compiled by the x:Bind core. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending."
         }
       ]
     },
@@ -2995,7 +2995,7 @@
           "name": "title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back"
         }
       ],
-      "notes": "All three source examples use the native TitleBar. The configuration example binds Title, Subtitle, IsBackButtonVisible and IsPaneToggleButtonVisible to the options (ElementName and x:Bind become ordinary Bindings; IsOn is IsChecked of the ToggleSwitch; Header is a composed label). The two \"Show window\" buttons open the source's sample windows, extended into a tall title bar with Mica: TitleBar.IsDragRegion of the status badge (unset, true, false), its Click, the extra button and RecomputeDragRegions; and the end-to-end window with the back button bound to Frame.CanGoBack, BackRequested, PaneToggleRequested and NavigationView navigation over the gallery's sample pages. ImageIconSource is a PathIconSource and PersonPicture a composed circle with the initials, since FerroUI has neither (G2). TitleBar_LayoutUpdated (TitleBarHelper.ApplySystemThemeToCaptionButtons) is left to the decorations of the window; the link of the intro to the AppWindowTitleBar page is text. Dragging the window is verified on the hosts, not by these tests.",
+      "notes": "All three source examples use the native TitleBar. The configuration example binds Title, Subtitle, IsBackButtonVisible and IsPaneToggleButtonVisible to the options (the source x:Bind to the named options, compiled by the x:Bind core; IsOn is IsChecked of the ToggleSwitch; Header is a composed label). The two \"Show window\" buttons open the source's sample windows, extended into a tall title bar with Mica: TitleBar.IsDragRegion of the status badge (unset, true, false), its Click, the extra button and RecomputeDragRegions; and the end-to-end window with the back button bound to Frame.CanGoBack, BackRequested, PaneToggleRequested and NavigationView navigation over the gallery's sample pages. ImageIconSource is a PathIconSource and PersonPicture a composed circle with the initials, since FerroUI has neither (G2). TitleBar_LayoutUpdated (TitleBarHelper.ApplySystemThemeToCaptionButtons) is left to the decorations of the window; the link of the intro to the AppWindowTitleBar page is text. Dragging the window is verified on the hosts, not by these tests.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/TitleBar/TitlebarConfiguration.txt",
@@ -3238,7 +3238,7 @@
           "name": "rich_text_block_highlight_follows_the_chosen_color_over_the_source_range"
         }
       ],
-      "notes": "All four examples use the native RichTextBlock: paragraphs with formatted runs and a hyperlink, SelectionHighlightColor, OverflowContentTarget through two RichTextBlockOverflow columns, and a TextHighlighter whose color follows the ComboBox selection over the source range 28+11. x:Bind of the overflow targets is an element-name Binding; mixed text content is written as explicit Runs; the ComboBox header is composed. Exact text layout, fonts and host accessibility remain pending.",
+      "notes": "All four examples use the native RichTextBlock: paragraphs with formatted runs and a hyperlink, SelectionHighlightColor, OverflowContentTarget through two RichTextBlockOverflow columns, and a TextHighlighter whose color follows the ComboBox selection over the source range 28+11. The overflow targets keep the source x:Bind of the elements; mixed text content is written as explicit Runs; the ComboBox header is composed. Exact text layout, fonts and host accessibility remain pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/RichTextBlock/SimpleRichtextblock.txt",
@@ -3276,7 +3276,7 @@
           "source": "WinUIGallery/Samples/RichTextBlock/RichtextblockOverflow.txt",
           "source_sha256": "337d399379381a17001168d867916b513dc1d728486854b719f82b058d0041b0",
           "status": "ported",
-          "notes": "The justified RichTextBlock flows into two linked RichTextBlockOverflow columns; x:Bind becomes {Binding #name}.",
+          "notes": "The justified RichTextBlock flows into two linked RichTextBlockOverflow columns through the source x:Bind of the elements.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",

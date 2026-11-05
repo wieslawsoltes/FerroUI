@@ -1630,6 +1630,95 @@ fn component_reload_preserves_root_model_and_installs_a_fresh_namescope() {
     }
 }
 
+/// Step X7 of #525 (docs/porting/x-bind.md): a component reload of markup with `{x:Bind}`
+/// binds the new content to the preserved root, not to the detached candidate, and updates the
+/// bindings of the root once the content is in place: the bindings the reload added are read at
+/// once (`OneTime` included), `OneWay` ones follow the root afterwards, and a revision whose path
+/// does not resolve fails and keeps the content and its bindings.
+#[test]
+fn component_reload_updates_the_x_bind_bindings_of_the_preserved_root() {
+    use ferroui_base::{controls::NameScope, threading::Dispatcher, BoxedValue, Ref};
+    use ferroui_controls::{ContentPage, StackPanel, TextBlock};
+    use ferroui_markup_xaml::markup_extensions::XBindings;
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let page = |body: &str| {
+        format!(
+            r#"<ContentPage xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">{body}</ContentPage>"#
+        )
+    };
+    let uri = "ferres://component/XBind.xaml".to_string();
+    let initial = page(r#"<TextBlock x:Name="Label" Text="{x:Bind Tag, Mode=OneWay}"/>"#);
+    let root = ContentPage::new();
+    root.set_tag(Some(Rc::new("live tag".to_string())));
+    ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_root_instance(Some(Rc::new(root.clone()) as BoxedValue), &initial),
+        None,
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    let label = |root: &Ref<ContentPage>| {
+        NameScope::get_name_scope(root)
+            .and_then(|scope| scope.find_as::<TextBlock>("Label"))
+            .expect("the label of the current content")
+    };
+    let bindings = XBindings::get_for_root(&root).expect("the x:Bind of the document creates the bindings of its root");
+    // The root is not in a visual tree: the host initializes it, as its attach would.
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(label(&root).text().as_deref(), Some("live tag"));
+
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.clone(), initial.clone()).unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::ComponentReloadTarget::content_page(
+        &root,
+        uri.clone(),
+        initial,
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+
+    // New bound elements: they read the preserved root, through the root's own bindings.
+    session.submit(
+        uri.clone(),
+        page(
+            r#"<StackPanel><TextBlock x:Name="Label" Text="{x:Bind Tag, Mode=OneWay}"/><TextBlock Text="{x:Bind Label.Text, Mode=OneWay}"/></StackPanel>"#,
+        ),
+    );
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    let panel = Ref::<StackPanel>::from_xaml_object(&root.content().unwrap()).expect("the reloaded content");
+    let mirror = panel.children().get(1).cast::<TextBlock>().expect("the mirror of the label");
+    assert!(Rc::ptr_eq(&XBindings::get_for_root(&root).unwrap(), &bindings), "the root keeps its bindings");
+    assert!(bindings.is_initialized());
+    assert_eq!(label(&root).text().as_deref(), Some("live tag"));
+    assert_eq!(mirror.text().as_deref(), Some("live tag"));
+    root.set_tag(Some(Rc::new("changed".to_string())));
+    assert_eq!(label(&root).text().as_deref(), Some("changed"));
+    assert_eq!(mirror.text().as_deref(), Some("changed"));
+    assert!(bindings.diagnostics().is_empty(), "{:?}", bindings.diagnostics());
+
+    // A OneTime binding of a revision reads the root when the revision is applied, then keeps it.
+    session.submit(uri.clone(), page(r#"<TextBlock x:Name="Label" Text="{x:Bind Tag}"/>"#));
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    let once = label(&root);
+    assert_eq!(once.text().as_deref(), Some("changed"));
+    root.set_tag(Some(Rc::new("after the reload".to_string())));
+    assert_eq!(once.text().as_deref(), Some("changed"));
+
+    // A path the root does not have is the compile error of the revision: nothing changes.
+    let content = root.content().unwrap();
+    session.submit(uri.clone(), page(r#"<TextBlock x:Name="Label" Text="{x:Bind NoSuchMember}"/>"#));
+    assert_eq!(session.apply_pending().unwrap().status, ReloadStatus::Failed);
+    assert!(Rc::ptr_eq(&root.content().unwrap(), &content));
+    assert!(label(&root).ptr_eq(&once));
+    // Update reads the OneTime binding of the current content again. (The bindings of a previous
+    // content stay registered until that content is released, so the result is not asserted.)
+    let _ = bindings.update();
+    assert_eq!(once.text().as_deref(), Some("after the reload"));
+}
+
 #[test]
 fn component_refresh_replaces_cached_controls_and_disposes_subscriptions_transactionally() {
     use ferroui_base::{
