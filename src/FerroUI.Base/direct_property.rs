@@ -48,6 +48,53 @@ impl<T: PropertyValue> DirectPropertyBase<T> {
         converted.downcast_ref::<T>().cloned()
     }
 
+    // These fields depend on the value type and owner identity, but not the
+    // owner's Rust type. Keep their construction shared across owner types.
+    #[cold]
+    #[inline(never)]
+    fn new(
+        name: &str,
+        owner_type: &'static TypeInfo,
+        is_read_only: bool,
+        metadata: DirectPropertyMetadata<T>,
+    ) -> Self {
+        let base = FerroProperty::new::<T>(
+            name,
+            owner_type,
+            FerroPropertyInit { inherits: false, is_attached: false, is_direct: true, is_read_only },
+            None,
+        );
+        Self {
+            base,
+            owner: owner_type,
+            metadata: MetadataTable::new(owner_type, metadata),
+            accessor: OnceCell::new(),
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn for_added_owner(
+        source: &Self,
+        source_owner_type: &'static TypeInfo,
+        owner_type: &'static TypeInfo,
+        is_read_only: bool,
+        metadata: Option<DirectPropertyMetadata<T>>,
+    ) -> Self {
+        let metadata = metadata.map(|mut m| {
+            use crate::ferro_property_metadata::PropertyMetadata;
+            m.merge(&source.metadata.get(source_owner_type));
+            m.freeze();
+            m
+        });
+        Self {
+            base: FerroProperty::for_added_owner(&source.base, owner_type, is_read_only),
+            owner: owner_type,
+            metadata: MetadataTable::for_added_owner(&source.metadata, owner_type, metadata),
+            accessor: OnceCell::new(),
+        }
+    }
+
     /// The untyped base of the property.
     #[inline]
     pub fn as_property(&'static self) -> &'static FerroProperty {
@@ -259,19 +306,8 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectProperty<TOwner, T> {
         setter: Option<fn(&TOwner, T)>,
         metadata: DirectPropertyMetadata<T>,
     ) -> &'static Self {
-        let base = FerroProperty::new::<T>(
-            name,
-            TOwner::TYPE,
-            FerroPropertyInit { inherits: false, is_attached: false, is_direct: true, is_read_only: setter.is_none() },
-            None,
-        );
         Self::leak(Self {
-            base: DirectPropertyBase {
-                base,
-                owner: TOwner::TYPE,
-                metadata: MetadataTable::new(TOwner::TYPE, metadata),
-                accessor: OnceCell::new(),
-            },
+            base: DirectPropertyBase::new(name, TOwner::TYPE, setter.is_none(), metadata),
             getter,
             setter,
         })
@@ -304,19 +340,10 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectProperty<TOwner, T> {
         setter: Option<fn(&TNewOwner, T)>,
         metadata: Option<DirectPropertyMetadata<T>>,
     ) -> &'static DirectProperty<TNewOwner, T> {
-        let metadata = metadata.map(|mut m| {
-            use crate::ferro_property_metadata::PropertyMetadata;
-            m.merge(&self.base.metadata.get(TOwner::TYPE));
-            m.freeze();
-            m
-        });
         let result = DirectProperty::<TNewOwner, T>::leak(DirectProperty {
-            base: DirectPropertyBase {
-                base: FerroProperty::for_added_owner(&self.base.base, TNewOwner::TYPE, setter.is_none()),
-                owner: TNewOwner::TYPE,
-                metadata: MetadataTable::for_added_owner(&self.base.metadata, TNewOwner::TYPE, metadata),
-                accessor: OnceCell::new(),
-            },
+            base: DirectPropertyBase::for_added_owner(
+                &self.base, TOwner::TYPE, TNewOwner::TYPE, setter.is_none(), metadata,
+            ),
             getter,
             setter,
         });
