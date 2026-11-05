@@ -54,8 +54,9 @@ stop.
 
 The sample tests verify compiled and runtime construction equivalence, one-click invalidation and
 changed geometry in every chart, and native gradient mutation. The CPU images exercise native
-layout, text shaping and the controls' rendering path. The snapshot renders are the 86 ported
-Cartesian, pie, polar, Sankey, treemap and map scenarios of the upstream snapshot suite; they are
+layout, text shaping and the controls' rendering path. The snapshot renders are the 101 ported
+Cartesian, pie, polar, Sankey, treemap and map scenarios of the upstream snapshot suite (with the
+OHLC, error bar, heat, date axis and angular gauge suites); they are
 visual references, not a pixel comparison with the upstream images (which SkiaSharp draws). The
 custom map scenario reads `mexico-states.geojson` of the upstream sample (see NOTICE.md). The pinned upstream inventory and the remaining work
 are tracked in [`docs/porting/livecharts2.md`](../../docs/porting/livecharts2.md).

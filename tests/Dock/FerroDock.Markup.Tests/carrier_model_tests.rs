@@ -12,7 +12,7 @@ use ferroui_base::{
     controls::{INameScope, NameScope},
     data::core::ValueTypes,
     metadata::{MarkupAssembly, MarkupType, MarkupTyped},
-    utilities::Uri,
+    utilities::UriRef,
     BoxedValue,
 };
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
@@ -49,7 +49,7 @@ fn compiled_carrier_roots_return_the_original_engine_types_and_complete_the_scop
 }
 fn load(name: &str) -> BoxedValue {
     let extension = LoadExtension::with_source(
-        Uri::absolute(&format!("ferres://ferrodock_markup_tests/{name}")).unwrap(),
+        UriRef::parse(&format!("ferres://ferrodock_markup_tests/{name}")).unwrap(),
     );
     extension
         .provide_value(&provider(

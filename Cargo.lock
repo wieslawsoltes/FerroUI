@@ -1100,6 +1100,7 @@ dependencies = [
  "ferroui-system",
  "ferroui-themes-fluent",
  "indexmap",
+ "url",
 ]
 
 [[package]]
@@ -1160,6 +1161,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-headless",
  "ferroui-markup-xaml",
+ "url",
 ]
 
 [[package]]
@@ -1179,6 +1181,7 @@ dependencies = [
  "ferroui-headless",
  "ferroui-markup-xaml",
  "ferroui-themes-simple",
+ "url",
 ]
 
 [[package]]
@@ -1227,6 +1230,7 @@ dependencies = [
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
  "serde_json",
+ "url",
 ]
 
 [[package]]
@@ -1968,6 +1972,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "roxmltree 0.20.0",
  "serde_json",
+ "url",
 ]
 
 [[package]]
@@ -2120,6 +2125,7 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "roxmltree 0.20.0",
+ "url",
 ]
 
 [[package]]
@@ -7132,6 +7138,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+ "url",
  "xaml-include-fixture-theme",
 ]
 

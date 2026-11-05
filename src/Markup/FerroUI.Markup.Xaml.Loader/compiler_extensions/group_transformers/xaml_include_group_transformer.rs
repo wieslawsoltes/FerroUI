@@ -22,7 +22,7 @@
 
 use std::rc::Rc;
 
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::{Uri, UriKind, UriRef};
 use xamlx::ast::{
     IXamlAstManipulationNode, IXamlAstNode, IXamlAstNodeNeedsParentStack, IXamlAstTypeReference,
     IXamlAstValueNode, IXamlLineInfo, XamlAstClrTypeReference, XamlAstExtensions,
@@ -300,11 +300,17 @@ impl IXamlAstGroupTransformer for FerroXamlIncludeTransformer {
         let dotted_path = asset_path.replace('/', ".");
         let full_type_name = get_file_name_without_extension(&dotted_path);
 
-        // Search file in the current assembly among other XAML resources.
+        // Search file in the current assembly among other XAML resources. The URI of a document
+        // is the text of its URL, escaped where the URL standard escapes it (a path or a host
+        // that is not ASCII), and the source of the include is unescaped: the two are compared
+        // unescaped.
         let target_document = context
             .documents()
             .iter()
-            .find(|d| invariant_ignore_case_equals(d.uri().as_deref(), &asset_path_uri))
+            .find(|d| {
+                let uri = d.uri().map(|uri| unescape_data_string(&uri));
+                invariant_ignore_case_equals(uri.as_deref(), &asset_path_uri)
+            })
             .cloned();
         if let Some(target_document) = target_document {
             if let Some(build_method) = target_document.build_method()? {
@@ -584,24 +590,30 @@ impl FerroXamlIncludeTransformer {
             2 => UriKind::Relative,
             _ => UriKind::RelativeOrAbsolute,
         };
-        let mut uri_path = Uri::new(&original_asset_path, uri_kind).map_err(uri_format_exception)?;
-        if !uri_path.is_absolute_uri() {
-            let base_url = context
-                .current_document()
-                .and_then(|d| d.uri())
-                .ok_or_else(|| XamlError::invalid_operation("CurrentDocument URI is null."))?;
-            uri_path = Uri::combine(
-                &Uri::new(&base_url, UriKind::Absolute).map_err(uri_format_exception)?,
-                &uri_path,
-            );
-        } else if !uri_path.scheme().eq_ignore_ascii_case("ferres") {
-            let source_uri_node: Option<Rc<dyn IXamlAstNode>> = Some(source_uri_node);
-            on_invalid_source(&source_uri_node)?;
-            return Ok((None, source_uri_node));
-        }
+        // `new Uri(new Uri(baseUrl), uriPath)`: the reference resolved against the URL of the
+        // document as the run-time loader resolves it (`UriRef::resolve`, C5 of #423), so that
+        // the document linked here is the one the loader would load.
+        let uri_path = Uri::new(&original_asset_path, uri_kind).map_err(uri_format_exception)?;
+        let reference = UriRef::try_from(&uri_path).map_err(uri_format_exception)?;
+        let resolved = match reference.as_url() {
+            Some(url) if !url.scheme().eq_ignore_ascii_case("ferres") => {
+                let source_uri_node: Option<Rc<dyn IXamlAstNode>> = Some(source_uri_node);
+                on_invalid_source(&source_uri_node)?;
+                return Ok((None, source_uri_node));
+            }
+            Some(url) => url.clone(),
+            None => {
+                let base_url = context
+                    .current_document()
+                    .and_then(|d| d.uri())
+                    .ok_or_else(|| XamlError::invalid_operation("CurrentDocument URI is null."))?;
+                let base_url = UriRef::parse_absolute(&base_url).map_err(uri_format_exception)?;
+                reference.resolve(&base_url).map_err(uri_format_exception)?
+            }
+        };
 
         Ok((
-            Some(unescape_data_string(uri_path.absolute_uri())),
+            Some(unescape_data_string(resolved.as_str())),
             Some(source_uri_node),
         ))
     }

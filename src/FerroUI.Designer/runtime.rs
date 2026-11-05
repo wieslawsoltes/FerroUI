@@ -210,8 +210,8 @@ impl RuntimePreview {
         document: &Document,
     ) -> Result<(), String> {
         let canonical = |value: &str| {
-            ferroui_base::utilities::Uri::absolute(value)
-                .map(|uri| uri.absolute_uri().to_owned())
+            ferroui_base::utilities::UriRef::parse_absolute(value)
+                .map(String::from)
                 .map_err(|error| error.to_string())
         };
         if canonical(&uri)? == canonical(&self.uri)? {

@@ -62,7 +62,7 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreFinancialSeries.cs": {
-      "reason": "OHLC coordinates render candlesticks, wicks, bullish/bearish defaults, full category hover and all OHLC values in tooltip text.",
+      "reason": "OHLC coordinates render candlesticks (and the I-bars of an OHLC series), wicks, bullish/bearish defaults, full category hover and all OHLC values in tooltip text.",
       "remaining": [
         "Separate UpFill/DownFill/UpStroke/DownStroke properties, generic financial visuals and all source data label placement behavior remain pending."
       ],
@@ -86,14 +86,15 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CoreHeatSeries.cs": {
-      "reason": "Heat cells infer numeric/date spacing, bound each series independently, interpolate uniform palettes and expose weight in data/tooltip labels.",
+      "reason": "Heat cells span the smallest step of the data on each axis (issue 1511), inset by PointPadding (4 by default), coloured by HeatFunctions between the weight bounds (MinValue and MaxValue, else the extremes) at the ColorStops of the heat map (the source's two blues by default); the hover area is the whole cell and a data label is centred on it with the primary value, as the source's Middle position and default formatter.",
       "remaining": [
-        "Source explicit color stops, cell padding, source weight-bound overrides and all data label styles remain pending."
+        "The data label positions other than Middle, the tooltip label of the source, SVG cell geometries and the per-cell colour animation remain pending."
       ],
       "rust": [
-        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat",
         "src/FerroUI.LiveCharts/series.rs",
-        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
       ],
       "status": "partial"
     },
@@ -124,23 +125,25 @@
       "status": "partial"
     },
     "src/LiveChartsCore/CorePolarAxis.cs": {
-      "reason": "Angle separators run from the inner to the outer radius and radius separators are circles; the ticks use the polar nice step, custom separators and logarithmic bases; labels are placed at LabelsAngle with the tangent and cotangent rotation flags and kept upright.",
+      "reason": "Angle separators run from the inner to the outer radius and radius separators are circles; the ticks use the polar nice step, custom separators and logarithmic bases; labels are placed at LabelsAngle with the tangent and cotangent rotation flags and kept upright, each over its LabelsBackground (white by default) of the text and LabelsPadding, and the labels of every axis over the separators of every axis.",
       "remaining": [
-        "Axis names, label backgrounds, sub-separators and the animated separator lifecycle are not ported."
+        "The animated separator lifecycle is not ported. The source measures the name of a polar axis (GetNameLabelSize) but neither draws it nor reserves room for it, and a polar axis has no sub-separators, so neither is drawn here."
       ],
       "rust": [
-        "src/FerroUI.LiveCharts/polar_chart_engine.rs"
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs",
+        "src/FerroUI.LiveCharts/axis.rs"
       ],
       "status": "partial"
     },
     "src/LiveChartsCore/CorePolarLineSeries.cs": {
-      "reason": "The source spline of a polar line (open or closed, null splitting), its area filled with the theme's alpha 50, stacked radii, the five data label positions with the rotation flags, markers and hover areas.",
+      "reason": "The source spline of a polar line (open or closed, null splitting), its area filled with the theme's alpha 50, stacked radii, the five data label positions with the rotation flags, markers in their GeometryFill and GeometryStroke (the series paint without them) and hover areas.",
       "remaining": [
-        "The geometry fill and stroke paints of the markers and the per-point animation of the source segments are not ported; markers take the series paint."
+        "The per-point animation of the source segments is not ported, and the theme's marker paints (the light fill and the identity stroke of 4) are not applied by default."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/polar_chart_engine.rs",
-        "src/FerroUI.Controls.LiveCharts/series_classes.rs"
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
       ],
       "status": "partial"
     },
@@ -266,6 +269,41 @@
       ],
       "status": "partial"
     },
+    "src/LiveChartsCore/Defaults/DateTimePoint.cs": {
+      "reason": "A ChartPoint whose X is the ticks of its date (DateTime::ticks of ferroui-base, the ticks of .NET) stands for the date point, as the source maps it to its coordinate.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_point.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Defaults/ErrorDateTimePoint.cs": {
+      "reason": "A ChartPoint whose X is the ticks of its date, with its four error components, stands for the error date point, as the source maps it.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_point.rs",
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Defaults/ErrorPoint.cs": {
+      "reason": "A ChartPoint with HasError and its four error components (Coordinate::with_error) stands for the error point.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_point.rs",
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Defaults/ErrorValue.cs": {
+      "reason": "A ChartPoint with HasError and its ErrorYPlus and ErrorYMinus (Coordinate::with_error with an Error of zero X components) stands for the error value at its index.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_point.rs",
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs"
+      ],
+      "status": "native-replacement"
+    },
     "src/LiveChartsCore/Defaults/SankeyLink.cs": {
       "reason": "A notifying link that refers to its Source and Target node objects, with its Weight; its Color stands for the LinkColorMapper of the source series.",
       "remaining": [],
@@ -284,6 +322,14 @@
       ],
       "status": "ported"
     },
+    "src/LiveChartsCore/Defaults/TimeSpanPoint.cs": {
+      "reason": "A ChartPoint whose X is the ticks of its interval (SignedDuration::ticks) stands for the interval point, as the source maps it to its coordinate.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/chart_point.rs"
+      ],
+      "status": "native-replacement"
+    },
     "src/LiveChartsCore/Defaults/TreemapNode.cs": {
       "reason": "A notifying node with its Name, Value and nullable Children (null is a leaf, an empty list an internal node); a node that contains itself is an error.",
       "remaining": [],
@@ -298,6 +344,14 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/motion/animation.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Drawing/BaseNeedleGeometry.cs": {
+      "reason": "The radius and width of the needle are the measure of the needle in the pie engine; the needle has no motion properties, as the scene transition animates the scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle"
       ],
       "status": "native-replacement"
     },
@@ -330,6 +384,14 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/easing_functions.rs::KeyFrame"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Drawing/Segments/ErrorVisual.cs": {
+      "reason": "The YError and XError lines of a point in the error paint: a line across the value from its bottom to its top error and one across the category from its left to its right error, through the point or the centre of the end of a bar, with the axes a row series swaps; no caps, as in the source. The top error is above the value for every series, where the source draws it below a bar or a scatter point against its own bounds and documentation.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_errors"
       ],
       "status": "ported"
     },
@@ -670,6 +732,22 @@
       ],
       "status": "ported"
     },
+    "src/LiveChartsCore/HeatLayout.cs": {
+      "reason": "The cell, its padded visual and its hover area are computed in place by the heat measure of the Cartesian engine.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/HeatMeasureContext.cs": {
+      "reason": "The steps, padding, weight bounds and colour stops of a measure are locals of the heat measure of the Cartesian engine.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_heat"
+      ],
+      "status": "native-replacement"
+    },
     "src/LiveChartsCore/HorizontalBarSeries.cs": {
       "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
       "remaining": [
@@ -753,6 +831,25 @@
       ],
       "status": "partial"
     },
+    "src/LiveChartsCore/Kernel/Sketches/IErrorSeries.cs": {
+      "reason": "ShowError and ErrorPaint are fields of the series snapshot and generated properties of every series; the line, stacked area, bar, range bar and scatter series draw their errors (SeriesKind::has_error_bars), the step, range line, box and financial series have none, as in the source. ErrorPaint is a colour; None is the theme's (45, 45, 45) at the thickness 1 of a source paint.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs",
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Kernel/Sketches/IHeatSeries.cs": {
+      "reason": "HeatMap, ColorStops, PointPadding, MinValue and MaxValue are fields of the series snapshot and properties of the generated HeatSeries.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs"
+      ],
+      "status": "native-replacement"
+    },
     "src/LiveChartsCore/Kernel/Sketches/ISankeyChartView.cs": {
       "reason": "The native SankeyChart is a Chart of the kind Sankey.",
       "remaining": [],
@@ -804,6 +901,15 @@
         "src/FerroUI.LiveCharts/kernel/stacker.rs::Stacker"
       ],
       "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Labelers.cs": {
+      "reason": "SixRepresentativeDigits (Log10_6, up to seven decimals, millions and millionths), FormatCurrency (quadrillions to millions, digit groups and two decimals), Currency with the symbol of the current culture and BuildNamedLabeler (an index out of range an empty label), with the label function of an axis (Labeler). The native default label of an axis stays the native number format; SetDefaultLabeler has no counterpart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/labelers.rs",
+        "src/FerroUI.LiveCharts/axis.rs"
+      ],
+      "status": "ported"
     },
     "src/LiveChartsCore/Measure/AxisLimit.cs": {
       "reason": "Source sentinel defaults, explicit user pinning, scaling and validation are preserved.",
@@ -1009,7 +1115,7 @@
     "src/LiveChartsCore/PolarChartEngine.cs": {
       "reason": "The polar engine measures independent angle and radius axes, the empty and zero-width bounds, the series padding, the automatic margin of the angle labels, an explicit draw margin and the fit-to-bounds plot into a retained scene; the native PolarChart hosts it with the title and legend layout.",
       "remaining": [
-        "Tooltips, legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's; the polar axis name labels are not drawn."
+        "Tooltips, legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's; the source measures the axis names without drawing them, as here."
       ],
       "rust": [
         "src/FerroUI.LiveCharts/polar_chart_engine.rs",
@@ -1083,6 +1189,32 @@
       ],
       "status": "partial"
     },
+    "src/LiveChartsCore/VisualElements/BaseAngularTicksVisual.cs": {
+      "reason": "The measure of the source: the arc of the range from the truncated initial rotation over the maximum angle less 0.1, ten nice separations of the range, a tick from the inner radius to the arc at each step with its label at LabelsOuterOffset inside the draw margin, four sub-ticks of half length in each interval, the ticks, sub-ticks and labels before the minimum hidden, and the labels over the arc and the ticks; the theme's (30, 30, 30) stroke and labels. The arc, ticks and labels are paths, lines and text of the native renderer.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_angular_ticks"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/VisualElements/BaseNeedleVisual.cs": {
+      "reason": "The needle of the source: 45% of the smaller side of the draw margin long, turned about the centre by the truncated initial rotation and the angle of its value in the range, offset by Translate, in the theme's Width of 20 and (30, 30, 30) fill, drawn over the ticks and under the data labels.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/DateTimeAxis.cs": {
+      "reason": "Axis::date_time: the unit width and the minimum step of the ticks of the unit, and the labeler of the date of a value (AsDate, a negative value the first date); the generated DateTimeAxis control sets them from its Interval and its DateFormat (a .NET format string in the current culture, the native counterpart of the formatter delegate of XamlDateTimeAxis).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.LiveCharts/labelers.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "status": "ported"
+    },
     "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/DoughnutGeometry.cs": {
       "reason": "Classic and rounded/inverted doughnut outlines become FerroUI cubic path commands, with tangent arcs and quarter-circle segmentation; actual Pushout is applied to geometry and hit coordinates.",
       "remaining": [
@@ -1115,6 +1247,22 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/geo_map_chart_engine.rs"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/NeedleGeometry.cs": {
+      "reason": "The triangle from the base of the needle to its tip and the circle of its half width at the centre, a polygon and an ellipse of the native renderer.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::draw_needle"
+      ],
+      "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/OhlcGeometry.cs": {
+      "reason": "The I-bar of the source: the spine from the high to the low at the centre of the bar, the open as a tick to its left and the close as a tick to its right, each a line of the native renderer.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_ohlc"
       ],
       "status": "ported"
     },
@@ -1151,6 +1299,15 @@
       ],
       "status": "native-replacement"
     },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/HeatSeries.cs": {
+      "reason": "The generated HeatSeries class takes SeriesKind::Heat with the source's heat map and adds ColorStops, PointPadding, MinValue and MaxValue, which the chart passes to the engine.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "status": "native-replacement"
+    },
     "src/skiasharp/LiveChartsCore.SkiaSharp/MapFactory.cs": {
       "reason": "GenerateLands: the globe in the fill under an orthographic map, the visible layers by descending process index with the chart stroke and fill over the layer paints, the flat projection of each ring, BuildOrthographicPath with the horizon found by 15 bisections and walked along the rim in steps of 3 degrees, the fills under the stroke; Pan, Zoom (the speed clamped to [0.1, 0.95], the overshoot to 80 % of the minimum zoom, the pivot kept in place) and SetViewport. ViewTo is a no-op of the source and has no counterpart.",
       "remaining": [],
@@ -1159,6 +1316,16 @@
         "src/FerroUI.Controls.LiveCharts/chart.rs"
       ],
       "status": "ported"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/OhlcSeries.cs": {
+      "reason": "The generated OhlcSeries class takes SeriesKind::Ohlc with the source defaults (CoreFinancialSeries.MaxBarWidth 25, the stroke thickness 3 of the theme's UpStroke and DownStroke) and is measured by the financial pipeline of the Cartesian engine; generic visual and label type parameters have no native counterpart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs",
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs"
+      ],
+      "status": "native-replacement"
     },
     "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKDefaultGeoTooltip.cs": {
       "reason": "The text of the tooltip: the name of the land in title case, then a line for each series value, {name}: {value:N2}; placed above the anchor of the land, below it when there is no room.",
@@ -1180,12 +1347,40 @@
       ],
       "status": "native-replacement"
     },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/TimeSpanAxis.cs": {
+      "reason": "Axis::time_span: the unit width and the minimum step of the ticks of the unit, and the labeler of the interval of a value (AsTimeSpan, a negative value zero); the generated TimeSpanAxis control sets them from its Interval and its TimeFormat.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.LiveCharts/labelers.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "status": "ported"
+    },
     "src/skiasharp/LiveChartsCore.SkiaSharp/TreemapSeries.cs": {
       "reason": "The native TreemapSeries holds TreemapNode objects, the model the source wires its mappers to by default.",
       "remaining": [],
       "rust": [
         "src/FerroUI.Controls.LiveCharts/series_classes.rs",
         "src/FerroUI.Controls.LiveCharts/node_models.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/VisualElements/AngularTicksVisual.cs": {
+      "reason": "The generated AngularTicksVisual element of the VisualElements of a chart, with Stroke, StrokeThickness, LabelsColor (LabelsPaint), OuterOffset, LabelsOuterOffset, TicksLength, LabelsSize and Labeler; a pie chart draws and observes it.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/visual_elements.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/VisualElements/NeedleVisual.cs": {
+      "reason": "The generated NeedleVisual element of the VisualElements of a chart, with Value, Width, Translate and Fill; a pie chart draws and observes it.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/visual_elements.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
       ],
       "status": "native-replacement"
     },
@@ -2315,6 +2510,38 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/CoreObjectsTests/LabelerTesting.cs::CoreTests.CoreObjectsTests.LabelerTesting::void Currency()#L69": {
+      "reason": "The source values and labels with the \"$\" of the en-US culture the source assumes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/labelers.rs::tests::currency"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/LabelerTesting.cs::CoreTests.CoreObjectsTests.LabelerTesting::void Micra()#L48": {
+      "reason": "The source values and labels.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/labelers.rs::tests::micra"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/LabelerTesting.cs::CoreTests.CoreObjectsTests.LabelerTesting::void Million()#L27": {
+      "reason": "The source values and labels.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/labelers.rs::tests::million"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/LabelerTesting.cs::CoreTests.CoreObjectsTests.LabelerTesting::void NamedLabeler_NullEntry_ReturnsEmpty()#L11": {
+      "reason": "The source labels; the null entry of the source is an empty label of the native list.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/labelers.rs::tests::named_labeler_null_entry_returns_empty"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitStruct()#L225": {
       "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
       "remaining": [],
@@ -2698,6 +2925,30 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/OtherTests/TimeSpanAxisTests.cs::CoreTests.OtherTests.TimeSpanAxisTests::void ConstructorSetsUnitWidthAndMinStepToUnitTicks()#L10": {
+      "reason": "The source unit of five minutes on Axis::time_span.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/labelers.rs::tests::time_span_axis_constructor_sets_unit_width_and_min_step_to_unit_ticks"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/TimeSpanAxisTests.cs::CoreTests.OtherTests.TimeSpanAxisTests::void LabelerClampsNegativeTicksToZero()#L30": {
+      "reason": "The source unit and formatter (the ticks).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/labelers.rs::tests::time_span_axis_labeler_clamps_negative_ticks_to_zero"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/OtherTests/TimeSpanAxisTests.cs::CoreTests.OtherTests.TimeSpanAxisTests::void LabelerFormatsTicksAsTimeSpan()#L20": {
+      "reason": "The source unit and formatter (the total minutes and \"m\").",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/labelers.rs::tests::time_span_axis_labeler_formats_ticks_as_time_span"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/BoxSeriesTests.cs::CoreTests.SeriesTests.BoxSeriesTest::void ShouldScale()#L19": {
       "reason": "The series, values, chart size and axis limits of the source test, with its assertions on the measured visuals read from the retained scene by point identity.",
       "remaining": [],
@@ -2743,6 +2994,14 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.Controls.LiveCharts/chart_input_tests.rs::geo_map_land_colours_change_without_animation"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/HeatSeriesTest.cs::CoreTests.SeriesTests.HeatSeriesTest::void ShouldScale()#L20": {
+      "reason": "The source values, heat map and 1000 by 1000 chart: every cell has the size of the unit cell and the colour of its weight, read from the retained scene by point identity.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_heat_should_scale"
       ],
       "status": "ported"
     },
@@ -2809,6 +3068,14 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/RangeRowDateTimeAxisTests.cs::CoreTests.SeriesTests.RangeRowDateTimeAxisTests::void RangeRow_WithDateTimeXAxis_HoverAreaStaysInPixelRange()#L28": {
+      "reason": "The source values (days from 2026-06-01), the DateTimeAxis of two days, the named Y axis and the 400 by 400 chart: every hover area and anchor stays in the pixels of the chart.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_range_row_with_date_time_x_axis_hover_area_stays_in_pixel_range"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeColumnSeries_AutoBounds_IncludeLowestLowEndpoint()#L76": {
       "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [],
@@ -2838,6 +3105,46 @@
       "remaining": [],
       "rust": [
         "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_scatter_should_scale"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void Heat_CompareAll_HitsCellCenter()#L824": {
+      "reason": "The source values and 1000 by 1000 chart with hidden axes, probed through the hit test of the retained scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_heat_hit_tests"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void Heat_OutsideAnyCell_Misses()#L843": {
+      "reason": "The source values and 1000 by 1000 chart with hidden axes, probed through the hit test of the retained scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_heat_hit_tests"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void Ohlc_CompareOnlyX_GapAroundVisualStillHits()#L461": {
+      "reason": "The source values and 1000 by 1000 chart with hidden axes, probed through the hit test of the retained scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_ohlc_hit_tests"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void Ohlc_CompareOnlyX_HitsInBarColumn()#L428": {
+      "reason": "The source values and 1000 by 1000 chart with hidden axes, probed through the hit test of the retained scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_ohlc_hit_tests"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/SeriesHitTests.cs::CoreTests.SeriesTests.SeriesHitTests::void Ohlc_OutsideChart_Misses()#L447": {
+      "reason": "The source values and 1000 by 1000 chart with hidden axes, probed through the hit test of the retained scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_ohlc_hit_tests"
       ],
       "status": "ported"
     },
@@ -2897,6 +3204,14 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/_MemoryTests.cs::CoreTests.SeriesTests._MemoryTests::void HeatSeries_Releases()#L34": {
+      "reason": "Twenty points of a heat series on a 300 by 200 chart: drawn, detached and drawn again, after which no point survives (weak handles in place of the forced garbage collection).",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/tests/control_tests.rs::heat_series_release_their_points"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/_MemoryTests.cs::CoreTests.SeriesTests._MemoryTests::void SankeySeries_Releases_BipartiteArc()#L47": {
       "reason": "The source fixture of 20 nodes (and 10 links) on a 300 by 200 chart: drawn, emptied and drawn again, after which no node or link object survives (weak handles in place of the forced garbage collection).",
       "remaining": [],
@@ -2929,6 +3244,44 @@
       ],
       "status": "ported"
     },
+    "tests/SnapshotTests/AngularGaugeTests.cs::SnapshotTests.AngularGaugeTests::void AngularGauge()#L50": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "GaugeGenerator.BuildAngularGaugeSections has no native counterpart; the scenario builds its sections and background series, with the theme's gauge rule.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/AngularGaugeTests.cs::SnapshotTests.AngularGaugeTests::void AngularGaugeAtMinValue()#L60": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "GaugeGenerator.BuildAngularGaugeSections has no native counterpart; the scenario builds its sections and background series, with the theme's gauge rule.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/AxesTests.cs::SnapshotTests.AxesTests::void DateTimeScaled()#L125": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
     "tests/SnapshotTests/BoxSeriesTests.cs::SnapshotTests.BoxSeriesTests::void BasicBox()#L11": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
@@ -2942,6 +3295,18 @@
       "status": "partial"
     },
     "tests/SnapshotTests/CandlesticksSeriesTests.cs::SnapshotTests.CandlesticksSeriesTests::void Basic()#L11": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/CandlesticksSeriesTests.cs::SnapshotTests.CandlesticksSeriesTests::void DateTime()#L36": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
@@ -2990,6 +3355,119 @@
       "status": "partial"
     },
     "tests/SnapshotTests/ColumnSeriesTests.cs::SnapshotTests.ColumnSeriesTests::void SpacingColumns()#L65": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/DataLabelsTests.cs::SnapshotTests.DataLabelsTests::void HeatWithLabels()#L132": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ErrorSeriesTests.cs::SnapshotTests.ErrorSeriesTests::void ColumnWithError()#L10": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The source draws the top error (Yi) of a bar or scatter point below it, against its own bounds and the documentation of Error; the native error bar puts it above.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ErrorSeriesTests.cs::SnapshotTests.ErrorSeriesTests::void LineWithError()#L100": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The source draws the top error (Yi) of a bar or scatter point below it, against its own bounds and the documentation of Error; the native error bar puts it above.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ErrorSeriesTests.cs::SnapshotTests.ErrorSeriesTests::void RowWithError()#L55": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ErrorSeriesTests.cs::SnapshotTests.ErrorSeriesTests::void ScatterWithError()#L130": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The source draws the top error (Yi) of a bar or scatter point below it, against its own bounds and the documentation of Error; the native error bar puts it above.",
+        "The dates of the source start today; the scenario starts on 2021-01-01, on the hidden X axis of the source.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/HeatSeriesTests.cs::SnapshotTests.HeatSeriesTests::void Basic()#L12": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The heat legend of the source (SKHeatLegend on the right) has no native counterpart; the scenario has no legend.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/HeatSeriesTests.cs::SnapshotTests.HeatSeriesTests::void Issue1511_AutoAxisBounds_FractionalStep()#L129": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/HeatSeriesTests.cs::SnapshotTests.HeatSeriesTests::void Issue1511_ContinuousYAxis_FractionalStep()#L83": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/HeatSeriesTests.cs::SnapshotTests.HeatSeriesTests::void Issue1511_EmptyPointsDoNotContaminateStep()#L173": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
@@ -3307,6 +3785,30 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source map, projection, bounds, centre, series, lands and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/OhlcSeriesTests.cs::SnapshotTests.OhlcSeriesTests::void Basic()#L11": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/OhlcSeriesTests.cs::SnapshotTests.OhlcSeriesTests::void DateTime()#L36": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",

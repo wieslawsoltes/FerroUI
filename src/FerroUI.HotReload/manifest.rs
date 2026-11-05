@@ -124,11 +124,8 @@ impl ReloadManifest {
                     .ok_or_else(|| ReloadError::Failed(format!("Missing document {key}")))
             };
             let uri = crate::document_key(&string("uri")?);
-            let base = ferroui_base::utilities::Uri::try_create(
-                &uri,
-                ferroui_base::utilities::UriKind::Absolute,
-            )
-            .ok_or_else(|| ReloadError::Failed(format!("Invalid document URI: {uri}")))?;
+            let base = crate::document_url(&uri)
+                .ok_or_else(|| ReloadError::Failed(format!("Invalid document URI: {uri}")))?;
             if manifest
                 .files
                 .insert(uri.clone(), PathBuf::from(string("source_path")?))
@@ -145,17 +142,9 @@ impl ReloadManifest {
                     let text = value
                         .as_str()
                         .ok_or_else(|| ReloadError::Failed("Include must be a URI".into()))?;
-                    let relative = ferroui_base::utilities::Uri::try_create(
-                        text,
-                        ferroui_base::utilities::UriKind::RelativeOrAbsolute,
-                    )
-                    .ok_or_else(|| ReloadError::Failed(format!("Invalid include: {text}")))?;
-                    let resolved = if relative.is_absolute_uri() {
-                        relative
-                    } else {
-                        ferroui_base::utilities::Uri::combine(&base, &relative)
-                    };
-                    includes.push(resolved.absolute_uri().to_string());
+                    let resolved = crate::include_key(&base, text)
+                        .ok_or_else(|| ReloadError::Failed(format!("Invalid include: {text}")))?;
+                    includes.push(resolved);
                 }
             }
             manifest.dependencies.insert(uri, includes);
