@@ -28390,8 +28390,8 @@
     "properties": {
       "SourceUri": {
         "name": "SourceUri",
-        "type_name": "Option<Uri>",
-        "documentation": "XamlSourceInfo.SourceUri: Option<Uri>",
+        "type_name": "Option<Url>",
+        "documentation": "XamlSourceInfo.SourceUri: Option<Url>",
         "values": []
       },
       "LineNumber": {

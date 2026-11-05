@@ -17,7 +17,7 @@ use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocum
 
 use crate::support::app::xaml_test_base;
 use crate::support::helpers::{boxed, object_of, value_of};
-use crate::support::loader::{cast, load_document, uri};
+use crate::support::loader::{cast, load_document};
 
 /// The configuration of the tests: source info is created.
 fn configuration() -> RuntimeXamlLoaderConfiguration {
@@ -79,8 +79,8 @@ fn root_user_control_with_base_uri_gets_xaml_source_info_source_uri_set() {
         let source_info = source_info.unwrap();
         let source_uri = source_info.source_uri().unwrap_or_else(|| panic!("row {document:?}: no source URI"));
         assert_eq!("file", source_uri.scheme(), "row {document:?}");
-        assert!(source_uri.is_absolute_uri(), "row {document:?}");
-        assert_eq!(&uri(expected), source_uri, "row {document:?}");
+        // The source URI is a `Url`, absolute by its type (C5 of #423).
+        assert_eq!(&url::Url::parse(expected).unwrap(), source_uri, "row {document:?}");
     }
 }
 
