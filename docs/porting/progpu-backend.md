@@ -90,28 +90,29 @@ one font stack.
 
 ### 2.5 Geometries and bitmaps
 
-The backend uses ProGPU's own geometry and image code; it does not share the geometry of the Vello
-backend. A geometry is its path in the segment records of the engine (`progpu_native_path_segment`:
-lines, quadratic and cubic Béziers) with its fill rule, so drawing it copies the records into the
-scene. Every query of `IGeometryImpl` is ProGPU's:
+The backend uses ProGPU's own native code and shares nothing with the Vello or Skia backends.
+ProGPU's WinUI and Avalonia backends draw with its managed stack; this backend is the first UI
+backend on the native engine, so the parts the managed stack has and the engine lacks are added to
+the engine (decided by the owner, 2026-11-05):
 
-- the engine's geometry ABI (`progpu_native.h`): Boolean combination
-  (`progpu_native_geometry_combine`), the fill intersection result
-  (`progpu_native_geometry_compare_fill`), fill and stroke containment
-  (`progpu_native_geometry_fill_contains`, `progpu_native_geometry_stroke_query`);
-- ProGPU's Direct2D-compatible geometry (`progpu::native::direct2d::core`, the static
-  `progpu_native_direct2d_core` library of the SDK): bounds and widened bounds, area, length, the
-  point and tangent at a length, simplification, outline, widening with stroke styles (caps, joins,
-  dashes) and tessellation. Its C ABI (`progpu_native_direct2d_geometry_*`) is exported only by the
-  Windows library today, so step P7 adds the same functions to the C ABI of every platform (first in
-  the bindings, then in the SDK).
+- **A native Geometry module** in `src/ProGPU.Native` (`src/Geometry`): the path, Boolean and stroke
+  code the engine's geometry entry points use today, moved out of the Direct2D compatibility layer
+  into a neutral module the Direct2D layer then uses too; with path measures (contour length, the
+  point and tangent at a distance, segments) and the widening of a pen into its outline (caps,
+  joins, miter limit, dashes), ported from ProGPU's managed `PathMeasure` and
+  `StrokePathGeometry`. Its C ABI answers every query of `IGeometryImpl`: bounds and stroke bounds,
+  length, point and tangent at a distance, segment, fill and stroke containment, intersection and
+  Boolean combination, widening.
+- A geometry of the backend is its path in the engine's segment records
+  (`progpu_native_path_segment`) with its fill rule, so drawing it copies the records into the
+  scene, and a combined geometry draws through the scene's Boolean nodes.
 
-Bitmaps decode with ProGPU's image module: PNG today (`progpu::native::image`, bounded decoding).
-The other formats of FerroUI's bitmap contract (JPEG, GIF, BMP) are added to that module in the
-ProGPU repository (step P7), in its bounded, allocation-checked style, so the backend links no other
-decoder. The scene holds a bitmap as an image resource by stable id; a `WriteableBitmap` updates its
-resource in place (`update_rgba8_image`, same id, a new generation), so a changed bitmap uploads its
-pixels and nothing else.
+Bitmaps decode with ProGPU's native image module: PNG today, and **JPEG (baseline and
+progressive), GIF and BMP decoders** added beside it, bounded and allocation-checked like the PNG
+decoder, with a C ABI (decided by the owner, 2026-11-05). The backend links no other decoder. The
+scene holds a bitmap as an image resource by stable id; a `WriteableBitmap` updates its resource in
+place (`update_rgba8_image`, same id, a new generation), so a changed bitmap uploads its pixels and
+nothing else.
 
 ### 2.6 Browser
 
@@ -147,9 +148,7 @@ calls a frame:
      visual records one span again;
    - surface helpers for the native handles (creating and configuring a WebGPU surface for a
      `CAMetalLayer`, an `HWND`, an X11 window, a Wayland surface);
-   - the Direct2D-compatible geometry functions (`progpu_native_direct2d_geometry_*`: bounds,
-     widening, length, point at length, containment, outline, simplification) on every platform,
-     not only Windows.
+   - the C ABI of the native Geometry module (section 2.5).
 4. **Image decoders** in the native image module beside PNG: JPEG (baseline and progressive), GIF and
    BMP, bounded and allocation-checked as the PNG decoder.
 
