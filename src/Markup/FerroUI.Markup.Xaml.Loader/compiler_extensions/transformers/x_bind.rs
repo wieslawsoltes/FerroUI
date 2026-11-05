@@ -108,7 +108,7 @@ fn error(message: impl Into<String>, line_info: &dyn IXamlLineInfo) -> XamlError
 }
 
 /// The name of a property reference, resolved or not.
-pub(super) fn property_name(property: &Rc<dyn IXamlAstPropertyReference>) -> Option<String> {
+fn property_name(property: &Rc<dyn IXamlAstPropertyReference>) -> Option<String> {
     if let Some(clr) = property.cast::<XamlAstClrProperty>() {
         return Some(clr.name());
     }
@@ -116,7 +116,7 @@ pub(super) fn property_name(property: &Rc<dyn IXamlAstPropertyReference>) -> Opt
 }
 
 /// The values of the property value `name` of `object`, before property values are assignments.
-pub(super) fn property_values(object: &XamlAstObjectNode, name: &str) -> Option<Vec<Rc<dyn IXamlAstValueNode>>> {
+fn property_values(object: &XamlAstObjectNode, name: &str) -> Option<Vec<Rc<dyn IXamlAstValueNode>>> {
     let children = object.children.borrow().clone();
     for child in children {
         if let Some(value) = child.cast::<XamlAstXamlPropertyValueNode>() {
@@ -215,12 +215,11 @@ fn set_type_property(
     property: &str,
     type_name: &Rc<dyn IXamlAstValueNode>,
 ) -> XamlResult<()> {
-    let data_type = type_name;
-    let value: Rc<dyn IXamlAstValueNode> = if let Some(text) = data_type.cast::<XamlAstTextNode>() {
+    let value: Rc<dyn IXamlAstValueNode> = if let Some(text) = type_name.cast::<XamlAstTextNode>() {
         let string = context.configuration().well_known_types().string.clone();
         let node: Rc<dyn IXamlAstValueNode> = XamlAstTextNode::with_type(&**binding, &text.text(), true, Some(string));
         node
-    } else if let Some(type_node) = data_type.cast::<XamlTypeExtensionNode>() {
+    } else if let Some(type_node) = type_name.cast::<XamlTypeExtensionNode>() {
         let node: Rc<dyn IXamlAstValueNode> =
             XamlTypeExtensionNode::new(&**binding, type_node.value(), type_node.system_type().clone());
         node
