@@ -495,6 +495,9 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::visual_state::StateTriggerBase,
     crate::visual_state::StateTrigger,
     crate::visual_state::AdaptiveTrigger,
+    // --- x:Bind phasing (WinUI, docs/porting/x-bind.md) ---
+    // FerroUI.Controls.Templates
+    crate::templates::XamlBindingHelper,
     // --- leftovers ---
 ];
 
