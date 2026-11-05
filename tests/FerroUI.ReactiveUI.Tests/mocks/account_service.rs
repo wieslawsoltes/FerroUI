@@ -2,26 +2,26 @@
 
 use super::AccountUser;
 use ferroui_reactiveui::{reactive_object, ReactiveObject};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::rc::Rc;
 use uuid::Uuid;
 
 /// A service with three users, and the same users plus a missing one (`AccountService`).
 pub struct AccountService {
     reactive: ReactiveObject,
-    account_users: Dictionary<Uuid, Rc<AccountUser>>,
-    account_users_nullable: Dictionary<Uuid, Option<Rc<AccountUser>>>,
+    account_users: SlotOrderMap<Uuid, Rc<AccountUser>>,
+    account_users_nullable: SlotOrderMap<Uuid, Option<Rc<AccountUser>>>,
 }
 reactive_object!(AccountService);
 
 impl Default for AccountService {
     fn default() -> Self {
-        let mut account_users = Dictionary::new();
+        let mut account_users = SlotOrderMap::new();
         account_users.add(Uuid::new_v4(), AccountUser::with_last_name("Harris"));
         account_users.add(Uuid::new_v4(), AccountUser::with_last_name("Jones"));
         account_users.add(Uuid::new_v4(), AccountUser::with_last_name("Smith"));
 
-        let mut account_users_nullable = Dictionary::new();
+        let mut account_users_nullable = SlotOrderMap::new();
         account_users_nullable.add(Uuid::new_v4(), Some(AccountUser::with_last_name("Harris")));
         account_users_nullable.add(Uuid::new_v4(), Some(AccountUser::with_last_name("Jones")));
         account_users_nullable.add(Uuid::new_v4(), Some(AccountUser::with_last_name("Smith")));
@@ -46,12 +46,12 @@ impl AccountService {
     }
 
     /// `AccountUsers`.
-    pub fn account_users(&self) -> &Dictionary<Uuid, Rc<AccountUser>> {
+    pub fn account_users(&self) -> &SlotOrderMap<Uuid, Rc<AccountUser>> {
         &self.account_users
     }
 
     /// `AccountUsersNullable`.
-    pub fn account_users_nullable(&self) -> &Dictionary<Uuid, Option<Rc<AccountUser>>> {
+    pub fn account_users_nullable(&self) -> &SlotOrderMap<Uuid, Option<Rc<AccountUser>>> {
         &self.account_users_nullable
     }
 }

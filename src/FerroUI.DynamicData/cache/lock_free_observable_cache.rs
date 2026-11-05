@@ -7,7 +7,7 @@ use crate::kernel::return_with;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::subjects::Subject;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable, IObserver};
 use std::cell::RefCell;
 use std::hash::Hash;
@@ -175,7 +175,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IObservableCache<T, K> 
         self.inner.inner_cache.borrow().keys()
     }
 
-    fn key_values(&self) -> Dictionary<K, T> {
+    fn key_values(&self) -> SlotOrderMap<K, T> {
         self.inner.inner_cache.borrow().dictionary().clone()
     }
 

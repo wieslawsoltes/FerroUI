@@ -22,11 +22,11 @@ use ferroui_controls::primitives::{
 };
 use ferroui_controls::templates::IControlTemplate;
 use ferroui_controls::{Control, ControlImpl, TopLevel};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 /// Shared source operation dictionary, preserving native System enumeration order.
-pub type DockTargetOperations = Rc<RefCell<Dictionary<DockOperation, Ref<Control>>>>;
+pub type DockTargetOperations = Rc<RefCell<SlotOrderMap<DockOperation, Ref<Control>>>>;
 type RememberedParts = Vec<(DockOperation, WeakRef<Control>)>;
 const INDICATORS: [&str; 9] = [
     "PART_TopIndicator",
@@ -166,8 +166,8 @@ impl DockTargetBase {
             applied_indicators: RefCell::new(Vec::new()),
             applied_selectors: RefCell::new(Vec::new()),
             registrations_invalid: Cell::new(false),
-            indicators: RefCell::new(Rc::new(RefCell::new(Dictionary::new()))),
-            selectors: RefCell::new(Rc::new(RefCell::new(Dictionary::new()))),
+            indicators: RefCell::new(Rc::new(RefCell::new(SlotOrderMap::new()))),
+            selectors: RefCell::new(Rc::new(RefCell::new(SlotOrderMap::new()))),
             subscriptions: RefCell::new(Vec::new()),
             handle: RefCell::new(Weak::new()),
         }

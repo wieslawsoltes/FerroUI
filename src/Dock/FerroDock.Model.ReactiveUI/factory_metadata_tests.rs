@@ -1142,7 +1142,7 @@ fn typed_locators_resolve_optional_document_and_tool_content_contracts() {
     let tool = ToolMetadata::new();
     let located = document.clone();
     let registry: DockableLocatorMap = Rc::new(RefCell::new(
-        ferroui_system::collections::generic::Dictionary::new(),
+        ferroui_system::collections::generic::SlotOrderMap::new(),
     ));
     registry.borrow_mut().insert(
         "document".into(),

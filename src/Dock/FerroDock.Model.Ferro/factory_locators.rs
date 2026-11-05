@@ -11,7 +11,7 @@ use ferroui_base::{
     metadata::{from_markup_value, MarkupDelegate, MarkupType, MarkupTyped},
     BoxedValue,
 };
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::{cell::RefCell, rc::Rc};
 /// Native view of the original ContextFactory delegate; clones retain its actual instance.
 #[derive(Clone)]
@@ -62,7 +62,7 @@ pub struct ContextLocatorMapReference(ContextLocatorMap);
 impl ContextLocatorMapReference {
     /// Creates the original dictionary with no entries.
     pub fn create() -> Self {
-        Self(Rc::new(RefCell::new(Dictionary::new())))
+        Self(Rc::new(RefCell::new(SlotOrderMap::new())))
     }
     /// Views the same source dictionary, retaining all keys, nulls and delegate instances.
     pub fn new(model: ContextLocatorMap) -> Self {
@@ -187,7 +187,7 @@ pub struct HostWindowLocatorMapReference(HostWindowLocatorMap);
 impl HostWindowLocatorMapReference {
     /// Creates the original dictionary with no entries.
     pub fn create() -> Self {
-        Self(Rc::new(RefCell::new(Dictionary::new())))
+        Self(Rc::new(RefCell::new(SlotOrderMap::new())))
     }
     /// Views the same source dictionary, retaining all keys, nulls and delegate instances.
     pub fn new(model: HostWindowLocatorMap) -> Self {
@@ -316,7 +316,7 @@ pub struct DockableLocatorMapReference(DockableLocatorMap);
 impl DockableLocatorMapReference {
     /// Creates the original dictionary with no entries.
     pub fn create() -> Self {
-        Self(Rc::new(RefCell::new(Dictionary::new())))
+        Self(Rc::new(RefCell::new(SlotOrderMap::new())))
     }
     /// Views the same source dictionary, retaining all keys, nulls and delegate instances.
     pub fn new(model: DockableLocatorMap) -> Self {

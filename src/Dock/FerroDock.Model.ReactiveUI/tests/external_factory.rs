@@ -6,7 +6,7 @@ use ferrodock_model::{BoxedValue, FactoryBase, FactoryBaseImpl};
 use ferrodock_model_reactiveui::core::{DockableBase, DockableBaseImpl};
 use ferrodock_model_reactiveui::{impl_dockable, impl_factory, Factory, FactoryImpl};
 use ferroui_reactiveui::reactive_object;
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -161,7 +161,7 @@ fn downstream_concrete_locator_uses_the_original_custom_model_reference() {
     let factory = ApplicationFactory::new();
     let model = ApplicationLeaf::new();
     let located = model.clone();
-    let registry: DockableLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+    let registry: DockableLocatorMap = Rc::new(RefCell::new(SlotOrderMap::new()));
     registry.borrow_mut().insert(
         "custom".into(),
         Some(Rc::new(move || Some(located.clone()))),
@@ -197,7 +197,7 @@ fn downstream_application_interface_locator_casts_preserve_identity_through_regi
     let factory = Factory::new();
     let model = ApplicationLeaf::new();
     let located = model.clone();
-    let registry: DockableLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+    let registry: DockableLocatorMap = Rc::new(RefCell::new(SlotOrderMap::new()));
     registry.borrow_mut().insert(
         "custom".into(),
         Some(Rc::new(move || Some(located.clone()))),

@@ -333,7 +333,7 @@ fn content_state_interfaces_are_available_through_typed_locators() {
     let tool = Content::new("tool", true, false, None);
     let document = Content::new("document", false, true, None);
     let registry: DockableLocatorMap = Rc::new(RefCell::new(
-        ferroui_system::collections::generic::Dictionary::new(),
+        ferroui_system::collections::generic::SlotOrderMap::new(),
     ));
     let located = tool.clone();
     registry

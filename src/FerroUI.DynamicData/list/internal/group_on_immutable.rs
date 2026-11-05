@@ -5,7 +5,7 @@ use super::unified;
 use crate::list::{replace, ChangeAwareList, ChangeSet, IGrouping, ImmutableGroup, ListChangeReason};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IObservable, IObserver};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -74,7 +74,7 @@ fn group_state<T: Clone, G: Clone>(key: &G, list: &[T]) -> ImmutableGroup<T, G> 
 fn create_change_set<T: Clone + PartialEq, G: Eq + Hash + Clone>(
     result: &mut ChangeAwareList<ImmutableGroup<T, G>>,
     all_groupings: &mut HashMap<G, Vec<T>>,
-    initial_state_of_groups: Dictionary<G, ImmutableGroup<T, G>>,
+    initial_state_of_groups: SlotOrderMap<G, ImmutableGroup<T, G>>,
 ) -> ChangeSet<ImmutableGroup<T, G>> {
     // Now maintain the target list.
     for (key, initial_group) in initial_state_of_groups.iter() {
@@ -104,7 +104,7 @@ fn get_group<'a, T, G: Eq + Hash + Clone>(group_caches: &'a mut HashMap<G, Vec<T
 }
 
 /// Records the state of the group `key` before its first change.
-fn capture_initial_state<T: Clone, G: Eq + Hash + Clone>(initial_state_of_groups: &mut Dictionary<G, ImmutableGroup<T, G>>, key: &G, list: &[T]) {
+fn capture_initial_state<T: Clone, G: Eq + Hash + Clone>(initial_state_of_groups: &mut SlotOrderMap<G, ImmutableGroup<T, G>>, key: &G, list: &[T]) {
     if !initial_state_of_groups.contains_key(key) {
         initial_state_of_groups.insert(key.clone(), group_state(key, list));
     }
@@ -120,7 +120,7 @@ fn remove_item<T: PartialEq>(list: &mut Vec<T>, item: &T) {
 /// Removes `item` from the group of `group_key`, recording the state of that group first.
 fn remove_from_old_group<T: Clone + PartialEq, G: Eq + Hash + Clone>(
     all_groupings: &mut HashMap<G, Vec<T>>,
-    initial_state_of_groups: &mut Dictionary<G, ImmutableGroup<T, G>>,
+    initial_state_of_groups: &mut SlotOrderMap<G, ImmutableGroup<T, G>>,
     group_key: &G,
     item: &T,
 ) {
@@ -136,7 +136,7 @@ fn process<T: Clone + PartialEq + 'static, G: Eq + Hash + Clone + 'static>(state
     let GroupState { groupings: result, group_cache: all_groupings } = &mut *state;
 
     // The groups that change, with their states before, to make the right notifications.
-    let mut initial_state_of_groups: Dictionary<G, ImmutableGroup<T, G>> = Dictionary::new();
+    let mut initial_state_of_groups: SlotOrderMap<G, ImmutableGroup<T, G>> = SlotOrderMap::new();
 
     for (current_group, grouping) in group_by(unified(changes), |change| change.current.group()) {
         // Find the group, made when there is none.
@@ -209,7 +209,7 @@ fn regroup<T: Clone + PartialEq + 'static, G: Eq + Hash + Clone + 'static>(
 ) -> ChangeSet<ImmutableGroup<T, G>> {
     let mut state = state.borrow_mut();
     let GroupState { groupings: result, group_cache: all_groupings } = &mut *state;
-    let mut initial_state_of_groups: Dictionary<G, ImmutableGroup<T, G>> = Dictionary::new();
+    let mut initial_state_of_groups: SlotOrderMap<G, ImmutableGroup<T, G>> = SlotOrderMap::new();
 
     for item_with_value in current_items {
         let current_group_key = item_with_value.group();

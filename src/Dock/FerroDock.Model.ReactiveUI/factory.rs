@@ -6,7 +6,7 @@ use crate::core::DockWindow;
 use ferrodock_model::collections::ListHandle;
 use ferrodock_model::core::*;
 use ferrodock_model::{FactoryBase, FactoryBaseImpl};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -50,14 +50,14 @@ impl Factory {
                     .expect("the enclosing factory is alive")
                     .create_list(Vec::new())
             }),
-            visible_dockable_controls: Rc::new(RefCell::new(Dictionary::new())),
-            pinned_dockable_controls: Rc::new(RefCell::new(Dictionary::new())),
-            tab_dockable_controls: Rc::new(RefCell::new(Dictionary::new())),
-            visible_root_controls: Rc::new(RefCell::new(Dictionary::new())),
-            pinned_root_controls: Rc::new(RefCell::new(Dictionary::new())),
-            tab_root_controls: Rc::new(RefCell::new(Dictionary::new())),
-            tool_controls: Rc::new(RefCell::new(Dictionary::new())),
-            document_controls: Rc::new(RefCell::new(Dictionary::new())),
+            visible_dockable_controls: Rc::new(RefCell::new(SlotOrderMap::new())),
+            pinned_dockable_controls: Rc::new(RefCell::new(SlotOrderMap::new())),
+            tab_dockable_controls: Rc::new(RefCell::new(SlotOrderMap::new())),
+            visible_root_controls: Rc::new(RefCell::new(SlotOrderMap::new())),
+            pinned_root_controls: Rc::new(RefCell::new(SlotOrderMap::new())),
+            tab_root_controls: Rc::new(RefCell::new(SlotOrderMap::new())),
+            tool_controls: Rc::new(RefCell::new(SlotOrderMap::new())),
+            document_controls: Rc::new(RefCell::new(SlotOrderMap::new())),
             dock_controls: ListHandle::new(),
             host_windows: ListHandle::new(),
         }

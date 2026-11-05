@@ -3,7 +3,7 @@
 
 use super::{Cache, CacheUpdater, KeySelector};
 use crate::cache::{Change, ChangeAwareCache, ChangeReason, ChangeSet, ICache, ISourceUpdater};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::cell::RefCell;
 use std::hash::Hash;
 
@@ -33,7 +33,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ActiveCache<T, K> {
 /// The items and the edits (`ReaderWriter<TObject, TKey>`).
 pub(crate) struct ReaderWriter<T, K> {
     key_selector: Option<KeySelector<T, K>>,
-    data: RefCell<Dictionary<K, T>>,
+    data: RefCell<SlotOrderMap<K, T>>,
     /// The edit in progress (`_activeUpdater`): its cache holds the items meanwhile, as upstream's
     /// shares the dictionary.
     active: RefCell<Option<std::rc::Rc<ActiveCache<T, K>>>>,
@@ -41,7 +41,7 @@ pub(crate) struct ReaderWriter<T, K> {
 
 impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ReaderWriter<T, K> {
     pub(crate) fn new(key_selector: Option<KeySelector<T, K>>) -> Self {
-        Self { key_selector, data: RefCell::new(Dictionary::new()), active: RefCell::new(None) }
+        Self { key_selector, data: RefCell::new(SlotOrderMap::new()), active: RefCell::new(None) }
     }
 
     pub(crate) fn key_selector(&self) -> Option<&KeySelector<T, K>> {
@@ -49,7 +49,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ReaderWriter<T, K> {
     }
 
     /// Reads the items: those of the edit in progress, if there is one.
-    fn read<R>(&self, read: impl FnOnce(&Dictionary<K, T>) -> R) -> R {
+    fn read<R>(&self, read: impl FnOnce(&SlotOrderMap<K, T>) -> R) -> R {
         let active = self.active.borrow().clone();
         match active.as_deref() {
             Some(ActiveCache::Tracking(cache)) => read(cache.borrow().dictionary()),
@@ -73,7 +73,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ReaderWriter<T, K> {
         self.read(|data| data.keys().cloned().collect())
     }
 
-    pub(crate) fn key_values(&self) -> Dictionary<K, T> {
+    pub(crate) fn key_values(&self) -> SlotOrderMap<K, T> {
         self.read(|data| data.clone())
     }
 

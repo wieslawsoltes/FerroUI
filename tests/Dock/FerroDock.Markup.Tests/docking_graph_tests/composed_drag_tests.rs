@@ -502,7 +502,7 @@ fn check_move(document: &str) {
     let target = find("TargetDocuments");
     assert!(!Rc::ptr_eq(&documents, &scene.documents));
     let hosts: HostWindowLocatorMap = Rc::new(std::cell::RefCell::new(
-        ferroui_system::collections::generic::Dictionary::new(),
+        ferroui_system::collections::generic::SlotOrderMap::new(),
     ));
     hosts.borrow_mut().add(
         "IDockWindow".into(),

@@ -14,7 +14,7 @@ use ferrodock_model_reactiveui::{
     impl_factory, Factory, FactoryImpl,
 };
 use ferrodock_settings::DockSettings;
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::{
     cell::RefCell,
     rc::{Rc, Weak},
@@ -199,7 +199,7 @@ impl FactoryImpl for DockFactory {
         window
     }
     fn init_layout(this: &Self, layout: Rc<dyn IDockable>) {
-        let contexts: ContextLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+        let contexts: ContextLocatorMap = Rc::new(RefCell::new(SlotOrderMap::new()));
         for id in ["Document1", "Document2", "Document3"] {
             contexts.borrow_mut().add(
                 id.into(),
@@ -235,7 +235,7 @@ impl FactoryImpl for DockFactory {
             Some(Rc::new(move || Some(owner.context.clone()))),
         );
         this.set_context_locator(Some(contexts));
-        let dockables: DockableLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+        let dockables: DockableLocatorMap = Rc::new(RefCell::new(SlotOrderMap::new()));
         let owner = this.runtime.upgrade().expect("enclosing source factory");
         dockables.borrow_mut().add(
             "Root".into(),
@@ -259,7 +259,7 @@ impl FactoryImpl for DockFactory {
             })),
         );
         this.set_dockable_locator(Some(dockables));
-        let hosts: HostWindowLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+        let hosts: HostWindowLocatorMap = Rc::new(RefCell::new(SlotOrderMap::new()));
         hosts.borrow_mut().add(
             "IDockWindow".into(),
             Some(Rc::new(|| {

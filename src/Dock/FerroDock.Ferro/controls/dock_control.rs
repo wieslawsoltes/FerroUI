@@ -56,7 +56,7 @@ use ferroui_controls::{
     },
     Control, ControlImpl, ControlImplExt, TopLevel, Window,
 };
-use ferroui_system::{collections::generic::Dictionary, Subscription};
+use ferroui_system::{collections::generic::SlotOrderMap, Subscription};
 use std::{
     any::TypeId,
     cell::{Cell, RefCell},
@@ -705,7 +705,7 @@ impl DockControl {
                 layout
                     .factory()
                     .expect("source factory re-read")
-                    .set_context_locator(Some(Rc::new(RefCell::new(Dictionary::new()))));
+                    .set_context_locator(Some(Rc::new(RefCell::new(SlotOrderMap::new()))));
             }
             if layout
                 .factory()
@@ -716,7 +716,7 @@ impl DockControl {
                 layout
                     .factory()
                     .expect("source factory re-read")
-                    .set_dockable_locator(Some(Rc::new(RefCell::new(Dictionary::new()))));
+                    .set_dockable_locator(Some(Rc::new(RefCell::new(SlotOrderMap::new()))));
             }
             if layout
                 .factory()
@@ -746,7 +746,7 @@ impl DockControl {
                 .host_window_locator()
                 .is_none()
             {
-                let mut locators = Dictionary::new();
+                let mut locators = SlotOrderMap::new();
                 locators.insert(
                     "IDockWindow".into(),
                     Some(self.default_host_window_callback()),

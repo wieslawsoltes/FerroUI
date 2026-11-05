@@ -3,7 +3,7 @@
 
 use super::internal::KeySelector;
 use super::{Change, ChangeSet, IConnectableCache, IObservableCache, ISourceUpdater, ObservableCache};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable};
 use std::hash::Hash;
 use std::rc::Rc;
@@ -89,7 +89,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IObservableCache<T, K> 
         self.inner.keys()
     }
 
-    fn key_values(&self) -> Dictionary<K, T> {
+    fn key_values(&self) -> SlotOrderMap<K, T> {
         self.inner.key_values()
     }
 

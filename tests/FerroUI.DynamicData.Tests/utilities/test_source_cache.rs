@@ -4,7 +4,7 @@ use ferroui_dynamic_data::cache::{Change, ChangeSet, IConnectableCache, IObserva
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::subjects::BehaviorSubject;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::hash::Hash;
 use std::rc::Rc;
@@ -135,7 +135,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IObservableCache<T, K> 
         self.inner.source.keys()
     }
 
-    fn key_values(&self) -> Dictionary<K, T> {
+    fn key_values(&self) -> SlotOrderMap<K, T> {
         self.inner.source.key_values()
     }
 

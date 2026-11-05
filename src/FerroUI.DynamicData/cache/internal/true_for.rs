@@ -16,7 +16,7 @@ use crate::cache::{ChangeReason, ChangeSet};
 use crate::internal::DeliveryQueue;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -138,7 +138,7 @@ pub(crate) fn merge_many_values<T: Clone + 'static, K: Eq + Hash + Clone + 'stat
 type Collection<T, V> = Vec<Rc<ObservableWithValue<T, V>>>;
 
 struct State<T, K, V> {
-    items: Dictionary<K, Rc<ObservableWithValue<T, V>>>,
+    items: SlotOrderMap<K, Rc<ObservableWithValue<T, V>>>,
     collection: Option<Collection<T, V>>,
     merged_has_value: bool,
     merged_completed: bool,
@@ -228,7 +228,7 @@ pub(crate) fn true_for<T: Clone + 'static, K: Eq + Hash + Clone + 'static, V: Cl
 ) -> Rc<dyn IObservable<bool>> {
     Observable::create(move |observer: Rc<dyn IObserver<bool>>| {
         let context = Rc::new(Context {
-            state: RefCell::new(State { items: Dictionary::new(), collection: None, merged_has_value: false, merged_completed: false, collection_completed: false, last: None, terminated: false }),
+            state: RefCell::new(State { items: SlotOrderMap::new(), collection: None, merged_has_value: false, merged_completed: false, collection_completed: false, last: None, terminated: false }),
             subscriptions: ItemSubscriptions::new(),
             observer,
             collection_matcher: collection_matcher.clone(),

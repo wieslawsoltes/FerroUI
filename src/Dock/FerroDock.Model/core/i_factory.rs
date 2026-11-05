@@ -5,15 +5,15 @@ use crate::controls::*;
 use crate::core::*;
 use crate::BoxedValue;
 use ferrodock_model::collections::ListHandle;
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Shared map from dockable identity to its presentation control.
-pub type DockableControlMap = Rc<RefCell<Dictionary<Rc<dyn IDockable>, Rc<dyn IDockableControl>>>>;
+pub type DockableControlMap = Rc<RefCell<SlotOrderMap<Rc<dyn IDockable>, Rc<dyn IDockableControl>>>>;
 
 /// Shared map from dockable identity to an object value.
-pub type DockableObjectMap = Rc<RefCell<Dictionary<Rc<dyn IDockable>, BoxedValue>>>;
+pub type DockableObjectMap = Rc<RefCell<SlotOrderMap<Rc<dyn IDockable>, BoxedValue>>>;
 
 /// Creates an optional dockable context.
 pub type ContextFactory = Rc<dyn Fn() -> Option<BoxedValue>>;
@@ -31,13 +31,13 @@ pub type DockablePredicate = Rc<dyn Fn(Option<Rc<dyn IDockable>>) -> bool>;
 pub type RootPredicate = Rc<dyn Fn(Rc<dyn IRootDock>) -> bool>;
 
 /// A shared registry of context factories.
-pub type ContextLocatorMap = Rc<RefCell<Dictionary<String, Option<ContextFactory>>>>;
+pub type ContextLocatorMap = Rc<RefCell<SlotOrderMap<String, Option<ContextFactory>>>>;
 
 /// A shared registry of host factories.
-pub type HostWindowLocatorMap = Rc<RefCell<Dictionary<String, Option<HostWindowFactory>>>>;
+pub type HostWindowLocatorMap = Rc<RefCell<SlotOrderMap<String, Option<HostWindowFactory>>>>;
 
 /// A shared registry of dockable factories.
-pub type DockableLocatorMap = Rc<RefCell<Dictionary<String, Option<DockableFactory>>>>;
+pub type DockableLocatorMap = Rc<RefCell<SlotOrderMap<String, Option<DockableFactory>>>>;
 
 /// The `IFactory` docking contract.
 /// Generic methods are available on concrete factories (`Self: Sized`).

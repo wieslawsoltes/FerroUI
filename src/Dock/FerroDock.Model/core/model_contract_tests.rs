@@ -2,7 +2,7 @@ use super::*;
 use crate::controls::*;
 use crate::test_support::{TestDock, TestNode, TestRoot, TestWindow};
 use ferrodock_model::collections::ListHandle;
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -118,7 +118,7 @@ fn factory_dictionary_keys_use_reference_identity_even_when_ids_match() {
     let second: Rc<dyn IDockable> = TestNode::new(None);
     first.set_id("same".into());
     second.set_id("same".into());
-    let map: DockableObjectMap = Rc::new(RefCell::new(Dictionary::new()));
+    let map: DockableObjectMap = Rc::new(RefCell::new(SlotOrderMap::new()));
     map.borrow_mut().insert(first.clone(), Rc::new(1_i32));
     map.borrow_mut().insert(second.clone(), Rc::new(2_i32));
     assert_eq!(map.borrow().len(), 2);

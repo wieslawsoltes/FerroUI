@@ -1,13 +1,13 @@
 //! `ChangeAwareCache<TObject, TKey>` (`Cache/ChangeAwareCache.cs`).
 
 use super::{Change, ChangeReason, ChangeSet, ICache, IQuery};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::hash::Hash;
 
 /// A keyed collection that records its changes until they are captured (`ChangeAwareCache<TObject,
 /// TKey>`): the building block of the cache operators.
 pub struct ChangeAwareCache<T, K> {
-    data: Dictionary<K, T>,
+    data: SlotOrderMap<K, T>,
     changes: Vec<Change<T, K>>,
 }
 
@@ -20,27 +20,27 @@ impl<T: Clone, K: Eq + Hash + Clone> Default for ChangeAwareCache<T, K> {
 impl<T: Clone, K: Eq + Hash + Clone> ChangeAwareCache<T, K> {
     /// An empty cache.
     pub fn new() -> Self {
-        Self { data: Dictionary::new(), changes: Vec::new() }
+        Self { data: SlotOrderMap::new(), changes: Vec::new() }
     }
 
     /// An empty cache with room for `capacity` items.
     pub fn with_capacity(capacity: usize) -> Self {
-        Self { data: Dictionary::with_capacity(capacity), changes: Vec::with_capacity(capacity) }
+        Self { data: SlotOrderMap::with_capacity(capacity), changes: Vec::with_capacity(capacity) }
     }
 
     /// A cache of the items of `data`, without changes (`ChangeAwareCache(Dictionary<TKey,
     /// TObject>)`).
-    pub fn from_dictionary(data: Dictionary<K, T>) -> Self {
+    pub fn from_dictionary(data: SlotOrderMap<K, T>) -> Self {
         Self { data, changes: Vec::new() }
     }
 
     /// The underlying dictionary (`GetDictionary`).
-    pub fn dictionary(&self) -> &Dictionary<K, T> {
+    pub fn dictionary(&self) -> &SlotOrderMap<K, T> {
         &self.data
     }
 
     /// The items, giving up the cache.
-    pub fn into_dictionary(self) -> Dictionary<K, T> {
+    pub fn into_dictionary(self) -> SlotOrderMap<K, T> {
         self.data
     }
 
