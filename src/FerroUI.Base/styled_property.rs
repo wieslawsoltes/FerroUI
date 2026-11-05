@@ -129,16 +129,32 @@ impl<T: PropertyValue> StyledProperty<T> {
     /// Gets the default value for the property on the specified type.
     #[inline]
     pub fn get_default_value(&self, type_: &'static TypeInfo) -> T {
-        if let Some(value) = &*self.single_default_value.borrow() {
-            return value.clone();
-        }
-        self.get_metadata(type_).default_value().clone()
+        self.default_for(|| type_)
     }
 
     /// Gets the default value for the property on the type of `owner`.
     #[inline]
     pub fn get_default_value_for(&self, owner: &FerroObject) -> T {
-        self.get_default_value(owner.get_type())
+        self.default_for(|| owner.get_type())
+    }
+
+    #[inline]
+    fn default_for(&self, host: impl FnOnce() -> &'static TypeInfo) -> T {
+        if let Some(value) = &*self.single_default_value.borrow() {
+            return value.clone();
+        }
+        self.get_metadata(host()).default_value().clone()
+    }
+
+    /// A binding keeps the first fallback it observes for its owner, even if
+    /// the property's metadata is subsequently overridden.
+    pub(crate) fn binding_default(&self, owner: &FerroObject, cache: &RefCell<Option<T>>) -> T {
+        if let Some(value) = &*cache.borrow() {
+            return value.clone();
+        }
+        let value = self.get_default_value_for(owner);
+        *cache.borrow_mut() = Some(value.clone());
+        value
     }
 
     /// Gets the property metadata for the specified type.
@@ -345,18 +361,20 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
     }
 
+    fn route_create_boxed_local_binding(
+        &'static self,
+        owner: &FerroObject,
+    ) -> Rc<dyn crate::property_store::BoxedLocalBindingValue> {
+        crate::property_store::BoxedLocalValueBindingObserver::new(owner, self)
+    }
+
     fn route_create_binding_entry(
         &'static self,
         o: &FerroObject,
         frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn IValueEntry> {
-        crate::property_store::BindingEntry::new(
-            o,
-            frame,
-            self,
-            crate::property_store::BindingSource::Untyped(source),
-        )
+    ) -> Rc<dyn crate::property_store::BoxedBindingValue> {
+        crate::property_store::create_boxed_binding_entry(o, frame, self, source)
     }
 }
 

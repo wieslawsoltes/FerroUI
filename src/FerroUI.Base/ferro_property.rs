@@ -243,6 +243,14 @@ pub(crate) trait PropertyRoutes {
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into a box of its own. `None` if it has a different type.
     fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
+    /// Creates the typed cache for shared local boxed-source installation.
+    /// Direct properties keep their own binding path.
+    fn route_create_boxed_local_binding(
+        &'static self,
+        _owner: &FerroObject,
+    ) -> Rc<dyn crate::property_store::BoxedLocalBindingValue> {
+        panic!("not supported for direct properties");
+    }
     /// Creates a value entry for `frame` that reads its values from `source`.
     /// Only supported by styled properties.
     fn route_create_binding_entry(
@@ -250,7 +258,7 @@ pub(crate) trait PropertyRoutes {
         o: &FerroObject,
         frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn IValueEntry>;
+    ) -> Rc<dyn crate::property_store::BoxedBindingValue>;
 }
 
 type ChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);
