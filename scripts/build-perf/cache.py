@@ -53,8 +53,13 @@ def source_fingerprint(source: Path, excluded: Path) -> str:
             digest.update(hashlib.sha256(path.read_bytes()).digest())
         elif not path.exists():
             digest.update(b"deleted\0")
+        elif (path / ".git").exists():
+            # A submodule (third_party/ProGPU): its checked-out commit and every change in it.
+            digest.update(b"submodule\0" + subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=path).strip())
+            digest.update(subprocess.check_output(["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"], cwd=path))
+            digest.update(subprocess.check_output(["git", "diff", "--binary", "HEAD"], cwd=path))
         else:
-            raise RuntimeError(f"Unexpanded submodule or tracked directory in source fingerprint: {path}")
+            raise RuntimeError(f"Unexpanded tracked directory in source fingerprint: {path}")
     return digest.hexdigest()
 
 

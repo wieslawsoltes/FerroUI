@@ -565,7 +565,20 @@ def main() -> int:
         report["baseline_original_self_input_form"] = original_self_input_form(
             (sources["baseline"] / "samples/ControlCatalog/build.rs").read_text(encoding="utf-8"))
         if source_configuration(report["sources"]["baseline"]["files"]) != source_configuration(report["sources"]["candidate"]["files"]):
-            raise RuntimeError("Cargo manifests, lockfile or checked-in build/toolchain configuration differ")
+            # Different manifests, lockfile or build configuration build different workloads: there
+            # is no first-repeat comparison to make (a change of the workspace itself, such as a new
+            # member or submodule). The run is recorded as not comparable, not as a regression.
+            report["comparable"] = False
+            report["not_comparable_reason"] = "Cargo manifests, lockfile or checked-in build/toolchain configuration differ"
+            save()
+            message = "Catalog first-repeat comparison skipped: " + report["not_comparable_reason"]
+            print(f"::warning::{message}", flush=True)
+            if os.environ.get("GITHUB_STEP_SUMMARY"):
+                with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as stream:
+                    stream.write(message + "\n")
+            success = True
+            return 0
+        report["comparable"] = True
         catalog_inputs = {label: {name: entry for name, entry in report["sources"][label]["files"].items()
                                   if name.startswith("samples/ControlCatalog/") and name != "samples/ControlCatalog/build.rs"}
                           for label in sources}

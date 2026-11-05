@@ -7,6 +7,7 @@ import copy
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import tempfile
 from types import SimpleNamespace
 import unittest
@@ -207,6 +208,35 @@ class IsolationTests(unittest.TestCase):
                 (root / "input.rs").write_text("changed source")
                 self.assertNotEqual(before, cache.source_fingerprint(root, report))
 
+
+    def test_source_fingerprint_follows_a_submodule_commit_and_its_changes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            report = root / "report"
+            report.mkdir()
+            submodule = root / "third_party" / "module"
+            submodule.mkdir(parents=True)
+            git = ["git", "-c", "user.name=test", "-c", "user.email=test@example.invalid"]
+            subprocess.run(git + ["init", "-q"], cwd=submodule, check=True)
+            (submodule / "source.cpp").write_text("first")
+            subprocess.run(git + ["add", "source.cpp"], cwd=submodule, check=True)
+            subprocess.run(git + ["commit", "-q", "-m", "first"], cwd=submodule, check=True)
+            listing = b"third_party/module\0"
+            real = subprocess.check_output
+
+            def check_output(command, *args, **kwargs):
+                if command[:2] == ["git", "ls-files"]:
+                    return listing
+                return real(command, *args, **kwargs)
+
+            with patch.object(cache.subprocess, "check_output", side_effect=check_output):
+                before = cache.source_fingerprint(root, report)
+                self.assertEqual(before, cache.source_fingerprint(root, report))
+                (submodule / "source.cpp").write_text("edited")
+                edited = cache.source_fingerprint(root, report)
+                self.assertNotEqual(before, edited)
+                subprocess.run(git + ["commit", "-q", "-am", "second"], cwd=submodule, check=True)
+                self.assertNotIn(cache.source_fingerprint(root, report), {before, edited})
 
 class FailureDetectionTests(unittest.TestCase):
     def test_exit_zero_without_cargo_build_success_is_rejected(self):
