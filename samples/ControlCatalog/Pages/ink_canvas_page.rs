@@ -92,21 +92,19 @@ impl InkCanvasPage {
                 let paste = service.paste(container, Point::new(24.0, 24.0));
                 Box::pin(async move { paste.await.map(|_| ()) })
             };
-            Dispatcher::ui_thread()
-                .to_task_scheduler()
-                .start_local(async move {
-                    let result = task.await;
-                    if let Some(this) = weak.upgrade() {
-                        match result {
-                            Ok(()) => this.update_status(Some(if copy {
-                                "Selection copied"
-                            } else {
-                                "Ink pasted"
-                            })),
-                            Err(error) => this.update_status(Some(&error.to_string())),
-                        }
+            Dispatcher::ui_thread().start_local(async move {
+                let result = task.await;
+                if let Some(this) = weak.upgrade() {
+                    match result {
+                        Ok(()) => this.update_status(Some(if copy {
+                            "Selection copied"
+                        } else {
+                            "Ink pasted"
+                        })),
+                        Err(error) => this.update_status(Some(&error.to_string())),
                     }
-                });
+                }
+            });
             return;
         }
         let result = match action {

@@ -1,8 +1,8 @@
 //! `IInteraction<TInput, TOutput>` (ReactiveUI.Binding, `Interactions/IInteraction.cs`).
 
 use super::IInteractionContext;
-use ferroui_system::threading::tasks::Task;
-use ferroui_system::{IDisposable, IObservable};
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, IObservable, ObservableError};
 use std::rc::Rc;
 
 /// An interaction between collaborating parts of an application (`IInteraction<TInput, TOutput>`):
@@ -10,7 +10,8 @@ use std::rc::Rc;
 /// (the output). Typically a view model asks its view for a confirmation.
 ///
 /// Deviation (DEVIATIONS.md, ReactiveUI): the handlers are shared closures, so that the trait can
-/// be a trait object; the asynchronous handler gives a `Task<()>`, and the observable-based one an
+/// be a trait object; the asynchronous handler gives a task, the [`Shared`] of a
+/// `Result<(), ObservableError>`, and the observable-based one an
 /// observable of `()` (upstream's `TDontCare`: its values are ignored). [`Interaction`](super::Interaction)
 /// itself has generic forms that take any closure.
 pub trait IInteraction<I, O> {
@@ -20,7 +21,10 @@ pub trait IInteraction<I, O> {
 
     /// Registers a task-based asynchronous handler; disposing the result unregisters it
     /// (`RegisterHandler(Func<IInteractionContext<TInput, TOutput>, Task>)`).
-    fn register_handler_task(&self, handler: Rc<dyn Fn(Rc<dyn IInteractionContext<I, O>>) -> Task<()>>) -> Rc<dyn IDisposable>;
+    fn register_handler_task(
+        &self,
+        handler: Rc<dyn Fn(Rc<dyn IInteractionContext<I, O>>) -> Shared<Result<(), ObservableError>>>,
+    ) -> Rc<dyn IDisposable>;
 
     /// Registers an observable-based asynchronous handler, which finishes when its observable ends
     /// (`RegisterHandler<TDontCare>(Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>>)`).

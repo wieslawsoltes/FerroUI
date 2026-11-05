@@ -49,7 +49,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> AsyncDisposeManyState<T
         match (self.to_item_disposal)(item) {
             Some(ItemDisposal::Disposable(disposable)) => disposable.dispose(),
             Some(ItemDisposal::AsyncDisposable(async_disposable)) => {
-                self.disposals.on_next(Observable::from_async(move || async_disposable.dispose_async()));
+                self.disposals.on_next(Observable::from_async(move || async_disposable.dispose_async().flatten()));
             }
             None => {}
         }

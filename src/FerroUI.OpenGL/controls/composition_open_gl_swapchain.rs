@@ -1,10 +1,10 @@
-use crate::composition::task_support::start;
+use crate::composition::task_support::{join, start};
 use crate::composition::{
     CompositionGlTextureInfo, ICompositionGlContext, ICompositionGlTexture, ICompositionGlTextureLease,
 };
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::{CompositionDrawingSurface, ServerJobTask};
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -84,13 +84,13 @@ impl CompositionOpenGlSwapchain {
         (Lease { entry, lease: RefCell::new(Some(lease)) }, texture_info)
     }
 
-    pub(crate) fn dispose_async(&self) -> DispatcherTask<()> {
+    pub(crate) fn dispose_async(&self) -> JoinHandle<()> {
         let entries = self.entries.clone();
         start(async move {
             // Snapshot, since awaiting the disposal can pump the dispatcher
             let snapshot = entries.borrow().clone();
             for entry in snapshot {
-                let _ = entry.texture.dispose_async().await;
+                let _ = join(entry.texture.dispose_async()).await;
             }
             entries.borrow_mut().clear();
         })

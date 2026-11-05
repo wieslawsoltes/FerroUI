@@ -158,13 +158,11 @@ impl DesignerWorkspace {
             return;
         }
         let this = self.clone();
-        Dispatcher::ui_thread()
-            .to_task_scheduler()
-            .spawn_local(async move {
-                let result = this.choose_open().await;
-                this.file_busy.set(false);
-                this.report(result);
-            });
+        Dispatcher::ui_thread().spawn_local(async move {
+            let result = this.choose_open().await;
+            this.file_busy.set(false);
+            this.report(result);
+        });
     }
     async fn choose_open(self: &Rc<Self>) -> Result<(), String> {
         let top = TopLevel::get_top_level(Some(&self.root))
@@ -244,17 +242,15 @@ impl DesignerWorkspace {
             return;
         }
         let this = self.clone();
-        Dispatcher::ui_thread()
-            .to_task_scheduler()
-            .spawn_local(async move {
-                let result = match this.save_file(save_as).await {
-                    Ok(true) if then_open => this.complete_open(),
-                    Ok(_) => Ok(()),
-                    Err(error) => Err(error),
-                };
-                this.file_busy.set(false);
-                this.report(result);
-            });
+        Dispatcher::ui_thread().spawn_local(async move {
+            let result = match this.save_file(save_as).await {
+                Ok(true) if then_open => this.complete_open(),
+                Ok(_) => Ok(()),
+                Err(error) => Err(error),
+            };
+            this.file_busy.set(false);
+            this.report(result);
+        });
     }
     /// Save the authored buffer, including incomplete XAML. Returns false on picker cancellation.
     /// The saved snapshot is tracked independently of later editor changes, so a concurrent

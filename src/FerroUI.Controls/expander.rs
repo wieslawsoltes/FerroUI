@@ -341,12 +341,15 @@ impl Expander {
             };
 
             let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-            let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
-            drop(scheduler.start_local(async move {
-                if task.await.is_ok() {
-                    post_completed();
-                }
-            }));
+            // A transition that failed or was aborted ends without the completed state.
+            drop(Dispatcher::current_dispatcher().start_local_with_priority(
+                async move {
+                    if task.await.is_ok() {
+                        post_completed();
+                    }
+                },
+                priority,
+            ));
         } else {
             post_completed();
         }

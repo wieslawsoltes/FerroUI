@@ -4,14 +4,16 @@
 //! so the subscription has ended when `subscribe` returns, where upstream waits on an event);
 //! `MockEnumerable<T>` of the test library is a local enumerable that records the times its
 //! enumerators live (an enumerator is disposed when it is dropped). `Concat` of a sequence of tasks
-//! is `concat_inner` (a `Task` is an `ObservableSource`); `Task.Factory.StartNew` is `tasks::run`
-//! and the blocking `Single()` is `block_on` of `single_async().to_task()`.
+//! is `concat_inner` (the `Shared` of a result is an `ObservableSource`); `Task.Factory.StartNew`
+//! is `tasks::run`, which gives such a `Shared`, and the blocking `Single()` is `block_on` of
+//! `single_async().to_task().flatten()`.
 
 use ferroui_reactive::{IObservable, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{
     assert_messages, assert_recorded_eq, assert_subscriptions, new_error, Expected, ReactiveTest as RT, Recorded, Subscription, TestScheduler,
 };
-use ferroui_system::threading::tasks::{block_on, run};
+use ferroui_system::task::block_on;
+use ferroui_system::threading::tasks::run;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -618,7 +620,7 @@ fn concat_tail_recursive1() {
 fn concat_task() {
     let tss = Observable::to_observable(vec![run(|| Ok(1)), run(|| Ok(2)), run(|| Ok(3))]).concat_inner::<i32>();
 
-    let res = block_on(tss.to_array().single_async().to_task()).unwrap();
+    let res = block_on(tss.to_array().single_async().to_task().flatten()).unwrap();
 
     assert_eq!(vec![1, 2, 3], res);
 }

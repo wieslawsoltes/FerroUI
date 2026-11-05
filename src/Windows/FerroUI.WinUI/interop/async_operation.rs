@@ -6,7 +6,7 @@
 //! completes on, and all it does there is send the status through a
 //! one-shot channel (`ferroui_system::task::oneshot`), which wakes the
 //! task. The task of the integration runs on the dispatcher of the UI thread
-//! (`Dispatcher::to_task_scheduler().start_local`), whose waker posts to
+//! (`Dispatcher::start_local`), whose waker posts to
 //! that thread, so the results are read on the UI thread, where the await
 //! of the reference resumes too (its synchronization context is the one of
 //! the dispatcher queue of WinUI).

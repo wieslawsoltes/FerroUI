@@ -1,12 +1,10 @@
 use super::{BclStorageFile, BclStorageFolder, StorageBookmarkHelper, StorageProviderHelpers};
-use crate::animation::SignedDuration;
 use crate::platform::storage::{IStorageFolder, IStorageItem, StorageItemProperties};
-use crate::utilities::{DateTimeOffset, Uri, UriKind};
+use crate::utilities::{Uri, UriKind};
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use std::time::SystemTime;
 
 /// An entry of the local file system: a file or a directory, by its full
 /// path (the counterpart of the file-system info objects of the .NET base
@@ -85,16 +83,6 @@ impl FileSystemInfo {
             Self::Directory(path) => path.is_dir(),
         }
     }
-}
-
-fn to_date_time_offset(time: SystemTime) -> DateTimeOffset {
-    const NANOSECONDS_PER_TICK: u128 = 100;
-
-    let ticks = match time.duration_since(SystemTime::UNIX_EPOCH) {
-        Ok(after) => (after.as_nanos() / NANOSECONDS_PER_TICK) as i64,
-        Err(before) => -((before.duration().as_nanos() / NANOSECONDS_PER_TICK) as i64),
-    };
-    DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks(ticks))
 }
 
 /// The base of the storage items backed by an entry of the local file
@@ -189,10 +177,10 @@ impl BclStorageItem {
         if file_system_info.exists() {
             if let Ok(metadata) = fs::metadata(file_system_info.path()) {
                 let size = if file_system_info.is_directory() { 0 } else { metadata.len() };
-                let date_modified = metadata.modified().ok().map(to_date_time_offset);
+                let date_modified = metadata.modified().ok();
                 // File systems without a creation time report the time of
                 // the last change.
-                let date_created = metadata.created().ok().map(to_date_time_offset).or(date_modified);
+                let date_created = metadata.created().ok().or(date_modified);
                 return StorageItemProperties::new(Some(size), date_created, date_modified);
             }
         }

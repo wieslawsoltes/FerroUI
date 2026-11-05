@@ -65,7 +65,7 @@ impl StyledElementActionImpl for LaunchUriOrFileAction {
             return Some(Rc::new(false));
         };
 
-        drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        drop(Dispatcher::ui_thread().start_local(async move {
             let _ = launch.await;
         }));
 

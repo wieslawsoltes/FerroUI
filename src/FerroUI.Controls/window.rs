@@ -12,7 +12,10 @@ use ferroui_base::layout::{ILayoutManager, Layoutable, LayoutableImpl, Layoutabl
 use ferroui_base::media::{Brushes, IBrush};
 use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::styling::ControlTheme;
-use ferroui_base::threading::{Dispatcher, DispatcherTask};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+#[allow(deprecated)]
+use ferroui_base::threading::DispatcherTask;
+use ferroui_system::task::JoinHandle;
 use ferroui_base::utilities::{HandlerList, MathUtilities};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, BoxedValue, DirectProperty,
@@ -1071,8 +1074,8 @@ impl Window {
     /// Closes a dialog window with the specified result.
     ///
     /// When the window is shown with [`show_dialog`](Self::show_dialog) or
-    /// [`show_dialog_typed`](Self::show_dialog_typed), the resulting task
-    /// will produce the `dialog_result` value when the window is closed.
+    /// [`show_dialog_typed`](Self::show_dialog_typed), the handle of its task
+    /// gives the `dialog_result` value when the window is closed.
     pub fn close_with_result(&self, dialog_result: Option<BoxedValue>) {
         *self.dialog_result.borrow_mut() = dialog_result;
         self.close_core(WindowCloseReason::WindowClosing, true, false);
@@ -1578,46 +1581,74 @@ impl Window {
 
     /// Shows the window as a dialog owned by `owner`.
     ///
-    /// Returns a task that can be used to track the lifetime of the dialog:
-    /// it completes, from a dispatcher job, with the dialog result (see
-    /// [`close_with_result`](Self::close_with_result)) once the dialog has
-    /// closed. Nothing blocks: the caller keeps running and the task is
-    /// observed through the dispatcher.
+    /// Returns the handle of a task of the dispatcher that tracks the
+    /// lifetime of the dialog: it ends, in a dispatcher job, with the dialog
+    /// result (see [`close_with_result`](Self::close_with_result)) once the
+    /// dialog has closed, or with `JoinError::Canceled` when the dispatcher
+    /// shuts down first. Nothing blocks: the caller keeps running, and
+    /// dropping the handle leaves the dialog open.
     ///
     /// # Panics
     /// Panics when the window has already been closed or is already shown,
     /// and when the owner is closed, not visible or the window itself.
-    pub fn show_dialog(&self, owner: &Window) -> DispatcherTask<Option<BoxedValue>> {
+    pub fn show_dialog(&self, owner: &Window) -> JoinHandle<Option<BoxedValue>> {
         let completion = self.show_core(Some(owner), true).expect("showing a dialog creates its completion");
-        Dispatcher::ui_thread().invoke_async_task_local(move || completion)
+        Dispatcher::ui_thread().spawn_local_with_priority(completion, DispatcherPriority::DEFAULT)
     }
 
     /// Shows the window as a dialog owned by `owner`; `TResult` is the type
     /// of the result produced by the dialog.
     ///
-    /// Returns a task that can be used to retrieve the result of the dialog
-    /// when it closes: the value passed to
+    /// Returns the handle of a task that gives the result of the dialog when
+    /// it closes: the value passed to
     /// [`close_with_result`](Self::close_with_result), or the default of
-    /// `TResult` when the dialog closed without a result. The task fails
-    /// when the dialog result is not a `TResult`.
+    /// `TResult` when the dialog closed without a result. When the dialog
+    /// result is not a `TResult`, the task panics, and its handle ends with
+    /// `JoinError::Panicked`.
     ///
     /// # Panics
     /// See [`show_dialog`](Self::show_dialog).
-    pub fn show_dialog_typed<TResult: Clone + Default + 'static>(&self, owner: &Window) -> DispatcherTask<TResult> {
+    pub fn show_dialog_typed<TResult: Clone + Default + 'static>(&self, owner: &Window) -> JoinHandle<TResult> {
         let completion = self.show_core(Some(owner), true).expect("showing a dialog creates its completion");
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            match completion.await {
-                Some(dialog_result) => match dialog_result.downcast_ref::<TResult>() {
-                    Some(dialog_result) => dialog_result.clone(),
-                    None => panic!(
-                        "Unable to cast the dialog result of type {} to {}.",
-                        dialog_result.any_value_type_name(),
-                        std::any::type_name::<TResult>()
-                    ),
-                },
-                None => TResult::default(),
-            }
-        })
+        Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                match completion.await {
+                    Some(dialog_result) => match dialog_result.downcast_ref::<TResult>() {
+                        Some(dialog_result) => dialog_result.clone(),
+                        None => panic!(
+                            "Unable to cast the dialog result of type {} to {}.",
+                            dialog_result.any_value_type_name(),
+                            std::any::type_name::<TResult>()
+                        ),
+                    },
+                    None => TResult::default(),
+                }
+            },
+            DispatcherPriority::DEFAULT,
+        )
+    }
+
+    /// The deprecated form of [`show_dialog`](Self::show_dialog): a
+    /// `DispatcherTask`, which raises a failure again when it is observed.
+    ///
+    /// # Panics
+    /// See [`show_dialog`](Self::show_dialog).
+    #[deprecated(since = "0.5.0", note = "use `show_dialog`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn show_dialog_task(&self, owner: &Window) -> DispatcherTask<Option<BoxedValue>> {
+        self.show_dialog(owner).into()
+    }
+
+    /// The deprecated form of [`show_dialog_typed`](Self::show_dialog_typed):
+    /// a `DispatcherTask`, which raises the failure to cast the dialog result
+    /// again when it is observed.
+    ///
+    /// # Panics
+    /// See [`show_dialog`](Self::show_dialog).
+    #[deprecated(since = "0.5.0", note = "use `show_dialog_typed`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn show_dialog_typed_task<TResult: Clone + Default + 'static>(&self, owner: &Window) -> DispatcherTask<TResult> {
+        self.show_dialog_typed(owner).into()
     }
 
     /// Sorts the windows ascending by their Z order - the topmost window

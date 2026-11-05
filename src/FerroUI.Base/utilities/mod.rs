@@ -136,7 +136,7 @@ mod date_time_net_tests;
 #[cfg(test)]
 mod date_time_tests;
 
-pub use date_time::{DateTime, SystemTimeRangeError, UtcNowProvider};
+pub use date_time::{system_time_now, DateTime, SystemTimeRangeError, UtcNowProvider};
 pub use date_time_format_info::{CalendarWeekRule, DateTimeFormatInfo, DateTimeFormatInfoRef, DateTimeFormatProvider};
 pub use date_time_kind::DateTimeKind;
 pub use date_time_offset::DateTimeOffset;

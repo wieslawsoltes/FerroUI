@@ -60,18 +60,19 @@ fn drain(window: &Window) {
 fn native_file_storage_uses_weak_hosts_and_reports_missing_or_unsupported_pickers() {
     run(|| {
         use crate::{infrastructure::NativeLayoutFileStorage, services::ILayoutFileStorage};
-        use ferroui_system::threading::tasks::Task;
+        use ferroui_system::task::spawn_local;
         let orphan = Control::new();
         let service = NativeLayoutFileStorage::new(orphan.clone());
-        let task = Task::spawn_local(async move {
+        let task = spawn_local(async move {
             Ok::<_, ferroui_system::ObservableError>(
                 service.open_layout().await.err().unwrap().to_string(),
             )
-        });
-        assert!(task.result().unwrap().contains("No window"));
+        })
+        .shared();
+        assert!(task.result().unwrap().unwrap().contains("No window"));
         drop(orphan);
         let service = NativeLayoutFileStorage::new(Control::new());
-        let task = Task::spawn_local(async move {
+        let task = spawn_local(async move {
             Ok::<_, ferroui_system::ObservableError>(
                 service
                     .save_layout(Vec::new())
@@ -80,15 +81,16 @@ fn native_file_storage_uses_weak_hosts_and_reports_missing_or_unsupported_picker
                     .unwrap()
                     .to_string(),
             )
-        });
-        assert!(task.result().unwrap().contains("closed"));
+        })
+        .shared();
+        assert!(task.result().unwrap().unwrap().contains("closed"));
         let window = Window::new();
         let child = Control::new();
         window.set_content(Some(Control::boxed(child.clone())));
         window.show();
         drain(&window);
         let service = NativeLayoutFileStorage::new(child);
-        let task = Task::spawn_local(async move {
+        let task = spawn_local(async move {
             let open = service.open_layout().await.err().unwrap().to_string();
             let save = service
                 .save_layout(Vec::new())
@@ -97,8 +99,9 @@ fn native_file_storage_uses_weak_hosts_and_reports_missing_or_unsupported_picker
                 .unwrap()
                 .to_string();
             Ok::<_, ferroui_system::ObservableError>((open, save))
-        });
-        let (open, save) = task.result().unwrap();
+        })
+        .shared();
+        let (open, save) = task.result().unwrap().unwrap();
         assert!(open.contains("Opening files is unavailable"));
         assert!(save.contains("Saving files is unavailable"));
         window.close();

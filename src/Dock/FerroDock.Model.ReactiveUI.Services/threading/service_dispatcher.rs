@@ -20,17 +20,12 @@ impl ServiceDispatcher {
         &self,
         action: impl FnOnce() + 'static,
     ) -> super::DispatcherInvocation {
-        let completion = ferroui_system::threading::tasks::TaskCompletionSource::new();
-        let task = completion.task();
+        let (completion, task) = ferroui_system::task::Shared::channel();
         self.post(move || {
             let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(action));
             match outcome {
-                Ok(()) => {
-                    completion.try_set_result(());
-                }
-                Err(payload) => {
-                    completion.try_set_exception(super::task_action::panic_error(payload));
-                }
+                Ok(()) => completion.send(Ok(())),
+                Err(payload) => completion.send(Err(super::task_action::panic_error(payload))),
             }
         });
         super::DispatcherInvocation::new(task)

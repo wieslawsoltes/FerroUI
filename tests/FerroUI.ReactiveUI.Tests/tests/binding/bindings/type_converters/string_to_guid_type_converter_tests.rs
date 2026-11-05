@@ -1,11 +1,11 @@
 //! `StringToGuidTypeConverterTests` (`ReactiveUI.Binding.Tests/Bindings/TypeConverters/StringToGuidTypeConverterTests.cs`).
 
 use ferroui_reactiveui::*;
-use ferroui_splat::Guid;
+use uuid::Uuid;
 
 const EXPECTED_AFFINITY: i32 = 2;
 
-fn convert(value: &str) -> Option<Guid> {
+fn convert(value: &str) -> Option<Uuid> {
     StringToGuidTypeConverter.try_convert(Some(&value.to_string()), None)
 }
 
@@ -16,13 +16,13 @@ fn get_affinity_for_objects_returns2() {
 
 #[test]
 fn try_convert_valid_string_succeeds() {
-    let expected = Guid::from_u128(0x12345678_1234_1234_1234_123456789abc);
+    let expected = Uuid::from_u128(0x12345678_1234_1234_1234_123456789abc);
     assert_eq!(convert("12345678-1234-1234-1234-123456789abc"), Some(expected));
 }
 
 #[test]
 fn try_convert_empty_guid_string_succeeds() {
-    assert_eq!(convert("00000000-0000-0000-0000-000000000000"), Some(Guid::EMPTY));
+    assert_eq!(convert("00000000-0000-0000-0000-000000000000"), Some(Uuid::nil()));
 }
 
 #[test]
@@ -43,7 +43,7 @@ fn try_convert_invalid_string_returns_false() {
 /// The other formats of `Guid.TryParse`, which upstream's tests do not reach.
 #[test]
 fn try_convert_other_formats() {
-    let expected = Some(Guid::from_u128(0x12345678_1234_1234_1234_123456789abc));
+    let expected = Some(Uuid::from_u128(0x12345678_1234_1234_1234_123456789abc));
     assert_eq!(convert("12345678123412341234123456789abc"), expected);
     assert_eq!(convert("{12345678-1234-1234-1234-123456789abc}"), expected);
     assert_eq!(convert("(12345678-1234-1234-1234-123456789ABC)"), expected);

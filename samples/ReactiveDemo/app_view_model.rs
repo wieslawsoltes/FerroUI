@@ -161,7 +161,7 @@ fn search_crates(
     let metadata = search_service.search(&term, token);
     let launcher = launcher.clone();
     async move {
-        let metadata = metadata.await?;
+        let metadata = metadata.flatten().await?;
         let results: Vec<Rc<CrateDetailsViewModel>> =
             metadata.into_iter().map(|krate| CrateDetailsViewModel::new(krate, launcher.clone())).collect();
         Ok::<SearchResults, ObservableError>(Some(Rc::new(results)))

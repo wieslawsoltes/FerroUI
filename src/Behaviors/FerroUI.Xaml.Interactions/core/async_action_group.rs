@@ -3,6 +3,7 @@
 use super::{attach_actions_to_logical_tree, detach_actions_from_logical_tree};
 use crate::action_task::ActionTask;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
+use ferroui_base::threading::JoinError;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObject, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledElementImplExt,
@@ -125,6 +126,15 @@ fn task_of(result: Option<&BoxedValue>) -> Option<ActionTask> {
 
 /// Executes the actions of `items` from `start` in sequence, awaiting the task an action returns
 /// before the next action.
+/// Awaits the task of an action (`await task`): the failure of the action, which its handle gives
+/// as a value, fails the group with the same panic, as `await` of the reference raises the exception
+/// of a faulted task again; a canceled task ends the wait.
+async fn await_action(task: ActionTask) {
+    if let Err(JoinError::Panicked(payload)) = task.await {
+        std::panic::resume_unwind(payload);
+    }
+}
+
 async fn execute_sequence(
     items: Rc<Vec<Ref<FerroObject>>>,
     start: usize,
@@ -138,7 +148,7 @@ async fn execute_sequence(
         };
 
         if let Some(task) = task_of(result.as_ref()) {
-            let _ = task.await;
+            await_action(task).await;
         }
     }
 }
@@ -194,7 +204,7 @@ impl AsyncActionGroup {
                     let sender = sender.cloned();
                     let parameter = parameter.cloned();
                     return ActionTask::spawn(async move {
-                        let _ = task.await;
+                        await_action(task).await;
                         execute_sequence(rest, index + 1, sender, parameter).await;
                     });
                 }
@@ -222,7 +232,7 @@ impl AsyncActionGroup {
 
         ActionTask::spawn(async move {
             for task in tasks {
-                let _ = task.await;
+                await_action(task).await;
             }
         })
     }

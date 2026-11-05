@@ -159,13 +159,18 @@ impl MethodHelper {
     }
 }
 
-/// Whether a method returns nothing or a task (`ReturnType == typeof(void) || ReturnType == typeof(Task)`).
+/// Whether a method returns nothing or a task (`ReturnType == typeof(void) || ReturnType == typeof(Task)`):
+/// the `JoinHandle` of a task of the dispatcher, a `DispatcherTask` (deprecated) or a type named as
+/// a task.
 fn returns_nothing_or_task(method: &MarkupMethod) -> bool {
     match method.return_type {
         None => true,
         Some(return_type) => {
             let name = return_type().name();
-            name.contains("DispatcherTask") || name.ends_with("Task") || name.contains("Task<")
+            name.contains("JoinHandle")
+                || name.contains("DispatcherTask")
+                || name.ends_with("Task")
+                || name.contains("Task<")
         }
     }
 }

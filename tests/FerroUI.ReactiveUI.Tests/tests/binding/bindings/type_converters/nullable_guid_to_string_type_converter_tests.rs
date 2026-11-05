@@ -1,7 +1,7 @@
 //! `NullableGuidToStringTypeConverterTests` (`ReactiveUI.Binding.Tests/Bindings/TypeConverters/NullableGuidToStringTypeConverterTests.cs`).
 
 use ferroui_reactiveui::*;
-use ferroui_splat::Guid;
+use uuid::Uuid;
 
 const EXPECTED_AFFINITY: i32 = 2;
 
@@ -12,7 +12,7 @@ fn get_affinity_for_objects_returns2() {
 
 #[test]
 fn try_convert_guid_succeeds() {
-    let value = Some(Guid::from_u128(0x12345678_1234_1234_1234_123456789abc));
+    let value = Some(Uuid::from_u128(0x12345678_1234_1234_1234_123456789abc));
     assert_eq!(
         NullableGuidToStringTypeConverter.try_convert(Some(&value), None),
         Some("12345678-1234-1234-1234-123456789abc".to_string())

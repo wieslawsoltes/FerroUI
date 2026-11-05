@@ -4,7 +4,7 @@ use crate::{Button, ButtonImpl, ButtonImplExt, ContentControlImpl, ControlImpl, 
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::Uri;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt,
@@ -42,15 +42,18 @@ impl ButtonImpl for HyperlinkButton {
             let this = this.to_ref();
             // The task is not observed, as the posted asynchronous action
             // of the reference.
-            let _ = Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                let Some(top_level) = TopLevel::get_top_level(Some(&this)) else {
-                    return;
-                };
-                let success = top_level.launcher().launch_uri_async(&uri).await;
-                if success {
-                    this.set_current_value(Self::is_visited_property(), true);
-                }
-            });
+            let _ = Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    let Some(top_level) = TopLevel::get_top_level(Some(&this)) else {
+                        return;
+                    };
+                    let success = top_level.launcher().launch_uri_async(&uri).await;
+                    if success {
+                        this.set_current_value(Self::is_visited_property(), true);
+                    }
+                },
+                DispatcherPriority::DEFAULT,
+            );
         }
     }
 }

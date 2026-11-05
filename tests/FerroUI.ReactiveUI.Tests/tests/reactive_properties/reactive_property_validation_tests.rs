@@ -6,7 +6,6 @@ use crate::mocks::*;
 use ferroui_reactive::subjects::Subject;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::*;
-use ferroui_system::threading::tasks::{run_pending_wakes, Task};
 use ferroui_system::{IObservable, IObserver, ObservableError};
 use std::any::Any;
 use std::future::Future;
@@ -96,7 +95,7 @@ fn observable_validator_surfaces_error() {
 
 #[test]
 fn async_validator_surfaces_error() {
-    let rp = int_property(0).add_validation_error_async(|x: i32| Task::from_result(if x < 0 { Some(ASYNC_ERROR) } else { None }));
+    let rp = int_property(0).add_validation_error_async(|x: i32| from_result(if x < 0 { Some(ASYNC_ERROR) } else { None }));
 
     rp.set_value(-1);
 
@@ -131,7 +130,7 @@ fn observable_enumerable_validator_single_arg_overload() {
 
 #[test]
 fn async_enumerable_validator_single_arg_overload() {
-    let rp = int_property(-1).add_validation_error_async(|x: i32| Task::from_result(if x < 0 { Some(vec![ASYNC_ERROR]) } else { None }));
+    let rp = int_property(-1).add_validation_error_async(|x: i32| from_result(if x < 0 { Some(vec![ASYNC_ERROR]) } else { None }));
 
     assert!(string_errors(&rp.get_errors(None)).contains(&ASYNC_ERROR.to_owned()));
     rp.dispose();
@@ -139,7 +138,7 @@ fn async_enumerable_validator_single_arg_overload() {
 
 #[test]
 fn async_string_validator_single_arg_overload() {
-    let rp = int_property(-1).add_validation_error_async(|x: i32| Task::from_result(if x < 0 { Some(ASYNC_ERROR) } else { None }));
+    let rp = int_property(-1).add_validation_error_async(|x: i32| from_result(if x < 0 { Some(ASYNC_ERROR) } else { None }));
 
     assert!(string_errors(&rp.get_errors(None)).contains(&ASYNC_ERROR.to_owned()));
     rp.dispose();
@@ -196,7 +195,7 @@ fn manual_validator_error_is_forwarded_and_stops() {
 
 #[test]
 fn async_validator_dispose_completes_source() {
-    let rp = int_property(0).add_validation_error_async(|x: i32| Task::from_result(if x < 0 { Some(ASYNC_ERROR) } else { None }));
+    let rp = int_property(0).add_validation_error_async(|x: i32| from_result(if x < 0 { Some(ASYNC_ERROR) } else { None }));
 
     rp.set_value(-1);
     assert!(string_errors(&rp.get_errors(None)).contains(&ASYNC_ERROR.to_owned()));
@@ -234,7 +233,7 @@ fn manual_validators_complete_when_all_complete() {
 
 #[test]
 fn async_validator_faulted_task_is_handled() {
-    let rp = int_property(0).add_validation_error_async(|_: i32| Task::<Option<String>>::from_exception(error("nope")));
+    let rp = int_property(0).add_validation_error_async(|_: i32| std::future::ready(Err::<Option<String>, ObservableError>(error("nope"))));
 
     rp.set_value(-1);
 
@@ -250,7 +249,7 @@ fn async_validator_selector_throws_synchronously() {
         if x < 0 {
             panic!("sync throw");
         }
-        Task::<Option<String>>::from_result(None)
+        from_result::<Option<String>>(None)
     });
 
     rp.set_value(-1);
@@ -263,10 +262,10 @@ fn async_validator_selector_throws_synchronously() {
 fn async_validator_awaited_task_delivers_result() {
     let rp = int_property(0).add_validation_error_async_with(
         |x: i32| {
-            Task::spawn_local(async move {
+            async move {
                 YieldNow(false).await;
                 Ok::<_, ObservableError>(if x < 0 { Some(ASYNC_ERROR) } else { None })
-            })
+            }
         },
         true,
     );
@@ -278,7 +277,7 @@ fn async_validator_awaited_task_delivers_result() {
         if rp.has_errors() {
             break;
         }
-        let _ = run_pending_wakes();
+        let _ = ferroui_system::task::run_pending();
     }
 
     assert!(string_errors(&rp.get_errors(None)).contains(&ASYNC_ERROR.to_owned()));

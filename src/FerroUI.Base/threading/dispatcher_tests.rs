@@ -1,3 +1,8 @@
+// The deprecated `DispatcherTask`, `DispatcherTaskScheduler`, `invoke_async_task*` and
+// `to_task_scheduler*` (step A6 of phase C4 of #423) are tested here, with the ordering suite
+// (a child module) that keeps them unchanged.
+#![allow(deprecated)]
+
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -2592,6 +2597,127 @@ fn legacy_platform_threading_interface_is_adapted() {
     }
     assert_eq!(ticks.get(), 1);
     assert!(!timer.is_enabled());
+}
+
+#[test]
+fn start_local_polls_the_future_inside_the_call_then_from_jobs_of_its_priority() {
+    let t = DispatcherTests::new();
+    let order = Rc::new(RefCell::new(Vec::new()));
+    let handle: Rc<RefCell<Option<JoinHandle<DispatcherPriority>>>> = Rc::default();
+    let (d, o, h) = (t.ui_thread.clone(), order.clone(), handle.clone());
+    t.ui_thread.post_local(
+        move || {
+            let (d2, o2) = (d.clone(), o.clone());
+            *h.borrow_mut() = Some(d.start_local(async move {
+                o2.borrow_mut().push(format!("first poll at {}", current_priority()));
+                d2.invoke_async_local_with_priority(|| (), DispatcherPriority::NORMAL).await.unwrap();
+                o2.borrow_mut().push(format!("resumed at {}", current_priority()));
+                current_priority()
+            }));
+            o.borrow_mut().push("started".to_string());
+        },
+        DispatcherPriority::RENDER,
+    );
+
+    t.ui_thread.run_jobs(None);
+    assert_eq!(names(&order), ["first poll at Render", "started", "resumed at Render"]);
+    let mut handle = handle.borrow_mut().take().unwrap();
+    assert_eq!(outcome_of(&mut handle), Some(format!("{:?}", DispatcherPriority::RENDER)));
+
+    // A future without a pending await has ended when the call returns, and a panic of the future
+    // is the outcome of the handle, a value.
+    let mut ready = t.ui_thread.start_local_with_priority(async { 5 }, DispatcherPriority::BACKGROUND);
+    assert!(ready.is_finished());
+    assert_eq!(outcome_of(&mut ready).as_deref(), Some("5"));
+    let mut panicked = t.ui_thread.start_local(async {
+        panic!("first poll");
+    });
+    assert_eq!(outcome_of(&mut panicked).as_deref(), Some("the task panicked: first poll"));
+
+    // Aborted, the task ends canceled.
+    let mut aborted = t.ui_thread.start_local(std::future::pending::<()>());
+    aborted.abort();
+    assert_eq!(outcome_of(&mut aborted).as_deref(), Some("canceled"));
+}
+
+#[test]
+fn a_join_handle_converts_into_a_dispatcher_task_that_keeps_its_contract() {
+    let t = DispatcherTests::new();
+
+    // The task of a handle that has ended is complete at once...
+    let done: DispatcherTask<i32> = t.ui_thread.start_local(async { 1 }).into();
+    assert!(done.is_completed_successfully());
+    assert_eq!(done.result(), Ok(1));
+
+    // ...the one of a running task completes in a job of the dispatcher...
+    let later: DispatcherTask<i32> = t
+        .ui_thread
+        .spawn_local(async {
+            Dispatcher::yield_now().await;
+            2
+        })
+        .into();
+    assert!(!later.is_completed());
+    t.ui_thread.run_jobs(None);
+    assert_eq!(later.result(), Ok(2));
+
+    // ...a panic faults it and is raised again when it is observed...
+    let failed: DispatcherTask<()> = t
+        .ui_thread
+        .spawn_local(async {
+            panic!("converted");
+        })
+        .into();
+    t.ui_thread.run_jobs(None);
+    assert!(failed.is_faulted());
+    let raised = catch_unwind(AssertUnwindSafe(|| failed.result()));
+    assert_eq!(message_of(&*raised.unwrap_err()), Some("converted"));
+
+    // ...and an aborted task cancels it.
+    let aborted = t.ui_thread.spawn_local(std::future::pending::<()>());
+    let abort = aborted.abort_handle();
+    let canceled: DispatcherTask<()> = aborted.into();
+    abort.abort();
+    t.ui_thread.run_jobs(None);
+    assert!(canceled.is_canceled());
+}
+
+#[test]
+fn a_dispatcher_task_converts_into_a_join_handle_with_its_panic_as_a_value() {
+    let t = DispatcherTests::new();
+
+    let mut done: JoinHandle<i32> = t.ui_thread.invoke_async_task(|| async { 3 }).into();
+    assert!(!done.is_finished());
+    t.ui_thread.run_jobs(None);
+    assert_eq!(outcome_of(&mut done).as_deref(), Some("3"));
+
+    // The panic that the `DispatcherTask` raises again is the outcome of the handle.
+    let mut failed: JoinHandle<()> = t
+        .ui_thread
+        .invoke_async_task(|| async {
+            panic!("raised");
+        })
+        .into();
+    t.ui_thread.run_jobs(None);
+    assert_eq!(outcome_of(&mut failed).as_deref(), Some("the task panicked: raised"));
+
+    // A cancellation, while the handle waits or before it is made, ends it canceled.
+    let inner = t.ui_thread.spawn_local(std::future::pending::<()>());
+    let abort = inner.abort_handle();
+    let task: DispatcherTask<()> = inner.into();
+    let mut canceled: JoinHandle<()> = task.into();
+    abort.abort();
+    t.ui_thread.run_jobs(None);
+    assert_eq!(outcome_of(&mut canceled).as_deref(), Some("canceled"));
+
+    let inner = t.ui_thread.spawn_local(std::future::pending::<()>());
+    let abort = inner.abort_handle();
+    let task: DispatcherTask<()> = inner.into();
+    abort.abort();
+    t.ui_thread.run_jobs(None);
+    assert!(task.is_canceled());
+    let mut early: JoinHandle<()> = task.into();
+    assert_eq!(outcome_of(&mut early).as_deref(), Some("canceled"));
 }
 
 // The ordering guarantees that phase C4 of #423 keeps (docs/idiomatic-rust-async.md); a child

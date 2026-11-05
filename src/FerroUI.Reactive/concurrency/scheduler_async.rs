@@ -8,7 +8,7 @@
 //! Deviation (DEVIATIONS.md, Reactive): the body of `ScheduleAsync` is a closure returning a future
 //! of `Result<(), ObservableError>` (upstream's `Task`) or of `Result<Rc<dyn IDisposable>,
 //! ObservableError>` (`Task<IDisposable>`), which runs as a task of the thread
-//! (`Task::spawn_local`). An awaited operation that the token cancels ends with a cancellation
+//! (`ferroui_system::task::spawn_local`). An awaited operation that the token cancels ends with a cancellation
 //! (`ferroui_system::task::Canceled`) where upstream's `GetResult` throws
 //! `OperationCanceledException`.
 //!
@@ -21,7 +21,7 @@
 
 use super::{IScheduler, ScheduledAction, SchedulerExt};
 use crate::disposables::{Disposable, SingleAssignmentDisposableValue};
-use ferroui_system::threading::tasks::{canceled, Task};
+use ferroui_system::threading::tasks::canceled;
 use ferroui_system::task::{current_schedule, Schedule};
 use ferroui_system::threading::{CancellationGuard, CancellationToken};
 use ferroui_system::{IDisposable, ObservableError};
@@ -115,16 +115,14 @@ pub(crate) fn invoke_async<R: ScheduleAsyncResult, Fut: Future<Output = Result<R
     }
     let token = invocation.token.clone();
     let cancelable: Rc<dyn IScheduler> = Rc::new(CancelableScheduler { scheduler: scheduler.clone(), token: token.clone() });
-    let task = Task::spawn_local(action(cancelable, token));
+    let task = crate::linq::task_observable::spawn_shared(action(cancelable, token));
     let target = invocation.clone();
-    // `TaskContinuationOptions.ExecuteSynchronously | NotOnCanceled`. A faulted body has nothing to
-    // dispose: upstream rethrows its error inside the continuation, where nothing observes it.
-    task.continue_with(move |task| {
-        if task.is_canceled() {
-            return;
-        }
-        if let Ok(result) = task.result() {
-            target.run.set_disposable(Some(result.into_disposable()));
+    // `TaskContinuationOptions.ExecuteSynchronously | NotOnCanceled`. A faulted or canceled body
+    // has nothing to dispose: upstream rethrows its error inside the continuation, where nothing
+    // observes it.
+    task.on_finished(move |outcome| {
+        if let Ok(Ok(result)) = outcome {
+            target.run.set_disposable(Some(result.clone().into_disposable()));
         }
     });
     invocation
@@ -137,7 +135,7 @@ type ScheduleContinuation = Rc<dyn Fn(Box<dyn FnOnce()>) -> Rc<dyn IDisposable>>
 /// (`SchedulerOperation`), made by `yield_` and `sleep` of
 /// [`SchedulerExt`](super::SchedulerExt). Awaiting it (`.await`, through its
 /// [`get_awaiter`](Self::get_awaiter)) schedules the rest of the body on the scheduler, which
-/// resumes it there; the operation ends with a `TaskCanceledError` when its token is cancelled.
+/// resumes it there; the operation ends with the error `Canceled` when its token is cancelled.
 /// Nothing is scheduled until it is awaited.
 #[derive(Clone)]
 pub struct SchedulerOperation {

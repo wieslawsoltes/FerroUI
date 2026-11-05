@@ -137,20 +137,23 @@ impl FerroNativeMenuExporter {
 
         // The subscription lives as long as the item.
         about_item.click(|_| {
-            Dispatcher::ui_thread().invoke_async_task_local(|| async {
-                let dialog = AboutFerroDialog::new();
+            Dispatcher::ui_thread().spawn_local_with_priority(
+                async {
+                    let dialog = AboutFerroDialog::new();
 
-                let main_window = Application::current()
-                    .and_then(|app| app.application_lifetime())
-                    .and_then(|lifetime| lifetime.as_classic_desktop_style_application_lifetime().and_then(|d| d.main_window()))
-                    .filter(|main_window| main_window.is_visible());
-                match main_window {
-                    Some(main_window) => {
-                        let _ = dialog.show_dialog(&main_window).await;
+                    let main_window = Application::current()
+                        .and_then(|app| app.application_lifetime())
+                        .and_then(|lifetime| lifetime.as_classic_desktop_style_application_lifetime().and_then(|d| d.main_window()))
+                        .filter(|main_window| main_window.is_visible());
+                    match main_window {
+                        Some(main_window) => {
+                            let _ = dialog.show_dialog(&main_window).await;
+                        }
+                        None => WindowBase::show(&dialog),
                     }
-                    None => WindowBase::show(&dialog),
-                }
-            });
+                },
+                DispatcherPriority::DEFAULT,
+            );
         }).detach();
 
         result.add(about_item);

@@ -20,7 +20,8 @@ use crate::compiler_extensions::XamlIlBindingPathHelper;
 
 /// Resolves the parsed path of every compiled binding extension against its start type (the
 /// type of its `Source`, its `DataType` or the data context type in scope) and replaces it with
-/// the resolved path node.
+/// the resolved path node. The path of an `{x:Bind}` starts at its root source instead
+/// ([`super::x_bind::transform_path`]).
 pub struct FerroXamlIlBindingPathTransformer;
 
 /// `Enumerable.First()` on an empty sequence.
@@ -129,11 +130,13 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathTransformer {
             return Ok(node);
         };
         let types = context.try_get_ferro_types()?;
-        if !binding
-            .type_()
-            .get_clr_type()?
-            .equals(&*types.compiled_binding_extension)
-        {
+        let binding_type = binding.type_().get_clr_type()?;
+        if super::x_bind::is_x_bind_extension(&binding_type) {
+            // The root source and the checks of `{x:Bind}` (docs/porting/x-bind.md).
+            super::x_bind::transform_path(context, &binding)?;
+            return Ok(node);
+        }
+        if !binding_type.equals(&*types.compiled_binding_extension) {
             return Ok(node);
         }
 

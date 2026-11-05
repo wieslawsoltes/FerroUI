@@ -189,8 +189,8 @@ fn get_async_service_dispose_async_on_same_thread_throws_and_does_not_hang_and_d
 ) {
     let count = Rc::new(Cell::new(0));
     let c = count.clone();
-    let gate = TaskCompletionSource::new();
-    let g = gate.clone();
+    let (gate, gate_task) = Shared::<Result<(), ObservableError>>::channel();
+    let g = gate_task.clone();
     let mut s = ServiceCollection::new();
     s.add(
         ServiceDescriptor::new::<usize, _>(Singleton, |p| {
@@ -199,21 +199,21 @@ fn get_async_service_dispose_async_on_same_thread_throws_and_does_not_hang_and_d
         })
         .on_dispose_async::<usize>(move |_| {
             c.set(c.get() + 1);
-            g.task()
+            g.clone()
         }),
     );
     let p = build(&s);
     assert_eq!(error(p.get_service::<usize>()), ServiceError::Disposed);
     assert_eq!(count.get(), 1);
-    gate.set_result(());
-    assert!(gate.task().is_completed_successfully());
+    gate.send(Ok(()));
+    assert!(gate_task.is_completed_successfully());
 }
 
 #[test]
 fn add_disposables_and_async_disposables_dispose_async_all_disposed() {
     for delayed in [false, true] {
         let log = Rc::new(RefCell::new(vec![]));
-        let gate = TaskCompletionSource::new();
+        let (gate, gate_task) = Shared::<Result<(), ObservableError>>::channel();
         let mut s = ServiceCollection::new();
         let l = log.clone();
         s.add(
@@ -225,22 +225,23 @@ fn add_disposables_and_async_disposables_dispose_async_all_disposed() {
             ServiceDescriptor::new::<u8, _>(Singleton, |_| Ok(Rc::new(2))).on_dispose_async::<u8>(
                 move |_| {
                     l.borrow_mut().push(2);
-                    Task::from_result(())
+                    Shared::ready(Ok(()))
                 },
             ),
         );
         let l = log.clone();
-        let g = gate.clone();
+        let g = gate_task;
         s.add(
             ServiceDescriptor::new::<u16, _>(Singleton, |_| Ok(Rc::new(3)))
                 .on_dispose_async::<u16>(move |_| {
                     let l = l.clone();
-                    let task = g.task();
-                    Task::spawn_local(async move {
-                        task.await?;
+                    let task = g.clone();
+                    ferroui_system::task::spawn_local(async move {
+                        task.flatten().await?;
                         l.borrow_mut().push(3);
-                        Ok(())
+                        Ok::<(), ObservableError>(())
                     })
+                    .shared()
                 }),
         );
         let p = build(&s);
@@ -250,8 +251,8 @@ fn add_disposables_and_async_disposables_dispose_async_all_disposed() {
             p.get_required_service::<u16>().unwrap();
         }
         let done = p.dispose_async();
-        assert_eq!(done.is_completed(), !delayed);
-        gate.set_result(());
+        assert_eq!(done.is_finished(), !delayed);
+        gate.send(Ok(()));
         assert!(done.is_completed_successfully());
         assert_eq!(
             &*log.borrow(),
@@ -374,7 +375,7 @@ fn provider_dispose_prefers_service_dispose() {
 #[test]
 fn provider_scope_dispose_throws_when_only_dispose_async_implemented() {
     let mut s = ServiceCollection::new();
-    s.add(descriptor(Transient, 1).on_dispose_async::<dyn Service>(|_| Task::from_result(())));
+    s.add(descriptor(Transient, 1).on_dispose_async::<dyn Service>(|_| Shared::ready(Ok(()))));
     let p = build(&s);
     let scope = p.create_scope().unwrap();
     scope
@@ -388,7 +389,7 @@ fn provider_scope_dispose_throws_when_only_dispose_async_implemented() {
 #[test]
 fn provider_async_scope_dispose_throws_when_only_dispose_async_implemented() {
     let mut s = ServiceCollection::new();
-    s.add(descriptor(Transient, 1).on_dispose_async::<dyn Service>(|_| Task::from_result(())));
+    s.add(descriptor(Transient, 1).on_dispose_async::<dyn Service>(|_| Shared::ready(Ok(()))));
     let p = build(&s);
     let scope = p.create_async_scope().unwrap();
     scope

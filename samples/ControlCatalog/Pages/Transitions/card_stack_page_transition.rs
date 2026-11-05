@@ -6,7 +6,7 @@ use ferroui_base::animation::{
 };
 use ferroui_base::media::{ITransform, RotateTransform, ScaleTransform, TransformGroup, TranslateTransform};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, JoinHandle};
 use ferroui_base::{Ref, RelativePoint, RelativeUnit, Visual};
 use mini_mvvm::start_async;
 use std::cell::Cell;
@@ -318,7 +318,7 @@ impl IPageTransition for CardStackPageTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let orientation = self.base.orientation();
         let duration = self.base.duration();
         let fill_mode = self.base.fill_mode();

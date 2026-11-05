@@ -150,8 +150,8 @@ impl Dispatcher {
     /// Runs the future that `create` makes on this dispatcher, and gives its handle; callable from
     /// any thread. `create` is `Send` and runs in a job posted at `priority`; the future it makes
     /// need not be `Send`, never leaves the dispatcher thread, and is polled for the first time
-    /// inside that job, then from jobs of the same priority (what
-    /// [`invoke_async_task_with_priority`](Self::invoke_async_task_with_priority) does). A panic of
+    /// inside that job, then from jobs of the same priority (what the deprecated
+    /// `invoke_async_task_with_priority` does, with a `JoinHandle`). A panic of
     /// `create` faults the task like a panic of the future; the task is canceled when the
     /// dispatcher shuts down before the job runs.
     pub fn spawn_with_priority<C, F>(&self, create: C, priority: DispatcherPriority) -> JoinHandle<F::Output>
@@ -163,9 +163,35 @@ impl Dispatcher {
         task::spawn_on(create, self.task_schedule(priority))
     }
 
-    /// Runs `future` on this dispatcher at `priority`, polling it for the first time before this
-    /// returns ([`FirstPoll::Now`]). Dispatcher thread only.
-    pub(crate) fn start_local_with_priority<F>(&self, future: F, priority: DispatcherPriority) -> JoinHandle<F::Output>
+    /// Starts `future` on this dispatcher at the priority of the job that calls this
+    /// ([`DispatcherPriority::DEFAULT`] outside of a job), and gives its handle; see
+    /// [`start_local_with_priority`](Self::start_local_with_priority).
+    ///
+    /// # Panics
+    /// When called from a thread other than the dispatcher thread.
+    pub fn start_local<F>(&self, future: F) -> JoinHandle<F::Output>
+    where
+        F: Future + 'static,
+        F::Output: 'static,
+    {
+        self.start_local_with_priority(future, self.current_job_priority())
+    }
+
+    /// Starts `future`, which need not be `Send`, on this dispatcher the way calling an
+    /// asynchronous method does, and gives its handle: the future is polled for the first time
+    /// before this returns ([`FirstPoll::Now`]), so it runs up to its first pending await inside
+    /// the call (and the handle is finished when there is none); every later poll is a job posted
+    /// at `priority` by a wake, from any thread. Otherwise the task is the one of
+    /// [`spawn_local_with_priority`](Self::spawn_local_with_priority): a panic of the future is
+    /// [`JoinError::Panicked`](ferroui_system::task::JoinError::Panicked), an abort or the
+    /// shutdown of the dispatcher is [`JoinError::Canceled`](ferroui_system::task::JoinError::Canceled),
+    /// and dropping the handle detaches the task.
+    ///
+    /// What `DispatcherTaskScheduler::start_local` (deprecated) did, with a `JoinHandle`.
+    ///
+    /// # Panics
+    /// When called from a thread other than the dispatcher thread.
+    pub fn start_local_with_priority<F>(&self, future: F, priority: DispatcherPriority) -> JoinHandle<F::Output>
     where
         F: Future + 'static,
         F::Output: 'static,

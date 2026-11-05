@@ -3,7 +3,8 @@
 use ferrodock_model_reactiveui::services::IDockDispatcher;
 use ferroui_reactive::concurrency::SchedulerExt;
 use ferroui_reactiveui::RxSchedulers;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
+use ferroui_system::task::Shared;
+use ferroui_system::ObservableError;
 use std::rc::Rc;
 /// Source default dispatcher: looks up RxSchedulers.MainThreadScheduler on every
 /// invocation and always schedules through it, independently of synchronization context.
@@ -18,24 +19,19 @@ impl MainThreadDispatcher {
     /// Scheduling failure itself propagates synchronously, as in source.
     /// The pinned shared task lacks RunContinuationsAsynchronously; that runtime
     /// option remains a recorded parity gap, rather than a separate task engine.
-    pub fn invoke_async(&self, action: Rc<dyn Fn()>) -> Task<()> {
-        let completion = TaskCompletionSource::new();
-        let task = completion.task();
+    pub fn invoke_async(&self, action: Rc<dyn Fn()>) -> Shared<Result<(), ObservableError>> {
+        let (completion, task) = Shared::channel();
         let _ = RxSchedulers::main_thread_scheduler().schedule_action(move || {
             match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| action())) {
-                Ok(()) => {
-                    completion.try_set_result(());
-                }
-                Err(payload) => {
-                    completion.try_set_exception(super::task_action::panic_error(payload));
-                }
+                Ok(()) => completion.send(Ok(())),
+                Err(payload) => completion.send(Err(super::task_action::panic_error(payload))),
             }
         });
         task
     }
 }
 impl IDockDispatcher for MainThreadDispatcher {
-    fn invoke_async(&self, action: Rc<dyn Fn()>) -> Task<()> {
+    fn invoke_async(&self, action: Rc<dyn Fn()>) -> Shared<Result<(), ObservableError>> {
         self.invoke_async(action)
     }
 }
