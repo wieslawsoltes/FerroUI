@@ -1,7 +1,8 @@
-//! `{x:Bind}` in FerroUI XAML: steps X1 to X4 of #525 (docs/porting/x-bind.md). Not a port of
+//! `{x:Bind}` in FerroUI XAML: steps X1 to X5 of #525 (docs/porting/x-bind.md). Not a port of
 //! an upstream file; the behaviour is WinUI's (the NOTICE.md of `ferroui-markup-xaml`), X2 after
 //! its regression projects `FunctionTests` and `CastingTests`, X3 after `TwoWayTests` and
-//! `NullableTests`, X4 after `EventTests`.
+//! `NullableTests`, X4 after `EventTests`, X5 after `PhasingTests`, `ListAndTemplateTests`,
+//! `LoadAndCreateFromStringTests` and `Templates`.
 //!
 //! The fixtures in `x_bind/` run through the run-time loader and through the Rust emitter, and
 //! the same assertions check both: the root source, the modes and update triggers, named
@@ -11,7 +12,11 @@
 //! when an argument changes, `BindBack`, static members, indexers, casts and interface members;
 //! converters with a parameter and a language, `ConvertBack`, fallback and target null values;
 //! event bindings with each signature form, on a path, static, on an event that is not a routed
-//! event and in a template, subscribed while the bindings are initialized.
+//! event and in a template, subscribed while the bindings are initialized; `x:DefaultBindMode`
+//! (nearest wins, events have no mode), `x:Phase` through the template component of an instance
+//! (phases in order, the later ones hidden until their phase, recycling), `x:Load` (literal,
+//! `x:DeferLoadStrategy`, bound, `FindName`), a control template read from its templated parent
+//! with a bound `x:Load` in it, and a window initialized when it is activated.
 //! The diagnostics are load errors of the one and compile errors of the other.
 //!
 //! The emitter's output, `x_bind/x_bind.generated.rs`, is checked in, compiled with the tests and
@@ -24,10 +29,10 @@ use std::rc::Rc;
 use ferroui_base::controls::NameScope;
 use ferroui_base::input::{FocusChangedEventArgs, InputElement};
 use ferroui_base::interactivity::RoutedEventArgs;
-use ferroui_base::Ref;
-use ferroui_controls::templates::IDataTemplate;
-use ferroui_controls::{Button, ContentControl, Control, StackPanel, TextBlock, TextBox, Window};
-use ferroui_markup_xaml::markup_extensions::XBindings;
+use ferroui_base::{FerroObject, Ref};
+use ferroui_controls::templates::{IDataTemplate, IDataTemplateComponent, XamlBindingHelper};
+use ferroui_controls::{Border, Button, ContentControl, Control, StackPanel, TextBlock, TextBox, Window};
+use ferroui_markup_xaml::markup_extensions::{DeferredElement, XBindings};
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use ferroui_markup_xaml_loader::rust_emitter::generate_file;
@@ -47,6 +52,11 @@ const FUNCTIONS: &str = include_str!("x_bind/x_bind_functions.xaml");
 const CASTS: &str = include_str!("x_bind/x_bind_casts.xaml");
 const CONVERTERS: &str = include_str!("x_bind/x_bind_converters.xaml");
 const EVENTS: &str = include_str!("x_bind/x_bind_events.xaml");
+const DEFAULT_MODE: &str = include_str!("x_bind/x_bind_default_mode.xaml");
+const PHASES: &str = include_str!("x_bind/x_bind_phases.xaml");
+const LOAD: &str = include_str!("x_bind/x_bind_load.xaml");
+const CONTROL_TEMPLATE: &str = include_str!("x_bind/x_bind_control_template.xaml");
+const WINDOW: &str = include_str!("x_bind/x_bind_window.xaml");
 
 const ASSEMBLY: &str = "FerroUI.XBind.Fixture";
 const ROOT_URI: &str = "ferres://FerroUI.XBind.Fixture/";
@@ -806,6 +816,325 @@ fn event_bindings_do_not_keep_their_root_alive() {
     assert!(weak.upgrade().is_none(), "the root, its targets, their handlers and the bindings are released");
 }
 
+// --- x:DefaultBindMode (step X5) ----------------------------------------------------------
+
+/// `x:DefaultBindMode` gives the bindings of its element and its subtree their mode when they
+/// name none; the nearest one wins, an explicit mode wins over it, and an event binding has no
+/// mode (WinUI's `DefaultBindMode`, `Templates.xaml` of the BindTestbed).
+fn assert_default_mode_behavior(root: Ref<StackPanel>) {
+    let children = root.children();
+    let scoped = children.get(0).cast::<TextBlock>().unwrap();
+    let explicit = children.get(1).cast::<TextBlock>().unwrap();
+    let nested = children.get(2).cast::<StackPanel>().unwrap().children().get(0).cast::<TextBlock>().unwrap();
+    let editor = children.get(3).cast::<TextBox>().unwrap();
+    let button = children.get(4).cast::<Button>().unwrap();
+    let bindings = XBindings::get_for_root(&root).unwrap();
+    bindings.initialize().unwrap();
+    for text in [scoped.text(), explicit.text(), nested.text(), editor.text()] {
+        assert_eq!(text.as_deref(), Some("construction value"));
+    }
+
+    set_tag(&root, "changed");
+    assert_eq!(scoped.text().as_deref(), Some("changed"), "OneWay from the x:DefaultBindMode of the root");
+    assert_eq!(explicit.text().as_deref(), Some("construction value"), "an explicit Mode wins");
+    assert_eq!(nested.text().as_deref(), Some("construction value"), "the nearest x:DefaultBindMode wins");
+    assert_eq!(editor.text().as_deref(), Some("changed"));
+    editor.set_current_value(TextBox::text_property(), Some("typed".into()));
+    assert_eq!(tag_text(&root).as_deref(), Some("typed"), "TwoWay from the x:DefaultBindMode of the element itself");
+    assert_eq!(scoped.text().as_deref(), Some("typed"));
+
+    // The event binding of the subtree has no mode and calls its method.
+    let clicked = XBindHelpers::clicked_count();
+    click(&button);
+    assert_eq!(XBindHelpers::clicked_count(), clicked + 1);
+    assert!(bindings.diagnostics().is_empty());
+}
+
+fn compiled_default_mode() -> Ref<StackPanel> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_default_mode_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_default_bind_mode_of_a_subtree() {
+    let _app = styled_window_application();
+    assert_default_mode_behavior(parse::<Ref<StackPanel>>(DEFAULT_MODE));
+}
+
+#[test]
+fn compiled_default_bind_mode_of_a_subtree() {
+    let _app = styled_window_application();
+    assert_default_mode_behavior(compiled_default_mode());
+}
+
+// --- x:Phase (step X5, WinUI's PhasingTests and ListAndTemplateTests) -------------------------
+
+fn phased_item(content: &str, tag: &str, name: &str) -> Ref<Button> {
+    let result = item(content);
+    result.set_tag(Some(Rc::new(tag.to_string())));
+    result.set_name(Some(name.to_string()));
+    result
+}
+
+fn phase_blocks(root: &Control) -> Vec<Ref<TextBlock>> {
+    let panel = root.to_ref().cast::<StackPanel>().unwrap();
+    let children = panel.children();
+    (0..4).map(|index| children.get(index).cast::<TextBlock>().unwrap()).collect()
+}
+
+/// A container drives a template instance through its template component, as the repeater
+/// does: phase zero when it prepares the element for an item, then each phase the previous one
+/// returned, and `Recycle` before the element is reused. The bindings of an element with
+/// `x:Phase` are read in its phase and the element is hidden until then.
+fn assert_phase_behavior(template: Rc<dyn IDataTemplate>) {
+    let root = template.build(&None).unwrap();
+    let bindings = XBindings::get_for_root(&root).unwrap();
+    let component: Rc<dyn IDataTemplateComponent> = XamlBindingHelper::get_data_template_component(&root)
+        .expect("the root of a typed template instance carries its bindings as its template component");
+    let blocks = phase_blocks(&root);
+    let first = phased_item("first", "first tag", "first name");
+
+    // Phase zero: the bindings without a phase; the elements of the later phases are hidden.
+    component.recycle();
+    assert_eq!(component.process_bindings(Some(Rc::new(first.clone())), 0, 0), 1);
+    assert!(bindings.is_container_driven());
+    assert_eq!(blocks[0].text().as_deref(), Some("first"));
+    assert!(blocks[0].is_visible());
+    for block in &blocks[1..] {
+        assert_eq!(block.text(), None);
+        assert!(!block.is_visible(), "an element of a later phase is hidden until its phase");
+    }
+    assert_eq!(bindings.suspended_count(), 3);
+    // The container gives the item: a data context no longer drives the instance.
+    root.set_data_context(Some(Rc::new(item("a data context"))));
+    assert_eq!(blocks[0].text().as_deref(), Some("first"));
+
+    // Each phase shows its elements, reads their bindings and names the next phase.
+    assert_eq!(component.process_bindings(Some(Rc::new(first.clone())), -1, 1), 3);
+    assert_eq!(blocks[1].text().as_deref(), Some("first tag"));
+    assert!(blocks[1].is_visible());
+    assert!(!blocks[2].is_visible() && blocks[2].text().is_none());
+    assert_eq!(component.process_bindings(Some(Rc::new(first.clone())), -1, 3), -1);
+    assert_eq!(blocks[2].text().as_deref(), Some("first name"));
+    assert_eq!(blocks[3].text().as_deref(), Some("first tag"));
+    assert!(blocks[2].is_visible() && blocks[3].is_visible());
+    assert_eq!(bindings.suspended_count(), 0);
+    first.set_tag(Some(Rc::new("live tag".to_string())));
+    assert_eq!(blocks[3].text().as_deref(), Some("live tag"), "a OneWay binding of a later phase follows its source");
+    assert_eq!(blocks[1].text().as_deref(), Some("first tag"));
+
+    // Recycling releases the listeners and hides the later phases again; the next item reads
+    // phase by phase.
+    component.recycle();
+    assert!(blocks[0].is_visible());
+    assert!(!blocks[1].is_visible() && !blocks[2].is_visible() && !blocks[3].is_visible());
+    first.set_tag(Some(Rc::new("after recycling".to_string())));
+    assert_eq!(blocks[3].text().as_deref(), Some("live tag"));
+    let second = phased_item("second", "second tag", "second name");
+    assert_eq!(component.process_bindings(Some(Rc::new(second.clone())), 1, 0), 1);
+    assert_eq!(blocks[0].text().as_deref(), Some("second"));
+    assert_eq!(blocks[1].text().as_deref(), Some("first tag"), "a later phase is not read in phase zero");
+    assert_eq!(component.process_bindings(Some(Rc::new(second.clone())), -1, 1), 3);
+    assert_eq!(component.process_bindings(Some(Rc::new(second.clone())), -1, 3), -1);
+    for (block, expected) in blocks.iter().zip(["second", "second tag", "second name", "second tag"]) {
+        assert_eq!(block.text().as_deref(), Some(expected));
+        assert!(block.is_visible());
+    }
+    assert!(bindings.diagnostics().is_empty());
+}
+
+fn compiled_phases_host() -> Ref<ContentControl> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_phases_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_phases_of_a_template_instance_and_recycling() {
+    let _app = styled_window_application();
+    let host = parse::<Ref<ContentControl>>(PHASES);
+    assert_phase_behavior(host.content_template().unwrap());
+}
+
+#[test]
+fn compiled_phases_of_a_template_instance_and_recycling() {
+    let _app = styled_window_application();
+    assert_phase_behavior(compiled_phases_host().content_template().unwrap());
+}
+
+// --- x:Load (step X5, WinUI's LoadAndCreateFromStringTests) -------------------------------
+
+fn found_as<T: ferroui_base::ObjectType>(root: &StackPanel, name: &str) -> Option<Ref<T>> {
+    DeferredElement::find_name(root, name).unwrap().and_then(|found| found.cast::<T>())
+}
+
+/// An element with `x:Load="False"` or `x:DeferLoadStrategy="Lazy"` is created when it is found
+/// by name; one with a bound `x:Load` when the value becomes true, and released when it becomes
+/// false. Until then a placeholder holds its place; `x:Load="True"` creates it with its document.
+fn assert_load_behavior(root: Ref<StackPanel>) {
+    let children = root.children();
+    for index in [1, 2, 3] {
+        assert!(children.get(index).cast::<DeferredElement>().is_some(), "a placeholder holds the place of child {index}");
+    }
+    assert!(children.get(4).cast::<TextBlock>().is_some(), "x:Load='True' creates the element with its document");
+    let scope = NameScope::get_name_scope(&root).unwrap();
+    assert!(scope.find_as::<Border>("lazy").is_none(), "a deferred element is not created with its document");
+
+    // The bound x:Load is read with the bindings of the root.
+    XBindings::get_for_root(&root).unwrap().initialize().unwrap();
+    let bound = children.get(2).cast::<Border>().expect("a bound x:Load that is true loads its element");
+    let bound_text = bound.child().unwrap().cast::<TextBlock>().unwrap();
+    assert_eq!(bound_text.text().as_deref(), Some("root tag"));
+    assert!(children.get(1).cast::<DeferredElement>().is_some(), "x:Load='False' waits for FindName");
+
+    // FindName loads a deferred element in the place of its placeholder; its bindings read the
+    // root of its document and its named elements are found through it.
+    let lazy = found_as::<Border>(&root, "lazy").expect("FindName loads the element");
+    assert!(children.get(1).cast::<Border>() == Some(lazy.clone()));
+    let lazy_text = found_as::<TextBlock>(&root, "lazyText").expect("a named element of a loaded element");
+    assert!(lazy.child().and_then(|child| child.cast::<TextBlock>()) == Some(lazy_text.clone()));
+    assert_eq!(lazy_text.text().as_deref(), Some("root tag"));
+    assert!(found_as::<Border>(&root, "lazy") == Some(lazy.clone()), "FindName finds a loaded element again");
+    let later = found_as::<TextBlock>(&root, "later").expect("x:DeferLoadStrategy='Lazy' loads with FindName");
+    assert_eq!(later.text().as_deref(), Some("root tag"));
+    set_tag(&root, "changed");
+    assert_eq!(lazy_text.text().as_deref(), Some("changed"));
+    assert_eq!(bound_text.text().as_deref(), Some("changed"));
+
+    // A bound x:Load that becomes false gives the place back to the placeholder; true again
+    // loads a new element.
+    root.set_value(InputElement::is_enabled_property(), false);
+    let placeholder = children.get(2).cast::<DeferredElement>().expect("the placeholder takes its place back");
+    assert!(placeholder.loaded_element().is_none());
+    root.set_value(InputElement::is_enabled_property(), true);
+    let reloaded = children.get(2).cast::<Border>().expect("loaded again");
+    assert!(reloaded != bound, "an element loaded again is a new element");
+    assert_eq!(reloaded.child().unwrap().cast::<TextBlock>().unwrap().text().as_deref(), Some("changed"));
+    assert!(placeholder.error().is_none());
+}
+
+fn compiled_load() -> Ref<StackPanel> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_load_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_load_literal_deferred_and_bound() {
+    let _app = styled_window_application();
+    assert_load_behavior(parse::<Ref<StackPanel>>(LOAD));
+}
+
+#[test]
+fn compiled_load_literal_deferred_and_bound() {
+    let _app = styled_window_application();
+    assert_load_behavior(compiled_load());
+}
+
+#[test]
+fn load_on_the_root_of_a_document_is_an_error() {
+    let _app = styled_window_application();
+    crate::register_types();
+    let document = "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n  x:Name='root' x:Load='False'/>";
+    let expected = "x:Load cannot be used on the root";
+    let error = match try_parse::<Ref<StackPanel>>(document) {
+        Ok(_) => panic!("the document loaded"),
+        Err(error) => describe(&error),
+    };
+    assert!(error.contains(expected), "{error}");
+    let file = generate_file(ASSEMBLY, ROOT_URI, &[("root.xaml", document)], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    let reason = file.documents[0].1.clone().expect("the document compiled");
+    assert!(reason.contains(expected), "{reason}");
+}
+
+// --- control templates (step X5, WinUI's Templates.xaml) ----------------------------------
+
+/// In a control template the root of the bindings is the templated control, of the
+/// `TargetType` of the template; a bound `x:Load` in the template loads its element from it
+/// (the fix of bound `x:Load` in control templates, microsoft-ui-xaml #12239).
+fn assert_control_template_behavior(host: Ref<ContentControl>) {
+    host.apply_template();
+    let root = host.visual_children().snapshot()[0].cast::<StackPanel>().expect("the template root");
+    let bindings = XBindings::get_for_root(&root).expect("the bindings of the template instance");
+    assert!(bindings.is_template() && bindings.is_control_template());
+    assert!(bindings.is_initialized(), "the instance reads its templated parent when the template is applied");
+    let children = root.children();
+    let tag = children.get(0).cast::<TextBlock>().unwrap();
+    let content = children.get(1).cast::<TextBlock>().unwrap();
+    assert_eq!(tag.text().as_deref(), Some("host tag"));
+    assert_eq!(content.text().as_deref(), Some("host content"));
+    let panel = children.get(2).cast::<Border>().expect("the bound x:Load of the template loads its element");
+    let host_object: Ref<FerroObject> = host.clone().upcast();
+    assert!(panel.templated_parent() == Some(host_object.clone()), "the loaded element belongs to the template instance");
+    let inner = panel.child().unwrap().cast::<TextBlock>().unwrap();
+    assert_eq!(inner.text().as_deref(), Some("host tag"));
+
+    // OneWay from the x:DefaultBindMode of the template; OneTime where the markup says so.
+    host.set_tag(Some(Rc::new("changed tag".to_string())));
+    assert_eq!(tag.text().as_deref(), Some("changed tag"));
+    assert_eq!(inner.text().as_deref(), Some("changed tag"));
+    host.set_content(Some(Rc::new("changed content".to_string())));
+    assert_eq!(content.text().as_deref(), Some("host content"));
+
+    host.set_value(InputElement::is_enabled_property(), false);
+    assert!(children.get(2).cast::<DeferredElement>().is_some(), "x:Load false gives the place back");
+    host.set_value(InputElement::is_enabled_property(), true);
+    let reloaded = children.get(2).cast::<Border>().expect("loaded again");
+    assert!(reloaded.templated_parent() == Some(host_object));
+    assert_eq!(reloaded.child().unwrap().cast::<TextBlock>().unwrap().text().as_deref(), Some("changed tag"));
+    assert!(bindings.diagnostics().is_empty());
+}
+
+fn compiled_control_template_host() -> Ref<ContentControl> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_control_template_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_control_template_reads_its_templated_parent() {
+    let _app = styled_window_application();
+    assert_control_template_behavior(parse::<Ref<ContentControl>>(CONTROL_TEMPLATE));
+}
+
+#[test]
+fn compiled_control_template_reads_its_templated_parent() {
+    let _app = styled_window_application();
+    assert_control_template_behavior(compiled_control_template_host());
+}
+
+// --- window roots (step X5) ---------------------------------------------------------------
+
+/// WinUI initializes the bindings of a `Window` on `Activated`, not when its content loads.
+fn assert_window_behavior(window: Ref<Window>) {
+    let scope = NameScope::get_name_scope(&window).expect("the document root owns its name scope");
+    let title = scope.find_as::<TextBlock>("title").unwrap();
+    let bindings = XBindings::get_for_root(&window).unwrap();
+    assert!(!bindings.is_initialized());
+    assert_eq!(title.text(), None);
+    window.set_tag(Some(Rc::new("set before activation".to_string())));
+    window.show();
+    assert!(bindings.is_initialized(), "the bindings of a window are initialized when it is activated");
+    assert_eq!(title.text().as_deref(), Some("set before activation"));
+    window.set_tag(Some(Rc::new("after activation".to_string())));
+    assert_eq!(title.text().as_deref(), Some("set before activation"));
+    window.close();
+}
+
+fn compiled_window() -> Ref<Window> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_window_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_window_is_initialized_when_activated() {
+    let _app = styled_window_application();
+    assert_window_behavior(parse::<Ref<Window>>(WINDOW));
+}
+
+#[test]
+fn compiled_window_is_initialized_when_activated() {
+    let _app = styled_window_application();
+    assert_window_behavior(compiled_window());
+}
+
 // --- diagnostics --------------------------------------------------------------------------
 
 /// A document with one x:Bind on its second line, and what its error says. The run-time
@@ -879,6 +1208,30 @@ const DIAGNOSTICS: &[(&str, &str)] = &[
         "'Converter' cannot be set on an x:Bind of the event 'Click'",
     ),
     ("<Button Click='{x:Bind local:XBindHelpers.Clicked, FallbackValue=none}'/>", "'FallbackValue' cannot be set on an x:Bind of the event 'Click'"),
+    // Step X5: x:DefaultBindMode, x:Phase, x:Load and control templates, with WinUI's messages.
+    ("<TextBlock Text='{x:Bind Tag}' x:DefaultBindMode='Default'/>", "Invalid value specified for attribute 'DefaultBindMode'"),
+    ("<TextBlock x:Phase='1' Text='{x:Bind Tag}'/>", "Phase can only be used within a DataTemplate"),
+    (
+        "<ContentControl><ContentControl.ContentTemplate><DataTemplate x:DataType='Button'><TextBlock x:Phase='1' Text='static'/></DataTemplate></ContentControl.ContentTemplate></ContentControl>",
+        "Phase must be used with Bind",
+    ),
+    (
+        "<ContentControl><ContentControl.ContentTemplate><DataTemplate x:DataType='Button'><TextBlock x:Phase='25' Text='{x:Bind Content}'/></DataTemplate></ContentControl.ContentTemplate></ContentControl>",
+        "Phase value must be a positive integer less than 25",
+    ),
+    ("<Border x:Name='lazy' x:Load='Maybe'/>", "Invalid value specified for attribute 'Load'"),
+    ("<Border x:Load='False'/>", "Element must have x:Name attribute specified since it uses x:Load"),
+    ("<Border x:Name='lazy' x:Load='False' x:DeferLoadStrategy='Lazy'/>", "An element cannot have both x:Load and x:DeferLoadStrategy"),
+    ("<Border x:Name='lazy' x:DeferLoadStrategy='Eager'/>", "Invalid value specified for attribute 'DeferLoadStrategy'"),
+    ("<StackPanel.Resources><Border x:Key='resource' x:Name='lazy' x:Load='False'/></StackPanel.Resources>", "x:Load cannot be used on the root"),
+    (
+        "<ContentControl><ContentControl.ContentTemplate><DataTemplate x:DataType='Button'><Border x:Name='lazy' x:Load='False'/></DataTemplate></ContentControl.ContentTemplate></ContentControl>",
+        "x:Load cannot be used on the root",
+    ),
+    (
+        "<ContentControl><ContentControl.Template><ControlTemplate><TextBlock Text='{x:Bind Tag}'/></ControlTemplate></ContentControl.Template></ContentControl>",
+        "'TargetType' is required to use x:Bind inside a ControlTemplate",
+    ),
 ];
 
 fn diagnostic_document(body: &str) -> String {
@@ -933,6 +1286,11 @@ fn emitted_fixture() -> String {
             ("x_bind_casts.xaml", CASTS),
             ("x_bind_converters.xaml", CONVERTERS),
             ("x_bind_events.xaml", EVENTS),
+            ("x_bind_default_mode.xaml", DEFAULT_MODE),
+            ("x_bind_phases.xaml", PHASES),
+            ("x_bind_load.xaml", LOAD),
+            ("x_bind_control_template.xaml", CONTROL_TEMPLATE),
+            ("x_bind_window.xaml", WINDOW),
         ],
         &RuntimeXamlLoaderConfiguration::new(),
         &[],

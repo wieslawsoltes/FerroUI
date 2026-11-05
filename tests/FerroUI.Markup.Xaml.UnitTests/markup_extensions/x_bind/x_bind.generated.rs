@@ -1100,3 +1100,43 @@ pub fn build_x_bind_events_xaml(
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_markup_xaml_tests::support::x_bind::XBindPage>, ::ferroui_markup_xaml::XamlLoadError> {
     ::core::result::Result::Err(::ferroui_markup_xaml::XamlLoadError::with_message("regenerate the x:Bind fixture"))
 }
+
+// Placeholder of step X5 of #525 (x_bind_default_mode.xaml), written by hand so that the tests compile
+// before the fixture is regenerated; the regeneration replaces this file.
+pub fn build_x_bind_default_mode_xaml(
+    _service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
+    ::core::result::Result::Err(::ferroui_markup_xaml::XamlLoadError::with_message("regenerate the x:Bind fixture"))
+}
+
+// Placeholder of step X5 of #525 (x_bind_phases.xaml), written by hand so that the tests compile
+// before the fixture is regenerated; the regeneration replaces this file.
+pub fn build_x_bind_phases_xaml(
+    _service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadError> {
+    ::core::result::Result::Err(::ferroui_markup_xaml::XamlLoadError::with_message("regenerate the x:Bind fixture"))
+}
+
+// Placeholder of step X5 of #525 (x_bind_load.xaml), written by hand so that the tests compile
+// before the fixture is regenerated; the regeneration replaces this file.
+pub fn build_x_bind_load_xaml(
+    _service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
+    ::core::result::Result::Err(::ferroui_markup_xaml::XamlLoadError::with_message("regenerate the x:Bind fixture"))
+}
+
+// Placeholder of step X5 of #525 (x_bind_control_template.xaml), written by hand so that the tests compile
+// before the fixture is regenerated; the regeneration replaces this file.
+pub fn build_x_bind_control_template_xaml(
+    _service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadError> {
+    ::core::result::Result::Err(::ferroui_markup_xaml::XamlLoadError::with_message("regenerate the x:Bind fixture"))
+}
+
+// Placeholder of step X5 of #525 (x_bind_window.xaml), written by hand so that the tests compile
+// before the fixture is regenerated; the regeneration replaces this file.
+pub fn build_x_bind_window_xaml(
+    _service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Window>, ::ferroui_markup_xaml::XamlLoadError> {
+    ::core::result::Result::Err(::ferroui_markup_xaml::XamlLoadError::with_message("regenerate the x:Bind fixture"))
+}
