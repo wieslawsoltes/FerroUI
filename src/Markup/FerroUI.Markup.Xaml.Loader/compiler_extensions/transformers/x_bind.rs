@@ -34,17 +34,19 @@ use xamlx::ast::{
     IXamlAstNode, IXamlAstPropertyReference, IXamlAstValueNode, IXamlLineInfo, XamlAstClrProperty,
     XamlAstClrTypeReference, XamlAstConstructableObjectNode, XamlAstExtensions, XamlAstNamePropertyReference,
     XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXamlPropertyValueNode, XamlAstXmlDirective,
-    XamlAstXmlTypeReference, XamlConstantNode, XamlPropertyAssignmentNode, XamlTypeExtensionNode,
+    XamlAstXmlTypeReference, XamlConstantNode, XamlMarkupExtensionNode, XamlPropertyAssignmentNode,
+    XamlTypeExtensionNode,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::transform::transformers::TypeReferenceResolver;
-use xamlx::transform::AstTransformationContext;
-use xamlx::type_system::{IXamlMethod, IXamlType, TypeSystemHelpers, XamlValue};
+use xamlx::transform::{AstTransformationContext, XamlTransformHelpers};
+use xamlx::type_system::{IXamlMethod, IXamlType, TypeSystemHelpers, XamlPseudoType, XamlValue};
 use xamlx::XamlNamespaces;
 
 use super::x_bind_path::{self, XBindArgument, XBindFunctionOwner, XBindPath};
 use super::{
-    BindingExpressionNode, FerroXamlIlWellKnownTypesExtensions, ParsedBindingPathNode, XamlBindingsTransformException,
+    BindingExpressionNode, FerroXamlIlBindingPathTransformer, FerroXamlIlWellKnownTypesExtensions, ParsedBindingPathNode,
+    XamlBindingsTransformException,
 };
 use crate::compiler_extensions::{
     TypeCastPathElementNode, XBindBindBack, XBindFunctionArgument, XBindFunctionPathElementNode, XBindLiteral,
@@ -63,6 +65,11 @@ const PATH: &str = "Path";
 const MODE: &str = "Mode";
 const UPDATE_SOURCE_TRIGGER: &str = "UpdateSourceTrigger";
 const BIND_BACK: &str = "BindBack";
+const CONVERTER: &str = "Converter";
+const CONVERTER_PARAMETER: &str = "ConverterParameter";
+const CONVERTER_LANGUAGE: &str = "ConverterLanguage";
+const FALLBACK_VALUE: &str = "FallbackValue";
+const TARGET_NULL_VALUE: &str = "TargetNullValue";
 
 /// Whether `type_` is `XBindExtension`.
 pub fn is_x_bind_extension(type_: &Rc<dyn IXamlType>) -> bool {
@@ -681,10 +688,190 @@ fn literal(argument: &XBindArgument, parameter: &Rc<dyn IXamlType>) -> Option<XB
     }
 }
 
+/// The assignment of the property the binding is assigned to.
+fn target_assignment(context: &AstTransformationContext) -> Option<Rc<XamlPropertyAssignmentNode>> {
+    context.parent_nodes().into_iter().find_map(|node| node.cast::<XamlPropertyAssignmentNode>())
+}
+
 /// The type of the property the binding is assigned to.
 fn target_type(context: &AstTransformationContext) -> Option<Rc<dyn IXamlType>> {
-    let assignment = context.parent_nodes().into_iter().find_map(|node| node.cast::<XamlPropertyAssignmentNode>())?;
-    assignment.property.getter().map(|getter| getter.return_type())
+    target_assignment(context)?.property.getter().map(|getter| getter.return_type())
+}
+
+/// The assignment of the property `property` of the binding.
+fn assignment<'a>(
+    assignments: &'a [Rc<XamlPropertyAssignmentNode>],
+    property: &str,
+) -> Option<&'a Rc<XamlPropertyAssignmentNode>> {
+    assignments.iter().find(|a| a.property.name() == property)
+}
+
+/// The text of a value node: a text, or the string constant it became.
+fn literal_text(value: &Rc<dyn IXamlAstValueNode>) -> Option<String> {
+    if let Some(text) = value.cast::<XamlAstTextNode>() {
+        return Some(text.text());
+    }
+    let constant = value.cast::<XamlConstantNode>()?;
+    match &constant.constant {
+        XamlValue::String(text) => Some(text.clone()),
+        _ => None,
+    }
+}
+
+/// The type of the resource a `{StaticResource key}` names, when the resource is declared in the
+/// `Resources` of an element of the document around the binding (the inference the binding path
+/// transformer makes for the `Source` of a compiled binding). `None` when it is not a static
+/// resource of the document: its type is known when the document is loaded.
+fn static_resource_type(
+    context: &AstTransformationContext,
+    extension: &XamlMarkupExtensionNode,
+) -> XamlResult<Option<Rc<dyn IXamlType>>> {
+    let value = extension.value();
+    if !value.type_().get_clr_type()?.is("FerroUI.Markup.Xaml.MarkupExtensions", "StaticResourceExtension") {
+        return Ok(None);
+    }
+    let key = value.cast::<XamlAstConstructableObjectNode>().and_then(|object| {
+        let arguments = object.arguments.borrow();
+        match arguments.as_slice() {
+            [key] => key.cast::<XamlAstTextNode>(),
+            _ => None,
+        }
+    });
+    let Some(key) = key else {
+        return Ok(None);
+    };
+    let key = key.text();
+    let types = context.try_get_ferro_types()?;
+    let styled_element = &types.styled_element;
+    for object in context.parent_nodes().into_iter().filter_map(|n| n.cast::<XamlAstConstructableObjectNode>()) {
+        if !styled_element.is_assignable_from(&*object.type_().get_clr_type()?) {
+            continue;
+        }
+        let resources = object
+            .children
+            .borrow()
+            .iter()
+            .find(|p| FerroXamlIlBindingPathTransformer::match_property(p, styled_element, "Resources"))
+            .cloned();
+        let Some(resources) = resources else {
+            continue;
+        };
+        if let Some(found) = FerroXamlIlBindingPathTransformer::find_resource_value(&resources, &key)? {
+            return FerroXamlIlBindingPathTransformer::get_resource_value_type(&found, None);
+        }
+    }
+    Ok(None)
+}
+
+/// The checks of `Converter`, `ConverterParameter` and `ConverterLanguage`
+/// (`BindAssignment.ValidateConverter`): a parameter or a language without a converter, a
+/// converter with a function, and a converter that is not an `IValueConverter` (a static
+/// resource of the document of another type).
+fn check_converter(
+    context: &AstTransformationContext,
+    assignments: &[Rc<XamlPropertyAssignmentNode>],
+    has_function: bool,
+    line_info: &dyn IXamlLineInfo,
+) -> XamlResult<()> {
+    let Some(converter) = assignment(assignments, CONVERTER) else {
+        for name in [CONVERTER_PARAMETER, CONVERTER_LANGUAGE] {
+            if assignment(assignments, name).is_some() {
+                return Err(error(format!("{name} cannot be specified without an actual converter"), line_info));
+            }
+        }
+        return Ok(());
+    };
+    if has_function {
+        return Err(error("Using a converter with function binding is not supported", line_info));
+    }
+    let Some(converter_type) = converter.property.getter().map(|getter| getter.return_type()) else {
+        return Ok(());
+    };
+    let value = converter.values.borrow().last().cloned();
+    let Some(value) = value else {
+        return Ok(());
+    };
+    let value_type = match value.cast::<XamlMarkupExtensionNode>() {
+        Some(extension) => match static_resource_type(context, &extension)? {
+            Some(resource_type) => resource_type,
+            None => return Ok(()),
+        },
+        None => value.type_().get_clr_type()?,
+    };
+    // A value of type object (a resource found when the document is loaded) is checked then.
+    if value_type.is("System", "Object") || XamlPseudoType::is_null(&*value_type) {
+        return Ok(());
+    }
+    if !converter_type.is_assignable_from(&*value_type) {
+        return Err(error(
+            format!(
+                "The Converter of an x:Bind must be an IValueConverter: '{}' is not one",
+                value_type.full_name()
+            ),
+            line_info,
+        ));
+    }
+    Ok(())
+}
+
+/// The checks of `FallbackValue` and `TargetNullValue`: `TargetNullValue` on a target that
+/// cannot be null (WinUI's `XamlXBindTargetNullValueOnNonNullableTypeError`, WMC1120), a value
+/// that is not a text or `{x:Null}` (`BindAssignment_InvalidFallbackValue`), and a text that
+/// cannot be converted to the type of the target (WinUI generates the conversion of the text,
+/// which the C# compiler rejects).
+fn check_substitute_values(
+    context: &AstTransformationContext,
+    assignments: &[Rc<XamlPropertyAssignmentNode>],
+    line_info: &dyn IXamlLineInfo,
+) -> XamlResult<()> {
+    let target = target_assignment(context);
+    let target_type = target.as_ref().and_then(|target| target.property.getter()).map(|getter| getter.return_type());
+    if let (Some(target), Some(target_type), Some(_)) = (&target, &target_type, assignment(assignments, TARGET_NULL_VALUE)) {
+        if target_type.is_value_type() && !target_type.is_nullable() {
+            return Err(error(
+                format!(
+                    "TargetNullValue cannot be applied on '{}' because its type '{}' is not nullable",
+                    target.property.name(),
+                    target_type.name()
+                ),
+                line_info,
+            ));
+        }
+    }
+    for name in [FALLBACK_VALUE, TARGET_NULL_VALUE] {
+        let Some(value_assignment) = assignment(assignments, name) else {
+            continue;
+        };
+        let value = value_assignment.values.borrow().last().cloned();
+        let Some(value) = value else {
+            continue;
+        };
+        if XamlPseudoType::is_null(&*value.type_().get_clr_type()?) {
+            continue;
+        }
+        let Some(text) = literal_text(&value) else {
+            return Err(error(format!("Only string and {{x:Null}} are supported for {name}"), line_info));
+        };
+        let Some(target_type) = &target_type else {
+            continue;
+        };
+        let string = context.configuration().well_known_types().string.clone();
+        if target_type.is_assignable_from(&*string) {
+            continue;
+        }
+        let node: Rc<dyn IXamlAstValueNode> = XamlAstTextNode::new(&**value_assignment, &text, true);
+        let converted = XamlTransformHelpers::try_get_correctly_typed_value(context, &node, target_type);
+        if !matches!(converted, Ok(Some(_))) {
+            return Err(error(
+                format!(
+                    "The {name} '{text}' of an x:Bind cannot be converted to '{}', the type of its target",
+                    target_type.full_name()
+                ),
+                line_info,
+            ));
+        }
+    }
+    Ok(())
 }
 
 /// The text of the assignment `property`: its text, or the string constant it became.
@@ -754,8 +941,9 @@ fn enum_member(
 }
 
 /// The checks of the binding after its path is resolved: the mode and the update trigger WinUI
-/// accepts (`BindAssignment.ValidateUpdateSourceTrigger`), the `BindBack` of a `TwoWay`
-/// function (`ValidateBindBackAssignment`), the return type of a function
+/// accepts (`BindAssignment.ValidateUpdateSourceTrigger`), the converter and the substitute
+/// values (step X3), the `BindBack` of a `TwoWay` function (`ValidateBindBackAssignment`),
+/// the return type of a function
 /// (`ValidatePathAssignment`), a `TwoWay` path that ends in a cast (`ValidateTypeCasting`) and
 /// one that ends in something it cannot write (`BindAssignment_TwoWaySourceNotWritable`).
 fn check_binding(
@@ -783,6 +971,9 @@ fn check_binding(
         Some(XamlIlBindingPathElementNode::XBindFunction(function)) => Some(function.clone()),
         _ => None,
     };
+    // Step X3: the converter, the fallback value and the target null value.
+    check_converter(resolver.context, assignments, function.is_some(), line_info)?;
+    check_substitute_values(resolver.context, assignments, line_info)?;
     let target = target_type(resolver.context);
     match (&function, two_way, text_value(assignments, BIND_BACK)?) {
         (Some(function), true, Some(text)) => {
