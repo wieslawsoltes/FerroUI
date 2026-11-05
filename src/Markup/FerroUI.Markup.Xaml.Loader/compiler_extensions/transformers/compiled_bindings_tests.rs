@@ -669,6 +669,7 @@ fn describe_parsed(node: &BindingExpressionNode) -> String {
             format!("LogicalAncestor({};{})", n.type_.name(), n.level)
         }
         BindingExpressionNode::TemplatedParent(n) => format!("TemplatedParent({})", n.type_.name()),
+        BindingExpressionNode::XBind(path) => format!("XBind({path})"),
     }
 }
 

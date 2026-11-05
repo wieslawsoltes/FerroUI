@@ -87,8 +87,21 @@ impl MeScannerTypeName {
         self.type_reference.xml_namespace()
     }
 
+    /// Whether the type is the type of a markup extension. The scanner only knows the types it
+    /// was given by the parser, which marks the type of every extension it reads.
     pub fn is_markup_extension(&self) -> bool {
-        false
+        self.type_reference.is_markup_extension.get()
+    }
+
+    /// Whether the type is `x:Bind` (the name `Bind` in the XAML language namespace) or the
+    /// markup extension it is mapped onto (`XBind` / `XBindExtension`).
+    pub fn is_x_bind(&self) -> bool {
+        let name = self.type_reference.name();
+        match name.as_str() {
+            "Bind" => self.type_reference.xml_namespace().as_deref() == Some(crate::XamlNamespaces::XAML2006),
+            "XBind" | "XBindExtension" => true,
+            _ => false,
+        }
     }
 }
 
@@ -189,20 +202,49 @@ impl Default for MeScannerBracketModeParseParameters {
     }
 }
 
-/// Custom bracket characters are not supported (markup extension types are resolved after the
-/// initial AST is parsed), so no instance of this type is ever created.
-pub struct MeScannerSpecialBracketCharacters;
+/// The bracket characters of a markup extension property (the `SpecialBracketCharacters` of
+/// System.Xaml): inside a pair of them a value is read as it is, separators included, so that
+/// `{x:Bind Format(Name, 'a, b'), Mode=OneWay}` keeps the function call in one value.
+///
+/// System.Xaml reads them from the `MarkupExtensionBracketCharacters` attribute of a property;
+/// markup extension types are resolved after the initial AST is parsed, so only the one
+/// property WinUI declares them for is known: the `Path` of `x:Bind`, with `()` and `[]`
+/// (`ProxyDirectUIXamlMember.LookupMarkupExtensionBracketCharacters` of WinUI's XAML compiler).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MeScannerSpecialBracketCharacters {
+    start_characters: Vec<char>,
+    end_characters: Vec<char>,
+}
 
 impl MeScannerSpecialBracketCharacters {
-    pub fn starts_escape_sequence(&self, _ch: char) -> Result<bool, MeScannerError> {
-        Err(XamlError::not_supported("Specified method is not supported.").into())
+    /// The opening and closing characters, in pairs.
+    pub fn new(pairs: &[(char, char)]) -> Self {
+        Self {
+            start_characters: pairs.iter().map(|(start, _)| *start).collect(),
+            end_characters: pairs.iter().map(|(_, end)| *end).collect(),
+        }
     }
 
-    pub fn ends_escape_sequence(&self, _ch: char) -> Result<bool, MeScannerError> {
-        Err(XamlError::not_supported("Specified method is not supported.").into())
+    /// The bracket characters of the property `property_name` of the markup extension
+    /// `extension` (`None` is its first positional parameter): `()` and `[]` for the path of
+    /// `x:Bind`, none for every other property.
+    pub fn for_property(extension: &MeScannerTypeName, property_name: Option<&str>) -> Option<Self> {
+        let is_path = matches!(property_name, None | Some("Path"));
+        (is_path && extension.is_x_bind()).then(|| Self::new(&[('(', ')'), ('[', ']')]))
     }
 
-    pub fn r#match(&self, _peek: char, _ch: char) -> Result<bool, MeScannerError> {
-        Err(XamlError::not_supported("Specified method is not supported.").into())
+    pub fn starts_escape_sequence(&self, ch: char) -> Result<bool, MeScannerError> {
+        Ok(self.start_characters.contains(&ch))
+    }
+
+    pub fn ends_escape_sequence(&self, ch: char) -> Result<bool, MeScannerError> {
+        Ok(self.end_characters.contains(&ch))
+    }
+
+    /// Whether `ch` closes the bracket `peek` opened.
+    pub fn r#match(&self, peek: char, ch: char) -> Result<bool, MeScannerError> {
+        let start = self.start_characters.iter().position(|c| *c == peek);
+        let end = self.end_characters.iter().position(|c| *c == ch);
+        Ok(start.is_some() && start == end)
     }
 }
