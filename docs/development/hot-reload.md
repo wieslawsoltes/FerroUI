@@ -64,6 +64,14 @@ separately.
   scopes. External interleaving/removal of owned children, items-host panels, root
   assignment edits without explicit ownership and unsupported handler/resource
   ownership require restart.
+- `{x:Bind}` (#525, X7, [x-bind.md](../porting/x-bind.md) section 3.13): a component or panel
+  reload of markup with x:Bind compiles the candidate against the preserved root as its
+  code-behind; the bindings of the document root belong to the preserved root, and its
+  `XBindings` are updated after the commit and again after a rollback, so `OneTime` values
+  reflect the new markup. A root that a document populates while it is live (a populate
+  override, a designer preview) is updated or initialized by the run-time loader
+  (`XBindings::update_populated`). An x:Bind of an event is an event of the document and needs
+  `with_owned_handlers`.
 - Component and panel adapters expose `with_owned_handlers` for routed XAML events.
   Call after initial population; generated markup and the runtime interpreter both
   record the exact subscriptions they install. Replacement delegates invoke the
