@@ -1,6 +1,5 @@
 use crate::data::BindingMode;
 use crate::{FerroObject, TypeInfo};
-use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -228,19 +227,113 @@ impl<T: Clone + 'static> PropertyMetadata for DirectPropertyMetadata<T> {
 /// queried type wins, falling back to the type-safe default metadata.
 pub(crate) struct MetadataTable<M> {
     default_metadata: Rc<M>,
-    inner: RefCell<TableInner<M>>,
+    inner: RefCell<MetadataEntries<M>>,
 }
 
-struct TableInner<M> {
-    /// Fast path while only the registration metadata exists.
-    single: Option<(&'static TypeInfo, Rc<M>)>,
-    metadata: Vec<(&'static TypeInfo, Rc<M>)>,
-    /// The metadata of every type it was asked for, by the address of the type.
-    ///
-    /// A hash map, as the reference's dictionary of the metadata of each type (`_metadataCache`
-    /// of the property); the port scanned a vector, which grows with every type a common property
-    /// (`DataContext`, `Background`) is read on (DEVIATIONS.md, corrected divergences).
-    cache: FxHashMap<usize, Rc<M>>,
+// The normal property has only its registration. Do not allocate the host
+// index or cache until a second host actually provides different metadata.
+// The cache of the metadata of every type it was asked for is a hash table by
+// the address of the type, as the reference's `_metadataCache` dictionary
+// (DEVIATIONS.md, corrected divergences); its hierarchy traversal is shared by
+// every metadata type and only the cached values stay typed.
+enum MetadataEntries<M> {
+    Single(Option<(&'static TypeInfo, Rc<M>)>),
+    Multiple(Box<MetadataOverrides<M>>),
+}
+
+struct MetadataOverrides<M> {
+    hosts: MetadataHosts,
+    values: Vec<Rc<M>>,
+}
+
+// Slots are stable until a registration changes. All metadata types share the
+// hierarchy lookup and its cache, while the values stay strongly typed.
+struct MetadataHosts {
+    owners: Vec<&'static TypeInfo>,
+    // Each key is a non-null, process-lifetime TypeInfo address. The cache grows
+    // by powers of two and stays at most half full so every probe terminates.
+    // Removing or adding an owner invalidates every inherited slot at once.
+    slots: Vec<(usize, usize)>,
+    occupied: usize,
+}
+
+impl MetadataHosts {
+    fn new(first: &'static TypeInfo, second: &'static TypeInfo) -> Self {
+        Self { owners: vec![first, second], slots: Vec::new(), occupied: 0 }
+    }
+
+    #[inline]
+    fn bucket(key: usize, capacity: usize) -> usize {
+        // Adjacent records have an odd stride after the shift. Fold higher
+        // address bits into the index for independently aligned type descriptors.
+        let hash = key >> std::mem::size_of::<TypeInfo>().trailing_zeros();
+        (hash ^ (hash >> 7)) & (capacity - 1)
+    }
+
+    #[inline]
+    fn resolve(&mut self, host: &'static TypeInfo) -> usize {
+        let key = host as *const TypeInfo as usize;
+        if !self.slots.is_empty() {
+            let bucket = Self::bucket(key, self.slots.len());
+            let (cached, slot) = self.slots[bucket];
+            if cached == key {
+                return slot;
+            }
+        }
+        self.resolve_other(host, key)
+    }
+
+    #[inline(never)]
+    fn resolve_other(&mut self, host: &'static TypeInfo, key: usize) -> usize {
+        if !self.slots.is_empty() {
+            let bucket = Self::find(&self.slots, key);
+            if self.slots[bucket].0 != 0 {
+                return self.slots[bucket].1;
+            }
+        }
+        if self.occupied == self.slots.len() / 2 {
+            let mut slots = vec![(0, 0); (self.slots.len() * 2).max(4)];
+            for &(cached, slot) in &self.slots {
+                if cached != 0 {
+                    let bucket = Self::find(&slots, cached);
+                    slots[bucket] = (cached, slot);
+                }
+            }
+            self.slots = slots;
+        }
+        let bucket = Self::find(&self.slots, key);
+        let slot = inherited_metadata_index(&self.owners, host).unwrap_or(usize::MAX);
+        self.slots[bucket] = (key, slot);
+        self.occupied += 1;
+        slot
+    }
+
+    #[inline]
+    fn find(slots: &[(usize, usize)], key: usize) -> usize {
+        let mut bucket = Self::bucket(key, slots.len());
+        while slots[bucket].0 != 0 && slots[bucket].0 != key {
+            bucket = (bucket + 1) & (slots.len() - 1);
+        }
+        bucket
+    }
+
+    fn invalidate(&mut self) {
+        self.slots.fill((0, 0));
+        self.occupied = 0;
+    }
+}
+
+fn host_index(hosts: &[&'static TypeInfo], host: &'static TypeInfo) -> Option<usize> {
+    hosts.iter().position(|owner| std::ptr::eq(*owner, host))
+}
+
+fn inherited_metadata_index(hosts: &[&'static TypeInfo], host: &'static TypeInfo) -> Option<usize> {
+    let mut current = Some(host);
+    while let Some(t) = current {
+        if let Some(index) = host_index(hosts, t) { return Some(index); }
+        current = t.base_type();
+    }
+    None
 }
 
 impl<M: PropertyMetadata> MetadataTable<M> {
@@ -250,24 +343,16 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         let default_metadata = M::generate_type_safe_metadata(&metadata);
         Self {
             default_metadata,
-            inner: RefCell::new(TableInner {
-                single: Some((host_type, metadata.clone())),
-                metadata: vec![(host_type, metadata)],
-                cache: FxHashMap::default(),
-            }),
+            inner: RefCell::new(MetadataEntries::Single(Some((host_type, metadata)))),
         }
     }
 
     /// A table for a property that shares its identity with `source` (added
     /// owner) and optionally carries metadata for the new owner.
     pub fn for_added_owner(source: &Self, owner_type: &'static TypeInfo, metadata: Option<M>) -> Self {
-        let mut entries = Vec::new();
-        if let Some(m) = metadata {
-            entries.push((owner_type, Rc::new(m)));
-        }
         Self {
             default_metadata: source.default_metadata.clone(),
-            inner: RefCell::new(TableInner { single: None, metadata: entries, cache: FxHashMap::default() }),
+            inner: RefCell::new(MetadataEntries::Single(metadata.map(|m| (owner_type, Rc::new(m))))),
         }
     }
 
@@ -278,48 +363,119 @@ impl<M: PropertyMetadata> MetadataTable<M> {
 
     pub fn get(&self, type_: &'static TypeInfo) -> Rc<M> {
         let mut inner = self.inner.borrow_mut();
-        if let Some((host, single)) = &inner.single {
-            if Rc::ptr_eq(single, &self.default_metadata) {
-                return self.default_metadata.clone();
+        let table = match &mut *inner {
+            MetadataEntries::Single(Some((host, value))) => {
+                return if Rc::ptr_eq(value, &self.default_metadata) || host.is_assignable_from(type_) {
+                    value.clone()
+                } else {
+                    self.default_metadata.clone()
+                };
             }
-            return if host.is_assignable_from(type_) { single.clone() } else { self.default_metadata.clone() };
-        }
-        let key = type_ as *const TypeInfo as usize;
-        if let Some(m) = inner.cache.get(&key) {
-            return m.clone();
-        }
-        let mut current = Some(type_);
-        let mut result = None;
-        while let Some(t) = current {
-            if let Some((_, m)) = inner.metadata.iter().find(|(mt, _)| std::ptr::eq(*mt, t)) {
-                result = Some(m.clone());
-                break;
-            }
-            current = t.base_type();
-        }
-        let result = result.unwrap_or_else(|| self.default_metadata.clone());
-        inner.cache.insert(key, result.clone());
-        result
+            MetadataEntries::Single(None) => return self.default_metadata.clone(),
+            MetadataEntries::Multiple(table) => table,
+        };
+        let slot = table.hosts.resolve(type_);
+        table.values.get(slot).unwrap_or(&self.default_metadata).clone()
     }
 
     pub fn override_metadata(&self, property_name: &str, type_: &'static TypeInfo, mut metadata: M) {
-        let already_set = self.inner.borrow().metadata.iter().any(|(t, _)| std::ptr::eq(*t, type_));
-        if already_set {
+        let exists = match &*self.inner.borrow() {
+            MetadataEntries::Single(existing) => existing.as_ref().is_some_and(|(t, _)| std::ptr::eq(*t, type_)),
+            MetadataEntries::Multiple(table) => host_index(&table.hosts.owners, type_).is_some(),
+        };
+        if exists {
             panic!("Metadata is already set for {property_name} on {type_}.");
         }
         let base = self.get(type_);
         metadata.merge(&base);
         metadata.freeze();
+        let value = Rc::new(metadata);
         let mut inner = self.inner.borrow_mut();
-        inner.metadata.push((type_, Rc::new(metadata)));
-        inner.cache.clear();
-        inner.single = None;
+        match &mut *inner {
+            MetadataEntries::Single(existing) => {
+                if let Some((host, original)) = existing.take() {
+                    *inner = MetadataEntries::Multiple(Box::new(MetadataOverrides {
+                        hosts: MetadataHosts::new(host, type_),
+                        values: vec![original, value],
+                    }));
+                } else {
+                    *existing = Some((type_, value));
+                }
+            }
+            MetadataEntries::Multiple(table) => {
+                table.hosts.owners.push(type_);
+                table.values.push(value);
+                table.hosts.invalidate();
+            }
+        }
     }
 
     pub fn unregister(&self, type_: &'static TypeInfo) {
         let mut inner = self.inner.borrow_mut();
-        inner.metadata.retain(|(t, _)| !std::ptr::eq(*t, type_));
-        inner.cache.remove(&(type_ as *const TypeInfo as usize));
-        inner.single = None;
+        match &mut *inner {
+            MetadataEntries::Single(existing) => {
+                if existing.as_ref().is_some_and(|(t, _)| std::ptr::eq(*t, type_)) {
+                    *existing = None;
+                }
+            }
+            MetadataEntries::Multiple(table) => {
+                if let Some(i) = host_index(&table.hosts.owners, type_) {
+                    table.hosts.owners.swap_remove(i);
+                    table.values.swap_remove(i);
+                    // Descendants may have cached the removed override.
+                    table.hosts.invalidate();
+                    if table.hosts.owners.len() == 1 {
+                        let metadata = table.values.pop().expect("one registration remains");
+                        *inner = MetadataEntries::Single(Some((table.hosts.owners[0], metadata)));
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod metadata_table_tests {
+    use super::*;
+
+    static ROOT: TypeInfo = TypeInfo::new("Root", None);
+    static CHILD: TypeInfo = TypeInfo::new("Child", Some(&ROOT));
+    static LEAF: TypeInfo = TypeInfo::new("Leaf", Some(&CHILD));
+    static SIBLING: TypeInfo = TypeInfo::new("Sibling", Some(&ROOT));
+
+    #[test]
+    fn colliding_cache_entries_follow_replaced_and_removed_registrations() {
+        static TYPES: [TypeInfo; 16] = [const { TypeInfo::new("Derived", Some(&CHILD)) }; 16];
+        let table = MetadataTable::new(&ROOT, StyledPropertyMetadata::new(Some(1)));
+        table.override_metadata("Number", &CHILD, StyledPropertyMetadata::new(Some(2)));
+        table.override_metadata("Number", &TYPES[0], StyledPropertyMetadata::new(Some(3)));
+        for _ in 0..2 {
+            for (i, host) in TYPES.iter().enumerate() {
+                assert_eq!(*table.get(host).default_value(), if i == 0 { 3 } else { 2 });
+            }
+        }
+        table.unregister(&CHILD);
+        for (i, host) in TYPES.iter().enumerate() {
+            assert_eq!(*table.get(host).default_value(), if i == 0 { 3 } else { 1 });
+        }
+        table.override_metadata("Number", &CHILD, StyledPropertyMetadata::new(Some(4)));
+        for (i, host) in TYPES.iter().enumerate().rev() {
+            assert_eq!(*table.get(host).default_value(), if i == 0 { 3 } else { 4 });
+        }
+    }
+
+    #[test]
+    fn unregister_invalidates_inherited_and_relocated_overrides() {
+        let table = MetadataTable::new(&ROOT, StyledPropertyMetadata::new(Some(1)));
+        table.override_metadata("Number", &CHILD, StyledPropertyMetadata::new(Some(2)));
+        table.override_metadata("Number", &SIBLING, StyledPropertyMetadata::new(Some(3)));
+        assert_eq!(*table.get(&LEAF).default_value(), 2);
+        assert_eq!(*table.get(&SIBLING).default_value(), 3);
+
+        table.unregister(&CHILD);
+        assert_eq!(*table.get(&LEAF).default_value(), 1);
+        assert_eq!(*table.get(&SIBLING).default_value(), 3);
+        table.override_metadata("Number", &CHILD, StyledPropertyMetadata::new(Some(4)));
+        assert_eq!(*table.get(&LEAF).default_value(), 4);
     }
 }
