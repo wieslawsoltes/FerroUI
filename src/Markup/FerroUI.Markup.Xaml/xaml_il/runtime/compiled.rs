@@ -27,7 +27,7 @@ use ferroui_base::data::core::{
 use ferroui_base::data::core::plugins::PropertyAccessorFactory;
 use ferroui_base::data::{
     BindingBase, BindingError, BindingPriority, CompiledBindingPath, CompiledBindingPathBuilder, PathBindBackInvoke,
-    PathFunctionArgument, PathFunctionInvoke,
+    PathEventHandlerInvoke, PathFunctionArgument, PathFunctionInvoke,
 };
 use ferroui_base::metadata::{MarkupInvoke, MarkupProperty, MarkupType};
 use ferroui_base::AnyValue;
@@ -1708,6 +1708,105 @@ pub fn path_static_bind_back(
             .map_err(|error| BindingError::message(format!("{declaring_name}.{name}: {error}")))
     });
     builder.bind_back(None, value_type, invoke)
+}
+
+/// The element of a compiled binding path for the method an event binding of `{x:Bind}` calls
+/// (docs/porting/x-bind.md, step X4): the instance method `name` that the metadata `declaring`
+/// declares, called on the owner the path before the element produces (read when the event is
+/// raised) with the arguments of the event, as the run-time loader builds it. `method` calls the
+/// typed function of the method with the owner, as the Rust type instance members take
+/// (`This`), and reads the arguments it declares from [`DelegateArguments`] (a method without
+/// parameters reads none). An owner or an argument that is not of the type the method declares,
+/// and a failure of the method, are the failure of the call.
+pub fn path_event_handler<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let owner = declaring.full_name();
+    let invoke: PathEventHandlerInvoke = Rc::new(move |this: &BoxedValue, arguments: &[MarkupValue]| {
+        invoke_command_method::<This>(&method, this, arguments)
+            .map(|_| ())
+            .map_err(|error| BindingError::message(format!("{owner}.{name}: {error}")))
+    });
+    builder.event_handler(name, invoke)
+}
+
+/// [`path_event_handler`] of a static method (`Click="{x:Bind local:Handlers.OnClick}"`):
+/// `method` reads the arguments only; the method has no owner.
+pub fn path_static_event_handler(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    method: impl Fn(&mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let owner = declaring.full_name();
+    let invoke: PathEventHandlerInvoke = Rc::new(move |_root: &BoxedValue, arguments: &[MarkupValue]| {
+        method(&mut DelegateArguments { arguments, next: 0 })
+            .map(|_| ())
+            .map_err(|error| BindingError::message(format!("{owner}.{name}: {error}")))
+    });
+    builder.event_handler(name, invoke)
+}
+
+/// The event binding of `{x:Bind}` on a routed event (`Click="{x:Bind OnClick}"`, step X4):
+/// `binding` is the value the extension provided (`XBinding`), which subscribes its handler to
+/// `event` of `target` while the bindings of its root are initialized. What the run-time loader
+/// does for the setter of an x:Bind event; a failure is its load error at `line`, `position`.
+pub fn x_bind_routed_event<Target, EventArgs: ?Sized, V: PartialEq + 'static>(
+    target: &Ref<Target>,
+    event: &ferroui_base::interactivity::RoutedEvent<EventArgs>,
+    binding: V,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError>
+where
+    Target: ferroui_base::ObjectType + ferroui_base::Upcast<ferroui_base::interactivity::Interactive>,
+{
+    let binding = x_bind_binding(binding, line, position)?;
+    let target = target.upcast_ref::<ferroui_base::interactivity::Interactive>();
+    invoked(binding.bind_routed_event(target, &event.as_routed_event()), line, position)
+}
+
+/// The event binding of `{x:Bind}` on an event that is not a routed event, which metadata
+/// declares with its subscription (`events:`): the event `event` the metadata `declaring`
+/// declares, on `target` (step X4). As [`x_bind_routed_event`].
+pub fn x_bind_event<V: PartialEq + 'static>(
+    declaring: &'static MarkupType,
+    event: &str,
+    target: MarkupValue,
+    binding: V,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    let binding = x_bind_binding(binding, line, position)?;
+    let declared = declaring.find_event(event).ok_or_else(|| {
+        at(
+            TARGET_INVOCATION_EXCEPTION,
+            format!("Method {}.add_{event} has no invoker", declaring.full_name()),
+            line,
+            position,
+        )
+    })?;
+    invoked(binding.bind_markup_event(declared, target), line, position)
+}
+
+/// The `XBinding` an x:Bind extension provided, from the value generated code holds.
+fn x_bind_binding<V: PartialEq + 'static>(
+    binding: V,
+    line: i32,
+    position: i32,
+) -> Result<Rc<crate::markup_extensions::XBinding>, XamlLoadError> {
+    let value = to_value(binding);
+    from_markup_value::<Rc<crate::markup_extensions::XBinding>>(&value).ok_or_else(|| {
+        at(
+            "InvalidCastException",
+            "The value of an x:Bind event is not the binding of an x:Bind",
+            line,
+            position,
+        )
+    })
 }
 
 /// `target.AddHandler(event, handler, RoutingStrategies.Direct | RoutingStrategies.Bubble, false)`:

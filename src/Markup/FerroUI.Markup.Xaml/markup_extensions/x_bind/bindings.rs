@@ -1,6 +1,7 @@
 //! The per-root lifecycle of `{x:Bind}`: the `Bindings` object WinUI's compiler generates for a
 //! page or a template instance (NOTICE.md of the crate: `CSharpPagePass2.tt`).
 
+use super::event::XBindEvent;
 use super::root_node::XBindRootNode;
 use crate::XamlLoadError;
 use ferroui_base::controls::{NameScope, NameScopeRef};
@@ -71,6 +72,10 @@ impl std::error::Error for XBindErrors {}
 ///   listen to and leaves the targets as they are; the bindings are uninitialized again, and the
 ///   next attach (or `initialize`) reads them.
 ///
+/// The event bindings of the root (`Click="{x:Bind OnClick}"`) subscribe their handlers when the
+/// bindings are initialized or updated and release them when the bindings stop tracking; a
+/// handler reads the path of its method when the event is raised.
+///
 /// The root of a template instance (a `DataTemplate` with `x:DataType`) is updated whenever its
 /// data context changes to an item, as the generated `DataContextChangedHandler`: a recycled
 /// container reads its new item, `OneTime` bindings included. A null data context reads nothing.
@@ -84,6 +89,8 @@ pub struct XBindings {
     root_value: WeakValue,
     scope: XBindScope,
     nodes: RefCell<Vec<Weak<XBindRootNode>>>,
+    /// The event bindings, held here: the handler on the target holds its binding weakly.
+    events: RefCell<Vec<Rc<XBindEvent>>>,
     initialized: Cell<bool>,
     updating: Cell<bool>,
     /// The attach to a visual tree (a document root) or the data context changes (a template
@@ -147,6 +154,7 @@ impl XBindings {
             root_value: WeakValue::new(root),
             scope,
             nodes: RefCell::new(Vec::new()),
+            events: RefCell::new(Vec::new()),
             initialized: Cell::new(false),
             updating: Cell::new(false),
             hook: RefCell::new(None),
@@ -179,9 +187,19 @@ impl XBindings {
         matches!(self.scope, XBindScope::Template(_))
     }
 
-    /// The number of live bindings of the root.
+    /// The number of live property bindings of the root.
     pub fn binding_count(&self) -> usize {
         self.snapshot().len()
+    }
+
+    /// The number of event bindings of the root.
+    pub fn event_binding_count(&self) -> usize {
+        self.events.borrow().len()
+    }
+
+    /// The number of event bindings whose handler is subscribed to its event.
+    pub fn subscribed_event_count(&self) -> usize {
+        self.events_snapshot().iter().filter(|event| event.is_subscribed()).count()
     }
 
     /// `Initialize`: reads the bindings if they are not initialized.
@@ -217,6 +235,12 @@ impl XBindings {
             }
             node.refresh();
         }
+        for event in self.events_snapshot() {
+            if !self.is_initialized() {
+                break;
+            }
+            event.start();
+        }
         self.result()
     }
 
@@ -227,12 +251,18 @@ impl XBindings {
         for node in self.snapshot() {
             node.pause();
         }
+        for event in self.events_snapshot() {
+            event.stop();
+        }
     }
 
     /// The current failures, including those of a source change of a `OneWay` or `TwoWay`
     /// binding. Reading them evaluates nothing.
     pub fn diagnostics(&self) -> Vec<XBindDiagnostic> {
-        self.snapshot().into_iter().filter_map(|node| node.diagnostic()).collect()
+        let mut diagnostics: Vec<XBindDiagnostic> =
+            self.snapshot().into_iter().filter_map(|node| node.diagnostic()).collect();
+        diagnostics.extend(self.events_snapshot().into_iter().filter_map(|event| event.diagnostic()));
+        diagnostics
     }
 
     fn result(&self) -> Result<(), XBindErrors> {
@@ -252,6 +282,19 @@ impl XBindings {
 
     fn snapshot(&self) -> Vec<Rc<XBindRootNode>> {
         self.nodes.borrow().iter().filter_map(Weak::upgrade).collect()
+    }
+
+    /// Adds an event binding; it subscribes its handler at once when the bindings are
+    /// initialized (a document built into a live root).
+    pub(super) fn register_event(&self, event: Rc<XBindEvent>) {
+        self.events.borrow_mut().push(event.clone());
+        if self.is_initialized() {
+            event.start();
+        }
+    }
+
+    fn events_snapshot(&self) -> Vec<Rc<XBindEvent>> {
+        self.events.borrow().clone()
     }
 
     /// What the bindings read: the root of the document, or the item of a template instance

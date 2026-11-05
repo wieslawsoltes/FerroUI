@@ -1,5 +1,6 @@
 //! The binding `{x:Bind}` gives a target.
 
+use super::event::{SubscribeEvent, XBindEvent};
 use super::root_node::XBindRootNode;
 use super::XBindings;
 use crate::XamlLoadError;
@@ -7,6 +8,10 @@ use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::expression_nodes::ExpressionNode;
 use ferroui_base::data::core::{BindingExpression, BindingExpressionOptions, TargetTypeConverter};
 use ferroui_base::data::{BindingBase, BindingExpressionBase, BindingMode, CompiledBindingPath, UpdateSourceTrigger};
+use ferroui_base::data::core::WeakValue;
+use ferroui_base::interactivity::{Interactive, RoutedEvent};
+use ferroui_base::metadata::{MarkupEvent, MarkupValue};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{ferro_markup_type, BoxedValue, FerroObject, FerroProperty, Ref, UnsetValueType};
 use ferroui_controls::TextBox;
@@ -48,6 +53,12 @@ impl XBindValueOptions {
 /// `TargetNullValueExpression`): the value of the path goes through `Convert` (and `ConvertBack`
 /// when a `TwoWay` binding writes the target back), a path that cannot be read gives the target
 /// the fallback value, a null value the target null value.
+///
+/// On an event (step X4) the path ends with the method the event calls; the compiler gives the
+/// binding to [`bind_routed_event`](Self::bind_routed_event) or
+/// [`bind_markup_event`](Self::bind_markup_event) instead of binding a property. The handler is
+/// subscribed while the bindings of the root are initialized, and it calls the method on the
+/// value of the path before it, read when the event is raised.
 pub struct XBinding {
     bindings: Rc<XBindings>,
     path: Option<CompiledBindingPath>,
@@ -84,6 +95,61 @@ impl XBinding {
         self.update_source_trigger
     }
 
+    /// The event binding of the path, registered with the bindings of its root: `subscribe`
+    /// attaches its handler to the event.
+    fn bind_event(&self, event: String, subscribe: SubscribeEvent) -> Result<(), XamlLoadError> {
+        let path = self.path.clone().ok_or_else(|| {
+            XamlLoadError::with_message(format!("x:Bind of the event '{event}' needs the path of a method"))
+        })?;
+        let handler = path.event_handler().ok_or_else(|| {
+            XamlLoadError::with_message(format!(
+                "x:Bind of the event '{event}': the path '{path}' does not end with the method the event calls"
+            ))
+        })?;
+        let binding = XBindEvent::new(&self.bindings, event, path, handler, subscribe);
+        self.bindings.register_event(binding);
+        Ok(())
+    }
+
+    /// `target.Event += handler` of a routed event (`Click="{x:Bind OnClick}"`): the handler is
+    /// added with the routes of a handler markup adds (direct and bubble, unhandled events) when
+    /// the bindings of the root are initialized, and removed when they stop tracking. The target
+    /// is held weakly.
+    pub fn bind_routed_event(&self, target: &Ref<Interactive>, event: &RoutedEvent) -> Result<(), XamlLoadError> {
+        let target = target.downgrade();
+        let routed_event = event.clone();
+        let subscribe: SubscribeEvent = Box::new(move |handler| {
+            let target = target.upgrade().ok_or_else(|| "the target of the event has been released".to_string())?;
+            let token = target.add_handler_untyped(&routed_event, handler, Interactive::DEFAULT_ROUTES, false);
+            let weak = target.downgrade();
+            let routed_event = routed_event.clone();
+            Ok(Some(Subscription::new(Disposable::create(move || {
+                if let Some(target) = weak.upgrade() {
+                    target.remove_handler(&routed_event, token);
+                }
+            }))))
+        });
+        self.bind_event(event.name().to_string(), subscribe)
+    }
+
+    /// `target.Event += handler` of an event that is not a routed event, which metadata
+    /// declares with its subscription (`events:`): subscribed when the bindings of the root
+    /// are initialized; the subscription the event returns is released when they stop tracking
+    /// (an event without one keeps the handler, which then does nothing). The target is held
+    /// weakly.
+    pub fn bind_markup_event(&self, event: &'static MarkupEvent, target: MarkupValue) -> Result<(), XamlLoadError> {
+        let target = target
+            .as_ref()
+            .map(WeakValue::new)
+            .ok_or_else(|| XamlLoadError::with_message(format!("x:Bind of the event '{}': the target is null", event.name)))?;
+        let subscribe: SubscribeEvent = Box::new(move |handler| {
+            let target = target.upgrade().ok_or_else(|| "the target of the event has been released".to_string())?;
+            let subscription = event.subscribe(Some(target), handler).map_err(|error| error.to_string())?;
+            Ok(subscription.map(Subscription::new))
+        });
+        self.bind_event(event.name.to_string(), subscribe)
+    }
+
     /// The update trigger of a `TwoWay` binding to `target_property` of `target`: `Default` is
     /// `LostFocus` for `TextBox.Text` and `PropertyChanged` for every other property
     /// (`BindAssignment.NeedsLostFocusForTwoWay` of WinUI's compiler).
@@ -109,7 +175,7 @@ impl XBinding {
     ) -> Result<Rc<BindingExpression>, XamlLoadError> {
         let target_property = target_property.ok_or_else(|| {
             XamlLoadError::with_message(
-                "x:Bind needs a registered target property; a binding of an event comes with step X4 (docs/porting/x-bind.md)",
+                "x:Bind needs a registered target property or an event",
             )
         })?;
         let path_text = self.path.as_ref().map(ToString::to_string).unwrap_or_default();

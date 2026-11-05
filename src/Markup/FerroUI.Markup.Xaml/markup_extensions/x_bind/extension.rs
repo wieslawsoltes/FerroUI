@@ -39,6 +39,12 @@ use std::rc::Rc;
 /// [`target_null_value`](Self::target_null_value) stand for a path that cannot be read (a null
 /// in the middle of it, a failure) and for a null value (step X3).
 ///
+/// On an event (`Click="{x:Bind OnClick}"`, `Click="{x:Bind Model.OnClick}"`,
+/// `Click="{x:Bind local:Handlers.OnClick}"`) the path ends with the method the event calls,
+/// which the compiler resolves into the event handler element of the path; the binding the
+/// extension provides subscribes the handler while the bindings of the root are initialized
+/// (step X4, [`XBinding::bind_routed_event`]).
+///
 /// The default mode is `OneTime`, as WinUI's. Providing the value creates an [`XBinding`] for
 /// the target and registers it with the [`XBindings`] of its root, which reads it when it is
 /// initialized (on `Loading`, see [`XBindings`]) and on every `Update`.
