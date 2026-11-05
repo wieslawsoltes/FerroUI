@@ -32,7 +32,7 @@ use std::sync::{OnceLock, RwLock};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupAssembly};
 use ferroui_base::platform::IAssetLoader;
-use ferroui_base::utilities::{Uri, UriRef};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions, TypeInfo};
 use ferroui_markup_xaml::{
     IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError,
@@ -263,9 +263,9 @@ impl FerroRuntimeXamlLoader {
         })?;
         // The document of a class is found wherever the class is created, as compiled
         // markup is: without an asset loader service the registered assets are read
-        // directly. The asset loader takes the port `Uri` until U3 (C5 of #423).
+        // directly.
         let assets = asset_loader();
-        let (mut stream, assembly) = assets.open_and_get_assembly(&Uri::from(uri.clone()), None).map_err(|e| {
+        let (mut stream, assembly) = assets.open_and_get_assembly(&UriRef::from(uri.clone()), None).map_err(|e| {
             XamlLoadError::with_inner(format!("Could not open the XAML document {uri} of {type_name}: {e}"), e)
         })?;
         let mut text = String::new();
@@ -391,8 +391,7 @@ fn collect_included_documents(
         let text = match overlay {
             Some(text) => text,
             None => {
-                // The asset loader takes the port `Uri` until U3 (C5 of #423).
-                let Ok(mut stream) = assets.open(&Uri::from(included.clone()), None) else { continue };
+                let Ok(mut stream) = assets.open(&UriRef::from(included.clone()), None) else { continue };
                 let mut text = String::new();
                 if stream.read_to_string(&mut text).is_err() { continue; }
                 text

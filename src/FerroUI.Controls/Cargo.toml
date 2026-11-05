@@ -31,6 +31,8 @@ ferroui-remote-protocol.workspace = true
 bitflags.workspace = true
 # The legacy code pages of RTF text, with the feature `rtf-codepages`.
 encoding_rs = { workspace = true, optional = true }
+# `url::Url`, the font source of `AppBuilder::with_system_font_source` (C5 of #423).
+url.workspace = true
 
 [features]
 # Test doubles (mock windowing platform, unit-test application) for the tests

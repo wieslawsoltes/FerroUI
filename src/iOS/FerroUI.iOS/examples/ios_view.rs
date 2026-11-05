@@ -651,7 +651,6 @@ mod stage2 {
     use ferroui_base::platform::storage::ILauncher;
     use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformSettings, PlatformColorValues, PlatformThemeVariant};
     use ferroui_base::reactive::IDisposable;
-    use ferroui_base::utilities::Uri;
     use ferroui_base::{FerroLocator, LocatorExtensions};
     use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
     use ferroui_base::input::{KeyModifiers, NavigationMethod};
@@ -1128,9 +1127,10 @@ mod stage2 {
                 // A bookmark, and the file again by it and by its path.
                 let bookmark = poll_once(&mut file.save_bookmark_async()).flatten().ok_or(step("save_bookmark"))?;
                 let bookmarked = poll_once(&mut provider.open_file_bookmark_async(&bookmark)).flatten().ok_or(step("open bookmark"))?;
+                let file_url = file.path().as_url().cloned().ok_or(step("the URL of the file"))?;
                 let by_path =
-                    poll_once(&mut provider.try_get_file_from_path_async(&file.path())).flatten().ok_or(step("file from path"))?;
-                let not_a_folder = poll_once(&mut provider.try_get_folder_from_path_async(&file.path())).flatten().is_none();
+                    poll_once(&mut provider.try_get_file_from_path_async(&file_url)).flatten().ok_or(step("file from path"))?;
+                let not_a_folder = poll_once(&mut provider.try_get_folder_from_path_async(&file_url)).flatten().is_none();
                 if bookmarked.name() != file.name() || by_path.name() != file.name() || !not_a_folder {
                     return Err(format!("the bookmark gave {:?}, the path {:?}", bookmarked.name(), by_path.name()));
                 }
@@ -1258,7 +1258,7 @@ mod stage2 {
             let log = seen.clone();
             let subscription = lifetime.activated(Rc::new(move |args| {
                 let detail = match (args.as_protocol_activated(), args.as_file_activated()) {
-                    (Some(protocol), _) => protocol.uri().absolute_uri().to_string(),
+                    (Some(protocol), _) => protocol.uri().to_string(),
                     (_, Some(file)) => file.files().iter().map(|file| file.name()).collect::<Vec<_>>().join(", "),
                     _ => String::new(),
                 };
@@ -1349,7 +1349,7 @@ mod stage2 {
             // launched, and the answer is there at once.
             let launcher = provider.and_then(|provider| provider.try_get::<dyn ILauncher>());
             let launched = launcher.as_ref().and_then(|launcher| {
-                let uri = Uri::absolute("ferroui-no-such-scheme://nothing").ok()?;
+                let uri = url::Url::parse("ferroui-no-such-scheme://nothing").ok()?;
                 poll_once(&mut launcher.launch_uri_async(&uri))
             });
             checks.push((

@@ -1478,7 +1478,8 @@ mod imp {
                 let mut win_ui_items = Vec::new();
                 for ferro_file in ferro_files {
                     let uri = ferro_file.path();
-                    let path = if uri.is_absolute_uri() && uri.scheme() == "file" { uri.local_path() } else { String::new() };
+                    let path = ferroui_base::platform::storage::file_io::StorageProviderHelpers::try_get_path_from_file_uri(uri.as_url())
+                        .unwrap_or_default();
                     if path.is_empty() {
                         continue;
                     }

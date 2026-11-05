@@ -1,80 +1,71 @@
 use crate::platform::ASSET_SCHEME;
-use crate::utilities::{FormatError, Uri};
+use crate::utilities::{FormatError, UriRef};
 
-/// Helpers for the URIs that identify assets.
+/// Helpers for the URIs that identify assets: absolute ones are [`url::Url`],
+/// references that may be relative [`UriRef`] (C5 of #423).
 pub struct UriExtensions;
 
 impl UriExtensions {
-    /// Whether the URI is an absolute embedded-resource URI.
-    pub fn is_absolute_resm(uri: &Uri) -> bool {
-        uri.is_absolute_uri() && Self::is_resm(uri)
+    /// Whether the reference is an absolute embedded-resource URL.
+    pub fn is_absolute_resm(uri: &UriRef) -> bool {
+        uri.as_url().is_some_and(Self::is_resm)
     }
 
-    /// Whether the URI has the embedded-resource scheme. Panics for a
-    /// relative URI.
-    pub fn is_resm(uri: &Uri) -> bool {
+    /// Whether the URL has the embedded-resource scheme.
+    pub fn is_resm(uri: &url::Url) -> bool {
         uri.scheme() == "resm"
     }
 
-    /// Whether the URI has the asset scheme ([`ASSET_SCHEME`]). Panics for a
-    /// relative URI.
-    pub fn is_asset(uri: &Uri) -> bool {
+    /// Whether the URL has the asset scheme ([`ASSET_SCHEME`]).
+    pub fn is_asset(uri: &url::Url) -> bool {
         uri.scheme() == ASSET_SCHEME
     }
 
-    /// Whether the URI names a font collection (`fonts:` scheme). Panics for
-    /// a relative URI.
-    pub fn is_font_collection(uri: &Uri) -> bool {
+    /// Whether the URL names a font collection (`fonts:` scheme).
+    pub fn is_font_collection(uri: &url::Url) -> bool {
         uri.scheme() == crate::media::FontManager::FONT_COLLECTION_SCHEME
     }
 
-    /// Makes a relative URI absolute using `base_uri`; absolute URIs are
-    /// returned unchanged. Fails when the URI is relative and `base_uri` is
-    /// missing or relative.
-    pub fn ensure_absolute(uri: &Uri, base_uri: Option<&Uri>) -> Result<Uri, FormatError> {
-        if uri.is_absolute_uri() {
-            return Ok(uri.clone());
+    /// Makes a relative reference absolute using `base_uri`, with
+    /// [`UriRef::resolve`]; an absolute reference is its URL. Fails when the
+    /// reference is relative and `base_uri` is missing, or when the reference
+    /// does not resolve to a URL.
+    pub fn ensure_absolute(uri: &UriRef, base_uri: Option<&url::Url>) -> Result<url::Url, FormatError> {
+        if let UriRef::Absolute(url) = uri {
+            return Ok(url.clone());
         }
         let Some(base_uri) = base_uri else {
             return Err(FormatError::from_string(format!("Relative uri {uri} without base url")));
         };
-        if !base_uri.is_absolute_uri() {
-            return Err(FormatError::from_string(format!("Base uri {base_uri} is relative")));
-        }
-        Ok(Uri::combine(base_uri, uri))
+        uri.resolve(base_uri)
+            .map_err(|error| FormatError::from_string(format!("Relative uri {uri} does not resolve against {base_uri}: {error}")))
     }
 
-    /// The authority (host) of an absolute URI, or an empty string when it
-    /// has none. Panics for a relative URI.
-    pub fn authority(uri: &Uri) -> &str {
-        let text = uri.absolute_uri();
-        let rest = &text[uri.scheme().len() + 1..];
-        match rest.strip_prefix("//") {
-            Some(stripped) => &stripped[..stripped.find(['/', '?', '#']).unwrap_or(stripped.len())],
-            None => "",
-        }
+    /// The authority (host) of a URL, or an empty string when it has none.
+    pub fn authority(uri: &url::Url) -> &str {
+        uri.authority()
     }
 
-    /// The unescaped path of an absolute URI.
-    pub fn get_unescape_absolute_path(uri: &Uri) -> String {
-        Self::unescape_data_string(uri.absolute_path())
+    /// The unescaped path of a URL.
+    pub fn get_unescape_absolute_path(uri: &url::Url) -> String {
+        Self::unescape_data_string(uri.path())
     }
 
-    /// The unescaped text of an absolute URI.
-    pub fn get_unescape_absolute_uri(uri: &Uri) -> String {
-        Self::unescape_data_string(uri.absolute_uri())
+    /// The unescaped text of a URL.
+    pub fn get_unescape_absolute_uri(uri: &url::Url) -> String {
+        Self::unescape_data_string(uri.as_str())
     }
 
-    /// The value of the `assembly` parameter of the query of an absolute
-    /// URI, or an empty string.
-    pub fn get_assembly_name_from_query(uri: &Uri) -> String {
+    /// The value of the `assembly` parameter of the query of a URL, or an
+    /// empty string.
+    pub fn get_assembly_name_from_query(uri: &url::Url) -> String {
         const ASSEMBLY: &[u8] = b"assembly";
 
-        let query = Self::unescape_data_string(uri.query());
+        let query = Self::unescape_data_string(uri.query().unwrap_or_default());
         let query = query.as_bytes();
 
-        // Skip the '?'
-        let mut current_index = 1;
+        // The query of a URL has no leading '?'.
+        let mut current_index = 0;
         while current_index < query.len() {
             let mut is_find = false;
             let mut i = 0;
@@ -178,10 +169,13 @@ impl UriExtensions {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utilities::UriKind;
 
-    fn absolute(s: &str) -> Uri {
-        Uri::absolute(s).unwrap()
+    fn absolute(s: &str) -> url::Url {
+        UriRef::parse_absolute(s).unwrap()
+    }
+
+    fn reference(s: &str) -> UriRef {
+        UriRef::parse(s).unwrap()
     }
 
     #[test]
@@ -210,12 +204,11 @@ mod tests {
         let asset = absolute(&format!("{ASSET_SCHEME}://Lib/Assets/a.png"));
         assert!(UriExtensions::is_asset(&asset));
         assert!(!UriExtensions::is_resm(&asset));
-        assert!(!UriExtensions::is_absolute_resm(&asset));
+        assert!(!UriExtensions::is_absolute_resm(&UriRef::from(asset)));
         let resm = absolute("resm:Lib.Assets.a.png?assembly=Lib");
-        assert!(UriExtensions::is_absolute_resm(&resm));
+        assert!(UriExtensions::is_absolute_resm(&UriRef::from(resm.clone())));
         assert!(!UriExtensions::is_asset(&resm));
-        let relative = Uri::new("Assets/a.png", UriKind::Relative).unwrap();
-        assert!(!UriExtensions::is_absolute_resm(&relative));
+        assert!(!UriExtensions::is_absolute_resm(&reference("Assets/a.png")));
     }
 
     #[test]
@@ -233,12 +226,11 @@ mod tests {
     #[test]
     fn ensure_absolute() {
         let base = absolute(&format!("{ASSET_SCHEME}://lib/Views/Main.xaml"));
-        let relative = Uri::new("../Assets/a.png", UriKind::Relative).unwrap();
+        let relative = reference("../Assets/a.png");
         let result = UriExtensions::ensure_absolute(&relative, Some(&base)).unwrap();
-        assert_eq!(format!("{ASSET_SCHEME}://lib/Assets/a.png"), result.absolute_uri());
+        assert_eq!(format!("{ASSET_SCHEME}://lib/Assets/a.png"), result.as_str());
         assert!(UriExtensions::ensure_absolute(&relative, None).is_err());
-        assert!(UriExtensions::ensure_absolute(&relative, Some(&relative)).is_err());
-        assert_eq!(base, UriExtensions::ensure_absolute(&base, None).unwrap());
+        assert_eq!(base, UriExtensions::ensure_absolute(&UriRef::from(base.clone()), None).unwrap());
     }
 
     #[test]

@@ -202,7 +202,7 @@ mod imp {
         IStorageItem, StorageItemProperties,
     };
     use ferroui_base::reactive::IDisposable;
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use std::any::Any;
     use std::cell::RefCell;
     use std::fmt::Display;
@@ -514,15 +514,18 @@ mod imp {
                 })
         }
 
-        /// The URI of the item (`new Uri(Uri.ToString())`).
+        /// The URI of the item (`new Uri(Uri.ToString())`): the URL of the
+        /// text of the `android.net.Uri`.
         ///
         /// # Panics
-        /// Panics when the URI is not absolute (the reference throws
+        /// Panics when the text is not a URL (the reference throws
         /// `UriFormatException`).
-        fn path(&self) -> Uri {
+        fn path(&self) -> UriRef {
             let text = uri_to_string(&self.uri());
-            Uri::try_create(&text, UriKind::Absolute)
-                .unwrap_or_else(|| panic!("Invalid URI: The format of the URI could not be determined: {text}"))
+            match url::Url::parse(&text) {
+                Ok(url) => UriRef::Absolute(url),
+                Err(error) => panic!("Invalid URI: The format of the URI could not be determined: {text} ({error})"),
+            }
         }
 
         fn can_bookmark(&self) -> bool {
@@ -724,7 +727,7 @@ mod imp {
                     $type::name(self)
                 }
 
-                fn path(&self) -> Uri {
+                fn path(&self) -> UriRef {
                     self.base.path()
                 }
 

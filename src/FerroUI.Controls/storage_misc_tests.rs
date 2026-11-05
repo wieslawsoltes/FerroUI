@@ -2,7 +2,7 @@
 //! for these members (the helper tests of upstream are ported next to the
 //! helpers in the base crate), so none of these is a port.
 
-use crate::application_lifetimes::{ActivatedEventArgs, ActivationKind, FileActivatedEventArgs};
+use crate::application_lifetimes::{ActivatedEventArgs, ActivationKind, FileActivatedEventArgs, ProtocolActivatedEventArgs};
 use crate::border_visual::ServerBorderVisual;
 use crate::diagnostics::ToolTipDiagnostics;
 use crate::platform::{
@@ -22,12 +22,13 @@ use ferroui_base::platform::storage::{
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::server::ServerCompositionVisual;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, CornerRadius, FerroLocator, Rect, Ref, Size};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::task::{Context, Poll, Waker};
+use url::Url;
 
 fn ready<T>(mut future: LocalBoxFuture<T>) -> T {
     let mut cx = Context::from_waker(Waker::noop());
@@ -113,14 +114,14 @@ impl IStorageProvider for TestStorageProvider {
 
     fn try_get_file_from_path_async(
         &self,
-        file_path: &Uri,
+        file_path: &Url,
     ) -> LocalBoxFuture<Option<Rc<dyn ferroui_base::platform::storage::IStorageFile>>> {
         self.0.try_get_file_from_path_async(file_path)
     }
 
     fn try_get_folder_from_path_async(
         &self,
-        folder_path: &Uri,
+        folder_path: &Url,
     ) -> LocalBoxFuture<Option<Rc<dyn ferroui_base::platform::storage::IStorageFolder>>> {
         self.0.try_get_folder_from_path_async(folder_path)
     }
@@ -199,11 +200,11 @@ fn storage_provider_factory_takes_precedence_over_the_platform_implementation() 
 #[derive(Default)]
 struct TestLauncher {
     succeeds: bool,
-    uris: RefCell<Vec<Uri>>,
+    uris: RefCell<Vec<Url>>,
 }
 
 impl ILauncher for TestLauncher {
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool> {
+    fn launch_uri_async(&self, uri: &Url) -> LocalBoxFuture<bool> {
         self.uris.borrow_mut().push(uri.clone());
         Box::pin(std::future::ready(self.succeeds))
     }
@@ -218,7 +219,7 @@ fn launcher_without_platform_support_launches_nothing() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let target = Window::with_impl(MockWindowingPlatform::create_window_mock());
 
-    let launched = ready(target.launcher().launch_uri_async(&Uri::absolute("https://example.org/").unwrap()));
+    let launched = ready(target.launcher().launch_uri_async(&Url::parse("https://example.org/").unwrap()));
 
     assert!(!launched);
 }
@@ -231,7 +232,7 @@ fn launcher_comes_from_the_platform_implementation() {
     window_impl.setup_feature::<dyn ILauncher>(launcher.clone());
     let target = Window::with_impl(window_impl);
 
-    let uri = Uri::absolute("https://example.org/").unwrap();
+    let uri = Url::parse("https://example.org/").unwrap();
     assert!(ready(target.launcher().launch_uri_async(&uri)));
     assert_eq!(vec![uri], *launcher.uris.borrow());
 }
@@ -253,8 +254,8 @@ fn hyperlink_button_click_launches_the_navigate_uri_and_becomes_visited() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let launcher = Rc::new(TestLauncher { succeeds: true, ..TestLauncher::default() });
     let (window, target) = hyperlink_in_window(&launcher);
-    let uri = Uri::absolute("https://example.org/page").unwrap();
-    target.set_navigate_uri(Some(uri.clone()));
+    let uri = Url::parse("https://example.org/page").unwrap();
+    target.set_navigate_uri(Some(UriRef::from(uri.clone())));
     let clicks = Rc::new(Cell::new(0));
     target.click({
         let clicks = clicks.clone();
@@ -290,11 +291,48 @@ fn hyperlink_button_stays_unvisited_when_the_uri_cannot_be_launched_or_is_not_se
     assert!(!target.is_visited());
 
     // The launcher reports a failure.
-    target.set_navigate_uri(Some(Uri::absolute("unknown:thing").unwrap()));
+    target.set_navigate_uri(Some(UriRef::parse("unknown:thing").unwrap()));
     target.perform_click();
     Dispatcher::ui_thread().run_jobs(None);
     assert_eq!(1, launcher.uris.borrow().len());
     assert!(!target.is_visited());
+
+    window.close();
+}
+
+/// `NavigateUri` is a `UriRef` (decision O5 of docs/idiomatic-rust-signatures.md):
+/// a relative reference is kept as written and launches nothing, as the
+/// launchers of upstream refuse a relative URI; an absolute one is launched
+/// as its URL.
+#[test]
+fn hyperlink_button_keeps_a_relative_navigate_uri_and_launches_an_absolute_one() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let launcher = Rc::new(TestLauncher { succeeds: true, ..TestLauncher::default() });
+    let (window, target) = hyperlink_in_window(&launcher);
+
+    let relative = UriRef::parse("docs/index.html").unwrap();
+    target.set_navigate_uri(Some(relative.clone()));
+    assert_eq!(Some(relative), target.navigate_uri());
+    assert_eq!("docs/index.html", target.navigate_uri().unwrap().to_string());
+    target.perform_click();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(launcher.uris.borrow().is_empty());
+    assert!(!target.is_visited());
+
+    // A rooted path is a relative reference too (the rule of markup).
+    target.set_navigate_uri(Some(UriRef::parse("/docs/index.html").unwrap()));
+    assert!(target.navigate_uri().unwrap().is_relative());
+    target.perform_click();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(launcher.uris.borrow().is_empty());
+
+    let absolute = UriRef::parse("HTTPS://Example.org/Docs?q=1#top").unwrap();
+    target.set_navigate_uri(Some(absolute.clone()));
+    assert_eq!(Some(absolute), target.navigate_uri());
+    target.perform_click();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(vec![Url::parse("https://example.org/Docs?q=1#top").unwrap()], *launcher.uris.borrow());
+    assert!(target.is_visited());
 
     window.close();
 }
@@ -695,6 +733,19 @@ fn file_activated_event_args_are_activated_event_args_of_the_file_kind() {
 }
 
 #[test]
+fn protocol_activated_event_args_carry_the_url_of_the_activation() {
+    let url = Url::parse("myapp://open/item?id=7").unwrap();
+    let args = ProtocolActivatedEventArgs::new(url.clone());
+    assert_eq!(ActivationKind::OpenUri, args.kind());
+    assert_eq!(&url, args.uri());
+
+    let activated = ActivatedEventArgs::from(args);
+    assert_eq!(ActivationKind::OpenUri, activated.kind());
+    assert_eq!(Some(&url), activated.as_protocol_activated().map(ProtocolActivatedEventArgs::uri));
+    assert!(activated.as_file_activated().is_none());
+}
+
+#[test]
 fn tool_tip_diagnostics_exposes_the_tool_tip_property() {
     assert!(std::ptr::eq(ToolTipDiagnostics::tool_tip_property(), crate::ToolTip::tool_tip_property()));
 }
@@ -911,6 +962,7 @@ mod in_process_drag_source {
     use std::cell::{Cell, RefCell};
     use std::rc::Rc;
     use std::task::{Context, Poll, Waker};
+use url::Url;
 
     struct CountingDataTransfer {
         inner: Rc<DataTransfer>,

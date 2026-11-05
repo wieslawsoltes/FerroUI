@@ -6,10 +6,10 @@ use ferroui_base::input::DataFormat;
 use crate::storage_provider_api::{NativeStorageItem, StorageProviderApi};
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::storage::IStorageItem;
-use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use std::any::Any;
 use std::rc::Rc;
+use url::Url;
 
 /// Represents a single item inside a clipboard data transfer. The session
 /// is shared with the data transfer, which disposes it.
@@ -34,11 +34,11 @@ fn utf16_string(bytes: &[u8]) -> String {
     s
 }
 
-fn try_get_file_path_uri(uri_string: Option<&str>, storage_api: &StorageProviderApi) -> Option<Uri> {
-    let uri = Uri::try_create(uri_string?, UriKind::Absolute).filter(|uri| uri.scheme() == "file")?;
+fn try_get_file_path_uri(uri_string: Option<&str>, storage_api: &StorageProviderApi) -> Option<Url> {
+    let uri = Url::parse(uri_string?).ok().filter(|uri| uri.scheme() == "file")?;
 
     // macOS may return a file reference URI (e.g. file:///.file/id=6571367.2773272/), convert it to a path URI.
-    if uri.absolute_path().starts_with("/.file/id=") {
+    if uri.path().starts_with("/.file/id=") {
         storage_api.try_resolve_file_reference_uri(&uri)
     } else {
         Some(uri)

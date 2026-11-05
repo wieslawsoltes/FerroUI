@@ -11,7 +11,6 @@ use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerOpenOptions, FilePickerSaveOptions, FolderPickerOpenOptions, IStorageFile,
     IStorageFolder, IStorageItem, IStorageProvider, OpenFilePickerResult, SaveFilePickerResult,
 };
-use ferroui_base::utilities::Uri;
 use futures_util::StreamExt;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -172,7 +171,7 @@ pub(crate) fn paths_of_results(results: &HashMap<String, OwnedValue>) -> Vec<Str
     let Ok(uris) = <Vec<String>>::try_from(uris.try_clone().unwrap_or_else(|_| OwnedValue::from(0u32))) else {
         return Vec::new();
     };
-    uris.iter().filter_map(|uri| Uri::absolute(uri).ok()).map(|uri| uri.local_path()).collect()
+    uris.iter().filter_map(|uri| url::Url::parse(uri).ok()).map(|url| StorageProviderHelpers::local_path(&url)).collect()
 }
 
 /// The local path of a folder, when it has one.

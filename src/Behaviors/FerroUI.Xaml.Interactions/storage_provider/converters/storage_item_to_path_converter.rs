@@ -2,7 +2,7 @@
 
 use crate::{StorageFileRef, StorageFolderRef, StorageItemRef};
 use ferroui_base::platform::storage::IStorageItem;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::{BindingError, BindingOperations};
@@ -10,7 +10,8 @@ use ferroui_base::utilities::CultureInfo;
 use ferroui_base::BoxedValue;
 use std::rc::Rc;
 
-/// Converts a storage item to its path (a [`Uri`]).
+/// Converts a storage item to its path (a [`UriRef`]: the URL of a file, or the relative
+/// reference of an item of the browser).
 #[derive(Debug, Default)]
 pub struct StorageItemToPathConverter;
 
@@ -58,7 +59,7 @@ impl IValueConverter for StorageItemToPathConverter {
 }
 
 /// The path of the storage item an untyped value holds (`value is IStorageItem storageItem`).
-fn storage_item_path_of(value: &BoxedValue) -> Option<Uri> {
+fn storage_item_path_of(value: &BoxedValue) -> Option<UriRef> {
     if let Some(item) = value.downcast_ref::<StorageItemRef>() {
         return Some(item.path());
     }

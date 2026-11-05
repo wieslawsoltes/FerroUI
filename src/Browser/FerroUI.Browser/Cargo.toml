@@ -21,6 +21,8 @@ ferroui-opengl.workspace = true
 ferroui-skia = { workspace = true, optional = true }
 ferroui-harfbuzz.workspace = true
 wasm-bindgen.workspace = true
+# The URLs of the launcher and the storage (C5 of #423).
+url.workspace = true
 # The second render backend (feature `vello`): its CPU mode, and its hybrid mode over the WebGL2
 # context of a canvas.
 ferroui-vello = { workspace = true, optional = true, features = ["hybrid-webgl"] }

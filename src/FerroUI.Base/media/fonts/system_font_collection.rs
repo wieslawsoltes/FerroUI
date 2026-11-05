@@ -6,7 +6,7 @@ use crate::media::{
     FontFamily, FontManager, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface,
 };
 use crate::platform::IFontManagerImpl;
-use crate::utilities::{Locale, Uri};
+use crate::utilities::Locale;
 
 /// The collection of the fonts installed in the system, backed by the font
 /// manager backend.
@@ -34,7 +34,7 @@ impl FontCollectionBaseImpl for SystemFontCollection {
         &this.base
     }
 
-    fn key(_this: &Self) -> Uri {
+    fn key(_this: &Self) -> url::Url {
         FontManager::system_fonts_key()
     }
 

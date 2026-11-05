@@ -1,5 +1,5 @@
 use super::{AssetAssembly, AssetStream, IAssetLoader};
-use crate::utilities::Uri;
+use crate::utilities::UriRef;
 use crate::{FerroLocator, LocatorExtensions};
 use std::rc::Rc;
 
@@ -23,32 +23,32 @@ impl AssetLoader {
     }
 
     /// Checks if an asset with the specified URI exists.
-    pub fn exists(uri: &Uri, base_uri: Option<&Uri>) -> bool {
+    pub fn exists(uri: &UriRef, base_uri: Option<&url::Url>) -> bool {
         Self::get_asset_loader().exists(uri, base_uri)
     }
 
     /// Opens the asset with the requested URI.
-    pub fn open(uri: &Uri, base_uri: Option<&Uri>) -> std::io::Result<Box<dyn AssetStream>> {
+    pub fn open(uri: &UriRef, base_uri: Option<&url::Url>) -> std::io::Result<Box<dyn AssetStream>> {
         Self::get_asset_loader().open(uri, base_uri)
     }
 
     /// Opens the asset with the requested URI and returns the asset stream
     /// along with the assembly containing the asset.
     pub fn open_and_get_assembly(
-        uri: &Uri,
-        base_uri: Option<&Uri>,
+        uri: &UriRef,
+        base_uri: Option<&url::Url>,
     ) -> std::io::Result<(Box<dyn AssetStream>, AssetAssembly)> {
         Self::get_asset_loader().open_and_get_assembly(uri, base_uri)
     }
 
     /// Extracts the assembly information from a URI.
-    pub fn get_assembly(uri: &Uri, base_uri: Option<&Uri>) -> Option<AssetAssembly> {
+    pub fn get_assembly(uri: &UriRef, base_uri: Option<&url::Url>) -> Option<AssetAssembly> {
         Self::get_asset_loader().get_assembly(uri, base_uri)
     }
 
     /// Gets all assets of a folder and its subfolders that match the
     /// specified URI.
-    pub fn get_assets(uri: &Uri, base_uri: Option<&Uri>) -> Vec<Uri> {
+    pub fn get_assets(uri: &UriRef, base_uri: Option<&url::Url>) -> Vec<url::Url> {
         Self::get_asset_loader().get_assets(uri, base_uri)
     }
 

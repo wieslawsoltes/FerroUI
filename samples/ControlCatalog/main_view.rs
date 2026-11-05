@@ -9,7 +9,7 @@ use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
     StyledElementImplExt, TypeInfo, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
@@ -665,7 +665,7 @@ impl MainView {
         let top_level = TopLevel::get_top_level(Some(self)).expect("the view is attached to a top level");
         let launcher = top_level.launcher();
         drop(start_async(async move {
-            if let Ok(uri) = Uri::absolute("https://github.com/wieslawsoltes/FerroUI") {
+            if let Ok(uri) = UriRef::parse_absolute("https://github.com/wieslawsoltes/FerroUI") {
                 launcher.launch_uri_async(&uri).await;
             }
         }));

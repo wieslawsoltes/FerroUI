@@ -8,7 +8,7 @@ use ferroui_base::platform::storage::{
     SaveFilePickerResult, StorageItemProperties, WellKnownFolder,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};
 use ferroui_controls::Window;
 use ferroui_designer_core::Ast;
@@ -96,8 +96,8 @@ impl IStorageItem for MemoryFile {
     fn name(&self) -> String {
         "Workspace.ferroui-previews.json".into()
     }
-    fn path(&self) -> Uri {
-        Uri::absolute(MANIFEST_URI).unwrap()
+    fn path(&self) -> UriRef {
+        UriRef::parse(MANIFEST_URI).unwrap()
     }
     fn get_basic_properties_async(&self) -> LocalBoxFuture<StorageItemProperties> {
         ready(StorageItemProperties::new(
@@ -222,14 +222,14 @@ impl IStorageProvider for ManifestProvider {
     }
     fn try_get_file_from_path_async(
         &self,
-        _path: &Uri,
+        _path: &url::Url,
     ) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
         self.path_requests.set(self.path_requests.get() + 1);
         ready(None)
     }
     fn try_get_folder_from_path_async(
         &self,
-        path: &Uri,
+        path: &url::Url,
     ) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
         self.fallback.try_get_folder_from_path_async(path)
     }

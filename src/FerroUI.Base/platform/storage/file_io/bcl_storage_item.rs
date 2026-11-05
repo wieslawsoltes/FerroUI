@@ -1,6 +1,6 @@
 use super::{BclStorageFile, BclStorageFolder, StorageBookmarkHelper, StorageProviderHelpers};
 use crate::platform::storage::{IStorageFolder, IStorageItem, StorageItemProperties};
-use crate::utilities::{Uri, UriKind};
+use crate::utilities::UriRef;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -118,7 +118,7 @@ impl BclStorageItem {
         true
     }
 
-    pub fn path(&self) -> Uri {
+    pub fn path(&self) -> UriRef {
         Self::get_path_core(&self.file_system_info)
     }
 
@@ -161,16 +161,17 @@ impl BclStorageItem {
         }
     }
 
-    pub fn get_path_core(file_system_info: &FileSystemInfo) -> Uri {
+    /// The file URL of the entry, or, for the root of a file system, the
+    /// relative reference of its name (`/`, `C:\`), as upstream.
+    pub fn get_path_core(file_system_info: &FileSystemInfo) -> UriRef {
         if file_system_info.path().parent().is_some() {
-            return StorageProviderHelpers::uri_from_file_path(
+            return UriRef::Absolute(StorageProviderHelpers::uri_from_file_path(
                 &file_system_info.full_name(),
                 file_system_info.is_directory(),
-            );
+            ));
         }
 
-        Uri::new(&file_system_info.name(), UriKind::Relative)
-            .expect("the name of a file-system root is a valid relative URI")
+        UriRef::Relative(file_system_info.name().into())
     }
 
     pub fn get_basic_properties_async_core(file_system_info: &FileSystemInfo) -> StorageItemProperties {
@@ -295,7 +296,7 @@ macro_rules! impl_bcl_storage_item {
                 self.base.name()
             }
 
-            fn path(&self) -> $crate::utilities::Uri {
+            fn path(&self) -> $crate::utilities::UriRef {
                 self.base.path()
             }
 

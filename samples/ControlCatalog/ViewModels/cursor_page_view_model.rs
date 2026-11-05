@@ -5,7 +5,7 @@ use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
 use ferroui_base::input::{Cursor, StandardCursorType};
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{ferro_markup_type, PixelPoint};
 use mini_mvvm::ViewModelBase;
 use std::rc::Rc;
@@ -68,7 +68,7 @@ impl CursorPageViewModel {
     pub fn new() -> Rc<CursorPageViewModel> {
         let standard_cursors = BindableList::new(STANDARD_CURSOR_TYPES.into_iter().map(StandardCursorModel::new));
 
-        let uri = Uri::absolute("ferres://ControlCatalog/Assets/icon-32.png").unwrap_or_else(|e| panic!("{e}"));
+        let uri = UriRef::parse("ferres://ControlCatalog/Assets/icon-32.png").unwrap_or_else(|e| panic!("{e}"));
         let mut s = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
         let bitmap = Bitmap::from_stream(&mut s).unwrap_or_else(|e| panic!("{e}"));
         let custom_cursor = Cursor::from_bitmap(&bitmap, PixelPoint::new(16, 16));

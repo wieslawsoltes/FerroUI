@@ -72,7 +72,7 @@ mod uikit {
         IStorageBookmarkFolder, IStorageFile, IStorageFolder, IStorageProvider, OpenFilePickerResult,
         SaveFilePickerResult, WellKnownFolder,
     };
-    use ferroui_base::utilities::Uri;
+    use url::Url;
     use objc2::rc::{Retained, Weak};
     use objc2::runtime::{AnyClass, AnyObject, Bool, NSObject, ProtocolObject};
     use objc2::{define_class, msg_send, AnyThread, DefinedClass, MainThreadMarker, MainThreadOnly, Message};
@@ -301,7 +301,8 @@ mod uikit {
 
         fn get_url_from_folder(folder: Option<&Rc<dyn IStorageFolder>>) -> Option<Retained<NSURL>> {
             let folder = folder?;
-            url_of(&**folder).or_else(|| NSURL::URLWithString(&NSString::from_str(folder.path().absolute_uri())))
+            url_of(&**folder)
+                .or_else(|| folder.path().as_url().and_then(|url| NSURL::URLWithString(&NSString::from_str(url.as_str()))))
         }
 
         fn file_types_to_ut_type(options: &FilePickerOpenOptions) -> Retained<NSArray<AnyObject>> {
@@ -447,8 +448,8 @@ mod uikit {
             }
         }
 
-        fn file_url(uri: &Uri) -> Option<(Retained<NSURL>, Retained<NSString>)> {
-            let url = NSURL::URLWithString(&NSString::from_str(uri.absolute_uri()))?;
+        fn file_url(uri: &Url) -> Option<(Retained<NSURL>, Retained<NSString>)> {
+            let url = NSURL::URLWithString(&NSString::from_str(uri.as_str()))?;
             let path = url.path()?;
             Some((url, path))
         }
@@ -514,7 +515,7 @@ mod uikit {
             Box::pin(std::future::ready(folder))
         }
 
-        fn try_get_file_from_path_async(&self, file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
+        fn try_get_file_from_path_async(&self, file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
             let file = Self::file_url(file_path)
                 .filter(|(_, path)| {
                     Self::exists(path) == Some(false) && NSFileManager::defaultManager().isReadableFileAtPath(path)
@@ -524,7 +525,7 @@ mod uikit {
             Box::pin(std::future::ready(file))
         }
 
-        fn try_get_folder_from_path_async(&self, folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
+        fn try_get_folder_from_path_async(&self, folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
             let folder = Self::file_url(folder_path)
                 .filter(|(_, path)| Self::exists(path) == Some(true))
                 .map(|(folder_url, _)| IosStorageFolder::new(folder_url, None) as Rc<dyn IStorageFolder>);

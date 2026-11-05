@@ -381,10 +381,9 @@ ferro_markup_type!(class FontFamily {
     parse: FontFamily::parse,
     constructors: [
         (String) => |name: String| FontFamily::new(&name),
-        // `new FontFamily(context.BaseUri, text)`: the base URI of a document is a URL (C5 of #423);
-        // the font family takes the port `Uri` until U3.
+        // `new FontFamily(context.BaseUri, text)`: the base URI of a document is a URL (C5 of #423).
         (Option<url::Url>, String) => |base_uri: Option<url::Url>, name: String| {
-            FontFamily::with_base_uri(base_uri.map(Uri::from).as_ref(), &name)
+            FontFamily::with_base_uri(base_uri.as_ref(), &name)
         },
     ],
     static_properties: [Default: FontFamily { get: FontFamily::default_family }],

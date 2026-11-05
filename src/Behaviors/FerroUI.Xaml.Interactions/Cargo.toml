@@ -38,6 +38,8 @@ network = []
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-xaml-interactivity = { workspace = true }
+# The URL of the suggested start location of a picker (C5 of #423).
+url = { workspace = true }
 
 [build-dependencies]
 ferroui-build-scan = { workspace = true }
