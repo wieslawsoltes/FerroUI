@@ -6,7 +6,7 @@ use crate::view_models::{TabControlPageViewModel, TabControlPageViewModelItem};
 use ferroui_base::data::model::BindableList;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{ContentPage, Dock};
 use std::rc::Rc;
@@ -52,7 +52,7 @@ impl TabControlPage {
     /// # Panics
     /// Panics if the asset cannot be opened or decoded.
     fn load_bitmap(uri: &str) -> Rc<Bitmap> {
-        let uri = Uri::absolute(uri).unwrap_or_else(|e| panic!("{e}"));
+        let uri = UriRef::parse(uri).unwrap_or_else(|e| panic!("{e}"));
         let mut stream = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
         Rc::new(Bitmap::from_stream(&mut stream).unwrap_or_else(|e| panic!("{e}")))
     }

@@ -112,6 +112,8 @@ ferroui-build = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
+# `url::Url`, the base URI of the recording asset loader of the tests (C5 of #423).
+url.workspace = true
 # The themes of the test applications (`tests/support.rs`): the Simple theme of the unit test
 # application and the Fluent theme of the compositor tests, with or without the feature
 # `classic-themes`.

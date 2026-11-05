@@ -992,7 +992,7 @@ fn control_search_uses_chosen_suggestion_before_free_query_and_preserves_no_resu
 #[test]
 fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     use ferroui_base::platform::AssetLoader;
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use std::io::Read;
     let _application = start();
     crate::assets::register();
@@ -1011,7 +1011,7 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
             .find(|(registered, _)| *registered == path)
             .unwrap()
             .1;
-        let uri = Uri::new(entry.image_uri, UriKind::Absolute).unwrap();
+        let uri = UriRef::from(UriRef::parse_absolute(entry.image_uri).unwrap());
         let mut actual = Vec::new();
         AssetLoader::open(&uri, None)
             .unwrap()
@@ -1029,7 +1029,7 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
 #[test]
 fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
     use ferroui_base::platform::AssetLoader;
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use std::io::Read;
     let _application = start();
     crate::assets::register();
@@ -1039,7 +1039,7 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
         .collect();
     assert_eq!(media.len(), 22);
     for (path, expected) in media {
-        let uri = Uri::new(&format!("ferres://WinUIGallery/{path}"), UriKind::Absolute).unwrap();
+        let uri = UriRef::from(UriRef::parse_absolute(&format!("ferres://WinUIGallery/{path}")).unwrap());
         let mut actual = Vec::new();
         AssetLoader::open(&uri, None).unwrap().read_to_end(&mut actual).unwrap();
         assert_eq!(&actual, expected, "{path} resolves its original source bytes");
