@@ -1614,29 +1614,22 @@ impl<'a> Emitter<'a> {
     }
 
     /// Why `value` cannot be the `Locale` (or the nullable form) `target`: a culture literal
-    /// ([`culture_literal`]) that is not an IETF language tag, or whose culture is not a
-    /// locale (a name that is no BCP-47 tag, such as `x-private`; C5 of #423). The error of
-    /// the document, which the run-time loader reports as the error of the conversion or of
-    /// the cast when it loads the document. A literal that is a locale is stated through the
-    /// cast of the untyped value conversions, which cannot refuse it.
+    /// ([`culture_literal`]) that is not an IETF language tag, which is parsed into a locale
+    /// (a text that is no BCP-47 tag, such as `zh-CHT` or `x-private`; C5 of #423). The error
+    /// of the document, which the run-time loader reports as the error of the conversion when
+    /// it loads the document. A literal that is a locale is stated through the cast of the
+    /// untyped value conversions, which cannot refuse it.
     fn refused_locale_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         if target != self.types.known(Known::Locale) && target != self.types.option_of_known(Known::Locale) {
             return None;
         }
         let text = self.culture_literals.get(&value.expr)?;
-        let culture = match ferroui_base::data::CultureInfoIetfLanguageTagConverter::convert_from(text) {
-            Ok(culture) => culture,
-            Err(error) => return Some(error.to_string()),
-        };
-        ferroui_base::utilities::Locale::try_from(&culture)
-            .err()
-            .map(|error| format!("the culture name '{text}' is not a BCP-47 language tag, and a `Locale` cannot hold it ({error})"))
-
+        ferroui_base::data::CultureInfoIetfLanguageTagConverter::convert_to_locale(text).err().map(|error| error.to_string())
     }
 
     /// Why the literal `value` cannot be `target`: a negative time span for a `Duration`
     /// ([`Self::refused_time_span_literal`]), a relative URI for a `Url` or a URI that is no
-    /// URL ([`Self::refused_uri_literal`]), or a culture that is no locale for a `Locale`
+    /// URL ([`Self::refused_uri_literal`]), or a culture text that is no BCP-47 tag for a `Locale`
     /// ([`Self::refused_locale_literal`]).
     fn refused_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         self.refused_time_span_literal(value, target)

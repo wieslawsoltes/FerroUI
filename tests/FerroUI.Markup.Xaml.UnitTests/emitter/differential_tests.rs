@@ -275,18 +275,19 @@ fn a_language_literal_sets_a_locale_property() {
     assert_eq!(block.language(), ferroui_base::utilities::locale!("ja-JP"));
 }
 
-/// Not from upstream (C5 of #423): a culture literal whose culture is no locale (`x-private`,
-/// a name that is no BCP-47 tag), or that names no culture (`zh-CHT`), for a property that
-/// declares a `Locale` is an error of the compiler, which names the property and the tag, and
-/// a load error of the run-time loader.
+/// Not from upstream (C5 of #423): a culture literal that is no BCP-47 tag (`x-private`, a
+/// private name, or `zh-CHT`, an old name), which no locale can be parsed from (L2), for a
+/// property that declares a `Locale` is an error of the compiler, which names the property and
+/// the tag, and a load error of the run-time loader, both with the error of the converter of
+/// an IETF tag.
 #[test]
 fn an_invalid_language_tag_for_a_locale_property_is_an_error() {
     let _app = xaml_test_base();
     for (tag, compiled, loaded) in [
         (
             "x-private",
-            "Language: the culture name 'x-private' is not a BCP-47 language tag, and a `Locale` cannot hold it",
-            "The culture name 'x-private' is not a BCP-47 language tag",
+            "Language: Culture IETF Name x-private is not a recognized IETF name.",
+            "Culture IETF Name x-private is not a recognized IETF name.",
         ),
         ("zh-CHT", "Language: Culture IETF Name zh-CHT is not a recognized IETF name.", "Culture IETF Name zh-CHT is not a recognized IETF name."),
     ] {

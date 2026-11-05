@@ -252,7 +252,7 @@ fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error
 // Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md section 3.4): a property
 // that declares a `Locale` is a `System.Globalization.CultureInfo` property, as one that
 // declares a `CultureInfo`. `RichTextBlock.Language` (the `TextElement.Language` it owns) is
-// one of the framework. A tag whose culture is no locale is an error. The compiled forms of
+// one of the framework. A text that is no BCP-47 tag is an error. The compiled forms of
 // these tests are in `emitter::differential_tests`.
 
 #[test]
@@ -285,10 +285,10 @@ fn an_invalid_language_tag_for_a_locale_property_is_an_error() {
         Ok(_) => panic!("the tag is not a locale: {xaml}"),
         Err(error) => describe(&error),
     };
-    // An IETF tag whose culture is no locale: the error of the cast.
+    // A text that is no BCP-47 tag, which no locale is parsed from (a private name, an old name):
+    // the error of the conversion of the culture (L2 of C5).
     let described = error("<RichTextBlock xmlns='https://github.com/ferroui' Language='x-private'/>");
-    assert!(described.contains("The culture name 'x-private' is not a BCP-47 language tag"), "{described}");
-    // A name that is no IETF tag: the error of the conversion of the culture.
+    assert!(described.contains("Culture IETF Name x-private is not a recognized IETF name."), "{described}");
     let described = error("<RichTextBlock xmlns='https://github.com/ferroui' Language='zh-CHT'/>");
     assert!(described.contains("Culture IETF Name zh-CHT is not a recognized IETF name."), "{described}");
 }
