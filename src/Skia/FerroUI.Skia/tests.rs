@@ -2818,13 +2818,20 @@ mod custom_effect_graphs {
 /// (#455, E4): pushed as effects of the drawing context around a scene of
 /// opaque and translucent colours, at 96 and at 192 dots per inch, and
 /// compared with the CPU reference of each effect applied to the same scene
-/// drawn plain; and the fallback of a program that does not compile, does
-/// not declare the uniforms of its parameters or has children (step E6): the
-/// content unchanged, reported once.
+/// drawn plain; the page transitions, which sample images (E6), the same way,
+/// with their images made Skia images once over steady frames and released
+/// when their handles are dropped; and the fallback of a program that does
+/// not compile, does not declare the uniforms of its parameters or has
+/// children that are not images of an overlay: the content unchanged,
+/// reported once.
 mod custom_shader_effects {
     use super::*;
-    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
-    use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription};
+    use ferroui_base::media::effects::library::{
+        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+    };
+    use ferroui_base::media::effects::{
+        CustomEffect, EffectImage, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription,
+    };
 
     /// The logical size of the targets.
     const SIZE: i32 = 100;
@@ -3042,6 +3049,157 @@ mod custom_shader_effects {
 
     #[test]
     fn a_program_with_children_draws_the_content_unchanged() {
+        // `page` is no image parameter of the effect, and a content-sampling
+        // program takes no images.
         assert_draws_unchanged_and_reports_once(ImmutableCustomEffect::new(WithChildren { amount: 0.5 }));
+    }
+
+    // --- the images of the page transitions (E6) ---------------------------------
+
+    /// An image of `width` by `height` premultiplied RGBA pixels made by
+    /// `pixel`: an immutable bitmap of this backend, owned by the handle.
+    fn image(width: i32, height: i32, pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((width * height * 4) as usize);
+        for y in 0..height {
+            for x in 0..width {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = crate::immutable_bitmap::ImmutableBitmap::from_pixels(
+            PixelSize::new(width, height),
+            DPI,
+            width * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .expect("a bitmap");
+        EffectImage::from_impl(Arc::new(bitmap))
+    }
+
+    /// Two pages of the size of the target (in device independent pixels)
+    /// and a pattern of grey levels.
+    fn pages() -> (EffectImage, EffectImage, EffectImage) {
+        let from = image(SIZE, SIZE, |x, y| [(x * 2) as u8, (y * 2) as u8, 200, 255]);
+        let to = image(SIZE, SIZE, |x, y| [40, (255 - x * 2) as u8, (y * 2) as u8, 255]);
+        let pattern = image(SIZE, SIZE, |x, y| {
+            let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+            [level, level, level, 255]
+        });
+        (from, to, pattern)
+    }
+
+    /// The transitions of the library over the pages.
+    fn transitions(progress: f64) -> Vec<ImmutableCustomEffect> {
+        let (from, to, pattern) = pages();
+        // A translucent page, so that the content shows through.
+        let glass = image(SIZE, SIZE, |x, _| [0, 0, 160, 160 + (x % 2) as u8 * 40]);
+        vec![
+            ImmutableCustomEffect::new(DissolveTransitionEffect {
+                from_page: from,
+                to_page: to.clone(),
+                pattern: pattern.clone(),
+                progress,
+                center_x: 0.3,
+                center_y: 0.6,
+                ..DissolveTransitionEffect::default()
+            }),
+            ImmutableCustomEffect::new(MaskTransitionEffect { to_page: to, mask: pattern.clone(), progress, softness: 0.2 }),
+            ImmutableCustomEffect::new(MaskTransitionEffect { to_page: glass, mask: pattern, progress, softness: 0.5 }),
+        ]
+    }
+
+    #[test]
+    fn the_page_transitions_match_their_cpu_references() {
+        for scale in [1, 2] {
+            for effect in transitions(0.45) {
+                assert_matches_reference(effect, scale, 3);
+            }
+        }
+    }
+
+    /// Frames that change only the progress of the transitions make their
+    /// images into Skia images once: no image is converted (or uploaded)
+    /// per frame.
+    #[test]
+    fn steady_frames_of_the_page_transitions_make_their_images_once() {
+        let effects = transitions(0.2);
+        let mut made_after_first = None;
+        for frame in 0..6 {
+            let progress = 0.2 + 0.1 * f64::from(frame);
+            let target = target(1);
+            for effect in &effects {
+                let mut value = effect.clone();
+                if let Some(dissolve) = effect.downcast_ref::<DissolveTransitionEffect>() {
+                    value = ImmutableCustomEffect::new(DissolveTransitionEffect { progress, ..dissolve.clone() });
+                } else if let Some(mask) = effect.downcast_ref::<MaskTransitionEffect>() {
+                    value = ImmutableCustomEffect::new(MaskTransitionEffect { progress, ..mask.clone() });
+                }
+                draw_with(&target, &value, scene);
+            }
+            let made = crate::custom_shader_effects::effect_images_made();
+            match made_after_first {
+                None => made_after_first = Some(made),
+                Some(first) => assert_eq!(first, made, "frame {frame} made an image again"),
+            }
+        }
+    }
+
+    /// The Skia images of the images of a transition are released once the
+    /// last handle is dropped, and frames whose transitions take new images
+    /// keep no more than the images they draw.
+    #[test]
+    fn the_images_of_a_dropped_transition_are_released() {
+        let kept = crate::custom_shader_effects::effect_images_kept;
+        let before = kept();
+        for frame in 0..24 {
+            // A new page for every frame; the last one is dropped with it.
+            let page = image(SIZE, SIZE, |x, y| [frame as u8 * 10, x as u8, y as u8, 255]);
+            let effect = ImmutableCustomEffect::new(MaskTransitionEffect {
+                to_page: page,
+                progress: 0.5,
+                softness: 1.0,
+                ..MaskTransitionEffect::default()
+            });
+            draw_with(&target(1), &effect, scene);
+            assert!(kept() <= before + 1, "frame {frame}: {} images kept", kept());
+        }
+        // The next frame releases the image of the last one.
+        target(1).draw(|_| {});
+        assert_eq!(before, kept());
+    }
+
+    /// A transition at its neutral value, and the mask transition at a
+    /// progress of 0 with its images, leave the content unchanged.
+    #[test]
+    fn a_page_transition_at_its_start_draws_the_content_unchanged() {
+        let start = transitions(0.0);
+        for effect in transitions(0.45).iter().map(|effect| effect.neutral().unwrap()).chain(start.into_iter().skip(1)) {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
+        }
+    }
+
+    /// A content-sampling program cannot take images on Skia (skia-safe binds
+    /// no setter for the children of the builder of a runtime shader image
+    /// filter): it is refused and draws the content unchanged.
+    test_effect!(
+        SamplingWithImages,
+        "skia-test-sampling-with-images",
+        ShaderEffectDescription::content_sampling(
+            "uniform float2 layer_size; uniform float layer_scale; uniform float amount; uniform shader content;\n\
+             half4 main(float2 coord) { return content.eval(coord) * half(amount); }",
+            ""
+        )
+        .with_children(["amount"])
+    );
+
+    #[test]
+    fn a_content_sampling_program_with_images_draws_the_content_unchanged() {
+        assert_draws_unchanged_and_reports_once(ImmutableCustomEffect::new(SamplingWithImages { amount: 0.5 }));
     }
 }

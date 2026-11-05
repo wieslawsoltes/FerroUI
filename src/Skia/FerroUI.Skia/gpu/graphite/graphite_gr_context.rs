@@ -8,7 +8,7 @@ use skia_safe::{
     SurfaceProps,
 };
 use std::any::Any;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -64,6 +64,8 @@ struct GraphiteState {
 /// once and hands out the texture for as long as the image is alive.
 pub struct GraphiteGrContext {
     state: RefCell<Option<GraphiteState>>,
+    /// How many raster images were uploaded (or tried).
+    uploads: Cell<u64>,
 }
 
 impl GraphiteGrContext {
@@ -71,7 +73,10 @@ impl GraphiteGrContext {
     /// the recorder cannot be created.
     pub fn new(mut context: graphite::Context) -> Option<Self> {
         let recorder = context.make_recorder(None)?;
-        Some(Self { state: RefCell::new(Some(GraphiteState { uploaded_images: HashMap::new(), recorder, context })) })
+        Some(Self {
+            state: RefCell::new(Some(GraphiteState { uploaded_images: HashMap::new(), recorder, context })),
+            uploads: Cell::new(0),
+        })
     }
 
     fn with_state<R>(&self, f: impl FnOnce(&mut GraphiteState) -> R) -> R {
@@ -131,6 +136,13 @@ impl GraphiteGrContext {
     /// The number of raster images the context keeps an upload for.
     pub fn uploaded_image_count(&self) -> usize {
         self.state.borrow().as_ref().map_or(0, |state| state.uploaded_images.len())
+    }
+
+    /// How many raster images the context uploaded (or tried to) since it
+    /// was created: constant over frames that draw only images it holds the
+    /// texture of.
+    pub fn upload_count(&self) -> u64 {
+        self.uploads.get()
     }
 }
 
@@ -201,6 +213,7 @@ impl ISkiaGrContext for GraphiteGrContext {
         // The contents of an image never change, and its id is not given to
         // another image while the entry holds the image.
         let uploaded = uploaded_images.entry(image.unique_id()).or_insert_with(|| {
+            self.uploads.set(self.uploads.get() + 1);
             let texture = graphite::images::texture_from_image(recorder, image);
             if texture.is_none() {
                 Self::log_upload_failure(image, "Unable to upload a {Width}x{Height} image to the GPU; it is not drawn.");

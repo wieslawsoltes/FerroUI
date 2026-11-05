@@ -2737,14 +2737,20 @@ mod custom_effect_graphs {
 /// the CPU renderer over the area of the effect and the CPU reference of the
 /// effect applied to it (decision 3 of the plan); the scenes and tolerances
 /// of the tests of `ferroui-skia`. An application's shader effect without a
-/// CPU reference draws its content unchanged, reported once. The pass of the
-/// hybrid and GPU modes is tested in `gpu/effect_pass_tests.rs`.
+/// CPU reference draws its content unchanged, reported once. The page
+/// transitions (E6) draw their CPU references from the pixels of their
+/// images. The pass of the hybrid and GPU modes is tested in
+/// `gpu/effect_pass_tests.rs`.
 mod custom_shader_effects {
     use super::*;
-    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
-    use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription};
+    use ferroui_base::media::effects::library::{
+        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+    };
+    use ferroui_base::media::effects::{
+        CustomEffect, EffectImage, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription,
+    };
     use ferroui_base::media::imaging::BitmapBlendingMode;
-    use ferroui_base::platform::AlphaFormat;
+    use ferroui_base::platform::{AlphaFormat, PixelFormat};
 
     /// The logical size of the targets.
     const SIZE: i32 = 100;
@@ -2918,6 +2924,72 @@ mod custom_shader_effects {
                  fn effect(coord: vec2<f32>) -> vec4<f32> { return vec4<f32>(0.0, 0.0, 0.0, uniforms.amount); }",
                 BitmapBlendingMode::SourceOver,
             ))
+        }
+    }
+
+    /// An image of `SIZE` by `SIZE` premultiplied RGBA pixels made by
+    /// `pixel`: an immutable bitmap of this backend, owned by the handle.
+    fn image(pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = crate::immutable_bitmap::ImmutableBitmap::from_pixels(
+            PixelSize::new(SIZE, SIZE),
+            Vector::new(96.0, 96.0),
+            SIZE * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .expect("a bitmap");
+        EffectImage::from_impl(std::sync::Arc::new(bitmap))
+    }
+
+    /// The page transitions of the library sample the pixels of their
+    /// images in the CPU mode: the CPU reference of each, at 96 and 192 dots
+    /// per inch; at the start, the content unchanged.
+    #[test]
+    fn the_page_transitions_draw_their_cpu_references() {
+        let from = image(|x, y| [(x * 2) as u8, (y * 2) as u8, 200, 255]);
+        let to = image(|x, y| [40, (255 - x * 2) as u8, (y * 2) as u8, 255]);
+        let pattern = image(|x, y| {
+            let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+            [level, level, level, 255]
+        });
+        let transitions = |progress: f64| {
+            [
+                ImmutableCustomEffect::new(DissolveTransitionEffect {
+                    from_page: from.clone(),
+                    to_page: to.clone(),
+                    pattern: pattern.clone(),
+                    progress,
+                    center_x: 0.3,
+                    center_y: 0.6,
+                    ..DissolveTransitionEffect::default()
+                }),
+                ImmutableCustomEffect::new(MaskTransitionEffect {
+                    to_page: to.clone(),
+                    mask: pattern.clone(),
+                    progress,
+                    softness: 0.2,
+                }),
+            ]
+        };
+        for scale in [1, 2] {
+            for effect in transitions(0.45) {
+                assert_matches_reference(effect, scale, 1);
+            }
+        }
+        for effect in transitions(0.0).into_iter().skip(1) {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
         }
     }
 
