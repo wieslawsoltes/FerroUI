@@ -184,6 +184,35 @@ pub(crate) type InheritedValueChanged = fn(
     Option<&dyn EffectiveValueDyn>,
 );
 
+/// Only the payload copy depends on T. Keep implicit conversion lookup and
+/// the converted box's ownership in one cold implementation (the `TryConvert`
+/// of the property, see
+/// [`ValueTypes::try_convert_implicit`](crate::data::core::ValueTypes::try_convert_implicit)).
+pub(crate) fn convert_property_value<T: PropertyValue>(property: &FerroProperty, value: &dyn Any) -> Option<T> {
+    let mut typed = None;
+    copy_converted_property_value(property, value, &mut |value| {
+        typed = value.downcast_ref::<T>().cloned();
+        typed.is_some()
+    });
+    typed
+}
+
+#[inline(never)]
+pub(crate) fn copy_converted_property_value(
+    property: &FerroProperty,
+    value: &dyn Any,
+    copy_value: &mut dyn FnMut(&dyn Any) -> bool,
+) -> bool {
+    let Some(converted) = crate::data::core::ValueTypes::try_convert_implicit(value, property.property_type()) else {
+        return false;
+    };
+    let copied = copy_value(converted.as_any());
+    // A converter's temporary may have an observable destructor. Release it
+    // before validation, coercion or publication; it also drops if Clone panics.
+    drop(converted);
+    copied
+}
+
 /// Untyped operations that a property routes to its typed implementation.
 pub(crate) trait PropertyRoutes {
     fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn>;
