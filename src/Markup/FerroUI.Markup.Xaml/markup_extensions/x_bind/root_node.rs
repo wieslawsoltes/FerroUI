@@ -19,6 +19,10 @@ pub(super) struct XBindRootNode {
     /// the fallback, which is what WinUI's generated code does instead of failing, so it is not
     /// a diagnostic.
     has_fallback_value: bool,
+    /// A `OneTime` binding reads its path when the bindings are initialized or updated and
+    /// listens to nothing in between, as WinUI's generated code: the path nodes are released
+    /// after each read.
+    one_time: bool,
     /// Off while the bindings are stopped: a source change of the expression publishes nothing.
     enabled: Cell<bool>,
     error: RefCell<Option<String>>,
@@ -27,7 +31,7 @@ pub(super) struct XBindRootNode {
 }
 
 impl XBindRootNode {
-    pub fn new(bindings: &Rc<XBindings>, path: String, has_fallback_value: bool) -> Rc<Self> {
+    pub fn new(bindings: &Rc<XBindings>, path: String, has_fallback_value: bool, one_time: bool) -> Rc<Self> {
         Rc::new(Self {
             // The root is held weakly, as the elements a binding locates are: the root owns the
             // targets, which own their expressions.
@@ -35,6 +39,7 @@ impl XBindRootNode {
             bindings: Rc::downgrade(bindings),
             path,
             has_fallback_value,
+            one_time,
             enabled: Cell::new(bindings.is_initialized()),
             error: RefCell::new(None),
             path_nodes: RefCell::new(Vec::new()),
@@ -77,7 +82,12 @@ impl XBindRootNode {
         }
         self.error.borrow_mut().take();
         match bindings.data_root() {
-            Ok(Some(source)) => self.state.set_value(Some(source), None),
+            Ok(Some(source)) => {
+                self.state.set_value(Some(source), None);
+                if self.one_time {
+                    self.clear_path_sources();
+                }
+            }
             // A template instance without an item yet: nothing to read.
             Ok(None) => {}
             Err(message) => self.fail(&message),
