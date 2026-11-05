@@ -53,14 +53,22 @@ separate state record. `DAMAGE_RECT` with `PRESERVE_TARGET` limits a frame to a 
 ### 2.2 The device and the surfaces
 
 ProGPU takes its device from a C WebGPU library of a matching ABI: the `wgpu` crate of the Vello
-backend cannot be handed over. The desktop backend loads the wgpu-native runtime of the SDK package
-(the pinned May-2024 ABI) and creates the instance, adapter, device and queue there; a window
-surface comes from the native handle FerroUI already gives the GPU backends
-(`INativePlatformHandleSurface`): a `CAMetalLayer` of the `NSView` on macOS, the `HWND` on Windows,
-the X11 window or the Wayland surface on Linux. The Dawn ABI follows where wgpu-native lacks a
-feature. Resizing is cooperative, as in every backend: the surface is configured for the size of
-the frame being drawn, never stretched.
+backend cannot be handed over. Headless rendering and offscreen targets use the wgpu-native runtime
+(the pinned May-2024 ABI), which the engine's source build links.
 
+Window surfaces must keep FerroUI's cooperative resize (no stretched or stale frame while a window
+is resized): the platform presents its own frames, inside the window's Core Animation transaction on
+macOS, and the backend draws into them. wgpu-native's C ABI can neither import a platform texture
+nor present inside a transaction (its Metal presentation option is internal to wgpu-hal), so the
+window path is the engine's **Dawn target**, as in ProGPU's own macOS host
+(`DawnMetalRenderTarget`): each frame's `CAMetalDrawable` texture is IOSurface-backed and is
+imported once per swapchain IOSurface as Dawn shared texture memory; the engine renders into it
+between `BeginAccess` and `EndAccess` (synchronized with a Metal shared event), and the platform's
+render session presents it. The native Metal surface of FerroUI (`ferroui-native`, `metal.rs`:
+`IMetalPlatformSurface`, drawables of its own `CAMetalLayer`) already has that shape. Windows uses
+the same pattern with Dawn's D3D12 shared textures and the platform's swap chain, Linux Dawn's
+Vulkan path (step P8). The Dawn runtime is the provider package ProGPU's Dawn backend resolves
+(`progpu_native_dawn_engine_create` with a host resolver); its size is measured with the others.
 ### 2.3 Retained GPU mode
 
 The compositor of FerroUI already keeps a backend fragment of the content of every draw-list visual
