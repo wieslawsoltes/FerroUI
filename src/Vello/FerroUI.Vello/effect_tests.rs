@@ -3012,4 +3012,70 @@ mod custom_shader_effects {
         // Reported already: a later report is not logged.
         assert!(!effect.report_unhandled("Vello"));
     }
+
+    // --- the interactive effects (E7) --------------------------------------------------
+
+    use ferroui_base::media::effects::library::{
+        BurningFlameShaderEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::Point;
+
+    /// The interactive effects of the library at values that draw something: the pointer over
+    /// the area and pressed, a ripple spreading, the flame burning.
+    fn interactive_effects() -> Vec<ImmutableCustomEffect> {
+        let mut ripple =
+            WaterRippleShaderEffect { pointer_x: 0.5, pointer_y: 0.4, is_pointer_over: true, ..WaterRippleShaderEffect::default() };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.35;
+        vec![
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.45,
+                is_pointer_over: true,
+                is_pressed: true,
+                radius: 0.4,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                is_pointer_over: true,
+                cell_size: 12.0,
+                strength: 0.8,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ripple),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.9,
+                flame_phase: 1.4,
+                ignition_y: 0.6,
+                ..BurningFlameShaderEffect::default()
+            }),
+        ]
+    }
+
+    /// The CPU mode draws the interactive effects as their CPU references, at 96 and 192 DPI.
+    #[test]
+    fn the_interactive_effects_match_their_cpu_references() {
+        for scale in [1, 2] {
+            for effect in interactive_effects() {
+                assert_matches_reference(effect, scale, 3);
+            }
+        }
+    }
+
+    #[test]
+    fn a_neutral_interactive_effect_draws_the_content_unchanged() {
+        let neutral = interactive_effects().into_iter().map(|effect| effect.neutral().expect("a neutral value"));
+        let away = [
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect::default()),
+            ImmutableCustomEffect::new(WaterRippleShaderEffect::default()),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect::default()),
+        ];
+        for effect in neutral.chain(away) {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
+        }
+    }
 }

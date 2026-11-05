@@ -91,6 +91,16 @@ ferroui_base::ferro_thread_local! {
     static STATIC_CACHE: RefCell<HashMap<(ProgramKind, usize, usize), Option<sk::RuntimeEffect>>> =
         RefCell::new(HashMap::new());
     static ENABLED: Cell<bool> = Cell::new(true);
+    /// How many programs this thread compiled (#455, E7): the tests hold
+    /// frames that change only uniforms to compiling nothing.
+    static COMPILATIONS: Cell<u64> = const { Cell::new(0) };
+}
+
+/// How many SkSL programs this thread compiled, failures included: a frame
+/// of an effect whose program is in the cache compiles none.
+#[allow(dead_code)]
+pub(crate) fn compilation_count() -> u64 {
+    COMPILATIONS.with(Cell::get)
 }
 
 /// Switches the runtime effects of this thread on or off; off, nothing is
@@ -125,6 +135,7 @@ pub(crate) fn compile_named(kind: ProgramKind, source: &str, name: &str) -> Opti
     if let Some(compiled) = CACHE.with(|cache| cache.borrow()[index].get(source).cloned()) {
         return compiled;
     }
+    COMPILATIONS.with(|count| count.set(count.get() + 1));
     let result = match kind {
         ProgramKind::Shader => sk::RuntimeEffect::make_for_shader(source, None),
         ProgramKind::Blender => sk::RuntimeEffect::make_for_blender(source, None),

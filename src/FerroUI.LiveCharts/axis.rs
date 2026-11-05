@@ -1,8 +1,11 @@
 //! Chart axis snapshots and stable value/pixel conversion.
 
+use crate::labelers::Labeler;
 use crate::measure::{AxisOrientation, AxisTick, TickOptions};
 use crate::scene::ChartError;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::Color;
+use ferroui_base::utilities::DateTime;
 use ferroui_base::Size;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -42,6 +45,12 @@ pub struct Axis {
     pub separators_color: Color,
     pub logarithmic_base: Option<f64>,
     pub padding: f64,
+    /// The label of a value (`Labeler`); `None` takes the native number format. The `labels`
+    /// win over it, as in the source's `GetActualLabeler`.
+    pub labeler: Option<Labeler>,
+    /// The background of the labels of a polar axis (`LabelsBackground`); `None` takes the
+    /// source's white ([`POLAR_LABELS_BACKGROUND`]) and a transparent colour draws none.
+    pub labels_background: Option<Color>,
 }
 impl Default for Axis {
     fn default() -> Self {
@@ -69,6 +78,8 @@ impl Default for Axis {
             separators_color: Color::from_argb(50, 107, 114, 128),
             logarithmic_base: None,
             padding: 0.0,
+            labeler: None,
+            labels_background: None,
         }
     }
 }
@@ -76,8 +87,36 @@ impl Default for Axis {
 pub const CARTESIAN_LABELS_PADDING: f64 = 12.0;
 /// The default `LabelsPadding` of a source polar axis.
 pub const POLAR_LABELS_PADDING: f64 = 3.0;
+/// The default `LabelsBackground` of a source polar axis (and of its light theme).
+pub const POLAR_LABELS_BACKGROUND: Color = Color::from_rgb(255, 255, 255);
 
 impl Axis {
+    /// A `DateTimeAxis`: its unit width and minimum step are the ticks of `unit`, and it labels
+    /// the date of a value (`AsDate`) with `formatter`.
+    pub fn date_time(
+        unit: SignedDuration,
+        formatter: impl Fn(DateTime) -> String + 'static,
+    ) -> Self {
+        Self {
+            unit_width: unit.ticks() as f64,
+            min_step: unit.ticks() as f64,
+            labeler: Some(Labeler::date_time(formatter)),
+            ..Self::default()
+        }
+    }
+    /// A `TimeSpanAxis`: its unit width and minimum step are the ticks of `unit`, and it labels
+    /// the interval of a value (`AsTimeSpan`) with `formatter`.
+    pub fn time_span(
+        unit: SignedDuration,
+        formatter: impl Fn(SignedDuration) -> String + 'static,
+    ) -> Self {
+        Self {
+            unit_width: unit.ticks() as f64,
+            min_step: unit.ticks() as f64,
+            labeler: Some(Labeler::time_span(formatter)),
+            ..Self::default()
+        }
+    }
     /// The label padding, or the given family default when none is set.
     pub fn labels_padding_or(&self, default: f64) -> f64 {
         self.labels_padding.unwrap_or(default)
@@ -116,7 +155,10 @@ impl Axis {
                 return self.labels.get(index as usize).cloned().unwrap_or_default();
             }
         }
-        format_number(value)
+        match &self.labeler {
+            Some(labeler) => labeler.label(value),
+            None => format_number(value),
+        }
     }
 }
 
