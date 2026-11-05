@@ -366,14 +366,36 @@ fn source_preview_preserves_unported_bindings_and_substitution_tokens() {
 }
 
 #[test]
-fn winui_preview_uses_opt_in_public_loader_and_rejects_unported_bindings() {
+fn winui_preview_uses_opt_in_public_loader_and_compiles_x_bind() {
     let _application = start();
     let root = crate::gallery::load_winui_preview("<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Text=\"Preview\"/>").unwrap();
     assert_eq!(
         root.cast::<TextBlock>().unwrap().text().as_deref(),
         Some("Preview")
     );
-    assert!(crate::gallery::load_winui_preview("<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Text=\"{x:Bind Text}\"/>").is_err());
+    // x:Bind goes to the compiled x:Bind core (#525, X6): a path of the root loads, and the
+    // root's bindings read it when they are initialized; a path the root does not have is a
+    // compile error of the loader, and the Reject policy is a migration error.
+    let bound = crate::gallery::load_winui_preview("<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Tag=\"From the root\" Text=\"{x:Bind Tag}\"/>").unwrap();
+    ferroui_markup_xaml::markup_extensions::XBindings::get_for_root(&bound)
+        .expect("the bindings of the root")
+        .initialize()
+        .unwrap();
+    assert_eq!(
+        bound.cast::<TextBlock>().unwrap().text().as_deref(),
+        Some("From the root")
+    );
+    let unresolved = "<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Text=\"{x:Bind CodeBehindField}\"/>";
+    assert!(crate::gallery::load_winui_preview(unresolved).is_err());
+    let reject = ferroui_markup_xaml_winui::WinUIXamlOptions {
+        x_bind: ferroui_markup_xaml_winui::WinUIXBindPolicy::Reject,
+        ..Default::default()
+    };
+    let bound = "<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Text=\"{x:Bind Tag}\"/>";
+    assert!(crate::gallery::load_winui_preview_with_options(bound, &reject)
+        .unwrap_err()
+        .to_string()
+        .contains("WXAML1007"));
 }
 
 #[test]

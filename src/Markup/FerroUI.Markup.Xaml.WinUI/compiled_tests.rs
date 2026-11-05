@@ -1,7 +1,9 @@
 //! The WinUI migration output is a common input to the interpreter and Rust emitter.
 //!
 //! The checked-in generated file is compiled by rustc, then the same lifecycle and live
-//! source/target updates are exercised through both backends. Regenerate only this fixture:
+//! source/target updates are exercised through both backends. The x:Bind of the WinUI
+//! documents is kept as written and compiled by the x:Bind core of the XAML compiler
+//! (`XBindExtension`, `XBindings`; docs/porting/x-bind.md, X6). Regenerate only this fixture:
 //! `cargo test -p ferroui-markup-xaml-winui --lib
 //! compiled_tests::regenerate_winui_binding_fixture -- --ignored --exact`
 
@@ -26,7 +28,7 @@ use ferroui_controls::{
     Page, PathIconSource, ProgressRing, RadioButtons, RatingControl, RatingItemFontInfo,
     RatingItemImageInfo, RatingItemInfo, StackPanel, SymbolIconSource, TextBlock, TextBox,
 };
-use crate::WinUIBindings;
+use ferroui_markup_xaml::markup_extensions::XBindings;
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use ferroui_markup_xaml_loader::rust_emitter::generate_file;
@@ -46,7 +48,7 @@ const NATIVE_CONTROLS: &str = include_str!("fixtures/native_controls.xaml");
 
 fn options() -> WinUIXamlOptions {
     WinUIXamlOptions {
-        x_bind: WinUIXBindPolicy::PropertyPathsWithExplicitLifecycle,
+        x_bind: WinUIXBindPolicy::Compile,
         ..Default::default()
     }
 }
@@ -61,8 +63,8 @@ fn start() -> UnitTestApplicationScope {
 }
 
 fn parts(root: &Control) -> (Ref<TextBlock>, Ref<TextBox>, Ref<TextBlock>) {
-    // IDataTemplate::build returns the control; its separate template name scope is
-    // consumed by the presenter rather than attached to that control automatically.
+    // The children are found by position: the same helper reads a document root and a
+    // template instance, whose name scope is the template's.
     let panel = root.to_ref().cast::<StackPanel>().unwrap();
     let children = panel.children();
     let initial = children.get(0).cast::<TextBlock>().unwrap();
@@ -80,7 +82,10 @@ fn assert_root_behavior(root: Ref<StackPanel>) {
     assert_eq!(scope.find_as::<TextBlock>("initial"), Some(initial.clone()));
     assert_eq!(scope.find_as::<TextBox>("editor"), Some(editor.clone()));
     assert_eq!(scope.find_as::<TextBlock>("mirror"), Some(mirror.clone()));
-    let bindings = WinUIBindings::get_for_root(&root).unwrap();
+    let bindings = XBindings::get_for_root(&root).expect("the first x:Bind of the document creates the bindings of its root");
+    assert!(!bindings.is_template());
+    assert_eq!(bindings.binding_count(), 3);
+    // The root is not attached to a visual tree: nothing is read before `initialize`.
     assert!(!bindings.is_initialized());
     assert_eq!(initial.text(), None);
     assert_eq!(editor.text(), None);
@@ -110,7 +115,16 @@ fn assert_root_behavior(root: Ref<StackPanel>) {
     );
     assert_eq!(mirror.text().as_deref(), Some("user draft"));
 
+    // Update reads every binding again, OneTime included.
+    assert_eq!(
+        initial.text().as_deref(),
+        Some("assigned after construction")
+    );
+    bindings.update().unwrap();
+    assert_eq!(initial.text().as_deref(), Some("user draft"));
+
     bindings.stop_tracking();
+    assert!(!bindings.is_initialized());
     root.set_tag(Some(Rc::new("while stopped".to_string())));
     assert_eq!(mirror.text().as_deref(), Some("user draft"));
     editor.set_current_value(TextBox::text_property(), Some("blocked write".into()));
@@ -123,6 +137,7 @@ fn assert_root_behavior(root: Ref<StackPanel>) {
     assert_eq!(initial.text().as_deref(), Some("while stopped"));
     assert_eq!(editor.text(), initial.text());
     assert_eq!(mirror.text(), initial.text());
+    assert!(bindings.diagnostics().is_empty());
 }
 
 fn item(text: &str) -> Ref<Button> {
@@ -136,20 +151,23 @@ fn assert_template_behavior(template: Rc<dyn IDataTemplate>) {
     let second = template.build(&None).unwrap();
     let (initial, editor, mirror) = parts(&first);
     let (second_initial, second_editor, second_mirror) = parts(&second);
+    let first_bindings = XBindings::get_for_root(&first).expect("each template instance has the bindings of its root");
+    let second_bindings = XBindings::get_for_root(&second).unwrap();
+    assert!(!Rc::ptr_eq(&first_bindings, &second_bindings));
+    assert!(first_bindings.is_template());
+    // An instance reads its item when its data context changes to it, as WinUI's generated
+    // DataContextChanged handler: there is no explicit Initialize.
+    assert!(!first_bindings.is_initialized());
+    assert_eq!(initial.text(), None);
     let first_item = item("first");
     let second_item = item("second");
     first.set_data_context(Some(Rc::new(first_item.clone())));
-    second.set_data_context(Some(Rc::new(second_item.clone())));
-    let first_bindings = WinUIBindings::get_for_root(&first).unwrap();
-    let second_bindings = WinUIBindings::get_for_root(&second).unwrap();
-    assert!(!Rc::ptr_eq(&first_bindings, &second_bindings));
-    assert_eq!(initial.text(), None);
-    first_bindings.initialize().unwrap();
+    assert!(first_bindings.is_initialized());
     assert_eq!(initial.text().as_deref(), Some("first"));
     assert_eq!(editor.text(), initial.text());
     assert_eq!(mirror.text(), initial.text());
     assert_eq!(second_initial.text(), None);
-    second_bindings.initialize().unwrap();
+    second.set_data_context(Some(Rc::new(second_item.clone())));
     assert_eq!(second_initial.text().as_deref(), Some("second"));
 
     first_item.set_content(Some(Rc::new("changed source".to_string())));
