@@ -37,6 +37,21 @@ pub type PathFunctionInvoke = Rc<dyn Fn(&BoxedValue, &[Option<BoxedValue>]) -> R
 /// target.
 pub type PathBindBackInvoke = Rc<dyn Fn(&BoxedValue, Option<&BoxedValue>) -> Result<(), BindingError>>;
 
+/// Calls the method of an event handler element: the owner (the value the path before the
+/// element produces, read when the event is raised; for a static method, the root source, which
+/// it ignores) and the arguments the event passes (the sender and the event arguments of a
+/// routed event). A method without parameters ignores them. `Err` is the failure of the call.
+pub type PathEventHandlerInvoke = Rc<dyn Fn(&BoxedValue, &[Option<BoxedValue>]) -> Result<(), BindingError>>;
+
+/// The method an event binding of `{x:Bind}` calls (`Click="{x:Bind OnClick}"`,
+/// [`CompiledBindingPathBuilder::event_handler`]): the last element of a path, which an
+/// expression does not read.
+pub struct PathEventHandler {
+    /// The name of the method.
+    pub name: Box<str>,
+    pub invoke: PathEventHandlerInvoke,
+}
+
 /// An argument of a function element ([`CompiledBindingPathBuilder::function`]).
 #[derive(Clone)]
 pub enum PathFunctionArgument {
@@ -114,6 +129,9 @@ enum PathElement {
         notifier: Option<AsNotifyPropertyChanged>,
         bind_back: Option<Rc<PathBindBack>>,
     },
+    /// The method of an event binding, the last element of a path (`{x:Bind Model.OnClick}`):
+    /// no node of an expression.
+    EventHandler(Rc<PathEventHandler>),
 }
 
 /// What an element of a compiled binding path is: the element classes of
@@ -147,6 +165,8 @@ pub enum CompiledBindingPathElementKind {
     TypeCast,
     /// A function call with arguments (`{x:Bind}`).
     Function,
+    /// The method an event binding calls (`{x:Bind}` on an event).
+    EventHandler,
 }
 
 /// A read-only view of an element of a [`CompiledBindingPath`].
@@ -173,6 +193,7 @@ impl<'a> CompiledBindingPathElement<'a> {
             PathElement::ArrayElement { .. } => Kind::ArrayElement,
             PathElement::TypeCast { .. } => Kind::TypeCast,
             PathElement::Function { .. } => Kind::Function,
+            PathElement::EventHandler(_) => Kind::EventHandler,
         }
     }
 
@@ -188,6 +209,7 @@ impl<'a> CompiledBindingPathElement<'a> {
             PathElement::MethodAsCommand { method_name, .. } => Some(method_name),
             PathElement::ElementName { name, .. } => Some(name),
             PathElement::Function { name, .. } => Some(name),
+            PathElement::EventHandler(handler) => Some(&handler.name),
             _ => None,
         }
     }
@@ -369,6 +391,9 @@ impl CompiledBindingPath {
                     is_rooted = true;
                     Some(TemplatedParentNode::new())
                 }
+                // The method of an event binding is called when the event is raised, on the
+                // value of the elements before it.
+                PathElement::EventHandler(_) => None,
             };
             if let Some(node) = node {
                 result.push(node);
@@ -408,6 +433,28 @@ impl CompiledBindingPath {
 
     pub fn is_empty(&self) -> bool {
         self.elements.is_empty()
+    }
+
+    /// The method of an event binding the path ends with
+    /// ([`CompiledBindingPathBuilder::event_handler`]).
+    pub fn event_handler(&self) -> Option<Rc<PathEventHandler>> {
+        match self.elements.last() {
+            Some(PathElement::EventHandler(handler)) => Some(handler.clone()),
+            _ => None,
+        }
+    }
+
+    /// Reads the value of the path from `root` once, without following it: what an event
+    /// binding of `{x:Bind}` calls its method on when the event is raised. A path without
+    /// nodes (none, or only the method of an event binding) is `root` itself. `Err` says why
+    /// the path could not be read (a null in its middle, a failure).
+    pub fn read_once(&self, root: &BoxedValue) -> Result<Option<BoxedValue>, String> {
+        let mut nodes = Vec::new();
+        self.build_expression(&mut nodes);
+        if nodes.is_empty() {
+            return Ok(Some(root.clone()));
+        }
+        crate::data::core::expression_nodes::read_nodes_once(root, nodes)
     }
 }
 
@@ -458,6 +505,7 @@ impl fmt::Display for CompiledBindingPath {
                         .collect();
                     format!("{}{}({})", if first { "" } else { "." }, name, arguments.join(", "))
                 }
+                PathElement::EventHandler(handler) => format!("{}{}", if first { "" } else { "." }, handler.name),
             };
             f.write_str(&text)?;
             first = matches!(element, PathElement::Not);
@@ -805,6 +853,18 @@ impl CompiledBindingPathBuilder {
         self.clone()
     }
 
+    /// The method an event binding of `{x:Bind}` calls, the last element of the path
+    /// (`Click="{x:Bind OnClick}"`, `{x:Bind Model.OnClick}`, `{x:Bind local:Handlers.OnClick}`):
+    /// when the event is raised, `invoke` is called with the value of the elements before it
+    /// read from the root source (the root source itself for a method at the start of the path)
+    /// and the arguments of the event. An expression does not read the element.
+    pub fn event_handler(&self, name: &str, invoke: PathEventHandlerInvoke) -> Self {
+        self.elements
+            .borrow_mut()
+            .push(PathElement::EventHandler(Rc::new(PathEventHandler { name: name.into(), invoke })));
+        self.clone()
+    }
+
     /// Roots the path at the templated parent of the binding target.
     pub fn templated_parent(&self) -> Self {
         self.elements.borrow_mut().push(PathElement::TemplatedParent);
@@ -1144,5 +1204,44 @@ mod tests {
         sink.on_next(Some(Rc::new("typed".to_string())));
         assert_eq!(*written.borrow(), ["typed"]);
         subscription.dispose();
+    }
+
+    /// Not from upstream (step X4 of #525): the method of an event binding is no node of an
+    /// expression; it is called on the owner the elements before it read from the root source.
+    #[test]
+    fn an_event_handler_element_is_called_on_the_owner_its_path_reads() {
+        let calls: Rc<RefCell<Vec<String>>> = Rc::new(RefCell::new(Vec::new()));
+        let record = calls.clone();
+        let path = CompiledBindingPathBuilder::new()
+            .notifying_read_only_property::<PathVm, Value<String>>("Text", |vm| vm.text.borrow().clone())
+            .event_handler(
+                "OnClick",
+                Rc::new(move |owner: &BoxedValue, arguments: &[Option<BoxedValue>]| {
+                    let text = owner.downcast_ref::<String>().cloned().unwrap_or_default();
+                    record.borrow_mut().push(format!("{text} {}", arguments.len()));
+                    Ok(())
+                }),
+            )
+            .build();
+        assert_eq!(path.to_string(), "Text.OnClick");
+        let kind = path.element(1).map(|element| element.kind());
+        assert_eq!(kind, Some(CompiledBindingPathElementKind::EventHandler));
+        let mut nodes = Vec::new();
+        path.build_expression(&mut nodes);
+        assert_eq!(nodes.len(), 1, "only the property is a node");
+
+        let vm = Rc::new(PathVm { text: RefCell::new("first".to_string()), property_changed: Event::new() });
+        let root: BoxedValue = vm.clone();
+        let owner = path.read_once(&root).expect("the path can be read").expect("the owner is not null");
+        let handler = path.event_handler().expect("the path ends with an event handler");
+        (handler.invoke)(&owner, &[None, None]).expect("the handler is called");
+        assert_eq!(*calls.borrow(), ["first 2"]);
+
+        // A path of the method alone reads the root source itself.
+        let alone = CompiledBindingPathBuilder::new()
+            .event_handler("OnClick", Rc::new(|_owner: &BoxedValue, _arguments: &[Option<BoxedValue>]| Ok(())))
+            .build();
+        let read = alone.read_once(&root).expect("the root source").expect("not null");
+        assert!(Rc::ptr_eq(&read, &root));
     }
 }

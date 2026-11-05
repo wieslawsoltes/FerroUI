@@ -14,8 +14,8 @@ use ferroui_base::data::core::{
     ValueType, ValueTypes, INDEXER_NAME,
 };
 use ferroui_base::data::{
-    BindingError, CompiledBindingPath, CompiledBindingPathBuilder, PathBindBackInvoke, PathFunctionArgument,
-    PathFunctionInvoke,
+    BindingError, CompiledBindingPath, CompiledBindingPathBuilder, PathBindBackInvoke, PathEventHandlerInvoke,
+    PathFunctionArgument, PathFunctionInvoke,
 };
 use ferroui_base::metadata::{from_markup_value, MarkupDelegate, MarkupInvokeError, MarkupValue};
 use ferroui_base::{AnyValue, BoxedValue};
@@ -26,8 +26,8 @@ use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::type_system::{IXamlMethod, IXamlProperty, IXamlType};
 
 use crate::compiler_extensions::{
-    XBindFunctionArgument, XBindFunctionPathElementNode, XBindLiteral, XamlIlBindingPathElementNode,
-    XamlIlBindingPathNode, XamlIlPropertyAccessorFactory,
+    XBindEventHandlerPathElementNode, XBindFunctionArgument, XBindFunctionPathElementNode, XBindLiteral,
+    XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlPropertyAccessorFactory,
 };
 use crate::runtime::interpreter::{runtime_error, EvalContext, EvalResult};
 use crate::runtime::type_system::{box_object, RuntimeMethod, RuntimeType};
@@ -343,6 +343,7 @@ fn element(
             )
         }
         XamlIlBindingPathElementNode::XBindFunction(e) => function(builder, e, context)?,
+        XamlIlBindingPathElementNode::XBindEventHandler(e) => event_handler(builder, e),
         XamlIlBindingPathElementNode::ClrMethodAsCommand(e) => {
             // The execute and can-execute trampolines: the owner, then the command
             // parameter if the method takes one, cast to the parameter type (`unbox.any` /
@@ -464,6 +465,27 @@ fn function(
         invoke_function(&method, &all).map(|_| ())
     });
     Ok(builder.bind_back(owner, handle_of(&bind_back.value_type), invoke))
+}
+
+/// The method an event binding of `{x:Bind}` calls (`builder.event_handler(...)`): invoked
+/// through the run-time type system with the owner (unless it is static) and, when it declares
+/// parameters, the arguments of the event.
+fn event_handler(builder: CompiledBindingPathBuilder, handler: &XBindEventHandlerPathElementNode) -> CompiledBindingPathBuilder {
+    let method = handler.method.clone();
+    let is_static = method.is_static();
+    let takes_arguments = !method.parameters().is_empty();
+    let name = method.name();
+    let invoke: PathEventHandlerInvoke = Rc::new(move |owner: &BoxedValue, arguments: &[MarkupValue]| {
+        let mut all = Vec::with_capacity(arguments.len() + 1);
+        if !is_static {
+            all.push(Some(owner.clone()));
+        }
+        if takes_arguments {
+            all.extend(arguments.iter().cloned());
+        }
+        invoke_function(&method, &all).map(|_| ())
+    });
+    builder.event_handler(&name, invoke)
 }
 
 /// `new CompiledBindingPathBuilder()`, the builder call of each transform element and then

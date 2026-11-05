@@ -98,6 +98,11 @@ pub struct BindingExpression {
     should_update_one_time_binding_target: Cell<bool>,
     target_subscription: RefCell<Option<Subscription>>,
     lost_focus_token: RefCell<Option<RoutedEventHandlerToken>>,
+    /// Whether a change of the target that the expression makes itself is not written back to
+    /// the source ([`ignore_own_target_changes`](Self::ignore_own_target_changes)).
+    ignores_own_target_changes: Cell<bool>,
+    /// Set while the expression publishes a value to its target, when it ignores its own changes.
+    publishing: Cell<bool>,
 }
 
 impl BindingExpression {
@@ -167,6 +172,8 @@ impl BindingExpression {
             should_update_one_time_binding_target: Cell::new(mode == BindingMode::OneTime),
             target_subscription: RefCell::new(None),
             lost_focus_token: RefCell::new(None),
+            ignores_own_target_changes: Cell::new(false),
+            publishing: Cell::new(false),
         });
 
         let mut leaf_accessor = None;
@@ -182,6 +189,15 @@ impl BindingExpression {
             }
         }
         this
+    }
+
+    /// A `TwoWay` or `OneWayToSource` expression does not write back to its source a change of
+    /// its target that it makes itself, when it publishes a value: the rule of WinUI's
+    /// `{x:Bind}`, whose compiled update of a target does not run the two-way listener of that
+    /// target. A `{Binding}` writes such a change back (through `ConvertBack` with a converter),
+    /// as upstream does.
+    pub fn ignore_own_target_changes(&self) {
+        self.ignores_own_target_changes.set(true);
     }
 
     /// The type of the value accepted by the binding source, if it can be
@@ -466,7 +482,11 @@ impl BindingExpression {
             value = self.convert_fallback(fallback_value, "FallbackValue");
         }
 
+        let guard = self.ignores_own_target_changes.get() && !self.publishing.replace(true);
         self.base.publish_value(Publish::Value(value), error, force_update);
+        if guard {
+            self.publishing.set(false);
+        }
     }
 
     fn write_target_value_to_source(&self) {
@@ -583,6 +603,9 @@ impl BindingExpression {
 
     fn on_target_property_changed(&self) {
         debug_assert!(matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource));
+        if self.publishing.get() {
+            return;
+        }
         let delay = self.delay();
         let Some(uncommon) = self.uncommon.as_ref().filter(|_| !delay.is_zero()) else {
             // The value is read from the target object instead of the change

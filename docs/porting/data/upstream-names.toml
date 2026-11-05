@@ -320,8 +320,43 @@ deprecated = "ferroui_x11::x11_exception::X11Exception"
 behaviour = "same"
 
 # C4: `Task`, `TaskCompletionSource` and `SynchronizationContext` become futures on the executor of
-# `ferroui_system::task` (docs/idiomatic-rust-async.md); the old types remain one release as
-# deprecated wrappers.
+# `ferroui_system::task` (docs/idiomatic-rust-async.md), and the workspace has one cancellation type,
+# `CancellationToken`; the old types remain one release as deprecated wrappers and are removed in the
+# release after 0.5. The steps and their pull requests: A1 the executor core (#500), A2 the
+# dispatcher on it (#503), A3 the one-shot channel (#508), A4a and A4b the cancellation type and its
+# uses (#510, #516), A5 the schedule of the thread (#523), A6 the asynchronous members (#530), A7 the
+# Task forms of the reactive libraries (#533). A8 (`use_future` of `ferroui-view` on the dispatcher)
+# changes no upstream name: the declarative API is FerroUI's own (docs/declarative-ui.md).
+
+[[name]]
+upstream = "System.Threading.Tasks.Task (an async method that runs on the current thread)"
+rust = "ferroui_system::task::spawn_local"
+kind = "mechanism"
+phase = "C4"
+pull = 500
+deprecated = "ferroui_system::threading::tasks::spawn_local"
+behaviour = "test"
+notes = "Steps A1 and A5. The executor core: one task table and poll loop per thread (ferroui_system::task, named after std::task). spawn_local polls the future at once and gives a JoinHandle; spawn_local_on gives the task a Schedule (where its polls run), with FirstPoll::Now or Scheduled. A panic faults the task (JoinError::Panicked; F2). Where a schedule is current (a dispatcher job) a wake follows the rule of await: inline in the same schedule, queued on it otherwise (A5, F3). Tested in src/FerroUI.System/tests/executor_tests.rs and the ordering tests (G9, G19, G20)."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task.Wait (a thread without a dispatcher)"
+rust = "ferroui_system::task::block_on"
+kind = "member"
+phase = "C4"
+pull = 500
+deprecated = "ferroui_system::threading::tasks::block_on"
+behaviour = "same"
+notes = "Step A1. Runs a future to its end on the calling thread, with the tasks it spawns and the wakes from other threads (task::run_pending, deprecated as threading::tasks::run_pending_wakes); it raises the panic of its future again. A dispatcher thread does not block: waiting for a JoinHandle there is awaiting it in a task of the dispatcher."
+
+[[name]]
+upstream = "System.Threading.Tasks.TaskScheduler (TaskScheduler.FromCurrentSynchronizationContext of a dispatcher)"
+rust = "ferroui_base::threading::Dispatcher::start_local"
+kind = "type"
+phase = "C4"
+pull = 503
+deprecated = "ferroui_base::threading::DispatcherTaskScheduler"
+behaviour = "same"
+notes = "Steps A2 and A6. The dispatcher is a Schedule per priority of ferroui_system::task (Dispatcher::task_schedule(priority): each poll is a job at that priority; a queued poll that runs inside its task's poll schedules it again after that poll, F1). to_task_scheduler().start_local(future) is Dispatcher::start_local(future) (the first poll inside the call), spawn_local is Dispatcher::spawn_local (the first poll in a job), spawn is Dispatcher::spawn; to_task_scheduler_with_priority(p) is the _with_priority forms at p. Also deprecated: Dispatcher::to_task_scheduler, to_task_scheduler_with_priority, FerroSynchronizationContext::to_task_scheduler. The order is unchanged (G1 to G17)."
 
 [[name]]
 upstream = "System.Threading.Tasks.TaskCompletionSource"
@@ -338,24 +373,56 @@ upstream = "System.Threading.CancellationTokenSource"
 rust = "ferroui_system::threading::CancellationToken"
 kind = "type"
 phase = "C4"
+pull = 516
 deprecated = "ferroui_system::threading::CancellationTokenSource"
 behaviour = "same"
-notes = "Step A4b. A token that can be canceled is CancellationToken::new(); Token is a clone of it, Cancel is cancel(), IsCancellationRequested is is_cancelled(), CreateLinkedTokenSource is child_token() of the outer token. CancellationToken.CanBeCanceled is can_be_cancelled(); CancellationToken.None and the default token stay none(). The callbacks run once, in the order of registration, on the cancelling thread (the order is a DEVIATIONS row). Also deprecated: CancellationToken::is_cancellation_requested, CancellationToken::can_be_canceled, ferroui_freedesktop::signal_watch::{CancellationFlag, Cancelled} (the token, cancelled() and signal_watch::run_until_cancelled), ferroui_protranslate_studio::AiCancellationToken, CancellationDisposable::with_source (with_token)."
+notes = "Steps A4a (the type) and A4b (the uses). A token that can be canceled is CancellationToken::new(); Token is a clone of it, Cancel is cancel(), IsCancellationRequested is is_cancelled(), CreateLinkedTokenSource is child_token() of the outer token. CancellationToken.CanBeCanceled is can_be_cancelled(); CancellationToken.None and the default token stay none(). The callbacks run once, in the order of registration, on the cancelling thread (the order is a DEVIATIONS row). Also deprecated: CancellationToken::is_cancellation_requested, CancellationToken::can_be_canceled, ferroui_freedesktop::signal_watch::{CancellationFlag, Cancelled} (the token, cancelled() and signal_watch::run_until_cancelled), ferroui_protranslate_studio::AiCancellationToken, CancellationDisposable::with_source (with_token)."
 
 [[name]]
 upstream = "System.Threading.CancellationTokenRegistration"
 rust = "ferroui_system::threading::CancellationGuard"
 kind = "type"
 phase = "C4"
+pull = 516
 deprecated = "ferroui_system::threading::CancellationTokenRegistration"
 behaviour = "test"
 notes = "Step A4b. CancellationToken::register and register_local give the guard: #[must_use], Send, dropping it removes the callback (Dispose), detach() keeps it for the life of the token, which is what dropping a CancellationTokenRegistration did. The old forms are the deprecated register_handle and register_local_handle (and LocalCancellationTokenRegistration); register_guarded and register_local_guarded are deprecated aliases of register and register_local. Tested in src/FerroUI.System/tests/cancellation_tests.rs."
+
+[[name]]
+upstream = "System.Threading.CancellationToken.IsCancellationRequested"
+rust = "ferroui_system::threading::CancellationToken::is_cancelled"
+kind = "member"
+phase = "C4"
+pull = 516
+deprecated = "ferroui_system::threading::CancellationToken::is_cancellation_requested"
+behaviour = "same"
+notes = "Steps A4a and A4b, the name of tokio_util's CancellationToken."
+
+[[name]]
+upstream = "System.Threading.CancellationToken.CanBeCanceled"
+rust = "ferroui_system::threading::CancellationToken::can_be_cancelled"
+kind = "member"
+phase = "C4"
+pull = 516
+deprecated = "ferroui_system::threading::CancellationToken::can_be_canceled"
+behaviour = "same"
+notes = "Steps A4a and A4b. CancellationToken::none() and the default token never can be."
+
+[[name]]
+upstream = "System.Threading.CancellationTokenSource.CreateLinkedTokenSource"
+rust = "ferroui_system::threading::CancellationToken::child_token"
+kind = "member"
+phase = "C4"
+pull = 510
+behaviour = "same"
+notes = "Step A4a. A child is canceled with its parent, in the parent's pass of the callbacks, and not the other way round; a dropped child leaves its parent. A source linked to several tokens is a child of one with a registration on the others. The future of a cancellation (WaitHandle, Task.Delay(Infinite, token)) is cancelled(), and a source canceled when a scope ends is drop_guard()."
 
 [[name]]
 upstream = "System.OperationCanceledException"
 rust = "ferroui_system::task::Canceled"
 kind = "type"
 phase = "C4"
+pull = 516
 deprecated = "ferroui_base::threading::OperationCanceledError"
 behaviour = "same"
 notes = "Step A4b. The dispatcher operations (wait, wait_with_timeout, result, the future), the synchronous invokes, DispatcherTask, AutoCompletePopulation, HeadlessUnitTestTask and the TaskHandle of the behaviors give Canceled (re-exported as ferroui_base::threading::Canceled); OperationCanceledError converts to and from it. Its message is the one of Canceled."
@@ -365,6 +432,7 @@ upstream = "System.Threading.Tasks.TaskCanceledException"
 rust = "ferroui_system::task::Canceled"
 kind = "type"
 phase = "C4"
+pull = 516
 deprecated = "ferroui_system::threading::tasks::TaskCanceledError"
 behaviour = "deviation"
 notes = "Steps A4b and A7. A cancellation that names no task (threading::tasks::canceled(), the cancellation of RunAsync, the work of the tests) is Canceled; Canceled::is_cancellation recognizes it and the deprecated TaskCanceledError. Since A7 the Task forms of Rx, DynamicData and ReactiveUI end a canceled task with its cancellation error (Canceled), not with a TaskCanceledError that names the task (TaskCanceledException.Task has no counterpart; DEVIATIONS.md, Reactive); a deprecated Task keeps its error that names it."
@@ -374,15 +442,37 @@ upstream = "System.Threading.Tasks.Task`1"
 rust = "ferroui_system::task::Shared"
 kind = "type"
 phase = "C4"
+pull = 533
 deprecated = "ferroui_system::threading::tasks::Task"
 behaviour = "same"
 notes = "Step A7. A Task<T> of the reactive libraries is a Shared<Result<T, ObservableError>>: IsCompleted is is_finished, Result is result() once it ended, ContinueWith(ExecuteSynchronously) is on_finished (it runs before the awaiters are woken, G9) and its token remove_on_finished, await is awaiting flatten(); Task.FromResult is Shared::ready. A future of an async method that runs on the thread is task::spawn_local(future).shared(); the forms that take a Task take a future of Result<T, ObservableError>. Status (TaskStatus) and Id have no counterpart: the outcome says how it ended. Also deprecated: TaskStatus, ContinuationId (OnFinishedId), spawn_local, block_on, run_pending_wakes, set_thread_poster, ThreadPoster of threading::tasks (task::spawn_local, block_on, run_pending, set_thread_schedule, Schedule). Shared::from(task) converts. Tested in src/FerroUI.System/tests/shared_tests.rs; the deprecated types keep task_tests.rs and the ordering tests."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task.ContinueWith"
+rust = "ferroui_system::task::Shared::on_finished"
+kind = "member"
+phase = "C4"
+pull = 533
+deprecated = "ferroui_system::threading::tasks::Task::continue_with"
+behaviour = "same"
+notes = "Step A7. The continuation runs synchronously when the task ends, before the futures awaiting it are woken (TaskContinuationOptions.ExecuteSynchronously, G9), or at once on a task that has ended; it gives an OnFinishedId (the deprecated ContinuationId) for remove_on_finished."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task.FromResult"
+rust = "ferroui_system::task::Shared::ready"
+kind = "member"
+phase = "C4"
+pull = 533
+deprecated = "ferroui_system::threading::tasks::Task::from_result"
+behaviour = "same"
+notes = "Step A7. Task.FromException is Shared::ready(Err(error)) on a Shared of a Result; Shared::from_outcome gives one that ended with a JoinError."
 
 [[name]]
 upstream = "System.Threading.Tasks.TaskCompletionSource`1 (of the reactive libraries)"
 rust = "ferroui_system::task::Shared::channel"
 kind = "type"
 phase = "C4"
+pull = 533
 deprecated = "ferroui_system::threading::tasks::TaskCompletionSource"
 behaviour = "same"
 notes = "Step A7. Code of one thread whose continuations run synchronously (the operators of Rx, ReactiveUI's interactions, the dock's requests) ends a Shared made by Shared::channel(): SetResult is SharedSender::send, SetCanceled is cancel (or the error Canceled on a Shared of a Result), and a dropped sender leaves the Shared pending, as a dropped TaskCompletionSource leaves its task. A completion that crosses threads, or whose dropped producer should cancel, is task::oneshot (the row above); the ported tests that drive Rx use oneshot channels of Result<T, ObservableError> (receiver.flatten() is the task). oneshot::Sender::from(source) and Task::from(receiver) convert."
@@ -392,6 +482,7 @@ upstream = "System.Threading.Tasks.Task.Run"
 rust = "ferroui_system::threading::tasks::run"
 kind = "member"
 phase = "C4"
+pull = 533
 behaviour = "same"
 notes = "Step A7. The name is kept; it gives a Shared<Result<T, ObservableError>> (T: Clone) where it gave a Task<T>, and run(work).flatten() is the future of its result. The work runs on a new thread and its outcome comes back to the calling thread through the schedule of the thread (docs/idiomatic-rust-async.md, section 6)."
 
@@ -400,6 +491,7 @@ upstream = "System.Threading.SynchronizationContext"
 rust = "ferroui_system::task::Schedule"
 kind = "type"
 phase = "C4"
+pull = 523
 deprecated = "ferroui_system::threading::SynchronizationContext"
 behaviour = "test"
 notes = "Step A5. Post is Schedule::schedule (Send work) and Schedule::schedule_local (work of the thread of the schedule); Send and OperationStarted/OperationCompleted have no counterpart (blocking on the dispatcher is Dispatcher::invoke). A dispatcher is the schedule of its thread (task::set_thread_schedule) from its start to its shutdown, and its task_schedule(priority) is the context of a priority. A task spawned where a schedule is current continues by the rule of await: inline when completed in that schedule, queued on it otherwise (F3). threading::context_schedule adapts a context. The Rx forms of a context take a schedule: SynchronizationContextScheduler::with_schedule, ContextDisposable::with_schedule, observe_on_schedule, subscribe_on_schedule, notify_on_schedule, BindingSchedulers::use_schedule; their context forms are deprecated. Tested in src/FerroUI.Base/threading/dispatcher_schedule_tests.rs and src/FerroUI.System/tests/executor_tests.rs."
@@ -409,6 +501,7 @@ upstream = "System.Threading.SynchronizationContext.Current"
 rust = "ferroui_system::task::current_schedule"
 kind = "member"
 phase = "C4"
+pull = 523
 deprecated = "ferroui_system::threading::current_synchronization_context"
 behaviour = "same"
 notes = "Step A5. The schedule of the running work: in a dispatcher job the dispatcher at the priority of the job, None outside of such work (a thread without a dispatcher, or the code of a dispatcher thread outside of a job unless Dispatcher::set_current_priority set one). is_current_schedule compares by Schedule::identity. FromEvent, the awaiter of AsyncSubject, ConfigureAwait(true) of ScheduleAsync and the dock services capture it."
@@ -418,6 +511,7 @@ upstream = "System.Threading.SynchronizationContext.SetSynchronizationContext"
 rust = "ferroui_system::task::set_current_schedule"
 kind = "member"
 phase = "C4"
+pull = 523
 deprecated = "ferroui_system::threading::set_synchronization_context"
 behaviour = "same"
 notes = "Step A5. Gives the previous schedule, which the caller restores; a dispatcher sets it around each job. The schedule that the wakes from other threads go to is task::set_thread_schedule; the deprecated set_synchronization_context sets both to an adapter of the context."
@@ -427,6 +521,7 @@ upstream = "Avalonia.Threading.AvaloniaSynchronizationContext"
 rust = "ferroui_base::threading::Dispatcher::current_priority"
 kind = "type"
 phase = "C4"
+pull = 523
 deprecated = "ferroui_base::threading::FerroSynchronizationContext"
 behaviour = "same"
 notes = "Step A5. The context of the dispatcher kept one role, the priority of the running job: Dispatcher::current_priority (None outside of a job) and Dispatcher::set_current_priority (InstallIfNeeded, which Application does at Normal; the previous priority is given back, in the place of RestoreContext, also deprecated). Post is Dispatcher::post or post_local at that priority; the context of a priority as a schedule is Dispatcher::task_schedule(priority). FerroScheduler::install_on_ui_thread is deprecated: the dispatcher installs itself."
@@ -436,6 +531,7 @@ upstream = "System.Threading.Tasks.Task"
 rust = "ferroui_system::task::JoinHandle"
 kind = "type"
 phase = "C4"
+pull = 530
 deprecated = "ferroui_base::threading::DispatcherTask"
 behaviour = "deviation"
 notes = "Step A6. The Task that an asynchronous member returns is the JoinHandle of a task of the dispatcher (re-exported by ferroui_base::threading with JoinError and AbortHandle): a future of Result<T, JoinError>, is_finished (IsCompleted), abort (the outcome is JoinError::Canceled), one owner (shared() for several observers, T: Clone); dropping it detaches the task. Deviation: an exception of the task (a panic) is JoinError::Panicked, a value of the handle, where await raises it again; the code that awaits a task and must fail with it matches Panicked and calls resume_unwind. The members that returned DispatcherTask return JoinHandle: NavigationPage, INavigation and PageNavigationExtensions (PushAsync, PopAsync, PopToRootAsync, PopToPageAsync, ReplaceAsync, PushModalAsync, PopModalAsync, PopAllModalsAsync), Window.ShowDialog, TopLevel.RequestPlatformInhibition, IPageTransition.Start, ICompositionGlContext.DisposeAsync and ICompositionGlTexture.DisposeAsync; the navigation members and the dialogs keep their DispatcherTask form as deprecated ..._task methods. The Task of the behaviors is TaskHandle over a shared JoinHandle. Also deprecated: DispatcherTaskScheduler and Dispatcher::to_task_scheduler, to_task_scheduler_with_priority (Dispatcher::spawn_local, start_local, spawn_with_priority and their _with_priority forms). Tested in src/FerroUI.Base/threading/dispatcher_tests.rs and the tests of each member."
@@ -445,9 +541,10 @@ upstream = "Avalonia.Threading.Dispatcher.InvokeAsync (an asynchronous callback,
 rust = "ferroui_base::threading::Dispatcher::spawn"
 kind = "member"
 phase = "C4"
+pull = 530
 deprecated = "ferroui_base::threading::Dispatcher::invoke_async_task"
 behaviour = "deviation"
-notes = "Step A6. spawn and spawn_with_priority run the Send callback in a job of the dispatcher and the future it makes there, and give a JoinHandle (a panic is JoinError::Panicked). The callback that need not be Send (invoke_async_task_local, invoke_async_task_local_with_priority) is spawn_local_with_priority(async move { callback().await }, priority), at Default for the forms without a priority: its first poll is a job at that priority, as the job of the callback was."
+notes = "Steps A2 (Dispatcher::spawn on the executor core) and A6 (the uses). spawn and spawn_with_priority run the Send callback in a job of the dispatcher and the future it makes there, and give a JoinHandle (a panic is JoinError::Panicked). The callback that need not be Send (invoke_async_task_local, invoke_async_task_local_with_priority) is spawn_local_with_priority(async move { callback().await }, priority), at Default for the forms without a priority: its first poll is a job at that priority, as the job of the callback was."
 
 # C5: the public signatures take std and the chosen crates (docs/idiomatic-rust-signatures.md).
 
