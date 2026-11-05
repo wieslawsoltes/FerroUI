@@ -704,11 +704,69 @@ ported as the reference set.
 - E8: the tiles of the gallery and the pages of the catalog (section 3.7, "Samples as built",
   *Tests*): `samples/CustomEffects/tests.rs`, `samples/ControlCatalog/tests/view_models.rs` and
   `tests/custom_effects_pages.rs` of the catalog.
-- Later steps: per effect and backend, the GPU output against the CPU reference
-  (`tests/FerroUI.RenderTests`, `tests/FerroUI.RenderBackends.Comparison`); the steady-state test
-  (no new texture or program over frames that change only parameters, with the allocation
-  counters of the Vello pass pool and the Skia resource cache); the prewarm of registered effect
-  types; input routing with a test root.
+- E9: the validation of the whole library (section 3.9). Every effect at 96 and 192 DPI against
+  its CPU reference on Skia raster (`tests.rs`: the graph effects at 192 DPI added to the earlier
+  steps), Graphite at scales 1 and 2 (`gpu/metal/tests.rs`,
+  `graphite_draws_the_library_at_twice_the_scale_as_the_cpu_references`), and the CPU, hybrid and
+  GPU modes of Vello (`effect_tests.rs`, `gpu/effect_pass_tests.rs`: the graph effects at scale 2
+  added); the comparison scenes (`tests/FerroUI.RenderBackends.Comparison/custom_effect_scenes.rs`
+  and `custom_effect_tests.rs`): each effect through the contracts on Skia raster and every mode
+  of Vello at 96 and 192 DPI against its CPU reference, Skia against each mode of Vello, and the
+  neutral values; the steady state: frames of the whole library that change only parameters
+  compile no SkSL program and make no image on Skia raster
+  (`frames_of_the_library_compile_no_program_after_the_first`), and compile no pipeline, allocate
+  no texture and upload no image in the hybrid and GPU modes of Vello
+  (`frames_of_the_whole_library_compile_and_allocate_nothing_in_the_gpu_modes`); the prewarm: the
+  composition target draws every type of the library once offscreen after its first frame
+  (`a_target_prewarms_the_custom_effects_of_the_library_after_its_first_frame`,
+  `compositor_tests.rs`), the prewarm drawn as the target draws it compiles every program the first
+  frame of the library needs on Skia raster
+  (`the_prewarm_of_the_library_compiles_what_its_first_frame_draws`) and through a Graphite render
+  target (`a_graphite_render_target_prewarms_the_library_ahead_of_the_frame_that_shows_it`), and on
+  Vello, which does not prewarm, the first frame makes one pipeline per shader type and no frame
+  after it makes one (`the_first_frame_of_the_library_makes_one_pipeline_per_shader_type`).
+
+### 3.9 Validation as built (E9)
+
+- *Against the CPU reference, per backend and mode.* Every effect of the library (the nine graph
+  effects, the three runtime shaders, the two page transitions, the four interactive effects) is
+  drawn around a scene of opaque and translucent squares and compared with its CPU reference
+  applied to the same scene drawn plain by the same backend and mode, at one and two device pixels
+  per unit, on Skia raster, Graphite (macOS, a Metal device), and the CPU, hybrid and GPU modes of
+  Vello. The tolerances are those of the steps that added each effect, at both scales: 2 levels for
+  the colour matrices and convolutions, 12 for the glow (a blur against the reference's), 1 to 3
+  for the runtime shaders and the transitions, one or two more on Graphite (14 for the glow), and
+  for the programs that move the content (the water ripple, the flame) at most 1% of the pixels
+  further than 3 levels (4 on Graphite) with a mean within 1.5. Ganesh draws the same programs as
+  Graphite and raster; no pixel test of the custom effects runs on it (the GPU pixel tests of
+  `ferroui-skia` are Graphite's, on a Metal device). WebGL2 draws the CPU references until step 3
+  of the Vello route in gpu-rendering.md.
+- *Comparison scenes.* `tests/FerroUI.RenderBackends.Comparison` (the crate that links both
+  backends) draws each effect through the contracts only, as the render walk draws it, into render
+  target bitmaps of Skia raster and of every mode of Vello that is built, at 96 and 192 DPI, holds
+  each to the CPU reference, and compares Skia with each mode of Vello in the table form of the
+  other comparison scenes: the share of the pixels beyond the tolerance of the harness and the mean
+  difference, bounded by the two tolerances and by where the references of the two plain
+  renderings differ. A neutral value of each effect draws the content unchanged everywhere.
+- *Steady state.* Effect graphs are loaded once per type, programs compiled once per thread (Skia)
+  or device (Vello) and type, and a frame changes only uniforms and the members of graphs: the
+  tests draw the whole library over eight frames whose parameters change and hold the counters of
+  the programs (`runtime_effects::compilation_count`), the Skia images of effect images
+  (`custom_shader_effects::effect_images_made`), the pipelines
+  (`effect_passes::shader_pipelines_created`), the textures of the pool
+  (`effect_passes::texture_allocations`) and the uploads of images (`effect_passes::image_uploads`)
+  constant after the first frames.
+- *Prewarm.* The prewarm API is the one of #437 (gpu-rendering.md, "Pipelines made ahead of their
+  first draw"): each type registers its graph or its default value under `custom-effect:<NAME>`
+  when it is first loaded, and a composition target draws what was registered once offscreen after
+  its first frame, through `IRenderTarget::prewarm`. Skia's GPU render targets draw it (Graphite on
+  a recorder of its own); the tests show that this compiles every program the first frame of the
+  library needs. A graph is drawn at the values of its description, where some colour matrices are
+  the identity and are not drawn: a colour matrix layer is one program whatever its matrix, which
+  the other graphs prewarm. Vello's render targets do not prewarm (the default of the contract):
+  the pipeline of a shader effect type is made by the first frame that draws it, once per device,
+  which the tests bound; drawing the prewarm onto a scene of the device offscreen is the step that
+  would add it, not taken (its cost has not been measured).
 
 ## 4. Steps
 
@@ -725,7 +783,7 @@ Each step is one pull request from main.
 | E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions. **Done**: `EffectImage`, `EffectImageWeak`, `EffectImagePixels`, the children convention (`SHADER_WGSL_CHILDREN_BINDING`, `MAX_SHADER_CHILDREN`, `check_shader_children`, `for_each_shader_child`), Skia's image shaders and Vello's textures uploaded once and released after the last handle, the dissolve and mask transitions in the library and on the catalog page (section 3.6, "Secondary images as built") | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
 | E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples. **Done**: `IEffectInputHandler`, `EffectHostContext`, `Effect::construct_interactive`, `InputElement::interactive_effect`, the routing of `input_element_effects.rs`, the pointer spotlight, the reactive grid, the water ripple and the burning flame (values and interactive classes) in the library and on the catalog page (section 3.5, "Interactive effects as built") | addition | medium: event ordering and capture |
 | E8 | Samples and catalog pages (section 3.7). **Done**: `samples/CustomEffects` (the gallery application, crate `custom-effects`), the catalog section "Custom effects" with a page per family (section 3.7, "Samples as built") | none (samples) | low |
-| E9 | Validation and documentation: render tests GPU against the CPU reference per backend and mode, comparison scenes, the steady-state and prewarm tests, the rows of gpu-rendering.md, a section in winui-composition.md on how WinUI's effect and render subsystems map to FerroUI | none | low |
+| E9 | Validation and documentation: render tests GPU against the CPU reference per backend and mode, comparison scenes, the steady-state and prewarm tests, the rows of gpu-rendering.md, a section in winui-composition.md on how WinUI's effect and render subsystems map to FerroUI. **Done**: every effect of the library at 96 and 192 DPI on Skia raster, Graphite and every mode of Vello against its CPU reference, the comparison scenes of `tests/FerroUI.RenderBackends.Comparison`, the steady state of the whole library on both backends, the prewarm by the composition target and a Graphite render target, the rows of gpu-rendering.md, winui-composition.md section 5.4 (section 3.9, "Validation as built") | none | low |
 
 Status: E0 and E1 are merged (#455): the model and the no-op. E2 is done: a custom effect whose
 type has a graph is drawn by the render walk as that graph around the content, through the painter
@@ -797,6 +855,17 @@ page per family in a section "Custom effects", in place of its single page; its 
 photographs of its assets. The effects are those of E2 to E7, so every tile draws on the GPU of
 Skia and Vello, and a slider, a colour or a frame of an animation changes only uniforms and the
 members of graphs.
+
+E9 is done, and with it #455: every effect FerroUI ships is held to its CPU reference on Skia raster,
+Graphite and the CPU, hybrid and GPU modes of Vello at one and two device pixels per unit, and
+compared between Skia and each mode of Vello in the comparison scenes; frames of the whole library
+that change only parameters compile no program, make no image, allocate no texture and upload
+nothing on either backend; the prewarm of a composition target draws every type of the library after
+its first frame, which on Skia compiles every program its first frame needs, and on Vello, which does
+not prewarm, each pipeline is made once per device and type (section 3.9, "Validation as built").
+gpu-rendering.md records the paths and their tests, and winui-composition.md (section 5.4) maps
+WinUI's effect factory, Win2D's effects and pixel shaders and its render walk onto the custom
+effects.
 
 ## 5. Not in scope
 

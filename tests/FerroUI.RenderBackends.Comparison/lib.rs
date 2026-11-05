@@ -16,6 +16,7 @@
 //!
 //! This is the one crate that links both backends; an application has one.
 
+pub mod custom_effect_scenes;
 pub mod effect_scenes;
 pub mod geometries;
 pub mod modes;
@@ -209,6 +210,8 @@ pub fn drawn_the_same_way_twice(backend: &Backend, first: &Pixels, second: &Pixe
 mod application_tests;
 #[cfg(test)]
 mod codec_tests;
+#[cfg(test)]
+mod custom_effect_tests;
 #[cfg(test)]
 mod effect_tests;
 #[cfg(test)]
