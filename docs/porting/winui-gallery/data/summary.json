@@ -205,8 +205,8 @@
       "verified": 0
     },
     "member_candidates": {
-      "missing-source-candidate": 5421,
-      "source-candidate": 2041
+      "missing-source-candidate": 5170,
+      "source-candidate": 2292
     },
     "members_behavior": {
       "partial": 0,
@@ -220,8 +220,8 @@
       "verified": 0
     },
     "type_candidates": {
-      "missing-source-candidate": 1131,
-      "source-candidate": 414
+      "missing-source-candidate": 1083,
+      "source-candidate": 462
     },
     "types_behavior": {
       "partial": 0,
