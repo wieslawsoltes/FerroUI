@@ -35,6 +35,9 @@ pub enum BindingExpressionNode {
     VisualAncestor(VisualAncestorBindingExpressionNode),
     LogicalAncestor(LogicalAncestorBindingExpressionNode),
     TemplatedParent(TemplatedParentBindingExpressionNode),
+    /// The path of an `{x:Bind}`, in the grammar of WinUI's compiled bindings
+    /// ([`super::x_bind_path`]), resolved by [`super::x_bind::transform_path`].
+    XBind(Rc<super::x_bind_path::XBindPath>),
 }
 
 impl BindingExpressionNode {
@@ -81,7 +84,10 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathParser {
         let first_argument = binding.arguments.borrow().first().cloned();
         if let Some(binding_path_text) = first_argument.and_then(|a| a.cast::<XamlAstTextNode>())
         {
-            let mut nodes = Self::get_binding_path(&binding_path_text)?;
+            let mut nodes = match is_x_bind {
+                true => super::x_bind::parse_path(&binding_path_text)?,
+                false => Self::get_binding_path(&binding_path_text)?,
+            };
 
             if let Some(converted_node) = &converted_node {
                 let index = nodes.iter().take_while(|x| x.is_transform_node()).count();
@@ -107,7 +113,10 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathParser {
             if let Some(binding_path_assignment) = binding_path_assignment {
                 let first_value = binding_path_assignment.values.borrow().first().cloned();
                 if let Some(path_value) = first_value.and_then(|v| v.cast::<XamlAstTextNode>()) {
-                    let mut nodes = Self::get_binding_path(&path_value)?;
+                    let mut nodes = match is_x_bind {
+                        true => super::x_bind::parse_path(&path_value)?,
+                        false => Self::get_binding_path(&path_value)?,
+                    };
 
                     if nodes.len() == 1 && nodes[0].is_empty_expression_node() {
                         binding_path_assignment.values.borrow_mut().remove(0);
