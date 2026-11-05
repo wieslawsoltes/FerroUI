@@ -727,22 +727,27 @@
       "disposition": "implemented-subset",
       "implementation": [
         "src/Markup/FerroUI.Markup.Xaml.WinUI/importer/migration.rs",
-        "src/Markup/FerroUI.Markup.Xaml.WinUI/bindings/binding.rs",
-        "src/Markup/FerroUI.Markup.Xaml.WinUI/bindings/bindings.rs",
-        "src/Markup/FerroUI.Markup.Xaml.WinUI/bindings/path_node.rs"
+        "src/Markup/FerroUI.Markup.Xaml/markup_extensions/x_bind/extension.rs",
+        "src/Markup/FerroUI.Markup.Xaml/markup_extensions/x_bind/bindings.rs",
+        "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/x_bind.rs",
+        "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/x_bind_path.rs"
       ],
-      "notes": "Rejected by default. Explicit PropertyPathsWithExplicitLifecycle policy preserves typed root/named-element sources, typed template item scopes, OneTime default, OneWay/TwoWay tracking, TextBox LostFocus writeback and explicit Initialize/Update/StopTracking lifecycle. Functions, events, casts, indexers, phased and deferred loading remain diagnosed. This is not complete compiled-binding parity.",
+      "notes": "Kept as written by the default WinUIXBindPolicy::Compile and compiled by the x:Bind core of the XAML compiler (docs/porting/x-bind.md): the root source and typed DataTemplate and ControlTemplate scopes, OneTime default, OneWay/TwoWay with update triggers, WinUI's path grammar (casts, indexers, attached and static members, functions, BindBack), converters, fallback and target null values, event binding, and the Initialize/Update/StopTracking lifecycle, initialized when the root is attached to a visual tree. Nested x:Bind is reported by the importer as WinUI reports it; WinUIXBindPolicy::Reject reports every x:Bind. The deviations of the core are listed in x-bind.md; this is not complete compiled-binding parity.",
       "tests": [
         {
-          "name": "xbind_reports_root_source_semantics_even_with_an_alternative_xaml_prefix",
+          "name": "xbind_is_kept_as_written_for_the_compiler_core",
           "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
         },
         {
-          "name": "property_path_xbind_is_a_separate_extension_with_original_location_and_explicit_scope",
+          "name": "xbind_is_kept_or_rejected_with_an_alternative_xaml_prefix",
           "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
         },
         {
-          "name": "migrated_xbind_stays_dormant_until_the_host_initializes_the_document",
+          "name": "nested_extensions_of_an_x_bind_are_migrated_and_a_nested_x_bind_is_reported",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
+        },
+        {
+          "name": "migrated_xbind_stays_dormant_until_the_document_is_initialized",
           "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
         },
         {
@@ -750,8 +755,12 @@
           "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
         },
         {
-          "name": "property_path_policy_still_rejects_functions_events_casts_indexers_and_unknown_parameters",
-          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
+          "name": "root_is_initialized_when_it_is_attached_to_a_visual_tree",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/x_bind_tests.rs"
+        },
+        {
+          "name": "winui_diagnostics_of_the_core_are_load_errors",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/x_bind_tests.rs"
         }
       ]
     },
@@ -773,24 +782,52 @@
       "implementation": [
         "src/Markup/FerroUI.Markup.Xaml.WinUI/importer/migration.rs"
       ],
-      "notes": "Type references follow explicit alias mappings. In the opt-in property-path x:Bind policy, each template instance validates its source item against its resolved native data type. Other compiled/deferred expression contracts remain unsupported.",
+      "notes": "Type references follow explicit alias mappings. The x:DataType of a DataTemplate is the type of the item its x:Bind reads; each template instance validates its item against it (the x:Bind core, docs/porting/x-bind.md).",
       "tests": [
         {
           "name": "aliases_resolve_type_references_in_templates_directives_and_type_extensions",
           "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
+        },
+        {
+          "name": "typed_template_scope_keeps_its_type_namespace_even_when_the_prefix_is_shadowed",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
+        }
+      ]
+    },
+    "x:DefaultBindMode": {
+      "disposition": "implemented-subset",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.WinUI/importer/migration.rs",
+        "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/x_bind_directives.rs"
+      ],
+      "notes": "Kept as written and compiled by the x:Bind core: the default mode of the x:Bind of an element and its subtree (docs/porting/x-bind.md, section 3.12).",
+      "tests": [
+        {
+          "name": "native_and_winui_documents_keep_the_directives_of_x_bind",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
+        },
+        {
+          "name": "default_bind_mode_of_a_winui_document",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/x_bind_tests.rs"
         }
       ]
     },
     "x:Load": {
-      "disposition": "rejected",
+      "disposition": "implemented-subset",
       "implementation": [
-        "src/Markup/FerroUI.Markup.Xaml.WinUI/importer/migration.rs"
+        "src/Markup/FerroUI.Markup.Xaml.WinUI/importer/migration.rs",
+        "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/x_bind_directives.rs",
+        "src/Markup/FerroUI.Markup.Xaml/markup_extensions/x_bind/deferred_element.rs"
       ],
-      "notes": "Deferred creation and named-element lifetime require implementation; the migration pass reports the directive.",
+      "notes": "Kept as written and compiled by the x:Bind core: x:Load False/True or bound, and x:DeferLoadStrategy, create the element in the place of a DeferredElement when it is loaded or found by name. UnloadObject from code-behind has no counterpart yet (docs/porting/x-bind.md, section 3.12).",
       "tests": [
         {
           "name": "unknown_state_lifecycle_and_localization_contracts_are_not_discarded",
           "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
+        },
+        {
+          "name": "deferred_elements_of_a_winui_document_load_with_find_name",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/x_bind_tests.rs"
         }
       ]
     },
@@ -808,12 +845,23 @@
       ]
     },
     "x:Phase": {
-      "disposition": "rejected",
+      "disposition": "implemented-subset",
       "implementation": [
-        "src/Markup/FerroUI.Markup.Xaml.WinUI/importer/migration.rs"
+        "src/Markup/FerroUI.Markup.Xaml.WinUI/importer/migration.rs",
+        "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/x_bind_directives.rs",
+        "src/Markup/FerroUI.Markup.Xaml/markup_extensions/x_bind/bindings.rs"
       ],
-      "notes": "Phased rendering lifecycle is not implemented by renaming this directive.",
-      "tests": []
+      "notes": "Kept as written and compiled by the x:Bind core: the bindings of an element of an item template are read in its phase through IDataTemplateComponent, and the element is hidden until then (docs/porting/x-bind.md, section 3.12).",
+      "tests": [
+        {
+          "name": "native_and_winui_documents_keep_the_directives_of_x_bind",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/importer_tests.rs"
+        },
+        {
+          "name": "phases_of_a_winui_item_template",
+          "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/x_bind_tests.rs"
+        }
+      ]
     }
   }
 }
