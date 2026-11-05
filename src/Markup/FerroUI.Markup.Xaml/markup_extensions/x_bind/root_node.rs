@@ -15,6 +15,10 @@ pub(super) struct XBindRootNode {
     bindings: Weak<XBindings>,
     /// The path, for diagnostics.
     path: String,
+    /// Whether the binding has a `FallbackValue`: a path that cannot be read gives the target
+    /// the fallback, which is what WinUI's generated code does instead of failing, so it is not
+    /// a diagnostic.
+    has_fallback_value: bool,
     /// Off while the bindings are stopped: a source change of the expression publishes nothing.
     enabled: Cell<bool>,
     error: RefCell<Option<String>>,
@@ -23,13 +27,14 @@ pub(super) struct XBindRootNode {
 }
 
 impl XBindRootNode {
-    pub fn new(bindings: &Rc<XBindings>, path: String) -> Rc<Self> {
+    pub fn new(bindings: &Rc<XBindings>, path: String, has_fallback_value: bool) -> Rc<Self> {
         Rc::new(Self {
             // The root is held weakly, as the elements a binding locates are: the root owns the
             // targets, which own their expressions.
             state: NodeState::locating_an_element(),
             bindings: Rc::downgrade(bindings),
             path,
+            has_fallback_value,
             enabled: Cell::new(bindings.is_initialized()),
             error: RefCell::new(None),
             path_nodes: RefCell::new(Vec::new()),
@@ -85,11 +90,13 @@ impl XBindRootNode {
     }
 
     /// The failure of the binding: of its root source, or of its expression (a path that could
-    /// not be read or a value that could not be converted to the target).
+    /// not be read or a value that could not be converted to the target), unless a fallback
+    /// value stands for the expression.
     pub fn diagnostic(&self) -> Option<XBindDiagnostic> {
         let message = self.error.borrow().clone().or_else(|| {
             self.state
                 .owner()
+                .filter(|_| !self.has_fallback_value)
                 .filter(|owner| owner.error_type() != BindingErrorType::None)
                 .map(|_| "the path could not be read or its value converted to the target property".to_string())
         })?;

@@ -3,12 +3,37 @@
 use super::root_node::XBindRootNode;
 use super::XBindings;
 use crate::XamlLoadError;
+use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::expression_nodes::ExpressionNode;
 use ferroui_base::data::core::{BindingExpression, BindingExpressionOptions, TargetTypeConverter};
 use ferroui_base::data::{BindingBase, BindingExpressionBase, BindingMode, CompiledBindingPath, UpdateSourceTrigger};
-use ferroui_base::{ferro_markup_type, FerroObject, FerroProperty, Ref};
+use ferroui_base::utilities::CultureInfo;
+use ferroui_base::{ferro_markup_type, BoxedValue, FerroObject, FerroProperty, Ref, UnsetValueType};
 use ferroui_controls::TextBox;
 use std::rc::Rc;
+
+/// What `{x:Bind}` does with the value of its path on the way to the target and back (step X3):
+/// the converter with its parameter and culture, and the values that stand for a path that
+/// cannot be read and for a null value. They are the options of the engine's expression, as for
+/// `{Binding}`.
+#[derive(Clone)]
+pub(super) struct XBindValueOptions {
+    pub converter: Option<Rc<dyn IValueConverter>>,
+    pub converter_parameter: Option<BoxedValue>,
+    pub converter_culture: Option<CultureInfo>,
+    /// The unset marker for none.
+    pub fallback_value: Option<BoxedValue>,
+    /// The unset marker for none.
+    pub target_null_value: Option<BoxedValue>,
+}
+
+impl XBindValueOptions {
+    /// Whether the binding has a fallback value: a path that cannot be read then gives the
+    /// target the fallback, as WinUI's generated code does, and is not a failure of the binding.
+    pub fn has_fallback_value(&self) -> bool {
+        !self.fallback_value.as_ref().is_some_and(|value| value.is::<UnsetValueType>())
+    }
+}
 
 /// The binding of one target property to an `{x:Bind}` path: the compiled path, read from the
 /// root source of the [`XBindings`] it belongs to, in the mode the markup gave it.
@@ -17,11 +42,18 @@ use std::rc::Rc;
 /// after a root node that publishes the root source only while the bindings are initialized.
 /// `OneWay` and `TwoWay` follow change notification (registered properties,
 /// `INotifyPropertyChanged`); `OneTime` reads when the bindings are initialized or updated.
+///
+/// The converter, the fallback value and the target null value of the markup are the options of
+/// the expression (WinUI's `BindAssignment`, `GetConverterExpression`, `FallbackValueExpression`,
+/// `TargetNullValueExpression`): the value of the path goes through `Convert` (and `ConvertBack`
+/// when a `TwoWay` binding writes the target back), a path that cannot be read gives the target
+/// the fallback value, a null value the target null value.
 pub struct XBinding {
     bindings: Rc<XBindings>,
     path: Option<CompiledBindingPath>,
     mode: BindingMode,
     update_source_trigger: UpdateSourceTrigger,
+    options: XBindValueOptions,
 }
 
 impl XBinding {
@@ -30,8 +62,9 @@ impl XBinding {
         path: Option<CompiledBindingPath>,
         mode: BindingMode,
         update_source_trigger: UpdateSourceTrigger,
+        options: XBindValueOptions,
     ) -> Rc<Self> {
-        Rc::new(Self { bindings, path, mode, update_source_trigger })
+        Rc::new(Self { bindings, path, mode, update_source_trigger, options })
     }
 
     /// The bindings of the root this binding reads from.
@@ -80,7 +113,7 @@ impl XBinding {
             )
         })?;
         let path_text = self.path.as_ref().map(ToString::to_string).unwrap_or_default();
-        let root = XBindRootNode::new(&self.bindings, path_text);
+        let root = XBindRootNode::new(&self.bindings, path_text, self.options.has_fallback_value());
         let mut nodes: Vec<Rc<dyn ExpressionNode>> = vec![root.clone()];
         if let Some(path) = &self.path {
             // A path that starts at a named element is rooted at that element: its first node
@@ -96,6 +129,11 @@ impl XBinding {
                 update_source_trigger: self.trigger_for(target, target_property),
                 target_property: Some(target_property),
                 target_type_converter: Some(TargetTypeConverter::get_default_converter()),
+                converter: self.options.converter.clone(),
+                converter_parameter: self.options.converter_parameter.clone(),
+                converter_culture: self.options.converter_culture.clone(),
+                fallback_value: self.options.fallback_value.clone(),
+                target_null_value: self.options.target_null_value.clone(),
                 ..Default::default()
             },
         );
