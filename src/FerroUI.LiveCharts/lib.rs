@@ -1,7 +1,7 @@
 //! Live chart calculation and retained scenes for FerroUI: the core of the LiveCharts2 port
-//! (axes, scales, bounds, stacking, motion, paints, scenes and visual states) and the Cartesian,
-//! pie, polar, Sankey, treemap and geographic engines (docs/porting/livecharts2.md); see
-//! NOTICE.md for the source attribution and the bundled world map.
+//! (axes, scales, bounds, stacking, motion, paints, scenes, labelers and visual states) and the
+//! Cartesian, pie, polar, Sankey, treemap and geographic engines (docs/porting/livecharts2.md);
+//! see NOTICE.md for the source attribution and the bundled world map.
 
 pub mod axis;
 pub mod cartesian_chart_engine;
@@ -11,6 +11,7 @@ pub mod geo;
 pub mod geo_map_chart_engine;
 pub mod heat_functions;
 pub mod kernel;
+pub mod labelers;
 pub mod measure;
 pub mod motion;
 pub mod paint;
@@ -23,7 +24,10 @@ pub mod series;
 pub mod treemap_chart_engine;
 pub mod visual_states;
 
-pub use axis::{Axis, AxisPosition, AxisScale, CARTESIAN_LABELS_PADDING, POLAR_LABELS_PADDING};
+pub use axis::{
+    Axis, AxisPosition, AxisScale, CARTESIAN_LABELS_PADDING, POLAR_LABELS_BACKGROUND,
+    POLAR_LABELS_PADDING,
+};
 pub use cartesian_chart_engine::{
     CartesianChartEngine, CartesianMeasurement, CartesianOptions, CartesianSeriesBounds, Section,
 };
@@ -38,9 +42,10 @@ pub use geo_map_chart_engine::{
 };
 pub use heat_functions::HeatFunctions;
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
+pub use labelers::{as_date, as_time_span, Labeler, Labelers};
 pub use motion::{Animatable, Animation, MotionProperty, Repeat};
 pub use paint::BrushSpace;
-pub use pie_chart_engine::{PieChartEngine, PieOptions};
+pub use pie_chart_engine::{AngularTicks, Needle, PieChartEngine, PieOptions, PieVisual};
 pub use polar_chart_engine::{
     PolarChartEngine, PolarMeasurement, PolarOptions, PolarScale, COTANGENT_ANGLE, TANGENT_ANGLE,
 };
