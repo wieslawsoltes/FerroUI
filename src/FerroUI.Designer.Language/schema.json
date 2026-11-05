@@ -28258,6 +28258,36 @@
         "type_name": "Option<String>",
         "documentation": "XBindExtension.BindBack: Option<String>",
         "values": []
+      },
+      "Converter": {
+        "name": "Converter",
+        "type_name": "Option<Rc<dyn IValueConverter>>",
+        "documentation": "XBindExtension.Converter: Option<Rc<dyn IValueConverter>>",
+        "values": []
+      },
+      "ConverterParameter": {
+        "name": "ConverterParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.ConverterParameter: Option<BoxedValue>",
+        "values": []
+      },
+      "ConverterLanguage": {
+        "name": "ConverterLanguage",
+        "type_name": "Option<CultureInfo>",
+        "documentation": "XBindExtension.ConverterLanguage: Option<CultureInfo>",
+        "values": []
+      },
+      "FallbackValue": {
+        "name": "FallbackValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.FallbackValue: Option<BoxedValue>",
+        "values": []
+      },
+      "TargetNullValue": {
+        "name": "TargetNullValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.TargetNullValue: Option<BoxedValue>",
+        "values": []
       }
     },
     "namespace_aliases": [

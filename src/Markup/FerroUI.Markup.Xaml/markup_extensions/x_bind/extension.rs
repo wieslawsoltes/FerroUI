@@ -1,13 +1,16 @@
 //! The markup extension `{x:Bind}`.
 
+use super::binding::XBindValueOptions;
 use super::bindings::XBindScope;
 use super::{XBinding, XBindings};
 use crate::{IRootObjectProvider, ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::controls::NameScopeRef;
+use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
-use ferroui_base::data::{BindingMode, CompiledBindingPath, UpdateSourceTrigger};
+use ferroui_base::data::{BindingMode, CompiledBindingPath, CompiledBindingPathElementKind, UpdateSourceTrigger};
 use ferroui_base::metadata::IServiceProvider;
-use ferroui_base::{ferro_markup_type, BoxedValue};
+use ferroui_base::utilities::CultureInfo;
+use ferroui_base::{ferro_markup_type, BoxedValue, FerroProperty};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -29,6 +32,19 @@ use std::rc::Rc;
 /// through the method [`bind_back`](Self::bind_back) names, which the compiler resolves into
 /// the function element of the path.
 ///
+/// The value of the path goes through a [`converter`](Self::converter) (an `IValueConverter`,
+/// with its [`converter_parameter`](Self::converter_parameter) and the culture
+/// [`converter_language`](Self::converter_language) names; `ConvertBack` on the way back of a
+/// `TwoWay` binding), and [`fallback_value`](Self::fallback_value) and
+/// [`target_null_value`](Self::target_null_value) stand for a path that cannot be read (a null
+/// in the middle of it, a failure) and for a null value (step X3).
+///
+/// On an event (`Click="{x:Bind OnClick}"`, `Click="{x:Bind Model.OnClick}"`,
+/// `Click="{x:Bind local:Handlers.OnClick}"`) the path ends with the method the event calls,
+/// which the compiler resolves into the event handler element of the path; the binding the
+/// extension provides subscribes the handler while the bindings of the root are initialized
+/// (step X4, [`XBinding::bind_routed_event`]).
+///
 /// The default mode is `OneTime`, as WinUI's. Providing the value creates an [`XBinding`] for
 /// the target and registers it with the [`XBindings`] of its root, which reads it when it is
 /// initialized (on `Loading`, see [`XBindings`]) and on every `Update`.
@@ -38,6 +54,11 @@ pub struct XBindExtension {
     update_source_trigger: Cell<UpdateSourceTrigger>,
     data_type: Cell<Option<ValueType>>,
     bind_back: RefCell<Option<String>>,
+    converter: RefCell<Option<Rc<dyn IValueConverter>>>,
+    converter_parameter: RefCell<Option<BoxedValue>>,
+    converter_language: RefCell<Option<CultureInfo>>,
+    fallback_value: RefCell<Option<BoxedValue>>,
+    target_null_value: RefCell<Option<BoxedValue>>,
 }
 
 impl XBindExtension {
@@ -49,6 +70,11 @@ impl XBindExtension {
             update_source_trigger: Cell::new(UpdateSourceTrigger::Default),
             data_type: Cell::new(None),
             bind_back: RefCell::new(None),
+            converter: RefCell::new(None),
+            converter_parameter: RefCell::new(None),
+            converter_language: RefCell::new(None),
+            fallback_value: RefCell::new(Some(FerroProperty::unset_value())),
+            target_null_value: RefCell::new(Some(FerroProperty::unset_value())),
         })
     }
 
@@ -109,15 +135,90 @@ impl XBindExtension {
         *self.bind_back.borrow_mut() = bind_back;
     }
 
-    /// Checks the mode and the update trigger as WinUI's compiler does
-    /// (`BindAssignment.ValidateUpdateSourceTrigger`). The compiler reports the same errors with
-    /// the position of the binding; this covers an extension made in code.
+    /// `Converter`: the `IValueConverter` the value of the path goes through (`Convert` to the
+    /// target, `ConvertBack` to the source of a `TwoWay` binding). Markup gives it as a
+    /// `{StaticResource}`.
+    pub fn converter(&self) -> Option<Rc<dyn IValueConverter>> {
+        self.converter.borrow().clone()
+    }
+
+    pub fn set_converter(&self, converter: Option<Rc<dyn IValueConverter>>) {
+        *self.converter.borrow_mut() = converter;
+    }
+
+    /// `ConverterParameter`: the parameter the converter is called with.
+    pub fn converter_parameter(&self) -> Option<BoxedValue> {
+        self.converter_parameter.borrow().clone()
+    }
+
+    pub fn set_converter_parameter(&self, parameter: Option<BoxedValue>) {
+        *self.converter_parameter.borrow_mut() = parameter;
+    }
+
+    /// `ConverterLanguage`: the culture the converter is called with, which markup names by its
+    /// language tag (`fr-FR`); `None` is the current culture.
+    pub fn converter_language(&self) -> Option<CultureInfo> {
+        self.converter_language.borrow().clone()
+    }
+
+    pub fn set_converter_language(&self, language: Option<CultureInfo>) {
+        *self.converter_language.borrow_mut() = language;
+    }
+
+    /// `FallbackValue`: the value of the target when the path cannot be read (a null in the
+    /// middle of it, a failure); the unset marker (the default) for none, `None` for `x:Null`.
+    pub fn fallback_value(&self) -> Option<BoxedValue> {
+        self.fallback_value.borrow().clone()
+    }
+
+    pub fn set_fallback_value(&self, value: Option<BoxedValue>) {
+        *self.fallback_value.borrow_mut() = value;
+    }
+
+    /// `TargetNullValue`: the value of the target when the value of the path is null; the
+    /// unset marker (the default) for none.
+    pub fn target_null_value(&self) -> Option<BoxedValue> {
+        self.target_null_value.borrow().clone()
+    }
+
+    pub fn set_target_null_value(&self, value: Option<BoxedValue>) {
+        *self.target_null_value.borrow_mut() = value;
+    }
+
+    /// Checks the mode, the update trigger and the converter as WinUI's compiler does
+    /// (`BindAssignment.ValidateUpdateSourceTrigger`, `ValidateConverter`). The compiler reports
+    /// the same errors with the position of the binding; this covers an extension made in code.
     pub fn validate(&self) -> Result<(), XamlLoadError> {
         let mode = self.mode();
         if !matches!(mode, BindingMode::OneTime | BindingMode::OneWay | BindingMode::TwoWay) {
             return Err(XamlLoadError::with_message(format!(
                 "x:Bind: the mode {mode:?} is not supported; x:Bind is OneTime, OneWay or TwoWay"
             )));
+        }
+        if self.converter().is_none() {
+            if self.converter_parameter().is_some() {
+                return Err(XamlLoadError::with_message(
+                    "x:Bind: ConverterParameter cannot be specified without an actual converter",
+                ));
+            }
+            if self.converter_language().is_some() {
+                return Err(XamlLoadError::with_message(
+                    "x:Bind: ConverterLanguage cannot be specified without an actual converter",
+                ));
+            }
+        } else {
+            let ends_with_function = match self.path() {
+                Some(path) => {
+                    let last = path.len().checked_sub(1).and_then(|index| path.element(index)).map(|element| element.kind());
+                    last == Some(CompiledBindingPathElementKind::Function)
+                }
+                None => false,
+            };
+            if ends_with_function {
+                return Err(XamlLoadError::with_message(
+                    "x:Bind: Using a converter with function binding is not supported",
+                ));
+            }
         }
         match self.update_source_trigger() {
             UpdateSourceTrigger::Explicit => Err(XamlLoadError::with_message(
@@ -146,7 +247,14 @@ impl XBindExtension {
             None => XBindScope::Root,
         };
         let group = XBindings::for_root_value(root, scope, name_scope)?;
-        Ok(XBinding::new(group, self.path(), self.mode(), self.update_source_trigger()))
+        let options = XBindValueOptions {
+            converter: self.converter(),
+            converter_parameter: self.converter_parameter(),
+            converter_culture: self.converter_language(),
+            fallback_value: self.fallback_value(),
+            target_null_value: self.target_null_value(),
+        };
+        Ok(XBinding::new(group, self.path(), self.mode(), self.update_source_trigger(), options))
     }
 
     /// `ProvideValue`: the binding of the target the extension is provided for. Its root is the
@@ -197,6 +305,26 @@ ferro_markup_type!(class XBindExtension {
         BindBack: Option<String> {
             get: |this: &This| this.bind_back(),
             set: |this: &This, value: Option<String>| this.set_bind_back(value)
+        },
+        Converter: Option<Rc<dyn IValueConverter>> {
+            get: |this: &This| this.converter(),
+            set: |this: &This, value: Option<Rc<dyn IValueConverter>>| this.set_converter(value)
+        },
+        ConverterParameter: Option<BoxedValue> {
+            get: |this: &This| this.converter_parameter(),
+            set: |this: &This, value: Option<BoxedValue>| this.set_converter_parameter(value)
+        },
+        ConverterLanguage: Option<CultureInfo> {
+            get: |this: &This| this.converter_language(),
+            set: |this: &This, value: Option<CultureInfo>| this.set_converter_language(value)
+        },
+        FallbackValue: Option<BoxedValue> {
+            get: |this: &This| this.fallback_value(),
+            set: |this: &This, value: Option<BoxedValue>| this.set_fallback_value(value)
+        },
+        TargetNullValue: Option<BoxedValue> {
+            get: |this: &This| this.target_null_value(),
+            set: |this: &This, value: Option<BoxedValue>| this.set_target_null_value(value)
         },
     ],
     methods: [

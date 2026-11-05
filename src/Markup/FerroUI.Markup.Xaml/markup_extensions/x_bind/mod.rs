@@ -8,10 +8,13 @@
 //! accessors: the Rust emitter writes the builder calls, the run-time loader makes the same calls.
 //! [`XBindExtension`] then gives each target an [`XBinding`], whose expression reads the path from
 //! the root source of the [`XBindings`] of its root: the per-root lifecycle object that WinUI
-//! generates as the `Bindings` of a page (`Initialize`, `Update`, `StopTracking`).
+//! generates as the `Bindings` of a page (`Initialize`, `Update`, `StopTracking`). On an event
+//! the path ends with the method the event calls, and the binding subscribes its handler while
+//! the bindings of the root are initialized.
 
 mod binding;
 mod bindings;
+mod event;
 mod extension;
 mod root_node;
 

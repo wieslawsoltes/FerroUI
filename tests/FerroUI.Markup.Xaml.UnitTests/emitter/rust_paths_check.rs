@@ -1073,6 +1073,7 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_markup_xaml_tests::support::x_bind::XBindItems as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindItems", false),
         (<::ferroui_markup_xaml_tests::support::x_bind::XBindMap as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindMap", false),
         (<::ferroui_markup_xaml_tests::support::x_bind::XBindModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindModel", false),
+        (<::ferroui_markup_xaml_tests::support::x_bind::XBindTagConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindTagConverter", false),
     ]
 }
 

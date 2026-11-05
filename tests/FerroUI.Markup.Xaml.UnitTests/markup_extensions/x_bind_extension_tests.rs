@@ -1,13 +1,17 @@
-//! `{x:Bind}` in FerroUI XAML: steps X1 and X2 of #525 (docs/porting/x-bind.md). Not a port of
+//! `{x:Bind}` in FerroUI XAML: steps X1 to X4 of #525 (docs/porting/x-bind.md). Not a port of
 //! an upstream file; the behaviour is WinUI's (the NOTICE.md of `ferroui-markup-xaml`), X2 after
-//! its regression projects `FunctionTests` and `CastingTests`.
+//! its regression projects `FunctionTests` and `CastingTests`, X3 after `TwoWayTests` and
+//! `NullableTests`, X4 after `EventTests`.
 //!
 //! The fixtures in `x_bind/` run through the run-time loader and through the Rust emitter, and
 //! the same assertions check both: the root source, the modes and update triggers, named
 //! elements, attached properties, the typed template, and the lifecycle of the bindings of a root
 //! (`Initialize`, `Update`, `StopTracking`, initialized when the root is attached to a window);
 //! functions on the root, on a path and static, with path and literal arguments, called again
-//! when an argument changes, `BindBack`, static members, indexers, casts and interface members.
+//! when an argument changes, `BindBack`, static members, indexers, casts and interface members;
+//! converters with a parameter and a language, `ConvertBack`, fallback and target null values;
+//! event bindings with each signature form, on a path, static, on an event that is not a routed
+//! event and in a template, subscribed while the bindings are initialized.
 //! The diagnostics are load errors of the one and compile errors of the other.
 //!
 //! The emitter's output, `x_bind/x_bind.generated.rs`, is checked in, compiled with the tests and
@@ -19,6 +23,7 @@ use std::rc::Rc;
 
 use ferroui_base::controls::NameScope;
 use ferroui_base::input::{FocusChangedEventArgs, InputElement};
+use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::Ref;
 use ferroui_controls::templates::IDataTemplate;
 use ferroui_controls::{Button, ContentControl, Control, StackPanel, TextBlock, TextBox, Window};
@@ -29,7 +34,7 @@ use ferroui_markup_xaml_loader::rust_emitter::generate_file;
 
 use crate::support::app::styled_window_application;
 use crate::support::loader::{describe, parse, try_parse};
-use crate::support::x_bind::{XBindHelpers, XBindModel, XBindPage};
+use crate::support::x_bind::{XBindHelpers, XBindModel, XBindPage, XBindTagConverter};
 
 #[allow(dead_code)]
 #[rustfmt::skip]
@@ -40,6 +45,8 @@ const ROOT: &str = include_str!("x_bind/x_bind_root.xaml");
 const TEMPLATE: &str = include_str!("x_bind/x_bind_template.xaml");
 const FUNCTIONS: &str = include_str!("x_bind/x_bind_functions.xaml");
 const CASTS: &str = include_str!("x_bind/x_bind_casts.xaml");
+const CONVERTERS: &str = include_str!("x_bind/x_bind_converters.xaml");
+const EVENTS: &str = include_str!("x_bind/x_bind_events.xaml");
 
 const ASSEMBLY: &str = "FerroUI.XBind.Fixture";
 const ROOT_URI: &str = "ferres://FerroUI.XBind.Fixture/";
@@ -556,6 +563,249 @@ fn compiled_casts_interface_members_and_attached_properties() {
     assert_cast_behavior(compiled_casts());
 }
 
+// --- converters and substitute values (step X3, WinUI's TwoWayTests and NullableTests) ------
+
+struct ConverterParts {
+    converted: Ref<TextBlock>,
+    parameter: Ref<TextBlock>,
+    convert_back: Ref<TextBox>,
+    fallback_once: Ref<TextBlock>,
+    fallback: Ref<TextBlock>,
+    fallback_two_way: Ref<TextBox>,
+    null_fallback: Ref<TextBlock>,
+    null_value: Ref<TextBlock>,
+    null_two_way: Ref<TextBox>,
+}
+
+fn converter_parts(root: &Ref<XBindPage>) -> ConverterParts {
+    let scope = NameScope::get_name_scope(root).expect("the document root owns its name scope");
+    let text_block = |name: &str| scope.find_as::<TextBlock>(name).unwrap_or_else(|| panic!("the text block {name}"));
+    let text_box = |name: &str| scope.find_as::<TextBox>(name).unwrap_or_else(|| panic!("the text box {name}"));
+    ConverterParts {
+        converted: text_block("converted"),
+        parameter: text_block("parameter"),
+        convert_back: text_box("convertBack"),
+        fallback_once: text_block("fallbackOnce"),
+        fallback: text_block("fallback"),
+        fallback_two_way: text_box("fallbackTwoWay"),
+        null_fallback: text_block("nullFallback"),
+        null_value: text_block("nullValue"),
+        null_two_way: text_box("nullTwoWay"),
+    }
+}
+
+fn starts_with(value: Option<String>, prefix: &str) -> bool {
+    value.is_some_and(|value| value.starts_with(prefix))
+}
+
+fn assert_converter_behavior(root: Ref<XBindPage>) {
+    let parts = converter_parts(&root);
+    let bindings = XBindings::get_for_root(&root).expect("the first x:Bind of a document creates the bindings of its root");
+    assert_eq!(bindings.binding_count(), 9);
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+
+    // The converter, with its parameter and the culture ConverterLanguage names (the current
+    // culture without one).
+    assert!(starts_with(text(&parts.converted), "Ada|-|"), "{:?}", text(&parts.converted));
+    assert_eq!(text(&parts.parameter).as_deref(), Some("Ada|param|fr-FR"));
+    assert!(starts_with(box_text(&parts.convert_back), "Ada|back|"), "{:?}", box_text(&parts.convert_back));
+
+    // A path that cannot be read (a null in its middle) gives the fallback value, OneTime
+    // included; a value that is there needs no substitute.
+    assert_eq!(text(&parts.fallback_once).as_deref(), Some("no model"));
+    assert_eq!(text(&parts.fallback).as_deref(), Some("no model"));
+    assert_eq!(box_text(&parts.fallback_two_way).as_deref(), Some("no model"));
+    assert_eq!(text(&parts.null_fallback), None);
+    assert_eq!(text(&parts.null_value).as_deref(), Some("Ada"));
+    assert_eq!(box_text(&parts.null_two_way).as_deref(), Some("Ada"));
+    // A fallback value stands for the path: it is not a diagnostic.
+    assert!(bindings.diagnostics().is_empty(), "{:?}", bindings.diagnostics());
+
+    // A null value gives the target null value; a converter sees the null itself.
+    root.clear_title();
+    assert!(starts_with(text(&parts.converted), "null|-|"), "{:?}", text(&parts.converted));
+    assert_eq!(text(&parts.null_value).as_deref(), Some("untitled"));
+    assert_eq!(box_text(&parts.null_two_way).as_deref(), Some("untitled"));
+    // A TwoWay binding with a target null value writes what the target is given.
+    parts.null_two_way.set_current_value(TextBox::text_property(), Some("Hopper".into()));
+    assert_eq!(root.title().as_deref(), Some("Hopper"));
+    assert_eq!(text(&parts.null_value).as_deref(), Some("Hopper"));
+
+    // TwoWay through a converter writes back through ConvertBack, with its parameter.
+    parts.convert_back.set_current_value(TextBox::text_property(), Some("lovelace".into()));
+    assert_eq!(root.title().as_deref(), Some("LOVELACE"));
+    let converted_back = XBindTagConverter::converted_back();
+    assert!(
+        converted_back.last().is_some_and(|call| call.starts_with("lovelace|back|")),
+        "{converted_back:?}"
+    );
+    assert!(starts_with(text(&parts.converted), "LOVELACE|-|"), "{:?}", text(&parts.converted));
+
+    // The path can be read once the model is there; OneTime reads it on Update.
+    let model = XBindModel::new("grace");
+    root.set_tag(Some(model.clone()));
+    assert_eq!(text(&parts.fallback_once).as_deref(), Some("no model"));
+    assert_eq!(text(&parts.fallback).as_deref(), Some("grace"));
+    assert_eq!(box_text(&parts.fallback_two_way).as_deref(), Some("grace"));
+    assert_eq!(text(&parts.null_fallback).as_deref(), Some("grace"));
+    parts.fallback_two_way.set_current_value(TextBox::text_property(), Some("turing".into()));
+    assert_eq!(model.name(), "turing");
+    assert_eq!(text(&parts.fallback).as_deref(), Some("turing"));
+    bindings.update().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(text(&parts.fallback_once).as_deref(), Some("turing"));
+
+    // The model gone again: the fallback values (x:Null for one), and no diagnostic.
+    root.set_tag(None);
+    assert_eq!(text(&parts.fallback).as_deref(), Some("no model"));
+    assert_eq!(box_text(&parts.fallback_two_way).as_deref(), Some("no model"));
+    assert_eq!(text(&parts.null_fallback), None);
+    assert!(bindings.diagnostics().is_empty(), "{:?}", bindings.diagnostics());
+}
+
+fn compiled_converters() -> Ref<XBindPage> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_converters_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_converters_fallback_and_target_null_values() {
+    let _app = styled_window_application();
+    assert_converter_behavior(parse::<Ref<XBindPage>>(CONVERTERS));
+}
+
+#[test]
+fn compiled_converters_fallback_and_target_null_values() {
+    let _app = styled_window_application();
+    assert_converter_behavior(compiled_converters());
+}
+
+// --- events (step X4, WinUI's EventTests) --------------------------------------------------
+
+fn click(button: &Ref<Button>) {
+    button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+}
+
+fn assert_event_behavior(root: Ref<XBindPage>) {
+    let scope = NameScope::get_name_scope(&root).expect("the document root owns its name scope");
+    let button = |name: &str| scope.find_as::<Button>(name).unwrap_or_else(|| panic!("the button {name}"));
+    let regular = button("regular");
+    let no_arguments = button("noArguments");
+    let base_arguments = button("baseArguments");
+    let model_path = button("modelPath");
+    let current_path = button("currentPath");
+    let static_handler = button("staticHandler");
+    let item_host = scope.find_as::<ContentControl>("itemHost").expect("the item host");
+    let bindings = XBindings::get_for_root(&root).expect("the first x:Bind of a document creates the bindings of its root");
+    assert_eq!(bindings.binding_count(), 0);
+    assert_eq!(bindings.event_binding_count(), 7);
+
+    // Nothing is subscribed before the bindings are initialized.
+    assert_eq!(bindings.subscribed_event_count(), 0);
+    assert_eq!(root.pinged_handler_count(), 0);
+    click(&regular);
+    assert!(root.clicks().is_empty());
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(bindings.subscribed_event_count(), 7);
+    assert_eq!(root.pinged_handler_count(), 1);
+
+    // A method with the event's signature, without parameters, and with base parameters.
+    click(&regular);
+    click(&no_arguments);
+    click(&base_arguments);
+    assert_eq!(root.clicks(), ["regular", "no arguments", "base"]);
+
+    // A method on a path: the path is read when the event is raised.
+    let model = root.model();
+    click(&model_path);
+    assert_eq!(model.pokes(), 1);
+    // A null on the path calls nothing, and is not a failure.
+    click(&current_path);
+    let first = XBindModel::new("first");
+    root.set_current(Some(first.clone()));
+    click(&current_path);
+    assert_eq!(first.pokes(), 1);
+    // Another owner, after Update: the new one is called.
+    let second = XBindModel::new("second");
+    root.set_current(Some(second.clone()));
+    bindings.update().unwrap_or_else(|errors| panic!("{errors}"));
+    click(&current_path);
+    assert_eq!(second.pokes(), 1);
+    assert_eq!(first.pokes(), 1);
+    // Update keeps one subscription per event.
+    assert_eq!(root.pinged_handler_count(), 1);
+
+    // A static handler, and an event that is not a routed event.
+    let clicked = XBindHelpers::clicked_count();
+    click(&static_handler);
+    assert_eq!(XBindHelpers::clicked_count(), clicked + 1);
+    root.ping("hello");
+    assert_eq!(root.clicks().last().map(String::as_str), Some("pinged hello"));
+
+    // StopTracking releases the handlers.
+    bindings.stop_tracking();
+    assert_eq!(bindings.subscribed_event_count(), 0);
+    assert_eq!(root.pinged_handler_count(), 0);
+    let calls = root.clicks().len();
+    click(&regular);
+    click(&model_path);
+    click(&static_handler);
+    root.ping("stopped");
+    assert_eq!(root.clicks().len(), calls);
+    assert_eq!(model.pokes(), 1);
+    assert_eq!(XBindHelpers::clicked_count(), clicked + 1);
+
+    // Initialize subscribes them again.
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(bindings.subscribed_event_count(), 7);
+    assert_eq!(root.pinged_handler_count(), 1);
+    click(&regular);
+    assert_eq!(root.clicks().last().map(String::as_str), Some("regular"));
+    assert!(bindings.diagnostics().is_empty(), "{:?}", bindings.diagnostics());
+
+    // An event on the item of a typed template (WinUI: event binding at the root of a
+    // template); a recycled instance calls its new item.
+    let template = item_host.content_template().expect("the item template");
+    let instance = template.build(&None).unwrap();
+    let item_button = instance.to_ref().cast::<Button>().expect("the root of the template is a button");
+    let item = XBindModel::new("item");
+    instance.set_data_context(Some(item.clone()));
+    click(&item_button);
+    assert_eq!(item.pokes(), 1);
+    let next = XBindModel::new("next");
+    instance.set_data_context(Some(next.clone()));
+    click(&item_button);
+    assert_eq!(next.pokes(), 1);
+    assert_eq!(item.pokes(), 1);
+}
+
+fn compiled_events() -> Ref<XBindPage> {
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    generated::build_x_bind_events_xaml(Some(provider)).unwrap()
+}
+
+#[test]
+fn interpreted_events_signatures_paths_static_handlers_and_lifecycle() {
+    let _app = styled_window_application();
+    assert_event_behavior(parse::<Ref<XBindPage>>(EVENTS));
+}
+
+#[test]
+fn compiled_events_signatures_paths_static_handlers_and_lifecycle() {
+    let _app = styled_window_application();
+    assert_event_behavior(compiled_events());
+}
+
+#[test]
+fn event_bindings_do_not_keep_their_root_alive() {
+    let _app = styled_window_application();
+    let weak = {
+        let root = parse::<Ref<XBindPage>>(EVENTS);
+        XBindings::get_for_root(&root).unwrap().initialize().unwrap();
+        root.downgrade()
+    };
+    assert!(weak.upgrade().is_none(), "the root, its targets, their handlers and the bindings are released");
+}
+
 // --- diagnostics --------------------------------------------------------------------------
 
 /// A document with one x:Bind on its second line, and what its error says. The run-time
@@ -596,6 +846,39 @@ const DIAGNOSTICS: &[(&str, &str)] = &[
     ("<TextBlock Text='{x:Bind ((local:XBindModel)IsVisible).Name}'/>", "Unable to cast type"),
     ("<TextBlock Text='{x:Bind IsVisible[0]}'/>", "does not have an indexer"),
     ("<TextBlock Text='{x:Bind Name Other}'/>", "Invalid binding path 'Name Other' : Syntax error at 'Other'"),
+    // Step X3: converters, fallback values and target null values, with WinUI's messages.
+    ("<TextBlock Text='{x:Bind Tag, ConverterParameter=p}'/>", "ConverterParameter cannot be specified without an actual converter"),
+    ("<TextBlock Text='{x:Bind Tag, ConverterLanguage=fr-FR}'/>", "ConverterLanguage cannot be specified without an actual converter"),
+    (
+        "<StackPanel.Resources><local:XBindTagConverter x:Key='tag'/></StackPanel.Resources><TextBlock Text='{x:Bind local:XBindHelpers.Join(Name, Name, 1), Converter={StaticResource tag}}'/>",
+        "Using a converter with function binding is not supported",
+    ),
+    (
+        "<StackPanel.Resources><x:String x:Key='text'>plain</x:String></StackPanel.Resources><TextBlock Text='{x:Bind Tag, Converter={StaticResource text}}'/>",
+        "The Converter of an x:Bind must be an IValueConverter",
+    ),
+    ("<TextBlock IsVisible='{x:Bind Tag, TargetNullValue=True}'/>", "TargetNullValue cannot be applied on 'IsVisible'"),
+    ("<TextBlock IsVisible='{x:Bind Tag, FallbackValue=maybe}'/>", "The FallbackValue 'maybe' of an x:Bind cannot be converted"),
+    (
+        "<StackPanel.Resources><x:String x:Key='text'>plain</x:String></StackPanel.Resources><TextBlock Text='{x:Bind Tag, FallbackValue={StaticResource text}}'/>",
+        "Only string and {x:Null} are supported for FallbackValue",
+    ),
+    // Step X4: events, with WinUI's messages.
+    ("<Button Click='{x:Bind Missing}'/>", "Unable to resolve property or method of name 'Missing'"),
+    ("<Button Click='{x:Bind Tag}'/>", "Event 'Click' can only be bound to properties of delegate type"),
+    (
+        "<Button Click='{x:Bind local:XBindHelpers.Store}'/>",
+        "Invalid signature for event 'Click'. Events can only be bound to methods that match the event signature or are parameterless",
+    ),
+    ("<Button Click='{x:Bind local:XBindHelpers.Mismatched}'/>", "Invalid signature for event 'Click'. Parameter 1 of type 'String'"),
+    ("<Button Click='{x:Bind local:XBindHelpers.Overloaded}'/>", "Events can only be bound to non-overloaded methods"),
+    ("<Button Click='{x:Bind local:XBindHelpers.Clicked()}'/>", "binds to a method, not to a call"),
+    ("<Button Click='{x:Bind local:XBindHelpers.Clicked, Mode=OneWay}'/>", "'Mode' cannot be set on an x:Bind of the event 'Click'"),
+    (
+        "<StackPanel.Resources><local:XBindTagConverter x:Key='tag'/></StackPanel.Resources><Button Click='{x:Bind local:XBindHelpers.Clicked, Converter={StaticResource tag}}'/>",
+        "'Converter' cannot be set on an x:Bind of the event 'Click'",
+    ),
+    ("<Button Click='{x:Bind local:XBindHelpers.Clicked, FallbackValue=none}'/>", "'FallbackValue' cannot be set on an x:Bind of the event 'Click'"),
 ];
 
 fn diagnostic_document(body: &str) -> String {
@@ -648,6 +931,8 @@ fn emitted_fixture() -> String {
             ("x_bind_template.xaml", TEMPLATE),
             ("x_bind_functions.xaml", FUNCTIONS),
             ("x_bind_casts.xaml", CASTS),
+            ("x_bind_converters.xaml", CONVERTERS),
+            ("x_bind_events.xaml", EVENTS),
         ],
         &RuntimeXamlLoaderConfiguration::new(),
         &[],
