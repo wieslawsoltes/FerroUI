@@ -915,22 +915,28 @@ impl FerroObject {
         priority: BindingPriority,
         is_effective_value: bool,
     ) {
-        let e = FerroPropertyChangedEventArgs::new(
-            self,
-            property,
-            old_value.map(|v| v as &dyn Any),
-            new_value,
-            priority,
-            is_effective_value,
-        );
+        self.raise_property_changed_values(property, old_value.map(|v| v as &dyn Any), new_value, priority, is_effective_value);
+    }
+
+    /// [`raise_property_changed`](Self::raise_property_changed) with values
+    /// that are already untyped (compiled once, not per value type).
+    pub(crate) fn raise_property_changed_values(
+        &self,
+        property: &'static FerroProperty,
+        old_value: Option<&dyn Any>,
+        new_value: &dyn Any,
+        priority: BindingPriority,
+        is_effective_value: bool,
+    ) {
+        let e = FerroPropertyChangedEventArgs::new(self, property, old_value, new_value, priority, is_effective_value);
         self.notify_property_changed(&e);
     }
 
-    pub(crate) fn raise_inherited_property_changed<T: PropertyValue>(
+    pub(crate) fn raise_inherited_property_changed(
         &self,
         property: &'static FerroProperty,
-        old_value: &T,
-        new_value: &T,
+        old_value: &dyn Any,
+        new_value: &dyn Any,
         priority: BindingPriority,
     ) {
         let e = FerroPropertyChangedEventArgs::new(

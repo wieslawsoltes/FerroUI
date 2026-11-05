@@ -11,6 +11,7 @@ use crate::diagnostics::{
 use crate::data::{BindingExpressionBase, BindingPriority, BindingValueType};
 use crate::reactive::IDisposable;
 use crate::{DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -702,27 +703,17 @@ impl ValueStore {
         });
     }
 
-    pub fn on_inherited_effective_value_changed<T: PropertyValue>(
+    pub fn on_inherited_effective_value_changed(
         &self,
         owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-        old_value: &T,
-        new_value: &T,
+        property: &'static FerroProperty,
+        old_value: &dyn Any,
+        new_value: &dyn Any,
     ) {
         debug_assert!(property.inherits());
         owner.for_each_inheritance_child(|child| {
             child.values().on_ancestor_inherited_value_changed(child, property, old_value, new_value);
         });
-    }
-
-    pub fn on_inherited_effective_value_disposed<T: PropertyValue>(
-        &self,
-        owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-        old_value: &T,
-        new_value: &T,
-    ) {
-        self.on_inherited_effective_value_changed(owner, property, old_value, new_value)
     }
 
     pub fn on_local_value_binding_completed(
@@ -747,12 +738,12 @@ impl ValueStore {
         }
     }
 
-    fn on_ancestor_inherited_value_changed<T: PropertyValue>(
+    fn on_ancestor_inherited_value_changed(
         &self,
         owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-        old_value: &T,
-        new_value: &T,
+        property: &'static FerroProperty,
+        old_value: &dyn Any,
+        new_value: &dyn Any,
     ) {
         // If the inherited value is set locally, propagation stops here.
         if self.is_set(property) {
