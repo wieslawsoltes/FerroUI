@@ -18,6 +18,8 @@ the steps that follow, is `docs/porting/x-bind.md`):
 | `x_bind/root_node.rs` (the root source: the document root, or the typed data context of a template) | `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/XamlHarvester.cs` (the scope root of a `DataTemplate` with `x:DataType`), `BindUniverse.cs` |
 | `XBindExtension::bind_back`, and the function and `BindBack` helpers of `xaml_il/runtime/compiled.rs` (`path_function`, `path_static_function`, `path_bind_back`, `path_static_bind_back`, `path_key_indexer`; step X2) | `BindAssignment.cs` (`BindBackPath`, `ValidateBindBackAssignment`), `CodeGenerators/BindPathStepCodeGenerators.cs` (the invocation of a function step and its update when an argument changes), the generated code of `Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS/FunctionTests.xaml` in `src/XamlCompiler/TestMasters/RegressionProjects/fre/Features/CompiledBinding/BindTestbedCS/generated/FunctionTests.g.cs` (`Invoke_*`, `Update_*`, `UpdateTwoWay_*` calling the `BindBack` method, the `PropertyChanged` cases named after a function) |
 | `XBindExtension` `Converter`, `ConverterParameter`, `ConverterLanguage`, `FallbackValue`, `TargetNullValue`, their checks in `validate`, and the options of the expression of `x_bind/binding.rs` (step X3) | `BindAssignment.cs` (`Converter`, `ConverterParameter`, `ConverterLanguage`, `GetConverterExpression`, `FallbackValueExpression`, `TargetNullValueExpression`, `ValidateConverter`, `ValidateFallbackValue`), `XamlDomValidator.cs` (`ProcessXBindPropertyNode`, TargetNullValue on a non-nullable type) |
+| `x_bind/bindings.rs` (step X5: `IDataTemplateComponent`, its `ProcessBindings` phase by phase with the targets of a later phase hidden until their phase, `Recycle`; the root of a control template reading its templated parent; a `Window` root initialized on `Activated`), the `Phase` and `TargetType` of `XBindExtension` | `CodeGenerators/CSharpPagePass2.tt` (`ProcessBindings`, `Recycle`, `GetNextPhase`, `SuspendRendering`, `ResumeRendering`, `Activated`), `BindUniverse.cs` (`AddPhase`, `GetNextPhase`, the load root of a control template), `BindAssignment.cs` (`ComputedPhase`), `XamlHarvester.cs` (the scope root of a `ControlTemplate`) |
+| `x_bind/deferred_element.rs` (`x:Load` and `x:DeferLoadStrategy`, step X5) | `BoundLoadAssignment.cs`, `DeferLoadStrategy.cs`, `CodeGenerators/CSharpPagePass2.tt` (the `FindName` and `UnloadObject` of a bound `x:Load`, and of its `LoadRootElement` in a control template, the fix of bound `x:Load` in control templates, microsoft-ui-xaml #12239) |
 | `x_bind/event.rs`, `XBinding::bind_routed_event` and `bind_markup_event`, the event bindings of `x_bind/bindings.rs`, and the helpers `path_event_handler`, `path_static_event_handler`, `x_bind_routed_event`, `x_bind_event` of `xaml_il/runtime/compiled.rs` (step X4) | `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/BoundEventAssignment.cs`, the generated code of `Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS/EventTests.xaml` in `src/XamlCompiler/TestMasters/RegressionProjects/chk/Features/CompiledBinding/BindTestbedCS/generated/EventTests.g.cs` (the `obj*ClickHandler` methods that walk the path with null checks and call the method with or without the event's arguments, `Create_obj*Click`, the subscriptions of `Connect`) |
 
 The compiler half (the root type and the `x:DataType` of a template as the
@@ -74,6 +76,24 @@ are assignable to), with the messages of `XamlCompilerResources.resx`
 The tests port the behaviours of
 `Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS/EventTests.xaml`
 and `EventTests.xaml.cs`.
+
+Step X5 adds the directives around x:Bind:
+`compiler_extensions/transformers/x_bind_directives.rs` and `x_bind.rs`
+(`prepare_scope`, `apply_default_mode`) follow `XamlDomValidator.cs` (the checks
+of `x:DefaultBindMode`, `x:DeferLoadStrategy` and `x:Load`,
+`CanHaveDeferLoadStrategyOrLoad`), `PhaseAssignment.cs`, `DefaultBindMode.cs`,
+`XamlHarvester.cs` (the `x:DefaultBindMode` members stripped from the tree, the
+scope root of a `ControlTemplate`) and `BindUniverse.cs`, with the messages of
+`XamlCompilerResources.resx`
+(`XamlValidationError_DefaultBindModeInvalidValue`,
+`XamlCompiler_InvalidValueForPhase`, `XamlCompiler_PhaseMustBeUsedWithinADataTemplate`,
+`XamlCompiler_PhaseMustHaveAssociatedBind`, `XamlCompiler_LoadNotSupported`,
+`XamlCompiler_LoadMissingName`, `XamlCompiler_LoadConflict`,
+`XamlValidationError_DeferLoadStrategyInvalidValue`,
+`Harvester_ControlTemplateDoesNotDefineTargetType`). The tests port the
+behaviours of
+`Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS/PhasingTests.xaml`
+and `ListAndTemplateTests.xaml`.
 
 ```
 MIT License

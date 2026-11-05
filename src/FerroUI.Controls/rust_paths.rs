@@ -318,6 +318,7 @@ ferroui_base::ferro_rust_paths! {
         crate::shapes::Rectangle,
         crate::shapes::Sector,
         crate::shapes::Shape,
+        crate::templates::XamlBindingHelper,
         crate::utils::BindingEvaluator,
     ],
     types: [
@@ -509,6 +510,7 @@ ferroui_base::ferro_rust_paths! {
         crate::selection::ISelectionModel,
         crate::templates::IControlTemplate,
         crate::templates::IDataTemplate,
+        crate::templates::IDataTemplateComponent,
         crate::templates::IRecyclingDataTemplate,
         crate::templates::ITreeDataTemplate,
         crate::templates::ITypedDataTemplate,

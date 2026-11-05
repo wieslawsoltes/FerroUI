@@ -64,6 +64,8 @@ pub struct XBinding {
     path: Option<CompiledBindingPath>,
     mode: BindingMode,
     update_source_trigger: UpdateSourceTrigger,
+    /// The `x:Phase` of the element of the target (step X5).
+    phase: i32,
     options: XBindValueOptions,
 }
 
@@ -73,9 +75,10 @@ impl XBinding {
         path: Option<CompiledBindingPath>,
         mode: BindingMode,
         update_source_trigger: UpdateSourceTrigger,
+        phase: i32,
         options: XBindValueOptions,
     ) -> Rc<Self> {
-        Rc::new(Self { bindings, path, mode, update_source_trigger, options })
+        Rc::new(Self { bindings, path, mode, update_source_trigger, phase, options })
     }
 
     /// The bindings of the root this binding reads from.
@@ -93,6 +96,12 @@ impl XBinding {
 
     pub fn update_source_trigger(&self) -> UpdateSourceTrigger {
         self.update_source_trigger
+    }
+
+    /// The phase in which a container reads the binding (`x:Phase` of the element of its
+    /// target); `0` without one.
+    pub fn phase(&self) -> i32 {
+        self.phase
     }
 
     /// The event binding of the path, registered with the bindings of its root: `subscribe`
@@ -184,6 +193,8 @@ impl XBinding {
             path_text,
             self.options.has_fallback_value(),
             self.mode == BindingMode::OneTime,
+            self.phase,
+            target,
         );
         let mut nodes: Vec<Rc<dyn ExpressionNode>> = vec![root.clone()];
         if let Some(path) = &self.path {

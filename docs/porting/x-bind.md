@@ -74,7 +74,9 @@ relative to `src/XamlCompiler` of that checkout unless they start with another d
 - **Phasing**: the ItemsRepeater port has WinUI's phasing contract,
   `IDataTemplateComponent` (`ProcessBindings(item, index, phase)`, `Recycle`) and `Phaser`
   (`src/FerroUI.Controls.Repeater/phaser.rs`, `view_manager.rs`: phase zero before the data
-  context, as WinUI does for an x:Bind component).
+  context, as WinUI does for an x:Bind component). Since X5 the contract is declared in
+  `ferroui-controls` (`templates/i_data_template_component.rs`, with `XamlBindingHelper`) and
+  re-exported by the repeater.
 
 ### 1.3 Findings
 
@@ -113,8 +115,8 @@ relative to `src/XamlCompiler` of that checkout unless they start with another d
 | Converters | `Converter`, `ConverterParameter`, `ConverterLanguage`; not with a function. | `BindAssignment_ConverterWithFunctionBindingNotSupported`, `BindAssignment_OrphanConverterParam` | X3 |
 | `FallbackValue`, `TargetNullValue` | A string or `{x:Null}` (`BindAssignment_InvalidFallbackValue`); `TargetNullValue` on a non-nullable target is an error (WMC1120). | `CompileError.cs`, `XamlXBindTargetNullValueOnNonNullableTypeError` | X3 |
 | Events | `Click="{x:Bind Model.OnClick}"`: a method with the event's signature, no parameters, or a base signature. | `BoundEventAssignment.cs` | X4 |
-| `x:Phase` | Elements of an item template with a phase are hidden until their phase; their bindings are read in the phase, through `ContainerContentChanging` / `ProcessBindings`. | `PhaseAssignment.cs`, `CodeGenerators/CSharpPagePass2.tt` (`ProcessBindings`, `Recycle`) | X5 |
-| `x:Load` | Deferred creation of an element, driven by a binding. | `BoundLoadAssignment.cs`, `DeferLoadStrategy.cs` | X5 |
+| `x:Phase` | Elements of an item template with a phase are hidden until their phase; their bindings are read in the phase, through `ContainerContentChanging` / `ProcessBindings`. Only in a `DataTemplate`, below 25, on an element with an x:Bind. | `PhaseAssignment.cs`, `BindAssignment.cs` (`ComputedPhase`), `BindUniverse.cs` (`GetNextPhase`), `CodeGenerators/CSharpPagePass2.tt` (`ProcessBindings`, `Recycle`, `SuspendRendering`, `ResumeRendering`) | X5 |
+| `x:Load` | Deferred creation of an element, driven by a binding: `FindName` when the value becomes `true`, `UnloadObject` when it becomes `false`; `x:Load="False"` and `x:DeferLoadStrategy="Lazy"` wait for `FindName`. In a control template the element is found in the namescope of the template instance (microsoft-ui-xaml #12239). | `BoundLoadAssignment.cs`, `DeferLoadStrategy.cs`, `XamlDomValidator.cs` (`CanHaveDeferLoadStrategyOrLoad`), `BindUniverse.cs` (`LoadRootElement`), `CSharpPagePass2.tt` (`FindName`, `UnloadObject`) | X5 |
 | Lifecycle | The generated `Bindings`: `Initialize` (unless initialized, `Update`), `Update` (every binding, `OneTime` included), `StopTracking` (releases the listeners, uninitialized). The root calls `Initialize` on `Loading` (a `Window` on `Activated`); a template instance updates on `DataContextChanged` with a new item (`SetDataRoot` ignores null) until a container drives it through `ProcessBindings`. | `CodeGenerators/CSharpPagePass2.tt` (`Loading +=`, `DataContextChanged +=`, `DataContextChangedHandler`, `ProcessBindings`, `Initialize`, `Update`, `StopTracking`, `Loading`, `Activated`) | X1 (Window: X5) |
 
 WinUI's own tests are golden files of its compiler: the projects under
@@ -250,7 +252,7 @@ error.
 | A template without `x:DataType` | `DataTemplates containing x:Bind need a DataType to be specified using 'x:DataType'` | X1 |
 | In a style | `Cannot use x:Bind in Styles` | X1 |
 | Not x:Bind syntax | `Invalid binding path: '$self' is not x:Bind syntax` (and `$parent`, `#name`, `!`, `^`) | X1 |
-| A form of a later step | `ControlTemplate` (X5); each step removes its own. A method without a call bound to a property is WinUI's `Binding to methods is not supported` | X1 |
+| A form of a later step | Each step removes its own (X5 removed the last, `ControlTemplate`). A method without a call bound to a property is WinUI's `Binding to methods is not supported` | X1 |
 | A path WinUI's grammar rejects | `Invalid binding path '...' : Syntax error at '...'`; `Functions are only supported at the end of the bind path.`; `Functions cannot have other functions as parameters.` | X2 |
 | An unknown function; a member that is not one; a function that is not static | `Function '...' not found on type '...'.`; `Expecting a method: ...`; `Expecting '...' on type '...' to be a static function.` (and `... static property.`) | X2 |
 | A function with the wrong arity or argument types; a return type that does not match | `Mismatched function parameter count: ...`, `Cannot find an overload of '...' that takes N parameters.`; `Invalid or mismatched parameter at position 'N' of '...': ...`; `Function return type '...' must match binding target type '...'` | X2 |
@@ -260,6 +262,9 @@ error.
 | `TargetNullValue` on a non-nullable target; a fallback or target null value that is not a text or `{x:Null}`, or a text that cannot be converted to the target | `TargetNullValue cannot be applied on '...' because its type '...' is not nullable`; `Only string and {x:Null} are supported for FallbackValue` (and `TargetNullValue`); `The FallbackValue '...' of an x:Bind cannot be converted to '...', the type of its target` | X3 |
 | An event bound to what is not a method; an unknown method; an overloaded method; the wrong signature; a method in the middle of the path | `Event '...' can only be bound to properties of delegate type ...`; `Unable to resolve property or method of name '...' on type '...'.`; `Events can only be bound to non-overloaded methods`; `Invalid signature for event '...'. Events can only be bound to methods that match the event signature or are parameterless`, `Invalid signature for event '...'. Parameter N of type '...' is not assignable from type '...'`; `Invalid path node '...'. Methods can only be used as the leaf node in an event binding` | X4 |
 | An event with `Mode`, `UpdateSourceTrigger`, a converter, substitute values or `BindBack`; a function call on an event | `'Mode' cannot be set on an x:Bind of the event '...'` (and the others); `An x:Bind of the event '...' binds to a method, not to a call: '...'` | X4 |
+| `x:DefaultBindMode`; `x:Phase` | `Invalid value specified for attribute 'DefaultBindMode'.  Accepted values are 'OneWay', 'OneTime', or 'TwoWay'.`; `Phase value must be a positive integer less than 25.`, `Phase can only be used within a DataTemplate`, `Phase must be used with Bind` | X5 |
+| `x:Load`, `x:DeferLoadStrategy` | `Invalid value specified for attribute 'Load'. x:Load is True, False or an x:Bind`; `Invalid value specified for attribute 'DeferLoadStrategy'.`; `Element must have x:Name attribute specified since it uses x:Load.`; `An element cannot have both x:Load and x:DeferLoadStrategy`; `x:Load cannot be used on the root of a Page, User Control or DataTemplate, or direct children of a Resource Dictionary, and can only be used on elements of type UIElement or FlyoutBase` (also the root of a `ControlTemplate`, see section 3.12) | X5 |
+| A `ControlTemplate` without `TargetType` | `'TargetType' is required to use x:Bind inside a ControlTemplate` | X5 |
 
 At run time (`XBindings::diagnostics`, and the result of `initialize` and `update`): a root that
 was released, a template item that is not of the `x:DataType`, a path that could not be read or a
@@ -416,6 +421,68 @@ of their forms (`BasicTests`, `TwoWayTests` in X1; `FunctionTests`, `CastingTest
   to a property of the delegate type (`Click="{x:Bind Model.ClickHandler}"`); FerroUI has no
   typed delegate properties, so the leaf must be a method.
 
+### 3.12 Directives, phases, `x:Load`, control templates and windows (X5)
+
+- **The compiler.** `XBindDirectivesTransformer` (`compiler_extensions/transformers/x_bind_directives.rs`,
+  after `XDataTypeTransformer`: the types are resolved, the properties are not) checks the
+  directives with WinUI's messages and writes what they mean as markup would be written:
+  - `x:DefaultBindMode` is checked and left on its element. The binding path parser
+    (`x_bind::apply_default_mode`, after `prepare_event`) gives an x:Bind of a property without a
+    `Mode` the mode of the nearest `x:DefaultBindMode` on its element or around it (WinUI's
+    `XamlHarvester` reads the member and strips it); an event binding has no mode. The compiled
+    bindings metadata remover takes the directives out once the bindings are resolved.
+  - `x:Phase` becomes the `Phase` of the x:Bind extensions of its element (WinUI's
+    `ComputedPhase` is the phase of the element of a binding).
+  - `x:Load="False"`, `x:DeferLoadStrategy="Lazy"` and a bound `x:Load` replace the element by
+    a `DeferredElement` whose `Content` is the element, a property with `[TemplateContent]` (so
+    both back ends build it as the deferred content of a template), whose `ElementName` is its
+    name and whose `Load` (a registered property) is the literal or the x:Bind, written last.
+    `x:Load="True"` and `x:DeferLoadStrategy="None"` create the element with its document.
+  - In `prepare_scope`, an x:Bind in a `ControlTemplate` gets the template's `TargetType` as the
+    `TargetType` of the extension, which `transform_path` uses as the start type, as it uses the
+    `DataType` of a data template.
+
+  Nothing in the back ends is new: they assign properties, build deferred content and bind a
+  registered property as they did.
+- **Phases.** `XBindings` implements `IDataTemplateComponent` and sets itself as the component
+  of the root of a data template instance (`XamlBindingHelper::set_data_template_component`).
+  `process_bindings(item, index, 0)` takes the item (a null is ignored, as `SetDataRoot`),
+  drops the data-context hook (the container drives the instance from then on), hides the
+  targets of the bindings of a later phase (`IsVisible` false at the animation priority, the
+  counterpart of `SuspendRendering`; removing the value is `ResumeRendering`) and reads the
+  bindings of phase zero with the event bindings; a later phase shows the targets of its
+  bindings and reads them; each returns the next phase with bindings or `-1` (`GetNextPhase`).
+  `recycle` pauses every binding and hides the targets of the later phases again. `update`
+  still reads every binding. The repeater's `Phaser` calls the component as it called a
+  hand-written one: `recycle` and phase zero when it prepares an element, the later phases in
+  its callbacks.
+- **`x:Load`.** `DeferredElement` (`markup_extensions/x_bind/deferred_element.rs`) is an
+  invisible control in the place of the element. `load` builds the content
+  (`TemplateContent::try_load_as`, with the root of the document captured by the deferred
+  content: the x:Bind bindings of the element read the root of the document, or, in a data
+  template, the item through the element's own `XBindings`, or, in a control template, the
+  templated parent the element gets from the placeholder or its parent), gives the element its
+  name scope (a child of the scope of the document), puts it in the place of the placeholder in
+  its parent (a panel, a decorator or a content control) and holds the placeholder on it
+  (`DeferredElement.Placeholder`); `unload` gives the place back and releases the element.
+  `Load` changes call them; `DeferredElement::find_name(scope, name)` is `FindName`: a named
+  element of the scope, else the deferred element of that name (loaded), else a named element of
+  a loaded one.
+- **Control templates.** An `XBindings` of the scope `ControlTemplate(TargetType)` belongs to the
+  root of the template instance and reads its templated parent (cast to the `TargetType`); it is
+  updated when the templated parent changes (`TemplatedControl::apply_templated_parent` sets it
+  after the template is built) and stops tracking when the template is removed.
+- **Windows.** The root of a `Window` (any `WindowBase`) document is initialized on `Activated`
+  instead of the attach to a visual tree; each activation initializes (a no-op when initialized).
+- **Deviations.** WinUI's `SuspendRendering` keeps the element in the layout; hiding through
+  `IsVisible` takes it out until its phase. WinUI accepts `x:Load` on the root of a
+  `ControlTemplate`; the placeholder needs a parent that holds it as a child, so that is
+  rejected. An x:Bind path that starts at the name of a deferred element (`{x:Bind lazy.Text}`)
+  is not supported: the element is not in the name scope of the document (WinUI's field is
+  null until it is loaded). `x:Load="True"` creates the element with its document, and it cannot
+  be unloaded (WinUI's `UnloadObject` from code-behind has no counterpart yet). A placeholder
+  that has no parent when its `Load` becomes true loads on `load` or `find_name`.
+
 ## 4. Steps
 
 | Step | Content | Public API | Risk | Guard tests |
@@ -425,7 +492,7 @@ of their forms (`BasicTests`, `TwoWayTests` in X1; `FunctionTests`, `CastingTest
 | X2 | Paths of WinUI's grammar: casts `(ns:T)path` and `((ns:T)path).b`, `path.(ns:Owner.Prop)` with interface members, static members `ns:Type.Member`, integer and string indexers (`Items[0]`, `Map['key']`), functions (instance, path and static, with path and literal arguments, re-evaluated when an argument path changes) as a path element with a generated typed closure, `BindBack`; the TwoWay-after-cast error. **Done** (section 3.9) | additions (a function element of `CompiledBindingPathBuilder`; `XBindExtension::BindBack`; the `rt` helpers of functions, `BindBack` and string keys) | medium: a WinUI path parser beside the engine's grammar; the emitter writes closures; the markup extension scanner keeps the brackets of the x:Bind path | `x_bind_extension_tests.rs` on `x_bind_functions.xaml` and `x_bind_casts.xaml` (`FunctionTests` and `CastingTests` behaviours) in both back ends; the X2 diagnostics as load and compile errors; the parser's unit tests; the engine's tests of the function element |
 | X3 | `Converter`, `ConverterParameter`, `ConverterLanguage`, `FallbackValue`, `TargetNullValue` on `XBindExtension`, into the expression options; their WinUI checks. **Done** (section 3.10) | additions | low: the engine already has the options | converter, fallback and null-value cases of `TwoWayTests` and `NullableTests`; diagnostics |
 | X4 | Event binding: `Click="{x:Bind Model.OnClick}"`, a method with the event's signature, none, or a base signature; the emitter writes a typed handler, the interpreter an invoker; the handler reads its path when the event is raised, as WinUI's does. **Done** (section 3.11) | additions | medium: the event assignment path of the compiler (`FerroXamlIlTransformRoutedEvent`) gains a binding form | `EventTests` behaviours; the signature diagnostic |
-| X5 | `x:DefaultBindMode` (element and subtree); `x:Phase` through `IDataTemplateComponent` (`XBindings` implements `ProcessBindings` and `Recycle`; the contract moves from `ferroui-controls-repeater` to `ferroui-controls` so that the markup library can implement it, with a re-export); `x:Load`; x:Bind in a `ControlTemplate` with `TargetType`; `Window` roots on `Activated` | additions; a moved trait (re-exported) | medium: phasing touches ItemsRepeater recycling | `PhasingTests` and `ListAndTemplateTests` behaviours; deferred load; the template root |
+| X5 | `x:DefaultBindMode` (element and subtree); `x:Phase` through `IDataTemplateComponent` (`XBindings` implements `ProcessBindings` and `Recycle`; the contract moves from `ferroui-controls-repeater` to `ferroui-controls` so that the markup library can implement it, with a re-export); `x:Load`; x:Bind in a `ControlTemplate` with `TargetType`; `Window` roots on `Activated`. **Done** (section 3.12) | additions (`DeferredElement`, `XamlBindingHelper`, `XBindExtension::Phase` and `TargetType`); a moved trait (re-exported) | medium: phasing touches ItemsRepeater recycling | `PhasingTests` and `ListAndTemplateTests` behaviours; deferred load; the template root |
 | X6 | The WinUI importer onto the core: x:Bind kept as written, validation only for forms WinUI rejects; the adapter and its diagnostics removed; `winui-controls.md` 10.6 rows updated; the WinUI compiled fixture regenerated | removals in `ferroui-markup-xaml-winui` (a preview release) | medium: the Gallery and calculator pages that use x:Bind move to the core | the WinUI crate's compiled tests on the core; the importer's remaining diagnostics |
 | X7 | Validation and documentation: the WinUI Gallery (#418) and calculator (#443) pages that use x:Bind load and run without the adapter; hot reload calls `update` on a repopulated root; migration notes; the typed accessor of the bindings of a class document (`MyPage::bindings()`, section 6) | additions | low | gallery and calculator tests; hot reload test |
 
@@ -475,4 +542,8 @@ Decided (2026-11-03, on the merits, as the owner asked for the open decisions of
   through the run-time loader and the Rust emitter.
 - **X2** (paths of WinUI's grammar, functions, `BindBack`) is done: section 3.9.
 - **X3** (converters, fallback and target null values) is done: section 3.10.
-- **X4** (event binding) is done: section 3.11. The next step is X5.
+- **X4** (event binding) is done: section 3.11.
+- **X5** (`x:DefaultBindMode`, `x:Phase`, `x:Load`, control templates, windows) is done:
+  section 3.12. The WinUI importer still reports `x:Phase`, `x:DefaultBindMode` and `x:Load`
+  of WinUI documents (`WXAML1002`) and sends their x:Bind to its adapter; native FerroUI
+  documents are not touched. The next step is X6.

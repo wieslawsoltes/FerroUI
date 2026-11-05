@@ -45,14 +45,23 @@ use std::rc::Rc;
 /// extension provides subscribes the handler while the bindings of the root are initialized
 /// (step X4, [`XBinding::bind_routed_event`]).
 ///
-/// The default mode is `OneTime`, as WinUI's. Providing the value creates an [`XBinding`] for
-/// the target and registers it with the [`XBindings`] of its root, which reads it when it is
-/// initialized (on `Loading`, see [`XBindings`]) and on every `Update`.
+/// Inside a `ControlTemplate` the compiler sets [`target_type`](Self::target_type), the
+/// `TargetType` of the template: the binding reads the templated parent of the root of the
+/// template instance, which must be of that type (step X5). Inside a typed `DataTemplate` the
+/// compiler sets [`phase`](Self::phase) from the `x:Phase` of the element the binding is on: a
+/// container reads the binding in that phase of the instance (`IDataTemplateComponent`).
+///
+/// The default mode is `OneTime`, as WinUI's; the compiler gives the binding the mode of the
+/// nearest `x:DefaultBindMode` around it when the markup names none. Providing the value creates
+/// an [`XBinding`] for the target and registers it with the [`XBindings`] of its root, which reads
+/// it when it is initialized (on `Loading`, see [`XBindings`]) and on every `Update`.
 pub struct XBindExtension {
     path: RefCell<Option<CompiledBindingPath>>,
     mode: Cell<BindingMode>,
     update_source_trigger: Cell<UpdateSourceTrigger>,
     data_type: Cell<Option<ValueType>>,
+    target_type: Cell<Option<ValueType>>,
+    phase: Cell<i32>,
     bind_back: RefCell<Option<String>>,
     converter: RefCell<Option<Rc<dyn IValueConverter>>>,
     converter_parameter: RefCell<Option<BoxedValue>>,
@@ -69,6 +78,8 @@ impl XBindExtension {
             mode: Cell::new(BindingMode::OneTime),
             update_source_trigger: Cell::new(UpdateSourceTrigger::Default),
             data_type: Cell::new(None),
+            target_type: Cell::new(None),
+            phase: Cell::new(0),
             bind_back: RefCell::new(None),
             converter: RefCell::new(None),
             converter_parameter: RefCell::new(None),
@@ -121,6 +132,28 @@ impl XBindExtension {
 
     pub fn set_data_type(&self, data_type: Option<ValueType>) {
         self.data_type.set(data_type);
+    }
+
+    /// The `TargetType` of the `ControlTemplate` the binding is in, which the compiler sets: the
+    /// binding then reads the templated parent of the root of the template instance. `None`
+    /// outside a control template.
+    pub fn target_type(&self) -> Option<ValueType> {
+        self.target_type.get()
+    }
+
+    pub fn set_target_type(&self, target_type: Option<ValueType>) {
+        self.target_type.set(target_type);
+    }
+
+    /// The `x:Phase` of the element the binding is on, which the compiler sets: `0` (the
+    /// default) is read when a container prepares the template instance, a later phase when
+    /// the container processes that phase.
+    pub fn phase(&self) -> i32 {
+        self.phase.get()
+    }
+
+    pub fn set_phase(&self, phase: i32) {
+        self.phase.set(phase);
     }
 
     /// `BindBack`: the method a `TwoWay` binding through a function writes the value of its
@@ -195,6 +228,11 @@ impl XBindExtension {
                 "x:Bind: the mode {mode:?} is not supported; x:Bind is OneTime, OneWay or TwoWay"
             )));
         }
+        if !(0..MAX_PHASE).contains(&self.phase()) {
+            return Err(XamlLoadError::with_message(
+                "x:Bind: Phase value must be a positive integer less than 25.",
+            ));
+        }
         if self.converter().is_none() {
             if self.converter_parameter().is_some() {
                 return Err(XamlLoadError::with_message(
@@ -233,18 +271,19 @@ impl XBindExtension {
     }
 
     /// The binding of one target, registered with the [`XBindings`] of `root`: the root object
-    /// of the document, or the root of the template instance for a binding with a data type.
-    /// `name_scope` is the name scope of the place the binding is declared in; a template
-    /// instance keeps it (see [`XBindings`]).
+    /// of the document, or the root of the template instance for a binding with a data type or
+    /// a target type. `name_scope` is the name scope of the place the binding is declared in; a
+    /// template instance keeps it (see [`XBindings`]).
     pub fn create_binding(
         &self,
         root: &BoxedValue,
         name_scope: Option<&NameScopeRef>,
     ) -> Result<Rc<XBinding>, XamlLoadError> {
         self.validate()?;
-        let scope = match self.data_type() {
-            Some(data_type) => XBindScope::Template(data_type),
-            None => XBindScope::Root,
+        let scope = match (self.data_type(), self.target_type()) {
+            (Some(data_type), _) => XBindScope::Template(data_type),
+            (None, Some(target_type)) => XBindScope::ControlTemplate(target_type),
+            (None, None) => XBindScope::Root,
         };
         let group = XBindings::for_root_value(root, scope, name_scope)?;
         let options = XBindValueOptions {
@@ -254,25 +293,30 @@ impl XBindExtension {
             fallback_value: self.fallback_value(),
             target_null_value: self.target_null_value(),
         };
-        Ok(XBinding::new(group, self.path(), self.mode(), self.update_source_trigger(), options))
+        Ok(XBinding::new(group, self.path(), self.mode(), self.update_source_trigger(), self.phase(), options))
     }
 
     /// `ProvideValue`: the binding of the target the extension is provided for. Its root is the
-    /// root object of the document (`IRootObjectProvider.RootObject`), or, inside a typed
-    /// template, the root of the template instance (`IntermediateRootObject`).
+    /// root object of the document (`IRootObjectProvider.RootObject`), or, inside a typed data
+    /// template or a control template, the root of the template instance
+    /// (`IntermediateRootObject`).
     pub fn provide_value(&self, provider: &Rc<dyn IServiceProvider>) -> Result<Rc<XBinding>, XamlLoadError> {
         let roots = provider
             .get_service_of::<Rc<dyn IRootObjectProvider>>()
             .ok_or_else(|| XamlLoadError::with_message("x:Bind requires IRootObjectProvider"))?;
-        let root = match self.data_type() {
-            Some(_) => roots.intermediate_root_object(),
-            None => roots.root_object(),
+        let root = match (self.data_type(), self.target_type()) {
+            (None, None) => roots.root_object(),
+            _ => roots.intermediate_root_object(),
         }
         .ok_or_else(|| XamlLoadError::with_message("x:Bind requires the root object of its document"))?;
         let name_scope = provider.get_name_scope().map(NameScopeRef);
         self.create_binding(&root, name_scope.as_ref())
     }
 }
+
+/// The phases of `x:Phase`: `0` to `24`, as WinUI's compiler accepts them
+/// (`XamlCompiler_InvalidValueForPhase`).
+pub(crate) const MAX_PHASE: i32 = 25;
 
 crate::identity_eq!(XBindExtension);
 
@@ -301,6 +345,14 @@ ferro_markup_type!(class XBindExtension {
         DataType: Option<ValueType> {
             get: |this: &This| this.data_type(),
             set: |this: &This, value: Option<ValueType>| this.set_data_type(value)
+        },
+        TargetType: Option<ValueType> {
+            get: |this: &This| this.target_type(),
+            set: |this: &This, value: Option<ValueType>| this.set_target_type(value)
+        },
+        Phase: i32 {
+            get: |this: &This| this.phase(),
+            set: |this: &This, value: i32| this.set_phase(value)
         },
         BindBack: Option<String> {
             get: |this: &This| this.bind_back(),

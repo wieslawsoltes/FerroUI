@@ -45,7 +45,7 @@ use crate::compiler_extensions::transformers::{
     FerroXamlIlControlTemplateTargetTypeMetadataTransformer, FerroXamlIlDataContextTypeTransformer,
     FerroXamlIlFerroPropertyResolver, FerroXamlIlSelectorTransformer,
     FerroXamlIlSetterTargetTypeMetadataTransformer, FerroXamlIlSetterTransformer,
-    FerroXamlIlTransformSyntheticCompiledBindingMembers, XDataTypeTransformer, XNameTransformer,
+    FerroXamlIlTransformSyntheticCompiledBindingMembers, XBindDirectivesTransformer, XDataTypeTransformer, XNameTransformer,
     FERRO_XML_NAMESPACE,
 };
 use crate::compiler_extensions::{XamlIlBindingPathElementNode, XamlIlBindingPathNode};
@@ -741,7 +741,7 @@ pub fn bindings_pipeline(options: BindingsPipelineOptions) -> Vec<Box<dyn IXamlA
     );
 
     let index = index_of(&transformers, "TypeReferenceResolver") + 1;
-    insert_all(&mut transformers, index, vec![Box::new(XDataTypeTransformer)]);
+    insert_all(&mut transformers, index, vec![Box::new(XDataTypeTransformer), Box::new(XBindDirectivesTransformer)]);
 
     // After everything else
     transformers.push(Box::new(AddNameScopeRegistration));

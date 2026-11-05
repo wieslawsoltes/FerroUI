@@ -1,6 +1,6 @@
 # x:Bind compiler fixtures
 
-Original fixtures of steps X1 to X4 of #525 (docs/porting/x-bind.md). They run through the run-time
+Original fixtures of steps X1 to X5 of #525 (docs/porting/x-bind.md). They run through the run-time
 loader and through the Rust emitter, whose output, `x_bind.generated.rs`, is checked in, compiled
 with the tests and compared with the current compiler; the same assertions run on both
 (`../x_bind_extension_tests.rs`).
@@ -34,6 +34,21 @@ with the tests and compared with the current compiler; the same assertions run o
   (`local:XBindHelpers.Clicked`), an event that is not a routed event (`Pinged` of the root),
   and `Click` on the item of a typed template; the handlers are subscribed by `Initialize` and
   released by `StopTracking`.
+
+- `x_bind_default_mode.xaml` (X5, after WinUI's `DefaultBindMode` and `Templates.xaml`):
+  `x:DefaultBindMode` on the root (`OneWay`), an explicit mode, a nested `OneTime`, `TwoWay` on
+  the element itself, and an event binding, which has no mode.
+- `x_bind_phases.xaml` (X5, after WinUI's `PhasingTests` and `ListAndTemplateTests`): a typed
+  template with elements of phases 1 and 3, driven through the template component of the
+  instance (`IDataTemplateComponent`) as a container drives it: phase by phase, the later phases
+  hidden until their phase, recycling for another item.
+- `x_bind_load.xaml` (X5, after WinUI's `LoadAndCreateFromStringTests`): `x:Load="False"`,
+  `x:DeferLoadStrategy="Lazy"` and `x:Load="True"`, loaded through `FindName`, and a bound
+  `x:Load` that loads and unloads its element.
+- `x_bind_control_template.xaml` (X5, after WinUI's `Templates.xaml`): a `ControlTemplate` with
+  `TargetType` and `x:DefaultBindMode`, read from its templated parent, with a bound `x:Load` in
+  it (the fix of bound `x:Load` in control templates, microsoft-ui-xaml #12239).
+- `x_bind_window.xaml` (X5): a `Window` root, initialized when the window is activated.
 
 Regenerate the compiled fixture after reviewing a compiler change:
 
