@@ -1,4 +1,5 @@
 use crate::data::{BindingMode, BindingPriority};
+use crate::ferro_property_metadata::Coercion;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{Disposable, IDisposable, IObservable, Subscription};
 use crate::utilities::HandlerList;
@@ -667,7 +668,7 @@ pub struct StyledPropertyOptions<T> {
     inherits: bool,
     default_binding_mode: BindingMode,
     validate: Option<Box<dyn Fn(&T) -> bool>>,
-    coerce: Option<Rc<dyn Fn(&FerroObject, T) -> T>>,
+    coerce: Option<Coercion<T>>,
     enable_data_validation: bool,
     assign_binding: bool,
     notifying: Option<NotifyingCallback>,
@@ -708,7 +709,7 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
 
     /// A value coercion callback.
     pub fn coerce(mut self, coerce: impl Fn(&FerroObject, T) -> T + 'static) -> Self {
-        self.coerce = Some(Rc::new(coerce));
+        self.coerce = Some(Coercion::new(Rc::new(coerce)));
         self
     }
 
@@ -737,9 +738,25 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
             .with_default_binding_mode(self.default_binding_mode)
             .with_enable_data_validation(self.enable_data_validation);
         if let Some(coerce) = self.coerce {
-            metadata = metadata.with_coerce(move |o, v| coerce(o, v));
+            // Transfer the already registered callback and algorithm. Naming
+            // the algorithm here would root it for every options value type,
+            // including properties that never supplied a coercer.
+            metadata = metadata.with_registered_coercion(coerce);
         }
         (metadata, self.inherits, self.validate, self.notifying)
+    }
+}
+
+#[cfg(test)]
+mod styled_property_options_tests {
+    use super::*;
+
+    #[test]
+    fn registration_transfers_the_original_coercer() {
+        let options = StyledPropertyOptions::new(0_i32).coerce(|_, n| n.max(0));
+        let registered = options.coerce.as_ref().unwrap().callback().clone();
+        let (metadata, _, _, _) = options.into_parts();
+        assert!(Rc::ptr_eq(&registered, metadata.coerce_value().unwrap()));
     }
 }
 
