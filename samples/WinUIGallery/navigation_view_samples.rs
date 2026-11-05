@@ -60,7 +60,7 @@ sample_page!(SamplePage5, "Pages/NavigationSample5.xaml");
 sample_page!(SamplePage6, "Pages/NavigationSample6.xaml");
 sample_page!(SampleSettingsPage, "Pages/NavigationSettings.xaml");
 
-fn register_pages(frame: &Frame) -> Result<(), NavigationError> {
+pub(crate) fn register_pages(frame: &Frame) -> Result<(), NavigationError> {
     for (type_, factory) in [
         (SamplePage1::TYPE, SamplePage1::create as fn() -> _),
         (SamplePage2::TYPE, SamplePage2::create as fn() -> _),
@@ -78,7 +78,7 @@ fn register_pages(frame: &Frame) -> Result<(), NavigationError> {
     Ok(())
 }
 
-fn page_type(tag: &str) -> Option<&'static TypeInfo> {
+pub(crate) fn page_type(tag: &str) -> Option<&'static TypeInfo> {
     match tag {
         "SamplePage1" => Some(SamplePage1::TYPE),
         "SamplePage2" => Some(SamplePage2::TYPE),

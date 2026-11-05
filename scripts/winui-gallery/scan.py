@@ -860,7 +860,7 @@ def report(summary: dict, page_mapping: dict, lock: dict) -> str:
                   "## Gallery port state", "", "| Page state | Count |", "|---|---:|"])
     for state in ("pending", "partial", "ported", "verified"):
         lines.append(f"| {state} | {gallery['page_statuses'][state]} |")
-    lines.extend(["", "Partial pages exercise reviewed native subsets (`samples/WinUIGallery/port-status.json`).", "",
+    lines.extend(["", "Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.", "",
                   "| Page | Category | State | Catalog examples |", "|---|---|---|---:|"])
     for page in page_mapping["pages"]:
         lines.append(f"| {page['id']} | {page['category']} | {page['status']} | {page['examples_total']} |")

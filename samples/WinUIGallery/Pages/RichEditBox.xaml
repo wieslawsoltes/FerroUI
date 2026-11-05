@@ -1,0 +1,120 @@
+<!-- Ported from the pinned RichEditBox examples of WinUI Gallery (14061eea); see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="RichEditBoxExample1" Spacing="8">
+    <TextBlock Text="A simple RichEditBox" FontSize="18" />
+    <RichEditBox x:Name="SimpleEditor" AutomationProperties.Name="simple text editor" />
+  </StackPanel>
+
+  <StackPanel x:Name="RichEditBoxExample2" Spacing="8">
+    <TextBlock Text="Customizing the RichEditBox's context menu" FontSize="18" />
+    <RichEditBox x:Name="REBCustom" Width="800" Height="200" HorizontalAlignment="Left"
+                 AutomationProperties.Name="editor with custom menu" />
+  </StackPanel>
+
+  <StackPanel x:Name="RichEditBoxExample3" Spacing="8">
+    <TextBlock Text="A RichEditBox with formatting options" FontSize="18" />
+    <RelativePanel Margin="0,0,0,20" HorizontalAlignment="Stretch">
+      <RelativePanel.Styles>
+        <Style Selector="Button.EditorCommand">
+          <Setter Property="BorderThickness" Value="0" />
+          <Setter Property="Background" Value="Transparent" />
+          <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+      </RelativePanel.Styles>
+      <Button x:Name="openFileButton" Classes="EditorCommand"
+              AutomationProperties.Name="Open file" ToolTip.Tip="Open file">
+        <FontIcon Glyph="&#xE8E5;" />
+      </Button>
+      <Button x:Name="saveFileButton" Classes="EditorCommand"
+              AutomationProperties.Name="Save file" ToolTip.Tip="Save file"
+              RelativePanel.RightOf="openFileButton">
+        <FontIcon Glyph="&#xE74E;" />
+      </Button>
+      <Button x:Name="boldButton" Classes="EditorCommand"
+              AutomationProperties.Name="Bold" ToolTip.Tip="Bold"
+              RelativePanel.LeftOf="italicButton">
+        <FontIcon Glyph="&#xE8DD;" />
+      </Button>
+      <Button x:Name="italicButton" Classes="EditorCommand"
+              AutomationProperties.Name="Italic" ToolTip.Tip="Italic"
+              RelativePanel.LeftOf="fontColorButton">
+        <FontIcon Glyph="&#xE8DB;" />
+      </Button>
+      <DropDownButton x:Name="fontColorButton" AutomationProperties.Name="Font color"
+                      Background="Transparent" BorderThickness="0" ToolTip.Tip="Font color"
+                      RelativePanel.AlignRightWithPanel="True">
+        <SymbolIcon Symbol="FontColor" />
+        <DropDownButton.Flyout>
+          <Flyout Placement="Bottom">
+            <UniformGrid x:Name="FontColorGrid" Columns="3">
+              <UniformGrid.Styles>
+                <Style Selector="Rectangle">
+                  <Setter Property="Width" Value="32" />
+                  <Setter Property="Height" Value="32" />
+                </Style>
+                <Style Selector="Button">
+                  <Setter Property="Padding" Value="0" />
+                  <Setter Property="MinWidth" Value="0" />
+                  <Setter Property="MinHeight" Value="0" />
+                  <Setter Property="Margin" Value="6" />
+                </Style>
+              </UniformGrid.Styles>
+              <Button x:Name="RedColorButton" AutomationProperties.Name="Red"><Rectangle Fill="Red" /></Button>
+              <Button x:Name="OrangeColorButton" AutomationProperties.Name="Orange"><Rectangle Fill="Orange" /></Button>
+              <Button x:Name="YellowColorButton" AutomationProperties.Name="Yellow"><Rectangle Fill="Yellow" /></Button>
+              <Button x:Name="GreenColorButton" AutomationProperties.Name="Green"><Rectangle Fill="Green" /></Button>
+              <Button x:Name="BlueColorButton" AutomationProperties.Name="Blue"><Rectangle Fill="Blue" /></Button>
+              <Button x:Name="IndigoColorButton" AutomationProperties.Name="Indigo"><Rectangle Fill="Indigo" /></Button>
+              <Button x:Name="VioletColorButton" AutomationProperties.Name="Violet"><Rectangle Fill="Violet" /></Button>
+              <Button x:Name="GrayColorButton" AutomationProperties.Name="Gray"><Rectangle Fill="Gray" /></Button>
+            </UniformGrid>
+          </Flyout>
+        </DropDownButton.Flyout>
+      </DropDownButton>
+      <RichEditBox x:Name="editor" Height="200" MinWidth="300"
+                   AutomationProperties.Name="Custom editor"
+                   RelativePanel.AlignLeftWithPanel="True"
+                   RelativePanel.AlignRightWithPanel="True"
+                   RelativePanel.Below="openFileButton" />
+      <StackPanel x:Name="findPanel" Margin="0,10,0,0" Orientation="Horizontal"
+                  RelativePanel.AlignLeftWith="editor" RelativePanel.Below="editor">
+        <TextBlock x:Name="findBoxLabel" Margin="0,0,0,4" VerticalAlignment="Center" Text="Find:" />
+        <TextBox x:Name="findBox" Width="224" Margin="10,0,0,0" PlaceholderText="Enter search text"
+                 AutomationProperties.Name="Find" />
+      </StackPanel>
+      <TextBlock x:Name="FileStatus" TextWrapping="Wrap" Margin="0,8,0,0"
+                 RelativePanel.AlignLeftWith="editor" RelativePanel.Below="findPanel"
+                 AutomationProperties.LiveSetting="Polite" />
+    </RelativePanel>
+  </StackPanel>
+
+  <StackPanel x:Name="RichEditBoxExample4" Spacing="8">
+    <TextBlock Text="Math mode in RichEditBox" FontSize="18" />
+    <RichTextBlock>
+      <Paragraph Margin="0,0,0,4"><Run Text="Math mode enables users to have input automatically recognized and converted to math expressions while being received." /></Paragraph>
+      <Paragraph Margin="0,0,0,4"><Run Text="It uses " /><Hyperlink NavigateUri="https://www.unicode.org/notes/tn28/"><Run Text="Unicode Nearly Plain-Text Encoding of Mathematics" /></Hyperlink><Run Text=", which allows mathematical notation to be represented in a linear format and automatically converted into proper math equations." /></Paragraph>
+      <Paragraph Margin="0,0,0,4"><Run Text="For example, &quot;4^2&quot; is converted to &quot;4&#x00b2;&quot;, and &quot;\pi&quot; is converted to &quot;&#x03c0;&quot;." /></Paragraph>
+    </RichTextBlock>
+    <RichEditBox x:Name="MathEditor" Height="80" Width="724" FontSize="16" HorizontalAlignment="Left"
+                 AutomationProperties.Name="Math editor" />
+    <TextBlock x:Name="MathModeDiagnostic" TextWrapping="Wrap"
+               Text="Math mode is not available: RichEditMathMode (TextDocument.SetMathMode) is the math engine of the Windows RichEdit control, which the FerroUI editor does not have. This editor accepts plain rich text." />
+  </StackPanel>
+
+  <StackPanel x:Name="RichEditBoxExample5" Spacing="8">
+    <TextBlock Text="Working with MathML in RichEditBox" FontSize="18" />
+    <RichTextBlock>
+      <Paragraph Margin="0,0,0,4"><Run Text="The " /><Run FontWeight="SemiBold" Text="SetMathML" /><Run Text=" method takes a " /><Hyperlink NavigateUri="https://www.w3.org/Math/"><Run Text="MathML" /></Hyperlink><Run Text=" string and displays the equation in the RichEditBox. The " /><Run FontWeight="SemiBold" Text="GetMathML" /><Run Text=" method retrieves the MathML string of the equation." /></Paragraph>
+    </RichTextBlock>
+    <RichEditBox x:Name="mathEditor2" FontSize="16" Height="80" Width="724" HorizontalAlignment="Left"
+                 AutomationProperties.Name="MathML editor" />
+    <TextBlock FontWeight="SemiBold" Text="MathML Code" />
+    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="8">
+      <SelectableTextBlock x:Name="MathmlPresenter" FontFamily="Consolas" Text="&lt;!-- No MathML content --&gt;" />
+    </Border>
+    <Button x:Name="SetMathmlFormulaBtn" Content="Set sample formula" IsEnabled="False" />
+    <TextBlock x:Name="MathmlDiagnostic" TextWrapping="Wrap"
+               Text="MathML is not available: ITextDocument.SetMathML and GetMathML need the math mode of the Windows RichEdit control, which the FerroUI editor does not have." />
+  </StackPanel>
+</StackPanel>
