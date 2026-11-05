@@ -2,7 +2,7 @@
 
 use ferroui_base::numerics::{Matrix4x4, Vector3};
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::PixelSize;
 use ferroui_opengl::gl_consts::*;
 use ferroui_opengl::{GlInterface, GlProfileType, GlVersion};
@@ -159,7 +159,7 @@ impl OpenGlContent {
 
         // Deviation (DEVIATIONS.md, ControlCatalog sample): upstream finds the manifest
         // resource whose name contains "teapot.bin"; the file is an asset of the sample here.
-        let uri = Uri::absolute("ferres://ControlCatalog/Pages/teapot.bin").unwrap_or_else(|e| panic!("{e}"));
+        let uri = UriRef::parse("ferres://ControlCatalog/Pages/teapot.bin").unwrap_or_else(|e| panic!("{e}"));
         let mut sr = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
 
         let buf = read_block(&mut sr);

@@ -9,7 +9,7 @@ use ferrodock_ferro::{
 };
 use ferrodock_ferro_themes_simple::DockSimpleTheme;
 use ferrodock_model::core::*;
-use ferroui_base::{platform::AssetLoader, threading::CancellationToken, utilities::Uri, Ref};
+use ferroui_base::{platform::AssetLoader, threading::CancellationToken, utilities::UriRef, Ref};
 use ferroui_controls::{AppBuilder, Application, ItemsControl, Panel, Window};
 use ferroui_headless::{
     FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions, FerroTestApplicationAttribute,
@@ -154,7 +154,7 @@ fn simple_assembly_embeds_all_original_linked_target_images_with_its_own_uris() 
             "DockAnchorableRight",
             "DockDocumentInside",
         ] {
-            let uri = Uri::absolute(&format!(
+            let uri = UriRef::parse(&format!(
                 "ferres://FerroDock.Ferro.Themes.Simple/Assets/{name}.png"
             ))
             .unwrap();

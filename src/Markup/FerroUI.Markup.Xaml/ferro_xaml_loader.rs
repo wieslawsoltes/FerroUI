@@ -3,7 +3,7 @@
 use crate::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
 use ferroui_base::metadata::{IServiceProvider, MarkupAssembly};
 use ferroui_base::platform::IAssetLoader;
-use ferroui_base::utilities::{Uri, UriRef};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{ferro_markup_type, BoxedValue, FerroLocator, LocatorExtensions};
 use std::collections::HashMap;
 use std::io::Read;
@@ -169,10 +169,9 @@ impl FerroXamlLoader {
             })?,
             (None, None) => return Err(XamlLoadError::with_message(RELATIVE_WITHOUT_BASE)),
         };
-        // The asset loader takes the port `Uri` until U3 (C5 of #423). It is given the URL the
-        // reference resolves to, so that it opens the document the URL names (where the URL
-        // standard and `Uri::combine` differ, section 3.5 of docs/idiomatic-rust-signatures.md).
-        let asset_uri = Uri::from(absolute_uri.clone());
+        // The asset loader is given the URL the reference resolved to, the one the document's
+        // context reports as its base URI.
+        let asset_uri = UriRef::from(absolute_uri.clone());
 
         // Explicit designer snapshots (and development revisions) win over compiled
         // assets, including lazy includes. An unavailable draft must never fall back

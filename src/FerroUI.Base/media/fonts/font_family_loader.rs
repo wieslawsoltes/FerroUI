@@ -1,5 +1,5 @@
 use crate::platform::IAssetLoader;
-use crate::utilities::{Uri, UriExtensions, UriKind};
+use crate::utilities::{UriExtensions, UriRef};
 use crate::{FerroLocator, LocatorExtensions};
 
 /// Finds the font assets of a font family source.
@@ -11,8 +11,8 @@ impl FontFamilyLoader {
     /// font files.
     ///
     /// Panics when no asset loader is registered with the locator.
-    pub fn load_font_assets(source: &Uri) -> Vec<Uri> {
-        if UriExtensions::is_asset(source) || UriExtensions::is_absolute_resm(source) {
+    pub fn load_font_assets(source: &url::Url) -> Vec<url::Url> {
+        if UriExtensions::is_asset(source) || UriExtensions::is_resm(source) {
             return if Self::is_font_source(source) {
                 Self::get_font_assets_by_expression(source)
             } else {
@@ -23,9 +23,9 @@ impl FontFamilyLoader {
         Vec::new()
     }
 
-    /// Whether the URI (without its query) names a font file.
-    pub fn is_font_source(uri: &Uri) -> bool {
-        let source_without_arguments = Self::get_sub_string(uri.original_string(), '?');
+    /// Whether the URL (without its query) names a font file.
+    pub fn is_font_source(uri: &url::Url) -> bool {
+        let source_without_arguments = Self::get_sub_string(uri.as_str(), '?');
         Self::is_font_file(source_without_arguments)
     }
 
@@ -37,9 +37,9 @@ impl FontFamilyLoader {
     }
 
     /// Searches for font assets at a given location and returns a list of them.
-    fn get_font_assets_by_source(source: &Uri) -> Vec<Uri> {
+    fn get_font_assets_by_source(source: &url::Url) -> Vec<url::Url> {
         let asset_loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
-        let mut available_assets = asset_loader.get_assets(source, None);
+        let mut available_assets = asset_loader.get_assets(&UriRef::from(source.clone()), None);
         available_assets.retain(Self::is_font_source);
         available_assets
     }
@@ -47,7 +47,7 @@ impl FontFamilyLoader {
     /// Searches for font assets at a given location and only accepts assets
     /// that fit to a given filename expression. File names can target
     /// multiple files with `*` wildcard, for example `FontFile*.ttf`.
-    fn get_font_assets_by_expression(source: &Uri) -> Vec<Uri> {
+    fn get_font_assets_by_expression(source: &url::Url) -> Vec<url::Url> {
         let Some(((file_name_without_extension, extension), location)) = Self::get_file_name(source) else {
             return Vec::new();
         };
@@ -55,46 +55,51 @@ impl FontFamilyLoader {
         let file_pattern = Self::create_file_pattern(source, &location, &file_name_without_extension);
 
         let asset_loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
-        let mut available_resources = asset_loader.get_assets(&location, None);
+        let mut available_resources = asset_loader.get_assets(&UriRef::from(location), None);
 
         available_resources.retain(|asset| Self::is_contains_file(asset, &file_pattern, &extension));
         available_resources
     }
 
     /// The file name (without extension) and the extension of the source, and
-    /// the location the file is in. `None` when the location is not a valid URI.
-    fn get_file_name(source: &Uri) -> Option<((String, String), Uri)> {
-        if UriExtensions::is_absolute_resm(source) {
+    /// the location the file is in. `None` when the location is not a valid URL.
+    ///
+    /// The names are read from the unescaped text of the URL, which is the
+    /// text the location is made from (a URL escapes a space of its path,
+    /// `/Assets/My%20Font.ttf`).
+    fn get_file_name(source: &url::Url) -> Option<((String, String), url::Url)> {
+        let unescaped = UriExtensions::get_unescape_absolute_uri(source);
+
+        if UriExtensions::is_resm(source) {
             let file_name = Self::get_file_name_and_extension(&UriExtensions::get_unescape_absolute_path(source), '.');
 
-            let uri_location =
-                UriExtensions::get_unescape_absolute_uri(source).replace(&format!(".{}{}", file_name.0, file_name.1), "");
-            let location = Uri::try_create(&uri_location, UriKind::RelativeOrAbsolute)?;
+            let uri_location = unescaped.replace(&format!(".{}{}", file_name.0, file_name.1), "");
+            let location = UriRef::parse_absolute(&uri_location).ok()?;
 
             return Some((file_name, location));
         }
 
-        let file_name = Self::get_file_name_and_extension(source.original_string(), '/');
+        let file_name = Self::get_file_name_and_extension(&unescaped, '/');
         let full_filename = format!("{}{}", file_name.0, file_name.1);
 
-        let uri_string = UriExtensions::get_unescape_absolute_uri(source).replace(&full_filename, "");
-        let location = Uri::try_create(&uri_string, UriKind::Absolute)?;
+        let uri_string = unescaped.replace(&full_filename, "");
+        let location = UriRef::parse_absolute(&uri_string).ok()?;
 
         Some((file_name, location))
     }
 
-    fn create_file_pattern(source: &Uri, location: &Uri, file_name_without_extension: &str) -> String {
+    fn create_file_pattern(source: &url::Url, location: &url::Url, file_name_without_extension: &str) -> String {
         let path = UriExtensions::get_unescape_absolute_path(location);
         let file = Self::get_sub_string(file_name_without_extension, '*');
 
-        if UriExtensions::is_absolute_resm(source) {
+        if UriExtensions::is_resm(source) {
             format!("{path}.{file}")
         } else {
             format!("{path}{file}")
         }
     }
 
-    fn is_contains_file(asset: &Uri, file_pattern: &str, file_extension: &str) -> bool {
+    fn is_contains_file(asset: &url::Url, file_pattern: &str, file_extension: &str) -> bool {
         let path = UriExtensions::get_unescape_absolute_path(asset);
         path.contains(file_pattern) && ends_with_ignore_ascii_case(&path, file_extension)
     }
@@ -167,6 +172,10 @@ mod tests {
     const ASSET_LOCATION_FERRES: &str = "ferres://FerroUI.Visuals.UnitTests";
     const ASSET_YOUR_FILE_NAME: &str = "/Assets/YourFont.ttf";
 
+    fn url(text: &str) -> url::Url {
+        UriRef::parse_absolute(text).unwrap()
+    }
+
     fn asset(file_name: &str) -> String {
         format!("{ASSET_LOCATION}{file_name}{ASSEMBLY}{FONT_NAME}")
     }
@@ -194,7 +203,7 @@ mod tests {
     fn should_load_single_font_asset() {
         let _scope = start_with_resources();
 
-        let source = Uri::new(&asset_my_font_regular(), UriKind::RelativeOrAbsolute).unwrap();
+        let source = url(&asset_my_font_regular());
 
         let font_assets = FontFamilyLoader::load_font_assets(&source);
 
@@ -205,7 +214,7 @@ mod tests {
     fn should_load_single_font_asset_ferres_without_base_uri() {
         let _scope = start_with_resources();
 
-        let source = Uri::absolute(&asset_your_font_ferres()).unwrap();
+        let source = url(&asset_your_font_ferres());
 
         let font_assets = FontFamilyLoader::load_font_assets(&source);
 
@@ -216,10 +225,10 @@ mod tests {
     fn should_load_single_font_asset_ferres_with_base_uri() {
         let _scope = start_with_resources();
 
-        let source = Uri::new(ASSET_YOUR_FILE_NAME, UriKind::RelativeOrAbsolute).unwrap();
-        let base_uri = Uri::absolute(ASSET_LOCATION_FERRES).unwrap();
+        let source = UriRef::parse(ASSET_YOUR_FILE_NAME).unwrap();
+        let base_uri = url(ASSET_LOCATION_FERRES);
 
-        let font_assets = FontFamilyLoader::load_font_assets(&Uri::combine(&base_uri, &source));
+        let font_assets = FontFamilyLoader::load_font_assets(&source.resolve(&base_uri).unwrap());
 
         assert_eq!(font_assets.len(), 1);
     }
@@ -228,7 +237,7 @@ mod tests {
     fn should_load_matching_assets() {
         let _scope = start_with_resources();
 
-        let source = Uri::new(&asset(".MyFont*.ttf"), UriKind::RelativeOrAbsolute).unwrap();
+        let source = url(&asset(".MyFont*.ttf"));
 
         let font_assets = FontFamilyLoader::load_font_assets(&source);
 
@@ -239,14 +248,14 @@ mod tests {
     fn should_load_embedded_font() {
         let scope = TestFontScope::with_assets();
 
-        let source = Uri::new(&format!("{}#Noto Mono", test_fonts::ASSETS), UriKind::RelativeOrAbsolute).unwrap();
+        let source = url(&format!("{}#Noto Mono", test_fonts::ASSETS));
 
         let font_assets = FontFamilyLoader::load_font_assets(&source);
 
         assert!(!font_assets.is_empty());
 
         for font_asset in &font_assets {
-            assert!(scope.asset_loader().open(font_asset, None).is_ok());
+            assert!(scope.asset_loader().open(&UriRef::from(font_asset.clone()), None).is_ok());
         }
     }
 
@@ -254,8 +263,8 @@ mod tests {
     fn other_schemes_have_no_font_assets() {
         let _scope = start_with_resources();
 
-        assert!(FontFamilyLoader::load_font_assets(&Uri::absolute("fonts:Inter").unwrap()).is_empty());
-        assert!(FontFamilyLoader::load_font_assets(&Uri::absolute("file:///fonts/a.ttf").unwrap()).is_empty());
+        assert!(FontFamilyLoader::load_font_assets(&url("fonts:Inter")).is_empty());
+        assert!(FontFamilyLoader::load_font_assets(&url("file:///fonts/a.ttf")).is_empty());
     }
 
     #[test]
@@ -268,8 +277,8 @@ mod tests {
             assert!(!FontFamilyLoader::is_font_file(path), "{path}");
         }
 
-        assert!(FontFamilyLoader::is_font_source(&Uri::absolute("resm:A.B.c.ttf?assembly=A#Name").unwrap()));
-        assert!(!FontFamilyLoader::is_font_source(&Uri::absolute("resm:A.B?assembly=A.ttf").unwrap()));
+        assert!(FontFamilyLoader::is_font_source(&url("resm:A.B.c.ttf?assembly=A#Name")));
+        assert!(!FontFamilyLoader::is_font_source(&url("resm:A.B?assembly=A.ttf")));
     }
 
     #[test]

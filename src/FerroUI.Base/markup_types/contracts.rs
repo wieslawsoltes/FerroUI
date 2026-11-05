@@ -98,7 +98,7 @@ ferro_markup_type!(interface dyn crate::media::fonts::IFontCollection as "IFontC
     handles: [Rc<dyn crate::media::fonts::IFontCollection>, Option<Rc<dyn crate::media::fonts::IFontCollection>>],
     this: Rc<dyn crate::media::fonts::IFontCollection>,
     properties: [
-        Key: crate::utilities::Uri { get: |fonts: &Rc<dyn crate::media::fonts::IFontCollection>| fonts.key() },
+        Key: url::Url { get: |fonts: &Rc<dyn crate::media::fonts::IFontCollection>| fonts.key() },
         Count: i32 { get: |fonts: &Rc<dyn crate::media::fonts::IFontCollection>| fonts.count() as i32 },
     ],
 });

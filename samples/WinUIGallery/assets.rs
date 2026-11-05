@@ -2,7 +2,7 @@
 
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use std::sync::Once;
 
 pub(crate) fn register() {
@@ -23,9 +23,9 @@ pub(crate) fn register() {
 
 pub(crate) fn load_bitmap(uri: &str) -> std::io::Result<Bitmap> {
     register();
-    let uri = Uri::new(uri, UriKind::Absolute).map_err(|error| {
+    let uri = UriRef::parse_absolute(uri).map_err(|error| {
         std::io::Error::new(std::io::ErrorKind::InvalidInput, error.to_string())
     })?;
-    let mut stream = AssetLoader::open(&uri, None)?;
+    let mut stream = AssetLoader::open(&UriRef::from(uri), None)?;
     Bitmap::from_stream(&mut *stream)
 }

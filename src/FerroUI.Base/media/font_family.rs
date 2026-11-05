@@ -7,7 +7,7 @@ use crate::media::composite_font_family_key::CompositeFontFamilyKey;
 use crate::media::font_source_identifier::FontSourceIdentifier;
 use crate::media::fonts::{FamilyNameCollection, FontFamilyKey};
 use crate::media::{FontManager, Typeface};
-use crate::utilities::{FormatError, Uri, UriKind};
+use crate::utilities::{FormatError, UriRef};
 
 struct FontFamilyInner {
     family_names: FamilyNameCollection,
@@ -33,18 +33,13 @@ impl FontFamily {
         Self::with_base_uri(None, name)
     }
 
-    /// Creates a font family whose relative sources are resolved against `base_uri`.
+    /// Creates a font family whose relative sources are resolved against
+    /// `base_uri` (the URL of the document that names the family).
     ///
-    /// Panics when `name` is empty or `base_uri` is not absolute.
-    pub fn with_base_uri(base_uri: Option<&Uri>, name: &str) -> Self {
+    /// Panics when `name` is empty.
+    pub fn with_base_uri(base_uri: Option<&url::Url>, name: &str) -> Self {
         if name.is_empty() {
             panic!("name must not be empty");
-        }
-
-        if let Some(base_uri) = base_uri {
-            if !base_uri.is_absolute_uri() {
-                panic!("Base uri must be an absolute uri.");
-            }
         }
 
         let font_sources = Self::get_font_source_identifier(name);
@@ -55,10 +50,10 @@ impl FontFamily {
             let single_source = &font_sources[0];
 
             single_source.source.as_ref().map(|source| {
-                if source.is_absolute_uri() {
-                    FontFamilyKey::new(source.clone())
-                } else {
+                if source.is_relative() {
                     FontFamilyKey::with_base_uri(source.clone(), base_uri.cloned())
+                } else {
+                    FontFamilyKey::new(source.clone())
                 }
             })
         } else {
@@ -66,12 +61,14 @@ impl FontFamily {
                 .iter()
                 .map(|font_source| match &font_source.source {
                     Some(source) => FontFamilyKey::with_base_uri(source.clone(), base_uri.cloned()),
-                    None => FontFamilyKey::new(system_font_uri(&font_source.name)),
+                    None => FontFamilyKey::new(UriRef::from(named_font_url(
+                        FontManager::SYSTEM_FONT_SCHEME,
+                        &font_source.name,
+                    ))),
                 })
                 .collect();
 
-            let source = Uri::try_create(&format!("{}:{}", FontManager::COMPOSITE_FONT_SCHEME, name), UriKind::Absolute)
-                .expect("a composite font key is an absolute uri");
+            let source = named_font_url(FontManager::COMPOSITE_FONT_SCHEME, name);
 
             Some(CompositeFontFamilyKey::new(source, keys))
         };
@@ -128,13 +125,8 @@ impl FontFamily {
 
                     if path.is_empty() {
                         identifier = Some(FontSourceIdentifier::new(inner_name.to_owned(), None));
-                    } else {
-                        let relative =
-                            if path.contains('/') { Uri::try_create(path, UriKind::Relative) } else { None };
-
-                        if let Some(source) = relative.or_else(|| Uri::try_create(path, UriKind::Absolute)) {
-                            identifier = Some(FontSourceIdentifier::new(inner_name.to_owned(), Some(source)));
-                        }
+                    } else if let Some(source) = Self::get_font_source(path) {
+                        identifier = Some(FontSourceIdentifier::new(inner_name.to_owned(), Some(source)));
                     }
                 }
             }
@@ -146,34 +138,42 @@ impl FontFamily {
         result
     }
 
+    /// The source of a `source#name` segment: a relative reference when the
+    /// path has a `/` (`/Assets/Fonts`, `Fonts/`), or a URL when it has a
+    /// scheme and something after it (`fonts:Inter`, `resm:App.Fonts`).
+    fn get_font_source(path: &str) -> Option<UriRef> {
+        match UriRef::parse(path).ok()? {
+            UriRef::Relative(_) if !path.contains('/') => None,
+            // A scheme with nothing after it (`fonts:`) is not a source.
+            UriRef::Absolute(_) if path.find(':') == Some(path.len() - 1) => None,
+            source => Some(source),
+        }
+    }
+
     /// Parses a `FontFamily` string.
     pub fn parse(s: &str) -> Result<FontFamily, FormatError> {
         Self::parse_with_base_uri(s, None)
     }
 
     /// Parses a `FontFamily` string, resolving relative sources against `base_uri`.
-    pub fn parse_with_base_uri(s: &str, base_uri: Option<&Uri>) -> Result<FontFamily, FormatError> {
+    pub fn parse_with_base_uri(s: &str, base_uri: Option<&url::Url>) -> Result<FontFamily, FormatError> {
         if s.is_empty() {
             return Err(FormatError::new("Specified family is not supported."));
-        }
-
-        if base_uri.is_some_and(|base_uri| !base_uri.is_absolute_uri()) {
-            return Err(FormatError::new("Base uri must be an absolute uri."));
         }
 
         Ok(FontFamily::with_base_uri(base_uri, s))
     }
 }
 
-/// `systemfont:<name>`; the name is kept verbatim in the URI text.
-fn system_font_uri(name: &str) -> Uri {
-    Uri::try_create(&format!("{}:{}", FontManager::SYSTEM_FONT_SCHEME, name), UriKind::Absolute)
-        // An empty name (e.g. a trailing comma) has no valid URI form; use a
-        // placeholder path so the key still exists and never matches a family.
-        .unwrap_or_else(|| {
-            Uri::try_create(&format!("{}:/", FontManager::SYSTEM_FONT_SCHEME), UriKind::Absolute)
-                .expect("the placeholder is an absolute uri")
-        })
+/// `<scheme>:<name>` (`systemfont:Arial`, `compositefont:Inter, Arial`): the
+/// name is the opaque path of the URL. A name the URL parser would read as an
+/// authority (`//host`) has its slashes percent-encoded, so that every name
+/// has a URL; an empty name (a trailing comma) is the URL `systemfont:`, which
+/// never matches a family.
+fn named_font_url(scheme: &str, name: &str) -> url::Url {
+    url::Url::parse(&format!("{scheme}:{name}"))
+        .or_else(|_| url::Url::parse(&format!("{scheme}:{}", name.replace('/', "%2F"))))
+        .expect("a scheme followed by a path without a slash is a URL")
 }
 
 impl Default for FontFamily {
@@ -308,13 +308,17 @@ mod tests {
         assert_eq!(font_family.family_names().iter().last(), Some("Times New Roman"));
     }
 
+    fn url(text: &str) -> url::Url {
+        UriRef::parse_absolute(text).unwrap()
+    }
+
     #[test]
     fn should_parse_font_family_with_resource_folder() {
-        let source = Uri::absolute("resm:FerroUI.Visuals.UnitTests#MyFont").unwrap();
+        let source = "resm:FerroUI.Visuals.UnitTests#MyFont";
 
-        let key = FontFamilyKey::new(source.clone());
+        let key = FontFamilyKey::new(UriRef::parse(source).unwrap());
 
-        let font_family = FontFamily::parse(source.original_string()).unwrap();
+        let font_family = FontFamily::parse(source).unwrap();
 
         assert_eq!(font_family.name(), "MyFont");
         assert_eq!(font_family.key(), Some(&key));
@@ -322,11 +326,11 @@ mod tests {
 
     #[test]
     fn should_parse_font_family_with_resource_filename() {
-        let source = Uri::absolute("resm:FerroUI.Visuals.UnitTests.MyFont.ttf#MyFont").unwrap();
+        let source = "resm:FerroUI.Visuals.UnitTests.MyFont.ttf#MyFont";
 
-        let key = FontFamilyKey::new(source.clone());
+        let key = FontFamilyKey::new(UriRef::parse(source).unwrap());
 
-        let font_family = FontFamily::parse(source.original_string()).unwrap();
+        let font_family = FontFamily::parse(source).unwrap();
 
         assert_eq!(font_family.name(), "MyFont");
         assert_eq!(font_family.key(), Some(&key));
@@ -352,7 +356,7 @@ mod tests {
             (Some("ferres://FerroUI.Visuals.UnitTests/Assets/Fonts"), "/#MyFont"),
             (Some("ferres://FerroUI.Visuals.UnitTests"), "/Assets/Fonts#MyFont"),
         ] {
-            let base_uri = base.map(|base| Uri::absolute(base).unwrap());
+            let base_uri = base.map(url);
 
             let font_family = FontFamily::with_base_uri(base_uri.as_ref(), name);
 
@@ -380,8 +384,8 @@ mod tests {
                 Some("ferres://FerroUI.Fonts.Inter/Assets"),
             ),
         ] {
-            let b = base_uri.map(|base_uri| Uri::absolute(base_uri).unwrap());
-            let expected_uri = expected_uri.map(|uri| Uri::absolute(uri).unwrap().absolute_uri().to_owned());
+            let b = base_uri.map(url);
+            let expected_uri = expected_uri.map(url);
 
             let font_family = FontFamily::parse_with_base_uri(s, b.as_ref()).unwrap();
 
@@ -390,14 +394,11 @@ mod tests {
             if let Some(expected_uri) = expected_uri {
                 let key = font_family.key().expect("the family has a key");
 
-                match key.base_uri() {
-                    Some(base_uri) => assert!(base_uri.is_absolute_uri()),
-                    None => assert!(key.source().is_absolute_uri()),
+                if key.base_uri().is_none() {
+                    assert!(!key.source().is_relative());
                 }
 
-                let font_uri = key.source().ensure_absolute(key.base_uri());
-
-                assert_eq!(font_uri.absolute_uri(), expected_uri);
+                assert_eq!(key.absolute_source(), Some(&expected_uri));
             }
         }
     }
@@ -409,23 +410,42 @@ mod tests {
             ("ferres://MyAssembly/", "./Some/Path/#FontName", "ferres://MyAssembly/Some/Path/"),
             ("ferres://MyAssembly/sub/", "../Some/Path/#FontName", "ferres://MyAssembly/Some/Path/"),
         ] {
-            let base_uri = Uri::absolute(base_uri_string).unwrap();
+            let base_uri = url(base_uri_string);
 
             let font_family = FontFamily::parse_with_base_uri(path, Some(&base_uri)).unwrap();
 
             let key = font_family.key().expect("the family has a key");
-            let actual = Uri::combine(key.base_uri().expect("the key has a base uri"), key.source());
+            let actual = key.source().resolve(key.base_uri().expect("the key has a base uri")).unwrap();
 
-            assert_eq!(actual.absolute_uri(), Uri::absolute(expected).unwrap().absolute_uri());
+            assert_eq!(actual, url(expected));
+            assert_eq!(key.absolute_source(), Some(&actual));
         }
     }
 
+    // The base URI is a `Url`, so a relative base URI cannot be passed (the reference test also
+    // rejects one).
     #[test]
-    fn parse_rejects_an_empty_name_and_a_relative_base_uri() {
+    fn parse_rejects_an_empty_name() {
         assert!(FontFamily::parse("").is_err());
+        assert!(FontFamily::parse_with_base_uri("", Some(&url("ferres://app/"))).is_err());
+    }
 
-        let relative = Uri::new("/Assets", UriKind::Relative).unwrap();
+    #[test]
+    fn sources_are_references_and_names_are_urls() {
+        let single = FontFamily::new("/Assets/Fonts#Inter");
+        assert_eq!(single.key().map(|key| key.source().to_string()), Some("/Assets/Fonts".to_owned()));
 
-        assert!(FontFamily::parse_with_base_uri("Arial", Some(&relative)).is_err());
+        // A path without a `/` and without a scheme, or a scheme with nothing after it, is not
+        // a source: the whole segment is the name.
+        assert!(FontFamily::new("Fonts#Inter").key().is_none());
+        assert_eq!(FontFamily::new("Fonts#Inter").name(), "Fonts#Inter");
+        assert!(FontFamily::new("fonts:#Inter").key().is_none());
+
+        let composite = FontFamily::with_base_uri(Some(&url("ferres://app/Main.xaml")), "Inter, /Assets#Noto");
+        let keys = CompositeFontFamilyKey::keys(composite.key().unwrap()).unwrap();
+        assert_eq!(keys[0].source().to_string(), "systemfont:Inter");
+        assert_eq!(keys[1].absolute_source().map(url::Url::as_str), Some("ferres://app/Assets"));
+        assert_eq!(composite.key().unwrap().source().to_string(), "compositefont:Inter, /Assets#Noto");
+        assert_eq!(named_font_url(FontManager::SYSTEM_FONT_SCHEME, "//a b").as_str(), "systemfont:%2F%2Fa b");
     }
 }

@@ -3,7 +3,8 @@ use super::internal::{
     IAssemblyDescriptorResolver,
 };
 use super::{AssetAssembly, AssetStream, IAssetLoader, ASSET_SCHEME};
-use crate::utilities::{Uri, UriExtensions};
+use crate::utilities::{UriExtensions, UriRef};
+use std::borrow::Cow;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -44,19 +45,19 @@ impl StandardAssetLoader {
         Rc::new(AssemblyDescriptor::new(assembly))
     }
 
-    fn not_found(uri: &Uri) -> std::io::Error {
+    fn not_found(uri: &UriRef) -> std::io::Error {
         std::io::Error::new(std::io::ErrorKind::NotFound, format!("The resource {uri} could not be found."))
     }
 
-    fn try_get_asset(&self, uri: &Uri, base_uri: Option<&Uri>) -> Option<Rc<EmbeddedAssetDescriptor>> {
-        if UriExtensions::is_absolute_resm(uri) {
+    fn try_get_asset(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> Option<Rc<EmbeddedAssetDescriptor>> {
+        if let Some(resm) = uri.as_url().filter(|url| UriExtensions::is_resm(url)) {
             let assembly = self
-                .try_get_assembly(Some(uri))
+                .try_get_assembly(Some(resm))
                 .or_else(|| self.try_get_assembly(base_uri))
                 .or_else(|| self.default_resm_assembly.borrow().clone());
 
             if let Some(resources) = assembly.as_ref().and_then(|assembly| assembly.resources()) {
-                let resource_key = uri.absolute_path();
+                let resource_key = resm.path();
 
                 if let Some(asset_descriptor) = resources.get(resource_key) {
                     return Some(asset_descriptor);
@@ -79,18 +80,14 @@ impl StandardAssetLoader {
         None
     }
 
-    fn try_get_res_asm_and_path(&self, uri: &Uri) -> Option<(Rc<dyn IAssemblyDescriptor>, String)> {
+    fn try_get_res_asm_and_path(&self, uri: &url::Url) -> Option<(Rc<dyn IAssemblyDescriptor>, String)> {
         let path = UriExtensions::get_unescape_absolute_path(uri);
 
         self.try_load_assembly(UriExtensions::authority(uri)).map(|assembly| (assembly, path))
     }
 
-    fn try_get_assembly(&self, uri: Option<&Uri>) -> Option<Rc<dyn IAssemblyDescriptor>> {
+    fn try_get_assembly(&self, uri: Option<&url::Url>) -> Option<Rc<dyn IAssemblyDescriptor>> {
         let uri = uri?;
-
-        if !uri.is_absolute_uri() {
-            return None;
-        }
 
         if UriExtensions::is_asset(uri) {
             if let Some((assembly, _)) = self.try_get_res_asm_and_path(uri) {
@@ -121,18 +118,18 @@ impl IAssetLoader for StandardAssetLoader {
         *self.default_resm_assembly.borrow_mut() = Some(Self::describe(assembly));
     }
 
-    fn exists(&self, uri: &Uri, base_uri: Option<&Uri>) -> bool {
+    fn exists(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> bool {
         self.try_get_asset(uri, base_uri).is_some()
     }
 
-    fn open(&self, uri: &Uri, base_uri: Option<&Uri>) -> std::io::Result<Box<dyn AssetStream>> {
+    fn open(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> std::io::Result<Box<dyn AssetStream>> {
         Ok(self.open_and_get_assembly(uri, base_uri)?.0)
     }
 
     fn open_and_get_assembly(
         &self,
-        uri: &Uri,
-        base_uri: Option<&Uri>,
+        uri: &UriRef,
+        base_uri: Option<&url::Url>,
     ) -> std::io::Result<(Box<dyn AssetStream>, AssetAssembly)> {
         match self.try_get_asset(uri, base_uri) {
             Some(asset_descriptor) => Ok((asset_descriptor.get_stream(), asset_descriptor.assembly().clone())),
@@ -140,31 +137,27 @@ impl IAssetLoader for StandardAssetLoader {
         }
     }
 
-    fn get_assembly(&self, uri: &Uri, base_uri: Option<&Uri>) -> Option<AssetAssembly> {
-        let uri = match base_uri {
-            Some(base_uri) if !uri.is_absolute_uri() => {
-                if !base_uri.is_absolute_uri() {
-                    return None;
-                }
-                Uri::combine(base_uri, uri)
-            }
-            _ => uri.clone(),
+    fn get_assembly(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> Option<AssetAssembly> {
+        let uri = match (uri, base_uri) {
+            (UriRef::Absolute(url), _) => Cow::Borrowed(url),
+            (UriRef::Relative(_), Some(base_uri)) => Cow::Owned(uri.resolve(base_uri).ok()?),
+            (UriRef::Relative(_), None) => return None,
         };
-        self.try_get_assembly(Some(&uri)).map(|descriptor| descriptor.assembly().clone())
+        self.try_get_assembly(Some(&*uri)).map(|descriptor| descriptor.assembly().clone())
     }
 
-    fn get_assets(&self, uri: &Uri, base_uri: Option<&Uri>) -> Vec<Uri> {
-        if UriExtensions::is_absolute_resm(uri) {
-            let assembly = self.try_get_assembly(Some(uri)).or_else(|| self.default_resm_assembly.borrow().clone());
+    fn get_assets(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> Vec<url::Url> {
+        if let Some(resm) = uri.as_url().filter(|url| UriExtensions::is_resm(url)) {
+            let assembly = self.try_get_assembly(Some(resm)).or_else(|| self.default_resm_assembly.borrow().clone());
 
             let Some(assembly) = assembly else { return Vec::new() };
             let Some(resources) = assembly.resources() else { return Vec::new() };
-            let path = UriExtensions::get_unescape_absolute_path(uri);
+            let path = UriExtensions::get_unescape_absolute_path(resm);
             let name = assembly.name().unwrap_or_default();
             return resources
                 .keys()
                 .filter(|key| key.contains(&path))
-                .filter_map(|key| Uri::absolute(&format!("resm:{key}?assembly={name}")).ok())
+                .filter_map(|key| UriRef::parse_absolute(&format!("resm:{key}?assembly={name}")).ok())
                 .collect();
         }
 
@@ -181,7 +174,7 @@ impl IAssetLoader for StandardAssetLoader {
             return resources
                 .keys()
                 .filter(|key| key.starts_with(&path))
-                .filter_map(|key| Uri::absolute(&format!("{ASSET_SCHEME}://{name}{key}")).ok())
+                .filter_map(|key| UriRef::parse_absolute(&format!("{ASSET_SCHEME}://{name}{key}")).ok())
                 .collect();
         }
 
@@ -202,7 +195,6 @@ mod tests {
     use super::super::internal::AssetMap;
     use super::*;
     use crate::platform::{register_assets, register_manifest_resources};
-    use crate::utilities::UriKind;
     use std::collections::HashMap;
     use std::io::Read;
 
@@ -247,7 +239,7 @@ mod tests {
     #[test]
     fn assembly_name_with_whitespace_should_load_resm() {
         let uri =
-            Uri::absolute(&format!("resm:Ferro.Base.UnitTests.Assets.something?assembly={ASSEMBLY_NAME_WITH_WHITESPACE}"))
+            UriRef::parse(&format!("resm:Ferro.Base.UnitTests.Assets.something?assembly={ASSEMBLY_NAME_WITH_WHITESPACE}"))
                 .unwrap();
         let loader = StandardAssetLoader::with_resolver(resolver(), None);
 
@@ -258,7 +250,7 @@ mod tests {
 
     #[test]
     fn invalid_assembly_name_should_yield_empty_enumerable() {
-        let uri = Uri::absolute(&format!("{ASSET_SCHEME}://InvalidAssembly")).unwrap();
+        let uri = UriRef::parse(&format!("{ASSET_SCHEME}://InvalidAssembly")).unwrap();
         let loader = StandardAssetLoader::with_resolver(resolver(), None);
 
         let assembly_actual = loader.get_assets(&uri, None);
@@ -274,8 +266,17 @@ mod tests {
         content
     }
 
-    fn asset(path: &str) -> Uri {
-        Uri::absolute(&format!("{ASSET_SCHEME}://{path}")).unwrap()
+    /// The URL of an asset, with the case of the crate name as written.
+    fn asset_url(path: &str) -> url::Url {
+        url::Url::parse(&format!("{ASSET_SCHEME}://{path}")).unwrap()
+    }
+
+    fn asset(path: &str) -> UriRef {
+        UriRef::from(asset_url(path))
+    }
+
+    fn reference(text: &str) -> UriRef {
+        UriRef::parse(text).unwrap()
     }
 
     #[test]
@@ -298,11 +299,11 @@ mod tests {
         assert_eq!(Some(assembly), loader.get_assembly(&icon, None));
 
         // Relative URIs resolve against the base URI.
-        let base = asset("asset-loader-test-app/Styles/Main.xaml");
-        let relative = Uri::new("../Assets/logo.png", UriKind::Relative).unwrap();
+        let base = asset_url("asset-loader-test-app/Styles/Main.xaml");
+        let relative = reference("../Assets/logo.png");
         assert!(loader.exists(&relative, Some(&base)));
         assert!(!loader.exists(&relative, None));
-        let rooted = Uri::new("/Assets/logo.png", UriKind::Relative).unwrap();
+        let rooted = reference("/Assets/logo.png");
         assert_eq!(b"logo".to_vec(), read(loader.open(&rooted, Some(&base)).unwrap()));
         assert_eq!("asset-loader-test-app", loader.get_assembly(&rooted, Some(&base)).unwrap().name());
 
@@ -322,7 +323,7 @@ mod tests {
         let loader = StandardAssetLoader::new(None);
 
         let list = |uri: &str| -> Vec<String> {
-            loader.get_assets(&asset(uri), None).iter().map(|uri| uri.absolute_uri().to_owned()).collect()
+            loader.get_assets(&asset(uri), None).iter().map(|uri| uri.as_str().to_owned()).collect()
         };
 
         assert_eq!(
@@ -336,8 +337,8 @@ mod tests {
         assert_eq!(4, list("asset-loader-folder-app/").len());
         assert!(list("asset-loader-folder-app/Missing").is_empty());
 
-        let relative = Uri::new("Assets/Sub", UriKind::Relative).unwrap();
-        let base = asset("asset-loader-folder-app/d.png");
+        let relative = reference("Assets/Sub");
+        let base = asset_url("asset-loader-folder-app/d.png");
         assert_eq!(1, loader.get_assets(&relative, Some(&base)).len());
         assert!(loader.get_assets(&relative, None).is_empty());
     }
@@ -351,22 +352,23 @@ mod tests {
         let lib = AssetAssembly::new("asset-loader-resm-lib");
         let loader = StandardAssetLoader::new(None);
 
-        let qualified = Uri::absolute("resm:Lib.Assets.one.txt?assembly=asset-loader-resm-lib").unwrap();
+        let qualified_url = UriRef::parse_absolute("resm:Lib.Assets.one.txt?assembly=asset-loader-resm-lib").unwrap();
+        let qualified = UriRef::from(qualified_url.clone());
         assert_eq!(b"one".to_vec(), read(loader.open(&qualified, None).unwrap()));
         assert_eq!(Some(lib.clone()), loader.get_assembly(&qualified, None));
 
         // Without an assembly in the query, the assembly of the base URI and
         // then the default assembly are used.
-        let unqualified = Uri::absolute("resm:Lib.Assets.two.txt").unwrap();
+        let unqualified = reference("resm:Lib.Assets.two.txt");
         assert!(!loader.exists(&unqualified, None));
-        assert!(loader.exists(&unqualified, Some(&qualified)));
+        assert!(loader.exists(&unqualified, Some(&qualified_url)));
         loader.set_default_assembly(&lib);
         assert_eq!(b"two".to_vec(), read(loader.open(&unqualified, None).unwrap()));
 
         let found: Vec<String> = loader
-            .get_assets(&Uri::absolute("resm:Lib.Assets").unwrap(), None)
+            .get_assets(&reference("resm:Lib.Assets"), None)
             .iter()
-            .map(|uri| uri.absolute_uri().to_owned())
+            .map(|uri| uri.as_str().to_owned())
             .collect();
         assert_eq!(
             vec![

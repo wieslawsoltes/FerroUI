@@ -1,6 +1,5 @@
 use crate::media::fonts::{FontCollectionBase, FontCollectionBaseImpl};
 use crate::media::FontManager;
-use crate::utilities::Uri;
 
 /// A system font collection without any font family.
 pub(crate) struct EmptySystemFontCollection {
@@ -18,7 +17,7 @@ impl FontCollectionBaseImpl for EmptySystemFontCollection {
         &this.base
     }
 
-    fn key(_this: &Self) -> Uri {
+    fn key(_this: &Self) -> url::Url {
         FontManager::system_fonts_key()
     }
 }

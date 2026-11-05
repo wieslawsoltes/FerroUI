@@ -14,7 +14,7 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::{AssetLoader, IGeometryContext};
 use ferroui_base::styling::{Selectors, Setter, Style};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, CornerRadius, FerroObjectImpl, FerroObjectImplExt,
     FerroPropertyChangedEventArgs, Point, Ref, RelativePoint, RelativeUnit, Size, StyledElementImpl, Thickness, Visual,
@@ -69,7 +69,7 @@ fn transparent() -> Option<Rc<dyn IBrush>> {
 /// The bitmap of the asset `name`; `None` when the asset cannot be opened or decoded (the
 /// `catch` of the original).
 fn load_img(name: &str) -> Option<Rc<Bitmap>> {
-    let uri = Uri::absolute(&format!("{ASSET_BASE}{name}")).ok()?;
+    let uri = UriRef::parse(&format!("{ASSET_BASE}{name}")).ok()?;
     let mut stream = AssetLoader::open(&uri, None).ok()?;
     Some(Rc::new(Bitmap::from_stream(&mut stream).ok()?))
 }

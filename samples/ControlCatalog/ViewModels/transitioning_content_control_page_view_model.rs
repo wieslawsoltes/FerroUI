@@ -11,7 +11,7 @@ use ferroui_base::media::{IImage, ScaleTransform};
 use ferroui_base::platform::AssetLoader;
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::{CancellationToken, JoinHandle};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{Ref, Visual};
 use ferroui_controls::ItemsSource;
 use mini_mvvm::{start_async, ViewModelBase};
@@ -54,7 +54,7 @@ impl TransitioningContentControlPageViewModel {
             .into_iter()
             .map(|image| {
                 let path = format!("ferres://ControlCatalog/Assets/{image}");
-                let uri = Uri::absolute(&path).unwrap_or_else(|e| panic!("{e}"));
+                let uri = UriRef::parse(&path).unwrap_or_else(|e| panic!("{e}"));
                 let mut stream = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
                 Rc::new(Bitmap::from_stream(&mut stream).unwrap_or_else(|e| panic!("{e}")))
             })

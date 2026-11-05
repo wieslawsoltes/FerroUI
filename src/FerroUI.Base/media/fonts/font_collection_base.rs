@@ -10,7 +10,7 @@ use crate::media::fonts::{FontCollectionKey, FontFallbackScriptHints, IFontColle
 use crate::media::text_formatting::unicode::{Codepoint, Script};
 use crate::media::{FontFamily, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface};
 use crate::platform::{IAssetLoader, IFontManagerImpl, ASSET_SCHEME};
-use crate::utilities::{parent_locale, Locale, Uri};
+use crate::utilities::{parent_locale, Locale, UriRef};
 use crate::{FerroLocator, LocatorExtensions};
 
 /// The typefaces of one font family: glyph typefaces by style, weight and
@@ -181,8 +181,9 @@ pub trait FontCollectionBaseImpl: Sized + 'static {
     /// The base class state of the collection.
     fn base(this: &Self) -> &FontCollectionBase;
 
-    /// Gets the unique identifier for the font collection.
-    fn key(this: &Self) -> Uri;
+    /// Gets the unique identifier for the font collection (a URL of the
+    /// `fonts:` scheme, see [`IFontCollection::key`]).
+    fn key(this: &Self) -> url::Url;
 
     /// Tries to match a specified character to a [`Typeface`] that supports
     /// specified font properties.
@@ -275,7 +276,7 @@ impl<T: FontCollectionBaseImpl> IFontCollectionBase for T {
 }
 
 impl<T: FontCollectionBaseImpl> IFontCollection for T {
-    fn key(&self) -> Uri {
+    fn key(&self) -> url::Url {
         T::key(self)
     }
 
@@ -710,10 +711,7 @@ impl FontCollectionBase {
         }
 
         Typeface::with_style(
-            FontFamily::with_base_uri(
-                None,
-                &format!("{}#{}", this.key().absolute_uri(), glyph_typeface.family_name()),
-            ),
+            FontFamily::new(&format!("{}#{}", this.key(), glyph_typeface.family_name())),
             requested_key.style,
             requested_key.weight,
             requested_key.stretch,
@@ -1055,11 +1053,7 @@ impl FontCollectionBase {
     ///
     /// Returns `true` if at least one font from the specified source was
     /// successfully added to the font collection; otherwise, `false`.
-    pub fn try_add_font_source(this: &dyn IFontCollectionBase, source: &Uri) -> bool {
-        if !source.is_absolute_uri() {
-            return false;
-        }
-
+    pub fn try_add_font_source(this: &dyn IFontCollectionBase, source: &url::Url) -> bool {
         let base = this.base();
 
         let mut result = false;
@@ -1077,8 +1071,8 @@ impl FontCollectionBase {
                     .clone()
                     .unwrap_or_else(|| FerroLocator::current().get_required_service::<dyn IAssetLoader>());
 
-                for font_asset in &font_assets {
-                    let Ok(mut stream) = asset_loader.open(font_asset, None) else {
+                for font_asset in font_assets {
+                    let Ok(mut stream) = asset_loader.open(&UriRef::from(font_asset), None) else {
                         continue;
                     };
 
@@ -1129,7 +1123,7 @@ impl FontCollectionBase {
     }
 
     #[cfg(not(target_family = "wasm"))]
-    fn try_add_file_font_source(this: &dyn IFontCollectionBase, source: &Uri) -> bool {
+    fn try_add_file_font_source(this: &dyn IFontCollectionBase, source: &url::Url) -> bool {
         use std::fs::File;
         use std::path::{Path, PathBuf};
 
@@ -1181,7 +1175,7 @@ impl FontCollectionBase {
 
     /// There is no file system on this target.
     #[cfg(target_family = "wasm")]
-    fn try_add_file_font_source(_this: &dyn IFontCollectionBase, _source: &Uri) -> bool {
+    fn try_add_file_font_source(_this: &dyn IFontCollectionBase, _source: &url::Url) -> bool {
         false
     }
 
@@ -1591,7 +1585,7 @@ impl FontCollectionBase {
 /// The local operating-system representation of the path of a `file:` URI
 /// (C# `Uri.LocalPath`): the unescaped path, with Windows drive paths in
 /// their native form.
-fn local_path(uri: &Uri) -> String {
+fn local_path(uri: &url::Url) -> String {
     let path = crate::utilities::UriExtensions::get_unescape_absolute_path(uri);
 
     if cfg!(windows) && uri.scheme() == "file" {
