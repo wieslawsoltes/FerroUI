@@ -560,3 +560,85 @@ fn repeater_markup_activation_requires_native_constructor_arguments() {
         "FerroUI.Controls.Repeater.SelectionModel"
     );
 }
+
+/// Step X5 of #525 (docs/porting/x-bind.md): the `{x:Bind}` bindings of a typed template are the
+/// template component of its instance, which the phaser drives as WinUI's repeater does: phase
+/// zero when the element is prepared, the later phases (`x:Phase`) in the phasing callbacks, the
+/// elements of a later phase hidden until their phase, and again when the element is recycled
+/// for another item.
+#[test]
+fn x_bind_phases_of_a_template_run_through_the_phaser_and_reset_on_recycling() {
+    use crate::services_tests::TestClock;
+    use crate::{Phaser, VirtualizationInfo};
+    use ferroui_controls::templates::IDataTemplate;
+    use ferroui_controls::{Button, ContentControl, StackPanel, TextBlock};
+    use std::rc::Rc;
+
+    let _scope = xaml_test_base();
+    let clock = TestClock::install();
+    let host = load_as::<Ref<ContentControl>>(
+        r#"<ContentControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ContentControl.ContentTemplate>
+    <DataTemplate x:DataType="Button">
+      <StackPanel>
+        <TextBlock Text="{x:Bind Content}" />
+        <TextBlock x:Phase="1" Text="{x:Bind Tag}" />
+        <TextBlock x:Phase="2" Text="{x:Bind Name}" />
+      </StackPanel>
+    </DataTemplate>
+  </ContentControl.ContentTemplate>
+</ContentControl>"#,
+    );
+    let item = |content: &str| -> BoxedValue {
+        let button = Button::new();
+        button.set_content(Some(Rc::new(content.to_string())));
+        button.set_tag(Some(Rc::new(format!("{content} tag"))));
+        button.set_name(Some(format!("{content} name")));
+        Rc::new(button)
+    };
+    let items: Rc<Vec<BoxedValue>> = Rc::new(vec![item("first"), item("second")]);
+    let item_at = items.clone();
+    let phaser = Phaser::new(
+        Rc::new(|| Rect::new(0.0, 0.0, 100.0, 100.0)),
+        Rc::new(move |index| item_at.get(index as usize).cloned()),
+    );
+    let template: Rc<dyn IDataTemplate> = host.content_template().unwrap();
+    let element = template.build(&None).unwrap();
+    assert!(
+        Phaser::get_data_template_component(&element).is_some(),
+        "the root of an instance of a template with x:Bind carries its template component"
+    );
+    let panel = element.clone().cast::<StackPanel>().unwrap();
+    let block = |index: usize| panel.children().get(index).cast::<TextBlock>().unwrap();
+    let prepare = |index: i32| {
+        let info = VirtualizationInfo::new();
+        info.move_ownership_to_layout_from_element_factory(index, "");
+        info.set_arrange_bounds(Rect::new(0.0, 0.0, 80.0, 20.0));
+        phaser.phase_element(&element, &info);
+        info
+    };
+
+    // Phase zero runs when the element is prepared; the later phases wait for the callbacks.
+    let info = prepare(0);
+    assert_eq!(block(0).text().as_deref(), Some("first"));
+    assert!(block(1).text().is_none() && !block(1).is_visible());
+    assert!(block(2).text().is_none() && !block(2).is_visible());
+    assert_eq!(phaser.pending_count(), 1);
+    clock.pulse(0.0);
+    assert_eq!(block(1).text().as_deref(), Some("first tag"));
+    assert_eq!(block(2).text().as_deref(), Some("first name"));
+    assert!(block(1).is_visible() && block(2).is_visible());
+    assert_eq!(phaser.pending_count(), 0);
+
+    // Recycling the element for another item hides the later phases until they run again.
+    phaser.stop_phasing(&element, &info);
+    let info = prepare(1);
+    assert_eq!(block(0).text().as_deref(), Some("second"));
+    assert_eq!(block(1).text().as_deref(), Some("first tag"));
+    assert!(!block(1).is_visible() && !block(2).is_visible());
+    clock.pulse(16.0);
+    assert_eq!(block(1).text().as_deref(), Some("second tag"));
+    assert_eq!(block(2).text().as_deref(), Some("second name"));
+    assert!(block(1).is_visible() && block(2).is_visible());
+    phaser.stop_phasing(&element, &info);
+}

@@ -26,6 +26,7 @@ pub use expression_node::{ExpressionNode, IPropertyAccessorNode, ISettableNode, 
 pub use ferro_property_accessor_node::FerroPropertyAccessorNode;
 pub use func_transform_node::FuncTransformNode;
 pub use function_node::FunctionNode;
+pub(crate) use function_node::read_nodes_once;
 pub use logical_ancestor_element_node::LogicalAncestorElementNode;
 pub use logical_not_node::LogicalNotNode;
 pub use method_command_node::{MethodCommand, MethodCommandNode};

@@ -55,6 +55,7 @@ fn pipeline_has_the_upstream_order() {
             "XArgumentsTransformer",
             "TypeReferenceResolver",
             "XDataTypeTransformer",
+            "XBindDirectivesTransformer",
             "MarkupExtensionTransformer",
             "TextNodeMerger",
             "FerroXamlIlResolveClassesPropertiesTransformer",

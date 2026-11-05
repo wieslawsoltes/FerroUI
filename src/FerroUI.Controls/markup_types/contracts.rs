@@ -10,7 +10,8 @@ use crate::chrome::IWindowDrawnDecorationsTemplate;
 use crate::primitives::IPopupHost;
 use crate::selection::ISelectionModel;
 use crate::templates::{
-    IControlTemplate, IDataTemplate, IRecyclingDataTemplate, ITemplateOf, ITreeDataTemplate, ITypedDataTemplate,
+    IControlTemplate, IDataTemplate, IDataTemplateComponent, IRecyclingDataTemplate, ITemplateOf, ITreeDataTemplate,
+    ITypedDataTemplate,
 };
 use crate::documents::Inline;
 use crate::{Control, Panel};
@@ -75,6 +76,19 @@ ferro_markup_type!(interface dyn ITypedDataTemplate as "ITypedDataTemplate" {
     namespace: "FerroUI.Controls.Templates",
     handles: [Rc<dyn ITypedDataTemplate>, Option<Rc<dyn ITypedDataTemplate>>],
     interfaces: [Rc<dyn IDataTemplate>],
+});
+
+// The phasing contract of a template instance (WinUI's `IDataTemplateComponent`), moved here from
+// `ferroui-controls-repeater`, which drives it and re-exports it.
+ferro_markup_type!(interface dyn IDataTemplateComponent as "IDataTemplateComponent" {
+    namespace: "FerroUI.Controls.Templates",
+    handles: [Rc<dyn IDataTemplateComponent>, Option<Rc<dyn IDataTemplateComponent>>],
+    this: Rc<dyn IDataTemplateComponent>,
+    methods: [
+        fn ProcessBindings(Option<BoxedValue>, i32, i32) -> i32 =>
+            |component: &Rc<dyn IDataTemplateComponent>, data: Option<BoxedValue>, index: i32, phase: i32| component.process_bindings(data, index, phase),
+        fn Recycle() => |component: &Rc<dyn IDataTemplateComponent>| component.recycle(),
+    ],
 });
 
 ferro_markup_type!(interface dyn IControlTemplate as "IControlTemplate" {
@@ -187,6 +201,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <dyn ITreeDataTemplate as MarkupTyped>::MARKUP,
     <dyn IRecyclingDataTemplate as MarkupTyped>::MARKUP,
     <dyn ITypedDataTemplate as MarkupTyped>::MARKUP,
+    <dyn IDataTemplateComponent as MarkupTyped>::MARKUP,
     <dyn IControlTemplate as MarkupTyped>::MARKUP,
     <dyn ITemplateOf<Option<Ref<Control>>> as MarkupTyped>::MARKUP,
     <dyn ITemplateOf<Ref<Control>> as MarkupTyped>::MARKUP,
@@ -205,6 +220,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Inline>>>>();
     ValueTypes::register_nullable::<Rc<dyn IDataTemplate>>();
     ValueTypes::register_nullable::<Rc<dyn IControlTemplate>>();
+    ValueTypes::register_nullable::<Rc<dyn IDataTemplateComponent>>();
     ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Control>>>>>();
     ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Ref<Control>>>>();
     ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Panel>>>>>();

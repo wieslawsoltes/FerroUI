@@ -2604,7 +2604,6 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
- "ferroui-system",
  "ferroui-themes-fluent",
  "ferroui-view-macros",
  "proc-macro2",
