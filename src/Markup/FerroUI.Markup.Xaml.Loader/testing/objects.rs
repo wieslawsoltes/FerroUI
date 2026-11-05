@@ -327,6 +327,7 @@ const OTHER_AREAS: &[&str] = &[
     "FerroXamlIlStyleValidatorTransformer",
     "FerroXamlIlDataTemplateWarningsTransformer",
     "XDataTypeTransformer",
+    "XBindDirectivesTransformer",
     "FerroXamlIlControlTemplatePartsChecker",
     "FerroXamlIlDataContextTypeTransformer",
     "FerroXamlIlBindingPathTransformer",

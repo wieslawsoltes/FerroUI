@@ -9,8 +9,13 @@
 //!   extension of the XAML language namespace, is `XBind` of the framework namespace.
 //! - [`prepare_scope`] (from `FerroXamlIlBindingPathParser`, before the path is parsed): inside a
 //!   `DataTemplate` the binding reads the item of the template, so the `x:DataType` of the
-//!   template becomes the `DataType` of the extension; a template without one, a
-//!   `ControlTemplate` and a style are errors.
+//!   template becomes the `DataType` of the extension; inside a `ControlTemplate` it reads the
+//!   templated parent, so the `TargetType` of the template becomes the `TargetType` of the
+//!   extension (step X5); a template without its type and a style are errors.
+//! - [`apply_default_mode`] (from `FerroXamlIlBindingPathParser`, step X5): a binding without a
+//!   `Mode` (of a property, not of an event) has the mode of the nearest `x:DefaultBindMode`
+//!   around it ([`super::x_bind_directives`] checks the directives, and the other directives of
+//!   step X5).
 //! - [`parse_path`] (from `FerroXamlIlBindingPathParser`): the path is parsed in the grammar of
 //!   WinUI's compiled bindings ([`super::x_bind_path`]), not in the one of `{Binding}`.
 //! - [`transform_path`] (from `FerroXamlIlBindingPathTransformer`): the path is resolved against
@@ -70,6 +75,7 @@ pub const X_BIND_NAMESPACE: &str = "FerroUI.Markup.Xaml.MarkupExtensions";
 pub const X_BIND_EXTENSION: &str = "XBindExtension";
 
 const DATA_TYPE: &str = "DataType";
+const TARGET_TYPE: &str = "TargetType";
 const PATH: &str = "Path";
 const MODE: &str = "Mode";
 const UPDATE_SOURCE_TRIGGER: &str = "UpdateSourceTrigger";
@@ -102,7 +108,7 @@ fn error(message: impl Into<String>, line_info: &dyn IXamlLineInfo) -> XamlError
 }
 
 /// The name of a property reference, resolved or not.
-fn property_name(property: &Rc<dyn IXamlAstPropertyReference>) -> Option<String> {
+pub(super) fn property_name(property: &Rc<dyn IXamlAstPropertyReference>) -> Option<String> {
     if let Some(clr) = property.cast::<XamlAstClrProperty>() {
         return Some(clr.name());
     }
@@ -110,7 +116,7 @@ fn property_name(property: &Rc<dyn IXamlAstPropertyReference>) -> Option<String>
 }
 
 /// The values of the property value `name` of `object`, before property values are assignments.
-fn property_values(object: &XamlAstObjectNode, name: &str) -> Option<Vec<Rc<dyn IXamlAstValueNode>>> {
+pub(super) fn property_values(object: &XamlAstObjectNode, name: &str) -> Option<Vec<Rc<dyn IXamlAstValueNode>>> {
     let children = object.children.borrow().clone();
     for child in children {
         if let Some(value) = child.cast::<XamlAstXamlPropertyValueNode>() {
@@ -140,7 +146,9 @@ fn template_data_type(template: &XamlAstObjectNode) -> Option<Rc<dyn IXamlAstVal
 
 /// The scope of an `x:Bind` object node, before its path is parsed (WinUI's
 /// `XamlHarvester`): inside a `DataTemplate` the root source is the item of the template, of
-/// its `x:DataType`, which is given to the extension as its `DataType`.
+/// its `x:DataType`, which is given to the extension as its `DataType`; inside a
+/// `ControlTemplate` it is the templated control, of the template's `TargetType`, which is given
+/// to the extension as its `TargetType` (step X5).
 pub fn prepare_scope(context: &AstTransformationContext, binding: &Rc<XamlAstObjectNode>) -> XamlResult<()> {
     let types = context.try_get_ferro_types()?;
     for parent in context.parent_nodes() {
@@ -154,10 +162,7 @@ pub fn prepare_scope(context: &AstTransformationContext, binding: &Rc<XamlAstObj
             return set_template_data_type(context, binding, &object);
         }
         if types.control_template.is_assignable_from(&*type_) {
-            return Err(error(
-                "x:Bind inside a ControlTemplate is not supported yet (docs/porting/x-bind.md, step X5); use TemplateBinding",
-                &**binding,
-            ));
+            return set_template_target_type(context, binding, &object);
         }
         if types.setter_base.is_assignable_from(&*type_)
             || types.style.is_assignable_from(&*type_)
@@ -183,6 +188,34 @@ fn set_template_data_type(
             &**binding,
         ));
     };
+    set_type_property(context, binding, DATA_TYPE, &data_type)
+}
+
+/// The `TargetType` of the `ControlTemplate` around the binding as the `TargetType` of the
+/// extension (WinUI's `XamlHarvester`, `Harvester_ControlTemplateDoesNotDefineTargetType`).
+fn set_template_target_type(
+    context: &AstTransformationContext,
+    binding: &Rc<XamlAstObjectNode>,
+    template: &Rc<XamlAstObjectNode>,
+) -> XamlResult<()> {
+    if property_values(binding, TARGET_TYPE).is_some() {
+        return Ok(());
+    }
+    let Some(target_type) = property_values(template, TARGET_TYPE).and_then(|values| values.first().cloned()) else {
+        return Err(error("'TargetType' is required to use x:Bind inside a ControlTemplate", &**binding));
+    };
+    set_type_property(context, binding, TARGET_TYPE, &target_type)
+}
+
+/// Adds the type `type_name` names (a type name or an `{x:Type}`) as the value of the property
+/// `property` of the extension.
+fn set_type_property(
+    context: &AstTransformationContext,
+    binding: &Rc<XamlAstObjectNode>,
+    property: &str,
+    type_name: &Rc<dyn IXamlAstValueNode>,
+) -> XamlResult<()> {
+    let data_type = type_name;
     let value: Rc<dyn IXamlAstValueNode> = if let Some(text) = data_type.cast::<XamlAstTextNode>() {
         let string = context.configuration().well_known_types().string.clone();
         let node: Rc<dyn IXamlAstValueNode> = XamlAstTextNode::with_type(&**binding, &text.text(), true, Some(string));
@@ -193,22 +226,65 @@ fn set_template_data_type(
         node
     } else {
         return Err(error(
-            "x:Bind needs the x:DataType of its DataTemplate to be a type name",
+            format!("x:Bind needs the {property} of its template to be a type name"),
             &**binding,
         ));
     };
+    add_resolved_property(context, binding, property, value)
+}
+
+/// Adds the value of the property `name` of the extension, resolved as the binding path parser
+/// sees the properties of the extension.
+fn add_resolved_property(
+    context: &AstTransformationContext,
+    binding: &Rc<XamlAstObjectNode>,
+    name: &str,
+    value: Rc<dyn IXamlAstValueNode>,
+) -> XamlResult<()> {
     let binding_type = binding.type_.borrow().clone().get_clr_type()?;
     let property = binding_type
         .get_all_properties()
         .into_iter()
-        .find(|p| p.name() == DATA_TYPE)
-        .ok_or_else(|| XamlError::invalid_operation("XBindExtension has no DataType property"))?;
+        .find(|p| p.name() == name)
+        .ok_or_else(|| XamlError::invalid_operation(format!("XBindExtension has no {name} property")))?;
     let reference: Rc<dyn IXamlAstPropertyReference> =
         XamlAstClrProperty::from_property(&**binding, &property, context.configuration())?;
     let assignment: Rc<dyn IXamlAstNode> =
         XamlAstXamlPropertyValueNode::with_values(&**binding, reference, vec![value], true);
     binding.children.borrow_mut().push(assignment);
     Ok(())
+}
+
+/// `x:DefaultBindMode` (step X5, WinUI's `DefaultBindMode`): a binding of a property without a
+/// `Mode` has the mode of the nearest `x:DefaultBindMode` on its element or an element around it
+/// (checked by [`super::x_bind_directives`]); without one it stays `OneTime`. An event binding
+/// has no mode.
+pub fn apply_default_mode(context: &AstTransformationContext, binding: &Rc<XamlAstObjectNode>) -> XamlResult<()> {
+    if property_values(binding, MODE).is_some() || event_value(context) {
+        return Ok(());
+    }
+    let mode = context.parent_nodes().into_iter().find_map(|parent| {
+        let object = parent.cast::<XamlAstObjectNode>()?;
+        let directive = super::x_bind_directives::find_directive(&object.children, super::x_bind_directives::DEFAULT_BIND_MODE)?;
+        super::x_bind_directives::directive_text(&directive)
+    });
+    let Some(mode) = mode else {
+        return Ok(());
+    };
+    let string = context.configuration().well_known_types().string.clone();
+    let value: Rc<dyn IXamlAstValueNode> = XamlAstTextNode::with_type(&**binding, &mode, true, Some(string));
+    add_resolved_property(context, binding, MODE, value)
+}
+
+/// Whether the binding is the value of an event, whose property [`prepare_event`] replaced.
+fn event_value(context: &AstTransformationContext) -> bool {
+    let Some(value) = context.parent_nodes().into_iter().find_map(|node| node.cast::<XamlAstXamlPropertyValueNode>()) else {
+        return false;
+    };
+    let Some(property) = value.property().cast::<XamlAstClrProperty>() else {
+        return false;
+    };
+    property.setters().iter().any(|setter| setter.as_any().downcast_ref::<XBindEventSetter>().is_some())
 }
 
 /// Parses the path of an `{x:Bind}` (from `FerroXamlIlBindingPathParser`, in place of the
@@ -229,7 +305,8 @@ pub fn transform_path(context: &AstTransformationContext, binding: &Rc<XamlAstCo
         .iter()
         .filter_map(|c| c.cast::<XamlPropertyAssignmentNode>())
         .collect();
-    let template_type = match assignments.iter().find(|a| a.property.name() == DATA_TYPE) {
+    // The item of a data template, or the templated control of a control template (step X5).
+    let template_type = match assignments.iter().find(|a| a.property.name() == DATA_TYPE || a.property.name() == TARGET_TYPE) {
         Some(assignment) => Some(assigned_type(context, assignment)?),
         None => None,
     };
@@ -298,7 +375,7 @@ fn assigned_type(context: &AstTransformationContext, assignment: &XamlPropertyAs
             return type_node.value().get_clr_type();
         }
     }
-    Err(error("x:Bind: the DataType must be a type name", assignment))
+    Err(error(format!("x:Bind: the {} must be a type name", assignment.property.name()), assignment))
 }
 
 /// The parsed path: the first constructor argument or the `Path` property.
