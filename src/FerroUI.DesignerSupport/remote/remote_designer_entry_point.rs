@@ -14,8 +14,7 @@ use ferroui_remote_protocol::viewport::{
     ClientRenderInfoMessage, ClientSupportedPixelFormatsMessage, ClientViewportAllocatedMessage,
 };
 use ferroui_remote_protocol::{
-    exception_handler, message_handler, BsonTcpTransport, Guid, IFerroRemoteTransportConnection, Message,
-    TcpTransportBase,
+    exception_handler, message_handler, BsonTcpTransport, IFerroRemoteTransportConnection, Message, TcpTransportBase,
 };
 use std::cell::{Cell, RefCell};
 use std::net::IpAddr;
@@ -70,8 +69,8 @@ pub struct UsageError;
 
 /// `Guid.NewGuid()`: a random identifier of version four, from the random
 /// generator of the system.
-pub(crate) fn new_guid() -> Guid {
-    Guid::from(uuid::Uuid::new_v4())
+pub(crate) fn new_guid() -> uuid::Uuid {
+    uuid::Uuid::new_v4()
 }
 
 /// `Uri.Host` and `Uri.Port` of an absolute URI with an authority that
@@ -509,7 +508,7 @@ mod tests {
         assert_eq!(methods::FERRO_REMOTE, parsed.method);
         assert!(parsed.html_method_listen_uri.is_none());
         // The session is a new identifier, different every time.
-        let session = Guid::parse(&parsed.session_id).expect("an identifier");
+        let session = uuid::Uuid::parse_str(&parsed.session_id).expect("an identifier");
         let other =
             RemoteDesignerEntryPoint::parse_command_line_args(&args(&["app", "--transport", "file:///tmp/a.xaml"])).unwrap();
         assert_ne!(session.to_string(), other.session_id);

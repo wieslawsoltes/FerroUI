@@ -4,19 +4,19 @@
 //! go through `try_to_async`; an `Action` is a closure returning `()`. `Scheduler.Default` is the
 //! default scheduler of the thread (`SchedulerDefaults::default_scheduler`, the current-thread
 //! scheduler in a test) where upstream has the thread pool, so the function runs before the call
-//! returns; the blocking `ToEnumerable()` is `block_on` of `to_list().to_task()`. The flag the
-//! actions set is a shared `Cell`.
+//! returns; the blocking `ToEnumerable()` is `block_on` of `to_list().to_task().flatten()`. The
+//! flag the actions set is a shared `Cell`.
 
 use ferroui_reactive::concurrency::SchedulerDefaults;
 use ferroui_reactive::{IObservable, Notification, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::new_error;
-use ferroui_system::threading::tasks::block_on;
+use ferroui_system::task::block_on;
 use std::cell::Cell;
 use std::rc::Rc;
 
 /// The values of a sequence that has ended (`ToEnumerable()`).
 fn to_enumerable<T: Clone + 'static>(source: Rc<dyn IObservable<T>>) -> Vec<T> {
-    block_on(source.to_list().to_task()).unwrap()
+    block_on(source.to_list().to_task().flatten()).unwrap()
 }
 
 #[test]

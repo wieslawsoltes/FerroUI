@@ -19,7 +19,7 @@ use crate::unit_tests::mock_platform_render_interface;
 use crate::PlatformRenderInterface;
 use ferroui_base::media::text_formatting::{GlyphInfo, ShapedBuffer, TextShaper, TextShaperOptions};
 use ferroui_base::media::Typeface;
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{current_locale, ReadOnlyMemory};
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::rc::Rc;
 
@@ -302,7 +302,7 @@ fn shape_ascii(text: &str) -> Rc<ShapedBuffer> {
         Typeface::default_typeface().glyph_typeface(),
         12.0,
         0,
-        Some(CultureInfo::current_culture()),
+        Some(current_locale()),
         0.0,
         0.0,
         None,

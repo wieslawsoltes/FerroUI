@@ -48,7 +48,8 @@ fn year_first() -> CultureInfo {
 }
 
 fn pin_now(utc: DateTime, offset_hours: i64) {
-    DateTime::set_utc_now_provider(Some(Rc::new(move || utc.specify_kind(DateTimeKind::Utc))));
+    let instant = std::time::SystemTime::try_from(utc.specify_kind(DateTimeKind::Utc)).unwrap();
+    DateTime::set_utc_now_provider(Some(Rc::new(move || instant)));
     TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new(move |_| {
         SignedDuration::from_ticks(offset_hours * SignedDuration::TICKS_PER_HOUR)
     })));
@@ -226,6 +227,37 @@ fn now_can_be_pinned() {
 }
 
 #[test]
+fn the_clock_and_the_local_offset_are_instants() {
+    use std::time::{Duration, SystemTime};
+
+    // 2024-06-01T10:00:00Z.
+    let instant = SystemTime::UNIX_EPOCH + Duration::from_secs(1_717_236_000);
+    DateTime::set_utc_now_provider(Some(Rc::new(move || instant)));
+    let asked = Rc::new(std::cell::Cell::new(None));
+    TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new({
+        let asked = asked.clone();
+        move |at: SystemTime| {
+            asked.set(Some(at));
+            SignedDuration::from_hours(2.0)
+        }
+    })));
+    assert_eq!(super::system_time_now(), instant);
+    assert_eq!(DateTime::utc_now(), DateTime::new_with_time(2024, 6, 1, 10, 0, 0));
+    assert_eq!(DateTime::now(), DateTime::new_with_time(2024, 6, 1, 12, 0, 0));
+    assert_eq!(asked.get(), Some(instant));
+
+    // An instant after the years of DateTime is its largest value.
+    let late = SystemTime::UNIX_EPOCH + Duration::from_secs(400_000_000_000);
+    DateTime::set_utc_now_provider(Some(Rc::new(move || late)));
+    assert_eq!(super::system_time_now(), late);
+    assert_eq!(DateTime::utc_now(), DateTime::MAX_VALUE);
+    assert_eq!(DateTime::utc_now().kind(), DateTimeKind::Utc);
+
+    DateTime::set_utc_now_provider(None);
+    TimeZoneInfo::set_local_utc_offset_provider(None);
+}
+
+#[test]
 fn local_and_universal_conversion() {
     pin_now(DateTime::new(2024, 1, 1), -5);
     let local = DateTime::new_with_time(2024, 6, 1, 10, 0, 0);
@@ -288,10 +320,10 @@ fn standard_formats_of_en_us() {
 #[test]
 fn display_and_helpers_use_the_current_culture() {
     let value = DateTime::new_with_time(2024, 10, 5, 14, 7, 9);
-    CultureInfo::set_current_culture(en_us());
+    CultureInfo::set_current_formatting(en_us());
     assert_eq!(value.to_string(), "10/5/2024 2:07:09\u{202F}PM");
     assert_eq!(value.to_string_with("yyyy-MM-dd"), "2024-10-05");
-    CultureInfo::set_current_culture(invariant());
+    CultureInfo::set_current_formatting(invariant());
     assert_eq!(value.to_string(), "10/05/2024 14:07:09");
 }
 
@@ -433,9 +465,9 @@ fn format_info_of_en_us_and_fallback() {
     assert_eq!(british.first_day_of_week(), DayOfWeek::Monday);
     assert_eq!(british.calendar_week_rule(), CalendarWeekRule::FirstFourDayWeek);
 
-    CultureInfo::set_current_culture(en_us());
+    CultureInfo::set_current_formatting(en_us());
     assert!(Rc::ptr_eq(&DateTimeFormatInfo::current_info(), &info));
-    CultureInfo::set_current_culture(invariant());
+    CultureInfo::set_current_formatting(invariant());
 }
 
 #[test]
@@ -638,9 +670,9 @@ fn parse_rejects_malformed_text() {
         assert!(DateTime::try_parse(text, &culture, DateTimeStyles::NONE).is_none(), "{text:?}");
     }
     assert!("garbage".parse::<DateTime>().is_err());
-    CultureInfo::set_current_culture(culture_of("en-GB"));
+    CultureInfo::set_current_formatting(culture_of("en-GB"));
     assert_eq!("10/12/2024".parse::<DateTime>().unwrap(), DateTime::new(2024, 12, 10));
-    CultureInfo::set_current_culture(invariant());
+    CultureInfo::set_current_formatting(invariant());
 }
 
 #[test]
@@ -767,10 +799,10 @@ fn date_time_offset_formatting() {
     assert!(value.try_to_string_format("U", &en_us()).is_err());
     let utc = DateTimeOffset::new(2000, 10, 10, 0, 0, 0, SignedDuration::ZERO);
     assert_eq!(utc.to_string_format("", &en_us()), "10/10/2000 12:00:00\u{202F}AM +00:00");
-    CultureInfo::set_current_culture(en_us());
+    CultureInfo::set_current_formatting(en_us());
     assert_eq!(utc.to_string(), "10/10/2000 12:00:00\u{202F}AM +00:00");
     assert_eq!(utc.to_string_with("yyyy"), "2000");
-    CultureInfo::set_current_culture(invariant());
+    CultureInfo::set_current_formatting(invariant());
 }
 
 // --- calendar ---

@@ -20,13 +20,13 @@ use crate::media::{
     UnicodeRange,
 };
 use crate::platform::IFontFallbackMapper;
-use crate::utilities::{CultureInfo, ReadOnlyMemory};
+use crate::utilities::{Locale, ReadOnlyMemory};
 use crate::{FerroLocator, Matrix, Point, Rect};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 
-type Map = dyn Fn(&[u16], &Typeface, Option<&CultureInfo>) -> Option<FontFallbackMapping>;
+type Map = dyn Fn(&[u16], &Typeface, Option<&Locale>) -> Option<FontFallbackMapping>;
 
 struct Mapper {
     calls: RefCell<Vec<Vec<u16>>>,
@@ -35,7 +35,7 @@ struct Mapper {
 
 impl Mapper {
     fn new(
-        map: impl Fn(&[u16], &Typeface, Option<&CultureInfo>) -> Option<FontFallbackMapping> + 'static,
+        map: impl Fn(&[u16], &Typeface, Option<&Locale>) -> Option<FontFallbackMapping> + 'static,
     ) -> Rc<Self> {
         Rc::new(Self {
             calls: RefCell::new(Vec::new()),
@@ -57,7 +57,7 @@ impl IFontFallbackMapper for Mapper {
         &self,
         text: &[u16],
         typeface: &Typeface,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<FontFallbackMapping> {
         self.calls.borrow_mut().push(text.to_vec());
         (self.map)(text, typeface, culture)
@@ -570,7 +570,7 @@ fn font_fallback_scale_decorations_letter_spacing_and_copied_properties_apply_sc
     let face = mapped_face();
     let chosen = face.clone();
     let mapper = Mapper::new(move |text, _, culture| {
-        assert_eq!(culture.unwrap().name(), "ja-JP");
+        assert_eq!(culture.unwrap().to_string(), "ja-JP");
         FontFallbackMapping::new(chosen.clone(), text.len(), 2.0)
     });
     let _scope = TextTestScope::with_fonts_and_fallback_mapper(fonts(), mapper);
@@ -588,7 +588,7 @@ fn font_fallback_scale_decorations_letter_spacing_and_copied_properties_apply_sc
         Some(Brushes::black()),
         None,
         BaselineAlignment::Baseline,
-        Some(CultureInfo::get_culture_info("ja-JP")),
+        Some(Locale::try_from_str("ja-JP").unwrap()),
         Some(features.clone()),
     ));
     let paragraph = Rc::new(GenericTextParagraphProperties::with_options(

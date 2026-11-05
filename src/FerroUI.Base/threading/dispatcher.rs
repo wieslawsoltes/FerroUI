@@ -157,10 +157,10 @@ static NEXT_DISPATCHER_ID: AtomicU64 = AtomicU64::new(1);
 /// [`spawn_local_with_priority`](Self::spawn_local_with_priority) and
 /// [`spawn`](Self::spawn) run a future on the dispatcher thread, polling it
 /// from jobs queued at a fixed priority, and give its
-/// `ferroui_system::task::JoinHandle`;
-/// [`invoke_async_task`](Self::invoke_async_task) and
-/// [`DispatcherTaskScheduler`](super::DispatcherTaskScheduler) do the same
-/// and give a [`DispatcherTask`](super::DispatcherTask).
+/// `ferroui_system::task::JoinHandle`; [`start_local`](Self::start_local)
+/// polls it for the first time inside the call. The deprecated
+/// `invoke_async_task` and `DispatcherTaskScheduler` do the same and give a
+/// `DispatcherTask`.
 /// [`resume`](Self::resume), [`yield_now`](Self::yield_now) and
 /// [`await_with_priority`](Self::await_with_priority) change the priority at
 /// which an `async` block continues. No async runtime is involved.

@@ -595,10 +595,13 @@ fn synchronous_wrapper_waits_on_the_dispatcher_for_pending_values() {
     }
 
     // Complete from within the nested frame through a local task.
-    let _task = dispatcher.invoke_async_task_local(move || async move {
-        Dispatcher::yield_now().await;
-        completion.set(Rc::new("late text".to_string()));
-    });
+    let _task = dispatcher.spawn_local_with_priority(
+        async move {
+            Dispatcher::yield_now().await;
+            completion.set(Rc::new("late text".to_string()));
+        },
+        DispatcherPriority::DEFAULT,
+    );
 
     assert_eq!(Some("late text".to_string()), sync.try_get_text());
     assert!(*ran.lock().unwrap());

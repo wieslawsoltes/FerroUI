@@ -1,9 +1,6 @@
 //! Disposal cases from DependencyInjectionSpecificationTests.cs and ServiceProviderContainerTests.cs.
 use super::*;
-use ferroui_system::{
-    threading::tasks::{Task, TaskCompletionSource},
-    IDisposable,
-};
+use ferroui_system::{task::Shared, IDisposable, ObservableError};
 struct Resource {
     id: usize,
     log: Rc<RefCell<Vec<usize>>>,
@@ -146,36 +143,37 @@ fn disposal_callbacks_can_reenter_without_refcell_panics() {
 #[test]
 fn async_disposal_waits_in_reverse_order_and_prefers_async() {
     let log = Rc::new(RefCell::new(Vec::new()));
-    let gate = TaskCompletionSource::new();
+    let (gate, gate_task) = Shared::<Result<(), ObservableError>>::channel();
     let mut s = ServiceCollection::new();
     s.add(resource(ServiceLifetime::Singleton, 1, &log));
-    let g = gate.clone();
+    let g = gate_task;
     let l = log.clone();
     s.add(
         ServiceDescriptor::new::<usize, _>(ServiceLifetime::Singleton, |_| Ok(Rc::new(2)))
             .on_dispose::<usize>(|_| panic!("async should win"))
             .on_dispose_async::<usize>(move |_| {
-                let task = g.task();
+                let task = g.clone();
                 let l = l.clone();
-                Task::spawn_local(async move {
+                ferroui_system::task::spawn_local(async move {
                     l.borrow_mut().push(20);
-                    task.await?;
+                    task.flatten().await?;
                     l.borrow_mut().push(2);
-                    Ok(())
+                    Ok::<(), ObservableError>(())
                 })
+                .shared()
             }),
     );
     let p = s.build_service_provider(options()).unwrap();
     p.get_required_service::<Resource>().unwrap();
     p.get_required_service::<usize>().unwrap();
     let done = p.dispose_async();
-    assert!(!done.is_completed());
+    assert!(!done.is_finished());
     assert_eq!(&*log.borrow(), &[20]);
     assert!(matches!(
         p.get_service::<usize>(),
         Err(ServiceError::Disposed)
     ));
-    gate.set_result(());
+    gate.send(Ok(()));
     assert!(done.is_completed_successfully());
     assert_eq!(&*log.borrow(), &[20, 2, 1]);
 }
@@ -188,7 +186,7 @@ fn sync_disposal_of_async_only_service_can_be_retried_asynchronously() {
         ServiceDescriptor::new::<usize, _>(ServiceLifetime::Singleton, |_| Ok(Rc::new(2)))
             .on_dispose_async::<usize>(move |_| {
                 c.set(c.get() + 1);
-                Task::from_result(())
+                Shared::ready(Ok(()))
             }),
     );
     let p = s.build_service_provider(options()).unwrap();
@@ -208,7 +206,7 @@ fn async_disposal_faults_task_and_stops_at_failure() {
     s.add(
         ServiceDescriptor::new::<usize, _>(ServiceLifetime::Singleton, |_| Ok(Rc::new(2)))
             .on_dispose_async::<usize>(|_| {
-                Task::from_exception(Rc::new(ServiceError::Factory("dispose failed".into())))
+                Shared::ready(Err(Rc::new(ServiceError::Factory("dispose failed".into())) as ObservableError))
             }),
     );
     let p = s.build_service_provider(options()).unwrap();
@@ -270,7 +268,7 @@ fn scope_disposal_modes_prefer_the_requested_mode() {
                 .on_dispose::<usize>(move |_| sync.borrow_mut().push("sync"))
                 .on_dispose_async::<usize>(move |_| {
                     other.borrow_mut().push("async");
-                    Task::from_result(())
+                    Shared::ready(Ok(()))
                 }),
         );
         let p = s.build_service_provider(options()).unwrap();

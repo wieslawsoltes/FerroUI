@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 /// The result of an asynchronous operation of the input system: a future
 /// that is polled on the dispatcher thread (for instance from a future
-/// started with `Dispatcher::invoke_async_task_local`).
+/// started with `Dispatcher::spawn_local`).
 pub type LocalBoxFuture<T> = Pin<Box<dyn Future<Output = T>>>;
 
 /// Represent an item inside a [`IAsyncDataTransfer`](super::IAsyncDataTransfer).

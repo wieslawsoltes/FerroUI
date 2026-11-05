@@ -17887,8 +17887,8 @@
       },
       "Language": {
         "name": "Language",
-        "type_name": "ferroui_base::utilities::CultureInfo",
-        "documentation": "RichEditBox.Language: ferroui_base::utilities::CultureInfo",
+        "type_name": "ferroui_base::utilities::Locale",
+        "documentation": "RichEditBox.Language: ferroui_base::utilities::Locale",
         "values": [],
         "attached": false
       },
@@ -18457,8 +18457,8 @@
       },
       "Language": {
         "name": "Language",
-        "type_name": "ferroui_base::utilities::CultureInfo",
-        "documentation": "RichTextBlock.Language: ferroui_base::utilities::CultureInfo",
+        "type_name": "ferroui_base::utilities::Locale",
+        "documentation": "RichTextBlock.Language: ferroui_base::utilities::Locale",
         "values": [],
         "attached": false
       },
@@ -23319,8 +23319,8 @@
     "properties": {
       "Language": {
         "name": "Language",
-        "type_name": "CultureInfo",
-        "documentation": "TextElement.Language: CultureInfo",
+        "type_name": "Locale",
+        "documentation": "TextElement.Language: Locale",
         "values": [],
         "attached": true
       },

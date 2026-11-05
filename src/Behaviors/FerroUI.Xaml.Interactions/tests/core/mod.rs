@@ -6,6 +6,7 @@ pub(crate) mod observable_command;
 pub(crate) mod test_value_converter;
 
 mod action_logical_tree_lifetime_tests;
+mod action_task_tests;
 mod call_method_action_tests;
 mod change_property_action_tests;
 mod data_trigger_behavior_tests;

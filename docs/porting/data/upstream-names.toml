@@ -365,8 +365,35 @@ upstream = "System.Threading.Tasks.TaskCanceledException"
 rust = "ferroui_system::task::Canceled"
 kind = "type"
 phase = "C4"
+deprecated = "ferroui_system::threading::tasks::TaskCanceledError"
+behaviour = "deviation"
+notes = "Steps A4b and A7. A cancellation that names no task (threading::tasks::canceled(), the cancellation of RunAsync, the work of the tests) is Canceled; Canceled::is_cancellation recognizes it and the deprecated TaskCanceledError. Since A7 the Task forms of Rx, DynamicData and ReactiveUI end a canceled task with its cancellation error (Canceled), not with a TaskCanceledError that names the task (TaskCanceledException.Task has no counterpart; DEVIATIONS.md, Reactive); a deprecated Task keeps its error that names it."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task`1"
+rust = "ferroui_system::task::Shared"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_system::threading::tasks::Task"
 behaviour = "same"
-notes = "Step A4b. A cancellation that names no task (threading::tasks::canceled(), the cancellation of RunAsync, the work of the tests) is Canceled; TaskCanceledError::is_cancellation recognizes both, and a Canceled cancels a Task as a TaskCanceledError does. TaskCanceledError stays, not deprecated, as the outcome of a canceled Task that names it (TaskCanceledException.Task), until Task moves to the executor (A7)."
+notes = "Step A7. A Task<T> of the reactive libraries is a Shared<Result<T, ObservableError>>: IsCompleted is is_finished, Result is result() once it ended, ContinueWith(ExecuteSynchronously) is on_finished (it runs before the awaiters are woken, G9) and its token remove_on_finished, await is awaiting flatten(); Task.FromResult is Shared::ready. A future of an async method that runs on the thread is task::spawn_local(future).shared(); the forms that take a Task take a future of Result<T, ObservableError>. Status (TaskStatus) and Id have no counterpart: the outcome says how it ended. Also deprecated: TaskStatus, ContinuationId (OnFinishedId), spawn_local, block_on, run_pending_wakes, set_thread_poster, ThreadPoster of threading::tasks (task::spawn_local, block_on, run_pending, set_thread_schedule, Schedule). Shared::from(task) converts. Tested in src/FerroUI.System/tests/shared_tests.rs; the deprecated types keep task_tests.rs and the ordering tests."
+
+[[name]]
+upstream = "System.Threading.Tasks.TaskCompletionSource`1 (of the reactive libraries)"
+rust = "ferroui_system::task::Shared::channel"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_system::threading::tasks::TaskCompletionSource"
+behaviour = "same"
+notes = "Step A7. Code of one thread whose continuations run synchronously (the operators of Rx, ReactiveUI's interactions, the dock's requests) ends a Shared made by Shared::channel(): SetResult is SharedSender::send, SetCanceled is cancel (or the error Canceled on a Shared of a Result), and a dropped sender leaves the Shared pending, as a dropped TaskCompletionSource leaves its task. A completion that crosses threads, or whose dropped producer should cancel, is task::oneshot (the row above); the ported tests that drive Rx use oneshot channels of Result<T, ObservableError> (receiver.flatten() is the task). oneshot::Sender::from(source) and Task::from(receiver) convert."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task.Run"
+rust = "ferroui_system::threading::tasks::run"
+kind = "member"
+phase = "C4"
+behaviour = "same"
+notes = "Step A7. The name is kept; it gives a Shared<Result<T, ObservableError>> (T: Clone) where it gave a Task<T>, and run(work).flatten() is the future of its result. The work runs on a new thread and its outcome comes back to the calling thread through the schedule of the thread (docs/idiomatic-rust-async.md, section 6)."
 
 [[name]]
 upstream = "System.Threading.SynchronizationContext"
@@ -404,6 +431,24 @@ deprecated = "ferroui_base::threading::FerroSynchronizationContext"
 behaviour = "same"
 notes = "Step A5. The context of the dispatcher kept one role, the priority of the running job: Dispatcher::current_priority (None outside of a job) and Dispatcher::set_current_priority (InstallIfNeeded, which Application does at Normal; the previous priority is given back, in the place of RestoreContext, also deprecated). Post is Dispatcher::post or post_local at that priority; the context of a priority as a schedule is Dispatcher::task_schedule(priority). FerroScheduler::install_on_ui_thread is deprecated: the dispatcher installs itself."
 
+[[name]]
+upstream = "System.Threading.Tasks.Task"
+rust = "ferroui_system::task::JoinHandle"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_base::threading::DispatcherTask"
+behaviour = "deviation"
+notes = "Step A6. The Task that an asynchronous member returns is the JoinHandle of a task of the dispatcher (re-exported by ferroui_base::threading with JoinError and AbortHandle): a future of Result<T, JoinError>, is_finished (IsCompleted), abort (the outcome is JoinError::Canceled), one owner (shared() for several observers, T: Clone); dropping it detaches the task. Deviation: an exception of the task (a panic) is JoinError::Panicked, a value of the handle, where await raises it again; the code that awaits a task and must fail with it matches Panicked and calls resume_unwind. The members that returned DispatcherTask return JoinHandle: NavigationPage, INavigation and PageNavigationExtensions (PushAsync, PopAsync, PopToRootAsync, PopToPageAsync, ReplaceAsync, PushModalAsync, PopModalAsync, PopAllModalsAsync), Window.ShowDialog, TopLevel.RequestPlatformInhibition, IPageTransition.Start, ICompositionGlContext.DisposeAsync and ICompositionGlTexture.DisposeAsync; the navigation members and the dialogs keep their DispatcherTask form as deprecated ..._task methods. The Task of the behaviors is TaskHandle over a shared JoinHandle. Also deprecated: DispatcherTaskScheduler and Dispatcher::to_task_scheduler, to_task_scheduler_with_priority (Dispatcher::spawn_local, start_local, spawn_with_priority and their _with_priority forms). Tested in src/FerroUI.Base/threading/dispatcher_tests.rs and the tests of each member."
+
+[[name]]
+upstream = "Avalonia.Threading.Dispatcher.InvokeAsync (an asynchronous callback, Func<Task>)"
+rust = "ferroui_base::threading::Dispatcher::spawn"
+kind = "member"
+phase = "C4"
+deprecated = "ferroui_base::threading::Dispatcher::invoke_async_task"
+behaviour = "deviation"
+notes = "Step A6. spawn and spawn_with_priority run the Send callback in a job of the dispatcher and the future it makes there, and give a JoinHandle (a panic is JoinError::Panicked). The callback that need not be Send (invoke_async_task_local, invoke_async_task_local_with_priority) is spawn_local_with_priority(async move { callback().await }, priority), at Default for the forms without a priority: its first poll is a job at that priority, as the job of the callback was."
+
 # C5: the public signatures take std and the chosen crates (docs/idiomatic-rust-signatures.md).
 
 [[name]]
@@ -438,3 +483,46 @@ kind = "type"
 phase = "C5"
 behaviour = "same"
 notes = "Step U1. A Rust form of the markup type System.Uri: a relative URI literal for a Url is a markup error, a relative reference a conversion error of a binding. The text is the one of the URL standard (the C2 conversions). The base URIs and the platform edges move to it in U2 to U4."
+
+[[name]]
+upstream = "System.DateTime, System.DateTimeOffset (instants)"
+rust = "std::time::SystemTime"
+kind = "mechanism"
+phase = "C5"
+behaviour = "same"
+notes = "Step D1 (section 3.3, decision O4). The positions that hold a moment take and return SystemTime: IRuntimePlatform::get_utc_now, UtcNowProvider, LocalUtcOffsetProvider, StorageItemProperties DateCreated and DateModified (and the storage dates of the file system, Android, the browser and iOS), FiredEvent.TriggerTime of the developer tools, ManagedFileChooserItemViewModel.Modified of the dialogs (Option<SystemTime>). DateTime.UtcNow as an instant is ferroui_base::utilities::system_time_now; the browser reads Date.now() and never SystemTime::now(). The calendar values keep DateTime and DateTimeOffset, and the markup properties TriggerTime and Modified stay System.DateTime in local time. The BSON DateTime of the remote protocol keeps its name and converts to and from SystemTime."
+
+[[name]]
+upstream = "System.Guid"
+rust = "uuid::Uuid"
+kind = "type"
+phase = "C5"
+deprecated = "ferroui_remote_protocol::Guid"
+behaviour = "test"
+notes = "Step G1 (section 3.6). The remote protocol takes and returns Uuid (re-exported as ferroui_remote_protocol::Uuid): IMessageTypeResolver.GetByGuid and GetGuid, the identifier attribute and the GUID of each message, the BSON Guid values; the wire layout is Guid.ToByteArray, which is Uuid::to_bytes_le (tested in metsys_bson_tests). Splat's feature usage tracking references and the Guid converters of ReactiveUI take Uuid too. Also deprecated: ferroui_splat::Guid. The Guid of ferroui-microcom stays, the COM GUID layout."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo (the identity of a culture)"
+rust = "icu_locale_core::Locale"
+kind = "type"
+phase = "C5"
+behaviour = "deviation"
+notes = "Step L1. The identity positions take Locale (re-exported as ferroui_base::utilities::Locale): the culture of text runs, shaper options and FormattedText, font matching and fallback (IFontManagerImpl, IFontFallbackMapper, IFontCollection, FontCollectionBaseImpl), the family and face names of GlyphTypeface, the script hints, the Language properties (TextElement, RichTextBlock, RichEditBox, CharacterFormat). The invariant culture is the unknown locale und. The markup name stays System.Globalization.CultureInfo: Locale is a second handle of it, parsed from an IETF tag; CultureInfo stays the formatting parameter (decision O3). Deviation: an XML language tag that is no BCP-47 tag (x-private) is not a language (DEVIATIONS.md, Text block)."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo.CurrentCulture"
+rust = "ferroui_base::utilities::current_locale"
+kind = "member"
+phase = "C5"
+deprecated = "ferroui_base::utilities::CultureInfo::current_culture"
+behaviour = "same"
+notes = "Step L1. The ambient value of a thread is its locale (current_locale, set_current_locale); the culture it formats with, the conventions attached to it included, is CultureInfo::current_formatting and CultureInfo::set_current_formatting. CultureInfo::set_current_culture is deprecated with it."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo.CurrentUICulture"
+rust = "ferroui_base::utilities::current_ui_locale"
+kind = "member"
+phase = "C5"
+deprecated = "ferroui_base::utilities::CultureInfo::current_ui_culture"
+behaviour = "same"
+notes = "Step L1. set_current_ui_locale replaces CultureInfo::set_current_ui_culture (deprecated)."

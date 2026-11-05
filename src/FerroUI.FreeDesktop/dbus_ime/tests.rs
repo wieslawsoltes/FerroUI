@@ -493,9 +493,12 @@ fn handle(
     let handled = im.handle_event_async(args, key_val as i32, key_code);
     {
         let answer = answer.clone();
-        drop(ferroui_base::threading::Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            *answer.borrow_mut() = Some(handled.await);
-        }));
+        drop(ferroui_base::threading::Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                *answer.borrow_mut() = Some(handled.await);
+            },
+            ferroui_base::threading::DispatcherPriority::DEFAULT,
+        ));
     }
     pump_until(|| answer.borrow().is_some());
     let answer = answer.borrow_mut().take().unwrap();

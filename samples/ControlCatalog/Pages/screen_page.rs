@@ -7,7 +7,7 @@ use ferroui_base::media::{
     BoxShadows, Brushes, DrawingContext, FlowDirection, FormattedText, IBrush, IPen, Pen, SolidColorBrush, Typeface,
 };
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, PixelSize, Point,
     Rect, Ref, StyledElementImpl, Thickness, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
@@ -278,7 +278,7 @@ impl ScreensPagePresenter {
         let green: Rc<dyn IBrush> = Brushes::green();
         FormattedText::new(
             text_to_format,
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             Typeface::default(),
             size,
@@ -290,7 +290,7 @@ impl ScreensPagePresenter {
         let foreground: Rc<dyn IBrush> = if primary { Brushes::white() } else { Brushes::black() };
         FormattedText::new(
             text_to_format,
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             Typeface::default(),
             20.0,

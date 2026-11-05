@@ -21,7 +21,8 @@ use ferroui_base::animation::IPageTransition;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
+use ferroui_system::task::{JoinError, JoinHandle};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, ObjectType, Ref, StaticType,
     StyledElement, StyledElementImpl, Visual, VisualImpl,
@@ -34,21 +35,35 @@ use std::task::{Context, Poll, Waker};
 
 // --- helpers shared by the navigation page test files ---
 
-/// `await task`.
-pub(super) fn wait<T: 'static>(task: DispatcherTask<T>) -> T {
-    if !task.is_completed() {
-        Dispatcher::ui_thread().run_jobs(None);
+/// The outcome of a task that has ended, taken from its handle; `None` while it runs.
+pub(super) fn outcome<T>(task: &mut JoinHandle<T>) -> Option<Result<T, JoinError>> {
+    match Pin::new(task).poll(&mut Context::from_waker(Waker::noop())) {
+        Poll::Ready(outcome) => Some(outcome),
+        Poll::Pending => None,
     }
-    assert!(task.is_completed(), "the navigation did not complete");
-    task.result().expect("the navigation was not canceled")
 }
 
-/// `await Assert.ThrowsAsync(() => task)`.
-pub(super) fn throws_async<T: 'static>(task: DispatcherTask<T>) -> bool {
-    if !task.is_completed() {
+/// `await task`: runs the dispatcher until the navigation has ended, and gives its result; a
+/// failure of the navigation is raised again.
+pub(super) fn wait<T: 'static>(mut task: JoinHandle<T>) -> T {
+    if !task.is_finished() {
         Dispatcher::ui_thread().run_jobs(None);
     }
-    task.is_faulted()
+    assert!(task.is_finished(), "the navigation did not complete");
+    match outcome(&mut task) {
+        Some(Ok(value)) => value,
+        Some(Err(JoinError::Panicked(payload))) => std::panic::resume_unwind(payload),
+        _ => panic!("the navigation was canceled"),
+    }
+}
+
+/// `await Assert.ThrowsAsync(() => task)`: whether the navigation failed, its panic being the
+/// outcome of its handle.
+pub(super) fn throws_async<T: 'static>(mut task: JoinHandle<T>) -> bool {
+    if !task.is_finished() {
+        Dispatcher::ui_thread().run_jobs(None);
+    }
+    matches!(outcome(&mut task), Some(Err(JoinError::Panicked(_))))
 }
 
 /// `Assert.Throws(() => action())`.
@@ -271,7 +286,7 @@ impl IPageTransition for ControllableTransition {
         to: Option<&Ref<Visual>>,
         _forward: bool,
         _cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let from = from.cloned();
         let to = to.cloned();
         let gate = self.gate.clone();
@@ -884,4 +899,86 @@ fn back_button_visible_updates_when_current_page_has_back_button_changes() {
 
     NavigationPage::set_has_back_button(&top, true);
     assert!(nav.is_back_button_effectively_visible());
+}
+
+// --- The handles of the navigation members (step A6 of phase C4 of #423) ---
+
+#[test]
+fn a_navigation_handle_gives_the_result_and_ends_canceled_when_aborted() {
+    let _scope = test_scope();
+    let gate = Gate::new();
+    let (nav, _root) = create_navigation_page(None);
+    let root = page();
+    let top = page();
+    wait(nav.push_async(&root));
+    wait(nav.push_async(&top));
+
+    // The result of a pop is the output of its handle.
+    let popped = wait(nav.pop_async());
+    assert!(same(&top, &popped));
+
+    // Aborted while its transition runs, the push ends canceled: its future is dropped, which ends
+    // the navigation.
+    nav.set_page_transition(Some(ControllableTransition::new(&gate)));
+    let mut push = nav.push_async(page());
+    assert!(nav.is_navigating());
+    push.abort();
+    assert!(matches!(outcome(&mut push), Some(Err(JoinError::Canceled))));
+    assert!(!nav.is_navigating());
+    gate.set_result();
+    Dispatcher::ui_thread().run_jobs(None);
+}
+
+#[test]
+fn a_failed_navigation_is_the_panic_of_its_handle() {
+    let _scope = test_scope();
+    let nav = NavigationPage::new();
+    let root = page();
+    wait(nav.push_async(&root));
+
+    let mut again = nav.push_async(&root);
+    Dispatcher::ui_thread().run_jobs(None);
+    match outcome(&mut again) {
+        Some(Err(JoinError::Panicked(_))) => {}
+        other => panic!("the push of a hosted page did not fail: {:?}", other.map(|outcome| outcome.is_ok())),
+    }
+    // The failure is a value: the navigation page goes on.
+    assert_eq!(1, nav.stack_depth());
+    assert!(!nav.is_navigating());
+}
+
+#[test]
+#[allow(deprecated)]
+fn the_deprecated_task_forms_keep_the_contract_of_the_dispatcher_task() {
+    let _scope = test_scope();
+    let nav = NavigationPage::new();
+    let root = page();
+
+    let pushed = nav.push_async_task(&root);
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(pushed.is_completed_successfully());
+
+    // A clone observes the same task; the result of a pop on the root only is `None`.
+    let popped = nav.pop_async_task();
+    let observer = popped.clone();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(observer.is_completed_successfully());
+    assert!(popped.result().expect("the pop was not canceled").is_none());
+
+    // A failure faults the task and is raised again when it is observed.
+    let failed = nav.push_async_task(&root);
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(failed.is_faulted());
+    assert!(throws(|| drop(failed.result())));
+
+    // The navigation service of a hosted page has the same forms.
+    let navigation = root.navigation().expect("the root is hosted");
+    let second = page();
+    let task = navigation.push_async_task(second.clone().upcast());
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(task.is_completed_successfully());
+    assert_eq!(2, nav.stack_depth());
+    let task = navigation.pop_async_task();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(same(&second, &task.result().expect("the pop was not canceled")));
 }

@@ -7,8 +7,8 @@
 use ferroui_reactive::subjects::BehaviorSubject;
 use ferroui_reactive::{IObserver, ObservableExt};
 use ferroui_reactiveui_testing::TestSequencer;
-use ferroui_system::threading::tasks::{block_on, Task};
-use ferroui_system::IDisposable;
+use ferroui_system::task::block_on;
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -29,11 +29,11 @@ fn should_execute_tests_in_order() {
     let _subscription = subject.as_observable().skip(1).subscribe_next(move |_| {
         let sequencer = sequencer.clone();
         let count = count.clone();
-        let _ = Task::spawn_local(async move {
-            sequencer.advance_phase_async().await?;
+        drop(ferroui_system::task::spawn_local(async move {
+            sequencer.advance_phase_async().flatten().await?;
             count.set(count.get() + 1);
-            Ok(())
-        });
+            Ok::<(), ObservableError>(())
+        }));
     });
 
     assert_eq!(test_sequencer.current_phase(), INITIAL_PHASE);
@@ -46,7 +46,7 @@ fn should_execute_tests_in_order() {
     assert_eq!(test_sequencer.completed_phases(), INITIAL_PHASE);
 
     // Complete Phase 1 from the test.
-    block_on(test_sequencer.advance_phase_async_with("Phase 1")).expect("phase 1 completes");
+    block_on(test_sequencer.advance_phase_async_with("Phase 1").flatten()).expect("phase 1 completes");
     assert_eq!(test_sequencer.current_phase(), FIRST_PHASE);
     assert_eq!(test_sequencer.completed_phases(), FIRST_PHASE);
     assert_eq!(advance_count.get(), 1);
@@ -58,7 +58,7 @@ fn should_execute_tests_in_order() {
     assert_eq!(test_sequencer.completed_phases(), FIRST_PHASE);
 
     // Complete Phase 2 from the test.
-    block_on(test_sequencer.advance_phase_async_with("Phase 2")).expect("phase 2 completes");
+    block_on(test_sequencer.advance_phase_async_with("Phase 2").flatten()).expect("phase 2 completes");
     assert_eq!(test_sequencer.current_phase(), SECOND_PHASE);
     assert_eq!(test_sequencer.completed_phases(), SECOND_PHASE);
     assert_eq!(advance_count.get(), 2);

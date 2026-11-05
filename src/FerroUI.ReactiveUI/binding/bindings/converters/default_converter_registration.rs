@@ -14,7 +14,7 @@ impl DefaultConverterRegistration {
     /// directions, and between each number type and its `Option`.
     // Deviation (DEVIATIONS.md, ReactiveUI): the converters of `Uri`, `decimal`, `DateTime`,
     // `DateTimeOffset`, `DateOnly` and `TimeOnly` wait for those types in ferroui-system
-    // (phase 1b); `Guid` is `ferroui_splat::Guid` and `TimeSpan` is `std::time::Duration`.
+    // (phase 1b); `Guid` is `uuid::Uuid` and `TimeSpan` is `std::time::Duration`.
     pub fn register_defaults(service: &ConverterService) {
         let registry = service.typed_converters();
         register_core_converters(registry);

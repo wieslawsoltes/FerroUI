@@ -20,3 +20,5 @@ ferroui-reactive = { workspace = true }
 ferroui-reactive-testing = { workspace = true }
 ferroui-splat = { workspace = true }
 ferroui-system = { workspace = true }
+# The identifiers of the mocks and of the tests of the Guid converters (`Uuid::new_v4`).
+uuid = { workspace = true, features = ["v4"] }

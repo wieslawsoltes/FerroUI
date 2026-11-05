@@ -22,7 +22,8 @@ use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::input::{Key, KeyModifiers};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::FlowDirection;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::CancellationToken;
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{Ref, Visual};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -55,7 +56,7 @@ impl IPageTransition for TestPageTransition {
         _to: Option<&Ref<Visual>>,
         _forward: bool,
         _cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         super::completed_task()
     }
 }

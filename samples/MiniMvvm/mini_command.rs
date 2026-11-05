@@ -3,7 +3,7 @@
 use ferroui_base::input::ICommand;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTimer};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer, JoinHandle};
 use ferroui_base::BoxedValue;
 use std::cell::{Cell, RefCell};
 use std::future::Future;
@@ -15,16 +15,16 @@ use std::time::Duration;
 /// Starts `future` the way calling an asynchronous method does:
 /// synchronously up to its first pending await, then resumed through the
 /// synchronization context of the calling thread (the dispatcher's context
-/// when the thread has none). The returned task is the `Task` of the
-/// method; dropping it does not cancel the future (`_ = FooAsync()`,
-/// `async void`).
+/// when the thread has none). The handle of the task is the `Task` of the
+/// method: awaited, it gives the output, or a `JoinError` (a panic of the
+/// future is `JoinError::Panicked`, a value); dropping it does not cancel
+/// the future (`_ = FooAsync()`, `async void`).
 ///
 /// # Panics
 /// Panics when called from a thread other than the dispatcher thread.
-pub fn start_async<T: 'static>(future: impl Future<Output = T> + 'static) -> DispatcherTask<T> {
+pub fn start_async<T: 'static>(future: impl Future<Output = T> + 'static) -> JoinHandle<T> {
     let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
-    let scheduler = Dispatcher::current_dispatcher().to_task_scheduler_with_priority(priority);
-    scheduler.start_local(future)
+    Dispatcher::current_dispatcher().start_local_with_priority(future, priority)
 }
 
 /// The state of a [`Delay`]: whether its time has passed, and who waits.

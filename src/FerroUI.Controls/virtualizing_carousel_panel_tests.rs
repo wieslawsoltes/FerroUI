@@ -26,7 +26,8 @@ use ferroui_base::input::{SwipeGestureEndedEventArgs, SwipeGestureEventArgs};
 use ferroui_base::layout::Layoutable;
 use ferroui_base::media::{ITransform, ScaleTransform, Transform, TransformGroup, TranslateTransform};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
-use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{FerroLocator, Ref, Size, StaticType, Vector, Visual};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
@@ -221,8 +222,8 @@ fn swipe(id: i32, x: f64, y: f64) -> SwipeGestureEventArgs {
     SwipeGestureEventArgs::new(id, Vector::new(x, y), Vector::default())
 }
 
-fn completed_task() -> DispatcherTask<()> {
-    Dispatcher::current_dispatcher().to_task_scheduler().start_local(async {})
+fn completed_task() -> JoinHandle<()> {
+    Dispatcher::current_dispatcher().start_local(async {})
 }
 
 /// The stand-in for a task completion source: its task completes when the
@@ -238,8 +239,8 @@ impl TaskGate {
         Rc::new(Self::default())
     }
 
-    fn task(self: &Rc<Self>) -> DispatcherTask<()> {
-        Dispatcher::current_dispatcher().to_task_scheduler().start_local(TaskGateFuture(self.clone()))
+    fn task(self: &Rc<Self>) -> JoinHandle<()> {
+        Dispatcher::current_dispatcher().start_local(TaskGateFuture(self.clone()))
     }
 
     fn set_result(&self) {
@@ -273,7 +274,7 @@ struct StartCall {
     cancellation_token: CancellationToken,
 }
 
-type StartSetup = Box<dyn Fn(&StartCall) -> Option<DispatcherTask<()>>>;
+type StartSetup = Box<dyn Fn(&StartCall) -> Option<JoinHandle<()>>>;
 
 /// A page transition that records how it was started.
 #[derive(Default)]
@@ -288,7 +289,7 @@ impl MockTransition {
     }
 
     /// Sets up the task that a start returns; `None` leaves the default.
-    fn setup(&self, setup: impl Fn(&StartCall) -> Option<DispatcherTask<()>> + 'static) {
+    fn setup(&self, setup: impl Fn(&StartCall) -> Option<JoinHandle<()>> + 'static) {
         *self.setup.borrow_mut() = Some(Box::new(setup));
     }
 
@@ -316,7 +317,7 @@ impl IPageTransition for MockTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let call = StartCall { from: from.cloned(), to: to.cloned(), forward, cancellation_token };
         let task = self.setup.borrow().as_ref().and_then(|setup| setup(&call));
         self.starts.borrow_mut().push(call);
@@ -729,7 +730,7 @@ mod transitions {
             to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             self.starts
                 .borrow_mut()
                 .push((from.map_or(1.0, |from| from.opacity()), from.and_then(|from| from.render_transform())));
@@ -743,7 +744,7 @@ mod transitions {
             }
 
             // Never completes: the reference waits until it is cancelled.
-            Dispatcher::current_dispatcher().to_task_scheduler().start_local(std::future::pending::<()>())
+            Dispatcher::current_dispatcher().start_local(std::future::pending::<()>())
         }
     }
 }
@@ -1150,7 +1151,7 @@ mod gestures {
             _to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             completed_task()
         }
 
@@ -1194,7 +1195,7 @@ mod gestures {
             _to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             completed_task()
         }
 
@@ -1233,7 +1234,7 @@ mod gestures {
             _to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             completed_task()
         }
 
@@ -1294,7 +1295,7 @@ mod gestures {
             _to: Option<&Ref<Visual>>,
             _forward: bool,
             _cancellation_token: CancellationToken,
-        ) -> DispatcherTask<()> {
+        ) -> JoinHandle<()> {
             completed_task()
         }
 

@@ -188,7 +188,14 @@ impl XBinding {
             )
         })?;
         let path_text = self.path.as_ref().map(ToString::to_string).unwrap_or_default();
-        let root = XBindRootNode::new(&self.bindings, path_text, self.options.has_fallback_value(), self.phase, target);
+        let root = XBindRootNode::new(
+            &self.bindings,
+            path_text,
+            self.options.has_fallback_value(),
+            self.mode == BindingMode::OneTime,
+            self.phase,
+            target,
+        );
         let mut nodes: Vec<Rc<dyn ExpressionNode>> = vec![root.clone()];
         if let Some(path) = &self.path {
             // A path that starts at a named element is rooted at that element: its first node
@@ -212,6 +219,9 @@ impl XBinding {
                 ..Default::default()
             },
         );
+        // The update of a target by the bindings is not written back to the source (WinUI's
+        // compiled two-way listener runs for a change of the target the bindings did not make).
+        expression.ignore_own_target_changes();
         self.bindings.register(&root);
         Ok(expression)
     }

@@ -23,7 +23,7 @@ use ferroui_base::platform::{
     IPlatformRenderInterface, IRenderTargetBitmapImpl, PixelFormat, StandardAssetLoader,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{locale, Locale, ReadOnlyMemory};
 use ferroui_base::{FerroLocator, LocatorExtensions, Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
 use std::cell::RefCell;
 use std::io::Read;
@@ -216,7 +216,7 @@ fn font_manager_matches_characters_with_fallback_fonts() {
         FontWeight::Bold,
         FontStretch::Condensed,
         Some(&font_manager.get_default_font_family_name()),
-        Some(&CultureInfo::get_culture_info("en-US")),
+        Some(&locale!("en-US")),
     );
     assert!(bold_italic.is_some());
 }
@@ -1162,7 +1162,7 @@ fn font_manager_falls_back_by_script_language_and_character() {
                 FontWeight::Normal,
                 FontStretch::Normal,
                 None,
-                Some(&CultureInfo::get_culture_info(culture)),
+                Some(&Locale::try_from_str(culture).unwrap()),
             )
             .map(|typeface| {
                 let glyph = skrifa::MetadataProvider::charmap(&VelloTypeface::try_get(&*typeface).unwrap().face().font_ref())

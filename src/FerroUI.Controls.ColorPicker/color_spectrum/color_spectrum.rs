@@ -1117,7 +1117,7 @@ impl ColorSpectrum {
     /// returns.
     fn create_bitmaps_and_color_map(&self) {
         let this = self.to_ref();
-        Dispatcher::current_dispatcher().to_task_scheduler().start_local(async move {
+        Dispatcher::current_dispatcher().start_local(async move {
             Self::create_bitmaps_and_color_map_async(this).await;
         });
     }

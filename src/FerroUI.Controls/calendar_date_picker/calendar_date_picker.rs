@@ -1302,7 +1302,7 @@ impl CalendarDatePicker {
     fn convert_text(&self, text: &str) -> ParseResult {
         if let Some(text_converter) = self.text_converter() {
             let boxed: BoxedValue = Rc::new(text.to_string());
-            return match text_converter.convert_back(Some(&boxed), ValueType::of::<Option<DateTime>>(), None, &ferroui_base::utilities::CultureInfo::current_culture()) {
+            return match text_converter.convert_back(Some(&boxed), ValueType::of::<Option<DateTime>>(), None, &ferroui_base::utilities::CultureInfo::current_formatting()) {
                 Ok(value) => Ok(value.and_then(|value| {
                     value
                         .downcast_ref::<DateTime>()
@@ -1338,7 +1338,7 @@ impl CalendarDatePicker {
     fn date_time_to_string(&self, d: DateTime) -> Option<String> {
         if let Some(text_converter) = self.text_converter() {
             let boxed: BoxedValue = Rc::new(d);
-            return match text_converter.convert(Some(&boxed), ValueType::of::<String>(), None, &ferroui_base::utilities::CultureInfo::current_culture()) {
+            return match text_converter.convert(Some(&boxed), ValueType::of::<String>(), None, &ferroui_base::utilities::CultureInfo::current_formatting()) {
                 Ok(value) => value.and_then(|value| {
                     value
                         .downcast_ref::<String>()

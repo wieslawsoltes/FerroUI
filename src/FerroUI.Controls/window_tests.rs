@@ -19,11 +19,28 @@ use ferroui_base::media::{FlowDirection, MediaContext};
 use ferroui_base::reactive::ObservableExt;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::*;
+use ferroui_system::task::{JoinError, JoinHandle};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::pin::Pin;
 use std::rc::Rc;
+
+/// The outcome of a task that has ended, taken from its handle; `None` while it runs.
+fn outcome<T>(task: &mut JoinHandle<T>) -> Option<Result<T, JoinError>> {
+    match Pin::new(task).poll(&mut std::task::Context::from_waker(std::task::Waker::noop())) {
+        std::task::Poll::Ready(outcome) => Some(outcome),
+        std::task::Poll::Pending => None,
+    }
+}
+
+/// The result of a dialog whose task has ended with one.
+fn dialog_result<T>(task: &mut JoinHandle<T>) -> T {
+    match outcome(task) {
+        Some(Ok(result)) => result,
+        other => panic!("the task of the dialog did not end with a result: {:?}", other.map(Result::err)),
+    }
+}
 
 /// A screens implementation with fixed answers (the counterpart of a loose
 /// mock with a few members set up).
@@ -513,13 +530,13 @@ fn show_dialog_with_value_type_returns_default_when_closed() {
 
     parent.show();
     let target = window_with_impl(&window_impl);
-    let task = target.show_dialog_typed::<bool>(&parent);
+    let mut task = target.show_dialog_typed::<bool>(&parent);
 
     closed(&window_impl);
 
     Dispatcher::ui_thread().run_jobs(None);
-    assert!(task.is_completed());
-    let result = task.result().unwrap();
+    assert!(task.is_finished());
+    let result = dialog_result(&mut task);
     assert!(!result);
 }
 
@@ -530,13 +547,13 @@ fn show_dialog_returns_the_dialog_result_when_closed_with_a_result() {
     parent.show();
 
     let untyped = Window::new();
-    let untyped_task = untyped.show_dialog(&parent);
+    let mut untyped_task = untyped.show_dialog(&parent);
     let typed = Window::new();
-    let typed_task = typed.show_dialog_typed::<i32>(&parent);
+    let mut typed_task = typed.show_dialog_typed::<i32>(&parent);
 
     Dispatcher::ui_thread().run_jobs(None);
-    assert!(!untyped_task.is_completed());
-    assert!(!typed_task.is_completed());
+    assert!(!untyped_task.is_finished());
+    assert!(!typed_task.is_finished());
 
     let result: BoxedValue = Rc::new("done".to_string());
     untyped.close_with_result(Some(result));
@@ -544,10 +561,10 @@ fn show_dialog_returns_the_dialog_result_when_closed_with_a_result() {
     typed.close_with_result(Some(result));
 
     Dispatcher::ui_thread().run_jobs(None);
-    assert!(untyped_task.is_completed());
-    let untyped_result = untyped_task.result().unwrap().expect("the dialog was closed with a result");
+    assert!(untyped_task.is_finished());
+    let untyped_result = dialog_result(&mut untyped_task).expect("the dialog was closed with a result");
     assert_eq!(Some(&"done".to_string()), untyped_result.downcast_ref::<String>());
-    assert_eq!(42, typed_task.result().unwrap());
+    assert_eq!(42, dialog_result(&mut typed_task));
 }
 
 #[test]
@@ -584,7 +601,7 @@ fn calling_show_dialog_on_closed_window_should_throw() {
 
     closed(&window_impl);
     Dispatcher::ui_thread().run_jobs(None);
-    assert!(task.is_completed());
+    assert!(task.is_finished());
 
     let opened_raised = Rc::new(Cell::new(false));
     target.opened({
@@ -1223,12 +1240,12 @@ macro_rules! sizing_tests {
 
                 let target = Window::new();
 
-                let task = target.show_dialog_typed::<bool>(&parent);
+                let mut task = target.show_dialog_typed::<bool>(&parent);
 
                 target.set_is_visible(false);
 
                 Dispatcher::ui_thread().run_jobs(None);
-                assert!(task.is_completed_successfully());
+                assert!(matches!(outcome(&mut task), Some(Ok(_))));
             }
 
             #[test]
@@ -1422,7 +1439,7 @@ fn dialog_is_owned_and_disables_its_owner_until_it_closes() {
     parent.show();
     let dialog = Window::new();
 
-    let task = dialog.show_dialog(&parent);
+    let mut task = dialog.show_dialog(&parent);
 
     assert!(dialog.is_dialog());
     assert_eq!(1, parent.owned_windows().len());
@@ -1440,8 +1457,7 @@ fn dialog_is_owned_and_disables_its_owner_until_it_closes() {
     assert_eq!(1, parent_impl.count_of(&MockCall::Activate));
 
     Dispatcher::ui_thread().run_jobs(None);
-    assert!(task.is_completed_successfully());
-    assert!(task.result().unwrap().is_none());
+    assert!(dialog_result(&mut task).is_none());
 }
 
 #[test]
@@ -1487,4 +1503,72 @@ fn shown_window_is_kept_alive_by_its_platform_impl_until_it_closes() {
 
     // (b) The closed window is released.
     assert!(weak.upgrade().is_none());
+}
+
+// The handles of the dialogs (step A6 of phase C4 of #423).
+
+#[test]
+fn a_dialog_result_of_another_type_is_the_panic_of_the_typed_handle() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let parent = Window::new();
+    parent.show();
+    let dialog = Window::new();
+    let mut task = dialog.show_dialog_typed::<i32>(&parent);
+
+    let result: BoxedValue = Rc::new("not a number".to_string());
+    dialog.close_with_result(Some(result));
+    Dispatcher::ui_thread().run_jobs(None);
+
+    match outcome(&mut task) {
+        Some(Err(JoinError::Panicked(payload))) => {
+            let message = payload.downcast_ref::<String>().cloned().unwrap_or_default();
+            assert!(message.starts_with("Unable to cast the dialog result"), "{message}");
+        }
+        other => panic!("the cast did not fail: {:?}", other.map(|outcome| outcome.is_ok())),
+    }
+}
+
+#[test]
+fn an_aborted_dialog_handle_ends_canceled_and_leaves_the_dialog_open() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let parent = Window::new();
+    parent.show();
+    let dialog = Window::new();
+    let mut task = dialog.show_dialog(&parent);
+
+    task.abort();
+    assert!(matches!(outcome(&mut task), Some(Err(JoinError::Canceled))));
+    assert!(dialog.is_dialog());
+
+    dialog.close();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(!dialog.is_dialog());
+}
+
+#[test]
+#[allow(deprecated)]
+fn the_deprecated_dialog_tasks_keep_the_contract_of_the_dispatcher_task() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let parent = Window::new();
+    parent.show();
+
+    let untyped = Window::new();
+    let untyped_task = untyped.show_dialog_task(&parent);
+    let typed = Window::new();
+    let typed_task = typed.show_dialog_typed_task::<i32>(&parent);
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(!untyped_task.is_completed());
+
+    let result: BoxedValue = Rc::new(7);
+    untyped.close_with_result(Some(result));
+    let result: BoxedValue = Rc::new("seven".to_string());
+    typed.close_with_result(Some(result));
+    Dispatcher::ui_thread().run_jobs(None);
+
+    assert!(untyped_task.is_completed_successfully());
+    let untyped_result = untyped_task.result().unwrap().expect("the dialog was closed with a result");
+    assert_eq!(Some(&7), untyped_result.downcast_ref::<i32>());
+    // The failed cast is raised again when the task is observed.
+    assert!(typed_task.is_faulted());
+    assert!(catch_unwind(AssertUnwindSafe(|| typed_task.result())).is_err());
 }

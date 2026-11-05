@@ -16,7 +16,7 @@ use ferroui_headless::{
 use ferroui_reactive::concurrency::{IScheduler, ImmediateScheduler};
 use ferroui_reactiveui::RxSchedulers;
 use ferroui_system::task::{set_current_schedule, Schedule};
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
 use std::rc::Rc;
 /// No current schedule (the synchronization context of the reference), so that the services use
 /// the Rx main-thread scheduler, the immediate one; both are restored when dropped.
@@ -129,7 +129,7 @@ fn original_overlay_templates_compile_bind_and_follow_live_services_in_a_downstr
                 let called = calls.clone();
                 busy_service.set_reload_handler(Some(Rc::new(move || {
                     called.set(called.get() + 1);
-                    Task::from_result(())
+                    Shared::<Result<(), ferroui_system::ObservableError>>::ready(Ok(()))
                 })));
                 assert!(reload.is_enabled());
                 reload.command().unwrap().execute(None);

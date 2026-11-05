@@ -5,7 +5,8 @@ use crate::animation::{
 use crate::animation::i_page_transition::{start_async, when_all};
 use crate::media::{ITransform, TranslateTransform};
 use crate::styling::Setter;
-use crate::threading::{CancellationToken, DispatcherTask};
+use crate::threading::CancellationToken;
+use ferroui_system::task::JoinHandle;
 use crate::{Ref, Visual};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -138,7 +139,7 @@ impl IPageTransition for PageSlide {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let horizontal = self.orientation.get() == SlideAxis::Horizontal;
         let fill_mode = self.fill_mode.get();
         let duration = self.duration.get();

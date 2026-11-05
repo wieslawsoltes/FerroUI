@@ -7,7 +7,7 @@ use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::{ferro_markup_type, BoxedValue};
 use ferroui_base::input::ICommand;
 use ferroui_base::media::Color;
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_controls::ItemsSource;
 use mini_mvvm::{MiniCommand, ViewModelBase};
 use std::cell::{Cell, RefCell};
@@ -154,7 +154,7 @@ impl NavigationPageMvvmShellViewModel {
         self.base.raise_and_set_if_changed(&self.selected_project, value, "SelectedProject");
     }
 
-    pub fn initialize_async(&self) -> DispatcherTask<()> {
+    pub fn initialize_async(&self) -> JoinHandle<()> {
         self.navigation_service.navigate_to_async(self.workspace())
     }
 
@@ -398,7 +398,7 @@ impl ProjectCardViewModel {
         self.open_command.clone()
     }
 
-    pub fn open_command_async(self: &Rc<Self>) -> DispatcherTask<()> {
+    pub fn open_command_async(self: &Rc<Self>) -> JoinHandle<()> {
         self.navigation_service
             .navigate_to_async(ProjectDetailViewModel::new(self.clone(), self.navigation_service.clone()))
     }
@@ -492,7 +492,7 @@ impl ProjectDetailViewModel {
     fn open_activity_async(
         project: &Rc<ProjectCardViewModel>,
         navigation_service: &Rc<dyn ISampleNavigationService>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         navigation_service.navigate_to_async(ProjectActivityViewModel::new(project))
     }
 }
@@ -566,18 +566,18 @@ mod tests {
             Disposable::create(|| {})
         }
 
-        fn navigate_to_async(&self, view_model: SampleViewModel) -> DispatcherTask<()> {
+        fn navigate_to_async(&self, view_model: SampleViewModel) -> JoinHandle<()> {
             self.requests.borrow_mut().push(String::from("navigate"));
             self.view_models.borrow_mut().push(view_model);
             start_async(async {})
         }
 
-        fn go_back_async(&self) -> DispatcherTask<()> {
+        fn go_back_async(&self) -> JoinHandle<()> {
             self.requests.borrow_mut().push(String::from("back"));
             start_async(async {})
         }
 
-        fn pop_to_root_async(&self) -> DispatcherTask<()> {
+        fn pop_to_root_async(&self) -> JoinHandle<()> {
             self.requests.borrow_mut().push(String::from("root"));
             start_async(async {})
         }

@@ -300,7 +300,7 @@ impl DateTimeAxis {
             other => other,
         };
         value
-            .try_to_string_format(format, &CultureInfo::current_culture())
+            .try_to_string_format(format, &CultureInfo::current_formatting())
             .unwrap_or_else(|_| {
                 format!(
                     "{:04}-{:02}-{:02}",

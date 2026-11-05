@@ -811,36 +811,32 @@ impl FerroObjectImpl for MaterialTimePickerField {
             // Paste uses the same input transformation as typing and IME commits. The
             // ordinary TextBox paste path bypasses on_text_input and would update its
             // presenter/caret after a rejected Text property replacement.
-            drop(
-                Dispatcher::ui_thread()
-                    .to_task_scheduler()
-                    .start_local(async move {
-                        match clipboard.try_get_text_async().await {
-                            Ok(Some(text)) => {
-                                if let Some(field) =
-                                    weak.upgrade().filter(|f| f.is_attached_to_visual_tree())
-                                {
-                                    let mut input = TextInputEventArgs::new();
-                                    input.text = Some(text);
-                                    input.set_routed_event(Some(InputElement::text_input_event()));
-                                    field.raise_event(&input);
-                                }
-                            }
-                            Ok(None) => {}
-                            Err(error) => {
-                                if !matches!(
-                                    error.kind(),
-                                    ClipboardErrorKind::Timeout
-                                        | ClipboardErrorKind::Canceled
-                                        | ClipboardErrorKind::AccessDenied
-                                        | ClipboardErrorKind::Platform
-                                ) {
-                                    panic!("Unhandled time-input clipboard error: {error}");
-                                }
-                            }
+            drop(Dispatcher::ui_thread().start_local(async move {
+                match clipboard.try_get_text_async().await {
+                    Ok(Some(text)) => {
+                        if let Some(field) =
+                            weak.upgrade().filter(|f| f.is_attached_to_visual_tree())
+                        {
+                            let mut input = TextInputEventArgs::new();
+                            input.text = Some(text);
+                            input.set_routed_event(Some(InputElement::text_input_event()));
+                            field.raise_event(&input);
                         }
-                    }),
-            );
+                    }
+                    Ok(None) => {}
+                    Err(error) => {
+                        if !matches!(
+                            error.kind(),
+                            ClipboardErrorKind::Timeout
+                                | ClipboardErrorKind::Canceled
+                                | ClipboardErrorKind::AccessDenied
+                                | ClipboardErrorKind::Platform
+                        ) {
+                            panic!("Unhandled time-input clipboard error: {error}");
+                        }
+                    }
+                }
+            }));
         });
     }
     fn on_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {

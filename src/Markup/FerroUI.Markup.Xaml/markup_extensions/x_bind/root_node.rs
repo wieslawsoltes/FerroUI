@@ -19,6 +19,10 @@ pub(super) struct XBindRootNode {
     /// the fallback, which is what WinUI's generated code does instead of failing, so it is not
     /// a diagnostic.
     has_fallback_value: bool,
+    /// A `OneTime` binding reads its path when the bindings are initialized or updated and
+    /// listens to nothing in between, as WinUI's generated code: the path nodes are released
+    /// after each read.
+    one_time: bool,
     /// The `x:Phase` of the element of the target (step X5): a container reads the binding in
     /// that phase.
     phase: i32,
@@ -36,6 +40,7 @@ impl XBindRootNode {
         bindings: &Rc<XBindings>,
         path: String,
         has_fallback_value: bool,
+        one_time: bool,
         phase: i32,
         target: &FerroObject,
     ) -> Rc<Self> {
@@ -46,6 +51,7 @@ impl XBindRootNode {
             bindings: Rc::downgrade(bindings),
             path,
             has_fallback_value,
+            one_time,
             phase,
             target: target.to_weak(),
             enabled: Cell::new(bindings.is_initialized()),
@@ -100,7 +106,12 @@ impl XBindRootNode {
         }
         self.error.borrow_mut().take();
         match bindings.data_root() {
-            Ok(Some(source)) => self.state.set_value(Some(source), None),
+            Ok(Some(source)) => {
+                self.state.set_value(Some(source), None);
+                if self.one_time {
+                    self.clear_path_sources();
+                }
+            }
             // A template instance without an item yet: nothing to read.
             Ok(None) => {}
             Err(message) => self.fail(&message),

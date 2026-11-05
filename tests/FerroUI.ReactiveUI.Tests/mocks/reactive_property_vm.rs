@@ -2,7 +2,6 @@
 
 use ferroui_reactive::concurrency::{IScheduler, ImmediateScheduler};
 use ferroui_reactiveui::{reactive_object, ReactiveObject, ReactiveProperty};
-use ferroui_system::threading::tasks::Task;
 use std::rc::Rc;
 
 /// The maximum length of [`ReactivePropertyVm::length_less_than_five_property`] (`MaxLength`).
@@ -63,7 +62,7 @@ impl ReactivePropertyVm {
 
         let task_validation_test_property = ReactiveProperty::<Option<String>>::with_scheduler(None, Some(scheduler), false, false)
             .add_validation_error_async(|value: Option<String>| {
-                Task::from_result(if is_null_or_white_space(&value) { Some("required".to_owned()) } else { None })
+                std::future::ready(Ok::<_, ferroui_system::ObservableError>(if is_null_or_white_space(&value) { Some("required".to_owned()) } else { None }))
             });
 
         Self {

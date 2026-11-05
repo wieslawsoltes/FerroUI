@@ -9,8 +9,7 @@ use ferroui_reactiveui::{
     ReactiveUIBindingExtensions,
 };
 use ferroui_system::prop;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
-use ferroui_system::task::Schedule;
+use ferroui_system::task::{Schedule, Shared, SharedSender};
 use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, OnceCell, RefCell};
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -58,10 +57,9 @@ impl DockBusyService {
         let weak = Rc::downgrade(&service);
         let command = ReactiveCommand::create_from_task_with(
             move || {
-                weak.upgrade().map_or_else(
-                    || Task::from_result(()),
-                    |service| service.execute_reload_async(),
-                )
+                weak.upgrade()
+                    .map_or_else(|| Shared::ready(Ok(())), |service| service.execute_reload_async())
+                    .flatten()
             },
             Some(can_reload),
             None,
@@ -120,19 +118,24 @@ impl DockBusyService {
     }
     /// Runs work eagerly, retaining its scope until completion. Cleanup occurs
     /// before the returned task ends, and a cleanup failure supersedes a work failure.
-    pub fn run_async(&self, message: String, action: BusyAction) -> Task<()> {
+    pub fn run_async(&self, message: String, action: BusyAction) -> Shared<Result<(), ObservableError>> {
         let handle = match catch_unwind(AssertUnwindSafe(|| self.begin(message))) {
             Ok(handle) => handle,
-            Err(payload) => return Task::from_exception(panic_error(payload)),
+            Err(payload) => return Shared::ready(Err(panic_error(payload))),
         };
-        let completion = TaskCompletionSource::new();
-        let result = completion.task();
+        let (completion, result) = Shared::channel();
         let work = invoke_task(|| action());
-        work.continue_with(move |work| Self::finish_run(completion, handle, work.result()));
+        work.on_finished(move |outcome| {
+            let outcome = match outcome {
+                Ok(outcome) => outcome.clone(),
+                Err(error) => Err(error.to_observable_error()),
+            };
+            Self::finish_run(completion, handle, outcome);
+        });
         result
     }
     fn finish_run(
-        completion: TaskCompletionSource<()>,
+        completion: SharedSender<Result<(), ObservableError>>,
         handle: Rc<dyn IDisposable>,
         outcome: Result<(), ObservableError>,
     ) {
@@ -140,14 +143,7 @@ impl DockBusyService {
             Ok(()) => outcome,
             Err(payload) => Err(panic_error(payload)),
         };
-        match outcome {
-            Ok(()) => {
-                completion.try_set_result(());
-            }
-            Err(error) => {
-                completion.try_set_exception(error);
-            }
-        }
+        completion.send(outcome);
     }
     /// Posts a message assignment even when no scope is active.
     pub fn update_message(&self, message: Option<String>) {
@@ -186,10 +182,10 @@ impl DockBusyService {
             service.raise_and_set_if_changed(&service.message, message, "Message");
         });
     }
-    fn execute_reload_async(&self) -> Task<()> {
+    fn execute_reload_async(&self) -> Shared<Result<(), ObservableError>> {
         let handler = self.reload_handler.borrow().clone();
         handler.map_or_else(
-            || Task::from_result(()),
+            || Shared::ready(Ok(())),
             |handler| invoke_task(|| handler()),
         )
     }
@@ -216,7 +212,7 @@ impl IDockBusyService for DockBusyService {
     fn begin(&self, message: String) -> Rc<dyn IDisposable> {
         self.begin(message)
     }
-    fn run_async(&self, message: String, action: BusyAction) -> Task<()> {
+    fn run_async(&self, message: String, action: BusyAction) -> Shared<Result<(), ObservableError>> {
         self.run_async(message, action)
     }
     fn update_message(&self, message: Option<String>) {

@@ -8,7 +8,8 @@ use crate::mocks::*;
 use ferroui_reactive::subjects::Subject;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::*;
-use ferroui_system::threading::tasks::{block_on, canceled, Task, TaskCompletionSource};
+use ferroui_system::task::block_on;
+use ferroui_system::threading::tasks::canceled;
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
@@ -34,7 +35,7 @@ fn materialize<T: 'static>(source: &Rc<dyn IObservable<AsyncExecution<T>>>) -> A
 /// (`RunToCompletionAsync`).
 fn run_to_completion<T: Clone + 'static>(source: &Rc<dyn IObservable<AsyncExecution<T>>>) -> Result<T, ObservableError> {
     let (result, _) = materialize(source);
-    let completion = TaskCompletionSource::<T>::new();
+    let completion = TestCompletion::<T>::new();
     let last: Rc<RefCell<Option<T>>> = Rc::new(RefCell::new(None));
     let (on_next_last, on_completed_last) = (last.clone(), last);
     let (failed, completed) = (completion.clone(), completion.clone());
@@ -49,7 +50,7 @@ fn run_to_completion<T: Clone + 'static>(source: &Rc<dyn IObservable<AsyncExecut
             }
         },
     );
-    block_on(completion.task())
+    block_on(completion.task().flatten())
 }
 
 /// Upstream resets the builder first (`RxAppBuilder.ResetForTesting()`) to show that
@@ -181,7 +182,7 @@ fn deferred_value_observable_forwards_factory_exception_as_on_error() {
 
 #[test]
 fn from_async_with_all_notifications_runs_action() {
-    let source = from_async_with_all_notifications(|_| Task::from_result(()));
+    let source = from_async_with_all_notifications(|_| from_result(()));
 
     let result = run_to_completion(&source);
 
@@ -197,7 +198,7 @@ fn from_async_with_all_notifications_with_parameter_runs_action() {
     let source = from_async_with_all_notifications_param(
         move |param: i32, _| {
             sink.set(param);
-            Task::from_result(())
+            from_result(())
         },
         PARAMETER,
     );
@@ -209,7 +210,7 @@ fn from_async_with_all_notifications_with_parameter_runs_action() {
 
 #[test]
 fn from_async_with_all_notifications_produces_result() {
-    let source = from_async_with_all_notifications(|_| Task::from_result(42));
+    let source = from_async_with_all_notifications(|_| from_result(42));
 
     let result = run_to_completion(&source);
 
@@ -221,7 +222,7 @@ fn from_async_with_all_notifications_with_parameter_produces_result() {
     const PARAMETER: i32 = 21;
     const MULTIPLIER: i32 = 2;
 
-    let source = from_async_with_all_notifications_param(|param: i32, _| Task::from_result(param * MULTIPLIER), PARAMETER);
+    let source = from_async_with_all_notifications_param(|param: i32, _| from_result(param * MULTIPLIER), PARAMETER);
 
     let result = run_to_completion(&source);
 
@@ -232,11 +233,11 @@ fn from_async_with_all_notifications_with_parameter_produces_result() {
 fn from_async_with_all_notifications_propagates_error() {
     let expected = InvalidOperationException::error("async failure");
 
-    let source = from_async_with_all_notifications_param(|error: ObservableError, _| Task::<i32>::from_exception(error), expected.clone());
+    let source = from_async_with_all_notifications_param(|error: ObservableError, _| std::future::ready(Err::<i32, ObservableError>(error)), expected.clone());
 
     let (result, _) = materialize(&source);
 
-    let completion = TaskCompletionSource::<ObservableError>::new();
+    let completion = TestCompletion::<ObservableError>::new();
     let failed = completion.clone();
     let _subscription = result.subscribe_all(
         |_| {},
@@ -246,20 +247,20 @@ fn from_async_with_all_notifications_propagates_error() {
         || {},
     );
 
-    let actual = block_on(completion.task()).expect("the error is notified");
+    let actual = block_on(completion.task().flatten()).expect("the error is notified");
 
     assert!(Rc::ptr_eq(&actual, &expected));
 }
 
 #[test]
 fn from_async_with_all_notifications_cancel_delegate_is_invokable() {
-    let started = TaskCompletionSource::<()>::new();
-    let release = TaskCompletionSource::<()>::new();
+    let started = TestCompletion::<()>::new();
+    let release = TestCompletion::<()>::new();
 
     let source = from_async_with_all_notifications_param(
-        |(start, release): (TaskCompletionSource<()>, TaskCompletionSource<()>), token: CancellationToken| async move {
+        |(start, release): (TestCompletion<()>, TestCompletion<()>), token: CancellationToken| async move {
             start.try_set_result(());
-            release.task().await?;
+            release.task().flatten().await?;
             if token.is_cancelled() {
                 return canceled();
             }
@@ -270,7 +271,7 @@ fn from_async_with_all_notifications_cancel_delegate_is_invokable() {
 
     let (result, cancel) = materialize(&source);
 
-    let completion = TaskCompletionSource::<()>::new();
+    let completion = TestCompletion::<()>::new();
     let (failed, completed) = (completion.clone(), completion.clone());
     let _subscription = result.subscribe_all(
         |_| {},
@@ -282,11 +283,11 @@ fn from_async_with_all_notifications_cancel_delegate_is_invokable() {
         },
     );
 
-    assert!(started.task().is_completed());
+    assert!(started.task().is_finished());
     cancel();
     release.try_set_result(());
 
-    block_on(completion.task()).expect("the execution ends");
+    block_on(completion.task().flatten()).expect("the execution ends");
 
-    assert!(completion.task().is_completed_successfully());
+    assert!(matches!(completion.task().result(), Some(Ok(()))));
 }

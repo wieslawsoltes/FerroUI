@@ -22,7 +22,7 @@ use crate::media::{
     IPlatformTypeface, ITextShaperTypeface, UnicodeRange, UnicodeRangeSegment,
 };
 use crate::platform::{self, IGeometryImpl, ITextShaperImpl};
-use crate::utilities::CultureInfo;
+use crate::utilities::{CultureInfo, Locale};
 use crate::{FerroLocator, LocatorExtensions, Matrix};
 
 /// LCID of the invariant culture as stored in name records.
@@ -50,8 +50,8 @@ pub struct GlyphTypeface {
 
     family_name: String,
     typographic_family_name: String,
-    family_names: HashMap<CultureInfo, String>,
-    face_names: HashMap<CultureInfo, String>,
+    family_names: HashMap<Locale, String>,
+    face_names: HashMap<Locale, String>,
     metrics: FontMetrics,
     weight: FontWeight,
     style: FontStyle,
@@ -232,8 +232,8 @@ impl GlyphTypeface {
                 }
             }
             None => {
-                family_names.insert(CultureInfo::invariant_culture(), family_name.clone());
-                face_names.insert(CultureInfo::invariant_culture(), weight.to_string());
+                family_names.insert(Locale::UNKNOWN, family_name.clone());
+                face_names.insert(Locale::UNKNOWN, weight.to_string());
             }
         }
 
@@ -266,12 +266,17 @@ impl GlyphTypeface {
         }))
     }
 
-    fn get_culture(lcid: i32) -> CultureInfo {
+    /// The locale of the Windows language identifier of a name record: the unknown locale
+    /// `und` (the invariant culture) for an identifier that is not known, and for one whose
+    /// culture name is not a language tag (`es-ES_tradnl`, the traditional sort of Spanish).
+    fn get_culture(lcid: i32) -> Locale {
         if lcid == u16::MAX as i32 {
-            return CultureInfo::invariant_culture();
+            return Locale::UNKNOWN;
         }
 
-        CultureInfo::get_culture_info_by_lcid(lcid).unwrap_or_else(CultureInfo::invariant_culture)
+        CultureInfo::get_culture_info_by_lcid(lcid)
+            .and_then(|culture| Locale::try_from(&culture).ok())
+            .unwrap_or(Locale::UNKNOWN)
     }
 
     fn get_font_design_em_height(head_table: Option<&HeadTable>) -> u16 {
@@ -322,13 +327,15 @@ impl GlyphTypeface {
         &self.typographic_family_name
     }
 
-    /// Gets a mapping of culture-specific family names.
-    pub fn family_names(&self) -> &HashMap<CultureInfo, String> {
+    /// Gets a mapping of culture-specific family names, keyed by the locale of the culture
+    /// (the unknown locale `und` for the invariant culture).
+    pub fn family_names(&self) -> &HashMap<Locale, String> {
         &self.family_names
     }
 
-    /// Gets a mapping of culture-specific face names.
-    pub fn face_names(&self) -> &HashMap<CultureInfo, String> {
+    /// Gets a mapping of culture-specific face names, keyed by the locale of the culture
+    /// (the unknown locale `und` for the invariant culture).
+    pub fn face_names(&self) -> &HashMap<Locale, String> {
         &self.face_names
     }
 
@@ -396,12 +403,12 @@ impl GlyphTypeface {
     }
 
     /// Whether the font's `meta` table declares coverage of the culture's language.
-    pub fn declares_language_coverage(&self, culture: Option<&CultureInfo>) -> bool {
+    pub fn declares_language_coverage(&self, culture: Option<&Locale>) -> bool {
         let Some(culture) = culture else {
             return false;
         };
 
-        if culture.is_invariant() {
+        if *culture == Locale::UNKNOWN {
             return false;
         }
 
@@ -409,7 +416,8 @@ impl GlyphTypeface {
             return false;
         }
 
-        let name = culture.name();
+        let name = culture.to_string();
+        let name = name.as_str();
 
         let matches_any =
             |tags: &[String]| tags.iter().any(|tag| Self::is_bcp47_prefix_match(tag, name));

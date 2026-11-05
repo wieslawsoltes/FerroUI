@@ -42,7 +42,7 @@ impl TextInfo {
 
     /// The conventions of the current culture.
     pub fn current_info() -> Rc<TextInfo> {
-        CultureInfo::current_culture().text_info()
+        CultureInfo::current_formatting().text_info()
     }
 
     /// Gets the string that separates items in a list (C# `ListSeparator`).

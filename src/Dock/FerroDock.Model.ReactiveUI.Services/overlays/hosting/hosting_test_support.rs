@@ -11,8 +11,8 @@ use ferrodock_model_reactiveui::{impl_dock, Factory};
 use ferroui_reactiveui::{reactive_object, ICommand, IRoutableViewModel, IScreen, RoutingState};
 use ferroui_system::component_model::INotifyPropertyChanged;
 use ferroui_system::events::Event;
-use ferroui_system::threading::tasks::Task;
-use ferroui_system::IDisposable;
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -289,7 +289,7 @@ impl IDockDialogService for CountingDialogs {
         &self,
         content: DialogContent,
         title: Option<String>,
-    ) -> Task<Option<BoxedValue>> {
+    ) -> Shared<Result<Option<BoxedValue>, ObservableError>> {
         self.inner.show_async_boxed(content, title)
     }
     fn close(&self, request: Rc<DialogRequest>, result: Option<BoxedValue>) {
@@ -324,7 +324,7 @@ impl IDockConfirmationService for CountingConfirmations {
     fn has_confirmations(&self) -> bool {
         self.inner.has_confirmations()
     }
-    fn confirm_async(&self, t: String, m: String, c: String, x: String) -> Task<bool> {
+    fn confirm_async(&self, t: String, m: String, c: String, x: String) -> Shared<Result<bool, ObservableError>> {
         self.inner.confirm_async(t, m, c, x)
     }
     fn close(&self, r: Rc<ConfirmationRequest>, v: bool) {

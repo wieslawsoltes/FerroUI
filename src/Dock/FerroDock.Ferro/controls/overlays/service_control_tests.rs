@@ -10,8 +10,8 @@ use ferroui_reactiveui::{ICommand, RxSchedulers};
 use ferroui_system::component_model::INotifyPropertyChanged;
 use ferroui_system::events::Event;
 use ferroui_system::task::{set_current_schedule, Schedule};
-use ferroui_system::threading::tasks::Task;
-use ferroui_system::IDisposable;
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -130,7 +130,7 @@ fn reload_visibility_override_handler_enablement_and_identity_use_original_comma
         let called = calls.clone();
         service.set_reload_handler(Some(Rc::new(move || {
             called.set(called.get() + 1);
-            Task::from_result(())
+            Shared::<Result<(), ObservableError>>::ready(Ok(()))
         })));
         assert!(control.is_reload_enabled());
         let boxed: BoxedValue = Rc::new(command.clone());
@@ -452,7 +452,7 @@ impl IDockBusyService for BusyProbe {
     fn begin(&self, message: String) -> Rc<dyn IDisposable> {
         self.delegate.begin(message)
     }
-    fn run_async(&self, message: String, action: BusyAction) -> Task<()> {
+    fn run_async(&self, message: String, action: BusyAction) -> Shared<Result<(), ObservableError>> {
         self.delegate.run_async(message, action)
     }
     fn update_message(&self, message: Option<String>) {

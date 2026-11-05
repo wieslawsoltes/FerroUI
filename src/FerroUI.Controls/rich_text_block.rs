@@ -851,7 +851,7 @@ ferroui_base::ferro_properties! {
         pub fn font_weight_property() -> StyledProperty<FontWeight> { TextElement::font_weight_property().add_owner::<RichTextBlock>() }
         pub fn font_stretch_property() -> StyledProperty<FontStretch> { TextElement::font_stretch_property().add_owner::<RichTextBlock>() }
         pub fn font_features_property() -> StyledProperty<Option<FontFeatureCollection>> { TextElement::font_features_property().add_owner::<RichTextBlock>() }
-        pub fn language_property() -> StyledProperty<ferroui_base::utilities::CultureInfo> { TextElement::language_property().add_owner::<RichTextBlock>() }
+        pub fn language_property() -> StyledProperty<ferroui_base::utilities::Locale> { TextElement::language_property().add_owner::<RichTextBlock>() }
         pub fn foreground_property() -> StyledProperty<Option<Rc<dyn IBrush>>> { TextElement::foreground_property().add_owner::<RichTextBlock>() }
         pub fn letter_spacing_property() -> StyledProperty<f64> { TextElement::letter_spacing_property().add_owner::<RichTextBlock>() }
         pub fn text_alignment_property() -> StyledProperty<TextAlignment> { TextBlock::text_alignment_property().add_owner::<RichTextBlock>() }
@@ -1635,10 +1635,10 @@ impl RichTextBlock {
     pub fn font_features(&self) -> Option<FontFeatureCollection> {
         self.get_value(Self::font_features_property())
     }
-    pub fn language(&self) -> ferroui_base::utilities::CultureInfo {
+    pub fn language(&self) -> ferroui_base::utilities::Locale {
         self.get_value(Self::language_property())
     }
-    pub fn set_language(&self, value: ferroui_base::utilities::CultureInfo) {
+    pub fn set_language(&self, value: ferroui_base::utilities::Locale) {
         self.set_value(Self::language_property(), value);
     }
     pub fn set_font_features(&self, value: Option<FontFeatureCollection>) {

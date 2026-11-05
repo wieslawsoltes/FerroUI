@@ -4,21 +4,21 @@
 use ferroui_dynamic_data::list::{ChangeSet, IObservableList, ObservableListEx, SourceList, SourceListEditConvenienceEx};
 use ferroui_dynamic_data::ObservableChangeSet;
 use ferroui_reactive::ObservableExt;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
 use ferroui_system::{IDisposable, IObservable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// `CreateTask`: `value` as a completed task (`Task.FromResult`).
-fn create_task<T: Clone + 'static>(value: T) -> Task<T> {
-    Task::from_result(value)
+fn create_task<T: Clone + 'static>(value: T) -> Shared<Result<T, ObservableError>> {
+    Shared::ready(Ok(value))
 }
 
 #[test]
 fn create() {
     subscribe_and_assert(
         ObservableChangeSet::create_list_async_with_action(|list: SourceList<i32>| async move {
-            let value = create_task(10).await?;
+            let value = create_task(10).flatten().await?;
             list.add(value);
             Ok::<_, ObservableError>(|| {})
         }),

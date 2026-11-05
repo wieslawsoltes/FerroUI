@@ -500,7 +500,7 @@ impl BrowserInputHandler {
         if matches!(type_, "dragenter" | "dragover" | "dragleave" | "drop") {
             // If a file is dropped, the storage module is needed to read it. Not awaited, as in
             // the original.
-            Dispatcher::ui_thread().to_task_scheduler().start_local(async {
+            Dispatcher::ui_thread().start_local(async {
                 let _ = ferro_module::import_storage().await;
             });
         }
