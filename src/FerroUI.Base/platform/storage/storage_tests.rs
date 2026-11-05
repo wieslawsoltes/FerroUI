@@ -5,7 +5,8 @@
 use super::*;
 use crate::input::LocalBoxFuture;
 use crate::reactive::IDisposable;
-use crate::utilities::Uri;
+use crate::utilities::UriRef;
+use url::Url;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::task::{Context, Poll, Waker};
@@ -36,8 +37,13 @@ impl IStorageItem for TestFolder {
         self.name.to_owned()
     }
 
-    fn path(&self) -> Uri {
-        Uri::absolute(&format!("file:///folders/{}%20x", self.name)).unwrap()
+    /// The file URL of the folder, or, for the folder named `relative`, a
+    /// relative reference, as the items of the browser have.
+    fn path(&self) -> UriRef {
+        if self.name == "relative" {
+            return UriRef::Relative("relative%20x".into());
+        }
+        UriRef::Absolute(Url::parse(&format!("file:///folders/{}%20x", self.name)).unwrap())
     }
 
     fn get_basic_properties_async(&self) -> LocalBoxFuture<StorageItemProperties> {
@@ -178,13 +184,13 @@ impl IStorageProvider for TestProvider {
         now(None)
     }
 
-    fn try_get_file_from_path_async(&self, _file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
+    fn try_get_file_from_path_async(&self, _file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
         now(None)
     }
 
-    fn try_get_folder_from_path_async(&self, folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
-        self.requested_paths.borrow_mut().push(folder_path.absolute_uri().to_owned());
-        let found = self.known_path.is_some_and(|known| known == folder_path.absolute_uri());
+    fn try_get_folder_from_path_async(&self, folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
+        self.requested_paths.borrow_mut().push(folder_path.as_str().to_owned());
+        let found = self.known_path.is_some_and(|known| known == folder_path.as_str());
         now(found.then(|| Rc::new(TestFolder { name: "known", local_path: None }) as Rc<dyn IStorageFolder>))
     }
 
@@ -217,7 +223,7 @@ fn noop_launcher_launches_nothing() {
     let launcher = NoopLauncher;
     let folder: Rc<dyn IStorageItem> = Rc::new(TestFolder { name: "f", local_path: None });
 
-    assert!(!ready(launcher.launch_uri_async(&Uri::absolute("https://example.org/").unwrap())));
+    assert!(!ready(launcher.launch_uri_async(&Url::parse("https://example.org/").unwrap())));
     assert!(!ready(launcher.launch_file_async(folder)));
 }
 
@@ -260,13 +266,13 @@ fn fallback_storage_provider_uses_the_first_suitable_provider_and_creates_provid
     assert_eq!(4, created.get());
 
     // The first result that is not `None` wins, and the providers are asked in order.
-    let known = Uri::absolute("file:///known/").unwrap();
+    let known = Url::parse("file:///known/").unwrap();
     let folder = ready(provider.try_get_folder_from_path_async(&known)).unwrap();
     assert_eq!("known", folder.name());
     assert_eq!(1, first.requested_paths.borrow().len());
     assert_eq!(1, second.requested_paths.borrow().len());
     assert_eq!(0, third.requested_paths.borrow().len());
-    assert!(ready(provider.try_get_folder_from_path_async(&Uri::absolute("file:///other/").unwrap())).is_none());
+    assert!(ready(provider.try_get_folder_from_path_async(&Url::parse("file:///other/").unwrap())).is_none());
     assert_eq!(1, third.requested_paths.borrow().len());
 
     provider.reset(vec![factory(Some(third.clone()))]);
@@ -296,6 +302,11 @@ fn try_get_local_path_prefers_the_file_system_entry_of_the_item() {
 
     let item: Rc<dyn IStorageItem> = Rc::new(TestFolder { name: "a", local_path: Some("/exact/a%20x") });
     assert_eq!(Some("/exact/a%20x"), item.try_get_local_path().as_deref());
+
+    // A relative path, as the items of the browser have, has no local path.
+    let item: Rc<dyn IStorageItem> = Rc::new(TestFolder { name: "relative", local_path: None });
+    assert!(item.path().is_relative());
+    assert_eq!(None, item.try_get_local_path());
 
     // A folder handle converts to an item handle.
     let folder: Rc<dyn IStorageFolder> = Rc::new(TestFolder { name: "b", local_path: None });

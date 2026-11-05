@@ -86,7 +86,7 @@ fn should_convert_file_path_to_uri_and_back() {
     ] {
         let uri = StorageProviderHelpers::uri_from_file_path(path, false);
 
-        assert_eq!(path, uri.local_path());
+        assert_eq!(path, StorageProviderHelpers::local_path(&uri));
     }
 }
 
@@ -98,7 +98,7 @@ fn should_convert_long_file_path_to_uri_and_back() {
     )] {
         let uri = StorageProviderHelpers::uri_from_file_path(prepath, false);
 
-        assert_eq!(path, uri.local_path());
+        assert_eq!(path, StorageProviderHelpers::local_path(&uri));
     }
 }
 
@@ -106,21 +106,74 @@ fn should_convert_long_file_path_to_uri_and_back() {
 
 #[test]
 fn file_uris_are_escaped_and_local_paths_only_come_from_file_uris() {
-    use crate::utilities::Uri;
+    use crate::utilities::UriRef;
+    use url::Url;
 
     let uri = StorageProviderHelpers::uri_from_file_path("/home/a b/[x]?.txt", false);
-    assert_eq!("file:///home/a%20b/%5Bx%5D%3F.txt", uri.absolute_uri());
+    assert_eq!("file:///home/a%20b/%5Bx%5D%3F.txt", uri.as_str());
     assert_eq!(Some("/home/a b/[x]?.txt"), StorageProviderHelpers::try_get_path_from_file_uri(Some(&uri)).as_deref());
 
     let directory = StorageProviderHelpers::uri_from_file_path("/home/user", true);
-    assert_eq!("file:///home/user/", directory.absolute_uri());
-    assert_eq!("file:///C:/Work/", StorageProviderHelpers::uri_from_file_path("C:\\Work", true).absolute_uri());
+    assert_eq!("file:///home/user/", directory.as_str());
+    assert_eq!("file:///C:/Work/", StorageProviderHelpers::uri_from_file_path("C:\\Work", true).as_str());
 
-    let content = Uri::absolute("content://media/1").unwrap();
+    let content = Url::parse("content://media/1").unwrap();
     assert_eq!(None, StorageProviderHelpers::try_get_path_from_file_uri(Some(&content)));
-    let relative = Uri::new("a/b.txt", crate::utilities::UriKind::Relative).unwrap();
-    assert_eq!(None, StorageProviderHelpers::try_get_path_from_file_uri(Some(&relative)));
+    // A relative path (the browser's items) has no URL, so no local path.
+    let relative = UriRef::parse("a/b.txt").unwrap();
+    assert_eq!(None, StorageProviderHelpers::try_get_path_from_file_uri(relative.as_url()));
     assert_eq!(None, StorageProviderHelpers::try_get_path_from_file_uri(None));
+}
+
+/// The file URLs of the storage helpers and their local paths are the same on
+/// every target, `wasm32-unknown-unknown` included, where `Url::from_file_path`
+/// and `Url::to_file_path` do not exist (F12 of
+/// docs/idiomatic-rust-signatures.md): a drive path is a drive path and a host
+/// is a UNC path everywhere, as for .NET's `Uri.LocalPath`. Where the host has
+/// `to_file_path`, the local path of a path of the host is the path it gives.
+#[test]
+fn a_file_uri_converts_to_a_path_on_every_target() {
+    use url::Url;
+
+    let local_path = |text: &str| StorageProviderHelpers::local_path(&Url::parse(text).unwrap());
+
+    // Paths with slashes, escaped and unescaped.
+    assert_eq!("/home/a b/c.txt", local_path("file:///home/a%20b/c.txt"));
+    assert_eq!("/home/Stahování/x.txt", local_path("file:///home/Stahov%C3%A1n%C3%AD/x.txt"));
+    assert_eq!("/home/100%.txt", local_path("file:///home/100%25.txt"));
+    // A drive.
+    assert_eq!("C:\\dir\\a b.txt", local_path("file:///C:/dir/a%20b.txt"));
+    assert_eq!("C:", local_path("file:///C:"));
+    assert_eq!("C:\\", local_path("file:///C:/"));
+    // A host is a UNC path; `localhost` is no host in a URL.
+    assert_eq!("\\\\server\\share\\a.txt", local_path("file://server/share/a.txt"));
+    assert_eq!("/a.txt", local_path("file://localhost/a.txt"));
+    // Any other scheme gives its unescaped path.
+    assert_eq!("/document/a b", local_path("content://com.example/document/a%20b"));
+
+    // A path converts to a URL and back.
+    for (path, is_directory, url) in [
+        ("/home/a b/[x].txt", false, "file:///home/a%20b/%5Bx%5D.txt"),
+        ("/home/user/", true, "file:///home/user/"),
+        ("C:\\Work\\a#b.txt", false, "file:///C:/Work/a%23b.txt"),
+        ("D:\\", false, "file:///D:/"),
+    ] {
+        let uri = StorageProviderHelpers::uri_from_file_path(path, is_directory);
+        assert_eq!(url, uri.as_str());
+        assert_eq!(Some(path), StorageProviderHelpers::try_get_path_from_file_uri(Some(&uri)).as_deref());
+    }
+
+    // The path of the host, where the host has one, agrees with `to_file_path`.
+    #[cfg(all(unix, not(target_arch = "wasm32")))]
+    for text in ["file:///home/a%20b/c.txt", "file:///tmp/100%25.txt", "file:///"] {
+        let url = Url::parse(text).unwrap();
+        assert_eq!(url.to_file_path().unwrap(), std::path::PathBuf::from(StorageProviderHelpers::local_path(&url)));
+    }
+    #[cfg(windows)]
+    for text in ["file:///C:/dir/a%20b.txt", "file://server/share/a.txt"] {
+        let url = Url::parse(text).unwrap();
+        assert_eq!(url.to_file_path().unwrap(), std::path::PathBuf::from(StorageProviderHelpers::local_path(&url)));
+    }
 }
 
 #[test]
