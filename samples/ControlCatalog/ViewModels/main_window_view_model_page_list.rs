@@ -170,11 +170,20 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add_page(|| crate::pages::winui_composition_pages::zoom_page().upcast(), "Zoom and manipulation", Icons::VIEWBOX, "Visuals that follow the zoom of a scroll viewer");
             s.add_page(|| crate::pages::winui_composition_pages::acrylic_brush_page().upcast(), "Acrylic brush", Icons::BLUR, "The acrylic recipe of WinUI over a busy scene");
             s.add_page(|| crate::pages::winui_composition_pages::blend_effects_page().upcast(), "Blend and colour effects", Icons::PALETTE, "Blend modes, saturation, tint and colour matrices");
-            s.add_page(|| crate::pages::winui_composition_pages::custom_effects_page().upcast(), "Custom effects", Icons::PALETTE, "Tint, grayscale, sepia, saturation, contrast, invert, glow, pixelate, scan lines, spotlight, page transitions and interactive effects as Visual.Effect");
             s.add_page(|| crate::pages::winui_composition_pages::lighting_page().upcast(), "Lighting", Icons::LIGHTNING, "Coloured lights and the scene lighting effect");
             s.add_page(|| crate::pages::winui_composition_pages::reveal_page().upcast(), "Reveal", Icons::SPARKLE, "Reveal brushes lit by the XAML lights of WinUI");
             s.add_page(|| crate::pages::winui_composition_pages::system_backdrops_page().upcast(), "System backdrops", Icons::WINDOW, "Mica, Mica Alt and desktop acrylic window backdrops");
             s.add_page(|| crate::pages::winui_composition_pages::acrylic_menus_page().upcast(), "Acrylic menus", Icons::MENU, "Menus whose background is the desktop acrylic backdrop");
+        }),
+        // Not from upstream: the custom effects of `Visual.Effect`, one page per family
+        // (`Pages/custom_effects_pages.rs`, the sections of `samples/CustomEffects`,
+        // docs/porting/custom-effects.md, section 3.7).
+        section("Custom effects", Icons::PALETTE, &mut unavailable, |s| {
+            s.add_page(|| crate::pages::custom_effects_pages::colour_effects_page().upcast(), "Colour effects", Icons::PALETTE, "Tint, grayscale, sepia, saturation, brightness and contrast, and invert as effect graphs");
+            s.add_page(|| crate::pages::custom_effects_pages::image_effects_page().upcast(), "Image effects", Icons::IMAGE, "Glow, sharpen, edge detect and pixelate");
+            s.add_page(|| crate::pages::custom_effects_pages::shader_effects_page().upcast(), "Shader effects", Icons::SPARKLE, "Scan lines, a grid and a spotlight as runtime shaders");
+            s.add_page(|| crate::pages::custom_effects_pages::interactive_effects_page().upcast(), "Interactive effects", Icons::CURSOR, "A spotlight, a grid, water ripples and a burn-away button that follow the pointer");
+            s.add_page(|| crate::pages::custom_effects_pages::page_transitions_page().upcast(), "Page transitions", Icons::TRANSITION, "Dissolve and mask transitions between two pages, played by key frames");
         }),
         section("Status & Feedback", Icons::CHAT, &mut unavailable, |s| {
             s.add("/Pages/AdornerLayerPage.xaml", "AdornerLayer", Icons::SPARKLE, "Overlay visuals on top of other controls");
