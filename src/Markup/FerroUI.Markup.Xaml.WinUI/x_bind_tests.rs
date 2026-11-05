@@ -127,14 +127,15 @@ fn found_as<T: ObjectType>(root: &StackPanel, name: &str) -> Option<Ref<T>> {
 }
 
 /// `x:Load="False"` and `x:DeferLoadStrategy="Lazy"`: a placeholder holds the place of the
-/// element until `FindName` creates it; its bindings read the root of the document.
+/// element until `FindName` creates it; its bindings read the root of the document, whose
+/// bindings an element that is created with the document makes.
 #[test]
 fn deferred_elements_of_a_winui_document_load_with_find_name() {
     let _app = start();
     let xaml = document(
         "StackPanel",
         "Tag='root tag'",
-        "<Border x:Name='lazy' x:Load='False'><TextBlock x:Name='lazyText' Text='{x:Bind Tag, Mode=OneWay}'/></Border><TextBlock x:Name='later' x:DeferLoadStrategy='Lazy' Text='{x:Bind Tag}'/>",
+        "<Border x:Name='lazy' x:Load='False'><TextBlock x:Name='lazyText' Text='{x:Bind Tag, Mode=OneWay}'/></Border><TextBlock x:Name='later' x:DeferLoadStrategy='Lazy' Text='{x:Bind Tag}'/><TextBlock x:Name='eager' Text='{x:Bind Tag}'/>",
     );
     let root: Ref<StackPanel> = load(&xaml);
     let children = root.children();
