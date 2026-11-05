@@ -1,5 +1,5 @@
 use crate::remote::remote_designer_entry_point::methods;
-use ferroui_base::utilities::Uri;
+use ferroui_base::platform::storage::file_io::StorageProviderHelpers;
 use ferroui_remote_protocol::designer::UpdateXamlMessage;
 use ferroui_remote_protocol::metsys_bson::{BsonObject, ValueRef};
 use ferroui_remote_protocol::{
@@ -8,6 +8,7 @@ use ferroui_remote_protocol::{
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, PoisonError, Weak};
 use std::time::Duration;
+use url::Url;
 
 /// A pseudo-transport that triggers XAML updates on file changes: the
 /// "other end" is a file, whose text is sent as an [`UpdateXamlMessage`]
@@ -25,11 +26,11 @@ pub(crate) struct FileWatcherTransport {
 }
 
 impl FileWatcherTransport {
-    pub(crate) fn new(file: &Uri, app_path: Option<String>) -> Arc<FileWatcherTransport> {
+    pub(crate) fn new(file: &Url, app_path: Option<String>) -> Arc<FileWatcherTransport> {
         Arc::new_cyclic(|this| FileWatcherTransport {
             this: this.clone(),
             app_path,
-            path: file.local_path(),
+            path: StorageProviderHelpers::local_path(file),
             last_contents: Mutex::new(None),
             disposed: AtomicBool::new(false),
             on_message: Mutex::new(Delegate::new()),
@@ -169,7 +170,6 @@ impl IFerroRemoteTransportConnection for FileWatcherTransport {
 mod tests {
     // Not from upstream.
     use super::*;
-    use ferroui_base::utilities::UriKind;
     use ferroui_remote_protocol::message_handler;
     use ferroui_remote_protocol::viewport::MeasureViewportMessage;
     use std::sync::mpsc::channel;
@@ -180,7 +180,7 @@ mod tests {
     fn a_change_of_the_file_is_an_update_of_the_xaml() {
         let path = std::env::temp_dir().join(format!("ferroui-file-watcher-{}.xaml", std::process::id()));
         std::fs::write(&path, "<A/>").unwrap();
-        let uri = Uri::new(&format!("file://{}", path.display()), UriKind::Absolute).unwrap();
+        let uri = StorageProviderHelpers::uri_from_file_path(path.to_str().unwrap(), false);
         let transport = FileWatcherTransport::new(&uri, Some("app".to_string()));
         assert_eq!("html", transport.previewer_method());
 
