@@ -20,36 +20,45 @@
 //!   members, casts, and a function at the end of the path with its arguments and its
 //!   `BindBack` (step X2). The forms WinUI rejects, the modes and update triggers it rejects, a
 //!   function that does not match its call or its target, and a `TwoWay` path that cannot be
-//!   written are errors.
+//!   written are errors; so are the converter and substitute values WinUI rejects (step X3).
+//! - [`prepare_event`] (from `FerroXamlIlBindingPathParser`) and [`transform_path`] on an event
+//!   (step X4): the event of an `x:Bind` (`Click="{x:Bind OnClick}"`) is assigned through an
+//!   [`XBindEventSetter`] instead of its subscription, and its path ends with the method the
+//!   event calls, checked against the signature of the event as WinUI's
+//!   `BoundEventAssignment` does.
 //!
 //! The run-time loader and the Rust emitter run the same transformers: a diagnostic is a load
 //! error of the one and a compile error of the other, with the position of the binding.
 
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use ferroui_base::data::core::parsers::Node;
 use ferroui_base::metadata::FERRO_XML_NAMESPACE;
 use xamlx::ast::{
-    IXamlAstNode, IXamlAstPropertyReference, IXamlAstValueNode, IXamlLineInfo, XamlAstClrProperty,
-    XamlAstClrTypeReference, XamlAstConstructableObjectNode, XamlAstExtensions, XamlAstNamePropertyReference,
-    XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXamlPropertyValueNode, XamlAstXmlDirective,
-    XamlAstXmlTypeReference, XamlConstantNode, XamlMarkupExtensionNode, XamlPropertyAssignmentNode,
-    XamlTypeExtensionNode,
+    IXamlAstNode, IXamlAstPropertyReference, IXamlAstValueNode, IXamlLineInfo, IXamlPropertySetter,
+    PropertySetterBinderParameters, XamlAstClrProperty, XamlAstClrTypeReference, XamlAstConstructableObjectNode,
+    XamlAstExtensions, XamlAstNamePropertyReference, XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode,
+    XamlAstXamlPropertyValueNode, XamlAstXmlDirective, XamlAstXmlTypeReference, XamlConstantNode,
+    XamlDirectCallPropertySetter, XamlMarkupExtensionNode, XamlPropertyAssignmentNode, XamlTypeExtensionNode,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::transform::transformers::TypeReferenceResolver;
 use xamlx::transform::{AstTransformationContext, XamlTransformHelpers};
-use xamlx::type_system::{IXamlMethod, IXamlType, TypeSystemHelpers, XamlPseudoType, XamlValue};
+use xamlx::type_system::{
+    IXamlCustomAttribute, IXamlField, IXamlMethod, IXamlType, TypeSystemHelpers, XamlPseudoType, XamlValue,
+};
 use xamlx::XamlNamespaces;
 
 use super::x_bind_path::{self, XBindArgument, XBindFunctionOwner, XBindPath};
 use super::{
     BindingExpressionNode, FerroXamlIlBindingPathTransformer, FerroXamlIlWellKnownTypesExtensions, ParsedBindingPathNode,
-    XamlBindingsTransformException,
+    XamlBindingsTransformException, XamlDirectCallAddHandler,
 };
 use crate::compiler_extensions::{
-    TypeCastPathElementNode, XBindBindBack, XBindFunctionArgument, XBindFunctionPathElementNode, XBindLiteral,
+    TypeCastPathElementNode, XBindBindBack, XBindEventHandlerPathElementNode, XBindFunctionArgument,
+    XBindFunctionPathElementNode, XBindLiteral,
     XamlIlBindingPathElementNode, XamlIlBindingPathHelper, XamlIlBindingPathNode, XamlIlClrPropertyPathElementNode,
     XamlIlFerroPropertyPropertyPathElementNode,
 };
@@ -230,13 +239,18 @@ pub fn transform_path(context: &AstTransformationContext, binding: &Rc<XamlAstCo
         // of its root element.
         None => context.root_object()?.type_().get_clr_type()?,
     };
+    let event = event_target(context);
     let resolver = Resolver {
         context,
         line_info: &**binding,
         start_type,
         in_template: template_type.is_some(),
         path_type: context.try_get_ferro_types()?.compiled_binding_path.clone(),
+        event: event.as_ref().map(|(name, _)| name.clone()),
     };
+    if let Some((event, delegate_type)) = &event {
+        return transform_event(&resolver, binding, &assignments, event, delegate_type);
+    }
 
     let mut elements = Vec::new();
     if let Some(parsed) = parsed_path(binding, &assignments) {
@@ -328,6 +342,8 @@ struct Resolver<'c> {
     start_type: Rc<dyn IXamlType>,
     in_template: bool,
     path_type: Rc<dyn IXamlType>,
+    /// The name of the event the binding is assigned to (step X4).
+    event: Option<String>,
 }
 
 impl Resolver<'_> {
@@ -424,9 +440,14 @@ impl Resolver<'_> {
         let element =
             self.grammar(&owner.type_, Node::PropertyName { accepts_null: false, property_name: name.to_string() })?;
         if matches!(element, XamlIlBindingPathElementNode::ClrMethod(_)) {
-            return Err(self.error(format!(
-                "x:Bind to the method '{name}' without a call is an event binding, which is not supported yet (docs/porting/x-bind.md, step X4); a function binding calls it: {name}()"
-            )));
+            return Err(match self.event {
+                Some(_) => self.error(format!(
+                    "Invalid path node '{name}'. Methods can only be used as the leaf node in an event binding"
+                )),
+                None => self.error(format!(
+                    "Binding to methods is not supported: '{name}' is a method; a function binding calls it: {name}(), and an event binds to it"
+                )),
+            });
         }
         // `DataContext` after a named element has the data context type in scope where the
         // element is registered, as in a path of `{CompiledBinding}`.
@@ -938,6 +959,251 @@ fn enum_member(
         }
     }
     Ok(None)
+}
+
+// --- events (step X4) --------------------------------------------------------------------
+
+/// What an [`XBindEventSetter`] subscribes to.
+#[derive(Clone)]
+pub enum XBindEventKind {
+    /// A routed event: the static field that holds it (`Button.ClickEvent`), as the setter of a
+    /// routed event assigned in markup has it ([`XamlDirectCallAddHandler`]).
+    Routed { event_field: Rc<dyn IXamlField> },
+    /// An event that metadata declares with its subscription (`events:`): the declaring type
+    /// and the name of the event.
+    Plain { declaring_type: Rc<dyn IXamlType> },
+}
+
+/// The setter of an event whose value is an `{x:Bind}` (step X4): it takes the binding the
+/// extension provides, which subscribes its handler while the bindings of its root are
+/// initialized, instead of a delegate subscribed when the document is built.
+///
+/// # What a back end has to do
+///
+/// With the target object and the provided binding: for a routed event, the Rust emitter writes
+/// `rt::x_bind_routed_event(&target, &Owner::name_event(), provided, line, position)?` and the
+/// interpreter calls `XBinding::bind_routed_event` with the event the field holds; for another
+/// event, `rt::x_bind_event(markup, "Name", target, provided, line, position)?` and
+/// `XBinding::bind_markup_event` with the declared event.
+pub struct XBindEventSetter {
+    pub event: XBindEventKind,
+    /// The name of the event.
+    pub name: String,
+    /// The delegate type of the event, whose `Invoke` is the signature of the event.
+    pub delegate_type: Rc<dyn IXamlType>,
+    target_type: Rc<dyn IXamlType>,
+    binder_parameters: PropertySetterBinderParameters,
+    parameters: Vec<Rc<dyn IXamlType>>,
+}
+
+impl IXamlPropertySetter for XBindEventSetter {
+    fn target_type(&self) -> Rc<dyn IXamlType> {
+        self.target_type.clone()
+    }
+    fn binder_parameters(&self) -> &PropertySetterBinderParameters {
+        &self.binder_parameters
+    }
+    fn parameters(&self) -> Vec<Rc<dyn IXamlType>> {
+        self.parameters.clone()
+    }
+    fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>> {
+        Vec::new()
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn type_name(&self) -> &'static str {
+        "XBindEventSetter"
+    }
+}
+
+/// The event a property reference subscribes to: a routed event (its `AddHandler` setters, the
+/// last one the most specific delegate), or the `add` accessor of an event of its declaring type;
+/// with the name of the event and its delegate type.
+fn event_of(property: &XamlAstClrProperty) -> Option<(XBindEventKind, Rc<dyn IXamlType>)> {
+    let setters = property.setters();
+    if let Some(add) = setters.iter().rev().find_map(|setter| setter.as_any().downcast_ref::<XamlDirectCallAddHandler>()) {
+        let delegate_type = add.parameters.first()?.clone();
+        return Some((XBindEventKind::Routed { event_field: add.event_field.clone() }, delegate_type));
+    }
+    for setter in &setters {
+        let Some(direct) = setter.as_any().downcast_ref::<XamlDirectCallPropertySetter>() else {
+            continue;
+        };
+        let method = direct.method();
+        let declaring_type = method.declaring_type();
+        let is_event = declaring_type
+            .events()
+            .into_iter()
+            .any(|event| event.name() == property.name() && event.add().is_some_and(|add| add.equals(&**method)));
+        if is_event {
+            let delegate_type = setter.parameters().last()?.clone();
+            return Some((XBindEventKind::Plain { declaring_type }, delegate_type));
+        }
+    }
+    None
+}
+
+/// An `x:Bind` that is the value of an event (`Click="{x:Bind OnClick}"`, from
+/// `FerroXamlIlBindingPathParser`, before the values become assignments): the property of the
+/// event is replaced by one whose only setter is an [`XBindEventSetter`] that takes the binding
+/// the extension provides, so that the assignment subscribes the handler through the bindings of
+/// the root (WinUI's `BoundEventAssignment`) instead of through the subscription of the event.
+pub fn prepare_event(context: &AstTransformationContext, binding: &Rc<XamlAstObjectNode>) -> XamlResult<()> {
+    let Some(value_node) = context.parent_nodes().into_iter().find_map(|node| node.cast::<XamlAstXamlPropertyValueNode>())
+    else {
+        return Ok(());
+    };
+    // The extension must be the value itself, not a value inside another one.
+    let binding_address = Rc::as_ptr(binding) as *const ();
+    let is_value = value_node.values.borrow().iter().any(|value| {
+        let inner = value.cast::<XamlMarkupExtensionNode>().map(|extension| extension.value()).unwrap_or_else(|| value.clone());
+        Rc::as_ptr(&inner) as *const () == binding_address
+    });
+    if !is_value {
+        return Ok(());
+    }
+    let Some(property) = value_node.property().cast::<XamlAstClrProperty>() else {
+        return Ok(());
+    };
+    let Some((event, delegate_type)) = event_of(&property) else {
+        return Ok(());
+    };
+    let binding_type = binding.type_.borrow().clone().get_clr_type()?;
+    let provided = binding_type
+        .find_method(|method| method.name() == "ProvideValue")
+        .map(|method| method.return_type())
+        .ok_or_else(|| XamlError::invalid_operation("XBindExtension has no ProvideValue method"))?;
+    let setter: Rc<dyn IXamlPropertySetter> = Rc::new(XBindEventSetter {
+        event,
+        name: property.name(),
+        delegate_type,
+        target_type: property.declaring_type(),
+        binder_parameters: PropertySetterBinderParameters::default(),
+        parameters: vec![provided],
+    });
+    let replacement: Rc<dyn IXamlAstPropertyReference> = XamlAstClrProperty::with_setters(
+        &*property,
+        &property.name(),
+        property.declaring_type(),
+        None,
+        Some(vec![setter]),
+        None,
+    );
+    *value_node.property.borrow_mut() = replacement;
+    Ok(())
+}
+
+/// The event the binding is assigned to, when its assignment is the one of an
+/// [`XBindEventSetter`]: its name and its delegate type.
+fn event_target(context: &AstTransformationContext) -> Option<(String, Rc<dyn IXamlType>)> {
+    let assignment = target_assignment(context)?;
+    let setters = assignment.possible_setters.borrow().clone();
+    setters.iter().find_map(|setter| {
+        setter
+            .as_any()
+            .downcast_ref::<XBindEventSetter>()
+            .map(|event| (event.name.clone(), event.delegate_type.clone()))
+    })
+}
+
+/// The path of an `x:Bind` of an event (WinUI's `BoundEventAssignment.ValidateEvent`): the
+/// method it ends with, on the root source, on the value of a path or static, without overloads,
+/// with no parameters or with as many as the event passes, each accepting the argument of the
+/// event (its type or a base of it). A mode, an update trigger, a converter, substitute values
+/// and `BindBack` have no meaning for an event and are errors.
+fn transform_event(
+    resolver: &Resolver<'_>,
+    binding: &XamlAstConstructableObjectNode,
+    assignments: &[Rc<XamlPropertyAssignmentNode>],
+    event: &str,
+    delegate_type: &Rc<dyn IXamlType>,
+) -> XamlResult<()> {
+    for name in [
+        MODE,
+        UPDATE_SOURCE_TRIGGER,
+        CONVERTER,
+        CONVERTER_PARAMETER,
+        CONVERTER_LANGUAGE,
+        FALLBACK_VALUE,
+        TARGET_NULL_VALUE,
+        BIND_BACK,
+    ] {
+        if assignment(assignments, name).is_some() {
+            return Err(resolver.error(format!("'{name}' cannot be set on an x:Bind of the event '{event}'")));
+        }
+    }
+    let Some(parsed) = parsed_path(binding, assignments) else {
+        return Err(resolver.error(format!("An x:Bind of the event '{event}' needs the path of the method it calls")));
+    };
+    let syntax = match parsed.path().as_slice() {
+        [BindingExpressionNode::XBind(syntax)] => syntax.clone(),
+        _ => return Err(XamlError::invalid_operation("The path of an x:Bind is not an x:Bind path")),
+    };
+    let non_delegate = || {
+        resolver.error(format!(
+            "Event '{event}' can only be bound to properties of delegate type {}",
+            delegate_type.name()
+        ))
+    };
+    let (owner, owner_type, is_static_owner, name) = match &*syntax {
+        XBindPath::Identifier(name) => (resolver.root(), resolver.start_type.clone(), false, name.clone()),
+        XBindPath::Member(path, name) => {
+            let owner = resolver.resolve(path)?;
+            let owner_type = owner.type_.clone();
+            (owner, owner_type, false, name.clone())
+        }
+        XBindPath::Static { type_name, member } => (resolver.root(), resolver.type_by_name(type_name)?, true, member.clone()),
+        XBindPath::Function { .. } => {
+            return Err(resolver.error(format!(
+                "An x:Bind of the event '{event}' binds to a method, not to a call: '{syntax}'"
+            )));
+        }
+        _ => return Err(non_delegate()),
+    };
+    let methods = XamlIlBindingPathHelper::path_methods(&owner_type, &name);
+    let method = match methods.as_slice() {
+        [] if XamlIlBindingPathHelper::has_path_member(&owner_type, &name) => return Err(non_delegate()),
+        [] => {
+            return Err(resolver.error(format!(
+                "Unable to resolve property or method of name '{name}' on type '{}'.",
+                owner_type.full_name()
+            )));
+        }
+        [method] => method.clone(),
+        _ => return Err(resolver.error("Events can only be bound to non-overloaded methods")),
+    };
+    if is_static_owner && !method.is_static() {
+        return Err(resolver.error(format!(
+            "Expecting '{name}' on type '{}' to be a static function.",
+            owner_type.full_name()
+        )));
+    }
+    let invoke = delegate_type.find_method(|method| method.name() == "Invoke").ok_or_else(non_delegate)?;
+    let event_parameters = invoke.parameters();
+    let parameters = method.parameters();
+    if !parameters.is_empty() && parameters.len() != event_parameters.len() {
+        return Err(resolver.error(format!(
+            "Invalid signature for event '{event}'. Events can only be bound to methods that match the event signature or are parameterless"
+        )));
+    }
+    for (index, (parameter, argument)) in parameters.iter().zip(event_parameters.iter()).enumerate() {
+        if !parameter.is_assignable_from(&**argument) {
+            return Err(resolver.error(format!(
+                "Invalid signature for event '{event}'. Parameter {index} of type '{}' is not assignable from type '{}'",
+                parameter.name(),
+                argument.name()
+            )));
+        }
+    }
+    let element = XamlIlBindingPathElementNode::XBindEventHandler(Rc::new(XBindEventHandlerPathElementNode {
+        method,
+        owner_type,
+    }));
+    let elements = owner.push(element).elements;
+    let resolved: Rc<dyn IXamlAstValueNode> = resolver.path_node(elements);
+    replace_parsed_path(binding, assignments, resolved);
+    Ok(())
 }
 
 /// The checks of the binding after its path is resolved: the mode and the update trigger WinUI

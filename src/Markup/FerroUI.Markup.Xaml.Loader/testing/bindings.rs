@@ -946,6 +946,12 @@ pub fn describe_element(element: &XamlIlBindingPathElementNode) -> String {
             e.arguments.len(),
             e.bind_back.borrow().as_ref().map(|b| b.method.name()).unwrap_or_else(|| "-".to_string())
         ),
+        XamlIlBindingPathElementNode::XBindEventHandler(e) => format!(
+            "EventHandler({}.{}({}))",
+            e.owner_type.name(),
+            e.method.name(),
+            parameter_list(&e.method.parameters())
+        ),
     }
 }
 

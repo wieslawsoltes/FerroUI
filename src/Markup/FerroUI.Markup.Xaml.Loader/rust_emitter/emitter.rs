@@ -40,9 +40,10 @@ use crate::compiler_extensions::transformers::{
     XamlIlAndQueryNode, XamlIlHeightQuery, XamlIlOrQueryNode, XamlIlQueryInitialNode, XamlIlQueryNode, XamlIlWidthQuery,
     XamlSourceInfoValueManipulation, DevelopmentKeyNode,
 };
+use crate::compiler_extensions::transformers::x_bind::{XBindEventKind, XBindEventSetter};
 use crate::compiler_extensions::{
-    BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XBindFunctionArgument,
-    XBindFunctionPathElementNode, XBindLiteral, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
+    BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XBindEventHandlerPathElementNode,
+    XBindFunctionArgument, XBindFunctionPathElementNode, XBindLiteral, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
     XamlIlClrIndexerPathElementNode, XamlIlClrMethodAsCommandPathElementNode, XamlIlFerroClassProperty, XamlIlFerroPropertyFieldNode,
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
@@ -2156,6 +2157,43 @@ impl<'a> Emitter<'a> {
                 target.expr
             ));
         }
+        if let Some(event) = any.downcast_ref::<XBindEventSetter>() {
+            // An `{x:Bind}` of an event (step X4 of docs/porting/x-bind.md): the provided binding
+            // subscribes its handler while the bindings of its root are initialized.
+            let (value, line, position) = match values {
+                SetterValues::Typed(value, value_node) => {
+                    let expr = match value.kind {
+                        Kind::Class(_) => format!("{}.clone()", value.expr),
+                        _ => value.expr.clone(),
+                    };
+                    (expr, value_node.line(), value_node.position())
+                }
+                SetterValues::Untyped(local, value_node) => (format!("{local}.clone()"), value_node.line(), value_node.position()),
+                SetterValues::Checked => return Ok(String::new()),
+                SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
+            };
+            return match &event.event {
+                XBindEventKind::Routed { event_field } => {
+                    object_target()?;
+                    let routed = self.routed_event(node, &property_name, event_field)?;
+                    Ok(format!("rt::x_bind_routed_event(&{}, &{routed}, {value}, {line}, {position})?;", target.expr))
+                }
+                XBindEventKind::Plain { declaring_type } => {
+                    let markup = self.markup_expr(node, declaring_type)?;
+                    let instance = match target.kind {
+                        Kind::Class(_) => format!("rt::to_value({}.clone())", target.expr),
+                        Kind::Exact { .. } => format!("rt::to_value({})", owned(&target.expr)),
+                        Kind::Null | Kind::SystemType { .. } => {
+                            return Err(unsupported(node, format!("{property_name}: the target of the event is not an object")));
+                        }
+                    };
+                    Ok(format!(
+                        "rt::x_bind_event({markup}, {}, {instance}, {value}, {line}, {position})?;",
+                        rust_string_literal(&event.name)
+                    ))
+                }
+            };
+        }
         if let Some(add) = any.downcast_ref::<XamlDirectCallAddHandler>() {
             // `target.AddHandler(EventField, handler, RoutingStrategies.Direct | RoutingStrategies.Bubble, false)`.
             object_target()?;
@@ -3230,6 +3268,7 @@ impl<'a> Emitter<'a> {
             XamlIlBindingPathElementNode::ClrMethod(_) => return Err(unsupported(node, "a binding path with a method")),
             XamlIlBindingPathElementNode::ClrMethodAsCommand(e) => self.path_command(node, e)?,
             XamlIlBindingPathElementNode::XBindFunction(e) => self.path_function(node, e)?,
+            XamlIlBindingPathElementNode::XBindEventHandler(e) => self.path_event_handler(node, e)?,
         })
     }
 
@@ -3340,6 +3379,22 @@ impl<'a> Emitter<'a> {
             }
         };
         Ok(format!("{{ let builder = {call}; {bind_back_call} }}"))
+    }
+
+    /// The method an event binding of `{x:Bind}` calls (`XBindEventHandlerPathElementNode`), the
+    /// element the interpreter builds (`builder.event_handler(...)`): `rt::path_event_handler`
+    /// (`rt::path_static_event_handler`) over the typed function of the declared method, which
+    /// reads the arguments of the event it declares (none for a method without parameters).
+    fn path_event_handler(&mut self, node: &Rc<dyn IXamlAstNode>, handler: &XBindEventHandlerPathElementNode) -> EmitResult<String> {
+        let name = handler.method.name();
+        let (closure, method) = self.function_method(node, &handler.method, false)?;
+        let declaring = method
+            .declaring_type
+            .clone()
+            .ok_or_else(|| unsupported(node, format!("{name}: the declaring type is gone")))?;
+        let markup = self.markup_expr(node, &declaring)?;
+        let helper = if method.is_static { "rt::path_static_event_handler" } else { "rt::path_event_handler" };
+        Ok(format!("{helper}(&builder, {markup}, {}, {closure})", rust_string_literal(&name)))
     }
 
     /// The call of the typed function of a method of the owner of a command, as the body
