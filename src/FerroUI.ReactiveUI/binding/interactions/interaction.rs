@@ -6,7 +6,7 @@ use crate::PanicError;
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::linq::Observable;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
+use ferroui_system::task::{Shared, SharedSender};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::fmt;
@@ -14,8 +14,9 @@ use std::future::Future;
 use std::rc::Rc;
 
 /// A registered handler of an interaction, as the interaction keeps it: it receives the context
-/// and gives the task that ends when it has finished (`Func<IInteractionContext<TInput, TOutput>, Task>`).
-pub type InteractionHandler<I, O> = Rc<dyn Fn(Rc<dyn IInteractionContext<I, O>>) -> Task<()>>;
+/// and gives the task that ends when it has finished (`Func<IInteractionContext<TInput, TOutput>, Task>`),
+/// the [`Shared`] of its outcome.
+pub type InteractionHandler<I, O> = Rc<dyn Fn(Rc<dyn IInteractionContext<I, O>>) -> Shared<Result<(), ObservableError>>>;
 
 /// An interaction between collaborating parts of an application (`Interaction<TInput, TOutput>`).
 /// It is a shared handle: clones are the same interaction.
@@ -83,18 +84,19 @@ impl<I: Clone + 'static, O: Clone + 'static> Interaction<I, O> {
     pub fn register_handler(&self, handler: impl Fn(Rc<dyn IInteractionContext<I, O>>) + 'static) -> Rc<dyn IDisposable> {
         self.add_handler(Rc::new(move |context| {
             handler(context);
-            Task::from_result(())
+            Shared::ready(Ok(()))
         }))
     }
 
     /// Registers an asynchronous handler: the future it gives runs as a task of the thread, and
     /// the next handler runs when it has ended (`RegisterHandler(Func<IInteractionContext<TInput,
-    /// TOutput>, Task>)`). A `Task<()>` is such a future.
+    /// TOutput>, Task>)`). The `flatten()` of a `Shared` or of a `oneshot` receiver is such a
+    /// future.
     pub fn register_handler_task<Fut: Future<Output = Result<(), ObservableError>> + 'static>(
         &self,
         handler: impl Fn(Rc<dyn IInteractionContext<I, O>>) -> Fut + 'static,
     ) -> Rc<dyn IDisposable> {
-        self.add_handler(Rc::new(move |context| Task::spawn_local(handler(context))))
+        self.add_handler(Rc::new(move |context| ferroui_system::task::spawn_local(handler(context)).shared()))
     }
 
     /// Registers a handler that finishes when the observable it gives ends; its values are ignored,
@@ -105,28 +107,29 @@ impl<I: Clone + 'static, O: Clone + 'static> Interaction<I, O> {
         handler: impl Fn(Rc<dyn IInteractionContext<I, O>>) -> Rc<dyn IObservable<D>> + 'static,
     ) -> Rc<dyn IDisposable> {
         self.add_handler(Rc::new(move |context| {
-            let completion = TaskCompletionSource::new();
-            let _ = handler(context).subscribe(Rc::new(ObservableToTaskObserver { completion: completion.clone() }));
-            completion.task()
+            let (completion, task) = Shared::channel();
+            let _ = handler(context).subscribe(Rc::new(ObservableToTaskObserver { completion: RefCell::new(Some(completion)) }));
+            task
         }))
     }
 
     /// Runs the handlers, latest registered first, until one sets an output, and gives a task of
-    /// that output; the task fails with an [`UnhandledInteractionError`] when no handler set
-    /// one (`Handle(TInput)`).
-    pub fn handle(&self, input: I) -> Task<O> {
+    /// that output, the [`Shared`] of its result (`flatten()` is a future of it); the task fails
+    /// with an [`UnhandledInteractionError`] when no handler set one (`Handle(TInput)`).
+    pub fn handle(&self, input: I) -> Shared<Result<O, ObservableError>> {
         let this = self.clone();
-        Task::spawn_local(async move {
+        ferroui_system::task::spawn_local(async move {
             let context = this.generate_context(input.clone());
             let handlers = this.inner.handlers.borrow().clone();
             for handler in handlers.iter().rev() {
-                this.invoke_handler(handler, &context).await?;
+                this.invoke_handler(handler, &context).flatten().await?;
                 if context.is_handled() {
                     return Ok(context.get_output());
                 }
             }
             Err(Rc::new(UnhandledInteractionError::new(this.clone(), input)) as ObservableError)
         })
+        .shared()
     }
 
     /// Asks the question as an observable: each subscription runs [`handle`](Self::handle) once,
@@ -135,7 +138,7 @@ impl<I: Clone + 'static, O: Clone + 'static> Interaction<I, O> {
     /// running still finishes.
     pub fn when_handled(&self, input: I) -> Rc<dyn IObservable<O>> {
         let this = self.clone();
-        Observable::from_async(move || this.handle(input.clone()))
+        Observable::from_async(move || this.handle(input.clone()).flatten())
     }
 
     /// A copy of the registered handlers, earliest first (`GetHandlers()`).
@@ -150,34 +153,25 @@ impl<I: Clone + 'static, O: Clone + 'static> Interaction<I, O> {
 
     /// Invokes a handler on the handler scheduler, or inline when there is none
     /// (`InvokeHandler`); the task ends when the handler has finished.
-    fn invoke_handler(&self, handler: &InteractionHandler<I, O>, context: &Rc<dyn IOutputContext<I, O>>) -> Task<()> {
+    fn invoke_handler(&self, handler: &InteractionHandler<I, O>, context: &Rc<dyn IOutputContext<I, O>>) -> Shared<Result<(), ObservableError>> {
         let handler_context: Rc<dyn IInteractionContext<I, O>> = context.clone();
         let Some(scheduler) = &self.inner.handler_scheduler else {
             return run_handler(handler, handler_context);
         };
         // `ScheduledHandlerCall`: completes with the handler's task once the scheduler has invoked
         // the handler.
-        let completion = TaskCompletionSource::new();
-        let started = completion.clone();
+        let (started, completion) = Shared::channel();
         let handler = handler.clone();
         let _ = scheduler.schedule_action(move || {
             let running = run_handler(&handler, handler_context);
-            let _ = running.continue_with(move |running| {
-                if running.is_canceled() {
-                    started.try_set_canceled();
-                    return;
-                }
-                match running.result() {
-                    Ok(()) => {
-                        started.try_set_result(());
-                    }
-                    Err(error) => {
-                        started.try_set_exception(error);
-                    }
-                }
+            let _ = running.on_finished(move |outcome| {
+                started.send(match outcome {
+                    Ok(result) => result.clone(),
+                    Err(error) => Err(error.to_observable_error()),
+                });
             });
         });
-        completion.task()
+        completion
     }
 
     /// Adds a handler to the registered set, and returns the disposable that removes the first
@@ -204,10 +198,10 @@ impl<I: Clone + 'static, O: Clone + 'static> Interaction<I, O> {
 
 /// Runs a handler: its task, or a faulted task when it panics (the exception a handler throws
 /// upstream faults `Handle`).
-fn run_handler<I, O>(handler: &InteractionHandler<I, O>, context: Rc<dyn IInteractionContext<I, O>>) -> Task<()> {
+fn run_handler<I, O>(handler: &InteractionHandler<I, O>, context: Rc<dyn IInteractionContext<I, O>>) -> Shared<Result<(), ObservableError>> {
     match PanicError::catch(|| handler(context)) {
         Ok(task) => task,
-        Err((error, _)) => Task::from_exception(error),
+        Err((error, _)) => Shared::ready(Err(error)),
     }
 }
 
@@ -216,7 +210,10 @@ impl<I: Clone + 'static, O: Clone + 'static> IInteraction<I, O> for Interaction<
         Interaction::register_handler(self, move |context| handler(context))
     }
 
-    fn register_handler_task(&self, handler: Rc<dyn Fn(Rc<dyn IInteractionContext<I, O>>) -> Task<()>>) -> Rc<dyn IDisposable> {
+    fn register_handler_task(
+        &self,
+        handler: Rc<dyn Fn(Rc<dyn IInteractionContext<I, O>>) -> Shared<Result<(), ObservableError>>>,
+    ) -> Rc<dyn IDisposable> {
         self.add_handler(Rc::new(move |context| handler(context)))
     }
 
@@ -234,7 +231,18 @@ impl<I: Clone + 'static, O: Clone + 'static> IInteraction<I, O> for Interaction<
 
 /// `ObservableToTaskObserver<T>`: ends the task of a handler when its observable ends or fails.
 struct ObservableToTaskObserver {
-    completion: TaskCompletionSource<()>,
+    completion: RefCell<Option<SharedSender<Result<(), ObservableError>>>>,
+}
+
+impl ObservableToTaskObserver {
+    /// `TrySetResult`, `TrySetException`: the first end of the observable ends the task.
+    fn try_send(&self, result: Result<(), ObservableError>) {
+        // Taken out of the cell before it sends: the continuations may reach this observer.
+        let completion = self.completion.borrow_mut().take();
+        if let Some(completion) = completion {
+            completion.send(result);
+        }
+    }
 }
 
 impl<T> IObserver<T> for ObservableToTaskObserver {
@@ -243,10 +251,10 @@ impl<T> IObserver<T> for ObservableToTaskObserver {
     }
 
     fn on_error(&self, error: ObservableError) {
-        self.completion.try_set_exception(error);
+        self.try_send(Err(error));
     }
 
     fn on_completed(&self) {
-        self.completion.try_set_result(());
+        self.try_send(Ok(()));
     }
 }

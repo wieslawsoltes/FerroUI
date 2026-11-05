@@ -1,7 +1,8 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 
-use ferroui_system::threading::tasks::{Task, TaskWorkError};
+use ferroui_system::task::Shared;
+use ferroui_system::threading::tasks::TaskWorkError;
 use ferroui_system::ObservableError;
 use std::any::Any;
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -22,14 +23,16 @@ pub(crate) fn panic_error(payload: Box<dyn Any + Send>) -> ObservableError {
         .unwrap_or_else(|| "Asynchronous operation panicked.".into());
     Rc::new(TaskWorkError { message })
 }
-pub(crate) fn invoke_task(action: impl FnOnce() -> Task<()>) -> Task<()> {
+pub(crate) fn invoke_task(
+    action: impl FnOnce() -> Shared<Result<(), ObservableError>>,
+) -> Shared<Result<(), ObservableError>> {
     catch_unwind(AssertUnwindSafe(action))
-        .unwrap_or_else(|payload| Task::from_exception(panic_error(payload)))
+        .unwrap_or_else(|payload| Shared::ready(Err(panic_error(payload))))
 }
 
-pub(crate) fn spawn_catching<T: 'static>(
+pub(crate) fn spawn_catching<T: Clone + 'static>(
     future: impl std::future::Future<Output = Result<T, ObservableError>> + 'static,
-) -> Task<T> {
+) -> Shared<Result<T, ObservableError>> {
     struct Catch<F> {
         future: std::pin::Pin<Box<F>>,
     }
@@ -47,7 +50,8 @@ pub(crate) fn spawn_catching<T: 'static>(
             }
         }
     }
-    Task::spawn_local(Catch {
+    ferroui_system::task::spawn_local(Catch {
         future: Box::pin(future),
     })
+    .shared()
 }

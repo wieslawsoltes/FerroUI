@@ -11,14 +11,23 @@ use ferroui_base::{ferro_markup_type, BoxedValue};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-/// `{x:Bind Path, Mode=..., UpdateSourceTrigger=...}`: a binding whose path the compiler resolved
-/// against the root of its document, or against the `x:DataType` of the `DataTemplate` it is in.
+/// `{x:Bind Path, Mode=..., UpdateSourceTrigger=..., BindBack=...}`: a binding whose path the
+/// compiler resolved against the root of its document, or against the `x:DataType` of the
+/// `DataTemplate` it is in.
 ///
 /// Markup writes it as `x:Bind` (the XAML language namespace, as WinUI) or as `XBind` (the
 /// framework namespace); the compiler maps the first onto the second. The compiler sets
 /// [`data_type`](Self::data_type) for a binding inside a typed `DataTemplate`: the binding then
 /// reads the data context of the template's root, which must be of that type; without it the
 /// binding reads the root object of its document itself.
+///
+/// The path has the grammar of WinUI's compiled bindings: properties, attached properties
+/// (`path.(Owner.Property)`), static members (`ns:Type.Member`), indexers (`Items[0]`,
+/// `Map['key']`), casts (`(ns:Type)path`, `((ns:Type)path).Member`) and a function at its end
+/// (`Format(Name, 'text', 3)`, `Model.Format(Name)`, `ns:Type.Format(Name)`), compiled into the
+/// elements of a [`CompiledBindingPath`]. A `TwoWay` binding through a function writes back
+/// through the method [`bind_back`](Self::bind_back) names, which the compiler resolves into
+/// the function element of the path.
 ///
 /// The default mode is `OneTime`, as WinUI's. Providing the value creates an [`XBinding`] for
 /// the target and registers it with the [`XBindings`] of its root, which reads it when it is
@@ -28,6 +37,7 @@ pub struct XBindExtension {
     mode: Cell<BindingMode>,
     update_source_trigger: Cell<UpdateSourceTrigger>,
     data_type: Cell<Option<ValueType>>,
+    bind_back: RefCell<Option<String>>,
 }
 
 impl XBindExtension {
@@ -38,6 +48,7 @@ impl XBindExtension {
             mode: Cell::new(BindingMode::OneTime),
             update_source_trigger: Cell::new(UpdateSourceTrigger::Default),
             data_type: Cell::new(None),
+            bind_back: RefCell::new(None),
         })
     }
 
@@ -84,6 +95,18 @@ impl XBindExtension {
 
     pub fn set_data_type(&self, data_type: Option<ValueType>) {
         self.data_type.set(data_type);
+    }
+
+    /// `BindBack`: the method a `TwoWay` binding through a function writes the value of its
+    /// target with, as markup names it (`ParseName`, `Model.SetName`, `local:Helpers.Parse`).
+    /// The compiler resolves it into the function element of the path; the extension keeps
+    /// the text.
+    pub fn bind_back(&self) -> Option<String> {
+        self.bind_back.borrow().clone()
+    }
+
+    pub fn set_bind_back(&self, bind_back: Option<String>) {
+        *self.bind_back.borrow_mut() = bind_back;
     }
 
     /// Checks the mode and the update trigger as WinUI's compiler does
@@ -170,6 +193,10 @@ ferro_markup_type!(class XBindExtension {
         DataType: Option<ValueType> {
             get: |this: &This| this.data_type(),
             set: |this: &This, value: Option<ValueType>| this.set_data_type(value)
+        },
+        BindBack: Option<String> {
+            get: |this: &This| this.bind_back(),
+            set: |this: &This, value: Option<String>| this.set_bind_back(value)
         },
     ],
     methods: [

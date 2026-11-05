@@ -18,7 +18,7 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{CultureInfo, Uri, UriKind};
+use ferroui_base::utilities::{Locale, Uri, UriKind};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::testing::{TestLogSink, UnitTestApplication};
 use ferroui_fonts_inter::InterFontCollection;
@@ -985,7 +985,7 @@ impl IFontManagerImpl for FamilyRemappingFontManagerImpl {
         _font_weight: FontWeight,
         _font_stretch: FontStretch,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         None
     }

@@ -13,7 +13,10 @@ use ferroui_base::data::core::{
     BoxedPropertyGetter, BoxedPropertySetter, ClrPropertyInfo, FalliblePropertyGetter, IPropertyInfo, PropertySetter,
     ValueType, ValueTypes, INDEXER_NAME,
 };
-use ferroui_base::data::{BindingError, CompiledBindingPathBuilder};
+use ferroui_base::data::{
+    BindingError, CompiledBindingPath, CompiledBindingPathBuilder, PathBindBackInvoke, PathFunctionArgument,
+    PathFunctionInvoke,
+};
 use ferroui_base::metadata::{from_markup_value, MarkupDelegate, MarkupInvokeError, MarkupValue};
 use ferroui_base::{AnyValue, BoxedValue};
 use ferroui_markup_xaml::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
@@ -23,7 +26,8 @@ use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::type_system::{IXamlMethod, IXamlProperty, IXamlType};
 
 use crate::compiler_extensions::{
-    XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlPropertyAccessorFactory,
+    XBindFunctionArgument, XBindFunctionPathElementNode, XBindLiteral, XamlIlBindingPathElementNode,
+    XamlIlBindingPathNode, XamlIlPropertyAccessorFactory,
 };
 use crate::runtime::interpreter::{runtime_error, EvalContext, EvalResult};
 use crate::runtime::type_system::{box_object, RuntimeMethod, RuntimeType};
@@ -338,6 +342,7 @@ fn element(
                 e.accepts_null,
             )
         }
+        XamlIlBindingPathElementNode::XBindFunction(e) => function(builder, e, context)?,
         XamlIlBindingPathElementNode::ClrMethodAsCommand(e) => {
             // The execute and can-execute trampolines: the owner, then the command
             // parameter if the method takes one, cast to the parameter type (`unbox.any` /
@@ -375,9 +380,95 @@ fn element(
     })
 }
 
-/// `new CompiledBindingPathBuilder()`, the builder call of each transform
-/// element and then of each element, `Build()`.
-pub(crate) fn evaluate(node: &Rc<XamlIlBindingPathNode>, context: &mut EvalContext<'_>) -> XamlResult<EvalResult> {
+/// The value of a literal argument of a function of `{x:Bind}`, of the type of its parameter.
+fn literal_value(literal: &XBindLiteral) -> MarkupValue {
+    match literal {
+        XBindLiteral::Null => None,
+        XBindLiteral::Boolean(value) => Some(Rc::new(*value)),
+        XBindLiteral::Int32(value) => Some(Rc::new(*value)),
+        XBindLiteral::Int64(value) => Some(Rc::new(*value)),
+        XBindLiteral::Single(value) => Some(Rc::new(*value)),
+        XBindLiteral::Double(value) => Some(Rc::new(*value)),
+        XBindLiteral::String(value) => Some(Rc::new(value.clone())),
+    }
+}
+
+/// Invokes the method of a function of `{x:Bind}` (or of its `BindBack`) through its invoker;
+/// the failure is the error of the binding, named after the method, as the helpers of
+/// generated code name it.
+fn invoke_function(method: &Rc<dyn IXamlMethod>, arguments: &[MarkupValue]) -> Result<MarkupValue, BindingError> {
+    let name = format!("{}.{}", method.declaring_type().full_name(), method.name());
+    match method.as_any().downcast_ref::<RuntimeMethod>() {
+        Some(runtime) => runtime
+            .invoke(arguments)
+            .map(|value| value.map(ferroui_markup_xaml::xaml_il::runtime::compiled::normalize_object))
+            .map_err(|error| BindingError::message(format!("{name}: {error}"))),
+        None => Err(BindingError::message(format!("Method {name} has no invoker"))),
+    }
+}
+
+/// The function of an `{x:Bind}` path (`builder.function(...)`, and `builder.bind_back(...)`
+/// for a `TwoWay` binding through it): the method invoked through the run-time type system
+/// with the owner (unless it is static) and the values of the arguments, which are paths
+/// built as the paths of their own or literals; the notifier of the declaring type follows
+/// the owner's property change notifications.
+fn function(
+    builder: CompiledBindingPathBuilder,
+    function: &XBindFunctionPathElementNode,
+    context: &mut EvalContext<'_>,
+) -> XamlResult<CompiledBindingPathBuilder> {
+    let mut arguments = Vec::with_capacity(function.arguments.len());
+    for argument in &function.arguments {
+        arguments.push(match argument {
+            XBindFunctionArgument::Path(path) => PathFunctionArgument::Path(build(path, context)?),
+            XBindFunctionArgument::Literal(literal) => PathFunctionArgument::Value(literal_value(literal)),
+        });
+    }
+    let method = function.method.clone();
+    let is_static = method.is_static();
+    let name = method.name();
+    let invoke: PathFunctionInvoke = Rc::new(move |owner: &BoxedValue, values: &[MarkupValue]| {
+        let mut all = Vec::with_capacity(values.len() + 1);
+        if !is_static {
+            all.push(Some(owner.clone()));
+        }
+        all.extend(values.iter().cloned());
+        invoke_function(&method, &all)
+    });
+    let notifier = match is_static {
+        true => None,
+        false => function
+            .method
+            .declaring_type()
+            .as_any()
+            .downcast_ref::<RuntimeType>()
+            .and_then(RuntimeType::markup)
+            .and_then(|markup| markup.notify_property_changed),
+    };
+    let builder = builder.function(&name, arguments, invoke, notifier);
+    let Some(bind_back) = function.bind_back.borrow().clone() else {
+        return Ok(builder);
+    };
+    let owner = match &bind_back.owner {
+        Some(path) => Some(build(path, context)?),
+        None => None,
+    };
+    let method = bind_back.method.clone();
+    let is_static = method.is_static();
+    let invoke: PathBindBackInvoke = Rc::new(move |owner: &BoxedValue, value: Option<&BoxedValue>| {
+        let mut all = Vec::with_capacity(2);
+        if !is_static {
+            all.push(Some(owner.clone()));
+        }
+        all.push(value.cloned());
+        invoke_function(&method, &all).map(|_| ())
+    });
+    Ok(builder.bind_back(owner, handle_of(&bind_back.value_type), invoke))
+}
+
+/// `new CompiledBindingPathBuilder()`, the builder call of each transform element and then
+/// of each element, `Build()`: the path a path node stands for.
+fn build(node: &Rc<XamlIlBindingPathNode>, context: &mut EvalContext<'_>) -> XamlResult<CompiledBindingPath> {
     node.try_enable_typed_emission();
     let mut builder = CompiledBindingPathBuilder::new();
     let transform_elements = node.transform_elements.borrow().clone();
@@ -385,6 +476,12 @@ pub(crate) fn evaluate(node: &Rc<XamlIlBindingPathNode>, context: &mut EvalConte
     for path_element in transform_elements.iter().chain(elements.iter()) {
         builder = element(builder, path_element, node, context)?;
     }
+    Ok(builder.build())
+}
+
+/// The value of a path node: the path ([`build`]).
+pub(crate) fn evaluate(node: &Rc<XamlIlBindingPathNode>, context: &mut EvalContext<'_>) -> XamlResult<EvalResult> {
+    let path = build(node, context)?;
     let type_ = IXamlAstValueNode::type_(&**node).get_clr_type()?;
-    Ok(EvalResult::value(type_, boxed(builder.build())))
+    Ok(EvalResult::value(type_, boxed(path)))
 }

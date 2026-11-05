@@ -1,12 +1,13 @@
 //! Ported from `Tests.System.Reactive/Tests/Linq/Observable/SwitchTest.cs` of Rx.NET.
 //! Adapted: the inner sequences of the sequence of sequences are `Rc<dyn IObservable<i32>>` handles
-//! of the test observables. `Switch` of a sequence of tasks is `switch` (a `Task` is an
-//! `ObservableSource`); `Task.Factory.StartNew` is `tasks::run` and the blocking `Single()` is
-//! `block_on` of `single_async().to_task()`.
+//! of the test observables. `Switch` of a sequence of tasks is `switch` (the `Shared` of a result
+//! is an `ObservableSource`); `Task.Factory.StartNew` is `tasks::run`, which gives such a `Shared`,
+//! and the blocking `Single()` is `block_on` of `single_async().to_task().flatten()`.
 
 use ferroui_reactive::{IObservable, Observable, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, TestScheduler};
-use ferroui_system::threading::tasks::{block_on, run};
+use ferroui_system::task::block_on;
+use ferroui_system::threading::tasks::run;
 use std::rc::Rc;
 
 type Inner = Rc<dyn IObservable<i32>>;
@@ -245,7 +246,7 @@ fn switch_inner_completes() {
 fn switch_task() {
     let tss = Observable::to_observable(vec![run(|| Ok(1)), run(|| Ok(2)), run(|| Ok(3))]).switch::<i32>();
 
-    let res = block_on(tss.to_array().single_async().to_task()).unwrap();
+    let res = block_on(tss.to_array().single_async().to_task().flatten()).unwrap();
 
     assert!(res.iter().zip(res.iter().skip(1)).map(|(l, r)| r > l).all(|b| b));
 }

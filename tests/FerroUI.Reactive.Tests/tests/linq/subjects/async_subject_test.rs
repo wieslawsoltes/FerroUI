@@ -5,7 +5,7 @@
 //! throws `InvalidOperationException`. `GetResult_Context` runs on a thread of its own: the awaiter
 //! is made there with the context current, as on upstream's `Task.Run`, and the subject ends there
 //! with the context cleared, as on the test thread of upstream; the awaiter of the port is a task,
-//! whose `continue_with` is `OnCompleted`.
+//! the `Shared` of its result, whose `on_finished` is `OnCompleted`.
 //!
 //! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
 //! of #423); the tests of them keep them, with their assertions.
@@ -491,7 +491,7 @@ fn get_result_context() {
         let e = Rc::new(Cell::new(false));
         let a = x.get_awaiter();
         let set = e.clone();
-        a.continue_with(move |_| set.set(true));
+        a.on_finished(move |_| set.set(true));
 
         // The subject ends where no context is current, as on the test thread of upstream.
         set_synchronization_context(None);

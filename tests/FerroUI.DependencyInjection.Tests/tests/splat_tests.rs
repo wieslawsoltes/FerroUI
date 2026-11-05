@@ -117,7 +117,7 @@ fn reactiveui_registers_and_resolves_its_services_through_di() {
 }
 #[test]
 fn failed_sync_rebuild_preserves_provider_for_async_cleanup() {
-    use ferroui_system::threading::tasks::Task;
+    use ferroui_system::task::Shared;
     let count = Rc::new(Cell::new(0));
     let c = count.clone();
     let mut s = ServiceCollection::new();
@@ -125,7 +125,7 @@ fn failed_sync_rebuild_preserves_provider_for_async_cleanup() {
         ServiceDescriptor::new::<usize, _>(ServiceLifetime::Singleton, |_| Ok(Rc::new(1)))
             .on_dispose_async::<usize>(move |_| {
                 c.set(c.get() + 1);
-                Task::from_result(())
+                Shared::ready(Ok(()))
             }),
     );
     let r = MicrosoftDependencyResolver::new(s);

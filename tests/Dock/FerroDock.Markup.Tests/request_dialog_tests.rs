@@ -112,12 +112,12 @@ fn compiled_request_template_displays_original_native_content_and_close_button_c
         assert!(close.is_visible());
         shell.set_title(Some("Changed title".into()));
         assert_eq!(title.text().as_deref(), Some("Changed title"));
-        assert!(!task.is_completed());
+        assert!(!task.is_finished());
         press(&window, &close);
         assert!(!service.has_dialogs());
         assert!(!overlay.is_overlay_visible());
-        assert!(task.is_completed_successfully());
-        assert!(task.result().unwrap().is_none());
+        assert!(matches!(task.result(), Some(Ok(_))));
+        assert!(task.result().unwrap().unwrap().is_none());
         window.close();
     });
 }
@@ -182,10 +182,10 @@ fn compiled_confirmation_template_buttons_complete_true_and_false_through_headle
             let card = shell.visual_children().get(0).cast::<Border>().unwrap();
             assert_eq!(card.padding(), Thickness::uniform(20.0));
             assert_eq!(card.max_width(), 440.0);
-            assert!(!task.is_completed());
+            assert!(!task.is_finished());
             press(&window, &buttons[usize::from(confirm)]);
-            assert!(task.is_completed_successfully());
-            assert_eq!(task.result().unwrap(), confirm);
+            assert!(matches!(task.result(), Some(Ok(_))));
+            assert_eq!(task.result().unwrap().unwrap(), confirm);
             assert!(!service.has_confirmations());
             assert!(!overlay.is_overlay_visible());
         }
@@ -303,7 +303,7 @@ fn original_default_layers_are_fresh_per_host_and_bind_all_six_original_services
             .filter_map(|c| c.cast::<Button>())
             .collect();
         press(&window, &buttons[1]);
-        assert!(task.result().unwrap());
+        assert!(task.result().unwrap().unwrap());
         first.set_data_context(Some(Rc::new(second_services.clone())));
         update(&window);
         assert!(Rc::ptr_eq(

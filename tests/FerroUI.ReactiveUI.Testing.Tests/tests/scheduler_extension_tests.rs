@@ -6,7 +6,8 @@
 use ferroui_reactive_testing::{assert_throws, TestScheduler};
 use ferroui_reactiveui::RxSchedulers;
 use ferroui_reactiveui_testing::SchedulerExtensions;
-use ferroui_system::threading::tasks::{block_on, Task};
+use ferroui_system::task::block_on;
+use ferroui_system::ObservableError;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -114,11 +115,15 @@ fn with_async_function_should_execute_and_return_value() {
     let scheduler = TestScheduler::new();
     let original_scheduler = RxSchedulers::main_thread_scheduler();
 
-    let result = block_on(scheduler.with_async(|s| {
-        // Inside the block, scheduler should be active.
-        assert!(is_main_thread_scheduler(s), "{SCHEDULER_NOT_SET_MESSAGE}");
-        Task::from_result(EXPECTED_VALUE)
-    }))
+    let result = block_on(
+        scheduler
+            .with_async(|s| {
+                // Inside the block, scheduler should be active.
+                assert!(is_main_thread_scheduler(s), "{SCHEDULER_NOT_SET_MESSAGE}");
+                std::future::ready(Ok::<i32, ObservableError>(EXPECTED_VALUE))
+            })
+            .flatten(),
+    )
     .expect("the block ends with its value");
 
     assert_eq!(result, EXPECTED_VALUE);
@@ -132,13 +137,17 @@ fn with_async_action_should_execute() {
     let executed = Rc::new(Cell::new(false));
 
     let flag = executed.clone();
-    block_on(scheduler.with_async(move |s| {
-        flag.set(true);
+    block_on(
+        scheduler
+            .with_async(move |s| {
+                flag.set(true);
 
-        // Inside the block, scheduler should be active.
-        assert!(is_main_thread_scheduler(s), "{SCHEDULER_NOT_SET_MESSAGE}");
-        Task::from_result(())
-    }))
+                // Inside the block, scheduler should be active.
+                assert!(is_main_thread_scheduler(s), "{SCHEDULER_NOT_SET_MESSAGE}");
+                std::future::ready(Ok::<(), ObservableError>(()))
+            })
+            .flatten(),
+    )
     .expect("the block ends");
 
     assert!(executed.get());

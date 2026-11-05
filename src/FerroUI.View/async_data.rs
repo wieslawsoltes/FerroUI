@@ -3,7 +3,7 @@
 //! future that waits on a timer of the dispatcher ([`sleep`]).
 //!
 //! The futures run on the executor of the thread
-//! (`ferroui_system::threading::tasks::spawn_local`): a future is polled when
+//! (`ferroui_system::task::spawn_local`): a future is polled when
 //! it is started and again whenever it is woken, on the thread of the user
 //! interface, so what it reads and writes needs no synchronization. A future
 //! that waits for work of another thread (`tasks::run`) is woken through the
@@ -185,7 +185,8 @@ where
             }
         }
     });
-    let _task = ferroui_system::threading::tasks::spawn_local(watched);
+    // Detached: the task keeps running, and the flag above abandons it.
+    drop(ferroui_system::task::spawn_local(watched));
 }
 
 /// An element that follows `state`: the element of `pending()` while it is

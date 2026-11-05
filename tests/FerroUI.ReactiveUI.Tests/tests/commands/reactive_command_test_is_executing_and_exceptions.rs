@@ -11,7 +11,7 @@ use ferroui_reactive::subjects::Subject;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactive_testing::{duration_to_ticks, TestScheduler};
 use ferroui_reactiveui::*;
-use ferroui_system::threading::tasks::{block_on, TaskCanceledError, TaskCompletionSource};
+use ferroui_system::task::{block_on, oneshot, Canceled};
 use ferroui_system::{IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -178,9 +178,9 @@ fn scheduler_results_delivered_on_output_scheduler() {
 #[test]
 fn task_cancellation_handles_proper_cancellation_flow() {
     with_immediate_schedulers();
-    let tcs_started = TaskCompletionSource::<()>::new();
-    let tcs_caught = TaskCompletionSource::<()>::new();
-    let tcs_finish = TaskCompletionSource::<()>::new();
+    let tcs_started = TestCompletion::<()>::new();
+    let tcs_caught = TestCompletion::<()>::new();
+    let tcs_finish = TestCompletion::<()>::new();
     let status_trail: StatusTrail = Rc::new(RefCell::new(Vec::new()));
 
     let (trail, started, caught, finish) = (status_trail.clone(), tcs_started.clone(), tcs_caught.clone(), tcs_finish.clone());
@@ -193,7 +193,7 @@ fn task_cancellation_handles_proper_cancellation_flow() {
                 if let Err(error) = delay(Duration::from_millis(10_000), token).await {
                     push(&trail, CANCELLING_COMMAND_STATUS);
                     caught.try_set_result(());
-                    finish.task().await?;
+                    finish.task().flatten().await?;
                     push(&trail, FINISHED_CANCELLING_STATUS);
                     return Err(error);
                 }
@@ -216,18 +216,18 @@ fn task_cancellation_handles_proper_cancellation_flow() {
 
     let disposable = subscribe_ignoring_errors(&command.execute_default());
 
-    assert!(tcs_started.task().is_completed());
+    assert!(tcs_started.task().is_finished());
     assert!(latest_is_executing_value.get());
 
     disposable.dispose();
 
-    assert!(tcs_caught.task().is_completed());
+    assert!(tcs_caught.task().is_finished());
     assert!(latest_is_executing_value.get());
 
     tcs_finish.try_set_result(());
 
     assert!(!latest_is_executing_value.get());
-    assert!(exception.borrow().as_ref().is_some_and(TaskCanceledError::is_cancellation));
+    assert!(exception.borrow().as_ref().is_some_and(Canceled::is_cancellation));
     assert_eq!(
         *status_trail.borrow(),
         trail_of(&[
@@ -244,9 +244,9 @@ fn task_cancellation_handles_proper_cancellation_flow() {
 #[test]
 fn task_completion_handles_proper_completion_flow() {
     with_immediate_schedulers();
-    let tcs_started = TaskCompletionSource::<()>::new();
-    let tcs_finished = TaskCompletionSource::<()>::new();
-    let tcs_continue = TaskCompletionSource::<()>::new();
+    let tcs_started = TestCompletion::<()>::new();
+    let tcs_finished = TestCompletion::<()>::new();
+    let tcs_continue = TestCompletion::<()>::new();
     let status_trail: StatusTrail = Rc::new(RefCell::new(Vec::new()));
 
     let (trail, started, finished, continue_) = (status_trail.clone(), tcs_started.clone(), tcs_finished.clone(), tcs_continue.clone());
@@ -264,7 +264,7 @@ fn task_completion_handles_proper_completion_flow() {
                 }
                 push(&trail, "finished command");
                 finished.try_set_result(());
-                continue_.task().await?;
+                continue_.task().flatten().await?;
                 Ok(())
             }
         },
@@ -286,10 +286,10 @@ fn task_completion_handles_proper_completion_flow() {
     let flag = result.clone();
     let _ = command.execute_default().subscribe_next(move |_| flag.set(true));
 
-    assert!(tcs_started.task().is_completed());
+    assert!(tcs_started.task().is_finished());
     assert!(latest_is_executing_value.get());
 
-    block_on(tcs_finished.task()).expect("the command finishes");
+    block_on(tcs_finished.task().flatten()).expect("the command finishes");
     assert!(latest_is_executing_value.get());
 
     tcs_continue.try_set_result(());
@@ -306,13 +306,13 @@ fn task_completion_handles_proper_completion_flow() {
 #[test]
 fn task_exception_handles_exception_flow() {
     with_immediate_schedulers();
-    let tcs_start = TaskCompletionSource::<()>::new();
-    let start = tcs_start.clone();
+    let (tcs_start, start) = oneshot::channel::<Result<(), ObservableError>>();
+    let start = start.shared();
     let command = ReactiveCommand::create_from_task_cancellable_with(
         move |_token| {
             let start = start.clone();
             async move {
-                start.task().await?;
+                start.flatten().await?;
                 Err::<(), _>(InvalidOperationException::error(TASK_EXCEPTION_MESSAGE))
             }
         },
@@ -327,8 +327,8 @@ fn task_exception_handles_exception_flow() {
 
     let _ = subscribe_ignoring_errors(&command.execute_default());
 
-    tcs_start.set_result(());
-    let _ = block_on(thrown).expect("the command throws");
+    tcs_start.send(Ok(())).expect("the command waits for the start");
+    let _ = block_on(thrown.flatten()).expect("the command throws");
 
     assert!(!is_executing.borrow()[0]);
     assert!(is_executing.borrow()[1]);
@@ -383,13 +383,13 @@ fn thrown_exceptions_delivered_on_output_scheduler() {
 #[test]
 fn thrown_exceptions_propagates_task_exceptions() {
     with_immediate_schedulers();
-    let tcs_start = TaskCompletionSource::<()>::new();
-    let start = tcs_start.clone();
+    let (tcs_start, start) = oneshot::channel::<Result<(), ObservableError>>();
+    let start = start.shared();
     let command = ReactiveCommand::create_from_task_cancellable_with(
         move |_token| {
             let start = start.clone();
             async move {
-                start.task().await?;
+                start.flatten().await?;
                 Err::<(), _>(InvalidOperationException::error(TASK_EXCEPTION_MESSAGE))
             }
         },
@@ -400,7 +400,7 @@ fn thrown_exceptions_propagates_task_exceptions() {
 
     let _ = subscribe_ignoring_errors(&command.execute_default());
 
-    tcs_start.set_result(());
+    tcs_start.send(Ok(())).expect("the command waits for the start");
 
     assert_eq!(exceptions.borrow().len(), 1);
     assert_eq!(exceptions.borrow()[0].to_string(), TASK_EXCEPTION_MESSAGE);

@@ -6,7 +6,7 @@
 use crate::mocks::*;
 use ferroui_reactive::linq::Observable;
 use ferroui_reactiveui::*;
-use ferroui_system::threading::tasks::block_on;
+use ferroui_system::task::block_on;
 use ferroui_system::ObservableError;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -29,7 +29,7 @@ fn handle_sync_handler_returns_output() {
     let interaction = Interaction::<String, i32>::new();
     let registration = interaction.register_handler(|context| context.set_output(context.input().len() as i32));
 
-    let result = block_on(interaction.handle("hello".to_owned())).expect("the question is handled");
+    let result = block_on(interaction.handle("hello".to_owned()).flatten()).expect("the question is handled");
 
     assert_eq!(result, HELLO_LENGTH);
     registration.dispose();
@@ -44,7 +44,7 @@ fn handle_task_handler_returns_output() {
         Ok(())
     });
 
-    let result = block_on(interaction.handle("question".to_owned())).expect("the question is handled");
+    let result = block_on(interaction.handle("question".to_owned()).flatten()).expect("the question is handled");
 
     assert!(result);
     registration.dispose();
@@ -58,7 +58,7 @@ fn handle_observable_handler_returns_output() {
         Observable::return_(0)
     });
 
-    let result = block_on(interaction.handle("test".to_owned())).expect("the question is handled");
+    let result = block_on(interaction.handle("test".to_owned()).flatten()).expect("the question is handled");
 
     assert_eq!(result, SAMPLE_OUTPUT);
     registration.dispose();
@@ -70,7 +70,7 @@ fn handle_multiple_handlers_lifo_order() {
     let first = interaction.register_handler(|context| context.set_output(FIRST_HANDLER_RESULT.to_owned()));
     let second = interaction.register_handler(|context| context.set_output(SECOND_HANDLER_RESULT.to_owned()));
 
-    let result = block_on(interaction.handle(HANDLE_INPUT.to_owned())).expect("the question is handled");
+    let result = block_on(interaction.handle(HANDLE_INPUT.to_owned()).flatten()).expect("the question is handled");
 
     assert_eq!(result, SECOND_HANDLER_RESULT);
     first.dispose();
@@ -89,7 +89,7 @@ fn get_handlers_returns_a_copy_of_the_registered_handlers() {
     handlers.clear();
 
     assert_eq!(interaction.get_handlers().len(), REGISTERED_HANDLER_COUNT);
-    assert_eq!(block_on(interaction.handle(HANDLE_INPUT.to_owned())).expect("the question is handled"), SECOND_HANDLER_RESULT);
+    assert_eq!(block_on(interaction.handle(HANDLE_INPUT.to_owned()).flatten()).expect("the question is handled"), SECOND_HANDLER_RESULT);
     first.dispose();
     second.dispose();
 }
@@ -98,7 +98,7 @@ fn get_handlers_returns_a_copy_of_the_registered_handlers() {
 fn handle_no_handlers_throws_unhandled_interaction_exception() {
     let interaction = Interaction::<String, i32>::new();
 
-    let error = block_on(interaction.handle("test".to_owned())).expect_err("no handler handles the question");
+    let error = block_on(interaction.handle("test".to_owned()).flatten()).expect_err("no handler handles the question");
 
     assert!(is_unhandled::<String, i32>(&error));
 }
@@ -109,7 +109,7 @@ fn dispose_unregisters_handler() {
     let registration = interaction.register_handler(|context| context.set_output(SAMPLE_OUTPUT));
     registration.dispose();
 
-    let error = block_on(interaction.handle("test".to_owned())).expect_err("no handler handles the question");
+    let error = block_on(interaction.handle("test".to_owned()).flatten()).expect_err("no handler handles the question");
 
     assert!(is_unhandled::<String, i32>(&error));
 }
@@ -122,7 +122,7 @@ fn handle_handler_skips_falls_to_next() {
         // Intentionally does not set the output: skip.
     });
 
-    let result = block_on(interaction.handle(HANDLE_INPUT.to_owned())).expect("the question is handled");
+    let result = block_on(interaction.handle(HANDLE_INPUT.to_owned()).flatten()).expect("the question is handled");
 
     assert_eq!(result, FIRST_HANDLER_RESULT);
     first.dispose();
@@ -141,7 +141,7 @@ fn handle_observable_handler_on_error_propagates_exception() {
         Observable::throw::<i32>(InvalidOperationException::error(HANDLER_ERROR_MESSAGE))
     });
 
-    let error = block_on(interaction.handle("test".to_owned())).expect_err("the handler fails");
+    let error = block_on(interaction.handle("test".to_owned()).flatten()).expect_err("the handler fails");
 
     assert!(is_invalid_operation(&error));
     assert_eq!(error.to_string(), HANDLER_ERROR_MESSAGE);
@@ -153,7 +153,7 @@ fn register_handler_action_sets_output() {
     let interaction = Interaction::<String, i32>::new();
     let registration = interaction.register_handler(|context| context.set_output(ACTION_OUTPUT));
 
-    let result = block_on(interaction.handle("test".to_owned())).expect("the question is handled");
+    let result = block_on(interaction.handle("test".to_owned()).flatten()).expect("the question is handled");
 
     assert_eq!(result, ACTION_OUTPUT);
     registration.dispose();
@@ -174,12 +174,12 @@ fn when_handled_runs_handlers_on_each_subscription() {
 
     let first = CompletionObserver::<i32>::new();
     let subscription = question.subscribe(first.clone());
-    assert_eq!(block_on(first.completion()).expect("the question is handled"), HELLO_LENGTH);
+    assert_eq!(block_on(first.completion().flatten()).expect("the question is handled"), HELLO_LENGTH);
     subscription.dispose();
 
     let second = CompletionObserver::<i32>::new();
     let subscription = question.subscribe(second.clone());
-    assert_eq!(block_on(second.completion()).expect("the question is handled"), HELLO_LENGTH);
+    assert_eq!(block_on(second.completion().flatten()).expect("the question is handled"), HELLO_LENGTH);
     subscription.dispose();
 
     assert_eq!(calls.get(), REGISTERED_HANDLER_COUNT);
@@ -193,7 +193,7 @@ fn when_handled_no_handlers_fails_with_unhandled_interaction_exception() {
 
     let subscription = interaction.when_handled(HANDLE_INPUT.to_owned()).subscribe(observer.clone());
 
-    let error = block_on(observer.completion()).expect_err("no handler handles the question");
+    let error = block_on(observer.completion().flatten()).expect_err("no handler handles the question");
     assert!(is_unhandled::<String, i32>(&error));
     subscription.dispose();
 }
@@ -206,7 +206,7 @@ fn interface_handle_emits_the_output() {
 
     let subscription = interaction.handle(HANDLE_INPUT.to_owned()).subscribe(observer.clone());
 
-    assert_eq!(block_on(observer.completion()).expect("the question is handled"), SAMPLE_OUTPUT);
+    assert_eq!(block_on(observer.completion().flatten()).expect("the question is handled"), SAMPLE_OUTPUT);
     subscription.dispose();
     registration.dispose();
 }
@@ -226,7 +226,7 @@ fn handle_with_scheduler_invokes_handler_on_the_scheduler() {
     assert!(!invoked.get());
 
     assert_eq!(scheduler.run_pending(), 1);
-    assert_eq!(block_on(pending).expect("the question is handled"), SAMPLE_OUTPUT);
+    assert_eq!(block_on(pending.flatten()).expect("the question is handled"), SAMPLE_OUTPUT);
     assert!(invoked.get());
     registration.dispose();
 }
@@ -239,7 +239,7 @@ fn handle_with_scheduler_falls_to_next_handler() {
         // Intentionally does not set the output: skip.
     });
 
-    assert_eq!(block_on(interaction.handle(HANDLE_INPUT.to_owned())).expect("the question is handled"), FIRST_HANDLER_RESULT);
+    assert_eq!(block_on(interaction.handle(HANDLE_INPUT.to_owned()).flatten()).expect("the question is handled"), FIRST_HANDLER_RESULT);
     first.dispose();
     second.dispose();
 }
@@ -252,7 +252,7 @@ fn handle_with_scheduler_handler_throws_faults_handle() {
     let registration =
         interaction.register_handler_task(|_context| -> std::future::Ready<Result<(), ObservableError>> { panic!("{}", HANDLER_ERROR_MESSAGE) });
 
-    let error = block_on(interaction.handle(HANDLE_INPUT.to_owned())).expect_err("the handler fails");
+    let error = block_on(interaction.handle(HANDLE_INPUT.to_owned()).flatten()).expect_err("the handler fails");
 
     assert!(error.downcast_ref::<PanicError>().is_some());
     assert_eq!(error.to_string(), HANDLER_ERROR_MESSAGE);
@@ -266,7 +266,7 @@ fn handle_with_null_scheduler_invokes_handler_inline() {
 
     let pending = interaction.handle(HANDLE_INPUT.to_owned());
 
-    assert!(pending.is_completed());
-    assert_eq!(block_on(pending).expect("the question is handled"), SAMPLE_OUTPUT);
+    assert!(pending.is_finished());
+    assert_eq!(block_on(pending.flatten()).expect("the question is handled"), SAMPLE_OUTPUT);
     registration.dispose();
 }

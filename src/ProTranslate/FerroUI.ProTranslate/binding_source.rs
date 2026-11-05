@@ -300,12 +300,22 @@ fn default_context() -> Rc<DefaultSourceContext> {
         static CONTEXT: Rc<DefaultSourceContext> = Rc::new(DefaultSourceContext {
             source: RefCell::new(TranslationBindingSource::new(TranslationService::new(
                 Rc::new(InMemoryTranslationProvider::new("Default")),
-                CultureService::new(Culture::parse(ferroui_base::utilities::CultureInfo::current_ui_culture().name()).unwrap_or_else(|_| Culture::invariant())),
+                CultureService::new(current_ui_culture()),
             ))),
             changed: Event::new(),
         });
     }
     CONTEXT.with(Rc::clone)
+}
+
+/// The culture of the user interface locale of the current thread: the invariant culture
+/// for the unknown locale `und`, and for a locale ProTranslate does not take.
+pub(crate) fn current_ui_culture() -> Culture {
+    let locale = ferroui_base::utilities::current_ui_locale();
+    if locale == ferroui_base::utilities::Locale::UNKNOWN {
+        return Culture::invariant();
+    }
+    Culture::parse(&locale.to_string()).unwrap_or_else(|_| Culture::invariant())
 }
 
 struct DefaultSourceSubscription {

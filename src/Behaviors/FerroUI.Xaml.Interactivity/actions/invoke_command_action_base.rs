@@ -252,7 +252,7 @@ impl InvokeCommandActionBase {
         } else if let Some(input_converter) = self.input_converter() {
             let culture = match self.input_converter_language() {
                 Some(language) => CultureInfo::get_culture_info(&language),
-                None => CultureInfo::current_culture(),
+                None => CultureInfo::current_formatting(),
             };
             input_converter
                 .convert(parameter, ValueType::object(), self.input_converter_parameter().as_ref(), &culture)

@@ -610,7 +610,7 @@ ferro_markup_type!(class CultureInfo {
     parse: CultureInfoIetfLanguageTagConverter::convert_from,
     static_properties: [
         InvariantCulture: CultureInfo { get: CultureInfo::invariant_culture },
-        CurrentCulture: CultureInfo { get: CultureInfo::current_culture },
+        CurrentCulture: CultureInfo { get: CultureInfo::current_formatting },
     ],
     properties: [
         Name: String { get: |culture: &CultureInfo| culture.name().to_string() },

@@ -17,7 +17,8 @@
 //! - [`collections::specialized`]: `System.Collections.Specialized` (`INotifyCollectionChanged` and
 //!   the arguments of a change).
 //! - [`threading`]: `System.Threading` (`CancellationToken` and its source) and
-//!   `System.Threading.Tasks` (`Task<T>`, `TaskCompletionSource<T>`, futures run on their thread).
+//!   `System.Threading.Tasks` (`Task.Run`; the deprecated `Task<T>` and `TaskCompletionSource<T>`,
+//!   wrappers over [`task::Shared`] since 0.5.0).
 //! - [`task`]: the executor of the workspace (named after `std::task`): futures spawned on their
 //!   thread, their handles ([`task::JoinHandle`], [`task::Shared`]) and where their polls run
 //!   ([`task::Schedule`]), and the one-shot channel ([`task::oneshot`]); `threading::tasks` runs

@@ -8,16 +8,27 @@
 //! own:
 //!
 //! - [`CratesIoSearchService`], with the feature `online` (the default), sends the query to the
-//!   API of crates.io from a worker thread and gives the result through a task;
+//!   API of crates.io from a worker thread and gives the result through a task (the
+//!   [`Shared`] of its result);
 //! - [`CatalogueSearchService`] searches an in-memory catalogue of about thirty crates. The sample
 //!   uses it without the feature `online`, and the tests always do.
 //!
 //! Deviation (DEVIATIONS.md, samples): the reference searches the packages of NuGet; the port
 //! searches the crates of crates.io, because FerroUI is a Rust framework.
 
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::{Canceled, Shared};
 use ferroui_system::threading::CancellationToken;
+use ferroui_system::ObservableError;
 use std::rc::Rc;
+
+/// The task of a search: the [`Shared`] of its result, whose `flatten()` is a future of it.
+pub type SearchTask = Shared<Result<Vec<CrateSearchMetadata>, ObservableError>>;
+
+/// The task of a search that `token` cancelled before it started: it has ended with the error
+/// [`Canceled`].
+fn canceled_search() -> SearchTask {
+    Shared::ready(Err(Rc::new(Canceled) as ObservableError))
+}
 
 /// The number of crates a search gives (`SearchAsync(term, filter, skip: 0, take: 10, ..)` of the
 /// reference, `per_page=10` of crates.io).
@@ -87,8 +98,8 @@ impl CrateSearchMetadata {
 pub trait ICrateSearchService {
     /// The first [`TAKE`] crates that match `term` (`SearchAsync(term, filter, 0, 10, logger,
     /// token)` of the reference). The task ends on the calling thread. A search that `token`
-    /// cancelled before it started gives a canceled task.
-    fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>>;
+    /// cancelled before it started gives a task that ended with the error `Canceled`.
+    fn search(&self, term: &str, token: CancellationToken) -> SearchTask;
 }
 
 /// The search service of the sample when it runs: that of crates.io with the feature `online`,
@@ -194,11 +205,11 @@ impl CatalogueSearchService {
 }
 
 impl ICrateSearchService for CatalogueSearchService {
-    fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
+    fn search(&self, term: &str, token: CancellationToken) -> SearchTask {
         if token.is_cancelled() {
-            return Task::from_canceled();
+            return canceled_search();
         }
-        Task::from_result(Self::find(term))
+        Shared::ready(Ok(Self::find(term)))
     }
 }
 
@@ -209,8 +220,8 @@ pub use online::{CratesIoSearchService, USER_AGENT};
 
 #[cfg(all(feature = "online", not(target_arch = "wasm32")))]
 mod online {
-    use super::{search_url, CrateSearchMetadata, ICrateSearchService};
-    use ferroui_system::threading::tasks::{self, Task};
+    use super::{canceled_search, search_url, CrateSearchMetadata, ICrateSearchService, SearchTask};
+    use ferroui_system::threading::tasks;
     use ferroui_system::threading::CancellationToken;
     use serde::Deserialize;
     use std::error::Error;
@@ -301,15 +312,15 @@ mod online {
 
     impl ICrateSearchService for CratesIoSearchService {
         /// Sends the query from a worker thread (the reference awaits `SearchAsync` with
-        /// `ConfigureAwait(false)`); the task ends on the calling thread, through the poster of the
-        /// thread (the dispatcher in the application).
+        /// `ConfigureAwait(false)`); the task ends on the calling thread, through the schedule of
+        /// the thread (the dispatcher in the application).
         ///
         /// Deviation (DEVIATIONS.md, samples): the token stops a search that has not started; a
         /// request that has started runs to its end, and the reactive pipeline drops its result
         /// when the subscription is gone (NuGet.Protocol hands the token to the HTTP client).
-        fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
+        fn search(&self, term: &str, token: CancellationToken) -> SearchTask {
             if token.is_cancelled() {
-                return Task::from_canceled();
+                return canceled_search();
             }
             let term = term.to_owned();
             tasks::run(move || query(&term))

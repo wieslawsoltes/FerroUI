@@ -247,7 +247,7 @@ impl Default for TreeDataGridTextColumn {
             is_read_only: Cell::new(false),
             is_text_search_enabled: Cell::new(true),
             string_format: RefCell::new("{0}".to_string()),
-            culture: RefCell::new(CultureInfo::current_culture()),
+            culture: RefCell::new(CultureInfo::current_formatting()),
             text_alignment: Cell::new(TextAlignment::Left),
             text_trimming: RefCell::new(<dyn TextTrimming>::character_ellipsis()),
             text_wrapping: Cell::new(TextWrapping::NoWrap),

@@ -402,6 +402,23 @@ fn a_duration_is_a_system_time_span() {
     assert_eq!(runtime(&time_span).handle(), Some(ValueType::of::<ferroui_base::animation::SignedDuration>()));
 }
 
+/// Not from upstream (C5 of #423): `Locale` is the other Rust form of a culture, its
+/// nullable form the other nullable form of the culture, and a locale is a value of the
+/// culture.
+#[test]
+fn a_locale_is_a_system_globalization_culture_info() {
+    use ferroui_base::utilities::{locale, Locale};
+
+    let ts = system();
+    let culture = ts.get("System.Globalization.CultureInfo");
+    assert!(ts.resolve(ValueType::of::<Locale>()).equals(&*culture));
+    assert!(ts.resolve(ValueType::of::<Option<Locale>>()).equals(&*culture));
+    assert!(ts.resolve(ValueType::of::<CultureInfo>()).equals(&*culture));
+    assert!(ts.is_instance(&boxed(locale!("ja-JP")), &*culture));
+    // The culture stays the canonical handle: what markup makes of a culture.
+    assert_eq!(runtime(&culture).handle(), Some(ValueType::of::<CultureInfo>()));
+}
+
 /// Not from upstream (C5 of #423): `UriRef` and `url::Url` are the other Rust forms of a URI,
 /// with their nullable forms, and a reference and a URL are values of `System.Uri`.
 #[test]

@@ -258,6 +258,54 @@ fn a_relative_uri_literal_for_a_url_property_is_an_error() {
     }
 }
 
+/// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md section 3.4): the
+/// compiled form of the test of `xaml::ferro_intrinsics_tests`. A culture literal for a
+/// property that declares a `Locale` (`RichTextBlock.Language`) is the culture of the text
+/// cast to its locale; the run-time loader sets the same value.
+#[test]
+fn a_language_literal_sets_a_locale_property() {
+    let _app = xaml_test_base();
+    let document = ("rich_text_block_language.xaml", "<RichTextBlock xmlns='https://github.com/ferroui' Language='ja-JP'/>");
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    assert!(generated.source.contains("language_property(), rt::cast("), "{}", generated.source);
+
+    let loaded = try_load(document.1).expect("the text block loads");
+    let block = ValueTypes::as_object(&*loaded).and_then(|object| object.cast::<ferroui_controls::RichTextBlock>()).expect("a text block");
+    assert_eq!(block.language(), ferroui_base::utilities::locale!("ja-JP"));
+}
+
+/// Not from upstream (C5 of #423): a culture literal whose culture is no locale (`x-private`,
+/// a name that is no BCP-47 tag), or that names no culture (`zh-CHT`), for a property that
+/// declares a `Locale` is an error of the compiler, which names the property and the tag, and
+/// a load error of the run-time loader.
+#[test]
+fn an_invalid_language_tag_for_a_locale_property_is_an_error() {
+    let _app = xaml_test_base();
+    for (tag, compiled, loaded) in [
+        (
+            "x-private",
+            "Language: the culture name 'x-private' is not a BCP-47 language tag, and a `Locale` cannot hold it",
+            "The culture name 'x-private' is not a BCP-47 language tag",
+        ),
+        ("zh-CHT", "Language: Culture IETF Name zh-CHT is not a recognized IETF name.", "Culture IETF Name zh-CHT is not a recognized IETF name."),
+    ] {
+        let xaml = format!("<RichTextBlock xmlns='https://github.com/ferroui' Language='{tag}'/>");
+        let document = ("rich_text_block_invalid_language.xaml", xaml.as_str());
+        let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+        let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+        assert!(reason.contains(compiled), "{reason}");
+        assert!(!generated.source.contains("language_property()"), "{}", generated.source);
+
+        let error = match try_load(&xaml) {
+            Ok(_) => panic!("the tag {tag} is not a locale"),
+            Err(error) => error,
+        };
+        let described = describe(&error);
+        assert!(described.contains(loaded), "{described}");
+    }
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")

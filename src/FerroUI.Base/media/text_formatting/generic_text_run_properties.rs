@@ -5,7 +5,7 @@ use crate::media::text_formatting::TextRunProperties;
 use crate::media::{
     BaselineAlignment, FontFamily, FontFeatureCollection, GlyphTypeface, IBrush, TextDecorationCollection, Typeface,
 };
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 
 /// Generic implementation of `TextRunProperties`.
 pub struct GenericTextRunProperties {
@@ -18,7 +18,7 @@ pub struct GenericTextRunProperties {
     background_brush: Option<Rc<dyn IBrush>>,
     font_features: Option<FontFeatureCollection>,
     baseline_alignment: BaselineAlignment,
-    culture_info: Option<CultureInfo>,
+    culture_info: Option<Locale>,
     cached_glyph_typeface: OnceCell<Rc<GlyphTypeface>>,
 }
 
@@ -46,7 +46,7 @@ impl GenericTextRunProperties {
         foreground_brush: Option<Rc<dyn IBrush>>,
         background_brush: Option<Rc<dyn IBrush>>,
         baseline_alignment: BaselineAlignment,
-        culture_info: Option<CultureInfo>,
+        culture_info: Option<Locale>,
         font_features: Option<FontFeatureCollection>,
     ) -> Self {
         Self {
@@ -117,7 +117,7 @@ impl TextRunProperties for GenericTextRunProperties {
         self.baseline_alignment
     }
 
-    fn culture_info(&self) -> Option<&CultureInfo> {
+    fn culture_info(&self) -> Option<&Locale> {
         self.culture_info.as_ref()
     }
 

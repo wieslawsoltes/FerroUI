@@ -17,7 +17,7 @@ use crate::media::text_formatting::testing::{
 use crate::media::text_formatting::unicode::Script;
 use crate::media::text_formatting::{GenericTextRunProperties, TextCharacters, TextRun, TextRunProperties};
 use crate::media::{BaselineAlignment, FontManager, FontStretch, FontStyle, FontWeight, TextWrapping, Typeface};
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 
 const PRIMARY: &str = "Test Mono";
 const FALLBACK: &str = "Test Fallback";
@@ -56,7 +56,7 @@ fn text_of(codepoints: &[i32]) -> String {
     codepoints.iter().map(|&codepoint| char::from_u32(codepoint as u32).unwrap()).collect()
 }
 
-fn match_character(codepoint: i32, culture: Option<&CultureInfo>) -> Option<Typeface> {
+fn match_character(codepoint: i32, culture: Option<&Locale>) -> Option<Typeface> {
     FontManager::current().try_match_character(
         codepoint,
         FontStyle::Normal,
@@ -71,7 +71,7 @@ fn family_of(run: &Rc<dyn TextRun>) -> String {
     run.properties().unwrap().cached_glyph_typeface().family_name().to_owned()
 }
 
-fn properties_with_culture(typeface: Typeface, culture: Option<CultureInfo>) -> Rc<dyn TextRunProperties> {
+fn properties_with_culture(typeface: Typeface, culture: Option<Locale>) -> Rc<dyn TextRunProperties> {
     Rc::new(GenericTextRunProperties::with_all(typeface, 12.0, None, None, None, BaselineAlignment::Baseline, culture, None))
 }
 
@@ -203,8 +203,8 @@ fn get_shapeable_characters_replaces_null_characters_with_non_breaking_word_join
 fn get_shapeable_characters_does_not_pin_previous_region_font_across_a_culture_change() {
     let _scope = TextTestScope::with_fonts(vec![primary(), sans_sc(), sans_jp()]);
 
-    let ja = CultureInfo::get_culture_info("ja-JP");
-    let zh = CultureInfo::get_culture_info("zh-CN");
+    let ja = Locale::try_from_str("ja-JP").unwrap();
+    let zh = Locale::try_from_str("zh-CN").unwrap();
 
     // Previous run: the Simplified-Chinese font, resolved for a zh culture.
     let sc_typeface = Typeface::from_name(SC);

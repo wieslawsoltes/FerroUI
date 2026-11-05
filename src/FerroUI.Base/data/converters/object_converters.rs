@@ -152,7 +152,7 @@ mod tests {
         ];
         for (value1, value2, value3, valid) in cases {
             let converter = ObjectConverters::are_all_null();
-            let result = converter.convert(&[text(value1), text(value2), text(value3)], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+            let result = converter.convert(&[text(value1), text(value2), text(value3)], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
             assert_eq!(as_bool(result), valid, "{value1:?} {value2:?} {value3:?}");
         }
     }
@@ -168,7 +168,7 @@ mod tests {
         ];
         for (value1, value2, value3, valid) in cases {
             let converter = ObjectConverters::are_any_null();
-            let result = converter.convert(&[text(value1), text(value2), text(value3)], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+            let result = converter.convert(&[text(value1), text(value2), text(value3)], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
             assert_eq!(as_bool(result), valid, "{value1:?} {value2:?} {value3:?}");
         }
     }
@@ -185,7 +185,7 @@ mod tests {
         ];
         for (values, valid) in cases {
             let converter = ObjectConverters::are_all_equal();
-            let result = converter.convert(&values, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+            let result = converter.convert(&values, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
             assert_eq!(as_bool(result), valid);
         }
     }
@@ -202,7 +202,7 @@ mod tests {
             };
 
             let converter = ObjectConverters::are_all_equal();
-            let result = converter.convert(&values, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+            let result = converter.convert(&values, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
             assert_eq!(as_bool(result), valid, "empty: {empty}, unique: {unique}");
         }
     }

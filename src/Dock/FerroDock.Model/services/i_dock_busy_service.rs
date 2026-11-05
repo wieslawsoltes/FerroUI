@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use ferroui_reactiveui::ICommand;
 use ferroui_system::component_model::INotifyPropertyChanged;
-use ferroui_system::threading::tasks::Task;
-use ferroui_system::IDisposable;
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::rc::Rc;
-/// An asynchronous source busy/reload handler.
-pub type BusyAction = Rc<dyn Fn() -> Task<()>>;
+/// An asynchronous source busy/reload handler: it gives the task of its work, the `Shared` of its
+/// result.
+pub type BusyAction = Rc<dyn Fn() -> Shared<Result<(), ObservableError>>>;
 /// Per-host busy state and reload contract used by source overlay controls.
 pub trait IDockBusyService: INotifyPropertyChanged {
     /// Gets whether this host has an active busy scope.
@@ -24,7 +25,7 @@ pub trait IDockBusyService: INotifyPropertyChanged {
     /// Begins a scope, ended only by explicit handle disposal.
     fn begin(&self, message: String) -> Rc<dyn IDisposable>;
     /// Runs work eagerly within a scope, ending it on success, error or cancellation.
-    fn run_async(&self, message: String, action: BusyAction) -> Task<()>;
+    fn run_async(&self, message: String, action: BusyAction) -> Shared<Result<(), ObservableError>>;
     /// Posts a busy message update.
     fn update_message(&self, message: Option<String>);
     /// Installs or clears the reload handler.

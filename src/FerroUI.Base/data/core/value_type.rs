@@ -10,6 +10,7 @@
 //! table.
 
 use crate::utilities::CultureInfo;
+use icu_locale_core::Locale;
 use crate::{AnyValue, BoxedValue, FerroObject, ObjectType, PropertyValue, Ref, StyledElement, TypeInfo, Upcast};
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -1943,6 +1944,28 @@ fn register_defaults() {
     ValueTypes::register_parse::<::url::Url>(parse_url);
     ValueTypes::register_conversion::<String, Option<crate::utilities::UriRef>>(|text| parse_uri_ref(text).map(Some));
     ValueTypes::register_conversion::<String, Option<::url::Url>>(|text| parse_url(text).map(Some));
+
+    // A `Locale` is the other Rust form of `System.Globalization.CultureInfo` (C5 of #423,
+    // docs/idiomatic-rust-signatures.md section 3.4): the identity of a culture. A locale is
+    // the culture of its name; a culture is a locale unless its name is not a BCP-47
+    // language tag (`es-ES_tradnl`, `x-custom`), which the cast refuses with its error. Text
+    // converts to a locale as it converts to a culture in markup (an IETF language tag, the
+    // empty text the invariant culture, the unknown locale `und`), and the text of a locale
+    // is its tag.
+    ValueTypes::register_display::<Locale>();
+    ValueTypes::register_nullable::<Locale>();
+    ValueTypes::register_cast::<Locale, CultureInfo>(|locale: &Locale| CultureInfo::from(locale));
+    ValueTypes::register_try_cast::<CultureInfo, Locale>(|culture| {
+        Locale::try_from(culture).map_err(|error| {
+            format!("The culture name '{}' is not a BCP-47 language tag and cannot be converted to a Locale: {error}.", culture.name())
+        })
+    });
+    fn parse_locale(text: &str) -> Option<Locale> {
+        let culture = crate::data::CultureInfoIetfLanguageTagConverter::convert_from(text).ok()?;
+        Locale::try_from(&culture).ok()
+    }
+    ValueTypes::register_parse::<Locale>(parse_locale);
+    ValueTypes::register_conversion::<String, Option<Locale>>(|text| parse_locale(text).map(Some));
 }
 
 impl ValueTypes {
@@ -2909,5 +2932,57 @@ mod tests {
         let parsed = ValueTypes::try_convert(Some(&text("fonts:SystemFonts")), ValueType::of::<Option<::url::Url>>()).flatten();
         assert!(parsed.expect("a nullable URL").downcast_ref::<Option<::url::Url>>().is_some_and(Option::is_some));
         assert!(ValueTypes::try_convert(Some(&text("/Styles/Base.xaml")), url_type).is_none());
+    }
+
+    /// Not from upstream (C5 of #423): `CultureInfo` and `Locale` are the two Rust forms of
+    /// `System.Globalization.CultureInfo`. A locale is the culture of its name; a culture is
+    /// a locale unless its name is not a BCP-47 language tag, which the cast refuses with its
+    /// error.
+    #[test]
+    fn cultures_and_locales_are_two_forms_of_a_culture() {
+        use icu_locale_core::locale;
+
+        let culture = |name: &str| -> BoxedValue { Rc::new(CultureInfo::get_culture_info(name)) };
+        let locale_type = ValueType::of::<Locale>();
+        let culture_type = ValueType::of::<CultureInfo>();
+        assert!(ValueTypes::is_assignable(culture_type, locale_type));
+        assert!(ValueTypes::is_assignable(locale_type, culture_type));
+
+        // A culture of a language tag casts to its locale, the invariant culture to `und`.
+        let cast = ValueTypes::try_cast(&culture("ja-JP"), locale_type).expect("a locale");
+        assert_eq!(cast.downcast_ref::<Locale>(), Some(&locale!("ja-JP")));
+        let invariant: BoxedValue = Rc::new(CultureInfo::invariant_culture());
+        let cast = ValueTypes::try_cast(&invariant, locale_type).expect("a locale");
+        assert_eq!(cast.downcast_ref::<Locale>(), Some(&Locale::UNKNOWN));
+        let nullable = ValueTypes::try_cast(&culture("de-DE"), ValueType::of::<Option<Locale>>()).expect("a nullable locale");
+        assert_eq!(nullable.downcast_ref::<Option<Locale>>(), Some(&Some(locale!("de-DE"))));
+        assert_eq!(ValueTypes::cast_error(&culture("de-DE"), locale_type), None);
+
+        // A culture whose name is no language tag is refused, with the error of the cast.
+        let custom = culture("es-ES_tradnl");
+        assert!(ValueTypes::try_cast(&custom, locale_type).is_none());
+        assert!(ValueTypes::try_convert(Some(&custom), locale_type).is_none());
+        let error = ValueTypes::cast_error(&custom, locale_type).expect("the error of the cast");
+        assert!(error.starts_with("The culture name 'es-ES_tradnl' is not a BCP-47 language tag"), "{error}");
+
+        // A locale is the culture of its name.
+        let back = ValueTypes::try_cast(&(Rc::new(locale!("zh-Hant-TW")) as BoxedValue), culture_type).expect("a culture");
+        assert_eq!(back.downcast_ref::<CultureInfo>(), Some(&CultureInfo::get_culture_info("zh-Hant-TW")));
+        let back = ValueTypes::try_cast(&(Rc::new(Locale::UNKNOWN) as BoxedValue), culture_type).expect("a culture");
+        assert!(back.downcast_ref::<CultureInfo>().is_some_and(CultureInfo::is_invariant));
+
+        // Text converts to a locale as to a culture in markup; the text of a locale is its tag.
+        let text = |text: &str| -> BoxedValue { Rc::new(text.to_string()) };
+        let parsed = ValueTypes::try_convert(Some(&text("ko-KR")), locale_type).flatten().expect("a locale");
+        assert_eq!(parsed.downcast_ref::<Locale>(), Some(&locale!("ko-KR")));
+        let parsed = ValueTypes::try_convert(Some(&text("")), locale_type).flatten().expect("the unknown locale");
+        assert_eq!(parsed.downcast_ref::<Locale>(), Some(&Locale::UNKNOWN));
+        let parsed = ValueTypes::try_convert(Some(&text("en-GB")), ValueType::of::<Option<Locale>>()).flatten();
+        assert_eq!(parsed.expect("a nullable locale").downcast_ref::<Option<Locale>>(), Some(&Some(locale!("en-GB"))));
+        for invalid in ["zh-CHT", "x-private", "en_US"] {
+            assert!(ValueTypes::try_convert(Some(&text(invalid)), locale_type).is_none(), "{invalid}");
+        }
+        let shown = ValueTypes::to_display_string(Some(&(Rc::new(locale!("pt-BR")) as BoxedValue)));
+        assert_eq!(shown, "pt-BR");
     }
 }

@@ -250,9 +250,12 @@ error.
 | A template without `x:DataType` | `DataTemplates containing x:Bind need a DataType to be specified using 'x:DataType'` | X1 |
 | In a style | `Cannot use x:Bind in Styles` | X1 |
 | Not x:Bind syntax | `Invalid binding path: '$self' is not x:Bind syntax` (and `$parent`, `#name`, `!`, `^`) | X1 |
-| A form of a later step | `Invalid binding path: a cast is not supported yet (... step X2)`, the same for indexers, methods (X2, X4) and `ControlTemplate` (X5); each step removes its own | X1 |
-| A function with the wrong arity or argument types; a return type that does not match | WinUI's `BindAssignment_FunctionReturnTypeInvalid` | X2 |
-| `BindBack` | `BindAssignment_BindBack_*` | X2 |
+| A form of a later step | a method without a call (an event binding, X4) and `ControlTemplate` (X5); each step removes its own | X1 |
+| A path WinUI's grammar rejects | `Invalid binding path '...' : Syntax error at '...'`; `Functions are only supported at the end of the bind path.`; `Functions cannot have other functions as parameters.` | X2 |
+| An unknown function; a member that is not one; a function that is not static | `Function '...' not found on type '...'.`; `Expecting a method: ...`; `Expecting '...' on type '...' to be a static function.` (and `... static property.`) | X2 |
+| A function with the wrong arity or argument types; a return type that does not match | `Mismatched function parameter count: ...`, `Cannot find an overload of '...' that takes N parameters.`; `Invalid or mismatched parameter at position 'N' of '...': ...`; `Function return type '...' must match binding target type '...'` | X2 |
+| `BindBack` | `BindBack was expected, but not found: ...`; `Unexpected BindBack found: ...`; `BindBack must point to a method ...`; `BindBack must point to a method that takes one argument of type '...'` | X2 |
+| Casts and indexers | `TwoWay binding is invalid when the binding expression ends with a cast`; `Unable to cast type '...' to '...'.  Use a converter or function binding to change the type`; `The type '...' does not have an indexer.` | X2 |
 | A converter with a function; `ConverterParameter` without a converter; `TargetNullValue` on a non-nullable target | WinUI's messages | X3 |
 | An event method with the wrong signature | WinUI's `BoundEventAssignment` validation | X4 |
 
@@ -270,13 +273,75 @@ errors (`generate_file`). The behaviours of WinUI's regression projects are port
 of their forms (`BasicTests`, `TwoWayTests` in X1; `FunctionTests`, `CastingTests` in X2;
 `EventTests` in X4; `PhasingTests`, `ListAndTemplateTests` in X5).
 
+### 3.9 Paths of WinUI's grammar, functions and `BindBack` (X2)
+
+- **Parsing.** The markup extension scanner of xamlx keeps `()` and `[]` of the path of
+  `x:Bind` (positional or `Path=`) together, separators and quotes included: the bracket
+  characters WinUI's compiler declares for it (`ProxyDirectUIXamlMember`). The path is parsed
+  in WinUI's grammar (`compiler_extensions/transformers/x_bind_path.rs`) instead of the one of
+  `{Binding}`; the syntax tree is one node of the parsed path.
+- **Resolution** (`x_bind::transform_path`). Each step that a path of `{CompiledBinding}` also
+  has is resolved by its resolution, one grammar node on the type of the step before:
+  members, named elements, integer and string indexers, registered attached properties. The
+  others are resolved by the x:Bind transformer as WinUI's `BindPathListener` does: a static
+  member is a static property read whatever its source is; `path.(ns:Owner.Prop)` without a
+  registered property is the member of `Owner`, after a cast to it when it is a class (the
+  member of an interface is read through the metadata of the interface); a cast is the
+  engine's type test (`TypeCast`) after WinUI's check that the types can be cast; a function
+  is the overload of the number of arguments, each argument a path from the root source of an
+  accepted type or a literal of the type of its parameter; `BindBack` is a method of one
+  parameter that accepts the type of the target, of the root source, of a path or static.
+- **The function element.** `CompiledBindingPathBuilder::function(name, arguments, invoke,
+  notifier)` and `bind_back(owner, value_type, invoke)`; the node (`FunctionNode`) reads each
+  argument path from the root source of the expression (the value of its first node) through
+  a binding expression of its own and, unless the binding is `OneTime`, calls the function
+  again when an argument changes, when its owner changes, and when the owner raises
+  `PropertyChanged` with the name of the function or of all its properties (WinUI's generated
+  `PropertyChanged` cases). An argument that cannot be read is an error of the binding and the
+  function is not called (WinUI returns before the call). With `BindBack` the node is the
+  settable leaf of the `TwoWay` expression; the value of the target is converted to the type of
+  the parameter and the method is called with the owner read from the root source when the
+  value is written.
+- **Generated code.** For `Model.Greet(Title, 'Hello', 3)`:
+
+  ```rust
+  let path_1 = {
+      let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+      let builder = builder.ferro_property(rt::property(XBindPage::title_property()));
+      builder.build()
+  };
+  let path_2 = {
+      let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+      let builder = rt::path_property(&builder, /* Model */);
+      let builder = rt::path_function(&builder, <XBindModel as MarkupTyped>::MARKUP, "Greet",
+          ::std::vec![
+              ::ferroui_base::data::PathFunctionArgument::Path(path_1.clone()),
+              ::ferroui_base::data::PathFunctionArgument::Value(rt::boxed(::std::string::String::from("Hello"))),
+              ::ferroui_base::data::PathFunctionArgument::Value(rt::boxed(3_i32)),
+          ],
+          |this, arguments| ::core::result::Result::Ok(rt::delegate_result(
+              XBindModel::__markup_Greet_0(this, arguments.next()?, arguments.next()?, arguments.next()?))));
+      builder.build()
+  };
+  ```
+
+  A static function is `rt::path_static_function` with `|arguments| ...`; `BindBack` wraps the
+  call: `{ let builder = rt::path_function(...); rt::path_bind_back(&builder, markup, "Rename",
+  Some(owner_path), value_type, |this, arguments| ...) }`. The run-time loader builds the same
+  element and invokes the methods through the invokers of the run-time type system.
+- **Deviations.** A cast is a type test, not a conversion: `(x:Int32)DoubleValue` gives null
+  where WinUI's generated C# converts the number (a converter or a function converts, X3). A
+  static member is a static property (WinUI also reads static fields). WinUI's special case of a
+  `bool` function bound to `Visibility` has no counterpart: the framework's visibility is a
+  `bool`.
+
 ## 4. Steps
 
 | Step | Content | Public API | Risk | Guard tests |
 |---|---|---|---|---|
 | X0 | This plan | none | none | none |
 | X1 | The core: `XBindExtension`, `XBinding`, `XBindings` and the root node in `ferroui-markup-xaml`; `x:Bind` mapped onto it; the root source (the document root, the `x:DataType` of a `DataTemplate`); property paths, attached properties, named elements; `OneTime`/`OneWay`/`TwoWay` with `UpdateSourceTrigger`; the lifecycle with initialization on attach and the template update on a data context change; the diagnostics of section 3.7 for X1. **Done** | additions (`CompiledBindingPath::build_expression` public) | low: a new extension; the compiled-binding transformers gain a branch for its type only; no generated output of an existing document changes | `x_bind_extension_tests.rs`: both back ends on the root and template fixtures (modes, triggers, named elements, attached property, `Update`, `StopTracking`, attach, recycling, isolation of instances, release of the root); diagnostics as load errors with the position and as compile errors; the freshness of the generated fixture; the pipeline order test unchanged |
-| X2 | Paths of WinUI's grammar: casts `(ns:T)path` and `((ns:T)path).b`, `path.(ns:Owner.Prop)` with interface members, static members `ns:Type.Member`, integer and string indexers (`Items[0]`, `Map['key']`), functions (instance, path and static, with path and literal arguments, re-evaluated when an argument path changes) as a path element with a generated typed closure, `BindBack`; the TwoWay-after-cast error | additions (a function element of `CompiledBindingPathBuilder`) | medium: the engine's grammar is extended or a WinUI path parser added beside it; the emitter writes closures | `FunctionTests` and `CastingTests` behaviours in both back ends; arity, argument and return-type diagnostics |
+| X2 | Paths of WinUI's grammar: casts `(ns:T)path` and `((ns:T)path).b`, `path.(ns:Owner.Prop)` with interface members, static members `ns:Type.Member`, integer and string indexers (`Items[0]`, `Map['key']`), functions (instance, path and static, with path and literal arguments, re-evaluated when an argument path changes) as a path element with a generated typed closure, `BindBack`; the TwoWay-after-cast error. **Done** (section 3.9) | additions (a function element of `CompiledBindingPathBuilder`; `XBindExtension::BindBack`; the `rt` helpers of functions, `BindBack` and string keys) | medium: a WinUI path parser beside the engine's grammar; the emitter writes closures; the markup extension scanner keeps the brackets of the x:Bind path | `x_bind_extension_tests.rs` on `x_bind_functions.xaml` and `x_bind_casts.xaml` (`FunctionTests` and `CastingTests` behaviours) in both back ends; the X2 diagnostics as load and compile errors; the parser's unit tests; the engine's tests of the function element |
 | X3 | `Converter`, `ConverterParameter`, `ConverterLanguage`, `FallbackValue`, `TargetNullValue` on `XBindExtension`, into the expression options; their WinUI checks | additions | low: the engine already has the options | converter, fallback and null-value cases of `TwoWayTests` and `NullableTests`; diagnostics |
 | X4 | Event binding: `Click="{x:Bind Model.OnClick}"`, a method with the event's signature, none, or a base signature; the emitter writes a typed handler, the interpreter an invoker; the handler re-reads its path on `Update` as WinUI does | additions | medium: the event assignment path of the compiler (`FerroXamlIlTransformRoutedEvent`) gains a binding form | `EventTests` behaviours; the signature diagnostic |
 | X5 | `x:DefaultBindMode` (element and subtree); `x:Phase` through `IDataTemplateComponent` (`XBindings` implements `ProcessBindings` and `Recycle`; the contract moves from `ferroui-controls-repeater` to `ferroui-controls` so that the markup library can implement it, with a re-export); `x:Load`; x:Bind in a `ControlTemplate` with `TargetType`; `Window` roots on `Activated` | additions; a moved trait (re-exported) | medium: phasing touches ItemsRepeater recycling | `PhasingTests` and `ListAndTemplateTests` behaviours; deferred load; the template root |
@@ -326,4 +391,6 @@ Decided (2026-11-03, on the merits, as the owner asked for the open decisions of
 ## 7. Status
 
 - **X0** (this plan) and **X1** (the core) are done: `{x:Bind}` and `{XBind}` in FerroUI XAML,
-  through the run-time loader and the Rust emitter. The next step is X2.
+  through the run-time loader and the Rust emitter.
+- **X2** (paths of WinUI's grammar, functions, `BindBack`) is done: section 3.9. The next step
+  is X3.

@@ -8,12 +8,14 @@
 //! sequence have ended. The forms that project to iterators share another sink, which iterates
 //! each projection to its end while it handles the source value. The forms that project to tasks
 //! (`TaskSelector._` and `TaskSelectorIndexed._` of both classes) share a third sink: a selector
-//! returns a future, which runs as a task ([`future_as_task`]), and the result of each task is
-//! notified when the task ends (docs/porting/reactive.md, section 5.8).
+//! returns a future, which runs as a task whose outcome is shared
+//! ([`future_to_shared`](crate::linq::task_observable::future_to_shared)), and the result of each
+//! task is notified when the task ends (docs/porting/reactive.md, section 5.8).
 
 use crate::disposables::{CompositeDisposable, SingleAssignmentDisposableValue};
 use crate::internal::{unary, OperatorSink, Sink};
-use ferroui_system::threading::tasks::Task;
+use crate::linq::task_observable::{future_to_shared, shared_result};
+use ferroui_system::task::{JoinError, Shared};
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
@@ -349,24 +351,14 @@ where
     )
 }
 
-/// A future as the task that runs it: a [`Task`] is used as it is, as upstream uses the task a
-/// function returns (so that the continuations, and the task named by a cancellation, are those of
-/// that task); another future runs as a task of the current thread (`Task::spawn_local`).
-pub(crate) fn future_as_task<T: 'static, Fut: Future<Output = Result<T, ObservableError>> + 'static>(future: Fut) -> Task<T> {
-    let mut slot = Some(future);
-    if let Some(task) = (&mut slot as &mut dyn std::any::Any).downcast_mut::<Option<Task<T>>>() {
-        if let Some(task) = task.take() {
-            return task;
-        }
-    }
-    Task::spawn_local(slot.take().expect("the future is in its slot"))
-}
-
 /// The projection of the result of a task to a result of the sequence (the result selector bound to
 /// the source value and its index, or the identity).
 pub(crate) type TaskProject<C, R> = Box<dyn FnOnce(C) -> Result<R, ObservableError>>;
 
-type TaskSelector<T, C, R> = Rc<dyn Fn(T, usize, CancellationToken) -> Result<(Task<C>, TaskProject<C, R>), ObservableError>>;
+/// The outcome of the task of a projected value.
+type TaskOf<C> = Shared<Result<C, ObservableError>>;
+
+type TaskSelector<T, C, R> = Rc<dyn Fn(T, usize, CancellationToken) -> Result<(TaskOf<C>, TaskProject<C, R>), ObservableError>>;
 
 /// The sink of the forms on tasks (`SelectMany<TSource, TResult>.TaskSelector._` and
 /// `TaskSelectorIndexed._`, `SelectMany<TSource, TCollection, TResult>.TaskSelector._` and
@@ -386,8 +378,8 @@ struct SelectManyTaskSink<T, C, R> {
 
 impl<T: 'static, C: Clone + 'static, R: 'static> SelectManyTaskSink<T, C, R> {
     /// `OnCompletedTask`.
-    fn on_completed_task(&self, task: &Task<C>, project: TaskProject<C, R>) {
-        match task.result() {
+    fn on_completed_task(&self, outcome: &Result<Result<C, ObservableError>, JoinError>, project: TaskProject<C, R>) {
+        match shared_result(outcome) {
             Ok(value) => match project(value) {
                 Ok(result) => {
                     self.sink.forward_on_next(result);
@@ -395,9 +387,10 @@ impl<T: 'static, C: Clone + 'static, R: 'static> SelectManyTaskSink<T, C, R> {
                 }
                 Err(error) => self.sink.forward_on_error(error),
             },
-            // A canceled task is a `TaskCanceledError` naming it, unless the sink cancelled it.
+            // A canceled task ends the sequence with its cancellation error, unless the sink
+            // cancelled it.
             Err(error) => {
-                if !(task.is_canceled() && self.cancel.is_cancelled()) {
+                if !(ferroui_system::task::Canceled::is_cancellation(&error) && self.cancel.is_cancelled()) {
                     self.sink.forward_on_error(error);
                 }
             }
@@ -423,22 +416,23 @@ impl<T: 'static, C: Clone + 'static, R: 'static> IObserver<T> for SelectManyTask
                 return;
             }
         };
-        if task.is_completed() {
-            self.on_completed_task(&task, project);
+        if let Some(outcome) = task.outcome() {
+            self.on_completed_task(&outcome, project);
         } else {
             // The continuation keeps the sink, as upstream's keeps `this`: the source may have
             // ended and released it while the task runs.
             let this = self.this.upgrade().expect("the sink is alive while it receives notifications");
-            let continuation = task.continue_with(move |task| {
-                this.pending.borrow_mut().remove(&index);
+            let continuation = task.on_finished(move |outcome| {
+                let removed = this.pending.borrow_mut().remove(&index);
+                drop(removed);
                 if !this.cancel.is_cancelled() {
-                    this.on_completed_task(task, project);
+                    this.on_completed_task(outcome, project);
                 }
             });
             if let Some(id) = continuation {
                 let task = task.clone();
                 self.pending.borrow_mut().insert(index, Box::new(move || {
-                    task.remove_continuation(id);
+                    task.remove_on_finished(id);
                 }));
             }
         }
@@ -500,8 +494,8 @@ where
     Fut: Future<Output = Result<U, ObservableError>> + 'static,
 {
     let selector: TaskSelector<T, U, U> =
-        Rc::new(move |value: T, index: usize, token: CancellationToken| -> Result<(Task<U>, TaskProject<U, U>), ObservableError> {
-            let task = future_as_task(selector(value, index, token)?);
+        Rc::new(move |value: T, index: usize, token: CancellationToken| -> Result<(TaskOf<U>, TaskProject<U, U>), ObservableError> {
+            let task = future_to_shared(selector(value, index, token)?);
             let project: TaskProject<U, U> = Box::new(|value| Ok(value));
             Ok((task, project))
         });
@@ -520,8 +514,8 @@ where
 {
     let result_selector = Rc::new(result_selector);
     let selector: TaskSelector<T, C, R> =
-        Rc::new(move |value: T, index: usize, token: CancellationToken| -> Result<(Task<C>, TaskProject<C, R>), ObservableError> {
-            let task = future_as_task(task_selector(value.clone(), index, token)?);
+        Rc::new(move |value: T, index: usize, token: CancellationToken| -> Result<(TaskOf<C>, TaskProject<C, R>), ObservableError> {
+            let task = future_to_shared(task_selector(value.clone(), index, token)?);
             let result_selector = result_selector.clone();
             let project: TaskProject<C, R> = Box::new(move |result| result_selector(value, index, result));
             Ok((task, project))
@@ -832,10 +826,11 @@ macro_rules! select_many_methods {
             crate::linq::select_many::select_many_iter_with(self.observable(), collection_selector, result_selector)
         }
 
-        /// Projects each value to a future, runs it as a task (a `Task` is used as it is), and
-        /// notifies the result of each task when it ends; the sequence ends when the source and
-        /// every task have ended. A task that fails ends the sequence with its error, a canceled
-        /// one with a `TaskCanceledError` naming it (`SelectMany(Func<TSource, Task<TResult>>)`).
+        /// Projects each value to a future, runs it as a task (the `flatten()` of a `Shared` is
+        /// used as it is), and notifies the result of each task when it ends; the sequence ends
+        /// when the source and every task have ended. A task that fails ends the sequence with its
+        /// error, a canceled one with its cancellation error (`SelectMany(Func<TSource,
+        /// Task<TResult>>)`).
         fn select_many_async<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
             &self,
             selector: impl Fn(T) -> Fut + 'static,

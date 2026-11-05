@@ -14,7 +14,7 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::{IBitmapImpl, ICursorFactory, ICursorImpl, IFontManagerImpl};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{Locale, ReadOnlyMemory};
 use ferroui_base::{PixelPoint, PixelRect};
 use ferroui_controls::platform::{
     IPlatformIconLoader, IWindowIconImpl, PlatformHandle, PlatformScreen, ScreensBase, ScreensBaseImpl,
@@ -365,7 +365,7 @@ impl IFontManagerImpl for HeadlessFontManagerStub {
         _font_weight: FontWeight,
         _font_stretch: FontStretch,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         None
     }
@@ -467,7 +467,7 @@ impl IFontManagerImpl for HeadlessFontManagerWithMultipleSystemFontsStub {
         _font_weight: FontWeight,
         _font_stretch: FontStretch,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         None
     }

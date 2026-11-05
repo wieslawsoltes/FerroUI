@@ -25,7 +25,10 @@ use ferroui_base::data::core::{
     BoxedPropertyGetter, BoxedPropertySetter, ClrPropertyInfo, FalliblePropertyGetter, IPropertyInfo, PropertySetter,
 };
 use ferroui_base::data::core::plugins::PropertyAccessorFactory;
-use ferroui_base::data::{BindingBase, BindingError, BindingPriority, CompiledBindingPathBuilder};
+use ferroui_base::data::{
+    BindingBase, BindingError, BindingPriority, CompiledBindingPath, CompiledBindingPathBuilder, PathBindBackInvoke,
+    PathFunctionArgument, PathFunctionInvoke,
+};
 use ferroui_base::metadata::{MarkupInvoke, MarkupProperty, MarkupType};
 use ferroui_base::AnyValue;
 use ferroui_base::styling::{Setter, SetterBase, StyleBase};
@@ -720,6 +723,46 @@ pub fn path_indexer(
         .iter()
         .find(|indexer| matches!(indexer.parameters, [parameter] if parameter().is::<i32>()))
         .unwrap_or_else(|| panic!("{} declares no indexer with one 32-bit integer argument", markup.full_name()));
+    let info = declared_indexer_info(markup, declared, Rc::new(move || into_markup_value(index)));
+    let factory: PropertyAccessorFactory = match notifying {
+        true => Rc::new(move |target, property| PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)),
+        false => Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor),
+    };
+    builder.property(info, factory)
+}
+
+/// The element of a compiled binding path for the indexer with one text argument that
+/// `markup` declares, at `key` (`Map['key']` of `{x:Bind}`): as [`path_indexer`], with the
+/// accessor factory that follows the property change notifications of the owner, as the
+/// run-time loader takes it for an indexer whose argument is not an integer.
+///
+/// # Panics
+/// Panics if `markup` declares no such indexer: the emitter writes the call only for a
+/// declared indexer.
+pub fn path_key_indexer(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    key: &'static str,
+) -> CompiledBindingPathBuilder {
+    let declared = markup
+        .indexers
+        .iter()
+        .find(|indexer| {
+            matches!(indexer.parameters, [parameter] if parameter().is::<String>() || parameter().is::<Option<String>>())
+        })
+        .unwrap_or_else(|| panic!("{} declares no indexer with one text argument", markup.full_name()));
+    let info = declared_indexer_info(markup, declared, Rc::new(move || into_markup_value(key.to_string())));
+    builder.property(info, Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor))
+}
+
+/// The description of a declared indexer applied to the argument `argument` gives: its
+/// accessors invoked with the owner, the argument and, for the setter, the value, with a
+/// failure named by the accessor.
+fn declared_indexer_info(
+    markup: &'static MarkupType,
+    declared: &'static ferroui_base::metadata::MarkupIndexer,
+    argument: Rc<dyn Fn() -> MarkupValue>,
+) -> Rc<dyn IPropertyInfo> {
     let owner = markup.full_name();
     let invoke = move |accessor: &str, invoke: MarkupInvoke, arguments: &[MarkupValue]| -> Result<MarkupValue, BindingError> {
         let result = invoke(arguments).map_err(|error| {
@@ -732,36 +775,30 @@ pub fn path_indexer(
         Ok(result.map(normalize_object))
     };
     let invoke = Rc::new(invoke);
-    let argument = move || into_markup_value(index);
     let getter: Option<FalliblePropertyGetter> = declared.get.map(|get| {
-        let invoke = invoke.clone();
+        let (invoke, argument) = (invoke.clone(), argument.clone());
         Rc::new(move |target: &dyn AnyValue| invoke("get", get, &[owner_handle(target)?, argument()])) as FalliblePropertyGetter
     });
     let setter: Option<PropertySetter> = declared.set.map(|set| {
-        let invoke = invoke.clone();
+        let (invoke, argument) = (invoke.clone(), argument.clone());
         Rc::new(move |target: &dyn AnyValue, value: Option<&BoxedValue>| {
             invoke("set", set, &[owner_handle(target)?, argument(), value.cloned()]).map(|_| ())
         }) as PropertySetter
     });
     let boxed_getter: Option<BoxedPropertyGetter> = declared.get.map(|get| {
-        let invoke = invoke.clone();
+        let (invoke, argument) = (invoke.clone(), argument.clone());
         Rc::new(move |target: &BoxedValue| invoke("get", get, &[Some(target.clone()), argument()])) as BoxedPropertyGetter
     });
     let boxed_setter: Option<BoxedPropertySetter> = declared.set.map(|set| {
-        let invoke = invoke.clone();
+        let (invoke, argument) = (invoke.clone(), argument.clone());
         Rc::new(move |target: &BoxedValue, value: Option<&BoxedValue>| {
             invoke("set", set, &[Some(target.clone()), argument(), value.cloned()]).map(|_| ())
         }) as BoxedPropertySetter
     });
-    let info: Rc<dyn IPropertyInfo> = Rc::new(
+    Rc::new(
         ClrPropertyInfo::new_fallible(ferroui_base::data::core::INDEXER_NAME, getter, setter, (declared.type_)())
             .with_boxed_accessors(boxed_getter, boxed_setter),
-    );
-    let factory: PropertyAccessorFactory = match notifying {
-        true => Rc::new(move |target, property| PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)),
-        false => Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor),
-    };
-    builder.property(info, factory)
+    )
 }
 
 /// The name scope of an element name in a binding path: the name scope field
@@ -1591,6 +1628,87 @@ pub fn path_command_with_can_execute<This: Clone + 'static>(
         Some(Rc::new(can_execute)),
         depends_on_properties,
     )
+}
+
+/// The element of a compiled binding path for a function of `{x:Bind}` (docs/porting/x-bind.md,
+/// step X2): the instance method `name` that the metadata `declaring` declares, called on the
+/// owner the path before the element produces, as the run-time loader builds it. `method`
+/// calls the typed function of the method with the owner, as the Rust type instance members
+/// take (`This`), and the values of `arguments` (paths read from the root source, or
+/// constants), which it reads from [`DelegateArguments`] in the types the method declares.
+/// The function is called again when the owner, viewed as a notifier by the declaration of
+/// `declaring`, reports a change of the property named as the function. An owner or an
+/// argument that is not of the type the method declares, and a failure of the method, are
+/// errors of the binding.
+pub fn path_function<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    arguments: Vec<PathFunctionArgument>,
+    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let owner = declaring.full_name();
+    let invoke: PathFunctionInvoke = Rc::new(move |this: &BoxedValue, arguments: &[MarkupValue]| {
+        invoke_command_method::<This>(&method, this, arguments)
+            .map_err(|error| BindingError::message(format!("{owner}.{name}: {error}")))
+    });
+    builder.function(name, arguments, invoke, declaring.notify_property_changed)
+}
+
+/// [`path_function`] of a static method (`local:Helpers.Format(Name)`): `method` reads the
+/// arguments only; the function has no owner.
+pub fn path_static_function(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    arguments: Vec<PathFunctionArgument>,
+    method: impl Fn(&mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let owner = declaring.full_name();
+    let invoke: PathFunctionInvoke = Rc::new(move |_root: &BoxedValue, arguments: &[MarkupValue]| {
+        method(&mut DelegateArguments { arguments, next: 0 })
+            .map_err(|error| BindingError::message(format!("{owner}.{name}: {error}")))
+    });
+    builder.function(name, arguments, invoke, None)
+}
+
+/// The `BindBack` of the function a path ends with (`{x:Bind Format(Name), Mode=TwoWay,
+/// BindBack=ParseName}`): the instance method `name` of `declaring`, called on the owner
+/// `owner` reads from the root source (`None`: the root source itself) with the value of the
+/// target, converted to `value_type`, the type of its one parameter. `method` calls its typed
+/// function as [`path_function`] does.
+pub fn path_bind_back<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    owner: Option<CompiledBindingPath>,
+    value_type: ValueType,
+    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let declaring_name = declaring.full_name();
+    let invoke: PathBindBackInvoke = Rc::new(move |this: &BoxedValue, value: Option<&BoxedValue>| {
+        invoke_command_method::<This>(&method, this, &[value.cloned()])
+            .map(|_| ())
+            .map_err(|error| BindingError::message(format!("{declaring_name}.{name}: {error}")))
+    });
+    builder.bind_back(owner, value_type, invoke)
+}
+
+/// [`path_bind_back`] of a static method: `method` reads the value only.
+pub fn path_static_bind_back(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    value_type: ValueType,
+    method: impl Fn(&mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let declaring_name = declaring.full_name();
+    let invoke: PathBindBackInvoke = Rc::new(move |_root: &BoxedValue, value: Option<&BoxedValue>| {
+        method(&mut DelegateArguments { arguments: &[value.cloned()], next: 0 })
+            .map(|_| ())
+            .map_err(|error| BindingError::message(format!("{declaring_name}.{name}: {error}")))
+    });
+    builder.bind_back(None, value_type, invoke)
 }
 
 /// `target.AddHandler(event, handler, RoutingStrategies.Direct | RoutingStrategies.Bubble, false)`:

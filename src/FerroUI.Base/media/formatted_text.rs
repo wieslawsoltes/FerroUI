@@ -12,7 +12,7 @@ use crate::media::{
     TextDecorationCollection, TextTrimming, TextWrapping, Transform, TranslateTransform, Typeface,
 };
 use crate::utilities::span::{SpanPosition, SpanRider, SpanVector};
-use crate::utilities::{CultureInfo, ReadOnlyMemory};
+use crate::utilities::{Locale, ReadOnlyMemory};
 use crate::{Point, Rect, Ref};
 
 /// The FormattedText class is targeted at programmers needing to add some
@@ -59,7 +59,7 @@ impl FormattedText {
     /// Panics when the em size is not a positive number or is too large.
     pub fn new(
         text_to_format: &str,
-        culture: CultureInfo,
+        culture: Locale,
         flow_direction: FlowDirection,
         typeface: Typeface,
         em_size: f64,
@@ -371,7 +371,7 @@ impl FormattedText {
     /// Sets or changes the culture for the text object.
     ///
     /// * `culture` — the new culture for the text object.
-    pub fn set_culture(&self, culture: CultureInfo) {
+    pub fn set_culture(&self, culture: Locale) {
         self.set_culture_range(culture, 0, self.text_length());
     }
 
@@ -380,7 +380,7 @@ impl FormattedText {
     /// * `culture` — the new culture for the text object.
     /// * `start_index` — the start index of initial character to apply the change to.
     /// * `count` — the number of characters the change should be applied to.
-    pub fn set_culture_range(&self, culture: CultureInfo, start_index: i32, count: i32) {
+    pub fn set_culture_range(&self, culture: Locale, start_index: i32, count: i32) {
         self.set_run_properties(start_index, count, true, |run_props| {
             if run_props.culture_info() == Some(&culture) {
                 return None;

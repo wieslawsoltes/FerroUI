@@ -11,10 +11,10 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{ObjectType, Ref, StyledElement};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Button, Control, Panel, TextBlock, TextBox};
-use ferroui_system::threading::tasks::{run_pending_wakes, Task};
+use ferroui_system::task::{run_pending, Shared};
 use ferroui_system::threading::CancellationToken;
 use ferroui_view::{Element, IntoElement, Owner};
-use reactive_demo::crate_search::{CatalogueSearchService, CrateSearchMetadata, ICrateSearchService};
+use reactive_demo::crate_search::{CatalogueSearchService, CrateSearchMetadata, ICrateSearchService, SearchTask};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
@@ -52,7 +52,7 @@ impl Ui {
     /// Runs the work queued on the dispatcher and the futures woken from other threads.
     fn run_jobs(&self) {
         Dispatcher::ui_thread().run_jobs(None);
-        run_pending_wakes();
+        run_pending();
     }
 
     /// Lets time pass until `done` holds: fires the timers of the dispatcher (the throttle of the
@@ -164,7 +164,7 @@ struct RecordingSearchService {
 }
 
 impl ICrateSearchService for RecordingSearchService {
-    fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
+    fn search(&self, term: &str, token: CancellationToken) -> SearchTask {
         self.terms.borrow_mut().push(term.to_owned());
         CatalogueSearchService::new().search(term, token)
     }
@@ -174,8 +174,8 @@ impl ICrateSearchService for RecordingSearchService {
 struct FailingSearchService;
 
 impl ICrateSearchService for FailingSearchService {
-    fn search(&self, _term: &str, _token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
-        Task::from_exception(Rc::new(std::io::Error::other("crates.io is not reachable")))
+    fn search(&self, _term: &str, _token: CancellationToken) -> SearchTask {
+        Shared::ready(Err(Rc::new(std::io::Error::other("crates.io is not reachable")) as ferroui_system::ObservableError))
     }
 }
 

@@ -10,7 +10,7 @@ use crate::media::fonts::{FontCollectionKey, FontFallbackScriptHints, IFontColle
 use crate::media::text_formatting::unicode::{Codepoint, Script};
 use crate::media::{FontFamily, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface};
 use crate::platform::{IAssetLoader, IFontManagerImpl, ASSET_SCHEME};
-use crate::utilities::{CultureInfo, Uri};
+use crate::utilities::{parent_locale, Locale, Uri};
 use crate::{FerroLocator, LocatorExtensions};
 
 /// The typefaces of one font family: glyph typefaces by style, weight and
@@ -145,7 +145,7 @@ impl GlyphTypefaceCache {
 }
 
 /// Identifies a script/culture bucket of the fallback cache.
-type ScriptFallbackKey = (Script, Option<CultureInfo>);
+type ScriptFallbackKey = (Script, Option<Locale>);
 
 /// The state and the shared matching, fallback and caching logic of font
 /// collections.
@@ -193,7 +193,7 @@ pub trait FontCollectionBaseImpl: Sized + 'static {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         FontCollectionBase::try_match_character(this, codepoint, style, weight, stretch, family_name, culture)
     }
@@ -207,7 +207,7 @@ pub trait FontCollectionBaseImpl: Sized + 'static {
         _codepoint: i32,
         _key: FontCollectionKey,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         None
     }
@@ -254,7 +254,7 @@ pub trait IFontCollectionBase: IFontCollection {
         codepoint: i32,
         key: FontCollectionKey,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>>;
 }
 
@@ -268,7 +268,7 @@ impl<T: FontCollectionBaseImpl> IFontCollectionBase for T {
         codepoint: i32,
         key: FontCollectionKey,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         T::try_match_character_from_platform(self, codepoint, key, family_name, culture)
     }
@@ -308,7 +308,7 @@ impl<T: FontCollectionBaseImpl> IFontCollection for T {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         T::try_match_character(self, codepoint, font_style, font_weight, font_stretch, family_name, culture)
     }
@@ -402,7 +402,7 @@ impl FontCollectionBase {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         Self::try_match_character_with_script(
             this,
@@ -429,7 +429,7 @@ impl FontCollectionBase {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Option<Typeface> {
         let base = this.base();
@@ -565,7 +565,7 @@ impl FontCollectionBase {
         codepoint: i32,
         key: FontCollectionKey,
         skip_family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         script: Script,
         refined_script: Script,
         shaping_script: Script,
@@ -612,7 +612,7 @@ impl FontCollectionBase {
     fn score_candidate(
         candidate: &GlyphTypeface,
         requested_key: FontCollectionKey,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         script: Script,
         refined_script: Script,
     ) -> i32 {
@@ -623,9 +623,9 @@ impl FontCollectionBase {
             if candidate.family_names().contains_key(culture) {
                 score += 8;
             } else {
-                let parent = culture.parent();
+                let parent = parent_locale(culture);
 
-                if !parent.is_invariant() && candidate.family_names().contains_key(&parent) {
+                if parent != Locale::UNKNOWN && candidate.family_names().contains_key(&parent) {
                     score += 4;
                 }
             }
@@ -652,7 +652,7 @@ impl FontCollectionBase {
         score
     }
 
-    fn is_culture_compatible(candidate: &GlyphTypeface, culture: Option<&CultureInfo>, script: Script) -> bool {
+    fn is_culture_compatible(candidate: &GlyphTypeface, culture: Option<&Locale>, script: Script) -> bool {
         // If no culture or codepoint is locale-insensitive, the candidate is fine.
         let Some(culture) = culture else {
             return true;
@@ -677,9 +677,9 @@ impl FontCollectionBase {
             return true;
         }
 
-        let parent = culture.parent();
+        let parent = parent_locale(culture);
 
-        if !parent.is_invariant() && candidate.family_names().contains_key(&parent) {
+        if parent != Locale::UNKNOWN && candidate.family_names().contains_key(&parent) {
             return true;
         }
 
@@ -731,7 +731,7 @@ impl FontCollectionBase {
         glyph_typefaces: &Rc<RefCell<GlyphTypefaceMap>>,
         key: FontCollectionKey,
         codepoint: i32,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Option<Rc<GlyphTypeface>> {
         // The borrow of the family's typefaces ends before the platform is consulted.
@@ -754,7 +754,7 @@ impl FontCollectionBase {
         glyph_typeface: Rc<GlyphTypeface>,
         key: FontCollectionKey,
         codepoint: i32,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Rc<GlyphTypeface> {
         // The platform's character match, biased by the family already resolved, yields that family

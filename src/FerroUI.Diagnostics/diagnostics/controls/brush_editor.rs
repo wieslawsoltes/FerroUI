@@ -13,7 +13,7 @@ use ferroui_base::media::immutable::ImmutablePen;
 use ferroui_base::media::{Brushes, Color, DrawingContext, FlowDirection, FormattedText, IBrush, IPen, Typeface};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::metadata::MarkupType;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
     FerroObjectImpl, FerroProperty, FerroPropertyChangedEventArgs, Point, Rect, Ref, StyledElementImpl, TypeInfo,
@@ -183,7 +183,7 @@ impl VisualImpl for BrushEditor {
 
         let ft = FormattedText::new(
             &text,
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             Typeface::default(),
             11.0,

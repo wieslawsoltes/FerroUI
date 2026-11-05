@@ -4,7 +4,7 @@
 
 use ferroui_reactive::concurrency::{IScheduler, ImmediateScheduler, ScheduledAction};
 use ferroui_reactive::disposables::Disposable;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
+use ferroui_system::task::{Canceled, Shared, SharedSender};
 use ferroui_system::{IDisposable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -92,19 +92,30 @@ impl IScheduler for ManualScheduler {
 /// An observer that completes a task with the last value when its sequence ends, or faults it
 /// with the error (`InteractionTests.CompletionObserver<T>`).
 pub struct CompletionObserver<T> {
-    completion: TaskCompletionSource<T>,
+    sender: RefCell<Option<SharedSender<Result<T, ObservableError>>>>,
+    completion: Shared<Result<T, ObservableError>>,
     last: RefCell<Option<T>>,
 }
 
 impl<T: Clone + 'static> CompletionObserver<T> {
     /// An observer whose task has not ended.
     pub fn new() -> Rc<Self> {
-        Rc::new(Self { completion: TaskCompletionSource::new(), last: RefCell::new(None) })
+        let (sender, completion) = Shared::channel();
+        Rc::new(Self { sender: RefCell::new(Some(sender)), completion, last: RefCell::new(None) })
     }
 
     /// The task (`Completion`).
-    pub fn completion(&self) -> Task<T> {
-        self.completion.task()
+    pub fn completion(&self) -> Shared<Result<T, ObservableError>> {
+        self.completion.clone()
+    }
+
+    /// `TrySetResult`, `TrySetException`, `TrySetCanceled`: the first end ends the task.
+    fn try_send(&self, result: Result<T, ObservableError>) {
+        // Taken out of the cell before it sends: the continuations may reach the observer.
+        let sender = self.sender.borrow_mut().take();
+        if let Some(sender) = sender {
+            sender.send(result);
+        }
     }
 }
 
@@ -114,17 +125,14 @@ impl<T: Clone + 'static> IObserver<T> for CompletionObserver<T> {
     }
 
     fn on_error(&self, error: ObservableError) {
-        self.completion.try_set_exception(error);
+        self.try_send(Err(error));
     }
 
     fn on_completed(&self) {
-        match self.last.borrow_mut().take() {
-            Some(value) => {
-                self.completion.try_set_result(value);
-            }
-            None => {
-                self.completion.try_set_canceled();
-            }
+        let last = self.last.borrow_mut().take();
+        match last {
+            Some(value) => self.try_send(Ok(value)),
+            None => self.try_send(Err(Rc::new(Canceled) as ObservableError)),
         }
     }
 }
