@@ -19,7 +19,7 @@ use ferroui_base::media::effects::{CustomEffect, EffectImage, EffectParameterVal
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{Color, FontWeight};
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{CornerRadius, Ref, Thickness};
 use ferroui_controls::{Border, Slider, StackPanel, TextBlock, WrapPanel};
 use std::cell::RefCell;
@@ -70,7 +70,7 @@ fn sample() -> Ref<Border> {
 /// (the handle holds it); the empty image, which the transitions draw transparent, when it does
 /// not load.
 fn asset_image(uri: &str) -> EffectImage {
-    let bitmap = Uri::absolute(uri)
+    let bitmap = UriRef::parse(uri)
         .ok()
         .and_then(|uri| AssetLoader::open(&uri, None).ok())
         .and_then(|mut stream| Bitmap::from_stream(&mut stream).ok());
