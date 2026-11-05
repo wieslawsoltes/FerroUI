@@ -350,7 +350,7 @@ ferroui-skia = { version = "=0.5.0-preview.1", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.5.0-preview.1", path = "src/Vello/FerroUI.Vello" }
 ferroui-progpu = { version = "=0.5.0-preview.1", path = "src/ProGPU/FerroUI.ProGPU" }
 # The bindings of the ProGPU native engine (wieslawsoltes/ProGPU#436), at the revision the backend is built on.
-progpu-native-sys = { git = "https://github.com/wieslawsoltes/ProGPU", rev = "4180f10f6b35ce458efd0755dbbb6a3fc6114fa1" }
+progpu-native-sys = { git = "https://github.com/wieslawsoltes/ProGPU", rev = "a2a17e0c683e2203b4ea42e83f2382d7c1be0666" }
 ferroui-harfbuzz = { version = "=0.5.0-preview.1", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
 # The legacy code pages of RTF (the optional feature `rtf-codepages` of ferroui-controls,

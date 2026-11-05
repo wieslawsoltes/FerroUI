@@ -70,3 +70,42 @@ fn the_engine_clears_a_target_and_draws_rectangles() {
         w.wgpuTextureRelease(texture);
     }
 }
+
+#[test]
+fn a_retained_scene_renders_and_a_stable_frame_uploads_nothing() {
+    use crate::scene::{SceneBuilder, NO_INDEX};
+    let Some(device) = device() else { return };
+    let (width, height) = (32u32, 32u32);
+    let mut builder = SceneBuilder::new();
+    builder.clear_target(progpu_native_color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 }).unwrap();
+    let brush = builder.add_solid_brush(progpu_native_color { r: 1.0, g: 1.0, b: 0.0, a: 1.0 }, 1.0).unwrap();
+    let primitive = progpu_native_analytic_primitive {
+        kind: PROGPU_NATIVE_PRIMITIVE_ELLIPSE as u32,
+        flags: 0,
+        x: 4.0,
+        y: 4.0,
+        width: 24.0,
+        height: 24.0,
+        corner_radius: 0.0,
+        stroke_thickness: 0.0,
+        color: progpu_native_color { r: 1.0, g: 1.0, b: 0.0, a: 1.0 },
+        transform: SceneBuilder::identity_transform(),
+    };
+    let bounds = progpu_native_image_rect { x: 4.0, y: 4.0, width: 24.0, height: 24.0 };
+    builder.draw_analytic(&[primitive], &[brush], bounds, NO_INDEX).unwrap();
+    let (scene_id, generation) = (builder.scene_id(), builder.generation());
+    device.update_scene(builder.build().unwrap()).unwrap();
+    let (texture, view) = device.create_target(width, height);
+    device.render_scene(scene_id, generation, view, width, height, 1.0).unwrap();
+    let stable = device.render_scene(scene_id, generation, view, width, height, 1.0).unwrap();
+    assert_eq!(0, stable.vertex_upload_bytes + stable.index_upload_bytes + stable.texture_upload_bytes);
+    let pixels = device.read_rgba8(texture, width, height);
+    let pixel = |x: u32, y: u32| pixels[((y * width + x) * 4) as usize..][..4].to_vec();
+    assert_eq!(vec![0, 0, 255, 255], pixel(1, 1), "the cleared target outside the ellipse");
+    assert_eq!(vec![255, 255, 0, 255], pixel(16, 16), "the center of the ellipse");
+    // SAFETY: the handles are owned by the test.
+    unsafe {
+        device.runtime().wgpu.wgpuTextureViewRelease(view);
+        device.runtime().wgpu.wgpuTextureRelease(texture);
+    }
+}

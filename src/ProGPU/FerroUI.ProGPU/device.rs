@@ -144,6 +144,84 @@ impl ProGpuDevice {
         }
     }
 
+    /// Sends a scene stream to the engine (`progpu_native_engine_update_scene`): only when its
+    /// generation changed; the engine keeps the scene and renders it until the next stream.
+    pub fn update_scene(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
+        // SAFETY: the engine is alive; the stream is borrowed for the call.
+        unsafe {
+            let mut metrics: progpu_native_scene_metrics = std::mem::zeroed();
+            metrics.struct_size = std::mem::size_of::<progpu_native_scene_metrics>() as u32;
+            let status = self.runtime.progpu.progpu_native_engine_update_scene(
+                self.engine,
+                stream.as_ptr() as *const c_void,
+                stream.len(),
+                &mut metrics,
+            );
+            if status == PROGPU_NATIVE_STATUS_SUCCESS {
+                Ok(metrics)
+            } else {
+                Err(format!("the engine refused the scene (status {status}, validation error {} at {}): {}", metrics.validation_error, metrics.error_offset, self.last_error()))
+            }
+        }
+    }
+
+    /// Renders the retained scene `scene_id` at `generation` into `target_view` (an
+    /// `RGBA8Unorm` view of `width` by `height` pixels) and submits the work.
+    pub fn render_scene(
+        &self,
+        scene_id: u64,
+        generation: u64,
+        target_view: WGPUTextureView,
+        width: u32,
+        height: u32,
+        dpi_scale: f32,
+    ) -> Result<progpu_native_scene_frame_metrics, String> {
+        // SAFETY: the engine is alive; the view is borrowed for the call.
+        unsafe {
+            let mut frame: progpu_native_scene_frame = std::mem::zeroed();
+            frame.struct_size = std::mem::size_of::<progpu_native_scene_frame>() as u32;
+            frame.width = width;
+            frame.height = height;
+            frame.dpi_scale = dpi_scale;
+            frame.target_view = target_view as usize;
+            frame.scene_id = scene_id;
+            frame.generation = generation;
+            let mut metrics: progpu_native_scene_frame_metrics = std::mem::zeroed();
+            metrics.struct_size = std::mem::size_of::<progpu_native_scene_frame_metrics>() as u32;
+            let status = self.runtime.progpu.progpu_native_engine_render_scene(self.engine, &frame, &mut metrics);
+            if status == PROGPU_NATIVE_STATUS_SUCCESS {
+                Ok(metrics)
+            } else {
+                Err(format!("the engine could not render the scene (status {status}): {}", self.last_error()))
+            }
+        }
+    }
+
+    /// Creates a texture of `RGBA8Unorm` that can be rendered to and read back, with its view.
+    pub fn create_target(&self, width: u32, height: u32) -> (WGPUTexture, WGPUTextureView) {
+        let w = &self.runtime.wgpu;
+        // SAFETY: the calls of the WebGPU C ABI with the device.
+        unsafe {
+            let texture = w.wgpuDeviceCreateTexture(
+                self.device,
+                &WGPUTextureDescriptor {
+                    nextInChain: ptr::null(),
+                    label: ptr::null(),
+                    usage: (WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_CopySrc | WGPUTextureUsage_TextureBinding) as u32,
+                    dimension: WGPUTextureDimension_2D,
+                    size: WGPUExtent3D { width, height, depthOrArrayLayers: 1 },
+                    format: WGPUTextureFormat_RGBA8Unorm,
+                    mipLevelCount: 1,
+                    sampleCount: 1,
+                    viewFormatCount: 0,
+                    viewFormats: ptr::null(),
+                },
+            );
+            let view = w.wgpuTextureCreateView(texture, ptr::null());
+            (texture, view)
+        }
+    }
+
     /// Reads a texture of `RGBA8Unorm` back: `width * height * 4` bytes, row by row.
     pub fn read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
         let w = &self.runtime.wgpu;
