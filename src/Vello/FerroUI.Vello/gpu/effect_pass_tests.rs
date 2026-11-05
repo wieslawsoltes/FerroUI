@@ -965,3 +965,225 @@ fn steady_frames_of_the_shader_effects_allocate_no_texture() {
         }
     }
 }
+
+// --- the images of the page transitions (#455, E6) ------------------------------------------
+
+use ferroui_base::media::effects::library::{DissolveTransitionEffect, MaskTransitionEffect};
+use ferroui_base::media::effects::EffectImage;
+use ferroui_base::platform::{AlphaFormat, PixelFormat};
+
+/// An image of `SIZE` by `SIZE` premultiplied RGBA pixels made by `pixel`:
+/// an immutable bitmap of this backend, owned by the handle.
+fn effect_image(pixel: impl Fn(u32, u32) -> [u8; 4]) -> EffectImage {
+    let side = u32::from(SIZE);
+    let mut data = Vec::with_capacity((side * side * 4) as usize);
+    for y in 0..side {
+        for x in 0..side {
+            data.extend_from_slice(&pixel(x, y));
+        }
+    }
+    let bitmap = crate::immutable_bitmap::ImmutableBitmap::from_pixels(
+        PixelSize::new(i32::from(SIZE), i32::from(SIZE)),
+        Vector::new(96.0, 96.0),
+        i32::from(SIZE) * 4,
+        PixelFormat::RGBA8888,
+        AlphaFormat::Premul,
+        &data,
+    )
+    .expect("a bitmap");
+    EffectImage::from_impl(Arc::new(bitmap))
+}
+
+/// The transitions of the library at `progress` over two pages and a
+/// pattern of grey levels, and the mask transition with a translucent page.
+fn page_transitions(progress: f64) -> Vec<ImmutableCustomEffect> {
+    let from = effect_image(|x, y| [(x * 2) as u8, (y * 2) as u8, 200, 255]);
+    let to = effect_image(|x, y| [40, (255 - x * 2) as u8, (y * 2) as u8, 255]);
+    let pattern = effect_image(|x, y| {
+        let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+        [level, level, level, 255]
+    });
+    let glass = effect_image(|x, _| [0, 0, 160, 160 + (x % 2) as u8 * 40]);
+    vec![
+        ImmutableCustomEffect::new(DissolveTransitionEffect {
+            from_page: from,
+            to_page: to.clone(),
+            pattern: pattern.clone(),
+            progress,
+            center_x: 0.3,
+            center_y: 0.6,
+            ..DissolveTransitionEffect::default()
+        }),
+        ImmutableCustomEffect::new(MaskTransitionEffect { to_page: to, mask: pattern.clone(), progress, softness: 0.2 }),
+        ImmutableCustomEffect::new(MaskTransitionEffect { to_page: glass, mask: pattern, progress, softness: 0.5 }),
+    ]
+}
+
+/// The modules of the transitions bind their images after the content and
+/// declare the uniforms of their parameters at the offsets of WGSL's layout;
+/// no device is needed.
+#[test]
+fn the_modules_of_the_page_transitions_are_checked_by_naga() {
+    for effect in page_transitions(0.5) {
+        check_shader_module(&effect).unwrap_or_else(|reason| panic!("{effect}: {reason}"));
+    }
+    let layout = |effect: ImmutableCustomEffect| {
+        let module = check_shader_module(&effect).unwrap();
+        (module.offsets().to_vec(), module.size())
+    };
+    assert_eq!(
+        (vec![0, 8, 12, 16, 20, 32], 48),
+        layout(ImmutableCustomEffect::new(DissolveTransitionEffect::default()))
+    );
+    assert_eq!((vec![0, 8, 12, 16], 32), layout(ImmutableCustomEffect::new(MaskTransitionEffect::default())));
+}
+
+/// The transitions drawn by their passes in the hybrid and GPU modes at
+/// scales 1 and 2, their images textures of the device, against their CPU
+/// references applied to the content drawn plain in the same mode; no layer
+/// drawn on the processor.
+#[test]
+fn the_page_transitions_match_their_cpu_references_in_the_gpu_modes() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    for mode in device_modes(&device) {
+        for effect in page_transitions(0.45) {
+            for scale in [1.0, 2.0] {
+                let transform = Matrix::create_scale(scale, scale);
+                let plain = draw_in(&device, mode, |drawing| {
+                    drawing.set_transform(transform);
+                    content(drawing);
+                });
+                let side = i32::from(SIZE);
+                let expected = reference_in_area(&plain, &effect, (0, 0, side, side), scale);
+                let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+                let actual = draw_in(&device, mode, |drawing| {
+                    drawing.set_transform(transform);
+                    let bounds = Rect::new(0.0, 0.0, f64::from(SIZE) / scale, f64::from(SIZE) / scale);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), &effect);
+                    content(drawing);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                });
+                assert_eq!(
+                    cpu_layers,
+                    crate::drawing_context_impl::cpu_layer_count(),
+                    "{mode:?}: {effect} at {scale}x: drawn on the processor"
+                );
+                let (most, mean, _) = difference(&expected, &actual);
+                assert!(most <= 3 && mean <= 0.5, "{mode:?}: {effect} at {scale}x: largest {most}, mean {mean}");
+                let (changed, _, _) = difference(&plain, &actual);
+                assert!(changed > 0, "{mode:?}: {effect} at {scale}x: the content is changed");
+            }
+        }
+    }
+}
+
+/// Frames of the transitions whose progress changes upload no image and
+/// allocate no texture once the first frames did, and the textures of the
+/// images of dropped transitions are released by the next frame; frames
+/// whose transitions take new images keep no more textures than they draw.
+#[test]
+fn the_images_of_the_page_transitions_are_uploaded_once_and_released() {
+    use super::effect_passes::{image_texture_count, image_uploads};
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    for mode in device_modes(&device) {
+        let before = image_texture_count();
+        {
+            let effects = page_transitions(0.2);
+            let mut counts_after_first = None;
+            for frame in 0..6 {
+                let progress = 0.2 + 0.1 * f64::from(frame);
+                draw_in(&device, mode, |drawing| {
+                    for effect in &effects {
+                        let value = if let Some(dissolve) = effect.downcast_ref::<DissolveTransitionEffect>() {
+                            ImmutableCustomEffect::new(DissolveTransitionEffect { progress, ..dissolve.clone() })
+                        } else if let Some(mask) = effect.downcast_ref::<MaskTransitionEffect>() {
+                            ImmutableCustomEffect::new(MaskTransitionEffect { progress, ..mask.clone() })
+                        } else {
+                            effect.clone()
+                        };
+                        drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), &value);
+                        content(drawing);
+                        drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                    }
+                });
+                let counts = (image_uploads(), super::effect_passes::texture_allocations());
+                match counts_after_first {
+                    None => counts_after_first = Some(counts),
+                    Some(first) => assert_eq!(first, counts, "{mode:?}: frame {frame} uploaded or allocated"),
+                }
+            }
+            // Four images: two pages, the pattern and the translucent page.
+            assert_eq!(before + 4, image_texture_count(), "{mode:?}");
+        }
+        // The transitions and their images are dropped: the next frame
+        // releases the textures.
+        draw_in(&device, mode, |drawing| content(drawing));
+        assert_eq!(before, image_texture_count(), "{mode:?}: the textures are released");
+
+        // A new page in every frame.
+        for frame in 0..12u32 {
+            let page = effect_image(|x, y| [(frame * 20) as u8, x as u8, y as u8, 255]);
+            let effect = ImmutableCustomEffect::new(MaskTransitionEffect {
+                to_page: page,
+                progress: 0.5,
+                softness: 1.0,
+                ..MaskTransitionEffect::default()
+            });
+            draw_in(&device, mode, |drawing| {
+                drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), &effect);
+                content(drawing);
+                drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+            });
+            assert!(image_texture_count() <= before + 1, "{mode:?}: frame {frame}: {} textures", image_texture_count());
+        }
+        draw_in(&device, mode, |drawing| content(drawing));
+        assert_eq!(before, image_texture_count(), "{mode:?}");
+    }
+}
+
+/// A content-sampling program cannot take images (both backends refuse it):
+/// its module is refused, and it draws the content unchanged.
+#[test]
+fn a_content_sampling_program_with_images_is_refused() {
+    #[derive(Clone, Debug, Default, PartialEq)]
+    struct SamplingWithImage {
+        page: EffectImage,
+    }
+
+    impl CustomEffect for SamplingWithImage {
+        const NAME: &'static str = "vello-test-sampling-with-an-image";
+
+        fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+            f("page", (&self.page).into());
+        }
+
+        fn set_parameter(&mut self, _: &str, _: EffectParameterValue) -> bool {
+            false
+        }
+
+        fn shader() -> Option<ShaderEffectDescription> {
+            Some(
+                ShaderEffectDescription::content_sampling(
+                    "",
+                    "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, }\n\
+                     fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) + sample_page(coord); }",
+                )
+                .with_children(["page"]),
+            )
+        }
+    }
+
+    assert!(check_shader_module(&ImmutableCustomEffect::new(SamplingWithImage::default())).is_err());
+}

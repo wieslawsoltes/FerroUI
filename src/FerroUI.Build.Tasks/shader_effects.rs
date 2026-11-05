@@ -215,9 +215,13 @@ pub fn write_shader_effect_glsl<T: CustomEffect>() -> Result<Option<ShaderEffect
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect, TintEffect};
+    use ferroui_base::media::effects::library::{
+        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+        TintEffect,
+    };
     use ferroui_base::media::effects::{
-        SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_PASS_BINDING, SHADER_WGSL_UNIFORMS_BINDING,
+        SHADER_WGSL_CHILDREN_BINDING, SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_PASS_BINDING,
+        SHADER_WGSL_UNIFORMS_BINDING,
     };
 
     /// A smoke check of a stage of GLSL ES 3.0: the version first, a
@@ -256,6 +260,25 @@ mod tests {
         }
         // A type without a shader has none.
         assert!(shader_effect_glsl::<TintEffect>().is_none());
+    }
+
+    /// The page transitions (#455, E6): the textures of their images follow
+    /// the content, at the bindings of their children.
+    #[test]
+    fn the_images_of_the_page_transitions_are_textures_of_the_glsl_es() {
+        for (name, children, glsl) in [
+            ("dissolve-transition", 3, shader_effect_glsl::<DissolveTransitionEffect>()),
+            ("mask-transition", 2, shader_effect_glsl::<MaskTransitionEffect>()),
+        ] {
+            let glsl = glsl.unwrap_or_else(|| panic!("{name}: a shader effect")).unwrap_or_else(|error| panic!("{name}: {error}"));
+            assert_glsl_es(&glsl.fragment, true, &format!("{name}, fragment"));
+            let mut textures: Vec<u32> = glsl.textures.iter().map(|(binding, _)| *binding).collect();
+            textures.sort_unstable();
+            let expected: Vec<u32> = std::iter::once(SHADER_WGSL_CONTENT_BINDING)
+                .chain((0..children).map(|child| SHADER_WGSL_CHILDREN_BINDING + child))
+                .collect();
+            assert_eq!(expected, textures, "{name}");
+        }
     }
 
     #[test]

@@ -36,12 +36,46 @@ pub(crate) fn start() -> ferroui_controls::testing::UnitTestApplicationScope {
 pub(crate) fn start_winui() -> ferroui_controls::testing::UnitTestApplicationScope {
     ferroui_markup_xaml::register_types();
     ferroui_themes_winui::register_types();
-    let services =
-        TestServices::styled_window().with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style());
+    let services = TestServices::styled_window()
+        .with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style())
+        .with_global_clock(std::rc::Rc::new(IdleClock::default()));
     let scope = UnitTestApplication::start(services);
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
     scope
 }
+
+/// The clock of the transitions of the WinUI theme in the tests: it never pulses, as the clock of
+/// the theme's own test host, so a transition stays at its start until a test moves it.
+#[cfg(feature = "theme")]
+#[derive(Default)]
+struct IdleClock {
+    ticks: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
+    state: std::cell::Cell<ferroui_base::animation::PlayState>,
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for IdleClock {
+    fn subscribe(
+        &self,
+        observer: std::rc::Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
+    ) -> std::rc::Rc<dyn ferroui_base::reactive::IDisposable> {
+        self.ticks.subscribe(observer)
+    }
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::animation::IClock for IdleClock {
+    fn play_state(&self) -> ferroui_base::animation::PlayState {
+        self.state.get()
+    }
+
+    fn set_play_state(&self, value: ferroui_base::animation::PlayState) {
+        self.state.set(value);
+    }
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::animation::IGlobalClock for IdleClock {}
 
 /// Raises a key event of `key` on `element`, as the keyboard does: `KeyDown`, or `KeyUp` with
 /// `up` (the NumberBox commits its text on the key-up of Enter, as WinUI's does).
@@ -118,6 +152,22 @@ fn all_reviewed_native_adaptations_load_real_controls() {
         }
     }
     assert!(errors.is_empty(), "{}", errors.join("\n"));
+}
+
+#[test]
+fn adaptation_port_states_match_port_status() {
+    // `port-status.json` is written with an indent of two spaces: a page is a key of `pages` and
+    // its status is the first member of its entry.
+    let status = include_str!("port-status.json");
+    for adaptation in examples::ADAPTATIONS {
+        let state = if adaptation.ported { "ported" } else { "partial" };
+        let entry = format!("\n    \"{}\": {{\n      \"status\": \"{state}\"", adaptation.page_id);
+        assert!(
+            status.contains(&entry),
+            "{}: port-status.json does not record it as {state}",
+            adaptation.page_id
+        );
+    }
 }
 
 #[test]
