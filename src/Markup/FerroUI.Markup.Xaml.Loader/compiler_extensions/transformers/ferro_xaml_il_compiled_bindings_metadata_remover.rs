@@ -2,7 +2,7 @@
 
 use std::rc::Rc;
 
-use xamlx::ast::{IXamlAstNode, XamlAstNodeExtensions};
+use xamlx::ast::{IXamlAstNode, XamlAstConstructableObjectNode, XamlAstNodeExtensions, XamlAstObjectNode};
 use xamlx::exceptions::XamlResult;
 use xamlx::transform::{AstTransformationContext, IXamlAstTransformer};
 
@@ -12,7 +12,9 @@ use super::{
 };
 
 /// Unwraps the scope markers the compiled binding transformers need (nested name scopes, data
-/// context types, `x:CompileBindings` scopes) once the binding paths are resolved.
+/// context types, `x:CompileBindings` scopes) once the binding paths are resolved, and (not
+/// upstream) takes out the `x:DefaultBindMode` directives that gave `{x:Bind}` its default mode
+/// (docs/porting/x-bind.md, step X5).
 pub struct FerroXamlIlCompiledBindingsMetadataRemover;
 
 impl IXamlAstTransformer for FerroXamlIlCompiledBindingsMetadataRemover {
@@ -32,6 +34,11 @@ impl IXamlAstTransformer for FerroXamlIlCompiledBindingsMetadataRemover {
             } else if let Some(compile_bindings) = node.cast::<FerroXamlIlCompileBindingsNode>() {
                 node = compile_bindings.value();
             } else {
+                if let Some(object) = node.cast::<XamlAstConstructableObjectNode>() {
+                    super::x_bind_directives::remove_default_bind_mode(&object.children);
+                } else if let Some(object) = node.cast::<XamlAstObjectNode>() {
+                    super::x_bind_directives::remove_default_bind_mode(&object.children);
+                }
                 return Ok(node);
             }
         }

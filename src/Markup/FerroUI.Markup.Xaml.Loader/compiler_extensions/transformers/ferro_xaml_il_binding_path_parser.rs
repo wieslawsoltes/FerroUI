@@ -75,6 +75,10 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathParser {
         if is_x_bind {
             // The root source of an `x:Bind` in a typed template is its item.
             super::x_bind::prepare_scope(context, &binding)?;
+            // An `x:Bind` of an event subscribes its handler through the bindings of its root.
+            super::x_bind::prepare_event(context, &binding)?;
+            // The mode of the nearest `x:DefaultBindMode` when the binding names none.
+            super::x_bind::apply_default_mode(context, &binding)?;
         }
 
         let converted_node =

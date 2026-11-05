@@ -22,7 +22,7 @@ pub use reflection_binding_extension::ReflectionBindingExtension;
 pub use relative_source_extension::RelativeSourceExtension;
 pub use resolve_by_name_extension::ResolveByNameExtension;
 pub use static_resource_extension::StaticResourceExtension;
-pub use x_bind::{XBindDiagnostic, XBindErrors, XBindExtension, XBinding, XBindings};
+pub use x_bind::{DeferredElement, XBindDiagnostic, XBindErrors, XBindExtension, XBinding, XBindings};
 
 #[cfg(test)]
 mod markup_extensions_tests;

@@ -1,0 +1,13 @@
+<ContentControl xmlns="https://github.com/ferroui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ContentControl.ContentTemplate>
+    <DataTemplate x:DataType="Button">
+      <StackPanel>
+        <TextBlock Text="{x:Bind Content}" />
+        <TextBlock x:Phase="1" Text="{x:Bind Tag}" />
+        <TextBlock x:Phase="3" Text="{x:Bind Name}" />
+        <TextBlock x:Phase="3" Text="{x:Bind Tag, Mode=OneWay}" />
+      </StackPanel>
+    </DataTemplate>
+  </ContentControl.ContentTemplate>
+</ContentControl>
