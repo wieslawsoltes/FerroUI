@@ -59,6 +59,7 @@ mod i_pointer;
 mod i_pointer_device;
 mod i_scrollable;
 mod input_element;
+mod input_element_effects;
 mod input_element_gestures;
 mod input_extensions;
 mod input_manager;

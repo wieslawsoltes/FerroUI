@@ -19,7 +19,7 @@ use crate::{
     StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use crate::collections::FerroList;
-use std::cell::{Cell, OnceCell};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
 /// Implements input-related functionality for a control.
@@ -38,6 +38,9 @@ pub struct InputElement {
     pub(super) is_context_menu_on_holding: Cell<bool>,
     key_bindings: OnceCell<FerroList<Ref<KeyBinding>>>,
     gesture_recognizers: OnceCell<GestureRecognizerCollection>,
+    /// The interactive effect the element routes its pointer input to, with
+    /// the guards of its handlers (#455, E7; `input_element_effects.rs`).
+    pub(super) effect_input: RefCell<Option<super::input_element_effects::EffectInputAttachment>>,
 }
 
 ferro_class! {
@@ -586,6 +589,8 @@ impl InputElement {
         Self::context_requested_event();
         Self::context_canceled_event();
         Self::register_gesture_events();
+        // The routing of pointer input to interactive effects (#455, E7).
+        Self::register_effect_input();
 
         Self::is_enabled_property().changed().subscribe(|e| {
             if let Some(sender) = e.sender().downcast_ref::<InputElement>() {
@@ -670,6 +675,7 @@ impl InputElement {
             is_context_menu_on_holding: Cell::new(false),
             key_bindings: OnceCell::new(),
             gesture_recognizers: OnceCell::new(),
+            effect_input: RefCell::new(None),
         }
     }
 

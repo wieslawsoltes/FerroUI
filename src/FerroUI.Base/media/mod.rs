@@ -261,8 +261,8 @@ pub use drawing_group::DrawingGroup;
 pub use drawing_image::DrawingImage;
 pub use effects::{
     BlurEffect, CustomEffect, CustomEffectClass, CustomEffectRegistrationError, CustomEffectRegistry,
-    DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions,
-    EffectParameterValue, IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect,
+    DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions, EffectHostContext,
+    EffectParameterValue, IBlurEffect, IEffectInputHandler, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect,
     IMutableEffect, ImmutableBlurEffect, ImmutableCustomEffect, ImmutableDropShadowDirectionEffect,
     ImmutableDropShadowEffect, ImmutableLuminanceToAlphaEffect,
 };
