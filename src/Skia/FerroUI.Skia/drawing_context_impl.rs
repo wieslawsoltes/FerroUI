@@ -351,6 +351,10 @@ impl DrawingContextImpl {
             .or_else(SkiaPlatform::options)
             .is_some_and(|options| options.use_opacity_save_layer);
 
+        // The Skia images of effect images whose last handle was dropped
+        // (#455, E6) go with this frame, and their textures with its flush.
+        crate::custom_shader_effects::release_dropped_images();
+
         let mut context = Self {
             disposables,
             intermediate_surface_dpi: create_info.dpi,
@@ -1126,7 +1130,7 @@ impl DrawingContextImpl {
             paint.set_image_filter(filter);
             PushedEffect::Shader { inherited_opacity }
         } else {
-            let Some(shader) = overlay_shader(&program, effect, &layer) else {
+            let Some(shader) = overlay_shader(&program, effect, &layer, self.gr_context.as_deref()) else {
                 SkPaintCache::return_reset(paint);
                 return None;
             };

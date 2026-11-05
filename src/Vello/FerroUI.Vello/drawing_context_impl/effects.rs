@@ -494,6 +494,13 @@ impl DrawingContextImpl {
     /// failed (reported once): the effect is then drawn as an effect without
     /// a factory.
     fn push_shader_effect(&mut self, clip_rect: Option<Rect>, effect: &ImmutableCustomEffect) -> bool {
+        // Images are the children of overlays only (#455, E6): a description
+        // that breaks this is drawn as an effect without a factory in every
+        // mode, as the device refuses its module.
+        if effect.check_shader_children().is_err() {
+            effect.report_unhandled("Vello");
+            return false;
+        }
         let Some((area, scale)) = self.shader_effect_area(clip_rect) else {
             return false;
         };
