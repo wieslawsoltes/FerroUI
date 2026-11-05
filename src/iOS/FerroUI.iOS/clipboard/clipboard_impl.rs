@@ -94,7 +94,7 @@ impl ClipboardImpl {
 
         if *format == DataFormat::file() {
             let file = data_transfer_item.try_get_value_async(&DataFormat::file()).await?;
-            return Ok(file.map(|file| NSString::from_str(file.path().absolute_uri()).into()));
+            return Ok(file.map(|file| NSString::from_str(&file.path().to_string()).into()));
         }
 
         if *format == DataFormat::bitmap() {
