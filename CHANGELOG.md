@@ -123,6 +123,21 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Migration
 
+- **Signatures migration: the summary of C5** (#423, [docs/idiomatic-rust-signatures.md](docs/idiomatic-rust-signatures.md)). The public signatures take and return std and chosen-crate types; markup is unchanged (its names and text formats load as before). A renamed type remains one release as a `#[deprecated(since = "0.5.0")]` alias or type with its `From` conversions; a trait method has one signature, so an implementation of a changed trait changes with it. The entries of each step below have the details.
+
+| Old | New | Step |
+|---|---|---|
+| `ferroui_base::animation::TimeSpan`, `NegativeTimeSpanError` | `SignedDuration`, `NegativeDurationError` (the same types; aliases until after 0.5) | T1 |
+| `SignedDuration` timer intervals and delays (caret blink, `ScrollBar`, `AutoCompleteBox`, connected animations, behaviors, dock) | `std::time::Duration`; a negative span is rejected (O2) | T2, T3 |
+| `Uri` base URIs and include sources of markup loading, `IUriContext` | `url::Url` base URIs, `UriRef` sources (`UriRef::parse_absolute`, `UriRef::parse`) | U1, U2 |
+| `Uri` in `IAssetLoader`, `AssetLoader`, `FontFamily`, the font keys and collections | `Url` (absolute) and `UriRef` (may be relative) | U3 |
+| `Uri` in `ILauncher`, `IStorageItem::path`, `IStorageProvider`, activation, `HyperlinkButton::NavigateUri`, the designer transports | `Url`, and `UriRef` for `IStorageItem::path` and `NavigateUri`; `try_get_local_path`, `StorageProviderHelpers::local_path` | U4 |
+| `DateTime`, `DateTimeOffset` holding an instant (`IRuntimePlatform::get_utc_now`, `StorageItemProperties`, ...) | `std::time::SystemTime`, `ferroui_base::utilities::system_time_now()`; calendar values keep `DateTime` and `DateTimeOffset` (O4) | D1 |
+| `ferroui_splat::Guid`, `ferroui_remote_protocol::Guid` | `uuid::Uuid` (`Uuid::from(guid)`; the wire layout is unchanged) | G1 |
+| `CultureInfo` as the identity of a culture (the `Language` properties, text and fonts, `current_culture`) | `icu_locale_core::Locale` (`ferroui_base::utilities::Locale`, `locale!`), `current_locale` | L1 |
+| `CultureInfo` constructors, `ICultureDataProvider` keyed by name | `CultureInfo::from_locale`, `locale()`; the `_by_locale` methods; converters keep `&CultureInfo` (O3) | L2 |
+| `ferroui_system::collections::generic::Dictionary`; `Dictionary` in the DynamicData and dock signatures | `SlotOrderMap` (alias until after 0.5); `HashMap`, or `IndexMap` where the order of addition is observable | X1 |
+
 - **Async migration: the summary of C4** (#423, [docs/idiomatic-rust-async.md](docs/idiomatic-rust-async.md)). Every old type of the table is `#[deprecated(since = "0.5.0")]`, keeps its behaviour, converts to its replacement with `From`, and is removed in the release after 0.5; the entries of each step below have the details. Nothing in the workspace uses them outside of their own tests, the ordering tests that pin the old forms, and a few compatibility paths, all under `#[allow(deprecated)]`.
 
 | Old | New | Step |
