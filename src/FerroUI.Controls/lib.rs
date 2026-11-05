@@ -345,6 +345,13 @@ mod number_box_tests;
 mod radio_buttons_tests;
 #[cfg(test)]
 mod rating_control_tests;
+// WinUI's BreadcrumbBar (docs/porting/winui-controls.md, G2 of #418).
+mod breadcrumb_bar;
+mod breadcrumb_bar_item;
+pub use breadcrumb_bar::{BreadcrumbBar, BreadcrumbBarItemClickedEventArgs};
+pub use breadcrumb_bar_item::BreadcrumbBarItem;
+#[cfg(test)]
+mod breadcrumb_bar_tests;
 // WinUI's navigation: Frame, its pages and the navigation model in the namespace
 // FerroUI.Navigation (docs/porting/winui-controls.md, section 7).
 pub mod navigation;

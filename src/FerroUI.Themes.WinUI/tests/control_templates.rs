@@ -288,6 +288,8 @@ control_tests! {
     drop_down_button => "DropDownButton";
     expander => "Expander";
     numeric_up_down => "NumericUpDown";
+    breadcrumb_bar => "BreadcrumbBar";
+    breadcrumb_bar_item => "BreadcrumbBarItem";
     pips_pager => "PipsPager";
     refresh_container => "RefreshContainer";
     refresh_visualizer => "RefreshVisualizer";
@@ -551,6 +553,56 @@ fn the_input_controls_get_their_parts_and_resources_from_the_theme() {
     assert_eq!(8.0, background.spacing());
     assert_eq!(5, background.children().count());
     assert_eq!(16.0, background.children().get(0).bounds().width);
+    window.close();
+}
+
+/// WinUI's BreadcrumbBar (`Controls/BreadcrumbBar.xaml`; docs/porting/winui-controls.md, G2) gets
+/// its panel from the theme, its items show their content with a chevron, the last one without,
+/// and the items that do not fit go to the ellipsis, whose flyout lists them.
+#[test]
+fn the_breadcrumb_bar_gets_its_parts_and_states_from_the_theme() {
+    use ferroui_controls::primitives::BreadcrumbLayoutPanel;
+    use ferroui_controls::{BreadcrumbBar, Button, ItemsSource, StackPanel, TextBlock};
+
+    let _app = start_themed_application();
+    let bar = BreadcrumbBar::new();
+    bar.set_items_source(Some(ItemsSource::from_strs(["Home", "Documents", "Design", "Specifications", "Archive"])));
+    let panel = StackPanel::new();
+    panel.set_width(220.0);
+    panel.children().add(&bar);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    let layout = part(&bar, "PART_ItemsRepeater").cast::<BreadcrumbLayoutPanel>().expect("the panel");
+    let items = bar.realized_items();
+    assert_eq!(6, items.len());
+    // The items do not fit in 220: the ellipsis is shown first.
+    assert!(layout.ellipsis_is_rendered());
+    assert!(items[0].bounds().width > 0.0);
+    let first = &items[1];
+    assert!(part(first, "PART_ItemButton").cast::<Button>().expect("a button").is_visible() || first.bounds().width == 0.0);
+    let last = &items[5];
+    assert!(last.bounds().width > 0.0);
+    assert!(!part(last, "PART_ItemButton").is_visible());
+    assert!(part(last, "PART_LastItemContentPresenter").is_visible());
+    let chevron = part(&items[4], "PART_ChevronTextBlock").cast::<TextBlock>().expect("a text block");
+    // BreadcrumbBarChevronLeftToRight
+    assert_eq!(Some("\u{E974}"), chevron.text().as_deref());
+    assert!(part(&items[0], "PART_EllipsisTextBlock").is_visible());
+    // The flyout of the ellipsis lists the hidden items, the last hidden first.
+    items[0].on_ellipsis_click_for_tests();
+    let hidden = items[0].ellipsis_drop_down_items();
+    assert!(!hidden.is_empty());
+    assert!(hidden.iter().all(|item| item.is_ellipsis_drop_down_item()));
     window.close();
 }
 

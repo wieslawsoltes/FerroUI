@@ -213,6 +213,7 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "AutoSuggestionBoxTextChangeReason",
     "AutoSuggestBoxTextChangedEventArgs",
     "AutoSuggestBoxSuggestionChosenEventArgs",
+    "BreadcrumbBarItemClickedEventArgs",
     "AutoSuggestBoxQuerySubmittedEventArgs",
     // WinUI rich text (crate::documents::MARKUP_TYPES).
     "Typography",

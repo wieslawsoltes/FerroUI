@@ -117,6 +117,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <AutoSuggestBoxTextChangedEventArgs as MarkupTyped>::MARKUP,
     <AutoSuggestBoxSuggestionChosenEventArgs as MarkupTyped>::MARKUP,
     <AutoSuggestBoxQuerySubmittedEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's BreadcrumbBar, declared next to the type (G2 of #418).
+    <crate::BreadcrumbBarItemClickedEventArgs as MarkupTyped>::MARKUP,
     // The WinUI materials (winui-materials.md), declared next to the types.
     <crate::media::ApplicationTheme as MarkupTyped>::MARKUP,
     <crate::media::RevealBrushState as MarkupTyped>::MARKUP,

@@ -127,16 +127,6 @@
       "reason": "ItemContainer (the container of ItemsView): no FerroUI control."
     },
     {
-      "document": "controls/dev/Breadcrumb/BreadcrumbBar.xaml",
-      "key": "*",
-      "reason": "BreadcrumbBar: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/Breadcrumb/BreadcrumbBar_themeresources.xaml",
-      "key": "*",
-      "reason": "BreadcrumbBar: no FerroUI control."
-    },
-    {
       "document": "controls/dev/PagerControl/PagerControl.xaml",
       "key": "*",
       "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager)."

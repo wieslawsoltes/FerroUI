@@ -85,6 +85,8 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `AutoSuggestBox` | WinUI's AutoSuggestBox: its template is converted from WinUI's DefaultAutoSuggestBoxStyle into the WinUI theme and its derived themes | W6 |
 | `RadioButtons` | WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml into the WinUI theme and its derived themes | W6 |
 | `RatingControl` | WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml into the WinUI theme and its derived themes | W6 |
+| `BreadcrumbBar` | WinUI's BreadcrumbBar: its template is converted from WinUI's BreadcrumbBar.xaml into the WinUI theme and its derived themes | G2 of #418 |
+| `BreadcrumbBarItem` | WinUI's BreadcrumbBarItem: its template is converted from WinUI's BreadcrumbBar.xaml into the WinUI theme and its derived themes | G2 of #418 |
 | `Frame` | WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationView` | WinUI's NavigationView: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationViewItem` | WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles into the WinUI theme and its derived themes | W8 |
