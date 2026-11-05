@@ -732,7 +732,7 @@
         "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/x_bind.rs",
         "src/Markup/FerroUI.Markup.Xaml.Loader/compiler_extensions/transformers/x_bind_path.rs"
       ],
-      "notes": "Kept as written by the default WinUIXBindPolicy::Compile and compiled by the x:Bind core of the XAML compiler (docs/porting/x-bind.md): the root source and typed DataTemplate and ControlTemplate scopes, OneTime default, OneWay/TwoWay with update triggers, WinUI's path grammar (casts, indexers, attached and static members, functions, BindBack), converters, fallback and target null values, event binding, and the Initialize/Update/StopTracking lifecycle, initialized when the root is attached to a visual tree. Nested x:Bind is reported by the importer as WinUI reports it; WinUIXBindPolicy::Reject reports every x:Bind. The deviations of the core are listed in x-bind.md; this is not complete compiled-binding parity.",
+      "notes": "Kept as written by the default WinUIXBindPolicy::Compile and compiled by the x:Bind core of the XAML compiler (docs/porting/x-bind.md): the root source and typed DataTemplate and ControlTemplate scopes, OneTime default, OneWay/TwoWay with update triggers, WinUI's path grammar (casts, indexers, attached and static members, functions, BindBack), converters, fallback and target null values, event binding, and the Initialize/Update/StopTracking lifecycle, initialized when the root is attached to a visual tree or populated while it is live. Nested x:Bind is reported by the importer as WinUI reports it; WinUIXBindPolicy::Reject reports every x:Bind. The deviations of the core are listed in x-bind.md; this is not complete compiled-binding parity.",
       "tests": [
         {
           "name": "xbind_is_kept_as_written_for_the_compiler_core",
@@ -761,6 +761,14 @@
         {
           "name": "winui_diagnostics_of_the_core_are_load_errors",
           "path": "src/Markup/FerroUI.Markup.Xaml.WinUI/x_bind_tests.rs"
+        },
+        {
+          "name": "winui_preview_binds_between_controls_one_way_and_two_way_on_the_core",
+          "path": "samples/WinUIGallery/x_bind_tests.rs"
+        },
+        {
+          "name": "winui_preview_of_every_x_bind_sample_reaches_the_core",
+          "path": "samples/WinUIGallery/x_bind_tests.rs"
         }
       ]
     },

@@ -1,5 +1,5 @@
 <!-- Ported from the three pinned TitleBar examples of WinUI Gallery (14061eea); see ../NOTICE.md.
-     x:Bind and ElementName bindings are ordinary Bindings to the named options. The
+     The bindings to the named options are x:Bind, compiled by the x:Bind core (#525). The
      ImageIconSource of the gallery icon is a PathIconSource (FerroUI has no ImageIconSource) and
      the PersonPicture of the right header a composed circle with the initials (FerroUI has no
      PersonPicture). The two "Show window" buttons open the source's sample windows
@@ -19,10 +19,10 @@
               BorderBrush="{DynamicResource SurfaceStrokeColorDefaultBrush}"
               BorderThickness="1" CornerRadius="8">
         <TitleBar x:Name="TitleBarControl"
-                  Title="{Binding #TitleBox.Text, Mode=OneWay}"
-                  Subtitle="{Binding #SubtitleBox.Text, Mode=OneWay}"
-                  IsBackButtonVisible="{Binding #BackButtonToggle.IsChecked, Mode=OneWay}"
-                  IsPaneToggleButtonVisible="{Binding #PaneToggle.IsChecked, Mode=OneWay}">
+                  Title="{x:Bind TitleBox.Text, Mode=OneWay}"
+                  Subtitle="{x:Bind SubtitleBox.Text, Mode=OneWay}"
+                  IsBackButtonVisible="{x:Bind BackButtonToggle.IsChecked, Mode=OneWay}"
+                  IsPaneToggleButtonVisible="{x:Bind PaneToggle.IsChecked, Mode=OneWay}">
           <TitleBar.Resources>
             <!-- TitleBar.Content uses Center alignment by default. Override to Stretch so the
                  search box can grow with the title bar. -->

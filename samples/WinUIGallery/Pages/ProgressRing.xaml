@@ -1,4 +1,5 @@
-<!-- Ported from both pinned ProgressRing examples; see ../NOTICE.md. -->
+<!-- Ported from both pinned ProgressRing examples; see ../NOTICE.md. IsActive keeps the source's
+     OneWay x:Bind, compiled by the x:Bind core (#525); IsOn is IsChecked of the ToggleSwitch. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <TextBlock Text="An indeterminate ProgressRing" FontSize="18" />
@@ -6,7 +7,7 @@
     <ProgressRing x:Name="ProgressRing1" Width="60" Height="60"
                         Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"
                         AutomationProperties.Name="Progress image"
-                        IsActive="{Binding #ProgressToggle.IsChecked, Mode=OneWay}" />
+                        IsActive="{x:Bind ProgressToggle.IsChecked, Mode=OneWay}" />
     <StackPanel Grid.Column="1" Spacing="12">
       <ToggleSwitch x:Name="ProgressToggle" Content="Progress Options" IsChecked="True"
                     OffContent="Do work" OnContent="Working"
