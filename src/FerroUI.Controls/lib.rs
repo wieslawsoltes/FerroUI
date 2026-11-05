@@ -345,6 +345,13 @@ mod number_box_tests;
 mod radio_buttons_tests;
 #[cfg(test)]
 mod rating_control_tests;
+// WinUI's PersonPicture and the contact it shows (docs/porting/winui-controls.md, G2 of #418).
+mod contact;
+mod person_picture;
+pub use contact::Contact;
+pub use person_picture::PersonPicture;
+#[cfg(test)]
+mod person_picture_tests;
 // WinUI's PagerControl (docs/porting/winui-controls.md, G2 of #418).
 mod pager_control;
 pub use pager_control::{

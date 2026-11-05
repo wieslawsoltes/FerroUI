@@ -43,6 +43,7 @@ The work comes from pull request #286 (branch `feat/winui-gallery-compat`), whic
 | `AutoSuggestBox`, its text-changed, suggestion-chosen and query-submitted arguments, `AutoSuggestionBoxTextChangeReason` | `dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`, `controls/dev/AutoSuggestBox` | `AutoCompleteBox` (upstream; the control filters) | A separate type: in WinUI the application filters on `TextChanged`, with a reason. | W6 |
 | `RadioButtons` | `controls/dev/RadioButtons` | `RadioButton` (upstream) | New; `RadioButton` is its container, and the spacing comes from the `RadioButtonsColumnSpacing` and `RadioButtonsRowSpacing` resources. | W6 |
 | `RatingControl`, `RatingItemInfo`, `RatingItemFontInfo`, `RatingItemImageInfo` | `controls/dev/RatingControl` | none | New. | W6 |
+| `PersonPicture`, `PersonPictureTemplateSettings`, the contact it shows (`Contact`) | `controls/dev/PersonPicture` | none | New; `Contact` holds the members of the Windows Runtime contact the control reads (section 10.10). | G2a of #418 |
 | `PagerControl`, `PagerControlTemplateSettings`, `PagerControlDisplayMode`, `PagerControlButtonVisibility`, the selected-index-changed arguments | `controls/dev/PagerControl` | `PipsPager` (upstream; WinUI's PipsPager, another control in WinUI too) | New; the number panel is an items control (section 10.9). | G2a of #418 |
 | `Frame`, `FramePage` (WinUI `Page`), the navigation types (`NavigationMode`, `NavigationCacheMode`, `NavigationEventArgs`, `NavigatingCancelEventArgs`, `NavigationFailedEventArgs`, `PageStackEntry`) | `dxaml/xcp/dxaml/lib/Frame_Partial.cpp`, `Page_Partial.cpp`, `NavigationHistory.cpp` | `Page`, `NavigationPage`, `PageNavigationHost` (upstream) | Separate types (section 7). `FramePage` keeps the name `Page` for upstream; the navigation types are in `ferroui_controls::navigation`, so `navigation::NavigationEventArgs` does not collide with the upstream `NavigationEventArgs`. | W8 |
 | `NavigationView`, `NavigationViewItemBase`, `NavigationViewItem`, `NavigationViewItemHeader`, `NavigationViewItemSeparator`, their events and arguments | `controls/dev/NavigationView` | `SplitView` (upstream; NavigationView builds on it), `DrawerPage` (upstream; its WinUI template is drawn after the pane of NavigationView) | New. Items are hosted without ItemsRepeater and `SelectionModel` until F1; the overflow of the top pane, the transitions and `NavigationViewItemPresenter` are recorded as missing. | W8 |
@@ -86,6 +87,7 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `AutoSuggestBox` | WinUI's AutoSuggestBox: its template is converted from WinUI's DefaultAutoSuggestBoxStyle into the WinUI theme and its derived themes | W6 |
 | `RadioButtons` | WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml into the WinUI theme and its derived themes | W6 |
 | `RatingControl` | WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml into the WinUI theme and its derived themes | W6 |
+| `PersonPicture` | WinUI's PersonPicture: its template is converted from WinUI's PersonPicture.xaml into the WinUI theme and its derived themes | G2 of #418 |
 | `PagerControl` | WinUI's PagerControl: its template is converted from WinUI's PagerControl.xaml into the WinUI theme and its derived themes | G2 of #418 |
 | `Frame` | WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationView` | WinUI's NavigationView: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
@@ -397,7 +399,7 @@ ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `I
 | `SampleSystemBackdropsWindow` adds its Activated, Closed and ActualThemeChanged handlers for every backdrop it sets. | Added once per window. | The repeated handlers of the source are a leak, not behaviour. |
 | `UIHelper.AnnounceActionForAccessibility` (a UIA notification). | The text of a polite live region. | FerroUI has no notification event; live regions are its announcement. |
 | `TitleBarHelper.ApplySystemThemeToCaptionButtons`. | Not called: the decorations of the window follow its theme. | The caption buttons are the window's. |
-| `ImageIconSource` of the gallery icon and `PersonPicture` in the TitleBar examples. | A `PathIconSource` and a composed circle with the initials. | Neither type is on main (PersonPicture is G2). |
+| `ImageIconSource` of the gallery icon and `PersonPicture` in the TitleBar examples. | A `PathIconSource` and a composed circle with the initials. | Neither type was on main when G1 landed (PersonPicture is G2a since). |
 | The ThemeShadow, the AcrylicBrush resources and the SolidColorBrush items with `ColorTemplate`. | A ThemeShadow resource set as `Shadow`; the brushes made in Rust with the source's values, page resources under the source's keys; composed swatch items, the handlers map the index to the colour. | As the templates of the WinUI theme share their shadow; the C# handlers change the brushes. |
 | The Hyperlink of the Acrylic and TitleBar intros to other gallery pages. | Text. | A page of the gallery cannot navigate its shell. |
 | Math mode and MathML of RichEditBox. | `not-applicable`, with a diagnostic on the page. | They are the math engine of the Windows RichEdit control. |
@@ -411,6 +413,21 @@ Phase G2 ports the WinUI controls the pending pages need, one control (or one sm
 | Page | Examples | State | Rust | Tests |
 |---|---:|---|---|---|
 | PagerControl | 3 of 3 | ported | `Pages/PagerControl.xaml` (no code-behind upstream) | `feedback_samples_tests.rs` |
+| PersonPicture | 1 of 1 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
+
+### 10.8 WinUI API and Gallery scanner (W10b)
+
+`scripts/winui-gallery/scan.py` (from #286) compares the public API of WinUI and the pages of WinUI Gallery with FerroUI's sources at the pins of `docs/porting/winui-gallery/data/sources.lock.json` (WinUI `7e4b0c2`, O13; Gallery `14061eea`). Its result is a report of candidates: 1,545 public WinUI types and 7,462 public members are scanned, a same-name Rust type or member in the mapped namespace is a *candidate*, and no candidate counts as behaviour, which the tests of the controls and of the sample establish. The pages have the states of `samples/WinUIGallery/port-status.json`.
+
+| #286 | Port | Why |
+|---|---|---|
+| Committed snapshots of the pinned sources (`upstream-api.json`, `gallery-pages.json`, `gallery-usage.json`, `source-files.json`, about 9 MB) with their hashes in the lock, and committed maps (`api-map.json` and others, about 7 MB). | The scan reads the pinned checkouts (`--winui-root`, `--gallery-root`, verified against the pins); the inventories and maps go to `target/winui-gallery-scan` and are an artifact of the workflow. Committed: the pins, the reviewed `api-mappings.json`, and the generated `summary.json` and `REPORT.md`. | O8. |
+| `api-evidence.json` and execution records (`data/executions/`) promote contracts and pages to `verified`; `--require-complete` gates on it. | Not taken: no contract or page is `verified`, and the scanner refuses the state for a page. | The records are per-run evidence (O8); behaviour is what the tests prove. |
+| `existing_api.py` and `ferroui-api-baseline.json`. | Not taken. | O9: the API gate guards the API. |
+| The implementation and test anchors of `api-mappings.json` name the importer in `ferroui-markup-xaml-loader` and the x:Bind adapter in `ferroui-markup-xaml`. | The anchors name `ferroui-markup-xaml-winui` (W9). | Where they landed. |
+| The event-target generator reads the committed snapshot. | Removed with the x:Bind adapter (#525, X6): the importer no longer rejects an x:Bind of an event, which the x:Bind core binds. | The table had no other user. |
+
+The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml sparsely: `controls/dev`, `controls/idl`, `dxaml/xcp/tools/XCPTypesAutoGen`), runs the tests of the scripts and `scan.py --check`, and puts the report in the run summary. It blocks a pull request only on its own paths (the scripts, `docs/porting/winui-gallery/`); at night it reports the drift that changes of the controls make to the report, without failing.
 
 ### 10.9 PagerControl (G2a)
 
@@ -426,16 +443,14 @@ Phase G2 ports the WinUI controls the pending pages need, one control (or one sm
 | The left and right keys move the focus from the root grid, also with the gamepad's D-pad. | From the control (the key down of the root grid bubbles to it); no gamepad keys. | FerroUI has no gamepad keys. |
 | A selected page out of range is coerced by setting it again inside its change, which raises `SelectedIndexChanged` for the value set and for the coerced value; setting the maximum of the number box when the template is applied coerces its value, which selects a page. | The same. | Kept: the order of the events is WinUI's. |
 
-### 10.8 WinUI API and Gallery scanner (W10b)
+### 10.10 PersonPicture (G2a)
 
-`scripts/winui-gallery/scan.py` (from #286) compares the public API of WinUI and the pages of WinUI Gallery with FerroUI's sources at the pins of `docs/porting/winui-gallery/data/sources.lock.json` (WinUI `7e4b0c2`, O13; Gallery `14061eea`). Its result is a report of candidates: 1,545 public WinUI types and 7,462 public members are scanned, a same-name Rust type or member in the mapped namespace is a *candidate*, and no candidate counts as behaviour, which the tests of the controls and of the sample establish. The pages have the states of `samples/WinUIGallery/port-status.json`.
+`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`.
 
-| #286 | Port | Why |
+| WinUI | FerroUI | Why |
 |---|---|---|
-| Committed snapshots of the pinned sources (`upstream-api.json`, `gallery-pages.json`, `gallery-usage.json`, `source-files.json`, about 9 MB) with their hashes in the lock, and committed maps (`api-map.json` and others, about 7 MB). | The scan reads the pinned checkouts (`--winui-root`, `--gallery-root`, verified against the pins); the inventories and maps go to `target/winui-gallery-scan` and are an artifact of the workflow. Committed: the pins, the reviewed `api-mappings.json`, and the generated `summary.json` and `REPORT.md`. | O8. |
-| `api-evidence.json` and execution records (`data/executions/`) promote contracts and pages to `verified`; `--require-complete` gates on it. | Not taken: no contract or page is `verified`, and the scanner refuses the state for a page. | The records are per-run evidence (O8); behaviour is what the tests prove. |
-| `existing_api.py` and `ferroui-api-baseline.json`. | Not taken. | O9: the API gate guards the API. |
-| The implementation and test anchors of `api-mappings.json` name the importer in `ferroui-markup-xaml-loader` and the x:Bind adapter in `ferroui-markup-xaml`. | The anchors name `ferroui-markup-xaml-winui` (W9). | Where they landed. |
-| The event-target generator reads the committed snapshot. | Removed with the x:Bind adapter (#525, X6): the importer no longer rejects an x:Bind of an event, which the x:Bind core binds. | The table had no other user. |
-
-The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml sparsely: `controls/dev`, `controls/idl`, `dxaml/xcp/tools/XCPTypesAutoGen`), runs the tests of the scripts and `scan.py --check`, and puts the report in the run summary. It blocks a pull request only on its own paths (the scripts, `docs/porting/winui-gallery/`); at night it reports the drift that changes of the controls make to the report, without failing.
+| `Contact` is the Windows Runtime's `Windows.ApplicationModel.Contacts.Contact`, whose display name the system composes and whose pictures are stream references the control opens and decodes asynchronously, at the size of the control. | `ferroui_controls::Contact` with `Id`, `FirstName`, `LastName`, `DisplayNameOverride` and the four pictures as images; the display name is the override, or the first and last names. The picture of a contact is shown at once. | The Windows contact store has no counterpart off Windows. |
+| `ProfilePicture` and `BadgeImageSource` are `ImageSource`s. | Image brush sources (a bitmap), the type of the image brush that paints them. | The picture is the source of an `ImageBrush`. |
+| The visual states of `VisualStateManager`; the `ImageBrush` BadgeImageBrush is declared in the setter of the state BadgeWithImageSource. | Pseudo-classes (`:photo`, `:nophotoorinitials`, `:group`, `:badge`, `:badgeimage`); the control owns the badge brush and sets it as the fill of BadgingEllipse. | The convention of the WinUI theme (section 5.1). |
+| The initials generator reads UTF-16 code units, so the CJK ranges outside the basic multilingual plane never match. | It reads characters, so those ideographs are symbolic, as the ranges intend. | The intent of the ranges. |
+| The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |

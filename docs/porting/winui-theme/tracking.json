@@ -67314,8 +67314,8 @@
    "key": "DefaultPersonPictureStyle",
    "kind": "Style",
    "target_type": "PersonPicture",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67324,8 +67324,8 @@
    "key": "{PersonPicture}",
    "kind": "Style",
    "target_type": "PersonPicture",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67334,8 +67334,8 @@
    "key": "PersonPictureBadgeGridMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67344,8 +67344,8 @@
    "key": "PersonPictureEllipseBadgeFillThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67354,8 +67354,8 @@
    "key": "PersonPictureEllipseBadgeForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67364,8 +67364,8 @@
    "key": "PersonPictureEllipseBadgeImageSourceStrokeOpacity",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67374,8 +67374,8 @@
    "key": "PersonPictureEllipseBadgeStrokeOpacity",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67384,8 +67384,8 @@
    "key": "PersonPictureEllipseBadgeStrokeThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67394,8 +67394,8 @@
    "key": "PersonPictureEllipseBadgeStrokeThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67404,8 +67404,8 @@
    "key": "PersonPictureEllipseFillStrokeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67414,8 +67414,8 @@
    "key": "PersonPictureEllipseFillThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67424,8 +67424,8 @@
    "key": "PersonPictureEllipseStrokeThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67434,8 +67434,8 @@
    "key": "PersonPictureForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67444,8 +67444,8 @@
    "key": "PersonPictureBadgeGridMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67454,8 +67454,8 @@
    "key": "PersonPictureEllipseBadgeFillThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67464,8 +67464,8 @@
    "key": "PersonPictureEllipseBadgeForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67474,8 +67474,8 @@
    "key": "PersonPictureEllipseBadgeImageSourceStrokeOpacity",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67484,8 +67484,8 @@
    "key": "PersonPictureEllipseBadgeStrokeOpacity",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67494,8 +67494,8 @@
    "key": "PersonPictureEllipseBadgeStrokeThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67504,8 +67504,8 @@
    "key": "PersonPictureEllipseBadgeStrokeThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67514,8 +67514,8 @@
    "key": "PersonPictureEllipseFillStrokeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67524,8 +67524,8 @@
    "key": "PersonPictureEllipseFillThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67534,8 +67534,8 @@
    "key": "PersonPictureEllipseStrokeThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67544,8 +67544,8 @@
    "key": "PersonPictureForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67554,8 +67554,8 @@
    "key": "PersonPictureBadgeGridMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67564,8 +67564,8 @@
    "key": "PersonPictureEllipseBadgeFillThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67574,8 +67574,8 @@
    "key": "PersonPictureEllipseBadgeForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67584,8 +67584,8 @@
    "key": "PersonPictureEllipseBadgeImageSourceStrokeOpacity",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67594,8 +67594,8 @@
    "key": "PersonPictureEllipseBadgeStrokeOpacity",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67604,8 +67604,8 @@
    "key": "PersonPictureEllipseBadgeStrokeThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67614,8 +67614,8 @@
    "key": "PersonPictureEllipseBadgeStrokeThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67624,8 +67624,8 @@
    "key": "PersonPictureEllipseFillStrokeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67634,8 +67634,8 @@
    "key": "PersonPictureEllipseFillThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67644,8 +67644,8 @@
    "key": "PersonPictureEllipseStrokeThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67654,8 +67654,8 @@
    "key": "PersonPictureForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PersonPicture: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90108,6 +90108,7 @@
   "Controls/OverlayPopupHost.xaml",
   "Controls/PagerControl.xaml",
   "Controls/PathIcon.xaml",
+  "Controls/PersonPicture.xaml",
   "Controls/PipsPager.xaml",
   "Controls/PopupRoot.xaml",
   "Controls/ProgressBar.xaml",
@@ -90194,6 +90195,7 @@
   "Resources/NumberBox_themeresources.xaml",
   "Resources/PagerControl_themeresources.xaml",
   "Resources/PasswordBox_themeresources.xaml",
+  "Resources/PersonPicture_themeresources.xaml",
   "Resources/PipsPager_themeresources.xaml",
   "Resources/ProgressBar_themeresources.xaml",
   "Resources/ProgressRing_themeresources.xaml",
@@ -90873,6 +90875,17 @@
    "date": "2026-10-24"
   },
   {
+   "document": "PersonPicture.xaml",
+   "themes": [
+    "{PersonPicture}"
+   ],
+   "batch": "B1",
+   "winui": "PersonPicture: {PersonPicture}, DefaultPersonPictureStyle (PersonPicture.xaml, PersonPicture_themeresources.xaml). A WinUI control in ferroui-controls (G2 of #418); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 0,
+   "date": "not committed"
+  },
+  {
    "document": "PagerControl.xaml",
    "themes": [
     "{PagerControl}"
@@ -90881,7 +90894,7 @@
    "winui": "PagerControl: {PagerControl} (PagerControl.xaml), PagerControlPageNavigationButtonStyle, PagerControlNumberPanelButtonStyle (PagerControl_themeresources.xaml). A WinUI control in ferroui-controls (G2 of #418); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 0,
-   "date": "not committed"
+   "date": "2026-11-05"
   },
   {
    "document": "PipsPager.xaml",
@@ -91400,20 +91413,6 @@
    "items": 125
   },
   {
-   "document": "controls/dev/PersonPicture/PersonPicture.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "PersonPicture: no FerroUI control.",
-   "items": 2
-  },
-  {
-   "document": "controls/dev/PersonPicture/PersonPicture_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "PersonPicture: no FerroUI control.",
-   "items": 33
-  },
-  {
    "document": "controls/dev/MapControl/MapControl.xaml",
    "key": "*",
    "variant": null,
@@ -91929,6 +91928,11 @@
    "ferroui": "TextBox",
    "batch": "B3",
    "note": "FerroUI's TextBox with a PasswordChar; ported as the keyed DefaultPasswordBoxStyle"
+  },
+  "PersonPicture": {
+   "ferroui": "PersonPicture",
+   "batch": "B1",
+   "note": "WinUI's PersonPicture in ferroui-controls"
   },
   "PagerControl": {
    "ferroui": "PagerControl",

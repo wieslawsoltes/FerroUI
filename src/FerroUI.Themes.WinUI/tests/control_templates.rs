@@ -288,6 +288,7 @@ control_tests! {
     drop_down_button => "DropDownButton";
     expander => "Expander";
     numeric_up_down => "NumericUpDown";
+    person_picture => "PersonPicture";
     pager_control => "PagerControl";
     pips_pager => "PipsPager";
     refresh_container => "RefreshContainer";
@@ -552,6 +553,51 @@ fn the_input_controls_get_their_parts_and_resources_from_the_theme() {
     assert_eq!(8.0, background.spacing());
     assert_eq!(5, background.children().count());
     assert_eq!(16.0, background.children().get(0).bounds().width);
+    window.close();
+}
+
+/// WinUI's PersonPicture (`Controls/PersonPicture.xaml`; docs/porting/winui-controls.md, G2) gets
+/// the parts its code looks up from the theme, shows the initials of its display name, the glyph
+/// of a contact or of a group in the symbol font, and its badge.
+#[test]
+fn the_person_picture_gets_its_parts_and_states_from_the_theme() {
+    use ferroui_controls::{PersonPicture, StackPanel, TextBlock};
+
+    let _app = start_themed_application();
+    let picture = PersonPicture::new();
+    let panel = StackPanel::new();
+    panel.children().add(&picture);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    // The default size of the style.
+    assert_eq!(96.0, picture.bounds().width);
+    let initials = part(&picture, "InitialsTextBlock").cast::<TextBlock>().expect("a text block");
+    // NoPhotoOrInitials: the glyph of a contact.
+    assert_eq!(Some("\u{E77B}"), initials.text().as_deref());
+    picture.set_display_name("Jane Doe");
+    window.update_layout();
+    assert_eq!(Some("JD"), initials.text().as_deref());
+    // 42 % of the width.
+    assert!((initials.font_size() - 96.0 * 0.42).abs() < 1e-9);
+    picture.set_is_group(true);
+    window.update_layout();
+    assert_eq!(Some("\u{E716}"), initials.text().as_deref());
+    assert!(!part(&picture, "BadgeGrid").is_visible());
+    picture.set_badge_number(3);
+    window.update_layout();
+    assert!(part(&picture, "BadgeGrid").is_visible());
+    let number = part(&picture, "BadgeNumberTextBlock").cast::<TextBlock>().expect("a text block");
+    assert_eq!(Some("3"), number.text().as_deref());
     window.close();
 }
 

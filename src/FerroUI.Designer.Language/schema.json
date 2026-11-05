@@ -3808,6 +3808,75 @@
     ]
   },
   {
+    "name": "Contact",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Contact",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "String",
+        "documentation": "Contact.Id: String",
+        "values": [],
+        "attached": false
+      },
+      "FirstName": {
+        "name": "FirstName",
+        "type_name": "String",
+        "documentation": "Contact.FirstName: String",
+        "values": [],
+        "attached": false
+      },
+      "LastName": {
+        "name": "LastName",
+        "type_name": "String",
+        "documentation": "Contact.LastName: String",
+        "values": [],
+        "attached": false
+      },
+      "DisplayNameOverride": {
+        "name": "DisplayNameOverride",
+        "type_name": "String",
+        "documentation": "Contact.DisplayNameOverride: String",
+        "values": [],
+        "attached": false
+      },
+      "SmallDisplayPicture": {
+        "name": "SmallDisplayPicture",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "Contact.SmallDisplayPicture: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "LargeDisplayPicture": {
+        "name": "LargeDisplayPicture",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "Contact.LargeDisplayPicture: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "SourceDisplayPicture": {
+        "name": "SourceDisplayPicture",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "Contact.SourceDisplayPicture: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "Thumbnail": {
+        "name": "Thumbnail",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "Contact.Thumbnail: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Container",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::styling::Container",
@@ -15290,6 +15359,141 @@
     "namespace_aliases": [
       "using:FerroUI.Media",
       "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "PersonPicture",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PersonPicture",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "BadgeNumber": {
+        "name": "BadgeNumber",
+        "type_name": "i32",
+        "documentation": "PersonPicture.BadgeNumber: i32",
+        "values": [],
+        "attached": false
+      },
+      "BadgeGlyph": {
+        "name": "BadgeGlyph",
+        "type_name": "String",
+        "documentation": "PersonPicture.BadgeGlyph: String",
+        "values": [],
+        "attached": false
+      },
+      "BadgeImageSource": {
+        "name": "BadgeImageSource",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "PersonPicture.BadgeImageSource: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "BadgeText": {
+        "name": "BadgeText",
+        "type_name": "String",
+        "documentation": "PersonPicture.BadgeText: String",
+        "values": [],
+        "attached": false
+      },
+      "IsGroup": {
+        "name": "IsGroup",
+        "type_name": "bool",
+        "documentation": "PersonPicture.IsGroup: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "Contact": {
+        "name": "Contact",
+        "type_name": "Option<Ref<Contact>>",
+        "documentation": "PersonPicture.Contact: Option<Ref<Contact>>",
+        "values": [],
+        "attached": false
+      },
+      "DisplayName": {
+        "name": "DisplayName",
+        "type_name": "String",
+        "documentation": "PersonPicture.DisplayName: String",
+        "values": [],
+        "attached": false
+      },
+      "Initials": {
+        "name": "Initials",
+        "type_name": "String",
+        "documentation": "PersonPicture.Initials: String",
+        "values": [],
+        "attached": false
+      },
+      "PreferSmallImage": {
+        "name": "PreferSmallImage",
+        "type_name": "bool",
+        "documentation": "PersonPicture.PreferSmallImage: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ProfilePicture": {
+        "name": "ProfilePicture",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "PersonPicture.ProfilePicture: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "TemplateSettings": {
+        "name": "TemplateSettings",
+        "type_name": "Option<Ref<PersonPictureTemplateSettings>>",
+        "documentation": "PersonPicture.TemplateSettings: Option<Ref<PersonPictureTemplateSettings>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PersonPictureAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::PersonPictureAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PersonPictureTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::PersonPictureTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "ActualInitials": {
+        "name": "ActualInitials",
+        "type_name": "String",
+        "documentation": "PersonPictureTemplateSettings.ActualInitials: String",
+        "values": [],
+        "attached": false
+      },
+      "ActualImageBrush": {
+        "name": "ActualImageBrush",
+        "type_name": "Option<Ref<ImageBrush>>",
+        "documentation": "PersonPictureTemplateSettings.ActualImageBrush: Option<Ref<ImageBrush>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {
