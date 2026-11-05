@@ -3,8 +3,9 @@
 #[cfg(not(target_arch = "wasm32"))]
 use ferroui_base::platform::storage::file_io::StorageProviderHelpers;
 use ferroui_base::platform::storage::{IStorageFolder, IStorageProvider};
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use std::rc::Rc;
+use url::Url;
 
 /// Resolves the suggested start locations of the pickers (an internal class of the reference).
 ///
@@ -45,9 +46,9 @@ impl PickerSuggestedStartLocationHelper {
 
     /// Creates the directory of the location; true when it was created.
     #[cfg(not(target_arch = "wasm32"))]
-    fn try_create_directory(uri: &Uri, suggested_start_location_path: &str) -> bool {
+    fn try_create_directory(uri: &Url, suggested_start_location_path: &str) -> bool {
         let directory_path = if uri.scheme() == "file" {
-            uri.local_path()
+            StorageProviderHelpers::local_path(uri)
         } else {
             match std::path::absolute(suggested_start_location_path) {
                 Ok(path) => path.to_string_lossy().into_owned(),
@@ -64,16 +65,17 @@ impl PickerSuggestedStartLocationHelper {
 
     /// The browser has no local directories to create.
     #[cfg(target_arch = "wasm32")]
-    fn try_create_directory(_uri: &Uri, _suggested_start_location_path: &str) -> bool {
+    fn try_create_directory(_uri: &Url, _suggested_start_location_path: &str) -> bool {
         false
     }
 
-    fn try_create_uri(path: &str) -> Option<Uri> {
+    fn try_create_uri(path: &str) -> Option<Url> {
         if path.trim().is_empty() {
             return None;
         }
 
-        if let Some(uri) = Uri::try_create(path, UriKind::Absolute) {
+        // A text with a scheme of two characters or more (a drive path is a path).
+        if let Ok(uri) = UriRef::parse_absolute(path) {
             return Some(uri);
         }
 
@@ -81,7 +83,7 @@ impl PickerSuggestedStartLocationHelper {
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    fn try_create_file_uri(path: &str) -> Option<Uri> {
+    fn try_create_file_uri(path: &str) -> Option<Url> {
         let full_path = std::path::absolute(path).ok()?;
         if !full_path.is_absolute() {
             return None;
@@ -92,7 +94,7 @@ impl PickerSuggestedStartLocationHelper {
 
     /// The browser has no local paths.
     #[cfg(target_arch = "wasm32")]
-    fn try_create_file_uri(_path: &str) -> Option<Uri> {
+    fn try_create_file_uri(_path: &str) -> Option<Url> {
         None
     }
 }
