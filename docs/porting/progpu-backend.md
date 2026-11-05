@@ -127,6 +127,54 @@ These land in ProGPU as their own pull requests, each with the tests of the engi
 backend starts on the existing C ABI with a small C++ shim over the builder (step P2) and moves to
 the Rust writer as it lands, keeping the shim as the differential reference.
 
+### 3.1 The WebGPU implementation
+
+The engine takes a device of a C WebGPU implementation of its pinned ABI. The `wgpu` crate of the
+Vello backend exposes no `webgpu.h` handles, so it cannot be handed over; the two that fit are:
+
+- **Dawn** (the implementation of Chrome): the Dawn build of the engine links no WebGPU library and
+  resolves every procedure through the resolver the host gives
+  (`progpu_native_dawn_engine_create`), so FerroUI supplies the Dawn of the pinned revision
+  (Dawn `710c330`, `webgpu-headers` `01addc4b`). It is the same API family as the browser path and
+  has the most mature Direct3D 12, Metal and Vulkan backends; it is the target of the desktop
+  backend.
+- **wgpu-native** (May-2024 ABI): the default build of the engine is linked against it; the
+  runtime is the pinned package (`Silk.NET.WebGPU.Native.WGPU` 2.23.0), or built from the pinned
+  commit. The first steps run on it, and it stays a supported implementation.
+
+Both are measured (section 4) for speed, features and size before the default is chosen per
+platform. In the browser the implementation is the browser's (`navigator.gpu`); nothing is shipped.
+
+### 3.2 Binary size
+
+Measured on macOS arm64 (preview.70): the engine's runtime library is 38.9 MB stripped (15.4 MB
+gzipped), of which 33.1 MB is one symbol, `progpu_edit_icu_data`, the complete ICU data set that the
+engine links for the word boundaries of text editing; the code is 3.4 MB, the Unicode normalization
+data 0.45 MB, the WGSL shaders about 0.6 MB. wgpu-native is 4.1 MB stripped.
+
+The size is reduced by correct construction, never by turning a feature off or trimming data by
+hand; every change keeps the behaviour and its tests:
+
+1. **ICU data built for what the engine uses.** ICU's data filter (`ICU_DATA_FILTER_FILE`, the
+   supported build input) generates the data set of the services the engine calls: the word-break
+   rules and their dictionaries. The engine's ICU build at its pin produces it, and the engine's
+   edit-word-boundary tests are its acceptance. Beside it, the boundary service becomes a provider
+   of the C ABI, so a host that already ships a Unicode segmenter (FerroUI's ICU4X segmenter)
+   provides the boundaries and the application carries one segmentation implementation, not two;
+   the engine's own provider remains the default.
+2. **The engine as a static archive** of the SDK, linked into the application with link-time
+   optimization and dead-code stripping, so the families an application does not call (3D, the
+   Direct2D compatibility layer, MIL, hit-test queries) are not in its binary: the linker removes
+   unreferenced code, nothing is disabled.
+3. **One copy of each shared component.** The engine's text, shaping and font code is FerroUI's
+   text stack with this backend (section 2.4), not a second stack beside Skia's; an application
+   built with ProGPU does not link Skia.
+4. **Shaders as WGSL text** (about 0.6 MB, smaller compressed), compiled by the WebGPU
+   implementation; in the browser the browser compiles them, so the module carries only the text.
+5. **Fonts** from the system catalog; none are bundled by default.
+
+The bindings and SDK changes these need are part of step P7.
+
 ## 4. Measurements
 
 All measured locally (the owner, 2026-11-05: no new workflows), on the same machine and commit for
