@@ -367,6 +367,40 @@ The sample `samples/WinUIGallery` (package `winui-gallery`, not published) ports
 
 The workflow `winui-gallery.yml` runs the tests of the sample and checks its desktop and capture binaries on the paths of the sample and the WinUI controls (O12); it renders every page, the WinUI controls in the dark theme and the NavigationView compositions nightly and on demand. The scanner of the gallery is W10b (section 10.8).
 
+#### G1: pages of the controls on main (#418)
+
+Phase G1 of the full port (#418) gives the pending pages whose control is on main their native examples. A page is `ported` when every catalog example of it has a native adaptation with its events and bindings, or is `not-applicable` with the Windows-only API recorded in `port-status.json`; otherwise `partial`. The state is in `examples::ADAPTATIONS` (`page!(ported ...)`), shown on the page, and the test `adaptation_port_states_match_port_status` checks it against `port-status.json`.
+
+| Page | Examples | State | Rust | Tests |
+|---|---:|---|---|---|
+| ThemeShadow | 1 of 1 | ported | `materials_samples.rs` | `materials_samples_tests.rs` |
+| Acrylic | 3 of 3 | ported | `materials_samples.rs` | `materials_samples_tests.rs` |
+| SystemBackdrops | 3 of 3 | ported | `window_samples.rs` | `window_samples_tests.rs` |
+| TitleBar | 3 of 3 | ported | `window_samples.rs` | `window_samples_tests.rs` |
+| RichTextBlock | 4 of 4 | ported | `text_samples.rs` | `text_samples_tests.rs` |
+| RichEditBox | 2 ported, 1 partial, 2 not applicable | partial | `text_samples.rs` | `text_samples_tests.rs` |
+| ItemsRepeater | 4 ported, 2 partial | partial | `repeater_samples.rs` | `repeater_samples_tests.rs` |
+| LayoutPanel | 1 of 1 | ported | `repeater_samples.rs` | `repeater_samples_tests.rs` |
+| InkCanvas | 3 of 3 | ported | `ink_samples.rs` | `ink_samples_tests.rs` |
+| Chart | 3 ported, 4 partial | partial | `chart_samples.rs` | `chart_samples_tests.rs` |
+| ItemsView | 0 of 3 | pending | | |
+| SystemBackdropElement | no catalog sample | pending | | |
+
+ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `ItemContainer`) and `SystemBackdropElement` are not on main (the system backdrop of an element is crate-private, for the menu flyout presenter), so they are G2 work. The other pending pages are G2 and G3 (#418); the owner's deferrals (media, WebView2, maps, TableView) are unchanged.
+
+| WinUI Gallery | Port | Why |
+|---|---|---|
+| The sample windows of SystemBackdrops and TitleBar (`SampleSupport/SamplePages`). | Native windows built by `window_samples.rs` from `Pages/*Window.xaml`, extended into the title bar; a window lives until it closes. | The windows are the examples. |
+| `SampleSystemBackdropsWindow` adds its Activated, Closed and ActualThemeChanged handlers for every backdrop it sets. | Added once per window. | The repeated handlers of the source are a leak, not behaviour. |
+| `UIHelper.AnnounceActionForAccessibility` (a UIA notification). | The text of a polite live region. | FerroUI has no notification event; live regions are its announcement. |
+| `TitleBarHelper.ApplySystemThemeToCaptionButtons`. | Not called: the decorations of the window follow its theme. | The caption buttons are the window's. |
+| `ImageIconSource` of the gallery icon and `PersonPicture` in the TitleBar examples. | A `PathIconSource` and a composed circle with the initials. | Neither type is on main (PersonPicture is G2). |
+| The ThemeShadow, the AcrylicBrush resources and the SolidColorBrush items with `ColorTemplate`. | A ThemeShadow resource set as `Shadow`; the brushes made in Rust with the source's values, page resources under the source's keys; composed swatch items, the handlers map the index to the colour. | As the templates of the WinUI theme share their shadow; the C# handlers change the brushes. |
+| The Hyperlink of the Acrylic and TitleBar intros to other gallery pages. | Text. | A page of the gallery cannot navigate its shell. |
+| Math mode and MathML of RichEditBox. | `not-applicable`, with a diagnostic on the page. | They are the math engine of the Windows RichEdit control. |
+| `FileOpenPicker` and `FileSavePicker` of the RichEditBox editor. | The storage provider of the window (RTF). | The pickers are Windows APIs; the provider is FerroUI's. |
+| The InkToolbar styles. | The application includes `ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml` after the WinUI theme. | The inking crate has its own control themes. |
+
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
 `scripts/winui-gallery/scan.py` (from #286) compares the public API of WinUI and the pages of WinUI Gallery with FerroUI's sources at the pins of `docs/porting/winui-gallery/data/sources.lock.json` (WinUI `7e4b0c2`, O13; Gallery `14061eea`). Its result is a report of candidates: 1,545 public WinUI types and 7,462 public members are scanned, a same-name Rust type or member in the mapped namespace is a *candidate*, and no candidate counts as behaviour, which the tests of the controls and of the sample establish. The pages have the states of `samples/WinUIGallery/port-status.json`.
