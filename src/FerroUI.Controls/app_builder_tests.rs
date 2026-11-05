@@ -351,7 +351,9 @@ fn with_system_font_source_adds_the_fonts_of_the_source_to_the_system_fonts() {
     std::fs::create_dir_all(&directory.0).unwrap();
     let font_file = directory.0.join("Extra Sans.ttf");
     std::fs::write(&font_file, TestFontBuilder::new("Extra Sans").build_bytes()).unwrap();
-    let font_source = StorageProviderHelpers::uri_from_file_path(font_file.to_str().unwrap(), false);
+    // The storage helpers give the port `Uri` until U4 (C5 of #423).
+    let font_source =
+        url::Url::try_from(&StorageProviderHelpers::uri_from_file_path(font_file.to_str().unwrap(), false)).unwrap();
 
     let font_manager_impl = TestFontManagerImpl::headless();
     let builder = configured()
