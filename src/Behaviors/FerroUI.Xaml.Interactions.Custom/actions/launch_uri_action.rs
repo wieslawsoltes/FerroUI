@@ -2,7 +2,7 @@
 
 use super::visual_of;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Ref,
     StyledElementImpl, StyledProperty,
@@ -40,7 +40,9 @@ impl StyledElementActionImpl for LaunchUriAction {
             return Some(Rc::new(false));
         };
 
-        let Ok(uri) = Uri::absolute(&uri_string) else {
+        // An absolute reference (a relative one names nothing to launch), with the rule of markup:
+        // a scheme has two characters or more.
+        let Ok(uri) = UriRef::parse_absolute(&uri_string) else {
             return Some(Rc::new(false));
         };
 

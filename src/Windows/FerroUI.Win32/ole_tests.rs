@@ -412,7 +412,7 @@ fn exposes_virtual_file_as_storage_file() {
     let file = file.as_storage_file().expect("the item of a virtual file is a storage file");
 
     assert_eq!(file.name(), "archive-entry.txt");
-    assert_eq!(file.path().original_string(), "virtual-file:///archive-entry.txt");
+    assert_eq!(file.path().to_string(), "virtual-file:///archive-entry.txt");
     assert_eq!(ready(file.get_basic_properties_async()).size(), Some(expected_contents.len() as u64));
     let mut stream = ready(file.open_read_async()).unwrap();
     let mut output = Vec::new();

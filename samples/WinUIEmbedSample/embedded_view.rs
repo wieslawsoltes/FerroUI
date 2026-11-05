@@ -333,7 +333,9 @@ impl EmbeddedView {
         let text = dt.try_get_value(&DataFormat::text());
 
         if !files.is_empty() {
-            let paths: Vec<String> = files.iter().map(|file| file.path().local_path()).collect();
+            // The local path of a file, else the text of its path.
+            let paths: Vec<String> =
+                files.iter().map(|file| file.try_get_local_path().unwrap_or_else(|| file.path().to_string())).collect();
             drop_status.set_text(Some(&format!("{} file(s):\n{}", files.len(), paths.join("\n"))));
         } else if let Some(text) = text.filter(|text| !text.is_empty()) {
             drop_status.set_text(Some(&format!("text: {text}")));

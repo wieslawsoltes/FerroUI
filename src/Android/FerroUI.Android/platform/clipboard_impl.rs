@@ -162,7 +162,7 @@ impl ClipboardImpl {
                     &JavaClass::find("android/net/Uri"),
                     "parse",
                     "(Ljava/lang/String;)Landroid/net/Uri;",
-                    &[JavaValue::String(storage_item.path().original_string())],
+                    &[JavaValue::String(&storage_item.path().to_string())],
                 );
                 return Ok(Some(
                     new_object(

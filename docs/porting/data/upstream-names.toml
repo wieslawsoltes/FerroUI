@@ -598,6 +598,14 @@ behaviour = "same"
 notes = "Step U3. IAssetLoader and AssetLoader take a UriRef against an Option<Url> base URI and list assets as Url; UriExtensions reads Url. FontFamily takes an Option<Url> base URI, FontFamilyKey a UriRef source and an Option<Url> base URI, IFontCollection.Key, EmbeddedFontCollection, FontManager.SystemFontsKey and RemoveFontCollection, FontCollectionBase.TryAddFontSource and FontFamilyLoader are Url. FontFamilyKey compares as Uri did: a URL without its fragment, a relative reference by its text; the font manager keys its collections by the URL without its fragment."
 
 [[name]]
+upstream = "System.Uri (launcher, storage, activation, NavigateUri, XamlSourceInfo, designer transports)"
+rust = "url::Url, ferroui_base::utilities::UriRef"
+kind = "mechanism"
+phase = "C5"
+behaviour = "same"
+notes = "Step U4. ILauncher.LaunchUriAsync, IStorageProvider.TryGetFileFromPathAsync and TryGetFolderFromPathAsync, ProtocolActivatedEventArgs.Uri, XamlSourceInfo.SourceUri, the storage helpers (UriFromFilePath, TryGetUriFromFilePath, TryGetPathFromFileUri) and the transports of the designer support are url::Url; IStorageItem.Path is a UriRef (the browser, the root of a file system and iOS give a relative reference, as upstream) and HyperlinkButton.NavigateUri a UriRef (O5). The storage helpers make and read file URLs with their own mapping on every target (Url::to_file_path does not exist on the browser); StorageProviderHelpers::local_path is Uri.LocalPath. The html transport compares the origin of a page with the origin of its listen URL."
+
+[[name]]
 upstream = "System.DateTime, System.DateTimeOffset (instants)"
 rust = "std::time::SystemTime"
 kind = "mechanism"

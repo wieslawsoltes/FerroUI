@@ -5,7 +5,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty, VisualImpl,
@@ -37,7 +37,9 @@ impl ButtonImpl for HyperlinkButton {
     fn on_click(this: &Self) {
         Self::parent_on_click(this);
 
-        let uri = this.navigate_uri();
+        // A relative reference names nothing the launcher can open, as upstream,
+        // where the launchers refuse a relative URI.
+        let uri = this.navigate_uri().and_then(|uri| uri.as_url().cloned());
         if let Some(uri) = uri {
             let this = this.to_ref();
             // The task is not observed, as the posted asynchronous action
@@ -83,7 +85,7 @@ ferroui_base::ferro_properties! { impl HyperlinkButton {
 
     ferro_property!(
         /// Defines the `NavigateUri` property.
-        pub fn navigate_uri_property() -> StyledProperty<Option<Uri>> {
+        pub fn navigate_uri_property() -> StyledProperty<Option<UriRef>> {
             FerroProperty::register::<HyperlinkButton, _>("NavigateUri", None)
         }
     );
@@ -117,11 +119,15 @@ impl HyperlinkButton {
     ///
     /// If a URI should not be automatically launched, leave this property
     /// unset and use the `Click` event and `is_visited` directly.
-    pub fn navigate_uri(&self) -> Option<Uri> {
+    ///
+    /// The URI is a [`UriRef`], as markup writes it (decision O5 of
+    /// docs/idiomatic-rust-signatures.md): a relative reference loads and
+    /// is kept, and a click launches only an absolute one.
+    pub fn navigate_uri(&self) -> Option<UriRef> {
         self.get_value(Self::navigate_uri_property())
     }
 
-    pub fn set_navigate_uri(&self, value: Option<Uri>) {
+    pub fn set_navigate_uri(&self, value: Option<UriRef>) {
         self.set_value(Self::navigate_uri_property(), value)
     }
 }

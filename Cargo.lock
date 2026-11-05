@@ -1496,6 +1496,7 @@ dependencies = [
  "jni-sys 0.4.1",
  "libc",
  "skia-safe",
+ "url",
 ]
 
 [[package]]
@@ -1543,6 +1544,7 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-vello",
+ "url",
  "wasm-bindgen",
 ]
 
@@ -1711,6 +1713,7 @@ dependencies = [
  "ferroui-xaml-interactivity",
  "serde",
  "serde_json",
+ "url",
 ]
 
 [[package]]
@@ -1789,6 +1792,7 @@ dependencies = [
  "ferroui-remote-protocol",
  "ferroui-skia",
  "ferroui-win32",
+ "url",
  "uuid",
  "xamlx",
 ]
@@ -1870,6 +1874,7 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-system",
  "sysinfo",
+ "url",
 ]
 
 [[package]]
@@ -1911,6 +1916,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-system",
  "futures-util",
+ "url",
  "uuid",
  "zbus",
 ]
@@ -2037,6 +2043,7 @@ dependencies = [
  "objc2-open-gl-es",
  "objc2-quartz-core",
  "objc2-ui-kit",
+ "url",
 ]
 
 [[package]]
@@ -2172,6 +2179,7 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-skia",
  "microcom-codegen",
+ "url",
 ]
 
 [[package]]
@@ -2690,6 +2698,7 @@ dependencies = [
  "ferroui-vulkan",
  "microcom-codegen",
  "mozangle",
+ "url",
  "windows-sys 0.61.2",
 ]
 
@@ -2722,6 +2731,7 @@ dependencies = [
  "ferroui-themes-simple",
  "ferroui-vulkan",
  "libc",
+ "url",
  "x11-dl",
  "zbus",
 ]
@@ -2763,6 +2773,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-xaml-interactions-custom",
  "ferroui-xaml-interactivity",
+ "url",
 ]
 
 [[package]]
@@ -4752,6 +4763,7 @@ dependencies = [
  "serde",
  "serde_json",
  "ureq",
+ "url",
 ]
 
 [[package]]

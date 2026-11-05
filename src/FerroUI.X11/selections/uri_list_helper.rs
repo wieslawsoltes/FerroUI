@@ -2,8 +2,8 @@
 
 use ferroui_base::platform::storage::file_io::{BclStorageItemHandle, StorageProviderHelpers};
 use ferroui_base::platform::storage::IStorageItem;
-use ferroui_base::utilities::{Uri, UriKind};
 use std::rc::Rc;
+use url::Url;
 
 /// The lines of a text as the stream reader of the reference's base
 /// library gives them: a line ends with a line feed, a carriage return or
@@ -47,9 +47,9 @@ pub fn utf8_bytes_to_file_paths(utf8_bytes: &[u8]) -> Vec<String> {
 
     read_lines(&text)
         .into_iter()
-        .filter_map(|line| Uri::try_create(line, UriKind::Absolute))
+        .filter_map(|line| Url::parse(line).ok())
         .filter(|uri| uri.scheme() == "file")
-        .map(|uri| uri.local_path())
+        .map(|uri| StorageProviderHelpers::local_path(&uri))
         .collect()
 }
 
@@ -83,8 +83,11 @@ pub fn uris_to_utf8_bytes<'a>(uris: impl IntoIterator<Item = &'a str>) -> Vec<u8
 /// Panics when the path of an item is a relative URI (the reference
 /// throws).
 pub fn file_uri_list_to_utf8_bytes(items: &[Rc<dyn IStorageItem>]) -> Vec<u8> {
-    let uris: Vec<Uri> = items.iter().map(|item| item.path()).collect();
-    uris_to_utf8_bytes(uris.iter().map(|uri| uri.absolute_uri()))
+    let uris: Vec<Url> = items
+        .iter()
+        .map(|item| item.path().as_url().cloned().expect("the path of an item of a URI list is a URL"))
+        .collect();
+    uris_to_utf8_bytes(uris.iter().map(Url::as_str))
 }
 
 #[cfg(test)]
@@ -125,7 +128,7 @@ mod tests {
             return;
         };
         let uri = StorageProviderHelpers::uri_from_file_path(path, true);
-        let list = uris_to_utf8_bytes([uri.absolute_uri()]);
+        let list = uris_to_utf8_bytes([uri.as_str()]);
         let items = utf8_bytes_to_file_uri_list(&list);
         assert_eq!(items.len(), 1);
 

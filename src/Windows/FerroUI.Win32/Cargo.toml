@@ -48,6 +48,8 @@ ferroui-microcom.workspace = true
 # is linked: the loader of the system (`vulkan-1.dll`) is opened at run time.
 ferroui-vulkan.workspace = true
 bitflags.workspace = true
+# The URLs of the storage items of virtual files (C5 of #423).
+url.workspace = true
 
 # The bindings of the Windows API (docs/porting/win32-platform.md, section 2): declarations only,
 # linked through `windows-link` without import libraries, so the crate is checked for a Windows

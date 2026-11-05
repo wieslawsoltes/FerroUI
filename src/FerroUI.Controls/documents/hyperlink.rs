@@ -4,7 +4,7 @@ use ferroui_base::input::Key;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::{HandlerList, Uri};
+use ferroui_base::utilities::{HandlerList, UriRef};
 use ferroui_base::{
     ferro_class, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty,
@@ -410,7 +410,7 @@ impl Hyperlink {
         let Some(uri) = args
             .navigate_uri
             .as_deref()
-            .and_then(|s| Uri::absolute(s).ok())
+            .and_then(|s| UriRef::parse_absolute(s).ok())
         else {
             return;
         };

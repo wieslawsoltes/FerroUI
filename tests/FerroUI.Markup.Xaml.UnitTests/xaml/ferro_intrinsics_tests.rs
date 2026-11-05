@@ -349,6 +349,30 @@ fn a_relative_uri_literal_for_a_url_property_is_an_error() {
     assert!(described.contains("The URI http://host:99999/ is not a valid Url: invalid port number."), "{described}");
 }
 
+/// `HyperlinkButton.NavigateUri` is a `UriRef` (decision O5 of
+/// docs/idiomatic-rust-signatures.md, step U4): markup sets a relative and an absolute
+/// reference from text, as it set the port `Uri`.
+#[test]
+fn hyperlink_button_navigate_uri_is_set_from_a_relative_and_an_absolute_text() {
+    use ferroui_base::utilities::UriRef;
+    use ferroui_controls::HyperlinkButton;
+
+    let _base = xaml_test_base();
+    let link = |navigate_uri: &str| {
+        parse::<Ref<HyperlinkButton>>(&format!(
+            "<HyperlinkButton xmlns='https://github.com/ferroui' NavigateUri='{navigate_uri}'/>"
+        ))
+    };
+    assert_eq!(link("docs/index.html").navigate_uri(), Some(UriRef::Relative("docs/index.html".into())));
+    // A leading `/` is relative, the rule of markup.
+    assert_eq!(link("/docs/index.html").navigate_uri(), Some(UriRef::Relative("/docs/index.html".into())));
+    let absolute = link("https://github.com/wieslawsoltes/FerroUI#readme").navigate_uri();
+    assert_eq!(
+        absolute.as_ref().and_then(UriRef::as_url).map(url::Url::as_str),
+        Some("https://github.com/wieslawsoltes/FerroUI#readme")
+    );
+}
+
 #[test]
 fn a_uri_resource_sets_a_uri_ref_and_a_url_property() {
     use crate::support::emitter::Linked;

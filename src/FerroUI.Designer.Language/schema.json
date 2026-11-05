@@ -7967,8 +7967,8 @@
       },
       "NavigateUri": {
         "name": "NavigateUri",
-        "type_name": "Option<Uri>",
-        "documentation": "HyperlinkButton.NavigateUri: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "HyperlinkButton.NavigateUri: Option<UriRef>",
         "values": [],
         "attached": false
       }
@@ -28534,8 +28534,8 @@
     "properties": {
       "SourceUri": {
         "name": "SourceUri",
-        "type_name": "Option<Uri>",
-        "documentation": "XamlSourceInfo.SourceUri: Option<Uri>",
+        "type_name": "Option<Url>",
+        "documentation": "XamlSourceInfo.SourceUri: Option<Url>",
         "values": []
       },
       "LineNumber": {
