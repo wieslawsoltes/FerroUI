@@ -17605,8 +17605,8 @@
       },
       "Source": {
         "name": "Source",
-        "type_name": "Option<Uri>",
-        "documentation": "ResourceInclude.Source: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "ResourceInclude.Source: Option<UriRef>",
         "values": []
       }
     },
@@ -21046,8 +21046,8 @@
       },
       "Source": {
         "name": "Source",
-        "type_name": "Option<Uri>",
-        "documentation": "StyleInclude.Source: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "StyleInclude.Source: Option<UriRef>",
         "values": []
       },
       "Loaded": {
