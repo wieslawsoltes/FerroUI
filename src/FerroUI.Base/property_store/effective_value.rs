@@ -1,7 +1,7 @@
 use super::{entry_ptr_eq, IValueEntry};
 use crate::data::{BindingPriority, BindingValueType};
 use crate::ferro_property::value_equals;
-use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations};
+use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations, DefaultCoercionOperations};
 use crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledPropertyMetadata};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -269,6 +269,18 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         self.set_and_raise_core_with_base(owner, value, self.state.priority.get(), base_value, self.state.base_priority.get(), operations);
     }
 
+    pub(crate) fn apply_coercion_at_end(&self, owner: &FerroObject, operations: DefaultCoercionOperations<T>) {
+        if let Some(uncommon) = &self.uncommon {
+            // Coerce the default value and raise if it differs. The default
+            // stays alive through the typed setter, including its unwind.
+            let default = self.metadata.default_value().clone();
+            let coerced = (uncommon.coerce)(owner, default.clone());
+            if !(operations.equals)(&default, &coerced) {
+                (operations.set_default)(self, owner, coerced);
+            }
+        }
+    }
+
     fn set_and_raise_core_with_base(
         &self,
         owner: &FerroObject,
@@ -508,13 +520,12 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
 
     fn end_reevaluation(&self, owner: &FerroObject) {
         if self.state.priority.get() == BindingPriority::Unset {
-            if let Some(uncommon) = &self.uncommon {
-                // Coerce the default value and raise if it differs.
-                let default = self.metadata.default_value().clone();
-                let coerced = (uncommon.coerce)(owner, default.clone());
-                if !value_equals(&default, &coerced) {
-                    self.set_coerced_default_value_and_raise(owner, coerced);
-                }
+            // Keep the priority short circuit before even reading metadata.
+            if let Some(coercion) = self.metadata.coercion() {
+                coercion.end_reevaluation(self, owner, DefaultCoercionOperations {
+                    equals: value_equals::<T>,
+                    set_default: Self::set_coerced_default_value_and_raise,
+                });
             }
         }
     }

@@ -69,12 +69,47 @@ pub(crate) struct CoercionOperations<T> {
     pub(crate) notify_base_value_changed: fn(&EffectiveValue<T>, &FerroObject),
 }
 
+pub(crate) struct DefaultCoercionOperations<T> {
+    pub(crate) equals: fn(&T, &T) -> bool,
+    pub(crate) set_default: fn(&EffectiveValue<T>, &FerroObject, T),
+}
+
+/// The factory borrows the store, owner and typed property. Keeping that
+/// PropertyValue-specific construction outside the algorithm lets public
+/// Clone-only metadata retain its existing bounds.
+pub(crate) trait DefaultEffectiveValueFactory<T> {
+    fn create_and_add(&self) -> Rc<EffectiveValue<T>>;
+}
+
+// Requests contain only borrows and function pointers: no owned T, Rc or
+// observable destructor crosses this dispatch frame. One entry covers all
+// coercion paths without enlarging metadata for additional algorithm slots.
+enum CoercionRequest<'a, T> {
+    Recoerce {
+        target: &'a EffectiveValue<T>,
+        owner: &'a FerroObject,
+        operations: CoercionOperations<T>,
+    },
+    EndReevaluation {
+        target: &'a EffectiveValue<T>,
+        owner: &'a FerroObject,
+        operations: DefaultCoercionOperations<T>,
+    },
+    Default {
+        coercion: &'a Coercion<T>,
+        metadata: &'a StyledPropertyMetadata<T>,
+        owner: &'a FerroObject,
+        factory: &'a dyn DefaultEffectiveValueFactory<T>,
+        operations: DefaultCoercionOperations<T>,
+    },
+}
+
 /// Constructed only when a caller supplies a coercer. A property without a
-/// coercer must not take the address of its heavy recoercion algorithm merely
-/// because its untyped effective-value interface supports `coerce_value`.
+/// coercer must not take the address of its cold algorithms merely because
+/// its untyped effective-value and property interfaces expose coercion.
 pub(crate) struct Coercion<T> {
     callback: CoerceValueCallback<T>,
-    apply: fn(&EffectiveValue<T>, &FerroObject, CoercionOperations<T>),
+    apply: for<'a> fn(CoercionRequest<'a, T>),
 }
 
 impl<T> Clone for Coercion<T> {
@@ -91,13 +126,98 @@ impl<T> Coercion<T> {
     }
 
     pub(crate) fn apply(&self, target: &EffectiveValue<T>, owner: &FerroObject, operations: CoercionOperations<T>) {
-        (self.apply)(target, owner, operations);
+        (self.apply)(CoercionRequest::Recoerce { target, owner, operations });
+    }
+
+    pub(crate) fn end_reevaluation(
+        &self,
+        target: &EffectiveValue<T>,
+        owner: &FerroObject,
+        operations: DefaultCoercionOperations<T>,
+    ) {
+        (self.apply)(CoercionRequest::EndReevaluation { target, owner, operations });
+    }
+
+    pub(crate) fn coerce_default(
+        &self,
+        metadata: &StyledPropertyMetadata<T>,
+        owner: &FerroObject,
+        factory: &dyn DefaultEffectiveValueFactory<T>,
+        operations: DefaultCoercionOperations<T>,
+    ) {
+        (self.apply)(CoercionRequest::Default { coercion: self, metadata, owner, factory, operations });
     }
 }
 
 impl<T: Clone + 'static> Coercion<T> {
     pub(crate) fn new(callback: CoerceValueCallback<T>) -> Self {
-        Self { callback, apply: EffectiveValue::<T>::apply_coercion }
+        Self { callback, apply: Self::dispatch }
+    }
+
+    fn dispatch(request: CoercionRequest<'_, T>) {
+        match request {
+            CoercionRequest::Recoerce { target, owner, operations } => target.apply_coercion(owner, operations),
+            CoercionRequest::EndReevaluation { target, owner, operations } => {
+                target.apply_coercion_at_end(owner, operations);
+            }
+            CoercionRequest::Default { coercion, metadata, owner, factory, operations } => {
+                coercion.apply_default(metadata, owner, factory, operations);
+            }
+        }
+    }
+
+    fn apply_default(
+        &self,
+        metadata: &StyledPropertyMetadata<T>,
+        owner: &FerroObject,
+        factory: &dyn DefaultEffectiveValueFactory<T>,
+        operations: DefaultCoercionOperations<T>,
+    ) {
+        let coerce = &self.callback;
+        // The outer typed route retains the original metadata Rc. Keep all
+        // owned values in this frame through application and cleanup; never
+        // return an owned coerced T after releasing default or metadata.
+        let default = metadata.default_value().clone();
+        let coerced = coerce(owner, default.clone());
+        if (operations.equals)(&default, &coerced) {
+            return;
+        }
+        // Construction reloads current metadata, as it originally did after
+        // a potentially reentrant coercer/equality implementation.
+        let effective = factory.create_and_add();
+        (operations.set_default)(&effective, owner, coerced);
+    }
+}
+
+#[cfg(test)]
+mod coercion_request_tests {
+    use super::*;
+    use std::mem::{align_of, needs_drop, size_of};
+
+    #[test]
+    fn borrowed_coercion_requests_keep_the_single_pointer_layout_and_unbounded_types() {
+        struct DropOnly;
+        impl Drop for DropOnly {
+            fn drop(&mut self) { panic!("the request must not own this value"); }
+        }
+        type Original<T> = (
+            CoerceValueCallback<T>,
+            fn(&EffectiveValue<T>, &FerroObject, CoercionOperations<T>),
+        );
+        assert_eq!(size_of::<Coercion<DropOnly>>(), size_of::<Original<DropOnly>>());
+        assert_eq!(align_of::<Coercion<DropOnly>>(), align_of::<Original<DropOnly>>());
+        assert_eq!(size_of::<Option<Coercion<DropOnly>>>(), size_of::<Option<Original<DropOnly>>>());
+        assert!(!needs_drop::<CoercionRequest<'_, DropOnly>>());
+        assert!(!needs_drop::<CoercionOperations<DropOnly>>());
+        assert!(!needs_drop::<DefaultCoercionOperations<DropOnly>>());
+        assert_eq!(size_of::<CoercionRequest<'_, DropOnly>>(), size_of::<CoercionRequest<'_, String>>());
+
+        // Naming public metadata must not acquire Clone, PartialEq or 'static
+        // bounds just because its private dispatch field names a request.
+        let _: Option<StyledPropertyMetadata<DropOnly>> = None;
+        fn borrowed<'a>(_: &'a ()) -> Option<StyledPropertyMetadata<&'a ()>> { None }
+        let local = ();
+        assert!(borrowed(&local).is_none());
     }
 }
 

@@ -9,6 +9,7 @@ use crate::diagnostics::{
     ValueFrameDiagnostic, ValueStoreDiagnostic,
 };
 use crate::data::{BindingExpressionBase, BindingPriority, BindingValueType};
+use crate::ferro_property_metadata::{DefaultCoercionOperations, DefaultEffectiveValueFactory};
 use crate::reactive::IDisposable;
 use crate::{DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
 use std::any::Any;
@@ -16,6 +17,25 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 type EffectiveValueRef = Rc<dyn EffectiveValueDyn>;
+
+// Borrowing only references keeps the factory vtable free of owning drop
+// glue. The returned Rc is the original local, with no extra clone.
+struct CoercedDefaultFactory<'a, T: PropertyValue> {
+    store: &'a ValueStore,
+    owner: &'a FerroObject,
+    property: &'static StyledProperty<T>,
+}
+
+impl<T: PropertyValue> DefaultEffectiveValueFactory<T> for CoercedDefaultFactory<'_, T> {
+    fn create_and_add(&self) -> Rc<EffectiveValue<T>> {
+        let effective = self.store.create_effective_value(self.owner, self.property);
+        self.store.add_effective_value(self.owner, self.property, effective.clone());
+        // No other owning locals or callable temporaries remain after this
+        // result is formed. On insertion unwind, effective still drops before
+        // the caller's coerced/default values and retained metadata.
+        effective
+    }
+}
 
 /// The value of an inherited property before and after a change of the
 /// inheritance ancestor: the effective value the old ancestors hold for it
@@ -494,17 +514,20 @@ impl ValueStore {
 
     pub fn coerce_default_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) {
         let metadata = property.get_metadata_for(owner);
-        let Some(coerce) = metadata.coerce_value() else { return };
-        let default = metadata.default_value().clone();
-        let coerced = coerce(owner, default.clone());
-        if default == coerced {
-            return;
-        }
-        // The default value isn't valid according to the coerce function, so
-        // an effective value entry is needed.
-        let effective = self.create_effective_value(owner, property);
-        self.add_effective_value(owner, property, effective.clone());
-        effective.set_coerced_default_value_and_raise(owner, coerced);
+        let Some(coercion) = metadata.coercion() else { return };
+        // Retain this exact metadata Rc through application and cleanup.
+        // The factory separately reloads metadata at the original point.
+        coercion.coerce_default(
+            &metadata,
+            owner,
+            &CoercedDefaultFactory { store: self, owner, property },
+            DefaultCoercionOperations {
+                // This route originally used PartialEq, not value_equals:
+                // preserve its distinct NaN behavior.
+                equals: <T as PartialEq>::eq,
+                set_default: EffectiveValue::<T>::set_coerced_default_value_and_raise,
+            },
+        );
     }
 
     pub fn get_base_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
@@ -1266,3 +1289,7 @@ impl Drop for EvaluatingGuard<'_> {
         self.0.set(self.0.get() - 1);
     }
 }
+
+#[cfg(test)]
+#[path = "value_store_default_coercion_tests.rs"]
+mod default_coercion_tests;
