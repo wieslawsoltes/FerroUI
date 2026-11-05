@@ -3,7 +3,7 @@
 use super::RecordingObserverBase;
 use ferroui_dynamic_data::cache::{ChangeReason, ChangeSet};
 use ferroui_reactive::concurrency::IScheduler;
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IObserver, ObservableError};
 use std::cell::RefCell;
 use std::hash::Hash;
@@ -17,7 +17,7 @@ use std::rc::Rc;
 pub struct CacheItemRecordingObserver<T, K> {
     base: RecordingObserverBase<ChangeSet<T, K>>,
     recorded_change_sets: RefCell<Vec<ChangeSet<T, K>>>,
-    recorded_items_by_key: RefCell<Dictionary<K, T>>,
+    recorded_items_by_key: RefCell<SlotOrderMap<K, T>>,
     recorded_items_sorted: RefCell<Vec<T>>,
 }
 
@@ -27,7 +27,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> CacheItemRecordingObser
         Rc::new(Self {
             base: RecordingObserverBase::new(scheduler),
             recorded_change_sets: RefCell::new(Vec::new()),
-            recorded_items_by_key: RefCell::new(Dictionary::new()),
+            recorded_items_by_key: RefCell::new(SlotOrderMap::new()),
             recorded_items_sorted: RefCell::new(Vec::new()),
         })
     }
@@ -38,7 +38,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> CacheItemRecordingObser
     }
 
     /// The items the change sets make, by key (`RecordedItemsByKey`).
-    pub fn recorded_items_by_key(&self) -> Dictionary<K, T> {
+    pub fn recorded_items_by_key(&self) -> SlotOrderMap<K, T> {
         self.recorded_items_by_key.borrow().clone()
     }
 

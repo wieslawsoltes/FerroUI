@@ -6,7 +6,7 @@ use crate::test_support::{
     TestControl as Control, TestDock, TestHost, TestNode, TestRoot, TestSplit, TestWindow,
 };
 use crate::BoxedValue;
-use ferroui_system::collections::generic::Dictionary;
+use std::collections::HashMap;
 use ferroui_system::collections::specialized::{CollectionChange, INotifyCollectionChanged};
 use ferroui_system::events::Event;
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -43,13 +43,13 @@ fn locator_state_defaults_and_shared_registries_are_preserved() {
     factory.set_hide_tools_on_close(true);
     factory.set_hide_documents_on_close(true);
     assert!(factory.hide_tools_on_close() && factory.hide_documents_on_close());
-    let contexts = Rc::new(RefCell::new(Dictionary::new()));
+    let contexts = Rc::new(RefCell::new(HashMap::new()));
     factory.set_context_locator(Some(contexts.clone()));
     assert!(Rc::ptr_eq(&factory.context_locator().unwrap(), &contexts));
-    let hosts = Rc::new(RefCell::new(Dictionary::new()));
+    let hosts = Rc::new(RefCell::new(HashMap::new()));
     factory.set_host_window_locator(Some(hosts.clone()));
     assert!(Rc::ptr_eq(&factory.host_window_locator().unwrap(), &hosts));
-    let dockables = Rc::new(RefCell::new(Dictionary::new()));
+    let dockables = Rc::new(RefCell::new(HashMap::new()));
     factory.set_dockable_locator(Some(dockables.clone()));
     assert!(Rc::ptr_eq(&factory.dockable_locator().unwrap(), &dockables));
 }
@@ -71,15 +71,15 @@ fn empty_ids_skip_default_locators_and_registered_null_results_do_not_fall_back(
     assert!(factory.get_context(String::new()).is_none());
     assert!(factory.get_host_window(String::new()).is_none());
     assert_eq!(calls.get(), 0);
-    let contexts = Rc::new(RefCell::new(Dictionary::new()));
+    let contexts = Rc::new(RefCell::new(HashMap::new()));
     contexts
         .borrow_mut()
-        .add("null".into(), Some(Rc::new(|| None) as ContextFactory));
+        .insert("null".into(), Some(Rc::new(|| None) as ContextFactory));
     factory.set_context_locator(Some(contexts));
-    let hosts = Rc::new(RefCell::new(Dictionary::new()));
+    let hosts = Rc::new(RefCell::new(HashMap::new()));
     hosts
         .borrow_mut()
-        .add("null".into(), Some(Rc::new(|| None) as HostWindowFactory));
+        .insert("null".into(), Some(Rc::new(|| None) as HostWindowFactory));
     factory.set_host_window_locator(Some(hosts));
     assert!(factory.get_context("null".into()).is_none());
     assert!(factory.get_host_window("null".into()).is_none());
@@ -99,12 +99,12 @@ fn empty_ids_skip_default_locators_and_registered_null_results_do_not_fall_back(
 #[test]
 fn locator_callbacks_see_shared_edits_and_can_replace_or_clear_their_registry() {
     let factory = RecordingFactory::with_base();
-    let contexts = Rc::new(RefCell::new(Dictionary::new()));
+    let contexts = Rc::new(RefCell::new(HashMap::new()));
     factory.set_context_locator(Some(contexts.clone()));
     let weak = Rc::downgrade(&factory);
     let value: BoxedValue = Rc::new(42_i32);
     let result = value.clone();
-    contexts.borrow_mut().add(
+    contexts.borrow_mut().insert(
         "found".into(),
         Some(Rc::new(move || {
             weak.upgrade().unwrap().set_context_locator(None);
@@ -118,10 +118,10 @@ fn locator_callbacks_see_shared_edits_and_can_replace_or_clear_their_registry() 
     assert!(factory.context_locator().is_none());
     let host = Rc::new(TestHost::default());
     let result = host.clone();
-    let hosts = Rc::new(RefCell::new(Dictionary::new()));
+    let hosts = Rc::new(RefCell::new(HashMap::new()));
     factory.set_host_window_locator(Some(hosts.clone()));
     let registry = Rc::downgrade(&hosts);
-    hosts.borrow_mut().add(
+    hosts.borrow_mut().insert(
         "host".into(),
         Some(Rc::new(move || {
             registry.upgrade().unwrap().borrow_mut().clear();

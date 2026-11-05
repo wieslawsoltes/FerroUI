@@ -36,7 +36,8 @@ mod context_flyout_page;
 mod context_menu_page;
 mod cursor_page;
 mod custom_drawing;
-mod custom_effects_page;
+// The section Custom effects: the pages of the families of the custom effects gallery (#455).
+pub(crate) mod custom_effects_pages;
 mod custom_drawing_example_control;
 mod data_validation_page;
 mod dialogs_page;

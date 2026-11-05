@@ -4,7 +4,7 @@ use super::group_on::{dispose_many, group_on};
 use crate::cache::{Change, ChangeAwareCache, ChangeReason, ChangeSet, Group, GroupChangeSet, ICache, IChangeSet, IConnectableCache, IObservableCache, ObservableCache};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable, IObserver};
 use std::cell::RefCell;
 use std::hash::Hash;
@@ -65,7 +65,7 @@ where
         // Each group of the source updates the group of the result of its key
         // (`SubscribeMany(..).DisposeMany().Subscribe()`).
         let updates_from_children = {
-            let child_subscriptions = Rc::new(RefCell::new(Dictionary::<G, Rc<dyn IDisposable>>::new()));
+            let child_subscriptions = Rc::new(RefCell::new(SlotOrderMap::<G, Rc<dyn IDisposable>>::new()));
             let (subscriptions, targets) = (child_subscriptions.clone(), parent_groups.clone());
             let subscription = source_groups.connect().subscribe_all(
                 move |changes: ChangeSet<Group<T, K, G>, G>| {

@@ -575,6 +575,49 @@ ripple, burn-away button) and page transitions (the compiz-style set). Each show
 (`Effect="tint(...)"`) and an animation, as Effector's gallery does. Effector's sample effects are
 ported as the reference set.
 
+**Samples as built (E8).**
+
+- *The gallery.* `samples/CustomEffects` (the crate `custom-effects`; `cargo run -p custom-effects`)
+  is the counterpart of `Effector.Sample.App` and `Effector.Compiz.Sample.App`: a header, a
+  section "Setting an effect" (a value set from code, the effect string
+  `tint(color=#0F9D8E, strength=0.55)` read by `Effect::parse`, the converter of `IEffect` that
+  markup's `Effect="..."` goes through, and key frames of `Visual.Effect` on a glow) and one
+  section per family (`Family`, in `Family::ALL`): colour effects, image effects, shader effects,
+  interactive effects and page transitions. Without its default feature `app` (the WinUI 3 theme
+  and the desktop entry point) the crate is the sections only, which the catalog depends on.
+- *The tiles.* A tile (`EffectTile`) holds a value of a library effect and sets its snapshot as
+  the `Effect` of its host: a slider per number and a button per colour (Effector's swatches)
+  change the value; the tile shows the code that makes the value, the effect string markup writes
+  for the current value (which `Effect::parse` reads back to the same snapshot), and two
+  animations of `Visual.Effect`: an `EffectTransition` of 300 ms on the host, so a change fades
+  in and turning the effect off fades it out through its neutral value, and key frames that sweep
+  the first number from the minimum of its slider to the maximum and back (the progress of a
+  transition forward only). The interactive tiles host the interactive classes of E7 and show the
+  effect string of the snapshot the pointer changes. The shader family has Effector's grid as the
+  reactive grid without the pointer (the library has no second grid program) and Effector's
+  nested sample, a spotlight over cards with tints of their own.
+- *The page transitions.* The images are a parameter of the sections (`TransitionImages`: two
+  pages and the pattern of the dissolve, also the mask of the mask transition). The gallery
+  captures two pages of its own and a pattern of grey cells once with `RenderTargetBitmap`
+  (`TransitionImages::render`); the catalog gives photographs of its assets. Besides a tile per
+  transition, the presenter (Effector's compiz sample) shows one page and, on a press or its
+  button, rests on the other page and plays the dissolve to it from the point pressed by key
+  frames of its progress. The compiz set of Effector beyond the dissolve (burn, cube, wobbly,
+  genie, magnetic) is not in the library: the library's transitions are the dissolve and the mask
+  of E6.
+- *The catalog.* The section "Custom effects", after "Composition", has a page per family
+  (Colour effects, Image effects, Shader effects, Interactive effects, Page transitions), each the
+  section of its family in a scroll viewer (`Pages/custom_effects_pages.rs`); it replaces the
+  single page "Custom effects" of the section "Composition" of E2 to E7.
+- *Tests.* The gallery (`samples/CustomEffects/tests.rs`, on the test application with the Skia
+  render interface of `sample-testing` and a global clock the tests tick): the tiles of each
+  family and the effects of their hosts, the effect strings parsed back, a slider, a colour, the
+  toggle, the key frames there and back and forward, the captured pages, the presenter going to
+  the other page and back, an interactive tile following its class, the ways of setting an
+  effect and the sections of the gallery. The catalog: the section and its pages
+  (`tests/view_models.rs`), each page showing its tiles in a window and the photographs of the
+  transitions (`tests/custom_effects_pages.rs`).
+
 ### 3.8 Tests
 
 - E1 (this step): the snapshot's equality, padding and interpolation, the parameter kinds and
@@ -658,6 +701,9 @@ ported as the reference set.
   Vello: the modules checked by naga, the hybrid and GPU modes against the CPU references, frames
   of an interaction compiling no pipeline and allocating no texture (`gpu/effect_pass_tests.rs`),
   the CPU mode (`effect_tests.rs`). The GLSL ES of the modules (`ferroui-build/shader_effects.rs`).
+- E8: the tiles of the gallery and the pages of the catalog (section 3.7, "Samples as built",
+  *Tests*): `samples/CustomEffects/tests.rs`, `samples/ControlCatalog/tests/view_models.rs` and
+  `tests/custom_effects_pages.rs` of the catalog.
 - Later steps: per effect and backend, the GPU output against the CPU reference
   (`tests/FerroUI.RenderTests`, `tests/FerroUI.RenderBackends.Comparison`); the steady-state test
   (no new texture or program over frames that change only parameters, with the allocation
@@ -678,7 +724,7 @@ Each step is one pull request from main.
 | E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3). **Done**: `ShaderEffectDescription::wgsl_module`, the pass of the hybrid and GPU modes, the CPU reference in the CPU mode, `ferroui_build::shader_effects` (the GLSL ES, not drawn by the browser yet) (section 3.4, "Shader effects on Vello as built") | addition | high: depends on E3 |
 | E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions. **Done**: `EffectImage`, `EffectImageWeak`, `EffectImagePixels`, the children convention (`SHADER_WGSL_CHILDREN_BINDING`, `MAX_SHADER_CHILDREN`, `check_shader_children`, `for_each_shader_child`), Skia's image shaders and Vello's textures uploaded once and released after the last handle, the dissolve and mask transitions in the library and on the catalog page (section 3.6, "Secondary images as built") | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
 | E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples. **Done**: `IEffectInputHandler`, `EffectHostContext`, `Effect::construct_interactive`, `InputElement::interactive_effect`, the routing of `input_element_effects.rs`, the pointer spotlight, the reactive grid, the water ripple and the burning flame (values and interactive classes) in the library and on the catalog page (section 3.5, "Interactive effects as built") | addition | medium: event ordering and capture |
-| E8 | Samples and catalog pages (section 3.7) | none (samples) | low |
+| E8 | Samples and catalog pages (section 3.7). **Done**: `samples/CustomEffects` (the gallery application, crate `custom-effects`), the catalog section "Custom effects" with a page per family (section 3.7, "Samples as built") | none (samples) | low |
 | E9 | Validation and documentation: render tests GPU against the CPU reference per backend and mode, comparison scenes, the steady-state and prewarm tests, the rows of gpu-rendering.md, a section in winui-composition.md on how WinUI's effect and render subsystems map to FerroUI | none | low |
 
 Status: E0 and E1 are merged (#455): the model and the no-op. E2 is done: a custom effect whose
@@ -740,6 +786,17 @@ pointer spotlight, the reactive grid, the water ripple and the burning flame of 
 set ship in the library as shader effects with CPU references and as interactive classes, held to
 their references on Skia raster and Graphite and in every mode of Vello, and the catalog page
 "Custom effects" shows them with the burn-away button.
+
+E8 is done: the samples of section 3.7. `samples/CustomEffects` is the gallery application of the
+custom effects, Effector's gallery and compiz sample in one, with a section per family of the
+library: each effect in a tile with its code, its effect string, sliders and colours, the
+transition of the effect of its host and key frames of `Visual.Effect`; the page transitions
+sample pages the application captures once, and a presenter dissolves from one to the other where
+it is pressed (section 3.7, "Samples as built"). The ControlCatalog shows the same sections as one
+page per family in a section "Custom effects", in place of its single page; its transitions sample
+photographs of its assets. The effects are those of E2 to E7, so every tile draws on the GPU of
+Skia and Vello, and a slider, a colour or a frame of an animation changes only uniforms and the
+members of graphs.
 
 ## 5. Not in scope
 

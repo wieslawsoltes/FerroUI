@@ -543,6 +543,7 @@ checksum = "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c"
 name = "control-catalog"
 version = "0.5.0-preview.1"
 dependencies = [
+ "custom-effects",
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
@@ -763,6 +764,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
 dependencies = [
  "hybrid-array",
+]
+
+[[package]]
+name = "custom-effects"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-themes-winui",
+ "sample-testing",
 ]
 
 [[package]]
@@ -1864,6 +1876,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-reactive",
  "ferroui-system",
+ "indexmap",
 ]
 
 [[package]]
