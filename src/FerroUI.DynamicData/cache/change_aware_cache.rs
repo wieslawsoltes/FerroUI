@@ -1,13 +1,14 @@
 //! `ChangeAwareCache<TObject, TKey>` (`Cache/ChangeAwareCache.cs`).
 
 use super::{Change, ChangeReason, ChangeSet, ICache, IQuery};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
+use indexmap::IndexMap;
 use std::hash::Hash;
 
 /// A keyed collection that records its changes until they are captured (`ChangeAwareCache<TObject,
 /// TKey>`): the building block of the cache operators.
 pub struct ChangeAwareCache<T, K> {
-    data: Dictionary<K, T>,
+    data: SlotOrderMap<K, T>,
     changes: Vec<Change<T, K>>,
 }
 
@@ -20,27 +21,38 @@ impl<T: Clone, K: Eq + Hash + Clone> Default for ChangeAwareCache<T, K> {
 impl<T: Clone, K: Eq + Hash + Clone> ChangeAwareCache<T, K> {
     /// An empty cache.
     pub fn new() -> Self {
-        Self { data: Dictionary::new(), changes: Vec::new() }
+        Self { data: SlotOrderMap::new(), changes: Vec::new() }
     }
 
     /// An empty cache with room for `capacity` items.
     pub fn with_capacity(capacity: usize) -> Self {
-        Self { data: Dictionary::with_capacity(capacity), changes: Vec::with_capacity(capacity) }
+        Self { data: SlotOrderMap::with_capacity(capacity), changes: Vec::with_capacity(capacity) }
     }
 
-    /// A cache of the items of `data`, without changes (`ChangeAwareCache(Dictionary<TKey,
-    /// TObject>)`).
-    pub fn from_dictionary(data: Dictionary<K, T>) -> Self {
+    /// A cache of the items of `data`, in their order, without changes
+    /// (`ChangeAwareCache(Dictionary<TKey, TObject>)`).
+    pub fn from_dictionary(data: IndexMap<K, T>) -> Self {
+        Self { data: data.into_iter().collect(), changes: Vec::new() }
+    }
+
+    /// A cache of the items of `data` in their slots, without changes: the edits of an observable
+    /// cache go on in the order of .NET's dictionary, removals included.
+    pub(crate) fn from_slot_order_map(data: SlotOrderMap<K, T>) -> Self {
         Self { data, changes: Vec::new() }
     }
 
-    /// The underlying dictionary (`GetDictionary`).
-    pub fn dictionary(&self) -> &Dictionary<K, T> {
+    /// The underlying map (`GetDictionary`, internal upstream).
+    pub(crate) fn dictionary(&self) -> &SlotOrderMap<K, T> {
         &self.data
     }
 
-    /// The items, giving up the cache.
-    pub fn into_dictionary(self) -> Dictionary<K, T> {
+    /// The items in the order of enumeration of the cache, giving up the cache.
+    pub fn into_dictionary(self) -> IndexMap<K, T> {
+        self.data.into_iter().collect()
+    }
+
+    /// The items in their slots, giving up the cache.
+    pub(crate) fn into_slot_order_map(self) -> SlotOrderMap<K, T> {
         self.data
     }
 

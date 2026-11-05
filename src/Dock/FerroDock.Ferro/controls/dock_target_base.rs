@@ -22,11 +22,12 @@ use ferroui_controls::primitives::{
 };
 use ferroui_controls::templates::IControlTemplate;
 use ferroui_controls::{Control, ControlImpl, TopLevel};
-use ferroui_system::collections::generic::Dictionary;
+use indexmap::IndexMap;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
-/// Shared source operation dictionary, preserving native System enumeration order.
-pub type DockTargetOperations = Rc<RefCell<Dictionary<DockOperation, Ref<Control>>>>;
+/// Shared source operation dictionary, enumerated in the order its operations were added: the hit
+/// test resolves the operations in that order, and the last one hit wins.
+pub type DockTargetOperations = Rc<RefCell<IndexMap<DockOperation, Ref<Control>>>>;
 type RememberedParts = Vec<(DockOperation, WeakRef<Control>)>;
 const INDICATORS: [&str; 9] = [
     "PART_TopIndicator",
@@ -166,8 +167,8 @@ impl DockTargetBase {
             applied_indicators: RefCell::new(Vec::new()),
             applied_selectors: RefCell::new(Vec::new()),
             registrations_invalid: Cell::new(false),
-            indicators: RefCell::new(Rc::new(RefCell::new(Dictionary::new()))),
-            selectors: RefCell::new(Rc::new(RefCell::new(Dictionary::new()))),
+            indicators: RefCell::new(Rc::new(RefCell::new(IndexMap::new()))),
+            selectors: RefCell::new(Rc::new(RefCell::new(IndexMap::new()))),
             subscriptions: RefCell::new(Vec::new()),
             handle: RefCell::new(Weak::new()),
         }
@@ -525,16 +526,17 @@ fn remember_parts(parts: &DockTargetOperations) -> RememberedParts {
         .map(|(operation, control)| (*operation, control.downgrade()))
         .collect()
 }
-// Shared System preserves source enumeration order. Read each entry live, releasing
-// storage before policy/property callbacks. Its unexposed version/removal-slot
-// protocol remains an explicit runtime parity gap, not a snapshot workaround.
+// The map enumerates in the order its operations were added, which is the source order: the
+// registrations clear it and add the parts again, and nothing removes one. Read each entry live,
+// releasing storage before policy/property callbacks. The version check of the source enumerator
+// (an edit during the enumeration) remains an explicit runtime parity gap, not a snapshot
+// workaround.
 fn entries(parts: DockTargetOperations) -> impl Iterator<Item = (DockOperation, Ref<Control>)> {
     let mut index = 0;
     std::iter::from_fn(move || {
         let entry = parts
             .borrow()
-            .iter()
-            .nth(index)
+            .get_index(index)
             .map(|(operation, control)| (*operation, control.clone()));
         index += 1;
         entry

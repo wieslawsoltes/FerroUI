@@ -1,14 +1,14 @@
-//! Tests of `collections::generic::Dictionary`: the order of enumeration of .NET.
+//! Tests of `collections::generic::SlotOrderMap`: the order of enumeration of .NET.
 
-use crate::collections::generic::Dictionary;
+use crate::collections::generic::SlotOrderMap;
 
-fn keys(dictionary: &Dictionary<i32, &str>) -> Vec<i32> {
+fn keys(dictionary: &SlotOrderMap<i32, &str>) -> Vec<i32> {
     dictionary.keys().copied().collect()
 }
 
 #[test]
 fn enumerates_in_the_order_of_addition() {
-    let mut d = Dictionary::new();
+    let mut d = SlotOrderMap::new();
     for key in [5, 1, 9, 3] {
         d.add(key, "v");
     }
@@ -17,7 +17,7 @@ fn enumerates_in_the_order_of_addition() {
 
 #[test]
 fn an_update_keeps_the_place() {
-    let mut d = Dictionary::new();
+    let mut d = SlotOrderMap::new();
     d.add(1, "a");
     d.add(2, "b");
     assert_eq!(d.insert(1, "c"), Some("a"));
@@ -26,7 +26,7 @@ fn an_update_keeps_the_place() {
 
 #[test]
 fn an_addition_after_removals_takes_the_place_removed_last() {
-    let mut d = Dictionary::new();
+    let mut d = SlotOrderMap::new();
     for key in 1..=5 {
         d.add(key, "v");
     }
@@ -41,7 +41,7 @@ fn an_addition_after_removals_takes_the_place_removed_last() {
 
 #[test]
 fn clear_starts_over() {
-    let mut d = Dictionary::new();
+    let mut d = SlotOrderMap::new();
     d.add(1, "v");
     d.add(2, "v");
     d.remove(&1);
@@ -54,8 +54,28 @@ fn clear_starts_over() {
 
 #[test]
 fn add_of_an_existing_key_panics() {
-    let mut d = Dictionary::new();
+    let mut d = SlotOrderMap::new();
     d.add(1, "v");
     assert!(!d.try_add(1, "w"));
     assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || d.add(1, "w"))).is_err());
+}
+
+#[test]
+#[allow(deprecated)]
+fn the_former_name_is_the_same_type() {
+    let mut map: crate::collections::generic::Dictionary<i32, &str> = SlotOrderMap::new();
+    map.add(1, "a");
+    let map: SlotOrderMap<i32, &str> = map;
+    assert_eq!(keys(&map), vec![1]);
+}
+
+#[test]
+fn into_iter_gives_the_entries_in_the_order_of_enumeration() {
+    let mut d = SlotOrderMap::new();
+    for key in 1..=4 {
+        d.add(key, "v");
+    }
+    d.remove(&2);
+    d.add(9, "w");
+    assert_eq!(d.into_iter().collect::<Vec<_>>(), vec![(1, "v"), (9, "w"), (3, "v"), (4, "v")]);
 }

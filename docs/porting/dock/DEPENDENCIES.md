@@ -492,7 +492,7 @@ the actual-model fixture dependency is dev-only.
 | `INotifyPropertyChanged` | `ferroui_system::component_model::INotifyPropertyChanged` | Model service contracts, implemented through ReactiveUI |
 | `EventHandler`, event lists | `ferroui_system::events::{Event, HandlerList}` | ReactiveUI notifications and factory event handler contracts; FactoryBase lifecycle events reuse the shared publisher |
 | `ObservableCollection<T>` | `ferroui_system::collections::object_model::ObservableCollection<T>` | Observable backend of the general ListHandle/IList contract used by concrete models, factory contracts, navigation and group validation |
-| Insertion-ordered dictionaries | `ferroui_system::collections::generic::Dictionary` | Shared dictionary/locator handles in IFactory; FactoryBase locators retain shared mutation |
+| Dictionaries | `std::collections::HashMap`, `indexmap::IndexMap`, `ferroui_system::collections::generic::SlotOrderMap` | Shared dictionary/locator handles in IFactory are `HashMap`s (looked up by identity or ID); FactoryBase locators retain shared mutation. `DockTargetOperations` is an `IndexMap` (the order of the hit test). The workspaces of `DockWorkspaceManager` keep `SlotOrderMap`, the port of .NET's slot order (X1 of #423) |
 | `System.Windows.Input.ICommand` | `ferroui_reactiveui::ICommand` | Shared command contract in IDock and other model interfaces; bridge to control commands remains in the UI layer |
 | `Task<T>`, `TaskCompletionSource<T>` | `ferroui_system::threading::tasks` | Available for dialogs and dispatchers; task continuation policy needs attention below |
 | `CancellationToken` | `ferroui_system::threading::CancellationToken` | Available for asynchronous service lifecycles |

@@ -4,7 +4,7 @@
 use crate::cache::{Change, ChangeAwareCache, ChangeReason, ChangeSet, ICache, IQuery};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::hash::Hash;
@@ -69,7 +69,7 @@ struct ItemState<T> {
 /// The mutable part of a subscription of [`filter_dynamic`].
 struct DynamicFilterState<T, K, S> {
     downstream_changes_buffer: Vec<Change<T, K>>,
-    item_states_by_key: Dictionary<K, ItemState<T>>,
+    item_states_by_key: SlotOrderMap<K, ItemState<T>>,
     has_initialized: bool,
     has_predicate_state_completed: bool,
     has_reapply_filter_completed: bool,
@@ -110,7 +110,7 @@ pub(crate) fn filter_dynamic<T: Clone + 'static, K: Eq + Hash + Clone + 'static,
             suppress_empty_change_sets,
             state: RefCell::new(DynamicFilterState {
                 downstream_changes_buffer: Vec::new(),
-                item_states_by_key: Dictionary::new(),
+                item_states_by_key: SlotOrderMap::new(),
                 has_initialized: false,
                 has_predicate_state_completed: false,
                 has_reapply_filter_completed: false,

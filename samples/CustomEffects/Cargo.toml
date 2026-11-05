@@ -1,0 +1,47 @@
+[package]
+name = "custom-effects"
+description = "The custom effects gallery of FerroUI (#455): the effects of the library on Visual.Effect, one section per family, each with its code, its effect string and an animation; its sections are the pages of the ControlCatalog's section Custom effects"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+# The tests are a module of the library (`tests.rs`), not integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+doctest = false
+
+# The desktop entry point: the gallery in a window of its own, in the WinUI 3 theme.
+[[bin]]
+name = "custom-effects"
+path = "main.rs"
+required-features = ["app"]
+test = false
+
+[features]
+default = ["app"]
+# The application of the gallery: the WinUI 3 theme and the desktop entry point. Without it the
+# crate is the sections of the gallery, which the ControlCatalog shows as its pages (it depends on
+# the crate without the default features, so that it links neither this application nor its
+# entry point).
+app = ["dep:ferroui-themes-winui", "dep:ferroui-desktop"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-themes-winui = { workspace = true, optional = true }
+ferroui-desktop = { workspace = true, optional = true }
+
+[dev-dependencies]
+# The test application (a dispatcher of the thread) with the Skia render interface and font
+# manager of `sample-testing`, so that the pages of the transitions render into images, and a
+# global clock the tests tick.
+ferroui-controls = { workspace = true, features = ["testing"] }
+sample-testing = { path = "../SampleTesting" }
