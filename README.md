@@ -283,6 +283,10 @@ cargo run -p control-catalog-desktop
 # The TreeDataGrid demo (its pages are also the page TreeDataGrid of the ControlCatalog)
 cargo run -p treedatagrid-demo
 
+# The custom effects gallery: the effects of the library on Visual.Effect, one section per
+# family (its sections are also the pages of the section Custom effects of the ControlCatalog)
+cargo run -p custom-effects
+
 # Charts: compiled XAML, line/area/bar series, shared live data and light/dark resources
 cargo run -p charts-demo --features desktop
 
