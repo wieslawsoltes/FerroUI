@@ -1,6 +1,6 @@
 use crate::data::{BindingMode, BindingPriority};
 use crate::ferro_property_metadata::Coercion;
-use crate::property_store::{EffectiveValueDyn, IValueEntry};
+use crate::property_store::{EffectiveValue, EffectiveValueDyn, IValueEntry};
 use crate::reactive::{Disposable, IDisposable, IObservable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
@@ -174,6 +174,16 @@ impl fmt::Display for DoNothingType {
 /// raised on an object (`true` before, `false` after).
 pub type NotifyingCallback = Box<dyn Fn(&FerroObject, bool)>;
 
+// Installed only by an explicit inheritance registration. The property owns
+// this capability; its metadata may be overridden without changing whether
+// the property inherits or which Rust value type its entries contain.
+pub(crate) type InheritedValueChanged = fn(
+    &dyn EffectiveValueDyn,
+    &FerroObject,
+    Option<&dyn EffectiveValueDyn>,
+    Option<&dyn EffectiveValueDyn>,
+);
+
 /// Untyped operations that a property routes to its typed implementation.
 pub(crate) trait PropertyRoutes {
     fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn>;
@@ -278,6 +288,7 @@ pub struct FerroProperty {
     owner_type: &'static TypeInfo,
     id: u32,
     inherits: bool,
+    inherited_value_changed: Cell<Option<InheritedValueChanged>>,
     is_attached: bool,
     is_direct: bool,
     is_read_only: bool,
@@ -324,6 +335,7 @@ impl FerroProperty {
             owner_type,
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
             inherits: init.inherits,
+            inherited_value_changed: Cell::new(None),
             is_attached: init.is_attached,
             is_direct: init.is_direct,
             is_read_only: init.is_read_only,
@@ -345,6 +357,7 @@ impl FerroProperty {
             owner_type,
             id: source.id,
             inherits: source.inherits,
+            inherited_value_changed: source.inherited_value_changed.clone(),
             is_attached: source.is_attached,
             is_direct: source.is_direct,
             is_read_only,
@@ -360,6 +373,20 @@ impl FerroProperty {
         if self.routes.set(routes).is_err() {
             panic!("property routes are already set");
         }
+    }
+
+    // Registration fills this after construction and before exposing the
+    // property through the registry. Private inheriting constructors must do
+    // the same explicitly; a universal typed constructor must not name the
+    // algorithm and thereby retain it for non-inheriting value types.
+    pub(crate) fn set_inherited_value_changed(&self, callback: Option<InheritedValueChanged>) {
+        debug_assert_eq!(self.inherits, callback.is_some());
+        debug_assert!(self.inherited_value_changed.get().is_none());
+        self.inherited_value_changed.set(callback);
+    }
+
+    pub(crate) fn inherited_value_changed(&self) -> InheritedValueChanged {
+        self.inherited_value_changed.get().expect("inheriting property has no change notifier")
     }
 
     #[inline]
@@ -566,8 +593,10 @@ impl FerroProperty {
         options: StyledPropertyOptions<TValue>,
     ) -> &'static StyledProperty<TValue> {
         let assign_binding = options.assign_binding;
+        let inherited_value_changed = options.inherited_value_changed;
         let (metadata, inherits, validate, notifying) = options.into_parts();
         let result = StyledProperty::create(name, owner_type, owner_type, metadata, inherits, validate, notifying, false);
+        result.set_inherited_value_changed(inherited_value_changed);
         result.set_assign_binding(assign_binding);
         FerroPropertyRegistry::instance().register(owner_type, result);
         result
@@ -601,8 +630,10 @@ impl FerroProperty {
         options: StyledPropertyOptions<TValue>,
     ) -> &'static AttachedProperty<TValue> {
         let assign_binding = options.assign_binding;
+        let inherited_value_changed = options.inherited_value_changed;
         let (metadata, inherits, validate, notifying) = options.into_parts();
         let result = AttachedProperty::create(name, owner_type, host_type, metadata, inherits, validate, notifying);
+        result.set_inherited_value_changed(inherited_value_changed);
         result.set_assign_binding(assign_binding);
         result.host_type.set(Some(host_type));
         let registry = FerroPropertyRegistry::instance();
@@ -666,6 +697,7 @@ impl fmt::Display for FerroProperty {
 pub struct StyledPropertyOptions<T> {
     default_value: T,
     inherits: bool,
+    inherited_value_changed: Option<InheritedValueChanged>,
     default_binding_mode: BindingMode,
     validate: Option<Box<dyn Fn(&T) -> bool>>,
     coerce: Option<Coercion<T>>,
@@ -679,6 +711,7 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
         Self {
             default_value,
             inherits: false,
+            inherited_value_changed: None,
             default_binding_mode: BindingMode::OneWay,
             validate: None,
             coerce: None,
@@ -691,6 +724,11 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
     /// Whether the property inherits its value from the parent object.
     pub fn inherits(mut self, inherits: bool) -> Self {
         self.inherits = inherits;
+        self.inherited_value_changed = if inherits {
+            Some(EffectiveValue::<T>::notify_inherited_value_changed)
+        } else {
+            None
+        };
         self
     }
 

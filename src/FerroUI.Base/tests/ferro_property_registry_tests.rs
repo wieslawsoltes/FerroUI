@@ -74,6 +74,7 @@ fn registered_properties_count_reflects_newly_added_attached_property() {
     let metadata = StyledPropertyMetadata::new(Some(0));
     let property =
         AttachedProperty::<i32>::create("test", FerroObject::TYPE, FerroObject::TYPE, metadata, true, None, None);
+    property.set_inherited_value_changed(Some(crate::property_store::EffectiveValue::<i32>::notify_inherited_value_changed));
     registry.register(FerroObject::TYPE, property);
     registry.register_attached(Class4::TYPE, property);
     property.add_owner::<Class4>();

@@ -961,7 +961,7 @@ impl ValueStore {
 
         // Raise PropertyChanged on this object if necessary.
         let raiser = old_value.or(new_value).expect("one of the values is set");
-        raiser.raise_inherited_value_changed(owner, old_value, new_value);
+        raiser.raise_inherited_value_changed(property, owner, old_value, new_value);
 
         owner.for_each_inheritance_child(|child| {
             child.values().inherited_value_changed(child, property, old_value, new_value)
