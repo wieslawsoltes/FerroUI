@@ -4,6 +4,7 @@
 use super::{Cache, CacheUpdater, KeySelector};
 use crate::cache::{Change, ChangeAwareCache, ChangeReason, ChangeSet, ICache, ISourceUpdater};
 use ferroui_system::collections::generic::SlotOrderMap;
+use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::hash::Hash;
 
@@ -73,8 +74,9 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ReaderWriter<T, K> {
         self.read(|data| data.keys().cloned().collect())
     }
 
-    pub(crate) fn key_values(&self) -> SlotOrderMap<K, T> {
-        self.read(|data| data.clone())
+    /// The keys and items, in the order of enumeration of the cache.
+    pub(crate) fn key_values(&self) -> IndexMap<K, T> {
+        self.read(|data| data.iter().map(|(key, item)| (key.clone(), item.clone())).collect())
     }
 
     pub(crate) fn lookup(&self, key: &K) -> Option<T> {
@@ -107,7 +109,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ReaderWriter<T, K> {
         let data = std::mem::take(&mut *self.data.borrow_mut());
         let copy = preview.map(|_| data.clone());
         let active = std::rc::Rc::new(if preview.is_some() || collect_changes {
-            ActiveCache::Tracking(RefCell::new(ChangeAwareCache::from_dictionary(data)))
+            ActiveCache::Tracking(RefCell::new(ChangeAwareCache::from_slot_order_map(data)))
         } else {
             ActiveCache::Plain(RefCell::new(Cache::from_dictionary(data)))
         });
@@ -121,7 +123,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ReaderWriter<T, K> {
                 let active = self.owner.active.borrow_mut().take();
                 if let Some(active) = active {
                     let data = match std::rc::Rc::try_unwrap(active) {
-                        Ok(ActiveCache::Tracking(cache)) => cache.into_inner().into_dictionary(),
+                        Ok(ActiveCache::Tracking(cache)) => cache.into_inner().into_slot_order_map(),
                         Ok(ActiveCache::Plain(cache)) => cache.into_inner().into_dictionary(),
                         Err(shared) => match &*shared {
                             ActiveCache::Tracking(cache) => cache.borrow().dictionary().clone(),

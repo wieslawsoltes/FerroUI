@@ -177,6 +177,16 @@ impl<K: Eq + Hash + Clone, V> FromIterator<(K, V)> for SlotOrderMap<K, V> {
     }
 }
 
+impl<K, V> IntoIterator for SlotOrderMap<K, V> {
+    type Item = (K, V);
+    type IntoIter = std::iter::Flatten<std::vec::IntoIter<Option<(K, V)>>>;
+
+    /// The entries in the order of enumeration, giving up the map.
+    fn into_iter(self) -> Self::IntoIter {
+        self.entries.into_iter().flatten()
+    }
+}
+
 impl<K: Eq + Hash + Clone, V> Extend<(K, V)> for SlotOrderMap<K, V> {
     fn extend<I: IntoIterator<Item = (K, V)>>(&mut self, iter: I) {
         for (key, value) in iter {

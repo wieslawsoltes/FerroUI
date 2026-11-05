@@ -68,3 +68,14 @@ fn the_former_name_is_the_same_type() {
     let map: SlotOrderMap<i32, &str> = map;
     assert_eq!(keys(&map), vec![1]);
 }
+
+#[test]
+fn into_iter_gives_the_entries_in_the_order_of_enumeration() {
+    let mut d = SlotOrderMap::new();
+    for key in 1..=4 {
+        d.add(key, "v");
+    }
+    d.remove(&2);
+    d.add(9, "w");
+    assert_eq!(d.into_iter().collect::<Vec<_>>(), vec![(1, "v"), (9, "w"), (3, "v"), (4, "v")]);
+}
