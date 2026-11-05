@@ -29,6 +29,8 @@ ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 # The importer reads the document with byte ranges and edits the source; it never reserializes.
 roxmltree = { workspace = true }
+# `url::Url`, the URL of the document `load_winui` loads (C5 of #423).
+url = { workspace = true }
 
 [build-dependencies]
 ferroui-build-scan = { workspace = true }

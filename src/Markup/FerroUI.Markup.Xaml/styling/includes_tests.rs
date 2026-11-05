@@ -3,7 +3,7 @@
 //! service, and the includes as resource providers and styles.
 
 use super::*;
-use crate::test_support::{boxed, uri, TestAssetLoader, TestServiceProvider};
+use crate::test_support::{boxed, uri_ref, url, TestAssetLoader, TestServiceProvider};
 use crate::{
     register_types, FerroXamlLoader, IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
     ServiceProviderExtensions, XamlLoadError, XamlResourceNode,
@@ -82,14 +82,14 @@ fn loading_an_object_without_compiled_markup_is_an_error() {
 #[should_panic(expected = "Could not create IAssetLoader")]
 fn loading_without_an_asset_loader_panics() {
     let _scope = FerroLocator::enter_scope();
-    let _ = FerroXamlLoader::load(&uri("ferres://includes.none/A.xaml"), None);
+    let _ = FerroXamlLoader::load(&uri_ref("ferres://includes.none/A.xaml"), None);
 }
 
 #[test]
 #[should_panic(expected = "Cannot load relative Uri when BaseUri is null")]
 fn loading_a_relative_uri_without_a_base_uri_panics() {
     let _scope = TestAssetLoader::new().install();
-    let _ = FerroXamlLoader::load(&uri("A.xaml"), None);
+    let _ = FerroXamlLoader::load(&uri_ref("A.xaml"), None);
 }
 
 #[test]
@@ -97,28 +97,28 @@ fn compiled_documents_are_loaded_through_the_table_of_their_assembly() {
     let scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.resources", compiled_resources);
 
-    let loaded = FerroXamlLoader::load(&uri("ferres://includes.resources/Colors.xaml"), None).unwrap();
+    let loaded = FerroXamlLoader::load(&uri_ref("ferres://includes.resources/Colors.xaml"), None).unwrap();
     let dictionary = from_markup_value::<Ref<ResourceDictionary>>(&Some(loaded)).unwrap();
     assert_eq!(text(dictionary.try_get_value(&key("source"))), "Colors.xaml");
     assert!(!SEEN_PROVIDER.with(Cell::get));
 
     // A relative URI is resolved against the base URI; the service provider is passed on.
     let sp = TestServiceProvider::new().sp();
-    let base = uri("ferres://includes.resources/Themes/Base.xaml");
+    let base = url("ferres://includes.resources/Themes/Base.xaml");
     let loaded =
-        FerroXamlLoader::load_with_service_provider(Some(&sp), &uri("Dark.xaml"), Some(&base)).unwrap();
+        FerroXamlLoader::load_with_service_provider(Some(&sp), &uri_ref("Dark.xaml"), Some(&base)).unwrap();
     let dictionary = from_markup_value::<Ref<ResourceDictionary>>(&Some(loaded)).unwrap();
     assert_eq!(text(dictionary.try_get_value(&key("source"))), "Themes/Dark.xaml");
     assert!(SEEN_PROVIDER.with(Cell::get));
 
     // The table has no such document and there is no runtime loader.
-    let error = FerroXamlLoader::load(&uri("ferres://includes.resources/Missing.txt"), None).unwrap_err();
+    let error = FerroXamlLoader::load(&uri_ref("ferres://includes.resources/Missing.txt"), None).unwrap_err();
     assert_eq!(
         error.message(),
         "No precompiled XAML found for ferres://includes.resources/Missing.txt (baseUri: ), make sure to specify x:Class and include your XAML file as FerroResource"
     );
     // An assembly without a table.
-    assert!(FerroXamlLoader::load(&uri("ferres://includes.unknown/A.xaml"), None).is_err());
+    assert!(FerroXamlLoader::load(&uri_ref("ferres://includes.unknown/A.xaml"), None).is_err());
     scope.dispose();
 }
 
@@ -135,7 +135,7 @@ impl IRuntimeXamlLoader for RecordingRuntimeLoader {
         let text = document.read_to_string().unwrap();
         self.seen.borrow_mut().push(format!(
             "{}|{}|{}|{}",
-            document.base_uri.as_ref().unwrap().absolute_uri(),
+            document.base_uri.as_ref().unwrap().as_str(),
             text,
             document.service_provider.is_some(),
             configuration.local_assembly.map_or("none", |a| a.name)
@@ -162,7 +162,7 @@ fn documents_without_compiled_markup_go_to_the_runtime_loader_service() {
 
     let sp = TestServiceProvider::new().sp();
     let loaded =
-        FerroXamlLoader::load_with_service_provider(Some(&sp), &uri("ferres://FerroUI.Markup.Xaml/Runtime.xaml"), None)
+        FerroXamlLoader::load_with_service_provider(Some(&sp), &uri_ref("ferres://FerroUI.Markup.Xaml/Runtime.xaml"), None)
             .unwrap();
     assert!(from_markup_value::<Ref<ResourceDictionary>>(&Some(loaded)).is_some());
     // The document carries the absolute URI, the text, the service provider
@@ -173,13 +173,53 @@ fn documents_without_compiled_markup_go_to_the_runtime_loader_service() {
     );
 
     // The error of the runtime loader is the error of the load.
-    let error = FerroXamlLoader::load(&uri("ferres://includes.runtime/Broken.xaml"), None).unwrap_err();
+    let error = FerroXamlLoader::load(&uri_ref("ferres://includes.runtime/Broken.xaml"), None).unwrap_err();
     assert_eq!(error.message(), "bad document");
     assert!(loader.seen.borrow()[1].ends_with("|false|none"));
 
     // An asset that does not exist cannot be opened.
-    let error = FerroXamlLoader::load(&uri("ferres://includes.runtime/Missing.xaml"), None).unwrap_err();
+    let error = FerroXamlLoader::load(&uri_ref("ferres://includes.runtime/Missing.xaml"), None).unwrap_err();
     assert!(error.message().starts_with("Could not open the XAML document"));
+    scope.dispose();
+}
+
+/// The base URI of an include is a URL and its source a reference (C5 of #423): a relative
+/// source resolves against the base (`UriRef::resolve`), a `ferres://` source is itself, and a
+/// source that starts with `/` keeps the drive of a `file:` base, as the URL standard resolves it
+/// (`Uri::combine` gave `file:///Styles/Base.xaml`, section 3.5 of
+/// docs/idiomatic-rust-signatures.md). The asset loader opens the document of the URL.
+#[test]
+fn include_sources_resolve_against_a_url_base() {
+    register_types();
+    let assets = TestAssetLoader::new();
+    assets.add("ferres://includes.urls/Themes/Light.xaml", "relative");
+    assets.add("ferres://includes.urls/Shared/Colors.xaml", "absolute");
+    assets.add("file:///C:/Styles/Base.xaml", "rooted");
+    let scope = assets.install();
+    let loader = Rc::new(RecordingRuntimeLoader { seen: RefCell::new(Vec::new()) });
+    let service: Rc<dyn IRuntimeXamlLoader> = loader.clone();
+    FerroLocator::current_mutable().bind::<dyn IRuntimeXamlLoader>().to_constant(service);
+
+    let loaded = |base: &str, source: &str| {
+        let include = ResourceInclude::new(Some(url(base)));
+        include.set_source(Some(uri_ref(source)));
+        text(include.try_get_resource(&key("text"), None))
+    };
+    assert_eq!(loaded("ferres://includes.urls/Themes/Base.xaml", "Light.xaml"), "relative");
+    assert_eq!(loaded("file:///C:/dir/page.xaml", "ferres://includes.urls/Shared/Colors.xaml"), "absolute");
+    assert_eq!(loaded("file:///C:/dir/page.xaml", "/Styles/Base.xaml"), "rooted");
+    // The document carries the URL it was resolved to.
+    let documents: Vec<String> =
+        loader.seen.borrow().iter().map(|seen| seen.split('|').next().unwrap_or_default().to_string()).collect();
+    assert_eq!(
+        documents,
+        ["ferres://includes.urls/Themes/Light.xaml", "ferres://includes.urls/Shared/Colors.xaml", "file:///C:/Styles/Base.xaml"]
+    );
+    // The loader itself resolves a reference against a URL in the same way.
+    let base = url("file:///C:/dir/page.xaml");
+    let loaded = FerroXamlLoader::load(&uri_ref("/Styles/Base.xaml"), Some(&base)).unwrap();
+    let dictionary = from_markup_value::<Ref<ResourceDictionary>>(&Some(loaded)).unwrap();
+    assert_eq!(text(dictionary.try_get_value(&key("text"))), "rooted");
     scope.dispose();
 }
 
@@ -188,9 +228,9 @@ fn resource_include_loads_its_dictionary_on_first_use() {
     let scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.resources", compiled_resources);
 
-    let include = ResourceInclude::new(Some(uri("ferres://includes.resources/Themes/Base.xaml")));
+    let include = ResourceInclude::new(Some(url("ferres://includes.resources/Themes/Base.xaml")));
     assert!(include.source().is_none());
-    include.set_source(Some(uri("Light.xaml")));
+    include.set_source(Some(uri_ref("Light.xaml")));
     let before = LOADS.with(Cell::get);
 
     assert_eq!(text(include.try_get_resource(&key("source"), None)), "Themes/Light.xaml");
@@ -228,7 +268,7 @@ fn resource_include_takes_its_base_uri_from_the_service_provider() {
 
     let sp = TestServiceProvider::new().with_base_uri("ferres://includes.resources/Views/Main.xaml").sp();
     let include = ResourceInclude::with_service_provider(sp);
-    include.set_source(Some(uri("../Shared.xaml")));
+    include.set_source(Some(uri_ref("../Shared.xaml")));
     assert_eq!(text(include.try_get_resource(&key("source"), None)), "Shared.xaml");
     assert!(SEEN_PROVIDER.with(Cell::get));
     scope.dispose();
@@ -241,7 +281,7 @@ fn resource_include_as_a_merged_dictionary_and_as_a_parent() {
     FerroXamlLoader::register_compiled_xaml("includes.resources", compiled_resources);
 
     let include = ResourceInclude::new(None);
-    include.set_source(Some(uri("ferres://includes.resources/Merged.xaml")));
+    include.set_source(Some(uri_ref("ferres://includes.resources/Merged.xaml")));
 
     let dictionary = ResourceDictionary::new();
     dictionary.add_merged_dictionary(include.as_resource_provider());
@@ -266,7 +306,7 @@ fn resource_include_answers_nothing_while_it_is_loading() {
     FerroXamlLoader::register_compiled_xaml("includes.reentrant", compiled_reentrant);
 
     let include = ResourceInclude::new(None);
-    include.set_source(Some(uri("ferres://includes.reentrant/Self.xaml")));
+    include.set_source(Some(uri_ref("ferres://includes.reentrant/Self.xaml")));
     REENTRANT.with(|slot| *slot.borrow_mut() = Some(include.clone()));
     assert!(include.try_get_resource(&key("any"), None).is_none());
     REENTRANT.with(|slot| *slot.borrow_mut() = None);
@@ -277,7 +317,7 @@ fn resource_include_answers_nothing_while_it_is_loading() {
 fn resource_include_reports_a_document_that_cannot_be_loaded() {
     let scope = TestAssetLoader::new().install();
     let include = ResourceInclude::new(None);
-    include.set_source(Some(uri("ferres://includes.nothing/A.xaml")));
+    include.set_source(Some(uri_ref("ferres://includes.nothing/A.xaml")));
     assert!(include.try_loaded().err().unwrap().message().starts_with("No precompiled XAML found"));
     scope.dispose();
 }
@@ -294,7 +334,7 @@ fn resource_include_requires_a_resource_dictionary() {
     let _scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.styles", compiled_styles);
     let include = ResourceInclude::new(None);
-    include.set_source(Some(uri("ferres://includes.styles/NotAStyle.xaml")));
+    include.set_source(Some(uri_ref("ferres://includes.styles/NotAStyle.xaml")));
     let _ = include.loaded();
 }
 
@@ -304,13 +344,13 @@ fn merge_resource_include_behaves_like_a_resource_include() {
     let scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.resources", compiled_resources);
 
-    let include = MergeResourceInclude::new(Some(uri("ferres://includes.resources/Base.xaml")));
-    include.set_source(Some(uri("Merge.xaml")));
+    let include = MergeResourceInclude::new(Some(url("ferres://includes.resources/Base.xaml")));
+    include.set_source(Some(uri_ref("Merge.xaml")));
     assert_eq!(text(include.try_get_resource(&key("source"), None)), "Merge.xaml");
 
     let sp = TestServiceProvider::new().with_base_uri("ferres://includes.resources/Base.xaml").sp();
     let other = MergeResourceInclude::with_service_provider(sp);
-    other.set_source(Some(uri("Other.xaml")));
+    other.set_source(Some(uri_ref("Other.xaml")));
     assert!(other.loaded().has_resources());
 
     // It is a resource include: its base class part is reached by cast.
@@ -330,10 +370,10 @@ fn style_include_loads_its_style_on_first_use() {
     let scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.styles", compiled_styles);
 
-    let include = StyleInclude::new(Some(uri("ferres://includes.styles/App.xaml")));
+    let include = StyleInclude::new(Some(url("ferres://includes.styles/App.xaml")));
     // Nothing is loaded before the style is asked for.
     assert!(include.children().is_empty());
-    include.set_source(Some(uri("Style.xaml")));
+    include.set_source(Some(uri_ref("Style.xaml")));
 
     let loaded = include.loaded();
     assert!(loaded.as_object().unwrap().is::<Style>());
@@ -367,7 +407,7 @@ fn style_include_is_a_style_among_parents_and_in_a_styles_collection() {
 
     let sp = TestServiceProvider::new().with_base_uri("ferres://includes.styles/App.xaml").sp();
     let include = StyleInclude::with_service_provider(sp);
-    include.set_source(Some(uri("/Styles.xaml")));
+    include.set_source(Some(uri_ref("/Styles.xaml")));
     assert!(include.loaded().as_object().unwrap().is::<Styles>());
 
     let styles = Styles::new();
@@ -396,7 +436,7 @@ fn style_include_requires_a_style() {
     let _scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.styles", compiled_styles);
     let include = StyleInclude::new(None);
-    include.set_source(Some(uri("ferres://includes.styles/NotAStyle.xaml")));
+    include.set_source(Some(uri_ref("ferres://includes.styles/NotAStyle.xaml")));
     let _ = include.loaded();
 }
 
@@ -409,10 +449,10 @@ fn includes_are_constructed_and_loaded_through_their_metadata() {
 
     let markup = <ResourceInclude as MarkupTyped>::MARKUP;
     assert_eq!(markup.namespace(), "FerroUI.Markup.Xaml.Styling");
-    let base_uri = uri("ferres://includes.resources/Base.xaml");
+    let base_uri = url("ferres://includes.resources/Base.xaml");
     let include = (markup.constructors[0].invoke)(&[into_markup_value(base_uri)]).unwrap();
     let source = markup.find_property("Source").unwrap();
-    (source.set.unwrap())(&[include.clone(), into_markup_value(uri("Meta.xaml"))]).unwrap();
+    (source.set.unwrap())(&[include.clone(), into_markup_value(uri_ref("Meta.xaml"))]).unwrap();
     let typed = from_markup_value::<Rc<ResourceInclude>>(&include).unwrap();
     assert_eq!(text(typed.try_get_resource(&key("source"), None)), "Meta.xaml");
     assert!(markup.find_event("OwnerChanged").is_some());
@@ -424,14 +464,14 @@ fn includes_are_constructed_and_loaded_through_their_metadata() {
     let markup = <StyleInclude as MarkupTyped>::MARKUP;
     let include = (markup.constructors[1].invoke)(&[into_markup_value(sp)]).unwrap();
     let source = markup.find_property("Source").unwrap();
-    (source.set.unwrap())(&[include.clone(), into_markup_value(uri("ferres://includes.styles/Style.xaml"))]).unwrap();
+    (source.set.unwrap())(&[include.clone(), into_markup_value(uri_ref("ferres://includes.styles/Style.xaml"))]).unwrap();
     let typed = from_markup_value::<Rc<StyleInclude>>(&include).unwrap();
     assert!(typed.loaded().as_object().unwrap().is::<Style>());
 
     // The loader itself.
     let loader = <FerroXamlLoader as MarkupTyped>::MARKUP;
     let load = loader.find_methods("Load").find(|m| m.parameters.len() == 2 && m.return_type.is_some()).unwrap();
-    let loaded = (load.invoke)(&[into_markup_value(uri("ferres://includes.styles/Style.xaml")), None]).unwrap();
+    let loaded = (load.invoke)(&[into_markup_value(uri_ref("ferres://includes.styles/Style.xaml")), None]).unwrap();
     assert!(from_markup_value::<Ref<Style>>(&loaded).is_some());
     assert_eq!(loader.find_methods("Load").count(), 4);
     scope.dispose();
@@ -445,7 +485,7 @@ fn a_compiled_document_that_fails_to_build_is_an_error_of_the_load() {
     FerroXamlLoader::register_compiled_xaml("includes.failing", |_, _| {
         Err(XamlLoadError::with_message("The document failed to build"))
     });
-    let error = FerroXamlLoader::load(&uri("ferres://includes.failing/A.xaml"), None).unwrap_err();
+    let error = FerroXamlLoader::load(&uri_ref("ferres://includes.failing/A.xaml"), None).unwrap_err();
     assert_eq!(error.message(), "The document failed to build");
     assert!(FerroXamlLoader::unregister_compiled_xaml("includes.failing"));
     scope.dispose();
@@ -456,12 +496,12 @@ fn a_registration_can_be_replaced_and_removed() {
     let scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.replace", compiled_styles);
     FerroXamlLoader::register_compiled_xaml("includes.replace", |_, _| Ok(Some(boxed(1i32))));
-    let loaded = FerroXamlLoader::load(&uri("ferres://includes.replace/A.xaml"), None).unwrap();
+    let loaded = FerroXamlLoader::load(&uri_ref("ferres://includes.replace/A.xaml"), None).unwrap();
     assert_eq!(loaded.downcast_ref::<i32>(), Some(&1));
 
     assert!(FerroXamlLoader::unregister_compiled_xaml("includes.replace"));
     assert!(!FerroXamlLoader::unregister_compiled_xaml("includes.replace"));
-    assert!(FerroXamlLoader::load(&uri("ferres://includes.replace/A.xaml"), None).is_err());
+    assert!(FerroXamlLoader::load(&uri_ref("ferres://includes.replace/A.xaml"), None).is_err());
     scope.dispose();
 }
 
@@ -485,14 +525,14 @@ fn subscribing_to_owner_changed_through_metadata_reports_a_failing_load() {
         assert_eq!((event.add)(&[include.clone(), handler()]), Err(MarkupInvokeError::Failed(expected)));
 
         // A document that does not exist.
-        (source.set.unwrap())(&[include.clone(), into_markup_value(uri("ferres://includes.nothing/A.xaml"))]).unwrap();
+        (source.set.unwrap())(&[include.clone(), into_markup_value(uri_ref("ferres://includes.nothing/A.xaml"))]).unwrap();
         assert!(matches!(
             (event.add)(&[include.clone(), handler()]),
             Err(MarkupInvokeError::Failed(message)) if message.starts_with("No precompiled XAML found")
         ));
 
         // A document of the wrong kind.
-        (source.set.unwrap())(&[include.clone(), into_markup_value(uri("ferres://includes.styles/NotAStyle.xaml"))]).unwrap();
+        (source.set.unwrap())(&[include.clone(), into_markup_value(uri_ref("ferres://includes.styles/NotAStyle.xaml"))]).unwrap();
         assert!(matches!(
             (event.add)(&[include, handler()]),
             Err(MarkupInvokeError::Failed(message)) if message.starts_with("Unable to cast object of type")
@@ -504,7 +544,7 @@ fn subscribing_to_owner_changed_through_metadata_reports_a_failing_load() {
     let include = (markup.constructors[0].invoke)(&[None]).unwrap();
     (markup.find_property("Source").unwrap().set.unwrap())(&[
         include.clone(),
-        into_markup_value(uri("ferres://includes.resources/Events.xaml")),
+        into_markup_value(uri_ref("ferres://includes.resources/Events.xaml")),
     ])
     .unwrap();
     let raised = Rc::new(Cell::new(0));
@@ -537,7 +577,7 @@ fn includes_are_added_to_dictionaries_and_styles_through_their_contracts() {
     let include = (markup.constructors[0].invoke)(&[None]).unwrap();
     (markup.find_property("Source").unwrap().set.unwrap())(&[
         include.clone(),
-        into_markup_value(uri("ferres://includes.resources/Cast.xaml")),
+        into_markup_value(uri_ref("ferres://includes.resources/Cast.xaml")),
     ])
     .unwrap();
     let provider = from_markup_value::<Rc<dyn IResourceProvider>>(&include).unwrap();
@@ -566,7 +606,7 @@ fn includes_are_added_to_dictionaries_and_styles_through_their_contracts() {
     let include = (markup.constructors[0].invoke)(&[None]).unwrap();
     (markup.find_property("Source").unwrap().set.unwrap())(&[
         include.clone(),
-        into_markup_value(uri("ferres://includes.styles/Style.xaml")),
+        into_markup_value(uri_ref("ferres://includes.styles/Style.xaml")),
     ])
     .unwrap();
     let styles = Styles::new();
@@ -655,21 +695,21 @@ fn scoped_overlay_precedes_compiled_and_retains_uri_provider_and_assembly_in_eve
     // This assembly has no other tests installing a compiled handler.
     FerroXamlLoader::register_compiled_xaml("overlay.precedence", |_, _| Ok(Some(boxed("old compiled".to_owned()))));
     let sp = TestServiceProvider::new().sp();
-    let base = uri("ferres://FerroUI.Markup.Xaml/Base.xaml");
+    let base = url("ferres://FerroUI.Markup.Xaml/Base.xaml");
     let sources = Rc::new(BTreeMap::from([
         ("ferres://ferroui.markup.xaml/Runtime.xaml".into(), "edited source".into()),
         ("ferres://overlay.precedence/View.xaml".into(), "edited over compiled".into()),
     ]));
     with_sources(sources, || {
-        FerroXamlLoader::load_with_service_provider(Some(&sp), &uri("Runtime.xaml"), Some(&base)).unwrap();
-        let loaded = FerroXamlLoader::load(&uri("ferres://overlay.precedence/View.xaml"), None).unwrap();
+        FerroXamlLoader::load_with_service_provider(Some(&sp), &uri_ref("Runtime.xaml"), Some(&base)).unwrap();
+        let loaded = FerroXamlLoader::load(&uri_ref("ferres://overlay.precedence/View.xaml"), None).unwrap();
         let dictionary = from_markup_value::<Ref<ResourceDictionary>>(&Some(loaded)).unwrap();
         assert_eq!(text(dictionary.try_get_value(&key("text"))), "edited over compiled");
     });
     assert_eq!(loader.seen.borrow()[0], "ferres://ferroui.markup.xaml/Runtime.xaml|edited source|true|FerroUI.Markup.Xaml");
     let failed = Rc::new(BTreeMap::from([("ferres://overlay.precedence/View.xaml".into(), "fail".into())]));
-    with_sources(failed, || assert!(FerroXamlLoader::load(&uri("ferres://overlay.precedence/View.xaml"), None).is_err()));
-    assert_eq!(FerroXamlLoader::load(&uri("ferres://overlay.precedence/View.xaml"), None).unwrap().downcast_ref::<String>().unwrap(), "old compiled");
+    with_sources(failed, || assert!(FerroXamlLoader::load(&uri_ref("ferres://overlay.precedence/View.xaml"), None).is_err()));
+    assert_eq!(FerroXamlLoader::load(&uri_ref("ferres://overlay.precedence/View.xaml"), None).unwrap().downcast_ref::<String>().unwrap(), "old compiled");
     FerroXamlLoader::unregister_compiled_xaml("overlay.precedence");
     scope.dispose();
 }
@@ -692,8 +732,8 @@ fn lazy_native_includes_retain_their_explicit_source_snapshot_and_reject_unavail
         BTreeMap::new(),
     );
     let include = accepted.run(|| {
-        let include = ResourceInclude::new(Some(uri("ferres://FerroUI.Markup.Xaml/Base.xaml")));
-        include.set_source(Some(uri("Runtime.xaml")));
+        let include = ResourceInclude::new(Some(url("ferres://FerroUI.Markup.Xaml/Base.xaml")));
+        include.set_source(Some(uri_ref("Runtime.xaml")));
         include
     });
     assert_eq!(accepted.requested_uris(), BTreeSet::from([path.into()]));
@@ -710,8 +750,8 @@ fn lazy_native_includes_retain_their_explicit_source_snapshot_and_reject_unavail
         BTreeMap::from([(path.into(), "Apply the pending included source".into())]),
     );
     let unavailable = pending.run(|| {
-        let include = ResourceInclude::new(Some(uri("ferres://FerroUI.Markup.Xaml/Base.xaml")));
-        include.set_source(Some(uri("Runtime.xaml")));
+        let include = ResourceInclude::new(Some(url("ferres://FerroUI.Markup.Xaml/Base.xaml")));
+        include.set_source(Some(uri_ref("Runtime.xaml")));
         include
     });
     let error = match unavailable.try_loaded() {
@@ -739,14 +779,14 @@ fn failed_resource_and_style_loads_do_not_latch_the_loading_flag() {
         }
     });
     let resource = ResourceInclude::new(None);
-    resource.set_source(Some(uri("ferres://include.retry/Missing.xaml")));
+    resource.set_source(Some(uri_ref("ferres://include.retry/Missing.xaml")));
     assert!(resource.try_loaded().is_err());
-    resource.set_source(Some(uri("ferres://include.retry/Valid.xaml")));
+    resource.set_source(Some(uri_ref("ferres://include.retry/Valid.xaml")));
     assert_eq!(text(resource.try_get_resource(&key("value"), None)), "resource");
     let style = StyleInclude::new(None);
-    style.set_source(Some(uri("ferres://include.retry/Missing.xaml")));
+    style.set_source(Some(uri_ref("ferres://include.retry/Missing.xaml")));
     assert!(style.try_loaded().is_err());
-    style.set_source(Some(uri("ferres://include.retry/Style.xaml")));
+    style.set_source(Some(uri_ref("ferres://include.retry/Style.xaml")));
     assert_eq!(text(style.try_get_resource(&key("value"), None)), "style");
     FerroXamlLoader::unregister_compiled_xaml("include.retry");
     scope.dispose();
@@ -755,13 +795,13 @@ fn failed_resource_and_style_loads_do_not_latch_the_loading_flag() {
 #[cfg(all(debug_assertions, feature = "hot-reload"))]
 #[test]
 fn development_include_sources_resolve_without_loading_missing_assets() {
-    let resource = ResourceInclude::new(Some(uri("ferres://Discovery/Views/Page.xaml")));
-    resource.set_source(Some(uri("../Resources/Values.xaml")));
+    let resource = ResourceInclude::new(Some(url("ferres://Discovery/Views/Page.xaml")));
+    resource.set_source(Some(uri_ref("../Resources/Values.xaml")));
     assert_eq!(resource.development_source().as_deref(), Some("ferres://discovery/Resources/Values.xaml"));
     let style = StyleInclude::new(None);
-    style.set_source(Some(uri("Styles.xaml")));
+    style.set_source(Some(uri_ref("Styles.xaml")));
     assert_eq!(style.development_source(), None, "relative source needs a base URI");
-    style.set_source(Some(uri("ferres://Discovery/Styles.xaml")));
+    style.set_source(Some(uri_ref("ferres://Discovery/Styles.xaml")));
     assert_eq!(style.development_source().as_deref(), Some("ferres://discovery/Styles.xaml"));
     // No asset loader or runtime loader is installed: metadata discovery must
     // never construct a dictionary/style or resolve an asset.

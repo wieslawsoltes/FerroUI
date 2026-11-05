@@ -10230,6 +10230,54 @@
     ]
   },
   {
+    "name": "InteractiveBurningFlameEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveBurningFlameEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractivePointerSpotlightEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractivePointerSpotlightEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractiveReactiveGridEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveReactiveGridEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractiveWaterRippleEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveWaterRippleEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "InteropAutomationPeer",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::automation::peers::InteropAutomationPeer",
@@ -17639,8 +17687,8 @@
       },
       "Source": {
         "name": "Source",
-        "type_name": "Option<Uri>",
-        "documentation": "ResourceInclude.Source: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "ResourceInclude.Source: Option<UriRef>",
         "values": []
       }
     },
@@ -21080,8 +21128,8 @@
       },
       "Source": {
         "name": "Source",
-        "type_name": "Option<Uri>",
-        "documentation": "StyleInclude.Source: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "StyleInclude.Source: Option<UriRef>",
         "values": []
       },
       "Loaded": {

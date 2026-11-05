@@ -175,7 +175,7 @@ fn the_service_provider_of_the_instantiation_is_the_parent_of_the_captured_one()
     let builder = DeferredContentBuilder::new(move |sp| {
         // Services the captured context does not answer are the ones of the
         // place the content is instantiated in.
-        assert_eq!(sp.get_context_base_uri().unwrap().absolute_uri(), "ferres://app/Host.xaml");
+        assert_eq!(sp.get_context_base_uri().unwrap().as_str(), "ferres://app/Host.xaml");
         // The parents of that place follow the captured ones.
         let buttons = sp.get_parents::<Ref<Button>>();
         assert_eq!(buttons.len(), 1);

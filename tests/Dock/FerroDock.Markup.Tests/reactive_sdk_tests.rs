@@ -13,7 +13,7 @@ use ferroui_base::{
     controls::{INameScope, NameScope},
     metadata::{MarkupAssembly, MarkupTyped},
     threading::Dispatcher,
-    utilities::Uri,
+    utilities::UriRef,
     BoxedValue, Ref,
 };
 use ferroui_controls::{CheckBox, StackPanel, TextBlock, TextBox};
@@ -171,7 +171,7 @@ fn sdk_class_view_bindings_retain_live_engine_notifications_and_two_way_state() 
 fn original_load_extension_constructs_fresh_sdk_models_and_completes_the_supplied_scope() {
     run(|| {
         let extension = LoadExtension::with_source(
-            Uri::absolute("ferres://ferrodock_markup_tests/ReactiveDocumentRoot.xaml").unwrap(),
+            UriRef::parse("ferres://ferrodock_markup_tests/ReactiveDocumentRoot.xaml").unwrap(),
         );
         let service = provider(
             Some(context(Some("ferres://ferrodock_markup_tests/"))),

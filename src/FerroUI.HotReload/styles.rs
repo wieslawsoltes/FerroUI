@@ -195,10 +195,7 @@ impl StyleReloadTarget {
                 "Custom style roots require an explicit adapter".into(),
             ));
         }
-        let uri = ferroui_base::utilities::Uri::try_create(
-            &self.uri,
-            ferroui_base::utilities::UriKind::Absolute,
-        )
+        let uri = crate::document_url(&self.uri)
         .ok_or_else(|| ReloadError::Failed("Invalid style URI".into()))?;
         let candidate = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
             RuntimeXamlLoaderDocument::with_base_uri(Some(uri), source),

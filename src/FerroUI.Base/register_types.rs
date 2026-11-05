@@ -214,6 +214,10 @@ const TYPES: &[&TypeInfo] = types![
     crate::media::effects::DropShadowEffect,
     crate::media::effects::DropShadowEffectBase,
     crate::media::effects::Effect,
+    crate::media::effects::library::InteractiveBurningFlameEffect,
+    crate::media::effects::library::InteractivePointerSpotlightEffect,
+    crate::media::effects::library::InteractiveReactiveGridEffect,
+    crate::media::effects::library::InteractiveWaterRippleEffect,
     // FerroUI.Media.Imaging
     crate::media::imaging::CroppedBitmap,
     // FerroUI.Styling

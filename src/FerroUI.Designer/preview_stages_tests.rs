@@ -791,18 +791,15 @@ fn deferred_include_discovery_uses_the_graphs_accepted_source_stamps_and_snapsho
             Rc::new(FrameworkContextServices),
             None,
             Rc::from([]),
-            Some(Uri::absolute(URI).unwrap()),
+            Some(UriRef::parse_absolute(URI).unwrap()),
         );
         context.set_root_object(Some(Control::boxed(root.clone())));
         context.push_parent(Some(Control::boxed(root.clone())));
         let provider: Rc<dyn IServiceProvider> = context;
         snapshot.run(|| {
             let builder = DeferredContentBuilder::try_new(|_| {
-                let include = ResourceInclude::new(Some(Uri::absolute(URI).unwrap()));
-                include.set_source(Uri::try_create(
-                    "DeferredValues.xaml",
-                    UriKind::RelativeOrAbsolute,
-                ));
+                let include = ResourceInclude::new(Some(UriRef::parse_absolute(URI).unwrap()));
+                include.set_source(UriRef::parse("DeferredValues.xaml").ok());
                 let dictionary = include.try_loaded()?;
                 let width = dictionary.try_get_value(&"width".into()).flatten().unwrap();
                 let child = TextBox::new();

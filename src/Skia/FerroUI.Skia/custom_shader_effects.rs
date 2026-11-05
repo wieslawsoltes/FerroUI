@@ -491,7 +491,9 @@ fn child_shader(image: &EffectImage, layer: &ShaderLayer, gr_context: Option<&dy
 mod tests {
     use super::*;
     use ferroui_base::media::effects::library::{
-        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+        BurningFlameShaderEffect, DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect,
+        PointerSpotlightShaderEffect, ReactiveGridShaderEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+        WaterRippleShaderEffect,
     };
     use ferroui_base::media::effects::{CustomEffect, EffectParameterValue};
     use ferroui_base::media::imaging::BitmapBlendingMode;
@@ -504,6 +506,11 @@ mod tests {
             ImmutableCustomEffect::new(SpotlightShaderEffect::default()),
             ImmutableCustomEffect::new(DissolveTransitionEffect::default()),
             ImmutableCustomEffect::new(MaskTransitionEffect::default()),
+            // The interactive effects (E7).
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect::default()),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect::default()),
+            ImmutableCustomEffect::new(WaterRippleShaderEffect::default()),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect::default()),
         ];
         for effect in effects {
             let description = effect.shader().expect("a shader effect");

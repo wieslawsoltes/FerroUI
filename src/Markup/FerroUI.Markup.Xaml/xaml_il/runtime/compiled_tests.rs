@@ -29,10 +29,9 @@ fn the_context_has_every_service_of_the_framework_language() {
     assert!(provider.get_service_of::<Rc<dyn IRootObjectProvider>>().is_some());
     assert!(provider.get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>().is_some());
     let uri_context = provider.get_service_of::<Rc<dyn IUriContext>>().expect("a URI context");
-    assert_eq!(
-        uri_context.base_uri().map(|uri| uri.original_string().to_string()).as_deref(),
-        Some("ferres://Assembly/Views/Main.xaml")
-    );
+    // The base URI is the URL of the canonical text of the document's URI: the scheme and the
+    // authority in lower case, as the `Uri` of the text compared and resolved it (C5 of #423).
+    assert_eq!(uri_context.base_uri().as_ref().map(url::Url::as_str), Some("ferres://assembly/Views/Main.xaml"));
 }
 
 #[test]

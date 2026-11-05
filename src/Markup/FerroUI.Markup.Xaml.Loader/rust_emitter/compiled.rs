@@ -656,25 +656,24 @@ pub fn class_document_group(
     documents: &[(&str, &str)],
     class_document: &str,
 ) -> Result<Vec<(String, String, Option<String>)>, String> {
-    use ferroui_base::utilities::{Uri, UriKind};
-    let mut uris: Vec<Uri> = Vec::with_capacity(documents.len());
+    use ferroui_base::utilities::UriRef;
+    // The URL of each document, and the documents its includes resolve to, as the run-time
+    // loader finds them (`FerroRuntimeXamlLoader::document_group_without`).
+    let mut uris: Vec<url::Url> = Vec::with_capacity(documents.len());
     for (name, _) in documents {
         let text = format!("{root_uri}{name}");
-        uris.push(Uri::new(&text, UriKind::Absolute).map_err(|e| format!("The URI '{text}' of the XAML document {name} is invalid: {e}"))?);
+        uris.push(UriRef::parse_absolute(&text).map_err(|e| format!("The URI '{text}' of the XAML document {name} is invalid: {e}"))?);
     }
     let start = documents
         .iter()
         .position(|(name, _)| *name == class_document)
         .ok_or_else(|| format!("the document `{class_document}` of the class is not a document of the group"))?;
     // The documents in the order they are found; a document is found once.
-    fn collect(documents: &[(&str, &str)], uris: &[Uri], index: usize, found: &mut Vec<usize>) {
+    fn collect(documents: &[(&str, &str)], uris: &[url::Url], index: usize, found: &mut Vec<usize>) {
         for source in crate::back_end::include_sources(documents[index].1) {
-            let Some(relative) = Uri::try_create(&source, UriKind::RelativeOrAbsolute) else { continue };
-            let included = match relative.is_absolute_uri() {
-                true => relative,
-                false => Uri::combine(&uris[index], &relative),
-            };
-            let Some(next) = uris.iter().position(|uri| uri.absolute_uri() == included.absolute_uri()) else { continue };
+            let Ok(reference) = UriRef::parse(&source) else { continue };
+            let Ok(included) = reference.resolve(&uris[index]) else { continue };
+            let Some(next) = uris.iter().position(|uri| uri.as_str() == included.as_str()) else { continue };
             if found.contains(&next) {
                 continue;
             }
@@ -686,7 +685,7 @@ pub fn class_document_group(
     collect(documents, &uris, start, &mut found);
     Ok(found
         .into_iter()
-        .map(|index| (uris[index].absolute_path().trim_start_matches('/').to_string(), documents[index].1.to_string(), Some(uris[index].to_string())))
+        .map(|index| (uris[index].path().trim_start_matches('/').to_string(), documents[index].1.to_string(), Some(uris[index].to_string())))
         .collect())
 }
 

@@ -10,7 +10,6 @@ use std::rc::{Rc, Weak};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{IServiceProvider, MarkupTyped};
 use ferroui_base::styling::{Style, StyleBaseImpl};
-use ferroui_base::utilities::Uri;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_type, instantiate, BoxedValue, FerroObjectImpl,
     Ref,
@@ -30,7 +29,7 @@ use crate::support::TypeModule;
 pub struct TestServiceProvider {
     this: Weak<TestServiceProvider>,
     root: Rc<dyn IServiceProvider>,
-    base_uri: RefCell<Option<Uri>>,
+    base_uri: RefCell<Option<url::Url>>,
     parents_stack: RefCell<Rc<Vec<BoxedValue>>>,
 }
 
@@ -88,11 +87,11 @@ impl IServiceProvider for TestServiceProvider {
 }
 
 impl IUriContext for TestServiceProvider {
-    fn base_uri(&self) -> Option<Uri> {
+    fn base_uri(&self) -> Option<url::Url> {
         self.base_uri.borrow().clone()
     }
 
-    fn set_base_uri(&self, value: Option<Uri>) {
+    fn set_base_uri(&self, value: Option<url::Url>) {
         *self.base_uri.borrow_mut() = value;
     }
 }
@@ -128,9 +127,9 @@ ferro_markup_type!(class TestServiceProvider {
     ],
     constructors: [() => TestServiceProvider::new],
     properties: [
-        BaseUri: Option<Uri> {
+        BaseUri: Option<url::Url> {
             get: |this: &Rc<TestServiceProvider>| this.base_uri(),
-            set: |this: &Rc<TestServiceProvider>, value: Option<Uri>| this.set_base_uri(value)
+            set: |this: &Rc<TestServiceProvider>, value: Option<url::Url>| this.set_base_uri(value)
         },
         ParentsStack: Rc<Vec<BoxedValue>> {
             get: |this: &Rc<TestServiceProvider>| this.parents_stack(),
