@@ -6,7 +6,7 @@ use ferroui_base::platform::storage::{
     IStorageItemWithFileSystemInfo, StorageItemProperties,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use std::any::Any;
 use std::io::{self, Read, Write};
 use std::rc::Rc;
@@ -16,8 +16,8 @@ use std::rc::Rc;
 pub(crate) struct StorageItem {
     storage_provider_api: Rc<StorageProviderApi>,
     file_system_info: FileSystemInfo,
-    path: Uri,
-    scope_owner_uri: Uri,
+    path: UriRef,
+    scope_owner_uri: UriRef,
 }
 
 /// A file-system entry wrapped as the storage item of its kind.
@@ -53,8 +53,8 @@ impl StorageItem {
     fn new(
         storage_provider_api: Rc<StorageProviderApi>,
         file_system_info: FileSystemInfo,
-        uri: Uri,
-        scope_owner_uri: Uri,
+        uri: UriRef,
+        scope_owner_uri: UriRef,
     ) -> Self {
         Self { storage_provider_api, file_system_info, path: uri, scope_owner_uri }
     }
@@ -63,11 +63,11 @@ impl StorageItem {
         self.file_system_info.name()
     }
 
-    fn path(&self) -> Uri {
+    fn path(&self) -> UriRef {
         self.path.clone()
     }
 
-    pub(crate) fn scope_owner_uri(&self) -> &Uri {
+    pub(crate) fn scope_owner_uri(&self) -> &UriRef {
         &self.scope_owner_uri
     }
 
@@ -83,7 +83,7 @@ impl StorageItem {
     }
 
     pub(crate) fn open_scope(&self) -> Option<Rc<dyn IDisposable>> {
-        self.storage_provider_api.open_security_scope(self.scope_owner_uri.absolute_uri())
+        self.storage_provider_api.open_security_scope(&self.scope_owner_uri.to_string())
     }
 
     fn save_bookmark(&self) -> Option<String> {
@@ -124,7 +124,7 @@ impl StorageItem {
         Ok(self.wrap_file_system_info(moved?, None).map(Wrapped::into_item))
     }
 
-    fn wrap_file_system_info(&self, file_system_info: Option<FileSystemInfo>, scoped_owner: Option<&Uri>) -> Option<Wrapped> {
+    fn wrap_file_system_info(&self, file_system_info: Option<FileSystemInfo>, scoped_owner: Option<&UriRef>) -> Option<Wrapped> {
         let file_system_info = file_system_info?;
 
         // It might not be always correct to assume NSUri from the file path, but that's the best we have here without using native API directly.
@@ -164,7 +164,7 @@ macro_rules! impl_storage_item {
                 self.base.name()
             }
 
-            fn path(&self) -> Uri {
+            fn path(&self) -> UriRef {
                 self.base.path()
             }
 
@@ -240,8 +240,8 @@ impl StorageFile {
     pub(crate) fn new(
         storage_provider_api: Rc<StorageProviderApi>,
         file_info: FileSystemInfo,
-        uri: Uri,
-        scope_owner_uri: Uri,
+        uri: UriRef,
+        scope_owner_uri: UriRef,
     ) -> Rc<Self> {
         Rc::new(Self { base: StorageItem::new(storage_provider_api, file_info, uri, scope_owner_uri) })
     }
@@ -281,8 +281,8 @@ impl StorageFolder {
     pub(crate) fn new(
         storage_provider_api: Rc<StorageProviderApi>,
         directory_info: FileSystemInfo,
-        uri: Uri,
-        scope_owner_uri: Uri,
+        uri: UriRef,
+        scope_owner_uri: UriRef,
     ) -> Rc<Self> {
         Rc::new(Self { base: StorageItem::new(storage_provider_api, directory_info, uri, scope_owner_uri) })
     }
