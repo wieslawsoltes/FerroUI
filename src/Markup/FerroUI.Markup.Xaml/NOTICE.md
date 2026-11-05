@@ -17,6 +17,7 @@ the steps that follow, is `docs/porting/x-bind.md`):
 | `x_bind/bindings.rs` (`Initialize`, `Update`, `StopTracking`; initialization on `Loading`; a template instance updated when its data context changes) | `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/CodeGenerators/CSharpPagePass2.tt` (the generated `Bindings` class: `Loading`, `Initialize`, `Update`, `StopTracking`, `DataContextChangedHandler`, `SetDataRoot`) |
 | `x_bind/root_node.rs` (the root source: the document root, or the typed data context of a template) | `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/XamlHarvester.cs` (the scope root of a `DataTemplate` with `x:DataType`), `BindUniverse.cs` |
 | `XBindExtension::bind_back`, and the function and `BindBack` helpers of `xaml_il/runtime/compiled.rs` (`path_function`, `path_static_function`, `path_bind_back`, `path_static_bind_back`, `path_key_indexer`; step X2) | `BindAssignment.cs` (`BindBackPath`, `ValidateBindBackAssignment`), `CodeGenerators/BindPathStepCodeGenerators.cs` (the invocation of a function step and its update when an argument changes), the generated code of `Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS/FunctionTests.xaml` in `src/XamlCompiler/TestMasters/RegressionProjects/fre/Features/CompiledBinding/BindTestbedCS/generated/FunctionTests.g.cs` (`Invoke_*`, `Update_*`, `UpdateTwoWay_*` calling the `BindBack` method, the `PropertyChanged` cases named after a function) |
+| `XBindExtension` `Converter`, `ConverterParameter`, `ConverterLanguage`, `FallbackValue`, `TargetNullValue`, their checks in `validate`, and the options of the expression of `x_bind/binding.rs` (step X3) | `BindAssignment.cs` (`Converter`, `ConverterParameter`, `ConverterLanguage`, `GetConverterExpression`, `FallbackValueExpression`, `TargetNullValueExpression`, `ValidateConverter`, `ValidateFallbackValue`), `XamlDomValidator.cs` (`ProcessXBindPropertyNode`, TargetNullValue on a non-nullable type) |
 
 The compiler half (the root type and the `x:DataType` of a template as the
 start of the path, named elements, the diagnostics) is in
@@ -49,6 +50,18 @@ x:Bind in the markup extension scanner of xamlx follow
 (`LookupMarkupExtensionBracketCharacters`). The tests port the behaviours of
 `Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS/FunctionTests.xaml`
 and `CastingTests.xaml`.
+
+Step X3 adds the converter and the substitute values: the checks of
+`x_bind.rs` follow `BindAssignment.cs` (`ValidateConverter`,
+`ValidateFallbackValue`) and `XamlDomValidator.cs` (`ProcessXBindPropertyNode`),
+with the messages of `XamlCompilerResources.resx`
+(`BindAssignment_OrphanConverterParam`,
+`BindAssignment_ConverterWithFunctionBindingNotSupported`,
+`BindAssignment_InvalidFallbackValue`,
+`XamlCompiler_XBindTargetNullValueOnNonNullableType`). The tests port the
+converter, fallback and null-value behaviours of
+`Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS/TwoWayTests.xaml`
+and `NullableTests.xaml`.
 
 ```
 MIT License

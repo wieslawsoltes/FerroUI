@@ -256,7 +256,8 @@ error.
 | A function with the wrong arity or argument types; a return type that does not match | `Mismatched function parameter count: ...`, `Cannot find an overload of '...' that takes N parameters.`; `Invalid or mismatched parameter at position 'N' of '...': ...`; `Function return type '...' must match binding target type '...'` | X2 |
 | `BindBack` | `BindBack was expected, but not found: ...`; `Unexpected BindBack found: ...`; `BindBack must point to a method ...`; `BindBack must point to a method that takes one argument of type '...'` | X2 |
 | Casts and indexers | `TwoWay binding is invalid when the binding expression ends with a cast`; `Unable to cast type '...' to '...'.  Use a converter or function binding to change the type`; `The type '...' does not have an indexer.` | X2 |
-| A converter with a function; `ConverterParameter` without a converter; `TargetNullValue` on a non-nullable target | WinUI's messages | X3 |
+| A converter with a function; `ConverterParameter` or `ConverterLanguage` without a converter; a converter that is not an `IValueConverter` | `Using a converter with function binding is not supported`; `ConverterParameter cannot be specified without an actual converter` (and `ConverterLanguage`); `The Converter of an x:Bind must be an IValueConverter: '...' is not one` (a `{StaticResource}` of the document of another type) | X3 |
+| `TargetNullValue` on a non-nullable target; a fallback or target null value that is not a text or `{x:Null}`, or a text that cannot be converted to the target | `TargetNullValue cannot be applied on '...' because its type '...' is not nullable`; `Only string and {x:Null} are supported for FallbackValue` (and `TargetNullValue`); `The FallbackValue '...' of an x:Bind cannot be converted to '...', the type of its target` | X3 |
 | An event method with the wrong signature | WinUI's `BoundEventAssignment` validation | X4 |
 
 At run time (`XBindings::diagnostics`, and the result of `initialize` and `update`): a root that
@@ -335,6 +336,34 @@ of their forms (`BasicTests`, `TwoWayTests` in X1; `FunctionTests`, `CastingTest
   `bool` function bound to `Visibility` has no counterpart: the framework's visibility is a
   `bool`.
 
+### 3.10 Converters and substitute values (X3)
+
+- **The extension.** `XBindExtension` has `Converter` (`Option<Rc<dyn IValueConverter>>`, markup
+  gives a `{StaticResource}`), `ConverterParameter` (`Option<BoxedValue>`), `ConverterLanguage`
+  (`Option<CultureInfo>`: markup writes a language tag, `fr-FR`, which the culture's conversion
+  from text reads; the converter is called with `&CultureInfo` as decision O3 of
+  [idiomatic-rust-signatures.md](../idiomatic-rust-signatures.md) has it, the current culture
+  without one), `FallbackValue` and `TargetNullValue` (`Option<BoxedValue>`, the unset marker
+  for none, `None` for `{x:Null}`). Generated code sets them as every property of a markup
+  extension (`XBindExtension::__markup_set_Converter(...)`); nothing new is generated.
+- **The runtime.** They are the options of the engine's `BindingExpression`, as for `{Binding}`:
+  the value of the path goes through `Convert`, a null value is replaced by the target null
+  value, a path that cannot be read (a null in its middle, an error) and a value that cannot be
+  converted to the target give the fallback value, and a `TwoWay` binding writes back through
+  `ConvertBack` with the same parameter and culture. A binding with a fallback value has no
+  diagnostic for a path that cannot be read: WinUI's generated code sets the fallback instead
+  of failing.
+- **The checks** (section 3.7) are WinUI's `ValidateConverter` and `ValidateFallbackValue`,
+  with the `TargetNullValue` check of `XamlDomValidator`. The type of a converter is checked
+  when it is a `{StaticResource}` declared in the document (the inference the binding path
+  transformer makes for a `Source`); a resource found at load time is checked when it is
+  assigned. WinUI generates the conversion of a fallback text and lets the C# compiler reject
+  it; here the compiler converts the text to the target type as an attribute value would be
+  converted.
+- **Deviation.** WinUI requires a converter when the value type cannot be assigned to the target
+  (`BindAssignment_NeedsConverter`); the engine's target type converter converts what it can at
+  run time, so a binding without a converter is not rejected for its types.
+
 ## 4. Steps
 
 | Step | Content | Public API | Risk | Guard tests |
@@ -342,7 +371,7 @@ of their forms (`BasicTests`, `TwoWayTests` in X1; `FunctionTests`, `CastingTest
 | X0 | This plan | none | none | none |
 | X1 | The core: `XBindExtension`, `XBinding`, `XBindings` and the root node in `ferroui-markup-xaml`; `x:Bind` mapped onto it; the root source (the document root, the `x:DataType` of a `DataTemplate`); property paths, attached properties, named elements; `OneTime`/`OneWay`/`TwoWay` with `UpdateSourceTrigger`; the lifecycle with initialization on attach and the template update on a data context change; the diagnostics of section 3.7 for X1. **Done** | additions (`CompiledBindingPath::build_expression` public) | low: a new extension; the compiled-binding transformers gain a branch for its type only; no generated output of an existing document changes | `x_bind_extension_tests.rs`: both back ends on the root and template fixtures (modes, triggers, named elements, attached property, `Update`, `StopTracking`, attach, recycling, isolation of instances, release of the root); diagnostics as load errors with the position and as compile errors; the freshness of the generated fixture; the pipeline order test unchanged |
 | X2 | Paths of WinUI's grammar: casts `(ns:T)path` and `((ns:T)path).b`, `path.(ns:Owner.Prop)` with interface members, static members `ns:Type.Member`, integer and string indexers (`Items[0]`, `Map['key']`), functions (instance, path and static, with path and literal arguments, re-evaluated when an argument path changes) as a path element with a generated typed closure, `BindBack`; the TwoWay-after-cast error. **Done** (section 3.9) | additions (a function element of `CompiledBindingPathBuilder`; `XBindExtension::BindBack`; the `rt` helpers of functions, `BindBack` and string keys) | medium: a WinUI path parser beside the engine's grammar; the emitter writes closures; the markup extension scanner keeps the brackets of the x:Bind path | `x_bind_extension_tests.rs` on `x_bind_functions.xaml` and `x_bind_casts.xaml` (`FunctionTests` and `CastingTests` behaviours) in both back ends; the X2 diagnostics as load and compile errors; the parser's unit tests; the engine's tests of the function element |
-| X3 | `Converter`, `ConverterParameter`, `ConverterLanguage`, `FallbackValue`, `TargetNullValue` on `XBindExtension`, into the expression options; their WinUI checks | additions | low: the engine already has the options | converter, fallback and null-value cases of `TwoWayTests` and `NullableTests`; diagnostics |
+| X3 | `Converter`, `ConverterParameter`, `ConverterLanguage`, `FallbackValue`, `TargetNullValue` on `XBindExtension`, into the expression options; their WinUI checks. **Done** (section 3.10) | additions | low: the engine already has the options | converter, fallback and null-value cases of `TwoWayTests` and `NullableTests`; diagnostics |
 | X4 | Event binding: `Click="{x:Bind Model.OnClick}"`, a method with the event's signature, none, or a base signature; the emitter writes a typed handler, the interpreter an invoker; the handler re-reads its path on `Update` as WinUI does | additions | medium: the event assignment path of the compiler (`FerroXamlIlTransformRoutedEvent`) gains a binding form | `EventTests` behaviours; the signature diagnostic |
 | X5 | `x:DefaultBindMode` (element and subtree); `x:Phase` through `IDataTemplateComponent` (`XBindings` implements `ProcessBindings` and `Recycle`; the contract moves from `ferroui-controls-repeater` to `ferroui-controls` so that the markup library can implement it, with a re-export); `x:Load`; x:Bind in a `ControlTemplate` with `TargetType`; `Window` roots on `Activated` | additions; a moved trait (re-exported) | medium: phasing touches ItemsRepeater recycling | `PhasingTests` and `ListAndTemplateTests` behaviours; deferred load; the template root |
 | X6 | The WinUI importer onto the core: x:Bind kept as written, validation only for forms WinUI rejects; the adapter and its diagnostics removed; `winui-controls.md` 10.6 rows updated; the WinUI compiled fixture regenerated | removals in `ferroui-markup-xaml-winui` (a preview release) | medium: the Gallery and calculator pages that use x:Bind move to the core | the WinUI crate's compiled tests on the core; the importer's remaining diagnostics |
@@ -392,5 +421,6 @@ Decided (2026-11-03, on the merits, as the owner asked for the open decisions of
 
 - **X0** (this plan) and **X1** (the core) are done: `{x:Bind}` and `{XBind}` in FerroUI XAML,
   through the run-time loader and the Rust emitter.
-- **X2** (paths of WinUI's grammar, functions, `BindBack`) is done: section 3.9. The next step
-  is X3.
+- **X2** (paths of WinUI's grammar, functions, `BindBack`) is done: section 3.9.
+- **X3** (converters, fallback and target null values) is done: section 3.10. The next step is
+  X4.

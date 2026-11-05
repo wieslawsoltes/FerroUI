@@ -1,6 +1,6 @@
 # x:Bind compiler fixtures
 
-Original fixtures of steps X1 and X2 of #525 (docs/porting/x-bind.md). They run through the run-time
+Original fixtures of steps X1 to X4 of #525 (docs/porting/x-bind.md). They run through the run-time
 loader and through the Rust emitter, whose output, `x_bind.generated.rs`, is checked in, compiled
 with the tests and compared with the current compiler; the same assertions run on both
 (`../x_bind_extension_tests.rs`).
@@ -23,6 +23,11 @@ with the tests and compared with the current compiler; the same assertions run o
   inside a path (`((local:XBindModel)Tag).Name`, `TwoWay` included), a function on a cast, an
   interface member after a path (`Tag.(local:IXBindNamed.DisplayName)`) and an attached property
   after a path (`rowHolder.(Grid.Row)`).
+- `x_bind_converters.xaml` (X3, after WinUI's `TwoWayTests` and `NullableTests`): a converter
+  (`XBindTagConverter`, a `{StaticResource}`) `OneWay`, with `ConverterParameter` and
+  `ConverterLanguage`, and `TwoWay` through `ConvertBack`; `FallbackValue` for a path with a null
+  in its middle (`OneTime`, `OneWay`, `TwoWay`, `{x:Null}`), and `TargetNullValue` (`OneWay`,
+  `TwoWay`).
 
 Regenerate the compiled fixture after reviewing a compiler change:
 

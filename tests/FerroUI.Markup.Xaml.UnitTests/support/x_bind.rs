@@ -1,15 +1,19 @@
-//! Not a port of an upstream file: the types the `{x:Bind}` fixtures of step X2 of #525 bind
-//! to (docs/porting/x-bind.md), after the models of WinUI's `FunctionTests` and
-//! `CastingTests` (`src/XamlCompiler/Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS`
-//! of microsoft-ui-xaml): a page with code-behind functions, a model with functions, indexers
-//! and an interface, and a static type with functions and a static property. Generated code
-//! names them by the public Rust paths registered here.
+//! Not a port of an upstream file: the types the `{x:Bind}` fixtures of steps X2 to X4 of #525
+//! bind to (docs/porting/x-bind.md), after the models of WinUI's `FunctionTests`,
+//! `CastingTests`, `TwoWayTests` and `NullableTests`
+//! (`src/XamlCompiler/Tests/RegressionProjects/Features/CompiledBinding/BindTestbedCS` of
+//! microsoft-ui-xaml): a page with code-behind functions, a model with functions, indexers and
+//! an interface, a static type with functions and a static property, and a value converter.
+//! Generated code names them by the public Rust paths registered here.
 
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::converters::IValueConverter;
+use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
+use ferroui_base::data::BindingError;
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -82,6 +86,11 @@ impl XBindPage {
 
     pub fn set_title(&self, title: &str) {
         self.set_value(Self::title_property(), Some(title.to_string()));
+    }
+
+    /// Sets the title to null.
+    pub fn clear_title(&self) {
+        self.set_value(Self::title_property(), None);
     }
 
     pub fn model(&self) -> Rc<XBindModel> {
@@ -320,6 +329,85 @@ ferro_markup_type!(static XBindHelpers {
     ],
 });
 
+// --- The converter -------------------------------------------------------------
+
+/// A value converter that shows what it is called with (step X3): `Convert` gives
+/// `value|parameter|culture` (`-` for no parameter, `null` for a null value), `ConvertBack` the
+/// text before the first `|`, upper-cased, and records `value|parameter|culture`.
+pub struct XBindTagConverter {
+    this: Weak<XBindTagConverter>,
+}
+
+crate::test_identity_eq!(XBindTagConverter);
+
+fn converter_text(value: Option<&BoxedValue>) -> String {
+    match value.and_then(|value| value.downcast_ref::<String>()) {
+        Some(text) => text.clone(),
+        None => "null".to_string(),
+    }
+}
+
+impl XBindTagConverter {
+    pub fn new() -> Rc<XBindTagConverter> {
+        Rc::new_cyclic(|this| Self { this: this.clone() })
+    }
+
+    /// The converter as the value converter contract.
+    pub fn as_value_converter(&self) -> Rc<dyn IValueConverter> {
+        self.this.upgrade().expect("the converter is alive while it is used")
+    }
+
+    /// What `ConvertBack` was called with on this thread, in order (`value|parameter|culture`).
+    pub fn converted_back() -> Vec<String> {
+        CONVERTED_BACK.with(|log| log.borrow().clone())
+    }
+}
+
+impl IValueConverter for XBindTagConverter {
+    fn convert(
+        &self,
+        value: Option<&BoxedValue>,
+        _target_type: ValueType,
+        parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        let parameter = match parameter {
+            Some(parameter) => converter_text(Some(parameter)),
+            None => "-".to_string(),
+        };
+        Ok(Some(Rc::new(format!("{}|{parameter}|{}", converter_text(value), culture.name()))))
+    }
+
+    fn convert_back(
+        &self,
+        value: Option<&BoxedValue>,
+        _target_type: ValueType,
+        parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        let text = converter_text(value);
+        let parameter = match parameter {
+            Some(parameter) => converter_text(Some(parameter)),
+            None => "-".to_string(),
+        };
+        CONVERTED_BACK.with(|log| log.borrow_mut().push(format!("{text}|{parameter}|{}", culture.name())));
+        let head = text.split('|').next().unwrap_or_default().to_uppercase();
+        Ok(Some(Rc::new(head)))
+    }
+}
+
+ferroui_base::ferro_thread_local! {
+    static CONVERTED_BACK: RefCell<Vec<String>> = RefCell::new(Vec::new());
+}
+
+ferro_markup_type!(class XBindTagConverter {
+    this: Rc<XBindTagConverter>,
+    handles: [XBindTagConverter, Rc<XBindTagConverter>, Option<Rc<XBindTagConverter>>],
+    namespace: "FerroUI.Markup.Xaml.UnitTests",
+    interfaces: [Rc<dyn IValueConverter>],
+    constructors: [() => XBindTagConverter::new],
+});
+
 pub(crate) const MODULE: TypeModule = TypeModule {
     types: &[XBindPage::TYPE],
     markup_types: &[
@@ -328,9 +416,12 @@ pub(crate) const MODULE: TypeModule = TypeModule {
         <XBindItems as MarkupTyped>::MARKUP,
         <XBindMap as MarkupTyped>::MARKUP,
         <XBindHelpers as MarkupTyped>::MARKUP,
+        <XBindTagConverter as MarkupTyped>::MARKUP,
     ],
     value_types: || {
         ValueTypes::register_reference::<XBindModel>();
+        ValueTypes::register_reference::<XBindTagConverter>();
+        ValueTypes::register_cast::<XBindTagConverter, Rc<dyn IValueConverter>>(XBindTagConverter::as_value_converter);
         ValueTypes::register_nullable::<Rc<XBindItems>>();
         ValueTypes::register_nullable::<Rc<XBindMap>>();
         ValueTypes::register_nullable::<Rc<dyn IXBindNamed>>();
@@ -354,4 +445,5 @@ pub(crate) const MARKUP_RUST_PATHS: &[(&MarkupType, &str, bool)] = &[
     (<XBindItems as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindItems", false),
     (<XBindMap as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindMap", false),
     (<XBindHelpers as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindHelpers", false),
+    (<XBindTagConverter as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindTagConverter", false),
 ];
