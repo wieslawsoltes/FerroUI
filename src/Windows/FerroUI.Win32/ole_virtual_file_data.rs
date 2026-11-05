@@ -95,7 +95,7 @@ mod imp {
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
     use ferroui_base::platform::storage::{IStorageFile, IStorageFolder, IStorageItem, StorageItemProperties};
     use ferroui_base::reactive::IDisposable;
-    use ferroui_base::utilities::Uri;
+    use ferroui_base::utilities::UriRef;
     use ferroui_microcom::{ComPtr, Interface};
     use std::cell::{Cell, RefCell};
     use std::ffi::c_void;
@@ -349,7 +349,7 @@ mod imp {
 
     struct VirtualStorageFile {
         name: String,
-        path: Uri,
+        path: UriRef,
         size: Option<u64>,
         contents: Option<Rc<[u8]>>,
         operation: Rc<Operation>,
@@ -367,7 +367,9 @@ mod imp {
             VirtualStorageFile {
                 name: descriptor.name.clone(),
                 size: descriptor.size,
-                path: Uri::absolute(&virtual_file_uri(&descriptor.name)).expect("the address of a virtual file is an absolute URI"),
+                path: UriRef::Absolute(
+                    url::Url::parse(&virtual_file_uri(&descriptor.name)).expect("the address of a virtual file is a URL"),
+                ),
                 contents,
                 operation,
                 marshaled_stream: RefCell::new(marshaled_stream),
@@ -425,7 +427,7 @@ mod imp {
             self.name.clone()
         }
 
-        fn path(&self) -> Uri {
+        fn path(&self) -> UriRef {
             self.path.clone()
         }
 
@@ -617,5 +619,14 @@ pub(crate) mod tests {
         assert_eq!(virtual_file_uri("archive-entry.txt"), "virtual-file:///archive-entry.txt");
         assert_eq!(virtual_file_uri("a b/c#d.txt"), "virtual-file:///a%20b%2Fc%23d.txt");
         assert_eq!(virtual_file_uri("ż"), "virtual-file:///%C5%BC");
+        // The address is the text of the URL of the storage item, which has no local path.
+        for name in ["archive-entry.txt", "a b/c#d.txt", "ż"] {
+            let url = url::Url::parse(&virtual_file_uri(name)).unwrap();
+            assert_eq!(url.as_str(), virtual_file_uri(name));
+            assert_eq!(
+                None,
+                ferroui_base::platform::storage::file_io::StorageProviderHelpers::try_get_path_from_file_uri(Some(&url))
+            );
+        }
     }
 }

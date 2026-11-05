@@ -2,7 +2,7 @@
 //! `scripts/material-theme/font-provenance.json`.
 use ferroui_base::media::fonts::EmbeddedFontCollection;
 use ferroui_base::platform::register_assets;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_controls::AppBuilder;
 use std::rc::Rc;
 
@@ -39,8 +39,8 @@ impl MaterialAppBuilderExtension for AppBuilder {
         self.configure_fonts(|manager| {
             register();
             manager.add_font_collection(Rc::new(EmbeddedFontCollection::new(
-                Uri::absolute("fonts:MaterialRoboto").expect("font key"),
-                Uri::absolute("ferres://FerroUI.Themes.Material/Assets").expect("font asset URI"),
+                UriRef::parse_absolute("fonts:MaterialRoboto").expect("font key"),
+                UriRef::parse_absolute("ferres://FerroUI.Themes.Material/Assets").expect("font asset URI"),
             )));
         })
     }

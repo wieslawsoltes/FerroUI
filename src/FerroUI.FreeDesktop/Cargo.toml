@@ -25,6 +25,8 @@ bitflags.workspace = true
 # Unix systems only; the crate has only its event type elsewhere.
 [target.'cfg(unix)'.dependencies]
 zbus.workspace = true
+# The file URLs of the results of the file chooser portal (C5 of #423).
+url.workspace = true
 # The random part of the object path of a menu (`Guid.NewGuid`).
 uuid = { workspace = true, features = ["v4"] }
 futures-util.workspace = true

@@ -4,7 +4,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::{DateTime, Uri};
+use ferroui_base::utilities::{DateTime, UriRef};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref,
     StyledElementImpl, VisualImpl,
@@ -112,7 +112,7 @@ impl AboutFerroDialog {
     }
 
     fn button_on_click(&self, _sender: &Option<BoxedValue>, _e: &RoutedEventArgs) {
-        let url = Uri::absolute(PROJECT_URL).expect("the project address is an absolute URI");
+        let url = UriRef::parse_absolute(PROJECT_URL).expect("the project address is a URL");
         let launcher = self.launcher();
         Dispatcher::ui_thread().spawn_local_with_priority(
             async move {

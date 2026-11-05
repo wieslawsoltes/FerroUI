@@ -4,7 +4,8 @@
 
 use ferroui_base::platform::storage::IStorageItem;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::{HandlerList, Uri, UriKind};
+use ferroui_base::utilities::HandlerList;
+use url::Url;
 use ferroui_controls::application_lifetimes::{ActivatedEventArgs, FileActivatedEventArgs, ProtocolActivatedEventArgs};
 use ferroui_controls::AppBuilder;
 use std::rc::{Rc, Weak};
@@ -68,9 +69,10 @@ impl AppDelegateEvents {
 
     /// The application was asked to open a URL: a file activation with
     /// the storage item `create_item` makes for a file URL, a protocol
-    /// activation for any other. False for what is not an absolute URI.
+    /// activation for any other. False for what is not a URL (a relative
+    /// reference among them).
     pub fn open_url(&self, url: &str, create_item: impl FnOnce() -> Rc<dyn IStorageItem>) -> bool {
-        if let Some(uri) = Uri::try_create(url, UriKind::Absolute) {
+        if let Ok(uri) = Url::parse(url) {
             if uri.scheme() == "file" {
                 self.on_activated(FileActivatedEventArgs::new(vec![create_item()]).into());
             } else {
@@ -85,10 +87,11 @@ impl AppDelegateEvents {
 
     /// The application was asked to continue a user activity: a protocol
     /// activation with the URL of the web page of an activity of browsing
-    /// the web. False for any other activity.
+    /// the web. False for any other activity, and for a web page whose
+    /// text is not a URL.
     pub fn continue_user_activity(&self, activity_type: &str, web_page_url: Option<&str>) -> bool {
         if activity_type == USER_ACTIVITY_TYPE_BROWSING_WEB {
-            if let Some(uri) = web_page_url.and_then(|url| Uri::try_create(url, UriKind::RelativeOrAbsolute)) {
+            if let Some(uri) = web_page_url.and_then(|url| Url::parse(url).ok()) {
                 self.on_activated(ProtocolActivatedEventArgs::new(uri).into());
                 return true;
             }
@@ -441,7 +444,7 @@ mod tests {
         let log = seen.clone();
         let subscription = events.activated(Rc::new(move |args: &ActivatedEventArgs| {
             let detail = match (args.as_protocol_activated(), args.as_file_activated()) {
-                (Some(protocol), _) => format!("{:?} {}", args.kind(), protocol.uri().original_string()),
+                (Some(protocol), _) => format!("{:?} {}", args.kind(), protocol.uri()),
                 (_, Some(file)) => format!("{:?} {} file(s)", args.kind(), file.files().len()),
                 _ => format!("{:?}", args.kind()),
             };

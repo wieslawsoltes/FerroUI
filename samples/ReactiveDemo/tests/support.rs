@@ -6,7 +6,6 @@ use crate::{register_types, App, LauncherSource, SAMPLE};
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::Uri;
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use ferroui_reactiveui::{ReactiveUIBuilder, RxAppBuilder, RxSuspension};
 use ferroui_reactiveui_controls::StartupConfiguration;
@@ -100,8 +99,8 @@ impl RecordingLauncher {
 }
 
 impl ILauncher for RecordingLauncher {
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool> {
-        self.uris.borrow_mut().push(uri.original_string().to_owned());
+    fn launch_uri_async(&self, uri: &url::Url) -> LocalBoxFuture<bool> {
+        self.uris.borrow_mut().push(uri.as_str().to_owned());
         Box::pin(std::future::ready(true))
     }
 

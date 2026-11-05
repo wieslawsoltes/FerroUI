@@ -3,7 +3,7 @@
 use crate::object_casts::{as_object, resource_key_of};
 use crate::{FromXamlObject, XamlLoadError};
 use ferroui_base::controls::{IResourceDictionary, ResourceDictionary, ResourceKey};
-use ferroui_base::utilities::{Uri, UriExtensions, UriKind};
+use ferroui_base::utilities::UriExtensions;
 use ferroui_base::{
     ferro_markup_type, ferro_properties, ferro_static_type, AnyValue, AttachedProperty, BoxedValue, FerroObject,
     FerroProperty, WeakRef,
@@ -12,6 +12,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use std::rc::{Rc, Weak};
+use url::Url;
 
 /// Represents source location information for an element within a XAML
 /// file.
@@ -19,7 +20,7 @@ use std::rc::{Rc, Weak};
 /// This type is instantiated through the XAML compiler.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct XamlSourceInfo {
-    source_uri: Option<Uri>,
+    source_uri: Option<Url>,
     line_number: i32,
     line_position: i32,
 }
@@ -77,8 +78,9 @@ impl XamlSourceInfo {
         Self { line_number: line, line_position: column, source_uri: file_path.and_then(file_uri) }
     }
 
-    /// The full path of the source file containing the XAML element.
-    pub fn source_uri(&self) -> Option<&Uri> {
+    /// The full path of the source file containing the XAML element: the
+    /// file URL of the path the element was loaded from.
+    pub fn source_uri(&self) -> Option<&Url> {
         self.source_uri.as_ref()
     }
 
@@ -172,8 +174,10 @@ impl XamlSourceInfo {
     }
 }
 
-/// `new UriBuilder("file", "") { Path = filePath }.Uri`.
-fn file_uri(file_path: &str) -> Option<Uri> {
+/// `new UriBuilder("file", "") { Path = filePath }.Uri`: the text is made
+/// here, as the builder does, and parsed as a URL (which escapes what else a
+/// path cannot hold).
+fn file_uri(file_path: &str) -> Option<Url> {
     let mut path = file_path.replace('\\', "/");
     if !path.starts_with('/') {
         path.insert(0, '/');
@@ -189,7 +193,7 @@ fn file_uri(file_path: &str) -> Option<Uri> {
             c => escaped.push(c),
         }
     }
-    Uri::try_create(&escaped, UriKind::Absolute)
+    Url::parse(&escaped).ok()
 }
 
 /// Returns a string that represents the current object:
@@ -197,7 +201,8 @@ fn file_uri(file_path: &str) -> Option<Uri> {
 impl fmt::Display for XamlSourceInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let file_path = match &self.source_uri {
-            Some(uri) => UriExtensions::get_unescape_absolute_path(uri),
+            // `Uri.AbsolutePath`, unescaped.
+            Some(uri) => UriExtensions::unescape_data_string(uri.path()),
             None => "(unknown)".to_string(),
         };
         write!(f, "{}:{},{}", file_path, self.line_number, self.line_position)
@@ -222,7 +227,7 @@ ferro_markup_type!(class XamlSourceInfo {
         },
     ],
     properties: [
-        SourceUri: Option<Uri> { get: |info: &XamlSourceInfo| info.source_uri().cloned() },
+        SourceUri: Option<Url> { get: |info: &XamlSourceInfo| info.source_uri().cloned() },
         LineNumber: i32 { get: XamlSourceInfo::line_number },
         LinePosition: i32 { get: XamlSourceInfo::line_position },
     ],
@@ -263,8 +268,13 @@ mod tests {
         let info = XamlSourceInfo::new(3, 7, Some("/src/My View.xaml"));
         assert_eq!(info.line_number(), 3);
         assert_eq!(info.line_position(), 7);
-        assert_eq!(info.source_uri().unwrap().absolute_uri(), "file:///src/My%20View.xaml");
+        assert_eq!(info.source_uri().unwrap().as_str(), "file:///src/My%20View.xaml");
         assert_eq!(info.to_string(), "/src/My View.xaml:3,7");
+
+        // A drive path, and the characters the builder escapes.
+        let info = XamlSourceInfo::new(1, 1, Some(r"C:\Views\A #1?.xaml"));
+        assert_eq!(info.source_uri().unwrap().as_str(), "file:///C:/Views/A%20%231%3F.xaml");
+        assert_eq!(info.to_string(), "/C:/Views/A #1?.xaml:1,1");
 
         let unknown = XamlSourceInfo::new(1, 2, None);
         assert!(unknown.source_uri().is_none());

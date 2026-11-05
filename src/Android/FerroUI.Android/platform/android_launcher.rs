@@ -9,8 +9,8 @@ use crate::interop::java::{
 use crate::interop::natives::PLATFORM_HELPER;
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
-use ferroui_base::utilities::Uri;
 use std::rc::Rc;
+use url::Url;
 
 /// `Intent.ACTION_VIEW`.
 const ACTION_VIEW: &str = "android.intent.action.VIEW";
@@ -55,9 +55,9 @@ impl AndroidLauncher {
         call_object(intent, "setFlags", "(I)Landroid/content/Intent;", &[JavaValue::Int(flags)]);
     }
 
-    fn launch_uri(&self, uri: &Uri) -> bool {
-        if uri.is_absolute_uri() && self.package_manager().is_some() {
-            let Some(android_uri) = parse_uri(uri.original_string()) else {
+    fn launch_uri(&self, uri: &Url) -> bool {
+        if self.package_manager().is_some() {
+            let Some(android_uri) = parse_uri(uri.as_str()) else {
                 return false;
             };
             let intent = Self::view_intent(&android_uri);
@@ -120,7 +120,7 @@ impl AndroidLauncher {
 }
 
 impl ILauncher for AndroidLauncher {
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool> {
+    fn launch_uri_async(&self, uri: &Url) -> LocalBoxFuture<bool> {
         Box::pin(std::future::ready(self.launch_uri(uri)))
     }
 

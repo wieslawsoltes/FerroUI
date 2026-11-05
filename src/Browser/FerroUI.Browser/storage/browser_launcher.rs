@@ -1,8 +1,8 @@
 use crate::interop::navigation_helper;
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
-use ferroui_base::utilities::Uri;
 use std::rc::Rc;
+use url::Url;
 
 /// The call the launcher makes into the page; replaced by a recorder in the
 /// tests.
@@ -38,11 +38,8 @@ impl BrowserLauncher {
 }
 
 impl ILauncher for BrowserLauncher {
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool> {
-        if uri.is_absolute_uri() {
-            return Box::pin(std::future::ready(self.page.window_open(uri.absolute_uri(), "_blank")));
-        }
-        Box::pin(std::future::ready(false))
+    fn launch_uri_async(&self, uri: &Url) -> LocalBoxFuture<bool> {
+        Box::pin(std::future::ready(self.page.window_open(uri.as_str(), "_blank")))
     }
 
     fn launch_file_async(&self, _storage_item: Rc<dyn IStorageItem>) -> LocalBoxFuture<bool> {
@@ -53,7 +50,6 @@ impl ILauncher for BrowserLauncher {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ferroui_base::utilities::UriKind;
     use std::cell::RefCell;
     use std::task::{Context, Poll, Waker};
 
@@ -85,22 +81,23 @@ mod tests {
     #[test]
     fn an_absolute_uri_is_opened_in_a_new_browsing_context() {
         let (launcher, opened) = launcher(true);
-        let uri = Uri::new("https://example.com/a?b=c", UriKind::Absolute).unwrap();
+        let uri = Url::parse("https://example.com/a?b=c").unwrap();
         assert!(run(launcher.launch_uri_async(&uri)));
-        assert_eq!(vec![(uri.absolute_uri().to_string(), "_blank".to_string())], *opened.borrow());
+        assert_eq!(vec![(uri.as_str().to_string(), "_blank".to_string())], *opened.borrow());
     }
 
     #[test]
     fn the_answer_is_whether_the_page_opened_a_context() {
         let (launcher, _) = launcher(false);
-        assert!(!run(launcher.launch_uri_async(&Uri::new("https://example.com", UriKind::Absolute).unwrap())));
+        assert!(!run(launcher.launch_uri_async(&Url::parse("https://example.com").unwrap())));
     }
 
     #[test]
-    fn a_relative_uri_is_not_opened() {
+    fn the_text_of_the_url_is_opened() {
+        // The URL standard normalises the text the page gets (`https://example.com` has its
+        // root path); a relative reference is no `Url`, so it cannot be launched.
         let (launcher, opened) = launcher(true);
-        let uri = Uri::new("docs/index.html", UriKind::RelativeOrAbsolute).unwrap();
-        assert!(!run(launcher.launch_uri_async(&uri)));
-        assert!(opened.borrow().is_empty());
+        assert!(run(launcher.launch_uri_async(&Url::parse("HTTPS://Example.com").unwrap())));
+        assert_eq!(vec![("https://example.com/".to_string(), "_blank".to_string())], *opened.borrow());
     }
 }

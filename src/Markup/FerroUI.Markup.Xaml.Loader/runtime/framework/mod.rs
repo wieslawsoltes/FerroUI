@@ -153,7 +153,7 @@ pub fn configure_configuration(configuration: &TransformerConfiguration) {
 /// with its `Source` can load it (`FerroXamlLoader::load`).
 fn can_load_at_run_time(absolute_uri: &str) -> bool {
     use ferroui_base::platform::IAssetLoader;
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::{FerroLocator, LocatorExtensions};
     let locator = FerroLocator::current();
     if locator.get_service::<dyn ferroui_markup_xaml::IRuntimeXamlLoader>().is_none() {
@@ -162,7 +162,7 @@ fn can_load_at_run_time(absolute_uri: &str) -> bool {
     let Some(assets) = locator.get_service::<dyn IAssetLoader>() else {
         return false;
     };
-    Uri::new(absolute_uri, UriKind::Absolute).is_ok_and(|uri| assets.exists(&uri, None))
+    UriRef::parse_absolute(absolute_uri).is_ok_and(|uri| assets.exists(&UriRef::from(uri), None))
 }
 
 /// Creates the interpreter of the framework language over `configuration`:

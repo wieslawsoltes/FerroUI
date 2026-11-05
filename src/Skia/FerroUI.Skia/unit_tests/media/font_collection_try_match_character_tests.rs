@@ -12,7 +12,7 @@ use ferroui_base::media::fonts::{
 };
 use ferroui_base::media::{FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface};
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
-use ferroui_base::utilities::{locale, Locale, Uri, UriKind};
+use ferroui_base::utilities::{locale, Locale, UriRef};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::cell::{Cell, RefCell};
@@ -159,7 +159,7 @@ fn tier_c_prefers_culture_matched_family_over_alphabetical_order() {
 fn tier_d_platform_fallback_is_invoked_when_cache_sweep_has_no_covering_family() {
     let _app = start_app();
 
-    let collection = RecordingFontCollection::new(Uri::new("fonts:tierD-positive", UriKind::Absolute).unwrap());
+    let collection = RecordingFontCollection::new(UriRef::parse_absolute("fonts:tierD-positive").unwrap());
     load_fonts(&*collection, &["Inter-Regular.ttf"]);
 
     // The fallback resolves to a known typeface that is *also* registered in the cache
@@ -189,7 +189,7 @@ fn tier_d_platform_fallback_is_invoked_when_cache_sweep_has_no_covering_family()
 fn tier_d_platform_fallback_is_invoked_at_most_once_per_script_culture_pair() {
     let _app = start_app();
 
-    let collection = RecordingFontCollection::new(Uri::new("fonts:tierD-cache", UriKind::Absolute).unwrap());
+    let collection = RecordingFontCollection::new(UriRef::parse_absolute("fonts:tierD-cache").unwrap());
     load_fonts(&*collection, &["Inter-Regular.ttf"]);
     collection.set_platform_fallback_result(None); // negative platform answer
 
@@ -211,7 +211,7 @@ fn tier_d_platform_fallback_is_invoked_at_most_once_per_script_culture_pair() {
 fn tier_d_negative_platform_result_is_cached_per_script_culture() {
     let _app = start_app();
 
-    let collection = RecordingFontCollection::new(Uri::new("fonts:tierD-negcache", UriKind::Absolute).unwrap());
+    let collection = RecordingFontCollection::new(UriRef::parse_absolute("fonts:tierD-negcache").unwrap());
     load_fonts(&*collection, &["Inter-Regular.ttf"]);
     collection.set_platform_fallback_result(None);
 
@@ -250,7 +250,7 @@ fn tier_d_negative_platform_result_is_cached_per_script_culture() {
 fn returns_false_when_no_family_covers_and_platform_has_no_fallback() {
     let _app = start_app();
 
-    let collection = RecordingFontCollection::new(Uri::new("fonts:no-match", UriKind::Absolute).unwrap());
+    let collection = RecordingFontCollection::new(UriRef::parse_absolute("fonts:no-match").unwrap());
     load_fonts(&*collection, &["Inter-Regular.ttf"]);
     collection.set_platform_fallback_result(None);
 
@@ -271,7 +271,7 @@ fn tier_d_positive_script_cache_does_not_block_platform_for_a_codepoint_the_buck
     const ZHONG: i32 = 0x4E2D; // 中 — covered by the Noto Sans SC subset
     const HUA: i32 = 0x534E; // 华 — Simplified-only; absent from the SC subset
 
-    let collection = RecordingFontCollection::new(Uri::new("fonts:bucket-coverage", UriKind::Absolute).unwrap());
+    let collection = RecordingFontCollection::new(UriRef::parse_absolute("fonts:bucket-coverage").unwrap());
 
     // Latin primary (covers neither ideograph) plus the SC subset that covers 中 but not 华.
     load_fonts(&*collection, &["NotoMono-Regular.ttf"]);
@@ -357,7 +357,7 @@ fn fallback_resolves_the_requested_typeface_not_a_cached_neighbour() {
             (FontSimulations::Oblique, create_glyph_typeface(FontSimulations::Oblique)),
         ]);
 
-        let collection = KeyedFallbackCollection::new(Uri::new("fonts:key", UriKind::Absolute).unwrap(), ALEPH);
+        let collection = KeyedFallbackCollection::new(UriRef::parse_absolute("fonts:key").unwrap(), ALEPH);
 
         for face in faces.values() {
             collection.add_platform_face(face.clone());
@@ -441,7 +441,7 @@ fn tier_c_sweep_resolves_the_requested_weight_not_a_cached_neighbour() {
         assert_eq!(FontWeight::Normal, faces[&FontSimulations::None].weight(), "{row}");
         assert_eq!(FontWeight::Bold, faces[&FontSimulations::Bold].weight(), "{row}");
 
-        let collection = KeyedFallbackCollection::new(Uri::new("fonts:tierc", UriKind::Absolute).unwrap(), TAMIL_KA);
+        let collection = KeyedFallbackCollection::new(UriRef::parse_absolute("fonts:tierc").unwrap(), TAMIL_KA);
 
         for face in faces.values() {
             collection.add_platform_face(face.clone());
@@ -489,7 +489,7 @@ fn start_app() -> UnitTestApplicationScope {
 }
 
 fn build_collection(asset_file_names: &[&str]) -> Rc<TestFontCollection> {
-    let collection = TestFontCollection::new(Uri::new("fonts:test", UriKind::Absolute).unwrap());
+    let collection = TestFontCollection::new(UriRef::parse_absolute("fonts:test").unwrap());
     load_fonts(&*collection, asset_file_names);
     collection
 }
@@ -498,10 +498,7 @@ fn load_fonts(collection: &dyn IFontCollectionBase, asset_file_names: &[&str]) {
     let loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
 
     for file_name in asset_file_names {
-        let uri = Uri::new(
-            &format!("resm:{ASSETS_NAMESPACE}.{file_name}?assembly=ferroui-skia"),
-            UriKind::Absolute,
-        )
+        let uri = UriRef::parse(&format!("resm:{ASSETS_NAMESPACE}.{file_name}?assembly=ferroui-skia"))
         .unwrap();
         let mut stream = loader.open(&uri, None).expect("the font stream");
         assert!(FontCollectionBase::try_add_glyph_typeface_from_stream(collection, &mut *stream).is_some(), "{file_name}");
@@ -513,10 +510,7 @@ fn load_fonts_from_fonts_namespace(collection: &dyn IFontCollectionBase, file_na
     let loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
 
     for file_name in file_names {
-        let uri = Uri::new(
-            &format!("resm:FerroUI.Skia.UnitTests.Fonts.{file_name}?assembly=ferroui-skia"),
-            UriKind::Absolute,
-        )
+        let uri = UriRef::parse(&format!("resm:FerroUI.Skia.UnitTests.Fonts.{file_name}?assembly=ferroui-skia"))
         .unwrap();
         let mut stream = loader.open(&uri, None).expect("the font stream");
         assert!(FontCollectionBase::try_add_glyph_typeface_from_stream(collection, &mut *stream).is_some(), "{file_name}");
@@ -527,10 +521,10 @@ fn load_fonts_from_fonts_namespace(collection: &dyn IFontCollectionBase, file_na
 // stub can return it without the font being present in the collection under test.
 fn load_standalone_glyph_typeface(resource_name: &str) -> Rc<GlyphTypeface> {
     let loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
-    let sink = TestFontCollection::new(Uri::new("fonts:sink", UriKind::Absolute).unwrap());
+    let sink = TestFontCollection::new(UriRef::parse_absolute("fonts:sink").unwrap());
 
     let mut stream = loader
-        .open(&Uri::new(&format!("resm:{resource_name}?assembly=ferroui-skia"), UriKind::Absolute).unwrap(), None)
+        .open(&UriRef::parse(&format!("resm:{resource_name}?assembly=ferroui-skia")).unwrap(), None)
         .expect("the font stream");
 
     FontCollectionBase::try_add_glyph_typeface_from_stream(&*sink, &mut *stream).expect("the glyph typeface")
@@ -548,7 +542,7 @@ fn create_glyph_typeface_from(resource_name: &str, simulations: FontSimulations)
     let font_manager_impl = FerroLocator::current().get_required_service::<dyn IFontManagerImpl>();
 
     let mut stream = loader
-        .open(&Uri::new(&format!("resm:{resource_name}?assembly=ferroui-skia"), UriKind::Absolute).unwrap(), None)
+        .open(&UriRef::parse(&format!("resm:{resource_name}?assembly=ferroui-skia")).unwrap(), None)
         .expect("the font stream");
 
     let platform_typeface = font_manager_impl
@@ -570,11 +564,11 @@ fn family_of(typeface: &Typeface) -> &str {
 
 struct TestFontCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
 }
 
 impl TestFontCollection {
-    fn new(key: Uri) -> Rc<Self> {
+    fn new(key: url::Url) -> Rc<Self> {
         Rc::new(Self { base: FontCollectionBase::new(), key })
     }
 }
@@ -584,20 +578,20 @@ impl FontCollectionBaseImpl for TestFontCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 }
 
 struct RecordingFontCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
     platform_call_count: Cell<i32>,
     platform_fallback_result: RefCell<Option<Rc<GlyphTypeface>>>,
 }
 
 impl RecordingFontCollection {
-    fn new(key: Uri) -> Rc<Self> {
+    fn new(key: url::Url) -> Rc<Self> {
         Rc::new(Self {
             base: FontCollectionBase::new(),
             key,
@@ -620,7 +614,7 @@ impl FontCollectionBaseImpl for RecordingFontCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 
@@ -643,13 +637,13 @@ impl FontCollectionBaseImpl for RecordingFontCollection {
 // TryMatchCharacterFromPlatform) is exercised deterministically.
 struct KeyedFallbackCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
     platform_faces: RefCell<HashMap<FontCollectionKey, Rc<GlyphTypeface>>>,
     covered_codepoint: i32,
 }
 
 impl KeyedFallbackCollection {
-    fn new(key: Uri, covered_codepoint: i32) -> Rc<Self> {
+    fn new(key: url::Url, covered_codepoint: i32) -> Rc<Self> {
         Rc::new(Self {
             base: FontCollectionBase::new(),
             key,
@@ -668,7 +662,7 @@ impl FontCollectionBaseImpl for KeyedFallbackCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 

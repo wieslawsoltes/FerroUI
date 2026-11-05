@@ -5,7 +5,7 @@ use crate::platform::storage::{
     IStorageBookmarkFolder, IStorageFile, IStorageFolder, IStorageProvider, OpenFilePickerResult,
     SaveFilePickerResult, WellKnownFolder,
 };
-use crate::utilities::Uri;
+use url::Url;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
@@ -67,12 +67,10 @@ pub trait BclStorageProvider: 'static {
 
     /// See [`IStorageProvider::try_get_file_from_path_async`]; the file at
     /// the local path of an absolute URI, if it exists.
-    fn try_get_file_from_path_async(&self, file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
-        if file_path.is_absolute_uri() {
-            let file = FileSystemInfo::file(file_path.local_path());
-            if file.exists() {
-                return ready(Some(BclStorageFile::new(file) as Rc<dyn IStorageFile>));
-            }
+    fn try_get_file_from_path_async(&self, file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
+        let file = FileSystemInfo::file(StorageProviderHelpers::local_path(file_path));
+        if file.exists() {
+            return ready(Some(BclStorageFile::new(file) as Rc<dyn IStorageFile>));
         }
 
         ready(None)
@@ -80,12 +78,10 @@ pub trait BclStorageProvider: 'static {
 
     /// See [`IStorageProvider::try_get_folder_from_path_async`]; the
     /// folder at the local path of an absolute URI, if it exists.
-    fn try_get_folder_from_path_async(&self, folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
-        if folder_path.is_absolute_uri() {
-            let directory = FileSystemInfo::directory(folder_path.local_path());
-            if directory.exists() {
-                return ready(Some(BclStorageFolder::new(directory) as Rc<dyn IStorageFolder>));
-            }
+    fn try_get_folder_from_path_async(&self, folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
+        let directory = FileSystemInfo::directory(StorageProviderHelpers::local_path(folder_path));
+        if directory.exists() {
+            return ready(Some(BclStorageFolder::new(directory) as Rc<dyn IStorageFolder>));
         }
 
         ready(None)
@@ -161,11 +157,11 @@ impl<T: BclStorageProvider> IStorageProvider for T {
         BclStorageProvider::open_folder_bookmark_async(self, bookmark)
     }
 
-    fn try_get_file_from_path_async(&self, file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
+    fn try_get_file_from_path_async(&self, file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
         BclStorageProvider::try_get_file_from_path_async(self, file_path)
     }
 
-    fn try_get_folder_from_path_async(&self, folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
+    fn try_get_folder_from_path_async(&self, folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
         BclStorageProvider::try_get_folder_from_path_async(self, folder_path)
     }
 

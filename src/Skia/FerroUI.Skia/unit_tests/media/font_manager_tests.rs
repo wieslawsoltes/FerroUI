@@ -18,7 +18,7 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{Locale, Uri, UriKind};
+use ferroui_base::utilities::{Locale, UriRef};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::testing::{TestLogSink, UnitTestApplication};
 use ferroui_fonts_inter::InterFontCollection;
@@ -312,7 +312,7 @@ fn should_match_character_with_fallbacks() {
 
         let _scope = LocatorScope::enter();
 
-        let base_uri = base_uri.map(|base_uri| Uri::new(base_uri, UriKind::Absolute).unwrap());
+        let base_uri = base_uri.map(|base_uri| UriRef::parse_absolute(base_uri).unwrap());
 
         let font_family =
             FontFamily::parse_with_base_uri(family_name, base_uri.as_ref()).expect("a valid font family");
@@ -348,7 +348,7 @@ fn should_use_custom_system_font() {
 
     FontManager::current().add_font_collection(Rc::new(EmbeddedFontCollection::new(
         FontManager::system_fonts_key(),
-        Uri::new(S_FONT_URI, UriKind::Absolute).unwrap(),
+        UriRef::parse_absolute(S_FONT_URI).unwrap(),
     )));
 
     let glyph_typeface =
@@ -367,7 +367,7 @@ fn should_get_nearest_match_for_custom_system_font() {
 
     FontManager::current().add_font_collection(Rc::new(EmbeddedFontCollection::new(
         FontManager::system_fonts_key(),
-        Uri::new(S_FONT_URI, UriKind::Absolute).unwrap(),
+        UriRef::parse_absolute(S_FONT_URI).unwrap(),
     )));
 
     let glyph_typeface = FontManager::current()
@@ -392,7 +392,7 @@ fn should_get_implicit_typeface() {
 
     FontManager::current().add_font_collection(Rc::new(EmbeddedFontCollection::new(
         FontManager::system_fonts_key(),
-        Uri::new(S_FONT_URI, UriKind::Absolute).unwrap(),
+        UriRef::parse_absolute(S_FONT_URI).unwrap(),
     )));
 
     let glyph_typeface = FontManager::current()
@@ -414,7 +414,7 @@ fn should_create_synthetic_typeface() {
 
     FontManager::current().add_font_collection(Rc::new(EmbeddedFontCollection::new(
         FontManager::system_fonts_key(),
-        Uri::new(S_FONT_URI, UriKind::Absolute).unwrap(),
+        UriRef::parse_absolute(S_FONT_URI).unwrap(),
     )));
 
     let italic_bold_typeface = FontManager::current()
@@ -566,8 +566,8 @@ fn should_use_font_collection_match_character() {
     let _scope = LocatorScope::enter();
 
     FontManager::current().add_font_collection(Rc::new(EmbeddedFontCollection::new(
-        Uri::absolute("fonts:MyCollection").unwrap(),                                      //key
-        Uri::absolute("resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia").unwrap(), //source
+        UriRef::parse_absolute("fonts:MyCollection").unwrap(),                                      //key
+        UriRef::parse_absolute("resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia").unwrap(), //source
     )));
 
     let font_family = FontFamily::new("fonts:MyCollection#Noto Mono");
@@ -602,8 +602,8 @@ fn should_use_last_resort_font_last_match_character() {
     let _scope = LocatorScope::enter();
 
     FontManager::current().add_font_collection(Rc::new(EmbeddedFontCollection::new(
-        Uri::absolute("fonts:MyCollection").unwrap(),                                      //key
-        Uri::absolute("resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia").unwrap(), //source
+        UriRef::parse_absolute("fonts:MyCollection").unwrap(),                                      //key
+        UriRef::parse_absolute("resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia").unwrap(), //source
     )));
 
     let font_family = FontFamily::new("fonts:MyCollection#Noto Sans");
@@ -656,7 +656,7 @@ fn should_get_system_font_with_base_uri() {
         let _scope = LocatorScope::enter();
 
         let font_family =
-            FontFamily::with_base_uri(Some(&Uri::absolute("ferres://ferroui-skia/NotFound").unwrap()), name);
+            FontFamily::with_base_uri(Some(&UriRef::parse_absolute("ferres://ferroui-skia/NotFound").unwrap()), name);
 
         let glyph_typeface = Typeface::new(font_family).glyph_typeface();
 
@@ -730,7 +730,7 @@ fn try_get_glyph_typeface_should_return_false_for_font_without_supported_cmap() 
         let font_manager_impl = FerroLocator::current().get_required_service::<dyn IFontManagerImpl>();
         let asset_loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
 
-        let mut stream = asset_loader.open(&Uri::absolute(FONT_URI).unwrap(), None).expect("the font stream");
+        let mut stream = asset_loader.open(&UriRef::parse(FONT_URI).unwrap(), None).expect("the font stream");
 
         let platform_typeface = font_manager_impl
             .try_create_glyph_typeface_from_stream(&mut *stream, FontSimulations::None)
@@ -924,8 +924,8 @@ impl FamilyRemappingFontManagerImpl {
 
         // LoadFontAssets ignores the family fragment and returns every embedded font asset,
         // so pick the one whose family name matches the substitute we want to return.
-        for font_asset in FontFamilyLoader::load_font_assets(&Uri::absolute(S_FONT_URI).unwrap()) {
-            let typeface = asset_loader.open(&font_asset, None).ok().and_then(|mut stream| {
+        for font_asset in FontFamilyLoader::load_font_assets(&UriRef::parse_absolute(S_FONT_URI).unwrap()) {
+            let typeface = asset_loader.open(&UriRef::from(font_asset.clone()), None).ok().and_then(|mut stream| {
                 let mut bytes = Vec::new();
                 stream.read_to_end(&mut bytes).ok()?;
                 FontMgr::new().new_from_data(Data::new_copy(&bytes), None)

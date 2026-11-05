@@ -49,7 +49,6 @@ mod app {
     use ferroui_base::input::platform::ClipboardExtensions;
     use ferroui_base::platform::storage::WellKnownFolder;
     use ferroui_base::reactive::IDisposable;
-    use ferroui_base::utilities::Uri;
     use ferroui_controls::platform::{
         FeedbackAction, FeedbackType, INativeControlHostControlTopLevelAttachment,
         INativeControlHostDestroyableControlHandle, INativeControlHostImpl, IPlatformFeedback, IPlatformHandle,
@@ -1035,7 +1034,7 @@ mod app {
                     move |e: &ActivatedEventArgs| {
                         lifecycle.activated.borrow_mut().push(e.kind());
                         if let Some(protocol) = e.as_protocol_activated() {
-                            lifecycle.protocols.borrow_mut().push(protocol.uri().original_string().to_string());
+                            lifecycle.protocols.borrow_mut().push(protocol.uri().to_string());
                         }
                     }
                 })));
@@ -1443,7 +1442,7 @@ mod app {
 
             match top_level(state) {
                 Some(top_level) => {
-                    let uri = Uri::absolute("ferroui-smoke-nobody://nothing").expect("a URI");
+                    let uri = url::Url::parse("ferroui-smoke-nobody://nothing").expect("a URL");
                     let launched = now(top_level.launcher().launch_uri_async(&uri));
                     check(
                         "launcher",
@@ -1453,7 +1452,7 @@ mod app {
 
                     let provider = top_level.storage_provider();
                     let documents = now(provider.try_get_well_known_folder_async(WellKnownFolder::Documents));
-                    let folder = documents.as_ref().and_then(|folder| folder.as_ref().map(|folder| folder.path().original_string().to_string()));
+                    let folder = documents.as_ref().and_then(|folder| folder.as_ref().map(|folder| folder.path().to_string()));
                     check(
                         "storage provider",
                         provider.can_open() && provider.can_save() && provider.can_pick_folder() && folder.is_some(),

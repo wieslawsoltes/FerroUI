@@ -11,7 +11,7 @@
 
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::media::{FontWeight, TextWrapping};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_system::threading::CancellationToken;
 use ferroui_view::prelude::*;
@@ -261,7 +261,7 @@ fn crate_details(krate: CrateSearchMetadata, router: Router) -> Element {
             }
             TextBlock { name: "Description", text: description, text_wrapping: TextWrapping::Wrap }
             TextBlock { name: "Downloads", text: format!("{} downloads", format_thousands(krate.downloads)), opacity: 0.7 }
-            HyperlinkButton { name: "Page", navigate_uri: Uri::absolute(&page).ok(), padding: 0.0,
+            HyperlinkButton { name: "Page", navigate_uri: UriRef::parse_absolute(&page).ok().map(UriRef::from), padding: 0.0,
                 {format!("Open on crates.io: {page}")} }
             {links}
         }
@@ -271,7 +271,7 @@ fn crate_details(krate: CrateSearchMetadata, router: Router) -> Element {
 /// A link of the page of a crate.
 fn link(label: &str, address: &str) -> Element {
     rsx! {
-        HyperlinkButton { key: label, name: label.replace(' ', ""), navigate_uri: Uri::absolute(address).ok(), padding: 0.0,
+        HyperlinkButton { key: label, name: label.replace(' ', ""), navigate_uri: UriRef::parse_absolute(address).ok().map(UriRef::from), padding: 0.0,
             {format!("{label}: {address}")} }
     }
 }

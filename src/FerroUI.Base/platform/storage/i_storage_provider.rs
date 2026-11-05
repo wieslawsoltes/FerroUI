@@ -4,7 +4,7 @@ use super::{
     WellKnownFolder,
 };
 use crate::input::LocalBoxFuture;
-use crate::utilities::Uri;
+use url::Url;
 use std::rc::Rc;
 
 /// Opens file and folder pickers and gives access to storage items.
@@ -91,7 +91,7 @@ pub trait IStorageProvider {
     ///
     /// The URI must be an absolute path. It also might ask the user for a
     /// permission, and resolve to `None` if it was denied.
-    fn try_get_file_from_path_async(&self, file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>>;
+    fn try_get_file_from_path_async(&self, file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>>;
 
     /// Attempts to read a folder from the file-system by its path.
     ///
@@ -99,7 +99,7 @@ pub trait IStorageProvider {
     ///
     /// The URI must be an absolute path. It also might ask the user for a
     /// permission, and resolve to `None` if it was denied.
-    fn try_get_folder_from_path_async(&self, folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>>;
+    fn try_get_folder_from_path_async(&self, folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>>;
 
     /// Attempts to read a folder from the file-system by its well-known
     /// folder identifier.

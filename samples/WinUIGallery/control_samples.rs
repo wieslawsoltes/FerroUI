@@ -1,6 +1,6 @@
 //! Direct native control examples from the pinned Gallery page code behind.
 
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, ObjectType, Ref};
 use ferroui_controls::primitives::SelectingItemsControl;
 use ferroui_controls::{
@@ -228,7 +228,7 @@ fn wire_info_bars(root: &Ref<Control>) {
                         let link = HyperlinkButton::new();
                         link.set_content(Some(Rc::new("Informational link".to_string())));
                         link.set_navigate_uri(Some(
-                            Uri::new("http://www.microsoft.com/", UriKind::Absolute)
+                            UriRef::parse("http://www.microsoft.com/")
                                 .expect("source URI"),
                         ));
                         Some(link.upcast::<Button>())

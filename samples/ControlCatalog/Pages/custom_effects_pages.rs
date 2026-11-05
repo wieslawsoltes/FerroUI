@@ -21,7 +21,7 @@ use ferroui_base::layout::VerticalAlignment;
 use ferroui_base::media::effects::EffectImage;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, Ref, Thickness};
 use ferroui_controls::{ContentPage, Control, ScrollViewer};
 use std::rc::Rc;
@@ -30,7 +30,7 @@ use std::rc::Rc;
 /// handle holds it); the empty image, which the transitions draw transparent, when it does not
 /// load.
 fn asset_image(uri: &str) -> EffectImage {
-    let bitmap = Uri::absolute(uri)
+    let bitmap = UriRef::parse(uri)
         .ok()
         .and_then(|uri| AssetLoader::open(&uri, None).ok())
         .and_then(|mut stream| Bitmap::from_stream(&mut stream).ok());
