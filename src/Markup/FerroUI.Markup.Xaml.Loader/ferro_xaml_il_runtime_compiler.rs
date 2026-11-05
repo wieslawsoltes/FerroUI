@@ -461,6 +461,16 @@ impl FerroXamlIlRuntimeCompiler {
             Some(root_instance) => {
                 let root_instance = Some(crate::runtime::type_system::normalize_object(root_instance));
                 provider.populate(Some(service_provider), &root_instance)?;
+                // A root populated again, or one that is already live (hot reload, a designer):
+                // its `{x:Bind}` bindings read the markup just populated (`Update`), or are
+                // initialized when no attach to a visual tree is coming (#525, X7). A binding
+                // that cannot be read is a diagnostic of the bindings, not a load error, as at
+                // the attach.
+                if let Some(object) =
+                    root_instance.as_ref().and_then(|root| ferroui_base::data::core::ValueTypes::as_object(&**root))
+                {
+                    let _ = ferroui_markup_xaml::markup_extensions::XBindings::update_populated(&object);
+                }
                 Ok(root_instance)
             }
         }

@@ -212,6 +212,7 @@ impl PreparedReload for Change {
             .children()
             .insert_range(self.index, self.new.clone());
         NameScope::set_name_scope(&self.root, self.new_scope.clone());
+        crate::x_bind::refresh(&self.root);
         if let Some(refresh) = &mut self.refresh {
             refresh.commit()?;
         }
@@ -243,6 +244,7 @@ impl PreparedReload for Change {
             context.restore();
         }
         NameScope::set_name_scope(&self.root, self.old_scope.clone());
+        crate::x_bind::refresh(&self.root);
         if let Some(refresh) = &mut self.refresh {
             refresh.rollback();
         }
@@ -370,11 +372,15 @@ impl ReloadTarget for PanelReloadTarget {
         );
         let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared);
         document.service_provider = Some(crate::root_resources::services(&root.clone().upcast(), self.resources.as_ref(), self.styles.as_ref()));
-        let candidate_root = (self.styles.is_some() || self.resources.is_some() || self.handlers.is_some()).then(|| crate::root_preview::create(&prepared)).transpose()?;
-        let _preview = candidate_root.as_ref().map(|candidate| crate::root_preview::install(
+        // The `{x:Bind}` bindings of the document root read the live root (#525, X7): the
+        // candidate is compiled against it as its code-behind.
+        let x_bind = crate::x_bind::uses_x_bind(&prepared);
+        let owned = self.styles.is_some() || self.resources.is_some() || self.handlers.is_some();
+        let candidate_root = (owned || x_bind).then(|| crate::root_preview::create(&prepared)).transpose()?;
+        let _preview = candidate_root.as_ref().filter(|_| owned).map(|candidate| crate::root_preview::install(
             &root.clone().upcast(), candidate, self.resources.as_ref(), self.styles.as_ref(),
         ));
-        let code = self.handlers.as_ref().map(|_| ferroui_markup_xaml::reload_events::ReloadCodeBehind::new(
+        let code = (self.handlers.is_some() || x_bind).then(|| ferroui_markup_xaml::reload_events::ReloadCodeBehind::new(
             &root.clone().upcast::<ferroui_base::StyledElement>().upcast(), &candidate_root.as_ref().unwrap().clone().upcast(),
         ));
         if let Some(code) = &code { document.service_provider = Some(code.services(document.service_provider.take().unwrap())); }

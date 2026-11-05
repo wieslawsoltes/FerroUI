@@ -215,6 +215,40 @@ impl XBindings {
             .and_then(|owner| owner.downcast_ref::<RootOwnership>().map(|owner| owner.0.clone()))
     }
 
+    /// After a document populated `root` again, or populated a root that is already live (step
+    /// X7: hot reload, a designer, a live root loaded into): what the bindings of the root need
+    /// so that they reflect the markup that was just populated.
+    ///
+    /// - Initialized bindings are read again ([`update`](Self::update)): the bindings the new
+    ///   markup added are read, the others read their sources again, `OneTime` included.
+    /// - The bindings of a root that is already attached to a visual tree, or of a `Window` that
+    ///   is already active, are initialized: no attach (or activation) is coming to do it.
+    /// - Otherwise nothing: the attach to a visual tree (or the activation) initializes them, as
+    ///   for a document built before it is shown.
+    ///
+    /// A root without `x:Bind` bindings, and the root of a template instance (its data context
+    /// or its container drives it), have nothing to do.
+    pub fn update_populated(root: &FerroObject) -> Result<(), XBindErrors> {
+        let Some(bindings) = Self::get_for_root(root) else {
+            return Ok(());
+        };
+        if bindings.is_template() {
+            return Ok(());
+        }
+        if bindings.is_initialized() {
+            return bindings.update();
+        }
+        let root = root.to_ref();
+        let live = match root.clone().cast::<WindowBase>() {
+            Some(window) => window.is_active(),
+            None => root.cast::<Visual>().is_some_and(|visual| visual.is_attached_to_visual_tree()),
+        };
+        match live {
+            true => bindings.initialize(),
+            false => Ok(()),
+        }
+    }
+
     /// Whether the bindings were read and are tracking their sources.
     pub fn is_initialized(&self) -> bool {
         self.initialized.get()

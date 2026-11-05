@@ -309,6 +309,17 @@ impl XBindExtension {
             _ => roots.intermediate_root_object(),
         }
         .ok_or_else(|| XamlLoadError::with_message("x:Bind requires the root object of its document"))?;
+        // Hot reload (step X7): a reload populates a detached candidate root and moves its content
+        // into the live root, whose code-behind the reloaded markup is compiled against
+        // (`ReloadCodeBehind`). The bindings of the document root then belong to the live root,
+        // whose `XBindings` the reload updates once the content is in place.
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        let root = match (self.data_type(), self.target_type()) {
+            (None, None) => crate::reload_events::code_behind(&**provider, &Some(root.clone()))
+                .map(crate::xaml_il::runtime::compiled::normalize_object)
+                .unwrap_or(root),
+            _ => root,
+        };
         let name_scope = provider.get_name_scope().map(NameScopeRef);
         self.create_binding(&root, name_scope.as_ref())
     }
