@@ -3,7 +3,8 @@
 use crate::renderer::NativeScene;
 use crate::scene_transition::SceneTransition;
 use crate::{
-    Axes, Axis, ChartKind, ChartSeriesCollection, GeoMarkers, MapInteractionMode, TooltipPosition,
+    Axes, Axis, ChartKind, ChartSeries, ChartSeriesCollection, ChartVisualElement,
+    ChartVisualElements, GeoMarkers, HeatSeries, MapInteractionMode, TooltipPosition,
     ZoomAndPanMode,
 };
 use ferroui_base::collections::FerroList;
@@ -122,6 +123,7 @@ impl FerroObjectImpl for Chart {
         this.set_x_axes(Axes::new());
         this.set_y_axes(Axes::new());
         this.set_markers(GeoMarkers::new());
+        this.set_visual_elements(ChartVisualElements::new());
         this.set_focusable(true);
     }
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -131,6 +133,7 @@ impl FerroObjectImpl for Chart {
             || property == Self::x_axes_property().as_property()
             || property == Self::y_axes_property().as_property()
             || property == Self::markers_property().as_property()
+            || property == Self::visual_elements_property().as_property()
         {
             this.rebind_sources();
         }
@@ -613,6 +616,23 @@ impl Chart {
                 }
             }),
         ));
+        // The visual elements of a pie chart (the ticks and needles of an angular gauge).
+        let visuals = self.visual_elements();
+        let weak = self.to_ref().downgrade();
+        subscriptions.push(Subscription::new(observe_list(&visuals, move || {
+            if let Some(this) = weak.upgrade() {
+                this.rebind_sources();
+                this.invalidate_chart();
+            }
+        })));
+        for visual in visuals.to_vec() {
+            let weak = self.to_ref().downgrade();
+            subscriptions.push(Subscription::new(visual.property_changed(move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_chart();
+                }
+            })));
+        }
         *self.source_subscriptions.borrow_mut() = subscriptions;
     }
 
@@ -629,7 +649,7 @@ impl Chart {
             }
         }
         let models = self.series().to_vec();
-        let series: Vec<_> = models.iter().map(|s| s.snapshot()).collect();
+        let series: Vec<_> = models.iter().map(series_snapshot).collect();
         let xs: Vec<_> = self
             .effective_x_axes()
             .to_vec()
@@ -689,6 +709,12 @@ impl Chart {
                         min_value: self.min_value(),
                         max_value: self.max_value(),
                         clockwise: self.clockwise(),
+                        visual_elements: self
+                            .visual_elements()
+                            .to_vec()
+                            .iter()
+                            .filter_map(ChartVisualElement::snapshot)
+                            .collect(),
                     },
                     crate::decorations::text_size,
                 )?,
@@ -1602,6 +1628,20 @@ impl Drop for Chart {
             timer.stop();
         }
     }
+}
+
+/// The engine snapshot of a series, with the properties of its family that the shared
+/// snapshot leaves at their defaults: the `ColorStops`, `PointPadding`, `MinValue` and `MaxValue`
+/// of a heat series.
+fn series_snapshot(model: &Ref<ChartSeries>) -> ferroui_livecharts::Series {
+    let mut series = model.snapshot();
+    if let Some(heat) = model.cast::<HeatSeries>() {
+        series.color_stops = heat.color_stops();
+        series.point_padding = heat.point_padding();
+        series.min_value = heat.min_value();
+        series.max_value = heat.max_value();
+    }
+    series
 }
 
 fn observe_list<T: Clone + 'static>(
