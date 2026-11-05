@@ -151,18 +151,6 @@ fn a_file_uri_converts_to_a_path_on_every_target() {
     // Any other scheme gives its unescaped path.
     assert_eq!("/document/a b", local_path("content://com.example/document/a%20b"));
 
-    // A path converts to a URL and back.
-    for (path, is_directory, url) in [
-        ("/home/a b/[x].txt", false, "file:///home/a%20b/%5Bx%5D.txt"),
-        ("/home/user/", true, "file:///home/user/"),
-        ("C:\\Work\\a#b.txt", false, "file:///C:/Work/a%23b.txt"),
-        ("D:\\", false, "file:///D:/"),
-    ] {
-        let uri = StorageProviderHelpers::uri_from_file_path(path, is_directory);
-        assert_eq!(url, uri.as_str());
-        assert_eq!(Some(path), StorageProviderHelpers::try_get_path_from_file_uri(Some(&uri)).as_deref());
-    }
-
     // The path of the host, where the host has one, agrees with `to_file_path`.
     #[cfg(all(unix, not(target_arch = "wasm32")))]
     for text in ["file:///home/a%20b/c.txt", "file:///tmp/100%25.txt", "file:///"] {
@@ -173,6 +161,18 @@ fn a_file_uri_converts_to_a_path_on_every_target() {
     for text in ["file:///C:/dir/a%20b.txt", "file://server/share/a.txt"] {
         let url = Url::parse(text).unwrap();
         assert_eq!(url.to_file_path().unwrap(), std::path::PathBuf::from(StorageProviderHelpers::local_path(&url)));
+    }
+
+    // A path converts to a URL and back.
+    for (path, is_directory, url) in [
+        ("/home/a b/[x].txt", false, "file:///home/a%20b/%5Bx%5D.txt"),
+        ("/home/user/", true, "file:///home/user/"),
+        ("C:\\Work\\a#b.txt", false, "file:///C:/Work/a%23b.txt"),
+        ("D:\\", false, "file:///D:/"),
+    ] {
+        let uri = StorageProviderHelpers::uri_from_file_path(path, is_directory);
+        assert_eq!(url, uri.as_str());
+        assert_eq!(Some(path), StorageProviderHelpers::try_get_path_from_file_uri(Some(&uri)).as_deref());
     }
 }
 
