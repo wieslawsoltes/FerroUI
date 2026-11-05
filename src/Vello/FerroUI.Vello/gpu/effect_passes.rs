@@ -24,7 +24,10 @@
 //!   wrapped with the bindings of the pass, checked by naga against the
 //!   uniform convention of its parameters once per type and compiled once
 //!   per device and type; a content-sampling program reads the content, an
-//!   overlay is composed over it with its blend mode.
+//!   overlay is composed over it with its blend mode. The images an overlay
+//!   samples (its children, E6) are textures of the device, uploaded once
+//!   per device and image and kept by the identity of the image's handle
+//!   while a handle lives ([`release_dropped_effect_images`]).
 //!
 //! The pipelines are compiled once per device and thread; the parameters
 //! are uniforms written for each pass. The textures, kept in pools per size
@@ -39,8 +42,8 @@
 use super::{VelloDeviceTexture, VelloTextureAlpha, VelloWgpuDevice};
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::media::effects::{
-    ImmutableCustomEffect, ShaderUniformType, ShaderUniformValue, SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_PASS_BINDING,
-    SHADER_WGSL_UNIFORMS_BINDING,
+    EffectImage, EffectImageWeak, ImmutableCustomEffect, ShaderUniformType, ShaderUniformValue, MAX_SHADER_CHILDREN,
+    SHADER_WGSL_CHILDREN_BINDING, SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_PASS_BINDING, SHADER_WGSL_UNIFORMS_BINDING,
 };
 use ferroui_base::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
 use ferroui_base::platform::{LightingParameters, PixelOperation};
@@ -1177,6 +1180,8 @@ pub(crate) struct ShaderModule {
     offsets: Vec<u32>,
     /// The size of the block in bytes: a multiple of 16.
     size: usize,
+    /// The number of children (images) the module binds.
+    children: usize,
 }
 
 #[cfg(test)]
@@ -1246,10 +1251,11 @@ fn uniform_block_layout(
     Ok((offsets, size))
 }
 
-/// The module of the pass of the shader of `effect`, checked: the
-/// description has no children besides the content (step E6), the module
-/// parses and validates with naga (the version wgpu compiles it with,
-/// without optional capabilities, so every device takes it), and its block
+/// The module of the pass of the shader of `effect`, checked: the children
+/// of the description are image parameters of an overlay
+/// ([`ImmutableCustomEffect::check_shader_children`], E6), the module parses
+/// and validates with naga (the version wgpu compiles it with, without
+/// optional capabilities, so every device takes it), and its block
 /// `uniforms` declares the uniforms of the convention
 /// ([`ImmutableCustomEffect::shader_uniform_layout`]). The error says why
 /// not. No device is needed.
@@ -1258,9 +1264,7 @@ pub(crate) fn check_shader_module(effect: &ImmutableCustomEffect) -> Result<Shad
     let Some(description) = effect.shader() else {
         return Err("the effect is not a shader effect".to_owned());
     };
-    if !description.children.is_empty() {
-        return Err("children besides the content are not supported yet".to_owned());
-    }
+    effect.check_shader_children()?;
     let source = description.wgsl_module();
     let module = naga::front::wgsl::parse_str(&source)
         .map_err(|error| format!("its WGSL does not parse: {}", error.emit_to_string(&source)))?;
@@ -1269,7 +1273,7 @@ pub(crate) fn check_shader_module(effect: &ImmutableCustomEffect) -> Result<Shad
         .validate(&module)
         .map_err(|error| format!("its WGSL is not valid: {}", error.emit_to_string(&source)))?;
     let (offsets, size) = uniform_block_layout(&module, &effect.shader_uniform_layout())?;
-    Ok(ShaderModule { source, offsets, size })
+    Ok(ShaderModule { source, offsets, size, children: description.children.len() })
 }
 
 /// The names of the shader effects whose module failed, each reported once.
@@ -1318,12 +1322,17 @@ struct ShaderPipeline {
     layout: wgpu::BindGroupLayout,
     uniforms: wgpu::Buffer,
     pass: wgpu::Buffer,
-    /// The bind groups the pipeline was run with, by the identity of the
-    /// texture of the content (a texture of the pool).
-    bind_groups: Vec<(u64, wgpu::BindGroup)>,
+    /// The bind groups the pipeline was run with, by the identities of the
+    /// textures they bind: the content (a texture of the pool) and the
+    /// images of the children ([`ImageTexture::id`]), 0 for no child.
+    bind_groups: Vec<(BindGroupKey, wgpu::BindGroup)>,
     /// The bytes of the block, kept for the next pass.
     block: Vec<u8>,
 }
+
+/// The identities of the textures a bind group of a shader pipeline binds:
+/// the content, then the children.
+type BindGroupKey = [u64; 1 + MAX_SHADER_CHILDREN];
 
 ferroui_base::ferro_thread_local! {
     // The modules of the shader effect types of this thread, checked once
@@ -1370,11 +1379,14 @@ fn with_shader_pipeline<R>(
             None => {
                 let wgpu_device = device.device();
                 let label = Some("FerroUI shader effect");
-                let entries = [
+                let mut entries = vec![
                     uniform_entry(SHADER_WGSL_UNIFORMS_BINDING),
                     uniform_entry(SHADER_WGSL_PASS_BINDING),
                     texture_entry(SHADER_WGSL_CONTENT_BINDING),
                 ];
+                for child in 0..module.children {
+                    entries.push(texture_entry(SHADER_WGSL_CHILDREN_BINDING + child as u32));
+                }
                 let (pipeline, layout) = create_pass_pipeline(wgpu_device, label, module.source.clone(), &entries);
                 let buffer = |size: usize| {
                     wgpu_device.create_buffer(&wgpu::BufferDescriptor {
@@ -1446,7 +1458,8 @@ fn fill_uniform_block(block: &mut [u8], offsets: &[u32], effect: &ImmutableCusto
 /// The shader of `effect` over `content` (a texture of the pool holding the
 /// part `area` of the area of the effect, `shader`) into a texture of the
 /// pool of the same size: the program compiled once per device and type,
-/// the uniforms of this frame written into its buffers. `None` when its
+/// the uniforms of this frame written into its buffers, its images bound as
+/// the textures of [`effect_image_view`] (uploaded once). `None` when its
 /// module failed (reported once).
 pub(crate) fn shader_effect_texture(
     device: &Arc<VelloWgpuDevice>,
@@ -1456,6 +1469,27 @@ pub(crate) fn shader_effect_texture(
     shader: ShaderArea,
 ) -> Option<Arc<VelloDeviceTexture>> {
     let module = shader_module(effect)?;
+    release_dropped_effect_images();
+    // The textures of the images, in the order of the children; no
+    // allocation.
+    let mut children: [(u64, Option<wgpu::TextureView>); MAX_SHADER_CHILDREN] = std::array::from_fn(|_| (0, None));
+    let mut child_count = 0;
+    effect.for_each_shader_child(&mut |_, image| {
+        if let Some(slot) = children.get_mut(child_count) {
+            let (id, view) = effect_image_view(device, image);
+            *slot = (id, Some(view));
+        }
+        child_count += 1;
+    });
+    if child_count != module.children {
+        report_shader_failure(effect.name(), "its images do not match its module");
+        return None;
+    }
+    let mut key: BindGroupKey = [0; 1 + MAX_SHADER_CHILDREN];
+    key[0] = content.id();
+    for (slot, (id, _)) in key[1..].iter_mut().zip(&children) {
+        *slot = *id;
+    }
     let mut pass_bytes = [0u8; 16];
     let pass_floats = [shader.origin[0], shader.origin[1], area.width as f32, area.height as f32];
     for (slot, value) in pass_bytes.chunks_exact_mut(4).zip(pass_floats) {
@@ -1476,29 +1510,34 @@ pub(crate) fn shader_effect_texture(
             return false;
         }
         device.queue().write_buffer(&pipeline.pass, 0, &pass_bytes);
-        let id = content.id();
-        let index = match pipeline.bind_groups.iter().position(|(key, _)| *key == id) {
+        let index = match pipeline.bind_groups.iter().position(|(bound, _)| *bound == key) {
             Some(index) => index,
             None => {
                 if pipeline.bind_groups.len() >= MAX_BIND_GROUPS {
                     pipeline.bind_groups.clear();
                 }
+                let mut entries = vec![
+                    wgpu::BindGroupEntry { binding: SHADER_WGSL_UNIFORMS_BINDING, resource: pipeline.uniforms.as_entire_binding() },
+                    wgpu::BindGroupEntry { binding: SHADER_WGSL_PASS_BINDING, resource: pipeline.pass.as_entire_binding() },
+                    wgpu::BindGroupEntry {
+                        binding: SHADER_WGSL_CONTENT_BINDING,
+                        resource: wgpu::BindingResource::TextureView(content.view()),
+                    },
+                ];
+                for (child, (_, view)) in children.iter().take(module.children).enumerate() {
+                    if let Some(view) = view {
+                        entries.push(wgpu::BindGroupEntry {
+                            binding: SHADER_WGSL_CHILDREN_BINDING + child as u32,
+                            resource: wgpu::BindingResource::TextureView(view),
+                        });
+                    }
+                }
                 let bind_group = device.device().create_bind_group(&wgpu::BindGroupDescriptor {
                     label: Some("FerroUI shader effect"),
                     layout: &pipeline.layout,
-                    entries: &[
-                        wgpu::BindGroupEntry {
-                            binding: SHADER_WGSL_UNIFORMS_BINDING,
-                            resource: pipeline.uniforms.as_entire_binding(),
-                        },
-                        wgpu::BindGroupEntry { binding: SHADER_WGSL_PASS_BINDING, resource: pipeline.pass.as_entire_binding() },
-                        wgpu::BindGroupEntry {
-                            binding: SHADER_WGSL_CONTENT_BINDING,
-                            resource: wgpu::BindingResource::TextureView(content.view()),
-                        },
-                    ],
+                    entries: &entries,
                 });
-                pipeline.bind_groups.push((id, bind_group));
+                pipeline.bind_groups.push((key, bind_group));
                 pipeline.bind_groups.len() - 1
             }
         };
@@ -1526,4 +1565,172 @@ pub(crate) fn shader_effect_texture(
         true
     });
     drawn.then_some(output)
+}
+
+// --- the images of the shader effects (E6) ---------------------------------------------
+
+/// The texture of an image of a shader effect on a device: the pixels of the
+/// image uploaded once, kept while a handle of the image lives.
+struct ImageTexture {
+    device: Weak<VelloWgpuDevice>,
+    /// Tells when the last handle of the image is dropped; the empty
+    /// texture of a device has a handle that never lives.
+    handle: EffectImageWeak,
+    /// The identity of the image ([`EffectImage::id`]); 0 for the empty
+    /// texture of a device.
+    image: u64,
+    /// The version of the bitmap the pixels were uploaded at.
+    version: i32,
+    /// The identity of this texture among the textures of the images, what
+    /// the bind groups are kept by.
+    id: u64,
+    view: wgpu::TextureView,
+    _texture: wgpu::Texture,
+}
+
+ferroui_base::ferro_thread_local! {
+    // Kept beyond the end of the thread, as the objects of the lighting
+    // pass are (see there).
+    static IMAGE_TEXTURES: ManuallyDrop<RefCell<Vec<ImageTexture>>> = ManuallyDrop::new(RefCell::new(Vec::new()));
+    // The generation of releases of effect images this thread last looked at
+    // its textures for (`EffectImage::release_generation`).
+    static IMAGE_RELEASES_SEEN: Cell<u64> = const { Cell::new(0) };
+    static IMAGE_UPLOADS: Cell<u64> = const { Cell::new(0) };
+}
+
+/// How many images the passes of this thread uploaded into textures:
+/// constant over frames that only change uniforms.
+#[allow(dead_code)]
+pub(crate) fn image_uploads() -> u64 {
+    IMAGE_UPLOADS.with(Cell::get)
+}
+
+/// How many textures of images (the empty textures of the devices aside)
+/// this thread keeps.
+#[allow(dead_code)]
+pub(crate) fn image_texture_count() -> usize {
+    IMAGE_TEXTURES.with(|textures| textures.borrow().iter().filter(|texture| texture.image != 0).count())
+}
+
+/// The next identity of a texture of an image.
+fn next_image_texture_id() -> u64 {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static NEXT: AtomicU64 = AtomicU64::new(1);
+    NEXT.fetch_add(1, Ordering::Relaxed)
+}
+
+/// Releases the textures of the images whose last handle was dropped since
+/// this thread last looked (on any thread; one atomic read when none was),
+/// and the bind groups that bind them, and the textures of devices that are
+/// gone. Called by the passes of the shader effects and by the drawing
+/// contexts of this thread when they are created, so the texture of a
+/// dropped image goes with the next frame.
+pub(crate) fn release_dropped_effect_images() {
+    let generation = EffectImage::release_generation();
+    if IMAGE_RELEASES_SEEN.with(|seen| seen.replace(generation)) == generation {
+        return;
+    }
+    let mut released = Vec::new();
+    IMAGE_TEXTURES.with(|textures| {
+        textures.borrow_mut().retain(|texture| {
+            let device_lives = texture.device.strong_count() > 0;
+            let keep = device_lives && (texture.image == 0 || texture.handle.is_alive());
+            if !keep {
+                released.push(texture.id);
+            }
+            keep
+        });
+    });
+    if released.is_empty() {
+        return;
+    }
+    // A bind group holds the views it binds: the bind groups of the
+    // released textures go with them.
+    SHADER_PIPELINES.with(|pipelines| {
+        for pipeline in pipelines.borrow_mut().iter_mut() {
+            pipeline.bind_groups.retain(|(key, _)| !key[1..].iter().any(|id| released.contains(id)));
+        }
+    });
+}
+
+/// The texture of `image` on `device` and its identity: the pixels of the
+/// image ([`EffectImage::pixels`]) uploaded the first time the device draws
+/// the image (or a new version of its bitmap), kept while a handle of the
+/// image lives; a transparent texture of one pixel for the empty image, an
+/// image whose pixels cannot be read or that is larger than the largest
+/// texture of the device.
+pub(crate) fn effect_image_view(device: &Arc<VelloWgpuDevice>, image: &EffectImage) -> (u64, wgpu::TextureView) {
+    let uploaded = if image.is_empty() { None } else { image_texture(device, image) };
+    uploaded.unwrap_or_else(|| empty_image_view(device))
+}
+
+fn image_texture(device: &Arc<VelloWgpuDevice>, image: &EffectImage) -> Option<(u64, wgpu::TextureView)> {
+    let (image_id, version) = (image.id(), image.version());
+    let on_device =
+        |texture: &ImageTexture| texture.image == image_id && std::ptr::eq(texture.device.as_ptr(), Arc::as_ptr(device));
+    let found = IMAGE_TEXTURES.with(|textures| {
+        let mut textures = textures.borrow_mut();
+        if let Some(texture) = textures.iter().find(|texture| on_device(*texture)) {
+            if texture.version == version {
+                return Some((texture.id, texture.view.clone()));
+            }
+        }
+        // A new version of the bitmap: the old pixels go.
+        textures.retain(|texture| !on_device(texture));
+        None
+    });
+    if found.is_some() {
+        return found;
+    }
+    let pixels = image.pixels()?;
+    let largest = device.device().limits().max_texture_dimension_2d as usize;
+    let (width, height) = (pixels.width(), pixels.height());
+    if width == 0 || height == 0 || width > largest || height > largest {
+        return None;
+    }
+    let texture = device.create_image_texture(width as u32, height as u32, pixels.rgba());
+    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+    let id = next_image_texture_id();
+    IMAGE_UPLOADS.with(|count| count.set(count.get() + 1));
+    IMAGE_TEXTURES.with(|textures| {
+        textures.borrow_mut().push(ImageTexture {
+            device: Arc::downgrade(device),
+            handle: image.downgrade(),
+            image: image_id,
+            version,
+            id,
+            view: view.clone(),
+            _texture: texture,
+        })
+    });
+    Some((id, view))
+}
+
+/// The transparent texture of one pixel of `device`, made once.
+fn empty_image_view(device: &Arc<VelloWgpuDevice>) -> (u64, wgpu::TextureView) {
+    let found = IMAGE_TEXTURES.with(|textures| {
+        textures
+            .borrow()
+            .iter()
+            .find(|texture| texture.image == 0 && std::ptr::eq(texture.device.as_ptr(), Arc::as_ptr(device)))
+            .map(|texture| (texture.id, texture.view.clone()))
+    });
+    if let Some(found) = found {
+        return found;
+    }
+    let texture = device.create_image_texture(1, 1, &[0; 4]);
+    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+    let id = next_image_texture_id();
+    IMAGE_TEXTURES.with(|textures| {
+        textures.borrow_mut().push(ImageTexture {
+            device: Arc::downgrade(device),
+            handle: EffectImageWeak::default(),
+            image: 0,
+            version: 0,
+            id,
+            view: view.clone(),
+            _texture: texture,
+        })
+    });
+    (id, view)
 }
