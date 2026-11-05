@@ -1,12 +1,12 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
-use ferroui_base::{metadata::IServiceProvider, utilities::Uri, BoxedValue};
+use ferroui_base::{metadata::IServiceProvider, utilities::UriRef, BoxedValue};
 use ferroui_markup_xaml::{FerroXamlLoader, IUriContext, MarkupExtension, XamlLoadError};
 use std::{cell::RefCell, rc::Rc};
 
 /// Loads a markup object from Source using the calling document's URI context.
 pub struct LoadExtension {
-    source: RefCell<Option<Uri>>,
+    source: RefCell<Option<UriRef>>,
 }
 impl LoadExtension {
     /// Creates the source extension without a URI.
@@ -15,18 +15,19 @@ impl LoadExtension {
             source: RefCell::new(None),
         })
     }
-    /// Creates the source extension with a URI.
-    pub fn with_source(source: Uri) -> Rc<Self> {
+    /// Creates the source extension with a URI: an absolute URL, or a reference
+    /// relative to the base URI of the calling document.
+    pub fn with_source(source: UriRef) -> Rc<Self> {
         let extension = Self::new();
         extension.set_source(Some(source));
         extension
     }
     /// Gets the optional source URI.
-    pub fn source(&self) -> Option<Uri> {
+    pub fn source(&self) -> Option<UriRef> {
         self.source.borrow().clone()
     }
     /// Sets the optional source URI.
-    pub fn set_source(&self, source: Option<Uri>) {
+    pub fn set_source(&self, source: Option<UriRef>) {
         self.source.replace(source);
     }
     /// Loads with the native loader, or returns null without context or source.
@@ -72,8 +73,8 @@ ferroui_base::ferro_markup_type!(class LoadExtension {
     namespace: "FerroUI.MarkupExtension",
     this: Rc<LoadExtension>,
     handles: [LoadExtension, Rc<LoadExtension>, Option<Rc<LoadExtension>>],
-    constructors: [() => LoadExtension::new, (Uri) => LoadExtension::with_source],
-    properties: [Source: Option<Uri> { get: LoadExtension::source, set: LoadExtension::set_source } [ConstructorArgument("source")]],
+    constructors: [() => LoadExtension::new, (UriRef) => LoadExtension::with_source],
+    properties: [Source: Option<UriRef> { get: LoadExtension::source, set: LoadExtension::set_source } [ConstructorArgument("source")]],
     methods: [try fn ProvideValue(Rc<dyn IServiceProvider>) -> Option<BoxedValue> =>
         |this: &Rc<LoadExtension>, provider: Rc<dyn IServiceProvider>| { this.provide_value(&provider) }],
 });

@@ -3,7 +3,7 @@
 use crate::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
 use ferroui_base::metadata::{IServiceProvider, MarkupAssembly};
 use ferroui_base::platform::IAssetLoader;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::{Uri, UriRef};
 use ferroui_base::{ferro_markup_type, BoxedValue, FerroLocator, LocatorExtensions};
 use std::collections::HashMap;
 use std::io::Read;
@@ -122,9 +122,10 @@ impl FerroXamlLoader {
 
     /// Loads XAML from a URI.
     ///
-    /// `base_uri` is the URI `uri` is relative to; it is required when
-    /// `uri` is relative.
-    pub fn load(uri: &Uri, base_uri: Option<&Uri>) -> Result<BoxedValue, XamlLoadError> {
+    /// `base_uri` is the URL `uri` is relative to; it is required when
+    /// `uri` is relative, which is resolved against it with
+    /// [`UriRef::resolve`].
+    pub fn load(uri: &UriRef, base_uri: Option<&url::Url>) -> Result<BoxedValue, XamlLoadError> {
         Self::load_with_service_provider(None, uri, base_uri)
     }
 
@@ -136,13 +137,13 @@ impl FerroXamlLoader {
     /// `base_uri` is `None`.
     pub fn load_with_service_provider(
         sp: Option<&Rc<dyn IServiceProvider>>,
-        uri: &Uri,
-        base_uri: Option<&Uri>,
+        uri: &UriRef,
+        base_uri: Option<&url::Url>,
     ) -> Result<BoxedValue, XamlLoadError> {
         if FerroLocator::current().get_service::<dyn IAssetLoader>().is_none() {
             panic!("{NO_ASSET_LOADER}");
         }
-        if !uri.is_absolute_uri() && base_uri.is_none() {
+        if uri.is_relative() && base_uri.is_none() {
             panic!("{RELATIVE_WITHOUT_BASE}");
         }
         Self::try_load_with_service_provider(sp, uri, base_uri)
@@ -154,27 +155,30 @@ impl FerroXamlLoader {
     /// use.
     pub fn try_load_with_service_provider(
         sp: Option<&Rc<dyn IServiceProvider>>,
-        uri: &Uri,
-        base_uri: Option<&Uri>,
+        uri: &UriRef,
+        base_uri: Option<&url::Url>,
     ) -> Result<BoxedValue, XamlLoadError> {
         let Some(asset_locator) = FerroLocator::current().get_service::<dyn IAssetLoader>() else {
             return Err(XamlLoadError::with_message(NO_ASSET_LOADER));
         };
 
-        let absolute_uri = if uri.is_absolute_uri() {
-            uri.clone()
-        } else {
-            match base_uri {
-                Some(base_uri) => Uri::combine(base_uri, uri),
-                None => return Err(XamlLoadError::with_message(RELATIVE_WITHOUT_BASE)),
-            }
+        let absolute_uri = match (uri.as_url(), base_uri) {
+            (Some(url), _) => url.clone(),
+            (None, Some(base_uri)) => uri.resolve(base_uri).map_err(|e| {
+                XamlLoadError::with_inner(format!("Could not resolve the XAML document {uri} against {base_uri}: {e}"), e)
+            })?,
+            (None, None) => return Err(XamlLoadError::with_message(RELATIVE_WITHOUT_BASE)),
         };
+        // The asset loader takes the port `Uri` until U3 (C5 of #423). It is given the URL the
+        // reference resolves to, so that it opens the document the URL names (where the URL
+        // standard and `Uri::combine` differ, section 3.5 of docs/idiomatic-rust-signatures.md).
+        let asset_uri = Uri::from(absolute_uri.clone());
 
         // Explicit designer snapshots (and development revisions) win over compiled
         // assets, including lazy includes. An unavailable draft must never fall back
         // to the old document. Scoped snapshots also work in release designers.
         #[cfg(feature = "source-overlays")]
-        if let Some(source) = crate::source_overlay::try_source(absolute_uri.absolute_uri())
+        if let Some(source) = crate::source_overlay::try_source(absolute_uri.as_str())
             .map_err(XamlLoadError::with_message)?
         {
             let runtime = FerroLocator::current().get_service::<dyn IRuntimeXamlLoader>()
@@ -182,7 +186,7 @@ impl FerroXamlLoader {
             let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(absolute_uri), &source);
             document.service_provider = sp.cloned();
             let mut configuration = RuntimeXamlLoaderConfiguration::default();
-            configuration.local_assembly = asset_locator.get_assembly(uri, base_uri)
+            configuration.local_assembly = asset_locator.get_assembly(&asset_uri, None)
                 .and_then(|assembly| MarkupAssembly::find(assembly.name()).or_else(|| {
                     // URI authorities are case-insensitive; metadata assembly names retain case.
                     MarkupAssembly::registered_assemblies().into_iter()
@@ -192,16 +196,16 @@ impl FerroXamlLoader {
         }
 
         let compiled_loader =
-            asset_locator.get_assembly(uri, base_uri).and_then(|assembly| Self::compiled_loader(assembly.name()));
+            asset_locator.get_assembly(&asset_uri, None).and_then(|assembly| Self::compiled_loader(assembly.name()));
         if let Some(compiled_loader) = compiled_loader {
-            if let Some(compiled_result) = compiled_loader(sp, absolute_uri.absolute_uri())? {
+            if let Some(compiled_result) = compiled_loader(sp, absolute_uri.as_str())? {
                 return Ok(compiled_result);
             }
         }
 
         // This is intended for unit-tests only
         if let Some(runtime_loader) = FerroLocator::current().get_service::<dyn IRuntimeXamlLoader>() {
-            let (stream, assembly) = asset_locator.open_and_get_assembly(uri, base_uri).map_err(|e| {
+            let (stream, assembly) = asset_locator.open_and_get_assembly(&asset_uri, None).map_err(|e| {
                 XamlLoadError::with_inner(format!("Could not open the XAML document {uri} (baseUri: {}): {e}", display(base_uri)), e)
             })?;
             let stream: Box<dyn Read> = Box::new(stream);
@@ -223,8 +227,8 @@ fn null_checked(obj: Option<BoxedValue>) -> Result<BoxedValue, XamlLoadError> {
     obj.ok_or_else(|| XamlLoadError::with_message("Value cannot be null. (Parameter 'obj')"))
 }
 
-fn display(uri: Option<&Uri>) -> String {
-    uri.map(Uri::to_string).unwrap_or_default()
+fn display(uri: Option<&url::Url>) -> String {
+    uri.map(url::Url::to_string).unwrap_or_default()
 }
 
 ferro_markup_type!(static FerroXamlLoader {
@@ -236,11 +240,11 @@ ferro_markup_type!(static FerroXamlLoader {
             |sp: Option<Rc<dyn IServiceProvider>>, obj: Option<BoxedValue>| {
                 FerroXamlLoader::load_object_with_service_provider(sp.as_ref(), &null_checked(obj)?)
             },
-        static try fn Load(Uri, Option<Uri>) -> BoxedValue => |uri: Uri, base_uri: Option<Uri>| {
+        static try fn Load(UriRef, Option<url::Url>) -> BoxedValue => |uri: UriRef, base_uri: Option<url::Url>| {
             FerroXamlLoader::try_load_with_service_provider(None, &uri, base_uri.as_ref())
         },
-        static try fn Load(Option<Rc<dyn IServiceProvider>>, Uri, Option<Uri>) -> BoxedValue =>
-            |sp: Option<Rc<dyn IServiceProvider>>, uri: Uri, base_uri: Option<Uri>| {
+        static try fn Load(Option<Rc<dyn IServiceProvider>>, UriRef, Option<url::Url>) -> BoxedValue =>
+            |sp: Option<Rc<dyn IServiceProvider>>, uri: UriRef, base_uri: Option<url::Url>| {
                 FerroXamlLoader::try_load_with_service_provider(sp.as_ref(), &uri, base_uri.as_ref())
             },
     ],

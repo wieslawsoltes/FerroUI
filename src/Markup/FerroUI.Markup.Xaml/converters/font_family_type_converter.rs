@@ -5,7 +5,7 @@ use super::{ITypeDescriptorContext, TypeConverter};
 use crate::{ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::media::FontFamily;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{CultureInfo, Uri};
 use ferroui_base::BoxedValue;
 use std::rc::Rc;
 
@@ -25,7 +25,8 @@ impl TypeConverter for FontFamilyTypeConverter {
         value: Option<&BoxedValue>,
     ) -> Result<Option<BoxedValue>, XamlLoadError> {
         let s = text_of(value)?;
-        let base_uri = service_provider_of(context).and_then(|sp| sp.get_context_base_uri());
+        // The asset loader and the font family take the port `Uri` until U3 (C5 of #423).
+        let base_uri = service_provider_of(context).and_then(|sp| sp.get_context_base_uri()).map(Uri::from);
 
         let font_family = FontFamily::parse_with_base_uri(s, base_uri.as_ref())
             .map_err(|e| XamlLoadError::with_message(e.to_string()))?;

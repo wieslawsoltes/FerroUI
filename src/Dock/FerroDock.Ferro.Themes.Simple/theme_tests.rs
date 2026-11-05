@@ -10,7 +10,7 @@ use ferroui_base::{
     metadata::{from_markup_value, IServiceProvider},
     styling::ThemeVariant,
     threading::{CancellationToken, Dispatcher},
-    utilities::Uri,
+    utilities::UriRef,
 };
 use ferroui_controls::{AppBuilder, Application, Control, Grid, Panel, Window};
 use ferroui_headless::{
@@ -55,12 +55,12 @@ fn number(theme: &DockSimpleTheme, key: &str) -> f64 {
         .unwrap()
 }
 fn include(name: &str) -> Rc<ResourceInclude> {
-    let uri = Uri::absolute(&format!(
+    let uri = UriRef::parse_absolute(&format!(
         "ferres://FerroDock.Ferro.Themes.Simple/Presets/Ide/{name}.xaml"
     ))
     .unwrap();
     let value = ResourceInclude::new(Some(uri.clone()));
-    value.set_source(Some(uri));
+    value.set_source(Some(UriRef::from(uri)));
     value
 }
 fn preset_sources(dictionary: &ResourceDictionary) -> Vec<String> {

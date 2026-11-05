@@ -6,7 +6,7 @@ use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::{IServiceProvider, MarkupDelegate};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::{IStyle, ThemeVariant};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -16,10 +16,10 @@ use std::rc::{Rc, Weak};
 pub struct StyleInclude {
     this: Weak<StyleInclude>,
     service_provider: Option<Rc<dyn IServiceProvider>>,
-    base_uri: Option<Uri>,
+    base_uri: Option<url::Url>,
     loaded: RefCell<Option<Rc<Vec<Rc<dyn IStyle>>>>>,
     is_loading: Cell<bool>,
-    source: RefCell<Option<Uri>>,
+    source: RefCell<Option<UriRef>>,
     #[cfg(feature = "source-overlays")]
     source_snapshot: Option<crate::source_overlay::SourceSnapshot>,
 }
@@ -29,10 +29,10 @@ ferroui_base::ferro_thread_local! {
 }
 
 impl StyleInclude {
-    /// Initializes a new instance: `base_uri` is the URI of the document
+    /// Initializes a new instance: `base_uri` is the URL of the document
     /// that contains the include, which a relative source is resolved
-    /// against.
-    pub fn new(base_uri: Option<Uri>) -> Rc<Self> {
+    /// against ([`UriRef::resolve`]).
+    pub fn new(base_uri: Option<url::Url>) -> Rc<Self> {
         Self::create(None, base_uri)
     }
 
@@ -43,7 +43,7 @@ impl StyleInclude {
         Self::create(Some(service_provider), base_uri)
     }
 
-    fn create(service_provider: Option<Rc<dyn IServiceProvider>>, base_uri: Option<Uri>) -> Rc<Self> {
+    fn create(service_provider: Option<Rc<dyn IServiceProvider>>, base_uri: Option<url::Url>) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             service_provider,
@@ -61,21 +61,21 @@ impl StyleInclude {
         self.loaded().as_resource_provider()?.owner()
     }
 
-    /// The source URL.
-    pub fn source(&self) -> Option<Uri> {
+    /// The source URL: an absolute URL, or a reference relative to the base
+    /// URI of the include.
+    pub fn source(&self) -> Option<UriRef> {
         self.source.borrow().clone()
     }
 
-    pub fn set_source(&self, value: Option<Uri>) {
+    pub fn set_source(&self, value: Option<UriRef>) {
         #[cfg(feature = "source-overlays")]
         if let (Some(snapshot), Some(source)) = (&self.source_snapshot, &value) {
-            let absolute = if source.is_absolute_uri() {
-                Some(source.clone())
-            } else {
-                self.base_uri.as_ref().map(|base| Uri::combine(base, source))
+            let absolute = match &self.base_uri {
+                Some(base) => source.resolve(base).ok(),
+                None => source.as_url().cloned(),
             };
             if let Some(absolute) = absolute {
-                snapshot.record_request(absolute.absolute_uri());
+                snapshot.record_request(absolute.as_str());
             }
         }
         *self.source.borrow_mut() = value;
@@ -167,12 +167,11 @@ impl IResourceProvider for StyleInclude {
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     fn development_source(&self) -> Option<String> {
         let source = self.source()?;
-        let uri = if source.is_absolute_uri() {
-            source
-        } else {
-            Uri::combine(self.base_uri.as_ref()?, &source)
+        let uri = match source.as_url() {
+            Some(url) => url.clone(),
+            None => source.resolve(self.base_uri.as_ref()?).ok()?,
         };
-        Some(uri.absolute_uri().to_owned())
+        Some(uri.into())
     }
 
     fn owner(&self) -> Option<ResourceHostRef> {
@@ -206,7 +205,7 @@ ferro_markup_type!(class StyleInclude {
     handles: [StyleInclude, Rc<StyleInclude>, Option<Rc<StyleInclude>>],
     interfaces: [Rc<dyn IStyle>, Rc<dyn IResourceProvider>],
     constructors: [
-        (Option<Uri>) => StyleInclude::new,
+        (Option<url::Url>) => StyleInclude::new,
         (Rc<dyn IServiceProvider>) => StyleInclude::with_service_provider,
     ],
     properties: [
@@ -215,7 +214,7 @@ ferro_markup_type!(class StyleInclude {
                 this.try_loaded().map(|loaded| loaded.as_resource_provider().and_then(|provider| provider.owner()))
             }
         },
-        Source: Option<Uri> { get: StyleInclude::source, set: StyleInclude::set_source },
+        Source: Option<UriRef> { get: StyleInclude::source, set: StyleInclude::set_source },
         Loaded: Rc<dyn IStyle> { try_get: StyleInclude::try_loaded },
     ],
     events: [

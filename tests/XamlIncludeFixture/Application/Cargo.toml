@@ -41,3 +41,5 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 # The emitter checks the output of the build script (`tests/compiled_xaml_tests.rs`); the tests of the
 # diagnostics compile documents in the test.
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+# The URI context of the include tests holds the URL of a document (C5 of #423).
+url = { workspace = true }

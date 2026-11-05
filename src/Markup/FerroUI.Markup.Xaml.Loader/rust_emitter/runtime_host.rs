@@ -158,9 +158,9 @@ pub fn transformed_class_group(class: &'static ferroui_base::TypeInfo) -> Result
     let uri = crate::FerroRuntimeXamlLoader::class_document(class)
         .ok_or_else(|| format!("no document is registered for {}", class.full_name()))?;
     let group = crate::FerroRuntimeXamlLoader::document_group(&uri, &class.full_name()).map_err(|e| e.message().to_string())?;
-    let mut documents = vec![(group.uri.absolute_path().trim_start_matches('/').to_string(), group.text, Some(group.uri.to_string()), Some(class))];
+    let mut documents = vec![(group.uri.path().trim_start_matches('/').to_string(), group.text, Some(group.uri.to_string()), Some(class))];
     for (uri, text) in group.included {
-        documents.push((uri.absolute_path().trim_start_matches('/').to_string(), text, Some(uri.to_string()), None));
+        documents.push((uri.path().trim_start_matches('/').to_string(), text, Some(uri.to_string()), None));
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
@@ -212,13 +212,13 @@ pub fn generate_class_file(
     let uri = crate::FerroRuntimeXamlLoader::class_document(class)
         .ok_or_else(|| format!("no document is registered for {}", class.full_name()))?;
     // A document of a crate with compiled markup is that crate's: the include calls it there.
-    let compiled_elsewhere = |uri: &ferroui_base::utilities::Uri| {
-        let assembly = uri.absolute_uri().split_once("://").and_then(|(_, rest)| rest.split('/').next()).unwrap_or_default();
+    let compiled_elsewhere = |uri: &url::Url| {
+        let assembly = uri.as_str().split_once("://").and_then(|(_, rest)| rest.split('/').next()).unwrap_or_default();
         dependencies.iter().any(|metadata| metadata.name.to_lowercase() == assembly.to_lowercase())
     };
     let group = crate::FerroRuntimeXamlLoader::document_group_without(&uri, &class.full_name(), &compiled_elsewhere)
         .map_err(|e| e.message().to_string())?;
-    let name_of = |uri: &ferroui_base::utilities::Uri| uri.absolute_path().trim_start_matches('/').to_string();
+    let name_of = |uri: &url::Url| uri.path().trim_start_matches('/').to_string();
     let mut documents = vec![(name_of(&group.uri), group.text.clone(), Some(group.uri.to_string()))];
     for (uri, text) in &group.included {
         documents.push((name_of(uri), text.clone(), Some(uri.to_string())));

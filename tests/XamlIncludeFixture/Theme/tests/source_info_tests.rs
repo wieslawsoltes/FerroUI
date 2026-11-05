@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 use ferroui_base::controls::{IResourceDictionary, ResourceDictionary};
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::UserControl;
@@ -45,7 +45,7 @@ fn compiled_source_information_is_the_run_time_loaders() {
     let documents = SOURCE_INFO_DOCUMENTS
         .iter()
         .map(|(name, xaml)| {
-            let uri = Uri::absolute(&format!("ferres://{}/{name}", ASSEMBLY.name)).expect("a valid URI");
+            let uri = UriRef::parse_absolute(&format!("ferres://{}/{name}", ASSEMBLY.name)).expect("a valid URI");
             let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), xaml);
             document.document = Some(name.to_string());
             document
