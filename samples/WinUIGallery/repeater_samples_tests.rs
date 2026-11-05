@@ -235,9 +235,9 @@ fn flow_layout_options_update_the_layout_and_the_realized_count() {
         alignments.set_selected_index(index);
         assert_eq!(flow.line_alignment(), alignment);
     }
-    root.get_control::<Slider>("FlowItemSpacing").set_value(16.0);
+    root.get_control::<Slider>("FlowItemSpacing").set_range_value(16.0);
     assert_eq!(flow.min_item_spacing(), 16.0);
-    root.get_control::<Slider>("FlowLineSpacing").set_value(20.0);
+    root.get_control::<Slider>("FlowLineSpacing").set_range_value(20.0);
     assert_eq!(flow.line_spacing(), 20.0);
 
     realize(&repeater, 520.0, 320.0);
@@ -350,7 +350,17 @@ fn content_heavy_repeater_filters_and_sorts_recipes_in_columns() {
 
     // Two 200-pixel columns: each item goes to the lowest column.
     realize(&repeater, 400.0, 600.0);
-    let bounds = |index: i32| element(&repeater, index).bounds();
+    // The slot of an item: its bounds and the margin of its template around them.
+    let bounds = |index: i32| {
+        let item = element(&repeater, index);
+        let (bounds, margin) = (item.bounds(), item.margin());
+        ferroui_base::Rect::new(
+            bounds.x - margin.left,
+            bounds.y - margin.top,
+            bounds.width + margin.left + margin.right,
+            bounds.height + margin.top + margin.bottom,
+        )
+    };
     assert_eq!((bounds(0).x, bounds(0).y, bounds(0).width), (0.0, 0.0, 200.0));
     assert_eq!((bounds(1).x, bounds(1).y, bounds(1).width), (200.0, 0.0, 200.0));
     assert_eq!(bounds(2).y, bounds(0).height.min(bounds(1).height));
@@ -412,7 +422,7 @@ fn layout_panel_switches_to_a_stack_and_follows_the_spacing() {
     assert_eq!(stack.orientation(), Orientation::Vertical);
     arrange_panel(&panel);
     assert_eq!((bounds(1).x, bounds(1).y, bounds(1).height), (13.0, 117.0, 72.0));
-    root.get_control::<Slider>("LayoutSpacing").set_value(16.0);
+    root.get_control::<Slider>("LayoutSpacing").set_range_value(16.0);
     assert_eq!(stack.spacing(), 16.0);
     arrange_panel(&panel);
     assert_eq!(bounds(1).y, 125.0);

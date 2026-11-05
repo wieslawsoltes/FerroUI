@@ -327,7 +327,7 @@ fn wire_files(root: &Ref<Control>, editor: &Ref<RichEditBox>) {
             }
             let weak_editor = editor.downgrade();
             let weak_status = status.downgrade();
-            drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+            drop(Dispatcher::ui_thread().start_local(async move {
                 let outcome = if save {
                     save_file(provider, weak_editor).await
                 } else {

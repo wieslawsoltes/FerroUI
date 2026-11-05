@@ -34,6 +34,7 @@ ferroui_base::ferro_thread_local! {
 }
 
 /// The sample windows the pages opened that are not closed yet, oldest first.
+#[cfg(test)]
 pub(crate) fn opened_windows() -> Vec<Ref<Window>> {
     OPENED.with(|opened| opened.borrow().clone())
 }
@@ -294,14 +295,17 @@ impl BackdropWindow {
         self.window.upgrade().expect("the sample window is alive while its state is used")
     }
 
+    #[cfg(test)]
     pub(crate) fn current(&self) -> BackdropType {
         self.current.get()
     }
 
+    #[cfg(test)]
     pub(crate) fn mica_controller(&self) -> Option<MicaController> {
         self.mica.borrow().clone()
     }
 
+    #[cfg(test)]
     pub(crate) fn acrylic_controller(&self) -> Option<DesktopAcrylicController> {
         self.acrylic.borrow().clone()
     }
