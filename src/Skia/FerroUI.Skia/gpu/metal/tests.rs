@@ -1937,7 +1937,8 @@ fn graphite_draws_the_page_transitions_from_textures_uploaded_once() {
     target.dispose();
 }
 
-/// The custom effects FerroUI ships on Graphite at twice the scale (#455, E9).
+/// The custom effects FerroUI ships on Graphite at twice the scale, and their
+/// prewarm by a render target of a window (#455, E9).
 mod custom_effect_validation {
     use super::*;
     use ferroui_base::media::effects::library::{
@@ -1946,7 +1947,7 @@ mod custom_effect_validation {
         ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
         SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
     };
-    use ferroui_base::media::effects::{EffectImage, ImmutableCustomEffect};
+    use ferroui_base::media::effects::{CustomEffect, EffectImage, ImmutableCustomEffect};
     use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
     use ferroui_base::{Matrix, Point};
 
@@ -2185,5 +2186,114 @@ mod custom_effect_validation {
                 }
             }
         }
+    }
+
+    /// The prewarm of the custom effects by the render target of a window
+    /// (`SkiaGpuRenderTarget::prewarm`, onto a recorder of its own): each
+    /// type of the library drawn once at the value it registers for the
+    /// prewarm (its default) around an image, at the scaling of the scene, as
+    /// `ServerCompositionTarget::prewarm_effects` draws the registered
+    /// effects. The prewarm compiles the program of every runtime shader of
+    /// the library, so the next frame of the window, which draws the library
+    /// at other values, compiles none; nothing of the prewarm is presented.
+    #[test]
+    fn a_graphite_render_target_prewarms_the_library_ahead_of_the_frame_that_shows_it() {
+        let Some(device) = TestMetalDevice::try_new() else {
+            eprintln!("skipped: no Metal device available");
+            return;
+        };
+        let (side, scaling) = (128, 2.0);
+        let size = PixelSize::new(side, side);
+        // SAFETY: the device handle is valid for the lifetime of `device`.
+        let texture = unsafe { create_texture(device.device, side as usize, side as usize) };
+        assert!(!texture.is_null());
+        let presented = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+        let surface: std::sync::Arc<dyn IPlatformRenderSurface> =
+            std::sync::Arc::new(TextureSurface { texture: texture as usize, size, presented: presented.clone() });
+        let context = crate::SkiaContext::new(Some(super::super::SkiaMetalGpu::new(device.clone(), None, None)));
+        let render_target = context.create_render_target(std::slice::from_ref(&surface));
+        let scene_info = RenderTargetSceneInfo::new(size, scaling, CompositionTransparencyLevel::None);
+
+        // The first two frames: the second prewarms the programs of the
+        // drawing context itself (`prewarm_runtime_effects`).
+        for _ in 0..2 {
+            let (mut frame, _) = render_target.create_drawing_context(&scene_info);
+            frame.clear(Colors::WHITE);
+            frame.dispose();
+        }
+        assert_eq!(2, presented.load(std::sync::atomic::Ordering::SeqCst));
+
+        // The prewarm, as the composition target draws it after a frame.
+        let before = crate::runtime_effects::compilation_count();
+        let stand_in = image(|x, y| [(x * 4) as u8, 128, (y * 4) as u8, 255]);
+        let stand_in_bitmap = stand_in.bitmap().expect("the image of the stand-in");
+        let registered: Vec<ImmutableCustomEffect> = {
+            fn of<T: CustomEffect>() -> ImmutableCustomEffect {
+                ImmutableCustomEffect::new(T::default())
+            }
+            vec![
+                of::<TintEffect>(),
+                of::<GrayscaleEffect>(),
+                of::<SepiaEffect>(),
+                of::<SaturationEffect>(),
+                of::<BrightnessContrastEffect>(),
+                of::<InvertEffect>(),
+                of::<GlowEffect>(),
+                of::<SharpenEffect>(),
+                of::<EdgeDetectEffect>(),
+                of::<PixelateEffect>(),
+                of::<ScanlineShaderEffect>(),
+                of::<SpotlightShaderEffect>(),
+                of::<DissolveTransitionEffect>(),
+                of::<MaskTransitionEffect>(),
+                of::<PointerSpotlightShaderEffect>(),
+                of::<ReactiveGridShaderEffect>(),
+                of::<WaterRippleShaderEffect>(),
+                of::<BurningFlameShaderEffect>(),
+            ]
+        };
+        let prewarm_scene = RenderTargetSceneInfo::new(PixelSize::new(256, 256), scaling, CompositionTransparencyLevel::None);
+        let area = Rect::new(32.0, 32.0, 64.0, 64.0);
+        let prewarmed = render_target.prewarm(&prewarm_scene, &mut |context: &mut dyn IDrawingContextImpl| {
+            context.set_transform(Matrix::create_scale(scaling, scaling));
+            for effect in &registered {
+                draw_with(context, effect, area, |context| {
+                    context.push_clip(area);
+                    context.draw_bitmap(
+                        &*stand_in_bitmap,
+                        1.0,
+                        Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)),
+                        Rect::new(area.x, area.y, f64::from(SIZE), f64::from(SIZE)),
+                    );
+                    context.pop_clip();
+                });
+            }
+        });
+        assert!(prewarmed, "a Graphite render target prewarms");
+        assert_eq!(2, presented.load(std::sync::atomic::Ordering::SeqCst), "a prewarm presents nothing");
+        let compiled = crate::runtime_effects::compilation_count();
+        let shaders = registered.iter().filter(|effect| effect.has_shader()).count() as u64;
+        assert_eq!(9, shaders, "the runtime shaders of the library");
+        assert!(compiled - before >= shaders, "the prewarm compiled {} programs", compiled - before);
+
+        // The frame that shows the library compiles nothing.
+        let pages = pages();
+        let (mut frame, _) = render_target.create_drawing_context(&scene_info);
+        frame.clear(Colors::WHITE);
+        frame.set_transform(Matrix::create_scale(scaling, scaling));
+        for (effect, _) in library(&pages) {
+            draw_with(&mut *frame, &effect, Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)), scene);
+        }
+        frame.dispose();
+        assert_eq!(compiled, crate::runtime_effects::compilation_count(), "the frame compiled a program");
+        for effect in &registered {
+            assert_eq!(0, crate::custom_shader_effects::failure_reports(effect.name()), "{effect}");
+        }
+
+        render_target.dispose();
+        context.dispose();
+        // SAFETY: balances the +1 of `newTextureWithDescriptor:`; Skia no
+        // longer references the texture.
+        unsafe { send(texture, sel(b"release\0")) };
     }
 }

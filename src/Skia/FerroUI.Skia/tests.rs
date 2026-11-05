@@ -3380,3 +3380,263 @@ mod custom_shader_effects {
     }
 }
 
+/// The steady state and the prewarm of the custom effects FerroUI ships
+/// (#455, E9), on the raster backend: every effect of the library (the graph
+/// effects, the runtime shaders, the page transitions with their images and
+/// the interactive effects) drawn in each frame with parameters that change,
+/// and the effects drawn as the prewarm of a composition target draws them
+/// (`ServerCompositionTarget::prewarm_effects`: the value each type registers,
+/// its default, around an image) ahead of the first frame.
+mod custom_effect_steady_state {
+    use super::*;
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, BurningFlameShaderEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect,
+        GrayscaleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, PointerSpotlightShaderEffect,
+        ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
+        SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::media::effects::{CustomEffect, EffectImage, ImmutableCustomEffect};
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+
+    /// The logical size of the targets.
+    const SIZE: i32 = 100;
+
+    /// Opaque red and steel blue squares and a translucent orange band, with
+    /// aliased edges.
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(30.0, 30.0, 20.0, 20.0), &no_shadows());
+        context.draw_rectangle(Some(&solid(steel_blue)), None, rect(52.0, 30.0, 20.0, 20.0), &no_shadows());
+        context.draw_rectangle(Some(&solid(orange)), None, rect(30.0, 52.0, 42.0, 18.0), &no_shadows());
+        context.pop_render_options();
+    }
+
+    /// An image of `SIZE` by `SIZE` premultiplied RGBA pixels made by
+    /// `pixel`: an immutable bitmap of this backend, owned by the handle.
+    fn image(pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = crate::immutable_bitmap::ImmutableBitmap::from_pixels(
+            PixelSize::new(SIZE, SIZE),
+            DPI,
+            SIZE * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .expect("a bitmap");
+        EffectImage::from_impl(Arc::new(bitmap))
+    }
+
+    /// The pages and the pattern of the transitions.
+    struct Pages {
+        from: EffectImage,
+        to: EffectImage,
+        pattern: EffectImage,
+    }
+
+    fn pages() -> Pages {
+        Pages {
+            from: image(|x, y| [(x * 2) as u8, (y * 2) as u8, 200, 255]),
+            to: image(|x, y| [40, (255 - x * 2) as u8, (y * 2) as u8, 255]),
+            pattern: image(|x, y| {
+                let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+                [level, level, level, 255]
+            }),
+        }
+    }
+
+    /// Every effect of the library at a frame `t` (0 to 1) of an animation:
+    /// each parameter that animates moves with `t`.
+    fn library(t: f64, pages: &Pages) -> Vec<ImmutableCustomEffect> {
+        let pressed = (t * 10.0).round() as i32 % 2 == 1;
+        let mut ripple = WaterRippleShaderEffect {
+            pointer_x: 0.3 + 0.4 * t,
+            is_pointer_over: true,
+            is_pressed: pressed,
+            ..WaterRippleShaderEffect::default()
+        };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.2 + 0.3 * t;
+        vec![
+            ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.2 + 0.6 * t }),
+            ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.2 + 0.8 * t }),
+            ImmutableCustomEffect::new(SepiaEffect { amount: 0.1 + 0.9 * t }),
+            ImmutableCustomEffect::new(SaturationEffect { saturation: 0.5 + 1.5 * t }),
+            ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.2 * t, contrast: 0.8 + 0.6 * t }),
+            ImmutableCustomEffect::new(InvertEffect { amount: t }),
+            ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 2.0 + 6.0 * t, intensity: 0.8 }),
+            ImmutableCustomEffect::new(SharpenEffect { strength: 0.2 + 0.8 * t }),
+            ImmutableCustomEffect::new(EdgeDetectEffect { strength: 0.5 + 0.5 * t }),
+            ImmutableCustomEffect::new(PixelateEffect { cell_size: 2.0 + 6.0 * t }),
+            ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.2 + 0.6 * t }),
+            ImmutableCustomEffect::new(SpotlightShaderEffect {
+                center_x: 0.3 + 0.4 * t,
+                strength: 0.8,
+                ..SpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(DissolveTransitionEffect {
+                from_page: pages.from.clone(),
+                to_page: pages.to.clone(),
+                pattern: pages.pattern.clone(),
+                progress: t,
+                center_x: 0.3,
+                center_y: 0.6,
+                ..DissolveTransitionEffect::default()
+            }),
+            ImmutableCustomEffect::new(MaskTransitionEffect {
+                to_page: pages.to.clone(),
+                mask: pages.pattern.clone(),
+                progress: t,
+                softness: 0.2,
+            }),
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.3 + 0.4 * t,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                pointer_x: 0.6 - 0.2 * t,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ripple),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.6 + 0.4 * t,
+                flame_phase: 3.0 * t,
+                is_pressed: pressed,
+                ..BurningFlameShaderEffect::default()
+            }),
+        ]
+    }
+
+    /// The value each type of the library registers for the prewarm: its
+    /// default (`custom_effect_graph.rs`, `custom_effect_shader.rs`).
+    fn registered_values() -> Vec<ImmutableCustomEffect> {
+        fn of<T: CustomEffect>() -> ImmutableCustomEffect {
+            ImmutableCustomEffect::new(T::default())
+        }
+        vec![
+            of::<TintEffect>(),
+            of::<GrayscaleEffect>(),
+            of::<SepiaEffect>(),
+            of::<SaturationEffect>(),
+            of::<BrightnessContrastEffect>(),
+            of::<InvertEffect>(),
+            of::<GlowEffect>(),
+            of::<SharpenEffect>(),
+            of::<EdgeDetectEffect>(),
+            of::<PixelateEffect>(),
+            of::<ScanlineShaderEffect>(),
+            of::<SpotlightShaderEffect>(),
+            of::<DissolveTransitionEffect>(),
+            of::<MaskTransitionEffect>(),
+            of::<PointerSpotlightShaderEffect>(),
+            of::<ReactiveGridShaderEffect>(),
+            of::<WaterRippleShaderEffect>(),
+            of::<BurningFlameShaderEffect>(),
+        ]
+    }
+
+    /// Draws `effect` around `content` over `bounds` as the render walk
+    /// draws it: a graph effect as its graph, any other as an effect of the
+    /// drawing context.
+    fn draw_with(
+        context: &mut dyn IDrawingContextImpl,
+        effect: &ImmutableCustomEffect,
+        bounds: Rect,
+        content: impl FnOnce(&mut dyn IDrawingContextImpl),
+    ) {
+        if effect.has_graph() {
+            assert!(push_custom_effect_graph(context, effect, bounds), "{effect}");
+            content(context);
+            assert!(pop_custom_effect_graph(context, effect, bounds), "{effect}");
+        } else {
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), effect);
+            content(context);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+        }
+    }
+
+    /// A frame of the library at `t`: each effect around the scene over the
+    /// whole target.
+    fn frame(t: f64, pages: &Pages) {
+        let target = Target::new();
+        let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+        target.draw(|context| {
+            for effect in library(t, pages) {
+                draw_with(context, &effect, bounds, scene);
+            }
+        });
+    }
+
+    /// Frames of the whole library that change only parameters compile no
+    /// program and make no Skia image of an image once the first frame did:
+    /// the programs are compiled once per thread and type, the uniforms set
+    /// per frame. No effect of the library fails.
+    #[test]
+    fn frames_of_the_library_compile_no_program_after_the_first() {
+        let pages = pages();
+        frame(0.0, &pages);
+        let compiled = crate::runtime_effects::compilation_count();
+        let images = crate::custom_shader_effects::effect_images_made();
+        for index in 1..8 {
+            frame(f64::from(index) / 7.0, &pages);
+            assert_eq!(compiled, crate::runtime_effects::compilation_count(), "frame {index} compiled a program");
+            assert_eq!(images, crate::custom_shader_effects::effect_images_made(), "frame {index} made an image");
+        }
+        for effect in library(0.0, &pages) {
+            assert_eq!(0, crate::custom_shader_effects::failure_reports(effect.name()), "{effect}");
+        }
+    }
+
+    /// The prewarm of a composition target draws each registered type of the
+    /// library once, at its registered value around an image, into a scene of
+    /// 128 units (`EFFECT_PREWARM_SIZE`) over its middle: that compiles every
+    /// program of the library, so the first frame that shows the library, at
+    /// other values, compiles none. Every program type is compiled by the
+    /// prewarm: at least one program for each runtime shader of the library.
+    #[test]
+    fn the_prewarm_of_the_library_compiles_what_its_first_frame_draws() {
+        let before = crate::runtime_effects::compilation_count();
+        let prewarm = Target::with_size(128, 128);
+        let stand_in = image(|x, y| [(x * 2) as u8, 128, (y * 2) as u8, 255]);
+        let stand_in_bitmap = stand_in.bitmap().expect("the image of the stand-in");
+        let area = Rect::new(32.0, 32.0, 64.0, 64.0);
+        let values = registered_values();
+        prewarm.draw(|context| {
+            for effect in &values {
+                draw_with(context, effect, area, |context| {
+                    context.push_clip(area);
+                    context.draw_bitmap(
+                        &*stand_in_bitmap,
+                        1.0,
+                        Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)),
+                        Rect::new(area.x, area.y, f64::from(SIZE), f64::from(SIZE)),
+                    );
+                    context.pop_clip();
+                });
+            }
+        });
+        let prewarmed = crate::runtime_effects::compilation_count();
+        let shaders = values.iter().filter(|effect| effect.has_shader()).count() as u64;
+        assert_eq!(9, shaders, "the runtime shaders of the library");
+        assert!(prewarmed - before >= shaders, "the prewarm compiled {} programs", prewarmed - before);
+
+        // The first frame of the library compiles nothing.
+        let pages = pages();
+        frame(0.6, &pages);
+        assert_eq!(prewarmed, crate::runtime_effects::compilation_count(), "the first frame compiled a program");
+        for effect in &values {
+            assert_eq!(0, crate::custom_shader_effects::failure_reports(effect.name()), "{effect}");
+        }
+    }
+}

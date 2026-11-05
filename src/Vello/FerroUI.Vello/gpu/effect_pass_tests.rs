@@ -1431,3 +1431,144 @@ fn frames_of_the_interactive_effects_compile_their_pipelines_once() {
     }
 }
 
+// --- the whole library (#455, E9) ----------------------------------------------------------
+
+/// Every effect of the library at a frame `t` (0 to 1) of an animation, the
+/// transitions over the images of `transitions` (made once, so that a frame
+/// changes only their progress): the graph effects (colour matrices, the glow,
+/// the convolutions), the runtime shaders, the page transitions and the
+/// interactive effects, each parameter that animates moving with `t`. The
+/// glow keeps its blur radius (its padding, and so the size of its layer,
+/// follow it) and animates its intensity.
+fn whole_library(t: f64, transitions: &[ImmutableCustomEffect]) -> Vec<ImmutableCustomEffect> {
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+        SepiaEffect, SharpenEffect, TintEffect,
+    };
+    let mut effects = vec![
+        ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.2 + 0.6 * t }),
+        ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.2 + 0.8 * t }),
+        ImmutableCustomEffect::new(SepiaEffect { amount: 0.1 + 0.9 * t }),
+        ImmutableCustomEffect::new(SaturationEffect { saturation: 0.5 + 1.5 * t }),
+        ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.2 * t, contrast: 0.8 + 0.6 * t }),
+        ImmutableCustomEffect::new(InvertEffect { amount: t }),
+        ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.3 + 0.6 * t }),
+        ImmutableCustomEffect::new(SharpenEffect { strength: 0.2 + 0.8 * t }),
+        ImmutableCustomEffect::new(EdgeDetectEffect { strength: 0.5 + 0.5 * t }),
+        ImmutableCustomEffect::new(PixelateEffect { cell_size: 2.0 + 6.0 * t }),
+        ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.2 + 0.6 * t }),
+        ImmutableCustomEffect::new(SpotlightShaderEffect { strength: 0.2 + 0.6 * t, ..SpotlightShaderEffect::default() }),
+    ];
+    for effect in transitions {
+        effects.push(if let Some(dissolve) = effect.downcast_ref::<DissolveTransitionEffect>() {
+            ImmutableCustomEffect::new(DissolveTransitionEffect { progress: t, ..dissolve.clone() })
+        } else if let Some(mask) = effect.downcast_ref::<MaskTransitionEffect>() {
+            ImmutableCustomEffect::new(MaskTransitionEffect { progress: t, ..mask.clone() })
+        } else {
+            effect.clone()
+        });
+    }
+    effects.extend(interactive_shader_effects(t).into_iter().map(|(effect, _)| effect));
+    effects
+}
+
+/// Draws `effect` around the content over the whole target as the render
+/// walk draws it: a graph effect as its graph, any other as an effect of the
+/// drawing context.
+fn draw_library_effect(drawing: &mut DrawingContextImpl, effect: &ImmutableCustomEffect) {
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+    if effect.has_graph() {
+        assert!(push_custom_effect_graph(drawing, effect, full()), "{effect}");
+        content(drawing);
+        assert!(pop_custom_effect_graph(drawing, effect, full()), "{effect}");
+    } else {
+        drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), effect);
+        content(drawing);
+        drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+    }
+}
+
+/// The steady state of the whole library in the hybrid and GPU modes: frames
+/// that draw every effect of the library with parameters that change compile
+/// no pipeline, allocate no texture and upload no image once the first frames
+/// compiled the pipelines, filled the pool and uploaded the images; nothing
+/// is drawn on the processor and no effect fails. Effect graphs and programs
+/// are compiled once, uniforms are written per frame.
+#[test]
+fn frames_of_the_whole_library_compile_and_allocate_nothing_in_the_gpu_modes() {
+    use super::effect_passes::image_uploads;
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let transitions = page_transitions(0.0);
+    for mode in device_modes(&device) {
+        let mut after_first = None;
+        for frame in 0..8 {
+            let effects = whole_library(f64::from(frame) / 7.0, &transitions);
+            let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+            draw_in(&device, mode, |drawing| {
+                for effect in &effects {
+                    draw_library_effect(drawing, effect);
+                }
+            });
+            assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: drawn on the processor");
+            let counts = (shader_pipelines_created(), super::effect_passes::texture_allocations(), image_uploads());
+            if frame == 2 {
+                after_first = Some(counts);
+            } else if let Some(previous) = after_first {
+                assert_eq!(
+                    previous, counts,
+                    "{mode:?}: frame {frame} compiled a pipeline, allocated a texture or uploaded an image"
+                );
+            }
+        }
+    }
+    for effect in whole_library(0.0, &transitions) {
+        assert_eq!(0, shader_failure_reports(effect.name()), "{effect}");
+    }
+}
+
+/// What stands for the prewarm on Vello: its render targets do not prewarm
+/// (gpu-rendering.md, "Pipelines made ahead of their first draw": vello and
+/// vello_hybrid make their own pipelines when their renderers are made), and
+/// the pipeline of a shader effect type is made by the first frame that draws
+/// the type, once per device. The first frame of the library makes one
+/// pipeline per runtime shader of the library, and no frame after it, in
+/// this mode or the other, makes one.
+#[test]
+fn the_first_frame_of_the_library_makes_one_pipeline_per_shader_type() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let transitions = page_transitions(0.0);
+    let shader_types = whole_library(0.0, &transitions)
+        .iter()
+        .filter(|effect| effect.has_shader())
+        .map(|effect| effect.value_type_id())
+        .collect::<std::collections::HashSet<_>>()
+        .len() as u64;
+    assert_eq!(9, shader_types, "the runtime shaders of the library");
+    let before = shader_pipelines_created();
+    for mode in device_modes(&device) {
+        for frame in 0..3 {
+            let effects = whole_library(0.2 + 0.3 * f64::from(frame), &transitions);
+            draw_in(&device, mode, |drawing| {
+                for effect in &effects {
+                    draw_library_effect(drawing, effect);
+                }
+            });
+            // The first frame of the first mode made them all; no frame
+            // after it made one.
+            let made = shader_pipelines_created() - before;
+            assert_eq!(shader_types, made, "{mode:?}: frame {frame}: {made} pipelines made, one per shader type");
+        }
+    }
+}
