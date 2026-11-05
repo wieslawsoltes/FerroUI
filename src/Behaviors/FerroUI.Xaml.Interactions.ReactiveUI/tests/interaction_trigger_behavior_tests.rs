@@ -6,7 +6,7 @@ use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::{BoxedValue, FerroObject, Ref};
 use ferroui_controls::Button;
 use ferroui_reactiveui::Interaction as ReactiveInteraction;
-use ferroui_system::threading::tasks::block_on;
+use ferroui_system::task::block_on;
 use ferroui_xaml_interactivity::Interaction;
 use std::rc::Rc;
 
@@ -34,7 +34,7 @@ fn handle_executes_the_actions_with_the_input_as_the_parameter() {
     Interaction::get_behaviors(&button).add(object(&trigger));
     window.show();
 
-    block_on(interaction.handle("question".to_owned())).expect("the trigger handles the question");
+    block_on(interaction.handle("question".to_owned()).flatten()).expect("the trigger handles the question");
 
     assert_eq!(1, action.execute_count());
     assert_eq!(Some(boxed(&button)), action.sender());
@@ -55,7 +55,7 @@ fn handle_answers_with_the_default_output() {
     Interaction::get_behaviors(&button).add(object(&trigger));
     window.show();
 
-    let output = block_on(interaction.handle(42)).expect("the trigger handles the question");
+    let output = block_on(interaction.handle(42).flatten()).expect("the trigger handles the question");
 
     assert_eq!(0, output);
     assert_eq!(Some(Rc::new(42) as BoxedValue), action.parameter());
@@ -98,7 +98,7 @@ fn detaching_from_the_visual_tree_unregisters_the_handler() {
     Interaction::set_behaviors(&button, None);
 
     assert!(interaction.get_handlers().is_empty());
-    assert!(block_on(interaction.handle(())).is_err());
+    assert!(block_on(interaction.handle(()).flatten()).is_err());
     assert_eq!(0, action.execute_count());
 
     window.close();

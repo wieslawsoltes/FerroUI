@@ -3,7 +3,6 @@
 
 use crate::PanicError;
 use ferroui_reactive::disposables::Disposable;
-use ferroui_system::threading::tasks::Task;
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::Cell;
@@ -167,7 +166,7 @@ impl<T: 'static> Run<T> {
     fn start(self: Rc<Self>, factory: &Rc<dyn Fn(CancellationToken) -> BoxedOutcome<T>>) {
         let outcome = factory(self.linked.clone());
         let run = self;
-        let _ = Task::spawn_local(async move {
+        drop(ferroui_system::task::spawn_local(async move {
             let outcome = outcome.await;
             if !run.emitted.replace(true) {
                 match outcome {
@@ -179,8 +178,7 @@ impl<T: 'static> Run<T> {
                 }
             }
             run.dispose();
-            Ok::<(), ObservableError>(())
-        });
+        }));
     }
 }
 

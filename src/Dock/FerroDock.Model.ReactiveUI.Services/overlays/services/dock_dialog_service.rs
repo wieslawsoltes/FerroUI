@@ -10,7 +10,8 @@ use ferrodock_model::BoxedValue;
 use ferroui_reactiveui::{reactive_object, IReactiveObject, IReactiveObjectExt, ReactiveObject};
 use ferroui_system::collections::object_model::ObservableCollection;
 use ferroui_system::task::Schedule;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
+use ferroui_system::ObservableError;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
@@ -64,7 +65,7 @@ impl DockDialogService {
         &self,
         content: DialogContent,
         title: Option<String>,
-    ) -> Task<Option<BoxedValue>> {
+    ) -> Shared<Result<Option<BoxedValue>, ObservableError>> {
         let service = self.runtime.upgrade().expect("live dialog service");
         spawn_catching(async move {
             let weak = service.runtime.clone();
@@ -92,7 +93,7 @@ impl DockDialogService {
             service
                 .dispatcher
                 .invoke_async(move || {
-                    if item.task().is_completed() {
+                    if item.task().is_finished() {
                         return;
                     }
                     target.requests.add(item.clone());
@@ -100,7 +101,7 @@ impl DockDialogService {
                     target.raise_property_changed("HasDialogs");
                 })
                 .await?;
-            request.task().await
+            request.task().flatten().await
         })
     }
     /// Closes the supplied request on the dispatcher, including foreign/removed requests.
@@ -168,7 +169,7 @@ impl IDockDialogService for DockDialogService {
         &self,
         content: DialogContent,
         title: Option<String>,
-    ) -> Task<Option<BoxedValue>> {
+    ) -> Shared<Result<Option<BoxedValue>, ObservableError>> {
         self.show_async_boxed(content, title)
     }
     fn close(&self, request: Rc<DialogRequest>, result: Option<BoxedValue>) {

@@ -10,6 +10,11 @@
 //!
 //! A child module of `dispatcher_tests`, whose simulated platform implementation, helpers and
 //! services it uses.
+//!
+//! The tasks and completion sources of `threading::tasks` that these tests drive are deprecated
+//! since 0.5.0 (step A7) and keep their behaviour: the tests stay on them, so that what they pin
+//! (the rule of F3 for the tasks of `ferroui-system`, G9) is unchanged.
+#![allow(deprecated)]
 
 use super::*;
 use ferroui_system::task::{current_schedule, is_current_schedule, thread_schedule};
@@ -36,7 +41,7 @@ impl Log {
 
 /// Spawns a task of `ferroui-system` that awaits `awaited` and logs `name`, the value and the
 /// priority it resumed at.
-fn log_resumption(log: &Log, name: &'static str, awaited: Task<i32>) -> Task<()> {
+fn log_resumption(log: &Log, name: &'static str, awaited: impl std::future::Future<Output = Result<i32, ObservableError>> + 'static) -> Task<()> {
     let log = log.clone();
     spawn_system_task(async move {
         let value = awaited.await?;
@@ -153,7 +158,8 @@ fn a_system_task_woken_from_another_thread_resumes_in_a_dispatcher_job_without_r
         run(move || {
             let _ = gate_outside.recv();
             Ok(1)
-        }),
+        })
+        .flatten(),
     );
     // Spawned in a Background job: the wake is a job at Background.
     let inside = Rc::new(RefCell::new(None));
@@ -164,7 +170,8 @@ fn a_system_task_woken_from_another_thread_resumes_in_a_dispatcher_job_without_r
                 let work = run(move || {
                     let _ = gate_inside.recv();
                     Ok(2)
-                });
+                })
+                .flatten();
                 *slot.borrow_mut() = Some(log_resumption(&l, "spawned at Background", work));
             },
             DispatcherPriority::BACKGROUND,

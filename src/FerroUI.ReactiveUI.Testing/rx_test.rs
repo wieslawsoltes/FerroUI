@@ -3,7 +3,8 @@
 use ferroui_reactive::linq::TimeoutError;
 use ferroui_reactiveui::PanicError;
 use ferroui_splat::AppBuilder;
-use ferroui_system::threading::tasks::{run, Task, TaskCompletionSource};
+use ferroui_system::task::{Shared, SharedSender};
+use ferroui_system::threading::tasks::run;
 use ferroui_system::ObservableError;
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -21,7 +22,8 @@ const DEFAULT_MAX_WAIT_MS: u64 = 60_000;
 #[derive(Default)]
 struct TestGate {
     held: Cell<bool>,
-    waiters: RefCell<VecDeque<TaskCompletionSource<()>>>,
+    /// Each waiting test: the turn it waits for, and what gives it.
+    waiters: RefCell<VecDeque<(Shared<()>, SharedSender<()>)>>,
 }
 
 ferroui_system::ferro_thread_local! {
@@ -41,14 +43,21 @@ impl TestGate {
             self.held.set(true);
             return true;
         }
-        let turn = TaskCompletionSource::<()>::new();
-        let granted = turn.task();
-        self.waiters.borrow_mut().push_back(turn);
+        let (turn, granted) = Shared::<()>::channel();
+        self.waiters.borrow_mut().push_back((granted.clone(), turn));
         match first_of(granted.clone(), delay(max_wait)).await {
             First::Left(_) => true,
             First::Right(_) => {
-                self.waiters.borrow_mut().retain(|waiter| waiter.task().id() != granted.id());
-                granted.is_completed()
+                let removed: VecDeque<_> = {
+                    let mut waiters = self.waiters.borrow_mut();
+                    let (kept, removed): (VecDeque<_>, VecDeque<_>) =
+                        std::mem::take(&mut *waiters).into_iter().partition(|(waiter, _)| !Shared::ptr_eq(waiter, &granted));
+                    *waiters = kept;
+                    removed
+                };
+                // Dropped outside of the borrow.
+                drop(removed);
+                granted.is_finished()
             }
         }
     }
@@ -57,7 +66,7 @@ impl TestGate {
     fn release(&self) {
         let next = self.waiters.borrow_mut().pop_front();
         match next {
-            Some(next) => next.set_result(()),
+            Some((_, next)) => next.send(()),
             None => self.held.set(false),
         }
     }
@@ -70,10 +79,7 @@ enum First<A, B> {
 }
 
 /// The first of two tasks to end, `left` when both have (`Task.WhenAny`).
-async fn first_of<A: Clone + 'static, B: Clone + 'static>(
-    mut left: Task<A>,
-    mut right: Task<B>,
-) -> First<Result<A, ObservableError>, Result<B, ObservableError>> {
+async fn first_of<A: Future + Unpin, B: Future + Unpin>(mut left: A, mut right: B) -> First<A::Output, B::Output> {
     poll_fn(move |context| {
         if let Poll::Ready(outcome) = Pin::new(&mut left).poll(context) {
             return Poll::Ready(First::Left(outcome));
@@ -90,11 +96,12 @@ async fn first_of<A: Clone + 'static, B: Clone + 'static>(
 ///
 /// Deviation (DEVIATIONS.md, ReactiveUI): `ferroui-system` has no timer of tasks; the time passes on
 /// a worker thread ([`run`]), and the task ends on the current thread.
-fn delay(duration: Duration) -> Task<()> {
+fn delay(duration: Duration) -> ferroui_system::task::Flatten<()> {
     run(move || {
         std::thread::sleep(duration);
         Ok(())
     })
+    .flatten()
 }
 
 /// Runs a test of the application builder of Splat from a clean builder state, one test at a time
@@ -108,13 +115,16 @@ pub struct RxTest;
 impl RxTest {
     /// [`app_builder_test_async_with`](Self::app_builder_test_async_with) with the default time
     /// limit of 60 seconds (`AppBuilderTestAsync(Func<Task>)`).
-    pub fn app_builder_test_async(test_body: impl FnOnce() -> Task<()> + 'static) -> Task<()> {
+    pub fn app_builder_test_async<Fut: Future<Output = Result<(), ObservableError>> + 'static>(
+        test_body: impl FnOnce() -> Fut + 'static,
+    ) -> Shared<Result<(), ObservableError>> {
         Self::app_builder_test_async_with(test_body, DEFAULT_MAX_WAIT_MS)
     }
 
     /// Runs `test_body` once no other test of the application builder runs, with the state of the
-    /// application builder reset before and after it, and gives a task that ends as the test does
-    /// (`AppBuilderTestAsync(Func<Task>, int)`).
+    /// application builder reset before and after it, and gives a task that ends as the test does,
+    /// the [`Shared`] of its result (`AppBuilderTestAsync(Func<Task>, int)`). The test body gives a
+    /// future of a `Result<(), ObservableError>`, which runs as a task of the thread.
     ///
     /// The task ends with a [`TimeoutError`] when the gate is not free within `max_wait_ms`
     /// milliseconds, or when the test runs longer than that; with the error of the test when it
@@ -122,9 +132,12 @@ impl RxTest {
     /// exception thrown in an `async` method faults its task.
     ///
     /// Not ported: the `ArgumentException` of a null test body - argument validation.
-    pub fn app_builder_test_async_with(test_body: impl FnOnce() -> Task<()> + 'static, max_wait_ms: u64) -> Task<()> {
+    pub fn app_builder_test_async_with<Fut: Future<Output = Result<(), ObservableError>> + 'static>(
+        test_body: impl FnOnce() -> Fut + 'static,
+        max_wait_ms: u64,
+    ) -> Shared<Result<(), ObservableError>> {
         let max_wait = Duration::from_millis(max_wait_ms);
-        Task::spawn_local(async move {
+        ferroui_system::task::spawn_local(async move {
             // Takes the gate, with a time limit so that a test that never ends cannot block the
             // others forever.
             let gate = TestGate::current();
@@ -138,10 +151,10 @@ impl RxTest {
             // Runs the test with a time limit, so that it cannot hang forever, and passes on its
             // error.
             let test_task = match PanicError::catch(test_body) {
-                Ok(task) => task,
-                Err((error, _payload)) => Task::from_exception(error),
+                Ok(future) => ferroui_system::task::spawn_local(future).shared(),
+                Err((error, _payload)) => Shared::ready(Err(error)),
             };
-            let outcome = match first_of(test_task, delay(max_wait)).await {
+            let outcome = match first_of(test_task.flatten(), delay(max_wait)).await {
                 First::Left(outcome) => outcome,
                 First::Right(_) => Err(Rc::new(TimeoutError) as ObservableError),
             };
@@ -151,5 +164,6 @@ impl RxTest {
             gate.release();
             outcome
         })
+        .shared()
     }
 }

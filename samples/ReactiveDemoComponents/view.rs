@@ -79,7 +79,7 @@ async fn search_crates(service: Rc<dyn ICrateSearchService>, term: String) -> Re
     }
     sleep(THROTTLE).await;
     // The task of the service is a future; it ends on this thread.
-    service.search(&term, CancellationToken::none()).await.map_err(|error| error.to_string())
+    service.search(&term, CancellationToken::none()).flatten().await.map_err(|error| error.to_string())
 }
 
 /// The application: a router whose routes are the search (`/`) and the page of a crate

@@ -43,7 +43,10 @@
 //!
 //! [`Shared`] (from [`JoinHandle::shared`]) is the outcome of a task for several observers, with
 //! synchronous continuations ([`Shared::on_finished`]) that run before the awaiting futures are
-//! woken.
+//! woken. [`Shared::channel`] makes one that code ends by hand ([`SharedSender`]): the
+//! `TaskCompletionSource<T>` and `Task<T>` of the reactive libraries, whose asynchronous forms give a
+//! `Shared<Result<T, ObservableError>>` ([`Shared::flatten`] is a future of that result,
+//! [`Flatten`]).
 //!
 //! [`oneshot`] is a value sent once to the code that awaits it (the port of
 //! `TaskCompletionSource`), from any thread; a sender dropped without sending ends the receiver
@@ -63,4 +66,4 @@ pub use executor::{
 };
 pub use join::{AbortHandle, Id, JoinError, JoinHandle};
 pub use schedule::{FirstPoll, Schedule};
-pub use shared::Shared;
+pub use shared::{Flatten, OnFinishedId, Shared, SharedSender};

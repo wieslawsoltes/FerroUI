@@ -9,7 +9,7 @@
 
 use crate::utilities::{ObservableExtensions, ValueRecordingObserver};
 use ferroui_dynamic_data::{IAsyncDisposable, ItemDisposal};
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
+use ferroui_system::task::{Shared, SharedSender};
 use ferroui_system::{IDisposable, IObservable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::fmt;
@@ -39,20 +39,25 @@ pub(crate) struct ItemBase {
     has_been_disposed: Cell<bool>,
     /// `_disposeError` of `DisposableItem` and `ImmediateAsyncDisposableItem`.
     dispose_error: RefCell<Option<ObservableError>>,
-    /// `_disposeCompletionSource` of `AsyncDisposableItem`.
-    dispose_completion_source: TaskCompletionSource<()>,
+    /// `_disposeCompletionSource` of `AsyncDisposableItem`: the sender of its task, taken when it
+    /// ends the task.
+    dispose_completion_source: RefCell<Option<SharedSender<Result<(), ObservableError>>>>,
+    /// The task of `_disposeCompletionSource`.
+    dispose_completion_task: Shared<Result<(), ObservableError>>,
 }
 
 impl ItemBase {
     /// `ItemBase.Create(ItemType, int id, int version)`.
     pub(crate) fn create(item_type: ItemType, id: i32, version: i32) -> Rc<Self> {
+        let (dispose_completion_source, dispose_completion_task) = Shared::channel();
         Rc::new(Self {
             id,
             version,
             item_type,
             has_been_disposed: Cell::new(false),
             dispose_error: RefCell::new(None),
-            dispose_completion_source: TaskCompletionSource::new(),
+            dispose_completion_source: RefCell::new(Some(dispose_completion_source)),
+            dispose_completion_task,
         })
     }
 
@@ -85,8 +90,18 @@ impl ItemBase {
     /// `CompleteDisposal`: ends the disposal task of an `AsyncDisposableItem`.
     pub(crate) fn complete_disposal(&self) {
         if self.item_type == ItemType::AsyncDisposable {
-            self.dispose_completion_source.set_result(());
+            self.end_disposal(Ok(()));
         }
+    }
+
+    /// `_disposeCompletionSource.SetResult` and `SetException`.
+    ///
+    /// # Panics
+    /// When the task has ended (`InvalidOperationException`).
+    fn end_disposal(&self, outcome: Result<(), ObservableError>) {
+        // Taken out of the cell before it sends: the continuations of the task may reach the item.
+        let source = self.dispose_completion_source.borrow_mut().take();
+        source.expect("An attempt was made to transition a task to a final state when it had already completed.").send(outcome);
     }
 
     /// `FailDisposal`: the error of the disposal.
@@ -94,7 +109,7 @@ impl ItemBase {
         match self.item_type {
             ItemType::Plain => {}
             ItemType::Disposable | ItemType::ImmediateAsyncDisposable => *self.dispose_error.borrow_mut() = Some(error),
-            ItemType::AsyncDisposable => self.dispose_completion_source.set_exception(error),
+            ItemType::AsyncDisposable => self.end_disposal(Err(error)),
         }
     }
 
@@ -127,14 +142,17 @@ impl IDisposable for ItemBase {
 impl IAsyncDisposable for ItemBase {
     /// `AsyncDisposableItem.DisposeAsync` (the task of the completion source) and
     /// `ImmediateAsyncDisposableItem.DisposeAsync` (a task that has ended, or failed).
-    fn dispose_async(&self) -> Task<()> {
+    fn dispose_async(&self) -> Shared<Result<(), ObservableError>> {
         self.has_been_disposed.set(true);
         match self.item_type {
-            ItemType::AsyncDisposable => self.dispose_completion_source.task(),
-            _ => match self.dispose_error.borrow().clone() {
-                Some(error) => Task::from_exception(error),
-                None => Task::from_result(()),
-            },
+            ItemType::AsyncDisposable => self.dispose_completion_task.clone(),
+            _ => {
+                let error = self.dispose_error.borrow().clone();
+                match error {
+                    Some(error) => Shared::ready(Err(error)),
+                    None => Shared::ready(Ok(())),
+                }
+            }
         }
     }
 }

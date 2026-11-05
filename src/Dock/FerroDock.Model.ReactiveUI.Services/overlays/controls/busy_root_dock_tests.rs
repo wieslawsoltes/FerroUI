@@ -1,15 +1,15 @@
 use super::*;
 use crate::overlays::hosting::hosting_test_support::{Overlays, Screen};
-use crate::test_environment::Environment;
+use crate::test_environment::{Environment, TaskState};
 use ferrodock_model_reactiveui::controls::Document;
 use ferroui_reactive::ObservableExt;
-use ferroui_system::threading::tasks::{TaskCompletionSource, TaskWorkError};
+use ferroui_system::threading::tasks::TaskWorkError;
 use std::cell::RefCell;
 
 struct ReloadRoot {
     base: RoutableRootDock,
     calls: Cell<usize>,
-    work: RefCell<Task<()>>,
+    work: RefCell<Shared<Result<(), ObservableError>>>,
 }
 reactive_object!(ReloadRoot, base);
 impl DockableBaseImpl for ReloadRoot {}
@@ -27,7 +27,7 @@ impl ReloadRoot {
         let root = Rc::new_cyclic(|weak| Self {
             base: RoutableRootDock::construct(weak, host, None),
             calls: Cell::new(0),
-            work: RefCell::new(Task::from_result(())),
+            work: RefCell::new(Shared::ready(Ok(()))),
         });
         root.base.initialize(&root);
         root
@@ -51,7 +51,7 @@ impl IRoutableViewModel for ReloadRoot {
     }
 }
 impl IReloadable for ReloadRoot {
-    fn reload_async(&self) -> Task<()> {
+    fn reload_async(&self) -> Shared<Result<(), ObservableError>> {
         self.calls.set(self.calls.get() + 1);
         self.work.borrow().clone()
     }
@@ -144,19 +144,19 @@ fn reload_retains_pending_task_and_propagates_original_failure() {
     let reload = ReloadRoot::new(host);
     reload.register(&root.types);
     root.set_active_dockable(Some(reload.clone()));
-    let pending = TaskCompletionSource::new();
-    reload.work.replace(pending.task());
+    let (pending, work) = Shared::<Result<(), ObservableError>>::channel();
+    reload.work.replace(work);
     let task = root.reload_current_async();
     assert!(!task.is_completed());
     assert_eq!(reload.calls.get(), 1);
-    pending.set_result(());
+    pending.send(Ok(()));
     assert!(task.is_completed_successfully());
     let failure: Rc<dyn std::error::Error> = Rc::new(TaskWorkError {
         message: "reload failed".into(),
     });
-    reload.work.replace(Task::from_exception(failure.clone()));
+    reload.work.replace(Shared::ready(Err(failure.clone())));
     let failed = root.reload_current_async();
-    assert!(Rc::ptr_eq(&failed.result().unwrap_err(), &failure));
+    assert!(Rc::ptr_eq(&failed.result().unwrap().unwrap_err(), &failure));
 }
 #[test]
 fn actual_busy_command_reloads_and_dispose_clears_it_before_cancelling_pending_overlays_once() {
@@ -195,8 +195,8 @@ fn actual_busy_command_reloads_and_dispose_clears_it_before_cancelling_pending_o
     );
     assert_eq!(overlays.dialogs.calls.get(), 1);
     assert_eq!(overlays.confirmations.calls.get(), 1);
-    assert!(dialog.result().unwrap().is_none());
-    assert!(!confirmation.result().unwrap());
+    assert!(dialog.result().unwrap().unwrap().is_none());
+    assert!(!confirmation.result().unwrap().unwrap());
     assert!(!root.busy().can_reload());
     assert!(!root.busy().reload_command().can_execute(None));
 }

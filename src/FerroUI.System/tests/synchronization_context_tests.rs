@@ -201,14 +201,14 @@ fn a_wake_from_another_thread_is_posted_to_the_context() {
             wait.recv().ok();
             Ok(5)
         });
-        assert!(!task.is_completed());
+        assert!(!task.is_finished());
 
         go.send(()).unwrap();
         // The work of the worker wakes the task from its thread: the wake is posted to the
         // context, and runs the task here when the context runs it.
         context.run_next();
-        assert!(task.is_completed());
-        assert_eq!(task.result().unwrap(), 5);
+        assert!(task.is_finished());
+        assert_eq!(task.result().unwrap().unwrap(), 5);
 
         set_synchronization_context(None);
     });

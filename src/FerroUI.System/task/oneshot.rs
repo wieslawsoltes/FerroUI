@@ -16,7 +16,10 @@
 //!
 //! In terms of the `TaskCompletionSource` of .NET: `SetResult` is `send(value)`, `SetException`
 //! is `send(Err(error))` on a channel of a `Result`, `SetCanceled` is dropping the sender, and the
-//! `TrySet` forms are `send`, which gives the value back when the receiver is gone.
+//! `TrySet` forms are `send`, which gives the value back when the receiver is gone. The `flatten`
+//! of a receiver of a `Result<T, ObservableError>` is a future of that result, with a dropped
+//! sender as the error [`Canceled`]: the `Task` of the source, as the asynchronous forms of the
+//! reactive libraries take it.
 
 pub use super::Canceled;
 use std::fmt;
@@ -238,6 +241,14 @@ impl<T> Receiver<T> {
     }
 }
 
+impl<T> Receiver<Result<T, crate::ObservableError>> {
+    /// A future of the result that the channel carries: what was sent, or the error [`Canceled`]
+    /// when the sender was dropped without sending (`SetCanceled`).
+    pub fn flatten(self) -> impl Future<Output = Result<T, crate::ObservableError>> {
+        async move { self.await.unwrap_or_else(|canceled| Err(std::rc::Rc::new(canceled) as crate::ObservableError)) }
+    }
+}
+
 impl<T> Future for Receiver<T> {
     type Output = Result<T, Canceled>;
 
@@ -312,6 +323,14 @@ impl<T> SharedReceiver<T> {
     /// poll is ready.
     pub fn is_finished(&self) -> bool {
         self.inner.lock().complete
+    }
+}
+
+impl<T: Clone> SharedReceiver<Result<T, crate::ObservableError>> {
+    /// A future of the result that the channel carries, for this waiter: what was sent, or the
+    /// error [`Canceled`] when the sender was dropped without sending (`SetCanceled`).
+    pub fn flatten(self) -> impl Future<Output = Result<T, crate::ObservableError>> {
+        async move { self.await.unwrap_or_else(|canceled| Err(std::rc::Rc::new(canceled) as crate::ObservableError)) }
     }
 }
 

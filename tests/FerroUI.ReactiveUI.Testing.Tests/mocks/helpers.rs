@@ -1,7 +1,8 @@
 //! The helpers of the tests in place of the base class library: the `InvalidOperationException`
 //! the tests throw, `Task.Delay` and `Task.Yield`. Not an upstream file.
 
-use ferroui_system::threading::tasks::{run, Task};
+use ferroui_system::task::Flatten;
+use ferroui_system::threading::tasks::run;
 use ferroui_system::ObservableError;
 use std::error::Error;
 use std::fmt;
@@ -40,11 +41,20 @@ pub fn is_invalid_operation(error: &ObservableError) -> bool {
 
 /// A task that ends after `duration` (`Task.Delay`): the time passes on a worker thread, and the
 /// task ends on the current thread.
-pub fn delay(duration: Duration) -> Task<()> {
+pub fn delay(duration: Duration) -> Flatten<()> {
     run(move || {
         std::thread::sleep(duration);
         Ok(())
     })
+    .flatten()
+}
+
+/// The future of a test body that has ended (`Task.CompletedTask`).
+pub type Done = std::future::Ready<Result<(), ObservableError>>;
+
+/// A test body that has ended (`Task.CompletedTask`, `Task.FromResult`).
+pub fn done() -> Done {
+    std::future::ready(Ok(()))
 }
 
 /// A future that is pending once and wakes itself (`Task.Yield()`).

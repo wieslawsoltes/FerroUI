@@ -3,7 +3,8 @@
 use super::ConfirmationRequest;
 use crate::collections::ReadOnlyObservableCollection;
 use ferroui_system::component_model::INotifyPropertyChanged;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
+use ferroui_system::ObservableError;
 use std::rc::Rc;
 /// Source per-host confirmation service contract.
 pub trait IDockConfirmationService: INotifyPropertyChanged {
@@ -20,9 +21,9 @@ pub trait IDockConfirmationService: INotifyPropertyChanged {
         message: String,
         confirm_text: String,
         cancel_text: String,
-    ) -> Task<bool>;
+    ) -> Shared<Result<bool, ObservableError>>;
     /// Shows a confirmation using source Confirm/Cancel default labels.
-    fn confirm_async_default(&self, title: String, message: String) -> Task<bool> {
+    fn confirm_async_default(&self, title: String, message: String) -> Shared<Result<bool, ObservableError>> {
         self.confirm_async(title, message, "Confirm".into(), "Cancel".into())
     }
     /// Closes a request, including a request no longer present in this service.

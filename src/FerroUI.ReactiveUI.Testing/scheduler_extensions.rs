@@ -4,8 +4,9 @@ use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive_testing::TestScheduler;
 use ferroui_reactiveui::{PanicError, RxSchedulers};
-use ferroui_system::threading::tasks::Task;
-use ferroui_system::IDisposable;
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
+use std::future::Future;
 use std::rc::Rc;
 
 /// Restores the schedulers of [`RxSchedulers`] when it is dropped: the `using` block of upstream's
@@ -57,25 +58,31 @@ pub trait SchedulerExtensions {
 
     /// Runs `block` with the scheduler as both schedulers of [`RxSchedulers`] until the task it
     /// returns ends, and gives the outcome of that task (`WithAsync<TRet>(Func<T, Task<TRet>>)`,
-    /// and `WithAsync(Func<T, Task>)` with a `Task<()>`).
+    /// and `WithAsync(Func<T, Task>)` with `R = ()`): the block gives a future of a
+    /// `Result<R, ObservableError>`, which runs as a task of the thread, and the task is the
+    /// [`Shared`] of its result.
     ///
     /// A panic of `block` ends the returned task with the error of the panic
     /// ([`PanicError`]), as an exception thrown in an `async` method faults its task; the
     /// schedulers are restored in every case.
-    fn with_async<R: Clone + 'static>(&self, block: impl FnOnce(&Self) -> Task<R>) -> Task<R> {
+    fn with_async<R: Clone + 'static, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        block: impl FnOnce(&Self) -> Fut,
+    ) -> Shared<Result<R, ObservableError>> {
         let restore = self.with_scheduler();
         let task = match PanicError::catch(|| block(self)) {
             Ok(task) => task,
             Err((error, _payload)) => {
                 restore.dispose();
-                return Task::from_exception(error);
+                return Shared::ready(Err(error));
             }
         };
-        Task::spawn_local(async move {
+        ferroui_system::task::spawn_local(async move {
             let outcome = task.await;
             restore.dispose();
             outcome
         })
+        .shared()
     }
 }
 

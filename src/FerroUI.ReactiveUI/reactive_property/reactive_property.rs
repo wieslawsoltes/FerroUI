@@ -16,11 +16,12 @@ use ferroui_system::component_model::{
     DataErrorsChangedEventArgs, INotifyDataErrorInfo, INotifyPropertyChanged, INotifyPropertyChanging,
 };
 use ferroui_system::events::Event;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::{JoinError, Shared};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::any::Any;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::fmt;
+use std::future::Future;
 use std::rc::{Rc, Weak};
 
 /// The validation errors of a reactive property, as `GetErrors` and `ObserveErrorChanged` give
@@ -375,9 +376,11 @@ impl<T: Clone + PartialEq + 'static> ReactiveProperty<T> {
 
     /// Adds an asynchronous validator of each value (`AddValidationError(Func<T, Task<IEnumerable?>>)`
     /// and `AddValidationError(Func<T, Task<string?>>)`); the current value is validated at once.
-    pub fn add_validation_error_async<R: IntoValidationErrors + Clone + 'static>(
+    /// The validator gives a future of a `Result<R, ObservableError>`, which runs as a task of the
+    /// thread (`ferroui_system::task::spawn_local`).
+    pub fn add_validation_error_async<R: IntoValidationErrors + Clone + 'static, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
         &self,
-        validator: impl Fn(T) -> Task<R> + 'static,
+        validator: impl Fn(T) -> Fut + 'static,
     ) -> Self {
         self.add_validation_error_async_with(validator, false)
     }
@@ -387,12 +390,13 @@ impl<T: Clone + PartialEq + 'static> ReactiveProperty<T> {
     /// `AddValidationError(Func<T, Task<string?>>, bool)`). The results of the tasks are reported
     /// as they come; a task that fails, or a validator that panics, ends the validation of the
     /// property, as its error goes to the validation pipeline.
-    pub fn add_validation_error_async_with<R: IntoValidationErrors + Clone + 'static>(
+    pub fn add_validation_error_async_with<R: IntoValidationErrors + Clone + 'static, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
         &self,
-        validator: impl Fn(T) -> Task<R> + 'static,
+        validator: impl Fn(T) -> Fut + 'static,
         ignore_initial_error: bool,
     ) -> Self {
-        let validator: Rc<dyn Fn(T) -> Task<R>> = Rc::new(validator);
+        let validator: Rc<dyn Fn(T) -> Shared<Result<R, ObservableError>>> =
+            Rc::new(move |value: T| ferroui_system::task::spawn_local(validator(value)).shared());
         self.add_validation_error_observable_with(
             move |values: Rc<dyn IObservable<T>>| -> Rc<dyn IObservable<R>> {
                 Rc::new(AsyncProjectObservable { source: values, selector: validator.clone() })
@@ -829,7 +833,7 @@ impl IObserver<Option<ValidationErrors>> for ValidationElement {
 /// forwards the results of the tasks as they complete.
 struct AsyncProjectObservable<TIn, TOut> {
     source: Rc<dyn IObservable<TIn>>,
-    selector: Rc<dyn Fn(TIn) -> Task<TOut>>,
+    selector: Rc<dyn Fn(TIn) -> Shared<Result<TOut, ObservableError>>>,
 }
 
 impl<TIn: 'static, TOut: Clone + 'static> IObservable<TOut> for AsyncProjectObservable<TIn, TOut> {
@@ -853,7 +857,7 @@ impl<TIn: 'static, TOut: Clone + 'static> IObservable<TOut> for AsyncProjectObse
 /// `AsyncProjectObservable.Sink`.
 struct AsyncProjectSink<TIn, TOut> {
     downstream: Rc<dyn IObserver<TOut>>,
-    selector: Rc<dyn Fn(TIn) -> Task<TOut>>,
+    selector: Rc<dyn Fn(TIn) -> Shared<Result<TOut, ObservableError>>>,
     /// `_sourceSubscription`.
     source_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     /// `_active`: the tasks running, plus one while the source runs.
@@ -865,8 +869,12 @@ struct AsyncProjectSink<TIn, TOut> {
 
 impl<TIn: 'static, TOut: Clone + 'static> AsyncProjectSink<TIn, TOut> {
     /// `ForwardAsync`: the result of the task, or its error.
-    fn forward(&self, task: &Task<TOut>) {
-        match task.result() {
+    fn forward(&self, outcome: &Result<Result<TOut, ObservableError>, JoinError>) {
+        let result = match outcome {
+            Ok(result) => result.clone(),
+            Err(error) => Err(error.to_observable_error()),
+        };
+        match result {
             Ok(result) => {
                 if self.stopped.get() {
                     return;
@@ -914,7 +922,7 @@ impl<TIn: 'static, TOut: Clone + 'static> IObserver<TIn> for AsyncProjectSink<TI
 
         self.active.set(self.active.get() + 1);
         let Some(this) = self.this.borrow().upgrade() else { return };
-        let _ = task.continue_with(move |completed: &Task<TOut>| this.forward(completed));
+        let _ = task.on_finished(move |outcome| this.forward(outcome));
     }
 
     fn on_error(&self, error: ObservableError) {
