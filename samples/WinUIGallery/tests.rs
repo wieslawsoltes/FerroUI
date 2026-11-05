@@ -36,12 +36,46 @@ pub(crate) fn start() -> ferroui_controls::testing::UnitTestApplicationScope {
 pub(crate) fn start_winui() -> ferroui_controls::testing::UnitTestApplicationScope {
     ferroui_markup_xaml::register_types();
     ferroui_themes_winui::register_types();
-    let services =
-        TestServices::styled_window().with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style());
+    let services = TestServices::styled_window()
+        .with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style())
+        .with_global_clock(std::rc::Rc::new(IdleClock::default()));
     let scope = UnitTestApplication::start(services);
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
     scope
 }
+
+/// The clock of the transitions of the WinUI theme in the tests: it never pulses, as the clock of
+/// the theme's own test host, so a transition stays at its start until a test moves it.
+#[cfg(feature = "theme")]
+#[derive(Default)]
+struct IdleClock {
+    ticks: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
+    state: std::cell::Cell<ferroui_base::animation::PlayState>,
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for IdleClock {
+    fn subscribe(
+        &self,
+        observer: std::rc::Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
+    ) -> std::rc::Rc<dyn ferroui_base::reactive::IDisposable> {
+        self.ticks.subscribe(observer)
+    }
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::animation::IClock for IdleClock {
+    fn play_state(&self) -> ferroui_base::animation::PlayState {
+        self.state.get()
+    }
+
+    fn set_play_state(&self, value: ferroui_base::animation::PlayState) {
+        self.state.set(value);
+    }
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::animation::IGlobalClock for IdleClock {}
 
 /// Raises a key event of `key` on `element`, as the keyboard does: `KeyDown`, or `KeyUp` with
 /// `up` (the NumberBox commits its text on the key-up of Enter, as WinUI's does).
