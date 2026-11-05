@@ -145,6 +145,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             // Not from upstream: the pages of the port of the inking controls of WinUI.
             s.add("/Pages/InkCanvasPage.xaml", "InkCanvas", Icons::CANVAS, "Pressure-sensitive ink from pen, mouse and touch");
             s.add("/Pages/InkToolbarPage.xaml", "InkToolbar", Icons::BRUSH, "Pens, eraser and stencil guides for an InkCanvas");
+            // Not from upstream: PersonPicture of WinUI (docs/porting/winui-controls.md, G2).
+            s.add("/Pages/PersonPicturePage.xaml", "PersonPicture", Icons::PERSON, "A person or a group: picture, initials and badges");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
             s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
             s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");

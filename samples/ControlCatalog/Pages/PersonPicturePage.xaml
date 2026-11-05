@@ -1,0 +1,37 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="PersonPicture"
+             x:Class="ControlCatalog.Pages.PersonPicturePage">
+  <!-- Not from upstream: WinUI's PersonPicture (docs/porting/winui-controls.md, G2). Its template is
+       in the WinUI theme and the macOS and Material themes derived from it; the placeholder glyphs
+       are E77B (a contact) and E716 (a group) of the symbol font. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A PersonPicture shows a person or a group: a profile picture, else the initials of a name, else a placeholder glyph, with an optional badge.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Options</TextBlock>
+    <Grid Margin="2" ColumnDefinitions="Auto,200" RowDefinitions="Auto,Auto,Auto,Auto">
+      <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="2">DisplayName:</TextBlock>
+      <TextBox Grid.Row="0" Grid.Column="1" x:Name="Name" Text="Jane Doe" Margin="2" />
+      <TextBlock Grid.Row="1" VerticalAlignment="Center" Margin="2">BadgeNumber:</TextBlock>
+      <NumericUpDown Grid.Row="1" Grid.Column="1" x:Name="Badge" Minimum="0" Maximum="200" Value="3" Increment="1" FormatString="0" Margin="2" />
+      <TextBlock Grid.Row="2" VerticalAlignment="Center" Margin="2">IsGroup:</TextBlock>
+      <CheckBox Grid.Row="2" Grid.Column="1" x:Name="Group" Margin="2" />
+      <TextBlock Grid.Row="3" VerticalAlignment="Center" Margin="2">Size:</TextBlock>
+      <Slider Grid.Row="3" Grid.Column="1" x:Name="Size" Minimum="24" Maximum="160" Value="96" Margin="2" />
+    </Grid>
+    <PersonPicture Margin="2" HorizontalAlignment="Left"
+                   DisplayName="{Binding #Name.Text}"
+                   BadgeNumber="{Binding #Badge.Value}"
+                   IsGroup="{Binding #Group.IsChecked}"
+                   Width="{Binding #Size.Value}"
+                   Height="{Binding #Size.Value}" />
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Initials, glyph badges and placeholders</TextBlock>
+    <StackPanel Margin="2" Orientation="Horizontal" Spacing="16">
+      <PersonPicture Initials="SB" Width="64" Height="64" />
+      <PersonPicture DisplayName="Ada Lovelace (Analytical)" BadgeGlyph="&#xE765;" BadgeText="Skype" Width="64" Height="64" />
+      <PersonPicture Width="64" Height="64" />
+      <PersonPicture IsGroup="True" BadgeNumber="120" Width="64" Height="64" />
+    </StackPanel>
+  </StackPanel>
+</ContentPage>

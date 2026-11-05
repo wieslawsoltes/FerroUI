@@ -241,6 +241,7 @@ document_tests! {
     resources_progress_ring_themeresources => "/Resources/ProgressRing_themeresources.xaml";
     resources_radio_buttons_themeresources => "/Resources/RadioButtons_themeresources.xaml";
     resources_rating_control_themeresources => "/Resources/RatingControl_themeresources.xaml";
+    resources_person_picture_themeresources => "/Resources/PersonPicture_themeresources.xaml";
     resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
     macos_theme => "/MacOSTheme.xaml";
@@ -262,6 +263,7 @@ document_tests! {
     controls_auto_suggest_box => "/Controls/AutoSuggestBox.xaml";
     controls_radio_buttons => "/Controls/RadioButtons.xaml";
     controls_rating_control => "/Controls/RatingControl.xaml";
+    controls_person_picture => "/Controls/PersonPicture.xaml";
     controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_frame => "/Controls/Frame.xaml";
     controls_navigation_view => "/Controls/NavigationView.xaml";

@@ -52,6 +52,7 @@ pub(crate) use time_utils::TimeUtils;
 
 // --- the expressions of WinUI's NumberBox (docs/porting/winui-controls.md) ---
 pub mod number_expression;
+pub(crate) mod initials_generator;
 #[cfg(test)]
 mod number_expression_tests;
 

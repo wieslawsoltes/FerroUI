@@ -62,16 +62,6 @@
       "reason": "GridViewItem: no FerroUI control (no GridView)."
     },
     {
-      "document": "controls/dev/PersonPicture/PersonPicture.xaml",
-      "key": "*",
-      "reason": "PersonPicture: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/PersonPicture/PersonPicture_themeresources.xaml",
-      "key": "*",
-      "reason": "PersonPicture: no FerroUI control."
-    },
-    {
       "document": "controls/dev/MapControl/MapControl.xaml",
       "key": "*",
       "reason": "MapControl: no FerroUI control."

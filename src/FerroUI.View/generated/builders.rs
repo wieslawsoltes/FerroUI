@@ -1076,6 +1076,19 @@ pub fn path_icon() -> El<ferroui_controls::PathIcon> {
     El::new()
 }
 
+pub use ferroui_controls::PersonPicture;
+
+impl ViewClass for ferroui_controls::PersonPicture {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PersonPicture>::new()
+    }
+}
+
+/// Starts an element of [`PersonPicture`](ferroui_controls::PersonPicture).
+pub fn person_picture() -> El<ferroui_controls::PersonPicture> {
+    El::new()
+}
+
 pub use ferroui_controls::PipsPager;
 
 impl ViewClass for ferroui_controls::PipsPager {
@@ -3052,6 +3065,50 @@ pub trait ConicGradientBrushProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::ConicGradientBrush>> ConicGradientBrushProps for El<T> {}
+
+/// The properties and routed events of [`Contact`](ferroui_controls::Contact).
+pub trait ContactProps: ElementBuilder {
+    /// Sets [`Contact::id_property`](ferroui_controls::Contact::id_property).
+    fn id<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::id_property(), value)
+    }
+
+    /// Sets [`Contact::first_name_property`](ferroui_controls::Contact::first_name_property).
+    fn first_name<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::first_name_property(), value)
+    }
+
+    /// Sets [`Contact::last_name_property`](ferroui_controls::Contact::last_name_property).
+    fn last_name<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::last_name_property(), value)
+    }
+
+    /// Sets [`Contact::display_name_override_property`](ferroui_controls::Contact::display_name_override_property).
+    fn display_name_override<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::display_name_override_property(), value)
+    }
+
+    /// Sets [`Contact::small_display_picture_property`](ferroui_controls::Contact::small_display_picture_property).
+    fn small_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::small_display_picture_property(), value)
+    }
+
+    /// Sets [`Contact::large_display_picture_property`](ferroui_controls::Contact::large_display_picture_property).
+    fn large_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::large_display_picture_property(), value)
+    }
+
+    /// Sets [`Contact::source_display_picture_property`](ferroui_controls::Contact::source_display_picture_property).
+    fn source_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::source_display_picture_property(), value)
+    }
+
+    /// Sets [`Contact::thumbnail_property`](ferroui_controls::Contact::thumbnail_property).
+    fn thumbnail<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::thumbnail_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::Contact>> ContactProps for El<T> {}
 
 /// The properties and routed events of [`ContentControl`](ferroui_controls::ContentControl).
 pub trait ContentControlProps: ElementBuilder {
@@ -5886,6 +5943,79 @@ pub trait PenProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::Pen>> PenProps for El<T> {}
+
+/// The properties and routed events of [`PersonPicture`](ferroui_controls::PersonPicture).
+pub trait PersonPictureProps: ElementBuilder {
+    /// Sets [`PersonPicture::badge_number_property`](ferroui_controls::PersonPicture::badge_number_property).
+    fn badge_number<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::badge_number_property(), value)
+    }
+
+    /// Sets [`PersonPicture::badge_glyph_property`](ferroui_controls::PersonPicture::badge_glyph_property).
+    fn badge_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::badge_glyph_property(), value)
+    }
+
+    /// Sets [`PersonPicture::badge_image_source_property`](ferroui_controls::PersonPicture::badge_image_source_property).
+    fn badge_image_source<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::badge_image_source_property(), value)
+    }
+
+    /// Sets [`PersonPicture::badge_text_property`](ferroui_controls::PersonPicture::badge_text_property).
+    fn badge_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::badge_text_property(), value)
+    }
+
+    /// Sets [`PersonPicture::is_group_property`](ferroui_controls::PersonPicture::is_group_property).
+    fn is_group<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::is_group_property(), value)
+    }
+
+    /// Sets [`PersonPicture::contact_property`](ferroui_controls::PersonPicture::contact_property).
+    fn contact<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Contact>>, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::contact_property(), value)
+    }
+
+    /// Sets [`PersonPicture::display_name_property`](ferroui_controls::PersonPicture::display_name_property).
+    fn display_name<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::display_name_property(), value)
+    }
+
+    /// Sets [`PersonPicture::initials_property`](ferroui_controls::PersonPicture::initials_property).
+    fn initials<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::initials_property(), value)
+    }
+
+    /// Sets [`PersonPicture::prefer_small_image_property`](ferroui_controls::PersonPicture::prefer_small_image_property).
+    fn prefer_small_image<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::prefer_small_image_property(), value)
+    }
+
+    /// Sets [`PersonPicture::profile_picture_property`](ferroui_controls::PersonPicture::profile_picture_property).
+    fn profile_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::profile_picture_property(), value)
+    }
+
+    /// Sets [`PersonPicture::template_settings_property`](ferroui_controls::PersonPicture::template_settings_property).
+    fn template_settings<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::PersonPictureTemplateSettings>>, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::template_settings_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::PersonPicture>> PersonPictureProps for El<T> {}
+
+/// The properties and routed events of [`PersonPictureTemplateSettings`](ferroui_controls::primitives::PersonPictureTemplateSettings).
+pub trait PersonPictureTemplateSettingsProps: ElementBuilder {
+    /// Sets [`PersonPictureTemplateSettings::actual_initials_property`](ferroui_controls::primitives::PersonPictureTemplateSettings::actual_initials_property).
+    fn actual_initials<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::PersonPictureTemplateSettings>::actual_initials_property(), value)
+    }
+
+    /// Sets [`PersonPictureTemplateSettings::actual_image_brush_property`](ferroui_controls::primitives::PersonPictureTemplateSettings::actual_image_brush_property).
+    fn actual_image_brush<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::ImageBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::PersonPictureTemplateSettings>::actual_image_brush_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::primitives::PersonPictureTemplateSettings>> PersonPictureTemplateSettingsProps for El<T> {}
 
 /// The properties and routed events of [`PipsPager`](ferroui_controls::PipsPager).
 pub trait PipsPagerProps: ElementBuilder {
