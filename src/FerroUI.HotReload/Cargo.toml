@@ -22,6 +22,8 @@ ferroui-controls.workspace = true
 ferroui-markup-xaml = { workspace = true, features = ["hot-reload"] }
 ferroui-markup-xaml-loader = { workspace = true, features = ["hot-reload"] }
 roxmltree.workspace = true
+# `url::Url`, the URL of a document: the base URI of the loaders and the key of the maps (C5 of #423).
+url.workspace = true
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

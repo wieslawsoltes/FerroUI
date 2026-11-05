@@ -5,7 +5,7 @@ use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::{Color, FontWeight, SolidColorBrush};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::styling::IStyle;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{CornerRadius, Ref, Thickness, WeakRef};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
@@ -198,7 +198,7 @@ impl PropertyColorEditor {
         install_color_popup_palette(&body);
         // Library control themes are scoped to this popup, leaving authored colors and
         // ColorView controls on the artboard under their application's own theme.
-        let uri = Uri::absolute("ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml")
+        let uri = UriRef::parse("ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml")
             .map_err(|error| error.to_string())?;
         let loaded = FerroXamlLoader::load(&uri, None).map_err(|error| error.to_string())?;
         let style = from_markup_value::<Rc<dyn IStyle>>(&Some(loaded))

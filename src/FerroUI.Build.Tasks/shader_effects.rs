@@ -216,8 +216,9 @@ pub fn write_shader_effect_glsl<T: CustomEffect>() -> Result<Option<ShaderEffect
 mod tests {
     use super::*;
     use ferroui_base::media::effects::library::{
-        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
-        TintEffect,
+        BurningFlameShaderEffect, DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect,
+        PointerSpotlightShaderEffect, ReactiveGridShaderEffect, ScanlineShaderEffect, SpotlightShaderEffect, TintEffect,
+        WaterRippleShaderEffect,
     };
     use ferroui_base::media::effects::{
         SHADER_WGSL_CHILDREN_BINDING, SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_PASS_BINDING,
@@ -243,6 +244,11 @@ mod tests {
             ("pixelate", shader_effect_glsl::<PixelateEffect>()),
             ("scanline", shader_effect_glsl::<ScanlineShaderEffect>()),
             ("spotlight", shader_effect_glsl::<SpotlightShaderEffect>()),
+            // The interactive effects (E7).
+            ("pointer-spotlight", shader_effect_glsl::<PointerSpotlightShaderEffect>()),
+            ("reactive-grid", shader_effect_glsl::<ReactiveGridShaderEffect>()),
+            ("water-ripple", shader_effect_glsl::<WaterRippleShaderEffect>()),
+            ("burning-flame", shader_effect_glsl::<BurningFlameShaderEffect>()),
         ] {
             let glsl = glsl.unwrap_or_else(|| panic!("{name}: a shader effect")).unwrap_or_else(|error| panic!("{name}: {error}"));
             assert_glsl_es(&glsl.vertex, false, &format!("{name}, vertex"));

@@ -8,7 +8,7 @@ use ferroui_base::controls::{
 use ferroui_base::metadata::{IServiceProvider, MarkupDelegate};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::ferro_markup_type;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -19,20 +19,20 @@ use std::rc::{Rc, Weak};
 pub struct ResourceInclude {
     this: Weak<ResourceInclude>,
     service_provider: Option<Rc<dyn IServiceProvider>>,
-    base_uri: Option<Uri>,
+    base_uri: Option<url::Url>,
     loaded: RefCell<Option<Rc<dyn IResourceDictionary>>>,
     is_loading: Cell<bool>,
-    source: RefCell<Option<Uri>>,
+    source: RefCell<Option<UriRef>>,
     key: RefCell<Option<ThemeVariant>>,
     #[cfg(feature = "source-overlays")]
     source_snapshot: Option<crate::source_overlay::SourceSnapshot>,
 }
 
 impl ResourceInclude {
-    /// Initializes a new instance: `base_uri` is the URI of the document
+    /// Initializes a new instance: `base_uri` is the URL of the document
     /// that contains the include, which a relative source is resolved
-    /// against.
-    pub fn new(base_uri: Option<Uri>) -> Rc<Self> {
+    /// against ([`UriRef::resolve`]).
+    pub fn new(base_uri: Option<url::Url>) -> Rc<Self> {
         Self::create(None, base_uri)
     }
 
@@ -43,7 +43,7 @@ impl ResourceInclude {
         Self::create(Some(service_provider), base_uri)
     }
 
-    fn create(service_provider: Option<Rc<dyn IServiceProvider>>, base_uri: Option<Uri>) -> Rc<Self> {
+    fn create(service_provider: Option<Rc<dyn IServiceProvider>>, base_uri: Option<url::Url>) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             service_provider,
@@ -102,21 +102,21 @@ impl ResourceInclude {
         Ok(loaded)
     }
 
-    /// The source URL.
-    pub fn source(&self) -> Option<Uri> {
+    /// The source URL: an absolute URL, or a reference relative to the base
+    /// URI of the include.
+    pub fn source(&self) -> Option<UriRef> {
         self.source.borrow().clone()
     }
 
-    pub fn set_source(&self, value: Option<Uri>) {
+    pub fn set_source(&self, value: Option<UriRef>) {
         #[cfg(feature = "source-overlays")]
         if let (Some(snapshot), Some(source)) = (&self.source_snapshot, &value) {
-            let absolute = if source.is_absolute_uri() {
-                Some(source.clone())
-            } else {
-                self.base_uri.as_ref().map(|base| Uri::combine(base, source))
+            let absolute = match &self.base_uri {
+                Some(base) => source.resolve(base).ok(),
+                None => source.as_url().cloned(),
             };
             if let Some(absolute) = absolute {
-                snapshot.record_request(absolute.absolute_uri());
+                snapshot.record_request(absolute.as_str());
             }
         }
         *self.source.borrow_mut() = value;
@@ -155,12 +155,11 @@ impl IResourceProvider for ResourceInclude {
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     fn development_source(&self) -> Option<String> {
         let source = self.source()?;
-        let uri = if source.is_absolute_uri() {
-            source
-        } else {
-            Uri::combine(self.base_uri.as_ref()?, &source)
+        let uri = match source.as_url() {
+            Some(url) => url.clone(),
+            None => source.resolve(self.base_uri.as_ref()?).ok()?,
         };
-        Some(uri.absolute_uri().to_owned())
+        Some(uri.into())
     }
 
     fn owner(&self) -> Option<ResourceHostRef> {
@@ -197,7 +196,7 @@ ferro_markup_type!(class ResourceInclude {
     handles: [ResourceInclude, Rc<ResourceInclude>, Option<Rc<ResourceInclude>>],
     interfaces: [Rc<dyn IResourceProvider>, Rc<dyn IThemeVariantProvider>],
     constructors: [
-        (Option<Uri>) => ResourceInclude::new,
+        (Option<url::Url>) => ResourceInclude::new,
         (Rc<dyn IServiceProvider>) => ResourceInclude::with_service_provider,
     ],
     properties: [
@@ -205,7 +204,7 @@ ferro_markup_type!(class ResourceInclude {
         Owner: Option<ResourceHostRef> {
             try_get: |this: &Rc<ResourceInclude>| this.try_loaded().map(|loaded| loaded.owner())
         },
-        Source: Option<Uri> { get: ResourceInclude::source, set: ResourceInclude::set_source },
+        Source: Option<UriRef> { get: ResourceInclude::source, set: ResourceInclude::set_source },
     ],
     events: [
         // As in the original, subscribing loads the dictionary: a failing

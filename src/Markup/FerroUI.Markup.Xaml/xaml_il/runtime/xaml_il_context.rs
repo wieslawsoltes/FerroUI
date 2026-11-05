@@ -23,7 +23,6 @@ use std::rc::{Rc, Weak};
 
 use ferroui_base::controls::INameScope;
 use ferroui_base::metadata::{service, IServiceProvider, MarkupValue};
-use ferroui_base::utilities::Uri;
 use ferroui_base::BoxedValue;
 
 use crate::converters::ITypeDescriptorContext;
@@ -165,7 +164,7 @@ pub struct XamlIlContext {
     scoped_static_providers: RefCell<Vec<ScopedStaticProvider>>,
     target_object: RefCell<MarkupValue>,
     target_property: RefCell<MarkupValue>,
-    base_uri: RefCell<Option<Uri>>,
+    base_uri: RefCell<Option<url::Url>>,
     extensions: RefCell<HashMap<TypeId, Rc<dyn Any>>>,
 }
 
@@ -177,7 +176,7 @@ impl XamlIlContext {
         services: Rc<dyn IXamlIlContextServices>,
         parent_service_provider: Option<Rc<dyn IServiceProvider>>,
         static_providers: Rc<[Rc<dyn IStaticServiceProvider>]>,
-        base_uri: Option<Uri>,
+        base_uri: Option<url::Url>,
     ) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
@@ -338,11 +337,11 @@ impl XamlIlContext {
         *self.target_property.borrow_mut() = value;
     }
 
-    pub fn base_uri(&self) -> Option<Uri> {
+    pub fn base_uri(&self) -> Option<url::Url> {
         self.base_uri.borrow().clone()
     }
 
-    pub fn set_base_uri(&self, value: Option<Uri>) {
+    pub fn set_base_uri(&self, value: Option<url::Url>) {
         *self.base_uri.borrow_mut() = value;
     }
 
@@ -458,11 +457,11 @@ impl IProvideValueTarget for XamlIlContext {
 }
 
 impl IUriContext for XamlIlContext {
-    fn base_uri(&self) -> Option<Uri> {
+    fn base_uri(&self) -> Option<url::Url> {
         XamlIlContext::base_uri(self)
     }
 
-    fn set_base_uri(&self, value: Option<Uri>) {
+    fn set_base_uri(&self, value: Option<url::Url>) {
         XamlIlContext::set_base_uri(self, value)
     }
 }

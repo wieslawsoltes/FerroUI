@@ -103,7 +103,7 @@ fn context_services_are_read() {
         .with_name_scope(scope.clone())
         .in_control_template()
         .sp();
-    assert_eq!(sp.get_context_base_uri().unwrap().absolute_uri(), "ferres://app/Views/Main.xaml");
+    assert_eq!(sp.get_context_base_uri().unwrap().as_str(), "ferres://app/Views/Main.xaml");
     assert!(std::ptr::addr_eq(Rc::as_ptr(&sp.get_name_scope().unwrap()), Rc::as_ptr(&scope.0)));
     assert!(sp.is_in_control_template());
 }
@@ -904,10 +904,10 @@ fn failures_of_metadata_members_are_failed_invocations() {
     // No asset loader, and a relative URI without a base URI.
     let scope = ferroui_base::FerroLocator::enter_scope();
     let load = loader.find_methods("Load").find(|m| m.parameters.len() == 2 && m.return_type.is_some()).unwrap();
-    let result = (load.invoke)(&[into_markup_value(crate::test_support::uri("A.xaml")), None]);
+    let result = (load.invoke)(&[into_markup_value(crate::test_support::uri_ref("A.xaml")), None]);
     assert!(matches!(result, Err(MarkupInvokeError::Failed(message)) if message.starts_with("Could not create IAssetLoader")));
     let _assets = crate::test_support::TestAssetLoader::new().install();
-    let result = (load.invoke)(&[into_markup_value(crate::test_support::uri("A.xaml")), None]);
+    let result = (load.invoke)(&[into_markup_value(crate::test_support::uri_ref("A.xaml")), None]);
     assert_eq!(result, Err(MarkupInvokeError::Failed("Cannot load relative Uri when BaseUri is null".to_string())));
     scope.dispose();
 

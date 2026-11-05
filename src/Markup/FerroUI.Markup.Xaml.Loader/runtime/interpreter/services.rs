@@ -13,7 +13,6 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use ferroui_base::metadata::{service, IServiceProvider, MarkupType, MarkupTyped, MarkupValue};
-use ferroui_base::utilities::Uri;
 use ferroui_base::{ferro_markup_type, BoxedValue};
 
 use crate::runtime::type_system::ITypeDescriptorContext;
@@ -40,10 +39,11 @@ pub trait IProvideValueTarget {
     fn target_property(&self) -> MarkupValue;
 }
 
-/// Provides the base URI of the document being built.
+/// Provides the base URI of the document being built: the absolute URL
+/// relative references of the document are resolved against.
 pub trait IUriContext {
-    fn base_uri(&self) -> Option<Uri>;
-    fn set_base_uri(&self, value: Option<Uri>);
+    fn base_uri(&self) -> Option<url::Url>;
+    fn set_base_uri(&self, value: Option<url::Url>);
 }
 
 /// Provides the objects being initialised around the current one
@@ -78,10 +78,10 @@ impl IProvideValueTarget for RuntimeContext {
 }
 
 impl IUriContext for RuntimeContext {
-    fn base_uri(&self) -> Option<Uri> {
+    fn base_uri(&self) -> Option<url::Url> {
         RuntimeContext::base_uri(self)
     }
-    fn set_base_uri(&self, value: Option<Uri>) {
+    fn set_base_uri(&self, value: Option<url::Url>) {
         RuntimeContext::set_base_uri(self, value)
     }
 }
@@ -178,9 +178,9 @@ ferro_markup_type!(interface dyn IUriContext as "IUriContext" {
     this: Rc<dyn IUriContext>,
     namespace: "FerroUI.Markup.Xaml.Loader.Runtime",
     properties: [
-        BaseUri: Option<Uri> {
+        BaseUri: Option<url::Url> {
             get: |p: &Rc<dyn IUriContext>| p.base_uri(),
-            set: |p: &Rc<dyn IUriContext>, value: Option<Uri>| p.set_base_uri(value)
+            set: |p: &Rc<dyn IUriContext>, value: Option<url::Url>| p.set_base_uri(value)
         },
     ],
 });

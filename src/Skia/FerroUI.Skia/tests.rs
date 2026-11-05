@@ -3202,4 +3202,139 @@ mod custom_shader_effects {
     fn a_content_sampling_program_with_images_draws_the_content_unchanged() {
         assert_draws_unchanged_and_reports_once(ImmutableCustomEffect::new(SamplingWithImages { amount: 0.5 }));
     }
+
+    // --- the interactive effects (E7) --------------------------------------------------
+
+    use ferroui_base::media::effects::library::{
+        BurningFlameShaderEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::Point;
+
+    /// The interactive effects of the library at a frame `t` (0 to 1) of an interaction: the
+    /// pointer over the area and pressed in odd frames, a ripple aging, the flame burning.
+    fn interactive_effects(t: f64) -> Vec<ImmutableCustomEffect> {
+        let pressed = (t * 10.0).round() as i32 % 2 == 1;
+        let mut ripple = WaterRippleShaderEffect {
+            pointer_x: 0.3 + 0.4 * t,
+            pointer_y: 0.4,
+            is_pointer_over: true,
+            is_pressed: pressed,
+            ..WaterRippleShaderEffect::default()
+        };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.2 + 0.3 * t;
+        vec![
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.3 + 0.4 * t,
+                pointer_y: 0.5,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                radius: 0.4,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                pointer_x: 0.6 - 0.2 * t,
+                pointer_y: 0.5,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                cell_size: 12.0,
+                strength: 0.8,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ripple),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.6 + 0.4 * t,
+                flame_phase: 3.0 * t,
+                is_pressed: pressed,
+                ignition_x: 0.5,
+                ignition_y: 0.6,
+                ..BurningFlameShaderEffect::default()
+            }),
+        ]
+    }
+
+    /// Draws `effect` around the scene at `scale` and compares it with the CPU reference: a
+    /// mean difference within `mean` levels, and no more than `share` of the pixels differing by
+    /// more than `largest` levels in a channel. A program that moves the content (the water
+    /// ripple and the flame) picks the texel under a coordinate it computes, so where that
+    /// coordinate falls on the edge of a texel at the edge of a square, the last bit of a `sin`
+    /// or an `exp` of the processor picks the neighbour.
+    fn assert_close_to_reference(effect: &ImmutableCustomEffect, scale: i32, largest: u8, share: f64, mean: f64) {
+        assert!(effect.has_shader(), "{effect}");
+        let plain = target(scale);
+        plain.draw(scene);
+        let mut expected = pixels(&plain);
+        let side = (SIZE * scale) as usize;
+        assert!(effect.cpu_reference(&mut expected, side, side, f64::from(scale)), "{effect}");
+        let drawn = target(scale);
+        draw_with(&drawn, effect, scene);
+        let actual = pixels(&drawn);
+        let far = expected
+            .chunks_exact(4)
+            .zip(actual.chunks_exact(4))
+            .filter(|(a, b)| a.iter().zip(b.iter()).any(|(a, b)| a.abs_diff(*b) > largest))
+            .count();
+        let (_, average) = difference(&expected, &actual);
+        let allowed = share * (side * side) as f64;
+        assert!(
+            far as f64 <= allowed && average <= mean,
+            "{effect} at {scale}x: {far} pixels differ by more than {largest} (at most {allowed}), mean {average}"
+        );
+        let (changed, _) = difference(&pixels(&plain), &actual);
+        assert!(changed > 0, "{effect} at {scale}x: the content is changed");
+    }
+
+    #[test]
+    fn the_interactive_effects_match_their_cpu_references() {
+        for scale in [1, 2] {
+            for t in [0.0, 0.5, 1.0] {
+                let effects = interactive_effects(t);
+                // The overlays as the other overlays; the programs that move the content with
+                // their outliers.
+                assert_matches_reference(effects[0].clone(), scale, 3);
+                assert_matches_reference(effects[1].clone(), scale, 3);
+                assert_close_to_reference(&effects[2], scale, 3, 0.01, 1.5);
+                assert_close_to_reference(&effects[3], scale, 3, 0.01, 1.5);
+            }
+        }
+    }
+
+    #[test]
+    fn a_neutral_interactive_effect_draws_the_content_unchanged() {
+        let neutral = interactive_effects(0.5).into_iter().map(|effect| effect.neutral().expect("a neutral value"));
+        let away = [
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect::default()),
+            ImmutableCustomEffect::new(WaterRippleShaderEffect::default()),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect::default()),
+        ];
+        for effect in neutral.chain(away) {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
+        }
+    }
+
+    /// Frames of an interaction change only the uniforms of the interactive effects: once the
+    /// first frame compiled their programs, no frame compiles one.
+    #[test]
+    fn frames_of_the_interactive_effects_compile_their_programs_once() {
+        let mut compiled_after_first = None;
+        for frame in 0..8 {
+            let target = target(1);
+            for effect in interactive_effects(f64::from(frame) / 7.0) {
+                draw_with(&target, &effect, scene);
+            }
+            let compiled = crate::runtime_effects::compilation_count();
+            match compiled_after_first {
+                None => compiled_after_first = Some(compiled),
+                Some(first) => assert_eq!(first, compiled, "frame {frame} compiled a program"),
+            }
+        }
+        for effect in interactive_effects(0.0) {
+            assert_eq!(0, crate::custom_shader_effects::failure_reports(effect.name()), "{effect}");
+        }
+    }
 }

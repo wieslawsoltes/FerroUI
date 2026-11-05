@@ -3,7 +3,6 @@
 
 use crate::XamlLoadError;
 use ferroui_base::data::core::expression_nodes::CastTarget;
-use ferroui_base::utilities::Uri;
 use ferroui_base::{ferro_markup_type, BoxedValue};
 use std::rc::Rc;
 
@@ -30,11 +29,13 @@ pub trait IRootObjectProvider {
     fn intermediate_root_object(&self) -> Option<BoxedValue>;
 }
 
-/// Gives access to the base URI of the document being loaded.
+/// Gives access to the base URI of the document being loaded: the absolute
+/// URL relative references of the document are resolved against
+/// ([`UriRef::resolve`](ferroui_base::utilities::UriRef::resolve)).
 pub trait IUriContext {
-    fn base_uri(&self) -> Option<Uri>;
+    fn base_uri(&self) -> Option<url::Url>;
 
-    fn set_base_uri(&self, value: Option<Uri>);
+    fn set_base_uri(&self, value: Option<url::Url>);
 }
 
 /// Resolves type names qualified with a namespace prefix of the document
@@ -83,9 +84,9 @@ ferro_markup_type!(interface dyn IUriContext as "IUriContext" {
     this: Rc<dyn IUriContext>,
     handles: [Rc<dyn IUriContext>, Option<Rc<dyn IUriContext>>],
     properties: [
-        BaseUri: Option<Uri> {
+        BaseUri: Option<url::Url> {
             get: |t: &Rc<dyn IUriContext>| t.base_uri(),
-            set: |t: &Rc<dyn IUriContext>, value: Option<Uri>| t.set_base_uri(value)
+            set: |t: &Rc<dyn IUriContext>, value: Option<url::Url>| t.set_base_uri(value)
         },
     ],
 });

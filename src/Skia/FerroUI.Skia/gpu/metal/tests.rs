@@ -1670,6 +1670,117 @@ fn graphite_draws_the_library_shader_effects_as_their_cpu_references() {
     }
 }
 
+/// The interactive effects of the library drawn by Graphite on the Metal device (#455, E7): the
+/// overlays within a few levels of their CPU references, the programs that move the content
+/// within a mean of a level and a half with at most 1% of the pixels further (the texel a moved coordinate
+/// falls in can differ by the last bit of the GPU's `sin` and `exp` at the edge of a square), and
+/// frames that change only their uniforms compile no program.
+#[test]
+fn graphite_draws_the_interactive_effects_as_their_cpu_references() {
+    use ferroui_base::media::effects::library::{
+        BurningFlameShaderEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::media::effects::ImmutableCustomEffect;
+    use ferroui_base::Point;
+
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    const SIZE: i32 = 64;
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(32.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    // The premultiplied RGBA pixels of the target, read back once.
+    fn pixels(target: &GraphiteTarget) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+    let effects = |t: f64| {
+        let mut ripple = WaterRippleShaderEffect { pointer_x: 0.3 + 0.4 * t, is_pointer_over: true, ..WaterRippleShaderEffect::default() };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.2 + 0.3 * t;
+        [
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.3 + 0.4 * t,
+                is_pointer_over: true,
+                radius: 0.4,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                is_pointer_over: true,
+                cell_size: 12.0,
+                strength: 0.8,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ripple),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.6 + 0.4 * t,
+                flame_phase: 3.0 * t,
+                ignition_y: 0.6,
+                ..BurningFlameShaderEffect::default()
+            }),
+        ]
+    };
+    let mut compiled_after_first = None;
+    for (frame, t) in [0.0, 0.5, 1.0].into_iter().enumerate() {
+        for (index, effect) in effects(t).into_iter().enumerate() {
+            let plain = GraphiteTarget::new(&device);
+            plain.draw(|context| {
+                context.clear(Colors::TRANSPARENT);
+                scene(context);
+            });
+            let mut expected = pixels(&plain);
+            plain.dispose();
+            assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+
+            let target = GraphiteTarget::new(&device);
+            target.draw(|context| {
+                context.clear(Colors::TRANSPARENT);
+                let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+                context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+                scene(context);
+                context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+            });
+            let actual = pixels(&target);
+            target.dispose();
+            let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+            let mean = total as f64 / expected.len() as f64;
+            let far = expected
+                .chunks_exact(4)
+                .zip(actual.chunks_exact(4))
+                .filter(|(a, b)| a.iter().zip(b.iter()).any(|(a, b)| a.abs_diff(*b) > 4))
+                .count();
+            // The overlays as the other overlays; the programs that move the content with their
+            // outliers.
+            let (allowed, mean_allowed) = if index < 2 { (0, 0.75) } else { ((SIZE * SIZE / 100) as usize, 1.5) };
+            assert!(far <= allowed && mean <= mean_allowed, "{effect}: {far} pixels differ by more than 4, mean {mean}");
+        }
+        let compiled = crate::runtime_effects::compilation_count();
+        match compiled_after_first {
+            None => compiled_after_first = Some(compiled),
+            Some(first) => assert_eq!(first, compiled, "frame {frame} compiled a program"),
+        }
+    }
+}
+
 /// The page transitions of the library drawn by Graphite (#455, E6): their
 /// images are textures of the recorder, uploaded once (the upload count is
 /// constant over frames that change only the progress), drawn as the CPU

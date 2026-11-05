@@ -13,7 +13,7 @@
 mod loading {
     use crate::element::Element;
     use crate::hooks::use_hook;
-    use ferroui_base::utilities::Uri;
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::Ref;
     use ferroui_controls::Control;
     use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadError};
@@ -44,7 +44,7 @@ mod loading {
     /// otherwise.
     pub fn load_xaml_uri(uri: &str) -> Result<Ref<Control>, XamlLoadError> {
         prepare();
-        let uri = Uri::absolute(uri).map_err(|error| XamlLoadError::with_message(format!("{uri}: {error:?}")))?;
+        let uri = UriRef::parse(uri).map_err(|error| XamlLoadError::with_message(format!("{uri}: {error:?}")))?;
         control(FerroXamlLoader::try_load_with_service_provider(None, &uri, None)?)
     }
 

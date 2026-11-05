@@ -748,7 +748,7 @@ fn the_well_known_members_have_the_signatures_the_compiler_asks_for() {
     constructor(find("FerroUI", "CornerRadius"), &[f64_; 4]);
     constructor(find("FerroUI", "RelativePoint"), &[f64_, f64_, ValueType::of::<crate::RelativeUnit>()]);
     constructor(find("FerroUI.Input", "Cursor"), &[ValueType::of::<crate::input::StandardCursorType>()]);
-    constructor(find("FerroUI.Media", "FontFamily"), &[ValueType::of::<Option<crate::utilities::Uri>>(), ValueType::of::<String>()]);
+    constructor(find("FerroUI.Media", "FontFamily"), &[ValueType::of::<Option<url::Url>>(), ValueType::of::<String>()]);
     constructor(find("FerroUI.Media.Immutable", "ImmutableSolidColorBrush"), &[ValueType::of::<u32>()]);
     constructor(find("System", "Uri"), &[ValueType::of::<String>(), ValueType::of::<crate::utilities::UriKind>()]);
 

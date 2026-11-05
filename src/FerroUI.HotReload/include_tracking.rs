@@ -146,7 +146,7 @@ impl IncludeTracking {
 mod tests {
     use super::*;
     use crate::{ContentReloadTarget, HotReloadSession, ReloadStatus};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use ferroui_controls::{
         testing::{TestServices, UnitTestApplication},
         Application, Border, ContentControl,
@@ -202,8 +202,8 @@ mod tests {
             }
         }
         let attach = || {
-            let base = Uri::try_create(view_uri, UriKind::Absolute).unwrap();
-            let source = Uri::try_create("Values.xaml", UriKind::RelativeOrAbsolute);
+            let base = UriRef::parse_absolute(view_uri).unwrap();
+            let source = UriRef::parse("Values.xaml").ok();
             if style {
                 let include = ferroui_markup_xaml::styling::StyleInclude::new(Some(base));
                 include.set_source(source);
@@ -328,7 +328,7 @@ mod tests {
                 .unwrap();
             let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
                 RuntimeXamlLoaderDocument::with_base_uri(
-                    Uri::try_create(uri, UriKind::Absolute),
+                    UriRef::parse_absolute(uri).ok(),
                     &source,
                 ),
                 None,

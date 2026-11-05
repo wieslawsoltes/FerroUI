@@ -183,11 +183,8 @@ impl HotReloadSession {
                 "Class already has a populate override".into(),
             ));
         }
-        let base = ferroui_base::utilities::Uri::try_create(
-            &uri,
-            ferroui_base::utilities::UriKind::Absolute,
-        )
-        .ok_or_else(|| ReloadError::Failed("Document URI must be absolute".into()))?;
+        let base = document_url(&uri)
+            .ok_or_else(|| ReloadError::Failed("Document URI must be absolute".into()))?;
         let sources = self.published.clone();
         let populate: ferroui_markup_xaml::PopulateOverride = Rc::new(move |sp, root| {
             let sources = sources.borrow().clone();
@@ -603,14 +600,30 @@ impl Drop for HotReloadSession {
     }
 }
 
+/// The URL of the document `uri`, as the loaders read the URI of a document
+/// (`UriRef::parse_absolute`, C5 of #423): the scheme and the authority in lower case.
+pub(crate) fn document_url(uri: &str) -> Option<url::Url> {
+    ferroui_base::utilities::UriRef::parse_absolute(uri).ok()
+}
+
+/// The key of a document in the maps of a session: the text of its URL, so that one
+/// document reached by two spellings (`FERRES://App/Main.xaml`, `ferres://app/Main.xaml`)
+/// is one entry and the key is the text the loaders resolve includes to. The fragment
+/// stays part of the key: a document URI has none, and the maps never relied on the
+/// fragment-insensitive equality of the port `Uri` (they are keyed by text). A text that
+/// is not a URL is its own key.
 fn document_key(uri: &str) -> String {
-    ferroui_base::utilities::Uri::try_create(uri, ferroui_base::utilities::UriKind::Absolute)
-        .map(|uri| uri.absolute_uri().to_string())
-        .unwrap_or_else(|| uri.to_string())
+    document_url(uri).map(String::from).unwrap_or_else(|| uri.to_string())
+}
+
+/// The key of the document the include source `source` of the document at `base` names:
+/// the text of the URL it resolves to (`UriRef::resolve`), as the loaders resolve it.
+pub(crate) fn include_key(base: &url::Url, source: &str) -> Option<String> {
+    let reference = ferroui_base::utilities::UriRef::parse(source).ok()?;
+    reference.resolve(base).ok().map(String::from)
 }
 
 fn dependencies_of(roots: Vec<String>, sources: &Sources) -> BTreeSet<String> {
-    use ferroui_base::utilities::{Uri, UriKind};
     let mut seen = BTreeSet::new();
     let mut pending = roots;
     while let Some(uri) = pending.pop() {
@@ -623,7 +636,7 @@ fn dependencies_of(roots: Vec<String>, sources: &Sources) -> BTreeSet<String> {
         };
         let (Ok(document), Some(base)) = (
             roxmltree::Document::parse(source),
-            Uri::try_create(&key, UriKind::Absolute),
+            document_url(&key),
         ) else {
             continue;
         };
@@ -634,16 +647,8 @@ fn dependencies_of(roots: Vec<String>, sources: &Sources) -> BTreeSet<String> {
             ) {
                 continue;
             }
-            if let Some(relative) = node
-                .attribute("Source")
-                .and_then(|source| Uri::try_create(source, UriKind::RelativeOrAbsolute))
-            {
-                let absolute = if relative.is_absolute_uri() {
-                    relative
-                } else {
-                    Uri::combine(&base, &relative)
-                };
-                pending.push(absolute.absolute_uri().to_string());
+            if let Some(included) = node.attribute("Source").and_then(|source| include_key(&base, source)) {
+                pending.push(included);
             }
         }
     }
