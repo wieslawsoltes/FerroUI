@@ -568,11 +568,11 @@ fn native_virtual_default_and_replaced_protected_dictionaries_preserve_extension
         let base: Ref<DockTargetBase> = custom.clone().upcast();
         assert_eq!(resolve(&base, Point::default()), Op::Left);
         let map = Rc::new(RefCell::new(
-            ferroui_system::collections::generic::SlotOrderMap::new(),
+            indexmap::IndexMap::new(),
         ));
         base.set_indicator_operations(map.clone());
         let other = Rc::new(RefCell::new(
-            ferroui_system::collections::generic::SlotOrderMap::new(),
+            indexmap::IndexMap::new(),
         ));
         base.set_selectors_operations(other.clone());
         assert!(Rc::ptr_eq(&map, &base.indicator_operations()));

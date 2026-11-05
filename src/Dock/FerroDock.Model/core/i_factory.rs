@@ -5,15 +5,16 @@ use crate::controls::*;
 use crate::core::*;
 use crate::BoxedValue;
 use ferrodock_model::collections::ListHandle;
-use ferroui_system::collections::generic::SlotOrderMap;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
-/// Shared map from dockable identity to its presentation control.
-pub type DockableControlMap = Rc<RefCell<SlotOrderMap<Rc<dyn IDockable>, Rc<dyn IDockableControl>>>>;
+/// Shared map from dockable identity to its presentation control. It is looked up by identity and
+/// nothing depends on the order of its entries, so it is a `HashMap`.
+pub type DockableControlMap = Rc<RefCell<HashMap<Rc<dyn IDockable>, Rc<dyn IDockableControl>>>>;
 
-/// Shared map from dockable identity to an object value.
-pub type DockableObjectMap = Rc<RefCell<SlotOrderMap<Rc<dyn IDockable>, BoxedValue>>>;
+/// Shared map from dockable identity to an object value, looked up by identity (a `HashMap`).
+pub type DockableObjectMap = Rc<RefCell<HashMap<Rc<dyn IDockable>, BoxedValue>>>;
 
 /// Creates an optional dockable context.
 pub type ContextFactory = Rc<dyn Fn() -> Option<BoxedValue>>;
@@ -30,14 +31,14 @@ pub type DockablePredicate = Rc<dyn Fn(Option<Rc<dyn IDockable>>) -> bool>;
 /// Tests a root dock during ownership lookup.
 pub type RootPredicate = Rc<dyn Fn(Rc<dyn IRootDock>) -> bool>;
 
-/// A shared registry of context factories.
-pub type ContextLocatorMap = Rc<RefCell<SlotOrderMap<String, Option<ContextFactory>>>>;
+/// A shared registry of context factories, looked up by ID (a `HashMap`).
+pub type ContextLocatorMap = Rc<RefCell<HashMap<String, Option<ContextFactory>>>>;
 
-/// A shared registry of host factories.
-pub type HostWindowLocatorMap = Rc<RefCell<SlotOrderMap<String, Option<HostWindowFactory>>>>;
+/// A shared registry of host factories, looked up by ID (a `HashMap`).
+pub type HostWindowLocatorMap = Rc<RefCell<HashMap<String, Option<HostWindowFactory>>>>;
 
-/// A shared registry of dockable factories.
-pub type DockableLocatorMap = Rc<RefCell<SlotOrderMap<String, Option<DockableFactory>>>>;
+/// A shared registry of dockable factories, looked up by ID (a `HashMap`).
+pub type DockableLocatorMap = Rc<RefCell<HashMap<String, Option<DockableFactory>>>>;
 
 /// The `IFactory` docking contract.
 /// Generic methods are available on concrete factories (`Self: Sized`).
