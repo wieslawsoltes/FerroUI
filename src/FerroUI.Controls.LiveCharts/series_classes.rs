@@ -3,7 +3,7 @@ use crate::{ChartSeries, HeatLands, SankeyLinks, SankeyNodes, TreemapNodes};
 use ferroui_base::media::Color;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObjectImpl,
-    FerroObjectImplExt, FerroProperty, Ref, StyledProperty,
+    FerroObjectImplExt, FerroProperty, Ref, StyledProperty, Thickness,
 };
 use ferroui_livecharts::{SankeyLabelPosition, SankeyLayoutKind, SeriesKind};
 
@@ -411,6 +411,7 @@ impl HeatSeries {
         ChartSeries::padding_property().override_default_value::<HeatSeries>(defaults.padding);
         ChartSeries::max_bar_width_property()
             .override_default_value::<HeatSeries>(defaults.max_bar_width);
+        ChartSeries::heat_map_property().override_default_value::<HeatSeries>(defaults.heat_map);
     }
     pub fn construct() -> Self {
         Self {
@@ -564,6 +565,45 @@ impl CandlesticksSeries {
             .override_default_value::<CandlesticksSeries>(defaults.padding);
         ChartSeries::max_bar_width_property()
             .override_default_value::<CandlesticksSeries>(defaults.max_bar_width);
+    }
+    pub fn construct() -> Self {
+        Self {
+            base: ChartSeries::construct(),
+        }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+}
+
+#[repr(C)]
+pub struct OhlcSeries {
+    base: ChartSeries,
+}
+ferro_class!(OhlcSeries: ChartSeries);
+ferro_class_info!(OhlcSeries {
+    new: OhlcSeries::new
+});
+impl FerroObjectImpl for OhlcSeries {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.set_kind(SeriesKind::Ohlc);
+    }
+}
+impl OhlcSeries {
+    fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Ohlc);
+        ChartSeries::kind_property().override_default_value::<OhlcSeries>(SeriesKind::Ohlc);
+        ChartSeries::data_padding_property()
+            .override_default_value::<OhlcSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<OhlcSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<OhlcSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<OhlcSeries>(defaults.max_bar_width);
+        ChartSeries::stroke_width_property()
+            .override_default_value::<OhlcSeries>(defaults.stroke_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -933,6 +973,47 @@ impl HeatLandSeries {
     }
     pub fn set_color_stops(&self, value: Option<Vec<f64>>) {
         self.set_value(Self::color_stops_property(), value);
+    }
+    pub fn min_value(&self) -> Option<f64> {
+        self.get_value(Self::min_value_property())
+    }
+    pub fn set_min_value(&self, value: Option<f64>) {
+        self.set_value(Self::min_value_property(), value);
+    }
+    pub fn max_value(&self) -> Option<f64> {
+        self.get_value(Self::max_value_property())
+    }
+    pub fn set_max_value(&self, value: Option<f64>) {
+        self.set_value(Self::max_value_property(), value);
+    }
+}
+
+ferro_properties! { impl HeatSeries {
+    pub fn color_stops_property() -> StyledProperty<Option<Vec<f64>>> {
+        FerroProperty::register::<HeatSeries, _>("ColorStops", None)
+    }
+    pub fn point_padding_property() -> StyledProperty<Thickness> {
+        FerroProperty::register::<HeatSeries, _>("PointPadding", Thickness::uniform(4.0))
+    }
+    pub fn min_value_property() -> StyledProperty<Option<f64>> {
+        FerroProperty::register::<HeatSeries, _>("MinValue", None)
+    }
+    pub fn max_value_property() -> StyledProperty<Option<f64>> {
+        FerroProperty::register::<HeatSeries, _>("MaxValue", None)
+    }
+} }
+impl HeatSeries {
+    pub fn color_stops(&self) -> Option<Vec<f64>> {
+        self.get_value(Self::color_stops_property())
+    }
+    pub fn set_color_stops(&self, value: Option<Vec<f64>>) {
+        self.set_value(Self::color_stops_property(), value);
+    }
+    pub fn point_padding(&self) -> Thickness {
+        self.get_value(Self::point_padding_property())
+    }
+    pub fn set_point_padding(&self, value: Thickness) {
+        self.set_value(Self::point_padding_property(), value);
     }
     pub fn min_value(&self) -> Option<f64> {
         self.get_value(Self::min_value_property())
