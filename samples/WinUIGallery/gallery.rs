@@ -5,7 +5,7 @@ use crate::{examples, navigation::NavigationHistory};
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::SelectingItemsControl;
@@ -343,8 +343,8 @@ fn link(title: &str, url: &str) -> Ref<HyperlinkButton> {
     let link = HyperlinkButton::new();
     link.set_content(box_text(title));
     link.set_horizontal_alignment(HorizontalAlignment::Left);
-    if let Ok(uri) = Uri::new(url, UriKind::Absolute) {
-        link.set_navigate_uri(Some(uri));
+    if let Ok(uri) = UriRef::parse_absolute(url) {
+        link.set_navigate_uri(Some(UriRef::from(uri)));
     }
     link
 }

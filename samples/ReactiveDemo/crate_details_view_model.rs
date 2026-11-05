@@ -2,7 +2,7 @@
 
 use crate::crate_search::CrateSearchMetadata;
 use ferroui_base::platform::storage::ILauncher;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_reactiveui::{reactive_object, ReactiveCommand, ReactiveObject};
 use std::rc::Rc;
 
@@ -40,7 +40,7 @@ impl CrateDetailsViewModel {
         let page = metadata.page_url();
         // ReactiveCommand.Create(() => Process.Start(ProjectUrl)).
         let open_page = ReactiveCommand::create(move || {
-            let Ok(uri) = Uri::absolute(&page) else {
+            let Ok(uri) = UriRef::parse_absolute(&page) else {
                 return;
             };
             let launcher = launcher();
