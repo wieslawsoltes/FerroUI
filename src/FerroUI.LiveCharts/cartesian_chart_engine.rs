@@ -2,6 +2,7 @@
 //! Pure calculation produces a retained FerroUI drawing scene; native controls own scheduling.
 
 use crate::axis::{format_number, Axis, AxisPosition, AxisScale, CARTESIAN_LABELS_PADDING};
+use crate::heat_functions::HeatFunctions;
 use crate::kernel::Coordinate;
 use crate::measure::{AxisOrientation, Bounds};
 use crate::scene::*;
@@ -185,7 +186,7 @@ impl CartesianChartEngine {
                     SeriesKind::RangeColumn | SeriesKind::RangeRow | SeriesKind::RangeLine => {
                         c.tertiary_value
                     }
-                    SeriesKind::Financial | SeriesKind::Box => c.quinary_value,
+                    SeriesKind::Financial | SeriesKind::Ohlc | SeriesKind::Box => c.quinary_value,
                     _ => s.pivot,
                 };
                 if s.kind.is_stacked() {
@@ -236,16 +237,27 @@ impl CartesianChartEngine {
                         ymax = ymax.max(bottom);
                     }
                 }
+                // DataFactory.GetCartesianBounds: the errors widen the bounds whether they are
+                // drawn or not, the Y errors (top and bottom) the value and the X errors (left
+                // and right) the category, on the axes a row series swaps.
                 if !c.point_error.is_empty {
-                    let (cx, cy) = if s.kind.is_row() {
-                        (top, c.secondary_value)
+                    let e = c.point_error;
+                    let (value_min, value_max) = (top - e.yj.abs(), top + e.yi.abs());
+                    let (category_min, category_max) = (
+                        c.secondary_value - e.xi.abs(),
+                        c.secondary_value + e.xj.abs(),
+                    );
+                    if s.kind.is_row() {
+                        xmin = xmin.min(value_min);
+                        xmax = xmax.max(value_max);
+                        ymin = ymin.min(category_min);
+                        ymax = ymax.max(category_max);
                     } else {
-                        (c.secondary_value, top)
-                    };
-                    xmin = xmin.min(cx - c.point_error.xi.abs());
-                    xmax = xmax.max(cx + c.point_error.xj.abs());
-                    ymin = ymin.min(cy - c.point_error.yj.abs());
-                    ymax = ymax.max(cy + c.point_error.yi.abs());
+                        xmin = xmin.min(category_min);
+                        xmax = xmax.max(category_max);
+                        ymin = ymin.min(value_min);
+                        ymax = ymax.max(value_max);
+                    }
                 }
                 for value in [
                     xmin,
@@ -482,8 +494,9 @@ impl CartesianChartEngine {
                     draw_bars(&mut scene, si, s, series, points, xs, ys, x_axes, y_axes)
                 }
                 SeriesKind::Scatter => draw_scatter(&mut scene, si, s, points, xs, ys),
-                SeriesKind::Heat => draw_heat(&mut scene, si, s, points, xs, ys, x_axes, y_axes),
+                SeriesKind::Heat => draw_heat(&mut scene, si, s, points, xs, ys, x_axes, y_axes)?,
                 SeriesKind::Financial => draw_financial(&mut scene, si, s, points, xs, ys, x_axes),
+                SeriesKind::Ohlc => draw_ohlc(&mut scene, si, s, points, xs, ys, x_axes),
                 SeriesKind::Box => draw_box(&mut scene, si, s, series, points, xs, ys, x_axes),
                 SeriesKind::Pie
                 | SeriesKind::PolarLine
@@ -696,7 +709,7 @@ fn valid_point(s: &Series, c: &Coordinate) -> bool {
         | SeriesKind::RangeLine
         | SeriesKind::Scatter
         | SeriesKind::Heat => c.tertiary_value.is_finite(),
-        SeriesKind::Financial => {
+        SeriesKind::Financial | SeriesKind::Ohlc => {
             c.tertiary_value.is_finite()
                 && c.quaternary_value.is_finite()
                 && c.quinary_value.is_finite()
@@ -729,10 +742,16 @@ fn validate_series(s: &Series, x: usize, y: usize) -> Result<(), ChartError> {
         s.data_labels_size,
         s.data_padding.x,
         s.data_padding.y,
+        s.point_padding.left,
+        s.point_padding.top,
+        s.point_padding.right,
+        s.point_padding.bottom,
     ]
     .iter()
     .any(|v| !v.is_finite())
         || s.dashes.iter().any(|d| !d.is_finite() || *d < 0.0)
+        || s.color_stops.iter().flatten().any(|v| !v.is_finite())
+        || [s.min_value, s.max_value].iter().flatten().any(|v| !v.is_finite())
         || s.data_padding.x < 0.0
         || s.data_padding.y < 0.0
     {
@@ -1039,7 +1058,7 @@ fn append_hit(
             format_number(p.coordinate.tertiary_value),
             format_number(p.coordinate.primary_value)
         ),
-        SeriesKind::Financial => format!(
+        SeriesKind::Financial | SeriesKind::Ohlc => format!(
             "O {} H {} L {} C {}",
             format_number(p.coordinate.tertiary_value),
             format_number(p.coordinate.primary_value),
@@ -1072,14 +1091,29 @@ fn append_hit(
         ),
     });
     if s.data_labels {
+        // A heat cell centres its label (the source's `DataLabelsPosition.Middle`) and labels
+        // the primary value, as the default `DataLabelsFormatter` of a source series.
+        let (origin, anchor, text) = if s.kind == SeriesKind::Heat {
+            (
+                Point::new(center.x, center.y - s.data_labels_size * 0.6),
+                TextAnchor::Center,
+                format_number(p.coordinate.primary_value),
+            )
+        } else {
+            (
+                Point::new(center.x + 4.0, center.y - s.data_labels_size - 4.0),
+                TextAnchor::Start,
+                text,
+            )
+        };
         scene.primitives.push(
             Primitive::new(
                 Geometry::Text {
-                    origin: Point::new(center.x + 4.0, center.y - s.data_labels_size - 4.0),
+                    origin,
                     text,
                     size: s.data_labels_size,
                     rotation: 0.0,
-                    anchor: TextAnchor::Start,
+                    anchor,
                 },
                 PaintStyle::fill(s.data_labels_color.unwrap_or_else(|| s.color(si))),
             )
@@ -1270,7 +1304,7 @@ fn draw_line_series(
                             s.geometry_size,
                             s.geometry_size,
                         )),
-                        s.style(si, true),
+                        s.marker_style(si),
                     )
                     .clipped(scene.plot_bounds)
                     .identified(PointId {
@@ -1322,7 +1356,7 @@ fn draw_line_series(
             },
         );
         if !range {
-            draw_errors(scene, si, s, p, x, y);
+            draw_errors(scene, si, s, p, x, y, 0.0);
         }
     }
 }
@@ -1336,7 +1370,10 @@ fn bar_group(si: usize, s: &Series, all: &[Series]) -> (usize, usize) {
     for (i, candidate) in all.iter().enumerate().filter(|(_, a)| {
         a.visible
             && a.kind.is_bar()
-            && !matches!(a.kind, SeriesKind::Financial | SeriesKind::Box)
+            && !matches!(
+                a.kind,
+                SeriesKind::Financial | SeriesKind::Ohlc | SeriesKind::Box
+            )
             && a.kind.is_row() == s.kind.is_row()
             && a.x_axis == s.x_axis
             && a.y_axis == s.y_axis
@@ -1474,7 +1511,7 @@ fn draw_bars(
             },
             center,
         );
-        draw_errors(scene, si, s, p, x, y);
+        draw_errors(scene, si, s, p, x, y, offset);
     }
 }
 fn draw_scatter(
@@ -1528,9 +1565,15 @@ fn draw_scatter(
             },
             center,
         );
-        draw_errors(scene, si, s, p, x, y);
+        draw_errors(scene, si, s, p, x, y, 0.0);
     }
 }
+/// `CoreHeatSeries`: each cell spans the smallest step of the data on each axis (issue 1511;
+/// the axis unit width without one), inset by `PointPadding`, in the colour of its weight
+/// (`HeatFunctions.InterpolateColor`) between the weight bounds (`MinValue` and `MaxValue`, else
+/// the extremes of the weights) at the stops of its heat map (`ColorStops`, else spread evenly).
+/// The hover area is the whole cell. A heat map of fewer than two colours, or stops of another
+/// count, is an error where the source throws.
 fn draw_heat(
     scene: &mut Scene,
     si: usize,
@@ -1540,7 +1583,8 @@ fn draw_heat(
     y: AxisScale,
     xa: &[Axis],
     ya: &[Axis],
-) {
+) -> Result<(), ChartError> {
+    let stops = HeatFunctions::build_color_stops(&s.heat_map, s.color_stops.as_deref())?;
     let dx = minimum_delta(
         points
             .iter()
@@ -1550,11 +1594,17 @@ fn draw_heat(
     .unwrap_or(xa[s.x_axis].unit_width);
     let dy = minimum_delta(points.iter().flatten().map(|p| p.coordinate.primary_value))
         .unwrap_or(ya[s.y_axis].unit_width);
-    let (mut min, mut max) = (f64::INFINITY, f64::NEG_INFINITY);
+    let mut weights = Bounds::default();
     for p in points.iter().flatten() {
-        min = min.min(p.coordinate.tertiary_value);
-        max = max.max(p.coordinate.tertiary_value);
+        weights.append_value(p.coordinate.tertiary_value);
     }
+    if let Some(min) = s.min_value {
+        weights.min = min;
+    }
+    if let Some(max) = s.max_value {
+        weights.max = max;
+    }
+    let padding = s.point_padding;
     for p in points.iter().flatten() {
         let c = p.coordinate;
         let a = Point::new(
@@ -1568,18 +1618,20 @@ fn draw_heat(
         if !finite_point(a) || !finite_point(b) {
             continue;
         }
-        let rect = Rect::new(
+        let cell = Rect::new(
             a.x.min(b.x),
             a.y.min(b.y),
             (b.x - a.x).abs(),
             (b.y - a.y).abs(),
         );
-        let t = if max == min {
-            0.0
-        } else {
-            (c.tertiary_value - min) / (max - min)
-        };
-        let color = heat_color(&s.heat_map, t);
+        let rect = Rect::new(
+            cell.x + padding.left,
+            cell.y + padding.top,
+            (cell.width - padding.left - padding.right).max(0.0),
+            (cell.height - padding.top - padding.bottom).max(0.0),
+        );
+        let color =
+            HeatFunctions::interpolate_color(c.tertiary_value, &weights, &s.heat_map, &stops);
         scene.primitives.push(
             Primitive::new(
                 Geometry::Rectangle { rect, radius: 0.0 },
@@ -1599,24 +1651,11 @@ fn draw_heat(
             si,
             s,
             p,
-            HitShape::Rectangle(rect),
-            Point::new((a.x + b.x) * 0.5, (a.y + b.y) * 0.5),
+            HitShape::Rectangle(cell),
+            Point::new(cell.x + cell.width * 0.5, cell.y + cell.height * 0.5),
         );
     }
-}
-pub(crate) fn heat_color(colors: &[Color], t: f64) -> Color {
-    if colors.is_empty() {
-        return Color::from_argb(0, 0, 0, 0);
-    }
-    if colors.len() == 1 {
-        return colors[0];
-    }
-    let pos = t.clamp(0.0, 1.0) * (colors.len() - 1) as f64;
-    let i = (pos.floor() as usize).min(colors.len() - 2);
-    let f = (pos - i as f64).clamp(0.0, 1.0);
-    let (a, b) = (colors[i], colors[i + 1]);
-    let mix = |a: u8, b: u8| (a as f64 + (b as f64 - a as f64) * f) as u8;
-    Color::from_argb(mix(a.a, b.a), mix(a.r, b.r), mix(a.g, b.g), mix(a.b, b.b))
+    Ok(())
 }
 fn draw_financial(
     scene: &mut Scene,
@@ -1697,6 +1736,81 @@ fn draw_financial(
             width,
             (low - high).abs(),
         );
+        append_hit(
+            scene,
+            si,
+            s,
+            p,
+            HitShape::WithHoverArea {
+                shape: Box::new(HitShape::Rectangle(hit)),
+                bounds: Rect::new(
+                    center - category_width * 0.5,
+                    hit.y,
+                    category_width,
+                    hit.height.max(1.0),
+                ),
+            },
+            Point::new(center, (high + low) * 0.5),
+        );
+    }
+}
+/// `OhlcSeries`, the I-bars of `OhlcGeometry` over the measure of `CoreFinancialSeries`: a
+/// spine from the high to the low at the centre of the bar, the open as a tick to its left and
+/// the close as a tick to its right. The bar is the category width clamped to `MaxBarWidth`
+/// (25); a close above the open takes the theme's up stroke and the others its down stroke,
+/// unless the series has a stroke of its own. The bars have no body, so a fill draws nothing.
+fn draw_ohlc(
+    scene: &mut Scene,
+    si: usize,
+    s: &Series,
+    points: &[Option<MeasuredPoint>],
+    x: AxisScale,
+    y: AxisScale,
+    xa: &[Axis],
+) {
+    for p in points.iter().flatten() {
+        let c = p.coordinate;
+        let center = x.to_pixels(c.secondary_value);
+        let high = y.to_pixels(c.primary_value);
+        let open = y.to_pixels(c.tertiary_value);
+        let close = y.to_pixels(c.quaternary_value);
+        let low = y.to_pixels(c.quinary_value);
+        let category_width = category_width(x, c.secondary_value, xa[s.x_axis].unit_width);
+        let width = category_width.min(s.max_bar_width.max(1.0));
+        if ![center, high, low, open, close, width]
+            .iter()
+            .all(|v| v.is_finite())
+        {
+            continue;
+        }
+        let mut style = s.style(si, false);
+        style.fill = None;
+        style.fill_brush = None;
+        if s.stroke.is_none() && s.stroke_brush.is_none() {
+            // FinancialLayout.IsBullish: the open is below the close in pixels.
+            style.stroke = Some(if open > close {
+                crate::series::FINANCIAL_UP
+            } else {
+                crate::series::FINANCIAL_DOWN
+            });
+        }
+        let left = center - width * 0.5;
+        let id = PointId {
+            series: si,
+            point: p.index,
+        };
+        for (start, end) in [
+            (Point::new(center, high), Point::new(center, low)),
+            (Point::new(left, open), Point::new(center, open)),
+            (Point::new(center, close), Point::new(left + width, close)),
+        ] {
+            scene.primitives.push(
+                Primitive::new(Geometry::Line { start, end }, style.clone())
+                    .clipped(scene.plot_bounds)
+                    .identified(id),
+            );
+        }
+        let hit = Rect::new(left, high.min(low), width, (low - high).abs());
         append_hit(
             scene,
             si,
@@ -1835,6 +1949,16 @@ fn draw_box(
         );
     }
 }
+/// The error bars of a point (`ErrorVisual`: the `YError` and `XError` lines of the error paint)
+/// when the series shows them (`ShowError`): a line across the value from its bottom error to
+/// its top error, and a line across the category from its left error to its right error, both
+/// through the point, which for a bar is the centre of its end, `offset` along the category from
+/// the category itself. There are no caps, as in the source. A row series swaps the axes, so its
+/// value errors are horizontal.
+///
+/// The source draws the top error (`Yi`) of a bar or scatter point below it, where its bounds,
+/// its line series and the documentation of `Error` put it above; here it is above for every
+/// series, and the bars of a stacked series take their errors at the top of their stack.
 fn draw_errors(
     scene: &mut Scene,
     si: usize,
@@ -1842,49 +1966,42 @@ fn draw_errors(
     p: &MeasuredPoint,
     x: AxisScale,
     y: AxisScale,
+    offset: f64,
 ) {
     let c = p.coordinate;
-    let error = c.point_error;
-    if error.is_empty {
+    let e = c.point_error;
+    if !s.show_error || !s.kind.has_error_bars() || e.is_empty {
         return;
     }
-    let (vx, vy) = if s.kind.is_row() {
-        (p.top, c.secondary_value)
-    } else {
-        (c.secondary_value, p.top)
+    let row = s.kind.is_row();
+    let (value_scale, category_scale) = if row { (x, y) } else { (y, x) };
+    let (value, category) = (p.top, c.secondary_value);
+    let v = value_scale.to_pixels(value);
+    let k = category_scale.to_pixels(category) + offset;
+    let category_end =
+        |d: f64| k + category_scale.to_pixels(category + d) - category_scale.to_pixels(category);
+    let (top, bottom) = (
+        value_scale.to_pixels(value + e.yi.abs()),
+        value_scale.to_pixels(value - e.yj.abs()),
+    );
+    let (left, right) = (category_end(-e.xi.abs()), category_end(e.xj.abs()));
+    if ![v, k, top, bottom, left, right]
+        .iter()
+        .all(|v| v.is_finite())
+    {
+        return;
+    }
+    let at = |value: f64, category: f64| {
+        if row {
+            Point::new(value, category)
+        } else {
+            Point::new(category, value)
+        }
     };
-    let center = Point::new(x.to_pixels(vx), y.to_pixels(vy));
-    let cap = 4.0;
-    let style = PaintStyle::stroke(s.color(si), s.stroke_width.max(1.0));
-    let left = x.to_pixels(vx - error.xi.abs());
-    let right = x.to_pixels(vx + error.xj.abs());
-    let top = y.to_pixels(vy + error.yi.abs());
-    let bottom = y.to_pixels(vy - error.yj.abs());
-    if ![left, right, top, bottom].iter().all(|v| v.is_finite()) {
-        return;
-    }
-    for (a, b) in [
-        (Point::new(left, center.y), Point::new(right, center.y)),
-        (
-            Point::new(left, center.y - cap),
-            Point::new(left, center.y + cap),
-        ),
-        (
-            Point::new(right, center.y - cap),
-            Point::new(right, center.y + cap),
-        ),
-        (Point::new(center.x, top), Point::new(center.x, bottom)),
-        (
-            Point::new(center.x - cap, top),
-            Point::new(center.x + cap, top),
-        ),
-        (
-            Point::new(center.x - cap, bottom),
-            Point::new(center.x + cap, bottom),
-        ),
-    ] {
+    let style = s.error_style();
+    for (start, end) in [(at(bottom, k), at(top, k)), (at(v, left), at(v, right))] {
         scene.primitives.push(
-            Primitive::new(Geometry::Line { start: a, end: b }, style.clone())
+            Primitive::new(Geometry::Line { start, end }, style.clone())
                 .clipped(scene.plot_bounds)
                 .identified(PointId {
                     series: si,
@@ -2052,6 +2169,7 @@ mod tests {
             SeriesKind::RangeRow,
             SeriesKind::RangeLine,
             SeriesKind::Financial,
+            SeriesKind::Ohlc,
             SeriesKind::Box,
         ] {
             let mut s = Series::new(kind);
