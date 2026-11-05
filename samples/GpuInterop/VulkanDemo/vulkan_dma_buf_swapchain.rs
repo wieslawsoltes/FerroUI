@@ -10,14 +10,14 @@ use super::vulkan_dma_buf_image::VulkanDmaBufImage;
 use super::vulkan_image::VulkanImage;
 use super::vulkan_swapchain::Disposals;
 use crate::native_methods;
-use crate::task_support::{present_status, start, ServerJobTaskFuture};
+use crate::task_support::{join, present_status, start, ServerJobTaskFuture};
 use ash::vk;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::{
     CompositionDrawingSurface, ICompositionGpuInterop, ICompositionImportedGpuImage, ServerJobTask,
 };
 use ferroui_base::rendering::{ISwapchainImage, SwapchainBase, SwapchainImageFactory, SwapchainImagePresentStatus};
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -49,12 +49,12 @@ impl VulkanDmaBufSwapchain {
     }
 
     /// Releases the images of the swapchain once the compositor is done with them.
-    pub fn dispose_async(&self) -> DispatcherTask<()> {
+    pub fn dispose_async(&self) -> JoinHandle<()> {
         self.base.dispose();
         let disposals = std::mem::take(&mut *self.disposals.borrow_mut());
         start(async move {
             for disposal in disposals {
-                let _ = disposal.await;
+                let _ = join(disposal).await;
             }
         })
     }
@@ -136,7 +136,7 @@ impl VulkanDmaBufSwapchainImage {
         Ok(())
     }
 
-    fn dispose_async(&self) -> DispatcherTask<()> {
+    fn dispose_async(&self) -> JoinHandle<()> {
         let last_present = self.last_present.borrow().clone();
         let imported_image = self.imported_image.borrow().clone();
         let image = self.image.clone();

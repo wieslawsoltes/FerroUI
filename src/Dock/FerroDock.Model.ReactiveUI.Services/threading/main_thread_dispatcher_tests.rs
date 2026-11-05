@@ -1,5 +1,5 @@
 use super::*;
-use crate::test_environment::Environment;
+use crate::test_environment::{Environment, TaskState};
 use ferroui_reactive::concurrency::{HistoricalScheduler, IScheduler, ScheduledAction};
 use ferroui_system::task::{set_current_schedule, Schedule};
 use ferroui_system::IDisposable;
@@ -49,7 +49,7 @@ fn immediate_and_queued_actions_capture_failure_in_task_and_success_complete_onc
     assert!(succeeded.is_completed_successfully());
     let failed = dispatcher.invoke_async(Rc::new(|| panic!("immediate failure")));
     assert_eq!(
-        failed.result().unwrap_err().to_string(),
+        failed.result().unwrap().unwrap_err().to_string(),
         "immediate failure"
     );
     let scheduler = HistoricalScheduler::historical();
@@ -57,7 +57,7 @@ fn immediate_and_queued_actions_capture_failure_in_task_and_success_complete_onc
     let failed = dispatcher.invoke_async(Rc::new(|| panic!("queued failure")));
     assert!(!failed.is_completed());
     scheduler.start();
-    assert_eq!(failed.result().unwrap_err().to_string(), "queued failure");
+    assert_eq!(failed.result().unwrap().unwrap_err().to_string(), "queued failure");
 }
 #[test]
 fn reentrant_invocation_uses_scheduler_changed_by_the_outer_action() {

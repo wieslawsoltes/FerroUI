@@ -1,7 +1,9 @@
 //! Characterization tests of the order in which the tasks, completion sources and cancellation
 //! tokens of `threading` run their callbacks: step A0 of phase C4 of #423
 //! (docs/idiomatic-rust-async.md, section 2). They pin what C4 has to keep, or to change on
-//! purpose with a DEVIATIONS row and a new test.
+//! purpose with a DEVIATIONS row and a new test. The tasks and completion sources they drive are
+//! deprecated since 0.5.0 (step A7) and keep their behaviour; the tests stay on them unchanged.
+#![allow(deprecated)]
 
 use crate::threading::tasks::{run_pending_wakes, spawn_local, TaskCompletionSource, TaskStatus};
 #[allow(deprecated)]

@@ -136,7 +136,7 @@ impl WriteableStream {
     fn observe(&self, task: PromiseFuture<JsObject>) {
         self.requests.borrow_mut().pending += 1;
         let requests = self.requests.clone();
-        Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        Dispatcher::ui_thread().start_local(async move {
             let result = task.await;
             let wakers = {
                 let mut requests = requests.borrow_mut();
@@ -226,7 +226,7 @@ impl Drop for WriteableStream {
         let pending = Rc::new(PendingClose { item: self.item.take(), state: RefCell::default() });
         PENDING_CLOSES.with(|closes| closes.borrow_mut().push(pending.clone()));
         let requests = self.requests.clone();
-        Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        Dispatcher::ui_thread().start_local(async move {
             let close = close.await;
             requests_settled(requests.clone()).await;
             let error = requests.borrow_mut().error.take().or(close.err());

@@ -6,7 +6,8 @@ use crate::animation::{
 use crate::media::{ITransform, Rotate3DTransform};
 use crate::styling::Setter;
 use crate::animation::i_page_transition::{start_async, when_all};
-use crate::threading::{CancellationToken, DispatcherTask};
+use crate::threading::CancellationToken;
+use ferroui_system::task::JoinHandle;
 use crate::{Ref, Visual};
 use std::cell::Cell;
 use std::ops::Deref;
@@ -160,7 +161,7 @@ impl IPageTransition for Rotate3DTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let orientation = self.orientation();
         let depth = self.depth.get();
         let duration = self.duration();

@@ -17,7 +17,7 @@ use ferroui_base::media::{
     TextOptions, TextRenderingMode, TextWrapping, Typeface,
 };
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
-use ferroui_base::utilities::{CultureInfo, HandlerList};
+use ferroui_base::utilities::{HandlerList, Locale};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Matrix, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty, Vector, Visual,
@@ -954,7 +954,7 @@ impl InteractiveLineControl {
 
         let text = Rc::new(FormattedText::new(
             label,
-            CultureInfo::invariant_culture(),
+            Locale::UNKNOWN,
             FlowDirection::LeftToRight,
             Typeface::default(),
             LABEL_FONT_SIZE,

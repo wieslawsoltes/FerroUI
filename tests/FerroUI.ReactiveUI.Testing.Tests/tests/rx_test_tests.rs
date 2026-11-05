@@ -1,10 +1,11 @@
 //! `RxTestTests` (`ReactiveUI.Testing.Tests/RxTestTests.cs`).
 
-use crate::mocks::{delay, is_invalid_operation, yield_now, InvalidOperationException};
+use crate::mocks::{delay, done, is_invalid_operation, yield_now, Done, InvalidOperationException};
 use ferroui_reactive::linq::TimeoutError;
 use ferroui_reactiveui::PanicError;
 use ferroui_reactiveui_testing::RxTest;
-use ferroui_system::threading::tasks::{block_on, Task};
+use ferroui_system::task::block_on;
+use ferroui_system::ObservableError;
 use std::cell::Cell;
 use std::rc::Rc;
 use std::time::Duration;
@@ -22,11 +23,11 @@ const SHORT_TIMEOUT_MILLISECONDS: u64 = 100;
 const DELAY_LONGER_THAN_TIMEOUT_MILLISECONDS: u64 = 2_000;
 
 /// A test body that counts its runs in `count`.
-fn counting_body(count: &Rc<Cell<i32>>) -> impl FnOnce() -> Task<()> + 'static {
+fn counting_body(count: &Rc<Cell<i32>>) -> impl FnOnce() -> Done + 'static {
     let count = count.clone();
     move || {
         count.set(count.get() + 1);
-        Task::from_result(())
+        done()
     }
 }
 
@@ -39,8 +40,9 @@ fn app_builder_test_async_executes_test_body() {
     let flag = executed.clone();
     block_on(RxTest::app_builder_test_async(move || {
         flag.set(true);
-        Task::from_result(())
-    }))
+        done()
+    })
+    .flatten())
     .expect("the test passes");
 
     // Assert
@@ -53,19 +55,20 @@ fn app_builder_test_async_executes_test_body() {
 fn app_builder_test_async_propagates_exceptions() {
     // The body throws before it returns a task: here it panics, and the task ends with the error of
     // the panic.
-    let error = block_on(RxTest::app_builder_test_async(|| panic!("Test exception"))).expect_err("the panic of the test is passed on");
+    let error = block_on(RxTest::app_builder_test_async(|| -> Done { panic!("Test exception") }).flatten()).expect_err("the panic of the test is passed on");
 
     assert_eq!(error.downcast_ref::<PanicError>().map(|exception| exception.message.as_str()), Some("Test exception"));
 }
 
 #[test]
 fn app_builder_test_async_propagates_async_exceptions() {
-    let error = block_on(RxTest::app_builder_test_async(|| {
-        Task::spawn_local(async {
+    let error = block_on(
+        RxTest::app_builder_test_async(|| async {
             yield_now().await?;
-            Err::<(), _>(InvalidOperationException::error("Async test exception"))
+            Err::<(), ObservableError>(InvalidOperationException::error("Async test exception"))
         })
-    }))
+        .flatten(),
+    )
     .expect_err("the exception of the test is passed on");
 
     assert!(is_invalid_operation(&error));
@@ -78,7 +81,7 @@ fn app_builder_test_async_allows_sequential_calls() {
 
     // Act
     for _ in 0..EXPECTED_SEQUENTIAL_CALL_COUNT {
-        block_on(RxTest::app_builder_test_async(counting_body(&count))).expect("the test passes");
+        block_on(RxTest::app_builder_test_async(counting_body(&count)).flatten()).expect("the test passes");
     }
 
     // Assert
@@ -89,15 +92,16 @@ fn app_builder_test_async_allows_sequential_calls() {
 fn app_builder_test_async_resets_builder_state_between_tests() {
     // This test verifies that multiple calls don't interfere with each other.
     // Arrange & Act
-    block_on(RxTest::app_builder_test_async(|| Task::from_result(()))).expect("the first test passes");
+    block_on(RxTest::app_builder_test_async(done).flatten()).expect("the first test passes");
 
     let second_test_executed = Rc::new(Cell::new(false));
     let flag = second_test_executed.clone();
     block_on(RxTest::app_builder_test_async(move || {
         // Second test - should have clean state.
         flag.set(true);
-        Task::from_result(())
-    }))
+        done()
+    })
+    .flatten())
     .expect("the second test passes");
 
     // Assert
@@ -114,10 +118,11 @@ fn app_builder_test_async_with_custom_timeout_executes_within_timeout() {
     block_on(RxTest::app_builder_test_async_with(
         move || {
             flag.set(true);
-            Task::from_result(())
+            done()
         },
         CUSTOM_TIMEOUT_MILLISECONDS,
-    ))
+    )
+    .flatten())
     .expect("the test passes");
 
     // Assert
@@ -129,7 +134,8 @@ fn app_builder_test_async_throws_timeout_exception_when_test_exceeds_timeout() {
     let error = block_on(RxTest::app_builder_test_async_with(
         || delay(Duration::from_millis(DELAY_LONGER_THAN_TIMEOUT_MILLISECONDS)),
         SHORT_TIMEOUT_MILLISECONDS,
-    ))
+    )
+    .flatten())
     .expect_err("the test runs longer than its time limit");
 
     assert!(error.downcast_ref::<TimeoutError>().is_some());
@@ -137,5 +143,5 @@ fn app_builder_test_async_throws_timeout_exception_when_test_exceeds_timeout() {
 
 #[test]
 fn app_builder_test_async_handles_task_completed_task() {
-    block_on(RxTest::app_builder_test_async(|| Task::from_result(()))).expect("the test passes");
+    block_on(RxTest::app_builder_test_async(done).flatten()).expect("the test passes");
 }

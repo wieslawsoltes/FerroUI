@@ -9,7 +9,7 @@ use std::rc::Rc;
 use crate::media::text_formatting::testing::{utf16, TextTestScope};
 use crate::media::text_formatting::{GlyphInfo, ShapedBuffer, TextShaper, TextShaperOptions};
 use crate::media::{GlyphTypeface, Typeface};
-use crate::utilities::CultureInfo;
+use crate::utilities::current_locale;
 
 fn load_typeface() -> Rc<GlyphTypeface> {
     Typeface::default_typeface().glyph_typeface()
@@ -158,7 +158,7 @@ fn shape_ascii(text: &str) -> Rc<ShapedBuffer> {
         Typeface::default_typeface().glyph_typeface(),
         12.0,
         0,
-        Some(CultureInfo::current_culture()),
+        Some(current_locale()),
         0.0,
         0.0,
         None,

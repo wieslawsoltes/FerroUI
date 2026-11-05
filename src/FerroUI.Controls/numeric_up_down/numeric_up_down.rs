@@ -927,7 +927,7 @@ impl NumericUpDown {
         if let Some(converter) = self.text_converter() {
             let boxed = value.map(|value| Rc::new(value) as BoxedValue);
             let text = converter
-                .convert_back(boxed.as_ref(), ValueType::of::<String>(), None, &CultureInfo::current_culture())
+                .convert_back(boxed.as_ref(), ValueType::of::<String>(), None, &CultureInfo::current_formatting())
                 .map_err(|error| ConversionError(error.to_string()))?;
             return Ok(text.map(|text| ValueTypes::to_display_string(Some(&text))));
         }
@@ -1179,7 +1179,7 @@ impl NumericUpDown {
         if let Some(converter) = self.text_converter() {
             let boxed: BoxedValue = Rc::new(text.to_string());
             let value_from_text = converter
-                .convert(Some(&boxed), ValueType::of::<Option<Decimal>>(), None, &CultureInfo::current_culture())
+                .convert(Some(&boxed), ValueType::of::<Option<Decimal>>(), None, &CultureInfo::current_formatting())
                 .map_err(|error| ConversionError(error.to_string()))?;
             return match value_from_text {
                 None => Ok(None),
@@ -1324,7 +1324,7 @@ fn parse_percent(text: &str, number_format: Option<&NumberFormatInfo>) -> Result
     let info = match number_format {
         Some(info) => info,
         None => {
-            current = CultureInfo::current_culture().number_format();
+            current = CultureInfo::current_formatting().number_format();
             &*current
         }
     };

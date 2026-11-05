@@ -7,27 +7,28 @@
 //! (Exceptionless, Raygun, ApplicationInsights), which are not ported, inherit them; here they are
 //! instantiated for `DefaultFeatureUsageTrackingSession`, with an `AppLocatorScope`, as the session
 //! logs through the log manager of the locator. The sub-feature is a `Rc<dyn
-//! IFeatureUsageTrackingSession>`, which does not convert to `IFeatureUsageTrackingSessionOf<Guid>`
+//! IFeatureUsageTrackingSession>`, which does not convert to `IFeatureUsageTrackingSessionOf<Uuid>`
 //! (`subfeature as IFeatureUsageTrackingSession<Guid>`), so the base checks its name only; the
 //! references of a sub-feature of a `DefaultFeatureUsageTrackingSession` are checked in
 //! `default_feature_usage_tracking_session_coverage_tests`.
 
 /// The tests of the construction of a session (`BaseConstructorTests<TFeatureUsageTracking>`);
-/// `$get_session` makes a session that implements `IFeatureUsageTrackingSessionOf<Guid>` from a
+/// `$get_session` makes a session that implements `IFeatureUsageTrackingSessionOf<Uuid>` from a
 /// feature name (`&str`).
 macro_rules! base_constructor_tests {
     ($get_session:expr) => {
         #[test]
         fn returns_instance() {
-            use ::ferroui_splat::{Guid, IFeatureUsageTrackingSession, IFeatureUsageTrackingSessionOf};
+            use ::ferroui_splat::{IFeatureUsageTrackingSession, IFeatureUsageTrackingSessionOf};
+            use ::uuid::Uuid;
 
             let _scope = $crate::tests::common::AppLocatorScope::new();
-            let feature_name = Guid::new_guid().to_string();
+            let feature_name = Uuid::new_v4().to_string();
             let instance = ($get_session)(feature_name.as_str());
 
             assert_eq!(instance.feature_name(), feature_name);
-            assert_ne!(instance.feature_reference(), Guid::EMPTY);
-            assert_eq!(instance.parent_reference(), Guid::EMPTY);
+            assert_ne!(instance.feature_reference(), Uuid::nil());
+            assert_eq!(instance.parent_reference(), Uuid::nil());
         }
     };
 }
@@ -35,23 +36,24 @@ macro_rules! base_constructor_tests {
 pub(crate) use base_constructor_tests;
 
 /// The tests of the sub-features of a session (`BaseSubFeatureMethodTests<TFeatureUsageTracking>`);
-/// `$get_session` makes a session that implements `IFeatureUsageTrackingSessionOf<Guid>` from a
+/// `$get_session` makes a session that implements `IFeatureUsageTrackingSessionOf<Uuid>` from a
 /// feature name (`&str`).
 macro_rules! base_sub_feature_method_tests {
     ($get_session:expr) => {
         #[test]
         fn returns_instance() {
-            use ::ferroui_splat::{Guid, IFeatureUsageTrackingSession, IFeatureUsageTrackingSessionOf};
+            use ::ferroui_splat::{IFeatureUsageTrackingSession, IFeatureUsageTrackingSessionOf};
+            use ::uuid::Uuid;
 
             let _scope = $crate::tests::common::AppLocatorScope::new();
-            let feature_name = Guid::new_guid().to_string();
+            let feature_name = Uuid::new_v4().to_string();
             let instance = ($get_session)(feature_name.as_str());
 
             assert_eq!(instance.feature_name(), feature_name);
-            assert_ne!(instance.feature_reference(), Guid::EMPTY);
-            assert_eq!(instance.parent_reference(), Guid::EMPTY);
+            assert_ne!(instance.feature_reference(), Uuid::nil());
+            assert_eq!(instance.parent_reference(), Uuid::nil());
 
-            let subfeature_name = Guid::new_guid().to_string();
+            let subfeature_name = Uuid::new_v4().to_string();
             let subfeature = instance.sub_feature(&subfeature_name);
 
             assert_eq!(subfeature.feature_name(), subfeature_name);

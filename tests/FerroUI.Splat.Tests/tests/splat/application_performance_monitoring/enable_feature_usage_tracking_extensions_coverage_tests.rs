@@ -14,11 +14,12 @@ use crate::tests::common::{
 };
 use ferroui_splat::{
     AppLocator, DefaultFeatureUsageTrackingSession, EnableFeatureUsageTrackingExt,
-    FeatureUsageTrackingSessionExt, Guid, IEnableFeatureUsageTracking, IFeatureUsageTrackingManager,
+    FeatureUsageTrackingSessionExt, IEnableFeatureUsageTracking, IFeatureUsageTrackingManager,
     IFeatureUsageTrackingSession, ILogger,
 };
 use ferroui_system::IDisposable;
 use std::rc::Rc;
+use uuid::Uuid;
 
 const FEATURE_NAME: &str = "feature";
 
@@ -31,7 +32,7 @@ impl IEnableFeatureUsageTracking for TrackingEnabledFixture {}
 fn feature_usage_tracking_session_returns_session_with_feature_name() {
     let _scope = AppLocatorScope::new();
     let fixture = TrackingEnabledFixture;
-    let feature_name = Guid::new_guid().to_string();
+    let feature_name = Uuid::new_v4().to_string();
 
     let session = fixture.feature_usage_tracking_session(&feature_name);
 
@@ -46,7 +47,7 @@ fn feature_usage_tracking_session_returns_default_session_type() {
     AppLocator::register_constant::<dyn ILogger>(logger.clone());
     let fixture = TrackingEnabledFixture;
 
-    let session = fixture.feature_usage_tracking_session(&Guid::new_guid().to_string());
+    let session = fixture.feature_usage_tracking_session(&Uuid::new_v4().to_string());
 
     assert!(logger
         .logs()
@@ -70,7 +71,7 @@ fn feature_usage_tracking_session_throws_when_manager_missing() {
 fn with_feature_usage_tracking_session_invokes_action() {
     let _scope = AppLocatorScope::new();
     let fixture = TrackingEnabledFixture;
-    let feature_name = Guid::new_guid().to_string();
+    let feature_name = Uuid::new_v4().to_string();
     let mut captured: Option<String> = None;
 
     fixture.with_feature_usage_tracking_session(&feature_name, |session: &dyn IFeatureUsageTrackingSession| {
@@ -100,8 +101,8 @@ fn with_feature_usage_tracking_session_reports_and_rethrows() {
 #[test]
 fn with_sub_feature_usage_tracking_session_invokes_action_with_sub_feature() {
     let _scope = AppLocatorScope::new();
-    let session = DefaultFeatureUsageTrackingSession::new(&Guid::new_guid().to_string());
-    let sub_feature_name = Guid::new_guid().to_string();
+    let session = DefaultFeatureUsageTrackingSession::new(&Uuid::new_v4().to_string());
+    let sub_feature_name = Uuid::new_v4().to_string();
     let mut captured: Option<String> = None;
 
     session.with_sub_feature_usage_tracking_session(&sub_feature_name, |sub: &dyn IFeatureUsageTrackingSession| {
@@ -117,7 +118,7 @@ fn with_sub_feature_usage_tracking_session_reports_and_rethrows() {
     let _scope = AppLocatorScope::new();
     let logger = Rc::new(TextLogger::new());
     AppLocator::register_constant::<dyn ILogger>(logger.clone());
-    let session = DefaultFeatureUsageTrackingSession::new(&Guid::new_guid().to_string());
+    let session = DefaultFeatureUsageTrackingSession::new(&Uuid::new_v4().to_string());
 
     let payload = panic_payload(|| {
         session.with_sub_feature_usage_tracking_session("sub", |_: &dyn IFeatureUsageTrackingSession| {

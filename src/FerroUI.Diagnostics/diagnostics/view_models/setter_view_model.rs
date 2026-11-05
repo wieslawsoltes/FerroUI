@@ -9,7 +9,7 @@ use super::{BindingSetterViewModel, ResourceSetterViewModel, ViewModelBase};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::input::platform::{ClipboardExtensions, IClipboard};
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{ferro_markup_type, BoxedValue, FerroProperty};
 use std::cell::RefCell;
 use std::ops::Deref;
@@ -122,9 +122,12 @@ impl SetterViewModel {
             return;
         };
         let text = value.to_string();
-        let _ = Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let _ = clipboard.set_text_async(Some(&text)).await;
-        });
+        let _ = Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let _ = clipboard.set_text_async(Some(&text)).await;
+            },
+            DispatcherPriority::DEFAULT,
+        );
     }
 }
 

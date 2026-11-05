@@ -18,11 +18,11 @@ mod imp {
         AssetAssembly, IAssetLoader, IRuntimePlatform, RuntimePlatformInfo, StandardAssetLoader,
         StandardRuntimePlatform,
     };
-    use ferroui_base::utilities::DateTime;
     use ferroui_base::FerroLocator;
     use ferroui_controls::AppBuilder;
     use std::rc::Rc;
     use std::sync::OnceLock;
+    use std::time::SystemTime;
 
     /// Registers the runtime platform services of Android.
     pub struct AndroidRuntimePlatformServices;
@@ -88,7 +88,7 @@ mod imp {
             })
         }
 
-        fn get_utc_now(&self) -> DateTime {
+        fn get_utc_now(&self) -> SystemTime {
             self.base.get_utc_now()
         }
     }

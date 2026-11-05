@@ -11,8 +11,8 @@ use super::{
 use crate::media::{
     BaselineAlignment, Brushes, CharacterHit, FlowDirection, TextAlignment, TextWrapping, Typeface,
 };
-use crate::utilities::{CultureInfo, NumberFormatInfo};
-use crate::Point;
+use crate::utilities::{locale, ICultureDataProvider, Locale, NumberFormatInfo};
+use crate::{FerroLocator, Point};
 use std::rc::Rc;
 
 fn tabs(
@@ -47,7 +47,16 @@ fn stop(position: f64, alignment: TabAlignment) -> TextTabStop {
 fn close(actual: f64, expected: f64) {
     assert!((actual - expected).abs() < 1e-7, "{actual} != {expected}");
 }
-fn colored_properties(culture: Option<CultureInfo>) -> Rc<dyn TextRunProperties> {
+/// The number conventions of `pl-PL` (a decimal comma), the only data of the provider.
+struct PolishNumbers(Rc<NumberFormatInfo>);
+
+impl ICultureDataProvider for PolishNumbers {
+    fn get_number_format(&self, culture_name: &str) -> Option<Rc<NumberFormatInfo>> {
+        (culture_name == "pl-PL").then(|| self.0.clone())
+    }
+}
+
+fn colored_properties(culture: Option<Locale>) -> Rc<dyn TextRunProperties> {
     Rc::new(GenericTextRunProperties::with_all(
         Typeface::default_typeface(),
         12.0,
@@ -126,10 +135,13 @@ fn paragraph_tabs_align_left_center_right_and_decimal_fields() {
 #[test]
 fn paragraph_tabs_decimal_uses_run_culture_and_crosses_style_boundaries() {
     let _scope = TextTestScope::new();
-    // Base runs without a culture-data provider. Supply the number conventions
-    // explicitly; a culture name alone intentionally uses invariant separators.
-    let culture = CultureInfo::get_culture_info("pl-PL")
-        .with_number_format(NumberFormatInfo::new().with_number_decimal_separator(","));
+    // Base runs without a culture-data provider, where a locale alone uses the
+    // invariant separators. Supply the number conventions of the run's locale
+    // through a provider.
+    let provider: Rc<dyn ICultureDataProvider> =
+        Rc::new(PolishNumbers(Rc::new(NumberFormatInfo::new().with_number_decimal_separator(","))));
+    FerroLocator::current_mutable().bind::<dyn ICultureDataProvider>().to_constant(provider);
+    let culture = locale!("pl-PL");
     let props = colored_properties(Some(culture.clone()));
     let decimal_props = Rc::new(GenericTextRunProperties::with_all(
         Typeface::default_typeface(),

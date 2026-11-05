@@ -9,7 +9,7 @@
 use ferroui_base::media::fonts::testing::TestPlatformTypeface;
 use ferroui_base::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface};
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
-use ferroui_base::utilities::{CultureInfo, Uri};
+use ferroui_base::utilities::{Locale, Uri};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use std::cell::Cell;
 use std::io::Read;
@@ -51,7 +51,7 @@ impl IFontManagerImpl for TestFontManager {
         _font_weight: FontWeight,
         _font_stretch: FontStretch,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         None
     }

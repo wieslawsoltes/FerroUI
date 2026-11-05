@@ -1,6 +1,6 @@
 //! The running of futures on the thread that started them (docs/porting/reactive.md, section 5.8):
 //! [`spawn_local`], the thread poster through which another thread wakes them, and the queue of
-//! such wakes on a thread that has no poster.
+//! such wakes on a thread that has no poster; [`run`] (`Task.Run`) and [`canceled`].
 //!
 //! The futures are tasks of the executor of the crate ([`crate::task`]), in the queue of their
 //! thread. A future is polled when it is spawned, and again whenever it is woken: at once on its
@@ -11,8 +11,14 @@
 //! priority of the job instead ([`crate::task::spawn_local`]): a wake in a job of the same
 //! priority polls it at once, any other wake queues a job at that priority. A panic of a future
 //! faults its task with a [`TaskWorkError`] that holds the message of the panic.
+//!
+//! Deprecated since 0.5.0 (step A7 of phase C4 of #423): [`spawn_local`], [`block_on`],
+//! [`run_pending_wakes`], [`set_thread_poster`] and [`ThreadPoster`] are wrappers over
+//! [`crate::task`] (`spawn_local`, `block_on`, `run_pending`, `set_thread_schedule`, `Schedule`).
+#![allow(deprecated)]
 
 use super::task::Task;
+use crate::task::Shared;
 use crate::task::Canceled;
 use crate::task::executor::{panic_message, spawn_task, Failure};
 use crate::task::{FirstPoll, Schedule};
@@ -23,6 +29,7 @@ use std::sync::{Arc, Mutex, PoisonError};
 use std::task::{Poll, Waker};
 
 /// Runs work on the thread it belongs to, from any thread (`SynchronizationContext.Post`).
+#[deprecated(since = "0.5.0", note = "implement `ferroui_system::task::Schedule`, the schedule of a thread")]
 pub type ThreadPoster = Arc<dyn Fn(Box<dyn FnOnce() + Send>) + Send + Sync>;
 
 /// A thread poster as the schedule of its thread.
@@ -38,6 +45,10 @@ impl Schedule for PosterSchedule {
 /// error that is a cancellation ([`Canceled`], [`TaskCanceledError`](super::TaskCanceledError))
 /// cancels it, and a panic faults it with a [`TaskWorkError`]. The future is polled at once, and
 /// again whenever it is woken (the module's documentation).
+#[deprecated(
+    since = "0.5.0",
+    note = "use `ferroui_system::task::spawn_local`, which gives a `JoinHandle` (`.shared()` for several observers)"
+)]
 pub fn spawn_local<T: 'static>(future: impl Future<Output = Result<T, ObservableError>> + 'static) -> Task<T> {
     let task = Task::with_status(super::TaskStatus::Running);
     let (target, failed) = (task.clone(), task.clone());
@@ -68,6 +79,7 @@ pub fn spawn_local<T: 'static>(future: impl Future<Output = Result<T, Observable
 /// the thread): a wake of one of its futures from another thread is posted through it, and the
 /// work it is given must run on this thread. `None` removes it. It is the schedule of the thread
 /// ([`crate::task::set_thread_schedule`]).
+#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::set_thread_schedule` with a `Schedule`")]
 pub fn set_thread_poster(poster: Option<ThreadPoster>) {
     crate::task::set_thread_schedule(poster.map(|poster| Arc::new(PosterSchedule(poster)) as Arc<dyn Schedule>));
 }
@@ -75,6 +87,7 @@ pub fn set_thread_poster(poster: Option<ThreadPoster>) {
 /// Polls the futures of the current thread that other threads woke, and runs the callbacks they
 /// asked for (a cancellation, [`CancellationToken::register_local`](crate::threading::CancellationToken::register_local)),
 /// until none is left; true when there was any ([`crate::task::run_pending`]).
+#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::run_pending`")]
 pub fn run_pending_wakes() -> bool {
     crate::task::run_pending()
 }
@@ -87,6 +100,7 @@ pub fn run_pending_wakes() -> bool {
 /// With the panic of the future. Never returns when nothing wakes the future again: a future that
 /// waits for this thread itself (a scheduler of the thread, a task that only this thread ends) has
 /// to be ended by something that runs before it waits.
+#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::block_on`, which takes any future")]
 pub fn block_on<T: Clone + 'static>(future: impl Future<Output = Result<T, ObservableError>> + 'static) -> Result<T, ObservableError> {
     crate::task::block_on(future)
 }
@@ -106,10 +120,14 @@ impl std::fmt::Display for TaskWorkError {
 
 impl std::error::Error for TaskWorkError {}
 
-/// Runs `work` on another thread and gives its task, which ends on the current thread
-/// (`Task.Run`): through the poster of the thread, or the queue of [`run_pending_wakes`].
-/// An `Err` of the work, or a panic, faults the task with a [`TaskWorkError`].
-pub fn run<T: Send + 'static>(work: impl FnOnce() -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + 'static) -> Task<T> {
+/// Runs `work` on another thread and gives the outcome, which ends on the current thread
+/// (`Task.Run`): the outcome is the [`Shared`] of a task of the current thread
+/// ([`crate::task::spawn_local`]), woken from the worker through the schedule of the thread, or the
+/// queue of [`crate::task::run_pending`]. An `Err` of the work, or a panic, is a
+/// [`TaskWorkError`] with its message; [`Shared::flatten`] is a future of the result.
+pub fn run<T: Clone + Send + 'static>(
+    work: impl FnOnce() -> Result<T, Box<dyn std::error::Error + Send + Sync>> + Send + 'static,
+) -> Shared<Result<T, ObservableError>> {
     struct Slot<T> {
         outcome: Option<Result<T, String>>,
         waker: Option<Waker>,
@@ -135,7 +153,7 @@ pub fn run<T: Send + 'static>(work: impl FnOnce() -> Result<T, Box<dyn std::erro
             waker.wake();
         }
     });
-    spawn_local(std::future::poll_fn(move |context| {
+    crate::task::spawn_local(std::future::poll_fn(move |context| {
         let mut slot = slot.lock().unwrap_or_else(PoisonError::into_inner);
         match slot.outcome.take() {
             Some(Ok(value)) => Poll::Ready(Ok(value)),
@@ -146,6 +164,7 @@ pub fn run<T: Send + 'static>(work: impl FnOnce() -> Result<T, Box<dyn std::erro
             }
         }
     }))
+    .shared()
 }
 
 /// A future that ends with a cancellation (`Task.FromCanceled` awaited): for code that stops

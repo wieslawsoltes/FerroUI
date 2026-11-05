@@ -14,6 +14,14 @@ extern "C" {
     /// of turn has no animation frame to take its timestamp from.
     #[wasm_bindgen(js_namespace = TimerHelper, js_name = now)]
     pub fn now() -> f64;
+
+    /// The wall clock of the page, `Date.now()`: milliseconds since the Unix
+    /// epoch, 1970-01-01T00:00:00 UTC. Not from upstream, which reads the
+    /// clock of the .NET runtime: the runtime platform of the browser reports
+    /// "now" from it, since `SystemTime::now()` is not available on
+    /// `wasm32-unknown-unknown`.
+    #[wasm_bindgen(js_namespace = TimerHelper, js_name = dateNow)]
+    pub fn date_now() -> f64;
 }
 
 ferroui_base::ferro_thread_local! {

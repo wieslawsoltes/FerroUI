@@ -5,6 +5,6 @@ mod helpers;
 mod test_fixture;
 mod test_fixture_builder;
 
-pub use helpers::{delay, is_invalid_operation, yield_now, InvalidOperationException};
+pub use helpers::{delay, done, is_invalid_operation, yield_now, Done, InvalidOperationException};
 pub use test_fixture::TestFixture;
 pub use test_fixture_builder::TestFixtureBuilder;

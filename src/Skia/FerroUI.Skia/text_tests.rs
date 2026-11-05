@@ -15,7 +15,7 @@ use ferroui_base::platform::{
     IPlatformRenderInterface, IRenderTargetBitmapImpl, PixelFormat, StandardAssetLoader,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{locale, ReadOnlyMemory};
 use ferroui_base::{FerroLocator, LocatorExtensions, Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
 use std::cell::RefCell;
 use std::io::Read;
@@ -178,7 +178,7 @@ fn font_manager_matches_characters_with_fallback_fonts() {
         FontWeight::Bold,
         FontStretch::Condensed,
         Some(&font_manager.get_default_font_family_name()),
-        Some(&CultureInfo::get_culture_info("en-US")),
+        Some(&locale!("en-US")),
     );
     assert!(bold_italic.is_some());
 }

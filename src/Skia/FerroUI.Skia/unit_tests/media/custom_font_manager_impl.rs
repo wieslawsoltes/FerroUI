@@ -9,7 +9,7 @@ use ferroui_base::media::{
     FontManager, FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface,
 };
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
-use ferroui_base::utilities::{CultureInfo, Uri, UriKind};
+use ferroui_base::utilities::{current_locale, Locale, Uri, UriKind};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use skia_safe::font_style::{Weight, Width};
 use skia_safe::{Data, FontMgr};
@@ -30,12 +30,15 @@ pub struct CustomFontManagerImpl {
 impl CustomFontManagerImpl {
     pub fn new() -> Self {
         // Seam: upstream passes the culture's `ThreeLetterISOLanguageName`
-        // before its `TwoLetterISOLanguageName`; the port's `CultureInfo`
-        // has no `ThreeLetterISOLanguageName` yet, so only the two letter
-        // name is passed.
+        // before its `TwoLetterISOLanguageName`; only the language subtag of
+        // the current locale (its `TwoLetterISOLanguageName`, `iv` for the
+        // invariant culture) is passed.
         Self {
             default_family_name: format!("{}#Noto Mono", FontManager::system_fonts_key()),
-            bcp47: [CultureInfo::current_culture().two_letter_iso_language_name().to_owned()],
+            bcp47: [match current_locale() {
+                locale if locale == Locale::UNKNOWN => "iv".to_owned(),
+                locale => locale.id.language.as_str().to_owned(),
+            }],
             system_fonts: RefCell::new(None),
         }
     }
@@ -102,7 +105,7 @@ impl IFontManagerImpl for CustomFontManagerImpl {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         if let Some(glyph_typeface) = self.system_fonts().try_match_character(
             codepoint,

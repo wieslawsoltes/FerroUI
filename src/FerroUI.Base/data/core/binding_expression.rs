@@ -200,7 +200,7 @@ impl BindingExpression {
         self.uncommon
             .as_ref()
             .and_then(|uncommon| uncommon.converter_culture.clone())
-            .unwrap_or_else(CultureInfo::current_culture)
+            .unwrap_or_else(CultureInfo::current_formatting)
     }
 
     pub fn converter_parameter(&self) -> Option<&BoxedValue> {

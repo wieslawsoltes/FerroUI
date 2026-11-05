@@ -7,12 +7,12 @@
 //! byte, its name with a terminating zero and its value.
 
 use crate::error::Error;
-use crate::guid::Guid;
 use crate::metsys_bson::configuration::BsonConfiguration;
 use crate::metsys_bson::{
     DateTime, Deserializer, Dictionary, Helper, ObjectId, ObjectIdGenerator, Options, Regex, RegexOptions, ScopedCode,
     Serializer, TypeHelper, Types, Value,
 };
+use uuid::Uuid;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[repr(i32)]
@@ -95,7 +95,7 @@ struct Everything {
     text: String,
     number: f64,
     single: f32,
-    id: Guid,
+    id: Uuid,
     time: DateTime,
     data: Option<Vec<u8>>,
     object_id: Option<ObjectId>,
@@ -115,7 +115,7 @@ crate::bson_class!(Everything as "Everything" {
     "Text" => text: String,
     "Number" => number: f64,
     "Single" => single: f32,
-    "Id" => id: Guid,
+    "Id" => id: Uuid,
     "Time" => time: DateTime,
     "Data" => data: Option<Vec<u8>>,
     "ObjectId" => object_id: Option<ObjectId>,
@@ -128,7 +128,7 @@ crate::bson_class!(Everything as "Everything" {
     "Color" => color: Color,
 });
 
-const GUID: Guid = Guid::parse_const("6E3C5310-E2B1-4C3D-8688-01183AA48C5B");
+const GUID: Uuid = Uuid::from_u128(0x6E3C5310_E2B1_4C3D_8688_01183AA48C5B);
 
 /// The document `{ key: value }`.
 fn document(key: &str, value: Value) -> Vec<u8> {
@@ -230,6 +230,38 @@ fn guid_is_binary_of_subtype_3() {
     assert_eq!(read_a(&bytes), Value::Guid(GUID));
 }
 
+#[derive(Clone, Debug, Default, PartialEq)]
+#[allow(deprecated)]
+struct WithPortGuid {
+    id: crate::guid::Guid,
+}
+
+#[allow(deprecated)]
+mod with_port_guid {
+    use super::WithPortGuid;
+    use crate::guid::Guid;
+
+    crate::bson_class!(WithPortGuid as "WithPortGuid" {
+        "Id" => id: Guid,
+    });
+}
+
+#[test]
+#[allow(deprecated)]
+fn a_property_of_the_deprecated_guid_has_the_layout_of_a_uuid() {
+    let value = WithPortGuid { id: crate::guid::Guid::from(GUID) };
+    let bytes = Serializer::serialize(&value).unwrap();
+    assert_eq!(
+        bytes,
+        [
+            0x1E, 0, 0, 0, 0x05, 0x49, 0x64, 0, 16, 0, 0, 0, 0x03, 0x10, 0x53, 0x3C, 0x6E, 0xB1, 0xE2, 0x3D, 0x4C,
+            0x86, 0x88, 0x01, 0x18, 0x3A, 0xA4, 0x8C, 0x5B, 0
+        ]
+    );
+    assert_eq!(bytes, document("Id", Value::Guid(GUID)));
+    assert_eq!(Deserializer::deserialize::<WithPortGuid>(&bytes, None).unwrap(), value);
+}
+
 #[test]
 fn object_id_is_type_7_and_twelve_bytes() {
     let id = ObjectId::from_string("0102030405060708090a0b0c").unwrap();
@@ -253,6 +285,23 @@ fn date_time_is_truncated_to_whole_milliseconds() {
     assert_eq!(DateTime::from_unix_ticks(-15_000).unix_milliseconds(), -1);
     let bytes = document("a", Value::DateTime(DateTime::from_unix_ticks(15_000)));
     assert_eq!(read_a(&bytes), Value::DateTime(DateTime::from_unix_ticks(10_000)));
+}
+
+#[test]
+fn date_time_converts_to_and_from_system_time() {
+    use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+    let time = UNIX_EPOCH + Duration::new(1_717_236_000, 123_456_789);
+    let value = DateTime::from(time);
+    assert_eq!(value, DateTime::from_unix_ticks(17_172_360_001_234_567));
+    // The system time of a value is exact; the value was truncated to a whole tick.
+    assert_eq!(SystemTime::try_from(value).unwrap(), UNIX_EPOCH + Duration::new(1_717_236_000, 123_456_700));
+    assert_eq!(SystemTime::try_from(Helper::EPOCH).unwrap(), UNIX_EPOCH);
+    // Before 1970, where the platform's system time can hold it.
+    if let Some(before) = UNIX_EPOCH.checked_sub(Duration::from_millis(1_500)) {
+        assert_eq!(DateTime::from(before), DateTime::from_unix_ticks(-15_000_000));
+        assert_eq!(SystemTime::try_from(DateTime::from_unix_ticks(-15_000_000)).unwrap(), before);
+    }
 }
 
 #[test]

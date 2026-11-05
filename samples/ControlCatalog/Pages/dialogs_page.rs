@@ -15,7 +15,7 @@ use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerFileTypes, FilePickerOpenOptions, FilePickerSaveOptions, FolderPickerOpenOptions,
     IStorageFile, IStorageFolder, IStorageItem, IStorageProvider, WellKnownFolder,
 };
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::{DateTimeOffset, Uri, UriKind};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
     VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
@@ -703,8 +703,8 @@ impl DialogsPage {
             result_text += &format!(
                 "Size: {}\n            DateCreated: {}\n            DateModified: {}\n            CanBookmark: {}\n            ",
                 nullable_text(props.size()),
-                nullable_text(props.date_created()),
-                nullable_text(props.date_modified()),
+                nullable_text(props.date_created().and_then(|date| DateTimeOffset::try_from(date).ok())),
+                nullable_text(props.date_modified().and_then(|date| DateTimeOffset::try_from(date).ok())),
                 bool_text(item.can_bookmark())
             );
             if let Some(file) = file {

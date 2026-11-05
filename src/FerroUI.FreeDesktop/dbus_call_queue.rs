@@ -8,7 +8,7 @@
 //! the order the one of `enqueue`.
 
 use ferroui_base::input::LocalBoxFuture;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_system::task::oneshot;
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -159,37 +159,40 @@ impl DBusCallQueue {
         self.inner.processing.set(true);
 
         let inner = self.inner.clone();
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            // The flag is reset when the loop is left in any way, as the
-            // `finally` of the reference.
-            struct ResetProcessing(Rc<Inner>);
-            impl Drop for ResetProcessing {
-                fn drop(&mut self) {
-                    self.0.processing.set(false);
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                // The flag is reset when the loop is left in any way, as the
+                // `finally` of the reference.
+                struct ResetProcessing(Rc<Inner>);
+                impl Drop for ResetProcessing {
+                    fn drop(&mut self) {
+                        self.0.processing.set(false);
+                    }
                 }
-            }
-            let _reset = ResetProcessing(inner.clone());
+                let _reset = ResetProcessing(inner.clone());
 
-            loop {
-                let Some(item) = inner.q.borrow_mut().pop_front() else {
-                    break;
-                };
-                match (item.callback)().await {
-                    Ok(()) => {
-                        if let Some(on_finish) = item.on_finish {
-                            on_finish(None);
+                loop {
+                    let Some(item) = inner.q.borrow_mut().pop_front() else {
+                        break;
+                    };
+                    match (item.callback)().await {
+                        Ok(()) => {
+                            if let Some(on_finish) = item.on_finish {
+                                on_finish(None);
+                            }
                         }
-                    }
-                    Err(e) => {
-                        if let Some(on_finish) = item.on_finish {
-                            on_finish(Some(e));
-                        } else {
-                            (inner.error_handler)(e).await;
+                        Err(e) => {
+                            if let Some(on_finish) = item.on_finish {
+                                on_finish(Some(e));
+                            } else {
+                                (inner.error_handler)(e).await;
+                            }
                         }
                     }
                 }
-            }
-        }));
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     /// Empties the queue; the calls somebody waits for fail as canceled.
@@ -311,10 +314,13 @@ mod tests {
         let results = Rc::new(RefCell::new(None));
         {
             let results = results.clone();
-            drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                let outcome = (done.await, value.await, failed.await);
-                *results.borrow_mut() = Some(outcome);
-            }));
+            drop(Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    let outcome = (done.await, value.await, failed.await);
+                    *results.borrow_mut() = Some(outcome);
+                },
+                DispatcherPriority::DEFAULT,
+            ));
         }
         pump_until(|| results.borrow().is_some());
 
@@ -352,9 +358,12 @@ mod tests {
         let result = Rc::new(RefCell::new(None));
         {
             let result = result.clone();
-            drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                *result.borrow_mut() = Some(waiting.await);
-            }));
+            drop(Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    *result.borrow_mut() = Some(waiting.await);
+                },
+                DispatcherPriority::DEFAULT,
+            ));
         }
         pump_until(|| result.borrow().is_some());
 

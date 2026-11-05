@@ -179,7 +179,7 @@ impl ClipboardMonitorBehavior {
 
         let behavior = self.to_ref().downgrade();
         let formats = clipboard.get_data_formats_async();
-        drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        drop(Dispatcher::ui_thread().start_local(async move {
             // Ignore clipboard access errors.
             let Ok(formats) = formats.await else {
                 return;

@@ -19,7 +19,7 @@ use ferroui_base::media::{
     CharacterHit, FlowDirection, FontFamily, TextAlignment, TextCollapsingCreateInfo, TextPathSegmentTrimming,
     TextTrimming, TextWrapping, Typeface,
 };
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{current_locale, ReadOnlyMemory};
 use ferroui_base::{Point, Rect, Size};
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::any::Any;
@@ -1523,7 +1523,7 @@ fn should_get_text_bounds_mixed() {
         Typeface::default_typeface().glyph_typeface(),
         10.0,
         0,
-        Some(CultureInfo::current_culture()),
+        Some(current_locale()),
         0.0,
         0.0,
         None,
@@ -1802,7 +1802,7 @@ fn should_get_text_bounds_not_infinite_loop() {
         Typeface::default_typeface().glyph_typeface(),
         10.0,
         0,
-        Some(CultureInfo::current_culture()),
+        Some(current_locale()),
         0.0,
         0.0,
         None,
@@ -1811,7 +1811,7 @@ fn should_get_text_bounds_not_infinite_loop() {
         Typeface::default_typeface().glyph_typeface(),
         11.0,
         0,
-        Some(CultureInfo::current_culture()),
+        Some(current_locale()),
         0.0,
         0.0,
         None,

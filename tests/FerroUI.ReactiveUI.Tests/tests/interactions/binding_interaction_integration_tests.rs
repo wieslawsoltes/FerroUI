@@ -4,7 +4,7 @@
 
 use crate::mocks::*;
 use ferroui_reactiveui::*;
-use ferroui_system::threading::tasks::block_on;
+use ferroui_system::task::block_on;
 
 const REQUEST: &str = "request";
 
@@ -13,7 +13,7 @@ fn handle_registered_handler_returns_output() {
     let interaction = Interaction::<String, bool>::new();
     let registration = interaction.register_handler(|context| context.set_output(context.input() == "accept"));
 
-    assert!(block_on(interaction.handle("accept".to_owned())).expect("the question is handled"));
+    assert!(block_on(interaction.handle("accept".to_owned()).flatten()).expect("the question is handled"));
     registration.dispose();
 }
 
@@ -23,9 +23,9 @@ fn handle_disposed_latest_handler_uses_earlier_handler() {
     let first = interaction.register_handler(|context| context.set_output("first".to_owned()));
     let latest = interaction.register_handler(|context| context.set_output("latest".to_owned()));
 
-    assert_eq!(block_on(interaction.handle(REQUEST.to_owned())).expect("the question is handled"), "latest");
+    assert_eq!(block_on(interaction.handle(REQUEST.to_owned()).flatten()).expect("the question is handled"), "latest");
     latest.dispose();
-    assert_eq!(block_on(interaction.handle(REQUEST.to_owned())).expect("the question is handled"), "first");
+    assert_eq!(block_on(interaction.handle(REQUEST.to_owned()).flatten()).expect("the question is handled"), "first");
     first.dispose();
 }
 
@@ -38,7 +38,7 @@ fn handle_async_handler_returns_output() {
         Ok(())
     });
 
-    assert_eq!(block_on(interaction.handle(1)).expect("the question is handled"), 2);
+    assert_eq!(block_on(interaction.handle(1).flatten()).expect("the question is handled"), 2);
     registration.dispose();
 }
 
@@ -46,7 +46,7 @@ fn handle_async_handler_returns_output() {
 fn handle_no_handler_throws() {
     let interaction = Interaction::<String, bool>::new();
 
-    let error = block_on(interaction.handle(REQUEST.to_owned())).expect_err("no handler handles the question");
+    let error = block_on(interaction.handle(REQUEST.to_owned()).flatten()).expect_err("no handler handles the question");
 
     assert!(error.downcast_ref::<UnhandledInteractionError<String, bool>>().is_some());
 }

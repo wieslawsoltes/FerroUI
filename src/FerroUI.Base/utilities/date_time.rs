@@ -32,12 +32,35 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 
-/// Gives the current UTC time.
-pub type UtcNowProvider = Rc<dyn Fn() -> DateTime>;
+/// Gives the current instant.
+///
+/// Since 0.5 the provider returns a [`SystemTime`], where it returned a
+/// `DateTime`: a provider that pins a date returns
+/// `SystemTime::try_from(date_time)` of it.
+pub type UtcNowProvider = Rc<dyn Fn() -> SystemTime>;
 
 crate::ferro_thread_local! {
     // CLOCK-SEAM: tests pin "now" here. The wall clock itself is `IRuntimePlatform::get_utc_now`.
     static UTC_NOW_PROVIDER: RefCell<Option<UtcNowProvider>> = const { RefCell::new(None) };
+}
+
+/// The current instant: the time of the pinned source of this thread
+/// ([`DateTime::set_utc_now_provider`]) when there is one, else the wall
+/// clock of the registered [`IRuntimePlatform`], else the one of the
+/// standard runtime platform.
+///
+/// Code that can run in the browser reads "now" here rather than with
+/// `SystemTime::now()`, which `wasm32-unknown-unknown` does not have: the
+/// runtime platform of the browser reads `Date.now()`.
+pub fn system_time_now() -> SystemTime {
+    let provider = UTC_NOW_PROVIDER.with(|current| current.borrow().clone());
+    if let Some(provider) = provider {
+        return provider();
+    }
+    match FerroLocator::current().get_service::<dyn IRuntimePlatform>() {
+        Some(platform) => platform.get_utc_now(),
+        None => StandardRuntimePlatform::new().get_utc_now(),
+    }
 }
 
 const TICKS_PER_DAY: i64 = SignedDuration::TICKS_PER_DAY;
@@ -161,28 +184,28 @@ impl DateTime {
 
     // --- the clock ---
 
-    /// Installs (or with `None` removes) the source of the current UTC time
+    /// Installs (or with `None` removes) the source of the current instant
     /// of the current thread and returns the previous one. Tests use it to
-    /// pin [`now`](Self::now), [`utc_now`](Self::utc_now) and [`today`](Self::today).
+    /// pin [`system_time_now`], [`now`](Self::now), [`utc_now`](Self::utc_now)
+    /// and [`today`](Self::today).
     pub fn set_utc_now_provider(provider: Option<UtcNowProvider>) -> Option<UtcNowProvider> {
         UTC_NOW_PROVIDER.with(|current| current.replace(provider))
     }
 
     /// The current date and time in UTC (kind [`DateTimeKind::Utc`]): the
-    /// time of the pinned source of this thread
-    /// ([`set_utc_now_provider`](Self::set_utc_now_provider)) when there is
-    /// one, else the wall clock of the registered
-    /// [`IRuntimePlatform`], else the one of the standard runtime platform.
+    /// instant of [`system_time_now`] as a date. An instant outside of the
+    /// years 1 to 9999 is [`MIN_VALUE`](Self::MIN_VALUE) or
+    /// [`MAX_VALUE`](Self::MAX_VALUE).
     pub fn utc_now() -> DateTime {
-        let provider = UTC_NOW_PROVIDER.with(|current| current.borrow().clone());
-        if let Some(provider) = provider {
-            return provider().to_universal_time();
-        }
-        let now = match FerroLocator::current().get_service::<dyn IRuntimePlatform>() {
-            Some(platform) => platform.get_utc_now(),
-            None => StandardRuntimePlatform::new().get_utc_now(),
-        };
-        now.specify_kind(DateTimeKind::Utc)
+        let now = system_time_now();
+        let date = DateTime::try_from(now).unwrap_or_else(|_| {
+            if now < SystemTime::UNIX_EPOCH {
+                DateTime::MIN_VALUE
+            } else {
+                DateTime::MAX_VALUE
+            }
+        });
+        date.specify_kind(DateTimeKind::Utc)
     }
 
     /// The current date and time in local time (kind [`DateTimeKind::Local`]).
@@ -473,7 +496,7 @@ impl DateTime {
     /// culture (.NET `ToString(string)`). Panics when the format is invalid.
     #[track_caller]
     pub fn to_string_with(self, format: &str) -> String {
-        self.to_string_format(format, &CultureInfo::current_culture())
+        self.to_string_format(format, &CultureInfo::current_formatting())
     }
 
     /// Formats with the general format `"G"` and the conventions of
@@ -711,7 +734,7 @@ impl SubAssign<SignedDuration> for DateTime {
 impl fmt::Display for DateTime {
     /// The general format `"G"` of the current culture (.NET `ToString()`).
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.to_string_format("G", &CultureInfo::current_culture()))
+        f.write_str(&self.to_string_format("G", &CultureInfo::current_formatting()))
     }
 }
 
@@ -734,7 +757,7 @@ impl FromStr for DateTime {
     type Err = FormatError;
     /// Parses with the conventions of the current culture (.NET `DateTime.Parse(string)`).
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        DateTime::parse(s, &CultureInfo::current_culture())
+        DateTime::parse(s, &CultureInfo::current_formatting())
     }
 }
 

@@ -10,7 +10,7 @@ use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignmen
 use ferroui_base::media::{
     BoxShadows, DrawingContext, FlowDirection, FormattedText, IBrush, SolidColorBrush, Typeface,
 };
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::{
     CornerRadius, FerroObjectImpl, Point, Rect, Ref, StyledElementImpl, Thickness, VisualImpl,
     WeakRef, ferro_class, ferro_class_info, ferro_impl_classes, instantiate,
@@ -314,7 +314,7 @@ impl VisualImpl for PropertyNumberScrubber {
         };
         let text = FormattedText::new(
             &label,
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             Typeface::new(ferroui_controls::documents::TextElement::get_font_family(
                 this,

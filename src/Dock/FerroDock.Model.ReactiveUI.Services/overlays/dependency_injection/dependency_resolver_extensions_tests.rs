@@ -174,7 +174,7 @@ fn factory_creates_distinct_local_services_sharing_all_three_global_services_and
         .confirm_async("t".into(), "m".into(), "y".into(), "n".into());
     assert!(b.global_confirmation_service().is_confirmation_open());
     a.confirmations().cancel_all();
-    assert!(!pending.result().unwrap());
+    assert!(!pending.result().unwrap().unwrap());
     assert!(!b.global_confirmation_service().is_confirmation_open());
     let provider = required::<dyn IHostOverlayServicesProvider>(services);
     let first = Screen::new("first");
@@ -483,8 +483,8 @@ fn registered_services_integrate_busy_root_lookup_and_factory_window_cleanup() {
     factory.on_window_closed(Some(window.clone()));
     factory.on_window_removed(Some(window));
     assert!(before.get());
-    assert!(dialog.result().unwrap().is_none());
-    assert!(!confirmation.result().unwrap());
+    assert!(dialog.result().unwrap().unwrap().is_none());
+    assert!(!confirmation.result().unwrap().unwrap());
     assert!(!root.busy().can_reload());
     assert_eq!(changes.get(), 1);
     assert!(!root.dialogs().has_dialogs());

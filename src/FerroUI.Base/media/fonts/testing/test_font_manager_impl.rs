@@ -5,7 +5,7 @@ use std::rc::Rc;
 use crate::media::fonts::font_collection_base::equals_ordinal_ignore_case;
 use crate::media::{FontFamily, FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface};
 use crate::platform::IFontManagerImpl;
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 
 use super::{TestFontBuilder, TestPlatformTypeface};
 
@@ -172,7 +172,7 @@ impl IFontManagerImpl for TestFontManagerImpl {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         self.match_character_calls.set(self.match_character_calls.get() + 1);
 

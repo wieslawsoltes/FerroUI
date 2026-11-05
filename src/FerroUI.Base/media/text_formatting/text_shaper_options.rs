@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::media::text_formatting::GenericTextRunProperties;
 use crate::media::{FontFeature, GlyphTypeface};
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 
 /// Options to customize text shaping.
 #[derive(Clone)]
@@ -10,7 +10,7 @@ pub struct TextShaperOptions {
     glyph_typeface: Rc<GlyphTypeface>,
     font_rendering_em_size: f64,
     bidi_level: i8,
-    culture: Option<CultureInfo>,
+    culture: Option<Locale>,
     incremental_tab_width: f64,
     letter_spacing: f64,
     font_features: Option<Rc<Vec<FontFeature>>>,
@@ -36,7 +36,7 @@ impl TextShaperOptions {
         typeface: Rc<GlyphTypeface>,
         font_rendering_em_size: f64,
         bidi_level: i8,
-        culture: Option<CultureInfo>,
+        culture: Option<Locale>,
         incremental_tab_width: f64,
         letter_spacing: f64,
         font_features: Option<Rc<Vec<FontFeature>>>,
@@ -68,7 +68,7 @@ impl TextShaperOptions {
     }
 
     /// Get the culture.
-    pub fn culture(&self) -> Option<&CultureInfo> {
+    pub fn culture(&self) -> Option<&Locale> {
         self.culture.as_ref()
     }
 

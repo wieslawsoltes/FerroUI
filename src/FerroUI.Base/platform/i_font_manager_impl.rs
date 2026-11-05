@@ -2,7 +2,7 @@ use std::io::Read;
 use std::rc::Rc;
 
 use crate::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface};
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 use super::IFontFallbackMapper;
 
 /// The font backend contract: enumerates installed fonts, creates platform
@@ -28,7 +28,7 @@ pub trait IFontManagerImpl: 'static {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>>;
 
     /// Optional range mapping with an independent fallback font scale.

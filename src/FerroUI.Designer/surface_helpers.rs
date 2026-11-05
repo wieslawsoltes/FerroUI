@@ -206,7 +206,7 @@ impl DesignSurface {
             let zoom = self.zoom.get();
             let text = FormattedText::new(
                 error,
-                CultureInfo::current_culture(),
+                current_locale(),
                 FlowDirection::LeftToRight,
                 Typeface::default(),
                 11.0 / zoom,

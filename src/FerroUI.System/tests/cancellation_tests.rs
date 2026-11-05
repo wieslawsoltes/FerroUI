@@ -4,6 +4,7 @@
 //! the source over the token, and the conversions of the cancellation errors.
 
 use crate::task::{block_on, run_pending, Canceled};
+#[allow(deprecated)]
 use crate::threading::tasks::TaskCanceledError;
 #[allow(deprecated)]
 use crate::threading::CancellationTokenSource;
@@ -357,6 +358,7 @@ fn a_source_is_a_token_that_can_be_canceled_and_its_registrations_stay_when_drop
 }
 
 #[test]
+#[allow(deprecated)]
 fn the_cancellation_errors_convert_to_and_from_canceled() {
     let error: TaskCanceledError = Canceled.into();
     assert_eq!(error, TaskCanceledError::default());

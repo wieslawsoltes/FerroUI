@@ -4,7 +4,7 @@ use ferroui_base::animation::easings::{Easing, CubicEaseOut};
 use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, SignedDuration};
 use ferroui_base::media::{ITransform, ScaleTransform};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, JoinHandle};
 use ferroui_base::{Ref, RelativePoint, Visual};
 use mini_mvvm::start_async;
 use std::cell::{Cell, RefCell};
@@ -75,7 +75,7 @@ impl IPageTransition for FadeThroughTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let duration = self.duration();
         let fade_easing = self.fade_easing();
         let from = from.cloned();

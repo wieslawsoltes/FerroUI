@@ -17,3 +17,5 @@ path = "lib.rs"
 [dependencies]
 ferroui-splat = { workspace = true }
 ferroui-system = { workspace = true }
+# The references of the feature usage tracking sessions (`Uuid::new_v4`).
+uuid = { workspace = true, features = ["v4"] }

@@ -2337,6 +2337,7 @@ dependencies = [
  "ferroui-reactiveui",
  "ferroui-splat",
  "ferroui-system",
+ "uuid",
 ]
 
 [[package]]
@@ -2412,6 +2413,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-splat",
  "ferroui-system",
+ "uuid",
 ]
 
 [[package]]
