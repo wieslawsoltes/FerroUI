@@ -2,7 +2,7 @@
 //! disposed when it is replaced, removed, or when the tracker is disposed.
 #![allow(dead_code)]
 
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 use std::hash::Hash;
@@ -11,7 +11,7 @@ use std::rc::Rc;
 
 /// The tracker (`KeyedDisposable<TKey>`).
 pub(crate) struct KeyedDisposable<K> {
-    disposables: RefCell<Dictionary<K, Rc<dyn IDisposable>>>,
+    disposables: RefCell<SlotOrderMap<K, Rc<dyn IDisposable>>>,
     disposed: Cell<bool>,
 }
 
@@ -23,7 +23,7 @@ impl<K: Eq + Hash + Clone> Default for KeyedDisposable<K> {
 
 impl<K: Eq + Hash + Clone> KeyedDisposable<K> {
     pub(crate) fn new() -> Self {
-        Self { disposables: RefCell::new(Dictionary::new()), disposed: Cell::new(false) }
+        Self { disposables: RefCell::new(SlotOrderMap::new()), disposed: Cell::new(false) }
     }
 
     /// The number of disposables tracked (`Count`).

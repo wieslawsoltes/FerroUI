@@ -1,4 +1,5 @@
 use crate::cache::{ChangeAwareCache, ChangeReason, ICache, IQuery};
+use crate::IndexMap;
 
 #[test]
 fn records_the_changes_in_order_until_captured() {
@@ -32,4 +33,18 @@ fn clear_removes_in_the_order_of_the_dictionary() {
     cache.clear();
     let keys: Vec<_> = cache.capture_changes().iter().map(|c| *c.key()).collect();
     assert_eq!(keys, vec![1, 5, 3, 4]);
+}
+
+#[test]
+fn from_dictionary_and_into_dictionary_keep_the_order_of_enumeration() {
+    let data: IndexMap<i32, &str> = [(3, "c"), (1, "a"), (2, "b")].into_iter().collect();
+    let mut cache = ChangeAwareCache::from_dictionary(data);
+    assert_eq!(cache.keys(), vec![3, 1, 2]);
+    assert_eq!(cache.capture_changes().count(), 0);
+    cache.remove(&1);
+    cache.add_or_update("d", 4);
+    // 4 takes the slot of 1, the one removed last; the map has the order of the cache.
+    let map = cache.into_dictionary();
+    assert_eq!(map.keys().copied().collect::<Vec<_>>(), vec![3, 4, 2]);
+    assert_eq!(map.get(&4), Some(&"d"));
 }

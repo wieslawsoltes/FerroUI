@@ -5,7 +5,7 @@ use super::FactoryBase;
 use crate::collections::ListHandle;
 use crate::controls::*;
 use crate::core::*;
-use ferroui_system::collections::generic::Dictionary;
+use std::collections::HashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -15,8 +15,8 @@ impl FactoryBase {
         if self.runtime().host_window_locator().is_none()
             && self.runtime().default_host_window_locator().is_some()
         {
-            let locators = Rc::new(RefCell::new(Dictionary::new()));
-            locators.borrow_mut().add(
+            let locators = Rc::new(RefCell::new(HashMap::new()));
+            locators.borrow_mut().insert(
                 "IDockWindow".into(),
                 self.runtime().default_host_window_locator(),
             );

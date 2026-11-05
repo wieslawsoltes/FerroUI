@@ -856,12 +856,12 @@ fn explicit_factory_base_host_initialization_skips_optional_creation_and_accepts
 
 #[test]
 fn factory_base_and_host_adapter_share_the_source_legacy_locator_path() {
-    use ferroui_system::collections::generic::Dictionary;
+    use std::collections::HashMap;
     let factory = RecordingFactory::with_base();
     let host = RecordingHost::new();
     let result = host.clone();
-    let locators = Rc::new(RefCell::new(Dictionary::new()));
-    locators.borrow_mut().add(
+    let locators = Rc::new(RefCell::new(HashMap::new()));
+    locators.borrow_mut().insert(
         "special".into(),
         Some(Rc::new(move || Some(result.clone() as Rc<dyn IHostWindow>)) as HostWindowFactory),
     );

@@ -4,7 +4,7 @@ use super::group_on::{group_by, ChangeWithGroup, MissingKeyError};
 use super::Cache;
 use crate::cache::{Change, ChangeReason, ChangeSet, ICache, IGrouping, IQuery, ImmutableGroup, ImmutableGroupChangeSet};
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -44,12 +44,12 @@ type GroupCache<T, K> = Rc<RefCell<Cache<T, K>>>;
 struct Grouper<T, K, G> {
     group_selector_key: Rc<dyn Fn(&T) -> G>,
     all_groupings: HashMap<G, GroupCache<T, K>>,
-    item_cache: Dictionary<K, ChangeWithGroup<T, K, G>>,
+    item_cache: SlotOrderMap<K, ChangeWithGroup<T, K, G>>,
 }
 
 impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 'static> Grouper<T, K, G> {
     fn new(group_selector_key: Rc<dyn Fn(&T) -> G>) -> Self {
-        Self { group_selector_key, all_groupings: HashMap::new(), item_cache: Dictionary::new() }
+        Self { group_selector_key, all_groupings: HashMap::new(), item_cache: SlotOrderMap::new() }
     }
 
     /// Evaluates the group of every item again (`Regroup`).
@@ -73,7 +73,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 
     }
 
     /// The change set of the groups whose state changed, from their states before (`CreateChangeSet`).
-    fn create_change_set(&mut self, initial_state_of_groups: Dictionary<G, ImmutableGroup<T, K, G>>) -> ImmutableGroupChangeSet<T, K, G> {
+    fn create_change_set(&mut self, initial_state_of_groups: SlotOrderMap<G, ImmutableGroup<T, K, G>>) -> ImmutableGroupChangeSet<T, K, G> {
         let mut result = Vec::new();
         for (key, initial_group) in initial_state_of_groups.iter() {
             let current = self.all_groupings.get(key).cloned().expect("every group of the initial states is a grouping");
@@ -105,7 +105,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 
     /// `HandleUpdates`.
     fn handle_updates(&mut self, changes: &[Change<T, K>]) -> Result<ImmutableGroupChangeSet<T, K, G>, ObservableError> {
         // The groups that change, with their states before, to make the right notifications.
-        let mut initial_state_of_groups: Dictionary<G, ImmutableGroup<T, K, G>> = Dictionary::new();
+        let mut initial_state_of_groups: SlotOrderMap<G, ImmutableGroup<T, K, G>> = SlotOrderMap::new();
 
         // 1. Group all items.
         let selector = self.group_selector_key.clone();
@@ -178,7 +178,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 
     }
 
     /// `RemoveFromOldGroup`.
-    fn remove_from_old_group(&mut self, group_state: &mut Dictionary<G, ImmutableGroup<T, K, G>>, group_key: &G, current_key: &K) {
+    fn remove_from_old_group(&mut self, group_state: &mut SlotOrderMap<G, ImmutableGroup<T, K, G>>, group_key: &G, current_key: &K) {
         let Some(group) = self.all_groupings.get(group_key).cloned() else { return };
         if !group_state.contains_key(group_key) {
             let state = ImmutableGroup::new(group_key.clone(), &*group.borrow());
