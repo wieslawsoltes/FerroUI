@@ -262,6 +262,14 @@ every backend, medians of repeated runs:
   ProGPU's runtime libraries counted), and the browser module (`.wasm` and its script, raw and
   compressed) of the WebGL2 Skia build and the WebGPU ProGPU build.
 - **Screenshots** of the ControlCatalog pages with each backend, side by side.
+- **Against GPUI** (the owner, 2026-11-05), built locally from a pinned Zed commit:
+  - the size of a hello world in the browser: FerroUI's HelloWorld (WebGPU ProGPU build, and the
+    WebGL2 Skia build) against GPUI's hello world example built with `gpui_web` (its wgpu
+    renderer), the `.wasm` and its script, raw and compressed;
+  - the TreeDataGrid against GPUI's table counterpart (its `uniform_list` table example with
+    the same row count and columns): first layout, scrolling a page a frame and frame times,
+    on the desktop (FerroUI with ProGPU against GPUI's Metal renderer) and in the browser
+    (FerroUI's WebGPU build against GPUI's web build).
 
 The tables go into section 6 and the pull request as each step lands.
 
