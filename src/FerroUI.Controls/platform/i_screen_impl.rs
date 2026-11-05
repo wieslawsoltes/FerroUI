@@ -39,7 +39,7 @@ pub trait IScreenImpl {
     /// screens; resolves to whether it was granted.
     ///
     /// The returned future is not tied to an executor; on the UI thread it
-    /// is driven by the dispatcher (`invoke_async_task_local`).
+    /// is driven by the dispatcher (`Dispatcher::spawn_local`).
     fn request_screen_details(&self) -> Pin<Box<dyn Future<Output = bool>>>;
 }
 

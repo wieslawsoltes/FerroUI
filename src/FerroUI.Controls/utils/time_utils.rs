@@ -7,7 +7,7 @@ impl TimeUtils {
     /// The PM designator of the current culture, or the one of the
     /// invariant culture when the current culture has none.
     pub fn get_pm_designator() -> String {
-        let current = CultureInfo::current_culture().date_time_format();
+        let current = CultureInfo::current_formatting().date_time_format();
         if !current.pm_designator().is_empty() {
             current.pm_designator().to_string()
         } else {
@@ -18,7 +18,7 @@ impl TimeUtils {
     /// The AM designator of the current culture, or the one of the
     /// invariant culture when the current culture has none.
     pub fn get_am_designator() -> String {
-        let current = CultureInfo::current_culture().date_time_format();
+        let current = CultureInfo::current_formatting().date_time_format();
         if !current.am_designator().is_empty() {
             current.am_designator().to_string()
         } else {

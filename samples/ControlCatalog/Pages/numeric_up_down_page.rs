@@ -18,7 +18,7 @@ ferroui_controls::ferro_markup_list!(pub FormatObjectList: Rc<FormatObject>);
 ferroui_base::ferro_thread_local! {
     static CULTURE_CONVERTER: Rc<dyn IValueConverter> =
         Rc::new(FuncValueConverter::<Option<CultureInfo>, Rc<NumberFormatInfo>>::new(|c| {
-            c.unwrap_or_else(CultureInfo::current_culture).number_format()
+            c.unwrap_or_else(CultureInfo::current_formatting).number_format()
         }));
 }
 

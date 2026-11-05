@@ -5,7 +5,7 @@ use crate::markup::{user_control_class, xaml_class};
 use crate::pages::{no_value_types, PageInfo};
 use ferroui_base::input::platform::ClipboardExtensions;
 use ferroui_base::interactivity::IRoutedEventArgs;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref, TypeInfo, Visual};
 use ferroui_controls::{Control, TextBox, TopLevel, UserControl};
 use std::rc::Rc;
@@ -55,12 +55,15 @@ impl ClipboardMonitorBehaviorView {
             return;
         };
         let this = this.clone();
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let text = clipboard.try_get_text_async().await.ok().flatten();
-            if let Some(output_box) = this.find_control::<TextBox>("OutputBox") {
-                output_box.set_text(text.as_deref());
-            }
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let text = clipboard.try_get_text_async().await.ok().flatten();
+                if let Some(output_box) = this.find_control::<TextBox>("OutputBox") {
+                    output_box.set_text(text.as_deref());
+                }
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 }
 

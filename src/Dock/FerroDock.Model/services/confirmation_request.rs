@@ -3,8 +3,8 @@
 
 use super::delegate_command::DelegateCommand;
 use ferroui_reactiveui::ICommand;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
-use ferroui_system::IDisposable;
+use ferroui_system::task::{Shared, SharedSender};
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -20,7 +20,8 @@ pub struct ConfirmationRequest {
     confirm: Rc<dyn ICommand>,
     cancel: Rc<dyn ICommand>,
     global_handle: RefCell<Option<Rc<dyn IDisposable>>>,
-    completion: TaskCompletionSource<bool>,
+    completion: RefCell<Option<SharedSender<Result<bool, ObservableError>>>>,
+    task: Shared<Result<bool, ObservableError>>,
 }
 impl ConfirmationRequest {
     /// Creates a request. Commands call the supplied close action with this request
@@ -32,6 +33,7 @@ impl ConfirmationRequest {
         cancel_text: String,
         close: ConfirmationCloseAction,
     ) -> Rc<Self> {
+        let (completion, task) = Shared::channel();
         Rc::new_cyclic(|runtime: &Weak<Self>| {
             let weak = runtime.clone();
             let confirm_close = close.clone();
@@ -60,7 +62,8 @@ impl ConfirmationRequest {
                 confirm,
                 cancel,
                 global_handle: RefCell::new(None),
-                completion: TaskCompletionSource::new(),
+                completion: RefCell::new(Some(completion)),
+                task,
             }
         })
     }
@@ -96,13 +99,18 @@ impl ConfirmationRequest {
     pub fn set_global_handle(&self, value: Option<Rc<dyn IDisposable>>) {
         self.global_handle.replace(value);
     }
-    /// Gets the shared task completed by Complete.
-    pub fn task(&self) -> Task<bool> {
-        self.completion.task()
+    /// Gets the shared task completed by Complete: the `Shared` of the result, whose `flatten()`
+    /// is a future of it.
+    pub fn task(&self) -> Shared<Result<bool, ObservableError>> {
+        self.task.clone()
     }
     /// Completes once. Subsequent attempts preserve the original result.
     pub fn complete(&self, result: bool) {
-        self.completion.try_set_result(result);
+        // Taken out of the cell before it sends: the continuations may reach this request.
+        let completion = self.completion.borrow_mut().take();
+        if let Some(completion) = completion {
+            completion.send(Ok(result));
+        }
     }
 }
 impl PartialEq for ConfirmationRequest {

@@ -15,7 +15,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::{FontWeight, SolidColorBrush, TextWrapping};
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{CornerRadius, FerroProperty, Thickness, TypeInfo};
 use ferroui_controls::{Border, Button, ContentControl, Control, StackPanel, TextBlock};
 use ferroui_designer_core::{Ast, Document, MarkupValue, NodeId, NodeKind};
@@ -1514,11 +1514,12 @@ impl DesignerWorkspace {
             data as Rc<dyn IDataTransfer>,
             DragDropEffects::COPY,
         );
-        drop(
-            Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
                 let _ = operation.await;
-            }),
-        );
+            },
+            DispatcherPriority::DEFAULT,
+        ));
         Ok(())
     }
 

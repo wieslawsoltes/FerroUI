@@ -1,5 +1,5 @@
 use ferroui_base::input::platform::{ClipboardError, ClipboardErrorKind};
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use std::any::Any;
 use std::future::Future;
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
@@ -36,17 +36,20 @@ impl ClipboardHelper {
     /// [`throw`](Self::throw), and so is a panic of the operation, instead
     /// of being kept in a task nobody looks at.
     pub(crate) fn start(operation: impl Future<Output = Result<(), ClipboardError>> + 'static) {
-        let scheduler = Dispatcher::ui_thread().to_task_scheduler();
-        let dispatcher = scheduler.dispatcher().clone();
-        let priority = scheduler.priority();
+        let dispatcher = Dispatcher::ui_thread();
+        let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::DEFAULT);
+        let target = dispatcher.clone();
 
-        drop(scheduler.start_local(async move {
-            match CatchUnwind::new(operation).await {
-                Ok(Ok(())) => {}
-                Ok(Err(error)) => dispatcher.post(move || Self::throw(error), priority),
-                Err(payload) => dispatcher.post(move || resume_unwind(payload), priority),
-            }
-        }));
+        drop(dispatcher.start_local_with_priority(
+            async move {
+                match CatchUnwind::new(operation).await {
+                    Ok(Ok(())) => {}
+                    Ok(Err(error)) => target.post(move || Self::throw(error), priority),
+                    Err(payload) => target.post(move || resume_unwind(payload), priority),
+                }
+            },
+            priority,
+        ));
     }
 
     /// Raises a clipboard failure nothing handles: a panic whose message

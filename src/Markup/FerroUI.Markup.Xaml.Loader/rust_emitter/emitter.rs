@@ -41,7 +41,8 @@ use crate::compiler_extensions::transformers::{
     XamlSourceInfoValueManipulation, DevelopmentKeyNode,
 };
 use crate::compiler_extensions::{
-    BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
+    BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XBindFunctionArgument,
+    XBindFunctionPathElementNode, XBindLiteral, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
     XamlIlClrIndexerPathElementNode, XamlIlClrMethodAsCommandPathElementNode, XamlIlFerroClassProperty, XamlIlFerroPropertyFieldNode,
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
@@ -648,6 +649,19 @@ fn uri_literal(n: &XamlAstNewClrObjectNode) -> Option<String> {
     }
 }
 
+/// The text of a culture literal: `CultureInfo.Parse(text)` of a text, what the compiler
+/// makes of the text of a culture (the parse of its markup metadata: an IETF language tag).
+fn culture_literal(node: &Rc<dyn IXamlAstNode>) -> Option<String> {
+    let call = node.as_method_call_base_node()?;
+    let method = call.method.borrow().clone();
+    if method.name() != "Parse" || !method.declaring_type().is("System.Globalization", "CultureInfo") {
+        return None;
+    }
+    let arguments = call.arguments.borrow().clone();
+    let [argument] = arguments.as_slice() else { return None };
+    Some(argument.clone().as_node().cast::<XamlAstTextNode>()?.text())
+}
+
 struct Emitter<'a> {
     /// What the type system the document was transformed with states for the emitter.
     types: &'a dyn EmitTypes,
@@ -702,6 +716,10 @@ struct Emitter<'a> {
     /// text: a member that declares a `UriRef` or a `Url` takes the literal only when it is
     /// one ([`Emitter::refused_uri_literal`]).
     uri_literals: HashMap<String, String>,
+    /// The locals that hold a culture literal ([`culture_literal`]), with its text: a member
+    /// that declares a `Locale` takes the literal only when it is a BCP-47 tag
+    /// ([`Emitter::refused_locale_literal`]).
+    culture_literals: HashMap<String, String>,
 }
 
 struct ScopedNamespaceTable {
@@ -1513,8 +1531,8 @@ impl<'a> Emitter<'a> {
     /// (`to_exact`). `None`: it cannot be stated.
     fn coerce(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         // A negative time span literal is not stated as a duration at all, nor a relative URI
-        // literal as a URL, not even by the cast at run time that would refuse it: it is an
-        // error of the document.
+        // literal as a URL, nor a culture literal that is no locale as a locale, not even by the
+        // cast at run time that would refuse it: it is an error of the document.
         if self.refused_literal(value, target).is_some() {
             return None;
         }
@@ -1595,11 +1613,35 @@ impl<'a> Emitter<'a> {
         }
     }
 
+    /// Why `value` cannot be the `Locale` (or the nullable form) `target`: a culture literal
+    /// ([`culture_literal`]) that is not an IETF language tag, or whose culture is not a
+    /// locale (a name that is no BCP-47 tag, such as `x-private`; C5 of #423). The error of
+    /// the document, which the run-time loader reports as the error of the conversion or of
+    /// the cast when it loads the document. A literal that is a locale is stated through the
+    /// cast of the untyped value conversions, which cannot refuse it.
+    fn refused_locale_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        if target != self.types.known(Known::Locale) && target != self.types.option_of_known(Known::Locale) {
+            return None;
+        }
+        let text = self.culture_literals.get(&value.expr)?;
+        let culture = match ferroui_base::data::CultureInfoIetfLanguageTagConverter::convert_from(text) {
+            Ok(culture) => culture,
+            Err(error) => return Some(error.to_string()),
+        };
+        ferroui_base::utilities::Locale::try_from(&culture)
+            .err()
+            .map(|error| format!("the culture name '{text}' is not a BCP-47 language tag, and a `Locale` cannot hold it ({error})"))
+
+    }
+
     /// Why the literal `value` cannot be `target`: a negative time span for a `Duration`
     /// ([`Self::refused_time_span_literal`]), a relative URI for a `Url` or a URI that is no
-    /// URL ([`Self::refused_uri_literal`]).
+    /// URL ([`Self::refused_uri_literal`]), or a culture that is no locale for a `Locale`
+    /// ([`Self::refused_locale_literal`]).
     fn refused_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
-        self.refused_time_span_literal(value, target).or_else(|| self.refused_uri_literal(value, target))
+        self.refused_time_span_literal(value, target)
+            .or_else(|| self.refused_uri_literal(value, target))
+            .or_else(|| self.refused_locale_literal(value, target))
     }
 
     /// A list of the runtime library created in markup as the collection handle a member
@@ -2917,6 +2959,20 @@ impl<'a> Emitter<'a> {
             return Err(unsupported(node, "a binding path with an indexer that does not take one argument"));
         };
         let value_node = value.clone().as_node();
+        // A text key (`Map['key']` of `{x:Bind}`): the indexer with one text argument.
+        let key = match (value_node.cast::<XamlAstTextNode>(), value_node.cast::<XamlConstantNode>()) {
+            (Some(text), _) => Some(text.text()),
+            (None, Some(constant)) => match &constant.constant {
+                XamlValue::String(text) => Some(text.clone()),
+                _ => None,
+            },
+            (None, None) => None,
+        };
+        if let Some(key) = key {
+            let declaring = self.indexer_declaring_type(node, element)?;
+            let markup = self.markup_expr(node, &declaring)?;
+            return Ok(format!("rt::path_key_indexer(&builder, {markup}, {})", rust_string_literal(&key)));
+        }
         let constant = value_node
             .cast::<XamlConstantNode>()
             .ok_or_else(|| unsupported(node, "a binding path with an indexer whose argument is not a constant"))?;
@@ -2927,6 +2983,13 @@ impl<'a> Emitter<'a> {
         let (integer, _) = numeric_constant(&constant.constant)
             .ok_or_else(|| unsupported(node, format!("the constant {:?}", constant.constant)))?;
         let index = i32::try_from(integer).map_err(|_| unsupported(node, format!("{integer} is out of the range of a 32-bit integer")))?;
+        let declaring = self.indexer_declaring_type(node, element)?;
+        let markup = self.markup_expr(node, &declaring)?;
+        Ok(format!("rt::path_indexer(&builder, {markup}, {index}_i32, {})", element.is_notifying_collection))
+    }
+
+    /// The type that declares the accessors of an indexer.
+    fn indexer_declaring_type(&self, node: &Rc<dyn IXamlAstNode>, element: &XamlIlClrIndexerPathElementNode) -> EmitResult<Rc<dyn IXamlType>> {
         let accessor = element
             .property
             .getter()
@@ -2936,9 +2999,7 @@ impl<'a> Emitter<'a> {
             .types
             .method(accessor.as_ref())
             .ok_or_else(|| unsupported(node, "an indexer whose accessor is not a method of the run-time type system"))?;
-        let declaring = runtime.declaring_type.clone().ok_or_else(|| unsupported(node, "an indexer whose declaring type is gone"))?;
-        let markup = self.markup_expr(node, &declaring)?;
-        Ok(format!("rt::path_indexer(&builder, {markup}, {index}_i32, {})", element.is_notifying_collection))
+        runtime.declaring_type.clone().ok_or_else(|| unsupported(node, "an indexer whose declaring type is gone"))
     }
 
     /// A compiled binding path (`XamlIlBindingPathNode`): a builder, the
@@ -3209,7 +3270,117 @@ impl<'a> Emitter<'a> {
             XamlIlBindingPathElementNode::ClrIndexer(e) => self.path_indexer(node, e)?,
             XamlIlBindingPathElementNode::ClrMethod(_) => return Err(unsupported(node, "a binding path with a method")),
             XamlIlBindingPathElementNode::ClrMethodAsCommand(e) => self.path_command(node, e)?,
+            XamlIlBindingPathElementNode::XBindFunction(e) => self.path_function(node, e)?,
         })
+    }
+
+    /// The closure over the typed function of a declared method that the helpers of a
+    /// function of `{x:Bind}` take (`|this, arguments| ...`, `|arguments| ...` for a static
+    /// method): the instance, then the arguments read from the ones the path passes, in the
+    /// types the method declares, and what the method returns (`yields`), or nothing (a
+    /// `BindBack`). Returns the closure and the method.
+    fn function_method(&self, node: &Rc<dyn IXamlAstNode>, method: &Rc<dyn IXamlMethod>, yields: bool) -> EmitResult<(String, MethodInfo<'a>)> {
+        let name = method.name();
+        let runtime = self
+            .types
+            .method(method.as_ref())
+            .ok_or_else(|| unsupported(node, format!("{name}: the function is not a method of the type system of the host")))?;
+        let declared = runtime
+            .declared()
+            .filter(|declared| declared.kind == DeclaredKind::Method)
+            .ok_or_else(|| unsupported(node, format!("{name}: the function is not a method markup metadata declares")))?;
+        let emit = declared.emit().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
+        let owner = self.owner_path(node, &runtime)?;
+        let count = runtime.parameters.len();
+        let mut arguments: Vec<&str> = Vec::with_capacity(count + 1);
+        if !runtime.is_static {
+            arguments.push("this");
+        }
+        arguments.extend(std::iter::repeat_n("arguments.next()?", count));
+        let call = format!("{owner}::{}({})", emit.function, arguments.join(", "));
+        let call = if emit.fallible { format!("{call}?") } else { call };
+        let body = match (yields, declared.returns) {
+            (true, Some(_)) => format!("::core::result::Result::Ok(rt::delegate_result({call}))"),
+            (true, None) => return Err(unsupported(node, format!("{name}: a function that returns nothing"))),
+            (false, Some(_)) => format!("{{ let _ = {call}; ::core::result::Result::Ok(::core::option::Option::None) }}"),
+            (false, None) => format!("{{ {call}; ::core::result::Result::Ok(::core::option::Option::None) }}"),
+        };
+        let parameter = if count == 0 { "_arguments" } else { "arguments" };
+        let closure = match runtime.is_static {
+            true => format!("|{parameter}| {body}"),
+            false => format!("|this, {parameter}| {body}"),
+        };
+        Ok((closure, runtime))
+    }
+
+    /// The value of a literal argument of a function of `{x:Bind}`, boxed as the type of its
+    /// parameter, as the interpreter boxes it.
+    fn function_literal(literal: &XBindLiteral) -> String {
+        match literal {
+            XBindLiteral::Null => "::core::option::Option::None".to_string(),
+            XBindLiteral::Boolean(value) => format!("rt::boxed({value})"),
+            XBindLiteral::Int32(value) => format!("rt::boxed({value}_i32)"),
+            XBindLiteral::Int64(value) => format!("rt::boxed({value}_i64)"),
+            XBindLiteral::Single(value) => format!("rt::boxed({})", f32_literal(*value)),
+            XBindLiteral::Double(value) => format!("rt::boxed({})", f64_literal(*value)),
+            XBindLiteral::String(value) => {
+                format!("rt::boxed(::std::string::String::from({}))", rust_string_literal(value))
+            }
+        }
+    }
+
+    /// A function of `{x:Bind}` (`XBindFunctionPathElementNode`), the element the interpreter
+    /// builds (`builder.function(...)`): `rt::path_function` (`rt::path_static_function`) over
+    /// the typed function of the declared method, with the metadata of its declaring type; each
+    /// argument a path written before the path of the binding, or a literal. A `TwoWay`
+    /// binding through it adds its `BindBack` (`rt::path_bind_back`,
+    /// `rt::path_static_bind_back`).
+    fn path_function(&mut self, node: &Rc<dyn IXamlAstNode>, function: &XBindFunctionPathElementNode) -> EmitResult<String> {
+        let name = function.method.name();
+        let (closure, method) = self.function_method(node, &function.method, true)?;
+        let declaring = method
+            .declaring_type
+            .clone()
+            .ok_or_else(|| unsupported(node, format!("{name}: the declaring type is gone")))?;
+        let markup = self.markup_expr(node, &declaring)?;
+        let mut arguments = Vec::with_capacity(function.arguments.len());
+        for argument in &function.arguments {
+            arguments.push(match argument {
+                XBindFunctionArgument::Path(path) => {
+                    let path = self.binding_path(node, path)?;
+                    format!("::ferroui_base::data::PathFunctionArgument::Path({})", path.expr)
+                }
+                XBindFunctionArgument::Literal(literal) => {
+                    format!("::ferroui_base::data::PathFunctionArgument::Value({})", Self::function_literal(literal))
+                }
+            });
+        }
+        let arguments = format!("::std::vec![{}]", arguments.join(", "));
+        let helper = if method.is_static { "rt::path_static_function" } else { "rt::path_function" };
+        let call = format!("{helper}(&builder, {markup}, {}, {arguments}, {closure})", rust_string_literal(&name));
+        let Some(bind_back) = function.bind_back.borrow().clone() else {
+            return Ok(call);
+        };
+        let bind_back_name = bind_back.method.name();
+        let (closure, method) = self.function_method(node, &bind_back.method, false)?;
+        let declaring = method
+            .declaring_type
+            .clone()
+            .ok_or_else(|| unsupported(node, format!("{bind_back_name}: the declaring type is gone")))?;
+        let markup = self.markup_expr(node, &declaring)?;
+        let value_type = self.handle_expr(node, &bind_back.value_type)?;
+        let name = rust_string_literal(&bind_back_name);
+        let bind_back_call = match method.is_static {
+            true => format!("rt::path_static_bind_back(&builder, {markup}, {name}, {value_type}, {closure})"),
+            false => {
+                let owner = match &bind_back.owner {
+                    Some(path) => format!("::core::option::Option::Some({})", self.binding_path(node, path)?.expr),
+                    None => "::core::option::Option::None".to_string(),
+                };
+                format!("rt::path_bind_back(&builder, {markup}, {name}, {owner}, {value_type}, {closure})")
+            }
+        };
+        Ok(format!("{{ let builder = {call}; {bind_back_call} }}"))
     }
 
     /// The call of the typed function of a method of the owner of a command, as the body
@@ -3600,6 +3771,11 @@ impl<'a> Emitter<'a> {
         // `Duration` takes it only when it is not negative.
         if let Some(ticks) = time_span_literal(node) {
             self.time_span_literals.insert(local.clone(), ticks);
+        }
+        // A culture literal is remembered with its text: a member that declares a `Locale`
+        // takes it only when it is a BCP-47 tag.
+        if let Some(text) = culture_literal(node) {
+            self.culture_literals.insert(local.clone(), text);
         }
         Ok(Typed { expr: local, kind: self.kind_of(returned) })
     }
@@ -4168,6 +4344,7 @@ pub fn emit_function<'a>(
         namespace_tables: Vec::new(),
         time_span_literals: HashMap::new(),
         uri_literals: HashMap::new(),
+        culture_literals: HashMap::new(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is

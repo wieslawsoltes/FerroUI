@@ -29,16 +29,16 @@ fn toolbar_window(toolbar: &InkToolbar) -> Ref<ferroui_controls::Window> {
 fn localized_names_update_from_resources_without_overwriting_local_values() {
     use ferroui_controls::automation::AutomationProperties;
     use ferroui_base::controls::ResourceKey;
-    use ferroui_base::utilities::CultureInfo;
+    use ferroui_base::utilities::{current_ui_locale, locale, set_current_ui_locale, Locale};
     let _scope = test_scope();
-    struct RestoreCulture(CultureInfo);
+    struct RestoreCulture(Locale);
     impl Drop for RestoreCulture {
         fn drop(&mut self) {
-            CultureInfo::set_current_ui_culture(self.0.clone());
+            set_current_ui_locale(self.0.clone());
         }
     }
-    let _culture = RestoreCulture(CultureInfo::current_ui_culture());
-    CultureInfo::set_current_ui_culture(CultureInfo::get_culture_info("pl-PL"));
+    let _culture = RestoreCulture(current_ui_locale());
+    set_current_ui_locale(locale!("pl-PL"));
     let pen = InkToolbarBallpointPenButton::new();
     assert_eq!(
         AutomationProperties::get_name(&pen).as_deref(),

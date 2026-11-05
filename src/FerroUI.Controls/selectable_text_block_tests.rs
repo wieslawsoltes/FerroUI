@@ -392,9 +392,9 @@ fn pointer_selection_is_published_to_primary_selection() {
     run_clipboard_operations();
     let text = Rc::new(RefCell::new(None));
     let clipboard = window.try_get_clipboard(ClipboardType::PrimarySelection).expect("the window has a primary selection");
-    let _ = Dispatcher::ui_thread().invoke_async_task_local({
+    let _ = Dispatcher::ui_thread().start_local({
         let text = text.clone();
-        move || async move {
+        async move {
             *text.borrow_mut() = clipboard.try_get_text_async().await.expect("the text of the primary selection");
         }
     });

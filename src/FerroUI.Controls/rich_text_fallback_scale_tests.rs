@@ -15,7 +15,7 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::IFontFallbackMapper;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{Rect, Ref, Size};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -52,7 +52,7 @@ impl IFontFallbackMapper for Mapper {
         &self,
         text: &[u16],
         requested: &Typeface,
-        _: Option<&CultureInfo>,
+        _: Option<&Locale>,
     ) -> Option<FontFallbackMapping> {
         assert_eq!(requested.font_family().name(), "Requested");
         self.calls.set(self.calls.get() + 1);

@@ -26,7 +26,7 @@ use ferroui_base::media::{
     IBrush, IPen, PenLineCap, PenLineJoin, Typeface,
 };
 use ferroui_base::reactive::{AnonymousObserver, Subscription};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::{
     FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, LocatorExtensions, Point, Rect, Ref, Size, StyledElementImpl,
@@ -662,7 +662,7 @@ impl MaterialTimePickerDial {
         );
         let normal = FormattedText::new(
             text,
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             typeface.clone(),
             number.font_size(),
@@ -670,7 +670,7 @@ impl MaterialTimePickerDial {
         );
         let selected = FormattedText::new(
             text,
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             typeface,
             number.font_size(),

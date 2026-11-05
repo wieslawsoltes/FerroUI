@@ -119,7 +119,7 @@ impl DateTimeFormatInfo {
 
     /// The conventions of the current culture.
     pub fn current_info() -> Rc<DateTimeFormatInfo> {
-        CultureInfo::current_culture().date_time_format()
+        CultureInfo::current_formatting().date_time_format()
     }
 
     /// The calendar of the conventions; always the Gregorian one.

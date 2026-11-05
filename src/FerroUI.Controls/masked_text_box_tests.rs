@@ -877,7 +877,7 @@ fn defaults_and_mask_state() {
     let target = MaskedTextBox::new();
 
     assert!(!target.ascii_only());
-    assert_eq!(Some(CultureInfo::current_culture()), target.culture());
+    assert_eq!(Some(CultureInfo::current_formatting()), target.culture());
     assert!(!target.hide_prompt_on_leave());
     assert_eq!(Some(""), target.mask().as_deref());
     assert_eq!('_', target.prompt_char());

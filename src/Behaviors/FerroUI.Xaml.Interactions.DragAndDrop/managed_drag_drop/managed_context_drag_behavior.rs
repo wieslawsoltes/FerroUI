@@ -16,7 +16,7 @@ use ferroui_base::{
 };
 use ferroui_controls::templates::IDataTemplate;
 use ferroui_controls::{as_selectable, Control, TopLevel};
-use ferroui_system::threading::tasks::TaskCompletionSource;
+use ferroui_system::task::{Shared, SharedSender};
 use ferroui_xaml_interactivity::{StyledElementBehaviorImpl, StyledElementBehaviorOfT};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -39,7 +39,7 @@ pub struct ManagedContextDragBehavior {
     captured: Cell<bool>,
     top_level: RefCell<Option<Ref<TopLevel>>>,
     internal_dragging: Cell<bool>,
-    internal_drag_tcs: RefCell<Option<TaskCompletionSource<bool>>>,
+    internal_drag_tcs: RefCell<Option<SharedSender<bool>>>,
     // Stores the calculated preview offset (TopLeftOfControl - PointerPosition) in TopLevel client
     // coordinates when enabled
     calculated_preview_offset: Cell<Option<Point>>,
@@ -378,9 +378,10 @@ impl ManagedContextDragBehavior {
 
     /// Completes the managed drag (`_internalDragTcs?.TrySetResult(true)`).
     fn complete_internal_drag(&self) {
-        let tcs = self.internal_drag_tcs.borrow().clone();
+        // Taken out of the cell before it sends: sending resumes what awaits the drag.
+        let tcs = self.internal_drag_tcs.borrow_mut().take();
         if let Some(tcs) = tcs {
-            tcs.try_set_result(true);
+            tcs.send(true);
         }
     }
 
@@ -413,8 +414,9 @@ impl ManagedContextDragBehavior {
         // try
         IS_DRAGGING.set(true);
         this.internal_dragging.set(true);
-        let tcs = TaskCompletionSource::<bool>::new();
-        *this.internal_drag_tcs.borrow_mut() = Some(tcs.clone());
+        let (tcs, drag) = Shared::<bool>::channel();
+        let previous = this.internal_drag_tcs.borrow_mut().replace(tcs);
+        drop(previous);
         if let Some(ao) = &associated_object {
             let input_element: Ref<InputElement> = ao.clone().upcast();
             trigger_event.pointer().capture(Some(&input_element));
@@ -429,7 +431,7 @@ impl ManagedContextDragBehavior {
                 }
             }));
         }
-        let _ = tcs.task().await;
+        let _ = drag.await;
 
         // finally
         ManagedDragDropService::instance().end();
@@ -441,7 +443,8 @@ impl ManagedContextDragBehavior {
         trigger_event.pointer().capture(None);
         DragPreviewService::hide();
         this.internal_dragging.set(false);
-        *this.internal_drag_tcs.borrow_mut() = None;
+        let completion = this.internal_drag_tcs.borrow_mut().take();
+        drop(completion);
         IS_DRAGGING.set(false);
         this.calculated_preview_offset.set(None);
     }
@@ -565,7 +568,7 @@ impl ManagedContextDragBehavior {
             // `async void` of the reference: the drag runs as a task of the dispatcher, started
             // now.
             let this = self.to_ref();
-            drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+            drop(Dispatcher::ui_thread().start_local(async move {
                 Self::start_internal_drag_async(this.clone(), trigger_event, context).await;
                 *this.trigger_event.borrow_mut() = None;
             }));

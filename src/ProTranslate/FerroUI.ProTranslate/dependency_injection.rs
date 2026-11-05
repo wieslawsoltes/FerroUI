@@ -4,7 +4,7 @@ use ferroui_dependency_injection::{
     ServiceResult,
 };
 use ferroui_protranslate_core::{
-    Culture, CultureService, DefaultLocalizedUnitFormatter, DefaultMeasurementSystemResolver,
+    CultureService, DefaultLocalizedUnitFormatter, DefaultMeasurementSystemResolver,
     DefaultRegionProfileProvider, DefaultUnitConversionService, GlobalizationService,
     InMemoryTranslationProvider, LocalizedUnitFormatter, MeasurementSystemResolver,
     RegionProfileProvider, TranslationCacheOptions, TranslationFallbackOptions,
@@ -54,9 +54,7 @@ impl ProTranslateServiceCollectionExtensions for ServiceCollection {
     }
 
     fn add_protranslate_defaults(&mut self) -> &mut Self {
-        let culture =
-            Culture::parse(ferroui_base::utilities::CultureInfo::current_ui_culture().name())
-                .unwrap_or_else(|_| Culture::invariant());
+        let culture = crate::binding_source::current_ui_culture();
         self.add_protranslate(
             Rc::new(InMemoryTranslationProvider::new("Default")),
             CultureService::new(culture),

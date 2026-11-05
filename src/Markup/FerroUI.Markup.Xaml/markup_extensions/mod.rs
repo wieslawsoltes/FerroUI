@@ -11,6 +11,7 @@ mod reflection_binding_extension;
 mod relative_source_extension;
 mod resolve_by_name_extension;
 mod static_resource_extension;
+mod x_bind;
 
 pub use compiled_binding_extension::CompiledBindingExtension;
 pub use dynamic_resource_extension::DynamicResourceExtension;
@@ -21,6 +22,7 @@ pub use reflection_binding_extension::ReflectionBindingExtension;
 pub use relative_source_extension::RelativeSourceExtension;
 pub use resolve_by_name_extension::ResolveByNameExtension;
 pub use static_resource_extension::StaticResourceExtension;
+pub use x_bind::{XBindDiagnostic, XBindErrors, XBindExtension, XBinding, XBindings};
 
 #[cfg(test)]
 mod markup_extensions_tests;

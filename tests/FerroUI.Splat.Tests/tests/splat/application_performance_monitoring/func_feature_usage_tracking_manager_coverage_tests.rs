@@ -6,16 +6,17 @@
 
 use crate::tests::common::AppLocatorScope;
 use ferroui_splat::{
-    DefaultFeatureUsageTrackingSession, FuncFeatureUsageTrackingManager, Guid,
+    DefaultFeatureUsageTrackingSession, FuncFeatureUsageTrackingManager,
     IFeatureUsageTrackingManager, IFeatureUsageTrackingSession,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+use uuid::Uuid;
 
 #[test]
 fn get_feature_usage_tracking_session_returns_session_from_factory() {
     let _scope = AppLocatorScope::new();
-    let feature_name = Guid::new_guid().to_string();
+    let feature_name = Uuid::new_v4().to_string();
     let captured_name: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
     let captured = captured_name.clone();
     let manager = FuncFeatureUsageTrackingManager::new(move |name| {

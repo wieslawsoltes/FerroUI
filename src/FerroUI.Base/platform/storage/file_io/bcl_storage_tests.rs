@@ -11,13 +11,14 @@ use crate::platform::storage::{
     ILauncher, IStorageFile, IStorageFolder, IStorageItem, IStorageProvider, NoopStorageProvider,
 };
 use crate::reactive::Disposable;
-use crate::utilities::{DateTimeOffset, Uri, UriKind};
+use crate::utilities::{Uri, UriKind};
 use std::cell::{Cell, RefCell};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::task::{Context, Poll, Waker};
+use std::time::SystemTime;
 
 fn ready<T>(mut future: LocalBoxFuture<T>) -> T {
     match future.as_mut().poll(&mut Context::from_waker(Waker::noop())) {
@@ -138,11 +139,11 @@ fn files_are_read_and_written_and_report_their_properties() {
     write_all(&*file, "short");
     assert_eq!("short", read_all(&*file));
 
-    let now = DateTimeOffset::utc_now();
-    let is_recent = |date: Option<DateTimeOffset>| {
+    let now = SystemTime::now();
+    let is_recent = |date: Option<SystemTime>| {
         let date = date.expect("the file system reports the date");
-        let seconds = now.subtract_date_time_offset(date).ticks().abs() / 10_000_000;
-        seconds < 3600
+        let distance = now.duration_since(date).unwrap_or_else(|error| error.duration());
+        distance.as_secs() < 3600
     };
 
     let properties = ready(file.get_basic_properties_async());

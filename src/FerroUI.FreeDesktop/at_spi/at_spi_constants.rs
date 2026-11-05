@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 
 use super::at_spi_state::AtSpiState;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{current_ui_locale, CultureInfo};
 
 // D-Bus paths
 pub(crate) const ROOT_PATH: &str = "/org/a11y/atspi/accessible/root";
@@ -77,7 +77,8 @@ pub(crate) fn build_state_set(states: &[AtSpiState]) -> Vec<u32> {
 }
 
 pub(crate) fn resolve_locale() -> String {
-    locale_from_culture_name(CultureInfo::current_ui_culture().name())
+    // The name of the culture of the locale: empty for the invariant culture, `und`.
+    locale_from_culture_name(CultureInfo::from(&current_ui_locale()).name())
 }
 
 pub(crate) fn locale_from_culture_name(culture: &str) -> String {

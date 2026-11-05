@@ -10,7 +10,7 @@ use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{IImage, ScaleTransform};
 use ferroui_base::platform::AssetLoader;
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, JoinHandle};
 use ferroui_base::utilities::Uri;
 use ferroui_base::{Ref, Visual};
 use ferroui_controls::ItemsSource;
@@ -375,7 +375,7 @@ impl IPageTransition for CustomTransition {
         to: Option<&Ref<Visual>>,
         _forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let duration = self.duration();
         let from = from.cloned();
         let to = to.cloned();

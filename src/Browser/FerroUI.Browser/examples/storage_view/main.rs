@@ -324,7 +324,7 @@ async fn scenario(name: String, argument: String) -> Result<String, String> {
 
 fn start(name: String, future: impl Future<Output = Result<String, String>> + 'static) {
     RESULTS.with(|results| results.borrow_mut().remove(&name));
-    Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+    Dispatcher::ui_thread().start_local(async move {
         let result = match future.await {
             Ok(result) => result,
             Err(error) => format!("error={error}"),

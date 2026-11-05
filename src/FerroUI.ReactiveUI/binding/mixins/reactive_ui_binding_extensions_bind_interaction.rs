@@ -12,7 +12,6 @@ use ferroui_reactive::disposables::{CompositeDisposable, Disposable, SerialDispo
 use ferroui_reactive::linq::Observable;
 use ferroui_reactive::ObservableExt;
 use ferroui_system::component_model::{PropertyOwner, PropertyPath};
-use ferroui_system::threading::tasks::Task;
 use ferroui_system::{IDisposable, IObservable, ObservableError};
 use std::any::Any;
 use std::future::Future;
@@ -143,7 +142,7 @@ where
     let handler = Rc::new(handler);
     move |interaction: Rc<dyn IInteraction<X::Input, X::Output>>| {
         let handler = handler.clone();
-        interaction.register_handler_task(Rc::new(move |context: InteractionContextOf<X>| Task::spawn_local(handler(context))))
+        interaction.register_handler_task(Rc::new(move |context: InteractionContextOf<X>| ferroui_system::task::spawn_local(handler(context)).shared()))
     }
 }
 
@@ -183,7 +182,8 @@ where
 pub trait BindInteractionMixins<V: 'static> {
     /// Registers the asynchronous `handler` on the interaction `path` reads from the view's view
     /// model (`BindInteraction(..., Func<IInteractionContext<TInput, TOutput>, Task>)`). The
-    /// handler gives a future (a `Task<()>` is one), which ends when it has handled the question.
+    /// handler gives a future of a `Result<(), ObservableError>`, which ends when it has handled
+    /// the question.
     fn bind_interaction<VM, X, Fut>(&self, path: PropertyPath<Rc<VM>, X>, handler: impl Fn(InteractionContextOf<X>) -> Fut + 'static) -> Rc<dyn IDisposable>
     where
         V: IViewForOf<VM>,

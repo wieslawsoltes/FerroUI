@@ -12,7 +12,7 @@ use crate::media::{
     FontFallback, FontFamily, FontManager, FontManagerOptions, FontSimulations, FontStretch, FontStyle, FontWeight,
     GlyphTypeface, Typeface, UnicodeRange,
 };
-use crate::utilities::{CultureInfo, Uri};
+use crate::utilities::{Locale, Uri};
 use crate::FerroLocator;
 
 fn uri(text: &str) -> Uri {
@@ -122,7 +122,7 @@ impl IFontCollection for StubFontCollection {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Typeface> {
         // Any character is matched to the default font family.
         Some(Typeface::with_style(FontFamily::new("Noto Sans"), font_style, font_weight, font_stretch))

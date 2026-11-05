@@ -340,7 +340,7 @@ impl DateTimeOffset {
     /// culture (.NET `ToString(string)`). Panics when the format is invalid.
     #[track_caller]
     pub fn to_string_with(self, format: &str) -> String {
-        self.to_string_format(format, &CultureInfo::current_culture())
+        self.to_string_format(format, &CultureInfo::current_formatting())
     }
 
     /// Formats with the default format and the conventions of `provider`
@@ -513,7 +513,7 @@ impl SubAssign<SignedDuration> for DateTimeOffset {
 impl fmt::Display for DateTimeOffset {
     /// The short date, long time and offset of the current culture (.NET `ToString()`).
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.to_string_format("", &CultureInfo::current_culture()))
+        f.write_str(&self.to_string_format("", &CultureInfo::current_formatting()))
     }
 }
 

@@ -138,7 +138,7 @@ impl FerroScheduler {
     /// Makes the synchronization context of the dispatcher of the user-interface thread the
     /// synchronization context of that thread (`SynchronizationContext.SetSynchronizationContext`),
     /// which also makes it the thread poster of the thread
-    /// ([`ferroui_system::threading::tasks::set_thread_poster`]): a task of the user-interface
+    /// ([`ferroui_system::task::set_thread_schedule`]): a task of the user-interface
     /// thread woken from another thread is resumed through the dispatcher.
     ///
     /// The context is the dispatcher's `FerroSynchronizationContext` of the thread (installed if it

@@ -12,9 +12,9 @@ impl IDisposable for FakeScope {
     }
 }
 impl IAsyncDisposable for FakeScope {
-    fn dispose_async(&self) -> Task<()> {
+    fn dispose_async(&self) -> DisposeTask {
         self.asynchronous.set(self.asynchronous.get() + 1);
-        Task::from_result(())
+        Shared::ready(Ok(()))
     }
 }
 impl IServiceScope for FakeScope {

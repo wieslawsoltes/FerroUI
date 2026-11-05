@@ -14,7 +14,7 @@
 //!   names are the real ones, so these runs need `--test-threads=1`.
 
 use crate::dbus_helper::DBusHelper;
-use ferroui_base::threading::{Dispatcher, UnitTestDispatcherScope};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, UnitTestDispatcherScope};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -259,18 +259,21 @@ impl TestConnections {
             let (client, flag) = (self.client.clone(), done.clone());
             let service_name = self.service.unique_name().map(|name| name.to_string());
             let ping_path = self.ping_path.clone();
-            drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                let peer = zbus::fdo::PeerProxy::builder(&client)
-                    .destination(service_name.unwrap_or_else(|| BUS_NAME.to_string()))
-                    .unwrap()
-                    .path(ping_path)
-                    .unwrap()
-                    .build()
-                    .await
-                    .unwrap();
-                peer.ping().await.unwrap();
-                *flag.borrow_mut() = true;
-            }));
+            drop(Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    let peer = zbus::fdo::PeerProxy::builder(&client)
+                        .destination(service_name.unwrap_or_else(|| BUS_NAME.to_string()))
+                        .unwrap()
+                        .path(ping_path)
+                        .unwrap()
+                        .build()
+                        .await
+                        .unwrap();
+                    peer.ping().await.unwrap();
+                    *flag.borrow_mut() = true;
+                },
+                DispatcherPriority::DEFAULT,
+            ));
             pump_until(|| *done.borrow());
             Dispatcher::ui_thread().run_jobs(None);
         }

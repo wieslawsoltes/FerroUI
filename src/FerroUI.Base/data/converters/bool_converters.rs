@@ -90,17 +90,17 @@ mod tests {
     #[test]
     fn bool_converters_not_works_two_way() {
         let converter = BoolConverters::not();
-        let result = converter.convert(Some(&boxed(true)), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+        let result = converter.convert(Some(&boxed(true)), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
         assert!(!as_bool(result));
 
-        let result = converter.convert_back(Some(&boxed(false)), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+        let result = converter.convert_back(Some(&boxed(false)), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
         assert!(as_bool(result));
     }
 
     #[test]
     fn bool_converters_not_returns_unset_on_invalid_input() {
         let converter = BoolConverters::not();
-        let result = converter.convert(Some(&boxed(1234i32)), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+        let result = converter.convert(Some(&boxed(1234i32)), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
         assert!(BindingOperations::is_unset(result.expect("no error").as_ref()));
     }
 
@@ -108,7 +108,7 @@ mod tests {
     fn bool_converters_and_works() {
         for (a, b, y) in [(false, false, false), (false, true, false), (true, false, false), (true, true, true)] {
             let converter = BoolConverters::and();
-            let result = converter.convert(&[Some(boxed(a)), Some(boxed(b))], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+            let result = converter.convert(&[Some(boxed(a)), Some(boxed(b))], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
             assert_eq!(as_bool(result), y, "{a} and {b}");
         }
     }
@@ -117,7 +117,7 @@ mod tests {
     fn bool_converters_or_works() {
         for (a, b, y) in [(false, false, false), (false, true, true), (true, false, true), (true, true, true)] {
             let converter = BoolConverters::or();
-            let result = converter.convert(&[Some(boxed(a)), Some(boxed(b))], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+            let result = converter.convert(&[Some(boxed(a)), Some(boxed(b))], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
             assert_eq!(as_bool(result), y, "{a} or {b}");
         }
     }
@@ -127,14 +127,14 @@ mod tests {
     #[test]
     fn not_returns_unset_on_null_input() {
         let converter = BoolConverters::not();
-        let result = converter.convert(None, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+        let result = converter.convert(None, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
         assert!(BindingOperations::is_unset(result.expect("no error").as_ref()));
     }
 
     #[test]
     fn and_returns_unset_on_invalid_input() {
         let converter = BoolConverters::and();
-        let result = converter.convert(&[Some(boxed(true)), Some(boxed(1234i32))], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
+        let result = converter.convert(&[Some(boxed(true)), Some(boxed(1234i32))], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_formatting());
         assert!(BindingOperations::is_unset(result.expect("no error").as_ref()));
     }
 

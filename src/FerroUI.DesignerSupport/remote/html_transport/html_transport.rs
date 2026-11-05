@@ -11,7 +11,7 @@ use ferroui_remote_protocol::viewport::{
     ClientSupportedPixelFormatsMessage, FrameMessage, FrameReceivedMessage, PixelFormat, RequestViewportResizeMessage,
 };
 use ferroui_remote_protocol::{
-    exception_handler, message_handler, Delegate, Error, ExceptionHandler, Guid, HandlerToken, HtmlTransportStartedMessage,
+    exception_handler, message_handler, Delegate, Error, ExceptionHandler, HandlerToken, HtmlTransportStartedMessage,
     IFerroRemoteTransportConnection, Message, MessageHandler, Task,
 };
 use std::collections::HashMap;
@@ -118,7 +118,7 @@ pub struct HtmlWebSocketTransport {
     lock: Mutex<State>,
     // `_listenUri.OriginalString`, all that is read of the URI later.
     listen_uri: String,
-    secret_cookie: Guid,
+    secret_cookie: uuid::Uuid,
     wakeup: AutoResetEvent,
     // One event at a time, whichever thread raises it.
     raising: Mutex<()>,
@@ -861,7 +861,7 @@ mod tests {
         );
         assert!(!page.contains("PREVIEWER_SECURITY_COOKIE"));
         let cookie = cookie_of(address);
-        assert!(Guid::parse(&cookie).is_ok());
+        assert!(uuid::Uuid::parse_str(&cookie).is_ok());
         assert_eq!(cookie, transport.secret_cookie.to_string());
         assert!(page.contains("<script type=\"module\" src=\"index.js\"></script>"));
         assert_eq!((head, page.into_bytes()), TestClient::get(address, "/index.html"));

@@ -351,7 +351,7 @@ ferroui_base::ferro_properties! { impl MaskedTextBox {
     ferro_property!(
         /// Defines the `Culture` property.
         pub fn culture_property() -> StyledProperty<Option<CultureInfo>> {
-            FerroProperty::register::<MaskedTextBox, _>("Culture", Some(CultureInfo::current_culture()))
+            FerroProperty::register::<MaskedTextBox, _>("Culture", Some(CultureInfo::current_formatting()))
         }
     );
 

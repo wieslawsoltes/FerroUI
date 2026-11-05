@@ -287,7 +287,7 @@ pub fn format_arg_with(arg: &FormatArg<'_>, format: &str, culture: &CultureInfo)
 /// current culture (`string.Format` without a provider); see
 /// [`format_values_with`] for another culture.
 pub fn format_values(format_string: &str, values: &[Option<BoxedValue>]) -> Result<String, FormatError> {
-    format_values_with(format_string, values, &CultureInfo::current_culture())
+    format_values_with(format_string, values, &CultureInfo::current_formatting())
 }
 
 /// [`format_values`] with the conventions of `culture`.

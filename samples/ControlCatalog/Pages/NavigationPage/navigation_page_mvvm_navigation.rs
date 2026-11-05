@@ -3,7 +3,7 @@
 
 use crate::pages::navigation_demo_helper::value_text;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{Ref, WeakRef};
 use ferroui_controls::{ContentPage, NavigationPage, Page};
@@ -21,11 +21,11 @@ pub(crate) trait ISampleNavigationService {
     /// unsubscribes.
     fn state_changed(&self, handler: Rc<dyn Fn(&NavigationStateChangedEventArgs)>) -> Rc<dyn IDisposable>;
 
-    fn navigate_to_async(&self, view_model: SampleViewModel) -> DispatcherTask<()>;
+    fn navigate_to_async(&self, view_model: SampleViewModel) -> JoinHandle<()>;
 
-    fn go_back_async(&self) -> DispatcherTask<()>;
+    fn go_back_async(&self) -> JoinHandle<()>;
 
-    fn pop_to_root_async(&self) -> DispatcherTask<()>;
+    fn pop_to_root_async(&self) -> JoinHandle<()>;
 }
 
 /// Resolves the page of a view model.
@@ -141,7 +141,7 @@ impl ISampleNavigationService for SampleNavigationService {
         })
     }
 
-    fn navigate_to_async(&self, view_model: SampleViewModel) -> DispatcherTask<()> {
+    fn navigate_to_async(&self, view_model: SampleViewModel) -> JoinHandle<()> {
         let navigation_page = self.navigation_page.upgrade();
         let page_factory = self.page_factory.clone();
         start_async(async move {
@@ -153,7 +153,7 @@ impl ISampleNavigationService for SampleNavigationService {
         })
     }
 
-    fn go_back_async(&self) -> DispatcherTask<()> {
+    fn go_back_async(&self) -> JoinHandle<()> {
         let navigation_page = self.navigation_page.upgrade();
         if navigation_page.as_ref().is_some_and(|navigation_page| navigation_page.navigation_stack().len() <= 1) {
             self.publish_state("Already at the root page");
@@ -167,7 +167,7 @@ impl ISampleNavigationService for SampleNavigationService {
         })
     }
 
-    fn pop_to_root_async(&self) -> DispatcherTask<()> {
+    fn pop_to_root_async(&self) -> JoinHandle<()> {
         let navigation_page = self.navigation_page.upgrade();
         if navigation_page.as_ref().is_some_and(|navigation_page| navigation_page.navigation_stack().len() <= 1) {
             self.publish_state("Already at the root page");

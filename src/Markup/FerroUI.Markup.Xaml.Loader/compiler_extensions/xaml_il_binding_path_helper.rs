@@ -744,6 +744,14 @@ impl XamlIlBindingPathHelper {
                 // As upstream, the switch has no case for the logical ancestor node of a
                 // long-form `RelativeSource` with `Tree=Logical`: it adds no element.
                 BindingExpressionNode::LogicalAncestor(_) => {}
+                // The path of an `{x:Bind}` is resolved by `x_bind::transform_path`, element
+                // by element, through the cases above.
+                BindingExpressionNode::XBind(path) => {
+                    return Err(XamlError::transform_exception(
+                        format!("The x:Bind path '{path}' is resolved by the x:Bind transformer only."),
+                        Some(line_info),
+                    ));
+                }
             }
         }
 
@@ -753,6 +761,63 @@ impl XamlIlBindingPathHelper {
             transform_nodes,
             nodes,
         ))
+    }
+}
+
+impl XamlIlBindingPathHelper {
+    /// Whether `name` is registered as the name of an element in the name scope of the node
+    /// being transformed: the name scope of the document, or of a template it is in. The search
+    /// of a `#name` path element; `{x:Bind}` names an element without the `#`.
+    pub(crate) fn is_named_element(context: &AstTransformationContext, name: &str) -> XamlResult<bool> {
+        let parent_nodes = context.parent_nodes();
+        let Some(namescope_root) = parent_nodes.last() else {
+            return Ok(false);
+        };
+        if ScopeRegistrationFinder::get_target_type(namescope_root, name)?.is_some() {
+            return Ok(true);
+        }
+        for deferred_content in parent_nodes
+            .iter()
+            .filter(|n| n.is::<NestedScopeMetadataNode>())
+        {
+            if ScopeRegistrationFinder::get_target_type(deferred_content, name)?.is_some() {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    /// The methods named `name` that `type_` declares or inherits, the most derived first: the
+    /// candidates of a function of `{x:Bind}`.
+    pub(crate) fn path_methods(type_: &Rc<dyn IXamlType>, name: &str) -> Vec<Rc<dyn IXamlMethod>> {
+        get_all_defined_methods(type_)
+            .into_iter()
+            .filter(|method| method.name() == name)
+            .collect()
+    }
+
+    /// The properties named `name` that `type_` declares or inherits, the most derived first.
+    pub(crate) fn path_properties(type_: &Rc<dyn IXamlType>, name: &str) -> Vec<Rc<dyn IXamlProperty>> {
+        get_all_defined_properties(type_)
+            .into_iter()
+            .filter(|property| property.name() == name)
+            .collect()
+    }
+
+    /// Whether a path can read a member `name` of `type_`: a registered property (its
+    /// `<name>Property` field), a property or a method, as a property path element resolves it.
+    pub(crate) fn has_path_member(type_: &Rc<dyn IXamlType>, name: &str) -> bool {
+        let ferro_property_field_name = format!("{name}Property");
+        type_
+            .get_all_fields()
+            .into_iter()
+            .any(|f| f.is_static() && f.is_public() && f.name() == ferro_property_field_name)
+            || get_all_defined_properties(type_)
+                .into_iter()
+                .any(|p| p.name() == name)
+            || get_all_defined_methods(type_)
+                .into_iter()
+                .any(|m| m.name() == name)
     }
 }
 
@@ -970,6 +1035,8 @@ pub enum XamlIlBindingPathElementNode {
     ClrIndexer(Rc<XamlIlClrIndexerPathElementNode>),
     ArrayIndexer(Rc<XamlIlArrayIndexerPathElementNode>),
     TypeCast(Rc<TypeCastPathElementNode>),
+    /// A function of `{x:Bind}` (not a node of upstream).
+    XBindFunction(Rc<XBindFunctionPathElementNode>),
 }
 
 impl XamlIlBindingPathElementNode {
@@ -991,6 +1058,7 @@ impl XamlIlBindingPathElementNode {
             XamlIlBindingPathElementNode::ClrIndexer(e) => e.type_(),
             XamlIlBindingPathElementNode::ArrayIndexer(e) => e.type_(),
             XamlIlBindingPathElementNode::TypeCast(e) => e.type_.clone(),
+            XamlIlBindingPathElementNode::XBindFunction(e) => e.type_(),
         }
     }
 
@@ -1031,6 +1099,7 @@ impl XamlIlBindingPathElementNode {
             XamlIlBindingPathElementNode::ClrIndexer(_) => "XamlIlClrIndexerPathElementNode",
             XamlIlBindingPathElementNode::ArrayIndexer(_) => "XamlIlArrayIndexerPathElementNode",
             XamlIlBindingPathElementNode::TypeCast(_) => "TypeCastPathElementNode",
+            XamlIlBindingPathElementNode::XBindFunction(_) => "XBindFunctionPathElementNode",
         }
     }
 }
@@ -1480,6 +1549,69 @@ impl XamlIlArrayIndexerPathElementNode {
 /// Rust: `CompiledBindingPathBuilder::type_cast::<T>()` / `type_cast_value(target)`.
 pub struct TypeCastPathElementNode {
     pub type_: Rc<dyn IXamlType>,
+}
+
+/// A function of `{x:Bind}` (docs/porting/x-bind.md, step X2; not a node of upstream): the
+/// last element of a path, `Format(Name, 'text')` on the root source, `Model.Format(Name)` on
+/// the value of the path before it, or `local:Helpers.Format(Name)` (a static method).
+///
+/// A back end builds `builder.function(name, arguments, invoke, notifier)`: the Rust emitter
+/// writes `rt::path_function` (`rt::path_static_function`) with a closure over the typed
+/// function of the declared method, the run-time loader invokes the method through its
+/// invoker. Each argument is a path read from the root source (a [`XamlIlBindingPathNode`]
+/// built as a path of its own) or a literal of the type of its parameter. With a
+/// [`bind_back`](Self::bind_back), the back end adds `builder.bind_back(...)`.
+pub struct XBindFunctionPathElementNode {
+    /// The method, chosen among the overloads by the number of arguments.
+    pub method: Rc<dyn IXamlMethod>,
+    /// The type the method is looked up on: the type of the owner, or the type of a static
+    /// function.
+    pub owner_type: Rc<dyn IXamlType>,
+    /// The arguments, one per parameter of [`method`](Self::method).
+    pub arguments: Vec<XBindFunctionArgument>,
+    /// The `BindBack` of a `TwoWay` binding through the function.
+    pub bind_back: RefCell<Option<Rc<XBindBindBack>>>,
+}
+
+impl XBindFunctionPathElementNode {
+    /// The return type of the method.
+    pub fn type_(&self) -> Rc<dyn IXamlType> {
+        self.method.return_type()
+    }
+}
+
+/// An argument of a function of `{x:Bind}`.
+pub enum XBindFunctionArgument {
+    /// A path read from the root source; the function is called again when its value changes.
+    Path(Rc<XamlIlBindingPathNode>),
+    /// A literal, already of the type of its parameter.
+    Literal(XBindLiteral),
+}
+
+/// A literal argument of a function of `{x:Bind}`, as the value of the type of its parameter
+/// (WinUI's `FunctionBoolParam`, `FunctionNumberParam`, `FunctionStringParam`,
+/// `FunctionNullValueParam`).
+#[derive(Clone, Debug, PartialEq)]
+pub enum XBindLiteral {
+    Null,
+    Boolean(bool),
+    Int32(i32),
+    Int64(i64),
+    Single(f32),
+    Double(f64),
+    String(String),
+}
+
+/// The `BindBack` of a function of `{x:Bind}`: a method of one parameter, of the root source
+/// (`BindBack=ParseName`), of the value of a path read from the root source
+/// (`BindBack=Model.SetName`), or a static method (`BindBack=local:Helpers.Parse`).
+pub struct XBindBindBack {
+    /// The path of the owner, read from the root source when a value is written; `None` for
+    /// the root source itself and for a static method.
+    pub owner: Option<Rc<XamlIlBindingPathNode>>,
+    pub method: Rc<dyn IXamlMethod>,
+    /// The type of the parameter of the method.
+    pub value_type: Rc<dyn IXamlType>,
 }
 
 /// `IXamlIlBindingPathNode : IXamlAstValueNode`.

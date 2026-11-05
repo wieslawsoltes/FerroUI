@@ -17,7 +17,8 @@ use crate::{Border, Button, Control, NativeControlHost, Panel, Window};
 use ferroui_base::animation::{IGlobalClock, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{ITransform, MediaContext, TranslateTransform};
-use ferroui_base::threading::{Dispatcher, DispatcherTask};
+use ferroui_base::threading::Dispatcher;
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{FerroLocator, Point, Rect, Ref, Size, Thickness, Visual};
 use std::rc::Rc;
 use std::time::Duration;
@@ -108,7 +109,7 @@ fn shell() -> Shell {
     // The first page is shown without a transition.
     let first = nav.push_async(page_with(None));
     frame();
-    assert!(first.is_completed());
+    assert!(first.is_finished());
 
     Shell { window, nav, host_impl }
 }
@@ -120,15 +121,15 @@ pub(crate) fn frame() {
 }
 
 /// Runs frames until `task` has completed, and a few more.
-pub(crate) fn run_to_end(task: &DispatcherTask<()>) {
+pub(crate) fn run_to_end(task: &JoinHandle<()>) {
     for _ in 0..500 {
-        if task.is_completed() {
+        if task.is_finished() {
             break;
         }
         std::thread::sleep(Duration::from_millis(5));
         frame();
     }
-    assert!(task.is_completed(), "the transition did not end");
+    assert!(task.is_finished(), "the transition did not end");
     for _ in 0..3 {
         frame();
     }

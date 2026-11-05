@@ -6,7 +6,7 @@ use ferroui_base::media::{
     IBrush, IPen, StreamGeometry, Typeface,
 };
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{Matrix, Point, Rect, Ref};
 use ferroui_livecharts::paint::{
     brush_or_color, native_dash_pattern, resolve_brush, snapshot_brush,
@@ -154,7 +154,7 @@ impl NativeScene {
                         .or_else(|| pen.as_ref().and_then(|p| p.brush()));
                     let text = FormattedText::new(
                         text,
-                        CultureInfo::invariant_culture(),
+                        Locale::UNKNOWN,
                         FlowDirection::LeftToRight,
                         Typeface::default(),
                         size.min(4096.0),

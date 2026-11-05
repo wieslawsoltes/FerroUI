@@ -2,12 +2,11 @@
 //!
 //! `Task.Delay(ms, token)` is [`delay`], whose time passes on a worker thread; [`first`] runs the
 //! tasks of the thread until the execution notifies. An `async` lambda is an `async` block, and
-//! `Task.FromResult` is `Task::from_result`.
+//! `Task.FromResult` is [`from_result`]; a `TaskCompletionSource` is a [`TestCompletion`].
 
 use crate::mocks::*;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::*;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
 use ferroui_system::threading::CancellationToken;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -20,9 +19,9 @@ const DELAY: Duration = Duration::from_millis(10);
 #[test]
 fn create_from_task_cancellable_properly_cancels_execution() {
     with_immediate_schedulers();
-    let tcs_started = TaskCompletionSource::<()>::new();
-    let tcs_caught = TaskCompletionSource::<()>::new();
-    let tcs_finish = TaskCompletionSource::<()>::new();
+    let tcs_started = TestCompletion::<()>::new();
+    let tcs_caught = TestCompletion::<()>::new();
+    let tcs_finish = TestCompletion::<()>::new();
 
     let (started, caught, finish) = (tcs_started.clone(), tcs_caught.clone(), tcs_finish.clone());
     let fixture = ReactiveCommand::create_from_task_cancellable_with(
@@ -32,7 +31,7 @@ fn create_from_task_cancellable_properly_cancels_execution() {
                 started.try_set_result(());
                 if let Err(error) = delay(Duration::from_millis(10_000), token).await {
                     caught.try_set_result(());
-                    finish.task().await?;
+                    finish.task().flatten().await?;
                     return Err(error);
                 }
                 Ok(())
@@ -46,10 +45,10 @@ fn create_from_task_cancellable_properly_cancels_execution() {
 
     let disposable = subscribe_ignoring_errors(&fixture.execute_default());
 
-    assert!(tcs_started.task().is_completed());
+    assert!(tcs_started.task().is_finished());
     disposable.dispose();
 
-    assert!(tcs_caught.task().is_completed());
+    assert!(tcs_caught.task().is_finished());
     tcs_finish.try_set_result(());
 
     // The cancellation has completed: the command is no longer executing.
@@ -206,7 +205,7 @@ fn create_from_task_unit_with_param_passes_parameter() {
 #[test]
 fn create_from_task_without_param_returns_task_result() {
     with_immediate_schedulers();
-    let command = ReactiveCommand::create_from_task_with(|| Task::from_result(PARAMETER_VALUE), None, Some(immediate()));
+    let command = ReactiveCommand::create_from_task_with(|| from_result(PARAMETER_VALUE), None, Some(immediate()));
     let results = collect_items(&command.as_observable());
 
     first(&command.execute_default());
@@ -219,7 +218,7 @@ fn create_from_task_without_param_returns_task_result() {
 #[test]
 fn create_from_task_with_param_passes_parameter_to_task() {
     with_immediate_schedulers();
-    let command = ReactiveCommand::create_from_task_param_with(|parameter: i32| Task::from_result(parameter.to_string()), None, Some(immediate()));
+    let command = ReactiveCommand::create_from_task_param_with(|parameter: i32| from_result(parameter.to_string()), None, Some(immediate()));
     let results = collect_items(&command.as_observable());
 
     first(&command.execute(PARAMETER_VALUE));

@@ -146,7 +146,7 @@ impl Dispatcher {
 /// which priority to continue. While the dispatcher executes a job, the
 /// current context is the dispatcher's context for the priority of that job;
 /// futures started without an explicit priority (see
-/// [`Dispatcher::to_task_scheduler`]) therefore continue at the priority of
+/// [`Dispatcher::spawn_local`]) therefore continue at the priority of
 /// the job that started them.
 ///
 /// What the reference implementation additionally does in its context -
@@ -266,6 +266,10 @@ impl FerroSynchronizationContext {
 
     /// The scheduler that runs futures on the dispatcher at the priority of
     /// this context.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use the dispatcher's `spawn_local_with_priority`, `spawn_with_priority` or `start_local_with_priority` at the priority of the context"
+    )]
     pub fn to_task_scheduler(self: &Arc<Self>) -> DispatcherTaskScheduler {
         DispatcherTaskScheduler { dispatcher: self.dispatcher.clone(), priority: self.priority }
     }
@@ -349,6 +353,17 @@ impl Drop for RestoreContext {
 ///
 /// Obtained from [`Dispatcher::to_task_scheduler`] and
 /// [`Dispatcher::to_task_scheduler_with_priority`].
+///
+/// Deprecated: the dispatcher spawns futures itself and gives a `JoinHandle`:
+/// [`spawn`](Self::spawn) is [`Dispatcher::spawn_with_priority`]`(move ||
+/// future, priority)`, [`spawn_local`](Self::spawn_local) is
+/// [`Dispatcher::spawn_local_with_priority`] and
+/// [`start_local`](Self::start_local) is
+/// [`Dispatcher::start_local_with_priority`].
+#[deprecated(
+    since = "0.5.0",
+    note = "use `Dispatcher::spawn_with_priority`, `spawn_local_with_priority` or `start_local_with_priority`, which give a `JoinHandle`"
+)]
 #[derive(Clone)]
 pub struct DispatcherTaskScheduler {
     dispatcher: Arc<Dispatcher>,
@@ -438,12 +453,27 @@ impl Dispatcher {
     /// Gets a scheduler which runs futures on this dispatcher. The priority
     /// is the one of the job that calls this ([`Dispatcher::current_priority`]),
     /// [`DispatcherPriority::DEFAULT`] outside of a job.
+    ///
+    /// Deprecated: [`Dispatcher::spawn_local`], [`Dispatcher::start_local`] and
+    /// [`Dispatcher::spawn_with_priority`] at that priority give a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn_local`, `start_local` or `spawn_with_priority`, which give a `JoinHandle`"
+    )]
     pub fn to_task_scheduler(&self) -> DispatcherTaskScheduler {
         self.to_task_scheduler_with_priority(self.current_job_priority())
     }
 
     /// Gets a scheduler which runs futures on this dispatcher with the
     /// specified priority.
+    ///
+    /// Deprecated: [`Dispatcher::spawn_local_with_priority`],
+    /// [`Dispatcher::start_local_with_priority`] and
+    /// [`Dispatcher::spawn_with_priority`] give a `JoinHandle`.
+    #[deprecated(
+        since = "0.5.0",
+        note = "use `Dispatcher::spawn_local_with_priority`, `start_local_with_priority` or `spawn_with_priority`, which give a `JoinHandle`"
+    )]
     pub fn to_task_scheduler_with_priority(&self, priority: DispatcherPriority) -> DispatcherTaskScheduler {
         DispatcherPriority::validate(priority, "priority");
         DispatcherTaskScheduler { dispatcher: self.to_arc(), priority }

@@ -47,7 +47,7 @@ fn the_values_of_the_view_model_are_shown_in_the_selected_format() {
     // Without culture data the runtime has no specific culture: the list of the cultures is
     // empty and the numbers have the conventions of the current culture, the invariant one.
     assert_eq!(0, page.get_control::<ComboBox>("CultureSelector").item_count());
-    assert!(up_down.number_format().is_some_and(|format| format == CultureInfo::current_culture().number_format()));
+    assert!(up_down.number_format().is_some_and(|format| format == CultureInfo::current_formatting().number_format()));
 
     // The first format, the currency.
     view_model.set_decimal_value(decimal("1.5"));

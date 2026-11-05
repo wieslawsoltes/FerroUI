@@ -435,6 +435,7 @@ pub fn classes() -> Vec<(&'static ::ferroui_base::TypeInfo, &'static str)> {
         (<::ferroui_markup_xaml_tests::support::emitter::Captioned as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::emitter::Captioned"),
         (<::ferroui_markup_xaml_tests::support::emitter::FailingEndInit as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::emitter::FailingEndInit"),
         (<::ferroui_markup_xaml_tests::support::emitter::Linked as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::emitter::Linked"),
+        (<::ferroui_markup_xaml_tests::support::x_bind::XBindPage as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::x_bind::XBindPage"),
         (<::ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton"),
         (<::ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost"),
         (<::ferroui_markup_xaml_tests::support::xaml::event_tests::MyPanel as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyPanel"),
@@ -1034,6 +1035,9 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::markup_extensions::RelativeSourceExtension", false),
         (<::ferroui_markup_xaml::markup_extensions::ResolveByNameExtension as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::markup_extensions::ResolveByNameExtension", false),
         (<::ferroui_markup_xaml::markup_extensions::StaticResourceExtension as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::markup_extensions::StaticResourceExtension", false),
+        (<::ferroui_markup_xaml::markup_extensions::XBindExtension as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::markup_extensions::XBindExtension", false),
+        (<::ferroui_markup_xaml::markup_extensions::XBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::markup_extensions::XBinding", false),
+        (<::ferroui_markup_xaml::markup_extensions::XBindings as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::markup_extensions::XBindings", false),
         (<::ferroui_markup_xaml::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory", false),
         (<::ferroui_markup_xaml::styling::MergeResourceInclude as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::styling::MergeResourceInclude", false),
         (<::ferroui_markup_xaml::styling::ResourceInclude as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::styling::ResourceInclude", false),
@@ -1064,6 +1068,11 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Row", false),
         (<::ferroui_markup_xaml_tests::support::emitter::RowList as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::RowList", false),
         (<::ferroui_markup_xaml_tests::support::emitter::Table as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Table", false),
+        (<dyn ::ferroui_markup_xaml_tests::support::x_bind::IXBindNamed as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::IXBindNamed", true),
+        (<::ferroui_markup_xaml_tests::support::x_bind::XBindHelpers as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindHelpers", false),
+        (<::ferroui_markup_xaml_tests::support::x_bind::XBindItems as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindItems", false),
+        (<::ferroui_markup_xaml_tests::support::x_bind::XBindMap as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindMap", false),
+        (<::ferroui_markup_xaml_tests::support::x_bind::XBindModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::x_bind::XBindModel", false),
     ]
 }
 
@@ -2563,5 +2572,6 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property()), "ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_markup_xaml_tests::support::emitter::Linked::address_property()), "ferroui_markup_xaml_tests::support::emitter::Linked::address_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_markup_xaml_tests::support::emitter::Linked::source_property()), "ferroui_markup_xaml_tests::support::emitter::Linked::source_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_markup_xaml_tests::support::x_bind::XBindPage::title_property()), "ferroui_markup_xaml_tests::support::x_bind::XBindPage::title_property"),
     ]
 }

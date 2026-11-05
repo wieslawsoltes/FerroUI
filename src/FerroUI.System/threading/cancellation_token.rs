@@ -262,7 +262,7 @@ impl CancellationToken {
     /// Registers a callback that runs on the current thread when the token is canceled: at once
     /// when it is canceled on this thread, or already canceled; through the schedule of this thread
     /// ([`crate::task::set_thread_schedule`]; a dispatcher, in a job at its default priority), or
-    /// its queue of [`run_pending_wakes`](crate::threading::tasks::run_pending_wakes), when it is
+    /// its queue of [`run_pending`](crate::task::run_pending), when it is
     /// canceled on another thread. The callback need not be `Send`; the guard is: dropped on
     /// another thread, it removes the registration at once and the callback is dropped on its own
     /// thread, the next time that thread runs its queue. [`CancellationGuard::detach`] keeps it.

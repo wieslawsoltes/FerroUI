@@ -8,7 +8,8 @@ use ferroui_splat::{
     IMutableDependencyResolver, IReadonlyDependencyResolver, LazyDisposal, RegistrationCallback,
     ServiceFactory, ServiceType as SplatType,
 };
-use ferroui_system::{threading::tasks::Task, IDisposable};
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
@@ -131,21 +132,22 @@ impl MicrosoftDependencyResolver {
         }
         Ok(())
     }
-    pub fn dispose_async(&self) -> Task<()> {
+    pub fn dispose_async(&self) -> DisposeTask {
         if self.disposed.replace(true) {
-            return Task::from_result(());
+            return Shared::ready(Ok(()));
         }
         let provider = self.provider.borrow_mut().take();
         let constants = std::mem::take(&mut *self.constants.borrow_mut());
-        Task::spawn_local(async move {
+        ferroui_system::task::spawn_local(async move {
             if let Some(provider) = provider {
-                provider.dispose_async().await?;
+                provider.dispose_async().flatten().await?;
             }
             for dispose in constants.into_iter().rev() {
                 dispose();
             }
-            Ok(())
+            Ok::<(), ObservableError>(())
         })
+        .shared()
     }
     fn add(&self, descriptor: ServiceDescriptor) {
         self.invalidate();
@@ -291,7 +293,7 @@ impl IDisposable for MicrosoftDependencyResolver {
     }
 }
 impl IAsyncDisposable for MicrosoftDependencyResolver {
-    fn dispose_async(&self) -> Task<()> {
+    fn dispose_async(&self) -> DisposeTask {
         self.dispose_async()
     }
 }

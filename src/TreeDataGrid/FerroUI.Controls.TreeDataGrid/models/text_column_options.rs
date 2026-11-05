@@ -31,7 +31,7 @@ impl<M: 'static> Default for TextColumnOptions<M> {
             base: ColumnOptions::default(),
             is_text_search_enabled: Cell::new(false),
             string_format: RefCell::new("{0}".to_string()),
-            culture: RefCell::new(CultureInfo::current_culture()),
+            culture: RefCell::new(CultureInfo::current_formatting()),
             text_trimming: RefCell::new(<dyn TextTrimming>::character_ellipsis()),
             text_wrapping: Cell::new(TextWrapping::NoWrap),
             text_alignment: Cell::new(TextAlignment::Left),

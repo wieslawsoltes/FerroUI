@@ -621,7 +621,7 @@ impl MaterialDatePicker {
     }
     pub fn culture(&self) -> CultureInfo {
         self.get_value(Self::culture_property())
-            .unwrap_or_else(CultureInfo::current_culture)
+            .unwrap_or_else(CultureInfo::current_formatting)
     }
     pub fn set_culture(&self, v: Option<CultureInfo>) {
         self.set_value(Self::culture_property(), v);
