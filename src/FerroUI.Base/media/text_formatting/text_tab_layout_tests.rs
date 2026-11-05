@@ -51,8 +51,8 @@ fn close(actual: f64, expected: f64) {
 struct PolishNumbers(Rc<NumberFormatInfo>);
 
 impl ICultureDataProvider for PolishNumbers {
-    fn get_number_format(&self, culture_name: &str) -> Option<Rc<NumberFormatInfo>> {
-        (culture_name == "pl-PL").then(|| self.0.clone())
+    fn get_number_format_by_locale(&self, locale: &Locale) -> Option<Rc<NumberFormatInfo>> {
+        (*locale == locale!("pl-PL")).then(|| self.0.clone())
     }
 }
 

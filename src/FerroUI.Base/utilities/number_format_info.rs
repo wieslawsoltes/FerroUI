@@ -269,9 +269,14 @@ impl NumberFormatInfo {
     /// The shared format information of a culture: that of the registered
     /// provider for the culture or for its nearest parent culture the
     /// provider has data for, else the invariant one.
+    #[allow(deprecated)] // the culture whose name is no locale is asked for by name
     pub(crate) fn for_culture(culture: &CultureInfo) -> Rc<NumberFormatInfo> {
-        find_culture_data(culture, |provider, name| provider.get_number_format(name))
-            .unwrap_or_else(Self::invariant_info)
+        find_culture_data(
+            culture,
+            |provider, locale| provider.get_number_format_by_locale(locale),
+            |provider, name| provider.get_number_format(name),
+        )
+        .unwrap_or_else(Self::invariant_info)
     }
 
     /// The format information of the invariant culture.

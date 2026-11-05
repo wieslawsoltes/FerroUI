@@ -1947,11 +1947,11 @@ fn register_defaults() {
 
     // A `Locale` is the other Rust form of `System.Globalization.CultureInfo` (C5 of #423,
     // docs/idiomatic-rust-signatures.md section 3.4): the identity of a culture. A locale is
-    // the culture of its name; a culture is a locale unless its name is not a BCP-47
-    // language tag (`es-ES_tradnl`, `x-custom`), which the cast refuses with its error. Text
-    // converts to a locale as it converts to a culture in markup (an IETF language tag, the
-    // empty text the invariant culture, the unknown locale `und`), and the text of a locale
-    // is its tag.
+    // the culture made from it; a culture is a locale unless its name is not a BCP-47
+    // language tag (`es-ES_tradnl`, `x-custom`, a culture made from a name in code), which
+    // the cast refuses with its error. Text converts to a locale as it converts to a culture
+    // in markup (an IETF language tag parsed into a locale, the empty text the invariant
+    // culture, the unknown locale `und`), and the text of a locale is its tag.
     ValueTypes::register_display::<Locale>();
     ValueTypes::register_nullable::<Locale>();
     ValueTypes::register_cast::<Locale, CultureInfo>(|locale: &Locale| CultureInfo::from(locale));
@@ -1961,8 +1961,7 @@ fn register_defaults() {
         })
     });
     fn parse_locale(text: &str) -> Option<Locale> {
-        let culture = crate::data::CultureInfoIetfLanguageTagConverter::convert_from(text).ok()?;
-        Locale::try_from(&culture).ok()
+        crate::data::CultureInfoIetfLanguageTagConverter::convert_to_locale(text).ok()
     }
     ValueTypes::register_parse::<Locale>(parse_locale);
     ValueTypes::register_conversion::<String, Option<Locale>>(|text| parse_locale(text).map(Some));

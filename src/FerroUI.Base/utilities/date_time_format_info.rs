@@ -108,8 +108,14 @@ impl DateTimeFormatInfo {
     /// The conventions of a culture without conventions of its own attached:
     /// the data the registered provider has for the culture or the nearest
     /// of its parents, else the invariant data.
+    #[allow(deprecated)] // the culture whose name is no locale is asked for by name
     pub(crate) fn for_culture(culture: &CultureInfo) -> Rc<DateTimeFormatInfo> {
-        find_culture_data(culture, |provider, name| provider.get_date_time_format(name)).unwrap_or_else(Self::invariant_info)
+        find_culture_data(
+            culture,
+            |provider, locale| provider.get_date_time_format_by_locale(locale),
+            |provider, name| provider.get_date_time_format(name),
+        )
+        .unwrap_or_else(Self::invariant_info)
     }
 
     /// The conventions of the invariant culture.

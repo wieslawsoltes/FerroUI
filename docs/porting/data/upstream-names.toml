@@ -649,6 +649,22 @@ behaviour = "same"
 notes = "Step L1. set_current_ui_locale replaces CultureInfo::set_current_ui_culture (deprecated)."
 
 [[name]]
+upstream = "System.Globalization.CultureInfo (the formatting parameter)"
+rust = "ferroui_base::utilities::CultureInfo"
+kind = "type"
+phase = "C5"
+behaviour = "deviation"
+notes = "Step L2 (decision O3). The formatting parameter of the converters, the bindings and StringFormat stays CultureInfo, not deprecated, on ICU4X: made from a Locale (CultureInfo::from_locale, From<Locale>) and giving it (locale()); its name is the text of the locale (EN-us is en-US; the variants in the order of ICU4X), its LCID the one of the locale, und is the invariant culture, and Parent is the culture of the parent of the locale. It carries the number and date conventions of its locale, or attached ones (with_number_format, with_date_time_format). A name that is no BCP-47 tag (es-ES_tradnl) still names a culture, without a locale of its own. The culture data provider (a port type) is keyed by Locale: get_number_format_by_locale and the other _by_locale methods, get_locales; the methods keyed by name are deprecated. Deviation: DEVIATIONS.md, Bindings."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo.GetCultureInfoByIetfLanguageTag"
+rust = "ferroui_base::utilities::CultureInfo::get_culture_info_by_ietf_language_tag"
+kind = "member"
+phase = "C5"
+behaviour = "deviation"
+notes = "Step L2. The tag is parsed into a Locale and the culture is the culture of the locale; a text that is no BCP-47 tag is refused (None, the error Culture IETF Name ... is not a recognized IETF name. of CultureInfoIetfLanguageTagConverter, the converter of ConverterCulture and of every CultureInfo and Locale property in markup), x-private and en_US besides the old names zh-CHT and zh-CHS and es-ES_tradnl. CultureInfoIetfLanguageTagConverter::convert_to_locale gives the locale. Deviation: DEVIATIONS.md, Bindings."
+
+[[name]]
 upstream = "System.Collections.Generic.Dictionary`2 (the order of its slots)"
 rust = "ferroui_system::collections::generic::SlotOrderMap"
 kind = "type"

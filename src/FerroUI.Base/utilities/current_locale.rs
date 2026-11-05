@@ -73,15 +73,15 @@ impl CultureInfo {
     }
 
     /// Sets the culture the current thread formats with, the conventions attached to it
-    /// included, and the locale of the thread to the locale of the culture. A culture whose
-    /// name is not a BCP-47 language tag (`es-ES_tradnl`, `x-custom`: see the conversion
-    /// `TryFrom<&CultureInfo> for Locale`) leaves the locale the unknown locale `und` while
-    /// the thread formats with the culture as it is.
+    /// included, and the locale of the thread to the locale of the culture
+    /// ([`CultureInfo::locale`]). A culture whose name is not a BCP-47 language tag
+    /// (`es-ES_tradnl`, `x-custom`), which has no locale of its own, leaves the locale the
+    /// unknown locale `und` while the thread formats with the culture as it is.
     ///
     /// A culture without attached conventions is the same as
     /// [`set_current_locale`] with its locale.
     pub fn set_current_formatting(culture: CultureInfo) {
-        let locale = Locale::try_from(&culture).unwrap_or(Locale::UNKNOWN);
+        let locale = culture.locale().clone();
         CURRENT.with(|current| *current.borrow_mut() = Ambient { locale, formatting: culture });
     }
 
@@ -114,7 +114,7 @@ impl CultureInfo {
     /// locale `und` for a culture whose name is not a BCP-47 language tag.
     #[deprecated(since = "0.5.0", note = "use `ferroui_base::utilities::set_current_ui_locale`")]
     pub fn set_current_ui_culture(culture: CultureInfo) {
-        set_current_ui_locale(Locale::try_from(&culture).unwrap_or(Locale::UNKNOWN));
+        set_current_ui_locale(culture.locale().clone());
     }
 }
 
