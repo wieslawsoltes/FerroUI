@@ -32,7 +32,7 @@ use ferroui_base::media::{Brushes, IBrush};
 use ferroui_base::platform::IPlatformRenderInterface;
 use ferroui_base::reactive::Observable;
 use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher};
-use ferroui_base::utilities::{CompareOptions, CultureInfo, ICompareRules, ICultureDataProvider};
+use ferroui_base::utilities::{locale, CompareOptions, CultureInfo, ICompareRules, ICultureDataProvider, Locale};
 use crate::utils::{
     ISelectionAdapter, SelectingItemsControlSelectionAdapter, SelectingItemsControlSelectionAdapterOverrides,
 };
@@ -2012,8 +2012,8 @@ impl ICompareRules for DigitsAreEqualRules {
 struct TestCultureRulesProvider(Rc<DigitsAreEqualRules>);
 
 impl ICultureDataProvider for TestCultureRulesProvider {
-    fn get_compare_rules(&self, culture_name: &str) -> Option<Rc<dyn ICompareRules>> {
-        (culture_name == "xx").then(|| self.0.clone() as Rc<dyn ICompareRules>)
+    fn get_compare_rules_by_locale(&self, locale: &Locale) -> Option<Rc<dyn ICompareRules>> {
+        (*locale == locale!("xx")).then(|| self.0.clone() as Rc<dyn ICompareRules>)
     }
 }
 
