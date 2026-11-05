@@ -81,10 +81,12 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           path: candidate
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           path: baseline
           ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
@@ -120,10 +122,12 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           path: candidate
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           path: baseline
           ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
@@ -155,10 +159,12 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           path: candidate
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           path: baseline
           # With acknowledged output changes the optimized build tools are compared with the
           # candidate's own source build (the equivalence of the two modes, strictly); else with main.
@@ -196,6 +202,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
         with:
@@ -225,10 +232,12 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           path: candidate
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           path: baseline
           # With acknowledged output changes the optimized build tools are compared with the
           # candidate's own source build (the equivalence of the two modes, strictly); else with main.
@@ -271,6 +280,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
         with:
@@ -311,6 +321,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          submodules: true
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:

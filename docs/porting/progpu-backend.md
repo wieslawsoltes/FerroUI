@@ -40,8 +40,15 @@ separate state record. `DAMAGE_RECT` with `PRESERVE_TARGET` limits a frame to a 
   fragments (`IDrawingContextImplWithFragments`), geometries, bitmaps, render targets for windows and
   offscreen, `IFontManagerImpl`, `ITextShaperImpl`, `IGlyphTypeface`, and the
   `use_progpu()` application extension.
-- The Rust bindings of the engine live in the ProGPU repository (section 3), consumed at a pinned
-  revision; FerroUI does not keep a second copy of the C ABI.
+- The Rust bindings of the engine live in the ProGPU repository (section 3). ProGPU is a git
+  submodule of FerroUI (`third_party/ProGPU`, owner's decision of 2026-11-05, outside the workspace
+  and the paths of the upstream-name check), and the workspace takes `progpu-native-sys` from it by
+  path: its build script builds the engine from the submodule's sources with CMake (37 seconds on
+  six cores, incremental after that), so FerroUI runs the engine of the pinned ProGPU commit,
+  including engine changes not yet in a ProGPU package, and FerroUI does not keep a second copy of
+  the C ABI. Every checkout of the FerroUI workflows takes the submodule (`submodules: true`, not
+  recursive: ProGPU's own submodules are never fetched). The published crate of the bindings falls
+  back to the pinned SDK packages.
 
 ### 2.2 The device and the surfaces
 
@@ -130,7 +137,9 @@ calls a frame:
 
 1. **`progpu-native-sys`**: the C ABI (`progpu_native*.h`) as Rust declarations, generated with
    `bindgen` and checked in, with a test that the layouts (sizes, offsets) match the headers, and a
-   `build.rs` that links the SDK package (static libraries and the runtime) of the same version.
+   `build.rs` that builds the engine from the ProGPU checkout it is part of (the submodule), or,
+   for the published crate, takes the SDK packages (static libraries and the runtime) of the same
+   version.
 2. **`progpu-native`**: a safe crate with
    - a **Rust stream writer**, the counterpart of `semantic_scene_builder`: it writes the
      pointer-free records directly into a reused buffer (no FFI per command, no allocation in a

@@ -4668,7 +4668,6 @@ checksum = "3d595e54a326bc53c1c197b32d295e14b169e3cfeaa8dc82b529f947fba6bcf5"
 [[package]]
 name = "progpu-native-sys"
 version = "0.1.0-preview.70"
-source = "git+https://github.com/wieslawsoltes/ProGPU?rev=a2a17e0c683e2203b4ea42e83f2382d7c1be0666#a2a17e0c683e2203b4ea42e83f2382d7c1be0666"
 dependencies = [
  "cc",
  "libloading",
