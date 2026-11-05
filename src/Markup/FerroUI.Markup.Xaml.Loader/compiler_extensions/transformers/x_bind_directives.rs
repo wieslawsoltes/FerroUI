@@ -141,8 +141,11 @@ fn add_property_value(
     object.children.borrow_mut().push(assignment);
 }
 
-fn text_value(line_info: &dyn IXamlLineInfo, text: &str) -> Rc<dyn IXamlAstValueNode> {
-    XamlAstTextNode::new(line_info, text, true)
+/// A text value of type `String`: the transformer runs after the types are resolved, so the
+/// value is given the resolved type the parser's text would have had by then.
+fn text_value(context: &AstTransformationContext, line_info: &dyn IXamlLineInfo, text: &str) -> Rc<dyn IXamlAstValueNode> {
+    let string = context.configuration().well_known_types().string.clone();
+    XamlAstTextNode::with_type(line_info, text, true, Some(string))
 }
 
 /// The name of an element: its `x:Name` (the `Name` property it became) or its `Name`.
@@ -175,7 +178,7 @@ impl IXamlAstTransformer for XBindDirectivesTransformer {
         let Some(object) = node.cast::<XamlAstObjectNode>() else {
             return Ok(node);
         };
-        default_bind_mode(&object)?;
+        default_bind_mode(context, &object)?;
         phase(context, &object)?;
         match load(context, &object)? {
             Some(placeholder) => Ok(placeholder),
@@ -186,7 +189,7 @@ impl IXamlAstTransformer for XBindDirectivesTransformer {
 
 /// `x:DefaultBindMode`: one of the modes of x:Bind (`XamlDomValidator`,
 /// `XamlValidationError_DefaultBindModeInvalidValue`), written with the case of the mode.
-fn default_bind_mode(object: &XamlAstObjectNode) -> XamlResult<()> {
+fn default_bind_mode(context: &AstTransformationContext, object: &XamlAstObjectNode) -> XamlResult<()> {
     let Some(directive) = find_directive(&object.children, DEFAULT_BIND_MODE) else {
         return Ok(());
     };
@@ -198,7 +201,7 @@ fn default_bind_mode(object: &XamlAstObjectNode) -> XamlResult<()> {
             &*line_info,
         ));
     };
-    *directive.values.borrow_mut() = vec![text_value(&*line_info, mode)];
+    *directive.values.borrow_mut() = vec![text_value(context, &*line_info, mode)];
     Ok(())
 }
 
@@ -233,7 +236,7 @@ fn phase(context: &AstTransformationContext, object: &XamlAstObjectNode) -> Xaml
             continue;
         }
         let type_ = binding.type_.borrow().clone();
-        add_property_value(&binding, &type_, PHASE, text_value(&*binding, &phase.to_string()), true);
+        add_property_value(&binding, &type_, PHASE, text_value(context, &*binding, &phase.to_string()), true);
     }
     remove_directive(object, &directive);
     Ok(())
@@ -255,7 +258,7 @@ fn load(context: &AstTransformationContext, object: &Rc<XamlAstObjectNode>) -> X
             match directive_text(&strategy).as_deref().map(str::trim) {
                 // `Enum.TryParse(strategy, false)`: the names of the strategy, with their case.
                 Some("Lazy") => {
-                    let value = text_value(&*line_info, "False");
+                    let value = text_value(context, &*line_info, "False");
                     (strategy, value)
                 }
                 Some("None") => {
@@ -281,7 +284,7 @@ fn load(context: &AstTransformationContext, object: &Rc<XamlAstObjectNode>) -> X
                     return Ok(None);
                 }
                 (None, Some(text)) if text.eq_ignore_ascii_case("false") => {
-                    let value = text_value(&*line_info, "False");
+                    let value = text_value(context, &*line_info, "False");
                     (load, value)
                 }
                 _ => {
@@ -304,7 +307,7 @@ fn load(context: &AstTransformationContext, object: &Rc<XamlAstObjectNode>) -> X
     let placeholder_type = context.configuration().type_system.get_type(DEFERRED_ELEMENT)?;
     let type_: Rc<dyn IXamlAstTypeReference> = XamlAstClrTypeReference::new(&**object, placeholder_type, false);
     let placeholder = XamlAstObjectNode::new(&**object, type_.clone());
-    add_property_value(&placeholder, &type_, "ElementName", text_value(&**object, &name), true);
+    add_property_value(&placeholder, &type_, "ElementName", text_value(context, &**object, &name), true);
     let element: Rc<dyn IXamlAstValueNode> = object.clone();
     add_property_value(&placeholder, &type_, "Content", element, false);
     // Last: a bound value can load the element as soon as it is read.

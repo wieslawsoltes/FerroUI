@@ -401,9 +401,12 @@ impl XBindings {
                     return Ok(None);
                 };
                 let parent: BoxedValue = Rc::new(parent);
-                match ValueTypes::try_cast(&parent, target_type) {
-                    Some(parent) => Ok(Some(parent)),
-                    None => Err(format!(
+                // The TargetType is a class: the templated parent is of it or of a class deriving
+                // from it.
+                let target = ValueTypes::class_of(target_type).map_or(CastTarget::Value(target_type), CastTarget::Class);
+                match target.is_instance(&parent) {
+                    true => Ok(Some(parent)),
+                    false => Err(format!(
                         "the templated parent of the template instance is not a '{}', the TargetType of its template",
                         target_type.name()
                     )),

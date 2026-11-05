@@ -11,6 +11,7 @@ use crate::templates::TemplateContent;
 use crate::XamlLoadError;
 use ferroui_base::controls::{INameScope, NameScope};
 use ferroui_base::data::core::ValueTypes;
+use ferroui_base::FerroObjectImplExt;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -87,11 +88,13 @@ ferro_properties! { impl DeferredElement {
     );
 } }
 
-impl FerroObjectImpl for DeferredElement {
-    fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
-        Self::parent_on_property_changed(this, change);
-        if change.property() == Self::load_property().as_property() {
-            this.load_changed();
+ferroui_base::ferro_overrides! {
+    impl FerroObjectImpl for DeferredElement {
+        fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+            Self::parent_on_property_changed(this, change);
+            if change.property() == Self::load_property().as_property() {
+                this.load_changed();
+            }
         }
     }
 }
