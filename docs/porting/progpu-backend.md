@@ -88,7 +88,24 @@ direction, features, variations), and its bidi and line breaking where the text 
 asks the platform. Glyph metrics and outlines come from the same faces, so layout and rendering use
 one font stack.
 
-### 2.5 Browser
+### 2.5 Geometries and bitmaps
+
+A geometry is its path in the segment records of the engine (`progpu_native_path_segment`:
+lines, quadratic and cubic Béziers) with its fill rule, so drawing it copies the records into the
+scene with no conversion. The queries of `IGeometryImpl` use the engine's geometry ABI where it
+has them: Boolean combination (`progpu_native_geometry_combine`), the fill intersection result
+(`progpu_native_geometry_compare_fill`), fill and stroke containment
+(`progpu_native_geometry_fill_contains`, `progpu_native_geometry_stroke_query`); the measures it does
+not have (bounds, contour length, the point and tangent at a distance, segments, the widened
+outline of a pen) are path mathematics on the same records with `kurbo`, which the workspace
+already uses and which renders nothing.
+
+Bitmaps decode with the decoders the workspace already ships (`png`, `zune-jpeg`, `zune-bmp`,
+`gif`) into premultiplied RGBA8 or BGRA8 pixels that the scene holds as image resources by stable
+id; a `WriteableBitmap` updates its resource in place (`update_rgba8_image`, same id, a new
+generation), so a changed bitmap uploads its pixels and nothing else.
+
+### 2.6 Browser
 
 A new rendering mode `WebGPU` of `ferroui-browser` (FerroUI's browser target is
 `wasm32-unknown-emscripten`): the ProGPU engine compiled with Emscripten 4.0.18 and Emdawnwebgpu,
