@@ -937,6 +937,15 @@ pub fn describe_element(element: &XamlIlBindingPathElementNode) -> String {
             format!("ArrayElement([{}]:{})", indices.join(","), e.type_().full_name())
         }
         XamlIlBindingPathElementNode::TypeCast(e) => format!("TypeCast({})", e.type_.full_name()),
+        XamlIlBindingPathElementNode::XBindFunction(e) => format!(
+            "Function({}.{}({}):{};arguments={};bind_back={})",
+            e.owner_type.name(),
+            e.method.name(),
+            parameter_list(&e.method.parameters()),
+            e.type_().full_name(),
+            e.arguments.len(),
+            e.bind_back.borrow().as_ref().map(|b| b.method.name()).unwrap_or_else(|| "-".to_string())
+        ),
     }
 }
 

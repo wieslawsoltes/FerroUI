@@ -1,0 +1,12 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:local="clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests">
+  <TextBlock x:Name="castRoot" Tag="{x:Bind (local:XBindModel)Tag, Mode=OneWay}" />
+  <TextBlock x:Name="castMember" Text="{x:Bind ((local:XBindModel)Tag).Name, Mode=OneWay}" />
+  <TextBox x:Name="castTwoWay" Text="{x:Bind ((local:XBindModel)Tag).Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+  <TextBlock x:Name="castLeaf" Text="{x:Bind (x:String)Tag, Mode=OneWay}" />
+  <TextBlock x:Name="castFunction" Text="{x:Bind ((local:XBindModel)Tag).Shout(((local:XBindModel)Tag).Name), Mode=OneWay}" />
+  <TextBlock x:Name="castInterface" Text="{x:Bind Tag.(local:IXBindNamed.DisplayName)}" />
+  <Border x:Name="rowHolder" Grid.Row="4" />
+  <TextBlock x:Name="attachedPath" Tag="{x:Bind rowHolder.(Grid.Row)}" />
+</StackPanel>
