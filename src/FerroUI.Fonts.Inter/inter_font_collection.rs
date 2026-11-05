@@ -1,5 +1,5 @@
 use ferroui_base::media::fonts::{EmbeddedFontCollection, FontCollectionBase, FontCollectionBaseImpl};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 
 /// The font collection of the embedded Inter family, with the key
 /// `fonts:Inter`.
@@ -13,8 +13,8 @@ impl InterFontCollection {
         crate::assets::register();
         Self {
             base: EmbeddedFontCollection::new(
-                Uri::absolute("fonts:Inter").expect("a valid key"),
-                Uri::absolute(&format!("ferres://{}/Assets", crate::ASSEMBLY_NAME)).expect("a valid source"),
+                UriRef::parse_absolute("fonts:Inter").expect("a valid key"),
+                UriRef::parse_absolute(&format!("ferres://{}/Assets", crate::ASSEMBLY_NAME)).expect("a valid source"),
             ),
         }
     }
@@ -31,7 +31,7 @@ impl FontCollectionBaseImpl for InterFontCollection {
         EmbeddedFontCollection::base(&this.base)
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         EmbeddedFontCollection::key(&this.base)
     }
 }
@@ -64,7 +64,7 @@ mod tests {
 
         let collection = InterFontCollection::new();
 
-        assert_eq!("fonts:Inter", IFontCollection::key(&collection).original_string());
+        assert_eq!("fonts:Inter", IFontCollection::key(&collection).as_str());
         scope.dispose();
     }
 

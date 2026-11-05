@@ -25,7 +25,7 @@ use crate::media::{
     FontSimulations, FontStretch, FontStyle, FontWeight, GlyphMetrics, GlyphTypeface, IFontMemory, IPlatformTypeface,
 };
 use crate::platform::{register_manifest_resources, IAssetLoader, StandardAssetLoader};
-use crate::utilities::{Locale, ReadOnlyMemory, Uri};
+use crate::utilities::{Locale, ReadOnlyMemory, UriRef};
 
 const INTER_FONT_URI: &str = "resm:FerroUI.Base.UnitTests.Assets.Inter-Regular.ttf?assembly=ferroui-base";
 const BLANK_FONT_URI: &str = "resm:FerroUI.Base.UnitTests.Assets.AdobeBlank2VF.ttf?assembly=ferroui-base";
@@ -58,7 +58,7 @@ fn standard_asset_loader() -> StandardAssetLoader {
 }
 
 fn open(asset_loader: &StandardAssetLoader, uri: &str) -> Box<dyn crate::platform::AssetStream> {
-    asset_loader.open(&Uri::absolute(uri).unwrap(), None).unwrap()
+    asset_loader.open(&UriRef::parse(uri).unwrap(), None).unwrap()
 }
 
 /// C# `new GlyphTypeface(platformTypeface, fontSimulations)`.

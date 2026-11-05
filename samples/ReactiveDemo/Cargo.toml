@@ -64,3 +64,5 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 ferroui-reactive-testing = { workspace = true }
 ferroui-reactiveui-testing = { workspace = true }
 sample-testing = { path = "../SampleTesting" }
+# The URLs the launcher of the tests is asked to open.
+url = { workspace = true }

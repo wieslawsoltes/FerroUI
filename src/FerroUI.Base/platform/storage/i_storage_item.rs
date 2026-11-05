@@ -1,7 +1,7 @@
 use super::{IStorageFile, IStorageFolder, IStorageItemWithFileSystemInfo, StorageItemProperties};
 use crate::input::LocalBoxFuture;
 use crate::reactive::IDisposable;
-use crate::utilities::Uri;
+use crate::utilities::UriRef;
 use std::any::Any;
 use std::rc::Rc;
 
@@ -20,8 +20,10 @@ pub trait IStorageItem: IDisposable {
     /// The file-system path of the item.
     ///
     /// Android backend might return a file path with "content:" scheme.
-    /// Browser and iOS backends might return a relative URI.
-    fn path(&self) -> Uri;
+    /// Browser and iOS backends might return a relative URI, and so does the
+    /// root of a local file system: the path is a [`UriRef`], whose
+    /// [`as_url`](UriRef::as_url) is the URL of an absolute one.
+    fn path(&self) -> UriRef;
 
     /// Gets the basic properties of the current item.
     fn get_basic_properties_async(&self) -> LocalBoxFuture<StorageItemProperties>;

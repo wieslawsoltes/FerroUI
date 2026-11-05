@@ -8,7 +8,7 @@ use super::support::*;
 use crate::view_models::MainWindowViewModel;
 use ferroui_base::platform::{AssetAssembly, AssetStream, IAssetLoader, StandardAssetLoader};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::{Uri, UriExtensions};
+use ferroui_base::utilities::{UriExtensions, UriRef};
 use std::cell::RefCell;
 use std::collections::BTreeSet;
 use std::rc::Rc;
@@ -23,7 +23,7 @@ struct RecordingAssetLoader {
 }
 
 impl RecordingAssetLoader {
-    fn record(&self, uri: &Uri, base_uri: Option<&Uri>) {
+    fn record(&self, uri: &UriRef, base_uri: Option<&url::Url>) {
         if let Ok(uri) = UriExtensions::ensure_absolute(uri, base_uri) {
             if UriExtensions::is_asset(&uri) && UriExtensions::authority(&uri).eq_ignore_ascii_case(crate::ASSEMBLY.name) {
                 self.opened.borrow_mut().insert(UriExtensions::get_unescape_absolute_path(&uri));
@@ -37,25 +37,25 @@ impl IAssetLoader for RecordingAssetLoader {
         self.inner.set_default_assembly(assembly)
     }
 
-    fn exists(&self, uri: &Uri, base_uri: Option<&Uri>) -> bool {
+    fn exists(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> bool {
         self.inner.exists(uri, base_uri)
     }
 
-    fn open(&self, uri: &Uri, base_uri: Option<&Uri>) -> std::io::Result<Box<dyn AssetStream>> {
+    fn open(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> std::io::Result<Box<dyn AssetStream>> {
         self.record(uri, base_uri);
         self.inner.open(uri, base_uri)
     }
 
-    fn open_and_get_assembly(&self, uri: &Uri, base_uri: Option<&Uri>) -> std::io::Result<(Box<dyn AssetStream>, AssetAssembly)> {
+    fn open_and_get_assembly(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> std::io::Result<(Box<dyn AssetStream>, AssetAssembly)> {
         self.record(uri, base_uri);
         self.inner.open_and_get_assembly(uri, base_uri)
     }
 
-    fn get_assembly(&self, uri: &Uri, base_uri: Option<&Uri>) -> Option<AssetAssembly> {
+    fn get_assembly(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> Option<AssetAssembly> {
         self.inner.get_assembly(uri, base_uri)
     }
 
-    fn get_assets(&self, uri: &Uri, base_uri: Option<&Uri>) -> Vec<Uri> {
+    fn get_assets(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> Vec<url::Url> {
         self.inner.get_assets(uri, base_uri)
     }
 

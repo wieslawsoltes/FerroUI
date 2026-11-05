@@ -9,7 +9,7 @@ use ferroui_base::media::{
     FontManager, FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface,
 };
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
-use ferroui_base::utilities::{current_locale, Locale, Uri, UriKind};
+use ferroui_base::utilities::{current_locale, Locale, UriRef};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use skia_safe::font_style::{Weight, Width};
 use skia_safe::{Data, FontMgr};
@@ -48,7 +48,7 @@ impl CustomFontManagerImpl {
             return system_fonts.clone();
         }
 
-        let source = Uri::try_create(ASSETS, UriKind::Absolute).unwrap();
+        let source = UriRef::parse_absolute(ASSETS).unwrap();
 
         let system_fonts: Rc<dyn IFontCollection> =
             Rc::new(EmbeddedFontCollection::new(FontManager::system_fonts_key(), source));
@@ -66,7 +66,7 @@ impl IFontManagerImpl for CustomFontManagerImpl {
 
     fn get_installed_font_family_names(&self, _check_for_updates: bool) -> Vec<String> {
         // Directly load from assets to avoid creating the full font collection
-        let key = Uri::try_create(ASSETS, UriKind::Absolute).unwrap();
+        let key = UriRef::parse_absolute(ASSETS).unwrap();
 
         let asset_loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
 
@@ -75,7 +75,7 @@ impl IFontManagerImpl for CustomFontManagerImpl {
         let mut seen = HashSet::new();
 
         for font_asset in font_assets {
-            let Ok(mut stream) = asset_loader.open(&font_asset, None) else {
+            let Ok(mut stream) = asset_loader.open(&UriRef::from(font_asset.clone()), None) else {
                 // Ignore faulty assets
                 continue;
             };

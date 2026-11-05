@@ -1,6 +1,6 @@
 use super::IStorageItem;
 use crate::input::LocalBoxFuture;
-use crate::utilities::Uri;
+use url::Url;
 use std::rc::Rc;
 
 /// Starts the default app associated with the specified file or URI.
@@ -8,9 +8,12 @@ pub trait ILauncher {
     /// Starts the default app associated with the URI scheme name for the
     /// specified URI.
     ///
+    /// The URI is absolute (a [`Url`]): a relative reference names nothing
+    /// to launch, so it is resolved, or refused, before it gets here.
+    ///
     /// Resolves to `true` if the operation was successful, `false`
     /// otherwise.
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool>;
+    fn launch_uri_async(&self, uri: &Url) -> LocalBoxFuture<bool>;
 
     /// Starts the default app associated with the specified storage file or
     /// folder.
@@ -25,7 +28,7 @@ pub trait ILauncher {
 pub struct NoopLauncher;
 
 impl ILauncher for NoopLauncher {
-    fn launch_uri_async(&self, _uri: &Uri) -> LocalBoxFuture<bool> {
+    fn launch_uri_async(&self, _uri: &Url) -> LocalBoxFuture<bool> {
         Box::pin(std::future::ready(false))
     }
 

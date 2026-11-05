@@ -4,7 +4,7 @@ use super::{
     SaveFilePickerResult, WellKnownFolder,
 };
 use crate::input::LocalBoxFuture;
-use crate::utilities::Uri;
+use url::Url;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -167,13 +167,13 @@ impl IStorageProvider for FallbackStorageProvider {
         Box::pin(async move { state.first_not_null(|p| p.open_folder_bookmark_async(&bookmark)).await })
     }
 
-    fn try_get_file_from_path_async(&self, file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
+    fn try_get_file_from_path_async(&self, file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
         let state = self.state.clone();
         let file_path = file_path.clone();
         Box::pin(async move { state.first_not_null(|p| p.try_get_file_from_path_async(&file_path)).await })
     }
 
-    fn try_get_folder_from_path_async(&self, folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
+    fn try_get_folder_from_path_async(&self, folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
         let state = self.state.clone();
         let folder_path = folder_path.clone();
         Box::pin(async move { state.first_not_null(|p| p.try_get_folder_from_path_async(&folder_path)).await })

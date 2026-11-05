@@ -6,7 +6,7 @@ use crate::view_models::random::Random;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{Color, IBrush, IImageBrushSource, ImageBrush, SolidColorBrush, Stretch};
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{ferro_class_info, instantiate, Ref};
 use ferroui_controls::{Border, TextBlock, UserControl};
 use std::collections::hash_map::DefaultHasher;
@@ -62,7 +62,7 @@ fn movie_facts(movie_title: &str) -> (String, String, String) {
 /// The brush of the image of the asset `uri`; `None` when the asset cannot
 /// be opened or decoded (the `catch` of the original).
 fn image_brush(uri: &str) -> Option<Rc<dyn IBrush>> {
-    let uri = Uri::absolute(uri).ok()?;
+    let uri = UriRef::parse(uri).ok()?;
     let mut stream = AssetLoader::open(&uri, None).ok()?;
     let bitmap: Rc<dyn IImageBrushSource> = Rc::new(Bitmap::from_stream(&mut stream).ok()?);
     let brush = ImageBrush::with_source(Some(bitmap));

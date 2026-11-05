@@ -15,7 +15,7 @@ use crate::interop::java::{call_boolean, call_object, call_void, string_of, Java
 use crate::interop::natives::{next_handle, sdk_int};
 use crate::platform::AndroidActivatableLifetime;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::{HandlerList, Uri, UriKind};
+use ferroui_base::utilities::HandlerList;
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions};
 use ferroui_controls::application_lifetimes::{
     ActivatedEventArgs, ActivationKind, FileActivatedEventArgs, ProtocolActivatedEventArgs,
@@ -154,7 +154,7 @@ impl FerroActivity {
         let Some(text) = call_object(&android_uri, "toString", "()Ljava/lang/String;", &[]) else {
             return;
         };
-        let Some(uri) = Uri::try_create(&string_of(&text), UriKind::Absolute) else {
+        let Ok(uri) = url::Url::parse(&string_of(&text)) else {
             return;
         };
 

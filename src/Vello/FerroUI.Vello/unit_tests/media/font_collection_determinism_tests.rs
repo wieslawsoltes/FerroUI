@@ -14,7 +14,7 @@ use crate::FontManagerImpl;
 use ferroui_base::media::fonts::{FontCollectionBase, FontCollectionBaseImpl, IFontCollection};
 use ferroui_base::media::{FontStretch, FontStyle, FontWeight, Typeface};
 use ferroui_base::platform::IAssetLoader;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::testing::UnitTestApplication;
 use std::rc::Rc;
@@ -158,10 +158,10 @@ fn try_match_character_cached_script_fallback_lookup_returns_same_family() {
 
 fn build_collection(asset_paths: &[String]) -> Rc<CustomFontCollection> {
     let asset_loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
-    let collection = CustomFontCollection::new(Uri::new("fonts:determinism", UriKind::Absolute).unwrap());
+    let collection = CustomFontCollection::new(UriRef::parse_absolute("fonts:determinism").unwrap());
 
     for path in asset_paths {
-        let uri = Uri::new(&format!("resm:{path}?assembly=ferroui-vello"), UriKind::Absolute).unwrap();
+        let uri = UriRef::parse(&format!("resm:{path}?assembly=ferroui-vello")).unwrap();
 
         let mut stream = asset_loader.open(&uri, None).expect("the font stream");
 
@@ -215,11 +215,11 @@ fn distinct(values: &[String]) -> Vec<&String> {
 
 struct CustomFontCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
 }
 
 impl CustomFontCollection {
-    fn new(key: Uri) -> Rc<Self> {
+    fn new(key: url::Url) -> Rc<Self> {
         Rc::new(Self { base: FontCollectionBase::new(), key })
     }
 }
@@ -229,7 +229,7 @@ impl FontCollectionBaseImpl for CustomFontCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 }

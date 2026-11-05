@@ -21,7 +21,7 @@ use ferroui_base::interactivity::{Interactive, RoutedEvent};
 use ferroui_base::platform::storage::{IStorageFolder, IStorageItem, StorageItemProperties};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::{HandlerList, Uri};
+use ferroui_base::utilities::{HandlerList, UriRef};
 use ferroui_base::{BoxedValue, FerroObject, ObjectType, Point, Ref, Upcast, Visual};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Border, Control, Window};
@@ -409,8 +409,8 @@ impl IStorageItem for TestFile {
         self.name.to_owned()
     }
 
-    fn path(&self) -> Uri {
-        Uri::absolute(&format!("file:///files/{}", self.name)).expect("a file URI")
+    fn path(&self) -> UriRef {
+        UriRef::parse(&format!("file:///files/{}", self.name)).expect("a file URI")
     }
 
     fn get_basic_properties_async(&self) -> LocalBoxFuture<StorageItemProperties> {

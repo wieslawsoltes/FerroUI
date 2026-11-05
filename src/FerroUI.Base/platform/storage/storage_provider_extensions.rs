@@ -79,6 +79,6 @@ impl dyn IStorageItem + '_ {
             return Some(storage_item.file_system_info_full_name());
         }
 
-        StorageProviderHelpers::try_get_path_from_file_uri(Some(&self.path()))
+        StorageProviderHelpers::try_get_path_from_file_uri(self.path().as_url())
     }
 }

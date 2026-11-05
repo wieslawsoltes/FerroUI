@@ -15,7 +15,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{Brushes, DrawingContext, FontSimulations, GlyphTypeface, IBrush};
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl, IGeometryImpl};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::*;
 use ferroui_controls::{Border, Control, ControlImpl};
 use std::rc::Rc;
@@ -113,7 +113,7 @@ fn blank_variable_font_returns_null_outline() {
 
 fn load_glyph_typeface(asset_uri: &str) -> Rc<GlyphTypeface> {
     let loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
-    let mut stream = loader.open(&Uri::absolute(asset_uri).expect("the URI of the asset is valid"), None).expect("the asset opens");
+    let mut stream = loader.open(&UriRef::parse(asset_uri).expect("the URI of the asset is valid"), None).expect("the asset opens");
     let font_manager = FerroLocator::current().get_required_service::<dyn IFontManagerImpl>();
     let platform_typeface = font_manager
         .try_create_glyph_typeface_from_stream(&mut stream, FontSimulations::None)

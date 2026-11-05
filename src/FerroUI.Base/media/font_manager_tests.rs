@@ -12,11 +12,11 @@ use crate::media::{
     FontFallback, FontFamily, FontManager, FontManagerOptions, FontSimulations, FontStretch, FontStyle, FontWeight,
     GlyphTypeface, Typeface, UnicodeRange,
 };
-use crate::utilities::{Locale, Uri};
+use crate::utilities::{Locale, UriRef};
 use crate::FerroLocator;
 
-fn uri(text: &str) -> Uri {
-    Uri::absolute(text).unwrap()
+fn uri(text: &str) -> url::Url {
+    UriRef::parse_absolute(text).unwrap()
 }
 
 /// The embedded test fonts, family "Noto Mono".
@@ -71,25 +71,25 @@ impl FontCollectionBaseImpl for InterFontCollection {
         &this.base
     }
 
-    fn key(_this: &Self) -> Uri {
+    fn key(_this: &Self) -> url::Url {
         uri("fonts:Inter")
     }
 }
 
 /// A collection implementing the interface directly.
 struct StubFontCollection {
-    key: Uri,
+    key: url::Url,
     is_disposed: std::cell::Cell<bool>,
 }
 
 impl StubFontCollection {
-    fn new(key: &Uri) -> Rc<Self> {
+    fn new(key: &url::Url) -> Rc<Self> {
         Rc::new(Self { key: key.clone(), is_disposed: std::cell::Cell::new(false) })
     }
 }
 
 impl IFontCollection for StubFontCollection {
-    fn key(&self) -> Uri {
+    fn key(&self) -> url::Url {
         self.key.clone()
     }
 

@@ -28,6 +28,8 @@ skia-safe.workspace = true
 
 [dev-dependencies]
 ferroui-controls = { workspace = true, features = ["testing"] }
+# `url::Url`, the keys and sources of the font collections of the tests (C5 of #423).
+url.workspace = true
 ferroui-fonts-inter.workspace = true
 ferroui-harfbuzz.workspace = true
 

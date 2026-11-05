@@ -50,6 +50,8 @@ ferroui-build = { workspace = true }
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+# The URLs the launcher of the tests records (C5 of #423).
+url = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

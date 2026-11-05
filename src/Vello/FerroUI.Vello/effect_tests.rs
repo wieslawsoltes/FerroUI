@@ -2610,13 +2610,20 @@ mod custom_effect_graphs {
         context.pop_render_options();
     }
 
+    /// A target of `SIZE` logical pixels at `scale` device pixels each.
+    fn target(scale: i32) -> Target {
+        let dpi = Vector::new(96.0 * f64::from(scale), 96.0 * f64::from(scale));
+        Target { bitmap: render_interface().create_render_target_bitmap(PixelSize::new(SIZE * scale, SIZE * scale), dpi) }
+    }
+
     /// The premultiplied RGBA pixels of the target.
     fn pixels(target: &Target) -> Vec<u8> {
         let framebuffer = target.bitmap.lock();
+        let size = framebuffer.size();
         let premultiplied = framebuffer.alpha_format() != AlphaFormat::Unpremul;
-        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
-        for y in 0..SIZE {
-            for x in 0..SIZE {
+        let mut rgba = Vec::with_capacity((size.width * size.height * 4) as usize);
+        for y in 0..size.height {
+            for x in 0..size.width {
                 let (r, g, b, a) = read_framebuffer_pixel(&*framebuffer, x, y);
                 let scale = |c: u8| if premultiplied { c } else { ((u32::from(c) * u32::from(a) + 127) / 255) as u8 };
                 rgba.extend_from_slice(&[scale(r), scale(g), scale(b), a]);
@@ -2638,24 +2645,52 @@ mod custom_effect_graphs {
     /// reference: within `largest` levels per channel, and within a mean of
     /// half a level.
     fn assert_matches_reference(effect: ImmutableCustomEffect, largest: u8) {
+        assert_matches_reference_at(effect, 1, largest);
+    }
+
+    /// [`assert_matches_reference`] at `scale` device pixels per device
+    /// independent pixel (#455, E9).
+    fn assert_matches_reference_at(effect: ImmutableCustomEffect, scale: i32, largest: u8) {
         assert!(effect.has_graph(), "{effect}");
-        let plain = Target::new();
+        let plain = target(scale);
         plain.draw(scene);
         let mut expected = pixels(&plain);
-        assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+        let side = (SIZE * scale) as usize;
+        assert!(effect.cpu_reference(&mut expected, side, side, f64::from(scale)), "{effect}");
 
-        let target = Target::new();
-        target.draw(|context| {
+        let drawn = target(scale);
+        drawn.draw(|context| {
             let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
             assert!(push_custom_effect_graph(context, &effect, bounds));
             scene(context);
             assert!(pop_custom_effect_graph(context, &effect, bounds));
         });
-        let actual = pixels(&target);
+        let actual = pixels(&drawn);
         let (most, mean) = difference(&expected, &actual);
-        assert!(most <= largest && mean <= 0.5, "{effect}: largest difference {most}, mean {mean}");
+        assert!(most <= largest && mean <= 0.5, "{effect} at {scale}x: largest difference {most}, mean {mean}");
         let (changed, _) = difference(&pixels(&plain), &actual);
-        assert!(changed > 0, "{effect}: the content is changed");
+        assert!(changed > 0, "{effect} at {scale}x: the content is changed");
+    }
+
+    /// The graph effects of the library at 192 dots per inch in the CPU mode
+    /// (#455, E9), with the tolerances of 96 and of the tests of
+    /// `ferroui-skia`.
+    #[test]
+    fn the_graph_effects_match_their_cpu_references_at_twice_the_scale() {
+        let effects = [
+            (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), 2),
+            (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), 2),
+            (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), 2),
+            (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), 2),
+            (ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }), 2),
+            (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 2),
+            (ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.8 }), 12),
+            (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), 2),
+            (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), 2),
+        ];
+        for (effect, largest) in effects {
+            assert_matches_reference_at(effect, 2, largest);
+        }
     }
 
     #[test]
