@@ -15,16 +15,22 @@ pub enum WinUIThemeResourcePolicy {
     DynamicResource,
 }
 
-/// x:Bind is a different source and lifecycle contract from an ordinary Binding.
+/// What the migration does with WinUI's `{x:Bind}` (docs/porting/x-bind.md, X6).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum WinUIXBindPolicy {
+    /// Keep x:Bind as written: the XAML compiler (the run-time loader and the Rust emitter)
+    /// compiles it with its x:Bind core, `XBindExtension` of `ferroui-markup-xaml`. The paths,
+    /// functions, casts, indexers, converters, substitute values, event bindings, `x:Phase`,
+    /// `x:DefaultBindMode`, `x:Load` and `x:DeferLoadStrategy` are WinUI's and are checked with
+    /// WinUI's messages. The bindings of a document root are initialized when it is attached to
+    /// a visual tree (a `Window` when it is activated), those of a typed template instance when
+    /// its data context changes to an item; `XBindings::get_for_root` gives the per-root
+    /// `Bindings` (`initialize`, `update`, `stop_tracking`).
     #[default]
+    Compile,
+    /// Report every x:Bind of the document as an error (`WXAML1007`), for a host that rewrites
+    /// x:Bind by hand, for example to `{Binding}`.
     Reject,
-    /// Emit the dedicated WinUIBind extension for dotted property paths. The host must
-    /// initialize each document/template root's WinUIBindings after construction and fields
-    /// are assigned, and choose unload stopping explicitly. No parse-time initialization is
-    /// implied. Functions, events, casts, indexers and unsupported parameters remain errors.
-    PropertyPathsWithExplicitLifecycle,
 }
 
 /// Maps one XML namespace URI, including an application `using:` namespace.

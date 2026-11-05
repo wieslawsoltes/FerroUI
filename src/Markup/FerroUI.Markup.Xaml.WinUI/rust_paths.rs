@@ -8,10 +8,6 @@ ferroui_base::ferro_rust_paths! {
     classes: [
     ],
     types: [
-        crate::WinUIBindExtension,
-        crate::WinUIBinding,
-        crate::WinUIBindingScope,
-        crate::WinUIBindings,
     ],
     contracts: [
     ],

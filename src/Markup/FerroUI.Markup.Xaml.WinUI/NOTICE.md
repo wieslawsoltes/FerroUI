@@ -1,37 +1,19 @@
-# WinUI property-path binding compatibility
+# WinUI XAML importer
 
-The observable binding contract is derived from Microsoft WinUI at revision
+The WinUI semantics the importer adapts are derived from Microsoft WinUI at revision
 `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`:
 https://github.com/microsoft/microsoft-ui-xaml
 
 | Implementation | Reference source |
 |---|---|
-| `binding.rs` | `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/BindAssignment.cs`, especially `NeedsLostFocusForTwoWay` and `ValidateUpdateSourceTrigger`; `DefaultBindMode.cs` |
-| `bindings.rs` | `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/CodeGenerators/CSharpPagePass2.tt`: generated `Initialize`, `Update`, `StopTracking` and template instance lifecycle |
-| `path_node.rs` | `src/XamlCompiler/Microsoft.UI.Xaml.Markup.Compiler.Parsing/BindPathListener.cs`: root vs typed-template name precedence |
+| `importer/migration.rs` (an x:Bind nested in an x:Bind) | `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/XamlDomValidator.cs` (`ProcessXBindPropertyNode`, `XamlXBindInsideXBindError`); `src/XamlCompiler/Properties/XamlCompilerResources.resx` (`XamlCompiler_XBindInsideXBind`) |
 
-The implementation uses the existing FerroUI property, metadata, notification and binding
-engine. It is an explicit property-path adapter, not the WinUI C#/C++ generated binding
-compiler. Application fields must expose registered Rust property or model metadata. The
-supported grammar consists of dotted names, an empty OneTime/OneWay path, explicit binding
-mode and source-update trigger. Functions, event binding, casts, indexers, converters,
-fallback/null-value parameters, x:DefaultBindMode, x:Phase and deferred lifecycle remain
-diagnosed requirements. New support must retain those diagnostics until implemented.
-
-The host explicitly initializes a document or template root after construction. It must
-assign a typed template's DataContext before initializing it. Item replacement then refreshes
-that instance's paths; it never changes another template instance. Loaded is not substituted
-for WinUI Loading. Unload stopping is opt-in. StopTracking resets the explicit controller to
-uninitialized even for groups containing only OneTime paths, whereas WinUI omits that reset
-when its generated group requires no tracking. A subsequent Initialize therefore refreshes
-all paths under this explicit host lifecycle. Update is not transactional if a user callback
-or getter fails; unrelated Rust panics propagate.
-
-OneTime paths do not subscribe to property notifications. Source roots, named elements and
-intermediate object values are held weakly to avoid Rust ownership cycles; the declaring
-root/model owns its fields. This matches the lifetime policy of the existing native binding
-engine rather than relying on a managed garbage collector. Public lifecycle tests check
-subscriber counts, root/target release, template isolation and failure recovery.
+WinUI's `{x:Bind}` and its directives (`x:Phase`, `x:DefaultBindMode`, `x:Load`,
+`x:DeferLoadStrategy`) are kept as written: the x:Bind core of `ferroui-markup-xaml` and the
+compiler of `ferroui-markup-xaml-loader` implement them (docs/porting/x-bind.md; their NOTICE.md
+files list the WinUI sources). The x:Bind property-path adapter this crate had until #525, X6
+(`WinUIBindExtension`, `WinUIBindings`) is removed, and with it the WinUI event-target table that
+the importer used to reject an x:Bind of an event.
 
 ## Microsoft license
 
