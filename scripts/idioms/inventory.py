@@ -136,17 +136,28 @@ PATTERNS = [
     ("std_error_impls", "`impl std::error::Error for`",
      re.compile(r"\bimpl\b(?:\s*<[^>{}]*>)?\s*(?:::)?(?:(?:std|core)::)?(?:error::)?Error\s+for\b"),
      "decl", "(target shape)"),
-    ("time_span", "`TimeSpan`", re.compile(r"\bTimeSpan\b"), "use", "`std::time::Duration`"),
+    # C5 (docs/idiomatic-rust-signatures.md): the public signatures take the std and chosen-crate
+    # types. What stays by decision (section 3.9: `CultureInfo`, `DateTime`, `DateTimeOffset`, the
+    # BSON types, the microcom `Guid`) is a deliberate declaration of the baseline.
+    ("time_span", "`TimeSpan`", re.compile(r"\bTimeSpan\b"), "use",
+     f"`Duration`, or `SignedDuration` where a span can be negative; {REMOVED_AFTER_0_5}"),
+    ("signed_duration", "`SignedDuration`", re.compile(r"\bSignedDuration\b"), "use",
+     "(the port, where a span can be negative)"),
     ("date_time", "`DateTime`", re.compile(r"\bDateTime\b"), "use",
-     "`SystemTime` and a calendar type (decide once)"),
+     "keep for calendar values (O4); an instant is `SystemTime`"),
     ("date_time_offset", "`DateTimeOffset`", re.compile(r"\bDateTimeOffset\b"), "use",
-     "`SystemTime` and a calendar type (decide once)"),
-    ("culture_info", "`CultureInfo`", re.compile(r"\bCultureInfo\b"), "use", "ICU4X `Locale`"),
-    ("uri", "`Uri`", re.compile(r"\bUri\b"), "use", "`url::Url`"),
-    ("guid_types", "`Guid` type declarations", declared(r"Guid"), "decl", "one type, or `uuid`"),
-    ("guid_uses", "`Guid` (uses)", re.compile(r"\bGuid\b"), "use", "one type, or `uuid`"),
+     "keep for calendar values (O4); an instant is `SystemTime`"),
+    ("culture_info", "`CultureInfo`", re.compile(r"\bCultureInfo\b"), "use",
+     "keep as the formatting parameter (O3); an identity is ICU4X `Locale`"),
+    ("uri", "`Uri`", re.compile(r"\bUri\b"), "use",
+     "`url::Url`, or `UriRef` where a reference can be relative; the port stays the markup form"),
+    ("guid_types", "`Guid` type declarations", declared(r"Guid"), "decl",
+     f"`uuid::Uuid`; the microcom `Guid` stays (COM layout), the others {REMOVED_AFTER_0_5}"),
+    ("guid_uses", "`Guid` (uses)", re.compile(r"\bGuid\b"), "use",
+     "`uuid::Uuid`; the microcom `Guid` stays (COM layout)"),
     ("dictionary", "`Dictionary` (uses)", re.compile(r"\bDictionary\b"), "use",
-     "`HashMap`, or `IndexMap` where the order matters"),
+     "`HashMap`, `IndexMap`, or `SlotOrderMap` where the .NET order is observable; the port's "
+     f"name {REMOVED_AFTER_0_5}, the BSON `Dictionary` stays (O6)"),
     # C4 (docs/idiomatic-rust-async.md): the old async types are deprecated in 0.5 and counted until
     # the release after 0.5 removes them; `CancellationToken` is the one cancellation type.
     ("task", "`Task<`", re.compile(r"\bTask\s*<"), "use",

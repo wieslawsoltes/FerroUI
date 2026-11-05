@@ -94,12 +94,12 @@ The owner's decision of 2026-10-31 for every port and for the 0.5 cleanup ([#423
 | `string` | `String` / `&str`; `double` → `f64`; `float` → `f32`; `int` → `i32` |
 | `IList<T>`, `List<T>` | `Vec<T>` for values and snapshots; observable collections, and any list a get-only property exposes by reference → `FerroList<T>` (a shared handle, see "Collections are handles") |
 | exceptions on parse/validation paths | `Result<_, XError>` with `XError` implementing `std::error::Error` (named `...Error`, never `...Exception`); programmer errors → `panic!` |
-| `TimeSpan` | `std::time::Duration` (a signed duration newtype only where negative spans are needed) |
-| `DateTime` / `DateTimeOffset` | `std::time::SystemTime` at the edges, with the port types of `ferroui-base` underneath for the calendar and the .NET formats (no new crate: decided in C2 of #423, [idiomatic-rust.md](../idiomatic-rust.md), section 7.1) |
-| `Uri` | `url::Url` |
-| `CultureInfo` | the ICU4X `Locale` (with the formatting data FerroUI uses) |
-| `Guid` | `uuid::Uuid` |
-| `Dictionary<K, V>` | `HashMap<K, V>`, or `IndexMap<K, V>` where insertion order is observable (test the order) |
+| `TimeSpan` | `std::time::Duration`; `ferroui_base::animation::SignedDuration` (the port, 100 ns ticks) only where a negative span is part of the contract (animation clocks and offsets). A timer interval or delay is a `Duration`; markup sets both from `x:TimeSpan` and time span literals, and a negative literal for a `Duration` is an error |
+| `DateTime` / `DateTimeOffset` | `std::time::SystemTime` for an instant (a file time, the clock: `ferroui_base::utilities::system_time_now()`, never `SystemTime::now()`, which the browser lacks); the port types `DateTime` and `DateTimeOffset` of `ferroui-base` for a calendar value (a date picker, a calendar, a chart axis) and the .NET formats (no new crate: decided in C2 of #423, [idiomatic-rust.md](../idiomatic-rust.md), section 7.1) |
+| `Uri` | `url::Url` where the URI is always absolute (a base URI, what a launcher opens, a font collection key); `ferroui_base::utilities::UriRef` where markup can write a relative reference (an include source, an asset, `NavigateUri`, the path of a storage item). Parse with `UriRef::parse_absolute` and `UriRef::parse` (the rule of markup: `C:` is a drive letter) |
+| `CultureInfo` | the ICU4X `Locale` (`ferroui_base::utilities::Locale`) for the identity of a culture (the `Language` properties, text and font fallback); `CultureInfo`, made from a `Locale`, stays the formatting parameter of converters, bindings and `StringFormat` (`&CultureInfo`) |
+| `Guid` | `uuid::Uuid` (the `Guid` of `ferroui-microcom` only for the COM layout) |
+| `Dictionary<K, V>` | `HashMap<K, V>`, or `IndexMap<K, V>` where insertion order is observable (test the order); `ferroui_system::collections::generic::SlotOrderMap` only where the .NET order after removals is observable |
 | `Task` / `Task<T>` returned by an async member | a future driven by the dispatcher: the `JoinHandle<T>` of `ferroui_system::task` (`Dispatcher::start_local`, `spawn_local`, `spawn`), whose outcome is `Result<T, JoinError>` |
 | `Task<T>` of Rx, DynamicData and ReactiveUI | `ferroui_system::task::Shared<Result<T, ObservableError>>` (several awaiters, `on_finished` for synchronous continuations; [reactive.md](reactive.md), section 5.8) |
 | `TaskCompletionSource<T>` | `ferroui_system::task::oneshot::channel()` (a dropped sender cancels the receiver); `Shared::channel()` where a dropped producer must leave the task pending |
