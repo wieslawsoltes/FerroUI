@@ -6,7 +6,7 @@
 use crate::cache::{Change, ChangeReason, ChangeSet, Group, GroupChangeSet, IChangeSet};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -105,7 +105,7 @@ where
     C: IChangeSet<V, G>,
 {
     Observable::create(move |observer: Rc<dyn IObserver<C>>| {
-        let tracked = Rc::new(RefCell::new(Dictionary::<G, V>::new()));
+        let tracked = Rc::new(RefCell::new(SlotOrderMap::<G, V>::new()));
         let (target, on_error, on_completed) = (tracked.clone(), observer.clone(), observer.clone());
         let subscription = source.subscribe_all(
             move |changes: C| {
@@ -193,7 +193,7 @@ where
 struct Grouper<T, K, G> {
     group_selector_key: Rc<dyn Fn(&T) -> G>,
     group_cache: HashMap<G, Group<T, K, G>>,
-    item_cache: Dictionary<K, ChangeWithGroup<T, K, G>>,
+    item_cache: SlotOrderMap<K, ChangeWithGroup<T, K, G>>,
 }
 
 /// What the grouping of one change set produces: its change set of groups, or the error of an
@@ -202,7 +202,7 @@ type Outcome<T, K, G> = (Result<GroupChangeSet<T, K, G>, ObservableError>, Suspe
 
 impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 'static> Grouper<T, K, G> {
     fn new(group_selector_key: Rc<dyn Fn(&T) -> G>) -> Self {
-        Self { group_selector_key, group_cache: HashMap::new(), item_cache: Dictionary::new() }
+        Self { group_selector_key, group_cache: HashMap::new(), item_cache: SlotOrderMap::new() }
     }
 
     /// Runs `action` on the grouper, then ends the suspensions of the groups it edited (the

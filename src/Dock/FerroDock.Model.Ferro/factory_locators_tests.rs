@@ -345,7 +345,7 @@ fn dictionary_replacement_removal_and_clear_release_captured_values_after_borrow
     struct OnDrop(
         std::rc::Weak<
             RefCell<
-                ferroui_system::collections::generic::Dictionary<String, Option<ContextFactory>>,
+                std::collections::HashMap<String, Option<ContextFactory>>,
             >,
         >,
         Rc<Cell<usize>>,
