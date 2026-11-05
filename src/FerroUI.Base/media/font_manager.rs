@@ -15,7 +15,7 @@ use crate::media::{
     FontFallback, FontFamily, FontManagerOptions, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface,
 };
 use crate::platform::IFontManagerImpl;
-use crate::utilities::{CultureInfo, Uri, UriExtensions, UriKind};
+use crate::utilities::{Locale, Uri, UriExtensions, UriKind};
 use crate::{FerroLocator, LocatorExtensions};
 
 /// The font manager is used to query the system's installed fonts and is
@@ -237,7 +237,7 @@ impl FontManager {
         &self,
         text: &[u16],
         typeface: &Typeface,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> FontFallbackMappingResult {
         if self.font_fallbacks.as_ref().is_some_and(|fallbacks| !fallbacks.is_empty()) {
             return FontFallbackMappingResult::Unavailable;
@@ -348,7 +348,7 @@ impl FontManager {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         font_family: Option<&FontFamily>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         self.try_match_character_with_script(
             codepoint,
@@ -373,7 +373,7 @@ impl FontManager {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         font_family: Option<&FontFamily>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Option<Typeface> {
         if let Some(font_fallbacks) = &self.font_fallbacks {
@@ -483,7 +483,7 @@ impl FontManager {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Option<Typeface> {
         if let Some(font_collection_base) = font_collection.as_font_collection_base() {

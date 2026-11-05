@@ -787,7 +787,7 @@ ferroui_base::ferro_properties! { impl RichEditBox {
     pub fn selection_foreground_brush_property() -> StyledProperty<Option<Rc<dyn IBrush>>> { RichTextBlock::selection_foreground_brush_property().add_owner::<RichEditBox>() }
     pub fn caret_brush_property() -> StyledProperty<Option<Rc<dyn IBrush>>> { RichTextBlock::caret_brush_property().add_owner::<RichEditBox>() }
     pub fn letter_spacing_property() -> StyledProperty<f64> { RichTextBlock::letter_spacing_property().add_owner::<RichEditBox>() }
-    pub fn language_property() -> StyledProperty<ferroui_base::utilities::CultureInfo> { RichTextBlock::language_property().add_owner::<RichEditBox>() }
+    pub fn language_property() -> StyledProperty<ferroui_base::utilities::Locale> { RichTextBlock::language_property().add_owner::<RichEditBox>() }
     pub fn text_alignment_property() -> StyledProperty<TextAlignment> { RichTextBlock::text_alignment_property().add_owner::<RichEditBox>() }
     pub fn text_wrapping_property() -> StyledProperty<TextWrapping> { RichTextBlock::text_wrapping_property().add_owner::<RichEditBox>() }
     pub fn line_height_property() -> StyledProperty<f64> { RichTextBlock::line_height_property().add_owner::<RichEditBox>() }
@@ -1020,10 +1020,10 @@ impl RichEditBox {
     pub fn letter_spacing(&self) -> f64 {
         self.get_value(Self::letter_spacing_property())
     }
-    pub fn language(&self) -> ferroui_base::utilities::CultureInfo {
+    pub fn language(&self) -> ferroui_base::utilities::Locale {
         self.get_value(Self::language_property())
     }
-    pub fn set_language(&self, value: ferroui_base::utilities::CultureInfo) {
+    pub fn set_language(&self, value: ferroui_base::utilities::Locale) {
         self.set_value(Self::language_property(), value);
     }
     pub fn set_letter_spacing(&self, value: f64) {

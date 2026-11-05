@@ -72,7 +72,7 @@ impl DateTimeHelper {
     /// calendars of a culture whose default calendar is another one, and
     /// falls back to the invariant conventions.)
     pub(crate) fn get_current_date_format() -> Rc<DateTimeFormatInfo> {
-        CultureInfo::current_culture().date_time_format()
+        CultureInfo::current_formatting().date_time_format()
     }
 
     /// Whether the day of `date` is within `range`.

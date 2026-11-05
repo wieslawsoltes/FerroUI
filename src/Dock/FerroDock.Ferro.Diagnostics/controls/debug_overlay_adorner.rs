@@ -12,7 +12,7 @@ use ferroui_base::{
         immutable::ImmutableSolidColorBrush, BoxShadows, Brushes, Color, DrawingContext,
         FlowDirection, FormattedText, IBrush, IPen, Pen, Typeface,
     },
-    utilities::CultureInfo,
+    utilities::Locale,
     FerroObjectImpl, FerroObjectImplExt, Point, Rect, Ref, StyledElementImpl, VisualImpl,
     VisualImplExt,
 };
@@ -70,7 +70,7 @@ impl VisualImpl for DebugOverlayAdorner {
             if let Some(text) = text.filter(|text| !text.is_empty()) {
                 let formatted = FormattedText::new(
                     &text,
-                    CultureInfo::invariant_culture(),
+                    Locale::UNKNOWN,
                     FlowDirection::LeftToRight,
                     Typeface::default(),
                     12.0,

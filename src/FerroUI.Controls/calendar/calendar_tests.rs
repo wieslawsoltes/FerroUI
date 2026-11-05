@@ -502,7 +502,7 @@ fn week_number_rule_defaults_to_culture_calendar_week_rule() {
     let _scope = test_scope();
     let calendar = Calendar::new();
     let rule: CalendarWeekRule = calendar.week_number_rule();
-    assert_eq!(CultureInfo::current_culture().date_time_format().calendar_week_rule(), rule);
+    assert_eq!(CultureInfo::current_formatting().date_time_format().calendar_week_rule(), rule);
 }
 
 #[test]
@@ -714,22 +714,22 @@ mod additional {
         InputElement, IPointer, Key, KeyEventArgs, MouseButton, PointerReleasedEventArgs, PointerWheelEventArgs,
     };
     use ferroui_base::reactive::IDisposable;
-    use ferroui_base::utilities::TestCultureDataProvider;
+    use ferroui_base::utilities::{current_ui_locale, locale, set_current_ui_locale, Locale, TestCultureDataProvider};
     use ferroui_base::{FerroLocator, Vector};
 
     /// The scope of an additional test: a dispatcher, and `en-US` as the
     /// current culture (restored when dropped).
     struct Scope {
         culture: CultureInfo,
-        ui_culture: CultureInfo,
+        ui_culture: Locale,
         locator: Rc<dyn IDisposable>,
         _test: crate::test_support::TestScope,
     }
 
     impl Drop for Scope {
         fn drop(&mut self) {
-            CultureInfo::set_current_culture(self.culture.clone());
-            CultureInfo::set_current_ui_culture(self.ui_culture.clone());
+            CultureInfo::set_current_formatting(self.culture.clone());
+            set_current_ui_locale(self.ui_culture.clone());
             self.locator.dispose();
         }
     }
@@ -738,15 +738,14 @@ mod additional {
         let test = test_scope();
         let locator = FerroLocator::enter_scope();
         let scope = Scope {
-            culture: CultureInfo::current_culture(),
-            ui_culture: CultureInfo::current_ui_culture(),
+            culture: CultureInfo::current_formatting(),
+            ui_culture: current_ui_locale(),
             locator,
             _test: test,
         };
         TestCultureDataProvider::register();
-        let culture = CultureInfo::get_culture_info("en-US");
-        CultureInfo::set_current_culture(culture.clone());
-        CultureInfo::set_current_ui_culture(culture);
+        CultureInfo::set_current_formatting(CultureInfo::get_culture_info("en-US"));
+        set_current_ui_locale(locale!("en-US"));
         scope
     }
 

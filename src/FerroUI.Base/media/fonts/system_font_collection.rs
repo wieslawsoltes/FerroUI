@@ -6,7 +6,7 @@ use crate::media::{
     FontFamily, FontManager, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface,
 };
 use crate::platform::IFontManagerImpl;
-use crate::utilities::{CultureInfo, Uri};
+use crate::utilities::{Locale, Uri};
 
 /// The collection of the fonts installed in the system, backed by the font
 /// manager backend.
@@ -124,7 +124,7 @@ impl FontCollectionBaseImpl for SystemFontCollection {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         // Delegate to the base algorithm. The platform call is exposed through
         // `try_match_character_from_platform` and invoked at most once per (script-bucket, culture)
@@ -137,7 +137,7 @@ impl FontCollectionBaseImpl for SystemFontCollection {
         codepoint: i32,
         key: FontCollectionKey,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         let platform_typeface =
             this.platform_impl.try_match_character(codepoint, key.style, key.weight, key.stretch, family_name, culture)?;

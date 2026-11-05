@@ -253,7 +253,7 @@ impl UntypedBindingExpressionBase {
         target_type: ValueType,
         error: &mut Option<ExpressionError>,
     ) -> Option<BoxedValue> {
-        let culture = converter_culture.cloned().unwrap_or_else(CultureInfo::current_culture);
+        let culture = converter_culture.cloned().unwrap_or_else(CultureInfo::current_formatting);
         match converter.convert(value, target_type, converter_parameter, &culture) {
             Ok(v) => v,
             Err(e) => {
@@ -285,7 +285,7 @@ impl UntypedBindingExpressionBase {
         value: Option<&BoxedValue>,
         target_type: ValueType,
     ) -> Option<BoxedValue> {
-        let culture = converter_culture.cloned().unwrap_or_else(CultureInfo::current_culture);
+        let culture = converter_culture.cloned().unwrap_or_else(CultureInfo::current_formatting);
         match converter.convert_back(value, target_type, converter_parameter, &culture) {
             Ok(v) => v,
             Err(e) => {

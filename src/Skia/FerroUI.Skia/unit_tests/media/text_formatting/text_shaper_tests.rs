@@ -7,7 +7,7 @@ use crate::PlatformRenderInterface;
 use ferroui_base::media::text_formatting::unicode::Codepoint;
 use ferroui_base::media::text_formatting::{TextShaper, TextShaperOptions};
 use ferroui_base::media::{FontFamily, FontManager, FontStretch, FontStyle, FontWeight, Typeface};
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{current_locale, Locale, ReadOnlyMemory};
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::rc::Rc;
 
@@ -20,7 +20,7 @@ fn should_form_clusters_for_break_pairs() {
         Typeface::default_typeface().glyph_typeface(),
         12.0,
         0,
-        Some(CultureInfo::current_culture()),
+        Some(current_locale()),
         0.0,
         0.0,
         None,
@@ -43,7 +43,7 @@ fn should_apply_incremental_tab_width() {
         Typeface::default_typeface().glyph_typeface(),
         12.0,
         0,
-        Some(CultureInfo::current_culture()),
+        Some(current_locale()),
         100.0,
         0.0,
         None,
@@ -104,7 +104,7 @@ fn should_not_split_right_to_left_cluster() {
         typeface.glyph_typeface(),
         12.0,
         1,
-        Some(CultureInfo::invariant_culture()),
+        Some(Locale::UNKNOWN),
         0.0,
         0.0,
         None,

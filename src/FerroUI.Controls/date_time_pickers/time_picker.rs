@@ -100,7 +100,7 @@ impl FerroObjectImpl for TimePicker {
 
         this.pseudo_classes().set(PC_HAS_NO_TIME, true);
 
-        let date_time_format = CultureInfo::current_culture().date_time_format();
+        let date_time_format = CultureInfo::current_formatting().date_time_format();
         let time_pattern = date_time_format.short_time_pattern();
         if time_pattern.contains('H') {
             this.set_current_value(Self::clock_identifier_property(), "24HourClock".to_string());

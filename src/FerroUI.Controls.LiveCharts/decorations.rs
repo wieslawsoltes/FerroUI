@@ -1,6 +1,6 @@
 use crate::{ChartKind, ChartPointerEventArgs, LegendPosition, TooltipPosition};
 use ferroui_base::media::{Color, FlowDirection, FormattedText, Typeface};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{Point, Rect, Size};
 use ferroui_livecharts::{Geometry, PaintStyle, Primitive, Scene, TextAnchor};
 
@@ -71,7 +71,7 @@ pub(crate) fn text_size(value: &str, size: f64) -> Size {
     }
     let text = FormattedText::new(
         value,
-        CultureInfo::invariant_culture(),
+        Locale::UNKNOWN,
         FlowDirection::LeftToRight,
         Typeface::default(),
         size.min(4096.0),

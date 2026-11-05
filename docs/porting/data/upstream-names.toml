@@ -500,3 +500,29 @@ phase = "C5"
 deprecated = "ferroui_remote_protocol::Guid"
 behaviour = "test"
 notes = "Step G1 (section 3.6). The remote protocol takes and returns Uuid (re-exported as ferroui_remote_protocol::Uuid): IMessageTypeResolver.GetByGuid and GetGuid, the identifier attribute and the GUID of each message, the BSON Guid values; the wire layout is Guid.ToByteArray, which is Uuid::to_bytes_le (tested in metsys_bson_tests). Splat's feature usage tracking references and the Guid converters of ReactiveUI take Uuid too. Also deprecated: ferroui_splat::Guid. The Guid of ferroui-microcom stays, the COM GUID layout."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo (the identity of a culture)"
+rust = "icu_locale_core::Locale"
+kind = "type"
+phase = "C5"
+behaviour = "deviation"
+notes = "Step L1. The identity positions take Locale (re-exported as ferroui_base::utilities::Locale): the culture of text runs, shaper options and FormattedText, font matching and fallback (IFontManagerImpl, IFontFallbackMapper, IFontCollection, FontCollectionBaseImpl), the family and face names of GlyphTypeface, the script hints, the Language properties (TextElement, RichTextBlock, RichEditBox, CharacterFormat). The invariant culture is the unknown locale und. The markup name stays System.Globalization.CultureInfo: Locale is a second handle of it, parsed from an IETF tag; CultureInfo stays the formatting parameter (decision O3). Deviation: an XML language tag that is no BCP-47 tag (x-private) is not a language (DEVIATIONS.md, Text block)."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo.CurrentCulture"
+rust = "ferroui_base::utilities::current_locale"
+kind = "member"
+phase = "C5"
+deprecated = "ferroui_base::utilities::CultureInfo::current_culture"
+behaviour = "same"
+notes = "Step L1. The ambient value of a thread is its locale (current_locale, set_current_locale); the culture it formats with, the conventions attached to it included, is CultureInfo::current_formatting and CultureInfo::set_current_formatting. CultureInfo::set_current_culture is deprecated with it."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo.CurrentUICulture"
+rust = "ferroui_base::utilities::current_ui_locale"
+kind = "member"
+phase = "C5"
+deprecated = "ferroui_base::utilities::CultureInfo::current_ui_culture"
+behaviour = "same"
+notes = "Step L1. set_current_ui_locale replaces CultureInfo::set_current_ui_culture (deprecated)."

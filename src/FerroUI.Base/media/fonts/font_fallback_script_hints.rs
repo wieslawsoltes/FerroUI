@@ -2,7 +2,7 @@ use crate::media::fonts::bcp47_script_resolver::Bcp47ScriptResolver;
 use crate::media::fonts::{FontCodePageCoverage, OpenTypeTag};
 use crate::media::text_formatting::unicode::{Codepoint, Script};
 use crate::media::GlyphTypeface;
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 
 /// Script-specific hints used by the font fallback: which scripts need a
 /// locale aware choice, which OS/2 Unicode range bit and probe codepoint tell
@@ -22,9 +22,9 @@ impl FontFallbackScriptHints {
     /// locale-sensitive (e.g. a Han ideograph under `ja-JP` is treated as
     /// Hiragana so Japanese fonts are preferred).
     ///
-    /// When `culture` is `None` or invariant, or the codepoint is not
+    /// When `culture` is `None` or the unknown locale `und`, or the codepoint is not
     /// locale-sensitive, the result is the codepoint's script unchanged.
-    pub fn refine_with_culture(codepoint: Codepoint, culture: Option<&CultureInfo>) -> Script {
+    pub fn refine_with_culture(codepoint: Codepoint, culture: Option<&Locale>) -> Script {
         let script = codepoint.script();
 
         if script == Script::KatakanaOrHiragana {
@@ -49,14 +49,14 @@ impl FontFallbackScriptHints {
     /// sufficient: the `meta` table's design/supported languages (a BCP-47
     /// prefix match against the culture name) and the OS/2 code page range
     /// bits (matched against the script the culture implies). Fonts that
-    /// declare neither return `false`, and so do a `None` or invariant
-    /// culture.
-    pub fn is_font_compatible_with_culture(candidate: &GlyphTypeface, culture: Option<&CultureInfo>) -> bool {
+    /// declare neither return `false`, and so do a `None` culture and the
+    /// unknown locale `und` (the invariant culture).
+    pub fn is_font_compatible_with_culture(candidate: &GlyphTypeface, culture: Option<&Locale>) -> bool {
         let Some(culture) = culture else {
             return false;
         };
 
-        if culture.is_invariant() {
+        if *culture == Locale::UNKNOWN {
             return false;
         }
 
@@ -169,6 +169,7 @@ impl FontFallbackScriptHints {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utilities::locale;
 
     #[test]
     fn refine_with_culture_returns_han_for_han_without_culture() {
@@ -181,7 +182,7 @@ mod tests {
     #[test]
     fn refine_with_culture_han_with_japanese_culture_maps_to_hiragana() {
         let cp = Codepoint::new(0x4E2D);
-        let refined = FontFallbackScriptHints::refine_with_culture(cp, Some(&CultureInfo::get_culture_info("ja-JP")));
+        let refined = FontFallbackScriptHints::refine_with_culture(cp, Some(&locale!("ja-JP")));
 
         assert_eq!(refined, Script::Hiragana);
     }
@@ -189,7 +190,7 @@ mod tests {
     #[test]
     fn refine_with_culture_han_with_korean_culture_maps_to_hangul() {
         let cp = Codepoint::new(0x4E2D);
-        let refined = FontFallbackScriptHints::refine_with_culture(cp, Some(&CultureInfo::get_culture_info("ko-KR")));
+        let refined = FontFallbackScriptHints::refine_with_culture(cp, Some(&locale!("ko-KR")));
 
         assert_eq!(refined, Script::Hangul);
     }
@@ -197,9 +198,9 @@ mod tests {
     #[test]
     fn refine_with_culture_han_with_chinese_culture_stays_han() {
         let cp = Codepoint::new(0x4E2D);
-        let simplified = FontFallbackScriptHints::refine_with_culture(cp, Some(&CultureInfo::get_culture_info("zh-CN")));
+        let simplified = FontFallbackScriptHints::refine_with_culture(cp, Some(&locale!("zh-CN")));
         let traditional =
-            FontFallbackScriptHints::refine_with_culture(cp, Some(&CultureInfo::get_culture_info("zh-TW")));
+            FontFallbackScriptHints::refine_with_culture(cp, Some(&locale!("zh-TW")));
 
         assert_eq!(simplified, Script::Han);
         assert_eq!(traditional, Script::Han);
@@ -218,7 +219,7 @@ mod tests {
     #[test]
     fn refine_with_culture_latin_codepoint_returns_latin_unchanged() {
         let cp = Codepoint::new('A' as u32);
-        let refined = FontFallbackScriptHints::refine_with_culture(cp, Some(&CultureInfo::get_culture_info("en-US")));
+        let refined = FontFallbackScriptHints::refine_with_culture(cp, Some(&locale!("en-US")));
 
         assert_eq!(refined, Script::Latin);
     }

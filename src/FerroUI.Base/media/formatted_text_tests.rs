@@ -25,7 +25,7 @@ fn black() -> Option<Rc<dyn IBrush>> {
 fn formatted(text: &str) -> FormattedText {
     FormattedText::new(
         text,
-        CultureInfo::invariant_culture(),
+        Locale::UNKNOWN,
         FlowDirection::LeftToRight,
         Typeface::default_typeface(),
         EM,
@@ -109,7 +109,7 @@ fn construction_has_upstream_defaults() {
     assert!(properties.text_decorations().is_none());
     assert!(properties.background_brush().is_none());
     assert!(properties.font_features().is_none());
-    assert_eq!(properties.culture_info(), Some(&CultureInfo::invariant_culture()));
+    assert_eq!(properties.culture_info(), Some(&Locale::UNKNOWN));
     assert!(Rc::ptr_eq(properties.foreground_brush().unwrap(), &black().unwrap()));
 
     assert_eq!(FormattedText::DEFAULT_REAL_TO_IDEAL, 300.0);
@@ -424,7 +424,7 @@ fn set_culture_formats_a_range() {
 
     let _ = text.width();
 
-    let culture = CultureInfo::get_culture_info("de-DE");
+    let culture = Locale::try_from_str("de-DE").unwrap();
 
     text.set_culture_range(culture.clone(), 3, 3);
 
@@ -433,7 +433,7 @@ fn set_culture_formats_a_range() {
     let format_runs = runs(&text);
 
     assert_eq!(run_lengths(&text), [3, 3]);
-    assert_eq!(format_runs[0].1.culture_info(), Some(&CultureInfo::invariant_culture()));
+    assert_eq!(format_runs[0].1.culture_info(), Some(&Locale::UNKNOWN));
     assert_eq!(format_runs[1].1.culture_info(), Some(&culture));
 
     text.set_culture(culture.clone());
@@ -709,7 +709,7 @@ fn invalid_arguments_panic() {
     let new_with_size = |em_size: f64| {
         FormattedText::new(
             "abc",
-            CultureInfo::invariant_culture(),
+            Locale::UNKNOWN,
             FlowDirection::LeftToRight,
             Typeface::default_typeface(),
             em_size,
@@ -743,7 +743,7 @@ fn invalid_arguments_panic() {
     assert_panics(|| text.set_font_style_range(FontStyle::Italic, 0, 4));
     assert_panics(|| text.set_font_typeface_range(Typeface::default_typeface(), 0, 4));
     assert_panics(|| text.set_font_family_name_range(DEFAULT_FAMILY, 0, 4));
-    assert_panics(|| text.set_culture_range(CultureInfo::invariant_culture(), 0, 4));
+    assert_panics(|| text.set_culture_range(Locale::UNKNOWN, 0, 4));
     assert_panics(|| text.set_foreground_brush_range(None, 0, 4));
     assert_panics(|| text.set_text_decorations_range(TextDecorations::underline(), 0, 4));
     assert_panics(|| text.set_font_features_range(None, 0, 4));

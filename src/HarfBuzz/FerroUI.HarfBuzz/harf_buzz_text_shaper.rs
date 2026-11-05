@@ -5,7 +5,7 @@ use ferroui_base::media::text_formatting::unicode::Codepoint;
 use ferroui_base::media::text_formatting::{GlyphInfo, ShapedBuffer, TextShaperOptions};
 use ferroui_base::media::{GlyphTypeface, ITextShaperTypeface};
 use ferroui_base::platform::ITextShaperImpl;
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{current_locale, Locale, ReadOnlyMemory};
 use ferroui_base::Vector;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -133,12 +133,14 @@ impl ITextShaperImpl for HarfBuzzTextShaper {
             let used_culture = match culture {
                 Some(culture) => culture,
                 None => {
-                    current_culture = CultureInfo::current_culture();
+                    current_culture = current_locale();
                     &current_culture
                 }
             };
 
-            buffer.set_language(used_culture.two_letter_iso_language_name());
+            // The primary language subtag (.NET's `TwoLetterISOLanguageName`), `iv` for the
+            // invariant culture, the unknown locale.
+            buffer.set_language(if *used_culture == Locale::UNKNOWN { "iv" } else { used_culture.id.language.as_str() });
 
             let features = Self::get_features(options);
 
