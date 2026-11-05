@@ -101,13 +101,9 @@ fn file_uri(path: &str, windows: bool) -> Option<String> {
         }
         return Some(uri);
     }
-    let uri = StorageProviderHelpers::try_get_uri_from_file_path(path, false)?.to_string();
-    if windows && path.starts_with(r"\\") && !path.starts_with(r"\\?\") {
-        // Keep the UNC server in the authority so relative resource resolution
-        // cannot turn the network path into a local path.
-        return Some(format!("file://{}", uri.strip_prefix("file:////")?));
-    }
-    Some(uri)
+    // A UNC path keeps its server as the host of the URL (the storage helper), so relative
+    // resource resolution cannot turn the network path into a local path.
+    Some(StorageProviderHelpers::try_get_uri_from_file_path(path, false)?.to_string())
 }
 
 #[cfg(feature = "desktop")]

@@ -163,12 +163,20 @@ fn a_file_uri_converts_to_a_path_on_every_target() {
         assert_eq!(url.to_file_path().unwrap(), std::path::PathBuf::from(StorageProviderHelpers::local_path(&url)));
     }
 
+    // The long form of a UNC path is the UNC path.
+    assert_eq!(
+        "file://server/share/a.txt",
+        StorageProviderHelpers::uri_from_file_path("\\\\?\\UNC\\server\\share\\a.txt", false).as_str()
+    );
+
     // A path converts to a URL and back.
     for (path, is_directory, url) in [
         ("/home/a b/[x].txt", false, "file:///home/a%20b/%5Bx%5D.txt"),
         ("/home/user/", true, "file:///home/user/"),
         ("C:\\Work\\a#b.txt", false, "file:///C:/Work/a%23b.txt"),
         ("D:\\", false, "file:///D:/"),
+        // A UNC path has its server as the host.
+        ("\\\\server\\share\\a b.txt", false, "file://server/share/a%20b.txt"),
     ] {
         let uri = StorageProviderHelpers::uri_from_file_path(path, is_directory);
         assert_eq!(url, uri.as_str());

@@ -29,6 +29,13 @@ fn file_uri_from_path(path: &str) -> Option<Url> {
     let mut text = String::with_capacity(path.len() + 16);
     text.push_str("file://");
 
+    // A UNC path (`\\server\share`) has its server as the host: "file://server/share/...".
+    // Written as "file:////server", the URL standard reads an empty host and collapses the
+    // empty segment, which would make the path local.
+    let path = match path.as_bytes() {
+        [b'\\' | b'/', b'\\' | b'/', rest @ ..] if rest.first().is_some_and(|b| *b != b'\\' && *b != b'/') => &path[2..],
+        _ => path,
+    };
     let bytes = path.as_bytes();
     // A drive path has no host: "file:///C:/..."
     if bytes.len() >= 2 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' {
@@ -145,7 +152,18 @@ impl StorageProviderHelpers {
     pub fn try_get_uri_from_file_path(path: &str, is_directory: bool) -> Option<Url> {
         // Windows long path prefix
         let is_long_path = path.starts_with(r"\\?\");
-        let mut uri_path = if is_long_path { &path[4..] } else { path }
+        // `\\?\UNC\server\share`: the long form of the UNC path `\\server\share`.
+        let unc_long_path = is_long_path && path[4..].get(..4).is_some_and(|prefix| prefix.eq_ignore_ascii_case(r"UNC\"));
+        let unc_path;
+        let path = if unc_long_path {
+            unc_path = format!(r"\\{}", &path[8..]);
+            unc_path.as_str()
+        } else if is_long_path {
+            &path[4..]
+        } else {
+            path
+        };
+        let mut uri_path = path
             .replace('%', "%25")
             .replace('[', "%5B")
             .replace(']', "%5D");
