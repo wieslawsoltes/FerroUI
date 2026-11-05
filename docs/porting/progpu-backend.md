@@ -213,6 +213,39 @@ hand; every change keeps the behaviour and its tests:
 
 The bindings and SDK changes these need are part of step P7.
 
+### 3.3 Lessons from GPUI
+
+GPUI (the UI framework of Zed; read 2026-11-05 at `crates/gpui`, `gpui_apple`, `gpui_windows`,
+`gpui_wgpu`, `gpui_web`) and what it changes here:
+
+- **Analytic shadows.** GPUI draws the blurred shadow of a rounded rectangle in closed form in the
+  fragment shader (the Gaussian integral through an `erf` approximation, drop and inset), one
+  instanced quad per shadow, with no offscreen layer and no blur pass. ProGPU has drop shadows only
+  as a group effect (a layer, two separable Gaussian passes, a compose). FerroUI's themes put a
+  `BoxShadow` on most raised surfaces (buttons, flyouts, cards, menus), so the engine gets an
+  analytic rounded-rectangle shadow primitive (drop and inset, per-corner radii, spread), in the
+  analytic primitive family with its batching, validated against the group effect's blur. The
+  group effect stays for shadows of arbitrary content.
+- **A small, fixed primitive vocabulary, batched.** GPUI's scene has eight primitive kinds (shadows,
+  quads with per-corner radii and borders, paths, underlines, monochrome, subpixel and polychrome
+  sprites, surfaces), each an instance record, sorted by draw order and texture and drawn in a few
+  instanced batches. The backend maps borders, rounded rectangles and ellipses to ProGPU's analytic
+  primitives (never to paths) so the engine batches them the same way.
+- **Frame reuse.** GPUI's cached views replay the previous frame's primitive range of a view that
+  was not notified, but the scene is still sorted and uploaded every frame. ProGPU's retained scene
+  goes further (content-hashed pages, replayed render bundles, nothing uploaded in a stable frame),
+  so the plan keeps it; the lesson kept is the granularity: one retained fragment per visual
+  boundary, invalidated by the visual's own change.
+- **Text and binary size.** GPUI ships no shaper, segmenter or Unicode data: it uses the system text
+  stacks (CoreText, DirectWrite, Canvas 2D in the browser) and cosmic-text on Linux. The owner keeps
+  ProGPU's own text stack, so the size lesson applies to its data: the ICU data of the edit word
+  classifier (33.1 MB of the 38.9 MB engine) is filtered to the break rules and the one admitted
+  dictionary it uses (section 3.2), not replaced.
+- **GPU APIs.** GPUI uses Metal on Apple platforms and Direct3D 11 on Windows directly, and wgpu only
+  on Linux and the web, with a WebGL2 variant of its shaders (instance records in a texture instead
+  of storage buffers). ProGPU stays on WebGPU everywhere (the owner's request); a WebGL2 fallback of
+  the browser build for browsers without WebGPU is an open question for the owner, not planned.
+
 ## 4. Measurements
 
 All measured locally (the owner, 2026-11-05: no new workflows), on the same machine and commit for
