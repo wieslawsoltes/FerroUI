@@ -88,6 +88,8 @@ vello_cpu = { workspace = true, features = ["multithreading"] }
 
 [dev-dependencies]
 ferroui-controls = { workspace = true, features = ["testing"] }
+# `url::Url`, the keys and sources of the font collections of the tests (C5 of #423).
+url.workspace = true
 ferroui-fonts-inter.workspace = true
 ferroui-harfbuzz.workspace = true
 # The GLSL ES of the library shader effects (`ferroui_build::shader_effects`), which the tests of the

@@ -19,7 +19,7 @@ use ferroui_base::media::{
     IPlatformTypeface, Typeface, UnicodeRange,
 };
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
-use ferroui_base::utilities::{Locale, Uri, UriKind};
+use ferroui_base::utilities::{Locale, UriRef};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::testing::UnitTestApplication;
 use std::cell::Cell;
@@ -90,7 +90,7 @@ fn should_use_fallback() {
         mock_platform_render_interface().with_font_manager_impl(Rc::new(CustomFontManagerImpl::new())),
     );
 
-    let source = Uri::new(NOTO_MONO, UriKind::Absolute).unwrap();
+    let source = UriRef::parse_absolute(NOTO_MONO).unwrap();
 
     let fallback = FontFallback { font_family: FontFamily::new("Arial"), unicode_range: UnicodeRange::new('A' as i32, 'A' as i32) };
 
@@ -109,9 +109,9 @@ fn should_ignore_font_family() {
         mock_platform_render_interface().with_font_manager_impl(Rc::new(CustomFontManagerImpl::new())),
     );
 
-    let key = Uri::new(NOTO_MONO, UriKind::Absolute).unwrap();
+    let key = UriRef::parse_absolute(NOTO_MONO).unwrap();
 
-    let ignorable = FontFamily::with_base_uri(Some(&Uri::new(NOTO_MONO, UriKind::Absolute).unwrap()), "Noto Mono");
+    let ignorable = FontFamily::with_base_uri(Some(&UriRef::parse_absolute(NOTO_MONO).unwrap()), "Noto Mono");
 
     let font_collection = CustomizableFontCollection::new(key.clone(), key, None, Some(vec![ignorable.clone()]));
 
@@ -137,8 +137,8 @@ struct CustomizableFontCollection {
 
 impl CustomizableFontCollection {
     fn new(
-        key: Uri,
-        source: Uri,
+        key: url::Url,
+        source: url::Url,
         fallbacks: Option<Vec<FontFallback>>,
         ignorables: Option<Vec<FontFamily>>,
     ) -> Self {
@@ -151,7 +151,7 @@ impl FontCollectionBaseImpl for CustomizableFontCollection {
         <EmbeddedFontCollection as FontCollectionBaseImpl>::base(&this.base)
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         <EmbeddedFontCollection as FontCollectionBaseImpl>::key(&this.base)
     }
 
@@ -363,7 +363,7 @@ impl AliasFontManagerImpl {
 
         Box::new(
             asset_loader
-                .open(&Uri::new(Self::BACKING_FONT_URI, UriKind::Absolute).unwrap(), None)
+                .open(&UriRef::parse(Self::BACKING_FONT_URI).unwrap(), None)
                 .expect("the backing font"),
         )
     }

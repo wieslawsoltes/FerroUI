@@ -17,7 +17,7 @@ use ferroui_base::media::{
     BaselineAlignment, FontFamily, FontManager, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface,
 };
 use ferroui_base::platform::IFontManagerImpl;
-use ferroui_base::utilities::{locale, Locale, ReadOnlyMemory, Uri, UriKind};
+use ferroui_base::utilities::{locale, Locale, ReadOnlyMemory, UriRef};
 use ferroui_base::FerroLocator;
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::rc::Rc;
@@ -570,7 +570,7 @@ impl CuratedSystemFontCollection {
         for name in font_resource_names {
             FontCollectionBase::try_add_font_source(
                 &collection,
-                &Uri::new(&format!("resm:{name}?assembly={ASSEMBLY}"), UriKind::Absolute).unwrap(),
+                &UriRef::parse_absolute(&format!("resm:{name}?assembly={ASSEMBLY}")).unwrap(),
             );
         }
 
@@ -583,7 +583,7 @@ impl FontCollectionBaseImpl for CuratedSystemFontCollection {
         &this.base
     }
 
-    fn key(_this: &Self) -> Uri {
+    fn key(_this: &Self) -> url::Url {
         FontManager::system_fonts_key()
     }
 }
