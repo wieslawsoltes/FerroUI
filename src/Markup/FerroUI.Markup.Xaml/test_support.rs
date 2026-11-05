@@ -10,7 +10,8 @@ use ferroui_base::controls::{INameScope, NameScopeRef};
 use ferroui_base::metadata::{service, IServiceProvider};
 use ferroui_base::platform::{AssetAssembly, AssetStream, IAssetLoader};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{Uri, UriExtensions, UriKind};
+use ferroui_base::metadata::MarkupAssembly;
+use ferroui_base::utilities::{Uri, UriExtensions, UriKind, UriRef};
 use ferroui_base::{BoxedValue, FerroLocator, PropertyValue};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -25,6 +26,16 @@ pub(crate) fn boxed<T: PropertyValue>(value: T) -> BoxedValue {
 
 pub(crate) fn uri(text: &str) -> Uri {
     Uri::new(text, UriKind::RelativeOrAbsolute).unwrap()
+}
+
+/// The reference of `text`, as markup reads it (the source of an include).
+pub(crate) fn uri_ref(text: &str) -> UriRef {
+    UriRef::parse(text).unwrap()
+}
+
+/// The absolute URL of `text`, as the loader reads the URI of a document.
+pub(crate) fn url(text: &str) -> url::Url {
+    UriRef::parse_absolute(text).unwrap()
 }
 
 /// A parent stack provider that only enumerates.
@@ -46,7 +57,7 @@ pub(crate) struct TestServiceProvider {
     outer: RefCell<Option<Rc<dyn IFerroXamlIlEagerParentStackProvider>>>,
     target: RefCell<Option<(Option<BoxedValue>, Option<BoxedValue>)>>,
     root: RefCell<Option<Option<BoxedValue>>>,
-    base_uri: RefCell<Option<Option<Uri>>>,
+    base_uri: RefCell<Option<Option<url::Url>>>,
     name_scope: RefCell<Option<NameScopeRef>>,
     in_control_template: Cell<bool>,
     namespaces: RefCell<Option<XmlNamespaces>>,
@@ -97,7 +108,7 @@ impl TestServiceProvider {
     }
 
     pub(crate) fn with_base_uri(self: Rc<Self>, base_uri: &str) -> Rc<Self> {
-        *self.base_uri.borrow_mut() = Some(Some(uri(base_uri)));
+        *self.base_uri.borrow_mut() = Some(Some(url(base_uri)));
         self
     }
 
@@ -210,11 +221,11 @@ impl IRootObjectProvider for TestServiceProvider {
 }
 
 impl IUriContext for TestServiceProvider {
-    fn base_uri(&self) -> Option<Uri> {
+    fn base_uri(&self) -> Option<url::Url> {
         self.base_uri.borrow().clone().flatten()
     }
 
-    fn set_base_uri(&self, value: Option<Uri>) {
+    fn set_base_uri(&self, value: Option<url::Url>) {
         *self.base_uri.borrow_mut() = Some(value);
     }
 }
@@ -228,7 +239,9 @@ impl IFerroXamlIlXmlNamespaceInfoProvider for TestServiceProvider {
 }
 
 /// An asset loader over documents held in memory. The assembly of a URI is
-/// its authority, as spelled.
+/// its authority: the registered markup assembly of that name, ignoring case
+/// (the authority of an absolute URI is in lower case, as the standard asset
+/// loader reads it), or the authority itself.
 pub(crate) struct TestAssetLoader {
     assets: RefCell<HashMap<String, Vec<u8>>>,
 }
@@ -251,10 +264,11 @@ impl TestAssetLoader {
     }
 
     fn assembly_of(uri: &Uri) -> AssetAssembly {
-        let original = uri.original_string();
-        let authority = original.split("://").nth(1).and_then(|rest| rest.split('/').next()).unwrap_or_default();
-        let _ = UriExtensions::authority(uri);
-        AssetAssembly::new(authority)
+        let authority = UriExtensions::authority(uri);
+        let registered = MarkupAssembly::registered_assemblies()
+            .into_iter()
+            .find(|assembly| assembly.name.eq_ignore_ascii_case(authority));
+        AssetAssembly::new(registered.map_or(authority, |assembly| assembly.name))
     }
 
     /// Makes the loader the asset loader of the calling thread until the

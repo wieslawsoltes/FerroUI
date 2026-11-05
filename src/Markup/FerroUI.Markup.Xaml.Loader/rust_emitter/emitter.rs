@@ -959,7 +959,7 @@ impl<'a> Emitter<'a> {
             self.uses_context = true;
             let base_uri = Typed {
                 expr: "context.base_uri()".to_string(),
-                kind: Kind::Exact { id: self.types.known(Known::OptionUri), nullable: None },
+                kind: Kind::Exact { id: self.types.option_of_known(Known::Url), nullable: None },
             };
             let text = self.exact(Known::String, format!("::std::string::String::from({})", rust_string_literal(n.text())));
             let constructor = n.types().font_family_constructor_uri_name.clone();

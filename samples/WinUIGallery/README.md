@@ -1,8 +1,8 @@
 # WinUI Gallery on FerroUI
 
-A FerroUI port of [Microsoft WinUI Gallery](https://github.com/microsoft/WinUI-Gallery) at commit `14061eeac21c38ae99f302edf3d9136d4f652c4c` (W10 of [docs/porting/winui-controls.md](../../docs/porting/winui-controls.md)). It shows the native WinUI controls of `ferroui-controls` (NumberBox, RadioButtons, RatingControl, AutoSuggestBox, InfoBar, InfoBadge, ProgressRing, the icon elements, NavigationView, Frame and FramePage) and the upstream-ported controls in the pages of the gallery, with the WinUI theme.
+A FerroUI port of [Microsoft WinUI Gallery](https://github.com/microsoft/WinUI-Gallery) at commit `14061eeac21c38ae99f302edf3d9136d4f652c4c` (W10 of [docs/porting/winui-controls.md](../../docs/porting/winui-controls.md)). It shows the native WinUI controls of `ferroui-controls` (NumberBox, RadioButtons, RatingControl, AutoSuggestBox, InfoBar, InfoBadge, ProgressRing, the icon elements, NavigationView, Frame and FramePage, TitleBar, RichEditBox and RichTextBlock), the materials (ThemeShadow, AcrylicBrush, the system backdrops), the ItemsRepeater and LayoutPanel of `ferroui-controls-repeater`, the InkCanvas of `ferroui-controls-inking`, the charts of `ferroui-controls-livecharts` and the upstream-ported controls in the pages of the gallery, with the WinUI theme.
 
-The whole pinned catalog is browsable: 126 pages and 350 sample definitions, each with the original XAML and code of its source file, the path of that file and its SHA-256. A subset of the pages have native examples: reviewed adaptations of the original markup in `Pages/`, with their handlers in Rust. `port-status.json` records the state of every page; every page with native examples is `partial`, since it does not reproduce every example, event, binding or pixel of the original.
+The whole pinned catalog is browsable: 126 pages and 350 sample definitions, each with the original XAML and code of its source file, the path of that file and its SHA-256. A subset of the pages have native examples: reviewed adaptations of the original markup in `Pages/`, with their handlers in Rust. `port-status.json` records the state of every page: `ported` when every catalog example of the page has a native adaptation with its events and bindings, or a recorded reason why it cannot (`not-applicable`, a Windows-only API); `partial` when the native examples cover a reviewed subset; `pending` when the page has only its source. No state claims pixel parity, which is a separate comparison against Windows captures.
 
 ## Run
 
@@ -34,7 +34,7 @@ The capture host has only the fonts it embeds: glyphs of the symbol font (`Symbo
 - `Gallery.xaml` and `gallery.rs`: the shell (search, categories, history, theme, the source browser). Only the selected page is created; replacing a page releases its controls and handlers.
 - `catalog_data.rs`: the pinned catalog, written by `generate_catalog.py` from a checkout of WinUI Gallery at the pin. `assets-manifest.json` and `generate_assets.py` record the images copied from the gallery.
 - `Pages/*.xaml` and `examples.rs`: the native examples, with their adaptations recorded per page. The original WinUI XAML of a page can also be loaded through the WinUI XAML importer (`ferroui-markup-xaml-winui`) from the page ("Load XAML preview"), which reports what it cannot translate.
-- `*_samples.rs`: the Rust behaviour of the examples (input, feedback, media, navigation, platform).
+- `*_samples.rs`: the Rust behaviour of the examples (input, feedback, media, navigation, platform, materials, text, repeater, ink, chart), and `window_samples.rs` the sample windows the SystemBackdrops and TitleBar pages open (their content in `Pages/*Window.xaml`).
 
 ## Tests
 

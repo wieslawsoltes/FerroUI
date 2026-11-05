@@ -3,7 +3,7 @@ use ferroui_base::metadata::{from_markup_value, MarkupAssembly};
 use ferroui_base::platform::ASSET_SCHEME;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::IStyle;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, FerroLocator, FerroObject, LocatorExtensions, Ref};
 use ferroui_controls::embedding::offscreen::OffscreenTopLevelImplBase;
 use ferroui_controls::platform::PlatformManager;
@@ -70,7 +70,7 @@ impl DesignWindowLoader {
                     "{ASSET_SCHEME}://{}{xaml_file_project_path}",
                     get_file_name_without_extension(assembly_path)
                 );
-                base_uri = Some(Uri::new(&uri, UriKind::Absolute).map_err(|e| {
+                base_uri = Some(UriRef::parse_absolute(&uri).map_err(|e| {
                     XamlLoadError::with_inner(format!("Invalid URI: the URI '{uri}' of the document: {e}"), e)
                 })?);
             }

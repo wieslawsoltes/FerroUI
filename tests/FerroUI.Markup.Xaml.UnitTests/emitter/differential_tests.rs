@@ -977,7 +977,7 @@ fn documents_that_read_their_base_uri_build_equal_object_trees() {
     for name in BASE_URI_DOCUMENTS {
         let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| document == name).unwrap_or_else(|| panic!("{name} is not a document of the corpus"));
         let uri = format!("{}{name}", generated::ROOT_URI);
-        let base_uri = ferroui_base::utilities::Uri::new(&uri, ferroui_base::utilities::UriKind::Absolute).expect("the URI of the document");
+        let base_uri = ferroui_base::utilities::UriRef::parse_absolute(&uri).expect("the URI of the document");
         let interpreted = match try_load_with(xaml, None, None, Some(base_uri), false) {
             Ok(root) => dump_root(&root),
             Err(error) => failure(&error),
@@ -1305,7 +1305,7 @@ fn a_failed_end_init_is_the_error_of_the_run_time_loader() {
 #[test]
 fn compiled_documents_are_registered_by_uri() {
     use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::FerroLocator;
     use ferroui_markup_xaml::FerroXamlLoader;
 
@@ -1330,7 +1330,7 @@ fn compiled_documents_are_registered_by_uri() {
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
     let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
-    let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
+    let parsed = UriRef::parse(&uri).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
     ferroui_markup_xaml::FerroXamlLoader::unregister_compiled_xaml(generated::ASSEMBLY_NAME);
     match loaded {
@@ -1348,7 +1348,7 @@ fn compiled_documents_are_registered_by_uri() {
 #[test]
 fn a_compiled_document_that_fails_to_build_fails_the_load() {
     use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::FerroLocator;
     use ferroui_markup_xaml::FerroXamlLoader;
 
@@ -1367,7 +1367,7 @@ fn a_compiled_document_that_fails_to_build_fails_the_load() {
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
     let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
-    let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
+    let parsed = UriRef::parse(&uri).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
     FerroXamlLoader::unregister_compiled_xaml(generated::ASSEMBLY_NAME);
     let error = loaded.err().expect("the load through FerroXamlLoader fails");

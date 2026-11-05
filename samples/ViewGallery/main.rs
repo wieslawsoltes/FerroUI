@@ -2,13 +2,13 @@
 //! and the TreeDataGrid.
 
 use ferroui_base::styling::{IStyle, Styles};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_markup_xaml::FerroXamlLoader;
 use std::rc::Rc;
 
 fn style_at(uri: &str) -> Rc<dyn IStyle> {
-    let uri = Uri::absolute(uri).expect("a URI");
+    let uri = UriRef::parse(uri).expect("a URI");
     let loaded = FerroXamlLoader::load(&uri, None).unwrap_or_else(|error| panic!("{error}"));
     from_markup_value::<Rc<dyn IStyle>>(&Some(loaded)).expect("a style")
 }

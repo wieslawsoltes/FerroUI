@@ -21,6 +21,8 @@ ferrodock-ferro = { path = "../FerroDock.Ferro" }
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-markup-xaml.workspace = true
+# `url::Url`, the URLs of the theme presets (C5 of #423).
+url.workspace = true
 [build-dependencies]
 ferroui-build.workspace = true
 [lints.rust]

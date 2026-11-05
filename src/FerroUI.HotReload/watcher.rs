@@ -159,8 +159,7 @@ fn discover(
     directory: &WatchDirectory,
     files: &mut BTreeMap<String, PathBuf>,
 ) -> Result<(), String> {
-    use ferroui_base::utilities::{Uri, UriKind};
-    let base = Uri::try_create(&directory.uri_prefix, UriKind::Absolute)
+    let base = crate::document_url(&directory.uri_prefix)
         .filter(|_| directory.uri_prefix.ends_with('/'))
         .ok_or_else(|| "Directory URI must be absolute and end in '/'".to_owned())?;
     let mut pending = vec![directory.path.clone()];
@@ -209,9 +208,9 @@ fn discover(
                         }
                     })
                     .collect();
-                let relative =
-                    Uri::try_create(&escaped, UriKind::Relative).ok_or("Invalid document path")?;
-                let uri = Uri::combine(&base, &relative).absolute_uri().to_string();
+                // The escaped path is a relative reference: it has no scheme, since a colon
+                // is escaped.
+                let uri = crate::include_key(&base, &escaped).ok_or("Invalid document path")?;
                 if let Some(existing) = files.get(&uri) {
                     if existing != &path && existing.canonicalize().ok() != path.canonicalize().ok()
                     {

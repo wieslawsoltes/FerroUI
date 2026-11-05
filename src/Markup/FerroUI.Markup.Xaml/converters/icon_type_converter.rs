@@ -8,7 +8,7 @@ use ferroui_base::data::core::ValueType;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::IImage;
 use ferroui_base::platform::IAssetLoader;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{CultureInfo, Uri};
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions};
 use ferroui_controls::WindowIcon;
 use std::rc::Rc;
@@ -32,7 +32,8 @@ impl IconTypeConverter {
             return WindowIcon::from_file(&path).map_err(io_error);
         }
         let assets = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
-        let base_uri = service_provider_of(context).and_then(|sp| sp.get_context_base_uri());
+        // The asset loader and the font family take the port `Uri` until U3 (C5 of #423).
+        let base_uri = service_provider_of(context).and_then(|sp| sp.get_context_base_uri()).map(Uri::from);
         let mut stream = assets.open(&uri, base_uri.as_ref()).map_err(io_error)?;
         WindowIcon::from_stream(&mut *stream).map_err(io_error)
     }

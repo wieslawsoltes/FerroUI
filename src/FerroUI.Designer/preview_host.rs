@@ -1,6 +1,6 @@
 //! Application-owned design hosts, real class instances and native top-level previews.
 use ferroui_base::metadata::from_markup_value;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 #[cfg(debug_assertions)]
 use ferroui_base::WeakRef;
 use ferroui_base::{BoxedValue, FerroObject, Ref};
@@ -81,7 +81,7 @@ impl PreviewRequest {
             }
         }
         let mut input = RuntimeXamlLoaderDocument::with_base_uri_and_root_instance(
-            Some(Uri::absolute(&self.uri).map_err(|e| e.to_string())?),
+            Some(UriRef::parse_absolute(&self.uri).map_err(|e| e.to_string())?),
             root,
             &source,
         );
@@ -260,10 +260,8 @@ impl FactoryReloadTarget {
         options: PreviewHostOptions,
         use_factory: Rc<std::cell::Cell<bool>>,
     ) -> Result<Self, String> {
-        let uri = Uri::absolute(uri)
-            .map_err(|error| error.to_string())?
-            .absolute_uri()
-            .to_owned();
+        // The key of the document in the reload session: the text of its URL (C5 of #423).
+        let uri = String::from(UriRef::parse_absolute(uri).map_err(|error| error.to_string())?);
         let configuration = Self::configuration(host, &uri, options);
         Ok(Self {
             host: host.downgrade(),

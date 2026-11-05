@@ -11,7 +11,7 @@ use ferroui_base::styling::{ControlTheme, IStyle, Setter, SetterValue, StyleBase
 use ferroui_base::{CornerRadius, FerroObject, Ref, Thickness, TypeInfo};
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_controls::{Application, Control, Window};
 use ferroui_markup_xaml::styling::StyleInclude;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -28,7 +28,7 @@ fn start_themed_application() -> UnitTestApplicationScope {
     let scope = UnitTestApplication::start(services);
     FerroRuntimeXamlLoader::register();
     let styles = StyleInclude::new(None);
-    styles.set_source(Some(Uri::new("ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml", UriKind::Absolute).expect("a URI")));
+    styles.set_source(Some(UriRef::parse("ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml").expect("a URI")));
     Application::current().expect("an application").styles().add(styles as Rc<dyn IStyle>);
     scope
 }

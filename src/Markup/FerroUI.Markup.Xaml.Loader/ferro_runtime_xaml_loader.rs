@@ -32,7 +32,7 @@ use std::sync::{OnceLock, RwLock};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupAssembly};
 use ferroui_base::platform::IAssetLoader;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::{Uri, UriRef};
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions, TypeInfo};
 use ferroui_markup_xaml::{
     IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError,
@@ -56,13 +56,14 @@ impl FerroRuntimeXamlLoader {
     /// * `local_assembly`: the default assembly for `clr-namespace:`.
     /// * `root_instance`: the optional instance into which the XAML should
     ///   be loaded.
-    /// * `uri`: the URI of the XAML being loaded.
+    /// * `uri`: the URL of the XAML being loaded, which relative references
+    ///   in it are resolved against.
     /// * `design_mode`: whether the XAML is being loaded in design mode.
     pub fn load(
         xaml: &str,
         local_assembly: Option<&'static MarkupAssembly>,
         root_instance: Option<BoxedValue>,
-        uri: Option<Uri>,
+        uri: Option<url::Url>,
         design_mode: bool,
     ) -> Result<BoxedValue, XamlLoadError> {
         let stream: Box<dyn Read> = Box::new(Cursor::new(xaml.as_bytes().to_vec()));
@@ -74,7 +75,7 @@ impl FerroRuntimeXamlLoader {
         stream: Box<dyn Read>,
         local_assembly: Option<&'static MarkupAssembly>,
         root_instance: Option<BoxedValue>,
-        uri: Option<Uri>,
+        uri: Option<url::Url>,
         design_mode: bool,
     ) -> Result<BoxedValue, XamlLoadError> {
         let document = RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(uri, root_instance, stream);
@@ -90,17 +91,17 @@ impl FerroRuntimeXamlLoader {
         configuration: Option<RuntimeXamlLoaderConfiguration>,
     ) -> Result<BoxedValue, XamlLoadError> {
         let configuration = configuration.unwrap_or_default();
-        // A document with an absolute URI is loaded as a group with the documents it
+        // A document with a URL is loaded as a group with the documents it
         // includes (directly or not) that the asset loader has: the group transformers
         // then link them as the compiler links the documents of a project (a style or
         // resource include becomes the included object, merged resource includes are
         // merged into the including dictionary).
-        let uri = document.base_uri.clone().filter(|uri| uri.is_absolute_uri());
+        let uri = document.base_uri.clone();
         let text = document
             .read_to_string()
             .map_err(|e| XamlLoadError::with_inner(format!("Unable to read the XAML document: {e}"), e))?;
         let mut included = Vec::new();
-        let mut visited: Vec<String> = uri.iter().map(|uri| uri.absolute_uri().to_string()).collect();
+        let mut visited: Vec<String> = uri.iter().map(|uri| uri.as_str().to_string()).collect();
         collect_included_documents(&*asset_loader(), uri.as_ref(), &text, &mut visited, &|_| false, &mut included);
 
         // The text was read: the document is given again, with the same properties.
@@ -255,16 +256,16 @@ impl FerroRuntimeXamlLoader {
     pub(crate) fn document_group_without(
         uri_text: &str,
         type_name: &str,
-        skip: &dyn Fn(&Uri) -> bool,
+        skip: &dyn Fn(&url::Url) -> bool,
     ) -> Result<DocumentGroup, XamlLoadError> {
-        let uri = Uri::new(uri_text, UriKind::Absolute).map_err(|e| {
+        let uri = UriRef::parse_absolute(uri_text).map_err(|e| {
             XamlLoadError::with_message(format!("The URI '{uri_text}' of the XAML document of {type_name} is invalid: {e}"))
         })?;
         // The document of a class is found wherever the class is created, as compiled
         // markup is: without an asset loader service the registered assets are read
-        // directly.
+        // directly. The asset loader takes the port `Uri` until U3 (C5 of #423).
         let assets = asset_loader();
-        let (mut stream, assembly) = assets.open_and_get_assembly(&uri, None).map_err(|e| {
+        let (mut stream, assembly) = assets.open_and_get_assembly(&Uri::from(uri.clone()), None).map_err(|e| {
             XamlLoadError::with_inner(format!("Could not open the XAML document {uri} of {type_name}: {e}"), e)
         })?;
         let mut text = String::new();
@@ -279,7 +280,7 @@ impl FerroRuntimeXamlLoader {
         // included objects), so that the populated instance is the one compiled markup
         // builds.
         let mut included = Vec::new();
-        collect_included_documents(&*assets, Some(&uri), &text, &mut vec![uri.absolute_uri().to_string()], skip, &mut included);
+        collect_included_documents(&*assets, Some(&uri), &text, &mut vec![uri.as_str().to_string()], skip, &mut included);
         Ok(DocumentGroup { uri, text, included, assembly: MarkupAssembly::find(assembly.name()) })
     }
 
@@ -298,12 +299,12 @@ impl FerroRuntimeXamlLoader {
 /// The document of a class with the documents it includes
 /// ([`FerroRuntimeXamlLoader::document_group`]).
 pub struct DocumentGroup {
-    /// The URI and the text of the document.
-    pub uri: Uri,
+    /// The URL and the text of the document.
+    pub uri: url::Url,
     pub text: String,
     /// The documents it includes, directly or not, in the order they are
-    /// found, each with its text.
-    pub included: Vec<(Uri, String)>,
+    /// found, each with its URL and its text.
+    pub included: Vec<(url::Url, String)>,
     /// The assembly of the document, if it is registered.
     pub assembly: Option<&'static MarkupAssembly>,
 }
@@ -345,8 +346,8 @@ fn asset_loader() -> Rc<dyn IAssetLoader> {
 }
 
 /// An included document of a group, named by its path as the compiler names it.
-fn included_document(uri: Uri, text: String) -> RuntimeXamlLoaderDocument {
-    let name = uri.absolute_path().trim_start_matches('/').to_string();
+fn included_document(uri: url::Url, text: String) -> RuntimeXamlLoaderDocument {
+    let name = uri.path().trim_start_matches('/').to_string();
     let stream: Box<dyn Read> = Box::new(Cursor::new(text.into_bytes()));
     let mut document = RuntimeXamlLoaderDocument::from_stream_with_base_uri(Some(uri), stream);
     document.document = Some(name);
@@ -355,35 +356,43 @@ fn included_document(uri: Uri, text: String) -> RuntimeXamlLoaderDocument {
 
 /// Adds to `documents` the documents `xaml` (at `uri`, if it has one) includes, directly or not, that
 /// the asset loader has and that are not in `visited` yet, each with its text.
+///
+/// `visited` holds the text of the URL of each document (the URL with its fragment, which
+/// an include source does not write): one document reached by two spellings of its
+/// reference (`Values.xaml`, `./Values.xaml`, `FERRES://App/Values.xaml`) is one entry.
 fn collect_included_documents(
     assets: &dyn IAssetLoader,
-    uri: Option<&Uri>,
+    uri: Option<&url::Url>,
     xaml: &str,
     visited: &mut Vec<String>,
-    skip: &dyn Fn(&Uri) -> bool,
-    documents: &mut Vec<(Uri, String)>,
+    skip: &dyn Fn(&url::Url) -> bool,
+    documents: &mut Vec<(url::Url, String)>,
 ) {
     for source in include_sources(xaml) {
-        let Some(relative) = Uri::try_create(&source, UriKind::RelativeOrAbsolute) else { continue };
-        // A relative source needs the URI of the including document.
-        let included = match (relative.is_absolute_uri(), uri) {
-            (true, _) => relative,
-            (false, Some(uri)) => Uri::combine(uri, &relative),
-            (false, None) => continue,
+        let Ok(reference) = UriRef::parse(&source) else { continue };
+        // A relative source needs the URL of the including document.
+        let included = match (reference.as_url(), uri) {
+            (Some(included), _) => included.clone(),
+            (None, Some(uri)) => match reference.resolve(uri) {
+                Ok(included) => included,
+                Err(_) => continue,
+            },
+            (None, None) => continue,
         };
-        let key = included.absolute_uri().to_string();
+        let key = included.as_str().to_string();
         if visited.contains(&key) || skip(&included) {
             continue;
         }
         visited.push(key);
         #[cfg(all(feature = "hot-reload", debug_assertions))]
-        let overlay = ferroui_markup_xaml::source_overlay::source(included.absolute_uri());
+        let overlay = ferroui_markup_xaml::source_overlay::source(included.as_str());
         #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
         let overlay: Option<String> = None;
         let text = match overlay {
             Some(text) => text,
             None => {
-                let Ok(mut stream) = assets.open(&included, None) else { continue };
+                // The asset loader takes the port `Uri` until U3 (C5 of #423).
+                let Ok(mut stream) = assets.open(&Uri::from(included.clone()), None) else { continue };
                 let mut text = String::new();
                 if stream.read_to_string(&mut text).is_err() { continue; }
                 text

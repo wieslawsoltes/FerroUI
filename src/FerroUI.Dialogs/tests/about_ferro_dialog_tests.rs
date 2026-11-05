@@ -9,7 +9,7 @@ use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::{Uri, UriRef};
 use ferroui_base::{Ref, StyledElement};
 use ferroui_controls::platform::IWindowImpl;
 use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};
@@ -107,7 +107,7 @@ fn loading_the_document_by_its_uri_creates_the_dialog() {
     crate::register_types();
     let _app = UnitTestApplication::start(TestServices::styled_window());
 
-    let uri = Uri::absolute(AboutFerroDialog::DOCUMENT_URI).expect("the URI of the document");
+    let uri = UriRef::parse(AboutFerroDialog::DOCUMENT_URI).expect("the URI of the document");
     let loaded = FerroXamlLoader::load(&uri, None).expect("the document is loaded");
 
     let dialog = from_markup_value::<Ref<AboutFerroDialog>>(&Some(loaded));

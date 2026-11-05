@@ -9,7 +9,7 @@
 use super::support::*;
 use crate::{assets, SimpleTheme, ASSEMBLY};
 use ferroui_base::metadata::from_markup_value;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::Ref;
 use ferroui_markup_xaml::FerroXamlLoader;
 
@@ -35,7 +35,7 @@ fn only_the_entry_point_is_built_by_the_document_table() {
         ferroui_controls::testing::TestServices::mock_platform_render_interface(),
     );
     for (path, _) in assets::documents() {
-        let uri = Uri::absolute(&format!("ferres://{}{path}", ASSEMBLY.name)).expect("a valid URI");
+        let uri = UriRef::parse(&format!("ferres://{}{path}", ASSEMBLY.name)).expect("a valid URI");
         let loaded = FerroXamlLoader::load(&uri, None);
         if *path == "/SimpleTheme.xaml" {
             let theme = loaded.unwrap_or_else(|error| panic!("{}", describe(&error)));

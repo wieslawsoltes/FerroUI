@@ -57,6 +57,23 @@ impl UriRef {
         }
     }
 
+    /// Parses an absolute URL with the rule of [`parse`](Self::parse) (the
+    /// scheme and the authority in lower case, as the canonical text of
+    /// [`Uri`] writes them): the base URI of a document (C#
+    /// `new Uri(text, UriKind.Absolute)`). Two spellings of one document
+    /// (`FERRES://App/Main.xaml`, `ferres://app/Main.xaml`) are one URL, as
+    /// they are one `Uri`; [`url::Url::parse`] keeps the case of the host of a
+    /// scheme that is not special.
+    ///
+    /// A relative reference is [`UriToUrlError::Relative`], and a text the
+    /// URL parser rejects [`UriToUrlError::Invalid`].
+    pub fn parse_absolute(text: &str) -> Result<url::Url, UriToUrlError> {
+        match UriRef::parse(text).map_err(UriToUrlError::Invalid)? {
+            UriRef::Absolute(url) => Ok(url),
+            UriRef::Relative(_) => Err(UriToUrlError::Relative),
+        }
+    }
+
     /// Resolves the reference against the absolute `base` (C# `new Uri(Uri, Uri)`,
     /// [`Uri::combine`] of the port): an absolute reference is itself, and a
     /// relative one is resolved with [`url::Url::join`].
@@ -284,6 +301,20 @@ mod tests {
         assert_eq!(parsed("HTTPS://Example.COM/Path").to_string(), "https://example.com/Path");
         // A text the URL parser rejects is its error.
         assert_eq!(UriRef::parse("http://host:99999/"), Err(url::ParseError::InvalidPort));
+    }
+
+    #[test]
+    fn uri_ref_parses_an_absolute_url_as_a_base() {
+        // Two spellings of one document are one URL, as they are one `Uri`.
+        let base = UriRef::parse_absolute("FERRES://App/Views/Main.xaml").unwrap();
+        assert_eq!(base.as_str(), "ferres://app/Views/Main.xaml");
+        assert_eq!(base, UriRef::parse_absolute("ferres://app/Views/Main.xaml").unwrap());
+        assert_eq!(base.as_str(), Uri::absolute("FERRES://App/Views/Main.xaml").unwrap().absolute_uri());
+        assert_eq!(UriRef::parse_absolute("file:///C:/dir/page.xaml").unwrap().as_str(), "file:///C:/dir/page.xaml");
+        // A relative reference is not a base, and a text the URL parser rejects is its error.
+        assert_eq!(UriRef::parse_absolute("/Views/Main.xaml"), Err(UriToUrlError::Relative));
+        assert_eq!(UriRef::parse_absolute("Main.xaml"), Err(UriToUrlError::Relative));
+        assert_eq!(UriRef::parse_absolute("http://host:99999/"), Err(UriToUrlError::Invalid(url::ParseError::InvalidPort)));
     }
 
     #[test]

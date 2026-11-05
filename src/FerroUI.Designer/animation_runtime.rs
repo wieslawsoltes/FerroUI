@@ -79,8 +79,8 @@ impl NativeAnimations {
                 // Debug reload canonicalizes URI authority before supplying Document;
                 // direct release factories can retain the original spelling. Compare
                 // only those two exact identities, preserving path case and provenance.
-                let canonical = ferroui_base::utilities::Uri::absolute(preview.uri())
-                    .map(|uri| uri.absolute_uri().to_owned())
+                let canonical = ferroui_base::utilities::UriRef::parse_absolute(preview.uri())
+                    .map(String::from)
                     .unwrap_or_else(|_| preview.uri().to_owned());
                 [preview.uri(), canonical.as_str()]
                     .into_iter()
