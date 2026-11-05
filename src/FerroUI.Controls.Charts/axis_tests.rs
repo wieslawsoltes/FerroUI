@@ -542,7 +542,7 @@ fn automatic_date_labels_use_the_interval_the_ticks_were_made_with() {
         axis.resolved_interval(date(2020, 1, 1), date(2020, 7, 1), 8)
     );
     assert_eq!(
-        date(2020, 1, 1).try_to_string_format("MMM yyyy", &CultureInfo::current_culture()).unwrap(),
+        date(2020, 1, 1).try_to_string_format("MMM yyyy", &CultureInfo::current_formatting()).unwrap(),
         months[0].1
     );
     // An explicit format still wins.

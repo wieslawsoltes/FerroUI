@@ -4,7 +4,7 @@ use ferroui_base::animation::easings::{Easing, LinearEasing};
 use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, SignedDuration};
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, JoinHandle};
 use ferroui_base::{Ref, StyledProperty, Visual};
 use mini_mvvm::start_async;
 use std::cell::{Cell, RefCell};
@@ -84,7 +84,7 @@ impl PageSlideTransition {
         cancellation_token: CancellationToken,
         prop: &'static StyledProperty<f64>,
         get_distance: impl FnOnce() -> f64 + 'static,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let duration = self.duration();
         let slide_easing = self.slide_easing();
         let from = from.cloned();
@@ -161,7 +161,7 @@ impl IPageTransition for PageSlideTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let (from_element, to_element) = (from.cloned(), to.cloned());
         if self.axis() == PageSlideTransitionAxis::Horizontal {
             self.start_axis(from, to, forward, cancellation_token, TranslateTransform::x_property(), move || {

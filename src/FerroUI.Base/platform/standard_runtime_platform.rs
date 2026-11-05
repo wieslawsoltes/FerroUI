@@ -1,5 +1,5 @@
 use super::{IRuntimePlatform, RuntimePlatformInfo};
-use crate::utilities::{DateTime, DateTimeKind};
+use std::time::SystemTime;
 
 /// The runtime platform of the standard targets: derives the platform
 /// information from the operating system the application was built for.
@@ -32,19 +32,13 @@ impl IRuntimePlatform for StandardRuntimePlatform {
 
     // CLOCK-SEAM: the browser platform must supply the wall clock (see `IRuntimePlatform::get_utc_now`).
     /// The system clock. A target without one (`wasm32-unknown-unknown`)
-    /// reports the Unix epoch; its platform layer registers a runtime
-    /// platform of its own.
-    fn get_utc_now(&self) -> DateTime {
+    /// reports the Unix epoch, and never calls `SystemTime::now()`; its
+    /// platform layer registers a runtime platform of its own.
+    fn get_utc_now(&self) -> SystemTime {
         if cfg!(all(target_arch = "wasm32", target_os = "unknown")) {
-            return DateTime::UNIX_EPOCH;
+            return SystemTime::UNIX_EPOCH;
         }
-        let epoch = DateTime::UNIX_EPOCH;
-        let ticks = |duration: std::time::Duration| (duration.as_nanos() / 100).min(i64::MAX as u128) as i64;
-        let now = match std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
-            Ok(elapsed) => epoch.try_add_ticks(ticks(elapsed)).unwrap_or(DateTime::MAX_VALUE),
-            Err(error) => epoch.try_add_ticks(-ticks(error.duration())).unwrap_or(DateTime::MIN_VALUE),
-        };
-        now.specify_kind(DateTimeKind::Utc)
+        SystemTime::now()
     }
 }
 

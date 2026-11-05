@@ -19,7 +19,7 @@ use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClien
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::reactive::{IDisposable, Subscription};
-use ferroui_base::threading::{CancellationToken, Dispatcher};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
 use ferroui_base::{PixelPoint, PixelRect, PixelVector, Rect};
 use ferroui_controls::Application;
 use futures_util::StreamExt;
@@ -159,7 +159,7 @@ impl DBusSignalGuard {
 /// Runs an `async void` of the reference: a task of the UI dispatcher
 /// nobody waits for.
 fn spawn(future: impl Future<Output = ()> + 'static) {
-    drop(Dispatcher::ui_thread().invoke_async_task_local(move || future));
+    drop(Dispatcher::ui_thread().spawn_local_with_priority(future, DispatcherPriority::DEFAULT));
 }
 
 fn log_error(area: &'static str, message: &str) {

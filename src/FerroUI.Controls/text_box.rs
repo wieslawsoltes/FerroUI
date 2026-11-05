@@ -34,7 +34,8 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::IPlatformSettings;
 use ferroui_base::reactive::{CompositeDisposable, IDisposable, IObserver, Observable, ObservableExt, Subscription};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_system::task::{JoinError, JoinHandle};
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AttachedProperty, BoxedValue,
@@ -2454,8 +2455,10 @@ impl TextBox {
         ClipboardHelper::start(async move {
             match pasted.await {
                 Ok(result) => result,
+                // A failure of the paste is the one the clipboard operation does not handle.
+                Err(JoinError::Panicked(payload)) => std::panic::resume_unwind(payload),
                 // A paste that was dropped with the dispatcher has nothing left to do.
-                Err(_) => Ok(()),
+                Err(JoinError::Canceled) => Ok(()),
             }
         });
     }
@@ -2466,10 +2469,10 @@ impl TextBox {
     /// A failure platform clipboards are known for is logged and pastes
     /// nothing; any other failure is the result of the task, for whoever
     /// awaits it.
-    fn paste_core_async(&self, clipboard: Option<Rc<dyn IClipboard>>) -> DispatcherTask<Result<(), ClipboardError>> {
+    fn paste_core_async(&self, clipboard: Option<Rc<dyn IClipboard>>) -> JoinHandle<Result<(), ClipboardError>> {
         let this = self.to_ref();
 
-        Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        Dispatcher::ui_thread().start_local(async move {
             let event_args =
                 PastingFromClipboardEventArgs::new(Self::pasting_from_clipboard_event(), clipboard.clone());
             this.raise_event(&event_args);

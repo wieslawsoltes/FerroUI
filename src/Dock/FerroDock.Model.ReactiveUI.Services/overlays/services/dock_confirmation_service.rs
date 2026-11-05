@@ -9,7 +9,8 @@ use ferrodock_model::services::{
 use ferroui_reactiveui::{reactive_object, IReactiveObject, IReactiveObjectExt, ReactiveObject};
 use ferroui_system::collections::object_model::ObservableCollection;
 use ferroui_system::task::Schedule;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
+use ferroui_system::ObservableError;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
@@ -65,7 +66,7 @@ impl DockConfirmationService {
         message: String,
         confirm_text: String,
         cancel_text: String,
-    ) -> Task<bool> {
+    ) -> Shared<Result<bool, ObservableError>> {
         let service = self.runtime.upgrade().expect("live confirmation service");
         spawn_catching(async move {
             let weak = service.runtime.clone();
@@ -95,11 +96,11 @@ impl DockConfirmationService {
                     target.raise_property_changed("HasConfirmations");
                 })
                 .await?;
-            request.task().await
+            request.task().flatten().await
         })
     }
     /// Uses the source Confirm/Cancel default labels.
-    pub fn confirm_async_default(&self, title: String, message: String) -> Task<bool> {
+    pub fn confirm_async_default(&self, title: String, message: String) -> Shared<Result<bool, ObservableError>> {
         self.confirm_async(title, message, "Confirm".into(), "Cancel".into())
     }
     /// Closes the supplied request on the dispatcher, even when it is not in this collection.
@@ -169,7 +170,7 @@ impl IDockConfirmationService for DockConfirmationService {
         message: String,
         confirm_text: String,
         cancel_text: String,
-    ) -> Task<bool> {
+    ) -> Shared<Result<bool, ObservableError>> {
         self.confirm_async(title, message, confirm_text, cancel_text)
     }
     fn close(&self, request: Rc<ConfirmationRequest>, result: bool) {

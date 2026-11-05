@@ -17,7 +17,7 @@ use super::dbus::types::AtSpiObjectReference;
 use super::handlers::at_spi_event_object_handler::AtSpiEventObjectHandler;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::reactive::Subscription;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::Ref;
 use ferroui_controls::automation::peers::AutomationPeer;
 use std::cell::{Cell, RefCell};
@@ -119,9 +119,12 @@ impl AtSpiServer {
         let tracker = AtSpiRegistryEventTracker::new(connection.connection().clone());
         *self.registry_tracker.borrow_mut() = Some(tracker.clone());
         // Registry tracking is best-effort; AT-SPI server remains functional without it.
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            tracker.initialize_async().await;
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                tracker.initialize_async().await;
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     pub fn add_window(&self, window_peer: &Ref<AutomationPeer>) {
@@ -162,9 +165,12 @@ impl AtSpiServer {
         }
 
         let Some(this) = self.weak_self.upgrade() else { return };
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            this.embed_and_announce_once_async().await;
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                this.embed_and_announce_once_async().await;
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     async fn embed_and_announce_once_async(&self) {

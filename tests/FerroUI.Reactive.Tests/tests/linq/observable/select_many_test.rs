@@ -10,8 +10,14 @@
 //! sequence of sequences are `Rc<dyn IObservable<i32>>` handles of the test observables.
 //! The forms on tasks are `select_many_async` (`_with_index`, `_with_token`, `_with` for a result
 //! selector, `try_` for selectors that throw). `Task.Factory.StartNew` is `tasks::run`, whose
-//! token argument the port does not have; `ToEnumerable()` is `block_on` of
-//! `to_array().to_task()`. A task that throws `ex` fails with `ex` once its work has run, so that
+//! token argument the port does not have and whose `Shared` gives the future with `flatten()`;
+//! `ToEnumerable()` is `block_on` of `to_array().to_task().flatten()`. A `TaskCompletionSource<int>`
+//! is a `TaskSource`: the sender of a `Shared` (`Shared::channel`), taken by the first `TrySet`,
+//! whose task is the `flatten()` of the `Shared`, used as it is by `SelectMany` (its continuations
+//! run inside the call that ends it, as upstream's); `SetCanceled` ends it with a cancellation. The
+//! tests of a canceled task (`Simple_Canceled_*`, `WithResultSelector_Canceled_*`) check that the
+//! cancellation names that task (`tcException.Task == tcss[1].Task`), which only the deprecated
+//! `TaskCompletionSource` of `ferroui_system::threading::tasks` gives, so they keep it. A task that throws `ex` fails with `ex` once its work has run, so that
 //! the error is the same value; `ManualResetEvent`s that only wait for the end are the flags of
 //! the subscription (the continuations of the tasks run when the tasks end, on the test thread);
 //! `token.Register` is `register_local`.
@@ -22,7 +28,8 @@ use ferroui_reactive::{IDisposable, IObservable, IObserver, Notification, Observ
 use ferroui_reactive_testing::{
     assert_messages, assert_subscriptions, new_error, ticks_to_duration, ColdObservable, HotObservable, ReactiveTest as RT, Recorded, TestScheduler,
 };
-use ferroui_system::threading::tasks::{block_on, run, Task, TaskCanceledError, TaskCompletionSource};
+use ferroui_system::task::{block_on, Flatten, Shared, SharedSender};
+use ferroui_system::threading::tasks::run;
 use ferroui_system::threading::CancellationToken;
 use std::cell::{Cell, RefCell};
 use std::future::Future;
@@ -2021,13 +2028,101 @@ fn try_many_async_token_with<C: Clone + 'static, Fut: Future<Output = Result<C, 
     }
 }
 
+/// The task of a completion source (`Task<int>`).
+type SourceTask = Flatten<i32>;
+
+/// A completion source (`TaskCompletionSource<int>`): the sender of a `Shared`, which the first
+/// `TrySet` takes; its task is the `flatten()` of the `Shared`. Clones are the same source.
+#[derive(Clone)]
+struct TaskSource {
+    sender: Rc<RefCell<Option<SharedSender<Result<i32, ObservableError>>>>>,
+    task: Shared<Result<i32, ObservableError>>,
+}
+
+impl TaskSource {
+    fn new() -> Self {
+        let (sender, task) = Shared::channel();
+        Self { sender: Rc::new(RefCell::new(Some(sender))), task }
+    }
+
+    /// `Task`.
+    fn task(&self) -> SourceTask {
+        self.task.clone().flatten()
+    }
+
+    /// The sender, unless a `TrySet` took it.
+    fn take(&self) -> Option<SharedSender<Result<i32, ObservableError>>> {
+        self.sender.borrow_mut().take()
+    }
+
+    /// `TrySetResult`.
+    fn try_set_result(&self, value: i32) -> bool {
+        match self.take() {
+            Some(sender) => {
+                sender.send(Ok(value));
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// `TrySetException`.
+    fn try_set_exception(&self, error: ObservableError) -> bool {
+        match self.take() {
+            Some(sender) => {
+                sender.send(Err(error));
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// `TrySetCanceled`.
+    fn try_set_canceled(&self) -> bool {
+        match self.take() {
+            Some(sender) => {
+                sender.cancel();
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// `SetResult`.
+    fn set_result(&self, value: i32) {
+        assert!(self.try_set_result(value), "An attempt was made to transition a task to a final state when it had already completed.");
+    }
+
+    /// `SetException`.
+    fn set_exception(&self, error: ObservableError) {
+        assert!(self.try_set_exception(error), "An attempt was made to transition a task to a final state when it had already completed.");
+    }
+}
+
 /// `n` completion sources (`new TaskCompletionSource<int>[n]`).
-fn completion_sources(n: usize) -> Vec<TaskCompletionSource<i32>> {
-    (0..n).map(|_| TaskCompletionSource::new()).collect()
+fn completion_sources(n: usize) -> Vec<TaskSource> {
+    (0..n).map(|_| TaskSource::new()).collect()
 }
 
 /// A selector of the task of a completion source (`x => tcss[x].Task`).
-fn task_of(tcss: &[TaskCompletionSource<i32>]) -> impl Fn(i32) -> Task<i32> + 'static {
+fn task_of(tcss: &[TaskSource]) -> impl Fn(i32) -> SourceTask + 'static {
+    let tcss = tcss.to_vec();
+    move |x| tcss[x as usize].task()
+}
+
+/// `n` completion sources of the deprecated `Task` (`new TaskCompletionSource<int>[n]`), for the
+/// tests that check the task a cancellation names.
+#[allow(deprecated)]
+fn named_completion_sources(n: usize) -> Vec<ferroui_system::threading::tasks::TaskCompletionSource<i32>> {
+    (0..n).map(|_| ferroui_system::threading::tasks::TaskCompletionSource::new()).collect()
+}
+
+/// A selector of the task of a completion source of [`named_completion_sources`]
+/// (`x => tcss[x].Task`).
+#[allow(deprecated)]
+fn named_task_of(
+    tcss: &[ferroui_system::threading::tasks::TaskCompletionSource<i32>],
+) -> impl Fn(i32) -> ferroui_system::threading::tasks::Task<i32> + 'static {
     let tcss = tcss.to_vec();
     move |x| tcss[x as usize].task()
 }
@@ -2070,24 +2165,25 @@ fn same_error(a: &ObservableError, b: &ObservableError) -> bool {
 }
 
 /// `err is TaskCanceledException tcException && tcException.Task == task`.
-fn is_cancellation_of(error: &ObservableError, task: &Task<i32>) -> bool {
-    error.downcast_ref::<TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(task.id()))
+#[allow(deprecated)]
+fn is_cancellation_of(error: &ObservableError, task: &ferroui_system::threading::tasks::Task<i32>) -> bool {
+    error.downcast_ref::<ferroui_system::threading::tasks::TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(task.id()))
 }
 
 /// The values of a sequence whose tasks run on worker threads (`ToEnumerable()`), or its error.
 fn to_enumerable<T: Clone + 'static>(res: Rc<dyn IObservable<T>>) -> Result<Vec<T>, ObservableError> {
-    block_on(res.to_array().to_task())
+    block_on(res.to_array().to_task().flatten())
 }
 
 fn select_many_task1_case(indexed: bool) {
-    let res = many_async(Observable::range(0, 10), indexed, |x| run(move || Ok(x + 1)));
+    let res = many_async(Observable::range(0, 10), indexed, |x| run(move || Ok(x + 1)).flatten());
     let mut res = to_enumerable(res).unwrap();
     res.sort();
     assert_eq!((0..10).map(|x| x + 1).collect::<Vec<i32>>(), res);
 }
 
 fn select_many_task2_case(indexed: bool) {
-    let res = many_async_token(Observable::range(0, 10), indexed, |x, _ct| run(move || Ok(x + 1)));
+    let res = many_async_token(Observable::range(0, 10), indexed, |x, _ct| run(move || Ok(x + 1)).flatten());
     let mut res = to_enumerable(res).unwrap();
     res.sort();
     assert_eq!((0..10).map(|x| x + 1).collect::<Vec<i32>>(), res);
@@ -2100,7 +2196,7 @@ fn select_many_task_task_throws_case(indexed: bool) {
     let res = many_async(Observable::range(0, 10), indexed, move |x| {
         let ex = e.clone();
         async move {
-            let value = run(move || Ok(x + 1)).await;
+            let value = run(move || Ok(x + 1)).flatten().await;
             if x > 5 {
                 Err(ex)
             } else {
@@ -2117,21 +2213,21 @@ fn select_many_task_selector_throws_case(indexed: bool) {
     let ex = new_error("ex");
 
     let e = ex.clone();
-    let res = try_many_async(Observable::range(0, 10), indexed, move |x| if x > 5 { Err(e.clone()) } else { Ok(run(move || Ok(x + 1))) });
+    let res = try_many_async(Observable::range(0, 10), indexed, move |x| if x > 5 { Err(e.clone()) } else { Ok(run(move || Ok(x + 1)).flatten()) });
 
     let error = to_enumerable(res).unwrap_err();
     assert!(same_error(&ex, &error));
 }
 
 fn select_many_task_result_selector1_case(indexed: bool) {
-    let res = many_async_with(Observable::range(0, 10), indexed, |x| run(move || Ok(x + 1)), |x, y| x + y);
+    let res = many_async_with(Observable::range(0, 10), indexed, |x| run(move || Ok(x + 1)).flatten(), |x, y| x + y);
     let mut res = to_enumerable(res).unwrap();
     res.sort();
     assert_eq!((0..10).map(|x| 2 * x + 1).collect::<Vec<i32>>(), res);
 }
 
 fn select_many_task_result_selector2_case(indexed: bool) {
-    let res = many_async_token_with(Observable::range(0, 10), indexed, |x, _ct| run(move || Ok(x + 1)), |x, y| x + y);
+    let res = many_async_token_with(Observable::range(0, 10), indexed, |x, _ct| run(move || Ok(x + 1)).flatten(), |x, y| x + y);
     let mut res = to_enumerable(res).unwrap();
     res.sort();
     assert_eq!((0..10).map(|x| 2 * x + 1).collect::<Vec<i32>>(), res);
@@ -2144,7 +2240,7 @@ fn select_many_task_result_selector_throws_case(indexed: bool) {
     let res = try_many_async_with(
         Observable::range(0, 10),
         indexed,
-        |x| Ok(run(move || Ok(x + 1))),
+        |x| Ok(run(move || Ok(x + 1)).flatten()),
         move |x, y| if x > 5 { Err(e.clone()) } else { Ok(x + y) },
     );
 
@@ -2214,10 +2310,11 @@ fn simple_faulted_sync_case(indexed: bool) {
     assert!(same_error(&ex, &received.error().unwrap()));
 }
 
+#[allow(deprecated)]
 fn simple_canceled_async_case(indexed: bool) {
-    let tcss = completion_sources(3);
+    let tcss = named_completion_sources(3);
 
-    let res = many_async(Observable::range(0, 3), indexed, task_of(&tcss));
+    let res = many_async(Observable::range(0, 3), indexed, named_task_of(&tcss));
 
     let (received, _) = receive(&res);
 
@@ -2229,12 +2326,13 @@ fn simple_canceled_async_case(indexed: bool) {
     assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
 }
 
+#[allow(deprecated)]
 fn simple_canceled_sync_case(indexed: bool) {
-    let tcss = completion_sources(3);
+    let tcss = named_completion_sources(3);
 
     tcss[1].set_canceled();
 
-    let res = many_async(Observable::range(0, 3), indexed, task_of(&tcss));
+    let res = many_async(Observable::range(0, 3), indexed, named_task_of(&tcss));
 
     let (received, _) = receive(&res);
 
@@ -2297,10 +2395,10 @@ fn simple_outer_complete_before_inner_case(indexed: bool) {
 /// (`(x, token) => { var tcs = tcss[x]; token.Register(...); return tcs.Task; }`); `throw_at`
 /// is the value for which the selector throws `ex`.
 fn registering_selector(
-    tcss: &[TaskCompletionSource<i32>],
+    tcss: &[TaskSource],
     throw_at: Option<(i32, ObservableError)>,
-    on_cancel: impl Fn(&TaskCompletionSource<i32>) + 'static,
-) -> impl Fn(i32, CancellationToken) -> Result<Task<i32>, ObservableError> + 'static {
+    on_cancel: impl Fn(&TaskSource) + 'static,
+) -> impl Fn(i32, CancellationToken) -> Result<SourceTask, ObservableError> + 'static {
     let tcss = tcss.to_vec();
     let on_cancel = Rc::new(on_cancel);
     move |x, token| {
@@ -2322,13 +2420,13 @@ fn registering_selector(
 
 /// [`registering_selector`] as a selector that does not fail (the form of upstream's tests whose
 /// selector does not throw).
-fn plain(selector: impl Fn(i32, CancellationToken) -> Result<Task<i32>, ObservableError> + 'static) -> impl Fn(i32, CancellationToken) -> Task<i32> + 'static {
+fn plain(selector: impl Fn(i32, CancellationToken) -> Result<SourceTask, ObservableError> + 'static) -> impl Fn(i32, CancellationToken) -> SourceTask + 'static {
     move |x, token| selector(x, token).expect("the selector does not fail")
 }
 
 /// The `token.Register(() => { n++; m += tcs.TrySetCanceled() ? 1 : 0; })` of the tests of the
 /// cancellation.
-fn counting_cancellation(n: &Rc<Cell<i32>>, m: &Rc<Cell<i32>>) -> impl Fn(&TaskCompletionSource<i32>) + 'static {
+fn counting_cancellation(n: &Rc<Cell<i32>>, m: &Rc<Cell<i32>>) -> impl Fn(&TaskSource) + 'static {
     let (n, m) = (n.clone(), m.clone());
     move |tcs| {
         n.set(n.get() + 1);
@@ -2525,10 +2623,11 @@ fn with_result_selector_faulted_sync_case(indexed: bool) {
     assert!(same_error(&ex, &received.error().unwrap()));
 }
 
+#[allow(deprecated)]
 fn with_result_selector_canceled_async_case(indexed: bool) {
-    let tcss = completion_sources(3);
+    let tcss = named_completion_sources(3);
 
-    let res = many_async_with(Observable::range(0, 3), indexed, task_of(&tcss), |x, y| x + y);
+    let res = many_async_with(Observable::range(0, 3), indexed, named_task_of(&tcss), |x, y| x + y);
 
     let (received, _) = receive(&res);
 
@@ -2540,12 +2639,13 @@ fn with_result_selector_canceled_async_case(indexed: bool) {
     assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
 }
 
+#[allow(deprecated)]
 fn with_result_selector_canceled_sync_case(indexed: bool) {
-    let tcss = completion_sources(3);
+    let tcss = named_completion_sources(3);
 
     tcss[1].set_canceled();
 
-    let res = many_async_with(Observable::range(0, 3), indexed, task_of(&tcss), |x, y| x + y);
+    let res = many_async_with(Observable::range(0, 3), indexed, named_task_of(&tcss), |x, y| x + y);
 
     let (received, _) = receive(&res);
 
@@ -2897,7 +2997,7 @@ fn select_many_task_with_completion_source_with_result_selector_cancellation_aft
 
 #[test]
 fn select_many_with_index_task_index() {
-    let res = Observable::range(0, 10).select_many_async_with_index(|x, i| run(move || Ok((x, i))));
+    let res = Observable::range(0, 10).select_many_async_with_index(|x, i| run(move || Ok((x, i))).flatten());
     let mut res = to_enumerable(res).unwrap();
     res.sort_by_key(|v| v.1);
     assert_eq!((0..10).map(|x| (x, x as usize)).collect::<Vec<(i32, usize)>>(), res);
@@ -2905,7 +3005,7 @@ fn select_many_with_index_task_index() {
 
 #[test]
 fn select_many_with_index_task_cancellation_index() {
-    let res = Observable::range(0, 10).select_many_async_with_index_with_token(|x, i, _ctx| run(move || Ok((x, i))));
+    let res = Observable::range(0, 10).select_many_async_with_index_with_token(|x, i, _ctx| run(move || Ok((x, i))).flatten());
     let mut res = to_enumerable(res).unwrap();
     res.sort_by_key(|v| v.1);
     assert_eq!((0..10).map(|x| (x, x as usize)).collect::<Vec<(i32, usize)>>(), res);
@@ -2913,7 +3013,7 @@ fn select_many_with_index_task_cancellation_index() {
 
 #[test]
 fn select_many_with_index_task_result_selector_index() {
-    let res = Observable::range(0, 10).select_many_async_with_index_with(|x, i| run(move || Ok((x, i))), |_, _, r| r);
+    let res = Observable::range(0, 10).select_many_async_with_index_with(|x, i| run(move || Ok((x, i))).flatten(), |_, _, r| r);
     let mut res = to_enumerable(res).unwrap();
     res.sort_by_key(|v| v.1);
     assert_eq!((0..10).map(|x| (x, x as usize)).collect::<Vec<(i32, usize)>>(), res);
@@ -2921,7 +3021,7 @@ fn select_many_with_index_task_result_selector_index() {
 
 #[test]
 fn select_many_with_index_task_result_selector_cancellation_index() {
-    let res = Observable::range(0, 10).select_many_async_with_index_with_token_with(|x, i, _ctx| run(move || Ok((x, i))), |_, _, r| r);
+    let res = Observable::range(0, 10).select_many_async_with_index_with_token_with(|x, i, _ctx| run(move || Ok((x, i))).flatten(), |_, _, r| r);
     let mut res = to_enumerable(res).unwrap();
     res.sort_by_key(|v| v.1);
     assert_eq!((0..10).map(|x| (x, x as usize)).collect::<Vec<(i32, usize)>>(), res);

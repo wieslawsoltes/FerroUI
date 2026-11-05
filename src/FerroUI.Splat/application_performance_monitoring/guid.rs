@@ -1,15 +1,24 @@
-//! `Guid`, the reference of a feature usage tracking session.
+//! `Guid`, the reference of a feature usage tracking session: since 0.5 a [`Uuid`], and the port
+//! type deprecated.
 
 use std::fmt;
 use uuid::Uuid;
 
 /// A 128-bit identifier (`System.Guid`), written as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
 ///
-/// It is a [`Uuid`] of the `uuid` crate, the identifier type of the workspace
-/// (docs/idiomatic-rust.md): the two convert into each other with `From`.
+/// Deprecated: the feature usage tracking takes and returns a [`Uuid`] of the `uuid` crate, the
+/// identifier type of the workspace (docs/idiomatic-rust.md); the two convert into each other
+/// with `From`. [`Guid::EMPTY`] is [`Uuid::nil`], [`Guid::new_guid`] is `Uuid::new_v4`,
+/// [`Guid::from_u128`] and [`Guid::as_u128`] are the methods of the same names, and the text is
+/// the same.
+#[deprecated(
+    since = "0.5.0",
+    note = "use `uuid::Uuid`: `EMPTY` is `Uuid::nil()`, `new_guid()` is `Uuid::new_v4()`; convert with `Uuid::from(guid)`"
+)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Guid(Uuid);
 
+#[allow(deprecated)]
 impl Guid {
     /// The identifier whose bits are all zero (`Guid.Empty`).
     pub const EMPTY: Guid = Guid(Uuid::nil());
@@ -31,18 +40,21 @@ impl Guid {
     }
 }
 
+#[allow(deprecated)]
 impl From<Uuid> for Guid {
     fn from(value: Uuid) -> Self {
         Guid(value)
     }
 }
 
+#[allow(deprecated)]
 impl From<Guid> for Uuid {
     fn from(value: Guid) -> Self {
         value.0
     }
 }
 
+#[allow(deprecated)]
 impl fmt::Display for Guid {
     /// The form `D` of `Guid.ToString()`: hyphenated, in lower case.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

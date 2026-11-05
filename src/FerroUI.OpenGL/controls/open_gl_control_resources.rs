@@ -1,12 +1,12 @@
 use super::composition_open_gl_swapchain::CompositionOpenGlSwapchain;
-use crate::composition::task_support::start;
+use crate::composition::task_support::{join, start};
 use crate::composition::ICompositionGlContext;
 use crate::gl_consts::*;
 use crate::{GlProfileType, IGlContext, OpenGlError};
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::rendering::composition::CompositionDrawingSurface;
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use std::any::Any;
 use std::cell::Cell;
@@ -123,7 +123,7 @@ impl OpenGlControlBaseResources {
         }))
     }
 
-    pub(crate) fn dispose_async(&self) -> DispatcherTask<()> {
+    pub(crate) fn dispose_async(&self) -> JoinHandle<()> {
         if !self.is_lost() {
             let context = self.context();
             let current = context.make_current();
@@ -143,8 +143,8 @@ impl OpenGlControlBaseResources {
         let swapchain_disposal = self.swapchain.dispose_async();
         let composition_context = self.composition_context.clone();
         start(async move {
-            let _ = swapchain_disposal.await;
-            let _ = composition_context.dispose_async().await;
+            let _ = join(swapchain_disposal).await;
+            let _ = join(composition_context.dispose_async()).await;
         })
     }
 }

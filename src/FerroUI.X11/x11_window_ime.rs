@@ -24,7 +24,7 @@ use ferroui_base::input::{
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::ops::Deref;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_freedesktop::{IX11InputMethodControl, IX11InputMethodFactory, X11InputMethodForwardedKey};
 use std::rc::Rc;
@@ -431,32 +431,35 @@ impl X11Window {
         };
         self.processing_ime.set(true);
 
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            // The `finally` of the reference.
-            struct ResetProcessing(Rc<X11Window>);
-            impl Drop for ResetProcessing {
-                fn drop(&mut self) {
-                    self.0.processing_ime.set(false);
-                }
-            }
-            let guard = ResetProcessing(window);
-            let window = &guard.0;
-
-            loop {
-                let Some(ev) = window.ime_queue.borrow_mut().pop_front() else {
-                    break;
-                };
-                let ime_control = window.ime_control.borrow().clone();
-                if let Some(ime_control) = ime_control {
-                    let handled_by_ime = ime_control.handle_event_async(ev.args.clone(), ev.keyval, ev.keycode).await;
-                    if handled_by_ime && !passes_although_handled(&ev.args) {
-                        continue;
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                // The `finally` of the reference.
+                struct ResetProcessing(Rc<X11Window>);
+                impl Drop for ResetProcessing {
+                    fn drop(&mut self) {
+                        self.0.processing_ime.set(false);
                     }
                 }
+                let guard = ResetProcessing(window);
+                let window = &guard.0;
 
-                window.schedule_input(ev.args);
-            }
-        }));
+                loop {
+                    let Some(ev) = window.ime_queue.borrow_mut().pop_front() else {
+                        break;
+                    };
+                    let ime_control = window.ime_control.borrow().clone();
+                    if let Some(ime_control) = ime_control {
+                        let handled_by_ime = ime_control.handle_event_async(ev.args.clone(), ev.keyval, ev.keycode).await;
+                        if handled_by_ime && !passes_although_handled(&ev.args) {
+                            continue;
+                        }
+                    }
+
+                    window.schedule_input(ev.args);
+                }
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 }
 

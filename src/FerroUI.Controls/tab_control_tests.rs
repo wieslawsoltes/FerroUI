@@ -29,7 +29,8 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::EllipseGeometry;
 use ferroui_base::styling::{ControlTheme, Selectors, Setter, Style};
-use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_model, instantiate, AnyValue, BoxedValue, FerroLocator, FerroObjectImpl,
     ObjectType, Rect, Ref, Size, StyledElement, StyledElementImpl, Visual, VisualImpl,
@@ -395,18 +396,18 @@ impl IPageTransition for TestTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         _cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let content = |visual: Option<&Ref<Visual>>| {
             let presenter = visual.and_then(|visual| visual.clone().cast::<ContentPresenter>());
             presenter.and_then(|presenter| presenter.content())
         };
         self.starts.borrow_mut().push((content(from), content(to), forward));
 
-        let scheduler = Dispatcher::current_dispatcher().to_task_scheduler();
+        let dispatcher = Dispatcher::current_dispatcher();
         if self.gated {
-            scheduler.start_local(std::future::pending::<()>())
+            dispatcher.start_local(std::future::pending::<()>())
         } else {
-            scheduler.start_local(async {})
+            dispatcher.start_local(async {})
         }
     }
 }

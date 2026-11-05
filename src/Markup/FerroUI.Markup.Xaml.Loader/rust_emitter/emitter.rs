@@ -648,6 +648,19 @@ fn uri_literal(n: &XamlAstNewClrObjectNode) -> Option<String> {
     }
 }
 
+/// The text of a culture literal: `CultureInfo.Parse(text)` of a text, what the compiler
+/// makes of the text of a culture (the parse of its markup metadata: an IETF language tag).
+fn culture_literal(node: &Rc<dyn IXamlAstNode>) -> Option<String> {
+    let call = node.as_method_call_base_node()?;
+    let method = call.method.borrow().clone();
+    if method.name() != "Parse" || !method.declaring_type().is("System.Globalization", "CultureInfo") {
+        return None;
+    }
+    let arguments = call.arguments.borrow().clone();
+    let [argument] = arguments.as_slice() else { return None };
+    Some(argument.clone().as_node().cast::<XamlAstTextNode>()?.text())
+}
+
 struct Emitter<'a> {
     /// What the type system the document was transformed with states for the emitter.
     types: &'a dyn EmitTypes,
@@ -702,6 +715,10 @@ struct Emitter<'a> {
     /// text: a member that declares a `UriRef` or a `Url` takes the literal only when it is
     /// one ([`Emitter::refused_uri_literal`]).
     uri_literals: HashMap<String, String>,
+    /// The locals that hold a culture literal ([`culture_literal`]), with its text: a member
+    /// that declares a `Locale` takes the literal only when it is a BCP-47 tag
+    /// ([`Emitter::refused_locale_literal`]).
+    culture_literals: HashMap<String, String>,
 }
 
 struct ScopedNamespaceTable {
@@ -1513,8 +1530,8 @@ impl<'a> Emitter<'a> {
     /// (`to_exact`). `None`: it cannot be stated.
     fn coerce(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         // A negative time span literal is not stated as a duration at all, nor a relative URI
-        // literal as a URL, not even by the cast at run time that would refuse it: it is an
-        // error of the document.
+        // literal as a URL, nor a culture literal that is no locale as a locale, not even by the
+        // cast at run time that would refuse it: it is an error of the document.
         if self.refused_literal(value, target).is_some() {
             return None;
         }
@@ -1595,11 +1612,35 @@ impl<'a> Emitter<'a> {
         }
     }
 
+    /// Why `value` cannot be the `Locale` (or the nullable form) `target`: a culture literal
+    /// ([`culture_literal`]) that is not an IETF language tag, or whose culture is not a
+    /// locale (a name that is no BCP-47 tag, such as `x-private`; C5 of #423). The error of
+    /// the document, which the run-time loader reports as the error of the conversion or of
+    /// the cast when it loads the document. A literal that is a locale is stated through the
+    /// cast of the untyped value conversions, which cannot refuse it.
+    fn refused_locale_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        if target != self.types.known(Known::Locale) && target != self.types.option_of_known(Known::Locale) {
+            return None;
+        }
+        let text = self.culture_literals.get(&value.expr)?;
+        let culture = match ferroui_base::data::CultureInfoIetfLanguageTagConverter::convert_from(text) {
+            Ok(culture) => culture,
+            Err(error) => return Some(error.to_string()),
+        };
+        ferroui_base::utilities::Locale::try_from(&culture)
+            .err()
+            .map(|error| format!("the culture name '{text}' is not a BCP-47 language tag, and a `Locale` cannot hold it ({error})"))
+
+    }
+
     /// Why the literal `value` cannot be `target`: a negative time span for a `Duration`
     /// ([`Self::refused_time_span_literal`]), a relative URI for a `Url` or a URI that is no
-    /// URL ([`Self::refused_uri_literal`]).
+    /// URL ([`Self::refused_uri_literal`]), or a culture that is no locale for a `Locale`
+    /// ([`Self::refused_locale_literal`]).
     fn refused_literal(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
-        self.refused_time_span_literal(value, target).or_else(|| self.refused_uri_literal(value, target))
+        self.refused_time_span_literal(value, target)
+            .or_else(|| self.refused_uri_literal(value, target))
+            .or_else(|| self.refused_locale_literal(value, target))
     }
 
     /// A list of the runtime library created in markup as the collection handle a member
@@ -3601,6 +3642,11 @@ impl<'a> Emitter<'a> {
         if let Some(ticks) = time_span_literal(node) {
             self.time_span_literals.insert(local.clone(), ticks);
         }
+        // A culture literal is remembered with its text: a member that declares a `Locale`
+        // takes it only when it is a BCP-47 tag.
+        if let Some(text) = culture_literal(node) {
+            self.culture_literals.insert(local.clone(), text);
+        }
         Ok(Typed { expr: local, kind: self.kind_of(returned) })
     }
 
@@ -4168,6 +4214,7 @@ pub fn emit_function<'a>(
         namespace_tables: Vec::new(),
         time_span_literals: HashMap::new(),
         uri_literals: HashMap::new(),
+        culture_literals: HashMap::new(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is

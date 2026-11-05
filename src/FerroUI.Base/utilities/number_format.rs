@@ -1606,10 +1606,10 @@ mod tests {
         // Without a provider the current culture is used.
         let _scope = FerroLocator::enter_scope();
         TestCultureDataProvider::register();
-        let previous = CultureInfo::current_culture();
-        CultureInfo::set_current_culture(CultureInfo::get_culture_info("en-US"));
+        let previous = CultureInfo::current_formatting();
+        CultureInfo::set_current_formatting(CultureInfo::get_culture_info("en-US"));
         assert_eq!(d("0.5").to_string_with("P0", None).unwrap(), "50%");
         assert_eq!(Decimal::parse_with("$5", NumberStyles::CURRENCY, None), Ok(d("5")));
-        CultureInfo::set_current_culture(previous);
+        CultureInfo::set_current_formatting(previous);
     }
 }

@@ -26,6 +26,9 @@ mod i_dispatcher;
 mod i_dispatcher_impl;
 
 pub use ferroui_system::task::Canceled;
+// The handle of a task of the dispatcher (`Dispatcher::spawn_local`, `spawn`, `start_local`) and how
+// it ends without an output: the types of `ferroui-system`, for the crates that use the dispatcher.
+pub use ferroui_system::task::{AbortHandle, JoinError, JoinHandle};
 pub use ferroui_system::threading::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
 #[allow(deprecated)]
 pub use ferroui_system::threading::{CancellationTokenRegistration, CancellationTokenSource};
@@ -42,10 +45,10 @@ pub use dispatcher_options::DispatcherOptions;
 pub use dispatcher_priority::{DispatcherPriority, DispatcherPriorityOutOfRangeError};
 pub use dispatcher_invoke::DispatcherInvokeError;
 pub use dispatcher_priority_awaitable::{DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable};
-pub use dispatcher_task::DispatcherTask;
-pub use ferro_synchronization_context::DispatcherTaskScheduler;
 #[allow(deprecated)]
-pub use ferro_synchronization_context::{FerroSynchronizationContext, RestoreContext};
+pub use dispatcher_task::DispatcherTask;
+#[allow(deprecated)]
+pub use ferro_synchronization_context::{DispatcherTaskScheduler, FerroSynchronizationContext, RestoreContext};
 mod thread_safe_object_pool;
 pub use thread_safe_object_pool::ThreadSafeObjectPool;
 pub use dispatcher_thread_storage::UnitTestDispatcherScope;

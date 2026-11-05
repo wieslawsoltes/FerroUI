@@ -8,7 +8,7 @@
 //! handler with each, on the UI thread, until it is disposed.
 
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::{CancellationToken, Dispatcher, WaitForCancellation};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, WaitForCancellation};
 use futures_util::future::{select, Either};
 use futures_util::{Stream, StreamExt};
 use std::future::Future;
@@ -117,15 +117,18 @@ where
 {
     let token = CancellationToken::new();
     let task_token = token.clone();
-    drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-        let mut stream = pin!(stream);
-        while let Some(Some(item)) = run_until_cancelled(&task_token, stream.next()).await {
-            if task_token.is_cancelled() {
-                break;
+    drop(Dispatcher::ui_thread().spawn_local_with_priority(
+        async move {
+            let mut stream = pin!(stream);
+            while let Some(Some(item)) = run_until_cancelled(&task_token, stream.next()).await {
+                if task_token.is_cancelled() {
+                    break;
+                }
+                handler(item);
             }
-            handler(item);
-        }
-    }));
+        },
+        DispatcherPriority::DEFAULT,
+    ));
 
     Rc::new(Subscription { token })
 }
@@ -147,19 +150,22 @@ mod tests {
 
         {
             let (token, outcome) = (token.clone(), outcome.clone());
-            drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                let first = run_until_cancelled(&token, async { 7 }).await;
-                outcome.borrow_mut().push(first);
-                let second = run_until_cancelled(&token, async {
-                    let _ = pending.await;
-                    8
-                })
-                .await;
-                outcome.borrow_mut().push(second);
-                // Once canceled, nothing is started.
-                let third = run_until_cancelled(&token, async { 9 }).await;
-                outcome.borrow_mut().push(third);
-            }));
+            drop(Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    let first = run_until_cancelled(&token, async { 7 }).await;
+                    outcome.borrow_mut().push(first);
+                    let second = run_until_cancelled(&token, async {
+                        let _ = pending.await;
+                        8
+                    })
+                    .await;
+                    outcome.borrow_mut().push(second);
+                    // Once canceled, nothing is started.
+                    let third = run_until_cancelled(&token, async { 9 }).await;
+                    outcome.borrow_mut().push(third);
+                },
+                DispatcherPriority::DEFAULT,
+            ));
         }
         Dispatcher::ui_thread().run_jobs(None);
         assert_eq!(*outcome.borrow(), [Some(7)]);

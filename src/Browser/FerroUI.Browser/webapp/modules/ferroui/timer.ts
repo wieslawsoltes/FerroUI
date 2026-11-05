@@ -14,4 +14,10 @@ export class TimerHelper {
     public static now(): number {
         return performance.now();
     }
+
+    // Not in the original. The wall clock, in milliseconds since the Unix epoch: the runtime
+    // platform reports "now" from it.
+    public static dateNow(): number {
+        return Date.now();
+    }
 }

@@ -8,7 +8,7 @@ use crate::media::{
     FontSimulations, FontStretch, FontStyle, FontWeight, IFontMemory, IPlatformTypeface, Typeface,
 };
 use crate::platform::{IFontFallbackMapper, IFontManagerImpl};
-use crate::utilities::{CultureInfo, ReadOnlyMemory};
+use crate::utilities::{Locale, ReadOnlyMemory};
 
 use super::{ASCENDER, DESCENDER, DESIGN_EM_HEIGHT, GLYPH_ADVANCE, LINE_GAP};
 
@@ -338,11 +338,11 @@ impl IFontManagerImpl for TestFontManagerImpl {
         _font_weight: FontWeight,
         _font_stretch: FontStretch,
         _family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         self.match_character_calls.set(self.match_character_calls.get() + 1);
 
-        let language = culture.map(|culture| culture.two_letter_iso_language_name());
+        let language = culture.map(|culture| culture.id.language.as_str());
 
         let mut covering = self.typefaces.iter().filter(|typeface| typeface.font.covers(codepoint));
 

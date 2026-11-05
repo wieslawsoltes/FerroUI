@@ -7,7 +7,7 @@ use ferroui_base::media::{
     BoxShadows, Brushes, Color, DrawingContext, FlowDirection, FormattedText, IBrush, IPen, Pen, SolidColorBrush,
     Typeface,
 };
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Point, Rect, Ref,
     StyledElementImpl, Visual, VisualImpl,
@@ -98,7 +98,7 @@ impl VisualImpl for ResizePattern {
         let text = FormattedText::new(
             // The format `0` rounds midpoints away from zero, as `round` does.
             &format!("{} x {} DIP", w.round(), h.round()),
-            CultureInfo::invariant_culture(),
+            Locale::UNKNOWN,
             FlowDirection::LeftToRight,
             Typeface::default(),
             22.0,

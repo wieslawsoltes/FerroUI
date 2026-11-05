@@ -12,7 +12,7 @@
 //! The current context of a thread ([`current_synchronization_context`],
 //! `SynchronizationContext.Current`) is set with [`set_synchronization_context`]
 //! (`SynchronizationContext.SetSynchronizationContext`). Setting it also makes it the thread poster
-//! of the thread ([`tasks::set_thread_poster`](super::tasks::set_thread_poster)): a wake of a task
+//! of the thread ([`crate::task::set_thread_schedule`]): a wake of a task
 //! of the thread, or a cancellation registered there with
 //! [`CancellationToken::register_local`](super::CancellationToken::register_local), that comes from
 //! another thread is posted to the context. The context of a thread is therefore expected to run

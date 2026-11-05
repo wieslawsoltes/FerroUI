@@ -1,9 +1,10 @@
 //! `TestSequencer` (`ReactiveUI.Testing/TestSequencer.cs`).
 
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
-use ferroui_system::IDisposable;
+use ferroui_system::task::{Canceled, Shared, SharedSender};
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::fmt;
+use std::rc::Rc;
 
 /// Two participants of a test that wait for each other phase by phase: each calls
 /// [`advance_phase_async`](Self::advance_phase_async) at the end of its part of a phase, and the
@@ -12,8 +13,10 @@ use std::fmt;
 /// Deviation (DEVIATIONS.md, ReactiveUI): the observables are single-threaded, so the two
 /// participants are two tasks of the current thread instead of two threads: the task of the first
 /// participant to arrive ends when the second one arrives, and the task of the second one has
-/// ended when [`advance_phase_async`](Self::advance_phase_async) returns. The continuations of a
-/// task run when it ends, so upstream's `Task.Yield()` after the barrier has no counterpart.
+/// ended when [`advance_phase_async`](Self::advance_phase_async) returns. A task is the
+/// [`Shared`] of a `Result<(), ObservableError>` (`flatten()` is a future of it); its
+/// continuations run when it ends, so upstream's `Task.Yield()` after the barrier has no
+/// counterpart.
 #[derive(Default)]
 pub struct TestSequencer {
     /// The phases both participants completed (`Barrier.CurrentPhaseNumber`).
@@ -21,7 +24,7 @@ pub struct TestSequencer {
     /// The phase the participants are in (`CurrentPhase`).
     current_phase: Cell<i64>,
     /// The first participant of the current phase, waiting for the second one.
-    waiting: RefCell<Option<TaskCompletionSource<()>>>,
+    waiting: RefCell<Option<SharedSender<Result<(), ObservableError>>>>,
     disposed: Cell<bool>,
 }
 
@@ -50,7 +53,7 @@ impl TestSequencer {
 
     /// Ends the part of the current phase of the calling participant; the task ends when the other
     /// participant has ended its part too (`AdvancePhaseAsync()`).
-    pub fn advance_phase_async(&self) -> Task<()> {
+    pub fn advance_phase_async(&self) -> Shared<Result<(), ObservableError>> {
         self.advance_phase_async_with("")
     }
 
@@ -59,7 +62,7 @@ impl TestSequencer {
     ///
     /// # Panics
     /// When the sequencer is disposed, where upstream's barrier throws `ObjectDisposedException`.
-    pub fn advance_phase_async_with(&self, comment: &str) -> Task<()> {
+    pub fn advance_phase_async_with(&self, comment: &str) -> Shared<Result<(), ObservableError>> {
         let _ = comment;
         assert!(!self.disposed.get(), "Cannot access a disposed object. Object name: 'TestSequencer'.");
         let waiting = self.waiting.borrow_mut().take();
@@ -67,30 +70,30 @@ impl TestSequencer {
             // The first participant to arrive starts the phase and waits for the other one.
             None => {
                 self.current_phase.set(self.completed_phases.get() + 1);
-                let source = TaskCompletionSource::new();
-                let task = source.task();
+                let (source, task) = Shared::channel();
                 *self.waiting.borrow_mut() = Some(source);
                 task
             }
             // The second one completes the phase and releases the first.
             Some(first) => {
                 self.completed_phases.set(self.completed_phases.get() + 1);
-                first.set_result(());
-                Task::from_result(())
+                first.send(Ok(()));
+                Shared::ready(Ok(()))
             }
         }
     }
 }
 
 impl IDisposable for TestSequencer {
-    /// Disposes the sequencer (`Dispose`); a participant still waiting has its task cancelled.
+    /// Disposes the sequencer (`Dispose`); a participant still waiting has its task cancelled: it
+    /// ends with the error [`Canceled`].
     fn dispose(&self) {
         if self.disposed.replace(true) {
             return;
         }
         let waiting = self.waiting.borrow_mut().take();
         if let Some(waiting) = waiting {
-            let _ = waiting.try_set_canceled();
+            waiting.send(Err(Rc::new(Canceled) as ObservableError));
         }
     }
 }

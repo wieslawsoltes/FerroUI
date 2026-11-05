@@ -16,6 +16,7 @@ fn cultures() -> [CultureInfo; 4] {
     TestCultureDataProvider::register();
     let (year, month, day) = net::NOW;
     let now = DateTime::new_with_time(year, month, day, 12, 0, 0).specify_kind(DateTimeKind::Utc);
+    let now = std::time::SystemTime::try_from(now).unwrap();
     DateTime::set_utc_now_provider(Some(Rc::new(move || now)));
     net::CULTURES.map(CultureInfo::get_culture_info)
 }

@@ -120,6 +120,13 @@ STD_TYPES = {
     "Duration": "std::time::Duration",
 }
 
+# Types of the chosen crates of the workspace that a property can hold and that no
+# `rust_paths.rs` lists (they have no markup type of their own), by the path FerroUI
+# re-exports them by (C5 of #423, docs/idiomatic-rust-signatures.md).
+EXTERNAL_TYPES = {
+    "Locale": "ferroui_base::utilities::Locale",
+}
+
 # Methods of the element that a generated setter must not hide; the element's
 # own method does what the property would (or the property is set with
 # `set(...)`).
@@ -355,6 +362,8 @@ def resolve(model, type_text):
             out += name
         elif name in STD_TYPES:
             out += STD_TYPES[name]
+        elif name in EXTERNAL_TYPES:
+            out += EXTERNAL_TYPES[name]
         elif name in model.paths and name not in model.ambiguous:
             out += model.paths[name]
         else:

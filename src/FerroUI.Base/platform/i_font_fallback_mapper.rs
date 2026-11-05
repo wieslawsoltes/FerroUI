@@ -1,5 +1,5 @@
 use crate::media::{FontFallbackMapping, Typeface};
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 
 /// Optional provider capability for mapping a logical UTF-16 prefix to an
 /// actual glyph face and an independent font-size multiplier.
@@ -29,6 +29,6 @@ pub trait IFontFallbackMapper: 'static {
         &self,
         text: &[u16],
         typeface: &Typeface,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<FontFallbackMapping>;
 }

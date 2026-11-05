@@ -11,7 +11,7 @@ use ferroui_base::media::{
     TextWrapping,
 };
 use ferroui_base::platform::IFontManagerImpl;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{Point, Rect, Vector};
 use ferroui_vello::VelloRenderingMode;
 use std::rc::Rc;
@@ -706,7 +706,7 @@ fn font_managers_agree() {
                 continue;
             }
 
-            let culture_info = CultureInfo::get_culture_info(culture);
+            let culture_info = Locale::try_from_str(culture).unwrap();
             let matched = |fonts: &Rc<dyn IFontManagerImpl>| {
                 fonts.try_match_character(
                     codepoint as i32,

@@ -18,7 +18,7 @@ use ferroui_dynamic_data::list::testing::ChangeSetAggregator as ListChangeSetAgg
 use ferroui_dynamic_data::list::{IObservableList, ObservableListEx};
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_reactive_testing::new_error;
-use ferroui_system::threading::tasks::{block_on, Task};
+use ferroui_system::task::{block_on, Shared};
 use ferroui_system::{IDisposable, IObservable, ObservableError};
 use std::cell::RefCell;
 use std::cmp::Ordering;
@@ -30,12 +30,12 @@ const INITIAL_OWNER_COUNT: usize = if cfg!(debug_assertions) { 7 } else { 103 };
 const ADD_COUNT: usize = if cfg!(debug_assertions) { 5 } else { 53 };
 const REMOVE_COUNT: usize = if cfg!(debug_assertions) { 3 } else { 37 };
 
-/// A delay before a selector gives its result (`Func<Task>`).
-type DelayFactory = Rc<dyn Fn() -> Task<()>>;
+/// A delay before a selector gives its result (`Func<Task>`): the `Shared` of a task.
+type DelayFactory = Rc<dyn Fn() -> Shared<Result<(), ObservableError>>>;
 
 /// `FakeDelay`: a task that has ended (`Task.CompletedTask`).
 fn fake_delay() -> Option<DelayFactory> {
-    Some(Rc::new(|| Task::from_result(())))
+    Some(Rc::new(|| Shared::ready(Ok(()))))
 }
 
 /// The bound collection of the animals of each owner (`AnimalOwner.ObservableCollection`), with
@@ -153,7 +153,7 @@ fn create_selector<T: 'static>(
                 let delay = delay_factory();
                 let selector = selector.clone();
                 Box::pin(async move {
-                    delay.await?;
+                    delay.flatten().await?;
                     Ok::<_, ObservableError>(selector(&owner))
                 })
             }
@@ -291,7 +291,7 @@ fn result_contains_children_from_added_parents_async() {
     fixture.add_initial_owners();
 
     // Act
-    block_on(shared_observable.take(1).to_task()).expect("the replay has a change set");
+    block_on(shared_observable.take(1).to_task().flatten()).expect("the replay has a change set");
 
     // Assert
     assert_eq!(fixture.animal_owner_results.data().count(), INITIAL_OWNER_COUNT);

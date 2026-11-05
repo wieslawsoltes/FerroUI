@@ -305,8 +305,8 @@ fn lifecycle_original_cleanup_and_idempotence_use_actual_services_and_layout() {
     assert_eq!(provider.calls.get(), 1);
     assert_eq!(&*overlays.log.borrow(), &["dialogs", "confirmations"]);
     assert_eq!(&*root.log.borrow(), &["dispose"]);
-    assert_eq!(dialog.result().unwrap(), 0);
-    assert!(!confirmation.result().unwrap());
+    assert_eq!(dialog.result().unwrap().unwrap(), 0);
+    assert!(!confirmation.result().unwrap().unwrap());
 }
 #[test]
 fn lifecycle_cached_provider_does_not_create_fallback_and_marks_before_missing_services() {
@@ -365,7 +365,7 @@ fn lifecycle_direct_then_resolver_then_provider_precedence_and_layout_reread_are
         .show_async::<i32>(DialogContent::new(Rc::new("content")), None);
     let target = window.clone();
     let next = replacement.clone();
-    task.continue_with(move |_| target.set_layout(Some(next)));
+    task.on_finished(move |_| target.set_layout(Some(next)));
     lifecycle.on_window_closed(Some(window.clone()));
     assert_eq!(resolver.calls.get(), 0);
     assert_eq!(provider.calls.get(), 0);
@@ -472,7 +472,7 @@ fn lifecycle_is_marked_before_reentrant_request_completion_and_preserves_cancel_
         .show_async::<i32>(DialogContent::new(Rc::new("content")), None);
     let weak = Rc::downgrade(&lifecycle);
     let target = window.clone();
-    task.continue_with(move |_| weak.upgrade().unwrap().on_window_removed(Some(target)));
+    task.on_finished(move |_| weak.upgrade().unwrap().on_window_removed(Some(target)));
     lifecycle.on_window_closed(Some(window));
     assert_eq!(overlays.dialogs.calls.get(), 1);
     assert_eq!(overlays.confirmations.calls.get(), 1);

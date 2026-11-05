@@ -2930,7 +2930,7 @@ fn support_converter_with_parameter() {
     data_context.set_string_property(Some("Foo".to_string()));
     window.set_data_context(Some(data_context));
 
-    assert_eq!(Some(format!("Foo+Bar+{}", CultureInfo::current_culture())), text_block.text());
+    assert_eq!(Some(format!("Foo+Bar+{}", CultureInfo::current_formatting())), text_block.text());
 }
 
 #[test]

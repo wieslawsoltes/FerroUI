@@ -8,7 +8,7 @@ use ferroui_dynamic_data::ObservableChangeSet;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactive_testing::new_error;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
 use ferroui_system::{IDisposable, IObservable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::hash::Hash;
@@ -24,8 +24,8 @@ fn people() -> Vec<Rc<Person>> {
 }
 
 /// `CreateTask`: the people, as a completed task (`Task.FromResult`).
-fn create_task() -> Task<Vec<Rc<Person>>> {
-    Task::from_result(people())
+fn create_task() -> Shared<Result<Vec<Rc<Person>>, ObservableError>> {
+    Shared::ready(Ok(people()))
 }
 
 #[test]
@@ -33,13 +33,13 @@ fn handles_async_error() {
     let error: Rc<RefCell<Option<ObservableError>>> = Rc::new(RefCell::new(None));
 
     // `Loader`: a task that fails.
-    fn loader() -> Task<Vec<Rc<Person>>> {
-        Task::from_exception(new_error("Broken"))
+    fn loader() -> Shared<Result<Vec<Rc<Person>>, ObservableError>> {
+        Shared::ready(Err(new_error("Broken")))
     }
 
     let observable = ObservableChangeSet::create_cache_async_with_action(
         |cache: SourceCache<Rc<Person>, String>| async move {
-            let people = loader().await?;
+            let people = loader().flatten().await?;
             cache.add_or_update_items(people);
             Ok::<_, ObservableError>(|| {})
         },
@@ -131,7 +131,7 @@ fn loads_and_dispose_using_action_async() {
             move |cache: SourceCache<Rc<Person>, String>| {
                 let is_disposed = is_disposed.clone();
                 async move {
-                    let people = create_task().await?;
+                    let people = create_task().flatten().await?;
                     cache.add_or_update_items(people);
                     Ok::<_, ObservableError>(move || is_disposed.set(true))
                 }
@@ -172,7 +172,7 @@ fn loads_and_dispose_using_disposable_async() {
             move |cache: SourceCache<Rc<Person>, String>| {
                 let is_disposed = is_disposed.clone();
                 async move {
-                    let people = create_task().await?;
+                    let people = create_task().flatten().await?;
                     cache.add_or_update_items(people);
                     Ok::<Rc<dyn IDisposable>, ObservableError>(Disposable::create(move || is_disposed.set(true)))
                 }

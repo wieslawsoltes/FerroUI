@@ -12,7 +12,7 @@ use ferroui_base::rendering::composition::{
     CompositionDrawingSurface, ICompositionGpuInterop, ICompositionImportableSharedGpuContextImage,
     ICompositionImportedGpuImage, RenderInterfaceFeature, ServerJobTask,
 };
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -288,7 +288,7 @@ impl ICompositionGlTexture for CompositionGlTexture {
         lease
     }
 
-    fn dispose_async(&self) -> DispatcherTask<()> {
+    fn dispose_async(&self) -> JoinHandle<()> {
         let owner = self.owner.upgrade();
         if let Some(owner) = &owner {
             owner.compositor().dispatcher().verify_access();

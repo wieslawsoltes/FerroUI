@@ -7,6 +7,7 @@ use super::{
     BidiReorderer, GlyphInfo, ShapedBuffer, ShapedTextRun, TabAlignment, TabLeader, TextParagraphProperties, TextRun,
 };
 use crate::media::FlowDirection;
+use crate::utilities::CultureInfo;
 
 pub(super) fn resolve_tabs(
     runs: &mut Vec<Rc<dyn TextRun>>,
@@ -150,10 +151,12 @@ fn field_metrics(runs: &[Rc<dyn TextRun>], flow: FlowDirection) -> (f64, Option<
         let Some(shaped) = run.downcast_ref::<ShapedTextRun>() else {
             continue;
         };
+        // The decimal separator of the culture of the run's locale (the data the registered
+        // culture data provider has for it).
         let separator: Vec<u16> = shaped
             .run_properties()
             .culture_info()
-            .map(|culture| culture.number_format().number_decimal_separator().to_owned())
+            .map(|culture| CultureInfo::from(culture).number_format().number_decimal_separator().to_owned())
             .unwrap_or_else(|| ".".to_owned())
             .encode_utf16()
             .collect();

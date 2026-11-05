@@ -1,11 +1,11 @@
 use super::composition_gl_texture::CompositionGlTexture;
-use super::task_support::start;
+use super::task_support::{join, start};
 use super::{ICompositionGlContext, ICompositionGlTexture};
 use crate::{IGlContext, IGlContextExternalObjectsFeature};
 use ferroui_base::rendering::composition::{
     CompositionDrawingSurface, Compositor, ICompositionGpuInterop, RenderInterfaceFeature,
 };
-use ferroui_base::threading::DispatcherTask;
+use ferroui_base::threading::JoinHandle;
 use ferroui_base::PixelSize;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -101,7 +101,7 @@ impl ICompositionGlContext for CompositionGlContext {
         texture
     }
 
-    fn dispose_async(&self) -> DispatcherTask<()> {
+    fn dispose_async(&self) -> JoinHandle<()> {
         self.compositor.dispatcher().verify_access();
         if self.disposed.get() {
             return start(async {});
@@ -112,7 +112,7 @@ impl ICompositionGlContext for CompositionGlContext {
         start(async move {
             let textures = this.textures.borrow().clone();
             for texture in textures {
-                let _ = texture.dispose_async().await;
+                let _ = join(texture.dispose_async()).await;
             }
             this.textures.borrow_mut().clear();
 

@@ -336,6 +336,7 @@ const KNOWN: &[(Known, &str)] = &[
     (Known::Duration, "::std::time::Duration"),
     (Known::UriRef, "::ferroui_base::utilities::UriRef"),
     (Known::Url, "::url::Url"),
+    (Known::Locale, "::icu_locale_core::Locale"),
 ];
 
 /// The primitive types generated code names by their name, and `String` by its path.

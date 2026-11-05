@@ -7,7 +7,7 @@ use crate::{ManagedFileDialogOptions, ManagedStorageProvider};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::platform::storage::file_io::{BclStorageFolder, FileSystemInfo};
 use ferroui_base::platform::storage::{FolderPickerOpenOptions, IStorageFolder, IStorageItem, IStorageProvider};
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::Ref;
 use ferroui_controls::primitives::Popup;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
@@ -39,17 +39,20 @@ fn open_folder_picker(
     let picked = provider.open_folder_picker_async(options);
     let result = Rc::new(RefCell::new(None));
     let sink = result.clone();
-    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-        let folders = picked.await.expect("the picker shows");
-        let paths = folders
-            .iter()
-            .map(|folder| {
-                let item: &dyn IStorageItem = &**folder;
-                item.try_get_local_path().unwrap()
-            })
-            .collect();
-        *sink.borrow_mut() = Some(paths);
-    });
+    Dispatcher::ui_thread().spawn_local_with_priority(
+        async move {
+            let folders = picked.await.expect("the picker shows");
+            let paths = folders
+                .iter()
+                .map(|folder| {
+                    let item: &dyn IStorageItem = &**folder;
+                    item.try_get_local_path().unwrap()
+                })
+                .collect();
+            *sink.borrow_mut() = Some(paths);
+        },
+        DispatcherPriority::DEFAULT,
+    );
     Dispatcher::ui_thread().run_jobs(None);
     result
 }
@@ -173,9 +176,12 @@ fn without_parent_or_windows_a_content_root_cannot_be_shown() {
     let picked = provider.open_folder_picker_async(picker_options);
     let failed = Rc::new(RefCell::new(None));
     let sink = failed.clone();
-    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-        *sink.borrow_mut() = Some(picked.await.is_err());
-    });
+    Dispatcher::ui_thread().spawn_local_with_priority(
+        async move {
+            *sink.borrow_mut() = Some(picked.await.is_err());
+        },
+        DispatcherPriority::DEFAULT,
+    );
     Dispatcher::ui_thread().run_jobs(None);
 
     assert_eq!(Some(true), *failed.borrow());
@@ -225,13 +231,16 @@ fn save_over_existing_file(
     let result = Rc::new(RefCell::new(None));
     {
         let sink = result.clone();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let file = picked.await.expect("the picker shows");
-            *sink.borrow_mut() = Some(file.map(|file| {
-                let item: &dyn IStorageItem = &*(file as Rc<dyn IStorageFile>);
-                item.try_get_local_path().unwrap()
-            }));
-        });
+        Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let file = picked.await.expect("the picker shows");
+                *sink.borrow_mut() = Some(file.map(|file| {
+                    let item: &dyn IStorageItem = &*(file as Rc<dyn IStorageFile>);
+                    item.try_get_local_path().unwrap()
+                }));
+            },
+            DispatcherPriority::DEFAULT,
+        );
     }
     Dispatcher::ui_thread().run_jobs(None);
 

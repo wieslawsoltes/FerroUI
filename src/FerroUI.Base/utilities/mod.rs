@@ -64,13 +64,19 @@ pub use character_reader::CharacterReader;
 mod array_builder;
 mod array_slice;
 mod culture_info;
+mod current_locale;
 mod read_only_memory;
 pub(crate) mod span;
 mod value_span;
 
 pub use array_builder::ArrayBuilder;
 pub use array_slice::ArraySlice;
+pub(crate) use culture_info::parent_locale;
 pub use culture_info::{CultureInfo, CultureTypes};
+pub use current_locale::{current_locale, current_ui_locale, set_current_locale, set_current_ui_locale};
+// The identity of a culture in the text and font API, the `Language` properties and the
+// ambient locale of a thread (C5 of #423): ICU4X's locale, with its `locale!` macro.
+pub use icu_locale_core::{locale, Locale};
 mod compare_info;
 pub use compare_info::{CompareInfo, CompareOptions, ICompareRules, StringComparison};
 pub use read_only_memory::ReadOnlyMemory;
@@ -130,7 +136,7 @@ mod date_time_net_tests;
 #[cfg(test)]
 mod date_time_tests;
 
-pub use date_time::{DateTime, SystemTimeRangeError, UtcNowProvider};
+pub use date_time::{system_time_now, DateTime, SystemTimeRangeError, UtcNowProvider};
 pub use date_time_format_info::{CalendarWeekRule, DateTimeFormatInfo, DateTimeFormatInfoRef, DateTimeFormatProvider};
 pub use date_time_kind::DateTimeKind;
 pub use date_time_offset::DateTimeOffset;

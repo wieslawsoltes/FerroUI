@@ -9,7 +9,7 @@ use ferroui_base::media::{
     BoxShadows, Brushes, Colors, DrawingContext, DrawingGroup, DrawingImage, FlowDirection, FormattedText, IBrush,
     IPen, Pen, Stretch, Typeface,
 };
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::*;
 use ferroui_controls::{Border, Control, ControlImpl, Image};
 use std::rc::Rc;
@@ -136,7 +136,7 @@ impl RenderControl {
             context.draw_text(
                 &FormattedText::new(
                     "any text to render",
-                    CultureInfo::current_culture(),
+                    current_locale(),
                     FlowDirection::LeftToRight,
                     Self::typeface(),
                     12.0,

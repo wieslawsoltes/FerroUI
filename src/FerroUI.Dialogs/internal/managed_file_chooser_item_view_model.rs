@@ -4,13 +4,14 @@ use ferroui_base::ferro_markup_type;
 use ferroui_base::utilities::DateTime;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::time::SystemTime;
 
 /// An entry of the managed file chooser: a file, a folder or a volume.
 pub struct ManagedFileChooserItemViewModel {
     base: FerroDialogsInternalViewModelBase,
     display_name: RefCell<Option<String>>,
     path: RefCell<Option<String>>,
-    modified: Cell<DateTime>,
+    modified: Cell<Option<SystemTime>>,
     type_: RefCell<Option<String>>,
     size: Cell<i64>,
     item_type: Cell<ManagedFileChooserItemType>,
@@ -34,7 +35,7 @@ impl ManagedFileChooserItemViewModel {
             base: FerroDialogsInternalViewModelBase::new(),
             display_name: RefCell::new(None),
             path: RefCell::new(None),
-            modified: Cell::new(DateTime::default()),
+            modified: Cell::new(None),
             type_: RefCell::new(None),
             size: Cell::new(0),
             item_type: Cell::new(ManagedFileChooserItemType::File),
@@ -65,12 +66,25 @@ impl ManagedFileChooserItemViewModel {
         self.base.raise_and_set_if_changed(&self.path, value, "Path");
     }
 
-    pub fn modified(&self) -> DateTime {
+    /// The time of the last write of the entry, `None` when it is not known
+    /// (the `Modified` of the reference, a local `DateTime`).
+    pub fn modified(&self) -> Option<SystemTime> {
         self.modified.get()
     }
 
-    pub fn set_modified(&self, value: DateTime) {
+    pub fn set_modified(&self, value: Option<SystemTime>) {
         self.base.raise_and_set_if_changed_cell(&self.modified, value, "Modified");
+    }
+
+    /// The markup property `Modified`: the time of the last write in local
+    /// time, `DateTime::default()` when it is not known, as in the reference.
+    fn modified_date_time(&self) -> DateTime {
+        let date = self.modified().and_then(|time| DateTime::try_from(time).ok());
+        date.map(DateTime::to_local_time).unwrap_or_default()
+    }
+
+    fn set_modified_date_time(&self, value: DateTime) {
+        self.set_modified(SystemTime::try_from(value).ok());
     }
 
     /// The `Type` property: the extension of a file, or the kind of a
@@ -124,8 +138,8 @@ ferro_markup_type!(class ManagedFileChooserItemViewModel {
         },
         Path: Option<String> { get: ManagedFileChooserItemViewModel::path, set: ManagedFileChooserItemViewModel::set_path },
         Modified: DateTime {
-            get: ManagedFileChooserItemViewModel::modified,
-            set: ManagedFileChooserItemViewModel::set_modified
+            get: ManagedFileChooserItemViewModel::modified_date_time,
+            set: ManagedFileChooserItemViewModel::set_modified_date_time
         },
         Type: Option<String> { get: ManagedFileChooserItemViewModel::type_, set: ManagedFileChooserItemViewModel::set_type },
         Size: i64 { get: ManagedFileChooserItemViewModel::size, set: ManagedFileChooserItemViewModel::set_size },

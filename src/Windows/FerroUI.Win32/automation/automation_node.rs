@@ -41,7 +41,7 @@ use super::marshalling::{ComVariant, ComVariantMarshaller, SafeArrayMarshaller, 
 use super::root_automation_node::RootAutomationNode;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{current_locale, CultureInfo};
 use ferroui_base::{Rect, Ref, WeakRef};
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationLandmarkType, AutomationPeer, InteropAutomationPeer,
@@ -415,7 +415,7 @@ impl AutomationNode {
                 let center = self.get_bounding_rectangle()?.center();
                 return Ok(Some(VariantValue::Array(VariantArray::R8(vec![center.x, center.y]))));
             }
-            UiaPropertyId::Culture => return Ok(Some(VariantValue::I4(CultureInfo::current_culture().lcid()))),
+            UiaPropertyId::Culture => return Ok(Some(VariantValue::I4(CultureInfo::from(&current_locale()).lcid()))),
             // The reference answers the name of its framework.
             UiaPropertyId::FrameworkId => return Ok(Some(VariantValue::Bstr("FerroUI".to_owned()))),
             UiaPropertyId::ProcessId => return Ok(Some(VariantValue::I4(Self::get_process_id()))),

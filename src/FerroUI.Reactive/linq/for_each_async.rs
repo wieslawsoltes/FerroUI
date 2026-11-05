@@ -2,14 +2,16 @@
 //! action for each value of a sequence and gives a task that ends with the sequence
 //! (docs/porting/reactive.md, section 5.8).
 //!
-//! Upstream's `Task` is `Task<()>`. An action that throws is the `try_` form, whose `Err` faults
+//! Upstream's `Task` is the [`Shared`] of a `Result<(), ObservableError>`, whose continuations
+//! (`on_finished`) run when the sequence ends and whose `flatten()` is a future of the result.
+//! The cancellation of the token ends it with the error `Canceled`. An action that throws is the `try_` form, whose `Err` faults
 //! the task and disposes the subscription, as upstream's `catch` around the action does. Upstream
 //! also catches a `Dispose` that throws and faults the task with it; disposables do not fail here.
 
 use crate::disposables::SingleAssignmentDisposableValue;
-use crate::internal::TokenRegistration;
+use crate::internal::{TaskCompletion, TokenRegistration};
 use crate::linq::SequenceError;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
+use ferroui_system::task::Shared;
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
@@ -17,14 +19,14 @@ use std::rc::Rc;
 
 /// What the observer, the cancellation and the caller share (the locals of `ForEachAsync_`).
 struct ForEachState {
-    completion: TaskCompletionSource<()>,
+    completion: TaskCompletion<()>,
     subscription: SingleAssignmentDisposableValue,
     registration: RefCell<Option<Rc<TokenRegistration>>>,
 }
 
 impl ForEachState {
     /// `dispose`: removes the registration and disposes the subscription, then runs `action`.
-    fn dispose_then(&self, action: impl FnOnce(&TaskCompletionSource<()>)) {
+    fn dispose_then(&self, action: impl FnOnce(&TaskCompletion<()>)) {
         let registration = self.registration.borrow().clone();
         if let Some(registration) = registration {
             registration.dispose();
@@ -79,9 +81,9 @@ pub(crate) fn for_each_async<T: 'static>(
     source: Rc<dyn IObservable<T>>,
     on_next: impl Fn(T) -> Result<(), ObservableError> + 'static,
     token: CancellationToken,
-) -> Task<()> {
+) -> Shared<Result<(), ObservableError>> {
     let state = Rc::new(ForEachState {
-        completion: TaskCompletionSource::new(),
+        completion: TaskCompletion::new(),
         subscription: SingleAssignmentDisposableValue::new(),
         registration: RefCell::new(None),
     });
@@ -98,7 +100,7 @@ pub(crate) fn for_each_async<T: 'static>(
         let subscription = source.subscribe(observer);
         state.subscription.set_disposable(Some(subscription));
     }
-    state.completion.task()
+    state.completion.shared()
 }
 
 /// The action of the overloads with an index: `x => onNext(x, checked(i++))`. The count past the
@@ -122,7 +124,7 @@ macro_rules! for_each_async_methods {
     () => {
         /// Runs `on_next` for each value of the sequence and gives a task that ends when the
         /// sequence ends, or faults with its error (`ForEachAsync(Action<TSource>)`).
-        fn for_each_async(&self, on_next: impl Fn(T) + 'static) -> ferroui_system::threading::tasks::Task<()> {
+        fn for_each_async(&self, on_next: impl Fn(T) + 'static) -> ferroui_system::task::Shared<Result<(), ferroui_system::ObservableError>> {
             crate::linq::for_each_async::for_each_async(
                 self.observable(),
                 move |value| {
@@ -139,7 +141,7 @@ macro_rules! for_each_async_methods {
             &self,
             on_next: impl Fn(T) + 'static,
             token: ferroui_system::threading::CancellationToken,
-        ) -> ferroui_system::threading::tasks::Task<()> {
+        ) -> ferroui_system::task::Shared<Result<(), ferroui_system::ObservableError>> {
             crate::linq::for_each_async::for_each_async(
                 self.observable(),
                 move |value| {
@@ -152,7 +154,7 @@ macro_rules! for_each_async_methods {
 
         /// [`for_each_async`](Self::for_each_async) with the index of each value
         /// (`ForEachAsync(Action<TSource, int>)`).
-        fn for_each_async_with_index(&self, on_next: impl Fn(T, usize) + 'static) -> ferroui_system::threading::tasks::Task<()> {
+        fn for_each_async_with_index(&self, on_next: impl Fn(T, usize) + 'static) -> ferroui_system::task::Shared<Result<(), ferroui_system::ObservableError>> {
             crate::linq::for_each_async::for_each_async(
                 self.observable(),
                 crate::linq::for_each_async::with_index(move |value, index| {
@@ -169,7 +171,7 @@ macro_rules! for_each_async_methods {
             &self,
             on_next: impl Fn(T, usize) + 'static,
             token: ferroui_system::threading::CancellationToken,
-        ) -> ferroui_system::threading::tasks::Task<()> {
+        ) -> ferroui_system::task::Shared<Result<(), ferroui_system::ObservableError>> {
             crate::linq::for_each_async::for_each_async(
                 self.observable(),
                 crate::linq::for_each_async::with_index(move |value, index| {
@@ -186,7 +188,7 @@ macro_rules! for_each_async_methods {
         fn try_for_each_async(
             &self,
             on_next: impl Fn(T) -> Result<(), ferroui_system::ObservableError> + 'static,
-        ) -> ferroui_system::threading::tasks::Task<()> {
+        ) -> ferroui_system::task::Shared<Result<(), ferroui_system::ObservableError>> {
             crate::linq::for_each_async::for_each_async(self.observable(), on_next, ferroui_system::threading::CancellationToken::none())
         }
 
@@ -196,7 +198,7 @@ macro_rules! for_each_async_methods {
             &self,
             on_next: impl Fn(T) -> Result<(), ferroui_system::ObservableError> + 'static,
             token: ferroui_system::threading::CancellationToken,
-        ) -> ferroui_system::threading::tasks::Task<()> {
+        ) -> ferroui_system::task::Shared<Result<(), ferroui_system::ObservableError>> {
             crate::linq::for_each_async::for_each_async(self.observable(), on_next, token)
         }
 
@@ -205,7 +207,7 @@ macro_rules! for_each_async_methods {
         fn try_for_each_async_with_index(
             &self,
             on_next: impl Fn(T, usize) -> Result<(), ferroui_system::ObservableError> + 'static,
-        ) -> ferroui_system::threading::tasks::Task<()> {
+        ) -> ferroui_system::task::Shared<Result<(), ferroui_system::ObservableError>> {
             crate::linq::for_each_async::for_each_async(
                 self.observable(),
                 crate::linq::for_each_async::with_index(on_next),
@@ -220,7 +222,7 @@ macro_rules! for_each_async_methods {
             &self,
             on_next: impl Fn(T, usize) -> Result<(), ferroui_system::ObservableError> + 'static,
             token: ferroui_system::threading::CancellationToken,
-        ) -> ferroui_system::threading::tasks::Task<()> {
+        ) -> ferroui_system::task::Shared<Result<(), ferroui_system::ObservableError>> {
             crate::linq::for_each_async::for_each_async(self.observable(), crate::linq::for_each_async::with_index(on_next), token)
         }
     };

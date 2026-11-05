@@ -20,7 +20,9 @@ use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::{FlowDirection, Geometry, StreamGeometry};
 use ferroui_base::reactive::{Disposable, ObservableExt, Subscription};
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::CancellationToken;
+#[allow(deprecated)]
+use ferroui_base::threading::DispatcherTask;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, AnyValue, AttachedProperty,
@@ -29,12 +31,10 @@ use ferroui_base::{
     StyledElementImpl, StyledProperty, Thickness, TypeInfo, Visual, VisualImpl, VisualImplExt,
     VisualTreeAttachmentEventArgs, WeakRef,
 };
+use ferroui_system::task::{JoinError, JoinHandle};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
-use std::future::Future;
-use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll};
 
 const EDGE_GESTURE_WIDTH: f64 = 20.0;
 
@@ -57,7 +57,7 @@ pub struct NavigationPage {
     page_back_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     current_transition: RefCell<Option<Rc<CancellationToken>>>,
     /// `None` stands for a completed task.
-    last_page_transition_task: RefCell<Option<DispatcherTask<()>>>,
+    last_page_transition_task: RefCell<Option<JoinHandle<()>>>,
     current_modal_transition: RefCell<Option<Rc<CancellationToken>>>,
     nav_bar: RefCell<Option<(Ref<Border>, RoutedEventHandlerToken)>>,
     nav_bar_shadow: RefCell<Option<Ref<Border>>>,
@@ -562,7 +562,7 @@ impl INavigation for NavigationPageNavigation {
         self.page().is_some_and(|page| page.can_go_back())
     }
 
-    fn push_async(&self, page: Ref<Page>) -> DispatcherTask<()> {
+    fn push_async(&self, page: Ref<Page>) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.push_async(page),
             None => super::completed_task(),
@@ -573,7 +573,7 @@ impl INavigation for NavigationPageNavigation {
         &self,
         page: Ref<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.push_async_with_transition(page, transition),
             None => super::completed_task(),
@@ -585,14 +585,14 @@ impl INavigation for NavigationPageNavigation {
         page: Ref<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.push_async_with_parameter(page, transition, parameter),
             None => super::completed_task(),
         }
     }
 
-    fn pop_async(&self) -> DispatcherTask<Option<Ref<Page>>> {
+    fn pop_async(&self) -> JoinHandle<Option<Ref<Page>>> {
         match self.page() {
             Some(this) => this.pop_async(),
             None => start_async(async { None }),
@@ -602,28 +602,28 @@ impl INavigation for NavigationPageNavigation {
     fn pop_async_with_transition(
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<Option<Ref<Page>>> {
+    ) -> JoinHandle<Option<Ref<Page>>> {
         match self.page() {
             Some(this) => this.pop_async_with_transition(transition),
             None => start_async(async { None }),
         }
     }
 
-    fn pop_to_root_async(&self) -> DispatcherTask<()> {
+    fn pop_to_root_async(&self) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.pop_to_root_async(),
             None => super::completed_task(),
         }
     }
 
-    fn pop_to_root_async_with_transition(&self, transition: Option<Rc<dyn IPageTransition>>) -> DispatcherTask<()> {
+    fn pop_to_root_async_with_transition(&self, transition: Option<Rc<dyn IPageTransition>>) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.pop_to_root_async_with_transition(transition),
             None => super::completed_task(),
         }
     }
 
-    fn pop_to_page_async(&self, page: Ref<Page>) -> DispatcherTask<()> {
+    fn pop_to_page_async(&self, page: Ref<Page>) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.pop_to_page_async(page),
             None => super::completed_task(),
@@ -634,14 +634,14 @@ impl INavigation for NavigationPageNavigation {
         &self,
         page: Ref<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.pop_to_page_async_with_transition(page, transition),
             None => super::completed_task(),
         }
     }
 
-    fn replace_async(&self, page: Ref<Page>) -> DispatcherTask<()> {
+    fn replace_async(&self, page: Ref<Page>) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.replace_async(page),
             None => super::completed_task(),
@@ -652,7 +652,7 @@ impl INavigation for NavigationPageNavigation {
         &self,
         page: Ref<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.replace_async_with_transition(page, transition),
             None => super::completed_task(),
@@ -664,14 +664,14 @@ impl INavigation for NavigationPageNavigation {
         page: Ref<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.replace_async_with_parameter(page, transition, parameter),
             None => super::completed_task(),
         }
     }
 
-    fn push_modal_async(&self, page: Ref<Page>) -> DispatcherTask<()> {
+    fn push_modal_async(&self, page: Ref<Page>) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.push_modal_async(page),
             None => super::completed_task(),
@@ -682,7 +682,7 @@ impl INavigation for NavigationPageNavigation {
         &self,
         page: Ref<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.push_modal_async_with_transition(page, transition),
             None => super::completed_task(),
@@ -694,14 +694,14 @@ impl INavigation for NavigationPageNavigation {
         page: Ref<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.push_modal_async_with_parameter(page, transition, parameter),
             None => super::completed_task(),
         }
     }
 
-    fn pop_modal_async(&self) -> DispatcherTask<Option<Ref<Page>>> {
+    fn pop_modal_async(&self) -> JoinHandle<Option<Ref<Page>>> {
         match self.page() {
             Some(this) => this.pop_modal_async(),
             None => start_async(async { None }),
@@ -711,14 +711,14 @@ impl INavigation for NavigationPageNavigation {
     fn pop_modal_async_with_transition(
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<Option<Ref<Page>>> {
+    ) -> JoinHandle<Option<Ref<Page>>> {
         match self.page() {
             Some(this) => this.pop_modal_async_with_transition(transition),
             None => start_async(async { None }),
         }
     }
 
-    fn pop_all_modals_async(&self) -> DispatcherTask<()> {
+    fn pop_all_modals_async(&self) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.pop_all_modals_async(),
             None => super::completed_task(),
@@ -728,7 +728,7 @@ impl INavigation for NavigationPageNavigation {
     fn pop_all_modals_async_with_transition(
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         match self.page() {
             Some(this) => this.pop_all_modals_async_with_transition(transition),
             None => super::completed_task(),
@@ -752,6 +752,194 @@ impl INavigation for NavigationPageNavigation {
     }
 }
 
+/// The deprecated forms of the asynchronous navigation members, which give a `DispatcherTask`
+/// (step A6 of phase C4 of #423): each converts the `JoinHandle` of its member, and the
+/// `DispatcherTask` raises a failure of the navigation again when it is observed.
+impl NavigationPage {
+    /// The deprecated form of [`push_async`](Self::push_async): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `push_async`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn push_async_task(&self, page: impl IntoRef<Page>) -> DispatcherTask<()> {
+        self.push_async(page).into()
+    }
+
+    /// The deprecated form of [`push_async_with_transition`](Self::push_async_with_transition): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `push_async_with_transition`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn push_async_with_transition_task(
+        &self,
+        page: impl IntoRef<Page>,
+        transition: Option<Rc<dyn IPageTransition>>,
+    ) -> DispatcherTask<()> {
+        self.push_async_with_transition(page, transition).into()
+    }
+
+    /// The deprecated form of [`push_async_with_parameter`](Self::push_async_with_parameter): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `push_async_with_parameter`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn push_async_with_parameter_task(
+        &self,
+        page: impl IntoRef<Page>,
+        transition: Option<Rc<dyn IPageTransition>>,
+        parameter: Option<BoxedValue>,
+    ) -> DispatcherTask<()> {
+        self.push_async_with_parameter(page, transition, parameter).into()
+    }
+
+    /// The deprecated form of [`pop_async`](Self::pop_async): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_async`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_async_task(&self) -> DispatcherTask<Option<Ref<Page>>> {
+        self.pop_async().into()
+    }
+
+    /// The deprecated form of [`pop_async_with_transition`](Self::pop_async_with_transition): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_async_with_transition`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_async_with_transition_task(
+        &self,
+        transition: Option<Rc<dyn IPageTransition>>,
+    ) -> DispatcherTask<Option<Ref<Page>>> {
+        self.pop_async_with_transition(transition).into()
+    }
+
+    /// The deprecated form of [`pop_to_root_async`](Self::pop_to_root_async): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_to_root_async`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_to_root_async_task(&self) -> DispatcherTask<()> {
+        self.pop_to_root_async().into()
+    }
+
+    /// The deprecated form of [`pop_to_root_async_with_transition`](Self::pop_to_root_async_with_transition):
+    /// a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_to_root_async_with_transition`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_to_root_async_with_transition_task(
+        &self,
+        transition: Option<Rc<dyn IPageTransition>>,
+    ) -> DispatcherTask<()> {
+        self.pop_to_root_async_with_transition(transition).into()
+    }
+
+    /// The deprecated form of [`pop_to_page_async`](Self::pop_to_page_async): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_to_page_async`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_to_page_async_task(&self, page: impl IntoRef<Page>) -> DispatcherTask<()> {
+        self.pop_to_page_async(page).into()
+    }
+
+    /// The deprecated form of [`pop_to_page_async_with_transition`](Self::pop_to_page_async_with_transition):
+    /// a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_to_page_async_with_transition`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_to_page_async_with_transition_task(
+        &self,
+        page: impl IntoRef<Page>,
+        transition: Option<Rc<dyn IPageTransition>>,
+    ) -> DispatcherTask<()> {
+        self.pop_to_page_async_with_transition(page, transition).into()
+    }
+
+    /// The deprecated form of [`replace_async`](Self::replace_async): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `replace_async`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn replace_async_task(&self, page: impl IntoRef<Page>) -> DispatcherTask<()> {
+        self.replace_async(page).into()
+    }
+
+    /// The deprecated form of [`replace_async_with_transition`](Self::replace_async_with_transition):
+    /// a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `replace_async_with_transition`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn replace_async_with_transition_task(
+        &self,
+        page: impl IntoRef<Page>,
+        transition: Option<Rc<dyn IPageTransition>>,
+    ) -> DispatcherTask<()> {
+        self.replace_async_with_transition(page, transition).into()
+    }
+
+    /// The deprecated form of [`replace_async_with_parameter`](Self::replace_async_with_parameter): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `replace_async_with_parameter`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn replace_async_with_parameter_task(
+        &self,
+        page: impl IntoRef<Page>,
+        transition: Option<Rc<dyn IPageTransition>>,
+        parameter: Option<BoxedValue>,
+    ) -> DispatcherTask<()> {
+        self.replace_async_with_parameter(page, transition, parameter).into()
+    }
+
+    /// The deprecated form of [`push_modal_async`](Self::push_modal_async): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `push_modal_async`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn push_modal_async_task(&self, page: impl IntoRef<Page>) -> DispatcherTask<()> {
+        self.push_modal_async(page).into()
+    }
+
+    /// The deprecated form of [`push_modal_async_with_transition`](Self::push_modal_async_with_transition):
+    /// a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `push_modal_async_with_transition`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn push_modal_async_with_transition_task(
+        &self,
+        page: impl IntoRef<Page>,
+        transition: Option<Rc<dyn IPageTransition>>,
+    ) -> DispatcherTask<()> {
+        self.push_modal_async_with_transition(page, transition).into()
+    }
+
+    /// The deprecated form of [`push_modal_async_with_parameter`](Self::push_modal_async_with_parameter):
+    /// a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `push_modal_async_with_parameter`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn push_modal_async_with_parameter_task(
+        &self,
+        page: impl IntoRef<Page>,
+        transition: Option<Rc<dyn IPageTransition>>,
+        parameter: Option<BoxedValue>,
+    ) -> DispatcherTask<()> {
+        self.push_modal_async_with_parameter(page, transition, parameter).into()
+    }
+
+    /// The deprecated form of [`pop_modal_async`](Self::pop_modal_async): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_modal_async`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_modal_async_task(&self) -> DispatcherTask<Option<Ref<Page>>> {
+        self.pop_modal_async().into()
+    }
+
+    /// The deprecated form of [`pop_modal_async_with_transition`](Self::pop_modal_async_with_transition):
+    /// a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_modal_async_with_transition`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_modal_async_with_transition_task(
+        &self,
+        transition: Option<Rc<dyn IPageTransition>>,
+    ) -> DispatcherTask<Option<Ref<Page>>> {
+        self.pop_modal_async_with_transition(transition).into()
+    }
+
+    /// The deprecated form of [`pop_all_modals_async`](Self::pop_all_modals_async): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_all_modals_async`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_all_modals_async_task(&self) -> DispatcherTask<()> {
+        self.pop_all_modals_async().into()
+    }
+
+    /// The deprecated form of [`pop_all_modals_async_with_transition`](Self::pop_all_modals_async_with_transition):
+    /// a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `pop_all_modals_async_with_transition`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    pub fn pop_all_modals_async_with_transition_task(
+        &self,
+        transition: Option<Rc<dyn IPageTransition>>,
+    ) -> DispatcherTask<()> {
+        self.pop_all_modals_async_with_transition(transition).into()
+    }
+}
+
 fn navigation_of(page: Ref<NavigationPage>) -> Rc<dyn INavigation> {
     page.as_navigation()
 }
@@ -763,24 +951,12 @@ enum TransitionOutcome {
     Faulted,
 }
 
-/// Waits for a page transition without re-raising its failure.
-struct TransitionOutcomeFuture {
-    task: DispatcherTask<()>,
-}
-
-impl Future for TransitionOutcomeFuture {
-    type Output = TransitionOutcome;
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<TransitionOutcome> {
-        if self.task.is_faulted() {
-            return Poll::Ready(TransitionOutcome::Faulted);
-        }
-
-        match Pin::new(&mut self.task).poll(cx) {
-            Poll::Ready(Ok(())) => Poll::Ready(TransitionOutcome::Completed),
-            Poll::Ready(Err(_)) => Poll::Ready(TransitionOutcome::Canceled),
-            Poll::Pending => Poll::Pending,
-        }
+/// Waits for a page transition: its failure is an outcome, not raised again.
+async fn transition_outcome(task: JoinHandle<()>) -> TransitionOutcome {
+    match task.await {
+        Ok(()) => TransitionOutcome::Completed,
+        Err(JoinError::Canceled) => TransitionOutcome::Canceled,
+        Err(JoinError::Panicked(_)) => TransitionOutcome::Faulted,
     }
 }
 
@@ -1710,7 +1886,7 @@ impl NavigationPage {
     /// If a `Navigating` handler of the outgoing page cancels, the push is
     /// silently aborted: the stack is not modified, no events are raised,
     /// and nothing panics.
-    pub fn push_async(&self, page: impl IntoRef<Page>) -> DispatcherTask<()> {
+    pub fn push_async(&self, page: impl IntoRef<Page>) -> JoinHandle<()> {
         start_async(Self::push_async_private(self.to_ref(), page.into_ref(), None))
     }
 
@@ -1720,7 +1896,7 @@ impl NavigationPage {
         &self,
         page: impl IntoRef<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         start_async(Self::push_async_private_with_transition(self.to_ref(), page.into_ref(), transition, None))
     }
 
@@ -1731,7 +1907,7 @@ impl NavigationPage {
         page: impl IntoRef<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         start_async(Self::push_async_private_with_transition(self.to_ref(), page.into_ref(), transition, parameter))
     }
 
@@ -1773,7 +1949,7 @@ impl NavigationPage {
     ///
     /// The result is `None` if the stack has only the root page or if a
     /// navigation transition is already in progress.
-    pub fn pop_async(&self) -> DispatcherTask<Option<Ref<Page>>> {
+    pub fn pop_async(&self) -> JoinHandle<Option<Ref<Page>>> {
         start_async(Self::pop_async_core(self.to_ref()))
     }
 
@@ -1782,7 +1958,7 @@ impl NavigationPage {
     pub fn pop_async_with_transition(
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<Option<Ref<Page>>> {
+    ) -> JoinHandle<Option<Ref<Page>>> {
         let this = self.to_ref();
         start_async(async move {
             if this.is_navigating.get() {
@@ -1855,7 +2031,7 @@ impl NavigationPage {
     /// If a navigation transition is already in progress, the call returns
     /// immediately without modifying the stack and without raising any
     /// events.
-    pub fn pop_to_root_async(&self) -> DispatcherTask<()> {
+    pub fn pop_to_root_async(&self) -> JoinHandle<()> {
         start_async(Self::pop_to_root_async_core(self.to_ref()))
     }
 
@@ -1872,7 +2048,7 @@ impl NavigationPage {
     }
 
     /// Pops all pages to the root page using `transition`.
-    pub fn pop_to_root_async_with_transition(&self, transition: Option<Rc<dyn IPageTransition>>) -> DispatcherTask<()> {
+    pub fn pop_to_root_async_with_transition(&self, transition: Option<Rc<dyn IPageTransition>>) -> JoinHandle<()> {
         let this = self.to_ref();
         start_async(async move {
             if this.is_navigating.get() {
@@ -1954,7 +2130,7 @@ impl NavigationPage {
     /// events.
     ///
     /// The task fails when `page` is not in the navigation stack.
-    pub fn pop_to_page_async(&self, page: impl IntoRef<Page>) -> DispatcherTask<()> {
+    pub fn pop_to_page_async(&self, page: impl IntoRef<Page>) -> JoinHandle<()> {
         start_async(Self::pop_to_page_async_core(self.to_ref(), page.into_ref()))
     }
 
@@ -1963,7 +2139,7 @@ impl NavigationPage {
         &self,
         page: impl IntoRef<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let this = self.to_ref();
         let page = page.into_ref();
         start_async(async move {
@@ -2019,7 +2195,7 @@ impl NavigationPage {
         let from: Option<Ref<Visual>> = from.map(|from| from.clone().upcast());
         let to: Option<Ref<Visual>> = to.map(|to| to.clone().upcast());
         let task = transition.start(from.as_ref(), to.as_ref(), forward, (**cts).clone());
-        let outcome = TransitionOutcomeFuture { task }.await;
+        let outcome = transition_outcome(task).await;
         if let TransitionOutcome::Faulted = outcome {
             if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::CONTROL) {
                 logger.log(Some(this as &dyn Any), "Modal transition threw an unhandled exception.");
@@ -2132,7 +2308,7 @@ impl NavigationPage {
     ///
     /// If a navigation transition is already in progress, the call returns
     /// immediately without pushing the page and without raising any events.
-    pub fn push_modal_async(&self, page: impl IntoRef<Page>) -> DispatcherTask<()> {
+    pub fn push_modal_async(&self, page: impl IntoRef<Page>) -> JoinHandle<()> {
         start_async(Self::push_modal_async_private(self.to_ref(), page.into_ref(), None))
     }
 
@@ -2141,7 +2317,7 @@ impl NavigationPage {
         &self,
         page: impl IntoRef<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         start_async(Self::push_modal_async_private_with_transition(self.to_ref(), page.into_ref(), transition, None))
     }
 
@@ -2152,7 +2328,7 @@ impl NavigationPage {
         page: impl IntoRef<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         start_async(Self::push_modal_async_private_with_transition(
             self.to_ref(),
             page.into_ref(),
@@ -2275,7 +2451,7 @@ impl NavigationPage {
     ///
     /// The result is `None` if there are no modal pages or if a navigation
     /// transition is already in progress.
-    pub fn pop_modal_async(&self) -> DispatcherTask<Option<Ref<Page>>> {
+    pub fn pop_modal_async(&self) -> JoinHandle<Option<Ref<Page>>> {
         start_async(Self::pop_modal_async_core(self.to_ref()))
     }
 
@@ -2283,7 +2459,7 @@ impl NavigationPage {
     pub fn pop_modal_async_with_transition(
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<Option<Ref<Page>>> {
+    ) -> JoinHandle<Option<Ref<Page>>> {
         let this = self.to_ref();
         start_async(async move {
             if this.is_navigating.get() {
@@ -2370,7 +2546,7 @@ impl NavigationPage {
     ///   are popped.
     /// - Every dismissed modal is navigated from, in LIFO order.
     /// - Only the current page is navigated to.
-    pub fn pop_all_modals_async(&self) -> DispatcherTask<()> {
+    pub fn pop_all_modals_async(&self) -> JoinHandle<()> {
         start_async(Self::pop_all_modals_async_core(self.to_ref()))
     }
 
@@ -2378,7 +2554,7 @@ impl NavigationPage {
     pub fn pop_all_modals_async_with_transition(
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let this = self.to_ref();
         start_async(async move {
             if this.is_navigating.get() {
@@ -2543,7 +2719,7 @@ impl NavigationPage {
     /// If a navigation transition is already in progress, the call returns
     /// immediately without modifying the stack and without raising any
     /// events.
-    pub fn replace_async(&self, page: impl IntoRef<Page>) -> DispatcherTask<()> {
+    pub fn replace_async(&self, page: impl IntoRef<Page>) -> JoinHandle<()> {
         start_async(Self::replace_async_private(self.to_ref(), page.into_ref(), None))
     }
 
@@ -2552,7 +2728,7 @@ impl NavigationPage {
         &self,
         page: impl IntoRef<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         start_async(Self::replace_async_private_with_transition(self.to_ref(), page.into_ref(), transition, None))
     }
 
@@ -2563,7 +2739,7 @@ impl NavigationPage {
         page: impl IntoRef<Page>,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         start_async(Self::replace_async_private_with_transition(
             self.to_ref(),
             page.into_ref(),
@@ -2583,7 +2759,7 @@ impl NavigationPage {
         let from_visual: Ref<Visual> = from.clone().upcast();
         let to_visual: Ref<Visual> = to.upcast();
         let task = transition.start(Some(&from_visual), Some(&to_visual), forward, (*ct).clone());
-        match (TransitionOutcomeFuture { task }).await {
+        match transition_outcome(task).await {
             TransitionOutcome::Canceled => return,
             TransitionOutcome::Faulted => {
                 if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::CONTROL) {
@@ -2609,7 +2785,8 @@ impl NavigationPage {
     async fn await_page_transition_async(&self) {
         let task = self.last_page_transition_task.borrow_mut().take();
         if let Some(task) = task {
-            // A transition whose task was dropped by a dispatcher shutdown ends the wait as well.
+            // A transition whose task was aborted (a dispatcher shutdown) ends the wait as well; the
+            // task logs a failure of the transition itself.
             let _ = task.await;
         }
     }

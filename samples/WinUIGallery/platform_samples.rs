@@ -92,56 +92,52 @@ fn wire_clipboard(root: &Ref<Control>) {
             let busy = busy.clone();
             busy.set(true);
             output.set_text(Some("Working…"));
-            drop(
-                Dispatcher::ui_thread()
-                    .to_task_scheduler()
-                    .start_local(async move {
-                        let outcome = match operation {
-                            ClipboardOperation::Copy => clipboard
-                                .set_text_async(Some(&text))
-                                .await
-                                .map(|()| "Text copied.".to_string()),
-                            ClipboardOperation::Paste => {
-                                clipboard.try_get_text_async().await.map(|text| {
-                                    if let Some(pasted) = weak_pasted.upgrade() {
-                                        pasted.set_text(text.as_deref());
-                                    }
-                                    if text.is_some() {
-                                        "Text pasted.".to_string()
-                                    } else {
-                                        "The clipboard has no text.".to_string()
-                                    }
-                                })
+            drop(Dispatcher::ui_thread().start_local(async move {
+                let outcome = match operation {
+                    ClipboardOperation::Copy => clipboard
+                        .set_text_async(Some(&text))
+                        .await
+                        .map(|()| "Text copied.".to_string()),
+                    ClipboardOperation::Paste => {
+                        clipboard.try_get_text_async().await.map(|text| {
+                            if let Some(pasted) = weak_pasted.upgrade() {
+                                pasted.set_text(text.as_deref());
                             }
-                            ClipboardOperation::Formats => {
-                                clipboard.get_data_formats_async().await.map(|formats| {
-                                    if formats.is_empty() {
-                                        "The clipboard is empty.".to_string()
-                                    } else {
-                                        format!(
-                                            "Available formats: {}",
-                                            formats
-                                                .iter()
-                                                .map(ToString::to_string)
-                                                .collect::<Vec<_>>()
-                                                .join(", ")
-                                        )
-                                    }
-                                })
+                            if text.is_some() {
+                                "Text pasted.".to_string()
+                            } else {
+                                "The clipboard has no text.".to_string()
                             }
-                            ClipboardOperation::Clear => clipboard
-                                .clear_async()
-                                .await
-                                .map(|()| "Clipboard cleared.".to_string()),
-                        };
-                        busy.set(false);
-                        if let Some(output) = weak_output.upgrade() {
-                            output.set_text(Some(&outcome.unwrap_or_else(|error| {
-                                format!("Clipboard operation failed: {error}")
-                            })));
-                        }
-                    }),
-            );
+                        })
+                    }
+                    ClipboardOperation::Formats => {
+                        clipboard.get_data_formats_async().await.map(|formats| {
+                            if formats.is_empty() {
+                                "The clipboard is empty.".to_string()
+                            } else {
+                                format!(
+                                    "Available formats: {}",
+                                    formats
+                                        .iter()
+                                        .map(ToString::to_string)
+                                        .collect::<Vec<_>>()
+                                        .join(", ")
+                                )
+                            }
+                        })
+                    }
+                    ClipboardOperation::Clear => clipboard
+                        .clear_async()
+                        .await
+                        .map(|()| "Clipboard cleared.".to_string()),
+                };
+                busy.set(false);
+                if let Some(output) = weak_output.upgrade() {
+                    output.set_text(Some(&outcome.unwrap_or_else(|error| {
+                        format!("Clipboard operation failed: {error}")
+                    })));
+                }
+            }));
         });
     }
 }

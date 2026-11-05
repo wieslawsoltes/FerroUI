@@ -2,15 +2,16 @@
 //!
 //! Deviation (DEVIATIONS.md, DynamicData): upstream's factory returns a `Task<TDestination>`; here
 //! it returns a future of `Result<TDestination, ObservableError>`, which runs as a task of the
-//! thread (docs/porting/reactive.md, section 5.8), and takes its arguments by value, so that the
-//! future owns them. Upstream serializes the change sets with a `SemaphoreSlim` as well as with
-//! `Concat`; on one thread `Concat` alone keeps one change set at a time, so the lock is left out.
+//! thread (`ferroui_system::task::spawn_local`, docs/porting/reactive.md, section 5.8), and takes
+//! its arguments by value, so that the future owns them. Upstream serializes the change sets with a
+//! `SemaphoreSlim` as well as with `Concat`; on one thread `Concat` alone keeps one change set at a
+//! time, so the lock is left out.
 
 use super::{transform_change_set, UnspecifiedIndexError};
 use crate::cache::internal::TransformFuture;
 use crate::list::{clear_or_remove_many, Change, ChangeAwareList, ChangeSet, IExtendedList, IList, ListChangeReason};
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::{spawn_local, JoinHandle};
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IObservable, ObservableError};
 use std::cell::RefCell;
@@ -133,14 +134,15 @@ async fn transform<S: Clone + PartialEq + 'static, D: Clone + 'static>(
                 let start_index = range.index().unwrap_or_else(|| transformed.borrow().count());
                 // The transforms of the range run at once (`Task.WhenAll`): each is a task, and
                 // every one is awaited before the first error, if any, ends the change set.
-                let tasks: Vec<Task<TransformedItemContainer<S, D>>> = range
+                let tasks: Vec<JoinHandle<Result<TransformedItemContainer<S, D>, ObservableError>>> = range
                     .iter()
                     .enumerate()
-                    .map(|(offset, source_item)| Task::spawn_local(container_factory(factory, source_item, None, offset + start_index, cancel)))
+                    .map(|(offset, source_item)| spawn_local(container_factory(factory, source_item, None, offset + start_index, cancel)))
                     .collect();
                 let mut outcomes = Vec::with_capacity(tasks.len());
                 for task in tasks {
-                    outcomes.push(task.await);
+                    // A panic of a transform is its error, as the fault of its task was.
+                    outcomes.push(task.await.unwrap_or_else(|error| Err(error.to_observable_error())));
                 }
                 let containers = outcomes.into_iter().collect::<Result<Vec<_>, ObservableError>>()?;
                 IList::add_or_insert_range(&mut *transformed.borrow_mut(), containers, range.index());

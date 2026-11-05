@@ -10,15 +10,20 @@
 //!
 //! At the edges the type converts from and to the ICU4X
 //! [`Locale`](icu_locale_core::Locale) by its name: the invariant culture is
-//! the unknown locale `und`.
+//! the unknown locale `und`. The identity of text (its language, font
+//! matching, shaping) is a `Locale`; a culture is the formatting parameter.
+//! The ambient values of a thread are in
+//! [`current_locale`](super::current_locale()): its locale, and the culture it
+//! formats with ([`CultureInfo::current_formatting`]).
 
 use super::{DateTimeFormatInfo, GregorianCalendar, ICultureDataProvider, NumberFormatInfo};
 use crate::{FerroLocator, LocatorExtensions};
 use bitflags::bitflags;
-use std::cell::RefCell;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
+
+use icu_locale_core::Locale;
 
 /// LCID of the invariant culture.
 const INVARIANT_LCID: i32 = 0x007F;
@@ -64,11 +69,6 @@ bitflags! {
     }
 }
 
-crate::ferro_thread_local! {
-    static CURRENT_CULTURE: RefCell<CultureInfo> = RefCell::new(CultureInfo::invariant_culture());
-    static CURRENT_UI_CULTURE: RefCell<CultureInfo> = RefCell::new(CultureInfo::invariant_culture());
-}
-
 /// Identifies a culture by its language tag.
 ///
 /// Cloning is cheap (one reference count). Equality compares names ignoring
@@ -91,28 +91,6 @@ impl CultureInfo {
             static INVARIANT: CultureInfo = CultureInfo { name: Rc::from(""), lcid: INVARIANT_LCID, date_time_format: None, number_format: None };
         }
         INVARIANT.with(Clone::clone)
-    }
-
-    /// The culture used by the current thread. Defaults to the invariant
-    /// culture until the platform layer sets it.
-    pub fn current_culture() -> CultureInfo {
-        CURRENT_CULTURE.with(|culture| culture.borrow().clone())
-    }
-
-    /// Sets the culture used by the current thread.
-    pub fn set_current_culture(culture: CultureInfo) {
-        CURRENT_CULTURE.with(|current| *current.borrow_mut() = culture);
-    }
-
-    /// The UI culture used by the current thread. Defaults to the invariant
-    /// culture until the platform layer sets it.
-    pub fn current_ui_culture() -> CultureInfo {
-        CURRENT_UI_CULTURE.with(|culture| culture.borrow().clone())
-    }
-
-    /// Sets the UI culture used by the current thread.
-    pub fn set_current_ui_culture(culture: CultureInfo) {
-        CURRENT_UI_CULTURE.with(|current| *current.borrow_mut() = culture);
     }
 
     /// The culture for a language tag such as `en-US` (C# `GetCultureInfo(string)`).
@@ -301,6 +279,42 @@ impl CultureInfo {
     }
 }
 
+/// The locale `locale` specializes, as [`CultureInfo::parent`] gives the culture a culture
+/// specializes: the locale without its last variant, else without its region, else without
+/// its script; the parent of a language alone is the unknown locale `und` (the invariant
+/// culture), and so is the parent of `und`. Chinese regional locales without a script have
+/// their script locale as parent (`zh-CN` -> `zh-Hans`, `zh-TW` -> `zh-Hant`), as in .NET.
+/// A locale with extensions (`en-US-u-hc-h12`) has the locale without them as its parent.
+pub(crate) fn parent_locale(locale: &Locale) -> Locale {
+    if !locale.extensions.is_empty() {
+        return Locale::from(locale.id.clone());
+    }
+    let mut id = locale.id.clone();
+    if !id.variants.is_empty() {
+        let mut variants: Vec<_> = id.variants.iter().copied().collect();
+        variants.pop();
+        id.variants = icu_locale_core::subtags::Variants::from_vec_unchecked(variants);
+        return Locale::from(id);
+    }
+    if let Some(region) = id.region.take() {
+        if id.script.is_none() && id.language.as_str() == "zh" {
+            const SIMPLIFIED: [&str; 3] = ["CN", "SG", "MY"];
+            const TRADITIONAL: [&str; 3] = ["TW", "HK", "MO"];
+            if SIMPLIFIED.contains(&region.as_str()) {
+                return icu_locale_core::locale!("zh-Hans");
+            }
+            if TRADITIONAL.contains(&region.as_str()) {
+                return icu_locale_core::locale!("zh-Hant");
+            }
+        }
+        return Locale::from(id);
+    }
+    if id.script.take().is_some() {
+        return Locale::from(id);
+    }
+    Locale::UNKNOWN
+}
+
 impl PartialEq for CultureInfo {
     fn eq(&self, other: &Self) -> bool {
         self.name.eq_ignore_ascii_case(&other.name)
@@ -408,6 +422,19 @@ mod tests {
         assert_eq!(CultureInfo::get_culture_info("zh-CN").parent().name(), "zh-Hans");
         assert_eq!(CultureInfo::get_culture_info("zh-TW").parent().name(), "zh-Hant");
         assert_eq!(CultureInfo::get_culture_info("zh-Hant").parent().name(), "zh");
+    }
+
+    /// Not from upstream (C5 of #423): the parent of a locale is the locale of the parent
+    /// of its culture.
+    #[test]
+    fn the_parent_of_a_locale_is_the_one_of_its_culture() {
+        for name in ["ja-JP", "ja", "zh-Hans-CN", "zh-CN", "zh-TW", "zh-Hant", "sr-Cyrl-RS", "de-DE-1996", "und"] {
+            let locale = Locale::try_from_str(name).unwrap();
+            let culture = CultureInfo::from(&locale);
+            assert_eq!(parent_locale(&locale), Locale::try_from(&culture.parent()).unwrap(), "{name}");
+        }
+        assert_eq!(parent_locale(&Locale::try_from_str("en-US-u-hc-h12").unwrap()), Locale::try_from_str("en-US").unwrap());
+        assert_eq!(parent_locale(&Locale::UNKNOWN), Locale::UNKNOWN);
     }
 
     #[test]

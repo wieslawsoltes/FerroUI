@@ -8,22 +8,22 @@ use crate::primitives::ColorHelper;
 use crate::{ColorComponent, ColorModel, HsvComponent};
 use ferroui_base::layout::Orientation;
 use ferroui_base::media::{Color, Colors, HsvColor};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{current_ui_locale, set_current_ui_locale, Locale};
 
 /// Sets the UI culture of the thread and restores it when dropped.
-struct UiCultureScope(CultureInfo);
+struct UiCultureScope(Locale);
 
 impl UiCultureScope {
     fn new(name: &str) -> Self {
-        let previous = CultureInfo::current_ui_culture();
-        CultureInfo::set_current_ui_culture(CultureInfo::get_culture_info(name));
+        let previous = current_ui_locale();
+        set_current_ui_locale(Locale::try_from_str(name).unwrap());
         Self(previous)
     }
 }
 
 impl Drop for UiCultureScope {
     fn drop(&mut self) {
-        CultureInfo::set_current_ui_culture(self.0.clone());
+        set_current_ui_locale(self.0.clone());
     }
 }
 
@@ -139,7 +139,7 @@ fn component_bitmaps_sweep_the_component() {
     let height = 2;
     let mut data = vec![0u8; (width * height * 4) as usize];
 
-    let task = ferroui_base::threading::Dispatcher::ui_thread().to_task_scheduler().start_local(
+    let mut task = ferroui_base::threading::Dispatcher::ui_thread().start_local(
         ColorPickerHelpers::create_component_bitmap_async(
             data.clone(),
             width,
@@ -153,7 +153,11 @@ fn component_bitmaps_sweep_the_component() {
         ),
     );
     ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
-    data = task.result().expect("the task result").expect("the bitmap data");
+    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    data = match std::future::Future::poll(std::pin::Pin::new(&mut task), &mut context) {
+        std::task::Poll::Ready(outcome) => outcome.expect("the task result").expect("the bitmap data"),
+        std::task::Poll::Pending => panic!("the task has not ended"),
+    };
 
     // Perceptive red sweep: blue and green are zero, red grows from the left.
     let reds: Vec<u8> = (0..width as usize).map(|x| data[x * 4 + 2]).collect();

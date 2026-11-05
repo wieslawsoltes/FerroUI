@@ -66,7 +66,7 @@ impl ILayoutFileStorage for TestLayoutFiles {
 }
 fn pump() {
     for _ in 0..8 {
-        ferroui_system::threading::tasks::run_pending_wakes();
+        ferroui_system::task::run_pending();
     }
 }
 fn failure(message: &str) -> DockSerializationError {

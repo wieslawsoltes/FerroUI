@@ -13,7 +13,7 @@ use ferroui_base::media::text_formatting::{ShapedBuffer, TextMetrics, TextShaper
 use ferroui_base::media::{
     CharacterHit, FontManager, FontStretch, FontStyle, FontWeight, GlyphInfoList, GlyphRun, Typeface,
 };
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{current_locale, ReadOnlyMemory};
 use ferroui_base::Rect;
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::rc::Rc;
@@ -34,7 +34,7 @@ fn should_get_next_character_hit() {
             Typeface::default_typeface().glyph_typeface(),
             10.0,
             direction,
-            Some(CultureInfo::current_culture()),
+            Some(current_locale()),
             0.0,
             0.0,
             None,
@@ -75,7 +75,7 @@ fn should_get_previous_character_hit() {
             Typeface::default_typeface().glyph_typeface(),
             10.0,
             direction,
-            Some(CultureInfo::current_culture()),
+            Some(current_locale()),
             0.0,
             0.0,
             None,
@@ -118,7 +118,7 @@ fn should_get_character_hit_from_distance() {
             Typeface::default_typeface().glyph_typeface(),
             10.0,
             direction,
-            Some(CultureInfo::current_culture()),
+            Some(current_locale()),
             0.0,
             0.0,
             None,

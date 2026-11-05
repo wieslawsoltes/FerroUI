@@ -615,6 +615,13 @@ fn declarations_are_merged_and_found_across_crates() {
         assert!(system.resolve(duration).equals(&*time_span), "{duration}");
         assert_eq!(system.resolve(&format!("Option<{duration}>")).full_name(), "System.Nullable`1[System.TimeSpan]");
     }
+    // `Locale`, the other Rust form of a culture (C5 of #423), by the path of its crate and
+    // the one `ferroui_base` exports it again by; a reference type, so its `Option` is the
+    // culture too.
+    for locale in ["::icu_locale_core::Locale", "::ferroui_base::utilities::Locale"] {
+        assert_eq!(system.resolve(locale).full_name(), "System.Globalization.CultureInfo", "{locale}");
+        assert_eq!(system.resolve(&format!("Option<{locale}>")).full_name(), "System.Globalization.CultureInfo");
+    }
     // `UriRef` and `Url`, the other Rust forms of a URI (C5 of #423), and their nullable forms.
     for uri in ["::ferroui_base::utilities::Uri", "::ferroui_base::utilities::UriRef", "::url::Url"] {
         assert_eq!(system.resolve(uri).full_name(), "System.Uri", "{uri}");
