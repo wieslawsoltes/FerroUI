@@ -766,6 +766,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "custom-effects"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-themes-winui",
+ "sample-testing",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
