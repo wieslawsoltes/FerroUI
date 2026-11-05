@@ -105,6 +105,12 @@ the WinUI project directly (`controls/dev/Repeater` at commit
 `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`, the revision the WinUI theme is
 ported from), under the same license.
 
+`templates/i_data_template_component.rs` (the phasing contract `IDataTemplateComponent`, moved
+here from `ferroui-controls-repeater`, and WinUI's `XamlBindingHelper.DataTemplateComponent`) is
+ported from the WinUI project directly (`controls/dev/Repeater` and the `ProcessBindings` and
+`Recycle` members the XAML compiler generates, `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/CodeGenerators/CSharpPagePass2.tt`,
+at the same commit), under the same license.
+
 `font_icon.rs`, `symbol_icon.rs` and `icon_source.rs` (WinUI's `FontIcon`, `Symbol`,
 `SymbolIcon` and the icon sources) are ported from the WinUI project directly
 (`dxaml/xcp/core/core/elements/icon.cpp`, `dxaml/xcp/dxaml/lib/*IconSource_Partial.cpp` and the

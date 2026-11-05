@@ -1,0 +1,13 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:local="clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests"
+            x:DefaultBindMode="OneWay"
+            Tag="construction value">
+  <TextBlock Text="{x:Bind Tag}" />
+  <TextBlock Text="{x:Bind Tag, Mode=OneTime}" />
+  <StackPanel x:DefaultBindMode="OneTime">
+    <TextBlock Text="{x:Bind Tag}" />
+  </StackPanel>
+  <TextBox x:DefaultBindMode="TwoWay" Text="{x:Bind Tag, UpdateSourceTrigger=PropertyChanged}" />
+  <Button Click="{x:Bind local:XBindHelpers.Clicked}" />
+</StackPanel>

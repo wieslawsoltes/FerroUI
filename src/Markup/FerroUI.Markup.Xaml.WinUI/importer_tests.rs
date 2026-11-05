@@ -45,6 +45,23 @@ fn native_documents_are_identity_and_migration_is_idempotent() {
 }
 
 #[test]
+fn native_documents_keep_the_directives_of_x_bind() {
+    // Step X5 of #525 (docs/porting/x-bind.md): x:DefaultBindMode, x:Phase, x:Load and
+    // x:DeferLoadStrategy are FerroUI XAML. The importer reports them (WXAML1002) only in WinUI
+    // documents, whose x:Bind still goes to its adapter until step X6.
+    let original = format!(
+        "<StackPanel xmlns='{FERRO_XML_NAMESPACE}' xmlns:x='{XAML_NAMESPACE}' x:DefaultBindMode='OneWay'><Border x:Name='lazy' x:Load='False'/><TextBlock x:Name='later' x:DeferLoadStrategy='Lazy'/><TextBlock x:Phase='1'/></StackPanel>"
+    );
+    let result = migrate_winui_xaml(&original, &WinUIXamlOptions::default()).unwrap();
+    assert_eq!(result.xaml, original);
+    assert!(result.edits.is_empty());
+    assert!(!result.diagnostics.iter().any(|d| d.code == "WXAML1002"));
+    // The same directives in a WinUI document are still reported.
+    let winui = migrate("<Border x:Name='lazy' x:Load='False'/><TextBlock x:Phase='1'/>");
+    assert_eq!(winui.diagnostics.iter().filter(|d| d.code == "WXAML1002").count(), 2);
+}
+
+#[test]
 fn source_page_maps_to_native_frame_page_with_balanced_property_elements() {
     let result = migrate("<Page><Page.Content><Frame/></Page.Content></Page>");
     assert!(!result.has_errors());

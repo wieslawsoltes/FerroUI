@@ -10580,5 +10580,10 @@ pub trait AttachedProps: ElementBuilder {
     fn xaml_ambient_light_is_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::media::XamlAmbientLight>::is_target_property(), value)
     }
+
+    /// Sets the attached [`XamlBindingHelper::data_template_component_property`](ferroui_controls::templates::XamlBindingHelper::data_template_component_property).
+    fn xaml_binding_helper_data_template_component<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplateComponent>>, M>) -> Self {
+        self.prop(<ferroui_controls::templates::XamlBindingHelper>::data_template_component_property(), value)
+    }
 }
 impl<T: ObjectType> AttachedProps for El<T> {}

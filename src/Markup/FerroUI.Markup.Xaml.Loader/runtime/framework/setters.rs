@@ -11,6 +11,7 @@ use xamlx::ast::{IXamlAstValueNode, IXamlLineInfo, IXamlPropertySetter};
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::type_system::IXamlType;
 
+use crate::compiler_extensions::transformers::x_bind::{XBindEventKind, XBindEventSetter};
 use crate::compiler_extensions::transformers::{
     ClassBindingSetter, ClassValueSetter, FerroAttachedInstancePropertySetterMethod, ResourceAdderSetter,
     XamlDirectCallAddHandler, XamlIlDirectCallPropertySetter,
@@ -136,6 +137,9 @@ impl IXamlSetterEvaluator for FrameworkSetterEvaluator {
         // assignment prefers the form that evaluates the arguments.
         if let Some(s) = any.downcast_ref::<XamlDirectCallAddHandler>() {
             return Some((|| add_handler(s, context, target, argument(arguments, 0)?.clone(), line))());
+        }
+        if let Some(s) = any.downcast_ref::<XBindEventSetter>() {
+            return Some((|| bind_x_bind_event(s, target, argument(arguments, 0)?, line))());
         }
         if let Some(s) = any.downcast_ref::<ResourceAdderSetter>() {
             return Some((|| {
@@ -295,6 +299,56 @@ fn add_handler(
     context
         .call_method(&setter.add_method, &[target.clone(), event, handler, routes, boxed(false)], line_info)
         .map(|_| ())
+}
+
+/// The setter of an `{x:Bind}` of an event (step X4 of docs/porting/x-bind.md): the binding the
+/// extension provided subscribes its handler to the event of `target` while the bindings of its
+/// root are initialized (`XBinding::bind_routed_event`, `XBinding::bind_markup_event`), what the
+/// Rust emitter writes as `rt::x_bind_routed_event` and `rt::x_bind_event`.
+fn bind_x_bind_event(
+    setter: &XBindEventSetter,
+    target: &MarkupValue,
+    binding: &MarkupValue,
+    line_info: &dyn IXamlLineInfo,
+) -> XamlResult<()> {
+    use ferroui_base::interactivity::{Interactive, RoutedEvent};
+    use ferroui_markup_xaml::markup_extensions::XBinding;
+    let binding = from_markup_value::<Rc<XBinding>>(binding).ok_or_else(|| {
+        runtime_error("InvalidCastException", "The value of an x:Bind event is not the binding of an x:Bind", line_info)
+    })?;
+    let result = match &setter.event {
+        XBindEventKind::Routed { event_field } => {
+            let event = load_field(event_field, line_info)?;
+            let event = untyped_routed_event(event_field, event);
+            let event = from_markup_value::<RoutedEvent>(&event)
+                .ok_or_else(|| XamlError::load_exception("Invalid routed event", Some(line_info)))?;
+            let object = object_of(target, line_info)?;
+            let interactive = object
+                .cast::<Interactive>()
+                .ok_or_else(|| XamlError::load_exception("Event target is not Interactive", Some(line_info)))?;
+            binding.bind_routed_event(&interactive, &event)
+        }
+        XBindEventKind::Plain { declaring_type } => {
+            let markup = declaring_type
+                .as_any()
+                .downcast_ref::<crate::runtime::type_system::RuntimeType>()
+                .and_then(crate::runtime::type_system::RuntimeType::markup)
+                .ok_or_else(|| {
+                    XamlError::load_exception(
+                        format!("{} has no metadata of its events", declaring_type.full_name()),
+                        Some(line_info),
+                    )
+                })?;
+            let event = markup.find_event(&setter.name).ok_or_else(|| {
+                XamlError::load_exception(
+                    format!("Method {}.add_{} has no invoker", declaring_type.full_name(), setter.name),
+                    Some(line_info),
+                )
+            })?;
+            binding.bind_markup_event(event, target.clone())
+        }
+    };
+    result.map_err(|error| runtime_error("InvalidOperationException", error.to_string(), line_info))
 }
 
 /// `var d = target[.Resources]; var k = key; d.Add(k, value);

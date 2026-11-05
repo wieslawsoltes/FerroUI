@@ -84,7 +84,7 @@ fn main() {
 
 `ferroui-view` also holds styles (`style.rs`), transitions and animations (`animation.rs`), futures run by components (`async_data.rs`), error boundaries (`error_boundary.rs`), the router (`router.rs`), and with the features `treedatagrid`, `color-picker`, `dialogs` and `reactiveui` the builders of those crates (`generated/`).
 
-`ferroui-view` depends on `ferroui-base` and `ferroui-controls`, and on `ferroui-system` for the executor of futures; it adds nothing to them. The builders are generated from their sources by `scripts/generate_view_builders.py`, so a control or a property ported later gets its builder by running the script again (`--check` fails when the generated file is stale; `--report` lists what was left out and why).
+`ferroui-view` depends on `ferroui-base` and `ferroui-controls` (its futures run on the dispatcher of `ferroui-base`); it adds nothing to them. The builders are generated from their sources by `scripts/generate_view_builders.py`, so a control or a property ported later gets its builder by running the script again (`--check` fails when the generated file is stale; `--report` lists what was left out and why).
 
 ## 3. Elements
 
@@ -623,12 +623,12 @@ Phase 6 adds what an application larger than a form needs: data that arrives lat
 
 | Function | What it gives |
 |---|---|
-| `use_future(deps, \|deps\| future)` | A hook. It runs the future on the executor of the thread when the component first runs, and again whenever `deps` differ from those of the run before, and gives its state as a `Signal<AsyncState<T>>` |
+| `use_future(deps, \|deps\| future)` | A hook. It runs the future on the dispatcher of the thread when the component first runs, and again whenever `deps` differ from those of the run before, and gives its state as a `Signal<AsyncState<T>>` |
 | `AsyncState<T>` | `Pending`, `Ready(T)` or `Failed(String)`, with `is_pending()`, `value()` and `error()` |
 | `suspense(state, pending, ready, failed)` | An element that shows the element of the state: a component that runs again when the state changes, so the controls of two states of the same shape are patched |
 | `sleep(duration)` | A future that ends after `duration`, on a timer of the dispatcher of the thread |
 
-The future of `use_future` returns `Result<T, String>`. It runs on the executor of `ferroui_system::threading::tasks` (`spawn_local`): it is polled when it starts and again when it is woken, on the thread of the user interface, so what it reads and writes needs no synchronization. A future that waits for work on another thread (`tasks::run`) is woken through the dispatcher.
+The future of `use_future` returns `Result<T, String>`. It runs on the dispatcher of the thread (`Dispatcher::start_local`, step A8 of [idiomatic-rust-async.md](idiomatic-rust-async.md)): it is polled for the first time when it starts, up to its first pending `await`, and every later poll is a dispatcher job that a wake queues, from any thread, at the priority of the job that started it (`Default` outside of a job), on the thread of the user interface, so what it reads and writes needs no synchronization. Its state is written in the job that completes it, behind the work of that priority queued before the wake, never inside the call that woke it (a future that does not wait writes in its start).
 
 ```rust
 #[component(rerender)]
@@ -656,7 +656,7 @@ fn Search() -> Element {
 ```
 
 - The future starts once the controls of the run are in place, as the closure of `use_effect_with` runs. With new dependencies the state goes back to `Pending` and another future starts.
-- A future whose dependencies were replaced, or whose component was taken out, is abandoned. Its result is ignored, and the executor is woken to drop it, which ends what it waited for: a `sleep` stops its timer. In the search above, each keystroke abandons the future of the one before, so the search runs once the user pauses for 300 ms.
+- A future whose dependencies were replaced, or whose component was taken out, is aborted (`JoinHandle::abort`): the dispatcher drops it at once, which ends what it waited for (a `sleep` stops its timer), and it never writes the state, also when what it awaited completed before it was replaced. In the search above, each keystroke abandons the future of the one before, so the search runs once the user pauses for 300 ms.
 - `get()` of the state needs `T: Clone`; `with(|state| ..)` reads it in place.
 
 ### 13.2 Error boundaries
@@ -889,6 +889,8 @@ What was built differs from the plan above in four points:
 - `src/FerroUI.View/tests/patterns_tests.rs` (phase 6):
   - a future pending, then ready or failed;
   - new dependencies that start a new future and abandon the old one, whose result is ignored;
+  - a superseded load aborted (its future dropped at once) that never writes, also when what it awaited completed before, and the latest load writing in the job that completes it, between the jobs queued before and after its wake;
+  - a load that replaces itself during its own poll and does not write;
   - the future of a component that ended, dropped and without effect;
   - `suspense` in its three states;
   - an error boundary: a panic on the first run and on a later run, the components beside it still running, a reset, the nearest boundary catching and a panic of a fallback going to the one above, and a panic without a boundary propagating;

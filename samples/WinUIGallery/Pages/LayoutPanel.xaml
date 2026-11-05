@@ -1,0 +1,63 @@
+<!-- Ported from the pinned LayoutPanel examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The custom FeaturedTileLayout of the source is the native Rust layout of repeater_samples.rs,
+     set on the panel there with the Spacing of the source; ThemeResource becomes DynamicResource. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="LayoutPanelExample1" Spacing="12">
+    <TextBlock Text="Use a custom Layout with panel children" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <LayoutPanel x:Name="LayoutPanel1" MaxWidth="560" HorizontalAlignment="Stretch"
+                   VerticalAlignment="Top" BorderThickness="1" CornerRadius="4" Padding="12"
+                   BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+        <Border Height="96" Padding="16" CornerRadius="4"
+                Background="{DynamicResource AccentFillColorDefaultBrush}">
+          <StackPanel VerticalAlignment="Center">
+            <!-- BodyStrongTextBlockStyle: 14 pixels, semibold. -->
+            <TextBlock FontSize="14" FontWeight="SemiBold" Text="Featured item"
+                       Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+            <TextBlock Text="The first child spans the available width."
+                       Foreground="{DynamicResource TextOnAccentFillColorSecondaryBrush}" />
+          </StackPanel>
+        </Border>
+        <Border Height="72" Padding="12" CornerRadius="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
+          <TextBlock VerticalAlignment="Center" Text="Second" />
+        </Border>
+        <Border Height="92" Padding="12" CornerRadius="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
+          <TextBlock VerticalAlignment="Center" Text="Third (taller)" />
+        </Border>
+        <Border Height="80" Padding="12" CornerRadius="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
+          <TextBlock VerticalAlignment="Center" Text="Fourth" />
+        </Border>
+        <Border Height="64" Padding="12" CornerRadius="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
+          <TextBlock VerticalAlignment="Center" Text="Fifth" />
+        </Border>
+        <Border Height="88" Padding="12" CornerRadius="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
+          <TextBlock VerticalAlignment="Center" Text="Sixth (taller)" />
+        </Border>
+        <Border Height="68" Padding="12" CornerRadius="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
+          <TextBlock VerticalAlignment="Center" Text="Seventh" />
+        </Border>
+        <Border Height="76" Padding="12" CornerRadius="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
+          <TextBlock VerticalAlignment="Center" Text="Eighth" />
+        </Border>
+        <Border Height="96" Padding="12" CornerRadius="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
+          <TextBlock VerticalAlignment="Center" Text="Ninth (taller)" />
+        </Border>
+      </LayoutPanel>
+      <StackPanel Grid.Column="1" Width="220" Spacing="12">
+        <RadioButtons x:Name="LayoutButtons" Header="Layout" SelectedIndex="0"
+                      AutomationProperties.AutomationId="LayoutPanelLayoutSelector"
+                      AutomationProperties.Name="LayoutPanel layout">
+          <x:String>Featured tile</x:String>
+          <x:String>Vertical stack</x:String>
+        </RadioButtons>
+        <TextBlock Text="Spacing" />
+        <Slider x:Name="LayoutSpacing" Maximum="24" TickFrequency="2" IsSnapToTickEnabled="True" Value="8"
+                AutomationProperties.AutomationId="LayoutPanelSpacing"
+                AutomationProperties.Name="Layout spacing" />
+        <TextBlock Text="LayoutPanel also applies its BorderBrush, BorderThickness, CornerRadius, and Padding around the layout."
+                   TextWrapping="Wrap" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>

@@ -328,7 +328,16 @@ fn read_value(value: Option<BoxedValue>) -> Result<Option<BoxedValue>, String> {
 
 /// Reads `path` from `root` once.
 fn read_once(root: &BoxedValue, path: &CompiledBindingPath) -> Result<Option<BoxedValue>, String> {
-    let sink = path_expression(root, path).to_observable(None);
+    let mut nodes = Vec::new();
+    path.build_expression(&mut nodes);
+    read_nodes_once(root, nodes)
+}
+
+/// Reads the value of the expression nodes `nodes` from `root` once, without following it
+/// ([`CompiledBindingPath::read_once`]).
+pub(crate) fn read_nodes_once(root: &BoxedValue, nodes: Vec<Rc<dyn ExpressionNode>>) -> Result<Option<BoxedValue>, String> {
+    let expression = BindingExpression::new(Some(root.clone()), nodes, BindingExpressionOptions::default());
+    let sink = expression.to_observable(None);
     let read: Rc<RefCell<Option<Option<BoxedValue>>>> = Rc::new(RefCell::new(None));
     let captured = read.clone();
     let observer: Rc<dyn IObserver<Option<BoxedValue>>> =

@@ -65,7 +65,6 @@ ferroui_base::ferro_rust_paths! {
         crate::selection::SelectionModelSelectionChangedEventArgs,
     ],
     contracts: [
-        crate::IDataTemplateComponent,
         crate::IDataTemplateSelector,
         crate::IElementFactory,
     ],

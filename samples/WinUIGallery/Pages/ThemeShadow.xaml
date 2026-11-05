@@ -1,0 +1,33 @@
+<!-- Ported from the pinned ThemeShadow example of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The ThemeShadow is a resource set as the Border's Shadow, as the templates of the WinUI theme
+     share theirs; the Loaded handler (the receiver) and the slider's ValueChanged handler
+     (Translation.Z) are in Rust (materials_samples.rs). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="20">
+  <StackPanel.Resources>
+    <ThemeShadow x:Key="SampleThemeShadow" />
+  </StackPanel.Resources>
+  <StackPanel x:Name="ThemeShadowExample1" Spacing="12">
+    <TextBlock Text="ThemeShadow applied to a Border" FontSize="18" />
+    <Grid ColumnDefinitions="*,240" ColumnSpacing="24">
+      <!-- The Padding of the source's Grid is a Border's (a FerroUI panel has no padding). -->
+      <Border Padding="36">
+        <Grid x:Name="Example3Grid">
+          <Grid x:Name="ShadowCastGrid" />
+          <Border x:Name="ShadowRect" Width="200" Height="200"
+                  Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                  CornerRadius="8"
+                  Shadow="{StaticResource SampleThemeShadow}" />
+        </Grid>
+      </Border>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <TextBlock Text="Z-translation" />
+        <Slider x:Name="TranslationSliderInApp" Width="200" HorizontalAlignment="Left"
+                AutomationProperties.Name="shadow intensity"
+                Minimum="0" Maximum="64" SmallChange="1"
+                TickFrequency="1" IsSnapToTickEnabled="True" Value="32" />
+        <TextBlock x:Name="ShadowTranslationOutput" Text="Translation.Z: 32" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>

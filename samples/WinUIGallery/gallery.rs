@@ -280,7 +280,11 @@ impl GalleryState {
         self.body.children().add(links);
 
         if let Some(adaptation) = examples::find(entry.id) {
-            self.body.children().add(text("Port state: partial. The native examples below cover a reviewed subset of this page."));
+            self.body.children().add(text(if adaptation.ported {
+                "Port state: ported. Every catalog example of this page has a native adaptation below, or a recorded reason why it cannot have one. Rendering parity with Windows is checked separately."
+            } else {
+                "Port state: partial. The native examples below cover a reviewed subset of this page."
+            }));
             let heading = text("Native FerroUI examples");
             heading.set_font_size(20.0);
             heading.set_font_weight(FontWeight::SemiBold);

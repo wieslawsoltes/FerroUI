@@ -10,8 +10,8 @@ use crate::diagnostics::XamlSourceInfo;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
 use crate::markup_extensions::{
     AddChildOfOn, CompiledBindingExtension, DynamicResourceExtension, On, OnFormFactorExtension, OnPlatformExtension,
-    ReflectionBindingExtension, RelativeSourceExtension, ResolveByNameExtension, StaticResourceExtension, XBindExtension,
-    XBinding, XBindings,
+    DeferredElement, ReflectionBindingExtension, RelativeSourceExtension, ResolveByNameExtension, StaticResourceExtension,
+    XBindExtension, XBinding, XBindings,
 };
 use crate::styling::{MergeResourceInclude, ResourceInclude, StyleInclude};
 use crate::templates::{
@@ -79,8 +79,10 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     metadata: &[],
 };
 
-/// The types of this crate that own registered properties.
-const TYPES: &[&TypeInfo] = &[<XamlSourceInfo as StaticType>::TYPE];
+/// The types of this crate that own registered properties: the attached properties of the
+/// source information, and the class of the placeholder of `x:Load` (step X5 of
+/// docs/porting/x-bind.md).
+const TYPES: &[&TypeInfo] = &[<XamlSourceInfo as StaticType>::TYPE, <DeferredElement as StaticType>::TYPE];
 
 macro_rules! markup_types {
     ($($type_:ty),* $(,)?) => {

@@ -74,6 +74,9 @@ SYSTEM_TYPES = {
     "Thread", "ThreadPool", "Monitor", "Interlocked", "Volatile", "Mutex", "Semaphore",
     "SemaphoreSlim", "ManualResetEvent", "ManualResetEventSlim", "AutoResetEvent", "CountdownEvent",
     "Barrier", "ReaderWriterLock", "ReaderWriterLockSlim", "SpinLock", "SpinWait", "WaitHandle",
+    # `CancellationToken` is the one cancellation type of the workspace (C4, the shape of
+    # `tokio_util`): its declaration in `ferroui-system` is the baseline, and another one is a
+    # duplicate.
     "CancellationToken", "CancellationTokenSource", "CancellationTokenRegistration",
     "SynchronizationContext", "ExecutionContext", "Task", "ValueTask", "TaskCompletionSource",
     "TaskScheduler", "TaskFactory", "TaskStatus", "TaskCreationOptions", "TaskContinuationOptions",
@@ -109,6 +112,11 @@ def declared(names):
     return re.compile(r"\b(?:struct|enum|union|trait|type)\s+(" + names + r")\b")
 
 
+# The direction of a pattern whose types are deprecated since 0.5.0 (docs/idiomatic-rust.md,
+# section 3): the count goes to zero, apart from the local types that keep the name over the new
+# type, when the release after 0.5 removes them.
+REMOVED_AFTER_0_5 = "deprecated in 0.5, counted until removed after 0.5"
+
 # The patterns of the inventory table of #423, in its order. Each is (key, title, regex, what is
 # counted, direction). A `decl` pattern counts declarations, a `use` pattern counts the occurrences
 # of the name (the files column is the number of files with at least one).
@@ -139,14 +147,20 @@ PATTERNS = [
     ("guid_uses", "`Guid` (uses)", re.compile(r"\bGuid\b"), "use", "one type, or `uuid`"),
     ("dictionary", "`Dictionary` (uses)", re.compile(r"\bDictionary\b"), "use",
      "`HashMap`, or `IndexMap` where the order matters"),
-    ("task", "`Task<`", re.compile(r"\bTask\s*<"), "use", "futures on the dispatcher's executor"),
+    # C4 (docs/idiomatic-rust-async.md): the old async types are deprecated in 0.5 and counted until
+    # the release after 0.5 removes them; `CancellationToken` is the one cancellation type.
+    ("task", "`Task<`", re.compile(r"\bTask\s*<"), "use",
+     f"`JoinHandle`, `Shared` and futures; {REMOVED_AFTER_0_5}"),
     ("task_completion_source", "`TaskCompletionSource`", re.compile(r"\bTaskCompletionSource\b"),
-     "use", "a oneshot channel"),
+     "use", f"`task::oneshot`, `Shared::channel`; {REMOVED_AFTER_0_5}"),
     ("synchronization_context", "`SynchronizationContext`",
-     re.compile(r"\bSynchronizationContext\b"), "use", "the dispatcher's executor"),
-    ("cancellation_token", "`CancellationToken...`",
-     re.compile(r"\bCancellationToken(?:Source|Registration)?\b"), "use",
-     "one cancellation type (decide once)"),
+     re.compile(r"\bSynchronizationContext\b"), "use",
+     f"the `Schedule` of the thread, `Dispatcher::current_priority`; {REMOVED_AFTER_0_5}"),
+    ("cancellation_token", "`CancellationToken`", re.compile(r"\bCancellationToken\b"), "use",
+     "(target shape: the one cancellation type)"),
+    ("cancellation_token_source", "`CancellationTokenSource`, `...Registration`",
+     re.compile(r"\b(?:Local)?CancellationToken(?:Source|Registration)\b"), "use",
+     f"`CancellationToken`, `CancellationGuard`; {REMOVED_AFTER_0_5}"),
     ("event_args", "`...EventArgs` structs", re.compile(r"\bstruct\s+(\w*EventArgs)\b"), "decl",
      "keep (control API)"),
     ("inotify_property_changed", "`INotifyPropertyChanged`",

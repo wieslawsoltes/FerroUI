@@ -834,6 +834,7 @@ FerroUI.Controls.TableViewColumn.CellTemplate: Option<Rc<dyn IDataTemplate>> = (
 FerroUI.Controls.TableViewColumn.CellTheme: Option<Ref<ControlTheme>> = (null); OneWay
 FerroUI.Controls.TableViewColumn.HeaderTheme: Option<Ref<ControlTheme>> = (null); OneWay
 FerroUI.Controls.TableViewColumn.Width: GridLength = 1*; OneWay
+FerroUI.Controls.Templates.XamlBindingHelper.DataTemplateComponent: Option<Rc<dyn IDataTemplateComponent>> = (null); OneWay; attached
 FerroUI.Controls.TextBlock overrides FerroUI.Visual.ClipToBounds = True; OneWay
 FerroUI.Controls.TextBlock.BaselineOffset: f64 = 0; OneWay; inherits; attached
 FerroUI.Controls.TextBlock.LayoutRoundingPlacement: TextLayoutRoundingPlacement = Below; OneWay; inherits; attached

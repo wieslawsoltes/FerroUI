@@ -1,0 +1,93 @@
+<!-- Ported from the pinned InkCanvas examples of WinUI Gallery (14061eea); see ../NOTICE.md. -->
+<!-- The three examples of InkCanvasPage.xaml with the native InkCanvas, InkPresenter and InkToolbar of
+     ferroui-controls-inking. Header is composed with a label; the handlers of InkCanvasPage.xaml.cs
+     are in ink_samples.rs, which also sets InkToolbar.TargetInkCanvas (x:Bind of an element). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="16">
+  <TextBlock Text="Draw with an InkCanvas" FontSize="18" />
+  <Grid x:Name="InkCanvasExample1" ColumnDefinitions="*,240" ColumnSpacing="24">
+    <Border Height="280" MaxWidth="600" HorizontalAlignment="Stretch" Background="White"
+            BorderBrush="Gray" BorderThickness="1">
+      <InkCanvas x:Name="drawingCanvas" AutomationProperties.Name="Drawing canvas" />
+    </Border>
+    <StackPanel Grid.Column="1" Spacing="8">
+      <TextBlock FontWeight="SemiBold" Text="Input devices" />
+      <StackPanel Spacing="4">
+        <CheckBox x:Name="penInput" AutomationProperties.Name="Pen input" Content="Pen" IsChecked="True" />
+        <CheckBox x:Name="mouseInput" AutomationProperties.Name="Mouse input" Content="Mouse" IsChecked="True" />
+        <CheckBox x:Name="touchInput" AutomationProperties.Name="Touch input" Content="Touch" IsChecked="True" />
+      </StackPanel>
+      <TextBlock Text="Ink color" />
+      <ComboBox x:Name="inkColor" HorizontalAlignment="Stretch" AutomationProperties.Name="Ink color"
+                SelectedIndex="0">
+        <ComboBoxItem Content="Black" />
+        <ComboBoxItem Content="Red" />
+        <ComboBoxItem Content="Blue" />
+      </ComboBox>
+      <TextBlock Text="Stroke width" />
+      <Slider x:Name="strokeWidth" AutomationProperties.Name="Stroke width" Minimum="1" Maximum="12"
+              TickFrequency="1" IsSnapToTickEnabled="True" Value="4" />
+      <TextBlock Text="Inking enabled" />
+      <ToggleSwitch x:Name="inkingEnabled" AutomationProperties.Name="Inking enabled" IsChecked="True" />
+      <Button x:Name="clearDrawing" AutomationProperties.Name="Clear drawing" Content="Clear drawing" />
+    </StackPanel>
+  </Grid>
+
+  <TextBlock Text="Customize an InkToolbar" FontSize="18" />
+  <Grid x:Name="InkCanvasExample2" ColumnDefinitions="*,240" ColumnSpacing="24">
+    <StackPanel Spacing="8">
+      <InkToolbar x:Name="sampleToolbar" AutomationProperties.Name="Drawing tools"
+                  ButtonFlyoutPlacement="Auto" InitialControls="None">
+        <InkToolbarBallpointPenButton x:Name="ballpointButton" AutomationProperties.Name="Ballpoint pen" />
+        <InkToolbarPencilButton x:Name="pencilButton" AutomationProperties.Name="Pencil" />
+        <InkToolbarHighlighterButton x:Name="highlighterButton" AutomationProperties.Name="Highlighter" />
+        <InkToolbarEraserButton x:Name="eraserButton" AutomationProperties.Name="Eraser" />
+      </InkToolbar>
+      <Border Height="280" MaxWidth="600" HorizontalAlignment="Stretch" Background="White"
+              BorderBrush="Gray" BorderThickness="1">
+        <InkCanvas x:Name="toolbarCanvas" AutomationProperties.Name="Toolbar drawing canvas" />
+      </Border>
+    </StackPanel>
+    <StackPanel Grid.Column="1" Spacing="8">
+      <TextBlock FontWeight="SemiBold" Text="Available tools" />
+      <TextBlock FontSize="12" Text="Ballpoint pen is always available." TextWrapping="Wrap" />
+      <CheckBox x:Name="showPencil" AutomationProperties.Name="Show pencil" Content="Pencil" IsChecked="True" />
+      <CheckBox x:Name="showHighlighter" AutomationProperties.Name="Show highlighter" Content="Highlighter" IsChecked="True" />
+      <CheckBox x:Name="showEraser" AutomationProperties.Name="Show eraser" Content="Eraser" IsChecked="True" />
+      <TextBlock Text="Active tool" />
+      <ComboBox x:Name="activeTool" HorizontalAlignment="Stretch" AutomationProperties.Name="Active tool"
+                SelectedIndex="0">
+        <ComboBoxItem Content="Ballpoint pen" Tag="BallpointPen" />
+        <ComboBoxItem Content="Pencil" Tag="Pencil" />
+        <ComboBoxItem Content="Highlighter" Tag="Highlighter" />
+        <ComboBoxItem Content="Eraser" Tag="Eraser" />
+      </ComboBox>
+      <TextBlock Text="Button flyout placement" />
+      <ComboBox x:Name="buttonFlyoutPlacement" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="Button flyout placement" SelectedIndex="0">
+        <ComboBoxItem Content="Auto" />
+        <ComboBoxItem Content="Top" />
+        <ComboBoxItem Content="Bottom" />
+        <ComboBoxItem Content="Left" />
+        <ComboBoxItem Content="Right" />
+      </ComboBox>
+      <Button x:Name="clearToolbar" AutomationProperties.Name="Clear toolbar drawing" Content="Clear drawing" />
+    </StackPanel>
+  </Grid>
+
+  <TextBlock Text="Save and restore ink strokes" FontSize="18" />
+  <Grid x:Name="InkCanvasExample3" ColumnDefinitions="*,240" ColumnSpacing="24">
+    <Border Height="280" MaxWidth="600" HorizontalAlignment="Stretch" Background="White"
+            BorderBrush="Gray" BorderThickness="1">
+      <InkCanvas x:Name="strokesCanvas" AutomationProperties.Name="Strokes drawing canvas" />
+    </Border>
+    <StackPanel Grid.Column="1" Spacing="8">
+      <TextBlock x:Name="strokeCount" Text="0 strokes on canvas" />
+      <Button x:Name="saveDrawing" AutomationProperties.Name="Save drawing" Content="Save drawing" />
+      <Button x:Name="clearStrokes" AutomationProperties.Name="Clear saved drawing canvas" Content="Clear canvas" />
+      <Button x:Name="restoreButton" AutomationProperties.Name="Restore saved drawing"
+              Content="Restore saved drawing" IsEnabled="False" />
+      <TextBlock x:Name="strokesStatus" FontSize="12" Text="Draw something, then save it." TextWrapping="Wrap" />
+    </StackPanel>
+  </Grid>
+</StackPanel>
