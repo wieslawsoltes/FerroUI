@@ -21,7 +21,7 @@ pub fn load_winui(
     design_mode: bool,
     options: &WinUIXamlOptions,
 ) -> Result<BoxedValue, XamlLoadError> {
-    // The migrated document names the x:Bind types of this crate.
+    // The migrated document names the types of the XAML runtime library (the x:Bind core).
     crate::register_types();
     let migrated = migrate_winui_xaml(xaml, options)
         .and_then(WinUIXamlMigration::into_xaml)

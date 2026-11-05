@@ -1280,7 +1280,7 @@
         },
         {
           "path": "samples/WinUIGallery/tests.rs",
-          "name": "winui_preview_uses_opt_in_public_loader_and_rejects_unported_bindings"
+          "name": "winui_preview_uses_opt_in_public_loader_and_compiles_x_bind"
         },
         {
           "path": "samples/WinUIGallery/tests.rs",

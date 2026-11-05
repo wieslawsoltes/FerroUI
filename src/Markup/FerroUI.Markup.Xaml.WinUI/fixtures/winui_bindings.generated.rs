@@ -18,29 +18,13 @@ pub type BuildDocument = fn(
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
     ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
-    ("fui0", &[("FerroUI.Markup.Xaml.WinUI", "")]),
     ("x", &[]),
 ];
 
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_1: rt::XmlNamespaceTable = &[
     ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
-    ("fui0", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
-    ("fui1", &[]),
-    ("fui2", &[("FerroUI.Markup.Xaml.WinUI", "")]),
-    ("x", &[]),
-];
-
-/// The XML namespaces of documents of this file, as the compiler resolved them.
-const XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
     ("fui0", &[("FerroUI.Controls", "")]),
-    ("x", &[]),
-];
-
-/// The XML namespaces of documents of this file, as the compiler resolved them.
-const XML_NAMESPACES_3: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
     ("x", &[]),
 ];
 
@@ -70,18 +54,13 @@ pub fn build_root_xaml(
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("initial")));
     rt::register_name_value(name_scope.as_ref(), "initial", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 4, 14)?;
     // root.xaml(4,31) Text
-    let win_ui_bind_extension_0 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
-    // root.xaml(4,31) Path
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Path(&win_ui_bind_extension_0, ::std::string::String::from("Tag"));
-    // root.xaml(4,31) Mode
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Mode(&win_ui_bind_extension_0, ::ferroui_base::data::BindingMode::OneTime);
-    // root.xaml(4,31) Scope
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Scope(&win_ui_bind_extension_0, ::ferroui_markup_xaml_winui::WinUIBindingScope::Root);
-    // root.xaml(4,31) SourceLine
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceLine(&win_ui_bind_extension_0, 4_i32);
-    // root.xaml(4,31) SourceColumn
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_0, 37_i32);
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &win_ui_bind_extension_0, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 4, 31)?;
+    let path_0 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.ferro_property(rt::property(::ferroui_controls::Control::tag_property()));
+        builder.build()
+    };
+    let x_bind_extension_0 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_0.clone());
+    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 4, 31)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 4, 31)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 4, 4)?;
@@ -96,18 +75,15 @@ pub fn build_root_xaml(
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
     rt::register_name_value(name_scope.as_ref(), "editor", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 5, 12)?;
     // root.xaml(5,28) Text
-    let win_ui_bind_extension_1 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
-    // root.xaml(5,28) Path
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Path(&win_ui_bind_extension_1, ::std::string::String::from("Tag"));
+    let path_1 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.ferro_property(rt::property(::ferroui_controls::Control::tag_property()));
+        builder.build()
+    };
+    let x_bind_extension_1 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_1.clone());
     // root.xaml(5,28) Mode
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Mode(&win_ui_bind_extension_1, ::ferroui_base::data::BindingMode::TwoWay);
-    // root.xaml(5,28) Scope
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Scope(&win_ui_bind_extension_1, ::ferroui_markup_xaml_winui::WinUIBindingScope::Root);
-    // root.xaml(5,28) SourceLine
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceLine(&win_ui_bind_extension_1, 5_i32);
-    // root.xaml(5,28) SourceColumn
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_1, 34_i32);
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &win_ui_bind_extension_1, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 5, 28)?;
+    ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_1, ::ferroui_base::data::BindingMode::TwoWay);
+    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 5, 28)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_1, 5, 28)?;
     context.pop_parent();
     rt::invoked(text_box_0.try_end_init(), 5, 4)?;
@@ -122,18 +98,15 @@ pub fn build_root_xaml(
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("mirror")));
     rt::register_name_value(name_scope.as_ref(), "mirror", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 6, 14)?;
     // root.xaml(6,30) Text
-    let win_ui_bind_extension_2 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
-    // root.xaml(6,30) Path
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Path(&win_ui_bind_extension_2, ::std::string::String::from("Tag"));
+    let path_2 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.ferro_property(rt::property(::ferroui_controls::Control::tag_property()));
+        builder.build()
+    };
+    let x_bind_extension_2 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_2.clone());
     // root.xaml(6,30) Mode
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Mode(&win_ui_bind_extension_2, ::ferroui_base::data::BindingMode::OneWay);
-    // root.xaml(6,30) Scope
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Scope(&win_ui_bind_extension_2, ::ferroui_markup_xaml_winui::WinUIBindingScope::Root);
-    // root.xaml(6,30) SourceLine
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceLine(&win_ui_bind_extension_2, 6_i32);
-    // root.xaml(6,30) SourceColumn
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_2, 36_i32);
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &win_ui_bind_extension_2, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 6, 30)?;
+    ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_2, ::ferroui_base::data::BindingMode::OneWay);
+    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 30)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 6, 30)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 6, 4)?;
@@ -151,7 +124,7 @@ fn build_root_xaml_untyped(
 }
 
 /// The base URI and the XML namespaces of `template.xaml`.
-static BUILD_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.WinUI.BindingFixture/template.xaml"), namespaces: XML_NAMESPACES_1 };
+static BUILD_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.WinUI.BindingFixture/template.xaml"), namespaces: XML_NAMESPACES_0 };
 
 /// Generated from `template.xaml`.
 pub fn build_template_xaml(
@@ -201,20 +174,15 @@ fn build_template_xaml_deferred_0(
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("initial")));
     rt::register_name_value(name_scope.as_ref(), "initial", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 6, 20)?;
     // template.xaml(6,37) Text
-    let win_ui_bind_extension_0 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
-    // template.xaml(6,37) Path
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Path(&win_ui_bind_extension_0, ::std::string::String::from("Content"));
-    // template.xaml(6,37) Mode
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Mode(&win_ui_bind_extension_0, ::ferroui_base::data::BindingMode::OneTime);
-    // template.xaml(6,37) Scope
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Scope(&win_ui_bind_extension_0, ::ferroui_markup_xaml_winui::WinUIBindingScope::Template);
-    // template.xaml(6,37) SourceLine
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceLine(&win_ui_bind_extension_0, 6_i32);
-    // template.xaml(6,37) SourceColumn
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_0, 43_i32);
+    let path_0 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.ferro_property(rt::property(::ferroui_controls::ContentControl::content_property()));
+        builder.build()
+    };
+    let x_bind_extension_0 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_0.clone());
     // template.xaml(6,37) DataType
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_DataType(&win_ui_bind_extension_0, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &win_ui_bind_extension_0, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 6, 37)?;
+    ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_0, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
+    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_0, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 6, 37)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 6, 37)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 6, 10)?;
@@ -229,22 +197,19 @@ fn build_template_xaml_deferred_0(
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
     rt::register_name_value(name_scope.as_ref(), "editor", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 7, 18)?;
     // template.xaml(7,34) Text
-    let win_ui_bind_extension_1 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
-    // template.xaml(7,34) Path
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Path(&win_ui_bind_extension_1, ::std::string::String::from("Content"));
+    let path_1 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.ferro_property(rt::property(::ferroui_controls::ContentControl::content_property()));
+        builder.build()
+    };
+    let x_bind_extension_1 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_1.clone());
     // template.xaml(7,34) Mode
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Mode(&win_ui_bind_extension_1, ::ferroui_base::data::BindingMode::TwoWay);
-    // template.xaml(7,34) Scope
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Scope(&win_ui_bind_extension_1, ::ferroui_markup_xaml_winui::WinUIBindingScope::Template);
-    // template.xaml(7,34) SourceLine
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceLine(&win_ui_bind_extension_1, 7_i32);
-    // template.xaml(7,34) SourceColumn
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_1, 40_i32);
-    // template.xaml(7,34) DataType
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_DataType(&win_ui_bind_extension_1, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
+    ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_1, ::ferroui_base::data::BindingMode::TwoWay);
     // template.xaml(7,34) UpdateSourceTrigger
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_UpdateSourceTrigger(&win_ui_bind_extension_1, ::ferroui_base::data::UpdateSourceTrigger::PropertyChanged);
-    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &win_ui_bind_extension_1, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 7, 34)?;
+    ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_UpdateSourceTrigger(&x_bind_extension_1, ::ferroui_base::data::UpdateSourceTrigger::PropertyChanged);
+    // template.xaml(7,34) DataType
+    ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_1, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
+    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &x_bind_extension_1, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 7, 34)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_1, 7, 34)?;
     context.pop_parent();
     rt::invoked(text_box_0.try_end_init(), 7, 10)?;
@@ -259,20 +224,17 @@ fn build_template_xaml_deferred_0(
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("mirror")));
     rt::register_name_value(name_scope.as_ref(), "mirror", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 8, 20)?;
     // template.xaml(8,36) Text
-    let win_ui_bind_extension_2 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
-    // template.xaml(8,36) Path
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Path(&win_ui_bind_extension_2, ::std::string::String::from("Content"));
+    let path_2 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.ferro_property(rt::property(::ferroui_controls::ContentControl::content_property()));
+        builder.build()
+    };
+    let x_bind_extension_2 = ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_new_1(path_2.clone());
     // template.xaml(8,36) Mode
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Mode(&win_ui_bind_extension_2, ::ferroui_base::data::BindingMode::OneWay);
-    // template.xaml(8,36) Scope
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_Scope(&win_ui_bind_extension_2, ::ferroui_markup_xaml_winui::WinUIBindingScope::Template);
-    // template.xaml(8,36) SourceLine
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceLine(&win_ui_bind_extension_2, 8_i32);
-    // template.xaml(8,36) SourceColumn
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_2, 42_i32);
+    ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_Mode(&x_bind_extension_2, ::ferroui_base::data::BindingMode::OneWay);
     // template.xaml(8,36) DataType
-    ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_DataType(&win_ui_bind_extension_2, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &win_ui_bind_extension_2, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 8, 36)?;
+    ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_set_DataType(&x_bind_extension_2, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
+    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &x_bind_extension_2, ::ferroui_markup_xaml::markup_extensions::XBindExtension::__markup_ProvideValue_0, 8, 36)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 8, 36)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 8, 10)?;
@@ -289,7 +251,7 @@ fn build_template_xaml_untyped(
 }
 
 /// The base URI and the XML namespaces of `navigation.xaml`.
-static BUILD_NAVIGATION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.WinUI.BindingFixture/navigation.xaml"), namespaces: XML_NAMESPACES_2 };
+static BUILD_NAVIGATION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.WinUI.BindingFixture/navigation.xaml"), namespaces: XML_NAMESPACES_1 };
 
 /// Generated from `navigation.xaml`.
 pub fn build_navigation_xaml(
@@ -443,7 +405,7 @@ fn build_navigation_xaml_untyped(
 }
 
 /// The base URI and the XML namespaces of `native_controls.xaml`.
-static BUILD_NATIVE_CONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.WinUI.BindingFixture/native_controls.xaml"), namespaces: XML_NAMESPACES_3 };
+static BUILD_NATIVE_CONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.WinUI.BindingFixture/native_controls.xaml"), namespaces: XML_NAMESPACES_0 };
 
 /// Generated from `native_controls.xaml`.
 pub fn build_native_controls_xaml(

@@ -18,6 +18,8 @@ relative to `src/XamlCompiler` of that checkout unless they start with another d
 
 ### 1.1 The WinUI side (`ferroui-markup-xaml-winui`)
 
+As it was before X6, which removed the adapter and moved the importer onto the core (section 3.6):
+
 - **The adapter** (`src/Markup/FerroUI.Markup.Xaml.WinUI/bindings/`): `WinUIBindExtension`
   (`binding.rs`; `Path` as a string, `Mode`, `Scope`, `DataType`, `UpdateSourceTrigger`,
   `SourceLine`, `SourceColumn`), `WinUIBinding` (the binding of a target), `WinUIBindings`
@@ -142,7 +144,7 @@ two back ends, step by step.
   root object of the document (`IRootObjectProvider::root_object`), or, with a `DataType`, the root
   of the template instance (`intermediate_root_object`).
 - `x:Bind` (the XAML language namespace) is mapped onto it by the compiler, as `{Binding}` is
-  mapped onto `CompiledBinding`. The WinUI importer writes `x:Bind` unchanged once X6 lands.
+  mapped onto `CompiledBinding`. The WinUI importer writes `x:Bind` unchanged since X6.
 
 ### 3.2 The compiler
 
@@ -235,6 +237,46 @@ adapter (`WinUIBindExtension`, `WinUIBinding`, `WinUIBindingScope`, `WinUIBindin
 with `WinUIXBindPolicy` reduced to `Reject` and `Compile` (or removed, see section 6), and the
 diagnostics `WXAML1007` and `WXAML2004` are dropped except for forms WinUI rejects. The compiled
 fixture of the WinUI crate is regenerated from the core.
+
+As done:
+
+- **The importer** (`importer/migration.rs`). With `WinUIXBindPolicy::Compile`, the default, an
+  x:Bind (in the XAML language namespace, whatever its prefix) is kept as written; its nested
+  extensions are migrated as every other value is (a `{ThemeResource}` of a `TargetNullValue`
+  follows the `ThemeResource` policy). The directives `x:Phase`, `x:DefaultBindMode`, `x:Load`
+  and `x:DeferLoadStrategy` are kept (`WXAML1002` remains for `x:Uid`). The one form the
+  importer reports is an x:Bind nested in an x:Bind (`WXAML1007`, `Nested x:Bind expressions are
+  not supported`, WinUI's `XamlDomValidator.ProcessXBindPropertyNode`, WMC1122), with WinUI's
+  message for the whole form instead of the core's message for one of its parameters. Everything else WinUI rejects is rejected by the core with WinUI's
+  message (section 3.7). With
+  `WinUIXBindPolicy::Reject` every x:Bind is `WXAML1007`. The x:DataType of a template keeps its
+  type mapping; the extension needs no `DataType` written by the importer, the compiler reads the
+  template's (section 3.2). The importer does not map WinUI member names inside an x:Bind path
+  (a `ToggleSwitch.IsOn` in a path is not renamed to `IsChecked`): the path is resolved against
+  the FerroUI types, and a member that does not exist is the compiler's error.
+- **What WinUI rejects and the core accepts**: x:Bind without code-behind
+  (`XamlCompiler_XBindWithoutCodeBehind`) and a path that starts with an attached property. Both
+  are the superset of section 3.2, decided for both dialects, and an imported document without
+  `x:Class` binds to its root element. A valid WinUI document is unaffected.
+- **Removed** from `ferroui-markup-xaml-winui` (a preview release): `WinUIBindExtension`,
+  `WinUIBinding`, `WinUIBindingScope`, `WinUIBindings`, `WinUIBindingDiagnostic`,
+  `WinUIBindingErrors`, the nodes `RootGate` and `PathNode`, their markup metadata, value types and
+  Rust paths, `WinUIXBindPolicy::PropertyPathsWithExplicitLifecycle`, the diagnostic `WXAML2004`
+  and the WinUI event-target table (`importer/event_targets.rs` and its generator
+  `scripts/winui-gallery/event_targets.py`), whose only user rejected an x:Bind of an event. A
+  host that called `WinUIBindings::initialize` uses `XBindings::get_for_root(&root)` of
+  `ferroui_markup_xaml::markup_extensions` (`initialize`, `update`, `stop_tracking`), or relies on
+  the initialization on attach (a window on activation) and, for a template instance, on its data
+  context.
+- **Tests.** `compiled_tests.rs` runs `fixtures/winui_root.xaml` and `fixtures/winui_template.xaml`
+  through the interpreter and the emitter on the core (the root initialized explicitly while it
+  is not in a tree, `Update`, `StopTracking`; the template instance read when its data context
+  changes); `x_bind_tests.rs` (in place of `bindings_tests.rs`) loads WinUI documents on the core:
+  initialization on attach, the release of the root, `x:DefaultBindMode`, `x:Load` and
+  `x:DeferLoadStrategy`, `x:Phase` through the template component, the core's WinUI-worded
+  diagnostics as load errors and the `Reject` policy; `importer_tests.rs` checks that every form
+  is kept as written and idempotent, the nested x:Bind, the `Reject` policy and the directives.
+  The WinUI Gallery's preview loads an x:Bind on the core.
 
 ### 3.7 Diagnostics
 
@@ -493,7 +535,7 @@ of their forms (`BasicTests`, `TwoWayTests` in X1; `FunctionTests`, `CastingTest
 | X3 | `Converter`, `ConverterParameter`, `ConverterLanguage`, `FallbackValue`, `TargetNullValue` on `XBindExtension`, into the expression options; their WinUI checks. **Done** (section 3.10) | additions | low: the engine already has the options | converter, fallback and null-value cases of `TwoWayTests` and `NullableTests`; diagnostics |
 | X4 | Event binding: `Click="{x:Bind Model.OnClick}"`, a method with the event's signature, none, or a base signature; the emitter writes a typed handler, the interpreter an invoker; the handler reads its path when the event is raised, as WinUI's does. **Done** (section 3.11) | additions | medium: the event assignment path of the compiler (`FerroXamlIlTransformRoutedEvent`) gains a binding form | `EventTests` behaviours; the signature diagnostic |
 | X5 | `x:DefaultBindMode` (element and subtree); `x:Phase` through `IDataTemplateComponent` (`XBindings` implements `ProcessBindings` and `Recycle`; the contract moves from `ferroui-controls-repeater` to `ferroui-controls` so that the markup library can implement it, with a re-export); `x:Load`; x:Bind in a `ControlTemplate` with `TargetType`; `Window` roots on `Activated`. **Done** (section 3.12) | additions (`DeferredElement`, `XamlBindingHelper`, `XBindExtension::Phase` and `TargetType`); a moved trait (re-exported) | medium: phasing touches ItemsRepeater recycling | `PhasingTests` and `ListAndTemplateTests` behaviours; deferred load; the template root |
-| X6 | The WinUI importer onto the core: x:Bind kept as written, validation only for forms WinUI rejects; the adapter and its diagnostics removed; `winui-controls.md` 10.6 rows updated; the WinUI compiled fixture regenerated | removals in `ferroui-markup-xaml-winui` (a preview release) | medium: the Gallery and calculator pages that use x:Bind move to the core | the WinUI crate's compiled tests on the core; the importer's remaining diagnostics |
+| X6 | The WinUI importer onto the core: x:Bind kept as written, validation only for forms WinUI rejects; the adapter and its diagnostics removed; `winui-controls.md` 10.6 rows updated; the WinUI compiled fixture regenerated. **Done** (section 3.6) | removals in `ferroui-markup-xaml-winui` (a preview release) | medium: the Gallery and calculator pages that use x:Bind move to the core | the WinUI crate's compiled tests on the core; the importer's remaining diagnostics |
 | X7 | Validation and documentation: the WinUI Gallery (#418) and calculator (#443) pages that use x:Bind load and run without the adapter; hot reload calls `update` on a repopulated root; migration notes; the typed accessor of the bindings of a class document (`MyPage::bindings()`, section 6) | additions | low | gallery and calculator tests; hot reload test |
 
 ## 5. Not in scope
@@ -544,6 +586,8 @@ Decided (2026-11-03, on the merits, as the owner asked for the open decisions of
 - **X3** (converters, fallback and target null values) is done: section 3.10.
 - **X4** (event binding) is done: section 3.11.
 - **X5** (`x:DefaultBindMode`, `x:Phase`, `x:Load`, control templates, windows) is done:
-  section 3.12. The WinUI importer still reports `x:Phase`, `x:DefaultBindMode` and `x:Load`
-  of WinUI documents (`WXAML1002`) and sends their x:Bind to its adapter; native FerroUI
-  documents are not touched. The next step is X6.
+  section 3.12.
+- **X6** (the WinUI importer onto the core) is done: section 3.6. WinUI documents keep their
+  x:Bind and its directives, and the core compiles them as it compiles native FerroUI documents;
+  the adapter of `ferroui-markup-xaml-winui`, `WXAML2004` and the event-target table are removed,
+  and `WXAML1007` remains for the `Reject` policy and a nested x:Bind. The next step is X7.

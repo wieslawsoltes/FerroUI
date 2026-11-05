@@ -29,7 +29,7 @@
 //! | `themes_macos` | `ferroui-themes-macos` | `macos-theme` | no |
 //! | `themes_material` | `ferroui-themes-material` | `material-theme` | no |
 //! | `markup_xaml`, `markup_xaml_loader` | `ferroui-markup-xaml`, `ferroui-markup-xaml-loader` (run-time loading) | `xaml` | no |
-//! | `markup_xaml_winui` | `ferroui-markup-xaml-winui` (the WinUI XAML importer and x:Bind) | `winui-xaml` | no |
+//! | `markup_xaml_winui` | `ferroui-markup-xaml-winui` (the WinUI XAML importer and its loading entry points) | `winui-xaml` | no |
 //! | `controls_color_picker` | `ferroui-controls-color-picker` | `color-picker` | no |
 //! | `controls_charts` | `ferroui-controls-charts` | `charts` | no |
 //! | `controls_inking` | `ferroui-controls-inking` | `inking` | no |
