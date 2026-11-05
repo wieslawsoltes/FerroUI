@@ -3,7 +3,7 @@
 
 use super::group_on::SuspendTracker;
 use crate::cache::{Change, ChangeAwareCache, ChangeReason, ChangeSet, Group, GroupChangeSet, ICache, IObservableCache, IQuery};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObserver};
 use std::collections::HashMap;
 use std::hash::Hash;
@@ -56,7 +56,7 @@ pub(crate) struct DynamicGrouper<T, K, G> {
     group_keys: HashMap<K, G>,
     /// The groups that became empty (`_emptyGroups`, a set of groups by group key, enumerated in
     /// .NET's order).
-    empty_groups: Dictionary<G, Group<T, K, G>>,
+    empty_groups: SlotOrderMap<G, Group<T, K, G>>,
     suspend_tracker: SuspendTracker<G>,
     group_selector: Option<DynamicGroupSelector<T, K, G>>,
 }
@@ -65,7 +65,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 
     /// A grouper with a selector of group keys, or one whose group keys are given
     /// (`DynamicGrouper(Func<TObject, TKey, TGroupKey>? groupSelector = null)`).
     pub(crate) fn new(group_selector: Option<DynamicGroupSelector<T, K, G>>) -> Self {
-        Self { group_cache: ChangeAwareCache::new(), group_keys: HashMap::new(), empty_groups: Dictionary::new(), suspend_tracker: SuspendTracker::new(), group_selector }
+        Self { group_cache: ChangeAwareCache::new(), group_keys: HashMap::new(), empty_groups: SlotOrderMap::new(), suspend_tracker: SuspendTracker::new(), group_selector }
     }
 
     /// Puts the item of `key` in the group of `group_key` (`AddOrUpdate`); with `emit`, the changes

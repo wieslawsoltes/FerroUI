@@ -5,7 +5,7 @@ use crate::cache::{Change, ChangeReason, ChangeSet, IConnectableCache, IObservab
 use ferroui_reactive::disposables::{CompositeDisposable, Disposable};
 use ferroui_reactive::subjects::BehaviorSubject;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable, IObserver};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -50,7 +50,7 @@ pub(crate) fn tree_builder<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(
         let grouped_by_pivot = Rc::new(RefCell::new(PivotGroups::<T, K>::new()));
 
         // The nodes that are in the tree, to dispose those that leave it (`DisposeMany`).
-        let tracked = Rc::new(RefCell::new(Dictionary::<K, Rc<Node<T, K>>>::new()));
+        let tracked = Rc::new(RefCell::new(SlotOrderMap::<K, Rc<Node<T, K>>>::new()));
 
         // As the nodes change, keep their parents and children.
         let (setter_nodes, setter_groups, setter_pivot, setter_re_filter, setter_tracked) =
@@ -210,7 +210,7 @@ fn update_children<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(grouped_b
 }
 
 /// `DisposeMany`: a node is disposed when it is removed or replaced by another.
-fn dispose_many<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(tracked: &RefCell<Dictionary<K, Rc<Node<T, K>>>>, changes: &ChangeSet<Rc<Node<T, K>>, K>) {
+fn dispose_many<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(tracked: &RefCell<SlotOrderMap<K, Rc<Node<T, K>>>>, changes: &ChangeSet<Rc<Node<T, K>>, K>) {
     for change in changes {
         match change.reason() {
             ChangeReason::Add | ChangeReason::Update => {
@@ -251,7 +251,7 @@ fn group_by<'a, T, K, G: PartialEq>(changes: &'a ChangeSet<T, K>, group_key: imp
 /// group of each node. Only the nodes of a group are enumerated: the groups and the group of each
 /// node are looked up by key.
 struct PivotGroups<T, K> {
-    groups: HashMap<K, Dictionary<K, Rc<Node<T, K>>>>,
+    groups: HashMap<K, SlotOrderMap<K, Rc<Node<T, K>>>>,
     item_groups: HashMap<K, K>,
 }
 
@@ -269,7 +269,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> PivotGroups<T, K> {
     fn update(&mut self, changes: &ChangeSet<Rc<Node<T, K>>, K>, pivot_on: &dyn Fn(&T) -> K) {
         for (group_key, group) in group_by(changes, |change| pivot_on(change.current().item())) {
             if !self.groups.contains_key(&group_key) {
-                self.groups.insert(group_key.clone(), Dictionary::new());
+                self.groups.insert(group_key.clone(), SlotOrderMap::new());
             }
             for change in group {
                 let key = change.key();
@@ -317,9 +317,9 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> PivotGroups<T, K> {
     }
 
     /// The group of `group_key`, made when it is not there (`GetCache`).
-    fn group_mut(&mut self, group_key: &K) -> &mut Dictionary<K, Rc<Node<T, K>>> {
+    fn group_mut(&mut self, group_key: &K) -> &mut SlotOrderMap<K, Rc<Node<T, K>>> {
         if !self.groups.contains_key(group_key) {
-            self.groups.insert(group_key.clone(), Dictionary::new());
+            self.groups.insert(group_key.clone(), SlotOrderMap::new());
         }
         self.groups.get_mut(group_key).expect("the group was made")
     }

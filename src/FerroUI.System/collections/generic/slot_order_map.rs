@@ -1,19 +1,25 @@
-//! `Dictionary<TKey, TValue>`, with the order of enumeration of .NET.
+//! `SlotOrderMap<K, V>`: the port of `Dictionary<TKey, TValue>`, with the order of enumeration of
+//! .NET.
 
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
 
-/// A map from keys to values that enumerates its entries in the order of .NET's
+/// A map from keys to values that enumerates its entries in the order of the slots of .NET's
 /// `Dictionary<TKey, TValue>`: in the order they were added, except that an entry added after a
-/// removal takes the place of the entry removed last (the free list of .NET), and `clear` starts
+/// removal takes the slot of the entry removed last (the free list of .NET), and `clear` starts
 /// over.
 ///
 /// Code ported from .NET that enumerates a dictionary (its keys, values, or a `Select` over it)
-/// produces the same sequence with this type; `HashMap` would give an arbitrary one.
+/// produces the same sequence with this type. `HashMap` gives an arbitrary order, and
+/// `indexmap::IndexMap` the order of addition, which differs from this one after a removal (with
+/// `shift_remove` and with `swap_remove`): use `HashMap` where nothing enumerates the map,
+/// `IndexMap` where the order of addition is what is observed, and this type only where the exact
+/// .NET sequence after removals is (the caches of DynamicData, whose change sets list their items
+/// in it).
 #[derive(Clone)]
-pub struct Dictionary<K, V> {
+pub struct SlotOrderMap<K, V> {
     /// The entries by slot; a removed entry leaves a hole that the free list reuses.
     entries: Vec<Option<(K, V)>>,
     /// The slots of the removed entries, the one removed last at the end (`_freeList`).
@@ -22,19 +28,19 @@ pub struct Dictionary<K, V> {
     index: HashMap<K, usize>,
 }
 
-impl<K, V> Default for Dictionary<K, V> {
+impl<K, V> Default for SlotOrderMap<K, V> {
     fn default() -> Self {
         Self { entries: Vec::new(), free: Vec::new(), index: HashMap::new() }
     }
 }
 
-impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Dictionary<K, V> {
+impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for SlotOrderMap<K, V> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_map().entries(self.iter()).finish()
     }
 }
 
-impl<K, V> Dictionary<K, V> {
+impl<K, V> SlotOrderMap<K, V> {
     /// The entries in the order of enumeration.
     pub fn iter(&self) -> impl Iterator<Item = (&K, &V)> {
         self.entries.iter().filter_map(|entry| entry.as_ref().map(|(key, value)| (key, value)))
@@ -56,13 +62,13 @@ impl<K, V> Dictionary<K, V> {
     }
 }
 
-impl<K: Eq + Hash + Clone, V> Dictionary<K, V> {
-    /// An empty dictionary.
+impl<K: Eq + Hash + Clone, V> SlotOrderMap<K, V> {
+    /// An empty map.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// An empty dictionary with room for `capacity` entries.
+    /// An empty map with room for `capacity` entries.
     pub fn with_capacity(capacity: usize) -> Self {
         Self { entries: Vec::with_capacity(capacity), free: Vec::new(), index: HashMap::with_capacity(capacity) }
     }
@@ -76,7 +82,7 @@ impl<K: Eq + Hash + Clone, V> Dictionary<K, V> {
         self.index.is_empty()
     }
 
-    /// Whether the dictionary has `key` (`ContainsKey`).
+    /// Whether the map has `key` (`ContainsKey`).
     pub fn contains_key<Q: Hash + Eq + ?Sized>(&self, key: &Q) -> bool
     where
         K: Borrow<Q>,
@@ -160,18 +166,28 @@ impl<K: Eq + Hash + Clone, V> Dictionary<K, V> {
 
 }
 
-impl<K: Eq + Hash + Clone, V> FromIterator<(K, V)> for Dictionary<K, V> {
+impl<K: Eq + Hash + Clone, V> FromIterator<(K, V)> for SlotOrderMap<K, V> {
     /// The entries in order; a key given twice keeps its first place and its last value.
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
-        let mut dictionary = Self::new();
+        let mut map = Self::new();
         for (key, value) in iter {
-            dictionary.insert(key, value);
+            map.insert(key, value);
         }
-        dictionary
+        map
     }
 }
 
-impl<K: Eq + Hash + Clone, V> Extend<(K, V)> for Dictionary<K, V> {
+impl<K, V> IntoIterator for SlotOrderMap<K, V> {
+    type Item = (K, V);
+    type IntoIter = std::iter::Flatten<std::vec::IntoIter<Option<(K, V)>>>;
+
+    /// The entries in the order of enumeration, giving up the map.
+    fn into_iter(self) -> Self::IntoIter {
+        self.entries.into_iter().flatten()
+    }
+}
+
+impl<K: Eq + Hash + Clone, V> Extend<(K, V)> for SlotOrderMap<K, V> {
     fn extend<I: IntoIterator<Item = (K, V)>>(&mut self, iter: I) {
         for (key, value) in iter {
             self.insert(key, value);
@@ -179,7 +195,7 @@ impl<K: Eq + Hash + Clone, V> Extend<(K, V)> for Dictionary<K, V> {
     }
 }
 
-impl<K: Eq + Hash + Clone, V: PartialEq> PartialEq for Dictionary<K, V> {
+impl<K: Eq + Hash + Clone, V: PartialEq> PartialEq for SlotOrderMap<K, V> {
     /// The same entries, whatever their order.
     fn eq(&self, other: &Self) -> bool {
         self.len() == other.len() && self.iter().all(|(key, value)| other.get(key) == Some(value))

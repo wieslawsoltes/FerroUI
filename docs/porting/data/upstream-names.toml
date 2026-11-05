@@ -647,3 +647,20 @@ kind = "member"
 phase = "C5"
 behaviour = "deviation"
 notes = "Step L2. The tag is parsed into a Locale and the culture is the culture of the locale; a text that is no BCP-47 tag is refused (None, the error Culture IETF Name ... is not a recognized IETF name. of CultureInfoIetfLanguageTagConverter, the converter of ConverterCulture and of every CultureInfo and Locale property in markup), x-private and en_US besides the old names zh-CHT and zh-CHS and es-ES_tradnl. CultureInfoIetfLanguageTagConverter::convert_to_locale gives the locale. Deviation: DEVIATIONS.md, Bindings."
+
+[[name]]
+upstream = "System.Collections.Generic.Dictionary`2 (the order of its slots)"
+rust = "ferroui_system::collections::generic::SlotOrderMap"
+kind = "type"
+phase = "C5"
+deprecated = "ferroui_system::collections::generic::Dictionary"
+behaviour = "test"
+notes = "Step X1 (decision O6). The port that enumerates in the order of .NET's slots and free list: an entry added after a removal takes the slot of the one removed last (slot_order_map_tests of ferroui-system). It stays where that sequence is observable, inside the caches of DynamicData, whose change sets list their items in it. The markup name System.Collections.Generic.Dictionary`2 of the dock's locator maps is unchanged, and the BSON Dictionary of the remote protocol, a wire type, keeps its name."
+
+[[name]]
+upstream = "System.Collections.Generic.Dictionary`2 (in a public signature)"
+rust = "std::collections::HashMap, indexmap::IndexMap"
+kind = "mechanism"
+phase = "C5"
+behaviour = "test"
+notes = "Step X1 (section 3.7). HashMap where nothing depends on the order: the dock's DockableControlMap, DockableObjectMap, ContextLocatorMap, HostWindowLocatorMap and DockableLocatorMap. IndexMap where a caller enumerates in the order of addition: IObservableCache.KeyValues of DynamicData (re-exported as ferroui_dynamic_data::IndexMap; built in the order of the cache, so unchanged), the dictionary of ChangeAwareCache's constructor and into_dictionary, and the dock's DockTargetOperations (the order of the hit test). ChangeAwareCache.GetDictionary is internal, as upstream. Add is insert of a new key; a removal from an IndexMap is shift_remove or swap_remove."

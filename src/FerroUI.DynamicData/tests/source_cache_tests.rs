@@ -114,3 +114,20 @@ fn a_panicking_edit_ends_the_edit_for_deferred_connections() {
     let (log, _subscription) = record(&cache.connect());
     assert_eq!(*log.borrow(), vec![vec![(ChangeReason::Add, 1)]]);
 }
+
+#[test]
+fn key_values_are_in_the_order_of_the_items() {
+    let cache = SourceCache::new(|x: &i32| *x);
+    cache.edit(|u| {
+        for x in [5, 1, 9, 3] {
+            u.add_or_update(x);
+        }
+    });
+    cache.edit(|u| u.remove_key(&1));
+    cache.edit(|u| u.add_or_update(7));
+    // 7 takes the slot of 1, as in .NET's dictionary.
+    assert_eq!(cache.keys(), vec![5, 7, 9, 3]);
+    let key_values = cache.key_values();
+    assert_eq!(key_values.keys().copied().collect::<Vec<_>>(), cache.keys());
+    assert_eq!(key_values.get(&7), Some(&7));
+}

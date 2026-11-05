@@ -5,7 +5,7 @@ use super::dynamic_grouper::DynamicGrouper;
 use crate::cache::{ChangeReason, ChangeSet, GroupChangeSet};
 use ferroui_reactive::disposables::SingleAssignmentDisposable;
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::hash::Hash;
@@ -45,7 +45,7 @@ struct Subscription<T, K, G> {
     select_group: GroupObservableSelector<T, K, G>,
     observer: Rc<dyn IObserver<GroupChangeSet<T, K, G>>>,
     /// The subscriptions of the children by the key of their parent (`KeyedDisposable<TKey>`).
-    child_subscriptions: RefCell<Dictionary<K, Rc<SingleAssignmentDisposable>>>,
+    child_subscriptions: RefCell<SlotOrderMap<K, Rc<SingleAssignmentDisposable>>>,
     parent_subscription: Rc<SingleAssignmentDisposable>,
     /// The subscriptions that have not ended: the parent and the children (`_subscriptionCounter`).
     subscription_counter: Cell<usize>,
@@ -62,7 +62,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 
             grouper: RefCell::new(DynamicGrouper::new(None)),
             select_group,
             observer,
-            child_subscriptions: RefCell::new(Dictionary::new()),
+            child_subscriptions: RefCell::new(SlotOrderMap::new()),
             parent_subscription: SingleAssignmentDisposable::new(),
             // It starts at 1, for the subscription to the parent.
             subscription_counter: Cell::new(1),
