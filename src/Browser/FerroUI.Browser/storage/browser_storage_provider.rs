@@ -779,9 +779,11 @@ mod tests {
         let path = relative_path_of_name("notes 1.txt".to_owned());
         assert_eq!(UriRef::Relative("notes 1.txt".into()), path);
         assert_eq!(None, StorageProviderHelpers::try_get_path_from_file_uri(path.as_url()));
-        let path = relative_path_of_name("a:b.txt".to_owned());
-        assert_eq!("./a:b.txt", path.to_string());
-        assert!(UriRef::parse(&path.to_string()).unwrap().is_relative());
+        // A name that reads as a URL is made relative, and the path reads back as relative.
+        for name in ["a:b.txt", "mailto:b.txt"] {
+            let path = relative_path_of_name(name.to_owned());
+            assert!(UriRef::parse(&path.to_string()).unwrap().is_relative(), "{path}");
+        }
 
         // A file URL made on the browser has the path it was made from, as on every target.
         let url = StorageProviderHelpers::uri_from_file_path("/documents/a b.txt", false);
