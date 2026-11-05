@@ -8,7 +8,7 @@ use ferroui_base::platform::storage::{
     WellKnownFolder,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{Ref, Vector};
 use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};
 use ferroui_controls::{Control, Window};
@@ -65,8 +65,8 @@ impl IStorageItem for MemoryFile {
         "Saved.xaml".into()
     }
 
-    fn path(&self) -> Uri {
-        Uri::absolute(SAVED_URI).unwrap()
+    fn path(&self) -> UriRef {
+        UriRef::parse(SAVED_URI).unwrap()
     }
 
     fn get_basic_properties_async(&self) -> LocalBoxFuture<StorageItemProperties> {
@@ -202,14 +202,14 @@ impl IStorageProvider for SaveProvider {
 
     fn try_get_file_from_path_async(
         &self,
-        path: &Uri,
+        path: &url::Url,
     ) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
         self.fallback.try_get_file_from_path_async(path)
     }
 
     fn try_get_folder_from_path_async(
         &self,
-        path: &Uri,
+        path: &url::Url,
     ) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
         self.fallback.try_get_folder_from_path_async(path)
     }
