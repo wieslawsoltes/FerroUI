@@ -288,6 +288,7 @@ control_tests! {
     drop_down_button => "DropDownButton";
     expander => "Expander";
     numeric_up_down => "NumericUpDown";
+    pager_control => "PagerControl";
     pips_pager => "PipsPager";
     refresh_container => "RefreshContainer";
     refresh_visualizer => "RefreshVisualizer";
@@ -551,6 +552,62 @@ fn the_input_controls_get_their_parts_and_resources_from_the_theme() {
     assert_eq!(8.0, background.spacing());
     assert_eq!(5, background.children().count());
     assert_eq!(16.0, background.children().get(0).bounds().width);
+    window.close();
+}
+
+/// WinUI's PagerControl (`Controls/PagerControl.xaml`; docs/porting/winui-controls.md, G2) gets
+/// the parts its code looks up from the theme: the display mode shows the combo box below ten
+/// pages, the number panel shows its buttons in the theme of the number panel buttons, and the
+/// indicator sits under the button of the selected page.
+#[test]
+fn the_pager_control_gets_its_parts_and_states_from_the_theme() {
+    use ferroui_controls::{Button, ComboBox, ItemsControl, PagerControl, PagerControlDisplayMode, StackPanel};
+
+    let _app = start_themed_application();
+    let combo_pager = PagerControl::new();
+    combo_pager.set_number_of_pages(5);
+    let panel_pager = PagerControl::new();
+    panel_pager.set_number_of_pages(20);
+    panel_pager.set_display_mode(PagerControlDisplayMode::ButtonPanel);
+    let panel = StackPanel::new();
+    panel.children().add(&combo_pager);
+    panel.children().add(&panel_pager);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    let combo_box = part(&combo_pager, "ComboBoxDisplay").cast::<ComboBox>().expect("a combo box");
+    assert!(combo_box.is_visible());
+    assert_eq!(5, combo_box.item_count());
+    assert_eq!(0, combo_box.selected_index());
+    assert!(!part(&combo_pager, "NumberBoxDisplay").is_visible());
+    let first = part(&combo_pager, "FirstPageButton").cast::<Button>().expect("a button");
+    assert!(!first.is_enabled());
+    assert!(part(&combo_pager, "NextPageButton").cast::<Button>().expect("a button").is_enabled());
+    assert_eq!(40.0, first.bounds().width);
+
+    panel_pager.set_selected_page_index(2);
+    window.update_layout();
+    assert!(!part(&panel_pager, "BoxPanels").is_visible());
+    let repeater = part(&panel_pager, "NumberPanelItemsRepeater").cast::<ItemsControl>().expect("an items control");
+    assert!(repeater.is_visible());
+    // 1 2 3 4 5 ... 20
+    assert_eq!(7, repeater.item_count());
+    let button = panel_pager.template_settings().number_panel_items().get(0).cast::<Button>().expect("a button");
+    // PagerControlNumberPanelButtonWidth
+    assert_eq!(32.0, button.min_width());
+    let indicator = part(&panel_pager, "NumberPanelCurrentPageIndicator");
+    assert!(indicator.is_visible());
+    let container = repeater.container_from_index(2).expect("the container of page 3");
+    assert_eq!(container.bounds().width, indicator.bounds().width);
     window.close();
 }
 

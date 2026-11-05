@@ -30,6 +30,7 @@ mod expander_automation_peer;
 mod foundation_automation_peer_tests;
 mod image_automation_peer;
 mod info_bar_automation_peer;
+mod pager_control_automation_peer;
 mod title_bar_automation_peer;
 mod interop_automation_peer;
 #[cfg(test)]
@@ -115,6 +116,7 @@ pub use embeddable_control_root_automation_peer::EmbeddableControlRootAutomation
 pub use expander_automation_peer::ExpanderAutomationPeer;
 pub use image_automation_peer::ImageAutomationPeer;
 pub use info_bar_automation_peer::InfoBarAutomationPeer;
+pub use pager_control_automation_peer::PagerControlAutomationPeer;
 pub use title_bar_automation_peer::TitleBarAutomationPeer;
 pub use interop_automation_peer::InteropAutomationPeer;
 pub use items_control_automation_peer::{

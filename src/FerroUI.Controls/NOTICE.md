@@ -168,6 +168,11 @@ under the same license. The RTF charset-to-code-page table was checked against
 (`controls/dev/RadioButtons` and `controls/dev/RatingControl` at the same commit), under the
 same license.
 
+`pager_control.rs`, `primitives/pager_control_template_settings.rs` and
+`automation/peers/pager_control_automation_peer.rs` (WinUI's `PagerControl`, its template
+settings, enumerations, event arguments and automation peer) are ported from the WinUI project
+directly (`controls/dev/PagerControl` at the same commit), under the same license.
+
 `frame.rs`, `frame_page.rs`, `navigation.rs` and `navigation/page_stack_entry.rs` (WinUI's
 `Frame`, `Page` as `FramePage`, and the navigation model of `Microsoft.UI.Xaml.Navigation`: the
 navigation and cache modes, the arguments of the navigation events, `PageStackEntry` and the

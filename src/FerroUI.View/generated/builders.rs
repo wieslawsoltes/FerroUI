@@ -1037,6 +1037,19 @@ pub fn page_navigation_host() -> El<ferroui_controls::PageNavigationHost> {
     El::new()
 }
 
+pub use ferroui_controls::PagerControl;
+
+impl ViewClass for ferroui_controls::PagerControl {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PagerControl>::new()
+    }
+}
+
+/// Starts an element of [`PagerControl`](ferroui_controls::PagerControl).
+pub fn pager_control() -> El<ferroui_controls::PagerControl> {
+    El::new()
+}
+
 pub use ferroui_controls::Panel;
 
 impl ViewClass for ferroui_controls::Panel {
@@ -5730,6 +5743,110 @@ pub trait PageNavigationHostProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::PageNavigationHost>> PageNavigationHostProps for El<T> {}
+
+/// The properties and routed events of [`PagerControl`](ferroui_controls::PagerControl).
+pub trait PagerControlProps: ElementBuilder {
+    /// Sets [`PagerControl::display_mode_property`](ferroui_controls::PagerControl::display_mode_property).
+    fn display_mode<M>(self, value: impl IntoProp<ferroui_controls::PagerControlDisplayMode, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::display_mode_property(), value)
+    }
+
+    /// Sets [`PagerControl::number_of_pages_property`](ferroui_controls::PagerControl::number_of_pages_property).
+    fn number_of_pages<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::number_of_pages_property(), value)
+    }
+
+    /// Sets [`PagerControl::selected_page_index_property`](ferroui_controls::PagerControl::selected_page_index_property).
+    fn selected_page_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::selected_page_index_property(), value)
+    }
+
+    /// Sets [`PagerControl::first_button_visibility_property`](ferroui_controls::PagerControl::first_button_visibility_property).
+    fn first_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::first_button_visibility_property(), value)
+    }
+
+    /// Sets [`PagerControl::previous_button_visibility_property`](ferroui_controls::PagerControl::previous_button_visibility_property).
+    fn previous_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::previous_button_visibility_property(), value)
+    }
+
+    /// Sets [`PagerControl::next_button_visibility_property`](ferroui_controls::PagerControl::next_button_visibility_property).
+    fn next_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::next_button_visibility_property(), value)
+    }
+
+    /// Sets [`PagerControl::last_button_visibility_property`](ferroui_controls::PagerControl::last_button_visibility_property).
+    fn last_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::last_button_visibility_property(), value)
+    }
+
+    /// Sets [`PagerControl::first_button_command_property`](ferroui_controls::PagerControl::first_button_command_property).
+    fn first_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::first_button_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::previous_button_command_property`](ferroui_controls::PagerControl::previous_button_command_property).
+    fn previous_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::previous_button_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::next_button_command_property`](ferroui_controls::PagerControl::next_button_command_property).
+    fn next_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::next_button_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::last_button_command_property`](ferroui_controls::PagerControl::last_button_command_property).
+    fn last_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::last_button_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::pager_input_command_property`](ferroui_controls::PagerControl::pager_input_command_property).
+    fn pager_input_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::pager_input_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::first_button_style_property`](ferroui_controls::PagerControl::first_button_style_property).
+    fn first_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::first_button_style_property(), value)
+    }
+
+    /// Sets [`PagerControl::previous_button_style_property`](ferroui_controls::PagerControl::previous_button_style_property).
+    fn previous_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::previous_button_style_property(), value)
+    }
+
+    /// Sets [`PagerControl::next_button_style_property`](ferroui_controls::PagerControl::next_button_style_property).
+    fn next_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::next_button_style_property(), value)
+    }
+
+    /// Sets [`PagerControl::last_button_style_property`](ferroui_controls::PagerControl::last_button_style_property).
+    fn last_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::last_button_style_property(), value)
+    }
+
+    /// Sets [`PagerControl::button_panel_always_show_first_last_page_index_property`](ferroui_controls::PagerControl::button_panel_always_show_first_last_page_index_property).
+    fn button_panel_always_show_first_last_page_index<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::button_panel_always_show_first_last_page_index_property(), value)
+    }
+
+    /// Sets [`PagerControl::prefix_text_property`](ferroui_controls::PagerControl::prefix_text_property).
+    fn prefix_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::prefix_text_property(), value)
+    }
+
+    /// Sets [`PagerControl::suffix_text_property`](ferroui_controls::PagerControl::suffix_text_property).
+    fn suffix_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::suffix_text_property(), value)
+    }
+
+    /// Sets [`PagerControl::template_settings_property`](ferroui_controls::PagerControl::template_settings_property).
+    fn template_settings<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::PagerControlTemplateSettings>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::template_settings_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::PagerControl>> PagerControlProps for El<T> {}
 
 /// The properties and routed events of [`Panel`](ferroui_controls::Panel).
 pub trait PanelProps: ElementBuilder {

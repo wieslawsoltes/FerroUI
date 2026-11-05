@@ -14693,6 +14693,232 @@
     ]
   },
   {
+    "name": "PagerControl",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PagerControl",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "DisplayMode": {
+        "name": "DisplayMode",
+        "type_name": "PagerControlDisplayMode",
+        "documentation": "PagerControl.DisplayMode: PagerControlDisplayMode",
+        "values": [
+          "Auto",
+          "ComboBox",
+          "NumberBox",
+          "ButtonPanel"
+        ],
+        "attached": false
+      },
+      "NumberOfPages": {
+        "name": "NumberOfPages",
+        "type_name": "i32",
+        "documentation": "PagerControl.NumberOfPages: i32",
+        "values": [],
+        "attached": false
+      },
+      "SelectedPageIndex": {
+        "name": "SelectedPageIndex",
+        "type_name": "i32",
+        "documentation": "PagerControl.SelectedPageIndex: i32",
+        "values": [],
+        "attached": false
+      },
+      "FirstButtonVisibility": {
+        "name": "FirstButtonVisibility",
+        "type_name": "PagerControlButtonVisibility",
+        "documentation": "PagerControl.FirstButtonVisibility: PagerControlButtonVisibility",
+        "values": [
+          "Visible",
+          "HiddenOnEdge",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "PreviousButtonVisibility": {
+        "name": "PreviousButtonVisibility",
+        "type_name": "PagerControlButtonVisibility",
+        "documentation": "PagerControl.PreviousButtonVisibility: PagerControlButtonVisibility",
+        "values": [
+          "Visible",
+          "HiddenOnEdge",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "NextButtonVisibility": {
+        "name": "NextButtonVisibility",
+        "type_name": "PagerControlButtonVisibility",
+        "documentation": "PagerControl.NextButtonVisibility: PagerControlButtonVisibility",
+        "values": [
+          "Visible",
+          "HiddenOnEdge",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "LastButtonVisibility": {
+        "name": "LastButtonVisibility",
+        "type_name": "PagerControlButtonVisibility",
+        "documentation": "PagerControl.LastButtonVisibility: PagerControlButtonVisibility",
+        "values": [
+          "Visible",
+          "HiddenOnEdge",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "FirstButtonCommand": {
+        "name": "FirstButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.FirstButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "PreviousButtonCommand": {
+        "name": "PreviousButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.PreviousButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "NextButtonCommand": {
+        "name": "NextButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.NextButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "LastButtonCommand": {
+        "name": "LastButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.LastButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "PagerInputCommand": {
+        "name": "PagerInputCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.PagerInputCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "FirstButtonStyle": {
+        "name": "FirstButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "PagerControl.FirstButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "PreviousButtonStyle": {
+        "name": "PreviousButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "PagerControl.PreviousButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "NextButtonStyle": {
+        "name": "NextButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "PagerControl.NextButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "LastButtonStyle": {
+        "name": "LastButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "PagerControl.LastButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "ButtonPanelAlwaysShowFirstLastPageIndex": {
+        "name": "ButtonPanelAlwaysShowFirstLastPageIndex",
+        "type_name": "bool",
+        "documentation": "PagerControl.ButtonPanelAlwaysShowFirstLastPageIndex: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "PrefixText": {
+        "name": "PrefixText",
+        "type_name": "String",
+        "documentation": "PagerControl.PrefixText: String",
+        "values": [],
+        "attached": false
+      },
+      "SuffixText": {
+        "name": "SuffixText",
+        "type_name": "String",
+        "documentation": "PagerControl.SuffixText: String",
+        "values": [],
+        "attached": false
+      },
+      "TemplateSettings": {
+        "name": "TemplateSettings",
+        "type_name": "Option<Ref<PagerControlTemplateSettings>>",
+        "documentation": "PagerControl.TemplateSettings: Option<Ref<PagerControlTemplateSettings>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PagerControlAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::PagerControlAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PagerControlSelectedIndexChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PagerControlSelectedIndexChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "NewPageIndex": {
+        "name": "NewPageIndex",
+        "type_name": "i32",
+        "documentation": "PagerControlSelectedIndexChangedEventArgs.NewPageIndex: i32",
+        "values": []
+      },
+      "PreviousPageIndex": {
+        "name": "PreviousPageIndex",
+        "type_name": "i32",
+        "documentation": "PagerControlSelectedIndexChangedEventArgs.PreviousPageIndex: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PagerControlTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::PagerControlTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Painted",
     "namespace": "https://github.com/ferroui",
     "documentation": "Painted",

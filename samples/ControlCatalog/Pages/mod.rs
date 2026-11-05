@@ -59,6 +59,7 @@ mod rich_edit_box_page;
 mod rich_text_block_page;
 mod number_box_page;
 mod radio_buttons_page;
+mod pager_control_page;
 mod rating_control_page;
 mod items_repeater_page;
 mod labels_page;
@@ -217,6 +218,7 @@ pub use rich_edit_box_page::RichEditBoxPage;
 pub use rich_text_block_page::RichTextBlockPage;
 pub use number_box_page::NumberBoxPage;
 pub use radio_buttons_page::RadioButtonsPage;
+pub use pager_control_page::PagerControlPage;
 pub use rating_control_page::RatingControlPage;
 pub use items_repeater_page::ItemsRepeaterPage;
 pub use labels_page::LabelsPage;
@@ -325,6 +327,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     RichTextBlockPage::TYPE,
     NumberBoxPage::TYPE,
     RadioButtonsPage::TYPE,
+    PagerControlPage::TYPE,
     RatingControlPage::TYPE,
     ItemsRepeaterPage::TYPE,
     ScrollViewerPage::TYPE,
@@ -431,6 +434,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &RichTextBlockPage::XAML_CLASS,
     &NumberBoxPage::XAML_CLASS,
     &RadioButtonsPage::XAML_CLASS,
+    &PagerControlPage::XAML_CLASS,
     &RatingControlPage::XAML_CLASS,
     &ItemsRepeaterPage::XAML_CLASS,
     &ScrollViewerPage::XAML_CLASS,

@@ -84,7 +84,7 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     let available: usize = view_model.home_sections().iter().map(|s| s.items().map_or(0, |items| items.len())).sum();
     // The upstream list has 74 entries. The native catalog also offers these
     // pages, each exactly once and available through its page factory.
-    let additional_pages = ["TreeDataGrid", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart", "PolarChart", "SankeyChart", "TreemapChart", "GeoMap"]
+    let additional_pages = ["TreeDataGrid", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "PagerControl", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart", "PolarChart", "SankeyChart", "TreemapChart", "GeoMap"]
         .into_iter()
         // The first page of the section "Composition" is the upstream page "Composition".
         .chain(COMPOSITION_PAGES.into_iter().skip(1))

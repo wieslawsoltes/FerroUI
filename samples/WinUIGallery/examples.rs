@@ -67,6 +67,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("AccessibilityColorContrast", "The original luminance/contrast calculation and pass thresholds run in Rust. Opaque RGB text inputs replace the Gallery's custom inline color pickers; those picker controls remain pending."),
     page!("AutoSuggestBox", "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending."),
     page!("NumberBox", "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending."),
+    page!(ported "PagerControl", "All three source examples use native PagerControl (WinUI's control in ferroui-controls): the basic pager, the number box and button panel display modes, and unbounded number box and button panel pagers. The page has no code-behind upstream."),
     page!("PipsPager", "The existing PipsPager provides page counts, selection and previous/next controls; wrapping remains explicit."),
     page!("TabView", "Native TabControl displays tab content; WinUI add/close/drag contracts remain pending."),
     page!("Pivot", "Native TabControl adapts the basic Pivot sample; Pivot-specific input and animation remain pending."),
