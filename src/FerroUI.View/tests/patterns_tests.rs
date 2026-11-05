@@ -8,6 +8,7 @@ use crate::{
     try_use_router, use_future, use_hook, use_router, AsyncState, Diagnostic, Element, ErrorInfo, IntoElement, RouteDef,
     Router,
 };
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::Ref;
 use ferroui_controls::{Control, StackPanel, TextBlock};
 use std::cell::{Cell, RefCell};
@@ -43,8 +44,8 @@ impl<T: 'static> Gate<T> {
         Gate { inner: Rc::new(RefCell::new((None, None))) }
     }
 
-    /// Ends the futures waiting on the gate with `outcome`; the executor
-    /// polls them at once.
+    /// Ends the futures waiting on the gate with `outcome`; the dispatcher
+    /// polls them in a job that the wake queues.
     fn open(&self, outcome: Result<T, String>) {
         let waker = {
             let mut inner = self.inner.borrow_mut();
@@ -69,6 +70,12 @@ impl<T: 'static> Gate<T> {
             }
         })
     }
+}
+
+/// Runs the jobs of the dispatcher of the thread: the polls that the wakes of
+/// the futures of `use_future` queued.
+fn run_jobs() {
+    Dispatcher::current_dispatcher().run_jobs(None);
 }
 
 fn describe(state: &AsyncState<i32>) -> String {
@@ -101,8 +108,10 @@ fn a_future_is_pending_until_it_ends_ready_or_failed() {
     });
     assert_eq!(texts(&panel), vec!["pending", "pending"]);
     ok.open(Ok(7));
+    run_jobs();
     assert_eq!(texts(&panel), vec!["ready 7", "pending"]);
     bad.open(Err(String::from("offline")));
+    run_jobs();
     assert_eq!(texts(&panel), vec!["ready 7", "failed offline"]);
 
     assert!(AsyncState::<i32>::Pending.is_pending());
@@ -141,27 +150,145 @@ fn new_dependencies_start_a_new_future_and_abandon_the_old_one() {
     query.set(1);
     assert_eq!(started.get(), 2, "other dependencies start another future");
     gates[0].open(Ok(String::from("old")));
+    run_jobs();
     assert_eq!(texts(&panel), vec!["pending"], "the result of an abandoned future is ignored");
     gates[1].open(Ok(String::from("one")));
+    run_jobs();
     assert_eq!(texts(&panel), vec!["one"]);
     query.set(2);
     assert_eq!(texts(&panel), vec!["pending"], "new dependencies make the state pending again");
     gates[2].open(Ok(String::from("two")));
+    run_jobs();
     assert_eq!(texts(&panel), vec!["two"]);
     assert_eq!(started.get(), 3);
     owner.dispose();
 }
 
+/// Sets `flag` when it is dropped: shows that a future was dropped.
+struct DropFlag(Rc<Cell<bool>>);
+
+impl Drop for DropFlag {
+    fn drop(&mut self) {
+        self.0.set(true);
+    }
+}
+
+#[test]
+fn a_superseded_load_is_aborted_and_never_writes_and_the_latest_writes_in_the_job_that_completes_it() {
+    let owner = Owner::new_root();
+    let gates: Rc<Vec<Gate<String>>> = Rc::new((0..3).map(|_| Gate::new()).collect());
+    let dropped: Rc<Vec<Rc<Cell<bool>>>> = Rc::new((0..3).map(|_| Rc::new(Cell::new(false))).collect());
+    let (query, panel) = owner.with(|| {
+        let query = signal(0_usize);
+        let (gates, dropped) = (gates.clone(), dropped.clone());
+        let panel = stack_panel()
+            .child(rerender(move || {
+                let (gates, dropped) = (gates.clone(), dropped.clone());
+                let state = use_future(query.get(), move |query: &usize| {
+                    let flag = DropFlag(dropped[*query].clone());
+                    let wait = gates[*query].wait();
+                    async move {
+                        let _flag = flag;
+                        wait.await
+                    }
+                });
+                let text = match state.get() {
+                    AsyncState::Pending => String::from("pending"),
+                    AsyncState::Ready(text) => text,
+                    AsyncState::Failed(error) => error,
+                };
+                text_block().text(text)
+            }))
+            .into_element()
+            .mount();
+        (query, panel)
+    });
+    let dispatcher = Dispatcher::current_dispatcher();
+
+    // What the first load awaited completes, and its poll is queued; new dependencies replace it
+    // before that poll runs. The abort drops its future at once, and the queued poll writes nothing.
+    gates[0].open(Ok(String::from("old")));
+    assert_eq!(texts(&panel), vec!["pending"], "a load does not write inside the call that wakes it");
+    query.set(1);
+    assert!(dropped[0].get(), "replacing a load aborts it, which drops its future at once");
+    assert!(!dropped[1].get());
+    run_jobs();
+    assert_eq!(texts(&panel), vec!["pending"], "a superseded load never writes");
+
+    // The latest load writes in the job that completes it: behind the work of its priority queued
+    // before the wake, ahead of the work queued after it.
+    let seen = Rc::new(RefCell::new(Vec::new()));
+    let (before, before_panel) = (seen.clone(), panel.clone());
+    dispatcher.post_local(
+        move || before.borrow_mut().push(format!("before: {}", texts(&before_panel)[0])),
+        DispatcherPriority::DEFAULT,
+    );
+    gates[1].open(Ok(String::from("one")));
+    assert_eq!(texts(&panel), vec!["pending"], "the wake queues the poll, it does not write");
+    let (later, later_panel) = (seen.clone(), panel.clone());
+    dispatcher.post_local(
+        move || later.borrow_mut().push(format!("after: {}", texts(&later_panel)[0])),
+        DispatcherPriority::DEFAULT,
+    );
+    run_jobs();
+    assert_eq!(*seen.borrow(), vec![String::from("before: pending"), String::from("after: one")]);
+    assert_eq!(texts(&panel), vec!["one"]);
+    assert!(dropped[1].get(), "a load that ended dropped its future");
+
+    // A load replaced while it waits is dropped, and the one after it writes.
+    query.set(2);
+    assert_eq!(texts(&panel), vec!["pending"]);
+    gates[2].open(Ok(String::from("two")));
+    run_jobs();
+    assert_eq!(texts(&panel), vec!["two"]);
+    owner.dispose();
+}
+
+#[test]
+fn a_load_that_replaces_itself_while_it_is_polled_does_not_write() {
+    let owner = Owner::new_root();
+    let gates: Rc<Vec<Gate<String>>> = Rc::new((0..2).map(|_| Gate::new()).collect());
+    let (query, panel) = owner.with(|| {
+        let query = signal(0_usize);
+        let gates = gates.clone();
+        let panel = stack_panel()
+            .child(rerender(move || {
+                let gates = gates.clone();
+                let state = use_future(query.get(), move |current: &usize| {
+                    let (current, wait) = (*current, gates[*current].wait());
+                    async move {
+                        let outcome = wait.await;
+                        if current == 0 {
+                            // New dependencies, from inside the poll of this load: it is replaced
+                            // while it is polled, and then ends with a value.
+                            query.set(1);
+                        }
+                        outcome
+                    }
+                });
+                let text = match state.get() {
+                    AsyncState::Pending => String::from("pending"),
+                    AsyncState::Ready(text) => text,
+                    AsyncState::Failed(error) => error,
+                };
+                text_block().text(text)
+            }))
+            .into_element()
+            .mount();
+        (query, panel)
+    });
+    gates[0].open(Ok(String::from("replaced")));
+    run_jobs();
+    assert_eq!(query.get_untracked(), 1);
+    assert_eq!(texts(&panel), vec!["pending"], "the load that was replaced during its poll did not write");
+    gates[1].open(Ok(String::from("latest")));
+    run_jobs();
+    assert_eq!(texts(&panel), vec!["latest"]);
+    owner.dispose();
+}
+
 #[test]
 fn a_future_whose_component_ended_is_dropped_and_changes_nothing() {
-    struct DropFlag(Rc<Cell<bool>>);
-
-    impl Drop for DropFlag {
-        fn drop(&mut self) {
-            self.0.set(true);
-        }
-    }
-
     let owner = Owner::new_root();
     let gate = Gate::<i32>::new();
     let dropped = Rc::new(Cell::new(false));
@@ -195,8 +322,9 @@ fn a_future_whose_component_ended_is_dropped_and_changes_nothing() {
     assert!(!dropped.get());
     visible.set(false);
     assert!(texts(&panel).is_empty());
-    assert!(dropped.get(), "the executor dropped the future of the component that ended");
+    assert!(dropped.get(), "the abort dropped the future of the component that ended");
     gate.open(Ok(1));
+    run_jobs();
     assert!(texts(&panel).is_empty(), "a future that ends after its component changes nothing");
     owner.dispose();
 }
