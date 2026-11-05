@@ -466,10 +466,16 @@ struct GraphiteTarget {
 
 impl GraphiteTarget {
     fn new(device: &Rc<TestMetalDevice>) -> Self {
+        Self::with_side(device, 64, 1.0)
+    }
+
+    /// A render target of `side` by `side` pixels at `scaling` (its DPI; the
+    /// drawing is not scaled to it, a test sets the transform).
+    fn with_side(device: &Rc<TestMetalDevice>, side: i32, scaling: f64) -> Self {
         let gpu = super::SkiaMetalGpu::new(device.clone(), None, None);
         let gr_context = gpu.gr_context();
         let context = crate::SkiaContext::new(Some(gpu));
-        let layer = context.create_offscreen_render_target(PixelSize::new(64, 64), Vector::new(1.0, 1.0), true);
+        let layer = context.create_offscreen_render_target(PixelSize::new(side, side), Vector::new(scaling, scaling), true);
         Self { gr_context, context, layer }
     }
 
@@ -1929,4 +1935,255 @@ fn graphite_draws_the_page_transitions_from_textures_uploaded_once() {
     target.gr_context.flush();
     assert_eq!(uploads_before, target.gr_context.uploaded_image_count());
     target.dispose();
+}
+
+/// The custom effects FerroUI ships on Graphite at twice the scale (#455, E9).
+mod custom_effect_validation {
+    use super::*;
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, BurningFlameShaderEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect,
+        GrayscaleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, PointerSpotlightShaderEffect,
+        ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
+        SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::media::effects::{EffectImage, ImmutableCustomEffect};
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+    use ferroui_base::{Matrix, Point};
+
+    /// The logical size of the scenes.
+    const SIZE: i32 = 64;
+
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(32.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+
+    /// The premultiplied RGBA pixels of a target of `side` by `side` pixels,
+    /// read back once.
+    fn pixels(target: &GraphiteTarget, side: i32) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((side * side * 4) as usize);
+        for y in 0..side {
+            for x in 0..side {
+                // `pixel` gives the colour un-premultiplied.
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+
+    /// An image of `SIZE` by `SIZE` premultiplied RGBA pixels made by `pixel`.
+    fn image(pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = ImmutableBitmap::from_pixels(
+            PixelSize::new(SIZE, SIZE),
+            Vector::new(96.0, 96.0),
+            SIZE * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .unwrap();
+        EffectImage::from_impl(std::sync::Arc::new(bitmap))
+    }
+
+    /// How an effect of the library is held to its CPU reference.
+    #[derive(Clone, Copy)]
+    enum Tolerance {
+        /// Within the largest difference of a channel, and a mean of 0.75.
+        Largest(u8),
+        /// A program that moves the content: at most 1% of the pixels further
+        /// than 4 levels, a mean within 1.5 (the texel a moved coordinate
+        /// falls in can differ by the last bit of the GPU's `sin` and `exp` at
+        /// the edge of a square).
+        Moves,
+    }
+
+    /// Every effect of the library at values that draw something, with the
+    /// tolerances of the tests at one device pixel per unit.
+    fn library(pages: &(EffectImage, EffectImage, EffectImage)) -> Vec<(ImmutableCustomEffect, Tolerance)> {
+        let (from, to, pattern) = pages;
+        let mut ripple = WaterRippleShaderEffect { pointer_x: 0.5, is_pointer_over: true, ..WaterRippleShaderEffect::default() };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.35;
+        vec![
+            (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), Tolerance::Largest(3)),
+            (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), Tolerance::Largest(3)),
+            (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), Tolerance::Largest(3)),
+            (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), Tolerance::Largest(3)),
+            (
+                ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }),
+                Tolerance::Largest(3),
+            ),
+            (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), Tolerance::Largest(3)),
+            (
+                ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 3.0, intensity: 0.8 }),
+                Tolerance::Largest(14),
+            ),
+            (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), Tolerance::Largest(4)),
+            (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), Tolerance::Largest(4)),
+            (ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), Tolerance::Largest(3)),
+            (ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }), Tolerance::Largest(3)),
+            (
+                ImmutableCustomEffect::new(SpotlightShaderEffect {
+                    center_x: 0.4,
+                    center_y: 0.5,
+                    radius: 0.5,
+                    strength: 0.8,
+                    color: Colors::ORANGE,
+                }),
+                Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(DissolveTransitionEffect {
+                    from_page: from.clone(),
+                    to_page: to.clone(),
+                    pattern: pattern.clone(),
+                    progress: 0.45,
+                    center_x: 0.3,
+                    center_y: 0.6,
+                    ..DissolveTransitionEffect::default()
+                }),
+                Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(MaskTransitionEffect {
+                    to_page: to.clone(),
+                    mask: pattern.clone(),
+                    progress: 0.45,
+                    softness: 0.2,
+                }),
+                Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                    pointer_x: 0.45,
+                    is_pointer_over: true,
+                    radius: 0.4,
+                    ..PointerSpotlightShaderEffect::default()
+                }),
+                Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                    is_pointer_over: true,
+                    cell_size: 12.0,
+                    strength: 0.8,
+                    ..ReactiveGridShaderEffect::default()
+                }),
+                Tolerance::Largest(4),
+            ),
+            (ImmutableCustomEffect::new(ripple), Tolerance::Moves),
+            (
+                ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                    burn_amount: 0.9,
+                    flame_phase: 1.4,
+                    ignition_y: 0.6,
+                    ..BurningFlameShaderEffect::default()
+                }),
+                Tolerance::Moves,
+            ),
+        ]
+    }
+
+    fn pages() -> (EffectImage, EffectImage, EffectImage) {
+        (
+            image(|x, y| [(x * 4) as u8, (y * 4) as u8, 200, 255]),
+            image(|x, y| [40, (255 - x * 4) as u8, (y * 4) as u8, 255]),
+            image(|x, y| {
+                let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+                [level, level, level, 255]
+            }),
+        )
+    }
+
+    /// Draws `effect` around `content` over `bounds` as the render walk
+    /// draws it: a graph effect as its graph, any other as an effect of the
+    /// drawing context.
+    fn draw_with(
+        context: &mut dyn IDrawingContextImpl,
+        effect: &ImmutableCustomEffect,
+        bounds: Rect,
+        content: impl FnOnce(&mut dyn IDrawingContextImpl),
+    ) {
+        if effect.has_graph() {
+            assert!(push_custom_effect_graph(context, effect, bounds), "{effect}");
+            content(context);
+            assert!(pop_custom_effect_graph(context, effect, bounds), "{effect}");
+        } else {
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), effect);
+            content(context);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+        }
+    }
+
+    /// Every effect of the library drawn by Graphite under a transform of
+    /// scale 2 (two device pixels per unit, as on a display of 192 DPI),
+    /// against its CPU reference at that scale applied to the scene drawn
+    /// plain by Graphite at the same scale: the tolerances of one pixel per
+    /// unit (`graphite_draws_the_library_effects_as_their_cpu_references`
+    /// and the tests after it).
+    #[test]
+    fn graphite_draws_the_library_at_twice_the_scale_as_the_cpu_references() {
+        let Some(device) = TestMetalDevice::try_new() else {
+            eprintln!("skipped: no Metal device available");
+            return;
+        };
+        let scale = 2;
+        let side = SIZE * scale;
+        let transform = Matrix::create_scale(f64::from(scale), f64::from(scale));
+        let pages = pages();
+        for (effect, tolerance) in library(&pages) {
+            let plain = GraphiteTarget::with_side(&device, side, f64::from(scale));
+            plain.draw(|context| {
+                context.clear(Colors::TRANSPARENT);
+                context.set_transform(transform);
+                scene(context);
+            });
+            let mut expected = pixels(&plain, side);
+            plain.dispose();
+            assert!(effect.cpu_reference(&mut expected, side as usize, side as usize, f64::from(scale)), "{effect}");
+
+            let target = GraphiteTarget::with_side(&device, side, f64::from(scale));
+            target.draw(|context| {
+                context.clear(Colors::TRANSPARENT);
+                context.set_transform(transform);
+                draw_with(context, &effect, Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)), scene);
+            });
+            let actual = pixels(&target, side);
+            target.dispose();
+            let most = expected.iter().zip(&actual).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+            let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+            let mean = total as f64 / expected.len() as f64;
+            match tolerance {
+                Tolerance::Largest(largest) => {
+                    assert!(most <= largest && mean <= 0.75, "{effect} at 2x: largest difference {most}, mean {mean}");
+                }
+                Tolerance::Moves => {
+                    let far = expected
+                        .chunks_exact(4)
+                        .zip(actual.chunks_exact(4))
+                        .filter(|(a, b)| a.iter().zip(b.iter()).any(|(a, b)| a.abs_diff(*b) > 4))
+                        .count();
+                    let allowed = (side * side / 100) as usize;
+                    assert!(far <= allowed && mean <= 1.5, "{effect} at 2x: {far} pixels differ by more than 4, mean {mean}");
+                }
+            }
+        }
+    }
 }

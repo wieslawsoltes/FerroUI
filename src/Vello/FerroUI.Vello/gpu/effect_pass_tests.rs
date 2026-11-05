@@ -227,6 +227,84 @@ fn the_library_effects_match_their_cpu_references_in_the_gpu_modes() {
     }
 }
 
+/// The graph effects of the library in the hybrid and GPU modes at two
+/// device pixels per unit (#455, E9): under a transform of scale 2 over the
+/// whole target, the content at half its size, against their CPU references at that scale applied to the
+/// content drawn plain in the same mode, with the tolerances of scale 1; no
+/// layer drawn on the processor. The colour matrices do not depend on the
+/// scale, the blur of the glow is twice as wide, and the kernels of the
+/// convolutions step over device pixels.
+#[test]
+fn the_library_effects_match_their_cpu_references_at_twice_the_scale_in_the_gpu_modes() {
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+        SepiaEffect, SharpenEffect, TintEffect,
+    };
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let effects = [
+        (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), 2u8),
+        (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), 2),
+        (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), 2),
+        (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), 2),
+        (ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }), 2),
+        (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 2),
+        (ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.8 }), 12),
+        (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), 2),
+        (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), 2),
+    ];
+    // The content at half its size: under the scale it covers the device
+    // pixels `content` covers at scale 1, inside the target, so that no
+    // content beyond the target reaches the glow.
+    fn small_content(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(RenderOptions { edge_mode: EdgeMode::Aliased, ..RenderOptions::default() });
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(12.0, 12.0, 10.0, 10.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(23.0, 12.0, 10.0, 10.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(12.0, 23.0, 21.0, 9.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    let scale = 2.0;
+    let transform = Matrix::create_scale(scale, scale);
+    let bounds = Rect::new(0.0, 0.0, f64::from(SIZE) / scale, f64::from(SIZE) / scale);
+    for mode in device_modes(&device) {
+        for (effect, largest) in &effects {
+            let plain = draw_in(&device, mode, |drawing| {
+                drawing.set_transform(transform);
+                small_content(drawing);
+            });
+            let mut expected = plain.clone();
+            assert!(effect.cpu_reference(&mut expected, usize::from(SIZE), usize::from(SIZE), scale), "{effect}");
+            let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+            let actual = draw_in(&device, mode, |drawing| {
+                drawing.set_transform(transform);
+                assert!(push_custom_effect_graph(drawing, effect, bounds));
+                small_content(drawing);
+                assert!(pop_custom_effect_graph(drawing, effect, bounds));
+            });
+            assert_eq!(
+                cpu_layers,
+                crate::drawing_context_impl::cpu_layer_count(),
+                "{mode:?}: {effect} at 2x: a layer was drawn on the processor"
+            );
+            let (most, mean, _) = difference(&expected, &actual);
+            assert!(most <= *largest && mean <= 0.5, "{mode:?}: {effect} at 2x: largest difference {most}, mean {mean}");
+            let (changed, _, _) = difference(&plain, &actual);
+            assert!(changed > 0, "{mode:?}: {effect} at 2x: the content is changed");
+        }
+    }
+}
+
 // --- layers with an effect ----------------------------------------------------------------
 
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
@@ -1352,3 +1430,4 @@ fn frames_of_the_interactive_effects_compile_their_pipelines_once() {
         assert_eq!(0, shader_failure_reports(effect.name()), "{effect}");
     }
 }
+
