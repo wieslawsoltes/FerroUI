@@ -1,6 +1,7 @@
 //! Bitmap effects applied to visuals and drawings: the built-in blur and
 //! drop shadow, and custom effects (#455, docs/porting/custom-effects.md):
-//! effect graphs and runtime shaders, and the images shaders sample.
+//! effect graphs and runtime shaders, the images shaders sample, and the
+//! pointer input of interactive effects.
 
 mod blur_effect;
 mod custom_effect;
@@ -17,10 +18,13 @@ mod effect_extensions;
 mod effect_image;
 #[cfg(test)]
 mod effect_image_tests;
+mod effect_input;
 mod i_blur_effect;
 mod i_drop_shadow_effect;
 mod i_effect;
 mod immutable_luminance_to_alpha_effect;
+#[cfg(test)]
+mod interactive_effect_tests;
 pub mod library;
 #[cfg(test)]
 mod library_tests;
@@ -40,6 +44,7 @@ pub use drop_shadow_effect::{DropShadowDirectionEffect, DropShadowEffect, DropSh
 pub use effect::Effect;
 pub use effect_extensions::EffectExtensions;
 pub use effect_image::{EffectImage, EffectImagePixels, EffectImageWeak};
+pub use effect_input::{EffectHostContext, IEffectInputHandler};
 pub(crate) use effect_image::sample_image;
 pub use i_blur_effect::{IBlurEffect, ImmutableBlurEffect};
 pub use i_drop_shadow_effect::{

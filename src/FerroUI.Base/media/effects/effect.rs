@@ -1,7 +1,7 @@
 use crate::animation::Animatable;
 use crate::media::effects::{
-    CustomEffectClass, CustomEffectRegistry, IEffect, ImmutableBlurEffect, ImmutableCustomEffect,
-    ImmutableDropShadowEffect,
+    CustomEffectClass, CustomEffectRegistry, IEffect, IEffectInputHandler, ImmutableBlurEffect,
+    ImmutableCustomEffect, ImmutableDropShadowEffect,
 };
 use crate::media::{Color, Colors};
 use crate::reactive::{Disposable, Subscription};
@@ -12,6 +12,9 @@ use std::rc::Rc;
 /// Makes the snapshot of a mutable custom effect class (#455).
 type CustomSnapshotFn = fn(&FerroObject) -> Option<ImmutableCustomEffect>;
 
+/// Views an interactive custom effect class as its input handler (#455, E7).
+type InputHandlerFn = for<'a> fn(&'a FerroObject) -> Option<&'a dyn IEffectInputHandler>;
+
 /// Base class of the mutable effects.
 #[repr(C)]
 pub struct Effect {
@@ -19,11 +22,19 @@ pub struct Effect {
     invalidated: HandlerList<dyn Fn()>,
     /// For a custom effect class, how its snapshot is made (#455).
     custom: Option<CustomSnapshotFn>,
+    /// For an interactive custom effect class, how its input handler is
+    /// found (#455, E7).
+    input: Option<InputHandlerFn>,
 }
 
 /// The snapshot of the object as the custom effect class `T`.
 fn custom_snapshot_of<T: CustomEffectClass>(object: &FerroObject) -> Option<ImmutableCustomEffect> {
     object.downcast_ref::<T>().map(<T as CustomEffectClass>::to_custom_effect)
+}
+
+/// The object as the input handler of the interactive effect class `T`.
+fn input_handler_of<T: CustomEffectClass + IEffectInputHandler>(object: &FerroObject) -> Option<&dyn IEffectInputHandler> {
+    object.downcast_ref::<T>().map(|effect| effect as &dyn IEffectInputHandler)
 }
 
 ferro_class!(Effect: Animatable);
@@ -33,7 +44,7 @@ ferro_impl_classes!(Effect: FerroObjectImpl);
 impl Effect {
     /// Creates the class data; see [`FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: Animatable::construct(), invalidated: HandlerList::new(), custom: None }
+        Self { base: Animatable::construct(), invalidated: HandlerList::new(), custom: None, input: None }
     }
 
     /// Creates the class data of a custom effect class `T` (#455, not from
@@ -47,10 +58,39 @@ impl Effect {
         Self { custom: Some(custom_snapshot_of::<T>), ..Self::construct() }
     }
 
+    /// Creates the class data of an interactive custom effect class `T`
+    /// (#455, E7, not from upstream): a custom effect class
+    /// ([`construct_custom`](Self::construct_custom)) that receives the
+    /// pointer input of the element it is the effect of, through
+    /// [`IEffectInputHandler`]. When it is set as the `Effect` of an input
+    /// element, the element routes its pointer events to it with an
+    /// [`EffectHostContext`](crate::media::effects::EffectHostContext); when
+    /// it is replaced or cleared, the routing ends. The state the input
+    /// changes lives in `T`, which raises
+    /// [`invalidated`](Self::invalidated) so that the next snapshot carries it
+    /// to the render thread.
+    pub fn construct_interactive<T: CustomEffectClass + IEffectInputHandler>() -> Self {
+        Self { input: Some(input_handler_of::<T>), ..Self::construct_custom::<T>() }
+    }
+
     /// Whether the effect is a custom effect class
     /// ([`construct_custom`](Self::construct_custom)).
     pub fn is_custom(&self) -> bool {
         self.custom.is_some()
+    }
+
+    /// Whether the effect is an interactive custom effect class
+    /// ([`construct_interactive`](Self::construct_interactive)).
+    pub fn is_interactive(&self) -> bool {
+        self.input.is_some()
+    }
+
+    /// The input handler of an interactive custom effect class; `None` for
+    /// the other effects.
+    pub fn input_handler(&self) -> Option<&dyn IEffectInputHandler> {
+        let input = self.input?;
+        let object: &FerroObject = self.upcast();
+        input(object)
     }
 
     /// The snapshot of a custom effect class; `None` for the built-in

@@ -1,5 +1,6 @@
 //! The Cartesian, pie, polar, Sankey, treemap and map scenarios of LiveCharts2's
-//! `tests/SnapshotTests` at the pin, restated with the native controls. Each scenario keeps the source's chart, series,
+//! `tests/SnapshotTests` at the pin, with the OHLC, error, heat, date axis and angular gauge
+//! suites, restated with the native controls. Each scenario keeps the source's chart, series,
 //! values, axes and size; `livecharts-snapshots` renders them through Vello CPU, and the render job of
 //! `livecharts.yml` keeps the images beside the upstream reference images. The upstream suite
 //! compares SkiaSharp images pixel by pixel, which a native renderer cannot reproduce, so the
@@ -11,21 +12,26 @@
 //! `LabelMapper` builds are the names of the nodes. The hover scenarios move the pointer after the
 //! first measure, so their renders show the native tooltip. The city markers of the map
 //! scenarios are native `GeoMarker`s in place of `GeoVisualElement`s around circle visuals, and
-//! the custom map is the source sample's `mexico-states.geojson`, copied beside this file.
+//! the custom map is the source sample's `mexico-states.geojson`, copied beside this file. The
+//! dates of the date axis scenarios are their ticks, as the source maps a `DateTimePoint`, and the
+//! label formats are .NET format strings.
 
 use ferroui_base::media::Color;
 use ferroui_base::{Point, Ref, Size};
+use ferroui_base::animation::SignedDuration;
+use ferroui_base::utilities::DateTime;
 use ferroui_controls_livecharts::{
-    Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint, ChartSeries,
-    ColumnSeries, GeoMap, GeoMarker, HeatLand, HeatLandSeries, HeatLands, LegendPosition,
-    LineSeries, MapProjection, Maps, PieChart, PieSeries, PolarChart, PolarLabelsPosition,
+    AngularTicksVisual, Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint,
+    ChartSeries, ChartVisualElement, ColumnSeries, DateTimeAxis, GeoMap, GeoMarker, HeatLand,
+    HeatLandSeries, HeatLands, HeatSeries, Labeler, LegendPosition, LineSeries, MapProjection,
+    Maps, NeedleVisual, OhlcSeries, PieChart, PieSeries, PolarChart, PolarLabelsPosition,
     PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries, RowSeries, SankeyChart,
     SankeyLayoutKind, SankeyLink, SankeyLinks, SankeyNode, SankeyNodes, SankeySeries,
     ScatterSeries, StackedAreaSeries, StackedColumnSeries, StackedRowSeries,
     StackedStepAreaSeries, StepLineSeries, TreemapChart, TreemapNode, TreemapNodes,
     TreemapSeries,
 };
-use ferroui_livecharts::kernel::Coordinate;
+use ferroui_livecharts::kernel::{Coordinate, Error};
 use ferroui_livecharts::{COTANGENT_ANGLE, TANGENT_ANGLE};
 
 /// One scenario: the name of its upstream reference image (`<Class>_<Test>`), its size and a
@@ -136,6 +142,34 @@ pub fn scenarios() -> Vec<Scenario> {
         scenario("StackedRowSeriesTests_Issue2152_MixedSigns", stacked_rows_mixed),
         scenario("BoxSeriesTests_BasicBox", box_basic),
         scenario("CandlesticksSeriesTests_Basic", candlesticks_basic),
+        scenario("CandlesticksSeriesTests_DateTime", candlesticks_date_time),
+        scenario("OhlcSeriesTests_Basic", ohlc_basic),
+        scenario("OhlcSeriesTests_DateTime", ohlc_date_time),
+        scenario("AxesTests_DateTimeScaled", axes_date_time_scaled),
+        scenario("ErrorSeriesTests_ColumnWithError", errors_column),
+        scenario("ErrorSeriesTests_RowWithError", errors_row),
+        scenario("ErrorSeriesTests_LineWithError", errors_line),
+        scenario("ErrorSeriesTests_ScatterWithError", errors_scatter),
+        scenario("HeatSeriesTests_Basic", heat_basic),
+        sized(
+            "HeatSeriesTests_Issue1511_ContinuousYAxis_FractionalStep",
+            600.,
+            400.,
+            heat_fractional_limits,
+        ),
+        sized(
+            "HeatSeriesTests_Issue1511_AutoAxisBounds_FractionalStep",
+            600.,
+            400.,
+            heat_fractional_auto,
+        ),
+        sized(
+            "HeatSeriesTests_Issue1511_EmptyPointsDoNotContaminateStep",
+            600.,
+            400.,
+            heat_empty_points,
+        ),
+        scenario("DataLabelsTests_HeatWithLabels", heat_with_labels),
         scenario("RangeSeriesTests_RangeColumn", range_column),
         scenario("RangeSeriesTests_RangeRow", range_row),
         scenario("RangeSeriesTests_RangeColumn_SwappedEndpoints", range_column_swapped),
@@ -163,6 +197,8 @@ pub fn scenarios() -> Vec<Scenario> {
         scenario("PolarChartTests_FilledArea", polar_filled),
         scenario("PolarChartTests_WithInnerRadius", polar_inner_radius),
         scenario("PolarChartTests_OpenLine", polar_open_line),
+        scenario("AngularGaugeTests_AngularGauge", angular_gauge),
+        scenario("AngularGaugeTests_AngularGaugeAtMinValue", angular_gauge_at_min),
         sized("SankeySeriesTests_TwoLevelFlow", 600., 400., sankey_two_level),
         sized("SankeySeriesTests_WithLabels", 700., 400., sankey_with_labels),
         sized("SankeySeriesTests_JobApplicationFunnel", 900., 600., sankey_funnel),
@@ -765,6 +801,256 @@ fn candlesticks_basic() -> Ref<Chart> {
     )])
 }
 
+/// The six prices of the financial suites: high, open, close and low.
+const PRICES: [(f64, f64, f64, f64); 6] = [
+    (523., 500., 450., 400.),
+    (500., 450., 425., 400.),
+    (490., 425., 400., 380.),
+    (420., 400., 420., 380.),
+    (520., 420., 490., 400.),
+    (580., 490., 560., 440.),
+];
+
+/// The ticks of a day after 2021-01-01, the first date of the date suites.
+fn day(index: usize) -> f64 {
+    DateTime::new(2021, 1, 1).add_days(index as f64).ticks() as f64
+}
+
+fn prices<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(
+    series: Ref<T>,
+    x: fn(usize) -> f64,
+) -> Ref<ChartSeries> {
+    coordinates(
+        series,
+        PRICES
+            .iter()
+            .enumerate()
+            .map(|(i, (h, o, c, l))| Coordinate::financial(x(i), *h, *o, *c, *l)),
+    )
+}
+
+/// The X axis of the financial date scenarios: a unit width of a day and the labeler
+/// `new DateTime((long)value).ToString("MM dd")`.
+fn daily_axis() -> Ref<Axis> {
+    axis(|a| {
+        a.set_unit_width(SignedDuration::TICKS_PER_DAY as f64);
+        a.set_labeler(Some(Labeler::date_time_format("MM dd")));
+    })
+}
+
+fn candlesticks_date_time() -> Ref<Chart> {
+    let chart = cartesian(vec![prices(CandlesticksSeries::new(), day)]);
+    chart.x_axes().add(daily_axis());
+    chart
+}
+
+// OhlcSeriesTests.
+
+fn ohlc_basic() -> Ref<Chart> {
+    // FinancialPointI: high, open, close, low, at the index.
+    cartesian(vec![prices(OhlcSeries::new(), |i| i as f64)])
+}
+
+fn ohlc_date_time() -> Ref<Chart> {
+    let chart = cartesian(vec![prices(OhlcSeries::new(), day)]);
+    chart.x_axes().add(daily_axis());
+    chart
+}
+
+// AxesTests.DateTimeScaled: a DateTimeAxis of a day, labelled "MM dd".
+
+fn axes_date_time_scaled() -> Ref<Chart> {
+    let series = coordinates(
+        ColumnSeries::new(),
+        [3., 6., 5., 3., 5., 8., 6.]
+            .iter()
+            .enumerate()
+            .map(|(i, y)| Coordinate::new(day(i), *y)),
+    );
+    let chart = cartesian(vec![series]);
+    let x = DateTimeAxis::new();
+    x.set_date_format("MM dd".into());
+    chart.x_axes().add(x.upcast::<Axis>());
+    chart.y_axes().add(Axis::new());
+    chart
+}
+
+// ErrorSeriesTests: ErrorValue(y, y error) and ErrorValue(y, top error, bottom error) at their
+// index; ErrorPoint(x, y, x error, y error) and ErrorPoint(x, y, left, right, top, bottom).
+
+fn error_values() -> Vec<Coordinate> {
+    [
+        (65., 6., 6.),
+        (70., 15., 4.),
+        (35., 4., 4.),
+        (70., 6., 6.),
+        (30., 5., 5.),
+        (60., 4., 16.),
+        (65., 6., 6.),
+    ]
+    .iter()
+    .enumerate()
+    .map(|(i, (y, top, bottom))| {
+        Coordinate::new(i as f64, *y).with_error(Error::new(0., 0., *top, *bottom))
+    })
+    .collect()
+}
+
+/// The ErrorPoints of the suite, at the X of `x`.
+fn error_points(x: fn(usize) -> f64) -> Vec<Coordinate> {
+    [
+        (50., 0.2, 0.2, 8., 8.),
+        (45., 0.1, 0.3, 15., 4.),
+        (25., 0.3, 0.3, 4., 4.),
+        (30., 0.2, 0.2, 6., 6.),
+        (70., 0.2, 0.2, 8., 8.),
+        (30., 0.4, 0.4, 4., 4.),
+        (50., 0.3, 0.3, 6., 6.),
+    ]
+    .iter()
+    .enumerate()
+    .map(|(i, (y, left, right, top, bottom))| {
+        Coordinate::new(x(i), *y).with_error(Error::new(*left, *right, *top, *bottom))
+    })
+    .collect()
+}
+
+fn showing_errors(series: Ref<ChartSeries>) -> Ref<ChartSeries> {
+    series.set_show_error(true);
+    series
+}
+
+fn errors_column() -> Ref<Chart> {
+    cartesian(vec![
+        showing_errors(coordinates(ColumnSeries::new(), error_values())),
+        showing_errors(coordinates(ColumnSeries::new(), error_points(|i| i as f64))),
+    ])
+}
+
+fn errors_row() -> Ref<Chart> {
+    cartesian(vec![
+        showing_errors(coordinates(RowSeries::new(), error_values())),
+        showing_errors(coordinates(RowSeries::new(), error_points(|i| i as f64))),
+    ])
+}
+
+fn errors_line() -> Ref<Chart> {
+    // The source's LineWithError draws a column series of ErrorValues.
+    cartesian(vec![showing_errors(coordinates(
+        ColumnSeries::new(),
+        error_values(),
+    ))])
+}
+
+fn errors_scatter() -> Ref<Chart> {
+    // ErrorDateTimePoints from DateTime.Today: the first date of the date suites here, on a
+    // hidden X axis, so the image does not depend on the day it is drawn.
+    let chart = cartesian(vec![showing_errors(coordinates(
+        ScatterSeries::new(),
+        error_points(day),
+    ))]);
+    chart.x_axes().add(axis(|a| a.set_visible(false)));
+    chart
+}
+
+// HeatSeriesTests and DataLabelsTests.HeatWithLabels: WeightedPoint(x, y, weight).
+
+fn heat(values: impl IntoIterator<Item = Coordinate>, map: &[u32]) -> Ref<ChartSeries> {
+    let series = coordinates(HeatSeries::new(), values);
+    series.set_heat_map(map.iter().map(|hex| rgb(*hex)).collect());
+    series
+}
+
+fn heat_basic() -> Ref<Chart> {
+    // The SKHeatLegend on the right (its gradient and BadgePadding) has no native counterpart.
+    let weights: [[f64; 6]; 4] = [
+        [150., 123., 310., 225., 473., 373.],
+        [432., 312., 135., 78., 124., 423.],
+        [543., 134., 524., 315., 145., 80.],
+        [90., 123., 70., 123., 432., 142.],
+    ];
+    let chart = cartesian(vec![heat(
+        weights.iter().enumerate().flat_map(|(x, column)| {
+            column
+                .iter()
+                .enumerate()
+                .map(move |(y, w)| Coordinate::weighted(x as f64, y as f64, *w))
+        }),
+        &[0xFFF176, 0x2F4F4F, 0x0000FF],
+    )]);
+    chart
+        .x_axes()
+        .add(axis(|a| a.set_labels(labels(&["Charles", "Richard", "Ana", "Mari"]))));
+    chart.y_axes().add(axis(|a| {
+        a.set_labels(labels(&["Jan", "Feb", "Mar", "Apr", "May", "Jun"]))
+    }));
+    chart
+}
+
+/// The data of issue 1511: sixteen columns of six rows from 0.5 by steps of 0.1.
+fn fractional_steps() -> Vec<Coordinate> {
+    let mut values = Vec::new();
+    for x in 0..16 {
+        for i in 0..6 {
+            let y = 0.5 + i as f64 * 0.1;
+            let t = (x + (5 - i)) as f64 / 20.0;
+            let w = 1 + ((1.0 - t) * 399.0) as i32;
+            values.push(Coordinate::weighted(x as f64, y, w as f64));
+        }
+    }
+    values
+}
+
+fn fractional_heat() -> Ref<ChartSeries> {
+    let series = heat(fractional_steps(), &[0xF27A7D, 0xF7D486, 0xC5F9D7]);
+    let heat = series.cast::<HeatSeries>().unwrap();
+    heat.set_color_stops(Some(vec![0., 0.5, 1.]));
+    heat.set_point_padding(ferroui_base::Thickness::uniform(0.));
+    series
+}
+
+fn heat_fractional_limits() -> Ref<Chart> {
+    let chart = cartesian(vec![fractional_heat()]);
+    chart.x_axes().add(limits(0., 15.));
+    chart.y_axes().add(limits(0.5, 1.));
+    chart
+}
+
+fn heat_fractional_auto() -> Ref<Chart> {
+    cartesian(vec![fractional_heat()])
+}
+
+fn heat_empty_points() -> Ref<Chart> {
+    // The first point is empty (`WeightedPoint(null, null, null)`).
+    let mut values = vec![Coordinate::EMPTY];
+    for x in 0..6 {
+        for i in 0..6 {
+            let w = 1 + (x + i) * 10;
+            values.push(Coordinate::weighted(x as f64, 0.5 + i as f64, w as f64));
+        }
+    }
+    let series = heat(values, &[0xF27A7D, 0xC5F9D7]);
+    series
+        .cast::<HeatSeries>()
+        .unwrap()
+        .set_point_padding(ferroui_base::Thickness::uniform(0.));
+    let chart = cartesian(vec![series]);
+    chart.x_axes().add(limits(-0.5, 5.5));
+    chart.y_axes().add(limits(0., 6.));
+    chart
+}
+
+fn heat_with_labels() -> Ref<Chart> {
+    let series = coordinates(
+        HeatSeries::new(),
+        (0..9).map(|i| Coordinate::weighted((i / 3) as f64, (i % 3) as f64, 5. + i as f64 * 5.)),
+    );
+    series.set_data_labels(true);
+    series.set_data_labels_size(12.);
+    series.set_data_labels_color(Some(Color::from_rgb(0, 0, 0)));
+    cartesian(vec![series])
+}
+
 // RangeSeriesTests: RangeValue(low, high).
 
 const RANGES: [(f64, f64); 7] = [
@@ -973,6 +1259,56 @@ fn pie_gauge_tight() -> Ref<Chart> {
     chart.set_min_value(0.);
     chart.set_max_value(Some(100.));
     chart
+}
+
+// AngularGaugeTests: GaugeGenerator.BuildAngularGaugeSections of 60, 30 and 10 with an outer
+// offset of 130 and a radial width of 20, the ticks of the test and a needle.
+
+fn angular_gauge_chart(needle: f64) -> Ref<Chart> {
+    // BuildAngularGaugeSections: each section a gauge series relative to the minimum, without
+    // data labels or a hover push-out; the theme's gauge rule (no stroke, corner radius 8),
+    // which the native controls do not apply by themselves yet.
+    let mut series = as_pie_series(&[60., 30., 10.], |_, s| {
+        s.set_is_gauge(true);
+        s.set_is_relative_to_min_value(true);
+        s.set_hover_push_out(0.);
+        s.set_stroke(None);
+        s.set_corner_radius(8.);
+        s.set_outer_radius_offset(130.);
+        s.set_max_radial_column_width(20.);
+    });
+    // The background of the generator: a fill series of a zero for each item but itself, in the
+    // theme's fill.
+    let fill = values(PieSeries::new(), &[0., 0., 0.]);
+    fill.set_is_gauge(true);
+    fill.set_is_fill_series(true);
+    fill.set_hover_push_out(0.);
+    fill.set_fill(Some(Color::from_argb(10, 30, 30, 30)));
+    series.push(fill);
+    let chart = pie_chart(series);
+    chart.set_initial_rotation(-225.);
+    chart.set_max_angle(270.);
+    chart.set_min_value(0.);
+    chart.set_max_value(Some(100.));
+    let ticks = AngularTicksVisual::new();
+    ticks.set_labeler(Some(Labeler::new(|value| format!("{value:.1}"))));
+    ticks.set_labels_size(16.);
+    ticks.set_labels_outer_offset(15.);
+    ticks.set_outer_offset(65.);
+    ticks.set_ticks_length(20.);
+    chart.visual_elements().add(ticks.upcast::<ChartVisualElement>());
+    let pointer = NeedleVisual::new();
+    pointer.set_numeric_value(needle);
+    chart.visual_elements().add(pointer.upcast::<ChartVisualElement>());
+    chart
+}
+
+fn angular_gauge() -> Ref<Chart> {
+    angular_gauge_chart(45.)
+}
+
+fn angular_gauge_at_min() -> Ref<Chart> {
+    angular_gauge_chart(0.)
 }
 
 // PolarChartTests.

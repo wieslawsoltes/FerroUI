@@ -7,7 +7,7 @@ use crate::{
 };
 use ferroui_base::media::{FlowDirection, SolidColorBrush};
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{Point, Ref, Visual, WeakRef};
 use ferroui_controls::{Border, ContentControl, Control, ThemeVariantScope};
 use ferroui_designer_core::{Ast, Document, Node, NodeId};
@@ -1806,9 +1806,11 @@ impl Drop for PreviewStageBoard {
 }
 
 fn native_source_uri(uri: &str) -> Result<String, String> {
-    Uri::try_create(uri, UriKind::Absolute)
-        .map(|uri| uri.absolute_uri().to_owned())
-        .ok_or_else(|| "Preview source URI must be absolute".into())
+    // The text of the URL of the document, the key the reload session and the loaders use
+    // (C5 of #423).
+    UriRef::parse_absolute(uri)
+        .map(String::from)
+        .map_err(|_| "Preview source URI must be absolute".into())
 }
 
 fn same_dependency(accepted: Option<&SourceStamp>, current: Option<&SourceStamp>) -> bool {
@@ -1931,7 +1933,7 @@ fn is_in_preview(visual: &Ref<Visual>, preview: &RuntimePreview) -> bool {
 
 fn validate_uri(uri: &str) -> Result<(), String> {
     bounded(uri, 8192, "Source URI", false)?;
-    ferroui_base::utilities::Uri::absolute(uri)
+    UriRef::parse_absolute(uri)
         .map(|_| ())
         .map_err(|error| error.to_string())
 }

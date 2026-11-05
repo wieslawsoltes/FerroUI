@@ -13,7 +13,7 @@ use ferroui_base::{
     reactive::IDisposable,
     styling::{Style, Styles, ThemeVariant},
     threading::CancellationToken,
-    utilities::Uri,
+    utilities::UriRef,
 };
 use ferroui_controls::{AppBuilder, Application};
 use ferroui_headless::{
@@ -46,8 +46,8 @@ fn run(test: impl FnOnce() + Send + 'static) {
         .wait()
         .unwrap();
 }
-fn uri(name: &str) -> Uri {
-    Uri::absolute(&format!(
+fn uri(name: &str) -> url::Url {
+    UriRef::parse_absolute(&format!(
         "ferres://FerroDock.Ferro.Themes.Fluent/Presets/Ide/{name}.xaml"
     ))
     .unwrap()
@@ -55,7 +55,7 @@ fn uri(name: &str) -> Uri {
 fn include(name: &str) -> Rc<ResourceInclude> {
     let uri = uri(name);
     let include = ResourceInclude::new(Some(uri.clone()));
-    include.set_source(Some(uri));
+    include.set_source(Some(UriRef::from(uri)));
     include
 }
 fn sources(dictionary: &dyn IResourceDictionary) -> Vec<String> {
@@ -248,7 +248,7 @@ fn source_switch_removes_every_matching_include_through_styles_and_custom_dictio
         let unrelated = include("Default");
         unrelated.loaded();
         unrelated.set_source(Some(
-            Uri::absolute("ferres://Other/Presets/Ide/Default.xaml").unwrap(),
+            UriRef::parse("ferres://Other/Presets/Ide/Default.xaml").unwrap(),
         ));
         root.merged_dictionaries()
             .add(unrelated.as_resource_provider());
@@ -269,7 +269,7 @@ fn source_switch_removes_every_matching_include_through_styles_and_custom_dictio
         assert_eq!(
             sources(&*root),
             [
-                Uri::absolute("ferres://Other/Presets/Ide/Default.xaml")
+                UriRef::parse("ferres://Other/Presets/Ide/Default.xaml")
                     .unwrap()
                     .to_string(),
                 uri("RiderDark").to_string()
@@ -337,7 +337,7 @@ fn first_match_case_unknown_uri_and_default_owner_identity_follow_the_original_a
         let source = include("RiderDark");
         source.loaded();
         source.set_source(Some(
-            Uri::absolute("FERRES://FERRODOCK.FERRO.THEMES.FLUENT/PRESETS/IDE/RIDERDARK.XAML")
+            UriRef::parse("FERRES://FERRODOCK.FERRO.THEMES.FLUENT/PRESETS/IDE/RIDERDARK.XAML")
                 .unwrap(),
         ));
         custom
@@ -349,7 +349,7 @@ fn first_match_case_unknown_uri_and_default_owner_identity_follow_the_original_a
         manager.switch_preset(4);
         assert!(Rc::ptr_eq(&stable, &root.merged_dictionaries_snapshot()));
         source.set_source(Some(
-            Uri::absolute("ferres://FerroDock.Ferro.Themes.Fluent/Presets/Ide/Unknown.xaml")
+            UriRef::parse("ferres://FerroDock.Ferro.Themes.Fluent/Presets/Ide/Unknown.xaml")
                 .unwrap(),
         ));
         assert_eq!(manager.current_preset_index(), 0);

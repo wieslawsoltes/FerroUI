@@ -1341,6 +1341,16 @@ ferroui_base::ferro_thread_local! {
     // Kept beyond the end of the thread, as the objects of the lighting
     // pass are (see there).
     static SHADER_PIPELINES: ManuallyDrop<RefCell<Vec<ShaderPipeline>>> = ManuallyDrop::new(RefCell::new(Vec::new()));
+    // How many shader pipelines this thread compiled (#455, E7): the tests
+    // hold frames that change only uniforms to compiling none.
+    static SHADER_PIPELINES_CREATED: Cell<u64> = const { Cell::new(0) };
+}
+
+/// How many pipelines of shader effects this thread compiled: a frame of an
+/// effect whose pipeline exists for the device compiles none.
+#[allow(dead_code)]
+pub(crate) fn shader_pipelines_created() -> u64 {
+    SHADER_PIPELINES_CREATED.with(Cell::get)
 }
 
 /// The checked module of the shader of `effect`, checked on the first call
@@ -1377,6 +1387,7 @@ fn with_shader_pipeline<R>(
         let index = match found {
             Some(index) => index,
             None => {
+                SHADER_PIPELINES_CREATED.with(|count| count.set(count.get() + 1));
                 let wgpu_device = device.device();
                 let label = Some("FerroUI shader effect");
                 let mut entries = vec![

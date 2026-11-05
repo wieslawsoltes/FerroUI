@@ -4,7 +4,7 @@ use crate::kernel::Coordinate;
 use crate::paint::{representative_color, snapshot_brush, BrushSpace};
 use crate::scene::{palette_color, PaintStyle};
 use ferroui_base::media::{Color, IBrush, PenLineCap, PenLineJoin};
-use ferroui_base::Point;
+use ferroui_base::{Point, Thickness};
 use std::rc::Rc;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default)]
@@ -25,6 +25,8 @@ pub enum SeriesKind {
     RangeRow,
     RangeLine,
     Financial,
+    /// The Open/High/Low/Close bars of `OhlcSeries`: a financial series drawn as I-bars.
+    Ohlc,
     Box,
     Pie,
     PolarLine,
@@ -48,6 +50,7 @@ ferroui_base::ferro_markup_enum!(SeriesKind {
     RangeRow,
     RangeLine,
     Financial,
+    Ohlc,
     Box,
     Pie,
     PolarLine,
@@ -75,7 +78,30 @@ impl SeriesKind {
                 | Self::RangeColumn
                 | Self::RangeRow
                 | Self::Financial
+                | Self::Ohlc
                 | Self::Box
+        )
+    }
+    /// The financial series (candlesticks and OHLC bars), which measure high, open, close and
+    /// low values.
+    pub fn is_financial(self) -> bool {
+        matches!(self, Self::Financial | Self::Ohlc)
+    }
+    /// The series with error bars (`IErrorSeries`): the line, stacked area, bar and scatter
+    /// series; a step line, a range line, a box and a financial series have none.
+    pub fn has_error_bars(self) -> bool {
+        matches!(
+            self,
+            Self::Line
+                | Self::Area
+                | Self::StackedArea
+                | Self::Column
+                | Self::Row
+                | Self::StackedColumn
+                | Self::StackedRow
+                | Self::RangeColumn
+                | Self::RangeRow
+                | Self::Scatter
         )
     }
     pub fn is_area(self) -> bool {
@@ -120,6 +146,17 @@ ferroui_base::ferro_markup_enum!(PolarLabelsPosition {
 
 /// The outline of a box series in the source's light theme.
 pub const BOX_STROKE: Color = Color::from_rgb(30, 30, 30);
+
+/// The error paint of the source's light theme (`ErrorPaint` of the line, bar and scatter rules).
+pub const ERROR_PAINT: Color = Color::from_rgb(45, 45, 45);
+
+/// The up and down paints of a financial series in the source's light theme
+/// (`HasRuleForFinancialSeries`): the green of a close above the open, the red of the others.
+pub const FINANCIAL_UP: Color = Color::from_rgb(139, 195, 74);
+pub const FINANCIAL_DOWN: Color = Color::from_rgb(239, 83, 80);
+
+/// The default `HeatMap` of a heat series (`CoreHeatSeries`): the cold and the hot blue.
+pub const HEAT_MAP: [Color; 2] = [Color::from_rgb(87, 103, 222), Color::from_rgb(95, 207, 249)];
 
 /// The data label paint of the source's light theme (`HasRuleForAnySeries`, `HasRuleForSankeySeries`).
 pub const DATA_LABELS_COLOR: Color = Color::from_rgb(45, 45, 45);
@@ -182,6 +219,26 @@ pub struct Series {
     pub polar_stacked: bool,
     /// Requested axis padding, expressed in nice tick steps for polar radii.
     pub data_padding: Point,
+    /// Draws the error bars of the points (`ShowError`) of a series with error bars
+    /// ([`SeriesKind::has_error_bars`]).
+    pub show_error: bool,
+    /// The stroke of the error bars (`ErrorPaint`); `None` takes the theme's [`ERROR_PAINT`].
+    pub error_paint: Option<Color>,
+    /// The fill of the markers of a line or polar line series (`GeometryFill`); `None` takes the
+    /// fill of the series.
+    pub geometry_fill: Option<Color>,
+    /// The stroke of the markers of a line or polar line series (`GeometryStroke`); `None` takes
+    /// the stroke of the series.
+    pub geometry_stroke: Option<Color>,
+    /// The offsets of the colours of the heat map of a heat series (`ColorStops`); `None` spreads
+    /// them evenly from 0 to 1.
+    pub color_stops: Option<Vec<f64>>,
+    /// The inset of each cell of a heat series (`PointPadding`), 4 on every side by default.
+    pub point_padding: Thickness,
+    /// The weight bounds of a heat series (`MinValue`, `MaxValue`); `None` takes the extremes of
+    /// its weights.
+    pub min_value: Option<f64>,
+    pub max_value: Option<f64>,
 }
 impl Default for Series {
     fn default() -> Self {
@@ -241,6 +298,14 @@ impl Series {
             polar_closed: true,
             polar_stacked: false,
             data_padding: Self::default_data_padding(kind),
+            show_error: false,
+            error_paint: None,
+            geometry_fill: None,
+            geometry_stroke: None,
+            color_stops: None,
+            point_padding: Thickness::uniform(4.0),
+            min_value: None,
+            max_value: None,
         };
         // The family defaults of the source series and of its default theme
         // (ThemesExtensions.AddDefaultTheme).
@@ -254,6 +319,14 @@ impl Series {
             SeriesKind::StackedArea | SeriesKind::StackedStepArea => series.geometry_size = 0.0,
             // CoreTreemapSeries.Padding.
             SeriesKind::Treemap => series.padding = 2.0,
+            // The heat map of CoreHeatSeries.
+            SeriesKind::Heat => series.heat_map = HEAT_MAP.to_vec(),
+            // CoreFinancialSeries.MaxBarWidth, and the stroke thickness of the theme's UpStroke
+            // and DownStroke, which draw the bars of an OHLC series.
+            SeriesKind::Ohlc => {
+                series.max_bar_width = 25.0;
+                series.stroke_width = 3.0;
+            }
             // The heat map of the HeatLandSeries constructor.
             SeriesKind::HeatLand => {
                 series.heat_map = crate::geo_map_chart_engine::HEAT_LAND_MAP.to_vec();
@@ -281,6 +354,7 @@ impl Series {
             SeriesKind::PolarLine => Point::new(1.0, 1.5),
             SeriesKind::Pie
             | SeriesKind::Financial
+            | SeriesKind::Ohlc
             | SeriesKind::Sankey
             | SeriesKind::Treemap
             | SeriesKind::HeatLand => Point::new(0.5, 0.5),
@@ -336,6 +410,28 @@ impl Series {
         style.fill = None;
         style.fill_brush = None;
         Some(style)
+    }
+    /// The paint of a marker of a line or polar line series: the series paint, with its
+    /// `GeometryFill` and `GeometryStroke` when they are set.
+    pub fn marker_style(&self, index: usize) -> PaintStyle {
+        let mut style = self.style(index, true);
+        if let Some(fill) = self.geometry_fill {
+            style.fill = Some(fill);
+            style.fill_brush = None;
+        }
+        if let Some(stroke) = self.geometry_stroke {
+            style.stroke = Some(stroke);
+            style.stroke_brush = None;
+        }
+        style
+    }
+    /// The stroke of the error bars (`ErrorPaint`, the theme's dark grey by default) at the
+    /// thickness of a source paint, 1.
+    pub fn error_style(&self) -> PaintStyle {
+        PaintStyle {
+            opacity: self.opacity,
+            ..PaintStyle::stroke(self.error_paint.unwrap_or(ERROR_PAINT), 1.0)
+        }
     }
     /// The paint of a box: its fill (the series colour by default) under a dark outline, the
     /// theme's `Stroke` of a box series.

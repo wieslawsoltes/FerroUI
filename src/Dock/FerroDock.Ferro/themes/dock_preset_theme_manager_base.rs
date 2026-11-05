@@ -8,7 +8,7 @@ use ferrodock_model::{
 use ferroui_base::{
     controls::IResourceDictionary,
     styling::{IStyle, Styles, ThemeVariant},
-    utilities::Uri,
+    utilities::UriRef,
 };
 use ferroui_controls::Application;
 use ferroui_markup_xaml::styling::ResourceInclude;
@@ -42,7 +42,7 @@ impl std::error::Error for PresetThemeManagerArgumentError {}
 /// Concrete managers compose this abstract base and implement its required hook.
 pub struct DockPresetThemeManagerBase {
     preset_names: ReadOnlyListHandle<String>,
-    preset_uris: ReadOnlyListHandle<Uri>,
+    preset_uris: ReadOnlyListHandle<url::Url>,
     preset_uri_prefix: String,
 }
 impl DockPresetThemeManagerBase {
@@ -50,7 +50,7 @@ impl DockPresetThemeManagerBase {
     /// Invalid arguments return the corresponding source constructor failure.
     pub fn new(
         preset_names: Option<ReadOnlyListHandle<String>>,
-        preset_uris: Option<ReadOnlyListHandle<Uri>>,
+        preset_uris: Option<ReadOnlyListHandle<url::Url>>,
         preset_uri_prefix: Option<String>,
     ) -> Result<Self, PresetThemeManagerArgumentError> {
         let fail = |parameter, message| PresetThemeManagerArgumentError { parameter, message };
@@ -156,7 +156,7 @@ impl DockPresetThemeManagerBase {
         }
         0
     }
-    fn try_find_application_preset_uri(&self, application: &Application) -> Option<Uri> {
+    fn try_find_application_preset_uri(&self, application: &Application) -> Option<UriRef> {
         let mut found = None;
         Self::visit_root_dictionaries(application, &mut |dictionary| {
             found = self.try_find_preset_uri(dictionary);
@@ -200,7 +200,7 @@ impl DockPresetThemeManagerBase {
         }
         false
     }
-    fn try_find_preset_uri(&self, dictionary: &dyn IResourceDictionary) -> Option<Uri> {
+    fn try_find_preset_uri(&self, dictionary: &dyn IResourceDictionary) -> Option<UriRef> {
         for provider in dictionary.merged_dictionaries().snapshot().iter() {
             if let Some(include) = provider.as_any().and_then(|provider| provider.downcast_ref::<ResourceInclude>()) {
                 if let Some(source) = include.source().filter(|source| self.is_preset_uri(source)) {
@@ -233,15 +233,15 @@ impl DockPresetThemeManagerBase {
             }
         }
     }
-    fn is_preset_uri(&self, source: &Uri) -> bool {
+    fn is_preset_uri(&self, source: &UriRef) -> bool {
         ordinal_ignore_case_starts_with(&source.to_string(), &self.preset_uri_prefix)
     }
-    fn are_equal_uris(left: &Uri, right: &Uri) -> bool {
-        ordinal_ignore_case_equal(&left.to_string(), &right.to_string())
+    fn are_equal_uris(left: &UriRef, right: &url::Url) -> bool {
+        ordinal_ignore_case_equal(&left.to_string(), right.as_str())
     }
-    fn create_preset_include(preset_uri: &Uri) -> Rc<ResourceInclude> {
+    fn create_preset_include(preset_uri: &url::Url) -> Rc<ResourceInclude> {
         let include = ResourceInclude::new(Some(preset_uri.clone()));
-        include.set_source(Some(preset_uri.clone()));
+        include.set_source(Some(UriRef::from(preset_uri.clone())));
         include
     }
 }

@@ -5477,3 +5477,8 @@ fn geometry_hit_test_finds_the_elements_intersecting_a_region() {
 
     scope.dispose();
 }
+
+// --- interactive effects (#455, E7) ----------------------------------------------------------
+
+#[path = "effect_input_tests.rs"]
+mod effect_input_tests;

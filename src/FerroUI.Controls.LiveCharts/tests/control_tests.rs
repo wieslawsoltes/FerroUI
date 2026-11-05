@@ -775,3 +775,199 @@ fn geo_map_draws_a_custom_map() {
     assert_eq!(chart.find_land_at(north).unwrap().short_name, "n");
     assert!(chart.find_land_at(chart.project(-3.0, 23.0).unwrap().unwrap()).is_none());
 }
+
+/// L5: the OHLC series, the error bars, the heat series properties and the date and time axes
+/// load from markup and reach the engine.
+#[test]
+fn ohlc_errors_heat_and_date_axes_load_from_markup_and_reach_the_engine() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    use ferroui_base::animation::SignedDuration;
+    use ferroui_base::media::Color;
+    // The family defaults of OhlcSeries (CoreFinancialSeries.MaxBarWidth, the theme's stroke)
+    // and HeatSeries (its heat map and point padding).
+    let ohlc = OhlcSeries::new();
+    assert_eq!(ohlc.kind(), SeriesKind::Ohlc);
+    assert_eq!((ohlc.max_bar_width(), ohlc.stroke_width()), (25.0, 3.0));
+    let heat = HeatSeries::new();
+    assert_eq!(
+        heat.heat_map(),
+        vec![Color::from_rgb(87, 103, 222), Color::from_rgb(95, 207, 249)]
+    );
+    assert_eq!(heat.point_padding(), ferroui_base::Thickness::uniform(4.0));
+    // DateTimeAxis and TimeSpanAxis take the unit width and minimum step of their interval
+    // (OnAxisIntervalChanged) and label with their format.
+    let dates = DateTimeAxis::new();
+    let day = SignedDuration::TICKS_PER_DAY as f64;
+    assert_eq!((dates.unit_width(), dates.min_step()), (day, day));
+    dates.set_date_format("MM dd".into());
+    let first = ferroui_base::utilities::DateTime::new(2021, 1, 2).ticks() as f64;
+    assert_eq!(dates.snapshot().label(first), "01 02");
+    dates.set_interval(SignedDuration::from_hours(1.0));
+    assert_eq!(dates.unit_width(), SignedDuration::TICKS_PER_HOUR as f64);
+    let spans = TimeSpanAxis::new();
+    assert_eq!(spans.unit_width(), SignedDuration::TICKS_PER_MILLISECOND as f64);
+    assert_eq!(
+        spans
+            .snapshot()
+            .label(SignedDuration::from_milliseconds(250.0).ticks() as f64),
+        "250ms"
+    );
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:CartesianChart.XAxes>
+            <lc:DateTimeAxis Interval="2.00:00:00" DateFormat="MMM dd" />
+          </lc:CartesianChart.XAxes>
+          <lc:OhlcSeries Name="Prices">
+            <lc:ChartPoint X="0" Y="523" TertiaryValue="500" QuaternaryValue="450" QuinaryValue="400" />
+          </lc:OhlcSeries>
+          <lc:ColumnSeries ShowError="True" ErrorPaint="#FF0000">
+            <lc:ChartPoint X="0" Y="65" ErrorYPlus="6" ErrorYMinus="6" HasError="True" />
+          </lc:ColumnSeries>
+          <lc:HeatSeries PointPadding="0" MinValue="0" MaxValue="100">
+            <lc:ChartPoint X="0" Y="0" TertiaryValue="50" />
+          </lc:HeatSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let axis = chart.x_axes().get(0).cast::<DateTimeAxis>().unwrap();
+    assert_eq!(axis.unit_width(), 2.0 * day);
+    assert_eq!(axis.date_format(), "MMM dd");
+    assert_eq!(chart.series().get(0).kind(), SeriesKind::Ohlc);
+    assert!(chart.series().get(1).show_error());
+    let heat = chart.series().get(2).cast::<HeatSeries>().unwrap();
+    assert_eq!(heat.point_padding(), ferroui_base::Thickness::uniform(0.0));
+    assert_eq!(heat.max_value(), Some(100.0));
+    heat.set_heat_map(vec![
+        Color::from_rgb(255, 0, 0),
+        Color::from_rgb(0, 255, 0),
+        Color::from_rgb(0, 0, 255),
+    ]);
+    heat.set_color_stops(Some(vec![0.0, 0.5, 1.0]));
+    let scene = chart.scene(Size::new(600.0, 400.0)).unwrap();
+    assert_eq!(scene.hits.len(), 3);
+    let error = scene
+        .primitives
+        .iter()
+        .find(|p| {
+            p.id.is_some_and(|id| id.series == 1)
+                && matches!(p.geometry, ferroui_livecharts::Geometry::Line { .. })
+        })
+        .expect("the error bar of the column");
+    assert_eq!(error.style.stroke, Some(Color::from_rgb(255, 0, 0)));
+    // The heat weight 50 is half way from 0 to 100: the middle colour.
+    let cell = scene
+        .primitives
+        .iter()
+        .find(|p| p.id.is_some_and(|id| id.series == 2))
+        .unwrap();
+    assert_eq!(cell.style.fill, Some(Color::from_rgb(0, 255, 0)));
+    // A heat property is observed.
+    let revision = chart.revision();
+    heat.set_max_value(Some(50.0));
+    assert!(chart.revision() > revision);
+}
+
+/// L5: the angular gauge of `AngularGaugeTests` (the source's Pies/AngularGauge sample) from
+/// markup: the visual elements of a pie chart are drawn and observed.
+#[test]
+fn pie_chart_draws_and_observes_its_angular_gauge_visuals() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:PieChart xmlns:lc="https://ferroui.dev/livecharts" InitialRotation="-225"
+              MaxAngle="270" MinValue="0" MaxValue="100">
+          <lc:PieSeries IsGauge="True" IsRelativeToMinValue="True" OuterRadiusOffset="130"
+                        MaxRadialColumnWidth="20"><lc:ChartPoint Y="60" /></lc:PieSeries>
+          <lc:PieSeries IsGauge="True" IsRelativeToMinValue="True" OuterRadiusOffset="130"
+                        MaxRadialColumnWidth="20"><lc:ChartPoint Y="40" /></lc:PieSeries>
+          <lc:PieChart.VisualElements>
+            <lc:AngularTicksVisual LabelsSize="16" LabelsOuterOffset="15" OuterOffset="65"
+                                   TicksLength="20" />
+            <lc:NeedleVisual Value="45" />
+          </lc:PieChart.VisualElements>
+        </lc:PieChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<PieChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    assert_eq!(chart.visual_elements().count(), 2);
+    let ticks = chart
+        .visual_elements()
+        .get(0)
+        .cast::<AngularTicksVisual>()
+        .unwrap();
+    assert_eq!(ticks.ticks_length(), 20.0);
+    assert_eq!(ticks.stroke(), Some(ferroui_base::media::Color::from_rgb(30, 30, 30)));
+    let size = Size::new(600.0, 600.0);
+    let needle_tip = |chart: &PieChart| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .find_map(|p| match &p.geometry {
+                ferroui_livecharts::Geometry::Polygon(points) => Some(points[0]),
+                _ => None,
+            })
+            .unwrap()
+    };
+    let scene = chart.scene(size).unwrap();
+    let lines = scene
+        .primitives
+        .iter()
+        .filter(|p| matches!(p.geometry, ferroui_livecharts::Geometry::Line { .. }))
+        .count();
+    assert_eq!(lines, 51);
+    let at_45 = needle_tip(&chart);
+    let needle = chart
+        .visual_elements()
+        .get(1)
+        .cast::<NeedleVisual>()
+        .unwrap();
+    assert_eq!(needle.width(), 20.0);
+    let revision = chart.revision();
+    needle.set_numeric_value(90.0);
+    assert!(chart.revision() > revision);
+    assert_ne!(needle_tip(&chart), at_45);
+    // A removed visual is no longer drawn nor observed.
+    chart.visual_elements().clear();
+    assert!(!chart
+        .scene(size)
+        .unwrap()
+        .primitives
+        .iter()
+        .any(|p| matches!(p.geometry, ferroui_livecharts::Geometry::Polygon(_))));
+    let revision = chart.revision();
+    needle.set_numeric_value(10.0);
+    assert_eq!(chart.revision(), revision);
+}
+
+/// Port of _MemoryTests.HeatSeries_Releases: twenty points of a heat series on a 300 by 200
+/// chart, drawn, detached and drawn again, after which no point survives.
+#[test]
+fn heat_series_release_their_points() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const COUNT: usize = 20;
+    let chart = CartesianChart::new();
+    chart.set_animations_speed(0.0);
+    let series = HeatSeries::new();
+    chart.series().add(series.clone().upcast());
+    let size = Size::new(300.0, 200.0);
+    let survivors = {
+        let points: Vec<_> = (0..COUNT)
+            .map(|i| ChartPoint::from_coordinate(Coordinate::weighted(i as f64, 0.0, i as f64)))
+            .collect();
+        let survivors = alive(&points);
+        series.set_values(ChartPoints::from_items(points));
+        assert_eq!(chart.scene(size).unwrap().hits.len(), COUNT);
+        series.set_values(ChartPoints::new());
+        assert!(chart.scene(size).unwrap().hits.is_empty());
+        survivors
+    };
+    assert!(survivors.iter().all(|alive| !alive()));
+}

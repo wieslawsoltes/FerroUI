@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use ferroui_base::metadata::{IServiceProvider, MarkupInvokeError, MarkupValue};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use xamlx::ast::{
     visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, IXamlLineInfo,
     IXamlPropertySetter, IXamlWrappedMethod, XamlAstClrProperty, XamlAstExtensions,
@@ -214,7 +214,7 @@ fn invoke_error(error: MarkupInvokeError, what: &str, line_info: &dyn IXamlLineI
 pub struct RuntimeDocument {
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     pub source_text: RefCell<Option<Rc<str>>>,
-    pub base_uri: Option<Uri>,
+    pub base_uri: Option<url::Url>,
     pub static_providers: Rc<[Rc<dyn IStaticServiceProvider>]>,
     /// The root node: the decisions below are remembered by node address,
     /// so the nodes must outlive them.
@@ -232,7 +232,7 @@ struct ScopedNamespaceProvider {
 
 impl RuntimeDocument {
     pub fn new(
-        base_uri: Option<Uri>,
+        base_uri: Option<url::Url>,
         static_providers: Vec<Rc<dyn IStaticServiceProvider>>,
         root: Option<Rc<dyn IXamlAstNode>>,
     ) -> Rc<Self> {
@@ -375,7 +375,7 @@ impl Interpreter {
         base_uri: Option<&str>,
     ) -> XamlResult<Rc<RuntimeDocument>> {
         let base_uri = match base_uri {
-            Some(base_uri) => Some(Uri::absolute(base_uri).map_err(|e| {
+            Some(base_uri) => Some(UriRef::parse_absolute(base_uri).map_err(|e| {
                 XamlError::internal(
                     "UriFormatException",
                     format!("Invalid base URI '{base_uri}': {e}"),
@@ -548,7 +548,7 @@ impl Interpreter {
                 {
                     ferroui_base::controls::resource_provenance::register(
                         &root,
-                        uri.absolute_uri().to_owned(),
+                        uri.as_str().to_owned(),
                     );
                 }
             }
@@ -571,7 +571,7 @@ impl Interpreter {
         context.set_intermediate_root_object(root_instance.clone());
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         crate::binding_capture::register_root(
-            document.base_uri.as_ref().map(|uri| uri.absolute_uri()),
+            document.base_uri.as_ref().map(url::Url::as_str),
             root_instance,
         );
         let scope = Rc::as_ptr(&manipulation) as *const () as usize;

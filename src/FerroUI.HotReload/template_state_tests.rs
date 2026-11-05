@@ -45,11 +45,7 @@ fn root_template_without_content_preserves_text_cursor_focus_and_releases_parts(
     let baseline = source(200, "");
     let document = RuntimeXamlLoaderDocument::with_base_uri(
         Some(
-            ferroui_base::utilities::Uri::try_create(
-                uri,
-                ferroui_base::utilities::UriKind::Absolute,
-            )
-            .unwrap(),
+            ferroui_base::utilities::UriRef::parse_absolute(uri).unwrap(),
         ),
         &baseline,
     );
@@ -120,11 +116,7 @@ impl Fixture {
         ferroui_markup_xaml::register_types();
         let document = RuntimeXamlLoaderDocument::with_base_uri(
             Some(
-                ferroui_base::utilities::Uri::try_create(
-                    uri,
-                    ferroui_base::utilities::UriKind::Absolute,
-                )
-                .unwrap(),
+                ferroui_base::utilities::UriRef::parse_absolute(uri).unwrap(),
             ),
             source,
         );
