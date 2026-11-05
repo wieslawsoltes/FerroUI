@@ -276,7 +276,12 @@ impl FerroXamlIlCompiler {
 
         insert_after::<TypeReferenceResolver>(
             &mut transformers,
-            vec![Box::new(XDataTypeTransformer)],
+            vec![
+                Box::new(XDataTypeTransformer),
+                // Not upstream: `x:DefaultBindMode`, `x:Phase` and `x:Load` of `{x:Bind}`
+                // (docs/porting/x-bind.md, step X5), once the types are resolved.
+                Box::new(XBindDirectivesTransformer),
+            ],
         );
 
         // After everything else

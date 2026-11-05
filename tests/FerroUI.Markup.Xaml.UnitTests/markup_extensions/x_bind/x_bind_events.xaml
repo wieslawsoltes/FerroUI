@@ -1,0 +1,18 @@
+<local:XBindPage xmlns="https://github.com/ferroui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:local="clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests"
+                 Title="Ada" Pinged="{x:Bind OnPinged}">
+  <Button x:Name="regular" Click="{x:Bind OnClick}" />
+  <Button x:Name="noArguments" Click="{x:Bind OnClickNoArgs}" />
+  <Button x:Name="baseArguments" Click="{x:Bind OnClickBase}" />
+  <Button x:Name="modelPath" Click="{x:Bind Model.Poke}" />
+  <Button x:Name="currentPath" Click="{x:Bind Current.Poke}" />
+  <Button x:Name="staticHandler" Click="{x:Bind local:XBindHelpers.Clicked}" />
+  <ContentControl x:Name="itemHost">
+    <ContentControl.ContentTemplate>
+      <DataTemplate x:DataType="local:XBindModel">
+        <Button Click="{x:Bind Poke}" />
+      </DataTemplate>
+    </ContentControl.ContentTemplate>
+  </ContentControl>
+</local:XBindPage>

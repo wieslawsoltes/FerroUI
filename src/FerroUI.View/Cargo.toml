@@ -47,8 +47,6 @@ hot-reload = ["dep:proc-macro2", "dep:syn"]
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
-# The executor of the thread, which runs the futures of `use_future` (`async_data.rs`).
-ferroui-system = { workspace = true }
 # The parser of selectors of `style("Button.accent")`.
 ferroui-markup = { workspace = true }
 ferroui-view-macros = { workspace = true }

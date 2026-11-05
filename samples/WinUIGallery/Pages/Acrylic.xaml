@@ -1,0 +1,105 @@
+<!-- Ported from the three pinned Acrylic examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page's two AcrylicBrush resources are created in Rust (materials_samples.rs) with the
+     source's values, and the Loaded, ValueChanged and SelectionChanged handlers change them as
+     the C# handlers do. The SolidColorBrush items and the ColorTemplate of the colour boxes are
+     composed items (a swatch and the colour's name); the handlers map the index to the colour. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="20">
+  <TextBlock TextWrapping="Wrap"
+             Text="Acrylic Brush might fall back to SolidColorBrush in certain scenarios (the transparency effects or the energy saver of the platform, a renderer without a compositor). Acrylic Brush uses in-app acrylic. See SystemBackdrops (Mica/Acrylic) for background acrylic." />
+  <HyperlinkButton Content="Acrylic brush adaptability documentation"
+                   NavigateUri="https://learn.microsoft.com/windows/apps/design/style/acrylic#usability-and-adaptability" />
+
+  <StackPanel x:Name="AcrylicExample1" Spacing="12">
+    <TextBlock Text="Default in-app acrylic brush" FontSize="18" />
+    <Grid x:Name="Example1Grid" Width="400" Height="252" MinWidth="320" HorizontalAlignment="Left">
+      <Grid>
+        <Rectangle Width="100" Height="200" HorizontalAlignment="Left" VerticalAlignment="Top" Fill="Aqua" />
+        <Ellipse Width="152" Height="152" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Magenta" />
+        <Rectangle Width="80" Height="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Fill="Yellow" />
+      </Grid>
+      <Rectangle x:Name="DefaultAcrylicShape" Margin="12"
+                 Fill="{DynamicResource AcrylicInAppFillColorDefaultBrush}" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="AcrylicExample2" Spacing="12">
+    <TextBlock Text="Custom acrylic brush" FontSize="18" />
+    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="24">
+      <Grid x:Name="Example3Grid" Width="500" MinWidth="320" MinHeight="252" ColumnDefinitions="*,252">
+        <Grid>
+          <Rectangle Width="100" Height="200" HorizontalAlignment="Left" VerticalAlignment="Top" Fill="Aqua" />
+          <Ellipse Width="152" Height="152" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Magenta" />
+          <Rectangle Width="80" Height="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Fill="Yellow" />
+        </Grid>
+        <Rectangle x:Name="CustomAcrylicShapeInApp" Margin="12" />
+      </Grid>
+      <StackPanel Grid.Column="1" Spacing="0">
+        <TextBlock Margin="0,0,0,12" Text="Tint Opacity :" />
+        <Slider x:Name="OpacitySliderInApp" Width="200" HorizontalAlignment="Left"
+                AutomationProperties.Name="tint opacity" Minimum="0" Maximum="1"
+                SmallChange="0.001" TickFrequency="0.001" IsSnapToTickEnabled="True" />
+        <TextBlock Margin="0,12" Text="Tint Color :" />
+        <ComboBox x:Name="ColorSelectorInApp" AutomationProperties.Name="tint color">
+          <ComboBoxItem AutomationProperties.Name="#FF000000">
+            <StackPanel Orientation="Horizontal">
+              <Rectangle Width="20" Height="20" Fill="Black" />
+              <TextBlock Margin="4,0,0,0" Text="#FF000000" />
+            </StackPanel>
+          </ComboBoxItem>
+          <ComboBoxItem AutomationProperties.Name="#FFFF0000">
+            <StackPanel Orientation="Horizontal">
+              <Rectangle Width="20" Height="20" Fill="Red" />
+              <TextBlock Margin="4,0,0,0" Text="#FFFF0000" />
+            </StackPanel>
+          </ComboBoxItem>
+          <ComboBoxItem AutomationProperties.Name="#FF0000FF">
+            <StackPanel Orientation="Horizontal">
+              <Rectangle Width="20" Height="20" Fill="Blue" />
+              <TextBlock Margin="4,0,0,0" Text="#FF0000FF" />
+            </StackPanel>
+          </ComboBoxItem>
+        </ComboBox>
+        <TextBlock Margin="0,12,0,12" Text="Fallback Color :" />
+        <ComboBox x:Name="FallbackColorSelectorInApp" AutomationProperties.Name="fallback color">
+          <ComboBoxItem AutomationProperties.Name="#FF008000">
+            <StackPanel Orientation="Horizontal">
+              <Rectangle Width="20" Height="20" Fill="Green" />
+              <TextBlock Margin="4,0,0,0" Text="#FF008000" />
+            </StackPanel>
+          </ComboBoxItem>
+          <ComboBoxItem AutomationProperties.Name="#FFFFFF00">
+            <StackPanel Orientation="Horizontal">
+              <Rectangle Width="20" Height="20" Fill="Yellow" />
+              <TextBlock Margin="4,0,0,0" Text="#FFFFFF00" />
+            </StackPanel>
+          </ComboBoxItem>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="AcrylicExample3" Spacing="12">
+    <TextBlock Text="Luminosity" FontSize="18" />
+    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="24">
+      <Grid x:Name="Example4Grid" Width="652" MinWidth="652" MinHeight="252" ColumnDefinitions="*,252">
+        <Grid>
+          <Rectangle Width="100" Height="200" HorizontalAlignment="Left" VerticalAlignment="Top" Fill="Aqua" />
+          <Ellipse Width="152" Height="152" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Magenta" />
+          <Rectangle Width="80" Height="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Fill="Yellow" />
+        </Grid>
+        <Rectangle x:Name="CustomAcrylicShapeLumin" Margin="12" />
+      </Grid>
+      <StackPanel Grid.Column="1" Spacing="0">
+        <TextBlock Margin="0,0,0,12" Text="Tint Opacity :" />
+        <Slider x:Name="OpacitySliderLumin" Width="200" HorizontalAlignment="Left"
+                AutomationProperties.Name="tint opacity" Minimum="0" Maximum="1"
+                SmallChange="0.001" TickFrequency="0.001" IsSnapToTickEnabled="True" />
+        <TextBlock Margin="0,0,0,12" Text="Tint Luminosity Opacity :" />
+        <Slider x:Name="LuminositySlider" Width="200" HorizontalAlignment="Left"
+                AutomationProperties.Name="tint luminosity" Minimum="0" Maximum="1"
+                SmallChange="0.001" TickFrequency="0.001" IsSnapToTickEnabled="True" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>

@@ -1,0 +1,232 @@
+<!-- Ported from the pinned Chart examples of WinUI Gallery (14061eea); see ../NOTICE.md. -->
+<!-- The seven examples of ChartPage.xaml (Microsoft.UI.Xaml.Controls.Charts) on the native
+     CartesianChart of ferroui-controls-livecharts. The data of the page (Months, Profits and the
+     others), the category labels, the time axis and the option handlers of ChartPage.xaml.cs are in
+     chart_samples.rs. Mappings: Chart is CartesianChart; CategoryAxis and LinearAxis are Axis
+     (Label is Name, Minimum/Maximum are MinLimit/MaxLimit, Spacing is MinStep with ForceStep,
+     GridLines is ShowSeparatorLines); LineSeries, AreaSeries and BarSeries are LineSeries, AreaSeries
+     and ColumnSeries (a horizontal BarSeries is a RowSeries); Title is Name; ShowLegend is
+     LegendPosition; ShowDataMarkers is GeometrySize; ShowDataLabels is DataLabels; StrokeDashStyle
+     is StrokeDashArray, set in code from the thickness. The straight segments of the source are LineSmoothness 0; a line series
+     whose area the source does not fill has a transparent Fill. Header is composed with a label. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:lc="https://ferroui.dev/livecharts" Spacing="16">
+  <TextBlock TextWrapping="Wrap"
+             Text="The charts of this page are the native charts of ferroui-controls-livecharts: they need no resource dictionary of their own." />
+
+  <!-- Example 1: BasicLineChart.txt -->
+  <TextBlock Text="A basic line chart" FontSize="18" />
+  <Grid x:Name="ChartExample1" ColumnDefinitions="*,220" ColumnSpacing="24">
+    <lc:CartesianChart x:Name="BasicLineChart" Height="320" LegendPosition="Top"
+                       AutomationProperties.AutomationId="ChartBasicLine"
+                       AutomationProperties.Name="Monthly profit line chart"
+                       AutomationProperties.HelpText="Monthly profit increases from 18 in January to 52 in June.">
+      <lc:CartesianChart.XAxes>
+        <lc:Axis Name="Month" />
+      </lc:CartesianChart.XAxes>
+      <lc:CartesianChart.YAxes>
+        <lc:Axis Name="Profit" MinLimit="0" />
+      </lc:CartesianChart.YAxes>
+      <lc:LineSeries Name="2025" Fill="#00000000" GeometrySize="0" LineSmoothness="0" />
+    </lc:CartesianChart>
+    <StackPanel Grid.Column="1" Spacing="4">
+      <TextBlock Text="Legend" />
+      <ToggleSwitch x:Name="LegendToggle" AutomationProperties.AutomationId="ChartLegendToggle"
+                    AutomationProperties.Name="Show legend" IsChecked="True"
+                    OffContent="Hidden" OnContent="Visible" />
+    </StackPanel>
+  </Grid>
+
+  <!-- Example 2: BarChart.txt -->
+  <TextBlock Text="A bar chart" FontSize="18" />
+  <Grid x:Name="ChartExample2" ColumnDefinitions="*,220" ColumnSpacing="24">
+    <lc:CartesianChart x:Name="BarChart" Height="320"
+                       AutomationProperties.AutomationId="ChartBar"
+                       AutomationProperties.Name="Units sold by region bar chart"
+                       AutomationProperties.HelpText="Units sold are 42 in North, 38 in South, 51 in East, and 47 in West.">
+      <lc:CartesianChart.XAxes>
+        <lc:Axis Name="Region" />
+      </lc:CartesianChart.XAxes>
+      <lc:CartesianChart.YAxes>
+        <lc:Axis Name="Units sold" MinLimit="0" />
+      </lc:CartesianChart.YAxes>
+      <lc:ColumnSeries Name="Units sold" Fill="#0078D4" />
+    </lc:CartesianChart>
+    <StackPanel Grid.Column="1" Spacing="4">
+      <TextBlock Text="Orientation" />
+      <ComboBox x:Name="BarOrientationComboBox" AutomationProperties.AutomationId="ChartBarOrientationSelector"
+                AutomationProperties.Name="Bar orientation" SelectedIndex="0">
+        <ComboBoxItem Content="Vertical" Tag="Vertical" />
+        <ComboBoxItem Content="Horizontal" Tag="Horizontal" />
+      </ComboBox>
+      <TextBlock Margin="0,8,0,0" Text="Sort categories by" />
+      <ComboBox x:Name="SortKeyComboBox" AutomationProperties.AutomationId="ChartBarSortKeySelector"
+                AutomationProperties.Name="Sort categories by" SelectedIndex="0">
+        <ComboBoxItem Content="Data order" Tag="Index" />
+        <ComboBoxItem Content="Value" Tag="Value" />
+      </ComboBox>
+      <TextBlock Margin="0,8,0,0" Text="Sort order" />
+      <ComboBox x:Name="SortOrderComboBox" AutomationProperties.AutomationId="ChartBarSortOrderSelector"
+                AutomationProperties.Name="Sort order" SelectedIndex="0">
+        <ComboBoxItem Content="Ascending" Tag="Ascending" />
+        <ComboBoxItem Content="Descending" Tag="Descending" />
+      </ComboBox>
+    </StackPanel>
+  </Grid>
+
+  <!-- Example 3: AxisOptions.txt -->
+  <TextBlock Text="Axis options" FontSize="18" />
+  <Grid x:Name="ChartExample3" ColumnDefinitions="*,220" ColumnSpacing="24">
+    <lc:CartesianChart x:Name="AxisOptionsChart" Height="320"
+                       AutomationProperties.AutomationId="ChartAxisOptions"
+                       AutomationProperties.Name="Quarterly visitors chart with configurable axes"
+                       AutomationProperties.HelpText="Visitors per quarter are 35 in Q1, 62 in Q2, 48 in Q3, and 81 in Q4, on an axis from 0 to 100.">
+      <lc:CartesianChart.XAxes>
+        <lc:Axis Name="Quarter" IsVisible="True" LabelsColor="#767676" />
+      </lc:CartesianChart.XAxes>
+      <lc:CartesianChart.YAxes>
+        <lc:Axis Name="Visitors (thousands)" IsVisible="True" LabelsColor="#767676"
+                 SeparatorsColor="#66808080" ShowSeparatorLines="True"
+                 MinLimit="0" MaxLimit="100" MinStep="20" ForceStep="True" />
+      </lc:CartesianChart.YAxes>
+      <lc:LineSeries Name="Visitors" Fill="#00000000" GeometrySize="8" LineSmoothness="0" />
+    </lc:CartesianChart>
+    <StackPanel Grid.Column="1" Spacing="4">
+      <TextBlock Text="Grid lines" />
+      <ComboBox x:Name="GridLinesComboBox" AutomationProperties.AutomationId="ChartGridLinesSelector"
+                AutomationProperties.Name="Grid lines" SelectedIndex="1">
+        <ComboBoxItem Content="None" Tag="None" />
+        <ComboBoxItem Content="Major" Tag="Major" />
+        <ComboBoxItem Content="Minor" Tag="Minor" />
+      </ComboBox>
+      <TextBlock Margin="0,8,0,0" Text="Axes" />
+      <ToggleSwitch x:Name="AxesVisibleToggle" AutomationProperties.AutomationId="ChartAxesVisibleToggle"
+                    AutomationProperties.Name="Show axes" IsChecked="True" OffContent="Hidden" OnContent="Visible" />
+      <TextBlock Text="Tick labels" />
+      <ToggleSwitch x:Name="TickLabelsToggle" AutomationProperties.AutomationId="ChartTickLabelsToggle"
+                    AutomationProperties.Name="Show tick labels" IsChecked="True" OffContent="Hidden" OnContent="Visible" />
+      <TextBlock FontSize="12" TextWrapping="Wrap"
+                 Text="The axes of the native chart draw no tick marks, so the Tick marks option of the source is not shown." />
+    </StackPanel>
+  </Grid>
+
+  <!-- Example 4: StyledSeries.txt -->
+  <TextBlock Text="Styled series" FontSize="18" />
+  <Grid x:Name="ChartExample4" ColumnDefinitions="*,220" ColumnSpacing="24">
+    <lc:CartesianChart x:Name="StyledSeriesChart" Height="360" LegendPosition="Top"
+                       AutomationProperties.AutomationId="ChartStyledSeries"
+                       AutomationProperties.Name="Monthly results chart with area, bar, and line series"
+                       AutomationProperties.HelpText="Forecast, actual, and target monthly results from January to June.">
+      <lc:CartesianChart.XAxes>
+        <lc:Axis Name="Month" />
+      </lc:CartesianChart.XAxes>
+      <lc:CartesianChart.YAxes>
+        <lc:Axis Name="Revenue" MinLimit="0" MaxLimit="60" MinStep="10" ForceStep="True" />
+      </lc:CartesianChart.YAxes>
+      <lc:AreaSeries Name="Forecast" Fill="#4D0078D4" Stroke="#0078D4" StrokeThickness="2"
+                     GeometrySize="0" LineSmoothness="0" IsVisible="True" />
+      <lc:ColumnSeries Name="Actual" Fill="#008575" DataLabels="True" IsVisible="True" />
+      <lc:LineSeries Name="Target" Fill="#00000000" Stroke="#D13438" StrokeThickness="2"
+                     GeometrySize="8" LineSmoothness="0" IsVisible="True" />
+    </lc:CartesianChart>
+    <StackPanel Grid.Column="1" Spacing="4">
+      <TextBlock FontWeight="SemiBold" Text="Visible series" />
+      <CheckBox x:Name="ForecastCheckBox" AutomationProperties.AutomationId="ChartForecastVisibleCheckBox"
+                Content="Forecast" IsChecked="True" />
+      <CheckBox x:Name="ActualCheckBox" AutomationProperties.AutomationId="ChartActualVisibleCheckBox"
+                Content="Actual" IsChecked="True" />
+      <CheckBox x:Name="TargetCheckBox" AutomationProperties.AutomationId="ChartTargetVisibleCheckBox"
+                Content="Target" IsChecked="True" />
+    </StackPanel>
+  </Grid>
+
+  <!-- Example 5: LinesAndMarkers.txt -->
+  <TextBlock Text="Lines and markers" FontSize="18" />
+  <Grid x:Name="ChartExample5" ColumnDefinitions="*,220" ColumnSpacing="24">
+    <lc:CartesianChart x:Name="LinesAndMarkersChart" Height="320"
+                       AutomationProperties.AutomationId="ChartLinesAndMarkers"
+                       AutomationProperties.Name="Daily visits line chart with markers and data labels"
+                       AutomationProperties.HelpText="Daily visits from Monday to Sunday are 120, 135, 128, 172, 150, 98, and 110. Thursday is the peak.">
+      <lc:CartesianChart.XAxes>
+        <lc:Axis Name="Day" />
+      </lc:CartesianChart.XAxes>
+      <lc:CartesianChart.YAxes>
+        <lc:Axis Name="Visits" MinLimit="0" />
+      </lc:CartesianChart.YAxes>
+      <lc:LineSeries Name="Visits" Fill="#00000000" Stroke="#8764B8" StrokeThickness="2"
+                     GeometrySize="8" DataLabels="True" LineSmoothness="0" />
+    </lc:CartesianChart>
+    <StackPanel Grid.Column="1" Spacing="4">
+      <TextBlock Text="Line dash style" />
+      <ComboBox x:Name="DashStyleComboBox" AutomationProperties.AutomationId="ChartDashStyleSelector"
+                AutomationProperties.Name="Line dash style" SelectedIndex="0">
+        <ComboBoxItem Content="Solid" Tag="Solid" />
+        <ComboBoxItem Content="Dash" Tag="Dash" />
+        <ComboBoxItem Content="Dot" Tag="Dot" />
+        <ComboBoxItem Content="DashDot" Tag="DashDot" />
+        <ComboBoxItem Content="DashDotDot" Tag="DashDotDot" />
+      </ComboBox>
+      <TextBlock Margin="0,8,0,0" Text="Line thickness" />
+      <Slider x:Name="StrokeThicknessSlider" AutomationProperties.AutomationId="ChartStrokeThicknessSlider"
+              AutomationProperties.Name="Line thickness" Minimum="1" Maximum="6"
+              TickFrequency="1" IsSnapToTickEnabled="True" Value="2" />
+      <TextBlock Text="Data markers" />
+      <ToggleSwitch x:Name="DataMarkersToggle" AutomationProperties.AutomationId="ChartDataMarkersToggle"
+                    AutomationProperties.Name="Show data markers" IsChecked="True" OffContent="Hidden" OnContent="Visible" />
+      <TextBlock Text="Data labels" />
+      <ToggleSwitch x:Name="DataLabelsToggle" AutomationProperties.AutomationId="ChartDataLabelsToggle"
+                    AutomationProperties.Name="Show data labels" IsChecked="True" OffContent="Hidden" OnContent="Visible" />
+      <TextBlock FontSize="12" TextWrapping="Wrap"
+                 Text="The markers of the native chart are circles: the Marker shape option and the per-point overrides of the source (the Peak label and marker) are not shown." />
+    </StackPanel>
+  </Grid>
+
+  <!-- Example 6: TimeSeries.txt -->
+  <TextBlock Text="A time series" FontSize="18" />
+  <Grid x:Name="ChartExample6" ColumnDefinitions="*,220" ColumnSpacing="24">
+    <!-- The axes and the series are created in code, as CreateTimeSeriesChart does. -->
+    <lc:CartesianChart x:Name="TimeSeriesChart" Height="320"
+                       AutomationProperties.AutomationId="ChartTimeSeries"
+                       AutomationProperties.Name="Weekly temperature area chart"
+                       AutomationProperties.HelpText="Weekly temperature readings in August are 72, 76, 74, 79, and 77 degrees." />
+    <StackPanel Grid.Column="1" Spacing="4">
+      <TextBlock Text="Tick interval" />
+      <ComboBox x:Name="IntervalTypeComboBox" AutomationProperties.AutomationId="ChartIntervalTypeSelector"
+                AutomationProperties.Name="Tick interval" SelectedIndex="2">
+        <ComboBoxItem Content="Auto" Tag="Auto" />
+        <ComboBoxItem Content="Day" Tag="Day" />
+        <ComboBoxItem Content="Week" Tag="Week" />
+        <ComboBoxItem Content="Month" Tag="Month" />
+      </ComboBox>
+      <TextBlock Margin="0,8,0,0" Text="Tick label format" />
+      <ComboBox x:Name="LabelFormatComboBox" AutomationProperties.AutomationId="ChartLabelFormatSelector"
+                AutomationProperties.Name="Tick label format" SelectedIndex="0">
+        <ComboBoxItem Content="month day" Tag="month day" />
+        <ComboBoxItem Content="month.abbreviated day" Tag="month.abbreviated day" />
+        <ComboBoxItem Content="shortdate" Tag="shortdate" />
+      </ComboBox>
+    </StackPanel>
+  </Grid>
+
+  <!-- Example 7: LiveObservableSeries.txt -->
+  <TextBlock Text="A live series" FontSize="18" />
+  <Grid x:Name="ChartExample7" ColumnDefinitions="*,220" ColumnSpacing="24">
+    <StackPanel Spacing="8">
+      <lc:CartesianChart x:Name="LiveSeriesChart" Height="320"
+                         AutomationProperties.AutomationId="ChartLiveObservableSeries"
+                         AutomationProperties.Name="Live response time chart"
+                         AutomationProperties.HelpText="A response-time line series that updates when Add sample is selected.">
+        <lc:CartesianChart.YAxes>
+          <lc:Axis Name="Milliseconds" MinLimit="0" />
+        </lc:CartesianChart.YAxes>
+        <lc:LineSeries Name="Response time" Fill="#00000000" GeometrySize="8" LineSmoothness="0" />
+      </lc:CartesianChart>
+      <TextBlock x:Name="LiveSeriesSummary" AutomationProperties.AutomationId="ChartLiveSeriesSummary"
+                 AutomationProperties.LiveSetting="Polite" TextWrapping="Wrap" />
+    </StackPanel>
+    <Button x:Name="AddResponseTimeSampleButton" Grid.Column="1" VerticalAlignment="Top"
+            AutomationProperties.AutomationId="ChartAddResponseTimeSampleButton"
+            AutomationProperties.Name="Add response time sample" Content="Add sample" />
+  </Grid>
+</StackPanel>

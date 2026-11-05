@@ -5368,6 +5368,48 @@
     ]
   },
   {
+    "name": "DeferredElement",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_markup_xaml::markup_extensions::DeferredElement",
+    "base": "Control",
+    "constructible": true,
+    "properties": {
+      "Load": {
+        "name": "Load",
+        "type_name": "bool",
+        "documentation": "DeferredElement.Load: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "Placeholder": {
+        "name": "Placeholder",
+        "type_name": "Option<Ref<DeferredElement>>",
+        "documentation": "DeferredElement.Placeholder: Option<Ref<DeferredElement>>",
+        "values": [],
+        "attached": true
+      },
+      "ElementName": {
+        "name": "ElementName",
+        "type_name": "Option<String>",
+        "documentation": "DeferredElement.ElementName: Option<String>",
+        "values": []
+      },
+      "Content": {
+        "name": "Content",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "DeferredElement.Content: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Markup.Xaml.MarkupExtensions",
+      "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
     "name": "DefinitionBase",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::DefinitionBase",
@@ -10185,6 +10227,54 @@
     "namespace_aliases": [
       "using:FerroUI.Interactivity",
       "clr-namespace:FerroUI.Interactivity;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractiveBurningFlameEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveBurningFlameEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractivePointerSpotlightEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractivePointerSpotlightEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractiveReactiveGridEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveReactiveGridEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractiveWaterRippleEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveWaterRippleEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
     ]
   },
   {
@@ -17477,15 +17567,7 @@
     "documentation": "ferroui_controls_repeater::RepeaterBindingHelper",
     "base": null,
     "constructible": false,
-    "properties": {
-      "DataTemplateComponent": {
-        "name": "DataTemplateComponent",
-        "type_name": "Option<Rc<dyn IDataTemplateComponent>>",
-        "documentation": "RepeaterBindingHelper.DataTemplateComponent: Option<Rc<dyn IDataTemplateComponent>>",
-        "values": [],
-        "attached": true
-      }
-    },
+    "properties": {},
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Repeater"
@@ -28253,10 +28335,52 @@
         "documentation": "XBindExtension.DataType: Option<ValueType>",
         "values": []
       },
+      "TargetType": {
+        "name": "TargetType",
+        "type_name": "Option<ValueType>",
+        "documentation": "XBindExtension.TargetType: Option<ValueType>",
+        "values": []
+      },
+      "Phase": {
+        "name": "Phase",
+        "type_name": "i32",
+        "documentation": "XBindExtension.Phase: i32",
+        "values": []
+      },
       "BindBack": {
         "name": "BindBack",
         "type_name": "Option<String>",
         "documentation": "XBindExtension.BindBack: Option<String>",
+        "values": []
+      },
+      "Converter": {
+        "name": "Converter",
+        "type_name": "Option<Rc<dyn IValueConverter>>",
+        "documentation": "XBindExtension.Converter: Option<Rc<dyn IValueConverter>>",
+        "values": []
+      },
+      "ConverterParameter": {
+        "name": "ConverterParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.ConverterParameter: Option<BoxedValue>",
+        "values": []
+      },
+      "ConverterLanguage": {
+        "name": "ConverterLanguage",
+        "type_name": "Option<CultureInfo>",
+        "documentation": "XBindExtension.ConverterLanguage: Option<CultureInfo>",
+        "values": []
+      },
+      "FallbackValue": {
+        "name": "FallbackValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.FallbackValue: Option<BoxedValue>",
+        "values": []
+      },
+      "TargetNullValue": {
+        "name": "TargetNullValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.TargetNullValue: Option<BoxedValue>",
         "values": []
       }
     },
@@ -28347,6 +28471,26 @@
     "namespace_aliases": [
       "using:FerroUI.Media",
       "clr-namespace:FerroUI.Media;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "XamlBindingHelper",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::templates::XamlBindingHelper",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DataTemplateComponent": {
+        "name": "DataTemplateComponent",
+        "type_name": "Option<Rc<dyn IDataTemplateComponent>>",
+        "documentation": "XamlBindingHelper.DataTemplateComponent: Option<Rc<dyn IDataTemplateComponent>>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Templates",
+      "clr-namespace:FerroUI.Controls.Templates;assembly=FerroUI.Controls"
     ]
   },
   {

@@ -31,7 +31,7 @@ fn sequence_contains_no_elements() -> XamlError {
 
 impl FerroXamlIlBindingPathTransformer {
     /// The local function `matchProperty`.
-    fn match_property(
+    pub(super) fn match_property(
         node: &Rc<dyn IXamlAstNode>,
         styled_element_type: &Rc<dyn IXamlType>,
         property_name: &str,
@@ -64,7 +64,7 @@ impl FerroXamlIlBindingPathTransformer {
     }
 
     /// The local function `getResourceValue_Type`.
-    fn get_resource_value_type(
+    pub(super) fn get_resource_value_type(
         node: &XamlPropertyAssignmentNode,
         xaml_type: Option<Rc<dyn IXamlType>>,
     ) -> XamlResult<Option<Rc<dyn IXamlType>>> {
@@ -78,7 +78,7 @@ impl FerroXamlIlBindingPathTransformer {
 
     /// The local iterator `getResourceValues`, searched for the first resource whose key is
     /// `key` (`getResourceValues(node).FirstOrDefault(r => getResourceValue_xKey(r) == key)`).
-    fn find_resource_value(
+    pub(super) fn find_resource_value(
         node: &Rc<dyn IXamlAstNode>,
         key: &str,
     ) -> XamlResult<Option<Rc<XamlPropertyAssignmentNode>>> {

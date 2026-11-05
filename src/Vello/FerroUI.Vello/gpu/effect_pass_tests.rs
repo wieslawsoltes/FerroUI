@@ -1187,3 +1187,168 @@ fn a_content_sampling_program_with_images_is_refused() {
 
     assert!(check_shader_module(&ImmutableCustomEffect::new(SamplingWithImage::default())).is_err());
 }
+
+// --- the interactive effects (#455, E7) ---------------------------------------------------
+
+use super::effect_passes::shader_pipelines_created;
+use ferroui_base::media::effects::library::{
+    BurningFlameShaderEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, WaterRippleShaderEffect,
+};
+
+/// The interactive effects of the library at a frame `t` (0 to 1) of an interaction: the pointer
+/// over the area and pressed in odd frames, a ripple aging, the flame burning; with whether each
+/// moves the content (which picks the texel under a coordinate it computes: at the edge of a
+/// square the last bit of the device's `sin` or `exp` can pick the neighbour).
+fn interactive_shader_effects(t: f64) -> Vec<(ImmutableCustomEffect, bool)> {
+    let pressed = (t * 10.0).round() as i32 % 2 == 1;
+    let mut ripple = WaterRippleShaderEffect {
+        pointer_x: 0.3 + 0.4 * t,
+        pointer_y: 0.4,
+        is_pointer_over: true,
+        is_pressed: pressed,
+        ..WaterRippleShaderEffect::default()
+    };
+    ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+    ripple.ripples[0].age = 0.2 + 0.3 * t;
+    vec![
+        (
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.3 + 0.4 * t,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                radius: 0.4,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            false,
+        ),
+        (
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                pointer_x: 0.6 - 0.2 * t,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                cell_size: 12.0,
+                strength: 0.8,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            false,
+        ),
+        (ImmutableCustomEffect::new(ripple), true),
+        (
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.6 + 0.4 * t,
+                flame_phase: 3.0 * t,
+                is_pressed: pressed,
+                ignition_y: 0.6,
+                ..BurningFlameShaderEffect::default()
+            }),
+            true,
+        ),
+    ]
+}
+
+/// The modules of the interactive effects parse, validate and declare the uniforms of their
+/// parameters at the offsets of WGSL's layout; no device is needed.
+#[test]
+fn the_shader_modules_of_the_interactive_effects_are_checked_by_naga() {
+    for (effect, _) in interactive_shader_effects(0.5) {
+        let module = check_shader_module(&effect).unwrap_or_else(|reason| panic!("{effect}: {reason}"));
+        assert_eq!(0, module.size() % 16, "{effect}: the block is a multiple of 16 bytes");
+        assert_eq!(effect.shader_uniform_layout().len(), module.offsets().len(), "{effect}");
+    }
+    // The flags are `i32`, the colour a `vec4<f32>` aligned to 16.
+    let module = check_shader_module(&ImmutableCustomEffect::new(PointerSpotlightShaderEffect::default())).unwrap();
+    assert_eq!((vec![0, 8, 12, 16, 20, 24, 28, 32, 36, 48], 64), (module.offsets().to_vec(), module.size()));
+}
+
+/// The interactive effects drawn by their passes in the hybrid and GPU modes at scales 1 and 2,
+/// against their CPU references applied to the content drawn plain in the same mode: the overlays
+/// within 3 levels, the programs that move the content within a mean of a level and a half and at
+/// most 1% of the pixels further than 2 levels; no layer drawn on the processor.
+#[test]
+fn the_interactive_effects_match_their_cpu_references_in_the_gpu_modes() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let pixels = usize::from(SIZE) * usize::from(SIZE);
+    for mode in device_modes(&device) {
+        for t in [0.0, 0.5, 1.0] {
+            for (effect, moves) in interactive_shader_effects(t) {
+                for scale in [1.0, 2.0] {
+                    let transform = Matrix::create_scale(scale, scale);
+                    let plain = draw_in(&device, mode, |drawing| {
+                        drawing.set_transform(transform);
+                        content(drawing);
+                    });
+                    let side = i32::from(SIZE);
+                    let expected = reference_in_area(&plain, &effect, (0, 0, side, side), scale);
+                    let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+                    let actual = draw_in(&device, mode, |drawing| {
+                        drawing.set_transform(transform);
+                        let bounds = Rect::new(0.0, 0.0, f64::from(SIZE) / scale, f64::from(SIZE) / scale);
+                        drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), &effect);
+                        content(drawing);
+                        drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                    });
+                    assert_eq!(
+                        cpu_layers,
+                        crate::drawing_context_impl::cpu_layer_count(),
+                        "{mode:?}: {effect} at {scale}x: drawn on the processor"
+                    );
+                    let (most, mean, far) = difference(&expected, &actual);
+                    if moves {
+                        assert!(
+                            far * 100 <= pixels && mean <= 1.5,
+                            "{mode:?}: {effect} at {scale}x: {far} pixels further than 2 levels, mean {mean}"
+                        );
+                    } else {
+                        assert!(most <= 3 && mean <= 0.5, "{mode:?}: {effect} at {scale}x: largest {most}, mean {mean}");
+                    }
+                    let (changed, _, _) = difference(&plain, &actual);
+                    assert!(changed > 0, "{mode:?}: {effect} at {scale}x: the content is changed");
+                }
+            }
+        }
+    }
+}
+
+/// Frames of an interaction change only the uniforms of the interactive effects: once the first
+/// frames compiled their pipelines and filled the pool, no frame compiles a pipeline or allocates
+/// a texture, and none is drawn on the processor.
+#[test]
+fn frames_of_the_interactive_effects_compile_their_pipelines_once() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    for mode in device_modes(&device) {
+        let mut after_first = None;
+        for frame in 0..8 {
+            let effects = interactive_shader_effects(f64::from(frame) / 7.0);
+            let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+            draw_in(&device, mode, |drawing| {
+                for (effect, _) in &effects {
+                    drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), effect);
+                    content(drawing);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                }
+            });
+            assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: drawn on the processor");
+            let counts = (shader_pipelines_created(), super::effect_passes::texture_allocations());
+            if frame == 1 {
+                after_first = Some(counts);
+            } else if let Some(previous) = after_first {
+                assert_eq!(previous, counts, "{mode:?}: frame {frame} compiled a pipeline or allocated a texture");
+            }
+        }
+    }
+    for (effect, _) in interactive_shader_effects(0.0) {
+        assert_eq!(0, shader_failure_reports(effect.name()), "{effect}");
+    }
+}

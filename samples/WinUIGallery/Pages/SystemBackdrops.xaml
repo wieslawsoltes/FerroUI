@@ -1,0 +1,50 @@
+<!-- Ported from the three pinned SystemBackdrops examples of WinUI Gallery (14061eea); see
+     ../NOTICE.md. Each "Show window" button opens the source's sample window (the markup
+     SystemBackdropsWindow.xaml, built by window_samples.rs): Window.SystemBackdrop with
+     MicaBackdrop and DesktopAcrylicBackdrop for the first, MicaController and
+     DesktopAcrylicController with a SystemBackdropConfiguration for the others. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="20">
+  <StackPanel x:Name="SystemBackdropsExample1" Spacing="8">
+    <TextBlock Text="Backdrop types" FontSize="18" />
+    <TextBlock TextWrapping="Wrap">
+      <Run Text="A window can use one of the following system backdrops:" /><LineBreak />
+      <Run Text="1. " /><Run Text="Mica" FontWeight="Bold" /><Run Text=" — An opaque material that samples the desktop wallpaper once to tint the window background. Best for main app windows." /><LineBreak />
+      <Run Text="2. " /><Run Text="Mica Alt" FontWeight="Bold" /><Run Text=" — A variant of Mica with stronger tinting. Recommended for apps with a tabbed title bar." /><LineBreak />
+      <Run Text="3. " /><Run Text="Desktop Acrylic (Base)" FontWeight="Bold" /><Run Text=" — A semi-transparent material that shows a blurred view of the content behind the window." /><LineBreak />
+      <Run Text="4. " /><Run Text="Desktop Acrylic (Thin)" FontWeight="Bold" /><Run Text=" — A lighter variant of Desktop Acrylic with more transparency." /><LineBreak /><LineBreak />
+      <Run Text="Mica vs. Acrylic:" FontWeight="Bold" /><Run Text=" Mica is opaque and renders the desktop wallpaper within the window background. Desktop Acrylic is semi-transparent and reveals a blurred view of what is behind the window in real-time. Mica is more performant because it captures the wallpaper only once, while Acrylic updates continuously." /><LineBreak /><LineBreak />
+      <Run Text="There are three backdrop types in the API:" /><LineBreak />
+      <Run Text="• " /><Run Text="SystemBackdrop" FontWeight="Bold" /><Run Text=" — The base class of every backdrop type." /><LineBreak />
+      <Run Text="• " /><Run Text="MicaBackdrop" FontWeight="Bold" /><Run Text=" — Applies the Mica material. Set the Kind property to switch between Base and Alt." /><LineBreak />
+      <Run Text="• " /><Run Text="DesktopAcrylicBackdrop" FontWeight="Bold" /><Run Text=" — Applies the Desktop Acrylic material (Base type only)." /><LineBreak /><LineBreak />
+      <Run Text="Mica is drawn by the platform on Windows 11 and macOS, desktop acrylic on Windows, macOS and where the platform blurs what is behind a transparent window; elsewhere the backdrops show their fallback colour. In-app acrylic (AcrylicBrush) is a separate brush used within UI elements, not a window backdrop." />
+    </TextBlock>
+    <Button x:Name="ShowBuiltInBackdropWindow" Margin="0,10,0,0" Content="Show window" />
+  </StackPanel>
+
+  <StackPanel x:Name="SystemBackdropsExample2" Spacing="8">
+    <TextBlock Text="MicaController" FontSize="18" />
+    <TextBlock TextWrapping="Wrap">
+      <Run Text="MicaController provides a customizable way to apply the Mica material. You can modify: FallbackColor, Kind, LuminosityOpacity, TintColor, and TintOpacity." /><LineBreak /><LineBreak />
+      <Run Text="There are 2 kinds of Mica:" /><LineBreak />
+      <Run Text="1. " /><Run Text="Base" FontWeight="Bold" /><Run Text=" — The default, lighter appearance." /><LineBreak />
+      <Run Text="2. " /><Run Text="Alt" FontWeight="Bold" /><Run Text=" — A darker appearance with stronger tinting of the desktop wallpaper." />
+    </TextBlock>
+    <Button x:Name="ShowMicaControllerWindow" Margin="0,10,0,0" Content="Show window" />
+  </StackPanel>
+
+  <StackPanel x:Name="SystemBackdropsExample3" Spacing="8">
+    <TextBlock Text="DesktopAcrylicController" FontSize="18" />
+    <TextBlock TextWrapping="Wrap">
+      <Run Text="DesktopAcrylicController provides a customizable way to apply the Desktop Acrylic material. It supports the same customization properties as MicaController." /><LineBreak /><LineBreak />
+      <Run Text="There are 2 kinds of Desktop Acrylic:" /><LineBreak />
+      <Run Text="1. " /><Run Text="Base" FontWeight="Bold" /><Run Text=" — The default, darker appearance with less transparency." /><LineBreak />
+      <Run Text="2. " /><Run Text="Thin" FontWeight="Bold" /><Run Text=" — A lighter appearance with more transparency." /><LineBreak /><LineBreak />
+      <Run Text="Note: DesktopAcrylicBackdrop always uses the Base kind. To use the Thin kind, you must use DesktopAcrylicController directly." />
+    </TextBlock>
+    <Button x:Name="ShowDesktopAcrylicControllerWindow" Margin="0,10,0,0" Content="Show window" />
+  </StackPanel>
+  <TextBlock x:Name="WindowSampleError" IsVisible="False" TextWrapping="Wrap"
+             Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+</StackPanel>

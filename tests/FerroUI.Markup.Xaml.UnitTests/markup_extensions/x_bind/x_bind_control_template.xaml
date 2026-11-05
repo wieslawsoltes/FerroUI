@@ -1,0 +1,16 @@
+<ContentControl xmlns="https://github.com/ferroui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                Tag="host tag"
+                Content="host content">
+  <ContentControl.Template>
+    <ControlTemplate TargetType="ContentControl" x:DefaultBindMode="OneWay">
+      <StackPanel>
+        <TextBlock Text="{x:Bind Tag}" />
+        <TextBlock Text="{x:Bind Content, Mode=OneTime}" />
+        <Border x:Name="panel" x:Load="{x:Bind IsEnabled}">
+          <TextBlock Text="{x:Bind Tag}" />
+        </Border>
+      </StackPanel>
+    </ControlTemplate>
+  </ContentControl.Template>
+</ContentControl>

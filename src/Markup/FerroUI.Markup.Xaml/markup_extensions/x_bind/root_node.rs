@@ -6,7 +6,7 @@ use super::{XBindDiagnostic, XBindings};
 use ferroui_base::data::core::expression_nodes::{ExpressionNode, NodeSource, NodeState};
 use ferroui_base::data::core::UntypedBindingExpression;
 use ferroui_base::data::{BindingError, BindingErrorType};
-use ferroui_base::BoxedValue;
+use ferroui_base::{BoxedValue, FerroObject, Ref, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -15,6 +15,19 @@ pub(super) struct XBindRootNode {
     bindings: Weak<XBindings>,
     /// The path, for diagnostics.
     path: String,
+    /// Whether the binding has a `FallbackValue`: a path that cannot be read gives the target
+    /// the fallback, which is what WinUI's generated code does instead of failing, so it is not
+    /// a diagnostic.
+    has_fallback_value: bool,
+    /// A `OneTime` binding reads its path when the bindings are initialized or updated and
+    /// listens to nothing in between, as WinUI's generated code: the path nodes are released
+    /// after each read.
+    one_time: bool,
+    /// The `x:Phase` of the element of the target (step X5): a container reads the binding in
+    /// that phase.
+    phase: i32,
+    /// The target, which a phased binding hides until its phase.
+    target: WeakRef<FerroObject>,
     /// Off while the bindings are stopped: a source change of the expression publishes nothing.
     enabled: Cell<bool>,
     error: RefCell<Option<String>>,
@@ -23,17 +36,38 @@ pub(super) struct XBindRootNode {
 }
 
 impl XBindRootNode {
-    pub fn new(bindings: &Rc<XBindings>, path: String) -> Rc<Self> {
+    pub fn new(
+        bindings: &Rc<XBindings>,
+        path: String,
+        has_fallback_value: bool,
+        one_time: bool,
+        phase: i32,
+        target: &FerroObject,
+    ) -> Rc<Self> {
         Rc::new(Self {
             // The root is held weakly, as the elements a binding locates are: the root owns the
             // targets, which own their expressions.
             state: NodeState::locating_an_element(),
             bindings: Rc::downgrade(bindings),
             path,
+            has_fallback_value,
+            one_time,
+            phase,
+            target: target.to_weak(),
             enabled: Cell::new(bindings.is_initialized()),
             error: RefCell::new(None),
             path_nodes: RefCell::new(Vec::new()),
         })
+    }
+
+    /// The phase in which a container reads the binding.
+    pub fn phase(&self) -> i32 {
+        self.phase
+    }
+
+    /// The target of the binding, while it is alive.
+    pub fn target(&self) -> Option<Ref<FerroObject>> {
+        self.target.upgrade()
     }
 
     pub fn set_path_nodes(&self, nodes: &[Rc<dyn ExpressionNode>]) {
@@ -72,7 +106,12 @@ impl XBindRootNode {
         }
         self.error.borrow_mut().take();
         match bindings.data_root() {
-            Ok(Some(source)) => self.state.set_value(Some(source), None),
+            Ok(Some(source)) => {
+                self.state.set_value(Some(source), None);
+                if self.one_time {
+                    self.clear_path_sources();
+                }
+            }
             // A template instance without an item yet: nothing to read.
             Ok(None) => {}
             Err(message) => self.fail(&message),
@@ -85,11 +124,13 @@ impl XBindRootNode {
     }
 
     /// The failure of the binding: of its root source, or of its expression (a path that could
-    /// not be read or a value that could not be converted to the target).
+    /// not be read or a value that could not be converted to the target), unless a fallback
+    /// value stands for the expression.
     pub fn diagnostic(&self) -> Option<XBindDiagnostic> {
         let message = self.error.borrow().clone().or_else(|| {
             self.state
                 .owner()
+                .filter(|_| !self.has_fallback_value)
                 .filter(|owner| owner.error_type() != BindingErrorType::None)
                 .map(|_| "the path could not be read or its value converted to the target property".to_string())
         })?;

@@ -1,4 +1,4 @@
-//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 to E6; not from
+//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 to E7; not from
 //! upstream; `docs/porting/custom-effects.md`): the custom effects FerroUI ships
 //! (`ferroui_base::media::effects::library`), each set as `Visual.Effect` on the same sample
 //! content, with a slider for each of its numbers and the effect string markup writes for it.
@@ -6,22 +6,28 @@
 //! shaders (SkSL on Skia, WGSL on Vello; Vello's CPU mode draws their CPU references), all drawn by
 //! the backend on the GPU; a slider changes only the values of the members or the uniforms. The
 //! page transitions sample photographs of the catalog's assets as images (E6), uploaded once by
-//! the backend; their images are set from code (an effect string cannot name an image).
+//! the backend; their images are set from code (an effect string cannot name an image). The
+//! interactive effects (E7) are effect classes that follow the pointer over their host: the
+//! pointer spotlight, the reactive grid, the water ripple and the burn-away button, each a runtime
+//! shader whose uniforms the pointer changes.
 
 use super::winui_composition_page::{brush, section, text};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::effects::library::{
-    BrightnessContrastEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect,
-    MaskTransitionEffect, PixelateEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
-    SpotlightShaderEffect, TintEffect,
+    BrightnessContrastEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect,
+    InteractiveBurningFlameEffect, InteractivePointerSpotlightEffect, InteractiveReactiveGridEffect,
+    InteractiveWaterRippleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, SaturationEffect,
+    ScanlineShaderEffect, SepiaEffect, SharpenEffect, SpotlightShaderEffect, TintEffect,
 };
-use ferroui_base::media::effects::{CustomEffect, EffectImage, EffectParameterValue, ImmutableCustomEffect};
+use ferroui_base::media::effects::{
+    CustomEffect, CustomEffectClass, Effect, EffectImage, EffectParameterValue, ImmutableCustomEffect,
+};
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{Color, FontWeight};
 use ferroui_base::platform::AssetLoader;
 use ferroui_base::utilities::UriRef;
-use ferroui_base::{CornerRadius, Ref, Thickness};
-use ferroui_controls::{Border, Slider, StackPanel, TextBlock, WrapPanel};
+use ferroui_base::{BoxedValue, CornerRadius, Ref, Thickness, Upcast};
+use ferroui_controls::{Border, Button, Slider, StackPanel, TextBlock, WrapPanel};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -191,9 +197,109 @@ pub(super) fn custom_effects_section() -> Ref<StackPanel> {
         MaskTransitionEffect { to_page: deer, mask: leaf, progress: 0.5, softness: 0.15 },
         &[("progress", 0.0, 1.0), ("softness", 0.001, 1.0)],
     ));
-    section(
+    let page = section(
         "Custom effects",
         "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The colour effects, the glow, sharpen and edge detect describe themselves as effect graphs: colour matrices, convolutions and a drop shadow drawn by the backend on the GPU. Pixelate, scan lines and spotlight are runtime shaders: an SkSL program Skia compiles once and a WGSL program Vello compiles once, each drawn around the content on the GPU (Vello's CPU mode draws the CPU reference of the effect). The dissolve and mask transitions are runtime shaders that sample images, here photographs set from code: each backend uploads an image once into a texture and binds it as a child of the program. A slider changes only the values of the members or the uniforms.",
+        &tiles.upcast(),
+    );
+    page.children().add(interactive_effects_section());
+    page
+}
+
+// --- the interactive effects (E7) --------------------------------------------------------------
+
+/// A caption with the effect string of the current snapshot of `effect`, kept up to date as the
+/// pointer changes it.
+fn snapshot_caption<T: CustomEffectClass + Upcast<Effect>>(effect: &Ref<T>) -> Ref<TextBlock> {
+    let markup = caption(&format!("Effect=\"{}\"", effect.to_custom_effect()));
+    let (weak_effect, weak_markup) = (effect.downgrade(), markup.downgrade());
+    let base: &Effect = Upcast::<Effect>::upcast(&**effect);
+    base.invalidated(move || {
+        if let (Some(effect), Some(markup)) = (weak_effect.upgrade(), weak_markup.upgrade()) {
+            markup.set_text(Some(&format!("Effect=\"{}\"", effect.to_custom_effect())));
+        }
+    })
+    .detach();
+    markup
+}
+
+/// The surface an interactive effect is shown on: the sample on a dark panel, so that the whole
+/// panel takes the pointer (an element without a background is not hit by it).
+fn interactive_surface() -> Ref<Border> {
+    let surface = sample();
+    surface.set_width(240.0);
+    surface.set_height(150.0);
+    surface.set_corner_radius(CornerRadius::uniform(8.0));
+    surface.set_background(Some(brush(Color::from_rgb(0x1E, 0x27, 0x3A))));
+    surface
+}
+
+/// The tile of an interactive effect: its name, what to do, the host and the effect string of
+/// the snapshot the pointer changes.
+fn interactive_tile(name: &str, hint: &str, host: Ref<ferroui_controls::Control>, markup: Ref<TextBlock>) -> Ref<StackPanel> {
+    let tile = column(6.0);
+    tile.set_width(260.0);
+    tile.set_margin(Thickness::new(0.0, 0.0, 16.0, 16.0));
+    tile.children().add(text(name, 15.0, FontWeight::SemiBold));
+    tile.children().add(caption(hint));
+    tile.children().add(host);
+    tile.children().add(markup);
+    tile
+}
+
+/// The section of the interactive effects: effect classes that receive the pointer input of the
+/// element they are the effect of, and change the uniforms of their programs from it.
+fn interactive_effects_section() -> Ref<StackPanel> {
+    let tiles = WrapPanel::new();
+    tiles.set_orientation(Orientation::Horizontal);
+
+    let spotlight = InteractivePointerSpotlightEffect::new();
+    let surface = interactive_surface();
+    surface.set_effect(Some(spotlight.clone().into()));
+    tiles.children().add(interactive_tile(
+        "pointer-spotlight",
+        "Move the pointer over the panel; press to brighten the light.",
+        surface.upcast(),
+        snapshot_caption(&spotlight),
+    ));
+
+    let grid = InteractiveReactiveGridEffect::new();
+    let surface = interactive_surface();
+    surface.set_effect(Some(grid.clone().into()));
+    tiles.children().add(interactive_tile(
+        "reactive-grid",
+        "The halo follows the pointer and widens while pressed.",
+        surface.upcast(),
+        snapshot_caption(&grid),
+    ));
+
+    let ripple = InteractiveWaterRippleEffect::new();
+    let surface = interactive_surface();
+    surface.set_effect(Some(ripple.clone().into()));
+    tiles.children().add(interactive_tile(
+        "water-ripple",
+        "Press, drag and release: rings spread from the pointer and bend the content.",
+        surface.upcast(),
+        snapshot_caption(&ripple),
+    ));
+
+    // The burn-away button: the flame takes the press the button handles.
+    let flame = InteractiveBurningFlameEffect::new();
+    let button = Button::new();
+    button.set_content(Some(Rc::new("Burn away".to_owned()) as BoxedValue));
+    button.set_width(240.0);
+    button.set_height(72.0);
+    button.set_effect(Some(flame.clone().into()));
+    tiles.children().add(interactive_tile(
+        "burning-flame",
+        "Press the button: it burns where it is pressed and burns down after the release.",
+        button.upcast(),
+        snapshot_caption(&flame),
+    ));
+
+    section(
+        "Interactive effects",
+        "Effect classes that implement IEffectInputHandler: set as Visual.Effect on an input element, the element routes its pointer events to the effect (after its own handlers and those of its children, handled events only to an effect that asks for them, captured pointers wherever they are), and the effect changes its value and raises Invalidated. The visual takes a new snapshot, so the program, compiled once, is drawn with new uniforms: the pointer position normalized to the element, the press, the age of a ripple, the phase of the flame. The water ripple and the flame advance on the frames of the animation clock while they move.",
         &tiles.upcast(),
     )
 }
