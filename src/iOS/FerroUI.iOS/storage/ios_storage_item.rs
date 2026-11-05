@@ -51,7 +51,7 @@ mod uikit {
         IStorageItem, StorageItemProperties, WellKnownFolder,
     };
     use ferroui_base::reactive::{Disposable, IDisposable};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use objc2::rc::Retained;
     use objc2::runtime::Bool;
     use objc2::{msg_send, MainThreadMarker};
@@ -167,14 +167,13 @@ mod uikit {
             self.name.clone()
         }
 
-        fn path(&self) -> Uri {
+        /// The URL of the `NSURL` of the item; its text as a relative
+        /// reference when it is no URL.
+        fn path(&self) -> UriRef {
             let absolute = self.url.absoluteString().map(|absolute| absolute.to_string()).unwrap_or_default();
-            match Uri::try_create(&absolute, UriKind::Absolute) {
-                Some(uri) => uri,
-                None => match Uri::new(&absolute, UriKind::Relative) {
-                    Ok(uri) => uri,
-                    Err(error) => panic!("The URL of the storage item is not a URI: {error}"),
-                },
+            match url::Url::parse(&absolute) {
+                Ok(url) => UriRef::Absolute(url),
+                Err(_) => UriRef::Relative(absolute.into()),
             }
         }
 
@@ -324,7 +323,7 @@ mod uikit {
                     self.base.name()
                 }
 
-                fn path(&self) -> Uri {
+                fn path(&self) -> UriRef {
                     self.base.path()
                 }
 

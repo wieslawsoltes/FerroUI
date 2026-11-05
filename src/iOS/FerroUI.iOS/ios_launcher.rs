@@ -3,7 +3,6 @@
 
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
-use ferroui_base::utilities::Uri;
 use block2::RcBlock;
 use objc2::rc::Retained;
 use objc2::runtime::{AnyObject, Bool};
@@ -13,6 +12,7 @@ use objc2_ui_kit::{UIApplication, UIApplicationOpenExternalURLOptionsKey, UIDocu
 use ferroui_system::task::oneshot;
 use std::cell::RefCell;
 use std::rc::Rc;
+use url::Url;
 
 /// The launcher of iOS.
 #[derive(Default)]
@@ -34,14 +34,14 @@ fn url_of_storage_item(storage_item: &Rc<dyn IStorageItem>) -> Option<Retained<N
 }
 
 impl ILauncher for IosLauncher {
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool> {
+    fn launch_uri_async(&self, uri: &Url) -> LocalBoxFuture<bool> {
         // The launcher of a top-level is asked on the main thread.
         let Some(mtm) = MainThreadMarker::new() else {
             return Box::pin(std::future::ready(false));
         };
 
         let application = UIApplication::sharedApplication(mtm);
-        let url = if uri.is_absolute_uri() { NSURL::URLWithString(&NSString::from_str(uri.absolute_uri())) } else { None };
+        let url = NSURL::URLWithString(&NSString::from_str(uri.as_str()));
         match url {
             Some(url) if application.canOpenURL(&url) => {
                 let (completion, future) = oneshot::channel();
