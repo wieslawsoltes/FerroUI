@@ -244,6 +244,7 @@ control_tests! {
     frame => "Frame";
     rating_control => "RatingControl";
     person_picture => "PersonPicture";
+    pager_control => "PagerControl";
     rich_edit_box => "RichEditBox";
     radio_buttons => "RadioButtons";
     auto_suggest_box => "AutoSuggestBox";

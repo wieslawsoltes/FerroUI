@@ -87,7 +87,7 @@ jobs:
       - name: Render the WinUI controls in the dark theme
         run: >-
           cargo run --locked -p winui-gallery --features capture
-          --bin winui-gallery-capture -- --pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,PersonPicture,CompactSizing,NavigationView,ColorPicker,ConnectedAnimation,Image,FlipView
+          --bin winui-gallery-capture -- --pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,PersonPicture,PagerControl,CompactSizing,NavigationView,ColorPicker,ConnectedAnimation,Image,FlipView
           --dark --query=Button --output-dir=gallery-captures/dark
       - name: Render the eight NavigationView compositions in both themes
         run: |

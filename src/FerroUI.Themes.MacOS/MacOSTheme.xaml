@@ -91,6 +91,7 @@
         <MergeResourceInclude Source="/Resources/RadioButtons_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RatingControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/PersonPicture_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/PagerControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RichEditBox_themeresources.xaml" />
 
         <!-- The labels of the commands of the context flyout of the text controls (not part of the

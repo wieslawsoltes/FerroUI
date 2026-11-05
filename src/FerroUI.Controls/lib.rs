@@ -352,6 +352,13 @@ pub use contact::Contact;
 pub use person_picture::PersonPicture;
 #[cfg(test)]
 mod person_picture_tests;
+// WinUI's PagerControl (docs/porting/winui-controls.md, G2 of #418).
+mod pager_control;
+pub use pager_control::{
+    PagerControl, PagerControlButtonVisibility, PagerControlDisplayMode, PagerControlSelectedIndexChangedEventArgs,
+};
+#[cfg(test)]
+mod pager_control_tests;
 // WinUI's navigation: Frame, its pages and the navigation model in the namespace
 // FerroUI.Navigation (docs/porting/winui-controls.md, section 7).
 pub mod navigation;

@@ -67064,8 +67064,8 @@
    "key": "{PagerControl}",
    "kind": "Style",
    "target_type": "PagerControl",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67074,8 +67074,8 @@
    "key": "PagerControlNumberPanelButtonStyle",
    "kind": "Style",
    "target_type": "Button",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67084,8 +67084,8 @@
    "key": "PagerControlNumberPanelButtonWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67094,8 +67094,8 @@
    "key": "PagerControlPageNavigationButtonStyle",
    "kind": "Style",
    "target_type": "Button",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67104,8 +67104,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67114,8 +67114,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67124,8 +67124,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67134,8 +67134,8 @@
    "key": "PagerControlPageNavigationButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67144,8 +67144,8 @@
    "key": "PagerControlPageNavigationButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67154,8 +67154,8 @@
    "key": "PagerControlPageNavigationButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67164,8 +67164,8 @@
    "key": "PagerControlSelectionIndicatorForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67174,8 +67174,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67184,8 +67184,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67194,8 +67194,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67204,8 +67204,8 @@
    "key": "PagerControlPageNavigationButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67214,8 +67214,8 @@
    "key": "PagerControlPageNavigationButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67224,8 +67224,8 @@
    "key": "PagerControlPageNavigationButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67234,8 +67234,8 @@
    "key": "PagerControlSelectionIndicatorForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67244,8 +67244,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67254,8 +67254,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67264,8 +67264,8 @@
    "key": "PagerControlPageNavigationButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67274,8 +67274,8 @@
    "key": "PagerControlPageNavigationButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67284,8 +67284,8 @@
    "key": "PagerControlPageNavigationButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67294,8 +67294,8 @@
    "key": "PagerControlPageNavigationButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -67304,8 +67304,8 @@
    "key": "PagerControlSelectionIndicatorForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90106,6 +90106,7 @@
   "Controls/NumberBox.xaml",
   "Controls/NumericUpDown.xaml",
   "Controls/OverlayPopupHost.xaml",
+  "Controls/PagerControl.xaml",
   "Controls/PathIcon.xaml",
   "Controls/PersonPicture.xaml",
   "Controls/PipsPager.xaml",
@@ -90192,6 +90193,7 @@
   "Resources/NavigationBackButton_themeresources.xaml",
   "Resources/NavigationView_themeresources.xaml",
   "Resources/NumberBox_themeresources.xaml",
+  "Resources/PagerControl_themeresources.xaml",
   "Resources/PasswordBox_themeresources.xaml",
   "Resources/PersonPicture_themeresources.xaml",
   "Resources/PipsPager_themeresources.xaml",
@@ -90884,6 +90886,17 @@
    "date": "not committed"
   },
   {
+   "document": "PagerControl.xaml",
+   "themes": [
+    "{PagerControl}"
+   ],
+   "batch": "B2",
+   "winui": "PagerControl: {PagerControl} (PagerControl.xaml), PagerControlPageNavigationButtonStyle, PagerControlNumberPanelButtonStyle (PagerControl_themeresources.xaml). A WinUI control in ferroui-controls (G2 of #418); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 0,
+   "date": "2026-11-05"
+  },
+  {
    "document": "PipsPager.xaml",
    "themes": [
     "{PipsPager}"
@@ -91491,20 +91504,6 @@
    "items": 87
   },
   {
-   "document": "controls/dev/PagerControl/PagerControl.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/PagerControl/PagerControl_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager).",
-   "items": 24
-  },
-  {
    "document": "controls/dev/ColorPicker/ColorPicker.xaml",
    "key": "*",
    "variant": null,
@@ -91934,6 +91933,11 @@
    "ferroui": "PersonPicture",
    "batch": "B1",
    "note": "WinUI's PersonPicture in ferroui-controls"
+  },
+  "PagerControl": {
+   "ferroui": "PagerControl",
+   "batch": "B2",
+   "note": "WinUI's PagerControl in ferroui-controls"
   },
   "PipsPager": {
    "ferroui": "PipsPager",

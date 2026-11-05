@@ -172,6 +172,10 @@ same license.
 `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs` (WinUI's
 `PersonPicture`, its template settings, automation peer and initials generator) are ported from the
 WinUI project directly (`controls/dev/PersonPicture` at the same commit), under the same license.
+`pager_control.rs`, `primitives/pager_control_template_settings.rs` and
+`automation/peers/pager_control_automation_peer.rs` (WinUI's `PagerControl`, its template
+settings, enumerations, event arguments and automation peer) are ported from the WinUI project
+directly (`controls/dev/PagerControl` at the same commit), under the same license.
 
 `frame.rs`, `frame_page.rs`, `navigation.rs` and `navigation/page_stack_entry.rs` (WinUI's
 `Frame`, `Page` as `FramePage`, and the navigation model of `Microsoft.UI.Xaml.Navigation`: the

@@ -127,16 +127,6 @@
       "reason": "BreadcrumbBar: no FerroUI control."
     },
     {
-      "document": "controls/dev/PagerControl/PagerControl.xaml",
-      "key": "*",
-      "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager)."
-    },
-    {
-      "document": "controls/dev/PagerControl/PagerControl_themeresources.xaml",
-      "key": "*",
-      "reason": "PagerControl: no FerroUI control (FerroUI's PipsPager is ported from WinUI's PipsPager)."
-    },
-    {
       "document": "controls/dev/ColorPicker/ColorPicker.xaml",
       "key": "*",
       "reason": "ColorPicker: the colour picker library of FerroUI (ferroui-controls-color-picker) carries its own control themes; a WinUI variant of them belongs to that crate, not to the theme of the control set."

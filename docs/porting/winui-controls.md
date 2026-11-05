@@ -44,6 +44,7 @@ The work comes from pull request #286 (branch `feat/winui-gallery-compat`), whic
 | `RadioButtons` | `controls/dev/RadioButtons` | `RadioButton` (upstream) | New; `RadioButton` is its container, and the spacing comes from the `RadioButtonsColumnSpacing` and `RadioButtonsRowSpacing` resources. | W6 |
 | `RatingControl`, `RatingItemInfo`, `RatingItemFontInfo`, `RatingItemImageInfo` | `controls/dev/RatingControl` | none | New. | W6 |
 | `PersonPicture`, `PersonPictureTemplateSettings`, the contact it shows (`Contact`) | `controls/dev/PersonPicture` | none | New; `Contact` holds the members of the Windows Runtime contact the control reads (section 10.10). | G2a of #418 |
+| `PagerControl`, `PagerControlTemplateSettings`, `PagerControlDisplayMode`, `PagerControlButtonVisibility`, the selected-index-changed arguments | `controls/dev/PagerControl` | `PipsPager` (upstream; WinUI's PipsPager, another control in WinUI too) | New; the number panel is an items control (section 10.9). | G2a of #418 |
 | `Frame`, `FramePage` (WinUI `Page`), the navigation types (`NavigationMode`, `NavigationCacheMode`, `NavigationEventArgs`, `NavigatingCancelEventArgs`, `NavigationFailedEventArgs`, `PageStackEntry`) | `dxaml/xcp/dxaml/lib/Frame_Partial.cpp`, `Page_Partial.cpp`, `NavigationHistory.cpp` | `Page`, `NavigationPage`, `PageNavigationHost` (upstream) | Separate types (section 7). `FramePage` keeps the name `Page` for upstream; the navigation types are in `ferroui_controls::navigation`, so `navigation::NavigationEventArgs` does not collide with the upstream `NavigationEventArgs`. | W8 |
 | `NavigationView`, `NavigationViewItemBase`, `NavigationViewItem`, `NavigationViewItemHeader`, `NavigationViewItemSeparator`, their events and arguments | `controls/dev/NavigationView` | `SplitView` (upstream; NavigationView builds on it), `DrawerPage` (upstream; its WinUI template is drawn after the pane of NavigationView) | New. Items are hosted without ItemsRepeater and `SelectionModel` until F1; the overflow of the top pane, the transitions and `NavigationViewItemPresenter` are recorded as missing. | W8 |
 | Automation peers of the controls above | `controls/dev/*/*AutomationPeer.cpp` | | New peers in `ferroui_controls::automation::peers`. | W4 to W8 |
@@ -87,6 +88,7 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `RadioButtons` | WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml into the WinUI theme and its derived themes | W6 |
 | `RatingControl` | WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml into the WinUI theme and its derived themes | W6 |
 | `PersonPicture` | WinUI's PersonPicture: its template is converted from WinUI's PersonPicture.xaml into the WinUI theme and its derived themes | G2 of #418 |
+| `PagerControl` | WinUI's PagerControl: its template is converted from WinUI's PagerControl.xaml into the WinUI theme and its derived themes | G2 of #418 |
 | `Frame` | WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationView` | WinUI's NavigationView: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationViewItem` | WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles into the WinUI theme and its derived themes | W8 |
@@ -404,17 +406,14 @@ ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `I
 | `FileOpenPicker` and `FileSavePicker` of the RichEditBox editor. | The storage provider of the window (RTF). | The pickers are Windows APIs; the provider is FerroUI's. |
 | The InkToolbar styles. | The application includes `ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml` after the WinUI theme. | The inking crate has its own control themes. |
 
-### 10.10 PersonPicture (G2a)
+#### G2: the WinUI controls not on main (#418)
 
-`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`.
+Phase G2 ports the WinUI controls the pending pages need, one control (or one small family) per pull request, each into `ferroui-controls` with its tests, its template in the WinUI theme and its derived themes (macOS 26, Material), a ControlCatalog page and the gallery page. The order: the standalone controls first (G2a PagerControl and PersonPicture, G2b BreadcrumbBar, G2c ContentDialog and TeachingTip, G2d XamlUICommand, StandardUICommand and CommandBarFlyout, G2e ParallaxView, VariableSizedWrapGrid and SemanticZoom), then the scrolling chain (ScrollView, then ItemContainer and ItemsView, then SelectorBar and AnnotatedScrollBar), then the motion types on the composition work, and GridView and SwipeControl with #443. The media controls are #561 (on #550); AnimatedIcon and AnimatedVisualPlayer (#557), TableView (#558), CustomXamlConditionals (#559), WebView2 (#555) and MapControl (#556) are 0.6.0.
 
-| WinUI | FerroUI | Why |
-|---|---|---|
-| `Contact` is the Windows Runtime's `Windows.ApplicationModel.Contacts.Contact`, whose display name the system composes and whose pictures are stream references the control opens and decodes asynchronously, at the size of the control. | `ferroui_controls::Contact` with `Id`, `FirstName`, `LastName`, `DisplayNameOverride` and the four pictures as images; the display name is the override, or the first and last names. The picture of a contact is shown at once. | The Windows contact store has no counterpart off Windows. |
-| `ProfilePicture` and `BadgeImageSource` are `ImageSource`s. | Image brush sources (a bitmap), the type of the image brush that paints them. | The picture is the source of an `ImageBrush`. |
-| The visual states of `VisualStateManager`; the `ImageBrush` BadgeImageBrush is declared in the setter of the state BadgeWithImageSource. | Pseudo-classes (`:photo`, `:nophotoorinitials`, `:group`, `:badge`, `:badgeimage`); the control owns the badge brush and sets it as the fill of BadgingEllipse. | The convention of the WinUI theme (section 5.1). |
-| The initials generator reads UTF-16 code units, so the CJK ranges outside the basic multilingual plane never match. | It reads characters, so those ideographs are symbolic, as the ranges intend. | The intent of the ranges. |
-| The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
+| Page | Examples | State | Rust | Tests |
+|---|---:|---|---|---|
+| PagerControl | 3 of 3 | ported | `Pages/PagerControl.xaml` (no code-behind upstream) | `feedback_samples_tests.rs` |
+| PersonPicture | 1 of 1 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
@@ -429,3 +428,29 @@ ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `I
 | The event-target generator reads the committed snapshot. | Removed with the x:Bind adapter (#525, X6): the importer no longer rejects an x:Bind of an event, which the x:Bind core binds. | The table had no other user. |
 
 The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml sparsely: `controls/dev`, `controls/idl`, `dxaml/xcp/tools/XCPTypesAutoGen`), runs the tests of the scripts and `scan.py --check`, and puts the report in the run summary. It blocks a pull request only on its own paths (the scripts, `docs/porting/winui-gallery/`); at night it reports the drift that changes of the controls make to the report, without failing.
+
+### 10.9 PagerControl (G2a)
+
+`src/FerroUI.Controls/pager_control.rs`, `primitives/pager_control_template_settings.rs` and `automation/peers/pager_control_automation_peer.rs`, from `controls/dev/PagerControl`. The tests are WinUI's API tests (`APITests/PagerControlTests.cs`) and the behaviour its interaction tests drive (`pager_control_tests.rs`), with the template of the WinUI theme in `the_pager_control_gets_its_parts_and_states_from_the_theme`.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The number panel is an `ItemsRepeater` with a horizontal `StackLayout`, and the control asks it for the element of an index with `TryGetElement`. | An `ItemsControl` with a horizontal `StackPanel` of the same spacing; the element is `ContainerFromIndex`. | `ferroui-controls` cannot depend on the repeater crate, which depends on it (as RadioButtons, section 10.3). |
+| The visual states of `VisualStateManager`. | The pseudo-classes of the control (`:numberbox`, `:combobox`, `:numberpanel`, `:infinite`, `:firstcollapsed`, `:nexthidden`, ...), in the groups of WinUI. | The convention of the WinUI theme (section 5.1). |
+| `FirstButtonStyle`, `PreviousButtonStyle`, `NextButtonStyle`, `LastButtonStyle` are `Style`s. | Control themes, set as the `Theme` of the buttons. | FerroUI's styles of a control are control themes. |
+| The indicator of the current page moves with a `RepositionThemeTransition`; the navigation buttons have tooltips of their automation names. | No transition; no tooltips. | Not yet (the theme transitions are G2 motion work). |
+| The localized strings of `Resources.resw`. | The English strings. | As the other WinUI controls. |
+| The left and right keys move the focus from the root grid, also with the gamepad's D-pad. | From the control (the key down of the root grid bubbles to it); no gamepad keys. | FerroUI has no gamepad keys. |
+| A selected page out of range is coerced by setting it again inside its change, which raises `SelectedIndexChanged` for the value set and for the coerced value; setting the maximum of the number box when the template is applied coerces its value, which selects a page. | The same. | Kept: the order of the events is WinUI's. |
+
+### 10.10 PersonPicture (G2a)
+
+`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `Contact` is the Windows Runtime's `Windows.ApplicationModel.Contacts.Contact`, whose display name the system composes and whose pictures are stream references the control opens and decodes asynchronously, at the size of the control. | `ferroui_controls::Contact` with `Id`, `FirstName`, `LastName`, `DisplayNameOverride` and the four pictures as images; the display name is the override, or the first and last names. The picture of a contact is shown at once. | The Windows contact store has no counterpart off Windows. |
+| `ProfilePicture` and `BadgeImageSource` are `ImageSource`s. | Image brush sources (a bitmap), the type of the image brush that paints them. | The picture is the source of an `ImageBrush`. |
+| The visual states of `VisualStateManager`; the `ImageBrush` BadgeImageBrush is declared in the setter of the state BadgeWithImageSource. | Pseudo-classes (`:photo`, `:nophotoorinitials`, `:group`, `:badge`, `:badgeimage`); the control owns the badge brush and sets it as the fill of BadgingEllipse. | The convention of the WinUI theme (section 5.1). |
+| The initials generator reads UTF-16 code units, so the CJK ranges outside the basic multilingual plane never match. | It reads characters, so those ideographs are symbolic, as the ranges intend. | The intent of the ranges. |
+| The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |

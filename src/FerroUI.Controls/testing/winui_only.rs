@@ -7,7 +7,8 @@
 
 use crate::{
     AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem, NavigationViewItemHeader,
-    NavigationViewItemSeparator, NumberBox, PersonPicture, ProgressRing, RadioButtons, RatingControl, RichEditBox, SymbolIcon, TitleBar,
+    NavigationViewItemSeparator, NumberBox, PagerControl, PersonPicture, ProgressRing, RadioButtons, RatingControl, RichEditBox, SymbolIcon,
+    TitleBar,
 };
 use ferroui_base::TypeInfo;
 
@@ -23,6 +24,7 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (RadioButtons::TYPE, "WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml into the WinUI theme and its derived themes"),
     (RatingControl::TYPE, "WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml into the WinUI theme and its derived themes"),
     (PersonPicture::TYPE, "WinUI's PersonPicture: its template is converted from WinUI's PersonPicture.xaml into the WinUI theme and its derived themes"),
+    (PagerControl::TYPE, "WinUI's PagerControl: its template is converted from WinUI's PagerControl.xaml into the WinUI theme and its derived themes"),
     (Frame::TYPE, "WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml into the WinUI theme and its derived themes"),
     (NavigationView::TYPE, "WinUI's NavigationView: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes"),
     (NavigationViewItem::TYPE, "WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles into the WinUI theme and its derived themes"),
