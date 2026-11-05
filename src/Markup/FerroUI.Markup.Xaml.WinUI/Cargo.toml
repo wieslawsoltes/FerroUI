@@ -1,6 +1,6 @@
 [package]
 name = "ferroui-markup-xaml-winui"
-description = "WinUI XAML compatibility of FerroUI: an opt-in importer from WinUI XAML, its run-time loading entry points and the x:Bind property-path adapter"
+description = "WinUI XAML compatibility of FerroUI: an opt-in importer from WinUI XAML and its run-time loading entry points"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
