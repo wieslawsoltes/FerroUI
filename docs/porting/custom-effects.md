@@ -422,6 +422,70 @@ the host's `InputElement` pointer events, holding `Subscription` guards
 the class; `raise_invalidated` makes the next snapshot, so the render thread sees only values (a
 pointer position is a `Point` parameter, a press time a `Float`).
 
+**Interactive effects as built (E7).**
+
+- *The input trait.* `IEffectInputHandler` (`media/effects/effect_input.rs`) has the members of
+  `ISkiaInputEffectHandler`, each with an empty default as in `SkiaInteractiveEffectBase`:
+  `on_attached`, `on_detached`, `on_host_bounds_changed`, `on_pointer_entered`, `on_pointer_exited`,
+  `on_pointer_moved`, `on_pointer_pressed`, `on_pointer_released`, `on_pointer_capture_lost` and
+  `on_pointer_wheel_changed`, and `handled_events_too` (default `false`). A class implements it
+  and constructs its base with `Effect::construct_interactive::<T>()` (a custom effect class whose
+  `Effect` also finds its handler: `is_interactive`, `input_handler`).
+- *The host context.* `EffectHostContext` is Effector's `SkiaEffectHostContext`: the effect, the
+  host (`InputElement`) and its visual, `bounds`, `size`, `input_bounds` (the host's own size),
+  `padding` and `effect_bounds` (the input bounds inflated by the padding of the effect: the area
+  the program is drawn over when the content lies within the host), `layer_scale` (the render
+  scaling times the mean of the lengths of the axes of the transform from the host to the root, as
+  the render thread computes it), `get_position` (in the host, through every render transform),
+  `get_normalized_position` and `normalize` (0 to 1 across the input bounds, clamped on request),
+  `get_effect_position` and `to_effect_space` (device pixels of the area of the effect: the
+  `coord` of the program), `capture_pointer`, `release_pointer_capture` and
+  `has_pointer_capture`, `invalidate` (`raise_invalidated`), and `request_animation_frame`, a frame
+  of the animation clock that runs only while the effect is still the host's.
+- *The routing* (`input/input_element_effects.rs`). One class handler of the changes of
+  `Visual::effect_property()`, registered with the class handlers of `InputElement`, attaches the
+  effect of an input element when it is an interactive class (`InputElement::interactive_effect`)
+  and detaches the one it attached when the effect changes: the old attachment is dropped (its
+  handlers removed), then `on_detached`; the new one adds its handlers, then `on_attached` and
+  `on_host_bounds_changed`. The attachment is a field of the element holding the effect and the
+  `Subscription` guards of seven handlers (`add_disposable_handler_with` on the direct and bubble
+  routes, handled events too) and of a subscription to the element's `Bounds`,
+  `RenderTransform` and `RenderTransformOrigin`; nothing outlives it. A handler delivers the event
+  to the effect after the tunnel route, the class handlers of the host (its `on_pointer_*`) and the
+  bubble handlers of its descendants, before its ancestors; a handled event only to an effect whose
+  `handled_events_too` is set. A pointer the host (or the effect, through the context) captured is
+  routed to the host wherever it is; the loss of the capture of the host or of a descendant (the
+  release of the implicit capture, another element capturing the pointer) is
+  `on_pointer_capture_lost`. No borrow of the host is held while the effect runs, so the effect
+  can capture the pointer or replace the effect of its host. Only an `InputElement` hosts an
+  interactive effect: a plain visual has no pointer input.
+- *Values only cross.* The class keeps its state (the pointer, the press, the ripples, the phase of
+  a flame) in a value of `CustomEffect` and raises `invalidated` when the value changes; the visual
+  takes the new snapshot, and the program, compiled once per backend, is given its uniforms. The
+  tests count the compilations (`runtime_effects::compilation_count` of Skia,
+  `effect_passes::shader_pipelines_created` of Vello): frames of an interaction compile nothing.
+- *The library* (`media::effects::library`, E7): `PointerSpotlightShaderEffect`
+  (`pointer-spotlight`, an overlay screened over the content) and `ReactiveGridShaderEffect`
+  (`reactive-grid`, an overlay drawn source over), the light and the halo under the normalized
+  pointer, brighter or wider while pressed; `WaterRippleShaderEffect` (`water-ripple`,
+  content-sampling, sample radius 20: three `RippleWave`s, each a point and two numbers, rings that
+  move the content outward and tint it); `BurningFlameShaderEffect` (`burning-flame`,
+  content-sampling, sample radius 20: a plume from an ignition point that moves, colours, lights
+  and smokes the content). Each has SkSL, WGSL, a CPU reference and a neutral value. The classes
+  `InteractivePointerSpotlightEffect`, `InteractiveReactiveGridEffect`,
+  `InteractiveWaterRippleEffect` and `InteractiveBurningFlameEffect` (with `value`, `set_value`
+  and `update`) follow Effector's: the overlays track the pointer and capture it while pressed,
+  the water ripple makes a ripple on a press, along a drag and on the release and ages them
+  (`advance`), the flame ignites on a press, follows a drag and burns down after the release
+  (`advance`); the last two advance on the frames of the animation clock while they move, where
+  Effector runs a `DispatcherTimer` of 16 ms. The flame takes handled events (its host, the
+  burn-away button, handles the press). The programs differ from Effector's in four ways: squares
+  are products (`pow` of a negative number is undefined), the moved content is sampled at the
+  centre of the texel under the moved coordinate (the same texel whatever the filtering of a
+  backend), colours are mixed in premultiplied form, and the phase of the flame wraps at 10 pi (a
+  period of its three waves). The catalog page "Custom effects" shows them in a section
+  "Interactive effects".
+
 ### 3.6 Secondary image handles
 
 An image a shader samples besides the content (the two pages of a transition) is a parameter kind,
@@ -573,6 +637,27 @@ ported as the reference set.
   over steady frames, the textures of dropped images released and bounded over frames with new
   images (`gpu/effect_pass_tests.rs`), the CPU mode (`effect_tests.rs`); the GLSL ES of the
   transitions binding their images (`ferroui-build/shader_effects.rs`).
+- E7: the routing with the test root of the input tests (`input/effect_input_tests.rs`): the
+  effect attached and detached with the effect of its host, its handlers and its subscription
+  removed with it, the bounds and the render transform reaching it; the order of the routed events
+  (tunnel, the bubble handlers of the descendants, the effect, the handlers of the host added
+  after it, the ancestors), entered before moved, the release, the loss of the implicit capture,
+  the wheel and the exit; handled events reaching only an effect that asks for them; a captured
+  pointer reaching the effect outside its host, the loss of the capture on the release and to
+  another element; the positions in the host, normalized and in the coordinates of the program
+  with the padding, through a render transform of scale 2 (`layer_scale` 2); the spotlight
+  following the pointer and capturing it, the burn-away button taking its button's handled press
+  while a spotlight does not, the water ripple making ripples on a press, a drag and a release and
+  stopping when detached. The library values and classes (`media/effects/interactive_effect_tests.rs`):
+  the programs declare the uniforms of the convention, round trips, registration and prewarm,
+  neutral values, the CPU references, the ripples, the invalidation of a class only on a change,
+  and the advance of the water ripple and the flame. On Skia: the programs compile and match
+  (`custom_shader_effects.rs`), raster at 96 and 192 DPI against the CPU references (the programs
+  that move the content with at most 1% of the pixels further than 3 levels), neutral values, and
+  frames of an interaction compiling no program (`tests.rs`), Graphite (`gpu/metal/tests.rs`). On
+  Vello: the modules checked by naga, the hybrid and GPU modes against the CPU references, frames
+  of an interaction compiling no pipeline and allocating no texture (`gpu/effect_pass_tests.rs`),
+  the CPU mode (`effect_tests.rs`). The GLSL ES of the modules (`ferroui-build/shader_effects.rs`).
 - Later steps: per effect and backend, the GPU output against the CPU reference
   (`tests/FerroUI.RenderTests`, `tests/FerroUI.RenderBackends.Comparison`); the steady-state test
   (no new texture or program over frames that change only parameters, with the allocation
@@ -592,7 +677,7 @@ Each step is one pull request from main.
 | E4 | Runtime shader effects on Skia (section 3.4): the shader description (SkSL source, the uniform convention, children, blend mode, overlay or content-sampling), compiled once per thread by `runtime_effects.rs`, drawn as a runtime-shader image filter of a save layer; the shader samples. **Done**: `shader`, `ShaderEffectDescription`, the uniform convention, the Skia programs, pixelate, scan lines and spotlight in the library and on the catalog page "Custom effects" (section 3.4, "Shader effects as built") | addition | medium: SkSL errors surface at the first draw (logged once, then the no-op) |
 | E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3). **Done**: `ShaderEffectDescription::wgsl_module`, the pass of the hybrid and GPU modes, the CPU reference in the CPU mode, `ferroui_build::shader_effects` (the GLSL ES, not drawn by the browser yet) (section 3.4, "Shader effects on Vello as built") | addition | high: depends on E3 |
 | E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions. **Done**: `EffectImage`, `EffectImageWeak`, `EffectImagePixels`, the children convention (`SHADER_WGSL_CHILDREN_BINDING`, `MAX_SHADER_CHILDREN`, `check_shader_children`, `for_each_shader_child`), Skia's image shaders and Vello's textures uploaded once and released after the last handle, the dissolve and mask transitions in the library and on the catalog page (section 3.6, "Secondary images as built") | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
-| E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples | addition | medium: event ordering and capture |
+| E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples. **Done**: `IEffectInputHandler`, `EffectHostContext`, `Effect::construct_interactive`, `InputElement::interactive_effect`, the routing of `input_element_effects.rs`, the pointer spotlight, the reactive grid, the water ripple and the burning flame (values and interactive classes) in the library and on the catalog page (section 3.5, "Interactive effects as built") | addition | medium: event ordering and capture |
 | E8 | Samples and catalog pages (section 3.7) | none (samples) | low |
 | E9 | Validation and documentation: render tests GPU against the CPU reference per backend and mode, comparison scenes, the steady-state and prewarm tests, the rows of gpu-rendering.md, a section in winui-composition.md on how WinUI's effect and render subsystems map to FerroUI | none | low |
 
@@ -639,6 +724,22 @@ images (skia-safe binds no setter for the children of a runtime shader image fil
 The dissolve and mask transitions ship in the library with CPU references, and the render tests
 hold them to those references on Skia raster and Graphite and in every mode of Vello, with no
 upload over steady frames. Graph effects take no images.
+
+E7 is done: a mutable effect class that implements `IEffectInputHandler` and is constructed with
+`Effect::construct_interactive` receives the pointer input of the input element it is the effect
+of (section 3.5, "Interactive effects as built"). One class handler of the changes of
+`Visual.Effect` attaches it to its host and detaches it when the effect changes, the attachment
+holding the guards of its handlers; the events reach it in the order of the routed events (after
+the tunnel route, the host's own handling and its descendants' bubble handlers), handled ones only
+when it asks for them, a captured pointer wherever it is, and the loss of the capture. The
+`EffectHostContext` gives the position in the host, normalized to it and in the coordinates of the
+program at the layer's scale, the capture, the invalidation and the frames of the animation clock.
+The class changes its value and raises `invalidated`; only the snapshot crosses, so a frame of an
+interaction changes uniforms and compiles nothing, which the tests count on both backends. The
+pointer spotlight, the reactive grid, the water ripple and the burning flame of Effector's sample
+set ship in the library as shader effects with CPU references and as interactive classes, held to
+their references on Skia raster and Graphite and in every mode of Vello, and the catalog page
+"Custom effects" shows them with the burn-away button.
 
 ## 5. Not in scope
 
