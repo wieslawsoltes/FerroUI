@@ -300,11 +300,17 @@ impl IXamlAstGroupTransformer for FerroXamlIncludeTransformer {
         let dotted_path = asset_path.replace('/', ".");
         let full_type_name = get_file_name_without_extension(&dotted_path);
 
-        // Search file in the current assembly among other XAML resources.
+        // Search file in the current assembly among other XAML resources. The URI of a document
+        // is the text of its URL, escaped where the URL standard escapes it (a path or a host
+        // that is not ASCII), and the source of the include is unescaped: the two are compared
+        // unescaped.
         let target_document = context
             .documents()
             .iter()
-            .find(|d| invariant_ignore_case_equals(d.uri().as_deref(), &asset_path_uri))
+            .find(|d| {
+                let uri = d.uri().map(|uri| unescape_data_string(&uri));
+                invariant_ignore_case_equals(uri.as_deref(), &asset_path_uri)
+            })
             .cloned();
         if let Some(target_document) = target_document {
             if let Some(build_method) = target_document.build_method()? {
