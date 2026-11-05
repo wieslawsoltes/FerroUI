@@ -458,6 +458,14 @@ behaviour = "same"
 notes = "Step U1. A Rust form of the markup type System.Uri: a relative URI literal for a Url is a markup error, a relative reference a conversion error of a binding. The text is the one of the URL standard (the C2 conversions). The base URIs and the platform edges move to it in U2 to U4."
 
 [[name]]
+upstream = "System.Uri (base URIs and include sources of markup loading)"
+rust = "url::Url, ferroui_base::utilities::UriRef"
+kind = "mechanism"
+phase = "C5"
+behaviour = "same"
+notes = "Step U2. The base URIs are url::Url (IUriContext.BaseUri of the runtime library and of the interpreter, XamlIlContext, RuntimeXamlLoaderDocument.BaseUri, the run-time loader, load_winui, DockPresetThemeManagerBase's preset URIs) and the include sources UriRef (ResourceInclude, StyleInclude and MergeResourceInclude Source, the dock's LoadExtension Source, FerroXamlLoader.Load); the markup names stay System.Uri. A source resolves with UriRef::resolve, so a rooted source against a file: URL of a drive keeps the drive, as in .NET. Hot reload, the designer and the include caches key a document by the text of its URL, read with UriRef::parse_absolute (scheme and authority in lower case, as the canonical text of the port Uri)."
+
+[[name]]
 upstream = "System.DateTime, System.DateTimeOffset (instants)"
 rust = "std::time::SystemTime"
 kind = "mechanism"
