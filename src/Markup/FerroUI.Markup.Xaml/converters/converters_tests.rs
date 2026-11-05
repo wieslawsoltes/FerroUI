@@ -329,7 +329,7 @@ fn bitmap_and_icon_converters_report_assets_that_do_not_exist() {
 fn asset_uris_keep_rooted_paths_relative_and_recognise_files() {
     use super::bitmap_type_converter::{asset_uri, local_file_path};
 
-    assert!(!asset_uri("/Assets/a.png").unwrap().is_absolute_uri());
+    assert!(asset_uri("/Assets/a.png").unwrap().is_relative());
     assert!(local_file_path(&asset_uri("/Assets/a.png").unwrap()).is_none());
     assert!(local_file_path(&asset_uri("ferres://app/a.png").unwrap()).is_none());
     assert_eq!(local_file_path(&asset_uri("file:///tmp/my%20icon.png").unwrap()).unwrap(), "/tmp/my icon.png");

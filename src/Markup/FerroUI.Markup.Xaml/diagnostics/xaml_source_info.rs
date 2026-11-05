@@ -197,7 +197,8 @@ fn file_uri(file_path: &str) -> Option<Uri> {
 impl fmt::Display for XamlSourceInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let file_path = match &self.source_uri {
-            Some(uri) => UriExtensions::get_unescape_absolute_path(uri),
+            // The source URI keeps the port `Uri` until U4 (C5 of #423).
+            Some(uri) => UriExtensions::unescape_data_string(uri.absolute_path()),
             None => "(unknown)".to_string(),
         };
         write!(f, "{}:{},{}", file_path, self.line_number, self.line_position)
