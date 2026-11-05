@@ -4282,7 +4282,7 @@ pub trait HyperlinkButtonProps: ElementBuilder {
     }
 
     /// Sets [`HyperlinkButton::navigate_uri_property`](ferroui_controls::HyperlinkButton::navigate_uri_property).
-    fn navigate_uri<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::Uri>, M>) -> Self {
+    fn navigate_uri<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::UriRef>, M>) -> Self {
         self.prop(<ferroui_controls::HyperlinkButton>::navigate_uri_property(), value)
     }
 }

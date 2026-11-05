@@ -120,11 +120,13 @@ STD_TYPES = {
     "Duration": "std::time::Duration",
 }
 
-# Types of the chosen crates of the workspace that a property can hold and that no
-# `rust_paths.rs` lists (they have no markup type of their own), by the path FerroUI
-# re-exports them by (C5 of #423, docs/idiomatic-rust-signatures.md).
+# Types of the chosen crates of the workspace, and the Rust handles of markup types,
+# that a property can hold and that no `rust_paths.rs` lists (they have no markup type
+# of their own: `UriRef` is a handle of `System.Uri`), by the path FerroUI re-exports
+# them by (C5 of #423, docs/idiomatic-rust-signatures.md).
 EXTERNAL_TYPES = {
     "Locale": "ferroui_base::utilities::Locale",
+    "UriRef": "ferroui_base::utilities::UriRef",
 }
 
 # Methods of the element that a generated setter must not hide; the element's

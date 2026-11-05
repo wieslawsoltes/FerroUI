@@ -7925,8 +7925,8 @@
       },
       "NavigateUri": {
         "name": "NavigateUri",
-        "type_name": "Option<Uri>",
-        "documentation": "HyperlinkButton.NavigateUri: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "HyperlinkButton.NavigateUri: Option<UriRef>",
         "values": [],
         "attached": false
       }
