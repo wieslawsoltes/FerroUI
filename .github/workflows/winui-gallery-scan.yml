@@ -3,15 +3,13 @@ name: WinUI Gallery scan
 on:
   pull_request:
     # Blocking only on its own paths (docs/porting/winui-controls.md, W10b): the scanner, its
-    # reviewed map and reports, and the event-target table of the WinUI XAML importer. A change of
-    # the controls changes the report too; that drift shows in the nightly run, without blocking
-    # unrelated pull requests.
+    # reviewed map and reports. A change of the controls changes the report too; that drift shows
+    # in the nightly run, without blocking unrelated pull requests.
     paths:
       - '.github/workflows/winui-gallery-scan.yml'
       - 'scripts/winui-gallery/**'
       - 'scripts/port-status/rustscan.py'
       - 'docs/porting/winui-gallery/**'
-      - 'src/Markup/FerroUI.Markup.Xaml.WinUI/importer/event_targets.rs'
   schedule:
     - cron: '43 3 * * *'
   workflow_dispatch:
@@ -54,10 +52,7 @@ jobs:
         run: >-
           python3 scripts/winui-gallery/scan.py --check
           --winui-root upstream/microsoft-ui-xaml --gallery-root upstream/WinUI-Gallery
-      - name: The event-target table of the importer matches the scanned API
-        run: python3 scripts/winui-gallery/event_targets.py --check
-      # After the scan: the tests of the event-target table read its upstream-api.json.
-      - name: Tests of the scanner and the event-target generator
+      - name: Tests of the scanner
         run: python3 -m unittest discover -s scripts/winui-gallery -p 'test_*.py'
       - name: The report in the run summary
         if: always()

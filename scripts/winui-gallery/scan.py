@@ -10,7 +10,7 @@ It reads the pinned checkouts of microsoft-ui-xaml and WinUI-Gallery
 reviewed map `api-mappings.json` and the generated `summary.json` and `REPORT.md`
 are committed (docs/porting/winui-controls.md, O8); the inventories and the maps
 (`upstream-api.json` and the others) are written to `--output-dir`, which the
-workflow keeps as an artifact and `event_targets.py --check` reads.
+workflow keeps as an artifact.
 """
 
 from __future__ import annotations
