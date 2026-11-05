@@ -564,7 +564,8 @@ fn error_bars_follow_show_error_through_the_point() {
     let result = measure(&[row], limits(0.0, 100.0), limits(-1.0, 2.0));
     let plot = result.scene.plot_bounds;
     let x = |value: f64| plot.x + value / 100.0 * plot.width;
-    let (_, low, high, style) = &lines(&result.scene, 0)[0];
+    let row_errors = lines(&result.scene, 0);
+    let (_, low, high, style) = &row_errors[0];
     assert_close(low.x, x(46.0), "a row's bottom error is to the left");
     assert_close(high.x, x(65.0), "a row's top error is to the right");
     assert_close(low.y, high.y, "a row's value error is horizontal");
