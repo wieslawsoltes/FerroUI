@@ -335,3 +335,32 @@ fn compact_sizing_resources_remain_page_scoped_and_release_with_the_gallery_page
     assert!(weak_frame.upgrade().is_none());
     assert!(weak_compact.upgrade().is_none());
 }
+
+#[cfg(feature = "theme")]
+#[test]
+fn person_picture_page_switches_between_image_name_and_initials() {
+    use ferroui_controls::{PersonPicture, RadioButton, Window};
+    let _application = crate::tests::start_winui();
+    let root = page("PersonPicture");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let picture = root.get_control::<PersonPicture>("personPicture");
+    // Profile Image is checked first: the source sets the picture and clears the names. The
+    // picture is the gallery image where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap("ferres://WinUIGallery/Assets/ControlImages/PersonPicture.png").is_ok();
+    assert_eq!(decoded, picture.profile_picture().is_some());
+    assert_eq!(decoded, picture.pseudo_classes().contains(":photo"));
+    assert_eq!(picture.display_name(), "");
+    assert_eq!(picture.initials(), "");
+    root.get_control::<RadioButton>("DisplayNameRadio").set_is_checked(Some(true));
+    assert!(picture.profile_picture().is_none());
+    assert_eq!(picture.display_name(), "Jane Doe");
+    assert_eq!(picture.template_settings().actual_initials(), "JD");
+    root.get_control::<RadioButton>("InitialsRadio").set_is_checked(Some(true));
+    assert_eq!(picture.display_name(), "");
+    assert_eq!(picture.initials(), "SB");
+    assert_eq!(picture.template_settings().actual_initials(), "SB");
+    window.close();
+}

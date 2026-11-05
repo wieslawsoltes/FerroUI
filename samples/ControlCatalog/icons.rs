@@ -134,6 +134,9 @@ impl Icons {
     // Radio
     pub const RADIO: &'static str = "M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7Z";
 
+    // Not from upstream: a head and shoulders for the PersonPicture page (the port's own geometry).
+    pub const PERSON: &'static str = "M12,3A4,4 0 1,1 12,11A4,4 0 1,1 12,3M4,20C4,16 7.6,13 12,13C16.4,13 20,16 20,20Z";
+
     // Not from upstream: a five-pointed star for the RatingControl page (the port's own geometry).
     pub const STAR: &'static str = "M12,2.6L14.41,9.28L21.51,9.51L15.9,13.87L17.88,20.69L12,16.7L6.12,20.69L8.1,13.87L2.49,9.51L9.59,9.28Z";
 

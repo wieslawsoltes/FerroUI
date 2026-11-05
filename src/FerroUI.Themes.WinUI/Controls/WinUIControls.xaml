@@ -103,6 +103,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/PipsPager.xaml" />
         <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RatingControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/PersonPicture.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RefreshContainer.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RefreshVisualizer.xaml" />
         <!-- B3: flyouts, menus, lists and selection. -->

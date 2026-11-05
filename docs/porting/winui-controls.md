@@ -43,6 +43,7 @@ The work comes from pull request #286 (branch `feat/winui-gallery-compat`), whic
 | `AutoSuggestBox`, its text-changed, suggestion-chosen and query-submitted arguments, `AutoSuggestionBoxTextChangeReason` | `dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`, `controls/dev/AutoSuggestBox` | `AutoCompleteBox` (upstream; the control filters) | A separate type: in WinUI the application filters on `TextChanged`, with a reason. | W6 |
 | `RadioButtons` | `controls/dev/RadioButtons` | `RadioButton` (upstream) | New; `RadioButton` is its container, and the spacing comes from the `RadioButtonsColumnSpacing` and `RadioButtonsRowSpacing` resources. | W6 |
 | `RatingControl`, `RatingItemInfo`, `RatingItemFontInfo`, `RatingItemImageInfo` | `controls/dev/RatingControl` | none | New. | W6 |
+| `PersonPicture`, `PersonPictureTemplateSettings`, the contact it shows (`Contact`) | `controls/dev/PersonPicture` | none | New; `Contact` holds the members of the Windows Runtime contact the control reads (section 10.10). | G2a of #418 |
 | `Frame`, `FramePage` (WinUI `Page`), the navigation types (`NavigationMode`, `NavigationCacheMode`, `NavigationEventArgs`, `NavigatingCancelEventArgs`, `NavigationFailedEventArgs`, `PageStackEntry`) | `dxaml/xcp/dxaml/lib/Frame_Partial.cpp`, `Page_Partial.cpp`, `NavigationHistory.cpp` | `Page`, `NavigationPage`, `PageNavigationHost` (upstream) | Separate types (section 7). `FramePage` keeps the name `Page` for upstream; the navigation types are in `ferroui_controls::navigation`, so `navigation::NavigationEventArgs` does not collide with the upstream `NavigationEventArgs`. | W8 |
 | `NavigationView`, `NavigationViewItemBase`, `NavigationViewItem`, `NavigationViewItemHeader`, `NavigationViewItemSeparator`, their events and arguments | `controls/dev/NavigationView` | `SplitView` (upstream; NavigationView builds on it), `DrawerPage` (upstream; its WinUI template is drawn after the pane of NavigationView) | New. Items are hosted without ItemsRepeater and `SelectionModel` until F1; the overflow of the top pane, the transitions and `NavigationViewItemPresenter` are recorded as missing. | W8 |
 | Automation peers of the controls above | `controls/dev/*/*AutomationPeer.cpp` | | New peers in `ferroui_controls::automation::peers`. | W4 to W8 |
@@ -85,6 +86,7 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `AutoSuggestBox` | WinUI's AutoSuggestBox: its template is converted from WinUI's DefaultAutoSuggestBoxStyle into the WinUI theme and its derived themes | W6 |
 | `RadioButtons` | WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml into the WinUI theme and its derived themes | W6 |
 | `RatingControl` | WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml into the WinUI theme and its derived themes | W6 |
+| `PersonPicture` | WinUI's PersonPicture: its template is converted from WinUI's PersonPicture.xaml into the WinUI theme and its derived themes | G2 of #418 |
 | `Frame` | WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationView` | WinUI's NavigationView: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationViewItem` | WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles into the WinUI theme and its derived themes | W8 |
@@ -395,12 +397,24 @@ ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `I
 | `SampleSystemBackdropsWindow` adds its Activated, Closed and ActualThemeChanged handlers for every backdrop it sets. | Added once per window. | The repeated handlers of the source are a leak, not behaviour. |
 | `UIHelper.AnnounceActionForAccessibility` (a UIA notification). | The text of a polite live region. | FerroUI has no notification event; live regions are its announcement. |
 | `TitleBarHelper.ApplySystemThemeToCaptionButtons`. | Not called: the decorations of the window follow its theme. | The caption buttons are the window's. |
-| `ImageIconSource` of the gallery icon and `PersonPicture` in the TitleBar examples. | A `PathIconSource` and a composed circle with the initials. | Neither type is on main (PersonPicture is G2). |
+| `ImageIconSource` of the gallery icon and `PersonPicture` in the TitleBar examples. | A `PathIconSource` and a composed circle with the initials. | Neither type was on main when G1 landed (PersonPicture is G2a since). |
 | The ThemeShadow, the AcrylicBrush resources and the SolidColorBrush items with `ColorTemplate`. | A ThemeShadow resource set as `Shadow`; the brushes made in Rust with the source's values, page resources under the source's keys; composed swatch items, the handlers map the index to the colour. | As the templates of the WinUI theme share their shadow; the C# handlers change the brushes. |
 | The Hyperlink of the Acrylic and TitleBar intros to other gallery pages. | Text. | A page of the gallery cannot navigate its shell. |
 | Math mode and MathML of RichEditBox. | `not-applicable`, with a diagnostic on the page. | They are the math engine of the Windows RichEdit control. |
 | `FileOpenPicker` and `FileSavePicker` of the RichEditBox editor. | The storage provider of the window (RTF). | The pickers are Windows APIs; the provider is FerroUI's. |
 | The InkToolbar styles. | The application includes `ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml` after the WinUI theme. | The inking crate has its own control themes. |
+
+### 10.10 PersonPicture (G2a)
+
+`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `Contact` is the Windows Runtime's `Windows.ApplicationModel.Contacts.Contact`, whose display name the system composes and whose pictures are stream references the control opens and decodes asynchronously, at the size of the control. | `ferroui_controls::Contact` with `Id`, `FirstName`, `LastName`, `DisplayNameOverride` and the four pictures as images; the display name is the override, or the first and last names. The picture of a contact is shown at once. | The Windows contact store has no counterpart off Windows. |
+| `ProfilePicture` and `BadgeImageSource` are `ImageSource`s. | Image brush sources (a bitmap), the type of the image brush that paints them. | The picture is the source of an `ImageBrush`. |
+| The visual states of `VisualStateManager`; the `ImageBrush` BadgeImageBrush is declared in the setter of the state BadgeWithImageSource. | Pseudo-classes (`:photo`, `:nophotoorinitials`, `:group`, `:badge`, `:badgeimage`); the control owns the badge brush and sets it as the fill of BadgingEllipse. | The convention of the WinUI theme (section 5.1). |
+| The initials generator reads UTF-16 code units, so the CJK ranges outside the basic multilingual plane never match. | It reads characters, so those ideographs are symbolic, as the ranges intend. | The intent of the ranges. |
+| The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
