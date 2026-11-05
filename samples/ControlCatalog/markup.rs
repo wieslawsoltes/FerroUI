@@ -151,7 +151,7 @@ pub fn document_uri(path: &str) -> String {
 mod run_time {
     use super::document_uri;
     use crate::register_types::{register_types, ASSEMBLY};
-    use ferroui_base::utilities::Uri;
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::BoxedValue;
     use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
     use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -159,7 +159,7 @@ mod run_time {
     fn document(xaml: &str, path: Option<&str>) -> Result<RuntimeXamlLoaderDocument, XamlLoadError> {
         let mut document = RuntimeXamlLoaderDocument::new(xaml);
         if let Some(path) = path {
-            let uri = Uri::absolute(&document_uri(path))
+            let uri = UriRef::parse_absolute(&document_uri(path))
                 .map_err(|e| XamlLoadError::with_message(format!("Invalid document URI for {path}: {e}")))?;
             document.base_uri = Some(uri);
             document.document = Some(path.trim_start_matches('/').to_string());

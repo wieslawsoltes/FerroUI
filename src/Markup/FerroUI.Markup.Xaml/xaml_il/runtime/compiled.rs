@@ -20,7 +20,7 @@ use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{
     from_markup_value, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
 };
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::data::core::{
     BoxedPropertyGetter, BoxedPropertySetter, ClrPropertyInfo, FalliblePropertyGetter, IPropertyInfo, PropertySetter,
 };
@@ -1020,8 +1020,9 @@ pub fn create_context(
 ) -> Rc<XamlIlContext> {
     let static_providers: Rc<[Rc<dyn IStaticServiceProvider>]> =
         Rc::new([Rc::new(CompiledXmlNamespaceInfo { table: namespaces }) as Rc<dyn IStaticServiceProvider>]);
-    // The emitter writes the URI of the document, which is absolute.
-    let base_uri = base_uri.and_then(|uri| Uri::absolute(uri).ok());
+    // The emitter writes the URI of the document, which is absolute; its scheme and authority are
+    // read in lower case, as the run-time loader reads the URI of a document.
+    let base_uri = base_uri.and_then(|uri| UriRef::parse_absolute(uri).ok());
     let context =
         XamlIlContext::new(FRAMEWORK_CONTEXT, Rc::new(FrameworkContextServices), parent, static_providers, base_uri);
     context.initialize_name_scope_field();
@@ -1067,7 +1068,7 @@ pub fn deferred_content(
         .map_err(|error| at("InvalidOperationException", error.message(), line, position))?;
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     content.set_declaration(crate::reload_templates::Declaration {
-        uri: context.base_uri().map(|uri| uri.absolute_uri().to_owned()),
+        uri: context.base_uri().map(String::from),
         line, column: position, source: None,
     });
     Ok(content)

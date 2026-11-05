@@ -5,7 +5,7 @@ use ferroui_base::{
     controls::{INameScope, NameScope},
     data::core::ValueTypes,
     metadata::{service, EmptyServiceProvider, IServiceProvider, MarkupTyped},
-    utilities::{Uri, UriKind},
+    utilities::UriRef,
     BoxedValue, Ref,
 };
 use ferroui_controls::{Button, ContentControl, StackPanel, TextBlock};
@@ -17,12 +17,12 @@ use std::{
 };
 
 pub(super) struct UriContext {
-    uri: RefCell<Option<Uri>>,
+    uri: RefCell<Option<url::Url>>,
     reads: Cell<usize>,
     on_read: RefCell<Option<Rc<dyn Fn()>>>,
 }
 impl IUriContext for UriContext {
-    fn base_uri(&self) -> Option<Uri> {
+    fn base_uri(&self) -> Option<url::Url> {
         self.reads.set(self.reads.get() + 1);
         let callback = self.on_read.borrow().clone();
         if let Some(callback) = callback {
@@ -30,7 +30,7 @@ impl IUriContext for UriContext {
         }
         self.uri.borrow().clone()
     }
-    fn set_base_uri(&self, value: Option<Uri>) {
+    fn set_base_uri(&self, value: Option<url::Url>) {
         self.uri.replace(value);
     }
 }
@@ -50,12 +50,15 @@ impl IServiceProvider for Provider {
             })
     }
 }
-fn uri(text: &str) -> Uri {
-    Uri::new(text, UriKind::RelativeOrAbsolute).unwrap()
+fn uri(text: &str) -> UriRef {
+    UriRef::parse(text).unwrap()
+}
+fn url(text: &str) -> url::Url {
+    UriRef::parse_absolute(text).unwrap()
 }
 pub(super) fn context(base: Option<&str>) -> Rc<UriContext> {
     Rc::new(UriContext {
-        uri: RefCell::new(base.map(uri)),
+        uri: RefCell::new(base.map(url)),
         reads: Cell::new(0),
         on_read: RefCell::new(None),
     })
@@ -150,7 +153,7 @@ fn load_relative_uri_reads_the_current_context_base_and_keeps_native_errors() {
             Some("Hello")
         );
         assert_eq!(context.reads.get(), 1);
-        context.set_base_uri(Some(uri("ferres://ferrodock_markup_tests/Other/Host.xaml")));
+        context.set_base_uri(Some(url("ferres://ferrodock_markup_tests/Other/Host.xaml")));
         extension.set_source(Some(uri("Missing.xaml")));
         assert!(extension.provide_value(&provider).is_err());
         assert_eq!(context.reads.get(), 2);

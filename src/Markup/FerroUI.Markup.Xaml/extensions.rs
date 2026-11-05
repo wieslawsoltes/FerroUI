@@ -8,7 +8,6 @@ use ferroui_base::controls::{INameScope, NameScopeRef};
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::styling::IStyle;
-use ferroui_base::utilities::Uri;
 use ferroui_base::{FerroObject, Ref};
 use ferroui_controls::Control;
 use std::rc::Rc;
@@ -24,7 +23,7 @@ pub trait ServiceProviderExtensions {
     fn get_required_service<T: Clone + 'static>(&self) -> T;
 
     /// The base URI of the document being loaded.
-    fn get_context_base_uri(&self) -> Option<Uri>;
+    fn get_context_base_uri(&self) -> Option<url::Url>;
 
     /// The name scope in effect. A provider may publish it as a contract
     /// handle or as the property-value handle; both are asked for.
@@ -58,7 +57,7 @@ impl ServiceProviderExtensions for dyn IServiceProvider + '_ {
         }
     }
 
-    fn get_context_base_uri(&self) -> Option<Uri> {
+    fn get_context_base_uri(&self) -> Option<url::Url> {
         self.get_service_of::<Rc<dyn IUriContext>>()?.base_uri()
     }
 

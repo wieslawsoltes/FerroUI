@@ -426,10 +426,7 @@ impl ReloadTarget for ComponentReloadTarget {
             },
             self.handlers.is_some(),
         )?;
-        let uri = ferroui_base::utilities::Uri::try_create(
-            &self.uri,
-            ferroui_base::utilities::UriKind::Absolute,
-        )
+        let uri = crate::document_url(&self.uri)
         .ok_or_else(|| ReloadError::Failed("Invalid component URI".into()))?;
         let bindings = ferroui_markup_xaml_loader::binding_capture::BindingCaptureScope::new(
             self.uri.clone(),

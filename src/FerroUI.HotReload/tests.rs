@@ -2392,16 +2392,9 @@ fn application_resource_revision_prepares_static_consumers_against_new_values() 
         .register_document(view_uri.into(), view.into())
         .unwrap();
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
-    let base = ferroui_base::utilities::Uri::try_create(
-        view_uri,
-        ferroui_base::utilities::UriKind::Absolute,
-    )
-    .unwrap();
+    let base = ferroui_base::utilities::UriRef::parse_absolute(view_uri).unwrap();
     let include = ferroui_markup_xaml::styling::ResourceInclude::new(Some(base));
-    include.set_source(ferroui_base::utilities::Uri::try_create(
-        "Values.xaml",
-        ferroui_base::utilities::UriKind::RelativeOrAbsolute,
-    ));
+    include.set_source(ferroui_base::utilities::UriRef::parse("Values.xaml").ok());
     assert_eq!(include.development_source().as_deref(), Some(resource_uri));
     let resources = Application::current().unwrap().resources();
     resources.add_merged_dictionary(include.as_resource_provider());
@@ -2625,16 +2618,9 @@ fn application_style_revision_prepares_static_consumers_against_new_values() {
         .register_document(view_uri.into(), view.into())
         .unwrap();
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
-    let base = ferroui_base::utilities::Uri::try_create(
-        view_uri,
-        ferroui_base::utilities::UriKind::Absolute,
-    )
-    .unwrap();
+    let base = ferroui_base::utilities::UriRef::parse_absolute(view_uri).unwrap();
     let include = ferroui_markup_xaml::styling::StyleInclude::new(Some(base));
-    include.set_source(ferroui_base::utilities::Uri::try_create(
-        "Values.xaml",
-        ferroui_base::utilities::UriKind::RelativeOrAbsolute,
-    ));
+    include.set_source(ferroui_base::utilities::UriRef::parse("Values.xaml").ok());
     assert_eq!(include.development_source().as_deref(), Some(resource_uri));
     let styles = Application::current().unwrap().styles();
     let index = styles.count();
@@ -2722,11 +2708,7 @@ fn linked_resource_provenance_does_not_retain_document_roots() {
     let _scope = Dispatcher::unit_test_scope();
     ferroui_controls::register_types();
     ferroui_markup_xaml::register_types();
-    let uri = ferroui_base::utilities::Uri::try_create(
-        "ferres://provenance/Values.xaml",
-        ferroui_base::utilities::UriKind::Absolute,
-    )
-    .unwrap();
+    let uri = ferroui_base::utilities::UriRef::parse_absolute("ferres://provenance/Values.xaml").unwrap();
     let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
         RuntimeXamlLoaderDocument::with_base_uri(
             Some(uri.clone()),
@@ -2740,7 +2722,7 @@ fn linked_resource_provenance_does_not_retain_document_roots() {
     let provider: Rc<dyn IResourceProvider> = dictionary.into();
     assert_eq!(
         provider.development_source().as_deref(),
-        Some(uri.absolute_uri())
+        Some(uri.as_str())
     );
     drop(value);
     drop(provider);
@@ -3425,4 +3407,32 @@ fn local_binding_reload_snapshots_source_updates_at_commit() {
         30.0,
         "rollback restored a stale preparation snapshot"
     );
+}
+
+/// Document identity by the text of the URL (C5 of #423): one document reached by two spellings
+/// of its URI (the case of the scheme and the authority, a dot segment, a relative include) is one
+/// key of the session, as it was one canonical `Uri`; the key is the text the loaders resolve an
+/// include to.
+#[test]
+fn a_document_reached_by_two_spellings_is_one_document() {
+    assert_eq!(document_key("FERRES://Identity/Views/Main.xaml"), "ferres://identity/Views/Main.xaml");
+    assert_eq!(document_key("ferres://identity/Views/./Main.xaml"), "ferres://identity/Views/Main.xaml");
+    // A text that is not a URL is its own key.
+    assert_eq!(document_key("Views/Main.xaml"), "Views/Main.xaml");
+    let base = document_url("FERRES://Identity/Views/Main.xaml").unwrap();
+    for source in ["Values.xaml", "./Values.xaml", "../Views/Values.xaml", "/Views/Values.xaml", "FERRES://IDENTITY/Views/Values.xaml"] {
+        assert_eq!(include_key(&base, source).as_deref(), Some("ferres://identity/Views/Values.xaml"), "{source}");
+    }
+
+    let mut session = HotReloadSession::new();
+    let view = r#"<Border xmlns="https://github.com/ferroui"/>"#;
+    session.register_document("FERRES://Identity/Views/Main.xaml".into(), view.into()).unwrap();
+    assert_eq!(session.sources().keys().collect::<Vec<_>>(), ["ferres://identity/Views/Main.xaml"]);
+    // The other spelling names the registered document.
+    assert!(session.register_document("ferres://identity/Views/Main.xaml".into(), view.into()).is_err());
+    assert_eq!(session.sources().len(), 1);
+    assert!(session.reapply_document("ferres://IDENTITY/Views/Main.xaml").is_ok());
+    // A `file:` URL of a drive keeps its drive for a rooted include (the URL standard).
+    let base = document_url("file:///C:/App/Views/Main.xaml").unwrap();
+    assert_eq!(include_key(&base, "/Styles/Base.xaml").as_deref(), Some("file:///C:/Styles/Base.xaml"));
 }

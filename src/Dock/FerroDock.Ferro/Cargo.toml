@@ -27,6 +27,8 @@ ferroui-reactiveui.workspace = true
 ferroui-reactiveui-controls.workspace = true
 ferrodock-model.workspace = true
 ferrodock-controls-recycling = { path = "../FerroDock.Controls.Recycling" }
+# `url::Url`, the URLs of the theme presets (C5 of #423).
+url.workspace = true
 
 [build-dependencies]
 ferroui-build-scan.workspace = true
