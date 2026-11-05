@@ -90,20 +90,28 @@ one font stack.
 
 ### 2.5 Geometries and bitmaps
 
-A geometry is its path in the segment records of the engine (`progpu_native_path_segment`:
+The backend uses ProGPU's own geometry and image code; it does not share the geometry of the Vello
+backend. A geometry is its path in the segment records of the engine (`progpu_native_path_segment`:
 lines, quadratic and cubic Béziers) with its fill rule, so drawing it copies the records into the
-scene with no conversion. The queries of `IGeometryImpl` use the engine's geometry ABI where it
-has them: Boolean combination (`progpu_native_geometry_combine`), the fill intersection result
-(`progpu_native_geometry_compare_fill`), fill and stroke containment
-(`progpu_native_geometry_fill_contains`, `progpu_native_geometry_stroke_query`); the measures it does
-not have (bounds, contour length, the point and tangent at a distance, segments, the widened
-outline of a pen) are path mathematics on the same records with `kurbo`, which the workspace
-already uses and which renders nothing.
+scene. Every query of `IGeometryImpl` is ProGPU's:
 
-Bitmaps decode with the decoders the workspace already ships (`png`, `zune-jpeg`, `zune-bmp`,
-`gif`) into premultiplied RGBA8 or BGRA8 pixels that the scene holds as image resources by stable
-id; a `WriteableBitmap` updates its resource in place (`update_rgba8_image`, same id, a new
-generation), so a changed bitmap uploads its pixels and nothing else.
+- the engine's geometry ABI (`progpu_native.h`): Boolean combination
+  (`progpu_native_geometry_combine`), the fill intersection result
+  (`progpu_native_geometry_compare_fill`), fill and stroke containment
+  (`progpu_native_geometry_fill_contains`, `progpu_native_geometry_stroke_query`);
+- ProGPU's Direct2D-compatible geometry (`progpu::native::direct2d::core`, the static
+  `progpu_native_direct2d_core` library of the SDK): bounds and widened bounds, area, length, the
+  point and tangent at a length, simplification, outline, widening with stroke styles (caps, joins,
+  dashes) and tessellation. Its C ABI (`progpu_native_direct2d_geometry_*`) is exported only by the
+  Windows library today, so step P7 adds the same functions to the C ABI of every platform (first in
+  the bindings, then in the SDK).
+
+Bitmaps decode with ProGPU's image module: PNG today (`progpu::native::image`, bounded decoding).
+The other formats of FerroUI's bitmap contract (JPEG, GIF, BMP) are added to that module in the
+ProGPU repository (step P7), in its bounded, allocation-checked style, so the backend links no other
+decoder. The scene holds a bitmap as an image resource by stable id; a `WriteableBitmap` updates its
+resource in place (`update_rgba8_image`, same id, a new generation), so a changed bitmap uploads its
+pixels and nothing else.
 
 ### 2.6 Browser
 
@@ -138,7 +146,12 @@ calls a frame:
    - render bundles per span or per cached layer instead of one for the scene, so a change of one
      visual records one span again;
    - surface helpers for the native handles (creating and configuring a WebGPU surface for a
-     `CAMetalLayer`, an `HWND`, an X11 window, a Wayland surface).
+     `CAMetalLayer`, an `HWND`, an X11 window, a Wayland surface);
+   - the Direct2D-compatible geometry functions (`progpu_native_direct2d_geometry_*`: bounds,
+     widening, length, point at length, containment, outline, simplification) on every platform,
+     not only Windows.
+4. **Image decoders** in the native image module beside PNG: JPEG (baseline and progressive), GIF and
+   BMP, bounded and allocation-checked as the PNG decoder.
 
 These land in ProGPU as their own pull requests, each with the tests of the engine; the FerroUI
 backend starts on the existing C ABI with a small C++ shim over the builder (step P2) and moves to
