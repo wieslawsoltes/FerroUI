@@ -15,9 +15,10 @@ use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::data::BindingError;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::input::InputElementImpl;
-use ferroui_base::interactivity::InteractiveImpl;
+use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::metadata::{MarkupType, MarkupTyped};
+use ferroui_base::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
+use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_type, ferro_properties, instantiate, BoxedValue,
     FerroObjectImpl, FerroProperty, Ref, StyledElementImpl, StyledProperty, TypeInfo, VisualImpl,
@@ -30,12 +31,19 @@ use super::TypeModule;
 
 /// The root of the function fixture, with the code-behind WinUI's x:Bind reads: a registered
 /// property (`Title`), a plain property (`Model`) and functions (`Format`, `ParseTitle`, the
-/// `BindBack` of a `TwoWay` binding through `Format`).
+/// `BindBack` of a `TwoWay` binding through `Format`); for the event fixture (step X4, after
+/// WinUI's `EventTests`), handlers with the event's signature (`OnClick`), without parameters
+/// (`OnClickNoArgs`) and with base parameters (`OnClickBase`), a settable plain property
+/// (`Current`) and an event that is not a routed event (`Pinged`, with `OnPinged`).
 #[repr(C)]
 pub struct XBindPage {
     base: Panel,
     model: Rc<XBindModel>,
     parsed: RefCell<Vec<String>>,
+    clicks: RefCell<Vec<String>>,
+    current: RefCell<Option<Rc<XBindModel>>>,
+    pinged: RefCell<Vec<(u64, MarkupDelegate)>>,
+    next_ping: Cell<u64>,
 }
 
 ferro_class!(XBindPage: Panel);
@@ -55,10 +63,28 @@ ferro_class_info!(XBindPage {
         namespace: "FerroUI.Markup.Xaml.UnitTests",
         properties: [
             Model: Rc<XBindModel> { get: |this: &Ref<XBindPage>| this.model() },
+            Current: Option<Rc<XBindModel>> {
+                get: |this: &Ref<XBindPage>| this.current(),
+                set: |this: &Ref<XBindPage>, value: Option<Rc<XBindModel>>| this.set_current(value)
+            },
         ],
         methods: [
             fn Format(Option<String>) -> String => |this: &Ref<XBindPage>, title: Option<String>| this.format(title),
             fn ParseTitle(Option<String>) => |this: &Ref<XBindPage>, text: Option<String>| this.parse_title(text),
+            fn OnClick(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) =>
+                |this: &Ref<XBindPage>, sender: Option<BoxedValue>, _e: Rc<dyn IRoutedEventArgs>| {
+                    this.record(if sender.is_some() { "regular" } else { "regular without a sender" })
+                },
+            fn OnClickNoArgs() => |this: &Ref<XBindPage>| this.record("no arguments"),
+            fn OnClickBase(Option<BoxedValue>, Option<BoxedValue>) =>
+                |this: &Ref<XBindPage>, _sender: Option<BoxedValue>, e: Option<BoxedValue>| {
+                    this.record(if e.is_some() { "base" } else { "base without arguments" })
+                },
+            fn OnPinged(Option<BoxedValue>, String) =>
+                |this: &Ref<XBindPage>, _sender: Option<BoxedValue>, text: String| this.record(&format!("pinged {text}")),
+        ],
+        events: [
+            Pinged(Option<BoxedValue>, String) => |this: &Ref<XBindPage>, handler: MarkupDelegate| this.add_pinged(handler),
         ],
     },
 });
@@ -73,7 +99,15 @@ ferro_properties! {
 
 impl XBindPage {
     pub fn construct() -> Self {
-        Self { base: Panel::construct(), model: XBindModel::new("Grace"), parsed: RefCell::new(Vec::new()) }
+        Self {
+            base: Panel::construct(),
+            model: XBindModel::new("Grace"),
+            parsed: RefCell::new(Vec::new()),
+            clicks: RefCell::new(Vec::new()),
+            current: RefCell::new(None),
+            pinged: RefCell::new(Vec::new()),
+            next_ping: Cell::new(1),
+        }
     }
 
     pub fn new() -> Ref<Self> {
@@ -114,6 +148,56 @@ impl XBindPage {
     pub fn parsed(&self) -> Vec<String> {
         self.parsed.borrow().clone()
     }
+
+    fn record(&self, call: &str) {
+        self.clicks.borrow_mut().push(call.to_string());
+    }
+
+    /// What the event handlers of the page were called for, in order.
+    pub fn clicks(&self) -> Vec<String> {
+        self.clicks.borrow().clone()
+    }
+
+    /// `XBindModel Current`: a plain property without change notification.
+    pub fn current(&self) -> Option<Rc<XBindModel>> {
+        self.current.borrow().clone()
+    }
+
+    pub fn set_current(&self, model: Option<Rc<XBindModel>>) {
+        *self.current.borrow_mut() = model;
+    }
+
+    /// `event EventHandler<string> Pinged`: the subscription removes the handler.
+    pub fn add_pinged(&self, handler: MarkupDelegate) -> Rc<dyn IDisposable> {
+        let id = self.next_ping.get();
+        self.next_ping.set(id + 1);
+        self.pinged.borrow_mut().push((id, handler));
+        let this = self.to_ref().downgrade();
+        Disposable::create(move || {
+            let Some(this) = this.upgrade() else {
+                return;
+            };
+            let removed = {
+                let mut handlers = this.pinged.borrow_mut();
+                let index = handlers.iter().position(|(handler_id, _)| *handler_id == id);
+                index.map(|index| handlers.remove(index))
+            };
+            drop(removed);
+        })
+    }
+
+    /// The number of handlers of `Pinged`.
+    pub fn pinged_handler_count(&self) -> usize {
+        self.pinged.borrow().len()
+    }
+
+    /// Raises `Pinged` with `text`.
+    pub fn ping(&self, text: &str) {
+        let handlers: Vec<MarkupDelegate> = self.pinged.borrow().iter().map(|(_, handler)| handler.clone()).collect();
+        for handler in handlers {
+            handler.invoke(&[None, Some(Rc::new(text.to_string()) as BoxedValue)]);
+        }
+    }
 }
 
 // --- The model ---------------------------------------------------------------
@@ -142,6 +226,7 @@ pub struct XBindModel {
     this: Weak<XBindModel>,
     name: RefCell<String>,
     stamp: Cell<u32>,
+    pokes: Cell<u32>,
     items: Rc<XBindItems>,
     map: Rc<XBindMap>,
     property_changed: Event<str>,
@@ -167,6 +252,7 @@ impl XBindModel {
             this: this.clone(),
             name: RefCell::new(name.to_string()),
             stamp: Cell::new(1),
+            pokes: Cell::new(0),
             items: Rc::new(XBindItems),
             map: Rc::new(XBindMap),
             property_changed: Event::new(),
@@ -215,6 +301,16 @@ impl XBindModel {
         self.property_changed.raise("Stamp");
     }
 
+    /// `void Poke()`: an event handler of the model, without parameters.
+    pub fn poke(&self) {
+        self.pokes.set(self.pokes.get() + 1);
+    }
+
+    /// How many times `Poke` was called.
+    pub fn pokes(&self) -> u32 {
+        self.pokes.get()
+    }
+
     pub fn items(&self) -> Rc<XBindItems> {
         self.items.clone()
     }
@@ -243,6 +339,7 @@ ferro_markup_type!(class XBindModel {
         fn Shout(String) -> String => |this: &Rc<XBindModel>, text: String| this.shout(text),
         fn Rename(String) => |this: &Rc<XBindModel>, text: String| this.rename(text),
         fn Stamp() -> String => |this: &Rc<XBindModel>| this.stamp(),
+        fn Poke() => |this: &Rc<XBindModel>| this.poke(),
     ],
     notify_property_changed: XBindModel,
 });
@@ -311,10 +408,30 @@ impl XBindHelpers {
     pub fn prefix() -> String {
         "prefix".to_string()
     }
+
+    /// `static void Clicked()`: a static event handler without parameters.
+    pub fn clicked() {
+        CLICKED.with(|clicked| clicked.set(clicked.get() + 1));
+    }
+
+    /// How many times `Clicked` was called on this thread.
+    pub fn clicked_count() -> u32 {
+        CLICKED.with(Cell::get)
+    }
+
+    /// `static void Mismatched(object sender, string text)`: not the signature of a routed event.
+    pub fn mismatched(_sender: Option<BoxedValue>, _text: String) {}
+
+    /// `static void Overloaded()` and `static void Overloaded(object, RoutedEventArgs)`: an event
+    /// cannot bind to an overloaded method.
+    pub fn overloaded() {}
+
+    pub fn overloaded_with(_sender: Option<BoxedValue>, _e: Rc<dyn IRoutedEventArgs>) {}
 }
 
 ferroui_base::ferro_thread_local! {
     static STORED: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    static CLICKED: Cell<u32> = const { Cell::new(0) };
 }
 
 ferro_markup_type!(static XBindHelpers {
@@ -323,6 +440,10 @@ ferro_markup_type!(static XBindHelpers {
         static fn Join(Option<String>, String, i32) -> String => XBindHelpers::join,
         static fn Describe(String, f64, bool, Option<BoxedValue>) -> String => XBindHelpers::describe,
         static fn Store(String) => XBindHelpers::store,
+        static fn Clicked() => XBindHelpers::clicked,
+        static fn Mismatched(Option<BoxedValue>, String) => XBindHelpers::mismatched,
+        static fn Overloaded() => XBindHelpers::overloaded,
+        static fn Overloaded(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) => XBindHelpers::overloaded_with,
     ],
     static_properties: [
         Prefix: String { get: XBindHelpers::prefix },

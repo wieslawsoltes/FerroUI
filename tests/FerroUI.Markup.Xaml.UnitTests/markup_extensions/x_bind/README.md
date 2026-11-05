@@ -28,6 +28,12 @@ with the tests and compared with the current compiler; the same assertions run o
   `ConverterLanguage`, and `TwoWay` through `ConvertBack`; `FallbackValue` for a path with a null
   in its middle (`OneTime`, `OneWay`, `TwoWay`, `{x:Null}`), and `TargetNullValue` (`OneWay`,
   `TwoWay`).
+- `x_bind_events.xaml` (X4, after WinUI's `EventTests`): `Click` bound to methods of the root
+  with the event's signature, without parameters and with base parameters, to a method on a path
+  (`Model.Poke`, and `Current.Poke`, null at first, then another owner), to a static method
+  (`local:XBindHelpers.Clicked`), an event that is not a routed event (`Pinged` of the root),
+  and `Click` on the item of a typed template; the handlers are subscribed by `Initialize` and
+  released by `StopTracking`.
 
 Regenerate the compiled fixture after reviewing a compiler change:
 
