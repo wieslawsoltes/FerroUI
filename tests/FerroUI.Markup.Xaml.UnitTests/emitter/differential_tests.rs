@@ -928,7 +928,7 @@ fn documents_that_read_their_base_uri_build_equal_object_trees() {
     for name in BASE_URI_DOCUMENTS {
         let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| document == name).unwrap_or_else(|| panic!("{name} is not a document of the corpus"));
         let uri = format!("{}{name}", generated::ROOT_URI);
-        let base_uri = ferroui_base::utilities::Uri::new(&uri, ferroui_base::utilities::UriKind::Absolute).expect("the URI of the document");
+        let base_uri = ferroui_base::utilities::UriRef::parse_absolute(&uri).expect("the URI of the document");
         let interpreted = match try_load_with(xaml, None, None, Some(base_uri), false) {
             Ok(root) => dump_root(&root),
             Err(error) => failure(&error),

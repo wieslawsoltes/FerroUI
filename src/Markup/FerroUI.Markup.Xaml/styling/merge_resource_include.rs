@@ -4,7 +4,6 @@ use super::ResourceInclude;
 use ferroui_base::controls::{IResourceProvider, IThemeVariantProvider};
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::IServiceProvider;
-use ferroui_base::utilities::Uri;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -22,7 +21,7 @@ pub struct MergeResourceInclude {
 }
 
 impl MergeResourceInclude {
-    pub fn new(base_uri: Option<Uri>) -> Rc<Self> {
+    pub fn new(base_uri: Option<url::Url>) -> Rc<Self> {
         Rc::new(Self { base: ResourceInclude::new(base_uri) })
     }
 
@@ -52,7 +51,7 @@ ferro_markup_type!(class MergeResourceInclude {
     base: Rc<ResourceInclude>,
     interfaces: [Rc<dyn IResourceProvider>, Rc<dyn IThemeVariantProvider>],
     constructors: [
-        (Option<Uri>) => MergeResourceInclude::new,
+        (Option<url::Url>) => MergeResourceInclude::new,
         (Rc<dyn IServiceProvider>) => MergeResourceInclude::with_service_provider,
     ],
 });

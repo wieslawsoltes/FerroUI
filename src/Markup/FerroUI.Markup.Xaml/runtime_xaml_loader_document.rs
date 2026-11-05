@@ -1,7 +1,6 @@
 //! Port of `RuntimeXamlLoaderDocument.cs`.
 
 use ferroui_base::metadata::IServiceProvider;
-use ferroui_base::utilities::Uri;
 use ferroui_base::BoxedValue;
 use std::cell::RefCell;
 use std::io::{Cursor, Read};
@@ -9,9 +8,9 @@ use std::rc::Rc;
 
 /// A markup document for the runtime XAML loader.
 pub struct RuntimeXamlLoaderDocument {
-    /// The URI of the document: what relative URIs in it are resolved
-    /// against.
-    pub base_uri: Option<Uri>,
+    /// The URI of the document: the absolute URL relative references in it
+    /// are resolved against.
+    pub base_uri: Option<url::Url>,
 
     /// The path of the document, for diagnostics.
     pub document: Option<String>,
@@ -34,7 +33,7 @@ impl RuntimeXamlLoaderDocument {
     }
 
     /// A document from text, with its URI.
-    pub fn with_base_uri(base_uri: Option<Uri>, xaml: &str) -> Self {
+    pub fn with_base_uri(base_uri: Option<url::Url>, xaml: &str) -> Self {
         Self { base_uri, ..Self::new(xaml) }
     }
 
@@ -44,7 +43,7 @@ impl RuntimeXamlLoaderDocument {
     }
 
     /// A document from text, with its URI, that populates `root_instance`.
-    pub fn with_base_uri_and_root_instance(base_uri: Option<Uri>, root_instance: Option<BoxedValue>, xaml: &str) -> Self {
+    pub fn with_base_uri_and_root_instance(base_uri: Option<url::Url>, root_instance: Option<BoxedValue>, xaml: &str) -> Self {
         Self { root_instance, ..Self::with_base_uri(base_uri, xaml) }
     }
 
@@ -60,7 +59,7 @@ impl RuntimeXamlLoaderDocument {
     }
 
     /// A document from a stream, with its URI.
-    pub fn from_stream_with_base_uri(base_uri: Option<Uri>, stream: Box<dyn Read>) -> Self {
+    pub fn from_stream_with_base_uri(base_uri: Option<url::Url>, stream: Box<dyn Read>) -> Self {
         Self { base_uri, ..Self::from_stream(stream) }
     }
 
@@ -72,7 +71,7 @@ impl RuntimeXamlLoaderDocument {
     /// A document from a stream, with its URI, that populates
     /// `root_instance`.
     pub fn from_stream_with_base_uri_and_root_instance(
-        base_uri: Option<Uri>,
+        base_uri: Option<url::Url>,
         root_instance: Option<BoxedValue>,
         stream: Box<dyn Read>,
     ) -> Self {
@@ -96,11 +95,10 @@ impl RuntimeXamlLoaderDocument {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ferroui_base::utilities::UriKind;
 
     #[test]
     fn text_constructors_set_their_members() {
-        let uri = Uri::new("ferres://app/Main.xaml", UriKind::Absolute).unwrap();
+        let uri = url::Url::parse("ferres://app/Main.xaml").unwrap();
         let root: BoxedValue = Rc::new(5i32);
 
         let document = RuntimeXamlLoaderDocument::new("<a/>");
@@ -127,7 +125,7 @@ mod tests {
 
     #[test]
     fn stream_constructors_set_their_members() {
-        let uri = Uri::new("ferres://app/Main.xaml", UriKind::Absolute).unwrap();
+        let uri = url::Url::parse("ferres://app/Main.xaml").unwrap();
         let root: BoxedValue = Rc::new(5i32);
         let stream = || Box::new(Cursor::new(b"<e/>".to_vec())) as Box<dyn Read>;
 

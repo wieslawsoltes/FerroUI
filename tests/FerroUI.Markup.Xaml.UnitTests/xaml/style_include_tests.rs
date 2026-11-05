@@ -18,7 +18,7 @@ use crate::support::app::{styled_window_application, unit_test_application, xaml
 use crate::support::helpers::{assert_is_type, assert_value_is_type, boxed, value_of};
 use crate::support::loader::{
     cast, describe, document, document_without_uri, load_document, load_group, parse, test_assembly, try_load_group,
-    uri,
+    uri_ref,
 };
 use crate::support::xaml::style_include_tests::{StyleWithServiceProvider, TestServiceProvider};
 
@@ -337,7 +337,7 @@ fn style_include_from_code_behind_resolves_compiled() {
     let sp = TestServiceProvider::new();
     let service_provider: Rc<dyn IServiceProvider> = sp.clone();
     let style_include = StyleInclude::with_service_provider(service_provider.clone());
-    style_include.set_source(Some(uri("ferres://FerroUI.Markup.Xaml.UnitTests/Xaml/StyleWithServiceProvider.xaml")));
+    style_include.set_source(Some(uri_ref("ferres://FerroUI.Markup.Xaml.UnitTests/Xaml/StyleWithServiceProvider.xaml")));
 
     let loaded = style_include.loaded();
     let loaded = loaded.as_object().expect("the loaded style is an object of the class model");

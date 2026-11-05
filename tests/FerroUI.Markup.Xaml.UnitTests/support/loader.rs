@@ -12,7 +12,7 @@
 use std::any::type_name;
 
 use ferroui_base::metadata::{from_markup_value, MarkupAssembly};
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::{Uri, UriKind, UriRef};
 use ferroui_base::BoxedValue;
 use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -83,12 +83,24 @@ pub fn uri(text: &str) -> Uri {
     Uri::new(text, UriKind::RelativeOrAbsolute).unwrap_or_else(|_| panic!("invalid URI '{text}'"))
 }
 
+/// A URI reference from text, as markup reads it: the source of an include (C5 of #423).
+#[track_caller]
+pub fn uri_ref(text: &str) -> UriRef {
+    UriRef::parse(text).unwrap_or_else(|_| panic!("invalid URI reference '{text}'"))
+}
+
+/// The URL of a document from text, as the loaders read it: a base URI (C5 of #423).
+#[track_caller]
+pub fn url(text: &str) -> url::Url {
+    UriRef::parse_absolute(text).unwrap_or_else(|_| panic!("invalid URL '{text}'"))
+}
+
 /// `FerroRuntimeXamlLoader.Load(xaml, localAssembly, rootInstance, uri, designMode)`.
 pub fn try_load_with(
     xaml: &str,
     local_assembly: Option<&'static MarkupAssembly>,
     root_instance: Option<BoxedValue>,
-    uri: Option<Uri>,
+    uri: Option<url::Url>,
     design_mode: bool,
 ) -> XamlResult<BoxedValue> {
     crate::register_types();
@@ -187,7 +199,7 @@ pub fn parse_local<T: Clone + 'static>(xaml: &str) -> T {
 /// `new RuntimeXamlLoaderDocument(new Uri(baseUri), xaml)`.
 #[track_caller]
 pub fn document(base_uri: &str, xaml: &str) -> RuntimeXamlLoaderDocument {
-    RuntimeXamlLoaderDocument::with_base_uri(Some(uri(base_uri)), xaml)
+    RuntimeXamlLoaderDocument::with_base_uri(Some(url(base_uri)), xaml)
 }
 
 /// `new RuntimeXamlLoaderDocument(xaml)`.
