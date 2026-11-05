@@ -1669,3 +1669,153 @@ fn graphite_draws_the_library_shader_effects_as_their_cpu_references() {
         assert!(most <= largest && mean <= 0.75, "{effect}: largest difference {most}, mean {mean}");
     }
 }
+
+/// The page transitions of the library drawn by Graphite (#455, E6): their
+/// images are textures of the recorder, uploaded once (the upload count is
+/// constant over frames that change only the progress), drawn as the CPU
+/// references of the effects; and the textures are released once the
+/// handles of the images are dropped.
+#[test]
+fn graphite_draws_the_page_transitions_from_textures_uploaded_once() {
+    use ferroui_base::media::effects::library::{DissolveTransitionEffect, MaskTransitionEffect};
+    use ferroui_base::media::effects::{EffectImage, ImmutableCustomEffect};
+
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    const SIZE: i32 = 64;
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    // The premultiplied RGBA pixels of the target, read back once.
+    fn pixels(target: &GraphiteTarget) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+    fn image(pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = ImmutableBitmap::from_pixels(
+            PixelSize::new(SIZE, SIZE),
+            Vector::new(96.0, 96.0),
+            SIZE * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .unwrap();
+        EffectImage::from_impl(std::sync::Arc::new(bitmap))
+    }
+    fn transitions(progress: f64, from: &EffectImage, to: &EffectImage, pattern: &EffectImage) -> [ImmutableCustomEffect; 2] {
+        [
+            ImmutableCustomEffect::new(DissolveTransitionEffect {
+                from_page: from.clone(),
+                to_page: to.clone(),
+                pattern: pattern.clone(),
+                progress,
+                center_x: 0.3,
+                center_y: 0.6,
+                ..DissolveTransitionEffect::default()
+            }),
+            ImmutableCustomEffect::new(MaskTransitionEffect {
+                to_page: to.clone(),
+                mask: pattern.clone(),
+                progress,
+                softness: 0.2,
+            }),
+        ]
+    }
+    fn draw(target: &GraphiteTarget, effect: Option<&ImmutableCustomEffect>) {
+        target.draw(|context| {
+            context.clear(Colors::TRANSPARENT);
+            if let Some(effect) = effect {
+                let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+                context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), effect);
+            }
+            scene(context);
+            if effect.is_some() {
+                context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+            }
+        });
+    }
+
+    let target = GraphiteTarget::new(&device);
+    let uploads_before = target.gr_context.uploaded_image_count();
+    {
+        let from = image(|x, y| [(x * 4) as u8, (y * 4) as u8, 200, 255]);
+        let to = image(|x, y| [40, (255 - x * 4) as u8, (y * 4) as u8, 255]);
+        let pattern = image(|x, y| {
+            let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+            [level, level, level, 255]
+        });
+
+        // Against the CPU references.
+        draw(&target, None);
+        let plain = pixels(&target);
+        for effect in transitions(0.45, &from, &to, &pattern) {
+            let mut expected = plain.clone();
+            assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+            draw(&target, Some(&effect));
+            let actual = pixels(&target);
+            let most = expected.iter().zip(&actual).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+            let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+            let mean = total as f64 / expected.len() as f64;
+            assert!(most <= 4 && mean <= 0.75, "{effect}: largest difference {most}, mean {mean}");
+        }
+
+        // Steady frames: the progress changes, the textures stay.
+        let uploads = target.gr_context.upload_count();
+        assert_eq!(uploads_before + 3, target.gr_context.uploaded_image_count(), "the three images are textures");
+        for frame in 0..6 {
+            for effect in transitions(0.1 * f64::from(frame), &from, &to, &pattern) {
+                draw(&target, Some(&effect));
+            }
+            target.gr_context.flush();
+            assert_eq!(uploads, target.gr_context.upload_count(), "frame {frame} uploaded an image");
+        }
+    }
+
+    // The handles are dropped: the next frame drops the Skia images, its
+    // flush the textures.
+    draw(&target, None);
+    target.gr_context.flush();
+    assert_eq!(uploads_before, target.gr_context.uploaded_image_count(), "the textures are released");
+
+    // New images in every frame: no more textures than a frame draws.
+    for frame in 0..12 {
+        let page = image(|x, y| [frame as u8 * 20, x as u8, y as u8, 255]);
+        let effect = ImmutableCustomEffect::new(MaskTransitionEffect {
+            to_page: page,
+            progress: 0.5,
+            softness: 1.0,
+            ..MaskTransitionEffect::default()
+        });
+        draw(&target, Some(&effect));
+        target.gr_context.flush();
+        assert!(target.gr_context.uploaded_image_count() <= uploads_before + 1, "frame {frame}");
+    }
+    draw(&target, None);
+    target.gr_context.flush();
+    assert_eq!(uploads_before, target.gr_context.uploaded_image_count());
+    target.dispose();
+}

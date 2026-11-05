@@ -21,13 +21,17 @@
 //! business of that backend's factory for the effect. A backend without one
 //! draws the content unchanged and reports it once
 //! ([`ImmutableCustomEffect::report_unhandled`]).
+//!
+//! A parameter may be an image ([`EffectParameterValue::Image`], step E6): a
+//! handle of a bitmap ([`EffectImage`]) that the program of a shader effect
+//! samples as a child besides its content (the pages of a transition).
 
 use super::custom_effect_graph::{load_custom_effect_graph, CustomEffectGraph};
 use super::custom_effect_shader::{
     load_custom_effect_shader, visit_shader_uniforms, ShaderEffectDescription, ShaderEffectPadding, ShaderUniformType,
-    ShaderUniformValue,
+    ShaderUniformValue, MAX_SHADER_CHILDREN,
 };
-use super::{IEffect, IImmutableEffect};
+use super::{EffectImage, IEffect, IImmutableEffect};
 use crate::animation::animators::{ColorAnimator, DoubleAnimator};
 use crate::logging::{LogEventLevel, Logger};
 use crate::media::Color;
@@ -42,7 +46,8 @@ use std::sync::{Arc, Mutex};
 ///
 /// The parameters are what parsing reads and writes (`tint(color=#0F9D8E,
 /// strength=0.55)`), what the default interpolation interpolates, and what a
-/// backend factory hands to its GPU program as uniforms.
+/// backend factory hands to its GPU program as uniforms (an image as a
+/// child).
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum EffectParameterValue {
@@ -65,6 +70,17 @@ pub enum EffectParameterValue {
     Rect(Rect),
     /// A name or other text. Steps when interpolated.
     Text(Arc<str>),
+    /// An image (#455, E6): a handle of a bitmap, compared by identity, that
+    /// the program of a shader effect samples as a child (see
+    /// [`ShaderEffectDescription`]). Switches at half when interpolated; an
+    /// empty handle takes the image of the other side.
+    ///
+    /// An effect string cannot name an image (markup has no resource
+    /// context in an effect string): parsing a value for an image parameter
+    /// fails, and the effect string of a snapshot leaves its images out, so
+    /// that it parses back to the effect with empty images. An image is set
+    /// from code, on the value or on the snapshot of a mutable effect class.
+    Image(EffectImage),
 }
 
 impl EffectParameterValue {
@@ -143,9 +159,19 @@ impl EffectParameterValue {
         }
     }
 
+    /// The value as an image.
+    pub fn as_image(&self) -> Option<&EffectImage> {
+        match self {
+            Self::Image(value) => Some(value),
+            _ => None,
+        }
+    }
+
     /// The value at `progress` (0 to 1) of the way from `self` to `to`, or
     /// `None` when the two are of different kinds or the kind does not
-    /// interpolate (booleans and text step).
+    /// interpolate (booleans and text step). Two images switch at half; an
+    /// empty image is the other image all the way (a transition from no
+    /// effect keeps the images of the effect it goes to).
     pub fn interpolate(&self, to: &Self, progress: f64) -> Option<Self> {
         let lerp = |from: f64, to: f64| DoubleAnimator::interpolate_core(progress, &from, &to);
         Some(match (self, to) {
@@ -166,6 +192,13 @@ impl EffectParameterValue {
                 lerp(from.width, to.width),
                 lerp(from.height, to.height),
             )),
+            (Self::Image(from), Self::Image(to)) => Self::Image(if from.is_empty() {
+                to.clone()
+            } else if to.is_empty() || progress < 0.5 {
+                from.clone()
+            } else {
+                to.clone()
+            }),
             _ => return None,
         })
     }
@@ -173,7 +206,8 @@ impl EffectParameterValue {
     /// Parses `text` as a value of the same kind as `self` (the kind of a
     /// parameter is that of its current value), in the invariant format
     /// [`Display`](fmt::Display) writes. Composite values may be wrapped in
-    /// parentheses and separate their numbers with commas or spaces.
+    /// parentheses and separate their numbers with commas or spaces. An
+    /// image is never parsed: an effect string cannot name one.
     pub fn parse_like(&self, text: &str) -> Option<Self> {
         let text = text.trim();
         if text.is_empty() {
@@ -209,6 +243,7 @@ impl EffectParameterValue {
                 Self::Rect(Rect::new(x, y, width, height))
             }
             Self::Text(_) => Self::Text(unquote(text).into()),
+            Self::Image(_) => return None,
         })
     }
 }
@@ -249,7 +284,9 @@ fn is_bare_text(text: &str) -> bool {
 }
 
 /// The invariant format of effect strings, which
-/// [`parse_like`](EffectParameterValue::parse_like) reads back.
+/// [`parse_like`](EffectParameterValue::parse_like) reads back; an image is
+/// written `image(WIDTHxHEIGHT)` (or `none` for the empty one), which does
+/// not parse (the effect string of a snapshot leaves images out).
 impl fmt::Display for EffectParameterValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -263,6 +300,11 @@ impl fmt::Display for EffectParameterValue {
             Self::Rect(value) => write!(f, "{},{},{},{}", value.x, value.y, value.width, value.height),
             Self::Text(value) if is_bare_text(value) => f.write_str(value),
             Self::Text(value) => write!(f, "\"{value}\""),
+            Self::Image(image) if image.is_empty() => f.write_str("none"),
+            Self::Image(image) => {
+                let size = image.pixel_size();
+                write!(f, "image({}x{})", size.width, size.height)
+            }
         }
     }
 }
@@ -330,6 +372,18 @@ impl From<String> for EffectParameterValue {
 impl From<Arc<str>> for EffectParameterValue {
     fn from(value: Arc<str>) -> Self {
         Self::Text(value)
+    }
+}
+
+impl From<EffectImage> for EffectParameterValue {
+    fn from(value: EffectImage) -> Self {
+        Self::Image(value)
+    }
+}
+
+impl From<&EffectImage> for EffectParameterValue {
+    fn from(value: &EffectImage) -> Self {
+        Self::Image(value.clone())
     }
 }
 
@@ -756,6 +810,78 @@ impl ImmutableCustomEffect {
         layout
     }
 
+    /// Calls `f` with the name and the image of each child of the shader of
+    /// the effect (#455, E6), in the order of the description's
+    /// [`children`](ShaderEffectDescription::children): the name of the
+    /// image parameter (the child of the program is that name with every `-`
+    /// written `_`) and its value in this snapshot, the empty image when the
+    /// effect has no image parameter of that name. Without allocating: what a
+    /// backend calls each frame to bind the children of the program. Nothing
+    /// for an effect without a shader.
+    pub fn for_each_shader_child(&self, f: &mut dyn FnMut(&str, &EffectImage)) {
+        static EMPTY: EffectImage = EffectImage::empty();
+        let Some(shader) = self.shader() else { return };
+        for child in &shader.children {
+            let mut found = None;
+            self.for_each_parameter(&mut |name, value| {
+                if found.is_none() && name == &**child {
+                    if let EffectParameterValue::Image(image) = value {
+                        found = Some(image);
+                    }
+                }
+            });
+            f(&**child, found.as_ref().unwrap_or(&EMPTY));
+        }
+    }
+
+    /// Checks the children of the shader of the effect's type against its
+    /// parameters (#455, E6): at most [`MAX_SHADER_CHILDREN`], each the name
+    /// of an image parameter of the effect, none twice and none `content`,
+    /// and none for a program that samples the content (see
+    /// [`ShaderEffectDescription::children`]). What both backends check once
+    /// per type before they compile the program; the error says why not.
+    /// `Ok` for an effect without a shader or without children.
+    pub fn check_shader_children(&self) -> Result<(), String> {
+        let Some(shader) = self.shader() else { return Ok(()) };
+        if shader.children.is_empty() {
+            return Ok(());
+        }
+        if shader.samples_content() {
+            return Err("a program that samples the content takes no images: its children are for overlays".to_owned());
+        }
+        if shader.children.len() > MAX_SHADER_CHILDREN {
+            return Err(format!(
+                "the program has {} children, at most {MAX_SHADER_CHILDREN} are bound",
+                shader.children.len()
+            ));
+        }
+        for (index, child) in shader.children.iter().enumerate() {
+            let uniform = super::shader_uniform_name(child);
+            if uniform == super::CUSTOM_EFFECT_CONTENT {
+                return Err(format!("the child {child} is named as the content"));
+            }
+            if shader.children[..index].iter().any(|earlier| super::shader_uniform_name(earlier) == uniform) {
+                return Err(format!("the child {child} is named twice"));
+            }
+            let is_image = matches!(self.parameter_named(child), Some(EffectParameterValue::Image(_)));
+            if !is_image {
+                return Err(format!("the child {child} is not an image parameter of the effect"));
+            }
+        }
+        Ok(())
+    }
+
+    /// The value of the parameter spelled exactly `name`.
+    fn parameter_named(&self, name: &str) -> Option<EffectParameterValue> {
+        let mut found = None;
+        self.for_each_parameter(&mut |candidate, value| {
+            if found.is_none() && candidate == name {
+                found = Some(value);
+            }
+        });
+        found
+    }
+
     /// Reports that `backend` has no factory for this effect, so that it
     /// draws the content of the effect unchanged. The first report of each
     /// backend and effect name is logged (a warning in the log area named
@@ -796,14 +922,16 @@ impl From<ImmutableCustomEffect> for Rc<dyn IEffect> {
 
 /// The effect string: `name(parameter=value, ...)`, which
 /// [`Effect::parse`](super::Effect::parse) reads back when the effect is
-/// registered ([`CustomEffectRegistry`](super::CustomEffectRegistry)).
+/// registered ([`CustomEffectRegistry`](super::CustomEffectRegistry)). The
+/// images of the effect are left out: an effect string cannot name an image,
+/// so the string reads back as the effect with empty images.
 impl fmt::Display for ImmutableCustomEffect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}(", self.name())?;
         let mut result = Ok(());
         let mut first = true;
         self.for_each_parameter(&mut |name, value| {
-            if result.is_ok() {
+            if result.is_ok() && !matches!(value, EffectParameterValue::Image(_)) {
                 let separator = if first { "" } else { ", " };
                 first = false;
                 result = write!(f, "{separator}{name}={value}");
