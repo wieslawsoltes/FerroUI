@@ -1076,6 +1076,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-system",
  "indexmap",
+ "url",
 ]
 
 [[package]]

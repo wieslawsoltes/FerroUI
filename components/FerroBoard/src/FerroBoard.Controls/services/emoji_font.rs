@@ -7,8 +7,8 @@ use ferroui_base::{
         fonts::{FontCollectionBase, FontCollectionBaseImpl, FontCollectionKey},
     },
     platform::IFontManagerImpl,
-    utilities::{Uri, UriKind},
 };
+use url::Url;
 use std::{
     io::{self, Cursor, Read},
     rc::Rc,
@@ -81,7 +81,7 @@ impl std::error::Error for EmojiFontError {
 #[derive(Clone)]
 pub struct EmojiFont {
     bytes: Arc<[u8]>,
-    key: Uri,
+    key: Url,
     family: FontFamily,
 }
 impl EmojiFont {
@@ -98,13 +98,10 @@ impl EmojiFont {
             return Err(EmojiFontError::Empty);
         }
         static NEXT_KEY: AtomicU64 = AtomicU64::new(1);
-        let key = Uri::try_create(
-            &format!(
-                "fonts:FerroBoardEmoji{}",
-                NEXT_KEY.fetch_add(1, Ordering::Relaxed)
-            ),
-            UriKind::Absolute,
-        )
+        let key = Url::parse(&format!(
+            "fonts:FerroBoardEmoji{}",
+            NEXT_KEY.fetch_add(1, Ordering::Relaxed)
+        ))
         .expect("native font collection URI");
         let family = FontFamily::new(&format!("{key}#{ALIAS}"));
         Ok(Self { bytes, key, family })
@@ -171,13 +168,13 @@ impl EmojiFont {
 }
 struct ByteFontCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: Url,
 }
 impl FontCollectionBaseImpl for ByteFontCollection {
     fn base(this: &Self) -> &FontCollectionBase {
         &this.base
     }
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> Url {
         this.key.clone()
     }
 }
