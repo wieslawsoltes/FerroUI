@@ -55,7 +55,7 @@ fn installed_font_is_cached_by_ferroui_and_owned_by_the_manager() {
                 .try_get_glyph_typeface(&Typeface::new(family.clone()))
                 .unwrap()
         ));
-        manager.remove_font_collection(family.key().unwrap().source());
+        manager.remove_font_collection(family.key().unwrap().source().as_url().unwrap());
         font.install(&manager).unwrap();
         let replacement = manager
             .try_get_glyph_typeface(&Typeface::new(family.clone()))
