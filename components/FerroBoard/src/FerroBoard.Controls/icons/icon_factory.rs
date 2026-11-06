@@ -274,6 +274,26 @@ mod tests {
     fn bits(value: f64) -> String {
         format!("{:016x}", value.to_bits())
     }
+    /// `value` with every number written as its bits that is a NaN replaced by the canonical
+    /// quiet NaN. The sign and payload of a NaN depend on the processor that computed it (x86-64
+    /// makes negative NaNs where ARM makes positive ones), on either side of the comparison.
+    fn canonical_nan(value: Value) -> Value {
+        match value {
+            Value::String(text) => match u64::from_str_radix(&text, 16) {
+                Ok(bits) if text.len() == 16 && f64::from_bits(bits).is_nan() => {
+                    Value::String(format!("{:016x}", f64::NAN.to_bits()))
+                }
+                _ => Value::String(text),
+            },
+            Value::Array(items) => Value::Array(items.into_iter().map(canonical_nan).collect()),
+            Value::Object(map) => Value::Object(
+                map.into_iter()
+                    .map(|(key, item)| (key, canonical_nan(item)))
+                    .collect(),
+            ),
+            other => other,
+        }
+    }
     fn point(p: Point) -> Value {
         json!([bits(p.x), bits(p.y)])
     }
@@ -349,11 +369,15 @@ mod tests {
                         "kind":char::from_u32(c.kind as u32).unwrap().to_string(),
                         "x1":bits(c.x1),"y1":bits(c.y1),"x2":bits(c.x2),"y2":bits(c.y2),"x":bits(c.x),"y":bits(c.y)
                     })).collect();
-                    assert_eq!(json!(actual), row["commands"], "commands row {id}");
+                    assert_eq!(
+                        canonical_nan(json!(actual)),
+                        canonical_nan(row["commands"].clone()),
+                        "commands row {id}"
+                    );
                     let geometry = IconFactory::create_geometry_value(icon, size).unwrap();
                     assert_eq!(
-                        geometry_data(geometry),
-                        row["geometry"],
+                        canonical_nan(geometry_data(geometry)),
+                        canonical_nan(row["geometry"].clone()),
                         "geometry row {id}"
                     );
                 }
