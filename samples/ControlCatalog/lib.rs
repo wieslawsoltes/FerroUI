@@ -32,6 +32,7 @@ use ferroui_base::TypeInfo;
 mod hot_reload;
 mod app;
 mod assets;
+pub mod media_samples;
 #[cfg(feature = "classic-themes")]
 mod classic_themes;
 mod decorated_window;

@@ -1,6 +1,7 @@
 //! OpenGL ES through ANGLE on Direct3D.
 
 mod angle_d3d_texture_feature;
+mod angle_display_lifetime;
 mod angle_egl_interface;
 mod angle_external_d3d11_texture2_d;
 mod angle_external_objects_feature;

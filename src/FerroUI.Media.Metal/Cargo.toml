@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-media-metal"
+description = "Independent Metal texture production and renderer-host encoding on the active device"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-base.workspace = true
+ferroui-media.workspace = true
+ferroui-media-apple.workspace = true
+ferroui-metal.workspace = true
+[build-dependencies]
+cc.workspace = true
+[package.metadata.release]
+group = "platforms"

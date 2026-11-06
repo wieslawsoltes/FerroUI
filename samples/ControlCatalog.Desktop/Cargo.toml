@@ -16,6 +16,10 @@ name = "control-catalog-desktop"
 path = "program.rs"
 
 [dependencies]
+ferroui-media.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-camera.workspace = true
+ferroui-media-controls.workspace = true
 ferroui-mcp = { workspace = true, optional = true }
 ferroui-headless = { workspace = true, optional = true }
 ferroui-devtools = { workspace = true, optional = true, features = ["server"] }
@@ -31,14 +35,26 @@ ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"
 
 # The options of a smoke run on Windows (`FERROUI_SMOKE_RENDERING`).
 [target.'cfg(windows)'.dependencies]
+ferroui-media-windows = {workspace=true,features=["controls"]}
+ferroui-media-video-windows.workspace=true
+ferroui-media-camera-windows.workspace=true
+ferroui-media-opengl.workspace=true
 ferroui-win32 = { workspace = true, features = ["angle"] }
 
 # The options of a smoke run on macOS (`FERROUI_SMOKE_RENDERING`).
 [target.'cfg(target_os = "macos")'.dependencies]
+ferroui-media-apple = { workspace=true, features=["controls"] }
+ferroui-media-video-apple.workspace=true
+ferroui-media-camera-apple.workspace=true
+ferroui-media-qr-apple.workspace=true
 ferroui-native = { workspace = true }
 
 # The native control demo of Linux: a window of the X server and a file chooser of GTK.
 [target.'cfg(target_os = "linux")'.dependencies]
+ferroui-media-linux = {workspace=true,features=["controls"]}
+ferroui-media-video-linux.workspace=true
+ferroui-media-camera-linux.workspace=true
+ferroui-media-opengl.workspace=true
 ferroui-x11 = { workspace = true }
 # The Wayland backend, which the catalog uses when a compositor can be reached, with the backend
 # of the platform detection as its fallback (`FERROUI_CATALOG_WAYLAND=0` leaves it out).

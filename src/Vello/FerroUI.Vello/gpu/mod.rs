@@ -10,7 +10,10 @@
 
 mod device_surface_render_target;
 pub(crate) mod effect_passes;
+#[cfg(target_os = "macos")]
+pub mod external_objects;
 mod i_vello_gpu;
+pub(crate) mod shared_frame;
 #[cfg(target_os = "macos")]
 pub mod metal;
 #[cfg(target_os = "macos")]
@@ -24,6 +27,7 @@ pub mod window_surface;
 
 
 pub use device_surface_render_target::DeviceSurfaceRenderTarget;
+pub use shared_frame::VelloSharedFrameBitmap;
 pub use i_vello_gpu::{create_window_scene_sink, window_rendering_mode, IVelloGpu};
 pub use vello_wgpu_device::{VelloWgpuDevice, VelloWgpuDeviceError};
 
@@ -163,6 +167,15 @@ pub enum VelloTextureAlpha {
     Straight,
 }
 
+/// The number of a new texture of a device. The identities of textures are apart from the
+/// identities of the pixels of images (`peniko::Blob::id`, which counts from one): a scene binds
+/// both by number.
+fn next_texture_id() -> u64 {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static NEXT_ID: AtomicU64 = AtomicU64::new(1 << 63);
+    NEXT_ID.fetch_add(1, Ordering::Relaxed)
+}
+
 /// A texture of a device that scenes are rendered into and painted with:
 /// what a layer of a GPU mode holds, so that what was drawn on the device
 /// is drawn from without leaving it. `Rgba8Unorm`, in the alpha form of the
@@ -197,13 +210,6 @@ impl VelloDeviceTexture {
         height: u32,
         alpha: VelloTextureAlpha,
     ) -> std::sync::Arc<Self> {
-        use std::sync::atomic::{AtomicU64, Ordering};
-
-        // The identities of textures are apart from the identities of the
-        // pixels of images (`peniko::Blob::id`, which counts from one): a
-        // scene binds both by number.
-        static NEXT_ID: AtomicU64 = AtomicU64::new(1 << 63);
-
         let usage = match alpha {
             VelloTextureAlpha::Premultiplied => wgpu::TextureUsages::RENDER_ATTACHMENT,
             VelloTextureAlpha::Straight => wgpu::TextureUsages::STORAGE_BINDING,
@@ -216,9 +222,27 @@ impl VelloDeviceTexture {
             device: device.clone(),
             texture,
             view,
-            id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
+            id: next_texture_id(),
             alpha,
         })
+    }
+
+    /// A texture of the device that wraps storage made outside of it (a frame of a video or a
+    /// camera, imported from the platform): sampled, never rendered to by the renderers, in
+    /// whatever format it has. The storage stays the producer's; whoever wraps it keeps the
+    /// producer's lease until the device has read it.
+    pub fn from_external(
+        device: &std::sync::Arc<VelloWgpuDevice>,
+        texture: wgpu::Texture,
+        alpha: VelloTextureAlpha,
+    ) -> std::sync::Arc<Self> {
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+        std::sync::Arc::new(Self { device: device.clone(), texture, view, id: next_texture_id(), alpha })
+    }
+
+    /// The format of the texture.
+    pub fn format(&self) -> wgpu::TextureFormat {
+        self.texture.format()
     }
 
     /// The device of the texture.

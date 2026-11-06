@@ -79,6 +79,14 @@ pub trait IGlExportableExternalSemaphore: IGlExternalSemaphore {
 
 /// A texture backed by an image shared with another graphics API.
 pub trait IGlExternalImageTexture {
+    /// Keeps a native alias alive with each submitted immutable source lease.
+    /// Only implementations with explicit alias ownership may admit this path.
+    fn acquire_frame_lease(
+        &self,
+        _frame: ferroui_base::rendering::composition::frames::FrameLease,
+    ) -> Result<ferroui_base::rendering::composition::frames::FrameLease, ferroui_base::rendering::composition::frames::FrameError> {
+        Err(ferroui_base::rendering::composition::frames::FrameError::MissingImporter)
+    }
     fn acquire_keyed_mutex(&self, key: u32);
 
     fn release_keyed_mutex(&self, key: u32);

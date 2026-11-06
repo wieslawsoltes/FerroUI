@@ -17,6 +17,12 @@ pub trait IVelloGpu {
     /// The `wgpu` device over the device of the platform.
     fn device(&self) -> &Arc<VelloWgpuDevice>;
 
+    /// An optional feature of the GPU (the import of images of other devices, the device of the
+    /// platform), by the type of its trait object: what the render interface context hands out.
+    fn try_get_feature(&self, _feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
+        None
+    }
+
     /// The graphics context of the platform this GPU draws with.
     fn platform_graphics_context(&self) -> Rc<dyn IPlatformGraphicsContext>;
 

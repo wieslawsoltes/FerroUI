@@ -114,6 +114,7 @@ mod gtk_helper;
 mod linux_framebuffer;
 
 use control_catalog::App;
+mod media_samples;
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::imaging::{Bitmap, BitmapEncoderOptions, PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
@@ -160,7 +161,11 @@ fn main() -> std::process::ExitCode {
     // frames went.
     #[cfg(feature = "vello")]
     ferroui_vello::perf::print_summary();
-    std::process::ExitCode::from(exit_code as u8)
+    if media_samples::SMOKE_FAILED.load(std::sync::atomic::Ordering::Relaxed) {
+        std::process::ExitCode::FAILURE
+    } else {
+        std::process::ExitCode::from(exit_code as u8)
+    }
 }
 
 /// The application builder of the catalog.
@@ -172,6 +177,8 @@ pub fn build_ferro_app() -> AppBuilder {
     let builder = use_renderer_of_the_environment(builder);
     builder
         .after_setup(|_| {
+            media_samples::install();
+            media_samples::smoke();
             #[cfg(target_os = "linux")]
             control_catalog::pages::EmbedSample::set_implementation(Some(std::rc::Rc::new(
                 embed_sample_gtk::EmbedSampleGtk::default(),

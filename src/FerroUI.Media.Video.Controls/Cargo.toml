@@ -1,0 +1,26 @@
+[package]
+name = "ferroui-media-video-controls"
+description = "Composited video presentation and accessible playback controls"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+links = "ferroui_media_video_controls_xaml"
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-base = {workspace=true, features=["markup-functions"]}
+ferroui-controls.workspace = true
+ferroui-media-controls.workspace = true
+ferroui-media-video.workspace = true
+[build-dependencies]
+ferroui-build-scan.workspace = true
+[package.metadata.release]
+group = "controls"
+[dev-dependencies]
+ferroui-controls = {workspace=true,features=["testing"]}

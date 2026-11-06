@@ -12,3 +12,6 @@ pub use skia_metal_gpu::{SkiaMetalGpu, SkiaMetalRenderSession, SkiaMetalRenderTa
 
 #[cfg(all(test, target_os = "macos", not(ferro_skia_apple_ganesh)))]
 mod tests;
+
+#[cfg(not(ferro_skia_apple_ganesh))]
+mod frame_completion;

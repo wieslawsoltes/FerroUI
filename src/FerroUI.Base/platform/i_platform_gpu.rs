@@ -55,6 +55,17 @@ const _: fn() = || {
 
 /// A context of a platform GPU API.
 pub trait IPlatformGraphicsContext: IOptionalFeatureProvider {
+    /// Polls asynchronous GPU retirement on the owning render thread. Never
+    /// waits for the GPU. `true` requests another render-loop tick, including
+    /// when all presentation targets have detached.
+    fn poll_pending_gpu_work(&self) -> bool {
+        false
+    }
+    /// Healthy contexts with externally leased storage cannot be destroyed
+    /// during replacement yet. The render-interface manager polls retirement
+    /// on their owning thread until this becomes false. A quiet retained lease
+    /// must wake the render loop when its native cleanup is queued.
+    fn has_pending_resource_retirement(&self) -> bool { false }
     /// Whether the context is lost and cannot be used anymore.
     fn is_lost(&self) -> bool;
 

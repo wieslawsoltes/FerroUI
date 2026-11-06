@@ -61,6 +61,8 @@ public:
     FrnGlContext(CGLContextObj context)
     {
         Context = context;
+        if (getenv("FERROUI_CGL_LIFETIME_DIAGNOSTICS"))
+            fprintf(stderr, "CGL_CONTEXT_CREATE %p\n", Context);
         CGLPixelFormatObj fmt = CGLGetPixelFormat(context);
         CGLDescribePixelFormat(fmt, 0, kCGLPFASamples, &SampleCount);
         CGLDescribePixelFormat(fmt, 0, kCGLPFAStencilSize, &StencilBits);
@@ -139,13 +141,13 @@ public:
                         GLint gpuIDLow  = 0;
                         GLint gpuIDHigh = 0;
                         
-                        if(CGLDescribeRenderer(rendererInfo, 0, kCGLRPRegistryIDLow, &gpuIDLow))
+                        if(CGLDescribeRenderer(rendererInfo, i, kCGLRPRegistryIDLow, &gpuIDLow))
                             return false;
                         
-                        if(CGLDescribeRenderer(rendererInfo, 0, kCGLRPRegistryIDHigh, &gpuIDHigh))
+                        if(CGLDescribeRenderer(rendererInfo, i, kCGLRPRegistryIDHigh, &gpuIDHigh))
                             return false;
                         
-                        *value = ((uint64_t)gpuIDHigh << 32) | gpuIDLow;
+                        *value = ((uint64_t)(uint32_t)gpuIDHigh << 32) | (uint32_t)gpuIDLow;
                         return true;
                     }
                 }
@@ -164,6 +166,8 @@ public:
     
     ~FrnGlContext()
     {
+        if (getenv("FERROUI_CGL_LIFETIME_DIAGNOSTICS"))
+            fprintf(stderr, "CGL_CONTEXT_DESTROY %p\n", Context);
         CGLReleaseContext(Context);
     }
 };

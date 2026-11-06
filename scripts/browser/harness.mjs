@@ -12,7 +12,8 @@ import { spawn } from "node:child_process";
 const TYPES = {
     ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".wasm": "application/wasm",
     ".css": "text/css", ".map": "application/json", ".json": "application/json", ".png": "image/png",
-    ".ico": "image/x-icon", ".svg": "image/svg+xml", ".br": "application/octet-stream", ".gz": "application/gzip"
+    ".ico": "image/x-icon", ".svg": "image/svg+xml", ".br": "application/octet-stream", ".gz": "application/gzip",
+    ".mp4": "video/mp4"
 };
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -69,6 +70,24 @@ export function serve(siteDirectory, { isolated = false, port = 0 } = {}) {
             response.statusCode = 404; response.end(); return;
         }
         response.setHeader("content-type", TYPES[path.extname(file)] ?? "application/octet-stream");
+        // Native media seeking depends on byte-range support. Serve a bounded
+        // single range; an empty seekable interval is not seek capability.
+        const size=fs.statSync(file).size;
+        response.setHeader("accept-ranges","bytes");
+        if(request.headers.range){
+            const range=/^bytes=(\d*)-(\d*)$/.exec(request.headers.range);
+            let start=range?.[1]?Number(range[1]):0;
+            let end=range?.[2]?Number(range[2]):size-1;
+            if(range && !range[1] && range[2]){start=Math.max(0,size-end);end=size-1;}
+            end=Math.min(end,size-1);
+            if(!range||(!range[1]&&!range[2])||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||start>end||start>=size){
+                response.statusCode=416;response.setHeader("content-range",`bytes */${size}`);response.end();return;
+            }
+            response.statusCode=206;response.setHeader("content-range",`bytes ${start}-${end}/${size}`);
+            response.setHeader("content-length",end-start+1);
+            fs.createReadStream(file,{start,end}).pipe(response);return;
+        }
+        response.setHeader("content-length",size);
         fs.createReadStream(file).pipe(response);
     });
     return new Promise((resolve) => server.listen(port, "127.0.0.1", () => resolve(server)));

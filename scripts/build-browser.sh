@@ -327,7 +327,8 @@ if [ "$WORKSPACE" != "$ROOT" ] \
     && ! grep -qsF "${ROOT_REAL#"$WORKSPACE_REAL"/}/.cargo/config.toml" "$WORKSPACE/.cargo/config.toml"; then
   FLAGS+=(--config "$ROOT/.cargo/config.toml")
 fi
-(cd "$WORKSPACE" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" "${FLAGS[@]}" \
+# Bash 3 (the macOS system shell) treats an empty array as unset under -u.
+(cd "$WORKSPACE" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" ${FLAGS[@]+"${FLAGS[@]}"} \
   --message-format=json-render-diagnostics > "$MESSAGES")
 
 echo "== site"

@@ -1142,6 +1142,39 @@ impl DrawingContextImpl {
         self.sink().fill(&rect_path(dest_rect), Fill::NonZero, transform, &paint, blend_mode, anti_alias);
     }
 
+    /// Draws `texture` (premultiplied RGBA of the device the scene is drawn on) as a bitmap: its
+    /// `source_rect` onto `dest_rect`.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    fn draw_device_texture(
+        &mut self,
+        texture: std::sync::Arc<crate::gpu::VelloDeviceTexture>,
+        opacity: f64,
+        source_rect: Rect,
+        dest_rect: Rect,
+    ) {
+        if source_rect.width <= 0.0 || source_rect.height <= 0.0 || dest_rect.width <= 0.0 || dest_rect.height <= 0.0 {
+            return;
+        }
+        let image_transform = Affine::translate((dest_rect.x, dest_rect.y))
+            * Affine::scale_non_uniform(dest_rect.width / source_rect.width, dest_rect.height / source_rect.height)
+            * Affine::translate((-source_rect.x, -source_rect.y));
+        let is_upscaling = dest_rect.width > source_rect.width || dest_rect.height > source_rect.height;
+        let (quality, _) =
+            crate::vello_extensions::to_sampling(self.render_options.bitmap_interpolation_mode, is_upscaling);
+        let alpha = ((255.0 * opacity * self.current_opacity) as u8) as f32 / 255.0;
+        let blend_mode = to_blend_mode(self.render_options.bitmap_blending_mode);
+        let (transform, anti_alias) = (self.device_transform(), self.anti_alias());
+        let brush = crate::scene::VelloSceneBrush::Texture(crate::scene::VelloSceneTexture {
+            texture,
+            x_extend: Extend::Pad,
+            y_extend: Extend::Pad,
+            quality,
+            alpha,
+        });
+        let paint = VelloScenePaint { brush, transform: image_transform };
+        self.sink().fill(&rect_path(dest_rect), Fill::NonZero, transform, &paint, blend_mode, anti_alias);
+    }
+
     fn geometry_impl(geometry: &dyn IGeometryImpl) -> &dyn GeometryImpl {
         try_get_geometry_impl(geometry)
             .unwrap_or_else(|| panic!("The geometry was not created by the Vello backend"))
@@ -1223,6 +1256,17 @@ impl IDrawingContextImpl for DrawingContextImpl {
                 self.draw_device_surface(surface, opacity, source_rect, dest_rect);
                 return;
             }
+        }
+
+        // A frame of a producer is drawn on its device only, from its converted texture.
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(frame) = source.as_any().downcast_ref::<crate::gpu::VelloSharedFrameBitmap>() {
+            if self.draws_on_device(frame.device()) {
+                if let Some(texture) = frame.texture() {
+                    self.draw_device_texture(texture, opacity, source_rect, dest_rect);
+                }
+            }
+            return;
         }
 
         let drawable_image = try_get_drawable_bitmap(source)

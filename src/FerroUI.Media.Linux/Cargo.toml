@@ -1,0 +1,27 @@
+[package]
+name = "ferroui-media-linux"
+description = "GStreamer DMA-BUF sessions and native EGL frame ownership"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-base.workspace = true
+ferroui-media.workspace = true
+ferroui-media-opengl.workspace = true
+ferroui-opengl.workspace = true
+[build-dependencies]
+cc.workspace = true
+pkg-config = "=0.3.34"
+[features]
+native-frame-tests = []
+controls = ["ferroui-media-opengl/controls"]
+[package.metadata.release]
+group = "platforms"

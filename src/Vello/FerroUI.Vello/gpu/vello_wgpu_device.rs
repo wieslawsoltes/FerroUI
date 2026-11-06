@@ -43,6 +43,10 @@ pub struct VelloWgpuDevice {
     /// What a renderer keeps on this device (its pipelines, its atlases,
     /// the textures of images), by the type of the state.
     renderer_states: Mutex<HashMap<TypeId, Box<dyn Any + Send>>>,
+    /// The completions of the frames of producers (video, cameras) that work submitted to the
+    /// queue reads: each is completed by the queue once that work is done
+    /// ([`release_frames_after_submitted_work`](Self::release_frames_after_submitted_work)).
+    frame_reads: Mutex<Vec<ferroui_base::rendering::composition::frames::GpuCompletion>>,
 }
 
 const _: fn() = || {
@@ -76,6 +80,7 @@ impl VelloWgpuDevice {
             supports_compute,
             lost,
             renderer_states: Mutex::new(HashMap::new()),
+            frame_reads: Mutex::new(Vec::new()),
         })
     }
 
@@ -162,6 +167,50 @@ impl VelloWgpuDevice {
     /// its callback.
     pub fn mark_lost(&self) {
         self.lost.store(true, Ordering::SeqCst);
+    }
+
+    /// Completes `completion` (which retains the frames of producers that the work submitted
+    /// last reads) once the queue has done the work submitted to it so far: the producers get
+    /// their storage back then, and not before. Nothing waits: the callback of the queue runs
+    /// when the device is polled ([`poll_frame_reads`](Self::poll_frame_reads)) or submits again.
+    pub fn release_frames_after_submitted_work(
+        &self,
+        completion: ferroui_base::rendering::composition::frames::GpuCompletion,
+    ) {
+        if completion.retained_frames() == 0 {
+            completion.complete();
+            return;
+        }
+        if self.is_lost() {
+            // Whether a lost device ran the work is not known: the frames stay charged.
+            completion.mark_indeterminate();
+            return;
+        }
+        self.frame_reads.lock().unwrap_or_else(|e| e.into_inner()).push(completion.clone());
+        self.queue.on_submitted_work_done(move || completion.complete());
+    }
+
+    /// Advances the completions of the frames the device reads without waiting: polls the
+    /// device, which runs the callbacks of the work it has done. Returns whether frames are still
+    /// read by submitted work. On a lost device every frame still read is marked indeterminate
+    /// (its storage stays charged, as nothing proves the device stopped reading it).
+    pub fn poll_frame_reads(&self) -> bool {
+        use ferroui_base::rendering::composition::frames::GpuCompletionStatus;
+        let mut reads = self.frame_reads.lock().unwrap_or_else(|e| e.into_inner());
+        if reads.is_empty() {
+            return false;
+        }
+        if !self.is_lost() && self.device.poll(wgpu::PollType::Poll).is_err() {
+            self.mark_lost();
+        }
+        if self.is_lost() {
+            for completion in reads.drain(..) {
+                completion.mark_indeterminate();
+            }
+            return false;
+        }
+        reads.retain(|completion| completion.status() == GpuCompletionStatus::Pending);
+        !reads.is_empty()
     }
 
     /// Runs `f` with the state a renderer keeps on this device, which is

@@ -44,6 +44,7 @@
 //! The browser target has no threads; it uses the same single-thread mode
 //! with a UI-thread render timer.
 
+pub mod frames;
 pub mod animations;
 pub mod brushes;
 pub mod drawing;
@@ -185,7 +186,7 @@ pub use visual::CompositionVisual;
 pub use visual_collection::CompositionVisualCollection;
 pub use composition_transparency_level::CompositionTransparencyLevel;
 pub use compositor::{
-    CompositionVisualSnapshotError, Compositor, ICompositorScheduler, LocalFuture, ServerJobError, ServerJobTask,
+    CompositionVisualSnapshotError, Compositor, ICompositorScheduler, LocalFuture, ServerJobError, ServerJobTask, RenderContextState,
 };
 pub use enums::{
     CompositionBitmapInterpolationMode, CompositionBlendMode, CompositionDropShadowSourcePolicy,

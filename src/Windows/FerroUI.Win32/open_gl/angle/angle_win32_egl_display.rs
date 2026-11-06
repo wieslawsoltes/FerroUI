@@ -2,7 +2,24 @@
 //! the Direct3D 11 platform with a device ANGLE creates, and over a
 //! Direct3D 11 device this backend creates on the adapter it chooses.
 
+use super::angle_display_lifetime::{DisplayCache, SharedDisplay};
 use super::Win32AngleEglInterface;
+use std::sync::Arc;
+
+#[cfg(windows)]
+struct FreeThreadedDevice(ferroui_microcom::ComPtr<crate::direct_x::ID3D11Device>);
+// ID3D11Device is free-threaded. Contexts remain on their creating thread;
+// this wrapper only checks device health and releases the device reference.
+#[cfg(windows)]
+unsafe impl Send for FreeThreadedDevice {}
+#[cfg(windows)]
+unsafe impl Sync for FreeThreadedDevice {}
+#[cfg(windows)]
+impl FreeThreadedDevice {
+    fn healthy(&self) -> bool {
+        self.0.get_device_removed_reason() == 0
+    }
+}
 use crate::angle_options::{AngleOptions, PlatformApi};
 use crate::win32_platform_options::GraphicsAdapterSelectionCallback;
 use ferroui_base::platform::PlatformGraphicsDeviceAdapterDescription;
@@ -152,10 +169,19 @@ impl AngleWin32EglDisplay {
         gl_versions: Option<Vec<GlVersion>>,
         adapter: &D3D11Adapter,
     ) -> Result<(AngleWin32EglDisplay, Option<u64>), OpenGlError> {
+        Self::create_d3d11_display_cached(egl, gl_versions, adapter, None)
+    }
+
+    #[cfg(windows)]
+    pub(super) fn create_d3d11_display_cached(
+        egl: &Rc<Win32AngleEglInterface>,
+        gl_versions: Option<Vec<GlVersion>>,
+        adapter: &D3D11Adapter,
+        cache: Option<&DisplayCache>,
+    ) -> Result<(AngleWin32EglDisplay, Option<u64>), OpenGlError> {
         use crate::direct_x::{DirectXUnmanagedMethods, IDXGIAdapter1, D3D_DRIVER_TYPE, D3D_FEATURE_LEVEL};
         use ferroui_base::logging::{LogEventLevel, Logger};
         use ferroui_microcom::ComPtr;
-        use std::cell::{Cell, RefCell};
 
         let feature_levels = [
             D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_1,
@@ -260,13 +286,31 @@ impl AngleWin32EglDisplay {
             }
         }
 
+        // Key by the adapter actually selected, including fallback when a
+        // requested adapter disappeared, rather than arbitrary caller IDs.
+        let cache_key = chosen_adapter.as_ref().and_then(|a| a.get_desc1().ok()).map(|d| d.adapter_luid);
+        let reuse = matches!(adapter, D3D11Adapter::Chosen(_));
+        if reuse {
+            if let Some(key) = cache_key {
+                if let Some(owner) = cache.and_then(|pool| pool.get(key)) {
+                    return Self::wrap_d3d11_display(owner, egl, gl_versions).map(|d| (d, chosen_luid));
+                }
+            }
+        }
+
         let (d3d_device, _) = DirectXUnmanagedMethods::d3d11_create_device(
             chosen_adapter.as_deref(),
             D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN,
-            0,
+            0x20 | 0x800, // BGRA_SUPPORT | VIDEO_SUPPORT for compatible MF device sharing.
             &feature_levels,
             7,
         )
+        // Older adapters remain usable by ordinary UI rendering. Native media
+        // independently rejects devices without the required video capability.
+        .or_else(|_| DirectXUnmanagedMethods::d3d11_create_device(
+            chosen_adapter.as_deref(), D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN,
+            0, &feature_levels, 7,
+        ))
         .map_err(|error| OpenGlError::new(format!("D3D11CreateDevice failed: {error}")))?;
         drop(chosen_adapter);
 
@@ -275,53 +319,47 @@ impl AngleWin32EglDisplay {
         };
         let p_d3d_device = d3d_device.as_ptr() as isize;
 
-        // What `Cleanup` of the reference releases: the device of EGL and
-        // the reference to the device of Direct3D.
-        let angle_device = Rc::new(Cell::new(0isize));
-        let device_slot = Rc::new(RefCell::new(Some(d3d_device.clone())));
-        let cleanup: Rc<dyn Fn()> = {
-            let (egl, angle_device, device_slot) = (egl.clone(), angle_device.clone(), device_slot.clone());
-            Rc::new(move || {
-                let device = angle_device.replace(0);
-                if device != 0 {
-                    egl.release_device_angle(device);
-                }
-                let d3d_device = device_slot.borrow_mut().take();
-                drop(d3d_device);
-            })
-        };
-
-        let mut display = 0;
-        let result = (|| {
-            angle_device.set(egl.create_device_angle(EGL_D3D11_DEVICE_ANGLE, p_d3d_device, None));
-            if angle_device.get() == 0 {
-                return Err(OpenGlError::get_formatted_exception_for_egl("eglCreateDeviceANGLE", egl.egl()));
-            }
-
-            display = egl.egl().get_platform_display_ext(EGL_PLATFORM_DEVICE_EXT, angle_device.get(), None);
-            if display == 0 {
-                return Err(OpenGlError::get_formatted_exception_for_egl("eglGetPlatformDisplayEXT", egl.egl()));
-            }
-
-            let device_lost_check: Rc<dyn Fn() -> bool> = Rc::new(move || d3d_device.get_device_removed_reason() != 0);
-            Self::new(
-                display,
-                egl.egl(),
-                Self::get_display_options(egl.egl(), gl_versions, Some(device_lost_check), Some(cleanup.clone())),
-                PlatformApi::DirectX11,
-            )
-        })();
-
-        match result {
-            Ok(rv) => Ok((rv, chosen_luid)),
-            Err(error) => {
-                if display != 0 {
-                    egl.egl().terminate(display);
-                }
-                cleanup();
-                Err(error)
+        let angle_device = egl.create_device_angle(EGL_D3D11_DEVICE_ANGLE, p_d3d_device, None);
+        if angle_device == 0 {
+            return Err(OpenGlError::get_formatted_exception_for_egl("eglCreateDeviceANGLE", egl.egl()));
+        }
+        let display = egl.egl().get_platform_display_ext(EGL_PLATFORM_DEVICE_EXT, angle_device, None);
+        if display == 0 {
+            let error = OpenGlError::get_formatted_exception_for_egl("eglGetPlatformDisplayEXT", egl.egl());
+            egl.release_device_angle(angle_device);
+            return Err(error);
+        }
+        let (terminate, release) = egl.lifetime_entries();
+        let device = FreeThreadedDevice(d3d_device);
+        let owner = SharedDisplay::new(
+            display,
+            move || device.healthy(),
+            // SAFETY: the statically linked EGL entry points refer to this
+            // live native display/device. The last context lease terminates
+            // the display before its owner releases the EGL device.
+            move || { unsafe { terminate(display); } },
+            move || { unsafe { release(angle_device); } },
+        );
+        // The initial adapter-selection probe is deliberately not cached. A
+        // lost native device is replaced; leases still keep its old generation
+        // alive until every independent wrapper has retired.
+        if reuse {
+            if let (Some(key), Some(pool)) = (cache_key, cache) {
+                pool.insert(key, owner.clone());
             }
         }
+        Self::wrap_d3d11_display(owner, egl, gl_versions).map(|d| (d, chosen_luid))
+    }
+
+    fn wrap_d3d11_display(
+        owner: Arc<SharedDisplay>,
+        egl: &Win32AngleEglInterface,
+        gl_versions: Option<Vec<GlVersion>>,
+    ) -> Result<Self, OpenGlError> {
+        let check = owner.clone();
+        let mut options = Self::get_display_options(egl.egl(), gl_versions, Some(Rc::new(move || !check.is_healthy())), None);
+        options.native_lifetime = Some(owner.lease());
+        Self::new(owner.handle, egl.egl(), options, PlatformApi::DirectX11)
     }
 
     /// Wraps a display of EGL.

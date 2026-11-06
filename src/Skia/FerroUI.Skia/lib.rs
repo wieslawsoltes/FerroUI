@@ -108,3 +108,5 @@ mod text_tests;
 mod text_rendering_tests;
 #[cfg(test)]
 mod unit_tests;
+
+mod leased_gpu_bitmap;
