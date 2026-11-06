@@ -241,6 +241,8 @@ impl Migration<'_, '_> {
                             | "InfoBarTemplateSettings"
                             | "InfoBadgeTemplateSettings"
                             | "ProgressRingTemplateSettings"
+                            | "PersonPictureTemplateSettings"
+                            | "PagerControlTemplateSettings"
                     ))
                 .then(|| (PRIMITIVES_NAMESPACE.to_string(), name.to_string()))
             })
@@ -284,6 +286,11 @@ impl Migration<'_, '_> {
                             | "RatingItemInfo"
                             | "RatingItemFontInfo"
                             | "RatingItemImageInfo"
+                            | "PersonPicture"
+                            | "PagerControl"
+                            | "PagerControlDisplayMode"
+                            | "PagerControlButtonVisibility"
+                            | "PagerControlSelectedIndexChangedEventArgs"
                             | "ProgressRing"
                             | "IconSource"
                             | "FontIconSource"
@@ -309,6 +316,8 @@ impl Migration<'_, '_> {
                             | "ProgressRingAutomationPeer"
                             | "RadioButtonsAutomationPeer"
                             | "RatingControlAutomationPeer"
+                            | "PersonPictureAutomationPeer"
+                            | "PagerControlAutomationPeer"
                     ))
                     .then(|| ("using:FerroUI.Automation.Peers".to_string(), name.to_string()))
             });

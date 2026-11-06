@@ -83,6 +83,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ItemsRepeaterPage.xaml", "ItemsRepeater", Icons::GRID, "Virtualized layouts, recycling, and collection changes across 10,000 items");
             s.add("/Pages/CarouselPage.xaml", "Carousel", Icons::SLIDES, "Cycle through a collection of items");
             s.add("/Pages/ListBoxPage.xaml", "ListBox", Icons::LIST, "A selectable, virtualized list of items");
+            // Not from upstream: PagerControl of WinUI (docs/porting/winui-controls.md, G2).
+            s.add("/Pages/PagerControlPage.xaml", "PagerControl", Icons::NUMBER, "Page through content with buttons, a combo box or a number box");
             s.add("/Pages/PipsPagerPage.xaml", "PipsPager", Icons::HORIZONTAL_DOTS, "Dot-style pager for paginated content");
             s.add("/Pages/RefreshContainerPage.xaml", "RefreshContainer", Icons::REFRESH, "Pull-to-refresh for scrollable content");
             s.add("/Pages/TableViewPage.xaml", "TableView", Icons::GRID, "Tabular data with resizable, sortable columns");
@@ -145,6 +147,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             // Not from upstream: the pages of the port of the inking controls of WinUI.
             s.add("/Pages/InkCanvasPage.xaml", "InkCanvas", Icons::CANVAS, "Pressure-sensitive ink from pen, mouse and touch");
             s.add("/Pages/InkToolbarPage.xaml", "InkToolbar", Icons::BRUSH, "Pens, eraser and stencil guides for an InkCanvas");
+            // Not from upstream: PersonPicture of WinUI (docs/porting/winui-controls.md, G2).
+            s.add("/Pages/PersonPicturePage.xaml", "PersonPicture", Icons::PERSON, "A person or a group: picture, initials and badges");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
             s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
             s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");

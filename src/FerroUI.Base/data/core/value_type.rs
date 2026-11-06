@@ -132,8 +132,33 @@ type IdMap<K, V> = HashMap<K, V, BuildHasherDefault<IdHasher>>;
 type ConvertFn = Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>;
 type AnyConvertFn = Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>>;
 type DisplayFn = fn(&dyn AnyValue) -> String;
-type UnwrapFn = fn(&dyn AnyValue) -> Option<BoxedValue>;
-type NullFn = fn() -> BoxedValue;
+
+// The request borrows its input: the caller retains the original owning box
+// through conversion and unwinding. Each nullable type supplies one operation
+// entry instead of separately address-taken unwrap, null and wrap leaves.
+enum NullableRequest<'a> {
+    /// The contents of a `Some` of the nullable type, `None` for a null.
+    Unwrap(&'a dyn AnyValue),
+    /// A boxed null of the nullable type.
+    Null,
+    /// A value of the inner type wrapped in the nullable type, `None` for a
+    /// value of another type.
+    Wrap(&'a dyn std::any::Any),
+}
+
+type NullableOperation = for<'a> fn(NullableRequest<'a>) -> Option<BoxedValue>;
+
+/// The typed leaf of `Option<T>`: the only nullable code compiled per type.
+fn nullable_operation<T: PropertyValue>(request: NullableRequest<'_>) -> Option<BoxedValue> {
+    match request {
+        NullableRequest::Unwrap(value) => match value.downcast_ref::<Option<T>>() {
+            Some(Some(v)) => Some(Rc::new(v.clone())),
+            _ => None,
+        },
+        NullableRequest::Null => Some(Rc::new(Option::<T>::None)),
+        NullableRequest::Wrap(value) => Some(Rc::new(Some(value.downcast_ref::<T>()?.clone()))),
+    }
+}
 type ObjectFn = fn(&dyn AnyValue) -> Option<Ref<FerroObject>>;
 type FromObjectFn = fn(Ref<FerroObject>) -> Option<BoxedValue>;
 type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
@@ -145,10 +170,9 @@ type CastErrorFn = Rc<dyn Fn(&dyn AnyValue) -> Option<String>>;
 #[derive(Default)]
 struct Registry {
     display: IdMap<TypeId, DisplayFn>,
-    /// `Option<T>` → unwraps to the contained `T`.
-    nullable: IdMap<TypeId, UnwrapFn>,
-    /// `Option<T>` → a boxed `None`.
-    null_values: IdMap<TypeId, NullFn>,
+    /// `Option<T>` → its operation: unwraps to the contained `T`, makes a
+    /// boxed `None`, wraps a `T`.
+    nullable: IdMap<TypeId, NullableOperation>,
     objects: IdMap<TypeId, (ObjectFn, FromObjectFn, &'static TypeInfo)>,
     /// Model types: values whose box is the shared object itself.
     references: IdMap<TypeId, ()>,
@@ -303,11 +327,20 @@ fn insert_display(id: TypeId, display: DisplayFn) {
     });
 }
 
-fn insert_nullable(id: TypeId, unwrap: UnwrapFn, null: NullFn, inner: ValueType) {
+/// Registers the nullable form `id` of `inner` and the assignability cast of
+/// a value of `inner` to it (as `register_cast::<T, Option<T>>` does), all
+/// through the one typed operation.
+#[inline(never)]
+fn insert_nullable(id: TypeId, inner: ValueType, operation: NullableOperation) {
+    let key = (inner.id(), id);
+    let wrap: ConvertFn = Rc::new(move |v: &BoxedValue| operation(NullableRequest::Wrap(v.as_any())));
+    let wrap_any: AnyConvertFn = Rc::new(move |v: &dyn std::any::Any| operation(NullableRequest::Wrap(v)));
     with_registry(|r| {
-        r.nullable.insert(id, unwrap);
-        r.null_values.insert(id, null);
+        r.nullable.insert(id, operation);
         r.nullable_inner.insert(id, inner);
+        r.conversions.insert(key, wrap.clone());
+        r.casts.insert(key, wrap);
+        r.any_conversions.insert(key, wrap_any);
     });
 }
 
@@ -392,17 +425,7 @@ impl ValueTypes {
     /// treat `None` as null and `Some(v)` as `v`, and convert a `T` (or null)
     /// to `Option<T>` when a target requires it.
     pub fn register_nullable<T: PropertyValue>() {
-        fn unwrap<T: PropertyValue>(value: &dyn AnyValue) -> Option<BoxedValue> {
-            match value.downcast_ref::<Option<T>>() {
-                Some(Some(v)) => Some(Rc::new(v.clone())),
-                _ => None,
-            }
-        }
-        fn null<T: PropertyValue>() -> BoxedValue {
-            Rc::new(Option::<T>::None)
-        }
-        insert_nullable(TypeId::of::<Option<T>>(), unwrap::<T>, null::<T>, ValueType::of::<T>());
-        Self::register_cast::<T, Option<T>>(|v| Some(v.clone()));
+        insert_nullable(TypeId::of::<Option<T>>(), ValueType::of::<T>(), nullable_operation::<T>);
     }
 
     /// Registers an assignability cast: values of `TFrom` are values of
@@ -671,9 +694,9 @@ impl ValueTypes {
                     _ => return None,
                 }
             }
-            let unwrap = with_registry(|r| r.nullable.get(&id).copied());
-            return match unwrap {
-                Some(unwrap) => unwrap(&*value),
+            let operation = with_registry(|r| r.nullable.get(&id).copied());
+            return match operation {
+                Some(operation) => operation(NullableRequest::Unwrap(&*value)),
                 None => Some(value),
             };
         }
@@ -871,14 +894,18 @@ impl ValueTypes {
     /// weakly, treat null as a valid value of the type, and convert between
     /// the object and `Rc<T>` / `Option<Rc<T>>` typed properties.
     pub fn register_reference<T: PartialEq + 'static>() {
-        fn unwrap<T: PartialEq + 'static>(value: &dyn AnyValue) -> Option<BoxedValue> {
-            match value.downcast_ref::<Option<Rc<T>>>() {
-                Some(Some(v)) => Some(v.clone() as BoxedValue),
-                _ => None,
+        // The nullable handle of a model unwraps to the model object itself,
+        // cloning its Rc, never the object (the type need not be Clone).
+        fn nullable<T: PartialEq + 'static>(request: NullableRequest<'_>) -> Option<BoxedValue> {
+            match request {
+                NullableRequest::Unwrap(value) => match value.downcast_ref::<Option<Rc<T>>>() {
+                    Some(Some(v)) => Some(v.clone() as BoxedValue),
+                    _ => None,
+                },
+                NullableRequest::Null => Some(Rc::new(Option::<Rc<T>>::None)),
+                // The wrapping casts of a model are the boxed casts below.
+                NullableRequest::Wrap(_) => None,
             }
-        }
-        fn null<T: PartialEq + 'static>() -> BoxedValue {
-            Rc::new(Option::<Rc<T>>::None)
         }
         fn to_rc<T: PartialEq + 'static>(value: &BoxedValue) -> Option<Rc<T>> {
             let any: Rc<dyn std::any::Any> = value.clone();
@@ -890,8 +917,7 @@ impl ValueTypes {
         }
         Self::register_reference_identity::<Rc<T>>(|value| Rc::as_ptr(value) as *const ());
         with_registry(|r| {
-            r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), unwrap::<T>);
-            r.null_values.insert(TypeId::of::<Option<Rc<T>>>(), null::<T>);
+            r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), nullable::<T>);
             r.nullable_inner.insert(TypeId::of::<Option<Rc<T>>>(), ValueType::of::<T>());
             r.reference_handles.insert(TypeId::of::<Rc<T>>(), TypeId::of::<T>());
             r.reference_objects.insert(TypeId::of::<T>(), TypeId::of::<Rc<T>>());
@@ -949,7 +975,7 @@ impl ValueTypes {
     /// Whether `target` accepts null.
     pub fn accepts_null(target: ValueType) -> bool {
         target.is_object()
-            || with_registry(|r| r.null_values.contains_key(&target.id()) || r.references.contains_key(&target.id()))
+            || with_registry(|r| r.nullable.contains_key(&target.id()) || r.references.contains_key(&target.id()))
     }
 
     /// The boxed null of a nullable target type.
@@ -957,8 +983,8 @@ impl ValueTypes {
         if target.is::<Option<BoxedValue>>() {
             return Some(Rc::new(Option::<BoxedValue>::None));
         }
-        let f = with_registry(|r| r.null_values.get(&target.id()).copied());
-        f.map(|f| f())
+        let f = with_registry(|r| r.nullable.get(&target.id()).copied());
+        f.and_then(|f| f(NullableRequest::Null))
     }
 
     /// Looks up a registered conversion.
@@ -1989,6 +2015,10 @@ impl ValueTypes {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "value_type_nullable_operation_tests.rs"]
+mod nullable_operation_tests;
 
 #[cfg(test)]
 mod tests {

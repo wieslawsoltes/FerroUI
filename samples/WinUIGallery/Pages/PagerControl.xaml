@@ -1,0 +1,69 @@
+<!-- Ported from the three pinned PagerControl examples; see ../NOTICE.md. The page has no code
+     behind upstream either; BodyStrongTextBlockStyle is the semibold body text. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <TextBlock Text="A basic pager" FontSize="18" />
+  <PagerControl x:Name="PagerControlBasic"
+                AutomationProperties.AutomationId="PagerControlBasic"
+                AutomationProperties.Name="Page selector"
+                NumberOfPages="12"
+                PrefixText="Page"
+                SelectedPageIndex="2"
+                SuffixText="of" />
+
+  <TextBlock Text="Pager display modes" FontSize="18" />
+  <StackPanel Spacing="20">
+    <StackPanel Spacing="8">
+      <TextBlock FontWeight="SemiBold" Text="Number box" />
+      <PagerControl x:Name="PagerControlNumberBox"
+                    AutomationProperties.AutomationId="PagerControlNumberBox"
+                    AutomationProperties.Name="Number box page selector"
+                    DisplayMode="NumberBox"
+                    NumberOfPages="50"
+                    PrefixText="Page"
+                    SelectedPageIndex="9"
+                    SuffixText="of" />
+    </StackPanel>
+    <StackPanel Spacing="8">
+      <TextBlock FontWeight="SemiBold" Text="Button panel" />
+      <PagerControl x:Name="PagerControlButtonPanel"
+                    AutomationProperties.AutomationId="PagerControlButtonPanel"
+                    AutomationProperties.Name="Button panel page selector"
+                    DisplayMode="ButtonPanel"
+                    FirstButtonVisibility="Visible"
+                    LastButtonVisibility="Visible"
+                    NextButtonVisibility="Visible"
+                    NumberOfPages="20"
+                    PreviousButtonVisibility="Visible"
+                    SelectedPageIndex="4" />
+    </StackPanel>
+  </StackPanel>
+
+  <TextBlock Text="Unbounded pagers" FontSize="18" />
+  <StackPanel Spacing="20">
+    <TextBlock Text="Set NumberOfPages to -1 when the final page is not known. Unbounded pagers omit the total-page count and last-page navigation."
+               TextWrapping="Wrap" />
+    <StackPanel Spacing="8">
+      <TextBlock FontWeight="SemiBold" Text="Number box" />
+      <PagerControl x:Name="PagerControlUnboundedNumberBox"
+                    AutomationProperties.AutomationId="PagerControlUnboundedNumberBox"
+                    AutomationProperties.Name="Unbounded number box page selector"
+                    DisplayMode="NumberBox"
+                    NumberOfPages="-1"
+                    PrefixText="Page"
+                    SelectedPageIndex="99" />
+    </StackPanel>
+    <StackPanel Spacing="8">
+      <TextBlock FontWeight="SemiBold" Text="Button panel" />
+      <PagerControl x:Name="PagerControlUnboundedButtonPanel"
+                    AutomationProperties.AutomationId="PagerControlUnboundedButtonPanel"
+                    AutomationProperties.Name="Unbounded button panel page selector"
+                    DisplayMode="ButtonPanel"
+                    FirstButtonVisibility="Visible"
+                    NextButtonVisibility="Visible"
+                    NumberOfPages="-1"
+                    PreviousButtonVisibility="Visible"
+                    SelectedPageIndex="99" />
+    </StackPanel>
+  </StackPanel>
+</StackPanel>

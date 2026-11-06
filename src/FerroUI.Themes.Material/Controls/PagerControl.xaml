@@ -1,0 +1,316 @@
+<!-- Material 3 Expressive theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/PagerControl.xaml),
+     as docs/porting/material-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/PagerControl/PagerControl.xaml (the implicit style of PagerControl)
+    controls/dev/PagerControl/PagerControl_themeresources.xaml (PagerControlPageNavigationButtonStyle,
+    PagerControlNumberPanelButtonStyle; its resources are Resources/PagerControl_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's PagerControl is WinUI's PagerControl (a WinUI control in ferroui-controls,
+    docs/porting/winui-controls.md, G2). The parts keep WinUI's names.
+  - The ItemsRepeater NumberPanelItemsRepeater with a horizontal StackLayout (Spacing 5) is an
+    ItemsControl with a horizontal StackPanel of the same spacing: the control finds the element of
+    a page with ContainerFromIndex, where WinUI asks the repeater with TryGetElement.
+  - The visual states are the pseudo-classes the control sets. PagerDisplayModeStates:
+    NumberBoxVisible is :numberbox, ComboBoxVisible :combobox, NumberPanelVisible :numberpanel.
+    InfiniteItemsDisplayMode: InfiniteItems is :infinite. The groups of the buttons:
+    FirstPageButtonCollapsed is :firstcollapsed, FirstPageButtonHidden :firsthidden,
+    FirstPageButtonDisabled :firstdisabled, and the same for the previous, next and last buttons
+    (NextPageButtonHidden and LastPageButtonHidden are states of the groups of the enabled states in
+    WinUI, so the control sets them in place of :nextdisabled and :lastdisabled). The Visible and
+    Enabled states set nothing. Visibility setters are IsVisible.
+  - The Style properties FirstButtonStyle, PreviousButtonStyle, NextButtonStyle and LastButtonStyle
+    are control themes (Theme of the buttons).
+  - The NumberBox Maximum binding to NumberOfPages is left out: the control sets the maximum when
+    the number of pages changes, as WinUI's control does too (infinity while it is not known).
+  - The tooltips of the navigation buttons (their automation names, ToolTipService.ToolTip with a
+    binding to the attached property) and the RepositionThemeTransition of the indicator are left
+    out.
+  - PagerControlPageNavigationButtonStyle shows its Content (a glyph of the symbol font) in a
+    FontIcon at the FontSize and FontFamily of the button: a ContentPresenter named Content in the
+    font of the button, which the pager sets to SymbolThemeFontFamily. MirroredWhenRightToLeft is
+    left out. The CommonStates are :pointerover, :pressed and :disabled. WinUI applies the default
+    style of Button beneath these keyed styles (docs/porting/winui-theme.md, section 4.2).
+  - UseSystemFocusVisuals is the focus adorner (section 4.6).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20">
+        <PagerControl NumberOfPages="5" />
+        <PagerControl NumberOfPages="100" SelectedPageIndex="10" />
+        <PagerControl NumberOfPages="20" SelectedPageIndex="8" DisplayMode="ButtonPanel" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="PagerControlPageNavigationButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Width" Value="40" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ContentPresenter x:Name="Content"
+                            Content="{TemplateBinding Content}"
+                            FontSize="{TemplateBinding FontSize}"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PagerControlPageNavigationButtonBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource PagerControlPageNavigationButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PagerControlPageNavigationButtonBackgroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource PagerControlPageNavigationButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PagerControlPageNavigationButtonBackgroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource PagerControlPageNavigationButtonForegroundDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="PagerControlNumberPanelButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="MinWidth" Value="{StaticResource PagerControlNumberPanelButtonWidth}" />
+    <Setter Property="MinHeight" Value="20" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          Padding="{TemplateBinding Padding}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource PagerControlPageNavigationButtonBackgroundPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource PagerControlPageNavigationButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource PagerControlPageNavigationButtonBackgroundPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource PagerControlPageNavigationButtonForegroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource PagerControlPageNavigationButtonBackgroundDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource PagerControlPageNavigationButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- The implicit style of PagerControl (it has no key in WinUI). -->
+  <ControlTheme x:Key="{x:Type PagerControl}" TargetType="PagerControl">
+    <Setter Property="AutomationProperties.LandmarkType" Value="Navigation" />
+    <Setter Property="FirstButtonStyle" Value="{StaticResource PagerControlPageNavigationButtonStyle}" />
+    <Setter Property="PreviousButtonStyle" Value="{StaticResource PagerControlPageNavigationButtonStyle}" />
+    <Setter Property="NextButtonStyle" Value="{StaticResource PagerControlPageNavigationButtonStyle}" />
+    <Setter Property="LastButtonStyle" Value="{StaticResource PagerControlPageNavigationButtonStyle}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="RootGrid"
+              Background="{TemplateBinding Background}"
+              ColumnDefinitions="*,Auto,*"
+              RowDefinitions="Auto">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="FirstPageButton"
+                    Theme="{TemplateBinding FirstButtonStyle}"
+                    FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                    Content="&#xE892;" />
+            <Button x:Name="PreviousPageButton"
+                    Theme="{TemplateBinding PreviousButtonStyle}"
+                    FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                    Content="&#xE76B;" />
+          </StackPanel>
+          <StackPanel x:Name="BoxPanels" IsVisible="False" Orientation="Horizontal" Grid.Column="1">
+            <TextBlock Text="{TemplateBinding PrefixText}" VerticalAlignment="Center" Margin="5,0,5,0" />
+            <!-- NumberBox Display -->
+            <NumberBox x:Name="NumberBoxDisplay"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Minimum="1"
+                       SmallChange="1"
+                       LargeChange="5"
+                       IsVisible="False" />
+            <!-- ComboBox Display -->
+            <ComboBox x:Name="ComboBoxDisplay"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      ItemsSource="{Binding TemplateSettings.Pages, RelativeSource={RelativeSource TemplatedParent}}"
+                      IsVisible="False" />
+            <TextBlock x:Name="SuffixTextLabel" Text="{TemplateBinding SuffixText}" VerticalAlignment="Center" Margin="5,0,0,0" />
+            <TextBlock x:Name="TotalNumberOfPagesLabel"
+                       VerticalAlignment="Center"
+                       Margin="5,0,5,0"
+                       Text="{Binding NumberOfPages, RelativeSource={RelativeSource TemplatedParent}}" />
+          </StackPanel>
+          <ItemsControl x:Name="NumberPanelItemsRepeater"
+                        ItemsSource="{Binding TemplateSettings.NumberPanelItems, RelativeSource={RelativeSource TemplatedParent}}"
+                        Grid.Column="1"
+                        IsVisible="False">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="5" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+          </ItemsControl>
+          <Rectangle x:Name="NumberPanelCurrentPageIndicator"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Bottom"
+                     Grid.Column="1"
+                     IsVisible="False"
+                     Fill="{DynamicResource PagerControlSelectionIndicatorForeground}"
+                     RadiusX="1"
+                     RadiusY="1"
+                     Height="2" />
+          <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Left">
+            <Button x:Name="NextPageButton"
+                    Theme="{TemplateBinding NextButtonStyle}"
+                    FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                    Content="&#xE76C;" />
+            <Button x:Name="LastPageButton"
+                    Theme="{TemplateBinding LastButtonStyle}"
+                    FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                    Content="&#xE893;" />
+          </StackPanel>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- FirstPageButtonVisibilityStates and FirstPageButtonIsEnabledStates -->
+    <Style Selector="^:firstcollapsed /template/ Button#FirstPageButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:firsthidden /template/ Button#FirstPageButton">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="IsEnabled" Value="False" />
+    </Style>
+    <Style Selector="^:firstdisabled /template/ Button#FirstPageButton">
+      <Setter Property="IsEnabled" Value="False" />
+    </Style>
+    <!-- PreviousPageButtonVisibilityStates and PreviousPageButtonIsEnabledStates -->
+    <Style Selector="^:previouscollapsed /template/ Button#PreviousPageButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:previoushidden /template/ Button#PreviousPageButton">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="IsEnabled" Value="False" />
+    </Style>
+    <Style Selector="^:previousdisabled /template/ Button#PreviousPageButton">
+      <Setter Property="IsEnabled" Value="False" />
+    </Style>
+    <!-- NextPageButtonVisibilityStates and NextPageButtonIsEnabledStates -->
+    <Style Selector="^:nextcollapsed /template/ Button#NextPageButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:nextdisabled /template/ Button#NextPageButton">
+      <Setter Property="IsEnabled" Value="False" />
+    </Style>
+    <Style Selector="^:nexthidden /template/ Button#NextPageButton">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="IsEnabled" Value="False" />
+    </Style>
+    <!-- LastPageButtonStates and the enabled states of the last button -->
+    <Style Selector="^:lastcollapsed /template/ Button#LastPageButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:lastdisabled /template/ Button#LastPageButton">
+      <Setter Property="IsEnabled" Value="False" />
+    </Style>
+    <Style Selector="^:lasthidden /template/ Button#LastPageButton">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="IsEnabled" Value="False" />
+    </Style>
+    <!-- PagerDisplayModeStates -->
+    <Style Selector="^:numberbox">
+      <Style Selector="^ /template/ StackPanel#BoxPanels">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ NumberBox#NumberBoxDisplay">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </Style>
+    <Style Selector="^:combobox">
+      <Style Selector="^ /template/ StackPanel#BoxPanels">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ ComboBox#ComboBoxDisplay">
+        <Setter Property="IsEnabled" Value="True" />
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </Style>
+    <Style Selector="^:numberpanel">
+      <Style Selector="^ /template/ StackPanel#BoxPanels">
+        <Setter Property="IsVisible" Value="False" />
+      </Style>
+      <Style Selector="^ /template/ ItemsControl#NumberPanelItemsRepeater">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ Rectangle#NumberPanelCurrentPageIndicator">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </Style>
+    <!-- InfiniteItemsDisplayMode -->
+    <Style Selector="^:infinite">
+      <Style Selector="^ /template/ TextBlock#SuffixTextLabel">
+        <Setter Property="IsVisible" Value="False" />
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TotalNumberOfPagesLabel">
+        <Setter Property="IsVisible" Value="False" />
+      </Style>
+      <Style Selector="^ /template/ Button#LastPageButton">
+        <Setter Property="IsVisible" Value="False" />
+      </Style>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

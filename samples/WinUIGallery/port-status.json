@@ -1052,6 +1052,45 @@
         }
       ]
     },
+    "PagerControl": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/PagerControl.xaml",
+        "samples/WinUIGallery/examples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/feedback_samples_tests.rs",
+          "name": "pager_control_page_shows_each_display_mode"
+        }
+      ],
+      "notes": "All three source examples use native PagerControl: the basic pager, the number box and button panel display modes, and the unbounded pagers. The page has no code-behind upstream.",
+      "examples": []
+    },
+    "PersonPicture": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/PersonPicture.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/feedback_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/feedback_samples_tests.rs",
+          "name": "person_picture_page_switches_between_image_name_and_initials"
+        }
+      ],
+      "notes": "The source example uses native PersonPicture with its RadioButtons handler. The profile image is the gallery's PersonPicture image instead of the remote image of the source.",
+      "examples": []
+    },
     "PipsPager": {
       "status": "partial",
       "implementation": [

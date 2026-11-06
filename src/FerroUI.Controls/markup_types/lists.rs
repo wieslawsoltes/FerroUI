@@ -88,6 +88,8 @@ macro_rules! ferro_markup_list {
 
 // The lists of this crate that are delivered to items source properties.
 ferro_markup_list!(pub(crate) PipsList: i32);
+// The buttons and ellipses of the number panel of a pager.
+ferro_markup_list!(pub(crate) ControlList: ferroui_base::Ref<crate::Control>);
 
 #[cfg(test)]
 mod tests {
