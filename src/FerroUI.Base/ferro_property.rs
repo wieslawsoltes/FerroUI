@@ -951,16 +951,17 @@ macro_rules! ferro_property {
 /// Registers the markup metadata of the value type of a property that is registered
 /// ([`MarkupType::register_used`](crate::metadata::MarkupType::register_used)), when the value
 /// type has metadata ([`MarkupTyped`](crate::metadata::MarkupTyped)); nothing otherwise. The
-/// choice is made where the property is declared, by the method the probe resolves to: the
-/// implementation for a value type with metadata is found on the reference, before the one of
-/// every type on the probe itself.
+/// choice is made where the property is declared, by the method a reference to a reference to
+/// the probe resolves to: the implementation for a value type with metadata (on `&Probe`) takes
+/// that receiver as it is and is found first; the one of every type (on `Probe`) is found after
+/// one dereference.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __register_value_markup {
     ($property:expr) => {{
         #[allow(unused_imports)]
         use $crate::{__NoValueMarkup as _, __RegisterValueMarkup as _};
-        (&$crate::__ValueMarkupProbe($property)).__register_value_markup();
+        (&&$crate::__ValueMarkupProbe($property)).__register_value_markup();
     }};
 }
 
