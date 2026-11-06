@@ -276,14 +276,14 @@ impl AxisGroup {
                 if axis.minimum().is_none() {
                     minimum = DateTimeOffset::from_ticks(
                         (minimum.utc_date_time().ticks() - padding).max(0),
-                        ferroui_base::animation::TimeSpan::ZERO,
+                        ferroui_base::animation::SignedDuration::ZERO,
                     );
                 }
                 if axis.maximum().is_none() {
                     maximum = DateTimeOffset::from_ticks(
                         (maximum.utc_date_time().ticks() + padding)
                             .min(DateTimeOffset::MAX_VALUE.utc_date_time().ticks()),
-                        ferroui_base::animation::TimeSpan::ZERO,
+                        ferroui_base::animation::SignedDuration::ZERO,
                     );
                 }
             }

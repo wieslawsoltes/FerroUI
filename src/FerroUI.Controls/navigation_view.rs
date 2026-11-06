@@ -159,7 +159,7 @@ pub struct NavigationView {
     footer_view: RefCell<Option<(Rc<ItemsSourceView>, u64)>>,
     roots: RefCell<Vec<Entry>>,
     known_entries: RefCell<Vec<Entry>>,
-    item_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    item_subscriptions: RefCell<Vec<Subscription>>,
     applied_themes: RefCell<Vec<AppliedTheme>>,
     settings_item: Ref<NavigationViewItem>,
     template_settings: Ref<NavigationViewTemplateSettings>,
@@ -1583,9 +1583,7 @@ impl Drop for NavigationView {
                 view.remove_collection_changed(token);
             }
         }
-        for subscription in self.item_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(self.item_subscriptions.get_mut()));
         for theme in self.applied_themes.get_mut().drain(..) {
             theme.value.dispose();
         }
@@ -1652,9 +1650,7 @@ impl NavigationView {
         loop {
             self.rebuild_pending.set(false);
             let force = self.rebuild_force.replace(false);
-            for subscription in self.item_subscriptions.replace(Vec::new()) {
-                subscription.dispose();
-            }
+            drop(self.item_subscriptions.replace(Vec::new()));
             let previous_known = self.known_entries.borrow().clone();
             let previous = self.roots.borrow().clone();
             let mut available = previous.clone();
@@ -1779,7 +1775,7 @@ impl NavigationView {
                 }
             }
         });
-        self.item_subscriptions.borrow_mut().push(property);
+        self.item_subscriptions.borrow_mut().push(Subscription::new(property));
         if let Some(item) = entry.container.cast::<NavigationViewItem>() {
             // Each realized container is observed itself: the children in a popup have a route of
             // their own that need not pass the navigation view. The handlers hold the owner and the
@@ -1802,7 +1798,7 @@ impl NavigationView {
                 }
                 // An ancestor item gets the bubbling event too: only the focused item is invoked.
                 owner.item_invoked_core(&item);
-            }).detach();
+            });
             let weak = self.to_ref().downgrade();
             let weak_item = item.downgrade();
             let keyboard = item.add_disposable_handler(InputElement::key_down_event(), move |_, args| {
@@ -1812,7 +1808,7 @@ impl NavigationView {
                 if args.source().is_some_and(|source| source.ptr_eq(&item.to_ref())) {
                     owner.item_key_down(&item, args);
                 }
-            }).detach();
+            });
             let weak = self.to_ref().downgrade();
             let weak_item = item.downgrade();
             let invoked = item.invoked(move || {
@@ -1826,7 +1822,12 @@ impl NavigationView {
                     owner.rebuild_items(false);
                 }
             });
-            self.item_subscriptions.borrow_mut().extend([focus, keyboard, invoked, items]);
+            self.item_subscriptions.borrow_mut().extend([
+                focus,
+                keyboard,
+                Subscription::new(invoked),
+                Subscription::new(items),
+            ]);
         }
     }
 

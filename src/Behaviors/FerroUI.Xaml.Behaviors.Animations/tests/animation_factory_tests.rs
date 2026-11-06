@@ -5,7 +5,7 @@
 
 use super::support::{control, panics, run_jobs, start_app};
 use crate::{AnimationFactory, FluidMoveAnimation};
-use ferroui_base::animation::{Cue, FillMode, TimeSpan};
+use ferroui_base::animation::{Cue, FillMode, SignedDuration};
 use ferroui_base::media::{ITransform, RotateTransform, TranslateTransform};
 use ferroui_controls::Border;
 use std::rc::Rc;
@@ -13,14 +13,14 @@ use std::rc::Rc;
 #[test]
 fn create_fade_in_creates_delayed_opacity_animation() {
     let _app = start_app();
-    let delay = TimeSpan::from_milliseconds(200.0);
-    let duration = TimeSpan::from_milliseconds(300.0);
+    let delay = SignedDuration::from_milliseconds(200.0);
+    let duration = SignedDuration::from_milliseconds(300.0);
 
     let animation = AnimationFactory::create_fade_in(delay, duration);
 
-    assert_eq!(animation.duration(), TimeSpan::from_milliseconds(500.0));
-    let key_times: Vec<TimeSpan> = animation.children().snapshot().iter().map(|key_frame| key_frame.key_time()).collect();
-    assert_eq!(key_times, vec![TimeSpan::ZERO, delay, delay + duration]);
+    assert_eq!(animation.duration(), SignedDuration::from_milliseconds(500.0));
+    let key_times: Vec<SignedDuration> = animation.children().snapshot().iter().map(|key_frame| key_frame.key_time()).collect();
+    assert_eq!(key_times, vec![SignedDuration::ZERO, delay, delay + duration]);
 }
 
 #[test]
@@ -29,8 +29,8 @@ fn create_fade_in_rejects_negative_times() {
     for (delay_milliseconds, duration_milliseconds) in [(-1.0, 0.0), (0.0, -1.0)] {
         assert!(panics(|| {
             AnimationFactory::create_fade_in(
-                TimeSpan::from_milliseconds(delay_milliseconds),
-                TimeSpan::from_milliseconds(duration_milliseconds),
+                SignedDuration::from_milliseconds(delay_milliseconds),
+                SignedDuration::from_milliseconds(duration_milliseconds),
             );
         }));
     }
@@ -39,15 +39,15 @@ fn create_fade_in_rejects_negative_times() {
 #[test]
 fn create_fade_in_timeline_preserves_explicit_key_times() {
     let _app = start_app();
-    let delay = TimeSpan::from_milliseconds(500.0);
-    let completion = TimeSpan::from_milliseconds(650.0);
-    let total_duration = TimeSpan::from_milliseconds(750.0);
+    let delay = SignedDuration::from_milliseconds(500.0);
+    let completion = SignedDuration::from_milliseconds(650.0);
+    let total_duration = SignedDuration::from_milliseconds(750.0);
 
     let animation = AnimationFactory::create_fade_in_timeline(delay, completion, total_duration);
 
     assert_eq!(animation.duration(), total_duration);
-    let key_times: Vec<TimeSpan> = animation.children().snapshot().iter().map(|key_frame| key_frame.key_time()).collect();
-    assert_eq!(key_times, vec![TimeSpan::ZERO, delay, completion]);
+    let key_times: Vec<SignedDuration> = animation.children().snapshot().iter().map(|key_frame| key_frame.key_time()).collect();
+    assert_eq!(key_times, vec![SignedDuration::ZERO, delay, completion]);
 }
 
 #[test]
@@ -58,9 +58,9 @@ fn create_fade_in_timeline_rejects_non_chronological_key_times() {
     {
         assert!(panics(|| {
             AnimationFactory::create_fade_in_timeline(
-                TimeSpan::from_milliseconds(delay_milliseconds),
-                TimeSpan::from_milliseconds(completion_milliseconds),
-                TimeSpan::from_milliseconds(duration_milliseconds),
+                SignedDuration::from_milliseconds(delay_milliseconds),
+                SignedDuration::from_milliseconds(completion_milliseconds),
+                SignedDuration::from_milliseconds(duration_milliseconds),
             );
         }));
     }
@@ -69,7 +69,7 @@ fn create_fade_in_timeline_rejects_non_chronological_key_times() {
 #[test]
 fn fluid_move_animation_creates_translation_animation() {
     let _app = start_app();
-    let duration = TimeSpan::from_milliseconds(250.0);
+    let duration = SignedDuration::from_milliseconds(250.0);
 
     let animation = FluidMoveAnimation::create(12.0, -8.0, duration);
 
@@ -87,7 +87,7 @@ fn fluid_move_animation_creates_translation_animation() {
 fn fluid_move_animation_rejects_negative_duration() {
     let _app = start_app();
     assert!(panics(|| {
-        FluidMoveAnimation::create(0.0, 0.0, TimeSpan::from_milliseconds(-1.0));
+        FluidMoveAnimation::create(0.0, 0.0, SignedDuration::from_milliseconds(-1.0));
     }));
 }
 
@@ -98,7 +98,7 @@ fn fluid_move_animation_try_run_prepares_control_transform() {
     let rotate: Rc<dyn ITransform> = RotateTransform::new().into();
     target.set_render_transform(Some(rotate));
 
-    let started = FluidMoveAnimation::try_run(Some(control(&target)), 12.0, -8.0, TimeSpan::ZERO);
+    let started = FluidMoveAnimation::try_run(Some(control(&target)), 12.0, -8.0, SignedDuration::ZERO);
 
     assert!(started);
     let transform = target
@@ -110,10 +110,10 @@ fn fluid_move_animation_try_run_prepares_control_transform() {
     run_jobs();
     // Adapted: the headless platform of the reference ticks the global clock; here the test
     // ticks it.
-    app.clock.pulse(TimeSpan::ZERO);
-    app.clock.pulse(TimeSpan::from_milliseconds(1.0));
+    app.clock.pulse(SignedDuration::ZERO);
+    app.clock.pulse(SignedDuration::from_milliseconds(1.0));
     run_jobs();
     assert_eq!(transform.x(), 0.0);
     assert_eq!(transform.y(), 0.0);
-    assert!(!FluidMoveAnimation::try_run(None, 0.0, 0.0, TimeSpan::ZERO));
+    assert!(!FluidMoveAnimation::try_run(None, 0.0, 0.0, SignedDuration::ZERO));
 }

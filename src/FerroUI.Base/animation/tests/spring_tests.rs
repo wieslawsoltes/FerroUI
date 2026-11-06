@@ -58,7 +58,7 @@ fn check_spring_easing_handled_properly() {
     let clock = TestClock::new();
     let _task = animation.run_async_with_clock(&rect, Some(clock.as_clock()), CancellationToken::none());
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(rotate_transform.angle(), -2.5);
     clock.step(seconds(5.0));
     assert_eq!(rotate_transform.angle(), 5.522828945000075);
@@ -70,7 +70,7 @@ fn check_spring_easing_handled_properly() {
         ("00:00:12.6158773", 2.1264981706749007),
         ("00:00:14.6495256", 5.4337608446234782),
     ] {
-        clock.step(TimeSpan::parse(time).unwrap());
+        clock.step(SignedDuration::parse(time).unwrap());
         assert_close(rotate_transform.angle(), expected, tolerance);
     }
 }

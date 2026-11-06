@@ -281,7 +281,7 @@ impl ContextDragWithDirectionBehavior {
         let direction = if diff.y > 0.0 { "up" } else { "down" };
         let operation = Self::do_drag_drop(&trigger_event, context.as_ref(), direction);
         let this = self.to_ref();
-        drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        drop(Dispatcher::ui_thread().start_local(async move {
             operation.await;
 
             if let Some(handler) = this.handler() {

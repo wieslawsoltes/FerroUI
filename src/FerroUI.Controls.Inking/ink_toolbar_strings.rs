@@ -4,7 +4,7 @@ use ferroui_controls::{ContentControl, Control, TextBlock, ToolTip};
 use ferroui_base::controls::{ResourceHostRef, ResourceKey};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::{IObservable, ObservableExt};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{current_ui_locale, CultureInfo};
 use ferroui_base::{BoxedValue, StyledElement};
 use std::rc::Rc;
 
@@ -58,12 +58,18 @@ pub(crate) fn for_culture(key: &str, culture: &str) -> &'static str {
         .unwrap_or_default()
 }
 
+/// The culture of the user interface locale of the thread, whose name is the tag the
+/// strings are looked up by (empty for the invariant culture, the unknown locale `und`).
+fn ui_culture() -> CultureInfo {
+    CultureInfo::from(&current_ui_locale())
+}
+
 pub(crate) fn text(control: &StyledElement, key: &str) -> String {
     control
         .try_find_resource(&ResourceKey::from(key), None)
         .flatten()
         .and_then(|value| value.downcast_ref::<String>().cloned())
-        .unwrap_or_else(|| for_culture(key, CultureInfo::current_ui_culture().name()).to_owned())
+        .unwrap_or_else(|| for_culture(key, ui_culture().name()).to_owned())
 }
 
 pub(crate) fn observable(
@@ -76,7 +82,7 @@ pub(crate) fn observable(
             value
                 .and_then(|value| value.downcast_ref::<String>().cloned())
                 .unwrap_or_else(|| {
-                    for_culture(key, CultureInfo::current_ui_culture().name()).to_owned()
+                    for_culture(key, ui_culture().name()).to_owned()
                 })
         })
 }

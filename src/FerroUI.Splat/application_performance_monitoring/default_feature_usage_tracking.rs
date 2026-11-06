@@ -1,16 +1,17 @@
 //! `DefaultFeatureUsageTrackingSession`, `FuncFeatureUsageTrackingManager` and
 //! `DefaultFeatureUsageTrackingManager`.
 
-use super::{Guid, IFeatureUsageTrackingManager, IFeatureUsageTrackingSession, IFeatureUsageTrackingSessionOf};
+use super::{IFeatureUsageTrackingManager, IFeatureUsageTrackingSession, IFeatureUsageTrackingSessionOf};
 use crate::logging::IEnableLogger;
 use ferroui_system::IDisposable;
 use std::rc::Rc;
+use uuid::Uuid;
 
 /// The session of [`DefaultFeatureUsageTrackingManager`] (`DefaultFeatureUsageTrackingSession`):
 /// it logs the start and the end of the feature, and its failures, at the level `Info`.
 pub struct DefaultFeatureUsageTrackingSession {
-    parent_reference: Guid,
-    feature_reference: Guid,
+    parent_reference: Uuid,
+    feature_reference: Uuid,
     feature_name: String,
 }
 
@@ -19,15 +20,15 @@ impl DefaultFeatureUsageTrackingSession {
     ///
     /// Panics when the name is empty or white space (`ArgumentException`).
     pub fn new(feature_name: &str) -> Self {
-        Self::with_parent(feature_name, Guid::EMPTY)
+        Self::with_parent(feature_name, Uuid::nil())
     }
 
     /// A session for the feature `feature_name` under the session `parent_reference`.
-    pub(crate) fn with_parent(feature_name: &str, parent_reference: Guid) -> Self {
+    pub(crate) fn with_parent(feature_name: &str, parent_reference: Uuid) -> Self {
         assert!(!feature_name.trim().is_empty(), "The value cannot be an empty string or composed entirely of whitespace. (Parameter 'featureName')");
         let session = Self {
             parent_reference,
-            feature_reference: Guid::new_guid(),
+            feature_reference: Uuid::new_v4(),
             feature_name: feature_name.to_owned(),
         };
         session.log().info_fn(&|| session.session_start_log_message());
@@ -36,7 +37,7 @@ impl DefaultFeatureUsageTrackingSession {
 
     fn session_start_log_message(&self) -> String {
         let mut message = format!("Feature Start. Reference={}", self.feature_reference);
-        if self.parent_reference != Guid::EMPTY {
+        if !self.parent_reference.is_nil() {
             message += &format!(", Parent Reference={}", self.parent_reference);
         }
         message
@@ -59,12 +60,14 @@ impl IFeatureUsageTrackingSession for DefaultFeatureUsageTrackingSession {
     }
 }
 
-impl IFeatureUsageTrackingSessionOf<Guid> for DefaultFeatureUsageTrackingSession {
-    fn feature_reference(&self) -> Guid {
+/// The references are [`Uuid`]s (upstream's `Guid`); since 0.5, where they were the deprecated
+/// `ferroui_splat::Guid`.
+impl IFeatureUsageTrackingSessionOf<Uuid> for DefaultFeatureUsageTrackingSession {
+    fn feature_reference(&self) -> Uuid {
         self.feature_reference
     }
 
-    fn parent_reference(&self) -> Guid {
+    fn parent_reference(&self) -> Uuid {
         self.parent_reference
     }
 }

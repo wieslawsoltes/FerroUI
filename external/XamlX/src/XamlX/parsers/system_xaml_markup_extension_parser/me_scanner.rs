@@ -225,6 +225,7 @@ impl<'c, 'a> MeScanner<'c, 'a> {
                     .is_constructor_parsing_mode
             {
                 self.current_special_bracket_characters = Self::get_bracket_character_for_property(
+                    &self.context.current_type,
                     self.current_parameter_name.as_deref(),
                 );
             }
@@ -483,7 +484,7 @@ impl<'c, 'a> MeScanner<'c, 'a> {
 
         if self.state == StringState::Property {
             self.current_special_bracket_characters =
-                Self::get_bracket_character_for_property(Some(&result));
+                Self::get_bracket_character_for_property(&self.context.current_type, Some(&result));
             self.current_parameter_name = Some(result.clone());
         }
 
@@ -542,10 +543,12 @@ impl<'c, 'a> MeScanner<'c, 'a> {
     }
 
     fn get_bracket_character_for_property(
-        _property_name: Option<&str>,
+        extension: &MeScannerTypeName,
+        property_name: Option<&str>,
     ) -> Option<MeScannerSpecialBracketCharacters> {
-        // Xaml resolves markup extension types after parsing the initial AST,
-        // so custom brackets aren't supported
-        None
+        // Xaml resolves markup extension types after parsing the initial AST, so the bracket
+        // characters of a property are only known for x:Bind (see
+        // `MeScannerSpecialBracketCharacters::for_property`).
+        MeScannerSpecialBracketCharacters::for_property(extension, property_name)
     }
 }

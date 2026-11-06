@@ -3,7 +3,7 @@
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::ILauncher;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Ref,
     StyledElementImpl, StyledProperty, Visual,
@@ -56,16 +56,17 @@ impl StyledElementActionImpl for LaunchUriOrFileAction {
         };
 
         let launcher = top_level.launcher();
-        let launch = match Uri::absolute(&target) {
-            // A one letter scheme is the drive of a Windows path.
-            Ok(uri) if uri.scheme().len() > 1 => Some(launcher.launch_uri_async(&uri)),
-            _ => Self::launch_file(&*launcher, &target),
+        // A one letter scheme is the drive of a Windows path, which `parse_absolute` reads as a
+        // relative reference, as it reads a rooted path: both are files.
+        let launch = match UriRef::parse_absolute(&target) {
+            Ok(uri) => Some(launcher.launch_uri_async(&uri)),
+            Err(_) => Self::launch_file(&*launcher, &target),
         };
         let Some(launch) = launch else {
             return Some(Rc::new(false));
         };
 
-        drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        drop(Dispatcher::ui_thread().start_local(async move {
             let _ = launch.await;
         }));
 

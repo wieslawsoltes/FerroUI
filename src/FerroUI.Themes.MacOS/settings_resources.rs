@@ -5,7 +5,7 @@
 //! fallback. This does not assert equivalence to AppKit's optical refraction.
 
 use crate::{ControlSize, DensityStyle, MacOSTheme};
-use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, TimeSpan, Transitions};
+use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, SignedDuration, Transitions};
 use ferroui_base::animation::DoubleTransition;
 use ferroui_base::animation::easings::Easing;
 use ferroui_base::controls::{ResourceKey, ResourceValue};
@@ -99,7 +99,7 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
         _ => None,
     };
     if let Some(milliseconds) = duration {
-        return Some(into_markup_value(if theme.effective_reduce_motion() { TimeSpan::ZERO } else { TimeSpan::from_milliseconds(milliseconds) }));
+        return Some(into_markup_value(if theme.effective_reduce_motion() { SignedDuration::ZERO } else { SignedDuration::from_milliseconds(milliseconds) }));
     }
 
     match name {
@@ -107,9 +107,9 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
             let transition = DoubleTransition::new();
             transition.set_property(Some(Visual::opacity_property().as_property()));
             transition.set_duration(if theme.effective_reduce_motion() {
-                TimeSpan::ZERO
+                SignedDuration::ZERO
             } else {
-                TimeSpan::from_milliseconds(100.0)
+                SignedDuration::from_milliseconds(100.0)
             });
             // Preserve the original opacity transition's default easing.
             return Some(into_markup_value(Transitions::from_items([transition.into()])));
@@ -121,9 +121,9 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
             let transition = DoubleTransition::new();
             transition.set_property(Some(Canvas::left_property().as_property()));
             transition.set_duration(if theme.effective_reduce_motion() {
-                TimeSpan::ZERO
+                SignedDuration::ZERO
             } else {
-                TimeSpan::from_milliseconds(180.0)
+                SignedDuration::from_milliseconds(180.0)
             });
             transition.set_easing(Easing::parse("CubicEaseOut").expect("built-in easing"));
             return Some(into_markup_value(Transitions::from_items([transition.into()])));
@@ -133,7 +133,7 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
             // DynamicResource. Replace the whole typed transition at its styled
             // consumer instead. The control retains its cancellation/gesture logic.
             let transition = Rc::new(PageSlide::with_duration(
-                if theme.effective_reduce_motion() { TimeSpan::ZERO } else { TimeSpan::from_milliseconds(180.0) },
+                if theme.effective_reduce_motion() { SignedDuration::ZERO } else { SignedDuration::from_milliseconds(180.0) },
                 if name == "MacOSModalTransition" { SlideAxis::Vertical } else { SlideAxis::Horizontal },
             ));
             transition.set_slide_in_easing(Easing::parse("CubicEaseOut").expect("built-in easing"));

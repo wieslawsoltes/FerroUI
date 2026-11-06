@@ -138,7 +138,7 @@ impl OpenGlInteropPage {
 
         let context = OpenGlCompositionInterop::try_create_compatible_gl_context_async(&compositor, None);
         let this = self.to_ref();
-        drop(Dispatcher::current_dispatcher().to_task_scheduler().start_local(async move {
+        drop(Dispatcher::current_dispatcher().start_local(async move {
             let context = context.await;
             this.initialize_with_context(generation, &viewport, &compositor, context);
         }));

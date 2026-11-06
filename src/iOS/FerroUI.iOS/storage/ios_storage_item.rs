@@ -2,8 +2,7 @@
 //! written inside the security scope of the URL the user opened it, or an
 //! ancestor of it, with.
 
-use ferroui_base::utilities::DateTimeOffset;
-use ferroui_base::animation::TimeSpan;
+use std::time::{Duration, SystemTime};
 
 /// The path of an item of a folder (`Path.Combine`): the name alone when
 /// it is rooted, else the folder, a separator if it lacks one, and the
@@ -22,9 +21,18 @@ pub fn combine(folder_path: &str, name: &str) -> String {
     }
 }
 
-/// The date of a number of seconds since 1970 (`NSDate`).
-pub fn date_from_time_interval_since_1970(seconds: f64) -> DateTimeOffset {
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks((seconds * 10_000_000.0) as i64))
+/// The instant of a number of seconds since 1970 (`NSDate`): `UNIX_EPOCH`
+/// plus the seconds (minus them before 1970). A number that is not a
+/// duration, or an instant `SystemTime` cannot hold, is the epoch.
+pub fn date_from_time_interval_since_1970(seconds: f64) -> SystemTime {
+    let instant = Duration::try_from_secs_f64(seconds.abs()).ok().and_then(|duration| {
+        if seconds < 0.0 {
+            SystemTime::UNIX_EPOCH.checked_sub(duration)
+        } else {
+            SystemTime::UNIX_EPOCH.checked_add(duration)
+        }
+    });
+    instant.unwrap_or(SystemTime::UNIX_EPOCH)
 }
 
 #[cfg(target_os = "ios")]
@@ -43,7 +51,7 @@ mod uikit {
         IStorageItem, StorageItemProperties, WellKnownFolder,
     };
     use ferroui_base::reactive::{Disposable, IDisposable};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use objc2::rc::Retained;
     use objc2::runtime::Bool;
     use objc2::{msg_send, MainThreadMarker};
@@ -159,14 +167,13 @@ mod uikit {
             self.name.clone()
         }
 
-        fn path(&self) -> Uri {
+        /// The URL of the `NSURL` of the item; its text as a relative
+        /// reference when it is no URL.
+        fn path(&self) -> UriRef {
             let absolute = self.url.absoluteString().map(|absolute| absolute.to_string()).unwrap_or_default();
-            match Uri::try_create(&absolute, UriKind::Absolute) {
-                Some(uri) => uri,
-                None => match Uri::new(&absolute, UriKind::Relative) {
-                    Ok(uri) => uri,
-                    Err(error) => panic!("The URL of the storage item is not a URI: {error}"),
-                },
+            match url::Url::parse(&absolute) {
+                Ok(url) => UriRef::Absolute(url),
+                Err(_) => UriRef::Relative(absolute.into()),
             }
         }
 
@@ -316,7 +323,7 @@ mod uikit {
                     self.base.name()
                 }
 
-                fn path(&self) -> Uri {
+                fn path(&self) -> UriRef {
                     self.base.path()
                 }
 
@@ -623,8 +630,11 @@ mod tests {
 
     #[test]
     fn a_date_of_foundation_is_a_date_of_the_framework() {
-        assert_eq!(DateTimeOffset::UNIX_EPOCH, date_from_time_interval_since_1970(0.0));
+        assert_eq!(SystemTime::UNIX_EPOCH, date_from_time_interval_since_1970(0.0));
         let date = date_from_time_interval_since_1970(86_400.5);
-        assert_eq!(DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(864_005_000_000)), date);
+        assert_eq!(SystemTime::UNIX_EPOCH + Duration::from_millis(86_400_500), date);
+        let before = date_from_time_interval_since_1970(-1.5);
+        assert_eq!(SystemTime::UNIX_EPOCH - Duration::from_millis(1_500), before);
+        assert_eq!(SystemTime::UNIX_EPOCH, date_from_time_interval_since_1970(f64::NAN));
     }
 }

@@ -3,9 +3,13 @@
 //!
 //! Each test runs on a thread of its own, so that the context it sets is not seen by another test
 //! that the harness runs on the same thread.
+//!
+//! The items are deprecated since 0.5.0 (step A5 of phase C4 of #423); these tests keep their
+//! behaviour on top of the schedules of `task`.
+#![allow(deprecated)]
 
 use crate::threading::tasks::{run, run_pending_wakes};
-use crate::threading::{current_synchronization_context, set_synchronization_context, CancellationTokenSource, SynchronizationContext};
+use crate::threading::{current_synchronization_context, set_synchronization_context, CancellationToken, SynchronizationContext};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::Rc;
@@ -197,14 +201,14 @@ fn a_wake_from_another_thread_is_posted_to_the_context() {
             wait.recv().ok();
             Ok(5)
         });
-        assert!(!task.is_completed());
+        assert!(!task.is_finished());
 
         go.send(()).unwrap();
         // The work of the worker wakes the task from its thread: the wake is posted to the
         // context, and runs the task here when the context runs it.
         context.run_next();
-        assert!(task.is_completed());
-        assert_eq!(task.result().unwrap(), 5);
+        assert!(task.is_finished());
+        assert_eq!(task.result().unwrap().unwrap(), 5);
 
         set_synchronization_context(None);
     });
@@ -216,10 +220,10 @@ fn a_cancellation_from_another_thread_is_posted_to_the_context() {
         let context = Arc::new(QueueContext::default());
         set_synchronization_context(Some(context.clone()));
 
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
         let ran = Rc::new(Cell::new(false));
         let r = ran.clone();
-        let _registration = source.token().register_local(move || r.set(true));
+        let _registration = source.register_local(move || r.set(true));
 
         let remote = source.clone();
         std::thread::spawn(move || remote.cancel()).join().unwrap();
@@ -240,10 +244,10 @@ fn clearing_the_context_removes_the_poster() {
         set_synchronization_context(Some(context.clone()));
         set_synchronization_context(None);
 
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
         let ran = Rc::new(Cell::new(false));
         let r = ran.clone();
-        let _registration = source.token().register_local(move || r.set(true));
+        let _registration = source.register_local(move || r.set(true));
 
         let remote = source.clone();
         std::thread::spawn(move || remote.cancel()).join().unwrap();
@@ -258,10 +262,10 @@ fn clearing_the_context_removes_the_poster() {
 #[test]
 fn setting_a_context_runs_the_wakes_that_came_before() {
     on_own_thread(|| {
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
         let ran = Rc::new(Cell::new(false));
         let r = ran.clone();
-        let _registration = source.token().register_local(move || r.set(true));
+        let _registration = source.register_local(move || r.set(true));
 
         let remote = source.clone();
         std::thread::spawn(move || remote.cancel()).join().unwrap();
@@ -273,5 +277,25 @@ fn setting_a_context_runs_the_wakes_that_came_before() {
         assert!(ran.get());
 
         set_synchronization_context(None);
+    });
+}
+
+#[test]
+fn setting_a_context_makes_an_adapter_of_it_the_schedule_of_the_thread_and_the_current_schedule() {
+    use crate::task::{current_schedule, is_current_schedule, thread_schedule, Schedule};
+    use crate::threading::context_schedule;
+
+    on_own_thread(|| {
+        let context: Arc<dyn SynchronizationContext> = Arc::new(QueueContext::default());
+        set_synchronization_context(Some(context.clone()));
+        let current = current_schedule().expect("a current schedule");
+        assert!(thread_schedule().is_some());
+        // Two adapters of one context are the same schedule.
+        assert!(is_current_schedule(&context_schedule(context.clone())));
+        assert_eq!(Schedule::identity(&*current), Arc::as_ptr(&context).cast::<()>());
+
+        set_synchronization_context(None);
+        assert!(current_schedule().is_none());
+        assert!(thread_schedule().is_none());
     });
 }

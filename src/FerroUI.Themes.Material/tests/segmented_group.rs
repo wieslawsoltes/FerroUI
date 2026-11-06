@@ -5,7 +5,7 @@ use crate::{
     MaterialMotionRole, MaterialMotionScheme, MaterialSegmentedContent, MaterialSegmentedGroup,
     MaterialTheme, register_types,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::input::{
     InputElement, Key, KeyEventArgs, KeyboardDevice, KeyboardNavigation, KeyboardNavigationMode,
 };
@@ -321,11 +321,11 @@ fn selection_provider_and_children_report_their_native_accessibility_roles() {
 }
 
 struct TestClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -365,8 +365,8 @@ fn check_entry_uses_separate_effects_and_spatial_springs_but_exit_is_immediate()
     let check: Ref<Viewbox> = named(&child, "CheckIcon");
     let width = group.bounds().width;
     select(&child);
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     let scheme = MaterialMotionScheme::Expressive;
     let spatial = scheme
         .spring(MaterialMotionRole::FastSpatial)
@@ -383,7 +383,7 @@ fn check_entry_uses_separate_effects_and_spatial_springs_but_exit_is_immediate()
     assert_eq!(0.0, content.icon_scale());
     assert_eq!(0.0, check.opacity());
     assert!((spatial.value - content.label_progress()).abs() < 1e-9);
-    clock.subject.on_next(TimeSpan::from_seconds(0.1));
+    clock.subject.on_next(SignedDuration::from_seconds(0.1));
     let reversed = scheme.spring(MaterialMotionRole::FastSpatial).sample(
         0.05,
         spatial.value,

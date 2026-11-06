@@ -4,7 +4,7 @@ use super::{
 use crate::automation::provider::{IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::ElementNotEnabledError;
 use crate::date_time_pickers::TimePicker;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
 use std::rc::Rc;
 
@@ -76,7 +76,7 @@ impl TimePickerAutomationPeer {
     /// Sets the selected time from text, if the text is a time (the value
     /// provider contract).
     pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
-        if let Some(result) = value.and_then(|value| TimeSpan::parse(value).ok()) {
+        if let Some(result) = value.and_then(|value| SignedDuration::parse(value).ok()) {
             self.owner().set_selected_time(Some(result));
         }
 

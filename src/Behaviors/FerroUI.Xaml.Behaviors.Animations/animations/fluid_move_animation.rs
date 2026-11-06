@@ -2,7 +2,7 @@
 
 use crate::argument_out_of_range::throw_if_less_than;
 use crate::AnimationRunner;
-use ferroui_base::animation::{Animatable, Animation, Cue, FillMode, IAnimationSetter, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animatable, Animation, Cue, FillMode, IAnimationSetter, KeyFrame, SignedDuration};
 use ferroui_base::media::{ITransform, TranslateTransform};
 use ferroui_base::styling::Setter;
 use ferroui_base::Ref;
@@ -20,8 +20,8 @@ impl FluidMoveAnimation {
     ///
     /// When `duration` is negative (the `ArgumentOutOfRangeException` of the reference).
     #[track_caller]
-    pub fn create(offset_x: f64, offset_y: f64, duration: TimeSpan) -> Ref<Animation> {
-        throw_if_less_than(duration, TimeSpan::ZERO, "duration");
+    pub fn create(offset_x: f64, offset_y: f64, duration: SignedDuration) -> Ref<Animation> {
+        throw_if_less_than(duration, SignedDuration::ZERO, "duration");
 
         let animation = Animation::new();
         animation.set_duration(duration);
@@ -43,7 +43,7 @@ impl FluidMoveAnimation {
     /// Creates and starts a fluid movement animation on a control: `target` is the target
     /// control, `offset_x` and `offset_y` the previous offsets, `duration` the animation duration.
     #[track_caller]
-    pub fn run(target: &Control, offset_x: f64, offset_y: f64, duration: TimeSpan) {
+    pub fn run(target: &Control, offset_x: f64, offset_y: f64, duration: SignedDuration) {
         Self::prepare_transform(target, offset_x, offset_y);
         let animation = Self::create(offset_x, offset_y, duration);
         let animatable: &Animatable = target;
@@ -53,7 +53,7 @@ impl FluidMoveAnimation {
     /// Prepares a control's translation transform and starts a fluid movement animation. Returns
     /// `true` when the target was prepared and the animation was started; otherwise, `false`.
     #[track_caller]
-    pub fn try_run(target: Option<&Control>, offset_x: f64, offset_y: f64, duration: TimeSpan) -> bool {
+    pub fn try_run(target: Option<&Control>, offset_x: f64, offset_y: f64, duration: SignedDuration) -> bool {
         let Some(target) = target else {
             return false;
         };

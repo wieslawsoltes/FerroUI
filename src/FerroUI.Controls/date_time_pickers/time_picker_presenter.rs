@@ -3,7 +3,7 @@ use super::{
 };
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt};
 use crate::{Button, ColumnDefinition, ColumnDefinitions, Control, ControlImpl, Grid, GridLength, Panel, SpinDirection};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::{
     FocusManager, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers, KeyboardNavigation, KeyboardNavigationHandler,
     KeyboardNavigationMode, NavigationDirection, NavigationMethod,
@@ -266,7 +266,7 @@ impl PickerPresenterBaseImpl for TimePickerPresenter {
 
             this.set_current_value(
                 Self::time_property(),
-                TimeSpan::from_hms(hr, min, if this.use_seconds() { sec } else { 0 }),
+                SignedDuration::from_hms(hr, min, if this.use_seconds() { sec } else { 0 }),
             );
         }
         Self::parent_on_confirmed(this);
@@ -296,8 +296,8 @@ ferro_properties! {
         }
 
         /// Defines the `Time` property.
-        pub fn time_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<TimePickerPresenter, _>("Time", TimeSpan::default())
+        pub fn time_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<TimePickerPresenter, _>("Time", SignedDuration::default())
         }
     }
 }
@@ -354,11 +354,11 @@ impl TimePickerPresenter {
     }
 
     /// The current time.
-    pub fn time(&self) -> TimeSpan {
+    pub fn time(&self) -> SignedDuration {
         self.get_value(Self::time_property())
     }
 
-    pub fn set_time(&self, value: TimeSpan) {
+    pub fn set_time(&self, value: SignedDuration) {
         self.set_value(Self::time_property(), value)
     }
 

@@ -15,7 +15,7 @@ use ferroui_base::media::{Brushes, IBrush, IImage};
 use ferroui_base::platform::storage::{IStorageFile, IStorageItem};
 use ferroui_base::platform::AssetLoader;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
     VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
@@ -163,7 +163,7 @@ impl ClipboardPage {
         timer.set_is_enabled(false);
         *this.clipboard_last_data_object_checker.borrow_mut() = Some(timer);
 
-        let uri = Uri::absolute("ferres://ControlCatalog/Assets/image1.jpg").unwrap_or_else(|e| panic!("{e}"));
+        let uri = UriRef::parse("ferres://ControlCatalog/Assets/image1.jpg").unwrap_or_else(|e| panic!("{e}"));
         let mut asset = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
         let default_image = Rc::new(Bitmap::from_stream(&mut asset).unwrap_or_else(|e| panic!("{e}")));
         *this.default_image.borrow_mut() = Some(default_image.clone());

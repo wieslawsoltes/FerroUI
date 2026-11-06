@@ -10,8 +10,6 @@ homepage.workspace = true
 readme = "README.md"
 keywords.workspace = true
 categories.workspace = true
-# The designer crates are published from 0.5 (owner decision D6 of #345).
-publish = false
 
 [lib]
 path = "lib.rs"

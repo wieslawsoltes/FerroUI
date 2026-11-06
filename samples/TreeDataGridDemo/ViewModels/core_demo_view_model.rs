@@ -21,7 +21,7 @@ use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{Brushes, IBrush, IImage, Stretch};
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::{DateTimeOffset, StringComparison, Uri};
+use ferroui_base::utilities::{DateTimeOffset, StringComparison, UriRef};
 use ferroui_base::{ferro_markup_type, BoxedValue, CornerRadius, Thickness};
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{Border, CheckBox, Control, Image, ItemsSource, StackPanel, TextBlock};
@@ -818,7 +818,7 @@ fn file_icons() -> (Rc<dyn IImage>, Rc<dyn IImage>) {
 }
 
 fn load_bitmap(uri: &str) -> Rc<dyn IImage> {
-    let uri = Uri::absolute(uri).unwrap_or_else(|e| panic!("{e}"));
+    let uri = UriRef::parse(uri).unwrap_or_else(|e| panic!("{e}"));
     let mut stream = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
     let bitmap = Bitmap::from_stream(&mut stream).unwrap_or_else(|e| panic!("{e}"));
     Rc::new(bitmap) as Rc<dyn IImage>

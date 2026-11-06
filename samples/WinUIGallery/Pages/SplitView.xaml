@@ -1,4 +1,5 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. IsPaneOpen is an x:Bind to
+     the toggle, compiled by the x:Bind core (#525). -->
 <StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <ToggleButton x:Name="OpenPane" Content="Toggle pane" IsChecked="True"/><SplitView Height="260" OpenPaneLength="180" CompactPaneLength="48" DisplayMode="CompactInline" IsPaneOpen="{Binding #OpenPane.IsChecked, Mode=OneWay}"><SplitView.Pane><StackPanel Spacing="8" Margin="12"><TextBlock Text="PANE CONTENT"/><Button Content="Home"/><Button Content="Settings"/></StackPanel></SplitView.Pane><TextBlock Text="SPLITVIEW CONTENT" Margin="20"/></SplitView>
+  <ToggleButton x:Name="OpenPane" Content="Toggle pane" IsChecked="True"/><SplitView Height="260" OpenPaneLength="180" CompactPaneLength="48" DisplayMode="CompactInline" IsPaneOpen="{x:Bind OpenPane.IsChecked, Mode=OneWay}"><SplitView.Pane><StackPanel Spacing="8" Margin="12"><TextBlock Text="PANE CONTENT"/><Button Content="Home"/><Button Content="Settings"/></StackPanel></SplitView.Pane><TextBlock Text="SPLITVIEW CONTENT" Margin="20"/></SplitView>
 </StackPanel>

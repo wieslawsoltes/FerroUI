@@ -11,7 +11,7 @@ use super::{
     CultureInfo, DateTime, DateTimeFormatProvider, DateTimeKind, DayOfWeek, FormatError, SystemTimeRangeError,
     TimeZoneInfo,
 };
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -41,18 +41,18 @@ impl DateTimeOffset {
     pub const UNIX_EPOCH: DateTimeOffset =
         DateTimeOffset { utc: DateTime::UNIX_EPOCH.specify_kind(DateTimeKind::Unspecified), offset_minutes: 0 };
 
-    fn validate_offset(offset: TimeSpan) -> Result<i16, &'static str> {
+    fn validate_offset(offset: SignedDuration) -> Result<i16, &'static str> {
         let ticks = offset.ticks();
-        if ticks % TimeSpan::TICKS_PER_MINUTE != 0 {
+        if ticks % SignedDuration::TICKS_PER_MINUTE != 0 {
             return Err("Offset must be specified in whole minutes. (Parameter 'offset')");
         }
         if ticks.abs() > TimeZoneInfo::MAX_OFFSET.ticks() {
             return Err("Offset must be within plus or minus 14 hours. (Parameter 'offset')");
         }
-        Ok((ticks / TimeSpan::TICKS_PER_MINUTE) as i16)
+        Ok((ticks / SignedDuration::TICKS_PER_MINUTE) as i16)
     }
 
-    fn from_clock(clock: DateTime, offset: TimeSpan) -> Result<DateTimeOffset, &'static str> {
+    fn from_clock(clock: DateTime, offset: SignedDuration) -> Result<DateTimeOffset, &'static str> {
         let offset_minutes = Self::validate_offset(offset)?;
         let utc = DateTime::try_from_ticks(clock.ticks() - offset.ticks(), DateTimeKind::Unspecified).ok_or(OUT_OF_RANGE)?;
         Ok(DateTimeOffset { utc, offset_minutes })
@@ -62,7 +62,7 @@ impl DateTimeOffset {
     /// date and time are invalid, the offset is not a whole number of
     /// minutes within 14 hours of UTC, or the UTC instant is out of range.
     #[track_caller]
-    pub fn new(year: i32, month: i32, day: i32, hour: i32, minute: i32, second: i32, offset: TimeSpan) -> DateTimeOffset {
+    pub fn new(year: i32, month: i32, day: i32, hour: i32, minute: i32, second: i32, offset: SignedDuration) -> DateTimeOffset {
         let clock = DateTime::new_with_time(year, month, day, hour, minute, second);
         Self::from_clock(clock, offset).unwrap_or_else(|message| panic!("{message}"))
     }
@@ -75,7 +75,7 @@ impl DateTimeOffset {
         hour: i32,
         minute: i32,
         second: i32,
-        offset: TimeSpan,
+        offset: SignedDuration,
     ) -> Option<DateTimeOffset> {
         let clock = DateTime::try_new_with_time(year, month, day, hour, minute, second)?;
         Self::from_clock(clock, offset).ok()
@@ -84,7 +84,7 @@ impl DateTimeOffset {
     /// The clock time with `ticks` ticks at `offset` from UTC. Panics when
     /// the ticks, the offset or the UTC instant are out of range.
     #[track_caller]
-    pub fn from_ticks(ticks: i64, offset: TimeSpan) -> DateTimeOffset {
+    pub fn from_ticks(ticks: i64, offset: SignedDuration) -> DateTimeOffset {
         Self::from_clock(DateTime::from_ticks(ticks), offset).unwrap_or_else(|message| panic!("{message}"))
     }
 
@@ -95,7 +95,7 @@ impl DateTimeOffset {
     #[track_caller]
     pub fn from_date_time(date_time: DateTime) -> DateTimeOffset {
         let offset = if date_time.kind() == DateTimeKind::Utc {
-            TimeSpan::ZERO
+            SignedDuration::ZERO
         } else {
             TimeZoneInfo::get_utc_offset_of_local_time(date_time)
         };
@@ -108,9 +108,9 @@ impl DateTimeOffset {
     /// value is given an offset other than the local one, or when the UTC
     /// instant is out of range.
     #[track_caller]
-    pub fn from_date_time_offset(date_time: DateTime, offset: TimeSpan) -> DateTimeOffset {
+    pub fn from_date_time_offset(date_time: DateTime, offset: SignedDuration) -> DateTimeOffset {
         match date_time.kind() {
-            DateTimeKind::Utc => assert!(offset == TimeSpan::ZERO, "The UTC Offset for Utc DateTime instances must be 0. (Parameter 'offset')"),
+            DateTimeKind::Utc => assert!(offset == SignedDuration::ZERO, "The UTC Offset for Utc DateTime instances must be 0. (Parameter 'offset')"),
             DateTimeKind::Local => assert!(
                 offset == TimeZoneInfo::get_utc_offset_of_local_time(date_time),
                 "The UTC Offset of the local dateTime parameter does not match the offset argument. (Parameter 'offset')"
@@ -134,8 +134,8 @@ impl DateTimeOffset {
 
     /// The offset from UTC.
     #[inline]
-    pub const fn offset(self) -> TimeSpan {
-        TimeSpan::from_ticks(self.offset_minutes as i64 * TimeSpan::TICKS_PER_MINUTE)
+    pub const fn offset(self) -> SignedDuration {
+        SignedDuration::from_ticks(self.offset_minutes as i64 * SignedDuration::TICKS_PER_MINUTE)
     }
 
     /// The clock date and time, of unspecified kind (.NET `DateTime`).
@@ -164,7 +164,7 @@ impl DateTimeOffset {
 
     /// The clock time elapsed since midnight.
     #[inline]
-    pub const fn time_of_day(self) -> TimeSpan {
+    pub const fn time_of_day(self) -> SignedDuration {
         self.date_time().time_of_day()
     }
 
@@ -234,19 +234,19 @@ impl DateTimeOffset {
 
     /// The value `value` later, with the same offset. Panics when out of range.
     #[track_caller]
-    pub fn add(self, value: TimeSpan) -> DateTimeOffset {
+    pub fn add(self, value: SignedDuration) -> DateTimeOffset {
         self.with_clock(self.date_time().add(value))
     }
 
     /// The value `value` earlier, with the same offset. Panics when out of range.
     #[track_caller]
-    pub fn subtract(self, value: TimeSpan) -> DateTimeOffset {
+    pub fn subtract(self, value: SignedDuration) -> DateTimeOffset {
         self.with_clock(self.date_time().subtract(value))
     }
 
     /// The interval from `other` to this value (by UTC instants).
     #[inline]
-    pub fn subtract_date_time_offset(self, other: DateTimeOffset) -> TimeSpan {
+    pub fn subtract_date_time_offset(self, other: DateTimeOffset) -> SignedDuration {
         self.utc - other.utc
     }
 
@@ -273,7 +273,7 @@ impl DateTimeOffset {
     /// The same instant at another offset. Panics when the offset is invalid
     /// or the clock time at that offset is out of range.
     #[track_caller]
-    pub fn to_offset(self, offset: TimeSpan) -> DateTimeOffset {
+    pub fn to_offset(self, offset: SignedDuration) -> DateTimeOffset {
         let offset_minutes = Self::validate_offset(offset).unwrap_or_else(|message| panic!("{message}"));
         assert!(DateTime::try_from_ticks(self.utc.ticks() + offset.ticks(), DateTimeKind::Unspecified).is_some(), "{OUT_OF_RANGE}");
         DateTimeOffset { utc: self.utc, offset_minutes }
@@ -284,7 +284,7 @@ impl DateTimeOffset {
     pub fn to_local_time(self) -> DateTimeOffset {
         let offset = TimeZoneInfo::get_local_utc_offset(self.utc_date_time());
         match DateTime::try_from_ticks(self.utc.ticks() + offset.ticks(), DateTimeKind::Unspecified) {
-            Some(_) => DateTimeOffset { utc: self.utc, offset_minutes: (offset.ticks() / TimeSpan::TICKS_PER_MINUTE) as i16 },
+            Some(_) => DateTimeOffset { utc: self.utc, offset_minutes: (offset.ticks() / SignedDuration::TICKS_PER_MINUTE) as i16 },
             None => DateTimeOffset { utc: self.utc, offset_minutes: 0 },
         }
     }
@@ -340,7 +340,7 @@ impl DateTimeOffset {
     /// culture (.NET `ToString(string)`). Panics when the format is invalid.
     #[track_caller]
     pub fn to_string_with(self, format: &str) -> String {
-        self.to_string_format(format, &CultureInfo::current_culture())
+        self.to_string_format(format, &CultureInfo::current_formatting())
     }
 
     /// Formats with the default format and the conventions of `provider`
@@ -472,40 +472,40 @@ impl Hash for DateTimeOffset {
     }
 }
 
-impl Add<TimeSpan> for DateTimeOffset {
+impl Add<SignedDuration> for DateTimeOffset {
     type Output = DateTimeOffset;
     #[track_caller]
-    fn add(self, rhs: TimeSpan) -> DateTimeOffset {
+    fn add(self, rhs: SignedDuration) -> DateTimeOffset {
         DateTimeOffset::add(self, rhs)
     }
 }
 
-impl Sub<TimeSpan> for DateTimeOffset {
+impl Sub<SignedDuration> for DateTimeOffset {
     type Output = DateTimeOffset;
     #[track_caller]
-    fn sub(self, rhs: TimeSpan) -> DateTimeOffset {
+    fn sub(self, rhs: SignedDuration) -> DateTimeOffset {
         self.subtract(rhs)
     }
 }
 
 impl Sub<DateTimeOffset> for DateTimeOffset {
-    type Output = TimeSpan;
+    type Output = SignedDuration;
     #[inline]
-    fn sub(self, rhs: DateTimeOffset) -> TimeSpan {
+    fn sub(self, rhs: DateTimeOffset) -> SignedDuration {
         self.subtract_date_time_offset(rhs)
     }
 }
 
-impl AddAssign<TimeSpan> for DateTimeOffset {
+impl AddAssign<SignedDuration> for DateTimeOffset {
     #[track_caller]
-    fn add_assign(&mut self, rhs: TimeSpan) {
+    fn add_assign(&mut self, rhs: SignedDuration) {
         *self = *self + rhs;
     }
 }
 
-impl SubAssign<TimeSpan> for DateTimeOffset {
+impl SubAssign<SignedDuration> for DateTimeOffset {
     #[track_caller]
-    fn sub_assign(&mut self, rhs: TimeSpan) {
+    fn sub_assign(&mut self, rhs: SignedDuration) {
         *self = *self - rhs;
     }
 }
@@ -513,7 +513,7 @@ impl SubAssign<TimeSpan> for DateTimeOffset {
 impl fmt::Display for DateTimeOffset {
     /// The short date, long time and offset of the current culture (.NET `ToString()`).
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.to_string_format("", &CultureInfo::current_culture()))
+        f.write_str(&self.to_string_format("", &CultureInfo::current_formatting()))
     }
 }
 
@@ -528,7 +528,7 @@ impl fmt::Debug for DateTimeOffset {
             clock.hour(),
             clock.minute(),
             clock.second(),
-            clock.ticks() % TimeSpan::TICKS_PER_SECOND,
+            clock.ticks() % SignedDuration::TICKS_PER_SECOND,
             if self.offset_minutes < 0 { '-' } else { '+' },
             minutes / 60,
             minutes % 60

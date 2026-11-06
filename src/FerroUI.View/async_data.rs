@@ -2,19 +2,20 @@
 //! ([`use_future`]), an element that follows that state ([`suspense`]), and a
 //! future that waits on a timer of the dispatcher ([`sleep`]).
 //!
-//! The futures run on the executor of the thread
-//! (`ferroui_system::threading::tasks::spawn_local`): a future is polled when
-//! it is started and again whenever it is woken, on the thread of the user
-//! interface, so what it reads and writes needs no synchronization. A future
-//! that waits for work of another thread (`tasks::run`) is woken through the
-//! dispatcher. Nothing here blocks the thread.
+//! The futures run on the dispatcher of the thread
+//! (`Dispatcher::start_local`): a future is polled for the first time when
+//! it is started, and every later poll is a dispatcher job that a wake
+//! queues, at the priority of the job that started it
+//! ([`DispatcherPriority::DEFAULT`] outside of a job), on the thread of the
+//! user interface, so what it reads and writes needs no synchronization. A
+//! load that is replaced is aborted (`JoinHandle::abort`), which drops its
+//! future. Nothing here blocks the thread.
 
 use crate::element::{rerender, Element};
 use crate::hooks::{after, use_hook, use_signal};
 use crate::reactive::{on_cleanup, Signal};
 use ferroui_base::reactive::Subscription;
-use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
-use ferroui_system::ObservableError;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer, JoinHandle};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
@@ -57,34 +58,32 @@ impl<T> AsyncState<T> {
     }
 }
 
-/// A future that was started and may be abandoned: its result is ignored,
-/// and the executor is woken to drop it.
-#[derive(Default)]
-struct Abandon {
-    abandoned: Cell<bool>,
-    /// The waker of the last poll that was pending.
-    waker: RefCell<Option<Waker>>,
-}
-
-impl Abandon {
-    fn abandon(&self) {
-        self.abandoned.set(true);
-        let waker = self.waker.borrow_mut().take();
-        if let Some(waker) = waker {
-            waker.wake();
-        }
-    }
-}
-
 /// What a component that runs a future keeps across its runs.
 struct Running<D> {
     /// The dependencies of the future that was started last.
     deps: Option<D>,
-    /// That future.
-    current: Option<Rc<Abandon>>,
+    /// The task of that future, until it is replaced or the component ends.
+    current: Option<JoinHandle<()>>,
+    /// The number of the load started last, shared with the tasks: a load
+    /// writes the state only while it is the latest. The abort drops the
+    /// future of a replaced load at once, except while that load is being
+    /// polled (it replaced itself, by writing a signal that the dependencies
+    /// follow), where the future is dropped once the poll returns, and this
+    /// keeps that poll from writing.
+    latest: Rc<Cell<u64>>,
 }
 
-/// Runs the future that `make` makes for `deps` on the executor of the
+impl<D> Running<D> {
+    /// Ends the load that was started last: no load is the latest any more,
+    /// and the task is taken, for the caller to abort outside of the borrow
+    /// (dropping a future runs arbitrary code).
+    fn supersede(&mut self) -> Option<JoinHandle<()>> {
+        self.latest.set(self.latest.get() + 1);
+        self.current.take()
+    }
+}
+
+/// Runs the future that `make` makes for `deps` on the dispatcher of the
 /// thread, when the component first runs and again whenever `deps` differ
 /// from those of the run before; the state is [`AsyncState::Pending`] until
 /// the future ends, then its value or its error. A hook: it follows the
@@ -103,11 +102,21 @@ struct Running<D> {
 /// ```
 ///
 /// The future is started once the controls of the run are in place, as the
-/// closure of [`use_effect_with`](crate::use_effect_with) runs. A future
-/// whose dependencies were replaced, or whose component was taken out, is
-/// abandoned: its result is ignored, and the executor drops it at once, which
-/// ends what it waited for (a [`sleep`] stops its timer). Reading the state
-/// with `get()` needs `T: Clone`; `with(|state| ..)` reads it in place.
+/// closure of [`use_effect_with`](crate::use_effect_with) runs, with
+/// `Dispatcher::start_local`: it runs up to its first pending `await` inside
+/// that call, and every later poll is a job of the dispatcher that a wake
+/// queues, at the priority of the job that started it
+/// ([`DispatcherPriority::DEFAULT`] outside of a job). So the state is written
+/// in the job that completes the future (or in the start, for a future that
+/// does not wait), never inside the call that woke it, and behind the work of
+/// that priority queued before the wake.
+///
+/// A future whose dependencies were replaced, or whose component was taken
+/// out, is aborted (`JoinHandle::abort`): the dispatcher drops it at once,
+/// which ends what it waited for (a [`sleep`] stops its timer), and it never
+/// writes the state, also when what it awaited completed before it was
+/// replaced. Reading the state with `get()` needs `T: Clone`;
+/// `with(|state| ..)` reads it in place.
 pub fn use_future<D, T, F, Fut>(deps: D, make: F) -> Signal<AsyncState<T>>
 where
     D: PartialEq + Clone + 'static,
@@ -117,12 +126,12 @@ where
 {
     let state = use_signal(|| AsyncState::<T>::Pending);
     let running: Rc<RefCell<Running<D>>> = use_hook(|| {
-        let running = Rc::new(RefCell::new(Running { deps: None, current: None }));
+        let running = Rc::new(RefCell::new(Running { deps: None, current: None, latest: Rc::new(Cell::new(0)) }));
         let ended = running.clone();
         on_cleanup(move || {
-            let current = ended.borrow_mut().current.take();
+            let current = ended.borrow_mut().supersede();
             if let Some(current) = current {
-                current.abandon();
+                current.abort();
             }
         });
         running
@@ -130,9 +139,9 @@ where
     let changed = running.borrow().deps.as_ref() != Some(&deps);
     if changed {
         after(move |_| {
-            let previous = running.borrow_mut().current.take();
+            let previous = running.borrow_mut().supersede();
             if let Some(previous) = previous {
-                previous.abandon();
+                previous.abort();
             }
             if !state.is_alive() {
                 return;
@@ -141,51 +150,40 @@ where
                 state.set(AsyncState::Pending);
             }
             let future = make(&deps);
-            let abandon = Rc::new(Abandon::default());
-            {
+            let (latest, load) = {
                 let mut running = running.borrow_mut();
                 running.deps = Some(deps);
-                running.current = Some(abandon.clone());
+                (running.latest.clone(), running.latest.get())
+            };
+            let task = start(future, state, latest.clone(), load);
+            if latest.get() == load {
+                running.borrow_mut().current = Some(task);
+            } else {
+                // Replaced inside its first poll: a later load is the current one.
+                task.abort();
             }
-            spawn(future, state, abandon);
         });
     }
     state
 }
 
-/// Runs `future` on the executor of the thread and writes its outcome into
-/// `state`, unless it was abandoned first.
-fn spawn<T, Fut>(future: Fut, state: Signal<AsyncState<T>>, abandon: Rc<Abandon>)
+/// Starts `future` on the dispatcher of the thread and writes its outcome
+/// into `state` in the job that completes it, if the load is still the
+/// latest (`latest` is `load`) and the state is alive.
+fn start<T, Fut>(future: Fut, state: Signal<AsyncState<T>>, latest: Rc<Cell<u64>>, load: u64) -> JoinHandle<()>
 where
     T: 'static,
     Fut: Future<Output = Result<T, String>> + 'static,
 {
-    let mut future = Box::pin(future);
-    let watched = std::future::poll_fn(move |context: &mut Context<'_>| -> Poll<Result<(), ObservableError>> {
-        if abandon.abandoned.get() {
-            // Ending here drops the future, and what it waited for.
-            return Poll::Ready(Ok(()));
+    Dispatcher::current_dispatcher().start_local(async move {
+        let outcome = future.await;
+        if latest.get() == load && state.is_alive() {
+            state.set(match outcome {
+                Ok(value) => AsyncState::Ready(value),
+                Err(message) => AsyncState::Failed(message),
+            });
         }
-        match future.as_mut().poll(context) {
-            Poll::Ready(outcome) => {
-                // Ended: nothing is left to abandon.
-                *abandon.waker.borrow_mut() = None;
-                abandon.abandoned.set(true);
-                if state.is_alive() {
-                    state.set(match outcome {
-                        Ok(value) => AsyncState::Ready(value),
-                        Err(message) => AsyncState::Failed(message),
-                    });
-                }
-                Poll::Ready(Ok(()))
-            }
-            Poll::Pending => {
-                *abandon.waker.borrow_mut() = Some(context.waker().clone());
-                Poll::Pending
-            }
-        }
-    });
-    let _task = ferroui_system::threading::tasks::spawn_local(watched);
+    })
 }
 
 /// An element that follows `state`: the element of `pending()` while it is

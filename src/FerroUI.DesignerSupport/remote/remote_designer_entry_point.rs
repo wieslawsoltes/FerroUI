@@ -3,7 +3,7 @@ use crate::remote::file_watcher_transport::FileWatcherTransport;
 use crate::remote::html_transport::HtmlWebSocketTransport;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
 use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::Ref;
 use ferroui_controls::{AppBuilder, Design, Window};
 use ferroui_markup_xaml::XamlLoadError;
@@ -14,13 +14,13 @@ use ferroui_remote_protocol::viewport::{
     ClientRenderInfoMessage, ClientSupportedPixelFormatsMessage, ClientViewportAllocatedMessage,
 };
 use ferroui_remote_protocol::{
-    exception_handler, message_handler, BsonTcpTransport, Guid, IFerroRemoteTransportConnection, Message,
-    TcpTransportBase,
+    exception_handler, message_handler, BsonTcpTransport, IFerroRemoteTransportConnection, Message, TcpTransportBase,
 };
 use std::cell::{Cell, RefCell};
 use std::net::IpAddr;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
+use url::Url;
 use xamlx::XamlError;
 
 ferroui_base::ferro_thread_local! {
@@ -38,8 +38,8 @@ ferroui_base::ferro_thread_local! {
 #[derive(Clone, Debug, PartialEq)]
 pub struct CommandLineArgs {
     pub app_path: Option<String>,
-    pub transport: Option<Uri>,
-    pub html_method_listen_uri: Option<Uri>,
+    pub transport: Option<Url>,
+    pub html_method_listen_uri: Option<Url>,
     pub method: String,
     pub session_id: String,
 }
@@ -70,39 +70,28 @@ pub struct UsageError;
 
 /// `Guid.NewGuid()`: a random identifier of version four, from the random
 /// generator of the system.
-pub(crate) fn new_guid() -> Guid {
-    Guid::from(uuid::Uuid::new_v4())
+pub(crate) fn new_guid() -> uuid::Uuid {
+    uuid::Uuid::new_v4()
 }
 
-/// `Uri.Host` and `Uri.Port` of an absolute URI with an authority that
-/// names its port.
-fn host_and_port(uri: &Uri) -> Option<(String, u16)> {
+/// `Uri.Host` and `Uri.Port` of a URL with an authority that names its
+/// port.
+fn host_and_port(uri: &Url) -> Option<(String, u16)> {
     host_and_port_or(uri, None)
 }
 
-/// `Uri.Host` and `Uri.Port` of an absolute URI with an authority;
-/// `default_port` is the port of the scheme, for a URI that names none.
-pub(crate) fn host_and_port_or(uri: &Uri, default_port: Option<u16>) -> Option<(String, u16)> {
-    let text = uri.absolute_uri();
-    let rest = &text[text.find("://")? + 3..];
-    let authority = &rest[..rest.find(['/', '?', '#']).unwrap_or(rest.len())];
-    let authority = authority.rsplit('@').next()?;
-    let (host, port) = match authority.strip_prefix('[') {
+/// `Uri.Host` and `Uri.Port` of a URL with an authority; `default_port` is
+/// the port of the scheme, for a URL that names none (the URL standard drops
+/// the port of a special scheme that is its default, `http://host:80`).
+/// An IPv6 host is its address, without the brackets.
+pub(crate) fn host_and_port_or(uri: &Url, default_port: Option<u16>) -> Option<(String, u16)> {
+    let host = match uri.host()? {
         // `[::1]:30243`
-        Some(bracketed) => {
-            let (host, port) = bracketed.split_once(']')?;
-            (host, port.strip_prefix(':'))
-        }
-        None => match authority.rsplit_once(':') {
-            Some((host, port)) => (host, Some(port)),
-            None => (authority, None),
-        },
+        url::Host::Ipv6(address) => address.to_string(),
+        host => host.to_string(),
     };
-    let port = match port {
-        Some(port) => port.parse().ok()?,
-        None => default_port?,
-    };
-    Some((host.to_string(), port))
+    let port = uri.port().or(default_port)?;
+    Some((host, port))
 }
 
 fn die(error: Option<&str>) -> ! {
@@ -165,10 +154,10 @@ impl RemoteDesignerEntryPoint {
         for arg in args {
             if let Some(option) = next.take() {
                 match option {
-                    Next::Transport => rv.transport = Some(Uri::new(arg, UriKind::Absolute).map_err(|_| UsageError)?),
+                    Next::Transport => rv.transport = Some(UriRef::parse_absolute(arg).map_err(|_| UsageError)?),
                     Next::Method => rv.method = arg.clone(),
                     Next::HtmlUrl => {
-                        rv.html_method_listen_uri = Some(Uri::new(arg, UriKind::Absolute).map_err(|_| UsageError)?)
+                        rv.html_method_listen_uri = Some(UriRef::parse_absolute(arg).map_err(|_| UsageError)?)
                     }
                     Next::SessionId => rv.session_id = arg.clone(),
                 }
@@ -208,7 +197,7 @@ impl RemoteDesignerEntryPoint {
         };
         if transport.scheme() == "tcp-bson" {
             let (host, port) =
-                host_and_port(transport).ok_or_else(|| format!("Invalid URI: no host and port in '{}'", transport.original_string()))?;
+                host_and_port(transport).ok_or_else(|| format!("Invalid URI: no host and port in '{transport}'"))?;
             let address: IpAddr = host.parse().map_err(|_| "An invalid IP address was specified.".to_string())?;
             let connection = BsonTcpTransport::empty().connect(address, port).map_err(|e| e.to_string())?;
             return Ok((connection, None));
@@ -276,11 +265,11 @@ impl RemoteDesignerEntryPoint {
     /// too (`IPAddress.Parse`), so that the method needs `--html-url`.
     fn html_transport(
         transport: Arc<dyn IFerroRemoteTransportConnection>,
-        html_method_listen_uri: Option<&Uri>,
+        html_method_listen_uri: Option<&Url>,
     ) -> Result<Arc<dyn IFerroRemoteTransportConnection>, String> {
         let listen_uri = match html_method_listen_uri {
             Some(listen_uri) => listen_uri.clone(),
-            None => Uri::new("http://localhost:5000", UriKind::Absolute).map_err(|_| "Invalid URI".to_string())?,
+            None => Url::parse("http://localhost:5000").map_err(|_| "Invalid URI".to_string())?,
         };
         let transport = HtmlWebSocketTransport::new(transport, &listen_uri).map_err(|e| e.to_string())?;
         Ok(transport)
@@ -509,7 +498,7 @@ mod tests {
         assert_eq!(methods::FERRO_REMOTE, parsed.method);
         assert!(parsed.html_method_listen_uri.is_none());
         // The session is a new identifier, different every time.
-        let session = Guid::parse(&parsed.session_id).expect("an identifier");
+        let session = uuid::Uuid::parse_str(&parsed.session_id).expect("an identifier");
         let other =
             RemoteDesignerEntryPoint::parse_command_line_args(&args(&["app", "--transport", "file:///tmp/a.xaml"])).unwrap();
         assert_ne!(session.to_string(), other.session_id);
@@ -537,7 +526,7 @@ mod tests {
 
     #[test]
     fn the_host_and_the_port_of_a_transport_are_read_from_its_uri() {
-        let uri = |text: &str| Uri::new(text, UriKind::Absolute).unwrap();
+        let uri = |text: &str| Url::parse(text).unwrap();
         assert_eq!(Some(("localhost".to_string(), 5000)), host_and_port(&uri("http://localhost:5000")));
         assert_eq!(Some(("::1".to_string(), 30243)), host_and_port(&uri("tcp-bson://[::1]:30243/")));
         assert_eq!(None, host_and_port(&uri("tcp-bson://127.0.0.1/")));
@@ -552,7 +541,7 @@ mod tests {
         use ferroui_remote_protocol::viewport::FrameMessage;
         use ferroui_remote_protocol::HtmlTransportStartedMessage;
 
-        let uri = |text: &str| Uri::new(text, UriKind::Absolute).unwrap();
+        let uri = |text: &str| Url::parse(text).unwrap();
         let connection = TestConnection::new();
         let transport = RemoteDesignerEntryPoint::html_transport(connection.clone(), Some(&uri("http://127.0.0.1:0")))
             .expect("the loopback interface can be listened on");

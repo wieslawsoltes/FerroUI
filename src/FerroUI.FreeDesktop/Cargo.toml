@@ -17,12 +17,16 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+# The one-shot channel of the D-Bus call queue.
+ferroui-system.workspace = true
 bitflags.workspace = true
 
 # D-Bus (docs/porting/x11-platform.md, section 3). The services of a FreeDesktop session exist on
 # Unix systems only; the crate has only its event type elsewhere.
 [target.'cfg(unix)'.dependencies]
 zbus.workspace = true
+# The file URLs of the results of the file chooser portal (C5 of #423).
+url.workspace = true
 # The random part of the object path of a menu (`Guid.NewGuid`).
 uuid = { workspace = true, features = ["v4"] }
 futures-util.workspace = true

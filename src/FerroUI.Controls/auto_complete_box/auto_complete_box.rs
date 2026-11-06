@@ -20,7 +20,6 @@ use crate::{
     AssignedBinding, ContentControl, ControlImpl, ItemsChangedEventArgs, ItemsChangedHandler, ItemsSource,
     SelectionChangedEventArgs, TextBlock, TextBox, TextChangedEventArgs,
 };
-use ferroui_base::animation::TimeSpan;
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction};
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::data::core::ValueTypes;
@@ -36,8 +35,7 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
 use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{
-    CancellationToken, CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer,
-    FerroSynchronizationContext, OperationCanceledError,
+    CancellationToken, Canceled, Dispatcher, DispatcherPriority, DispatcherTimer,
 };
 use ferroui_base::utilities::{CancelEventArgs, HandlerList, StringComparison};
 use ferroui_base::{
@@ -49,6 +47,7 @@ use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Represents the filter used by the [`AutoCompleteBox`] control to
 /// determine whether an item is a possible match for the specified text.
@@ -126,7 +125,7 @@ impl<T: 'static> PartialEq for AutoCompleteSelector<T> {
 
 /// The pending result of an [`AutoCompleteAsyncPopulator`]: the items for
 /// the drop-down, or the notice that the population was cancelled.
-pub type AutoCompletePopulation = Pin<Box<dyn Future<Output = Result<Vec<Option<BoxedValue>>, OperationCanceledError>>>>;
+pub type AutoCompletePopulation = Pin<Box<dyn Future<Output = Result<Vec<Option<BoxedValue>>, Canceled>>>>;
 
 /// The asynchronous populator of an [`AutoCompleteBox`]: given the search
 /// text and a cancellation token it produces the items for the drop-down.
@@ -269,7 +268,7 @@ pub struct AutoCompleteBox {
 
     /// The selection adapter, with the subscriptions to its events.
     adapter: RefCell<Option<Rc<dyn ISelectionAdapter>>>,
-    adapter_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    adapter_subscriptions: RefCell<Vec<Subscription>>,
 
     /// A control that can provide updated string values from a binding.
     value_member_binding_evaluator: RefCell<Option<Ref<BindingEvaluator>>>,
@@ -278,7 +277,7 @@ pub struct AutoCompleteBox {
     /// and the token of the handler.
     collection_change_subscription: RefCell<Option<(ItemsSource, u64)>>,
 
-    population_cancellation_token_source: RefCell<Option<CancellationTokenSource>>,
+    population_cancellation_token: RefCell<Option<CancellationToken>>,
 
     item_template_is_from_value_member_binding: Cell<bool>,
     setting_item_template_from_value_member_binding: Cell<bool>,
@@ -559,11 +558,11 @@ ferro_properties! {
         }
 
         /// Identifies the `MinimumPopulateDelay` property.
-        pub fn minimum_populate_delay_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register_with::<AutoCompleteBox, _>(
-                "MinimumPopulateDelay",
-                StyledPropertyOptions::new(TimeSpan::ZERO).validate(AutoCompleteBox::is_valid_minimum_populate_delay),
-            )
+        ///
+        /// A `Duration`: a negative delay, which the reference refuses in its validation
+        /// (`IsValidMinimumPopulateDelay`), is not a value of the type.
+        pub fn minimum_populate_delay_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<AutoCompleteBox, _>("MinimumPopulateDelay", Duration::ZERO)
         }
 
         /// Identifies the `MaxDropDownHeight` property.
@@ -728,10 +727,6 @@ impl AutoCompleteBox {
         *value >= -1
     }
 
-    fn is_valid_minimum_populate_delay(value: &TimeSpan) -> bool {
-        value.total_milliseconds() >= 0.0
-    }
-
     fn is_valid_max_drop_down_height(value: &f64) -> bool {
         *value >= 0.0
     }
@@ -767,21 +762,21 @@ impl AutoCompleteBox {
     /// dispatcher timer will be stopped. The timer will not be restarted
     /// until the next text update call by the user.
     fn on_minimum_populate_delay_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
-        let new_value = e.get_new_value::<TimeSpan>();
+        let new_value = e.get_new_value::<Duration>();
 
         // Stop any existing timer.
         let existing = self.delay_timer.borrow().as_ref().map(|(timer, _)| timer.clone());
         if let Some(timer) = existing {
             timer.stop();
 
-            if new_value == TimeSpan::ZERO {
+            if new_value.is_zero() {
                 if let Some((_, tick)) = self.delay_timer.take() {
                     tick.dispose();
                 }
             }
         }
 
-        if new_value > TimeSpan::ZERO {
+        if !new_value.is_zero() {
             // Create or clear a dispatcher timer instance.
             let timer = self.delay_timer.borrow().as_ref().map(|(timer, _)| timer.clone());
             let timer = timer.unwrap_or_else(|| {
@@ -796,8 +791,8 @@ impl AutoCompleteBox {
                 timer
             });
 
-            // Set the new tick interval: the delay is positive here, so it is a duration.
-            timer.set_interval(new_value.to_duration().unwrap_or_default());
+            // Set the new tick interval.
+            timer.set_interval(new_value);
         }
     }
 
@@ -1004,7 +999,7 @@ impl AutoCompleteBox {
             adapter_subscriptions: RefCell::new(Vec::new()),
             value_member_binding_evaluator: RefCell::new(None),
             collection_change_subscription: RefCell::new(None),
-            population_cancellation_token_source: RefCell::new(None),
+            population_cancellation_token: RefCell::new(None),
             item_template_is_from_value_member_binding: Cell::new(true),
             setting_item_template_from_value_member_binding: Cell::new(false),
             search_text: RefCell::new(Some(String::new())),
@@ -1074,11 +1069,11 @@ impl AutoCompleteBox {
     /// Gets or sets the minimum delay after text is typed in the text box
     /// before the control populates the list of possible matches in the
     /// drop-down. The default is zero.
-    pub fn minimum_populate_delay(&self) -> TimeSpan {
+    pub fn minimum_populate_delay(&self) -> Duration {
         self.get_value(Self::minimum_populate_delay_property())
     }
 
-    pub fn set_minimum_populate_delay(&self, value: TimeSpan) {
+    pub fn set_minimum_populate_delay(&self, value: Duration) {
         self.set_value(Self::minimum_populate_delay_property(), value)
     }
 
@@ -1393,9 +1388,7 @@ impl AutoCompleteBox {
     pub fn set_selection_adapter(&self, value: Option<Rc<dyn ISelectionAdapter>>) {
         let old = self.adapter.borrow().clone();
         if let Some(old) = old {
-            for subscription in self.adapter_subscriptions.take() {
-                subscription.dispose();
-            }
+            drop(self.adapter_subscriptions.take());
             old.set_items_source(None);
         }
 
@@ -1432,7 +1425,8 @@ impl AutoCompleteBox {
                     this.on_adapter_selection_complete();
                 }
             }));
-            *self.adapter_subscriptions.borrow_mut() = vec![selection_changed, commit, cancel, cancel_complete];
+            *self.adapter_subscriptions.borrow_mut() =
+                [selection_changed, commit, cancel, cancel_complete].map(Subscription::new).into();
             adapter.set_items_source(Some(self.view_source.clone()));
         }
     }
@@ -1680,24 +1674,24 @@ impl AutoCompleteBox {
     }
 
     fn try_populate_async(&self, search_text: Option<String>) -> bool {
-        if let Some(source) = self.population_cancellation_token_source.take() {
-            source.cancel();
+        if let Some(token) = self.population_cancellation_token.take() {
+            token.cancel();
         }
 
         let Some(populator) = self.async_populator() else {
             return false;
         };
 
-        let source = CancellationTokenSource::new();
-        let token = source.token();
-        *self.population_cancellation_token_source.borrow_mut() = Some(source);
+        let token = CancellationToken::new();
+        *self.population_cancellation_token.borrow_mut() = Some(token.clone());
 
         // Started the way an asynchronous method is called: it runs up to
         // its first pending await before this returns.
-        let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-            FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
-        });
-        drop(context.to_task_scheduler().start_local(Self::populate_async(self.to_ref(), populator, search_text, token)));
+        let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+        drop(Dispatcher::current_dispatcher().start_local_with_priority(
+            Self::populate_async(self.to_ref(), populator, search_text, token),
+            priority,
+        ));
 
         true
     }
@@ -1710,11 +1704,11 @@ impl AutoCompleteBox {
     ) {
         // A cancelled population is dropped silently.
         if let Ok(result_list) = populator.invoke(search_text, cancellation_token.clone()).await {
-            if !cancellation_token.is_cancellation_requested() {
+            if !cancellation_token.is_cancelled() {
                 let target = this.clone();
                 let token = cancellation_token.clone();
                 let operation = Dispatcher::ui_thread().invoke_async_local(move || {
-                    if !token.is_cancellation_requested() {
+                    if !token.is_cancelled() {
                         target.set_current_value(
                             Self::items_source_property(),
                             Some(ItemsSource::from_items(result_list)),
@@ -1728,7 +1722,7 @@ impl AutoCompleteBox {
             }
         }
 
-        this.population_cancellation_token_source.take();
+        this.population_cancellation_token.take();
     }
 
     /// Private method that directly opens the popup, checks the expander

@@ -14,7 +14,7 @@ use ferroui_base::input::{InputElementImpl, PointerEventArgs, TappedEventArgs};
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl, RoutedEvent};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::{from_markup_value, into_markup_value};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref,
@@ -32,7 +32,7 @@ use std::rc::Rc;
 pub struct EventsPageView {
     base: UserControl,
     events: RefCell<Option<Ref<ListBox>>>,
-    adorner: RefCell<Option<Rc<dyn IDisposable>>>,
+    adorner: RefCell<Option<Subscription>>,
     // Deviation (DEVIATIONS.md, Developer tools): the TreeDataGrid of the routed events, and the
     // handler of the changes of the selected node of the view model, which brings its row into
     // view.
@@ -229,15 +229,12 @@ impl EventsPageView {
 
         if let Some(main_view) = vm.main_view() {
             let adorner = ControlHighlightAdorner::add_visual(&visual, main_view.should_visualize_margin_padding());
-            *self.adorner.borrow_mut() = adorner;
+            *self.adorner.borrow_mut() = adorner.map(Subscription::new);
         }
     }
 
     /// Removes the highlight.
     pub fn list_box_item_pointer_exited(&self, _sender: &Option<BoxedValue>, _e: &PointerEventArgs) {
-        let adorner = self.adorner.borrow().clone();
-        if let Some(adorner) = adorner {
-            adorner.dispose();
-        }
+        drop(self.adorner.take());
     }
 }

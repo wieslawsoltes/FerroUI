@@ -1,7 +1,7 @@
 //! Port of `Core/ThrottleAction.cs`.
 
 use super::{attach_actions_to_logical_tree, detach_actions_from_logical_tree};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::utilities::DateTime;
 use ferroui_base::{
@@ -10,6 +10,7 @@ use ferroui_base::{
 };
 use ferroui_xaml_interactivity::{ActionCollection, Interaction, StyledElementAction, StyledElementActionImpl};
 use std::cell::Cell;
+use std::time::Duration;
 
 /// An action that will execute its child actions immediately, but ignores subsequent invocations
 /// until a specified interval has passed.
@@ -32,8 +33,8 @@ ferro_class_info!(ThrottleAction {
 ferro_properties! {
     impl ThrottleAction {
         /// Identifies the `Interval` property.
-        pub fn interval_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<ThrottleAction, _>("Interval", TimeSpan::ZERO)
+        pub fn interval_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<ThrottleAction, _>("Interval", Duration::ZERO)
         }
 
         /// Identifies the `Actions` property.
@@ -93,7 +94,9 @@ impl StyledElementActionImpl for ThrottleAction {
     /// ago. Returns nothing.
     fn execute(this: &Self, sender: Option<&BoxedValue>, parameter: Option<&BoxedValue>) -> Option<BoxedValue> {
         let now = DateTime::now();
-        if now - this.last_execution_time.get() >= this.interval() {
+        // The time since the last run is a signed span (the clock can be set back); the
+        // interval is the span of the same value, saturating.
+        if now - this.last_execution_time.get() >= SignedDuration::from(this.interval()) {
             this.last_execution_time.set(now);
             Interaction::execute_actions(sender, this.actions().as_ref(), parameter);
         }
@@ -115,11 +118,11 @@ impl ThrottleAction {
 
     /// Gets or sets the minimum interval between executions. This is a property of the object
     /// model.
-    pub fn interval(&self) -> TimeSpan {
+    pub fn interval(&self) -> Duration {
         self.get_value(Self::interval_property())
     }
 
-    pub fn set_interval(&self, value: TimeSpan) {
+    pub fn set_interval(&self, value: Duration) {
         self.set_value(Self::interval_property(), value)
     }
 

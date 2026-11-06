@@ -1,12 +1,18 @@
 //! `ServiceDescriptor.cs`, `ServiceKeyLookupMode.cs`, and constructor call-site metadata.
 
 use crate::*;
-use ferroui_system::{threading::tasks::Task, IDisposable};
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::rc::Rc;
 
-/// Async disposal uses FerroUI's local task executor; no external runtime is required.
+/// The outcome of an asynchronous disposal (`ValueTask` of `DisposeAsync`): the
+/// [`Shared`] of a result, whose `flatten()` is a future of it.
+pub type DisposeTask = Shared<Result<(), ObservableError>>;
+
+/// Async disposal uses FerroUI's local task executor (`ferroui_system::task`); no external runtime
+/// is required.
 pub trait IAsyncDisposable {
-    fn dispose_async(&self) -> Task<()>;
+    fn dispose_async(&self) -> DisposeTask;
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -75,7 +81,7 @@ pub type ErasedFactory =
     Rc<dyn Fn(&ServiceProvider, Option<&ServiceKey>) -> ServiceResult<ErasedService>>;
 pub(crate) type Enumerate = fn(&ErasedService) -> Vec<ErasedService>;
 pub(crate) type Dispose = Rc<dyn Fn(&ErasedService)>;
-pub(crate) type DisposeAsync = Rc<dyn Fn(&ErasedService) -> Task<()>>;
+pub(crate) type DisposeAsync = Rc<dyn Fn(&ErasedService) -> DisposeTask>;
 
 /// A registration. Construct typed factories with `new` or `from_factory`; erased registration
 /// exists for adapters. Instance registrations are externally owned and never disposed.
@@ -196,7 +202,7 @@ impl ServiceDescriptor {
     }
     pub fn on_dispose_async<S: ?Sized + 'static>(
         mut self,
-        dispose: impl Fn(Rc<S>) -> Task<()> + 'static,
+        dispose: impl Fn(Rc<S>) -> DisposeTask + 'static,
     ) -> Self {
         assert_eq!(
             self.service_type(),

@@ -1,7 +1,7 @@
 use super::{entry_ptr_eq, IValueEntry};
 use crate::data::{BindingPriority, BindingValueType};
 use crate::ferro_property::value_equals;
-use crate::ferro_property_metadata::CoerceValueCallback;
+use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations, DefaultCoercionOperations};
 use crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledPropertyMetadata};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -9,140 +9,64 @@ use std::rc::Rc;
 
 /// The untyped interface of an [`EffectiveValue`].
 pub(crate) trait EffectiveValueDyn: Any {
-    fn property(&self) -> &'static FerroProperty;
-    fn priority(&self) -> BindingPriority;
-    fn base_priority(&self) -> BindingPriority;
-    fn value_entry(&self) -> Option<Rc<dyn IValueEntry>>;
-    fn is_overriden_current_value(&self) -> bool;
-    fn set_is_overriden_current_value(&self, value: bool);
+    // A single projection gives the common store its property identity,
+    // priorities and subscriptions for every payload type.
+    fn state(&self) -> &EffectiveValueState;
     fn boxed_value(&self) -> BoxedValue;
-    /// A reference to the current value as `&dyn Any`, passed to `f`.
-    fn with_value(&self, f: &mut dyn FnMut(&dyn Any));
-
-    fn begin_reevaluation(&self, clear_local_value: bool);
     fn end_reevaluation(&self, owner: &FerroObject);
-    fn can_remove(&self) -> bool;
-    fn unsubscribe_if_necessary(&self);
-
-    /// Sets the value from a value entry and raises change notifications.
-    fn set_and_raise(&self, owner: &FerroObject, value: &Rc<dyn IValueEntry>, priority: BindingPriority);
-    /// Sets an untyped local value and raises change notifications.
-    fn set_local_value_and_raise_untyped(&self, owner: &FerroObject, value: &dyn Any);
-    /// Sets a local value from a value entry and raises change notifications.
-    fn set_local_value_and_raise_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry);
-    /// Raises a change notification on `owner` for a change of the value it
-    /// inherits, from `old_value` to `new_value` (either may be absent,
-    /// meaning the property's default value).
-    fn raise_inherited_value_changed(
-        &self,
-        owner: &FerroObject,
-        old_value: Option<&dyn EffectiveValueDyn>,
-        new_value: Option<&dyn EffectiveValueDyn>,
-    );
+    /// Reads the entry as this property's Rust type, then applies it.
+    fn apply_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry, priority: BindingPriority);
     fn remove_animation_and_raise(&self, owner: &FerroObject);
     fn coerce_value(&self, owner: &FerroObject);
-    fn dispose_and_raise_unset(&self, owner: &FerroObject);
-    fn as_any(&self) -> &dyn Any;
+    fn raise_unset(
+        &self,
+        owner: &FerroObject,
+        inherited: Option<&dyn EffectiveValueDyn>,
+        clear_data_validation: bool,
+    );
 }
 
-struct UncommonFields<T> {
+pub(crate) struct UncommonFields<T> {
     coerce: CoerceValueCallback<T>,
     uncoerced_value: RefCell<T>,
     uncoerced_base_value: RefCell<T>,
 }
 
-/// The effective (resolved) value of a styled property on an object: the
-/// highest priority value and the highest priority non-animation ("base")
-/// value.
-pub(crate) struct EffectiveValue<T: PropertyValue> {
-    property: &'static StyledProperty<T>,
-    metadata: Rc<StyledPropertyMetadata<T>>,
+impl<T: Clone> UncommonFields<T> {
+    pub(crate) fn new(coerce: &CoerceValueCallback<T>, value: &T) -> Self {
+        // Preserve the original map closure's initialization and partial-drop
+        // order. In particular, the callback is cloned before either T clone.
+        Self {
+            coerce: coerce.clone(),
+            uncoerced_value: RefCell::new(value.clone()),
+            uncoerced_base_value: RefCell::new(value.clone()),
+        }
+    }
+}
+
+/// Entry selection and subscription lifetime are identical for every styled
+/// property. Only the resolved values and their coercion callback depend on T.
+pub(crate) struct EffectiveValueState {
+    property: &'static FerroProperty,
     priority: Cell<BindingPriority>,
     base_priority: Cell<BindingPriority>,
     value_entry: RefCell<Option<Rc<dyn IValueEntry>>>,
     base_value_entry: RefCell<Option<Rc<dyn IValueEntry>>>,
     is_overriden_current_value: Cell<bool>,
     is_coerced_default_value: Cell<bool>,
-    value: RefCell<T>,
-    base_value: RefCell<Option<T>>,
-    uncommon: Option<UncommonFields<T>>,
 }
 
-impl<T: PropertyValue> EffectiveValue<T> {
-    pub fn new(owner: &FerroObject, property: &'static StyledProperty<T>, inherited: Option<&EffectiveValue<T>>) -> Self {
-        let metadata = property.get_metadata_for(owner);
-        let value = match inherited {
-            Some(inherited) => inherited.value(),
-            None => metadata.default_value().clone(),
-        };
-        let uncommon = metadata.coerce_value().map(|coerce| UncommonFields {
-            coerce: coerce.clone(),
-            uncoerced_value: RefCell::new(value.clone()),
-            uncoerced_base_value: RefCell::new(value.clone()),
-        });
+impl EffectiveValueState {
+    fn new(property: &'static FerroProperty) -> Self {
         Self {
             property,
-            metadata,
             priority: Cell::new(BindingPriority::Unset),
             base_priority: Cell::new(BindingPriority::Unset),
             value_entry: RefCell::new(None),
             base_value_entry: RefCell::new(None),
             is_overriden_current_value: Cell::new(false),
             is_coerced_default_value: Cell::new(false),
-            value: RefCell::new(value),
-            base_value: RefCell::new(None),
-            uncommon,
         }
-    }
-
-    /// The current value.
-    #[inline]
-    pub fn value(&self) -> T {
-        self.value.borrow().clone()
-    }
-
-    pub fn with_value<R>(&self, read: impl FnOnce(&T) -> R) -> R {
-        read(&self.value.borrow())
-    }
-
-    pub fn set_local_value_and_raise(&self, owner: &FerroObject, value: T) {
-        self.set_and_raise_core(owner, value, BindingPriority::LocalValue, false, false);
-    }
-
-    pub fn set_current_value_and_raise(&self, owner: &FerroObject, value: T) {
-        self.set_and_raise_core(owner, value, self.priority.get(), true, false);
-    }
-
-    pub fn set_coerced_default_value_and_raise(&self, owner: &FerroObject, value: T) {
-        self.set_and_raise_core(owner, value, self.priority.get(), false, true);
-    }
-
-    /// The base value, if there is one.
-    pub fn try_get_base_value(&self) -> Option<T> {
-        if self.base_priority.get() != BindingPriority::Unset {
-            self.base_value.borrow().clone()
-        } else {
-            None
-        }
-    }
-
-    fn get_entry_value(&self, entry: &dyn IValueEntry) -> T {
-        let mut out: Option<T> = None;
-        if entry.has_value() {
-            if entry.try_get_value(&mut out) {
-                if let Some(v) = out {
-                    return v;
-                }
-            } else if let Some(boxed) = entry.get_value_boxed() {
-                // An untyped entry (a binding expression): its value is
-                // already converted to the property type, or is the unset
-                // marker.
-                if let Some(v) = boxed.downcast_ref::<T>() {
-                    return v.clone();
-                }
-            }
-        }
-        self.metadata.default_value().clone()
     }
 
     fn update_value_entry(&self, entry: Option<&Rc<dyn IValueEntry>>, priority: BindingPriority) {
@@ -186,55 +110,186 @@ impl<T: PropertyValue> EffectiveValue<T> {
         }
     }
 
-    fn set_and_raise_core(
+    fn begin_reevaluation(&self, clear_local_value: bool) {
+        let overridden = self.is_overriden_current_value.get();
+        if clear_local_value || (self.priority.get() != BindingPriority::LocalValue && !overridden) {
+            self.priority.set(BindingPriority::Unset);
+        }
+        if clear_local_value || (self.base_priority.get() != BindingPriority::LocalValue && !overridden) {
+            self.base_priority.set(BindingPriority::Unset);
+        }
+    }
+
+    fn unsubscribe_if_necessary(&self) {
+        if self.priority.get() == BindingPriority::Unset {
+            if let Some(entry) = self.value_entry.take() {
+                entry.unsubscribe();
+            }
+        }
+        if self.base_priority.get() == BindingPriority::Unset {
+            if let Some(entry) = self.base_value_entry.take() {
+                entry.unsubscribe();
+            }
+        }
+    }
+
+    fn data_validation_enabled(&self) -> bool {
+        let has = |slot: &RefCell<Option<Rc<dyn IValueEntry>>>| {
+            slot.borrow().as_ref().map(|e| e.get_data_validation_state().is_some())
+        };
+        has(&self.value_entry).or_else(|| has(&self.base_value_entry)).unwrap_or(false)
+    }
+
+    fn finish_unset(
         &self,
         owner: &FerroObject,
-        value: T,
+        old: &dyn Any,
+        new: &dyn Any,
         priority: BindingPriority,
-        is_overridden_current_value: bool,
-        is_coerced_default_value: bool,
+        changed: bool,
+        clear_data_validation: bool,
     ) {
-        let old_value = self.value();
-        let mut value_changed = false;
-        let mut base_value_changed = false;
-
-        self.is_overriden_current_value.set(is_overridden_current_value);
-        self.is_coerced_default_value.set(is_coerced_default_value);
-
-        // `v = value`, or the coerced value. The value as it was given is
-        // only read again where it is stored uncoerced, so without a
-        // coercion `v` is the value itself and not a copy of it.
-        let (v, uncoerced) = match &self.uncommon {
-            Some(uncommon) if !is_coerced_default_value => {
-                ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value)))
-            }
-            _ => (value, None),
-        };
-
-        if priority <= self.priority.get() {
-            value_changed = !value_equals(&*self.value.borrow(), &v);
-            // `replace` releases the borrow before the previous value is
-            // dropped: dropping a value may run code that reads the property.
-            self.value.replace(v.clone());
-            self.priority.set(priority);
-            if let Some((uncommon, value)) = &uncoerced {
-                uncommon.uncoerced_value.replace(value.clone());
+        if changed {
+            owner.raise_property_changed_values(self.property, Some(old), new, priority, true);
+            if self.property.inherits() {
+                owner.values().on_inherited_effective_value_changed(owner, self.property, old, new);
             }
         }
+        if clear_data_validation {
+            owner.on_update_data_validation(self.property, BindingValueType::UNSET_VALUE, None);
+        }
+    }
 
-        if priority <= self.base_priority.get() && priority >= BindingPriority::LocalValue {
-            base_value_changed = !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &v));
-            self.base_value.replace(Some(v));
-            self.base_priority.set(priority);
-            if let Some((uncommon, value)) = uncoerced {
-                uncommon.uncoerced_base_value.replace(value);
+}
+
+// The store already holds these values through a trait object. Only methods
+// that read or write a typed payload need a distinct vtable slot per T.
+impl dyn EffectiveValueDyn {
+    pub(crate) fn property(&self) -> &'static FerroProperty {
+        self.state().property
+    }
+
+    /// Uses the capability of the already-selected property, avoiding another
+    /// state projection and a typed vtable slot for non-inheriting properties.
+    pub(crate) fn raise_inherited_value_changed(
+        &self,
+        property: &'static FerroProperty,
+        owner: &FerroObject,
+        old_value: Option<&dyn EffectiveValueDyn>,
+        new_value: Option<&dyn EffectiveValueDyn>,
+    ) {
+        (property.inherited_value_changed())(self, owner, old_value, new_value);
+    }
+
+    pub(crate) fn priority(&self) -> BindingPriority {
+        self.state().priority.get()
+    }
+
+    pub(crate) fn base_priority(&self) -> BindingPriority {
+        self.state().base_priority.get()
+    }
+
+    pub(crate) fn value_entry(&self) -> Option<Rc<dyn IValueEntry>> {
+        self.state().value_entry.borrow().clone()
+    }
+
+    pub(crate) fn is_overriden_current_value(&self) -> bool {
+        self.state().is_overriden_current_value.get()
+    }
+
+    pub(crate) fn set_is_overriden_current_value(&self, value: bool) {
+        self.state().is_overriden_current_value.set(value);
+    }
+
+    pub(crate) fn begin_reevaluation(&self, clear_local_value: bool) {
+        self.state().begin_reevaluation(clear_local_value);
+    }
+
+    pub(crate) fn can_remove(&self) -> bool {
+        let state = self.state();
+        state.priority.get() == BindingPriority::Unset
+            && !state.is_overriden_current_value.get()
+            && !state.is_coerced_default_value.get()
+    }
+
+    pub(crate) fn unsubscribe_if_necessary(&self) {
+        self.state().unsubscribe_if_necessary();
+    }
+
+    pub(crate) fn set_and_raise(&self, owner: &FerroObject, entry: &Rc<dyn IValueEntry>, priority: BindingPriority) {
+        debug_assert!(priority != BindingPriority::LocalValue);
+        let state = self.state();
+        state.update_value_entry(Some(entry), priority);
+        self.apply_entry(owner, &**entry, priority);
+        if priority > BindingPriority::LocalValue {
+            if let Some((kind, error)) = entry.get_data_validation_state() {
+                owner.on_update_data_validation(state.property, kind, error);
             }
         }
+    }
 
-        if value_changed {
-            self.notify_value_changed(owner, old_value);
-        } else if base_value_changed {
-            self.notify_base_value_changed(owner);
+    pub(crate) fn set_local_value_and_raise_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry) {
+        self.apply_entry(owner, entry, BindingPriority::LocalValue);
+    }
+
+    pub(crate) fn dispose_and_raise_unset(&self, owner: &FerroObject) {
+        let state = self.state();
+        let clear_data_validation = state.data_validation_enabled();
+        if let Some(entry) = state.value_entry.take() {
+            entry.unsubscribe();
+        }
+        if let Some(entry) = state.base_value_entry.take() {
+            entry.unsubscribe();
+        }
+        let inherited = if state.property.inherits() { owner.values().try_get_inherited_value(state.property) } else { None };
+        self.raise_unset(owner, inherited.as_deref(), clear_data_validation);
+    }
+}
+
+/// The effective (resolved) value of a styled property on an object: the
+/// highest priority value and the highest priority non-animation ("base")
+/// value.
+// Keep the representation unbounded so Clone-only public metadata can name
+// its cold algorithm. Construction, store access and notification impls retain
+// their PropertyValue bounds; none of the typed fields is erased or recast.
+pub(crate) struct EffectiveValue<T> {
+    metadata: Rc<StyledPropertyMetadata<T>>,
+    state: EffectiveValueState,
+    value: RefCell<T>,
+    base_value: RefCell<Option<T>>,
+    uncommon: Option<UncommonFields<T>>,
+}
+
+impl<T: Clone + 'static> EffectiveValue<T> {
+    /// The current value.
+    #[inline]
+    pub fn value(&self) -> T {
+        self.value.borrow().clone()
+    }
+
+    pub fn with_value<R>(&self, read: impl FnOnce(&T) -> R) -> R {
+        read(&self.value.borrow())
+    }
+
+    // Preserve the two owned-value frames and their argument evaluation:
+    // clone the uncoerced value, then the base, then read priorities in the
+    // original call. Clone, equality, coercion and Drop can reenter the store.
+    pub(crate) fn apply_coercion(&self, owner: &FerroObject, operations: CoercionOperations<T>) {
+        let Some(uncommon) = &self.uncommon else { return };
+        let value = uncommon.uncoerced_value.borrow().clone();
+        let base_value = uncommon.uncoerced_base_value.borrow().clone();
+        self.set_and_raise_core_with_base(owner, value, self.state.priority.get(), base_value, self.state.base_priority.get(), operations);
+    }
+
+    pub(crate) fn apply_coercion_at_end(&self, owner: &FerroObject, operations: DefaultCoercionOperations<T>) {
+        if let Some(uncommon) = &self.uncommon {
+            // Coerce the default value and raise if it differs. The default
+            // stays alive through the typed setter, including its unwind.
+            let default = self.metadata.default_value().clone();
+            let coerced = (uncommon.coerce)(owner, default.clone());
+            if !(operations.equals)(&default, &coerced) {
+                (operations.set_default)(self, owner, coerced);
+            }
         }
     }
 
@@ -245,6 +300,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
         priority: BindingPriority,
         base_value: T,
         base_priority: BindingPriority,
+        operations: CoercionOperations<T>,
     ) {
         debug_assert!(base_priority > BindingPriority::Animation);
         debug_assert!(priority <= base_priority);
@@ -262,7 +318,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             }
         }
 
-        if !value_equals(&*self.value.borrow(), &v) {
+        if !(operations.equals)(&*self.value.borrow(), &v) {
             self.value.replace(v.clone());
             value_changed = true;
             if let Some(uncommon) = &self.uncommon {
@@ -270,7 +326,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             }
         }
 
-        if !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &bv)) {
+        if !self.base_value.borrow().as_ref().is_some_and(|base| (operations.equals)(base, &bv)) {
             self.base_value.replace(Some(v));
             base_value_changed = true;
             if let Some(uncommon) = &self.uncommon {
@@ -278,30 +334,161 @@ impl<T: PropertyValue> EffectiveValue<T> {
             }
         }
 
-        self.priority.set(priority);
-        self.base_priority.set(base_priority);
+        self.state.priority.set(priority);
+        self.state.base_priority.set(base_priority);
+
+        if value_changed {
+            (operations.notify_value_changed)(self, owner, old_value);
+        }
+        if base_value_changed {
+            (operations.notify_base_value_changed)(self, owner);
+        }
+    }
+}
+
+impl<T: PropertyValue> EffectiveValue<T> {
+    // Its address is taken only by an explicit inheritance registration.
+    // Keep the original owned-value frame: the selected source's metadata
+    // supplies defaults, then old/new clones, equality and notification run
+    // in their original order. The checked projection adds no owning handle.
+    pub(crate) fn notify_inherited_value_changed(
+        source: &dyn EffectiveValueDyn,
+        owner: &FerroObject,
+        old_value: Option<&dyn EffectiveValueDyn>,
+        new_value: Option<&dyn EffectiveValueDyn>,
+    ) {
+        let source = (source as &dyn Any).downcast_ref::<Self>().expect("inherited value has the property's Rust type");
+        debug_assert!(old_value.is_some() || new_value.is_some());
+        let default = || source.metadata.default_value().clone();
+        let o = old_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
+        let n = new_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
+        let priority = if new_value.is_some() { BindingPriority::Inherited } else { BindingPriority::Unset };
+        if !value_equals(&o, &n) {
+            owner.raise_inherited_property_changed(source.state.property, &o, &n, priority);
+        }
+    }
+
+    pub fn new(owner: &FerroObject, property: &'static StyledProperty<T>, inherited: Option<&EffectiveValue<T>>) -> Self {
+        let metadata = property.get_metadata_for(owner);
+        let value = match inherited {
+            Some(inherited) => inherited.value(),
+            None => metadata.default_value().clone(),
+        };
+        let uncommon = metadata.coercion().map(|coercion| coercion.initialize_uncommon(&value));
+        Self {
+            metadata,
+            state: EffectiveValueState::new(property),
+            value: RefCell::new(value),
+            base_value: RefCell::new(None),
+            uncommon,
+        }
+    }
+
+    pub fn set_local_value_and_raise(&self, owner: &FerroObject, value: T) {
+        self.set_and_raise_core(owner, value, BindingPriority::LocalValue, false, false);
+    }
+
+    pub fn set_current_value_and_raise(&self, owner: &FerroObject, value: T) {
+        self.set_and_raise_core(owner, value, self.state.priority.get(), true, false);
+    }
+
+    pub fn set_coerced_default_value_and_raise(&self, owner: &FerroObject, value: T) {
+        self.set_and_raise_core(owner, value, self.state.priority.get(), false, true);
+    }
+
+    /// The base value, if there is one.
+    pub fn try_get_base_value(&self) -> Option<T> {
+        if self.state.base_priority.get() != BindingPriority::Unset {
+            self.base_value.borrow().clone()
+        } else {
+            None
+        }
+    }
+
+    fn get_entry_value(&self, entry: &dyn IValueEntry) -> T {
+        let mut out: Option<T> = None;
+        if entry.has_value() {
+            if entry.try_get_value(&mut out) {
+                if let Some(v) = out {
+                    return v;
+                }
+            } else if let Some(boxed) = entry.get_value_boxed() {
+                // An untyped entry (a binding expression): its value is
+                // already converted to the property type, or is the unset
+                // marker.
+                if let Some(v) = boxed.downcast_ref::<T>() {
+                    return v.clone();
+                }
+            }
+        }
+        self.metadata.default_value().clone()
+    }
+
+    fn set_and_raise_core(
+        &self,
+        owner: &FerroObject,
+        value: T,
+        priority: BindingPriority,
+        is_overridden_current_value: bool,
+        is_coerced_default_value: bool,
+    ) {
+        let old_value = self.value();
+        let mut value_changed = false;
+        let mut base_value_changed = false;
+
+        self.state.is_overriden_current_value.set(is_overridden_current_value);
+        self.state.is_coerced_default_value.set(is_coerced_default_value);
+
+        // `v = value`, or the coerced value. The value as it was given is
+        // only read again where it is stored uncoerced, so without a
+        // coercion `v` is the value itself and not a copy of it.
+        let (v, uncoerced) = match &self.uncommon {
+            Some(uncommon) if !is_coerced_default_value => {
+                ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value)))
+            }
+            _ => (value, None),
+        };
+
+        if priority <= self.state.priority.get() {
+            value_changed = !value_equals(&*self.value.borrow(), &v);
+            // `replace` releases the borrow before the previous value is
+            // dropped: dropping a value may run code that reads the property.
+            self.value.replace(v.clone());
+            self.state.priority.set(priority);
+            if let Some((uncommon, value)) = &uncoerced {
+                uncommon.uncoerced_value.replace(value.clone());
+            }
+        }
+
+        if priority <= self.state.base_priority.get() && priority >= BindingPriority::LocalValue {
+            base_value_changed = !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &v));
+            self.base_value.replace(Some(v));
+            self.state.base_priority.set(priority);
+            if let Some((uncommon, value)) = uncoerced {
+                uncommon.uncoerced_base_value.replace(value);
+            }
+        }
 
         if value_changed {
             self.notify_value_changed(owner, old_value);
-        }
-        if base_value_changed {
+        } else if base_value_changed {
             self.notify_base_value_changed(owner);
         }
     }
 
     fn notify_value_changed(&self, owner: &FerroObject, old_value: T) {
-        let notifying = self.property.notifying();
+        let notifying = self.state.property.notifying();
         if let Some(notifying) = notifying {
             notifying(owner, true);
         }
         let new_value = self.value();
-        owner.raise_property_changed(self.property, Some(&old_value), &new_value, self.priority.get(), true);
-        if self.property.inherits() {
+        owner.raise_property_changed(self.state.property, Some(&old_value), &new_value, self.state.priority.get(), true);
+        if self.state.property.inherits() {
             // A change handler may have changed the value again: inheritance
             // children are told the value as it is now, not the value that
             // was announced to the handlers of this object.
             let new_value = self.value();
-            owner.values().on_inherited_effective_value_changed(owner, self.property, &old_value, &new_value);
+            owner.values().on_inherited_effective_value_changed(owner, self.state.property, &old_value, &new_value);
         }
         if let Some(notifying) = notifying {
             notifying(owner, false);
@@ -311,30 +498,15 @@ impl<T: PropertyValue> EffectiveValue<T> {
     fn notify_base_value_changed(&self, owner: &FerroObject) {
         let base = self.base_value.borrow().clone();
         if let Some(base) = base {
-            owner.raise_property_changed(self.property, None, &base, self.base_priority.get(), false);
+            owner.raise_property_changed(self.state.property, None, &base, self.state.base_priority.get(), false);
         }
     }
-
-    fn data_validation_enabled(&self) -> bool {
-        let has = |slot: &RefCell<Option<Rc<dyn IValueEntry>>>| {
-            slot.borrow().as_ref().map(|e| e.get_data_validation_state().is_some())
-        };
-        has(&self.value_entry).or_else(|| has(&self.base_value_entry)).unwrap_or(false)
-    }
-}
-
-/// Panics for an untyped local value that is not of the value type of the
-/// property (compiled once, not per value type).
-#[cold]
-#[track_caller]
-fn invalid_value_type(property: &FerroProperty) -> ! {
-    panic!("invalid value type for property '{}'", property.name())
 }
 
 /// Downcasts an untyped effective value to its typed form.
 #[inline]
 pub(crate) fn cast_effective_value<T: PropertyValue>(value: &dyn EffectiveValueDyn) -> &EffectiveValue<T> {
-    debug_assert!(value.as_any().is::<EffectiveValue<T>>());
+    debug_assert!((value as &dyn Any).is::<EffectiveValue<T>>());
     // SAFETY: effective values are created exclusively by
     // `StyledProperty<T>::create_effective_value` and stored under that
     // property's ID, and a property ID is never shared between properties of
@@ -346,172 +518,76 @@ pub(crate) fn cast_effective_value<T: PropertyValue>(value: &dyn EffectiveValueD
 }
 
 impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
-    fn property(&self) -> &'static FerroProperty {
-        self.property
-    }
-
-    fn priority(&self) -> BindingPriority {
-        self.priority.get()
-    }
-
-    fn base_priority(&self) -> BindingPriority {
-        self.base_priority.get()
-    }
-
-    fn value_entry(&self) -> Option<Rc<dyn IValueEntry>> {
-        self.value_entry.borrow().clone()
-    }
-
-    fn is_overriden_current_value(&self) -> bool {
-        self.is_overriden_current_value.get()
-    }
-
-    fn set_is_overriden_current_value(&self, value: bool) {
-        self.is_overriden_current_value.set(value)
+    fn state(&self) -> &EffectiveValueState {
+        &self.state
     }
 
     fn boxed_value(&self) -> BoxedValue {
         Rc::new(self.value())
     }
 
-    fn with_value(&self, f: &mut dyn FnMut(&dyn Any)) {
-        let value = self.value();
-        f(&value)
-    }
-
-    fn begin_reevaluation(&self, clear_local_value: bool) {
-        let overridden = self.is_overriden_current_value.get();
-        if clear_local_value || (self.priority.get() != BindingPriority::LocalValue && !overridden) {
-            self.priority.set(BindingPriority::Unset);
-        }
-        if clear_local_value || (self.base_priority.get() != BindingPriority::LocalValue && !overridden) {
-            self.base_priority.set(BindingPriority::Unset);
-        }
-    }
-
     fn end_reevaluation(&self, owner: &FerroObject) {
-        if self.priority.get() == BindingPriority::Unset {
-            if let Some(uncommon) = &self.uncommon {
-                // Coerce the default value and raise if it differs.
-                let default = self.metadata.default_value().clone();
-                let coerced = (uncommon.coerce)(owner, default.clone());
-                if !value_equals(&default, &coerced) {
-                    self.set_coerced_default_value_and_raise(owner, coerced);
-                }
+        if self.state.priority.get() == BindingPriority::Unset {
+            // Keep the priority short circuit before even reading metadata.
+            if let Some(coercion) = self.metadata.coercion() {
+                coercion.end_reevaluation(self, owner, DefaultCoercionOperations {
+                    equals: value_equals::<T>,
+                    set_default: Self::set_coerced_default_value_and_raise,
+                });
             }
         }
     }
 
-    fn can_remove(&self) -> bool {
-        self.priority.get() == BindingPriority::Unset
-            && !self.is_overriden_current_value.get()
-            && !self.is_coerced_default_value.get()
-    }
-
-    fn unsubscribe_if_necessary(&self) {
-        if self.priority.get() == BindingPriority::Unset {
-            if let Some(entry) = self.value_entry.take() {
-                entry.unsubscribe();
-            }
-        }
-        if self.base_priority.get() == BindingPriority::Unset {
-            if let Some(entry) = self.base_value_entry.take() {
-                entry.unsubscribe();
-            }
-        }
-    }
-
-    fn set_and_raise(&self, owner: &FerroObject, value: &Rc<dyn IValueEntry>, priority: BindingPriority) {
-        debug_assert!(priority != BindingPriority::LocalValue);
-        self.update_value_entry(Some(value), priority);
-        let v = self.get_entry_value(&**value);
-        self.set_and_raise_core(owner, v, priority, false, false);
-
-        if priority > BindingPriority::LocalValue {
-            if let Some((state, error)) = value.get_data_validation_state() {
-                owner.on_update_data_validation(self.property, state, error);
-            }
-        }
-    }
-
-    fn set_local_value_and_raise_untyped(&self, owner: &FerroObject, value: &dyn Any) {
-        let value = value
-            .downcast_ref::<T>()
-            .unwrap_or_else(|| invalid_value_type(self.property))
-            .clone();
-        self.set_local_value_and_raise(owner, value);
-    }
-
-    fn set_local_value_and_raise_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry) {
+    fn apply_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry, priority: BindingPriority) {
         let value = self.get_entry_value(entry);
-        self.set_local_value_and_raise(owner, value);
-    }
-
-    fn raise_inherited_value_changed(
-        &self,
-        owner: &FerroObject,
-        old_value: Option<&dyn EffectiveValueDyn>,
-        new_value: Option<&dyn EffectiveValueDyn>,
-    ) {
-        debug_assert!(old_value.is_some() || new_value.is_some());
-        let default = || self.metadata.default_value().clone();
-        let o = old_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
-        let n = new_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
-        let priority = if new_value.is_some() { BindingPriority::Inherited } else { BindingPriority::Unset };
-        if !value_equals(&o, &n) {
-            owner.raise_inherited_property_changed(self.property, &o, &n, priority);
-        }
+        self.set_and_raise_core(owner, value, priority, false, false);
     }
 
     fn remove_animation_and_raise(&self, owner: &FerroObject) {
-        debug_assert!(self.priority.get() != BindingPriority::Animation);
-        debug_assert!(self.base_priority.get() != BindingPriority::Unset);
-        self.update_value_entry(None, BindingPriority::Animation);
+        debug_assert!(self.state.priority.get() != BindingPriority::Animation);
+        debug_assert!(self.state.base_priority.get() != BindingPriority::Unset);
+        self.state.update_value_entry(None, BindingPriority::Animation);
         let base = self.base_value.borrow().clone().expect("base value is set");
-        self.set_and_raise_core(owner, base, self.base_priority.get(), false, false);
+        self.set_and_raise_core(owner, base, self.state.base_priority.get(), false, false);
     }
 
     fn coerce_value(&self, owner: &FerroObject) {
-        let Some(uncommon) = &self.uncommon else { return };
-        let value = uncommon.uncoerced_value.borrow().clone();
-        let base_value = uncommon.uncoerced_base_value.borrow().clone();
-        self.set_and_raise_core_with_base(owner, value, self.priority.get(), base_value, self.base_priority.get());
+        let Some(coercion) = self.metadata.coercion() else { return };
+        // These typed leaves are the only PropertyValue-specific operations
+        // of explicit recoercion. The algorithm address comes from the actual
+        // coercer registration, never from this all-value-types vtable entry.
+        coercion.apply(self, owner, CoercionOperations {
+            equals: value_equals::<T>,
+            notify_value_changed: Self::notify_value_changed,
+            notify_base_value_changed: Self::notify_base_value_changed,
+        });
     }
 
-    fn dispose_and_raise_unset(&self, owner: &FerroObject) {
-        let clear_data_validation = self.data_validation_enabled();
-
-        if let Some(entry) = self.value_entry.take() {
-            entry.unsubscribe();
-        }
-        if let Some(entry) = self.base_value_entry.take() {
-            entry.unsubscribe();
-        }
-
-        let inherited = if self.property.inherits() {
-            owner.values().try_get_inherited_value(self.property)
-        } else {
-            None
-        };
-        let (new_value, priority) = match &inherited {
-            Some(i) => (cast_effective_value::<T>(&**i).value(), BindingPriority::Inherited),
+    fn raise_unset(
+        &self,
+        owner: &FerroObject,
+        inherited: Option<&dyn EffectiveValueDyn>,
+        clear_data_validation: bool,
+    ) {
+        let (new_value, priority) = match inherited {
+            Some(i) => (cast_effective_value::<T>(i).value(), BindingPriority::Inherited),
             None => (self.metadata.default_value().clone(), BindingPriority::Unset),
         };
 
         let old_value = self.value();
-        if !value_equals(&new_value, &old_value) {
-            owner.raise_property_changed(self.property, Some(&old_value), &new_value, priority, true);
-            if self.property.inherits() {
-                owner.values().on_inherited_effective_value_disposed(owner, self.property, &old_value, &new_value);
-            }
-        }
-
-        if clear_data_validation {
-            owner.on_update_data_validation(self.property, BindingValueType::UNSET_VALUE, None);
-        }
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
+        let changed = !value_equals(&new_value, &old_value);
+        self.state.finish_unset(owner, &old_value, &new_value, priority, changed, clear_data_validation);
     }
 }
+
+#[cfg(test)]
+#[path = "effective_value_coercion_tests.rs"]
+mod coercion_tests;
+
+#[cfg(test)]
+#[path = "effective_value_inheritance_tests.rs"]
+mod inheritance_tests;
+
+#[cfg(test)]
+#[path = "effective_value_construction_tests.rs"]
+mod construction_tests;

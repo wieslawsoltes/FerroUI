@@ -123,6 +123,10 @@ impl IXamlAstTransformer for FerroBindingExtensionTransformer {
         // Convert the <Binding> tag to either a CompiledBinding or ReflectionBinding tag.
 
         if let Some(tref) = node.cast::<XamlAstXmlTypeReference>() {
+            // `x:Bind` is `XBind` of the framework namespace (docs/porting/x-bind.md).
+            if super::x_bind::is_x_bind_reference(&tref) {
+                super::x_bind::map_type_reference(&tref);
+            }
             if tref.name() == "Binding"
                 && tref.xml_namespace().as_deref() == Some(FERRO_XML_NAMESPACE)
             {

@@ -21,7 +21,7 @@ use ferroui_base::platform::{
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop, SleepLoopRenderTimer, UiThreadRenderTimer};
-use ferroui_base::threading::{CancellationToken, CancellationTokenSource, Dispatcher};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
 use ferroui_controls::application_lifetimes::{
@@ -175,7 +175,7 @@ pub struct LinuxFramebufferLifetime {
     input_backend: Option<Rc<dyn IInputBackend>>,
     top_level: RefCell<Option<Ref<EmbeddableControlRoot>>>,
     main_view: RefCell<Option<Ref<Control>>>,
-    cts: CancellationTokenSource,
+    cts: CancellationToken,
     exit_code: Cell<i32>,
     startup: HandlerList<dyn Fn(&ControlledApplicationLifetimeStartupEventArgs)>,
     exit: HandlerList<dyn Fn(&ControlledApplicationLifetimeExitEventArgs)>,
@@ -193,7 +193,7 @@ impl LinuxFramebufferLifetime {
             input_backend: input,
             top_level: RefCell::new(None),
             main_view: RefCell::new(None),
-            cts: CancellationTokenSource::new(),
+            cts: CancellationToken::new(),
             exit_code: Cell::new(0),
             startup: HandlerList::new(),
             exit: HandlerList::new(),
@@ -202,7 +202,7 @@ impl LinuxFramebufferLifetime {
 
     /// The token that is cancelled when the application shuts down.
     pub fn token(&self) -> CancellationToken {
-        self.cts.token()
+        self.cts.clone()
     }
 
     pub fn exit_code(&self) -> i32 {

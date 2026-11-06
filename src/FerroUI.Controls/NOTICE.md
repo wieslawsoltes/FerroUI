@@ -105,6 +105,12 @@ the WinUI project directly (`controls/dev/Repeater` at commit
 `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`, the revision the WinUI theme is
 ported from), under the same license.
 
+`templates/i_data_template_component.rs` (the phasing contract `IDataTemplateComponent`, moved
+here from `ferroui-controls-repeater`, and WinUI's `XamlBindingHelper.DataTemplateComponent`) is
+ported from the WinUI project directly (`controls/dev/Repeater` and the `ProcessBindings` and
+`Recycle` members the XAML compiler generates, `src/XamlCompiler/BuildTasks/Microsoft/Xaml/XamlCompiler/CodeGenerators/CSharpPagePass2.tt`,
+at the same commit), under the same license.
+
 `font_icon.rs`, `symbol_icon.rs` and `icon_source.rs` (WinUI's `FontIcon`, `Symbol`,
 `SymbolIcon` and the icon sources) are ported from the WinUI project directly
 (`dxaml/xcp/core/core/elements/icon.cpp`, `dxaml/xcp/dxaml/lib/*IconSource_Partial.cpp` and the
@@ -139,7 +145,11 @@ The rich text of `documents/` (the sources are listed in `documents/NOTICE.md`),
 context-menu events) are ported from the WinUI project directly (`dxaml/xcp/core/text/RichTextBlock/`,
 `dxaml/xcp/core/text/BlockLayout/`, `dxaml/xcp/dxaml/lib/RichTextBlock_Partial.cpp`,
 `RichTextBlockOverflow_Partial.cpp` and `TextControlFlyoutHelper.cpp` at the same commit), under the
-same license (`docs/porting/winui-rich-text.md`).
+same license (`docs/porting/winui-rich-text.md`). The selection drawn over the lines in
+`rich_text_block.rs` and `rich_text_layout.rs` follows `dxaml/xcp/components/text/TextHighlightRenderer.cpp`
+(the highlight behind the text) and `D2DTextDrawingContext::DrawGlyphRun` of
+`dxaml/xcp/core/native/text/Common/D2DTextDrawingContext.cpp` (the selected part of a glyph run in the
+selection foreground) at the same commit.
 
 `rich_text/` (the editor, the text object model, RTF and the rich clipboard), `rich_edit_box*.rs`,
 `rich_edit_*.rs`, `automation/provider/i_text_*.rs`, `automation/provider/rich_text_automation.rs`
@@ -157,6 +167,15 @@ under the same license. The RTF charset-to-code-page table was checked against
 `RatingItemImageInfo` and their automation peers) are ported from the WinUI project directly
 (`controls/dev/RadioButtons` and `controls/dev/RatingControl` at the same commit), under the
 same license.
+
+`person_picture.rs`, `primitives/person_picture_template_settings.rs`,
+`automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs` (WinUI's
+`PersonPicture`, its template settings, automation peer and initials generator) are ported from the
+WinUI project directly (`controls/dev/PersonPicture` at the same commit), under the same license.
+`pager_control.rs`, `primitives/pager_control_template_settings.rs` and
+`automation/peers/pager_control_automation_peer.rs` (WinUI's `PagerControl`, its template
+settings, enumerations, event arguments and automation peer) are ported from the WinUI project
+directly (`controls/dev/PagerControl` at the same commit), under the same license.
 
 `frame.rs`, `frame_page.rs`, `navigation.rs` and `navigation/page_stack_entry.rs` (WinUI's
 `Frame`, `Page` as `FramePage`, and the navigation model of `Microsoft.UI.Xaml.Navigation`: the

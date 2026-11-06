@@ -15,8 +15,8 @@ use ferroui_reactive::linq::Observable;
 use ferroui_reactiveui::*;
 use ferroui_splat::AppLocator;
 use ferroui_system::prop;
-use ferroui_system::threading::tasks::{block_on, Task};
-use ferroui_system::IObservable;
+use ferroui_system::task::block_on;
+use ferroui_system::{IObservable, ObservableError};
 use std::rc::Rc;
 
 const BOUND_VALUE: &str = "bound";
@@ -243,11 +243,11 @@ fn bind_interaction_with_an_asynchronous_handler_registers_through_the_runtime_e
         prop!(DispatchStubViewModel => confirm),
         |context: Rc<dyn IInteractionContext<String, bool>>| {
             context.set_output(true);
-            Task::from_result(())
+            std::future::ready(Ok::<(), ObservableError>(()))
         },
     );
 
-    let handled = block_on(interaction.handle(BOUND_VALUE.to_string())).expect("the question is handled");
+    let handled = block_on(interaction.handle(BOUND_VALUE.to_string()).flatten()).expect("the question is handled");
 
     assert!(handled);
     binding.dispose();
@@ -268,7 +268,7 @@ fn bind_interaction_with_a_stream_handler_registers_through_the_runtime_engine()
         },
     );
 
-    let handled = block_on(interaction.handle(BOUND_VALUE.to_string())).expect("the question is handled");
+    let handled = block_on(interaction.handle(BOUND_VALUE.to_string()).flatten()).expect("the question is handled");
 
     assert!(handled);
     binding.dispose();

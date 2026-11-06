@@ -7,7 +7,7 @@ use super::{CompositionBrush, CompositionStretch, CompositionSurfaceBrush, Compo
 use crate::media::imaging::{Bitmap, BitmapBlendingMode, RenderTargetBitmap};
 use crate::media::RenderOptions;
 use crate::platform::{AlphaFormat, PixelFormats};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{LocatorExtensions, PixelSize, Rect, Vector, Visual};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -51,7 +51,7 @@ pub struct AlphaMask {
     updating: Cell<bool>,
     /// The subscriptions that hide the mask when the element leaves its tree
     /// or stops being visible.
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl AlphaMask {
@@ -211,8 +211,8 @@ impl AlphaMask {
                 }
             })
         };
-        subscriptions.push(on_detached.detach());
-        subscriptions.push(on_visibility.detach());
+        subscriptions.push(on_detached);
+        subscriptions.push(on_visibility);
     }
 }
 
@@ -221,9 +221,7 @@ impl Drop for AlphaMask {
         // The application may keep the brush: it loses the image of an
         // element that is gone (WinUI disconnects the surface).
         self.hide();
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        // The subscriptions are released after it, when the fields drop.
     }
 }
 

@@ -3,7 +3,7 @@
 
 use super::interaction_tracker_inertia_modifier::InteractionTrackerInertiaModifier;
 use super::visual_interaction_source::VisualInteractionSource;
-use crate::animation::{PlaybackDirection, TimeSpan};
+use crate::animation::{PlaybackDirection, SignedDuration};
 use crate::media::MediaContext;
 use crate::numerics::Vector3;
 use crate::rendering::composition::animations::{
@@ -1182,8 +1182,8 @@ impl InteractionTracker {
     // --- states -------------------------------------------------------------
 
     fn stop_runs(&self) {
-        drop(self.inertia.borrow_mut().take());
-        drop(self.custom.borrow_mut().take());
+        drop(self.inertia.take());
+        drop(self.custom.take());
     }
 
     fn enter_idle(&self, request_id: i32) {
@@ -1338,7 +1338,7 @@ impl InteractionTracker {
         });
     }
 
-    fn on_animation_frame(&self, now: TimeSpan) {
+    fn on_animation_frame(&self, now: SignedDuration) {
         self.frame_requested.set(false);
         let now = now.total_seconds();
         let elapsed = match self.last_frame_time.replace(Some(now)) {

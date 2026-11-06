@@ -3,7 +3,7 @@
 //! their static values, as the managed original declares them.
 
 use crate::animation::easings::Easing;
-use crate::animation::{Cue, IterationCount, IterationType, TimeSpan};
+use crate::animation::{Cue, IterationCount, IterationType, SignedDuration};
 use crate::data::core::ValueTypes;
 use crate::data::CultureInfoIetfLanguageTagConverter;
 use crate::utilities::{CultureInfo, DateTime, DateTimeKind, DateTimeOffset, DayOfWeek, Decimal, NumberStyles};
@@ -381,7 +381,10 @@ ferro_markup_type!(class FontFamily {
     parse: FontFamily::parse,
     constructors: [
         (String) => |name: String| FontFamily::new(&name),
-        (Option<Uri>, String) => |base_uri: Option<Uri>, name: String| FontFamily::with_base_uri(base_uri.as_ref(), &name),
+        // `new FontFamily(context.BaseUri, text)`: the base URI of a document is a URL (C5 of #423).
+        (Option<url::Url>, String) => |base_uri: Option<url::Url>, name: String| {
+            FontFamily::with_base_uri(base_uri.as_ref(), &name)
+        },
     ],
     static_properties: [Default: FontFamily { get: FontFamily::default_family }],
     properties: [
@@ -537,21 +540,21 @@ ferro_markup_type!(class ThemeVariant {
 
 // System
 
-ferro_markup_type!(struct TimeSpan {
+ferro_markup_type!(struct SignedDuration as "TimeSpan" {
     namespace: "System",
-    handles: [TimeSpan],
-    parse: TimeSpan::parse,
-    constructors: [() => TimeSpan::default, (i64) => TimeSpan::from_ticks],
+    handles: [SignedDuration],
+    parse: SignedDuration::parse,
+    constructors: [() => SignedDuration::default, (i64) => SignedDuration::from_ticks],
     methods: [
-        static fn FromTicks(i64) -> TimeSpan => TimeSpan::from_ticks,
-        static fn FromSeconds(f64) -> TimeSpan => TimeSpan::from_seconds,
-        static fn FromMilliseconds(f64) -> TimeSpan => TimeSpan::from_milliseconds,
-        static fn FromMinutes(f64) -> TimeSpan => TimeSpan::from_minutes,
+        static fn FromTicks(i64) -> SignedDuration => SignedDuration::from_ticks,
+        static fn FromSeconds(f64) -> SignedDuration => SignedDuration::from_seconds,
+        static fn FromMilliseconds(f64) -> SignedDuration => SignedDuration::from_milliseconds,
+        static fn FromMinutes(f64) -> SignedDuration => SignedDuration::from_minutes,
     ],
     properties: [
-        Ticks: i64 { get: |t: &TimeSpan| t.ticks() },
-        TotalSeconds: f64 { get: |t: &TimeSpan| t.total_seconds() },
-        TotalMilliseconds: f64 { get: |t: &TimeSpan| t.total_milliseconds() },
+        Ticks: i64 { get: |t: &SignedDuration| t.ticks() },
+        TotalSeconds: f64 { get: |t: &SignedDuration| t.total_seconds() },
+        TotalMilliseconds: f64 { get: |t: &SignedDuration| t.total_milliseconds() },
     ],
 });
 
@@ -586,7 +589,7 @@ ferro_markup_type!(struct DateTime {
         Month: i32 { get: |d: &DateTime| d.month() },
         Second: i32 { get: |d: &DateTime| d.second() },
         Ticks: i64 { get: |d: &DateTime| d.ticks() },
-        TimeOfDay: TimeSpan { get: |d: &DateTime| d.time_of_day() },
+        TimeOfDay: SignedDuration { get: |d: &DateTime| d.time_of_day() },
         Year: i32 { get: |d: &DateTime| d.year() },
     ],
 });
@@ -606,7 +609,7 @@ ferro_markup_type!(class CultureInfo {
     parse: CultureInfoIetfLanguageTagConverter::convert_from,
     static_properties: [
         InvariantCulture: CultureInfo { get: CultureInfo::invariant_culture },
-        CurrentCulture: CultureInfo { get: CultureInfo::current_culture },
+        CurrentCulture: CultureInfo { get: CultureInfo::current_formatting },
     ],
     properties: [
         Name: String { get: |culture: &CultureInfo| culture.name().to_string() },
@@ -658,7 +661,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <IterationCount as MarkupTyped>::MARKUP,
     <Easing as MarkupTyped>::MARKUP,
     <ThemeVariant as MarkupTyped>::MARKUP,
-    <TimeSpan as MarkupTyped>::MARKUP,
+    <SignedDuration as MarkupTyped>::MARKUP,
     <DateTime as MarkupTyped>::MARKUP,
     <DateTimeOffset as MarkupTyped>::MARKUP,
     <CultureInfo as MarkupTyped>::MARKUP,
@@ -707,7 +710,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<IterationCount>();
     ValueTypes::register_nullable::<Easing>();
     ValueTypes::register_nullable::<ThemeVariant>();
-    ValueTypes::register_nullable::<TimeSpan>();
+    ValueTypes::register_nullable::<SignedDuration>();
     ValueTypes::register_nullable::<Uri>();
     ValueTypes::register_nullable::<CultureInfo>();
     ValueTypes::register_nullable::<Rc<Cursor>>();
@@ -744,7 +747,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_display::<KeyGesture>();
     ValueTypes::register_display::<IterationCount>();
     ValueTypes::register_display::<ThemeVariant>();
-    ValueTypes::register_display::<TimeSpan>();
+    ValueTypes::register_display::<SignedDuration>();
     ValueTypes::register_display::<DateTime>();
     ValueTypes::register_display::<DateTimeOffset>();
     ValueTypes::register_display::<Decimal>();

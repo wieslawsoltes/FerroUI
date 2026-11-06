@@ -10,7 +10,8 @@ use crate::diagnostics::XamlSourceInfo;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
 use crate::markup_extensions::{
     AddChildOfOn, CompiledBindingExtension, DynamicResourceExtension, On, OnFormFactorExtension, OnPlatformExtension,
-    ReflectionBindingExtension, RelativeSourceExtension, ResolveByNameExtension, StaticResourceExtension,
+    DeferredElement, ReflectionBindingExtension, RelativeSourceExtension, ResolveByNameExtension, StaticResourceExtension,
+    XBindExtension, XBinding, XBindings,
 };
 use crate::styling::{MergeResourceInclude, ResourceInclude, StyleInclude};
 use crate::templates::{
@@ -78,8 +79,10 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     metadata: &[],
 };
 
-/// The types of this crate that own registered properties.
-const TYPES: &[&TypeInfo] = &[<XamlSourceInfo as StaticType>::TYPE];
+/// The types of this crate that own registered properties: the attached properties of the
+/// source information, and the class of the placeholder of `x:Load` (step X5 of
+/// docs/porting/x-bind.md).
+const TYPES: &[&TypeInfo] = &[<XamlSourceInfo as StaticType>::TYPE, <DeferredElement as StaticType>::TYPE];
 
 macro_rules! markup_types {
     ($($type_:ty),* $(,)?) => {
@@ -120,6 +123,9 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = markup_types![
     RelativeSourceExtension,
     ResolveByNameExtension,
     StaticResourceExtension,
+    XBindExtension,
+    XBinding,
+    XBindings,
     // FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindings
     PropertyInfoAccessorFactory,
     // FerroUI.Markup.Xaml.Styling
@@ -287,6 +293,12 @@ fn register_value_types() {
     ValueTypes::register_nullable::<Rc<DynamicResourceExtension>>();
     ValueTypes::register_nullable::<Rc<CompiledBindingExtension>>();
     ValueTypes::register_nullable::<Rc<ReflectionBindingExtension>>();
+    // `{x:Bind}` provides an `XBinding`, which a binding-typed member takes; its lifecycle
+    // object is a handle too.
+    ValueTypes::register_nullable::<Rc<XBindExtension>>();
+    ValueTypes::register_nullable::<Rc<XBinding>>();
+    ValueTypes::register_nullable::<Rc<XBindings>>();
+    ValueTypes::register_cast::<Rc<XBinding>, Rc<dyn BindingBase>>(|binding| binding.clone());
 
     // Nullable forms of the values members of this crate take and return.
     ValueTypes::register_nullable::<Rc<dyn IServiceProvider>>();
@@ -353,6 +365,7 @@ fn register_value_types() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ferroui_base::utilities::UriRef;
 
     #[test]
     fn a_markup_list_held_by_an_untyped_property_is_bound_to_an_items_source() {
@@ -431,6 +444,7 @@ mod tests {
             "FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindingExtension",
             "FerroUI.Markup.Xaml.MarkupExtensions.ResolveByNameExtension",
             "FerroUI.Markup.Xaml.MarkupExtensions.ReflectionBindingExtension",
+            "FerroUI.Markup.Xaml.MarkupExtensions.XBindExtension",
             "FerroUI.Markup.Xaml.Templates.DataTemplate",
             "FerroUI.Markup.Xaml.Templates.ControlTemplate",
             "FerroUI.Markup.Xaml.Styling.StyleInclude",
@@ -535,7 +549,7 @@ mod tests {
         );
         let roots = <dyn IRootObjectProvider as MarkupTyped>::MARKUP;
         assert!(roots.find_property("IntermediateRootObject").is_some() && roots.find_property("RootObject").is_some());
-        assert_eq!((<dyn IUriContext as MarkupTyped>::MARKUP.find_property("BaseUri").unwrap().type_)(), ValueType::of::<Option<Uri>>());
+        assert_eq!((<dyn IUriContext as MarkupTyped>::MARKUP.find_property("BaseUri").unwrap().type_)(), ValueType::of::<Option<url::Url>>());
 
         // The accessor factories of compiled binding paths.
         let factory = <PropertyInfoAccessorFactory as MarkupTyped>::MARKUP;
@@ -613,9 +627,13 @@ mod tests {
         ] {
             let constructors: Vec<Types> =
                 include.constructors.iter().map(|c| c.parameters.iter().map(|p| p()).collect()).collect();
-            assert_eq!(constructors, [t![Option<Uri>], t![Sp]], "{}", include.name);
+            assert_eq!(constructors, [t![Option<url::Url>], t![Sp]], "{}", include.name);
         }
-        assert_eq!((<ResourceInclude as MarkupTyped>::MARKUP.find_property("Source").unwrap().type_)(), ValueType::of::<Option<Uri>>());
+        // The base URI of an include is a URL, and its source a reference that can be relative
+        // (C5 of #423); both are `System.Uri` to markup.
+        for include in [<ResourceInclude as MarkupTyped>::MARKUP, <StyleInclude as MarkupTyped>::MARKUP] {
+            assert_eq!((include.find_property("Source").unwrap().type_)(), ValueType::of::<Option<UriRef>>(), "{}", include.name);
+        }
     }
 
     /// A value of each concrete type of the assignability table.

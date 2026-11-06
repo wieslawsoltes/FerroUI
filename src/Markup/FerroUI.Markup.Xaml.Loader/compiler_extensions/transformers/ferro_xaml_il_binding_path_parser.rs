@@ -35,6 +35,9 @@ pub enum BindingExpressionNode {
     VisualAncestor(VisualAncestorBindingExpressionNode),
     LogicalAncestor(LogicalAncestorBindingExpressionNode),
     TemplatedParent(TemplatedParentBindingExpressionNode),
+    /// The path of an `{x:Bind}`, in the grammar of WinUI's compiled bindings
+    /// ([`super::x_bind_path`]), resolved by [`super::x_bind::transform_path`].
+    XBind(Rc<super::x_bind_path::XBindPath>),
 }
 
 impl BindingExpressionNode {
@@ -49,8 +52,8 @@ impl BindingExpressionNode {
     }
 }
 
-/// Parses the path of every compiled binding extension (its first constructor argument or its
-/// `Path` property) and merges the long-form source properties (`ElementName`,
+/// Parses the path of every compiled binding extension and of every `{x:Bind}` (its first
+/// constructor argument or its `Path` property) and merges the long-form source properties (`ElementName`,
 /// `RelativeSource`) into it, leaving a [`ParsedBindingPathNode`] in place of the path text.
 pub struct FerroXamlIlBindingPathParser;
 
@@ -64,12 +67,18 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathParser {
             return Ok(node);
         };
         let types = context.try_get_ferro_types()?;
-        if !binding
-            .type_()
-            .get_clr_type()?
-            .equals(&*types.compiled_binding_extension)
-        {
+        let binding_type = binding.type_().get_clr_type()?;
+        let is_x_bind = super::x_bind::is_x_bind_extension(&binding_type);
+        if !is_x_bind && !binding_type.equals(&*types.compiled_binding_extension) {
             return Ok(node);
+        }
+        if is_x_bind {
+            // The root source of an `x:Bind` in a typed template is its item.
+            super::x_bind::prepare_scope(context, &binding)?;
+            // An `x:Bind` of an event subscribes its handler through the bindings of its root.
+            super::x_bind::prepare_event(context, &binding)?;
+            // The mode of the nearest `x:DefaultBindMode` when the binding names none.
+            super::x_bind::apply_default_mode(context, &binding)?;
         }
 
         let converted_node =
@@ -79,7 +88,10 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathParser {
         let first_argument = binding.arguments.borrow().first().cloned();
         if let Some(binding_path_text) = first_argument.and_then(|a| a.cast::<XamlAstTextNode>())
         {
-            let mut nodes = Self::get_binding_path(&binding_path_text)?;
+            let mut nodes = match is_x_bind {
+                true => super::x_bind::parse_path(&binding_path_text)?,
+                false => Self::get_binding_path(&binding_path_text)?,
+            };
 
             if let Some(converted_node) = &converted_node {
                 let index = nodes.iter().take_while(|x| x.is_transform_node()).count();
@@ -105,7 +117,10 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathParser {
             if let Some(binding_path_assignment) = binding_path_assignment {
                 let first_value = binding_path_assignment.values.borrow().first().cloned();
                 if let Some(path_value) = first_value.and_then(|v| v.cast::<XamlAstTextNode>()) {
-                    let mut nodes = Self::get_binding_path(&path_value)?;
+                    let mut nodes = match is_x_bind {
+                        true => super::x_bind::parse_path(&path_value)?,
+                        false => Self::get_binding_path(&path_value)?,
+                    };
 
                     if nodes.len() == 1 && nodes[0].is_empty_expression_node() {
                         binding_path_assignment.values.borrow_mut().remove(0);

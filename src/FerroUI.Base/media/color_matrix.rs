@@ -113,6 +113,34 @@ impl ColorMatrix {
         ColorMatrix::new([[r, r, r, 0.0], [g, g, g, 0.0], [b, b, b, 0.0], [0.0, 0.0, 0.0, 1.0], [0.0; 4]])
     }
 
+    /// Win2D's `SepiaEffect`: the identity at intensity 0, the sepia
+    /// matrix (red `0.393 R + 0.769 G + 0.189 B`, green `0.349 R + 0.686 G
+    /// + 0.168 B`, blue `0.272 R + 0.534 G + 0.131 B`) at 1, and the
+    /// interpolation of the two in between; the intensity is clamped to
+    /// 0..1, the alpha kept.
+    pub fn sepia(intensity: f32) -> ColorMatrix {
+        let t = if intensity.is_nan() { 0.0 } else { intensity.clamp(0.0, 1.0) };
+        let sepia = ColorMatrix::new([
+            [0.393, 0.349, 0.272, 0.0],
+            [0.769, 0.686, 0.534, 0.0],
+            [0.189, 0.168, 0.131, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+            [0.0; 4],
+        ]);
+        ColorMatrix::IDENTITY.lerp(&sepia, t)
+    }
+
+    /// The matrix `self + (to - self) * t`, member by member.
+    pub fn lerp(&self, to: &ColorMatrix, t: f32) -> ColorMatrix {
+        let mut rows = self.rows;
+        for (row, target) in rows.iter_mut().zip(to.rows.iter()) {
+            for (value, target) in row.iter_mut().zip(target.iter()) {
+                *value += (target - *value) * t;
+            }
+        }
+        ColorMatrix { rows }
+    }
+
     /// The matrix that scales each channel and adds an offset:
     /// `out = in * scale + offset`, channel by channel.
     pub fn scale_and_offset(scale: [f32; 4], offset: [f32; 4]) -> ColorMatrix {

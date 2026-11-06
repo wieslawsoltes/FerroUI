@@ -318,3 +318,381 @@ phase = "C3"
 pull = 466
 deprecated = "ferroui_x11::x11_exception::X11Exception"
 behaviour = "same"
+
+# C4: `Task`, `TaskCompletionSource` and `SynchronizationContext` become futures on the executor of
+# `ferroui_system::task` (docs/idiomatic-rust-async.md), and the workspace has one cancellation type,
+# `CancellationToken`; the old types remain one release as deprecated wrappers and are removed in the
+# release after 0.5. The steps and their pull requests: A1 the executor core (#500), A2 the
+# dispatcher on it (#503), A3 the one-shot channel (#508), A4a and A4b the cancellation type and its
+# uses (#510, #516), A5 the schedule of the thread (#523), A6 the asynchronous members (#530), A7 the
+# Task forms of the reactive libraries (#533). A8 (`use_future` of `ferroui-view` on the dispatcher)
+# changes no upstream name: the declarative API is FerroUI's own (docs/declarative-ui.md).
+
+[[name]]
+upstream = "System.Threading.Tasks.Task (an async method that runs on the current thread)"
+rust = "ferroui_system::task::spawn_local"
+kind = "mechanism"
+phase = "C4"
+pull = 500
+deprecated = "ferroui_system::threading::tasks::spawn_local"
+behaviour = "test"
+notes = "Steps A1 and A5. The executor core: one task table and poll loop per thread (ferroui_system::task, named after std::task). spawn_local polls the future at once and gives a JoinHandle; spawn_local_on gives the task a Schedule (where its polls run), with FirstPoll::Now or Scheduled. A panic faults the task (JoinError::Panicked; F2). Where a schedule is current (a dispatcher job) a wake follows the rule of await: inline in the same schedule, queued on it otherwise (A5, F3). Tested in src/FerroUI.System/tests/executor_tests.rs and the ordering tests (G9, G19, G20)."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task.Wait (a thread without a dispatcher)"
+rust = "ferroui_system::task::block_on"
+kind = "member"
+phase = "C4"
+pull = 500
+deprecated = "ferroui_system::threading::tasks::block_on"
+behaviour = "same"
+notes = "Step A1. Runs a future to its end on the calling thread, with the tasks it spawns and the wakes from other threads (task::run_pending, deprecated as threading::tasks::run_pending_wakes); it raises the panic of its future again. A dispatcher thread does not block: waiting for a JoinHandle there is awaiting it in a task of the dispatcher."
+
+[[name]]
+upstream = "System.Threading.Tasks.TaskScheduler (TaskScheduler.FromCurrentSynchronizationContext of a dispatcher)"
+rust = "ferroui_base::threading::Dispatcher::start_local"
+kind = "type"
+phase = "C4"
+pull = 503
+deprecated = "ferroui_base::threading::DispatcherTaskScheduler"
+behaviour = "same"
+notes = "Steps A2 and A6. The dispatcher is a Schedule per priority of ferroui_system::task (Dispatcher::task_schedule(priority): each poll is a job at that priority; a queued poll that runs inside its task's poll schedules it again after that poll, F1). to_task_scheduler().start_local(future) is Dispatcher::start_local(future) (the first poll inside the call), spawn_local is Dispatcher::spawn_local (the first poll in a job), spawn is Dispatcher::spawn; to_task_scheduler_with_priority(p) is the _with_priority forms at p. Also deprecated: Dispatcher::to_task_scheduler, to_task_scheduler_with_priority, FerroSynchronizationContext::to_task_scheduler. The order is unchanged (G1 to G17)."
+
+[[name]]
+upstream = "System.Threading.Tasks.TaskCompletionSource"
+rust = "ferroui_system::task::oneshot"
+kind = "type"
+phase = "C4"
+pull = 508
+deprecated = "ferroui_x11::selections::selection_helper::TaskCompletionSource"
+behaviour = "deviation"
+notes = "Step A3. `oneshot::channel()` gives a Sender (SetResult and TrySetResult are send, which gives the value back when the receiver is gone; SetCanceled is dropping the sender) and a Receiver (the task: a future of Result<T, Canceled>, try_recv, blocking_recv, recv_timeout, shared() for several waiters). A dropped sender cancels its receiver, where a dropped TaskCompletionSource leaves its task pending (F6; DEVIATIONS rows of the X11, remote protocol, iOS, Android and WinUI code). Also deprecated: ferroui_x11::selections::selection_helper::TaskCompletionFuture, ferroui_ios::completion::{Completion, CompletionFuture}. ferroui_system::threading::tasks::TaskCompletionSource keeps its behaviour until the steps that replace its uses (section 4)."
+
+[[name]]
+upstream = "System.Threading.CancellationTokenSource"
+rust = "ferroui_system::threading::CancellationToken"
+kind = "type"
+phase = "C4"
+pull = 516
+deprecated = "ferroui_system::threading::CancellationTokenSource"
+behaviour = "same"
+notes = "Steps A4a (the type) and A4b (the uses). A token that can be canceled is CancellationToken::new(); Token is a clone of it, Cancel is cancel(), IsCancellationRequested is is_cancelled(), CreateLinkedTokenSource is child_token() of the outer token. CancellationToken.CanBeCanceled is can_be_cancelled(); CancellationToken.None and the default token stay none(). The callbacks run once, in the order of registration, on the cancelling thread (the order is a DEVIATIONS row). Also deprecated: CancellationToken::is_cancellation_requested, CancellationToken::can_be_canceled, ferroui_freedesktop::signal_watch::{CancellationFlag, Cancelled} (the token, cancelled() and signal_watch::run_until_cancelled), ferroui_protranslate_studio::AiCancellationToken, CancellationDisposable::with_source (with_token)."
+
+[[name]]
+upstream = "System.Threading.CancellationTokenRegistration"
+rust = "ferroui_system::threading::CancellationGuard"
+kind = "type"
+phase = "C4"
+pull = 516
+deprecated = "ferroui_system::threading::CancellationTokenRegistration"
+behaviour = "test"
+notes = "Step A4b. CancellationToken::register and register_local give the guard: #[must_use], Send, dropping it removes the callback (Dispose), detach() keeps it for the life of the token, which is what dropping a CancellationTokenRegistration did. The old forms are the deprecated register_handle and register_local_handle (and LocalCancellationTokenRegistration); register_guarded and register_local_guarded are deprecated aliases of register and register_local. Tested in src/FerroUI.System/tests/cancellation_tests.rs."
+
+[[name]]
+upstream = "System.Threading.CancellationToken.IsCancellationRequested"
+rust = "ferroui_system::threading::CancellationToken::is_cancelled"
+kind = "member"
+phase = "C4"
+pull = 516
+deprecated = "ferroui_system::threading::CancellationToken::is_cancellation_requested"
+behaviour = "same"
+notes = "Steps A4a and A4b, the name of tokio_util's CancellationToken."
+
+[[name]]
+upstream = "System.Threading.CancellationToken.CanBeCanceled"
+rust = "ferroui_system::threading::CancellationToken::can_be_cancelled"
+kind = "member"
+phase = "C4"
+pull = 516
+deprecated = "ferroui_system::threading::CancellationToken::can_be_canceled"
+behaviour = "same"
+notes = "Steps A4a and A4b. CancellationToken::none() and the default token never can be."
+
+[[name]]
+upstream = "System.Threading.CancellationTokenSource.CreateLinkedTokenSource"
+rust = "ferroui_system::threading::CancellationToken::child_token"
+kind = "member"
+phase = "C4"
+pull = 510
+behaviour = "same"
+notes = "Step A4a. A child is canceled with its parent, in the parent's pass of the callbacks, and not the other way round; a dropped child leaves its parent. A source linked to several tokens is a child of one with a registration on the others. The future of a cancellation (WaitHandle, Task.Delay(Infinite, token)) is cancelled(), and a source canceled when a scope ends is drop_guard()."
+
+[[name]]
+upstream = "System.OperationCanceledException"
+rust = "ferroui_system::task::Canceled"
+kind = "type"
+phase = "C4"
+pull = 516
+deprecated = "ferroui_base::threading::OperationCanceledError"
+behaviour = "same"
+notes = "Step A4b. The dispatcher operations (wait, wait_with_timeout, result, the future), the synchronous invokes, DispatcherTask, AutoCompletePopulation, HeadlessUnitTestTask and the TaskHandle of the behaviors give Canceled (re-exported as ferroui_base::threading::Canceled); OperationCanceledError converts to and from it. Its message is the one of Canceled."
+
+[[name]]
+upstream = "System.Threading.Tasks.TaskCanceledException"
+rust = "ferroui_system::task::Canceled"
+kind = "type"
+phase = "C4"
+pull = 516
+deprecated = "ferroui_system::threading::tasks::TaskCanceledError"
+behaviour = "deviation"
+notes = "Steps A4b and A7. A cancellation that names no task (threading::tasks::canceled(), the cancellation of RunAsync, the work of the tests) is Canceled; Canceled::is_cancellation recognizes it and the deprecated TaskCanceledError. Since A7 the Task forms of Rx, DynamicData and ReactiveUI end a canceled task with its cancellation error (Canceled), not with a TaskCanceledError that names the task (TaskCanceledException.Task has no counterpart; DEVIATIONS.md, Reactive); a deprecated Task keeps its error that names it."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task`1"
+rust = "ferroui_system::task::Shared"
+kind = "type"
+phase = "C4"
+pull = 533
+deprecated = "ferroui_system::threading::tasks::Task"
+behaviour = "same"
+notes = "Step A7. A Task<T> of the reactive libraries is a Shared<Result<T, ObservableError>>: IsCompleted is is_finished, Result is result() once it ended, ContinueWith(ExecuteSynchronously) is on_finished (it runs before the awaiters are woken, G9) and its token remove_on_finished, await is awaiting flatten(); Task.FromResult is Shared::ready. A future of an async method that runs on the thread is task::spawn_local(future).shared(); the forms that take a Task take a future of Result<T, ObservableError>. Status (TaskStatus) and Id have no counterpart: the outcome says how it ended. Also deprecated: TaskStatus, ContinuationId (OnFinishedId), spawn_local, block_on, run_pending_wakes, set_thread_poster, ThreadPoster of threading::tasks (task::spawn_local, block_on, run_pending, set_thread_schedule, Schedule). Shared::from(task) converts. Tested in src/FerroUI.System/tests/shared_tests.rs; the deprecated types keep task_tests.rs and the ordering tests."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task.ContinueWith"
+rust = "ferroui_system::task::Shared::on_finished"
+kind = "member"
+phase = "C4"
+pull = 533
+deprecated = "ferroui_system::threading::tasks::Task::continue_with"
+behaviour = "same"
+notes = "Step A7. The continuation runs synchronously when the task ends, before the futures awaiting it are woken (TaskContinuationOptions.ExecuteSynchronously, G9), or at once on a task that has ended; it gives an OnFinishedId (the deprecated ContinuationId) for remove_on_finished."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task.FromResult"
+rust = "ferroui_system::task::Shared::ready"
+kind = "member"
+phase = "C4"
+pull = 533
+deprecated = "ferroui_system::threading::tasks::Task::from_result"
+behaviour = "same"
+notes = "Step A7. Task.FromException is Shared::ready(Err(error)) on a Shared of a Result; Shared::from_outcome gives one that ended with a JoinError."
+
+[[name]]
+upstream = "System.Threading.Tasks.TaskCompletionSource`1 (of the reactive libraries)"
+rust = "ferroui_system::task::Shared::channel"
+kind = "type"
+phase = "C4"
+pull = 533
+deprecated = "ferroui_system::threading::tasks::TaskCompletionSource"
+behaviour = "same"
+notes = "Step A7. Code of one thread whose continuations run synchronously (the operators of Rx, ReactiveUI's interactions, the dock's requests) ends a Shared made by Shared::channel(): SetResult is SharedSender::send, SetCanceled is cancel (or the error Canceled on a Shared of a Result), and a dropped sender leaves the Shared pending, as a dropped TaskCompletionSource leaves its task. A completion that crosses threads, or whose dropped producer should cancel, is task::oneshot (the row above); the ported tests that drive Rx use oneshot channels of Result<T, ObservableError> (receiver.flatten() is the task). oneshot::Sender::from(source) and Task::from(receiver) convert."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task.Run"
+rust = "ferroui_system::threading::tasks::run"
+kind = "member"
+phase = "C4"
+pull = 533
+behaviour = "same"
+notes = "Step A7. The name is kept; it gives a Shared<Result<T, ObservableError>> (T: Clone) where it gave a Task<T>, and run(work).flatten() is the future of its result. The work runs on a new thread and its outcome comes back to the calling thread through the schedule of the thread (docs/idiomatic-rust-async.md, section 6)."
+
+[[name]]
+upstream = "System.Threading.SynchronizationContext"
+rust = "ferroui_system::task::Schedule"
+kind = "type"
+phase = "C4"
+pull = 523
+deprecated = "ferroui_system::threading::SynchronizationContext"
+behaviour = "test"
+notes = "Step A5. Post is Schedule::schedule (Send work) and Schedule::schedule_local (work of the thread of the schedule); Send and OperationStarted/OperationCompleted have no counterpart (blocking on the dispatcher is Dispatcher::invoke). A dispatcher is the schedule of its thread (task::set_thread_schedule) from its start to its shutdown, and its task_schedule(priority) is the context of a priority. A task spawned where a schedule is current continues by the rule of await: inline when completed in that schedule, queued on it otherwise (F3). threading::context_schedule adapts a context. The Rx forms of a context take a schedule: SynchronizationContextScheduler::with_schedule, ContextDisposable::with_schedule, observe_on_schedule, subscribe_on_schedule, notify_on_schedule, BindingSchedulers::use_schedule; their context forms are deprecated. Tested in src/FerroUI.Base/threading/dispatcher_schedule_tests.rs and src/FerroUI.System/tests/executor_tests.rs."
+
+[[name]]
+upstream = "System.Threading.SynchronizationContext.Current"
+rust = "ferroui_system::task::current_schedule"
+kind = "member"
+phase = "C4"
+pull = 523
+deprecated = "ferroui_system::threading::current_synchronization_context"
+behaviour = "same"
+notes = "Step A5. The schedule of the running work: in a dispatcher job the dispatcher at the priority of the job, None outside of such work (a thread without a dispatcher, or the code of a dispatcher thread outside of a job unless Dispatcher::set_current_priority set one). is_current_schedule compares by Schedule::identity. FromEvent, the awaiter of AsyncSubject, ConfigureAwait(true) of ScheduleAsync and the dock services capture it."
+
+[[name]]
+upstream = "System.Threading.SynchronizationContext.SetSynchronizationContext"
+rust = "ferroui_system::task::set_current_schedule"
+kind = "member"
+phase = "C4"
+pull = 523
+deprecated = "ferroui_system::threading::set_synchronization_context"
+behaviour = "same"
+notes = "Step A5. Gives the previous schedule, which the caller restores; a dispatcher sets it around each job. The schedule that the wakes from other threads go to is task::set_thread_schedule; the deprecated set_synchronization_context sets both to an adapter of the context."
+
+[[name]]
+upstream = "Avalonia.Threading.AvaloniaSynchronizationContext"
+rust = "ferroui_base::threading::Dispatcher::current_priority"
+kind = "type"
+phase = "C4"
+pull = 523
+deprecated = "ferroui_base::threading::FerroSynchronizationContext"
+behaviour = "same"
+notes = "Step A5. The context of the dispatcher kept one role, the priority of the running job: Dispatcher::current_priority (None outside of a job) and Dispatcher::set_current_priority (InstallIfNeeded, which Application does at Normal; the previous priority is given back, in the place of RestoreContext, also deprecated). Post is Dispatcher::post or post_local at that priority; the context of a priority as a schedule is Dispatcher::task_schedule(priority). FerroScheduler::install_on_ui_thread is deprecated: the dispatcher installs itself."
+
+[[name]]
+upstream = "System.Threading.Tasks.Task"
+rust = "ferroui_system::task::JoinHandle"
+kind = "type"
+phase = "C4"
+pull = 530
+deprecated = "ferroui_base::threading::DispatcherTask"
+behaviour = "deviation"
+notes = "Step A6. The Task that an asynchronous member returns is the JoinHandle of a task of the dispatcher (re-exported by ferroui_base::threading with JoinError and AbortHandle): a future of Result<T, JoinError>, is_finished (IsCompleted), abort (the outcome is JoinError::Canceled), one owner (shared() for several observers, T: Clone); dropping it detaches the task. Deviation: an exception of the task (a panic) is JoinError::Panicked, a value of the handle, where await raises it again; the code that awaits a task and must fail with it matches Panicked and calls resume_unwind. The members that returned DispatcherTask return JoinHandle: NavigationPage, INavigation and PageNavigationExtensions (PushAsync, PopAsync, PopToRootAsync, PopToPageAsync, ReplaceAsync, PushModalAsync, PopModalAsync, PopAllModalsAsync), Window.ShowDialog, TopLevel.RequestPlatformInhibition, IPageTransition.Start, ICompositionGlContext.DisposeAsync and ICompositionGlTexture.DisposeAsync; the navigation members and the dialogs keep their DispatcherTask form as deprecated ..._task methods. The Task of the behaviors is TaskHandle over a shared JoinHandle. Also deprecated: DispatcherTaskScheduler and Dispatcher::to_task_scheduler, to_task_scheduler_with_priority (Dispatcher::spawn_local, start_local, spawn_with_priority and their _with_priority forms). Tested in src/FerroUI.Base/threading/dispatcher_tests.rs and the tests of each member."
+
+[[name]]
+upstream = "Avalonia.Threading.Dispatcher.InvokeAsync (an asynchronous callback, Func<Task>)"
+rust = "ferroui_base::threading::Dispatcher::spawn"
+kind = "member"
+phase = "C4"
+pull = 530
+deprecated = "ferroui_base::threading::Dispatcher::invoke_async_task"
+behaviour = "deviation"
+notes = "Steps A2 (Dispatcher::spawn on the executor core) and A6 (the uses). spawn and spawn_with_priority run the Send callback in a job of the dispatcher and the future it makes there, and give a JoinHandle (a panic is JoinError::Panicked). The callback that need not be Send (invoke_async_task_local, invoke_async_task_local_with_priority) is spawn_local_with_priority(async move { callback().await }, priority), at Default for the forms without a priority: its first poll is a job at that priority, as the job of the callback was."
+
+# C5: the public signatures take std and the chosen crates (docs/idiomatic-rust-signatures.md).
+
+[[name]]
+upstream = "System.TimeSpan"
+rust = "ferroui_base::animation::SignedDuration"
+kind = "type"
+phase = "C5"
+pull = 509
+deprecated = "ferroui_base::animation::TimeSpan"
+behaviour = "same"
+notes = "The markup name stays System.TimeSpan. The timer properties move to std::time::Duration in T3."
+
+[[name]]
+upstream = "System.TimeSpan (timer intervals and delays)"
+rust = "std::time::Duration"
+kind = "mechanism"
+phase = "C5"
+pull = 522
+behaviour = "deviation"
+notes = "Step T3 (decisions O1, O2). The timer properties and functions take Duration: TextBox, TextPresenter and RichEditBox CaretBlinkInterval, ScrollBar HideDelay and ShowDelay, AutoCompleteBox MinimumPopulateDelay, the durations of DirectConnectedAnimationConfiguration and ConnectedAnimationService, DebounceAction Delay, ThrottleAction Interval, DelayAction Duration, DelayedLoadBehavior Delay, DelayedLoadTrigger Delay, DelayedShowControlAction Delay, InactivityTrigger Timeout, VisualDebugBehavior Duration, SelectionIndicatorAnimation default_duration and try_start, DeferredContentScheduling.Delay, the timeline and settings of the deferred content control, DelayedUniformTabPanel ExpansionDelay. The markup name stays System.TimeSpan; a negative span is a markup error and a conversion error of a binding. Deviation: the infinite wait of DelayAction is Duration::MAX, not minus one millisecond (DEVIATIONS.md, Behaviors)."
+
+[[name]]
+upstream = "System.Uri (a reference that can be relative)"
+rust = "ferroui_base::utilities::UriRef"
+kind = "type"
+phase = "C5"
+pull = 526
+behaviour = "test"
+notes = "Step U1 (decision O5). An absolute url::Url or a relative reference as written; the markup name stays System.Uri, whose Rust forms are the port Uri, UriRef and url::Url, and markup, resources and bindings set a UriRef property as a Uri property. UriRef::parse follows the rule of markup (a leading / is relative). Equality and hashing are the ones of url::Url, with the fragment, where Uri ignores the fragment of an absolute URI: a map that needs that rule keys by UriRef::without_fragment. UriRef::resolve resolves as Uri::combine does for the references and bases of markup (uri_ref_resolves_like_uri_combine in src/FerroUI.Base/utilities/uri_ref.rs); where the URL standard differs (the base query of a fragment, //host, empty segments, the drive of a file: URL) it follows the standard. The positions move to it in U2 to U4."
+
+[[name]]
+upstream = "System.Uri (an absolute URI)"
+rust = "url::Url"
+kind = "type"
+phase = "C5"
+pull = 526
+behaviour = "same"
+notes = "Step U1. A Rust form of the markup type System.Uri: a relative URI literal for a Url is a markup error, a relative reference a conversion error of a binding. The text is the one of the URL standard (the C2 conversions). The base URIs and the platform edges move to it in U2 to U4."
+
+[[name]]
+upstream = "System.Uri (base URIs and include sources of markup loading)"
+rust = "url::Url, ferroui_base::utilities::UriRef"
+kind = "mechanism"
+phase = "C5"
+pull = 538
+behaviour = "same"
+notes = "Step U2. The base URIs are url::Url (IUriContext.BaseUri of the runtime library and of the interpreter, XamlIlContext, RuntimeXamlLoaderDocument.BaseUri, the run-time loader, load_winui, DockPresetThemeManagerBase's preset URIs) and the include sources UriRef (ResourceInclude, StyleInclude and MergeResourceInclude Source, the dock's LoadExtension Source, FerroXamlLoader.Load); the markup names stay System.Uri. A source resolves with UriRef::resolve, so a rooted source against a file: URL of a drive keeps the drive, as in .NET. Hot reload, the designer and the include caches key a document by the text of its URL, read with UriRef::parse_absolute (scheme and authority in lower case, as the canonical text of the port Uri)."
+
+[[name]]
+upstream = "System.Uri (asset URIs, font sources and font collection keys)"
+rust = "url::Url, ferroui_base::utilities::UriRef"
+kind = "mechanism"
+phase = "C5"
+pull = 541
+behaviour = "same"
+notes = "Step U3. IAssetLoader and AssetLoader take a UriRef against an Option<Url> base URI and list assets as Url; UriExtensions reads Url. FontFamily takes an Option<Url> base URI, FontFamilyKey a UriRef source and an Option<Url> base URI, IFontCollection.Key, EmbeddedFontCollection, FontManager.SystemFontsKey and RemoveFontCollection, FontCollectionBase.TryAddFontSource and FontFamilyLoader are Url. FontFamilyKey compares as Uri did: a URL without its fragment, a relative reference by its text; the font manager keys its collections by the URL without its fragment."
+
+[[name]]
+upstream = "System.Uri (launcher, storage, activation, NavigateUri, XamlSourceInfo, designer transports)"
+rust = "url::Url, ferroui_base::utilities::UriRef"
+kind = "mechanism"
+phase = "C5"
+pull = 548
+behaviour = "same"
+notes = "Step U4. ILauncher.LaunchUriAsync, IStorageProvider.TryGetFileFromPathAsync and TryGetFolderFromPathAsync, ProtocolActivatedEventArgs.Uri, XamlSourceInfo.SourceUri, the storage helpers (UriFromFilePath, TryGetUriFromFilePath, TryGetPathFromFileUri) and the transports of the designer support are url::Url; IStorageItem.Path is a UriRef (the browser, the root of a file system and iOS give a relative reference, as upstream) and HyperlinkButton.NavigateUri a UriRef (O5). The storage helpers make and read file URLs with their own mapping on every target (Url::to_file_path does not exist on the browser); StorageProviderHelpers::local_path is Uri.LocalPath. The html transport compares the origin of a page with the origin of its listen URL."
+
+[[name]]
+upstream = "System.DateTime, System.DateTimeOffset (instants)"
+rust = "std::time::SystemTime"
+kind = "mechanism"
+phase = "C5"
+pull = 528
+behaviour = "same"
+notes = "Step D1 (section 3.3, decision O4). The positions that hold a moment take and return SystemTime: IRuntimePlatform::get_utc_now, UtcNowProvider, LocalUtcOffsetProvider, StorageItemProperties DateCreated and DateModified (and the storage dates of the file system, Android, the browser and iOS), FiredEvent.TriggerTime of the developer tools, ManagedFileChooserItemViewModel.Modified of the dialogs (Option<SystemTime>). DateTime.UtcNow as an instant is ferroui_base::utilities::system_time_now; the browser reads Date.now() and never SystemTime::now(). The calendar values keep DateTime and DateTimeOffset, and the markup properties TriggerTime and Modified stay System.DateTime in local time. The BSON DateTime of the remote protocol keeps its name and converts to and from SystemTime."
+
+[[name]]
+upstream = "System.Guid"
+rust = "uuid::Uuid"
+kind = "type"
+phase = "C5"
+pull = 528
+deprecated = "ferroui_remote_protocol::Guid"
+behaviour = "test"
+notes = "Step G1 (section 3.6). The remote protocol takes and returns Uuid (re-exported as ferroui_remote_protocol::Uuid): IMessageTypeResolver.GetByGuid and GetGuid, the identifier attribute and the GUID of each message, the BSON Guid values; the wire layout is Guid.ToByteArray, which is Uuid::to_bytes_le (tested in metsys_bson_tests). Splat's feature usage tracking references and the Guid converters of ReactiveUI take Uuid too. Also deprecated: ferroui_splat::Guid. The Guid of ferroui-microcom stays, the COM GUID layout."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo (the identity of a culture)"
+rust = "icu_locale_core::Locale"
+kind = "type"
+phase = "C5"
+pull = 531
+behaviour = "deviation"
+notes = "Step L1. The identity positions take Locale (re-exported as ferroui_base::utilities::Locale): the culture of text runs, shaper options and FormattedText, font matching and fallback (IFontManagerImpl, IFontFallbackMapper, IFontCollection, FontCollectionBaseImpl), the family and face names of GlyphTypeface, the script hints, the Language properties (TextElement, RichTextBlock, RichEditBox, CharacterFormat). The invariant culture is the unknown locale und. The markup name stays System.Globalization.CultureInfo: Locale is a second handle of it, parsed from an IETF tag; CultureInfo stays the formatting parameter (decision O3). Deviation: an XML language tag that is no BCP-47 tag (x-private) is not a language (DEVIATIONS.md, Text block)."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo.CurrentCulture"
+rust = "ferroui_base::utilities::current_locale"
+kind = "member"
+phase = "C5"
+pull = 531
+deprecated = "ferroui_base::utilities::CultureInfo::current_culture"
+behaviour = "same"
+notes = "Step L1. The ambient value of a thread is its locale (current_locale, set_current_locale); the culture it formats with, the conventions attached to it included, is CultureInfo::current_formatting and CultureInfo::set_current_formatting. CultureInfo::set_current_culture is deprecated with it."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo.CurrentUICulture"
+rust = "ferroui_base::utilities::current_ui_locale"
+kind = "member"
+phase = "C5"
+pull = 531
+deprecated = "ferroui_base::utilities::CultureInfo::current_ui_culture"
+behaviour = "same"
+notes = "Step L1. set_current_ui_locale replaces CultureInfo::set_current_ui_culture (deprecated)."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo (the formatting parameter)"
+rust = "ferroui_base::utilities::CultureInfo"
+kind = "type"
+phase = "C5"
+pull = 544
+behaviour = "deviation"
+notes = "Step L2 (decision O3). The formatting parameter of the converters, the bindings and StringFormat stays CultureInfo, not deprecated, on ICU4X: made from a Locale (CultureInfo::from_locale, From<Locale>) and giving it (locale()); its name is the text of the locale (EN-us is en-US; the variants in the order of ICU4X), its LCID the one of the locale, und is the invariant culture, and Parent is the culture of the parent of the locale. It carries the number and date conventions of its locale, or attached ones (with_number_format, with_date_time_format). A name that is no BCP-47 tag (es-ES_tradnl) still names a culture, without a locale of its own. The culture data provider (a port type) is keyed by Locale: get_number_format_by_locale and the other _by_locale methods, get_locales; the methods keyed by name are deprecated. Deviation: DEVIATIONS.md, Bindings."
+
+[[name]]
+upstream = "System.Globalization.CultureInfo.GetCultureInfoByIetfLanguageTag"
+rust = "ferroui_base::utilities::CultureInfo::get_culture_info_by_ietf_language_tag"
+kind = "member"
+phase = "C5"
+pull = 544
+behaviour = "deviation"
+notes = "Step L2. The tag is parsed into a Locale and the culture is the culture of the locale; a text that is no BCP-47 tag is refused (None, the error Culture IETF Name ... is not a recognized IETF name. of CultureInfoIetfLanguageTagConverter, the converter of ConverterCulture and of every CultureInfo and Locale property in markup), x-private and en_US besides the old names zh-CHT and zh-CHS and es-ES_tradnl. CultureInfoIetfLanguageTagConverter::convert_to_locale gives the locale. Deviation: DEVIATIONS.md, Bindings."
+
+[[name]]
+upstream = "System.Collections.Generic.Dictionary`2 (the order of its slots)"
+rust = "ferroui_system::collections::generic::SlotOrderMap"
+kind = "type"
+phase = "C5"
+pull = 545
+deprecated = "ferroui_system::collections::generic::Dictionary"
+behaviour = "test"
+notes = "Step X1 (decision O6). The port that enumerates in the order of .NET's slots and free list: an entry added after a removal takes the slot of the one removed last (slot_order_map_tests of ferroui-system). It stays where that sequence is observable, inside the caches of DynamicData, whose change sets list their items in it. The markup name System.Collections.Generic.Dictionary`2 of the dock's locator maps is unchanged, and the BSON Dictionary of the remote protocol, a wire type, keeps its name."
+
+[[name]]
+upstream = "System.Collections.Generic.Dictionary`2 (in a public signature)"
+rust = "std::collections::HashMap, indexmap::IndexMap"
+kind = "mechanism"
+phase = "C5"
+pull = 545
+behaviour = "test"
+notes = "Step X1 (section 3.7). HashMap where nothing depends on the order: the dock's DockableControlMap, DockableObjectMap, ContextLocatorMap, HostWindowLocatorMap and DockableLocatorMap. IndexMap where a caller enumerates in the order of addition: IObservableCache.KeyValues of DynamicData (re-exported as ferroui_dynamic_data::IndexMap; built in the order of the cache, so unchanged), the dictionary of ChangeAwareCache's constructor and into_dictionary, and the dock's DockTargetOperations (the order of the hit test). ChangeAwareCache.GetDictionary is internal, as upstream. Add is insert of a new key; a removal from an IndexMap is shift_remove or swap_remove."

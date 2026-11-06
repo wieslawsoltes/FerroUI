@@ -65,6 +65,86 @@ pub(crate) enum EffectMatrix {
     Saturation(EffectScalar),
     /// `ColorMatrix::tint` of the member.
     Tint(EffectColor),
+    /// `ColorMatrix::sepia` of the member (the intensity).
+    Sepia(EffectScalar),
+    /// `ColorMatrix::scale_and_offset` of the members: the slope and the
+    /// offset of red, green, blue and alpha; a disabled channel is kept.
+    LinearTransfer { slopes: [EffectScalar; 4], offsets: [EffectScalar; 4], disabled: [bool; 4] },
+}
+
+/// The names of the members of a linear transfer, by channel: the slope and
+/// the offset.
+const TRANSFER_MEMBERS: [(&str, &str); 4] =
+    [("RedSlope", "RedOffset"), ("GreenSlope", "GreenOffset"), ("BlueSlope", "BlueOffset"), ("AlphaSlope", "AlphaOffset")];
+
+/// The animatable members of a convolution: the divisor, the bias and the
+/// elements of the kernel, row by row.
+static CONVOLVE_MEMBERS: [(&str, EffectMemberKind); 2 + crate::media::ConvolveMatrix::MAX_ELEMENTS] = [
+    ("Divisor", EffectMemberKind::Scalar),
+    ("Bias", EffectMemberKind::Scalar),
+    ("KernelMatrix0", EffectMemberKind::Scalar),
+    ("KernelMatrix1", EffectMemberKind::Scalar),
+    ("KernelMatrix2", EffectMemberKind::Scalar),
+    ("KernelMatrix3", EffectMemberKind::Scalar),
+    ("KernelMatrix4", EffectMemberKind::Scalar),
+    ("KernelMatrix5", EffectMemberKind::Scalar),
+    ("KernelMatrix6", EffectMemberKind::Scalar),
+    ("KernelMatrix7", EffectMemberKind::Scalar),
+    ("KernelMatrix8", EffectMemberKind::Scalar),
+    ("KernelMatrix9", EffectMemberKind::Scalar),
+    ("KernelMatrix10", EffectMemberKind::Scalar),
+    ("KernelMatrix11", EffectMemberKind::Scalar),
+    ("KernelMatrix12", EffectMemberKind::Scalar),
+    ("KernelMatrix13", EffectMemberKind::Scalar),
+    ("KernelMatrix14", EffectMemberKind::Scalar),
+    ("KernelMatrix15", EffectMemberKind::Scalar),
+    ("KernelMatrix16", EffectMemberKind::Scalar),
+    ("KernelMatrix17", EffectMemberKind::Scalar),
+    ("KernelMatrix18", EffectMemberKind::Scalar),
+    ("KernelMatrix19", EffectMemberKind::Scalar),
+    ("KernelMatrix20", EffectMemberKind::Scalar),
+    ("KernelMatrix21", EffectMemberKind::Scalar),
+    ("KernelMatrix22", EffectMemberKind::Scalar),
+    ("KernelMatrix23", EffectMemberKind::Scalar),
+    ("KernelMatrix24", EffectMemberKind::Scalar),
+];
+
+/// The element of a kernel the member `property` names (`KernelMatrix4`,
+/// ignoring case).
+fn kernel_member(property: &str) -> Option<usize> {
+    const PREFIX: &str = "KernelMatrix";
+    let head = property.get(..PREFIX.len())?;
+    if !head.eq_ignore_ascii_case(PREFIX) {
+        return None;
+    }
+    let index = &property[PREFIX.len()..];
+    if index.is_empty() || !index.bytes().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    index.parse().ok()
+}
+
+/// The member of a linear transfer named `property` (ignoring case): whether
+/// it is a slope, and its channel.
+fn transfer_member(property: &str) -> Option<(bool, usize)> {
+    TRANSFER_MEMBERS.iter().enumerate().find_map(|(channel, (slope, offset))| {
+        if property.eq_ignore_ascii_case(slope) {
+            Some((true, channel))
+        } else if property.eq_ignore_ascii_case(offset) {
+            Some((false, channel))
+        } else {
+            None
+        }
+    })
+}
+
+/// The kind of value an animatable member takes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum EffectMemberKind {
+    /// A number.
+    Scalar,
+    /// A colour.
+    Color,
 }
 
 /// What a node of a loaded graph does.
@@ -113,6 +193,19 @@ pub(crate) enum EffectNodeKind {
     /// An operation on the pixels of the sources, each drawn apart into a
     /// bitmap: what the blend layers of the drawing contexts cannot draw.
     Pixels { op: PixelOp, sources: Vec<EffectNode> },
+    /// The source convolved with a kernel (`ConvolveMatrix`): `kernel` has
+    /// `kernel_width * kernel_height` elements, row by row.
+    ConvolveMatrix {
+        kernel_width: u32,
+        kernel_height: u32,
+        kernel: Vec<EffectScalar>,
+        divisor: EffectScalar,
+        bias: EffectScalar,
+        /// The `Hard` border mode: the edge pixels repeat.
+        clamp_edges: bool,
+        preserve_alpha: bool,
+        source: Box<EffectNode>,
+    },
 }
 
 /// An operation of a [`EffectNodeKind::Pixels`] node.
@@ -148,6 +241,7 @@ impl EffectNode {
             | EffectNodeKind::Opacity { source, .. }
             | EffectNodeKind::ColorMatrix { source, .. }
             | EffectNodeKind::Shadow { source, .. }
+            | EffectNodeKind::ConvolveMatrix { source, .. }
             | EffectNodeKind::Border { source, .. } => vec![&**source],
             EffectNodeKind::Pixels { sources, .. } => sources.iter().collect(),
             EffectNodeKind::CrossFade { source1, source2, .. } => vec![&**source1, &**source2],
@@ -173,6 +267,7 @@ impl EffectNode {
             | EffectNodeKind::Opacity { source, .. }
             | EffectNodeKind::ColorMatrix { source, .. }
             | EffectNodeKind::Shadow { source, .. }
+            | EffectNodeKind::ConvolveMatrix { source, .. }
             | EffectNodeKind::Border { source, .. } => vec![&mut **source],
             EffectNodeKind::Pixels { sources, .. } => sources.iter_mut().collect(),
             EffectNodeKind::CrossFade { source1, source2, .. } => vec![&mut **source1, &mut **source2],
@@ -203,6 +298,16 @@ impl EffectNode {
                 EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Tint(color), .. } if is("Color") => {
                     color.key = key
                 }
+                EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Sepia(intensity), .. } if is("Intensity") => {
+                    intensity.key = key
+                }
+                EffectNodeKind::ColorMatrix { matrix: EffectMatrix::LinearTransfer { slopes, offsets, .. }, .. } => {
+                    match transfer_member(property) {
+                        Some((true, channel)) => slopes[channel].key = key,
+                        Some((false, channel)) => offsets[channel].key = key,
+                        None => return Err(()),
+                    }
+                }
                 EffectNodeKind::ArithmeticWithColor { multiply, .. } if is("MultiplyAmount") => multiply.key = key,
                 EffectNodeKind::ArithmeticWithColor { source1, .. } if is("Source1Amount") => source1.key = key,
                 EffectNodeKind::ArithmeticWithColor { source2, .. } if is("Source2Amount") => source2.key = key,
@@ -223,6 +328,15 @@ impl EffectNode {
                     source2.key = key
                 }
                 EffectNodeKind::Pixels { op: PixelOp::Arithmetic { offset, .. }, .. } if is("Offset") => offset.key = key,
+                EffectNodeKind::ConvolveMatrix { divisor, .. } if is("Divisor") => divisor.key = key,
+                EffectNodeKind::ConvolveMatrix { bias, .. } if is("Bias") => bias.key = key,
+                EffectNodeKind::ConvolveMatrix { kernel, .. }
+                    if kernel_member(property).is_some_and(|index| index < kernel.len()) =>
+                {
+                    if let Some(element) = kernel_member(property).and_then(|index| kernel.get_mut(index)) {
+                        element.key = key;
+                    }
+                }
                 // A member that exists but is not animatable, or no member of
                 // that name.
                 _ => return Err(()),
@@ -249,6 +363,10 @@ impl EffectNode {
             EffectNodeKind::ColorSource(value) => color(value),
             EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Saturation(value), .. } => scalar(value),
             EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Tint(value), .. } => color(value),
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Sepia(value), .. } => scalar(value),
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::LinearTransfer { slopes, offsets, .. }, .. } => {
+                slopes.iter().chain(offsets.iter()).find_map(|value| scalar(value))
+            }
             EffectNodeKind::ArithmeticWithColor { multiply, source1, source2, offset, .. } => {
                 scalar(multiply).or_else(|| scalar(source1)).or_else(|| scalar(source2)).or_else(|| scalar(offset))
             }
@@ -260,6 +378,9 @@ impl EffectNode {
                 scalar(multiply).or_else(|| scalar(source1)).or_else(|| scalar(source2)).or_else(|| scalar(offset))
             }
             EffectNodeKind::Pixels { .. } => None,
+            EffectNodeKind::ConvolveMatrix { kernel, divisor, bias, .. } => {
+                scalar(divisor).or_else(|| scalar(bias)).or_else(|| kernel.iter().find_map(|value| scalar(value)))
+            }
             EffectNodeKind::Parameter(_)
             | EffectNodeKind::Composite { .. }
             | EffectNodeKind::Blend { .. }
@@ -268,6 +389,69 @@ impl EffectNode {
             | EffectNodeKind::Border { .. } => None,
         };
         own.or_else(|| self.sources().into_iter().find_map(|source| source.animatable_value(key)))
+    }
+
+    /// The animatable members of the node: their names and kinds, as
+    /// [`bind_animatable`](Self::bind_animatable) knows them.
+    fn animatable_members(&self) -> &'static [(&'static str, EffectMemberKind)] {
+        use EffectMemberKind::{Color, Scalar};
+        match &self.kind {
+            EffectNodeKind::GaussianBlur { .. } => &[("BlurAmount", Scalar)],
+            EffectNodeKind::Opacity { .. } => &[("Opacity", Scalar)],
+            EffectNodeKind::CrossFade { .. } => &[("Weight", Scalar)],
+            EffectNodeKind::ColorSource(_) => &[("Color", Color)],
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Saturation(_), .. } => &[("Saturation", Scalar)],
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Tint(_), .. } => &[("Color", Color)],
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Sepia(_), .. } => &[("Intensity", Scalar)],
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::LinearTransfer { .. }, .. } => &[
+                ("RedSlope", Scalar),
+                ("RedOffset", Scalar),
+                ("GreenSlope", Scalar),
+                ("GreenOffset", Scalar),
+                ("BlueSlope", Scalar),
+                ("BlueOffset", Scalar),
+                ("AlphaSlope", Scalar),
+                ("AlphaOffset", Scalar),
+            ],
+            EffectNodeKind::ArithmeticWithColor { .. } | EffectNodeKind::Pixels { op: PixelOp::Arithmetic { .. }, .. } => &[
+                ("MultiplyAmount", Scalar),
+                ("Source1Amount", Scalar),
+                ("Source2Amount", Scalar),
+                ("Offset", Scalar),
+            ],
+            EffectNodeKind::SceneLighting { .. } => &[
+                ("AmbientAmount", Scalar),
+                ("DiffuseAmount", Scalar),
+                ("SpecularAmount", Scalar),
+                ("SpecularShine", Scalar),
+            ],
+            EffectNodeKind::Shadow { .. } => &[("BlurAmount", Scalar), ("ShadowColor", Color)],
+            EffectNodeKind::ConvolveMatrix { kernel, .. } => {
+                &CONVOLVE_MEMBERS[..2 + kernel.len().min(CONVOLVE_MEMBERS.len() - 2)]
+            }
+            EffectNodeKind::Parameter(_)
+            | EffectNodeKind::Composite { .. }
+            | EffectNodeKind::Blend { .. }
+            | EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Fixed(_), .. }
+            | EffectNodeKind::AlphaMask { .. }
+            | EffectNodeKind::Border { .. }
+            | EffectNodeKind::Pixels { .. } => &[],
+        }
+    }
+
+    /// The names of the animatable members of `kind` of the effects named
+    /// `effect` in the graph below this node, once each.
+    fn members_of(&self, effect: &str, kind: EffectMemberKind, found: &mut Vec<&'static str>) {
+        if !self.name.is_empty() && self.name == effect {
+            for &(member, member_kind) in self.animatable_members() {
+                if member_kind == kind && !found.contains(&member) {
+                    found.push(member);
+                }
+            }
+        }
+        for source in self.sources() {
+            source.members_of(effect, kind, found);
+        }
     }
 
     fn collect_parameters(&self, parameters: &mut Vec<String>) {
@@ -321,6 +505,11 @@ pub(crate) struct EffectGraph {
     /// The path to the first source parameter in graph order: where the
     /// composed layer goes when the brush is the effect of a layer visual.
     pub(crate) layer_path: Option<Vec<usize>>,
+    /// Whether the graph is drawn around content (the graph of a custom
+    /// effect, #455): the prewarm draws it around an image as the render
+    /// walk draws it around the content of a visual, rather than as a
+    /// brush.
+    pub(crate) around_content: bool,
 }
 
 impl EffectGraph {
@@ -337,7 +526,63 @@ impl EffectGraph {
         animatable: &[&str],
     ) -> Result<EffectGraph, (CompositionEffectFactoryLoadStatus, CompositionEffectFactoryError)> {
         let mut count = 0;
-        let mut root = build_node(effect, 1, &mut count)?;
+        let root = build_node(effect, 1, &mut count)?;
+        Self::with_root(root, animatable)
+    }
+
+    /// Loads `effect` as the graph of a custom effect (#455): each member is
+    /// the name of an animatable property, `EffectName.PropertyName` as for
+    /// [`load`](Self::load), or the name of an effect of the graph alone,
+    /// which names the one animatable property of that effect of the given
+    /// kind (`Saturation` for the saturation effect named `amount`). Returns
+    /// the graph and the full name (`EffectName.PropertyName`) of each
+    /// member, in order. A member whose kind is not the kind of the property
+    /// it names is an invalid animatable property.
+    pub(crate) fn load_with_members(
+        effect: &GraphicsEffect,
+        members: &[(&str, EffectMemberKind)],
+    ) -> Result<(EffectGraph, Vec<String>), (CompositionEffectFactoryLoadStatus, CompositionEffectFactoryError)> {
+        let invalid = |key: &str| {
+            (CompositionEffectFactoryLoadStatus::Other, CompositionEffectFactoryError::InvalidAnimatableProperty(key.to_owned()))
+        };
+        let mut count = 0;
+        let root = build_node(effect, 1, &mut count)?;
+        let mut keys = Vec::with_capacity(members.len());
+        for &(member, kind) in members {
+            if member.contains('.') {
+                keys.push(member.to_owned());
+                continue;
+            }
+            let mut found = Vec::new();
+            root.members_of(member, kind, &mut found);
+            match found.as_slice() {
+                [property] => keys.push(format!("{member}.{property}")),
+                _ => return Err(invalid(member)),
+            }
+        }
+        let names: Vec<&str> = keys.iter().map(String::as_str).collect();
+        let graph = Self::with_root(root, &names)?;
+        for (key, &(member, kind)) in keys.iter().zip(members) {
+            let matches = graph.animatable.iter().any(|(existing, value)| {
+                existing == key
+                    && matches!(
+                        (value, kind),
+                        (EffectPropertyValue::Scalar(_), EffectMemberKind::Scalar)
+                            | (EffectPropertyValue::Color(_), EffectMemberKind::Color)
+                    )
+            });
+            if !matches {
+                return Err(invalid(member));
+            }
+        }
+        Ok((graph, keys))
+    }
+
+    /// The graph of `root` with the animatable properties `animatable`.
+    fn with_root(
+        mut root: EffectNode,
+        animatable: &[&str],
+    ) -> Result<EffectGraph, (CompositionEffectFactoryLoadStatus, CompositionEffectFactoryError)> {
         let mut properties: Vec<(String, EffectPropertyValue)> = Vec::with_capacity(animatable.len());
         for &key in animatable {
             let invalid = || {
@@ -356,7 +601,7 @@ impl EffectGraph {
         root.collect_parameters(&mut parameters);
         let mut path = Vec::new();
         let layer_path = root.first_parameter_path(&mut path).then_some(path);
-        Ok(EffectGraph { root: Some(root), parameters, animatable: properties, layer_path })
+        Ok(EffectGraph { root: Some(root), parameters, animatable: properties, layer_path, around_content: false })
     }
 
     /// Whether the graph was loaded.
@@ -588,6 +833,40 @@ fn build_node(effect: &GraphicsEffect, depth: usize, count: &mut usize) -> Resul
             color: EffectColor::new(shadow.shadow_color),
             source: boxed(&shadow.source, count)?,
         },
+        GraphicsEffect::Sepia(sepia) => {
+            matrix_of(EffectMatrix::Sepia(EffectScalar::new(sepia.intensity)), sepia.alpha_mode, &sepia.source, count)?
+        }
+        GraphicsEffect::LinearTransfer(transfer) => matrix_of(
+            EffectMatrix::LinearTransfer {
+                slopes: [transfer.red_slope, transfer.green_slope, transfer.blue_slope, transfer.alpha_slope]
+                    .map(EffectScalar::new),
+                offsets: [transfer.red_offset, transfer.green_offset, transfer.blue_offset, transfer.alpha_offset]
+                    .map(EffectScalar::new),
+                disabled: [transfer.red_disable, transfer.green_disable, transfer.blue_disable, transfer.alpha_disable],
+            },
+            transfer.alpha_mode,
+            &transfer.source,
+            count,
+        )?,
+        GraphicsEffect::ConvolveMatrix(convolve) => {
+            let side = 1..=crate::media::ConvolveMatrix::MAX_SIDE;
+            if !side.contains(&convolve.kernel_width)
+                || !side.contains(&convolve.kernel_height)
+                || convolve.kernel_matrix.len() != (convolve.kernel_width * convolve.kernel_height) as usize
+            {
+                return Err(not_supported(effect));
+            }
+            EffectNodeKind::ConvolveMatrix {
+                kernel_width: convolve.kernel_width,
+                kernel_height: convolve.kernel_height,
+                kernel: convolve.kernel_matrix.iter().map(|value| EffectScalar::new(*value)).collect(),
+                divisor: EffectScalar::new(convolve.divisor),
+                bias: EffectScalar::new(convolve.bias),
+                clamp_edges: convolve.border_mode == EffectBorderMode::Hard,
+                preserve_alpha: convolve.preserve_alpha,
+                source: boxed(&convolve.source, count)?,
+            }
+        }
         GraphicsEffect::SceneLighting(lighting) => EffectNodeKind::SceneLighting {
             ambient: EffectScalar::new(lighting.ambient_amount),
             diffuse: EffectScalar::new(lighting.diffuse_amount),
@@ -603,8 +882,8 @@ mod tests {
     use super::*;
     use crate::media::Colors;
     use crate::rendering::composition::effects::{
-        ArithmeticCompositeEffect, BlendEffect, ColorSourceEffect, CompositionEffectSourceParameter, SaturationEffect,
-        SceneLightingEffect,
+        ArithmeticCompositeEffect, BlendEffect, ColorSourceEffect, CompositionEffectSourceParameter,
+        LinearTransferEffect, SaturationEffect, SceneLightingEffect, SepiaEffect, ShadowEffect,
     };
 
     fn parameter(name: &str) -> Option<GraphicsEffectSource> {
@@ -678,5 +957,116 @@ mod tests {
         let graph = EffectGraph::load(&effect, &["Light.DiffuseAmount"]).expect("loads");
         assert_eq!(graph.animatable, vec![("Light.DiffuseAmount".to_owned(), EffectPropertyValue::Scalar(1.0))]);
         assert!(graph.layer_path.is_none());
+    }
+
+    #[test]
+    fn sepia_and_linear_transfer_load_as_animatable_colour_matrices() {
+        let sepia: GraphicsEffect =
+            SepiaEffect { name: "Sepia".into(), intensity: 0.75, source: parameter("source"), ..Default::default() }.into();
+        let graph = EffectGraph::load(&sepia, &["Sepia.Intensity"]).expect("loads");
+        assert_eq!(graph.animatable, vec![("Sepia.Intensity".to_owned(), EffectPropertyValue::Scalar(0.75))]);
+        assert!(matches!(graph.root.unwrap().kind, EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Sepia(_), .. }));
+
+        let transfer: GraphicsEffect = LinearTransferEffect {
+            name: "Transfer".into(),
+            red_slope: 2.0,
+            alpha_disable: true,
+            source: parameter("source"),
+            ..Default::default()
+        }
+        .into();
+        let graph = EffectGraph::load(&transfer, &["Transfer.RedSlope", "Transfer.BlueOffset"]).expect("loads");
+        assert_eq!(
+            graph.animatable,
+            vec![
+                ("Transfer.RedSlope".to_owned(), EffectPropertyValue::Scalar(2.0)),
+                ("Transfer.BlueOffset".to_owned(), EffectPropertyValue::Scalar(0.0)),
+            ]
+        );
+        let Some(EffectNode { kind: EffectNodeKind::ColorMatrix { matrix: EffectMatrix::LinearTransfer { disabled, .. }, .. }, .. }) =
+            graph.root
+        else {
+            panic!("a linear transfer");
+        };
+        assert_eq!([false, false, false, true], disabled);
+        assert!(EffectGraph::load(&transfer, &["Transfer.Saturation"]).is_err());
+    }
+
+    #[test]
+    fn members_named_by_an_effect_alone_take_its_property_of_their_kind() {
+        let shadow: GraphicsEffect = ShadowEffect { name: "glow".into(), source: parameter("content"), ..Default::default() }.into();
+        let (graph, keys) = EffectGraph::load_with_members(
+            &shadow,
+            &[("glow", EffectMemberKind::Scalar), ("glow", EffectMemberKind::Color)],
+        )
+        .expect("loads");
+        assert_eq!(vec!["glow.BlurAmount".to_owned(), "glow.ShadowColor".to_owned()], keys);
+        assert_eq!(2, graph.animatable.len());
+
+        // A full name is taken as it is; its kind is checked.
+        let (_, keys) =
+            EffectGraph::load_with_members(&shadow, &[("glow.ShadowColor", EffectMemberKind::Color)]).expect("loads");
+        assert_eq!(vec!["glow.ShadowColor".to_owned()], keys);
+        assert!(EffectGraph::load_with_members(&shadow, &[("glow.ShadowColor", EffectMemberKind::Scalar)]).is_err());
+
+        // No effect of that name, or more than one property of the kind.
+        assert!(EffectGraph::load_with_members(&shadow, &[("other", EffectMemberKind::Scalar)]).is_err());
+        let transfer: GraphicsEffect =
+            LinearTransferEffect { name: "amount".into(), source: parameter("content"), ..Default::default() }.into();
+        let error = EffectGraph::load_with_members(&transfer, &[("amount", EffectMemberKind::Scalar)]).unwrap_err();
+        assert_eq!(CompositionEffectFactoryError::InvalidAnimatableProperty("amount".into()), error.1);
+    }
+
+    #[test]
+    fn a_convolution_loads_with_its_kernel_divisor_and_bias_animatable() {
+        use crate::rendering::composition::effects::ConvolveMatrixEffect;
+        let sharpen: GraphicsEffect = ConvolveMatrixEffect {
+            name: "Sharpen".into(),
+            kernel_matrix: vec![0.0, -1.0, 0.0, -1.0, 5.0, -1.0, 0.0, -1.0, 0.0],
+            border_mode: EffectBorderMode::Hard,
+            preserve_alpha: true,
+            source: parameter("content"),
+            ..Default::default()
+        }
+        .into();
+        let graph = EffectGraph::load(&sharpen, &["Sharpen.KernelMatrix4", "Sharpen.Divisor", "Sharpen.Bias"])
+            .expect("loads");
+        assert_eq!(
+            graph.animatable,
+            vec![
+                ("Sharpen.KernelMatrix4".to_owned(), EffectPropertyValue::Scalar(5.0)),
+                ("Sharpen.Divisor".to_owned(), EffectPropertyValue::Scalar(1.0)),
+                ("Sharpen.Bias".to_owned(), EffectPropertyValue::Scalar(0.0)),
+            ]
+        );
+        let Some(EffectNode { kind: EffectNodeKind::ConvolveMatrix { kernel, clamp_edges, preserve_alpha, .. }, .. }) =
+            graph.root
+        else {
+            panic!("a convolution");
+        };
+        assert_eq!(9, kernel.len());
+        assert!(clamp_edges && preserve_alpha);
+        // An element beyond the kernel, or a member it does not have.
+        assert!(EffectGraph::load(&sharpen, &["Sharpen.KernelMatrix9"]).is_err());
+        assert!(EffectGraph::load(&sharpen, &["Sharpen.KernelMatrix"]).is_err());
+        assert!(EffectGraph::load(&sharpen, &["Sharpen.Saturation"]).is_err());
+
+        // A kernel of more than 5 by 5 elements, or of the wrong length.
+        let large: GraphicsEffect = ConvolveMatrixEffect {
+            kernel_width: 7,
+            kernel_height: 1,
+            kernel_matrix: vec![0.0; 7],
+            source: parameter("content"),
+            ..Default::default()
+        }
+        .into();
+        assert!(EffectGraph::load(&large, &[]).is_err());
+        let wrong: GraphicsEffect = ConvolveMatrixEffect {
+            kernel_matrix: vec![1.0; 4],
+            source: parameter("content"),
+            ..Default::default()
+        }
+        .into();
+        assert!(EffectGraph::load(&wrong, &[]).is_err());
     }
 }

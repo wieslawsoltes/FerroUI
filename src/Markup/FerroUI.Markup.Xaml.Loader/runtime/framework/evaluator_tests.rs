@@ -68,6 +68,10 @@ fn describe(value: &MarkupValue) -> String {
     if let Some(uri) = value.downcast_ref::<Uri>() {
         return format!("<{uri}>");
     }
+    // The base URI of a document (C5 of #423).
+    if let Some(url) = value.downcast_ref::<url::Url>() {
+        return format!("<{url}>");
+    }
     let name = value.type_name();
     let name = name.split('<').next().unwrap_or(name);
     format!("[{}]", name.rsplit("::").next().unwrap_or(name))
@@ -164,7 +168,7 @@ impl Harness {
             interpreter.services.clone(),
             None,
             Rc::from(Vec::new()),
-            Uri::absolute("http://example.com/app/").ok(),
+            url::Url::parse("http://example.com/app/").ok(),
         );
         let scope = Rc::new(NameScope::new());
         let as_scope: Rc<dyn INameScope> = scope.clone();

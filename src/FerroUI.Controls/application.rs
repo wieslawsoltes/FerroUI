@@ -18,7 +18,7 @@ use ferroui_base::styling::{
     GlobalStylesHandler, IGlobalStyles, IStyle, IStyleHost, IThemeVariantHost, IThemeVariantRoot, StyleHostRef,
     Styles, ThemeVariant,
 };
-use ferroui_base::threading::FerroSynchronizationContext;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_property, instantiate, BoxedValue, DirectProperty, FerroLocator, FerroObject, FerroObjectImpl,
@@ -130,7 +130,11 @@ impl ApplicationImpl for Application {
     fn initialize(_this: &Self) {}
 
     fn register_services(this: &Self) {
-        FerroSynchronizationContext::install_if_needed();
+        // The code of the application that runs outside of a dispatcher job continues at Normal,
+        // as under the synchronization context that the upstream application installs here.
+        if Dispatcher::current_priority().is_none() {
+            Dispatcher::set_current_priority(Some(DispatcherPriority::NORMAL));
+        }
         let input_manager = Rc::new(InputManager::new());
         *this.input_manager.borrow_mut() = Some(input_manager.clone());
 

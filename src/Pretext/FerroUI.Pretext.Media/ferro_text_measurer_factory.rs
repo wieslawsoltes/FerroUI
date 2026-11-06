@@ -10,7 +10,7 @@ use ferroui_base::media::{
     FontStyle, FontWeight, GlyphInfoList, GlyphRun, Typeface,
 };
 use ferroui_base::platform::{IFontManagerImpl, ITextShaperImpl};
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory};
+use ferroui_base::utilities::{Locale, ReadOnlyMemory};
 use ferroui_base::{FerroLocator, LocatorExtensions, Point};
 use ferroui_pretext::{
     IPretextTextMeasurer, IPretextTextMeasurerFactory, IPretextTextShaper,
@@ -32,7 +32,7 @@ pub struct FerroTextMeasurerFactory {
     font_manager: Rc<FontManager>,
     text_shaper: Rc<TextShaper>,
     typeface_shaper: Rc<dyn ITextShaperImpl>,
-    culture: Option<CultureInfo>,
+    culture: Option<Locale>,
 }
 
 impl FerroTextMeasurerFactory {
@@ -80,7 +80,7 @@ impl FerroTextMeasurerFactory {
     }
 
     /// Selects the culture used by native font fallback and shaping.
-    pub fn with_culture(mut self, culture: CultureInfo) -> Self {
+    pub fn with_culture(mut self, culture: Locale) -> Self {
         self.culture = Some(culture);
         self
     }

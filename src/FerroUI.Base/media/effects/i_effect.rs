@@ -1,6 +1,6 @@
 use crate::media::effects::{
     BlurEffect, DropShadowDirectionEffect, DropShadowEffect, Effect, IBlurEffect, IDirectionDropShadowEffect,
-    IDropShadowEffect,
+    IDropShadowEffect, ImmutableCustomEffect,
 };
 use crate::media::ref_adapter::RefAdapter;
 use crate::{FerroObject, ObjectType, Ref, Upcast};
@@ -40,6 +40,13 @@ pub trait IEffect: 'static {
 
     /// The effect viewed as [`IMutableEffect`], when it is one.
     fn as_mutable_effect(&self) -> Option<&dyn IMutableEffect> {
+        None
+    }
+
+    /// The effect as the snapshot of a custom effect, when it is one (#455,
+    /// not from upstream). A mutable custom effect class is not one; its
+    /// snapshot is [`EffectExtensions::to_custom_effect`](super::EffectExtensions::to_custom_effect).
+    fn as_custom_effect(&self) -> Option<&ImmutableCustomEffect> {
         None
     }
 
@@ -84,6 +91,8 @@ impl std::fmt::Debug for dyn IEffect {
                 shadow.blur_radius(),
                 shadow.color()
             )
+        } else if let Some(custom) = self.as_custom_effect() {
+            write!(f, "IEffect({custom})")
         } else {
             f.write_str("IEffect")
         }
@@ -139,6 +148,7 @@ impl<T: ObjectType + Upcast<Effect>> IEffect for RefAdapter<T> {
         if self.object().is::<BlurEffect>()
             || self.object().is::<DropShadowEffect>()
             || self.object().is::<DropShadowDirectionEffect>()
+            || Upcast::<Effect>::upcast(&*self.0).is_custom()
         {
             Some(self)
         } else {
@@ -158,6 +168,8 @@ impl<T: ObjectType + Upcast<Effect>> IMutableEffect for RefAdapter<T> {
             blur.to_immutable()
         } else if let Some(shadow) = object.downcast_ref::<DropShadowEffect>() {
             shadow.to_immutable()
+        } else if let Some(custom) = Upcast::<Effect>::upcast(&*self.0).custom_snapshot() {
+            std::sync::Arc::new(custom)
         } else {
             self.class::<DropShadowDirectionEffect>().to_immutable()
         }

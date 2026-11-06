@@ -9,7 +9,7 @@ use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::*;
 use ferroui_system::component_model::{INotifyPropertyChanged, INotifyPropertyChanging};
 use ferroui_system::prop;
-use ferroui_system::threading::tasks::{block_on, TaskCompletionSource};
+use ferroui_system::task::{block_on, Shared};
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IObservable, ObservableError};
 use std::cell::{OnceCell, RefCell};
@@ -126,7 +126,7 @@ impl PersonViewModel {
     /// `LoadAsync`.
     async fn load_async(id: i32, token: CancellationToken) -> Result<i32, ObservableError> {
         YieldNow(false).await;
-        if token.is_cancellation_requested() {
+        if token.is_cancelled() {
             return Err(Rc::new(OperationCanceled));
         }
         Ok(id + 1)
@@ -186,19 +186,26 @@ fn reactive_command_runs_method_and_follows_can_execute() {
 #[test]
 fn reactive_command_from_async_method_returns_result() {
     let fixture = PersonViewModel::new();
-    let result = TaskCompletionSource::<i32>::new();
-    let (on_value, on_error) = (result.clone(), result.clone());
+    let (sender, result) = Shared::<Result<i32, ObservableError>>::channel();
+    let sender = Rc::new(RefCell::new(Some(sender)));
+    let (on_value, on_error) = (sender.clone(), sender);
 
     let execution = fixture.load_command().execute(LOAD_INPUT).subscribe_next_error(
         move |value| {
-            let _ = on_value.try_set_result(value);
+            let sender = on_value.borrow_mut().take();
+            if let Some(sender) = sender {
+                sender.send(Ok(value));
+            }
         },
         move |error| {
-            let _ = on_error.try_set_exception(error);
+            let sender = on_error.borrow_mut().take();
+            if let Some(sender) = sender {
+                sender.send(Err(error));
+            }
         },
     );
 
     // Upstream waits for the result for ten seconds at most; the task ends on this thread.
-    assert_eq!(block_on(result.task()).expect("the command returns its result"), LOAD_INPUT + 1);
+    assert_eq!(block_on(result.flatten()).expect("the command returns its result"), LOAD_INPUT + 1);
     execution.dispose();
 }

@@ -30,7 +30,7 @@
 
 use crate::interop::{accessibility_helper, JsObject};
 use crate::BrowserAccessibilityMode;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{Rect, Ref};
 use ferroui_controls::automation::peers::{AutomationControlType, AutomationLandmarkType, AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::automation::provider::{
@@ -294,7 +294,7 @@ struct Node {
     sent: Option<NodeState>,
     // The bounds of the peer in the view, for the relative bounds of its children.
     absolute: Rect,
-    subscriptions: Vec<Rc<dyn IDisposable>>,
+    subscriptions: Vec<Subscription>,
 }
 
 /// The accessibility tree of one view.
@@ -317,7 +317,7 @@ pub struct BrowserAccessibility {
     focus_dirty: Cell<bool>,
     focused: Cell<u32>,
     requested: Cell<bool>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl BrowserAccessibility {
@@ -388,20 +388,20 @@ impl BrowserAccessibility {
             accessibility_helper::set_enable_button(&self.host, false);
             let root = ControlAutomationPeer::create_peer_for_element(&self.top_level);
             let weak = self.this.clone();
-            let mut subscriptions: Vec<Rc<dyn IDisposable>> = vec![self.top_level.layout_updated(move || {
+            let mut subscriptions: Vec<Subscription> = vec![self.top_level.layout_updated(move || {
                 if let Some(this) = weak.upgrade() {
                     this.layout_dirty.set(true);
                     this.request();
                 }
-            }).detach()];
+            })];
             if let Some(provider) = root.get_provider::<dyn IEmbeddedRootProvider>() {
                 let weak = self.this.clone();
-                subscriptions.push(provider.focus_changed(Rc::new(move || {
+                subscriptions.push(Subscription::new(provider.focus_changed(Rc::new(move || {
                     if let Some(this) = weak.upgrade() {
                         this.focus_dirty.set(true);
                         this.request();
                     }
-                })));
+                }))));
             }
             *self.subscriptions.borrow_mut() = subscriptions;
             let key = peer_key(&root);
@@ -411,14 +411,8 @@ impl BrowserAccessibility {
             self.focus_dirty.set(true);
             self.request();
         } else {
-            for subscription in self.subscriptions.borrow_mut().drain(..) {
-                subscription.dispose();
-            }
-            for (_, node) in self.nodes.borrow_mut().drain() {
-                for subscription in node.subscriptions {
-                    subscription.dispose();
-                }
-            }
+            drop(self.subscriptions.take());
+            drop(self.nodes.take());
             self.ids.borrow_mut().clear();
             self.structure_dirty.borrow_mut().clear();
             self.attributes_dirty.borrow_mut().clear();
@@ -487,9 +481,7 @@ impl BrowserAccessibility {
             if !reached.contains(&key) && key != root_key {
                 if let Some(node) = self.nodes.borrow_mut().remove(&key) {
                     self.ids.borrow_mut().remove(&node.id);
-                    for subscription in node.subscriptions {
-                        subscription.dispose();
-                    }
+                    drop(node.subscriptions);
                     if node.sent.is_some() {
                         changes.push(format!("{{\"i\":{},\"d\":1}}", node.id));
                     }
@@ -620,14 +612,14 @@ impl BrowserAccessibility {
                 this.structure_dirty.borrow_mut().insert(key);
                 this.request();
             }
-        }).detach();
+        });
         let weak = self.this.clone();
         let property_changed = peer.property_changed(move |_| {
             if let Some(this) = weak.upgrade() {
                 this.attributes_dirty.borrow_mut().insert(key);
                 this.request();
             }
-        }).detach();
+        });
         self.nodes.borrow_mut().insert(
             key,
             Node {
@@ -656,7 +648,7 @@ impl BrowserAccessibility {
                     this.structure_dirty.borrow_mut().insert(key);
                     this.request();
                 }
-            }).detach();
+            });
             self.nodes.borrow_mut().insert(
                 key,
                 Node {
@@ -744,14 +736,8 @@ impl Drop for BrowserAccessibility {
                 trees.remove(&self.top_level_id);
             }
         });
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-        for (_, node) in self.nodes.get_mut().drain() {
-            for subscription in node.subscriptions {
-                subscription.dispose();
-            }
-        }
+        drop(std::mem::take(self.subscriptions.get_mut()));
+        drop(std::mem::take(self.nodes.get_mut()));
     }
 }
 

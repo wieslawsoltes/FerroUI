@@ -31,8 +31,14 @@ impl TextInfo {
     /// The conventions of `culture`: the data the registered provider has
     /// for the culture or the nearest of its parents, else the invariant
     /// data.
+    #[allow(deprecated)] // the culture whose name is no locale is asked for by name
     pub(crate) fn for_culture(culture: &CultureInfo) -> Rc<TextInfo> {
-        find_culture_data(culture, |provider, name| provider.get_text_info(name)).unwrap_or_else(Self::invariant_info)
+        find_culture_data(
+            culture,
+            |provider, locale| provider.get_text_info_by_locale(locale),
+            |provider, name| provider.get_text_info(name),
+        )
+        .unwrap_or_else(Self::invariant_info)
     }
 
     /// The conventions of the invariant culture.
@@ -42,7 +48,7 @@ impl TextInfo {
 
     /// The conventions of the current culture.
     pub fn current_info() -> Rc<TextInfo> {
-        CultureInfo::current_culture().text_info()
+        CultureInfo::current_formatting().text_info()
     }
 
     /// Gets the string that separates items in a list (C# `ListSeparator`).

@@ -15,7 +15,8 @@ use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerFileTypes, FilePickerOpenOptions, FilePickerSaveOptions, FolderPickerOpenOptions,
     IStorageFile, IStorageFolder, IStorageItem, IStorageProvider, WellKnownFolder,
 };
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::platform::storage::file_io::StorageProviderHelpers;
+use ferroui_base::utilities::{DateTimeOffset, UriRef};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
     VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
@@ -117,11 +118,9 @@ fn try_parse_well_known_folder(text: Option<&str>) -> Option<WellKnownFolder> {
 
 /// `FullPathOrName(item)`, for an item that is not null (no caller passes null).
 fn full_path_or_name(item: &dyn IStorageItem) -> String {
-    let path = item.path();
-    if path.is_absolute_uri() {
-        path.to_string()
-    } else {
-        item.name()
+    match item.path().as_url() {
+        Some(url) => url.to_string(),
+        None => item.name(),
     }
 }
 
@@ -335,8 +334,9 @@ impl DialogsPage {
                 *this.last_selected_directory.borrow_mut() = folder;
             }));
         } else if let Some(text) = text.filter(|text| !text.trim().is_empty()) {
-            let folder_link = Uri::try_create(&text, UriKind::Absolute)
-                .or_else(|| Uri::try_create(&format!("file://{text}"), UriKind::Absolute));
+            let folder_link = UriRef::parse_absolute(&text)
+                .or_else(|_| UriRef::parse_absolute(&format!("file://{text}")))
+                .ok();
 
             if let Some(folder_link) = folder_link {
                 let pending = self.get_storage_provider().try_get_folder_from_path_async(&folder_link);
@@ -616,7 +616,7 @@ impl DialogsPage {
     /// in the managed original).
     async fn launch_uri_click(&self) {
         let status_block = self.launch_status();
-        let uri = self.uri_to_launch().text().and_then(|text| Uri::try_create(&text, UriKind::Absolute));
+        let uri = self.uri_to_launch().text().and_then(|text| UriRef::parse_absolute(&text).ok());
         match uri {
             Some(uri) => {
                 let top_level = TopLevel::get_top_level(Some(self)).expect("the page is attached to a top level");
@@ -666,10 +666,9 @@ impl DialogsPage {
         });
         let text = folder.map(|folder| {
             let path = folder.path();
-            if path.is_absolute_uri() {
-                path.local_path()
-            } else {
-                path.to_string()
+            match path.as_url() {
+                Some(url) => StorageProviderHelpers::local_path(url),
+                None => path.to_string(),
             }
         });
         self.current_folder_box().set_text(text.as_deref());
@@ -703,8 +702,8 @@ impl DialogsPage {
             result_text += &format!(
                 "Size: {}\n            DateCreated: {}\n            DateModified: {}\n            CanBookmark: {}\n            ",
                 nullable_text(props.size()),
-                nullable_text(props.date_created()),
-                nullable_text(props.date_modified()),
+                nullable_text(props.date_created().and_then(|date| DateTimeOffset::try_from(date).ok())),
+                nullable_text(props.date_modified().and_then(|date| DateTimeOffset::try_from(date).ok())),
                 bool_text(item.can_bookmark())
             );
             if let Some(file) = file {

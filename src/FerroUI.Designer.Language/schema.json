@@ -321,8 +321,8 @@
       },
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "Animation.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "Animation.Duration: SignedDuration",
         "values": []
       },
       "IterationCount": {
@@ -365,14 +365,14 @@
       },
       "Delay": {
         "name": "Delay",
-        "type_name": "TimeSpan",
-        "documentation": "Animation.Delay: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "Animation.Delay: SignedDuration",
         "values": []
       },
       "DelayBetweenIterations": {
         "name": "DelayBetweenIterations",
-        "type_name": "TimeSpan",
-        "documentation": "Animation.DelayBetweenIterations: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "Animation.DelayBetweenIterations: SignedDuration",
         "values": []
       },
       "Children": {
@@ -608,8 +608,8 @@
       },
       "MinimumPopulateDelay": {
         "name": "MinimumPopulateDelay",
-        "type_name": "TimeSpan",
-        "documentation": "AutoCompleteBox.MinimumPopulateDelay: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "AutoCompleteBox.MinimumPopulateDelay: Duration",
         "values": [],
         "attached": false
       },
@@ -3791,8 +3791,8 @@
     "properties": {
       "DefaultDuration": {
         "name": "DefaultDuration",
-        "type_name": "TimeSpan",
-        "documentation": "ConnectedAnimationService.DefaultDuration: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "ConnectedAnimationService.DefaultDuration: Duration",
         "values": []
       },
       "DefaultEasingFunction": {
@@ -3805,6 +3805,75 @@
     "namespace_aliases": [
       "using:FerroUI.Animation",
       "clr-namespace:FerroUI.Animation;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "Contact",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Contact",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "String",
+        "documentation": "Contact.Id: String",
+        "values": [],
+        "attached": false
+      },
+      "FirstName": {
+        "name": "FirstName",
+        "type_name": "String",
+        "documentation": "Contact.FirstName: String",
+        "values": [],
+        "attached": false
+      },
+      "LastName": {
+        "name": "LastName",
+        "type_name": "String",
+        "documentation": "Contact.LastName: String",
+        "values": [],
+        "attached": false
+      },
+      "DisplayNameOverride": {
+        "name": "DisplayNameOverride",
+        "type_name": "String",
+        "documentation": "Contact.DisplayNameOverride: String",
+        "values": [],
+        "attached": false
+      },
+      "SmallDisplayPicture": {
+        "name": "SmallDisplayPicture",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "Contact.SmallDisplayPicture: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "LargeDisplayPicture": {
+        "name": "LargeDisplayPicture",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "Contact.LargeDisplayPicture: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "SourceDisplayPicture": {
+        "name": "SourceDisplayPicture",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "Contact.SourceDisplayPicture: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "Thumbnail": {
+        "name": "Thumbnail",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "Contact.Thumbnail: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -4677,8 +4746,8 @@
     "properties": {
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "CrossFade.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "CrossFade.Duration: SignedDuration",
         "values": []
       },
       "FadeInEasing": {
@@ -5365,6 +5434,48 @@
     "namespace_aliases": [
       "using:FerroUI.Markup.Xaml.XamlIl.Runtime",
       "clr-namespace:FerroUI.Markup.Xaml.XamlIl.Runtime;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
+    "name": "DeferredElement",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_markup_xaml::markup_extensions::DeferredElement",
+    "base": "Control",
+    "constructible": true,
+    "properties": {
+      "Load": {
+        "name": "Load",
+        "type_name": "bool",
+        "documentation": "DeferredElement.Load: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "Placeholder": {
+        "name": "Placeholder",
+        "type_name": "Option<Ref<DeferredElement>>",
+        "documentation": "DeferredElement.Placeholder: Option<Ref<DeferredElement>>",
+        "values": [],
+        "attached": true
+      },
+      "ElementName": {
+        "name": "ElementName",
+        "type_name": "Option<String>",
+        "documentation": "DeferredElement.ElementName: Option<String>",
+        "values": []
+      },
+      "Content": {
+        "name": "Content",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "DeferredElement.Content: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Markup.Xaml.MarkupExtensions",
+      "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"
     ]
   },
   {
@@ -7925,8 +8036,8 @@
       },
       "NavigateUri": {
         "name": "NavigateUri",
-        "type_name": "Option<Uri>",
-        "documentation": "HyperlinkButton.NavigateUri: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "HyperlinkButton.NavigateUri: Option<UriRef>",
         "values": [],
         "attached": false
       }
@@ -9757,6 +9868,16 @@
         ],
         "attached": false
       },
+      "AllowFocusOnInteraction": {
+        "name": "AllowFocusOnInteraction",
+        "type_name": "bool",
+        "documentation": "InputElement.AllowFocusOnInteraction: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "IsEnabled": {
         "name": "IsEnabled",
         "type_name": "bool",
@@ -10175,6 +10296,54 @@
     "namespace_aliases": [
       "using:FerroUI.Interactivity",
       "clr-namespace:FerroUI.Interactivity;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractiveBurningFlameEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveBurningFlameEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractivePointerSpotlightEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractivePointerSpotlightEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractiveReactiveGridEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveReactiveGridEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InteractiveWaterRippleEffect",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "InteractiveWaterRippleEffect",
+    "base": "Effect",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
     ]
   },
   {
@@ -10692,8 +10861,8 @@
       },
       "KeyTime": {
         "name": "KeyTime",
-        "type_name": "TimeSpan",
-        "documentation": "KeyFrame.KeyTime: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "KeyFrame.KeyTime: SignedDuration",
         "values": []
       },
       "Cue": {
@@ -14525,8 +14694,8 @@
     "properties": {
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "PageSlide.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "PageSlide.Duration: SignedDuration",
         "values": []
       },
       "Orientation": {
@@ -14590,6 +14759,232 @@
     "namespace_aliases": [
       "using:FerroUI.Navigation",
       "clr-namespace:FerroUI.Navigation;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PagerControl",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PagerControl",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "DisplayMode": {
+        "name": "DisplayMode",
+        "type_name": "PagerControlDisplayMode",
+        "documentation": "PagerControl.DisplayMode: PagerControlDisplayMode",
+        "values": [
+          "Auto",
+          "ComboBox",
+          "NumberBox",
+          "ButtonPanel"
+        ],
+        "attached": false
+      },
+      "NumberOfPages": {
+        "name": "NumberOfPages",
+        "type_name": "i32",
+        "documentation": "PagerControl.NumberOfPages: i32",
+        "values": [],
+        "attached": false
+      },
+      "SelectedPageIndex": {
+        "name": "SelectedPageIndex",
+        "type_name": "i32",
+        "documentation": "PagerControl.SelectedPageIndex: i32",
+        "values": [],
+        "attached": false
+      },
+      "FirstButtonVisibility": {
+        "name": "FirstButtonVisibility",
+        "type_name": "PagerControlButtonVisibility",
+        "documentation": "PagerControl.FirstButtonVisibility: PagerControlButtonVisibility",
+        "values": [
+          "Visible",
+          "HiddenOnEdge",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "PreviousButtonVisibility": {
+        "name": "PreviousButtonVisibility",
+        "type_name": "PagerControlButtonVisibility",
+        "documentation": "PagerControl.PreviousButtonVisibility: PagerControlButtonVisibility",
+        "values": [
+          "Visible",
+          "HiddenOnEdge",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "NextButtonVisibility": {
+        "name": "NextButtonVisibility",
+        "type_name": "PagerControlButtonVisibility",
+        "documentation": "PagerControl.NextButtonVisibility: PagerControlButtonVisibility",
+        "values": [
+          "Visible",
+          "HiddenOnEdge",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "LastButtonVisibility": {
+        "name": "LastButtonVisibility",
+        "type_name": "PagerControlButtonVisibility",
+        "documentation": "PagerControl.LastButtonVisibility: PagerControlButtonVisibility",
+        "values": [
+          "Visible",
+          "HiddenOnEdge",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "FirstButtonCommand": {
+        "name": "FirstButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.FirstButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "PreviousButtonCommand": {
+        "name": "PreviousButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.PreviousButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "NextButtonCommand": {
+        "name": "NextButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.NextButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "LastButtonCommand": {
+        "name": "LastButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.LastButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "PagerInputCommand": {
+        "name": "PagerInputCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "PagerControl.PagerInputCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "FirstButtonStyle": {
+        "name": "FirstButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "PagerControl.FirstButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "PreviousButtonStyle": {
+        "name": "PreviousButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "PagerControl.PreviousButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "NextButtonStyle": {
+        "name": "NextButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "PagerControl.NextButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "LastButtonStyle": {
+        "name": "LastButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "PagerControl.LastButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "ButtonPanelAlwaysShowFirstLastPageIndex": {
+        "name": "ButtonPanelAlwaysShowFirstLastPageIndex",
+        "type_name": "bool",
+        "documentation": "PagerControl.ButtonPanelAlwaysShowFirstLastPageIndex: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "PrefixText": {
+        "name": "PrefixText",
+        "type_name": "String",
+        "documentation": "PagerControl.PrefixText: String",
+        "values": [],
+        "attached": false
+      },
+      "SuffixText": {
+        "name": "SuffixText",
+        "type_name": "String",
+        "documentation": "PagerControl.SuffixText: String",
+        "values": [],
+        "attached": false
+      },
+      "TemplateSettings": {
+        "name": "TemplateSettings",
+        "type_name": "Option<Ref<PagerControlTemplateSettings>>",
+        "documentation": "PagerControl.TemplateSettings: Option<Ref<PagerControlTemplateSettings>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PagerControlAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::PagerControlAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PagerControlSelectedIndexChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PagerControlSelectedIndexChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "NewPageIndex": {
+        "name": "NewPageIndex",
+        "type_name": "i32",
+        "documentation": "PagerControlSelectedIndexChangedEventArgs.NewPageIndex: i32",
+        "values": []
+      },
+      "PreviousPageIndex": {
+        "name": "PreviousPageIndex",
+        "type_name": "i32",
+        "documentation": "PagerControlSelectedIndexChangedEventArgs.PreviousPageIndex: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PagerControlTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::PagerControlTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -14964,6 +15359,141 @@
     "namespace_aliases": [
       "using:FerroUI.Media",
       "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "PersonPicture",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PersonPicture",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "BadgeNumber": {
+        "name": "BadgeNumber",
+        "type_name": "i32",
+        "documentation": "PersonPicture.BadgeNumber: i32",
+        "values": [],
+        "attached": false
+      },
+      "BadgeGlyph": {
+        "name": "BadgeGlyph",
+        "type_name": "String",
+        "documentation": "PersonPicture.BadgeGlyph: String",
+        "values": [],
+        "attached": false
+      },
+      "BadgeImageSource": {
+        "name": "BadgeImageSource",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "PersonPicture.BadgeImageSource: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "BadgeText": {
+        "name": "BadgeText",
+        "type_name": "String",
+        "documentation": "PersonPicture.BadgeText: String",
+        "values": [],
+        "attached": false
+      },
+      "IsGroup": {
+        "name": "IsGroup",
+        "type_name": "bool",
+        "documentation": "PersonPicture.IsGroup: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "Contact": {
+        "name": "Contact",
+        "type_name": "Option<Ref<Contact>>",
+        "documentation": "PersonPicture.Contact: Option<Ref<Contact>>",
+        "values": [],
+        "attached": false
+      },
+      "DisplayName": {
+        "name": "DisplayName",
+        "type_name": "String",
+        "documentation": "PersonPicture.DisplayName: String",
+        "values": [],
+        "attached": false
+      },
+      "Initials": {
+        "name": "Initials",
+        "type_name": "String",
+        "documentation": "PersonPicture.Initials: String",
+        "values": [],
+        "attached": false
+      },
+      "PreferSmallImage": {
+        "name": "PreferSmallImage",
+        "type_name": "bool",
+        "documentation": "PersonPicture.PreferSmallImage: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ProfilePicture": {
+        "name": "ProfilePicture",
+        "type_name": "Option<Rc<dyn IImageBrushSource>>",
+        "documentation": "PersonPicture.ProfilePicture: Option<Rc<dyn IImageBrushSource>>",
+        "values": [],
+        "attached": false
+      },
+      "TemplateSettings": {
+        "name": "TemplateSettings",
+        "type_name": "Option<Ref<PersonPictureTemplateSettings>>",
+        "documentation": "PersonPicture.TemplateSettings: Option<Ref<PersonPictureTemplateSettings>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PersonPictureAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::PersonPictureAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PersonPictureTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::PersonPictureTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "ActualInitials": {
+        "name": "ActualInitials",
+        "type_name": "String",
+        "documentation": "PersonPictureTemplateSettings.ActualInitials: String",
+        "values": [],
+        "attached": false
+      },
+      "ActualImageBrush": {
+        "name": "ActualImageBrush",
+        "type_name": "Option<Ref<ImageBrush>>",
+        "documentation": "PersonPictureTemplateSettings.ActualImageBrush: Option<Ref<ImageBrush>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -17467,15 +17997,7 @@
     "documentation": "ferroui_controls_repeater::RepeaterBindingHelper",
     "base": null,
     "constructible": false,
-    "properties": {
-      "DataTemplateComponent": {
-        "name": "DataTemplateComponent",
-        "type_name": "Option<Rc<dyn IDataTemplateComponent>>",
-        "documentation": "RepeaterBindingHelper.DataTemplateComponent: Option<Rc<dyn IDataTemplateComponent>>",
-        "values": [],
-        "attached": true
-      }
-    },
+    "properties": {},
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Repeater"
@@ -17595,8 +18117,8 @@
       },
       "Source": {
         "name": "Source",
-        "type_name": "Option<Uri>",
-        "documentation": "ResourceInclude.Source: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "ResourceInclude.Source: Option<UriRef>",
         "values": []
       }
     },
@@ -17843,8 +18365,8 @@
       },
       "Language": {
         "name": "Language",
-        "type_name": "ferroui_base::utilities::CultureInfo",
-        "documentation": "RichEditBox.Language: ferroui_base::utilities::CultureInfo",
+        "type_name": "ferroui_base::utilities::Locale",
+        "documentation": "RichEditBox.Language: ferroui_base::utilities::Locale",
         "values": [],
         "attached": false
       },
@@ -17938,8 +18460,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "TimeSpan",
-        "documentation": "RichEditBox.CaretBlinkInterval: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "RichEditBox.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },
@@ -18413,8 +18935,8 @@
       },
       "Language": {
         "name": "Language",
-        "type_name": "ferroui_base::utilities::CultureInfo",
-        "documentation": "RichTextBlock.Language: ferroui_base::utilities::CultureInfo",
+        "type_name": "ferroui_base::utilities::Locale",
+        "documentation": "RichTextBlock.Language: ferroui_base::utilities::Locale",
         "values": [],
         "attached": false
       },
@@ -18693,8 +19215,8 @@
       },
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "Rotate3DTransition.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "Rotate3DTransition.Duration: SignedDuration",
         "values": []
       },
       "Orientation": {
@@ -18987,15 +19509,15 @@
       },
       "HideDelay": {
         "name": "HideDelay",
-        "type_name": "TimeSpan",
-        "documentation": "ScrollBar.HideDelay: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "ScrollBar.HideDelay: Duration",
         "values": [],
         "attached": false
       },
       "ShowDelay": {
         "name": "ShowDelay",
-        "type_name": "TimeSpan",
-        "documentation": "ScrollBar.ShowDelay: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "ScrollBar.ShowDelay: Duration",
         "values": [],
         "attached": false
       }
@@ -21036,8 +21558,8 @@
       },
       "Source": {
         "name": "Source",
-        "type_name": "Option<Uri>",
-        "documentation": "StyleInclude.Source: Option<Uri>",
+        "type_name": "Option<UriRef>",
+        "documentation": "StyleInclude.Source: Option<UriRef>",
         "values": []
       },
       "Loaded": {
@@ -22893,8 +23415,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "TimeSpan",
-        "documentation": "TextBox.CaretBlinkInterval: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "TextBox.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },
@@ -23275,8 +23797,8 @@
     "properties": {
       "Language": {
         "name": "Language",
-        "type_name": "CultureInfo",
-        "documentation": "TextElement.Language: CultureInfo",
+        "type_name": "Locale",
+        "documentation": "TextElement.Language: Locale",
         "values": [],
         "attached": true
       },
@@ -23641,8 +24163,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "TimeSpan",
-        "documentation": "TextPresenter.CaretBlinkInterval: TimeSpan",
+        "type_name": "Duration",
+        "documentation": "TextPresenter.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },
@@ -24218,8 +24740,8 @@
       },
       "SelectedTime": {
         "name": "SelectedTime",
-        "type_name": "Option<TimeSpan>",
-        "documentation": "TimePicker.SelectedTime: Option<TimeSpan>",
+        "type_name": "Option<SignedDuration>",
+        "documentation": "TimePicker.SelectedTime: Option<SignedDuration>",
         "values": [],
         "attached": false
       }
@@ -24281,8 +24803,8 @@
       },
       "Time": {
         "name": "Time",
-        "type_name": "TimeSpan",
-        "documentation": "TimePickerPresenter.Time: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "TimePickerPresenter.Time: SignedDuration",
         "values": [],
         "attached": false
       }
@@ -25031,15 +25553,15 @@
     "properties": {
       "Duration": {
         "name": "Duration",
-        "type_name": "TimeSpan",
-        "documentation": "TransitionBase.Duration: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "TransitionBase.Duration: SignedDuration",
         "values": [],
         "attached": false
       },
       "Delay": {
         "name": "Delay",
-        "type_name": "TimeSpan",
-        "documentation": "TransitionBase.Delay: TimeSpan",
+        "type_name": "SignedDuration",
+        "documentation": "TransitionBase.Delay: SignedDuration",
         "values": [],
         "attached": false
       },
@@ -28202,6 +28724,136 @@
     ]
   },
   {
+    "name": "XBindExtension",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_markup_xaml::markup_extensions::XBindExtension",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Path": {
+        "name": "Path",
+        "type_name": "Option<CompiledBindingPath>",
+        "documentation": "XBindExtension.Path: Option<CompiledBindingPath>",
+        "values": []
+      },
+      "Mode": {
+        "name": "Mode",
+        "type_name": "BindingMode",
+        "documentation": "XBindExtension.Mode: BindingMode",
+        "values": [
+          "Default",
+          "OneWay",
+          "TwoWay",
+          "OneTime",
+          "OneWayToSource"
+        ]
+      },
+      "UpdateSourceTrigger": {
+        "name": "UpdateSourceTrigger",
+        "type_name": "UpdateSourceTrigger",
+        "documentation": "XBindExtension.UpdateSourceTrigger: UpdateSourceTrigger",
+        "values": [
+          "Default",
+          "PropertyChanged",
+          "LostFocus",
+          "Explicit"
+        ]
+      },
+      "DataType": {
+        "name": "DataType",
+        "type_name": "Option<ValueType>",
+        "documentation": "XBindExtension.DataType: Option<ValueType>",
+        "values": []
+      },
+      "TargetType": {
+        "name": "TargetType",
+        "type_name": "Option<ValueType>",
+        "documentation": "XBindExtension.TargetType: Option<ValueType>",
+        "values": []
+      },
+      "Phase": {
+        "name": "Phase",
+        "type_name": "i32",
+        "documentation": "XBindExtension.Phase: i32",
+        "values": []
+      },
+      "BindBack": {
+        "name": "BindBack",
+        "type_name": "Option<String>",
+        "documentation": "XBindExtension.BindBack: Option<String>",
+        "values": []
+      },
+      "Converter": {
+        "name": "Converter",
+        "type_name": "Option<Rc<dyn IValueConverter>>",
+        "documentation": "XBindExtension.Converter: Option<Rc<dyn IValueConverter>>",
+        "values": []
+      },
+      "ConverterParameter": {
+        "name": "ConverterParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.ConverterParameter: Option<BoxedValue>",
+        "values": []
+      },
+      "ConverterLanguage": {
+        "name": "ConverterLanguage",
+        "type_name": "Option<CultureInfo>",
+        "documentation": "XBindExtension.ConverterLanguage: Option<CultureInfo>",
+        "values": []
+      },
+      "FallbackValue": {
+        "name": "FallbackValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.FallbackValue: Option<BoxedValue>",
+        "values": []
+      },
+      "TargetNullValue": {
+        "name": "TargetNullValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "XBindExtension.TargetNullValue: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Markup.Xaml.MarkupExtensions",
+      "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
+    "name": "XBinding",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_markup_xaml::markup_extensions::XBinding",
+    "base": "BindingBase",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Markup.Xaml.MarkupExtensions",
+      "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
+    "name": "XBindings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_markup_xaml::markup_extensions::XBindings",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "IsInitialized": {
+        "name": "IsInitialized",
+        "type_name": "bool",
+        "documentation": "XBindings.IsInitialized: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Markup.Xaml.MarkupExtensions",
+      "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
     "name": "XYFocus",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::XYFocus",
@@ -28252,6 +28904,26 @@
     ]
   },
   {
+    "name": "XamlBindingHelper",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::templates::XamlBindingHelper",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DataTemplateComponent": {
+        "name": "DataTemplateComponent",
+        "type_name": "Option<Rc<dyn IDataTemplateComponent>>",
+        "documentation": "XamlBindingHelper.DataTemplateComponent: Option<Rc<dyn IDataTemplateComponent>>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Templates",
+      "clr-namespace:FerroUI.Controls.Templates;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "XamlCompositionBrushBase",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::XamlCompositionBrushBase",
@@ -28292,8 +28964,8 @@
     "properties": {
       "SourceUri": {
         "name": "SourceUri",
-        "type_name": "Option<Uri>",
-        "documentation": "XamlSourceInfo.SourceUri: Option<Uri>",
+        "type_name": "Option<Url>",
+        "documentation": "XamlSourceInfo.SourceUri: Option<Url>",
         "values": []
       },
       "LineNumber": {

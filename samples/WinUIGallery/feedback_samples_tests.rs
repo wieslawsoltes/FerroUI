@@ -243,7 +243,7 @@ fn feedback_pages_and_callbacks_release_their_native_controls() {
 
 #[test]
 fn compact_sizing_copies_every_field_across_distinct_page_types() {
-    use ferroui_base::animation::TimeSpan;
+    use ferroui_base::animation::SignedDuration;
     use ferroui_base::utilities::DateTimeOffset;
     use ferroui_controls::{Frame, RadioButtons};
     use ferroui_controls::{DatePicker, TextBox};
@@ -261,7 +261,7 @@ fn compact_sizing_copies_every_field_across_distinct_page_types() {
     ] {
         initial.get_control::<TextBox>(name).set_text(Some(value));
     }
-    let selected = DateTimeOffset::new(2026, 10, 22, 0, 0, 0, TimeSpan::ZERO);
+    let selected = DateTimeOffset::new(2026, 10, 22, 0, 0, 0, SignedDuration::ZERO);
     initial
         .get_control::<DatePicker>("ChosenDate")
         .set_selected_date(Some(selected));
@@ -334,4 +334,65 @@ fn compact_sizing_resources_remain_page_scoped_and_release_with_the_gallery_page
     assert!(weak_root.upgrade().is_none());
     assert!(weak_frame.upgrade().is_none());
     assert!(weak_compact.upgrade().is_none());
+}
+
+#[cfg(feature = "theme")]
+#[test]
+fn person_picture_page_switches_between_image_name_and_initials() {
+    use ferroui_controls::{PersonPicture, RadioButton, Window};
+    let _application = crate::tests::start_winui();
+    let root = page("PersonPicture");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let picture = root.get_control::<PersonPicture>("personPicture");
+    // Profile Image is checked first: the source sets the picture and clears the names. The
+    // picture is the gallery image where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap("ferres://WinUIGallery/Assets/ControlImages/PersonPicture.png").is_ok();
+    assert_eq!(decoded, picture.profile_picture().is_some());
+    assert_eq!(decoded, picture.pseudo_classes().contains(":photo"));
+    assert_eq!(picture.display_name(), "");
+    assert_eq!(picture.initials(), "");
+    root.get_control::<RadioButton>("DisplayNameRadio").set_is_checked(Some(true));
+    assert!(picture.profile_picture().is_none());
+    assert_eq!(picture.display_name(), "Jane Doe");
+    assert_eq!(picture.template_settings().actual_initials(), "JD");
+    root.get_control::<RadioButton>("InitialsRadio").set_is_checked(Some(true));
+    assert_eq!(picture.display_name(), "");
+    assert_eq!(picture.initials(), "SB");
+    assert_eq!(picture.template_settings().actual_initials(), "SB");
+    window.close();
+}
+
+#[cfg(feature = "theme")]
+#[test]
+fn pager_control_page_shows_each_display_mode() {
+    use ferroui_controls::{PagerControl, PagerControlDisplayMode, Window};
+    let _application = crate::tests::start_winui();
+    let root = page("PagerControl");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let basic = root.get_control::<PagerControl>("PagerControlBasic");
+    assert_eq!(basic.number_of_pages(), 12);
+    assert_eq!(basic.selected_page_index(), 2);
+    // Twelve pages in the Auto display mode: the number box (from ten pages).
+    assert!(basic.pseudo_classes().contains(":numberbox"));
+    let number_box = root.get_control::<PagerControl>("PagerControlNumberBox");
+    assert_eq!(number_box.display_mode(), PagerControlDisplayMode::NumberBox);
+    assert_eq!(number_box.selected_page_index(), 9);
+    let button_panel = root.get_control::<PagerControl>("PagerControlButtonPanel");
+    assert!(button_panel.pseudo_classes().contains(":numberpanel"));
+    // 1 ... 4 5 6 ... 20 around the fifth page.
+    assert_eq!(button_panel.template_settings().number_panel_items().count(), 7);
+    let unbounded = root.get_control::<PagerControl>("PagerControlUnboundedNumberBox");
+    assert_eq!(unbounded.number_of_pages(), -1);
+    assert_eq!(unbounded.selected_page_index(), 99);
+    assert!(unbounded.pseudo_classes().contains(":infinite"));
+    let unbounded_panel = root.get_control::<PagerControl>("PagerControlUnboundedButtonPanel");
+    // 1 ... 99 100 101 while the number of pages is not known.
+    assert_eq!(unbounded_panel.template_settings().number_panel_items().count(), 5);
+    window.close();
 }

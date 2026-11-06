@@ -6,7 +6,9 @@ use crate::documents::{
     RichTextDocument, Span, TextElement, TextGravity, TextHighlightRegion,
     TextHighlighterCollection, TextPosition, Typography,
 };
-use crate::rich_text_layout::{RichTextBreak, RichTextLayout, RichTextLineMetrics, RichTextSource};
+use crate::rich_text_layout::{
+    RichTextBreak, RichTextLayout, RichTextLineMetrics, RichTextSource, SelectionOverlay,
+};
 use crate::{Border, Control, ControlImpl, RichTextBlockOverflow, TextBlock, TopLevel};
 use ferroui_base::collections::FerroList;
 use ferroui_base::controls::ResourceKey;
@@ -26,7 +28,7 @@ use ferroui_base::media::{
     FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextLineBounds,
     TextTrimming, TextWrapping,
 };
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, instantiate, DirectProperty, ElementRef, FerroObject, FerroObjectImpl,
@@ -87,8 +89,8 @@ pub struct RichTextBlock {
     reported_trimmed: Cell<bool>,
     reported_baseline: Cell<f64>,
     highlighters: TextHighlighterCollection,
-    view_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    default_highlight_brush_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    view_subscriptions: RefCell<Vec<Subscription>>,
+    default_highlight_brush_subscriptions: RefCell<Vec<Subscription>>,
     /// Set by an editable presenter derived from this view: its editor owns the
     /// context requests and the context-menu event.
     delegates_context_requests: Cell<bool>,
@@ -117,7 +119,8 @@ ferro_class! {
         fn default_incremental_tab(this, font_size: f64) -> f64;
         /// Shared origin for text, inline controls, caret, selection and hit testing.
         fn text_origin(this) -> Point;
-        /// Whether selection formatting is currently visible in this view.
+        /// Whether the selection is currently drawn in this view (its highlight, and the
+        /// selection foreground of the selected text).
         fn selection_is_visible(this) -> bool;
         /// The selection background after the host's focus policy is applied.
         fn selection_render_brush(this) -> Option<Rc<dyn IBrush>>;
@@ -188,11 +191,12 @@ impl FerroObjectImpl for RichTextBlock {
             | "LineHeight"
             | "LineStackingStrategy"
             | "TextIndent"
-            | "TextDecorations"
-            | "SelectionForegroundBrush"
-            | "SelectionHighlightColor"
-            | "IsTextSelectionEnabled" => {
+            | "TextDecorations" => {
                 this.invalidate_document_layout();
+            }
+            // The selection is drawn over the lines (#439): its brushes do not format the runs.
+            "SelectionForegroundBrush" | "SelectionHighlightColor" | "IsTextSelectionEnabled" => {
+                this.invalidate_selection_visual();
             }
             "TextLineBounds" => {
                 this.invalidate_document_layout();
@@ -261,7 +265,9 @@ impl VisualImpl for RichTextBlock {
 
 impl RichTextBlockImpl for RichTextBlock {
     fn render_text(this: &Self, context: &mut DrawingContext) {
-        this.page_layout().draw(context, this.text_origin());
+        let overlay = this.selected_text_overlay();
+        this.page_layout()
+            .draw_with_selection(context, this.text_origin(), overlay.as_ref());
     }
 
     fn caret_visible(_this: &Self) -> bool {
@@ -845,7 +851,7 @@ ferroui_base::ferro_properties! {
         pub fn font_weight_property() -> StyledProperty<FontWeight> { TextElement::font_weight_property().add_owner::<RichTextBlock>() }
         pub fn font_stretch_property() -> StyledProperty<FontStretch> { TextElement::font_stretch_property().add_owner::<RichTextBlock>() }
         pub fn font_features_property() -> StyledProperty<Option<FontFeatureCollection>> { TextElement::font_features_property().add_owner::<RichTextBlock>() }
-        pub fn language_property() -> StyledProperty<ferroui_base::utilities::CultureInfo> { TextElement::language_property().add_owner::<RichTextBlock>() }
+        pub fn language_property() -> StyledProperty<ferroui_base::utilities::Locale> { TextElement::language_property().add_owner::<RichTextBlock>() }
         pub fn foreground_property() -> StyledProperty<Option<Rc<dyn IBrush>>> { TextElement::foreground_property().add_owner::<RichTextBlock>() }
         pub fn letter_spacing_property() -> StyledProperty<f64> { TextElement::letter_spacing_property().add_owner::<RichTextBlock>() }
         pub fn text_alignment_property() -> StyledProperty<TextAlignment> { TextBlock::text_alignment_property().add_owner::<RichTextBlock>() }
@@ -1125,7 +1131,7 @@ impl RichTextBlock {
                 this.invalidate_document_layout();
             }
         });
-        *self.view_subscriptions.borrow_mut() = vec![highlighters.detach(), resources.detach(), theme.detach()];
+        *self.view_subscriptions.borrow_mut() = vec![highlighters, resources, theme];
         self.refresh_default_highlight_brush_subscriptions();
     }
 
@@ -1156,10 +1162,7 @@ impl RichTextBlock {
     }
 
     fn refresh_default_highlight_brush_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.default_highlight_brush_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(self.default_highlight_brush_subscriptions.take());
         let mut subscriptions = Vec::new();
         for foreground in [true, false] {
             let brush = self.default_highlight_brush(foreground);
@@ -1170,7 +1173,7 @@ impl RichTextBlock {
                 }
             });
             if let Some(subscription) = subscribe_invalidated(&brush, handler) {
-                subscriptions.push(subscription);
+                subscriptions.push(Subscription::new(subscription));
             }
         }
         *self.default_highlight_brush_subscriptions.borrow_mut() = subscriptions;
@@ -1309,14 +1312,9 @@ impl RichTextBlock {
             &String::new(),
             &self.selected_text(),
         );
-        if self.selection_foreground_brush().is_some()
-            || args.start != args.end
-            || args.old_start != args.old_end
-        {
-            self.invalidate_changed_paragraphs();
-        } else {
-            self.invalidate_visual();
-        }
+        // The selection is drawn over the lines (#439): a change of it keeps the source, the
+        // shaping caches and the lines of every paragraph, and only draws the view again.
+        self.invalidate_visual();
         for (_, handler) in self.selection_changed.snapshot().iter() {
             handler(args);
         }
@@ -1637,10 +1635,10 @@ impl RichTextBlock {
     pub fn font_features(&self) -> Option<FontFeatureCollection> {
         self.get_value(Self::font_features_property())
     }
-    pub fn language(&self) -> ferroui_base::utilities::CultureInfo {
+    pub fn language(&self) -> ferroui_base::utilities::Locale {
         self.get_value(Self::language_property())
     }
-    pub fn set_language(&self, value: ferroui_base::utilities::CultureInfo) {
+    pub fn set_language(&self, value: ferroui_base::utilities::Locale) {
         self.set_value(Self::language_property(), value);
     }
     pub fn set_font_features(&self, value: Option<FontFeatureCollection>) {
@@ -1801,15 +1799,52 @@ impl RichTextBlock {
         self.source.borrow_mut().take();
         self.invalidate_layout();
     }
-    /// Rebuilds the formatter input after an edit of the document or a change of the selection:
-    /// the paragraphs that format as before keep their runs and shaping caches (F1, #243 review
-    /// S7), so a keystroke reshapes the paragraphs it changed, not the document.
+    /// Rebuilds the formatter input after an edit of the document: the paragraphs that format
+    /// as before keep their runs and shaping caches (F1, #243 review S7), so a keystroke
+    /// reshapes the paragraphs it changed, not the document.
     pub(crate) fn invalidate_changed_paragraphs(&self) {
         let stale = self.source.borrow_mut().take();
         if let Some(stale) = stale {
             *self.previous_source.borrow_mut() = Some(stale);
         }
         self.invalidate_layout();
+    }
+    /// Draws this view and the overflow views it continues into again after a change of how
+    /// the selection is drawn (its brushes, its visibility): the selection is drawn over the
+    /// lines (#439), so their source, shaping caches and lines stay. The selected text of an
+    /// overflow view is drawn with the brushes of the view whose source it shares.
+    pub(crate) fn invalidate_selection_visual(&self) {
+        self.invalidate_visual();
+        let mut target = self.overflow_content_target();
+        while let Some(view) = target {
+            view.invalidate_visual();
+            target = view.overflow_content_target();
+        }
+    }
+    /// How the selected text is drawn over the selection highlight (#439), or `None` when it is
+    /// drawn as the rest of the text. The view that built the source (the first of an overflow
+    /// chain) decides it; the highlight of each view is drawn with the view's own brush.
+    pub(crate) fn selected_text_overlay(&self) -> Option<SelectionOverlay> {
+        let start = self.selection_start();
+        let end = self.selection_end();
+        let range = start.min(end)..start.max(end);
+        if range.is_empty() {
+            return None;
+        }
+        let mut view = self.to_ref();
+        while let Some(parent) = view.previous_flow_parent() {
+            view = parent;
+        }
+        if !view.selection_is_visible() {
+            return None;
+        }
+        let foreground = view.selection_foreground_brush();
+        let hides_backgrounds = view.selection_render_brush().is_some();
+        (foreground.is_some() || hides_backgrounds).then_some(SelectionOverlay {
+            range,
+            foreground,
+            hides_backgrounds,
+        })
     }
     fn invalidate_layout(&self) {
         self.clear_page_layout();
@@ -1951,16 +1986,8 @@ impl Drop for RichTextBlock {
         if let Some(subscription) = self.font_features_subscription.get_mut().take() {
             subscription.dispose();
         }
-        for subscription in self.view_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-        for subscription in self
-            .default_highlight_brush_subscriptions
-            .get_mut()
-            .drain(..)
-        {
-            subscription.dispose();
-        }
+        drop(std::mem::take(self.view_subscriptions.get_mut()));
+        drop(std::mem::take(self.default_highlight_brush_subscriptions.get_mut()));
         if let Some(subscription) = self.document_subscription.get_mut().take() {
             subscription.dispose();
         }

@@ -1,4 +1,4 @@
-use crate::animation::{PlayState, TimeSpan};
+use crate::animation::{PlayState, SignedDuration};
 use crate::reactive::IObservable;
 
 /// A source of animation time: an observable that produces the time elapsed
@@ -6,7 +6,7 @@ use crate::reactive::IObservable;
 ///
 /// Every timing decision in the animation system is derived from the values
 /// a clock produces; nothing reads a system timer.
-pub trait IClock: IObservable<TimeSpan> + 'static {
+pub trait IClock: IObservable<SignedDuration> + 'static {
     /// The playback state of the clock.
     fn play_state(&self) -> PlayState;
 

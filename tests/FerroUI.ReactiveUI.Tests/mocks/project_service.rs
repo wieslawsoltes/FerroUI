@@ -2,30 +2,30 @@
 
 use super::Project;
 use ferroui_reactiveui::{reactive_object, ReactiveObject};
-use ferroui_splat::Guid;
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::rc::Rc;
+use uuid::Uuid;
 
 /// A service with five projects, and four projects plus a missing one (`ProjectService`).
 pub struct ProjectService {
     reactive: ReactiveObject,
-    projects: Dictionary<Guid, Rc<Project>>,
-    projects_nullable: Dictionary<Guid, Option<Rc<Project>>>,
+    projects: SlotOrderMap<Uuid, Rc<Project>>,
+    projects_nullable: SlotOrderMap<Uuid, Option<Rc<Project>>>,
 }
 reactive_object!(ProjectService);
 
 impl Default for ProjectService {
     fn default() -> Self {
-        let mut projects = Dictionary::new();
+        let mut projects = SlotOrderMap::new();
         for name in ["Dummy1", "Dummy2", "Dummy3", "Dummy4", "Dummy5"] {
-            projects.add(Guid::new_guid(), Project::with_name(name));
+            projects.add(Uuid::new_v4(), Project::with_name(name));
         }
 
-        let mut projects_nullable = Dictionary::new();
+        let mut projects_nullable = SlotOrderMap::new();
         for name in ["Dummy1", "Dummy2", "Dummy3", "Dummy4"] {
-            projects_nullable.add(Guid::new_guid(), Some(Project::with_name(name)));
+            projects_nullable.add(Uuid::new_v4(), Some(Project::with_name(name)));
         }
-        projects_nullable.add(Guid::new_guid(), None);
+        projects_nullable.add(Uuid::new_v4(), None);
 
         Self { reactive: ReactiveObject::new(), projects, projects_nullable }
     }
@@ -45,12 +45,12 @@ impl ProjectService {
     }
 
     /// `Projects`.
-    pub fn projects(&self) -> &Dictionary<Guid, Rc<Project>> {
+    pub fn projects(&self) -> &SlotOrderMap<Uuid, Rc<Project>> {
         &self.projects
     }
 
     /// `ProjectsNullable`.
-    pub fn projects_nullable(&self) -> &Dictionary<Guid, Option<Rc<Project>>> {
+    pub fn projects_nullable(&self) -> &SlotOrderMap<Uuid, Option<Rc<Project>>> {
         &self.projects_nullable
     }
 }

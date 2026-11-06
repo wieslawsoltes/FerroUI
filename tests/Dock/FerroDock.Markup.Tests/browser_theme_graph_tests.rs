@@ -59,13 +59,10 @@ fn browser_uses_actual_delayed_panel_and_native_pointer_selection_preserves_cach
         assert_eq!(panel.max_tab_width(), 220.0);
         assert_eq!(panel.min_tab_width(), 28.0);
         assert_eq!(panel.item_spacing(), -6.0);
-        assert_eq!(
-            panel.expansion_delay(),
-            ferroui_base::animation::TimeSpan::from_seconds(1.0)
-        );
+        assert_eq!(panel.expansion_delay(), std::time::Duration::from_secs(1));
         assert_eq!(
             panel.resize_animation_duration(),
-            ferroui_base::animation::TimeSpan::from_milliseconds(180.0)
+            ferroui_base::animation::SignedDuration::from_milliseconds(180.0)
         );
         let document = scene
             .control

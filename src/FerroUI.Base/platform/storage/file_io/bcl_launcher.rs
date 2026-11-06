@@ -1,7 +1,7 @@
 use crate::input::LocalBoxFuture;
 use crate::logging::{LogEventLevel, Logger};
 use crate::platform::storage::{ILauncher, IStorageItem};
-use crate::utilities::Uri;
+use url::Url;
 use std::process::{Command, Stdio};
 use std::rc::Rc;
 
@@ -83,8 +83,8 @@ impl BclLauncher {
 }
 
 impl ILauncher for BclLauncher {
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool> {
-        let launched = uri.is_absolute_uri() && Self::exec(uri.absolute_uri());
+    fn launch_uri_async(&self, uri: &Url) -> LocalBoxFuture<bool> {
+        let launched = Self::exec(uri.as_str());
         Box::pin(std::future::ready(launched))
     }
 

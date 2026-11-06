@@ -14,15 +14,20 @@
 //! of `DateTimeOffset.Now.AddMilliseconds(10)` is ten milliseconds after the scheduler's `now`.
 //! `Scheduler.DisableOptimizations(params Type[])` is `disable_optimizations_of`, with the services
 //! named by `SchedulerOptimization`.
-//! The bodies of `ScheduleAsync` return a future (a `Task` is one): a `Task` is a `Task<()>`, and the
+//! The bodies of `ScheduleAsync` return a future of a result: a completed `Task` is the
+//! `flatten()` of a `Shared` that is ready (`Shared::ready`), a `Task` is one of `()`, and the
 //! `Task<int>` the overload tests return as a plain `Task` is one too; `Yield` is `yield_`, the
 //! overloads of `Sleep` are `sleep`, `sleep_at` and their `_with_token` forms, and
-//! `OperationCanceledException` is a `TaskCanceledError` result of `get_result`; the test token
+//! `OperationCanceledException` is a `Canceled` result of `get_result`; the test token
 //! `TestContext.CancellationToken` is a token that is never cancelled. `SchedulerAsync_Sleep_Cancel`
 //! sleeps on the default scheduler upstream and waits for an event, and sleeps here on the test
 //! scheduler, which the cancellation does not need to run. `ConfigureAwait(true)` of a
 //! `SchedulerOperation` is `configure_await(true)`, and the context `MySyncCtx` counts the work it
 //! is posted, which `SchedulerAsync_ScheduleAsync_SyncCtx` checks in addition.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::{
     IScheduler, ISchedulerPeriodic, IStopwatch, IStopwatchProvider, ScheduledAction, Scheduler, SchedulerExt,
@@ -30,10 +35,9 @@ use ferroui_reactive::concurrency::{
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{IDisposable, IObserver, ObservableError};
 use ferroui_reactive_testing::{assert_messages, assert_throws, duration_to_ticks, ticks_to_duration, ticks_to_time, ReactiveTest as RT, TestScheduler};
-use ferroui_system::threading::tasks::{TaskCanceledError, TaskCompletionSource};
+use ferroui_system::task::{Canceled, Shared};
 use ferroui_system::threading::{
-    current_synchronization_context, set_synchronization_context, CancellationToken, CancellationTokenSource,
-    SynchronizationContext,
+    current_synchronization_context, set_synchronization_context, CancellationToken, SynchronizationContext,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -436,13 +440,9 @@ fn detect_services_found() {
 
 #[test]
 fn scheduler_async_schedule_async_overloads1() {
-    let tcs_i = TaskCompletionSource::<()>::new();
-    let t = tcs_i.task();
-    tcs_i.set_result(());
+    let t = Shared::<Result<(), ObservableError>>::ready(Ok(())).flatten();
 
-    let tcs_d = TaskCompletionSource::<Rc<dyn IDisposable>>::new();
-    let d = tcs_d.task();
-    tcs_d.set_result(Disposable::empty());
+    let d = Shared::<Result<Rc<dyn IDisposable>, ObservableError>>::ready(Ok(Disposable::empty())).flatten();
 
     let s = TestScheduler::new();
     let scheduler = s.scheduler();
@@ -480,13 +480,9 @@ fn scheduler_async_schedule_async_overloads1() {
 
 #[test]
 fn scheduler_async_schedule_async_overloads2() {
-    let tcs_i = TaskCompletionSource::<()>::new();
-    let t = tcs_i.task();
-    tcs_i.set_result(());
+    let t = Shared::<Result<(), ObservableError>>::ready(Ok(())).flatten();
 
-    let tcs_d = TaskCompletionSource::<Rc<dyn IDisposable>>::new();
-    let d = tcs_d.task();
-    tcs_d.set_result(Disposable::empty());
+    let d = Shared::<Result<Rc<dyn IDisposable>, ObservableError>>::ready(Ok(Disposable::empty())).flatten();
 
     let s = TestScheduler::new();
     let scheduler = s.scheduler();
@@ -524,13 +520,9 @@ fn scheduler_async_schedule_async_overloads2() {
 
 #[test]
 fn scheduler_async_schedule_async_overloads3() {
-    let tcs_i = TaskCompletionSource::<()>::new();
-    let t = tcs_i.task();
-    tcs_i.set_result(());
+    let t = Shared::<Result<(), ObservableError>>::ready(Ok(())).flatten();
 
-    let tcs_d = TaskCompletionSource::<Rc<dyn IDisposable>>::new();
-    let d = tcs_d.task();
-    tcs_d.set_result(Disposable::empty());
+    let d = Shared::<Result<Rc<dyn IDisposable>, ObservableError>>::ready(Ok(Disposable::empty())).flatten();
 
     let s = TestScheduler::new();
     let scheduler = s.scheduler();
@@ -638,23 +630,23 @@ fn scheduler_async_awaiters() {
 
 #[test]
 fn scheduler_async_yield_cancel1() {
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
-    let op = Scheduler::immediate().yield_with_token(cts.token());
+    let op = Scheduler::immediate().yield_with_token(cts.clone());
     let aw = op.get_awaiter();
 
     cts.cancel();
 
     assert!(aw.is_completed());
 
-    assert!(aw.get_result().is_err_and(|e| TaskCanceledError::is_cancellation(&e)));
+    assert!(aw.get_result().is_err_and(|e| Canceled::is_cancellation(&e)));
 }
 
 #[test]
 fn scheduler_async_yield_cancel2() {
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
-    let op = Scheduler::immediate().yield_with_token(cts.token());
+    let op = Scheduler::immediate().yield_with_token(cts.clone());
     let aw = op.get_awaiter();
 
     assert!(!aw.is_completed());
@@ -665,16 +657,16 @@ fn scheduler_async_yield_cancel2() {
 
         source.cancel();
 
-        assert!(awaiter.get_result().is_err_and(|e| TaskCanceledError::is_cancellation(&e)));
+        assert!(awaiter.get_result().is_err_and(|e| Canceled::is_cancellation(&e)));
     });
 }
 
 #[test]
 fn scheduler_async_sleep_cancel() {
     let s = TestScheduler::new();
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
-    let op = s.scheduler().sleep_with_token(Duration::from_secs(3600), cts.token());
+    let op = s.scheduler().sleep_with_token(Duration::from_secs(3600), cts.clone());
     let aw = op.get_awaiter();
 
     assert!(!aw.is_completed());
@@ -683,7 +675,7 @@ fn scheduler_async_sleep_cancel() {
 
     let (awaiter, set) = (aw.clone(), e.clone());
     aw.on_completed(move || {
-        assert!(awaiter.get_result().is_err_and(|e| TaskCanceledError::is_cancellation(&e)));
+        assert!(awaiter.get_result().is_err_and(|e| Canceled::is_cancellation(&e)));
 
         set.set(true);
     });

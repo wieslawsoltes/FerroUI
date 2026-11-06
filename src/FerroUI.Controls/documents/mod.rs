@@ -57,6 +57,7 @@ pub use rich_text_document::{
     DocumentChangeKind, DocumentChangedEventArgs, DocumentEditBatch, DocumentError,
     DocumentTextChange, RichTextDocument, WeakRichTextDocument,
 };
+pub(crate) use rich_text_document::{BlockJournal, DocumentDelta};
 pub use run::Run;
 pub use span::Span;
 pub use text_element::{TextElement, TextElementImpl, TextElementImplExt, TextElementVTable};

@@ -97,17 +97,13 @@ fn file_uri(path: &str, windows: bool) -> Option<String> {
             let encoded =
                 StorageProviderHelpers::try_get_uri_from_file_path(&format!("/{piece}"), false)?;
             uri.push_str("%5C");
-            uri.push_str(encoded.absolute_path().strip_prefix('/')?);
+            uri.push_str(encoded.path().strip_prefix('/')?);
         }
         return Some(uri);
     }
-    let uri = StorageProviderHelpers::try_get_uri_from_file_path(path, false)?.to_string();
-    if windows && path.starts_with(r"\\") && !path.starts_with(r"\\?\") {
-        // Keep the UNC server in the authority so relative resource resolution
-        // cannot turn the network path into a local path.
-        return Some(format!("file://{}", uri.strip_prefix("file:////")?));
-    }
-    Some(uri)
+    // A UNC path keeps its server as the host of the URL (the storage helper), so relative
+    // resource resolution cannot turn the network path into a local path.
+    Some(StorageProviderHelpers::try_get_uri_from_file_path(path, false)?.to_string())
 }
 
 #[cfg(feature = "desktop")]
@@ -174,14 +170,16 @@ fn mcp_options(args: &[String]) -> Result<Option<ferroui_designer::mcp::Options>
 #[cfg(test)]
 mod tests {
     use super::file_uri;
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::platform::storage::file_io::StorageProviderHelpers;
+    use ferroui_base::utilities::UriRef;
 
+    /// A relative resource of the document, resolved as markup resolves it.
     fn resolve_resource(base: &str) -> String {
-        Uri::combine(
-            &Uri::absolute(base).unwrap(),
-            &Uri::new("Assets/icon.png", UriKind::Relative).unwrap(),
-        )
-        .to_string()
+        UriRef::parse("Assets/icon.png")
+            .unwrap()
+            .resolve(&UriRef::parse_absolute(base).unwrap())
+            .unwrap()
+            .to_string()
     }
 
     #[test]
@@ -234,7 +232,7 @@ mod tests {
         let path = r"/Designs/part\%5C ż.xaml";
         let uri = file_uri(path, false).unwrap();
         assert_eq!(uri, "file:///Designs/part%5C%255C%20%C5%BC.xaml");
-        assert_eq!(Uri::absolute(&uri).unwrap().local_path(), path);
+        assert_eq!(StorageProviderHelpers::local_path(&UriRef::parse_absolute(&uri).unwrap()), path);
     }
 
     #[cfg(feature = "mcp")]

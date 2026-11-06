@@ -11,7 +11,8 @@ use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::*;
 use ferroui_system::component_model::INotifyPropertyChanged;
 use ferroui_system::events::Event;
-use ferroui_system::threading::tasks::{block_on, run, Task, TaskCompletionSource};
+use ferroui_system::task::{block_on, Canceled, Flatten, Shared, SharedSender};
+use ferroui_system::threading::tasks::run;
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{prop, IDisposable, IObservable, ObservableError};
 use std::any::Any;
@@ -84,12 +85,12 @@ pub fn with_schedulers(scheduler: Rc<dyn IScheduler>) {
 /// The first value of `source` (`await source.FirstAsync()`), running the tasks of the thread
 /// until it arrives.
 pub fn first<T: Clone + 'static>(source: &Rc<dyn IObservable<T>>) -> T {
-    block_on(source.first_async().to_task()).unwrap_or_else(|error| panic!("the sequence failed: {error}"))
+    block_on(source.first_async().to_task().flatten()).unwrap_or_else(|error| panic!("the sequence failed: {error}"))
 }
 
 /// The last value of `source` (`await source`), running the tasks of the thread until it ends.
 pub fn last<T: Clone + 'static>(source: &Rc<dyn IObservable<T>>) -> T {
-    block_on(source.to_task()).unwrap_or_else(|error| panic!("the sequence failed: {error}"))
+    block_on(source.to_task().flatten()).unwrap_or_else(|error| panic!("the sequence failed: {error}"))
 }
 
 /// Subscribes to `source` and ignores its values and its error (`Subscribe(_ => { }, _ => { })`).
@@ -110,24 +111,97 @@ pub fn panic_message(action: impl FnOnce()) -> String {
 /// A future that ends after `duration`, or with a cancellation when `token` is cancelled first
 /// (`Task.Delay(TimeSpan, CancellationToken)`). The time passes on a worker thread, and the task
 /// ends on the thread that awaits it.
-pub fn delay(duration: Duration, token: CancellationToken) -> Task<()> {
-    let completion = TaskCompletionSource::<()>::new();
-    let elapsed = completion.clone();
+pub fn delay(duration: Duration, token: CancellationToken) -> Flatten<()> {
+    /// The end of the delay, which the first of the timer and the cancellation takes.
+    type Slot = Rc<RefCell<Option<SharedSender<Result<(), ObservableError>>>>>;
+
+    fn end(slot: &Slot, result: Result<(), ObservableError>) {
+        // Taken out of the cell before it sends: the continuations may reach the slot.
+        let sender = slot.borrow_mut().take();
+        if let Some(sender) = sender {
+            sender.send(result);
+        }
+    }
+
+    let (sender, completion) = Shared::<Result<(), ObservableError>>::channel();
+    let slot: Slot = Rc::new(RefCell::new(Some(sender)));
+    let elapsed = slot.clone();
     let timer = run(move || {
         std::thread::sleep(duration);
         Ok(())
     });
-    let _ = timer.continue_with(move |_| {
-        elapsed.try_set_result(());
-    });
-    if token.can_be_canceled() {
-        let canceled = completion.clone();
-        let registration = token.register_local(move || {
-            canceled.try_set_canceled();
-        });
-        let _ = completion.task().continue_with(move |_| registration.dispose());
+    let _ = timer.on_finished(move |_| end(&elapsed, Ok(())));
+    if token.can_be_cancelled() {
+        let canceled = slot.clone();
+        let registration = token.register_local(move || end(&canceled, Err(Rc::new(Canceled) as ObservableError)));
+        let _ = completion.on_finished(move |_| registration.dispose());
     }
-    completion.task()
+    completion.flatten()
+}
+
+/// A task that has ended with `value` (`Task.FromResult`), as the future the factories take.
+pub fn from_result<T>(value: T) -> std::future::Ready<Result<T, ObservableError>> {
+    std::future::ready(Ok(value))
+}
+
+/// The completion source of a test (`TaskCompletionSource<T>`): a [`Shared`] that the test ends
+/// by hand, once (`try_set_result`, `try_set_exception`, `try_set_canceled`, the error
+/// [`Canceled`]), and whose task (`task()`) the code under test awaits (`flatten()`).
+pub struct TestCompletion<T> {
+    sender: Rc<RefCell<Option<SharedSender<Result<T, ObservableError>>>>>,
+    task: Shared<Result<T, ObservableError>>,
+}
+
+impl<T> Clone for TestCompletion<T> {
+    fn clone(&self) -> Self {
+        Self { sender: self.sender.clone(), task: self.task.clone() }
+    }
+}
+
+impl<T: 'static> Default for TestCompletion<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<T: 'static> TestCompletion<T> {
+    /// A completion whose task has not ended.
+    pub fn new() -> Self {
+        let (sender, task) = Shared::channel();
+        Self { sender: Rc::new(RefCell::new(Some(sender))), task }
+    }
+
+    /// The task (`Task`).
+    pub fn task(&self) -> Shared<Result<T, ObservableError>> {
+        self.task.clone()
+    }
+
+    fn try_send(&self, result: Result<T, ObservableError>) -> bool {
+        // Taken out of the cell before it sends: the continuations may reach the completion.
+        let sender = self.sender.borrow_mut().take();
+        match sender {
+            Some(sender) => {
+                sender.send(result);
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// `TrySetResult`.
+    pub fn try_set_result(&self, value: T) -> bool {
+        self.try_send(Ok(value))
+    }
+
+    /// `TrySetException`.
+    pub fn try_set_exception(&self, error: ObservableError) -> bool {
+        self.try_send(Err(error))
+    }
+
+    /// `TrySetCanceled`: the error [`Canceled`].
+    pub fn try_set_canceled(&self) -> bool {
+        self.try_send(Err(Rc::new(Canceled) as ObservableError))
+    }
 }
 
 /// A future that is pending once and wakes itself (`Task.Yield()`).
@@ -259,9 +333,9 @@ impl Foo {
     }
 
     /// Sets the value, and gives a completed task (`SetValueAsync`).
-    pub fn set_value_async(&self, value: i32) -> Task<()> {
+    pub fn set_value_async(&self, value: i32) -> Flatten<()> {
         self.value.set(value);
-        Task::from_result(())
+        Shared::ready(Ok(())).flatten()
     }
 }
 

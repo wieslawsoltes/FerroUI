@@ -83,6 +83,10 @@ mod ferro_xaml_il_compiled_bindings_metadata_remover;
 mod ferro_xaml_il_data_context_type_transformer;
 mod ferro_xaml_il_transform_synthetic_compiled_binding_members;
 mod x_data_type_transformer;
+// `{x:Bind}` (docs/porting/x-bind.md): the parts of the three transformers above that are its own.
+pub mod x_bind;
+pub mod x_bind_directives;
+pub mod x_bind_path;
 
 pub use ferro_binding_extension_transformer::*;
 pub use ferro_xaml_il_binding_path_parser::*;
@@ -90,6 +94,7 @@ pub use ferro_xaml_il_binding_path_transformer::*;
 pub use ferro_xaml_il_compiled_bindings_metadata_remover::*;
 pub use ferro_xaml_il_data_context_type_transformer::*;
 pub use ferro_xaml_il_transform_synthetic_compiled_binding_members::*;
+pub use x_bind_directives::XBindDirectivesTransformer;
 pub use x_data_type_transformer::*;
 
 #[cfg(test)]

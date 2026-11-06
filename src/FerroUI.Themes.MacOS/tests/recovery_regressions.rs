@@ -2,7 +2,7 @@
 //! claims of native visual equivalence. Run with the complete theme library suite.
 use crate::tests::support::start_themed_application;
 use crate::MacOSTheme;
-use ferroui_base::animation::{TimeSpan, TransitionBase, Transitions};
+use ferroui_base::animation::{SignedDuration, TransitionBase, Transitions};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::metadata::from_markup_value;
@@ -31,7 +31,7 @@ fn resource_color(theme: &MacOSTheme, key: &str, variant: &ThemeVariant) -> Colo
     brush.as_solid_color_brush().unwrap_or_else(|| panic!("{key}: solid brush")).color()
 }
 
-fn duration(transitions: &Transitions) -> TimeSpan {
+fn duration(transitions: &Transitions) -> SignedDuration {
     assert_eq!(1, transitions.count());
     let transition = transitions.get(0);
     assert_eq!(Canvas::left_property().as_property(), transition.property());
@@ -45,7 +45,7 @@ fn switch_transition_resource_is_resolved_before_a_control_exists() {
     let theme = installed_theme();
     let first = resource::<Transitions>(&theme, "MacOSSwitchKnobTransitions", &ThemeVariant::light());
     let second = resource::<Transitions>(&theme, "MacOSSwitchKnobTransitions", &ThemeVariant::light());
-    assert_eq!(TimeSpan::from_milliseconds(180.0), duration(&first));
+    assert_eq!(SignedDuration::from_milliseconds(180.0), duration(&first));
     assert!(!first.ptr_eq(&second), "one control must not mutate another's transition collection");
     first.clear();
     assert_eq!(1, second.count());
@@ -70,7 +70,7 @@ fn existing_switch_knob_transitions_follow_reduce_motion_and_restore() {
         .and_then(|v| v.cast::<Grid>()).expect("moving knob panel");
     for reduced in [false, true, false, true, false] {
         theme.set_reduce_motion(reduced);
-        let expected = if reduced { TimeSpan::ZERO } else { TimeSpan::from_milliseconds(180.0) };
+        let expected = if reduced { SignedDuration::ZERO } else { SignedDuration::from_milliseconds(180.0) };
         assert_eq!(expected, duration(&switch.knob_transitions().expect("control transitions")));
         assert_eq!(expected, duration(&moving.transitions().expect("installed transitions")));
     }
@@ -84,8 +84,8 @@ fn progress_period_stays_nonzero_under_every_motion_preference() {
     for reduced in [false, true, false] {
         theme.set_reduce_motion(reduced);
         for variant in [ThemeVariant::light(), ThemeVariant::dark(), MacOSTheme::high_contrast()] {
-            assert_eq!(TimeSpan::from_seconds(1.2),
-                resource::<TimeSpan>(&theme, "MacOSProgressPulseDuration", &variant));
+            assert_eq!(SignedDuration::from_seconds(1.2),
+                resource::<SignedDuration>(&theme, "MacOSProgressPulseDuration", &variant));
             assert_eq!(!reduced, resource::<bool>(&theme, "MacOSAnimationsEnabled", &variant));
         }
     }

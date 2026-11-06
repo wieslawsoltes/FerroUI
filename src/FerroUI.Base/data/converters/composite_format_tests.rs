@@ -4334,7 +4334,7 @@ mod cultures {
     use super::super::composite_format::{
         format, format_arg, format_arg_with, format_values, format_values_with, format_with, FormatArg, FormatError,
     };
-    use crate::animation::TimeSpan;
+    use crate::animation::SignedDuration;
     use crate::utilities::{CultureInfo, DateTime, DateTimeOffset, Decimal, NumberFormatInfo};
     use crate::BoxedValue;
     use std::rc::Rc;
@@ -4505,10 +4505,10 @@ mod cultures {
             (FormatArg::DateTime(date), "HH:mm", "14:07"),
             (FormatArg::DateTime(date), "s", "2024-03-05T14:07:09"),
             (FormatArg::DateTime(date), "MMMM d, yyyy", "March 5, 2024"),
-            (FormatArg::DateTimeOffset(DateTimeOffset::new(2024, 3, 5, 14, 7, 9, TimeSpan::from_hms(2, 0, 0))), "yyyy-MM-dd HH:mm zzz", "2024-03-05 14:07 +02:00"),
-            (FormatArg::TimeSpan(TimeSpan::from_dhms(1, 2, 3, 4)), "", "1.02:03:04"),
-            (FormatArg::TimeSpan(TimeSpan::from_hms(2, 3, 4)), "c", "02:03:04"),
-            (FormatArg::TimeSpan(TimeSpan::from_hms(2, 3, 4)), "hh\\:mm", "02:03"),
+            (FormatArg::DateTimeOffset(DateTimeOffset::new(2024, 3, 5, 14, 7, 9, SignedDuration::from_hms(2, 0, 0))), "yyyy-MM-dd HH:mm zzz", "2024-03-05 14:07 +02:00"),
+            (FormatArg::TimeSpan(SignedDuration::from_dhms(1, 2, 3, 4)), "", "1.02:03:04"),
+            (FormatArg::TimeSpan(SignedDuration::from_hms(2, 3, 4)), "c", "02:03:04"),
+            (FormatArg::TimeSpan(SignedDuration::from_hms(2, 3, 4)), "hh\\:mm", "02:03"),
         ];
         check(&invariant, cases);
 
@@ -4517,9 +4517,34 @@ mod cultures {
             format_values_with("on {0:yyyy-MM-dd} at {0:HH:mm}", &[boxed], &invariant).as_deref(),
             Ok("on 2024-03-05 at 14:07")
         );
-        let span: Option<BoxedValue> = Some(Rc::new(TimeSpan::from_hms(2, 3, 4)));
+        let span: Option<BoxedValue> = Some(Rc::new(SignedDuration::from_hms(2, 3, 4)));
         assert_eq!(format_values_with("{0:hh\\:mm}", &[span], &invariant).as_deref(), Ok("02:03"));
         // An invalid date and time format string is the format exception.
         assert_eq!(format_arg(&FormatArg::DateTime(date), "%"), Err(FormatError::InvalidFormat));
+    }
+
+    /// Not from upstream (C5 of #423): a `Duration` is the other Rust form of a time span,
+    /// and a string format formats it exactly as the time span of the same value.
+    #[test]
+    fn string_format_formats_a_duration_as_a_time_span() {
+        let invariant = CultureInfo::invariant_culture();
+        let formats = ["{0}", "{0:c}", "{0:g}", "{0:G}", "{0:hh\\:mm\\:ss}", "{0:%s}", "[{0,12}]"];
+        for (duration, span) in [
+            (std::time::Duration::from_millis(1500), SignedDuration::from_seconds(1.5)),
+            (std::time::Duration::from_secs(93_784), SignedDuration::from_dhms(1, 2, 3, 4)),
+            (std::time::Duration::ZERO, SignedDuration::ZERO),
+        ] {
+            let duration: Option<BoxedValue> = Some(Rc::new(duration));
+            let span: Option<BoxedValue> = Some(Rc::new(span));
+            for format in formats {
+                let expected = format_values_with(format, std::slice::from_ref(&span), &invariant);
+                assert!(expected.is_ok(), "{format}: {expected:?}");
+                assert_eq!(format_values_with(format, std::slice::from_ref(&duration), &invariant), expected, "{format}");
+            }
+        }
+        let nullable: Option<BoxedValue> = Some(Rc::new(Some(std::time::Duration::from_secs(5))));
+        assert_eq!(format_values_with("{0:c}", &[nullable], &invariant).as_deref(), Ok("00:00:05"));
+        let duration: Option<BoxedValue> = Some(Rc::new(std::time::Duration::from_millis(1500)));
+        assert_eq!(format_values("{0}", &[duration]).as_deref(), Ok("00:00:01.5000000"));
     }
 }

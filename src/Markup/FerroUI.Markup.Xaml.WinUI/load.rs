@@ -3,7 +3,6 @@
 
 use crate::{migrate_winui_xaml, WinUIXamlMigration, WinUIXamlOptions};
 use ferroui_base::metadata::{from_markup_value, MarkupAssembly};
-use ferroui_base::utilities::Uri;
 use ferroui_base::BoxedValue;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -18,11 +17,11 @@ pub fn load_winui(
     xaml: &str,
     local_assembly: Option<&'static MarkupAssembly>,
     root_instance: Option<BoxedValue>,
-    uri: Option<Uri>,
+    uri: Option<url::Url>,
     design_mode: bool,
     options: &WinUIXamlOptions,
 ) -> Result<BoxedValue, XamlLoadError> {
-    // The migrated document names the x:Bind types of this crate.
+    // The migrated document names the types of the XAML runtime library (the x:Bind core).
     crate::register_types();
     let migrated = migrate_winui_xaml(xaml, options)
         .and_then(WinUIXamlMigration::into_xaml)

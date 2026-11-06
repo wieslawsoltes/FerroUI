@@ -20,8 +20,11 @@ ferroui-controls.workspace = true
 ferroui-dialogs.workspace = true
 ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
+ferroui-system.workspace = true
 ferroui-vulkan.workspace = true
 bitflags.workspace = true
+# The file URLs of the `text/uri-list` format (C5 of #423).
+url.workspace = true
 
 # What the example draws and shapes text with. Optional, behind the feature the example requires,
 # so that the crate and its tests build without the native libraries of the renderer and the text

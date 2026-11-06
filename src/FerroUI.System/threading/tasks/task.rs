@@ -1,17 +1,28 @@
 //! `Task<TResult>`, `TaskStatus`, `TaskCompletionSource<TResult>` and `TaskCanceledException`
 //! (`System.Threading.Tasks`), single-threaded (docs/porting/reactive.md, section 5.8).
+//!
+//! Deprecated since 0.5.0 (step A7 of phase C4 of #423, docs/idiomatic-rust-async.md, section 4):
+//! a `Task<T>` is a [`Shared`] of a `Result<T, ObservableError>` with a status and an id, and a
+//! `TaskCompletionSource<T>` ends that `Shared`. They keep their behaviour: continuations run
+//! synchronously before the awaiting futures are woken, a canceled task gives a
+//! [`TaskCanceledError`] that names it, and a dropped source leaves its task pending (G20). They
+//! convert to the new types: a task to its [`Shared`], a source to a [`oneshot::Sender`] and a
+//! [`oneshot::Receiver`] to a task.
+#![allow(deprecated)]
 
+use crate::task::{oneshot, Canceled, OnFinishedId, Shared};
 use crate::ObservableError;
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::error::Error;
 use std::fmt;
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::task::{Context, Poll, Waker};
+use std::task::{Context, Poll};
 
 /// The state of a task (`TaskStatus`).
+#[deprecated(since = "0.5.0", note = "a `ferroui_system::task::Shared` is finished or not (`is_finished`), and its outcome says how")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum TaskStatus {
     /// Made, and not started (`Created`).
@@ -28,7 +39,11 @@ pub enum TaskStatus {
     Canceled,
 }
 
-/// The error of a canceled task (`TaskCanceledException`).
+/// The error of a canceled task that names it (`TaskCanceledException` with its `Task`).
+///
+/// A cancellation that names no task is [`Canceled`], the one cancellation error of the workspace
+/// (docs/idiomatic-rust-async.md, section 3.7), which the new types give.
+#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::Canceled`, and `Canceled::is_cancellation` to recognize a cancellation")]
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct TaskCanceledError {
     /// The id of the task, when the error names one (`TaskCanceledException.Task`).
@@ -44,9 +59,26 @@ impl fmt::Display for TaskCanceledError {
 impl Error for TaskCanceledError {}
 
 impl TaskCanceledError {
-    /// Whether `error` is a cancellation: a [`TaskCanceledError`].
+    /// Whether `error` is a cancellation: a [`Canceled`] or a [`TaskCanceledError`]
+    /// ([`Canceled::is_cancellation`]).
     pub fn is_cancellation(error: &ObservableError) -> bool {
-        error.downcast_ref::<TaskCanceledError>().is_some()
+        Canceled::is_cancellation(error)
+    }
+}
+
+/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7): a
+/// cancellation that names no task.
+impl From<Canceled> for TaskCanceledError {
+    fn from(_: Canceled) -> Self {
+        Self::default()
+    }
+}
+
+/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7); the
+/// id of the task is not kept.
+impl From<TaskCanceledError> for Canceled {
+    fn from(_: TaskCanceledError) -> Self {
+        Canceled
     }
 }
 
@@ -55,21 +87,18 @@ fn next_task_id() -> u64 {
     NEXT.fetch_add(1, Ordering::Relaxed)
 }
 
-type Continuation = Box<dyn FnOnce()>;
-
 /// A continuation registered on a task that has not ended ([`Task::continue_with`]), for
 /// [`Task::remove_continuation`].
+#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::OnFinishedId` of `Shared::on_finished`")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct ContinuationId(u64);
+pub struct ContinuationId(OnFinishedId);
 
 struct TaskInner<T> {
     id: u64,
     status: Cell<TaskStatus>,
-    result: RefCell<Option<T>>,
-    error: RefCell<Option<ObservableError>>,
-    continuations: RefCell<Vec<(u64, Continuation)>>,
-    next_continuation: Cell<u64>,
-    wakers: RefCell<Vec<Waker>>,
+    /// The outcome: the result, the error of a faulted task, or the [`TaskCanceledError`] of a
+    /// canceled one.
+    shared: Shared<Result<T, ObservableError>>,
 }
 
 /// The outcome of an asynchronous operation (`Task<TResult>`; `Task` is `Task<()>`): a shared
@@ -79,6 +108,10 @@ struct TaskInner<T> {
 /// (`TaskContinuationOptions.ExecuteSynchronously`); a task is also a [`Future`] of its outcome.
 /// Tasks belong to the thread that made them, like the observables
 /// (docs/porting/reactive.md, section 5.8).
+#[deprecated(
+    since = "0.5.0",
+    note = "use `ferroui_system::task::Shared<Result<T, ObservableError>>` (`Shared::channel`, `JoinHandle::shared`, `Shared::on_finished`); `Shared::from(task)` converts"
+)]
 pub struct Task<T> {
     inner: Rc<TaskInner<T>>,
 }
@@ -97,17 +130,7 @@ impl<T> fmt::Debug for Task<T> {
 
 impl<T: 'static> Task<T> {
     pub(crate) fn with_status(status: TaskStatus) -> Self {
-        Self {
-            inner: Rc::new(TaskInner {
-                id: next_task_id(),
-                status: Cell::new(status),
-                result: RefCell::new(None),
-                error: RefCell::new(None),
-                continuations: RefCell::new(Vec::new()),
-                next_continuation: Cell::new(0),
-                wakers: RefCell::new(Vec::new()),
-            }),
-        }
+        Self { inner: Rc::new(TaskInner { id: next_task_id(), status: Cell::new(status), shared: Shared::detached() }) }
     }
 
     /// A task that has ended with `result` (`Task.FromResult`).
@@ -117,8 +140,8 @@ impl<T: 'static> Task<T> {
         task
     }
 
-    /// A task that has ended with `error` (`Task.FromException`); a [`TaskCanceledError`] makes it
-    /// canceled.
+    /// A task that has ended with `error` (`Task.FromException`); a cancellation ([`Canceled`],
+    /// [`TaskCanceledError`]) makes it canceled.
     pub fn from_exception(error: ObservableError) -> Self {
         let task = Self::with_status(TaskStatus::WaitingForActivation);
         task.try_complete(Err(error));
@@ -170,7 +193,13 @@ impl<T: 'static> Task<T> {
 
     /// The error of a faulted task (`Exception`, unwrapped from its `AggregateException`).
     pub fn exception(&self) -> Option<ObservableError> {
-        self.inner.error.borrow().clone()
+        if !self.is_faulted() {
+            return None;
+        }
+        self.inner.shared.with_outcome(|outcome| match outcome {
+            Some(Ok(Err(error))) => Some(error.clone()),
+            _ => None,
+        })
     }
 
     /// The outcome of an ended task: the result, the error of a faulted task, or a
@@ -182,10 +211,8 @@ impl<T: 'static> Task<T> {
     where
         T: Clone,
     {
-        match self.status() {
-            TaskStatus::RanToCompletion => Ok(self.inner.result.borrow().clone().expect("a completed task holds its result")),
-            TaskStatus::Faulted => Err(self.exception().expect("a faulted task holds its error")),
-            TaskStatus::Canceled => Err(Rc::new(TaskCanceledError { task_id: Some(self.id()) })),
+        match self.inner.shared.result() {
+            Some(outcome) if self.is_completed() => outcome,
             _ => panic!("the result of a task that has not ended was asked for; await it or use continue_with"),
         }
     }
@@ -196,47 +223,35 @@ impl<T: 'static> Task<T> {
     /// the cancellation token of `ContinueWith`); `None` when it ran at once.
     pub fn continue_with(&self, continuation: impl FnOnce(&Task<T>) + 'static) -> Option<ContinuationId> {
         let task = self.clone();
-        if self.is_completed() {
-            continuation(&task);
-            return None;
-        }
-        let id = self.inner.next_continuation.get();
-        self.inner.next_continuation.set(id + 1);
-        self.inner.continuations.borrow_mut().push((id, Box::new(move || continuation(&task))));
-        Some(ContinuationId(id))
+        self.inner.shared.on_finished(move |_| continuation(&task)).map(ContinuationId)
     }
 
     /// Removes a continuation that has not run; false when it has run or was removed.
     pub fn remove_continuation(&self, id: ContinuationId) -> bool {
-        let removed = {
-            let mut continuations = self.inner.continuations.borrow_mut();
-            let position = continuations.iter().position(|(entry, _)| *entry == id.0);
-            position.map(|position| continuations.remove(position))
-        };
-        // Dropped outside of the borrow: what the continuation holds may reach the task.
-        removed.is_some()
+        self.inner.shared.remove_on_finished(id.0)
     }
 
-    /// Ends the task with `outcome` unless it has ended; an error that is a [`TaskCanceledError`]
-    /// cancels it. False when it had ended.
+    /// Ends the task with `outcome` unless it has ended; an error that is a cancellation
+    /// ([`Canceled`], [`TaskCanceledError`]) cancels it. False when it had ended.
     pub(crate) fn try_complete(&self, outcome: Result<T, ObservableError>) -> bool {
         if self.is_completed() {
             return false;
         }
-        match outcome {
+        let outcome = match outcome {
             Ok(result) => {
-                *self.inner.result.borrow_mut() = Some(result);
                 self.inner.status.set(TaskStatus::RanToCompletion);
+                Ok(result)
             }
-            Err(error) if TaskCanceledError::is_cancellation(&error) => {
+            Err(error) if Canceled::is_cancellation(&error) => {
                 self.inner.status.set(TaskStatus::Canceled);
+                Err(self.canceled_error())
             }
             Err(error) => {
-                *self.inner.error.borrow_mut() = Some(error);
                 self.inner.status.set(TaskStatus::Faulted);
+                Err(error)
             }
-        }
-        self.finish();
+        };
+        self.inner.shared.finish(Ok(outcome));
         true
     }
 
@@ -245,19 +260,12 @@ impl<T: 'static> Task<T> {
             return false;
         }
         self.inner.status.set(TaskStatus::Canceled);
-        self.finish();
+        self.inner.shared.finish(Ok(Err(self.canceled_error())));
         true
     }
 
-    fn finish(&self) {
-        let continuations = std::mem::take(&mut *self.inner.continuations.borrow_mut());
-        for (_, continuation) in continuations {
-            continuation();
-        }
-        let wakers = std::mem::take(&mut *self.inner.wakers.borrow_mut());
-        for waker in wakers {
-            waker.wake();
-        }
+    fn canceled_error(&self) -> ObservableError {
+        Rc::new(TaskCanceledError { task_id: Some(self.id()) })
     }
 }
 
@@ -265,18 +273,56 @@ impl<T: Clone + 'static> Future for Task<T> {
     type Output = Result<T, ObservableError>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        if self.is_completed() {
-            return Poll::Ready(self.result());
-        }
-        let mut wakers = self.inner.wakers.borrow_mut();
-        if !wakers.iter().any(|waker| waker.will_wake(cx.waker())) {
-            wakers.push(cx.waker().clone());
-        }
-        Poll::Pending
+        let mut shared = self.inner.shared.clone().flatten();
+        Pin::new(&mut shared).poll(cx)
+    }
+}
+
+/// A task as the [`Shared`] of its outcome: the result, the error of a faulted task, or the
+/// [`TaskCanceledError`] of a canceled one, with the same continuations and awaiters.
+impl<T: 'static> From<Task<T>> for Shared<Result<T, ObservableError>> {
+    fn from(task: Task<T>) -> Self {
+        task.inner.shared.clone()
+    }
+}
+
+/// A future of the outcome of a [`oneshot`] channel of a `Result` as a task, which runs on the
+/// current thread ([`spawn_local`](super::spawn_local)): the result, the error, or a cancellation
+/// when the sender is dropped without sending.
+impl<T: 'static> From<oneshot::Receiver<Result<T, ObservableError>>> for Task<T> {
+    fn from(receiver: oneshot::Receiver<Result<T, ObservableError>>) -> Self {
+        super::local_executor::spawn_local(async move { receiver.await.unwrap_or_else(|canceled| Err(Rc::new(canceled) as ObservableError)) })
+    }
+}
+
+/// A completion source as the sender of a [`oneshot`] channel of a `Result`: what is sent ends the
+/// task of the source when the current thread runs the task that receives it (inside the call that
+/// sends, on this thread outside of a dispatcher job), and dropping the sender cancels the task.
+impl<T: 'static> From<TaskCompletionSource<T>> for oneshot::Sender<Result<T, ObservableError>> {
+    fn from(source: TaskCompletionSource<T>) -> Self {
+        let (sender, receiver) = oneshot::channel();
+        drop(crate::task::spawn_local(async move {
+            match receiver.await {
+                Ok(Ok(result)) => {
+                    source.try_set_result(result);
+                }
+                Ok(Err(error)) => {
+                    source.try_set_exception(error);
+                }
+                Err(Canceled) => {
+                    source.try_set_canceled();
+                }
+            }
+        }));
+        sender
     }
 }
 
 /// The producer side of a task that code ends by hand (`TaskCompletionSource<TResult>`).
+#[deprecated(
+    since = "0.5.0",
+    note = "use `ferroui_system::task::oneshot::channel` (a sender of a `Result`; dropping it cancels), or `Shared::channel` for synchronous continuations"
+)]
 pub struct TaskCompletionSource<T> {
     task: Task<T>,
 }
@@ -317,7 +363,8 @@ impl<T: 'static> TaskCompletionSource<T> {
         self.task.try_complete(Ok(result))
     }
 
-    /// Ends the task with `error` (`SetException`); a [`TaskCanceledError`] cancels it.
+    /// Ends the task with `error` (`SetException`); a cancellation ([`Canceled`],
+    /// [`TaskCanceledError`]) cancels it.
     ///
     /// # Panics
     /// When the task has ended (`InvalidOperationException`).

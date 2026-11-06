@@ -1,4 +1,6 @@
-<!-- Ported from both pinned RatingControl examples; see ../NOTICE.md. -->
+<!-- Ported from both pinned RatingControl examples; see ../NOTICE.md. The options keep the
+     source's x:Bind (OneWay, and TwoWay for the placeholder), compiled by the x:Bind core (#525);
+     IsChecked.Value of the nullable CheckBox state is IsChecked. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <TextBlock Text="A RatingControl with a caption" FontSize="18" />
@@ -6,8 +8,8 @@
     <StackPanel VerticalAlignment="Top" Spacing="12">
       <RatingControl x:Name="RatingControl1" HorizontalAlignment="Left"
                            Caption="312 ratings" AutomationProperties.Name="Simple RatingControl"
-                           IsClearEnabled="{Binding #ClearEnabled.IsChecked, Mode=OneWay}"
-                           IsReadOnly="{Binding #ReadOnly.IsChecked, Mode=OneWay}" />
+                           IsClearEnabled="{x:Bind ClearEnabled.IsChecked, Mode=OneWay}"
+                           IsReadOnly="{x:Bind ReadOnly.IsChecked, Mode=OneWay}" />
       <TextBlock x:Name="RatingOutput" Text="-1" FontWeight="Bold"
                  AutomationProperties.LiveSetting="Polite" />
     </StackPanel>
@@ -21,7 +23,7 @@
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <RatingControl x:Name="RatingControl2" HorizontalAlignment="Left" VerticalAlignment="Top"
                          AutomationProperties.Name="RatingControl with placeholder"
-                         PlaceholderValue="{Binding #PlaceholderSlider.Value, Mode=TwoWay}" />
+                         PlaceholderValue="{x:Bind PlaceholderSlider.Value, Mode=TwoWay}" />
     <StackPanel Grid.Column="1" Spacing="8">
       <TextBlock Text="PlaceholderValue" />
       <Slider x:Name="PlaceholderSlider" Minimum="0" Maximum="5" SmallChange="0.5"

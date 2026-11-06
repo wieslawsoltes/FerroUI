@@ -410,8 +410,8 @@ fn changing_speed_ratio_every_frame_should_not_lose_playback_time() {
     // written on every frame, as it would be when bound to a slider being
     // dragged. Re-anchoring playback time on each change must not
     // accumulate rounding errors.
-    let frame = TimeSpan::from_ticks(TimeSpan::TICKS_PER_SECOND / 60);
-    let mut time = TimeSpan::ZERO;
+    let frame = SignedDuration::from_ticks(SignedDuration::TICKS_PER_SECOND / 60);
+    let mut time = SignedDuration::ZERO;
 
     for i in 0..60 {
         time += frame;
@@ -575,7 +575,7 @@ fn zero_duration_should_finish_animation() {
     // This is not the normal way to access and set the animations
     // object's Duration property to zero that is defined in styles
     // but this is still valid for the RunAsync version.
-    animation.set_duration(TimeSpan::ZERO);
+    animation.set_duration(SignedDuration::ZERO);
 
     clock.step(seconds(1.2));
 
@@ -598,7 +598,7 @@ fn zero_duration_should_finish_animation_with_infinite_iteration() {
         assert_eq!(target.opacity(), expected, "at {time}");
     }
 
-    animation.set_duration(TimeSpan::ZERO);
+    animation.set_duration(SignedDuration::ZERO);
 
     clock.step(seconds(1.2));
 
@@ -675,7 +675,7 @@ fn delay_between_iterations_behind_initial_point_is_in_front_of_iterations() {
 fn zero_duration_with_delay_between_iterations_should_finish_animation() {
     start();
     let animation = Animation::new();
-    animation.set_duration(TimeSpan::ZERO);
+    animation.set_duration(SignedDuration::ZERO);
     animation.set_delay_between_iterations(seconds(0.5));
     animation.set_iteration_count(IterationCount::INFINITE);
     animation
@@ -709,7 +709,7 @@ fn setting_duration_to_zero_with_delay_between_iterations_should_finish_animatio
     clock.step(seconds(0.5));
     assert_eq!(target.opacity(), 0.5);
 
-    animation.set_duration(TimeSpan::ZERO);
+    animation.set_duration(SignedDuration::ZERO);
     clock.step(seconds(1.0));
 
     assert!(!target.opacity().is_nan());

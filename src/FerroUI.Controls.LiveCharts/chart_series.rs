@@ -20,7 +20,7 @@ pub struct ChartSeries {
     base: FerroObject,
     entity_id: u64,
     values_listener: RefCell<Option<(ChartPoints, u64)>>,
-    point_listeners: RefCell<Vec<Rc<dyn IDisposable>>>,
+    point_listeners: RefCell<Vec<Subscription>>,
     brush_listeners: RefCell<Vec<Subscription>>,
     changed: HandlerList<dyn Fn()>,
 }
@@ -128,10 +128,7 @@ impl ChartSeries {
         if let Some((values, token)) = old {
             values.remove_collection_changed(token);
         }
-        let previous = std::mem::take(&mut *self.point_listeners.borrow_mut());
-        for listener in previous {
-            listener.dispose();
-        }
+        drop(self.point_listeners.take());
     }
     fn rebind_values(&self) {
         self.clear_values_listener();
@@ -147,11 +144,11 @@ impl ChartSeries {
         let mut listeners = Vec::new();
         for point in values.to_vec() {
             let weak = self.to_ref().downgrade();
-            listeners.push(point.property_changed(move |_| {
+            listeners.push(Subscription::new(point.property_changed(move |_| {
                 if let Some(this) = weak.upgrade() {
                     this.notify_changed();
                 }
-            }));
+            })));
         }
         *self.point_listeners.borrow_mut() = listeners;
     }
@@ -218,6 +215,12 @@ impl ChartSeries {
             data_labels_rotation: self.data_labels_rotation(),
             polar_stacked: self.polar_stacked(),
             data_padding: self.data_padding(),
+            show_error: self.show_error(),
+            error_paint: self.error_paint(),
+            geometry_fill: self.geometry_fill(),
+            geometry_stroke: self.geometry_stroke(),
+            // The properties of one family (the heat series) are read by the chart.
+            ..SeriesSnapshot::new(self.kind())
         }
     }
 }
@@ -226,9 +229,7 @@ impl Drop for ChartSeries {
         if let Some((values, token)) = self.values_listener.get_mut().take() {
             values.remove_collection_changed(token);
         }
-        for listener in self.point_listeners.get_mut().drain(..) {
-            listener.dispose();
-        }
+        drop(std::mem::take(self.point_listeners.get_mut()));
         for listener in self.brush_listeners.get_mut().drain(..) {
             listener.dispose();
         }
@@ -384,6 +385,18 @@ ferro_properties! { impl ChartSeries {
     }
     pub fn data_padding_property() -> StyledProperty<Point> {
         FerroProperty::register::<ChartSeries, _>("DataPadding", Point::new(0.5,1.0))
+    }
+    pub fn show_error_property() -> StyledProperty<bool> {
+        FerroProperty::register::<ChartSeries, _>("ShowError", false)
+    }
+    pub fn error_paint_property() -> StyledProperty<Option<Color>> {
+        FerroProperty::register::<ChartSeries, _>("ErrorPaint", None)
+    }
+    pub fn geometry_fill_property() -> StyledProperty<Option<Color>> {
+        FerroProperty::register::<ChartSeries, _>("GeometryFill", None)
+    }
+    pub fn geometry_stroke_property() -> StyledProperty<Option<Color>> {
+        FerroProperty::register::<ChartSeries, _>("GeometryStroke", None)
     }
 } }
 impl ChartSeries {
@@ -686,5 +699,29 @@ impl ChartSeries {
     }
     pub fn set_data_padding(&self, value: Point) {
         self.set_value(Self::data_padding_property(), value);
+    }
+    pub fn show_error(&self) -> bool {
+        self.get_value(Self::show_error_property())
+    }
+    pub fn set_show_error(&self, value: bool) {
+        self.set_value(Self::show_error_property(), value);
+    }
+    pub fn error_paint(&self) -> Option<Color> {
+        self.get_value(Self::error_paint_property())
+    }
+    pub fn set_error_paint(&self, value: Option<Color>) {
+        self.set_value(Self::error_paint_property(), value);
+    }
+    pub fn geometry_fill(&self) -> Option<Color> {
+        self.get_value(Self::geometry_fill_property())
+    }
+    pub fn set_geometry_fill(&self, value: Option<Color>) {
+        self.set_value(Self::geometry_fill_property(), value);
+    }
+    pub fn geometry_stroke(&self) -> Option<Color> {
+        self.get_value(Self::geometry_stroke_property())
+    }
+    pub fn set_geometry_stroke(&self, value: Option<Color>) {
+        self.set_value(Self::geometry_stroke_property(), value);
     }
 }

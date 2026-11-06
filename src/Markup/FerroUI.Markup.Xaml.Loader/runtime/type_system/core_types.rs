@@ -11,11 +11,11 @@
 
 use std::rc::Rc;
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupDelegate, MarkupInvokeError, MarkupValue};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{CultureInfo, Uri};
+use ferroui_base::utilities::{CultureInfo, Locale, Uri, UriRef};
 use ferroui_base::{BoxedValue, FerroProperty, TypeInfo};
 use xamlx::type_system::{IXamlType, IXamlTypeSystem, XamlPseudoType};
 
@@ -211,7 +211,11 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
         "System.UInt64" => handles![u64],
         "System.Single" => handles![f32],
         "System.Double" => handles![f64],
-        "System.TimeSpan" => handles![TimeSpan],
+        // A time span has two Rust forms (C5 of #423): the signed one, and the
+        // `Duration` a value that cannot be negative is held in. The casts between the two
+        // are the ones of the untyped value conversions (a negative time span is not a
+        // duration).
+        "System.TimeSpan" => handles![SignedDuration, std::time::Duration],
         "System.String" => handles![String, Option<String>],
         "System.Type" => handles![
             RuntimeTypeValue,
@@ -221,11 +225,18 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
             ValueType,
             Option<ValueType>
         ],
-        "System.Uri" => handles![Uri, Option<Uri>],
+        // A URI has three Rust forms (C5 of #423): the port, the reference that can be relative
+        // and the absolute URL. The casts between them are the ones of the untyped value
+        // conversions (a relative reference is not a URL).
+        "System.Uri" => handles![Uri, Option<Uri>, UriRef, Option<UriRef>, url::Url, Option<url::Url>],
         "System.Delegate" => handles![MarkupDelegate, Option<MarkupDelegate>],
         "System.Exception" => handles![ferroui_base::data::BindingError, Option<ferroui_base::data::BindingError>],
         "System.IDisposable" => handles![Rc<dyn IDisposable>, Option<Rc<dyn IDisposable>>],
-        "System.Globalization.CultureInfo" => handles![CultureInfo, Option<CultureInfo>],
+        // A culture has two Rust forms (C5 of #423): the culture, the formatting parameter,
+        // and the locale, its identity (the `Language` properties). The casts between them
+        // are the ones of the untyped value conversions (a culture whose name is no BCP-47
+        // tag is not a locale).
+        "System.Globalization.CultureInfo" => handles![CultureInfo, Option<CultureInfo>, Locale, Option<Locale>],
         "System.IServiceProvider" => handles![Rc<dyn IServiceProvider>, Option<Rc<dyn IServiceProvider>>],
         "System.ComponentModel.ITypeDescriptorContext" => {
             handles![Rc<dyn ITypeDescriptorContext>, Option<Rc<dyn ITypeDescriptorContext>>]
@@ -247,7 +258,7 @@ fn invoker_of(full_name: &str, member: &CoreMember) -> RuntimeInvoker {
     match (full_name, member) {
         ("System.TimeSpan", CoreMember::Method { name, .. }) if name == "Parse" => dynamic(|arguments| {
             let text = argument::<String>(arguments, 0)?;
-            TimeSpan::parse(&text).map(boxed).map_err(|e| MarkupInvokeError::Failed(e.to_string()))
+            SignedDuration::parse(&text).map(boxed).map_err(|e| MarkupInvokeError::Failed(e.to_string()))
         }),
         // `string.Length`: the number of UTF-16 code units.
         ("System.String", CoreMember::Property { name, .. }) if name == "Length" => dynamic(|arguments| {
@@ -314,7 +325,8 @@ pub(crate) fn define_core_types(system: &Rc<RuntimeTypeSystem>) {
     map_nullable("System.UInt64", ValueType::of::<Option<u64>>());
     map_nullable("System.Single", ValueType::of::<Option<f32>>());
     map_nullable("System.Double", ValueType::of::<Option<f64>>());
-    map_nullable("System.TimeSpan", ValueType::of::<Option<TimeSpan>>());
+    map_nullable("System.TimeSpan", ValueType::of::<Option<SignedDuration>>());
+    map_nullable("System.TimeSpan", ValueType::of::<Option<std::time::Duration>>());
 
     // Arrays of the element types the compiler produces constants of: a member
     // that declares `Vec<T>` takes an array of `T` (see `values`).

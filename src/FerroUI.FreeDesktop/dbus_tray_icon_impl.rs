@@ -6,11 +6,11 @@
 use crate::dbus_helper::DBusHelper;
 use crate::dbus_menu_exporter::{DBusMenuExporter, DBusMenuExporterImpl};
 use crate::event::Event;
-use crate::signal_watch::CancellationFlag;
+use crate::signal_watch::run_until_cancelled;
 use crate::ui_thread_object::UiThreadHandle;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
 use ferroui_controls::platform::{INativeMenuExporter, ITrayIconImpl, IWindowIconImpl};
 use futures_util::future::{LocalBoxFuture, Shared};
 use futures_util::{FutureExt, StreamExt};
@@ -55,7 +55,7 @@ type NameTask = Shared<LocalBoxFuture<'static, Result<(), String>>>;
 
 pub struct DBusTrayIconImpl {
     connection: Option<Connection>,
-    watch_cts: RefCell<Option<CancellationFlag>>,
+    watch_cts: RefCell<Option<CancellationToken>>,
     status_notifier_item_dbus_obj: Option<Rc<StatusNotifierItemDbusObj>>,
     /// Whether the proxy of the watcher exists (`_statusNotifierWatcher`
     /// is not null); the proxy itself is made where it is called.
@@ -170,43 +170,46 @@ impl DBusTrayIconImpl {
         let Some(connection) = self.connection.clone() else {
             return;
         };
-        let watch_cts = CancellationFlag::new();
+        let watch_cts = CancellationToken::new();
         *self.watch_cts.borrow_mut() = Some(watch_cts.clone());
         let this = self.this.clone();
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let on_owner_changed = |owner: Option<String>| {
-                if let Some(this) = this.upgrade() {
-                    this.on_owner_changed(owner.as_deref());
-                }
-            };
-            let watch = async {
-                let dbus = zbus::fdo::DBusProxy::new(&connection).await?;
-                // Subscribed before the current owner is asked for, so
-                // that a change in between is not lost.
-                let mut changes = dbus.receive_name_owner_changed_with_args(&[(0, WATCHER_NAME)]).await?;
-                let owner = match dbus.get_name_owner(zbus::names::BusName::try_from(WATCHER_NAME)?).await {
-                    Ok(owner) => Some(owner.to_string()),
-                    Err(zbus::fdo::Error::NameHasNoOwner(_)) => None,
-                    Err(e) => return Err(zbus::Error::from(e)),
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let on_owner_changed = |owner: Option<String>| {
+                    if let Some(this) = this.upgrade() {
+                        this.on_owner_changed(owner.as_deref());
+                    }
                 };
-                on_owner_changed(owner);
-                while !watch_cts.is_cancellation_requested() {
-                    let Some(Some(signal)) = watch_cts.run(changes.next()).await else {
-                        break;
+                let watch = async {
+                    let dbus = zbus::fdo::DBusProxy::new(&connection).await?;
+                    // Subscribed before the current owner is asked for, so
+                    // that a change in between is not lost.
+                    let mut changes = dbus.receive_name_owner_changed_with_args(&[(0, WATCHER_NAME)]).await?;
+                    let owner = match dbus.get_name_owner(zbus::names::BusName::try_from(WATCHER_NAME)?).await {
+                        Ok(owner) => Some(owner.to_string()),
+                        Err(zbus::fdo::Error::NameHasNoOwner(_)) => None,
+                        Err(e) => return Err(zbus::Error::from(e)),
                     };
-                    let args = signal.args()?;
-                    on_owner_changed(args.new_owner().as_ref().map(|owner| owner.to_string()));
-                }
-                Ok::<(), zbus::Error>(())
-            };
+                    on_owner_changed(owner);
+                    while !watch_cts.is_cancelled() {
+                        let Some(Some(signal)) = run_until_cancelled(&watch_cts, changes.next()).await else {
+                            break;
+                        };
+                        let args = signal.args()?;
+                        on_owner_changed(args.new_owner().as_ref().map(|owner| owner.to_string()));
+                    }
+                    Ok::<(), zbus::Error>(())
+                };
 
-            if let Some(Err(e)) = watch_cts.run(watch).await {
-                let disposed = this.upgrade().is_none_or(|this| this.is_disposed.get());
-                if !disposed {
-                    log_error(&format!("Interface 'org.kde.StatusNotifierWatcher' is unavailable.\n{e}"));
+                if let Some(Err(e)) = run_until_cancelled(&watch_cts, watch).await {
+                    let disposed = this.upgrade().is_none_or(|this| this.is_disposed.get());
+                    if !disposed {
+                        log_error(&format!("Interface 'org.kde.StatusNotifierWatcher' is unavailable.\n{e}"));
+                    }
                 }
-            }
-        }));
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     fn on_owner_changed(&self, new_owner: Option<&str>) {
@@ -248,102 +251,105 @@ impl DBusTrayIconImpl {
             return;
         }
 
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            // The request this call waited for, and whether it completed.
-            let mut request: Option<(u64, bool)> = None;
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                // The request this call waited for, and whether it completed.
+                let mut request: Option<(u64, bool)> = None;
 
-            let result: Result<(), String> = async {
-                loop {
-                    let Some((id, release)) = this.sys_tray_service_name_release.borrow().clone() else {
-                        break;
-                    };
-                    release.await;
-                    let same = this.sys_tray_service_name_release.borrow().as_ref().is_some_and(|(now, _)| *now == id);
-                    if same {
-                        *this.sys_tray_service_name_release.borrow_mut() = None;
+                let result: Result<(), String> = async {
+                    loop {
+                        let Some((id, release)) = this.sys_tray_service_name_release.borrow().clone() else {
+                            break;
+                        };
+                        release.await;
+                        let same = this.sys_tray_service_name_release.borrow().as_ref().is_some_and(|(now, _)| *now == id);
+                        if same {
+                            *this.sys_tray_service_name_release.borrow_mut() = None;
+                        }
+                        if !this.should_own_name() {
+                            return Ok(());
+                        }
                     }
-                    if !this.should_own_name() {
+
+                    if this.sys_tray_service_name_request.borrow().is_none() {
+                        // Keep the name after a hide. A new id shows a new item to the host.
+                        if this.sys_tray_service_name.borrow().is_none() {
+                            let pid = std::process::id();
+                            let tid = TRAY_ICON_INSTANCE_ID.fetch_add(1, Ordering::Relaxed);
+                            *this.sys_tray_service_name.borrow_mut() = Some(format!("org.kde.StatusNotifierItem-{pid}-{tid}"));
+                        }
+
+                        let name = this.sys_tray_service_name.borrow().clone().unwrap_or_default();
+                        let task = this.request_tray_service_name_async(connection.clone(), name);
+                        *this.sys_tray_service_name_request.borrow_mut() = Some((this.next_task_id(), task));
+                    }
+
+                    let Some((id, task)) = this.sys_tray_service_name_request.borrow().clone() else {
+                        return Ok(());
+                    };
+                    request = Some((id, false));
+                    task.await?;
+                    request = Some((id, true));
+
+                    // A hide while the bus answers queues the release after this line.
+                    let same = this.sys_tray_service_name_request.borrow().as_ref().is_some_and(|(now, _)| *now == id);
+                    if !this.should_show_tray_icon() || !this.status_notifier_watcher.get() || !same {
                         return Ok(());
                     }
-                }
 
-                if this.sys_tray_service_name_request.borrow().is_none() {
-                    // Keep the name after a hide. A new id shows a new item to the host.
-                    if this.sys_tray_service_name.borrow().is_none() {
-                        let pid = std::process::id();
-                        let tid = TRAY_ICON_INSTANCE_ID.fetch_add(1, Ordering::Relaxed);
-                        *this.sys_tray_service_name.borrow_mut() = Some(format!("org.kde.StatusNotifierItem-{pid}-{tid}"));
+                    // A host that scans the bus adds a second item if the object is exported before the
+                    // connection owns the name. Two calls can reach this line, and a second export throws.
+                    if !this.item_exported.get() {
+                        this.item_exported.set(true);
+                        if let Err(e) = item.export().await {
+                            this.item_exported.set(false);
+                            return Err(e.to_string());
+                        }
                     }
 
-                    let name = this.sys_tray_service_name.borrow().clone().unwrap_or_default();
-                    let task = this.request_tray_service_name_async(connection.clone(), name);
-                    *this.sys_tray_service_name_request.borrow_mut() = Some((this.next_task_id(), task));
+                    let Some(name) = this.sys_tray_service_name.borrow().clone() else {
+                        return Ok(());
+                    };
+
+                    let watcher = async {
+                        StatusNotifierWatcherProxy::builder(&connection)
+                            .destination(WATCHER_NAME)?
+                            .path(WATCHER_PATH)?
+                            .cache_properties(CacheProperties::No)
+                            .build()
+                            .await
+                    }
+                    .await
+                    .map_err(|e| e.to_string())?;
+                    watcher.register_status_notifier_item(&name).await.map_err(|e| e.to_string())?;
+
+                    if !this.should_show_tray_icon() {
+                        return Ok(());
+                    }
+
+                    item.set_title_and_tooltip(this.tooltip_text.borrow().as_deref());
+                    item.set_icon(this.icon.borrow().clone());
+                    Ok(())
                 }
+                .await;
 
-                let Some((id, task)) = this.sys_tray_service_name_request.borrow().clone() else {
-                    return Ok(());
-                };
-                request = Some((id, false));
-                task.await?;
-                request = Some((id, true));
+                if let Err(e) = result {
+                    // Clear only this request, and only if it did not complete. The next call then asks for
+                    // the name again.
+                    if let Some((id, false)) = request {
+                        let mut current = this.sys_tray_service_name_request.borrow_mut();
+                        if current.as_ref().is_some_and(|(now, _)| *now == id) {
+                            *current = None;
+                        }
+                    }
 
-                // A hide while the bus answers queues the release after this line.
-                let same = this.sys_tray_service_name_request.borrow().as_ref().is_some_and(|(now, _)| *now == id);
-                if !this.should_show_tray_icon() || !this.status_notifier_watcher.get() || !same {
-                    return Ok(());
-                }
-
-                // A host that scans the bus adds a second item if the object is exported before the
-                // connection owns the name. Two calls can reach this line, and a second export throws.
-                if !this.item_exported.get() {
-                    this.item_exported.set(true);
-                    if let Err(e) = item.export().await {
-                        this.item_exported.set(false);
-                        return Err(e.to_string());
+                    if !this.is_disposed.get() {
+                        log_error(&format!("Unable to register the system tray icon.\n{e}"));
                     }
                 }
-
-                let Some(name) = this.sys_tray_service_name.borrow().clone() else {
-                    return Ok(());
-                };
-
-                let watcher = async {
-                    StatusNotifierWatcherProxy::builder(&connection)
-                        .destination(WATCHER_NAME)?
-                        .path(WATCHER_PATH)?
-                        .cache_properties(CacheProperties::No)
-                        .build()
-                        .await
-                }
-                .await
-                .map_err(|e| e.to_string())?;
-                watcher.register_status_notifier_item(&name).await.map_err(|e| e.to_string())?;
-
-                if !this.should_show_tray_icon() {
-                    return Ok(());
-                }
-
-                item.set_title_and_tooltip(this.tooltip_text.borrow().as_deref());
-                item.set_icon(this.icon.borrow().clone());
-                Ok(())
-            }
-            .await;
-
-            if let Err(e) = result {
-                // Clear only this request, and only if it did not complete. The next call then asks for
-                // the name again.
-                if let Some((id, false)) = request {
-                    let mut current = this.sys_tray_service_name_request.borrow_mut();
-                    if current.as_ref().is_some_and(|(now, _)| *now == id) {
-                        *current = None;
-                    }
-                }
-
-                if !this.is_disposed.get() {
-                    log_error(&format!("Unable to register the system tray icon.\n{e}"));
-                }
-            }
-        }));
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     fn request_tray_service_name_async(&self, connection: Connection, name: String) -> NameTask {
@@ -414,7 +420,7 @@ impl DBusTrayIconImpl {
         *self.sys_tray_service_name_release.borrow_mut() = Some((self.next_task_id(), release.clone()));
         // The reference starts the release with the call; here it is a
         // task of the dispatcher, which whoever waits for it shares.
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || release));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(release, DispatcherPriority::DEFAULT));
     }
 }
 
@@ -426,7 +432,8 @@ impl IDisposable for DBusTrayIconImpl {
         if let Some(menu_exporter) = &self.menu_exporter {
             menu_exporter.dispose();
         }
-        if let Some(watch_cts) = &*self.watch_cts.borrow() {
+        let watch_cts = self.watch_cts.borrow().clone();
+        if let Some(watch_cts) = watch_cts {
             watch_cts.cancel();
         }
         if let Some(item) = &self.status_notifier_item_dbus_obj {
@@ -584,10 +591,13 @@ impl StatusNotifierItemDbusObj {
     /// `Connection.RemoveMethodHandler(Path)`.
     fn unexport(&self) {
         let connection = self.connection.clone();
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let object_server = connection.object_server();
-            let _ = object_server.remove::<StatusNotifierItemDbusObjImpl, _>(STATUS_NOTIFIER_ITEM_PATH).await;
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let object_server = connection.object_server();
+                let _ = object_server.remove::<StatusNotifierItemDbusObjImpl, _>(STATUS_NOTIFIER_ITEM_PATH).await;
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     fn dispose(&self) {
@@ -598,17 +608,20 @@ impl StatusNotifierItemDbusObj {
 
     fn invalidate_all(&self) {
         let connection = self.connection.clone();
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let Ok(emitter) = SignalEmitter::new(&connection, STATUS_NOTIFIER_ITEM_PATH) else {
-                return;
-            };
-            let _ = StatusNotifierItemDbusObjImpl::new_title(&emitter).await;
-            let _ = StatusNotifierItemDbusObjImpl::new_icon(&emitter).await;
-            let _ = StatusNotifierItemDbusObjImpl::new_attention_icon(&emitter).await;
-            let _ = StatusNotifierItemDbusObjImpl::new_overlay_icon(&emitter).await;
-            let _ = StatusNotifierItemDbusObjImpl::new_tool_tip(&emitter).await;
-            let _ = StatusNotifierItemDbusObjImpl::new_status(&emitter, STATUS_ACTIVE).await;
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let Ok(emitter) = SignalEmitter::new(&connection, STATUS_NOTIFIER_ITEM_PATH) else {
+                    return;
+                };
+                let _ = StatusNotifierItemDbusObjImpl::new_title(&emitter).await;
+                let _ = StatusNotifierItemDbusObjImpl::new_icon(&emitter).await;
+                let _ = StatusNotifierItemDbusObjImpl::new_attention_icon(&emitter).await;
+                let _ = StatusNotifierItemDbusObjImpl::new_overlay_icon(&emitter).await;
+                let _ = StatusNotifierItemDbusObjImpl::new_tool_tip(&emitter).await;
+                let _ = StatusNotifierItemDbusObjImpl::new_status(&emitter, STATUS_ACTIVE).await;
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     fn set_icon(&self, dbus_pixmap: DBusPixmap) {

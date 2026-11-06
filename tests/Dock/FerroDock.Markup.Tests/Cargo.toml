@@ -49,6 +49,8 @@ ferrodock-model-reactiveui-services = { path = "../../../src/Dock/FerroDock.Mode
 ferroui-reactive.workspace = true
 ferroui-reactiveui.workspace = true
 ferroui-headless = { workspace = true, features = ["testing"] }
+# The URI context of the markup extension tests holds the URL of a document (C5 of #423).
+url.workspace = true
 
 [lints.rust]
 unsafe_code = "forbid"

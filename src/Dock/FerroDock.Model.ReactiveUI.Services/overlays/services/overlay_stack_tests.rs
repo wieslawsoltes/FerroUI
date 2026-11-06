@@ -1,12 +1,12 @@
 use super::*;
-use crate::test_environment::Environment;
+use crate::test_environment::{Environment, TaskState};
 use ferrodock_model::services::*;
 use ferrodock_model::BoxedValue;
 use ferroui_reactive::concurrency::HistoricalScheduler;
 use ferroui_reactiveui::RxSchedulers;
 use ferroui_system::collections::specialized::NotifyCollectionChangedAction as Action;
 use ferroui_system::component_model::INotifyPropertyChanged;
-use ferroui_system::threading::tasks::{block_on, Task};
+use ferroui_system::task::{block_on, Shared};
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -22,7 +22,7 @@ macro_rules! stacks {
     ($module:ident,$service:ident,$global:ident,$list:ident,$active:ident,$has:ident,$open:ident,$active_name:literal,$has_name:literal,$result:ty,$answer:expr,$foreign:expr,|$s:ident| $start:expr) => {
         mod $module {
             use super::*;
-            fn start($s:&Rc<$service>)->Task<$result> { $start }
+            fn start($s:&Rc<$service>)->Shared<Result<$result, ferroui_system::ObservableError>> { $start }
             #[test]
             fn live_collection_defaults_stack_selection_and_cancel_snapshot() {
                 let _environment=Environment::new(); let global=$global::new(None,None); let service=$service::new(Some(global.clone()),None);
@@ -41,7 +41,7 @@ macro_rules! stacks {
                 let seen=events.clone(); service.property_changed().add(Rc::new(move |name| seen.borrow_mut().push(name.to_owned())));
                 let task=start(&service); assert_eq!(&*events.borrow(),&["Count","Item[]","Add",$active_name,$has_name]); events.borrow_mut().clear();
                 let request=view.get(0); let weak=Rc::downgrade(&service); let seen=events.clone(); let global_probe=global.clone();
-                task.continue_with(move |_| { let service=weak.upgrade().unwrap(); assert!(!service.$has()); assert!(!global_probe.$open()); assert!(service.$active().is_some()); seen.borrow_mut().push("Complete".into()); });
+                task.on_finished(move |_| { let service=weak.upgrade().unwrap(); assert!(!service.$has()); assert!(!global_probe.$open()); assert!(service.$active().is_some()); seen.borrow_mut().push("Complete".into()); });
                 service.close(request,$answer);
                 assert_eq!(&*events.borrow(),&["Count","Item[]","Remove","Complete",$active_name,$has_name]);
             }
@@ -50,7 +50,7 @@ macro_rules! stacks {
                 let _environment=Environment::new(); let scheduler=HistoricalScheduler::historical(); RxSchedulers::set_main_thread_scheduler(scheduler.clone());
                 let service=$service::new(None,None); let task=start(&service); assert!(!service.$has()); assert!(!task.is_completed());
                 scheduler.start(); assert!(service.$has()); assert!(!task.is_completed()); service.close(service.$active().unwrap(),$answer); assert!(service.$has());
-                scheduler.start(); assert!(!service.$has()); block_on(task).unwrap();
+                scheduler.start(); assert!(!service.$has()); block_on(task.flatten()).unwrap();
             }
             #[test]
             fn foreign_and_already_closed_requests_still_dispose_and_complete_without_stack_notifications() {
@@ -63,7 +63,7 @@ macro_rules! stacks {
             #[test]
             fn cancel_all_snapshot_keeps_a_request_opened_reentrantly() {
                 let _environment=Environment::new(); let service=$service::new(None,None); let first=start(&service); let second=start(&service); let pending=Rc::new(RefCell::new(None)); let seen=pending.clone(); let weak=Rc::downgrade(&service);
-                first.continue_with(move |_| { seen.replace(Some(start(&weak.upgrade().unwrap()))); });
+                first.on_finished(move |_| { seen.replace(Some(start(&weak.upgrade().unwrap()))); });
                 service.cancel_all(); assert!(first.is_completed()); assert!(second.is_completed()); assert_eq!(service.$list().count(),1); assert!(!pending.borrow().as_ref().unwrap().is_completed());
                 service.cancel_all(); assert!(pending.borrow().as_ref().unwrap().is_completed());
             }
@@ -149,7 +149,7 @@ fn confirmation_default_labels_explicit_labels_and_command_results_use_erased_co
         ("title", "message", "Confirm", "Cancel")
     );
     request.confirm().execute(None);
-    assert!(task.result().unwrap());
+    assert!(task.result().unwrap().unwrap());
     let task = service.confirm_async("other".into(), "message".into(), "yes".into(), "no".into());
     let request = service.active_confirmation().unwrap();
     assert_eq!(
@@ -157,7 +157,7 @@ fn confirmation_default_labels_explicit_labels_and_command_results_use_erased_co
         ("yes", "no")
     );
     request.cancel().execute(None);
-    assert!(!task.result().unwrap());
+    assert!(!task.result().unwrap().unwrap());
 }
 struct SelfClosing {
     action: RefCell<Option<DialogContentCloseAction>>,
@@ -184,7 +184,7 @@ fn typed_dialog_content_can_close_before_insertion_and_keeps_original_content_id
         DialogContent::from_dialog_content(content.clone()),
         Some("title".into()),
     );
-    assert_eq!(task.result().unwrap(), 42);
+    assert_eq!(task.result().unwrap().unwrap(), 42);
     assert!(!service.has_dialogs());
     assert!(!global.is_dialog_open());
     let content = Rc::new(SelfClosing {
@@ -199,7 +199,7 @@ fn typed_dialog_content_can_close_before_insertion_and_keeps_original_content_id
         &(content.clone() as BoxedValue)
     ));
     content.action.borrow().as_ref().unwrap()(Some(Rc::new(7_i32)));
-    assert_eq!(task.result().unwrap(), 7);
+    assert_eq!(task.result().unwrap().unwrap(), 7);
     drop(request);
     drop(content);
     assert!(weak.upgrade().is_none());
@@ -218,7 +218,7 @@ fn queued_content_close_precedes_add_and_uses_completed_request_guard() {
     scheduler.start();
     assert!(!service.has_dialogs());
     assert!(service.active_dialog().is_none());
-    assert_eq!(block_on(task).unwrap(), 42);
+    assert_eq!(block_on(task.flatten()).unwrap(), 42);
 }
 #[test]
 fn generic_dialog_results_through_erased_service_use_source_defaults_and_reference_identity() {
@@ -227,14 +227,14 @@ fn generic_dialog_results_through_erased_service_use_source_defaults_and_referen
     let content: BoxedValue = Rc::new("content");
     let task = service.show_async::<i32>(content.clone(), None);
     service.close(service.active_dialog().unwrap(), Some(Rc::new(7_i64)));
-    assert_eq!(task.result().unwrap(), 0);
+    assert_eq!(task.result().unwrap().unwrap(), 0);
     let task = service.show_async::<Option<i32>>(content.clone(), None);
     service.close(service.active_dialog().unwrap(), None);
-    assert_eq!(task.result().unwrap(), None);
+    assert_eq!(task.result().unwrap().unwrap(), None);
     let value = Rc::new("reference".to_owned());
     let task = service.show_async::<Option<Rc<String>>>(content, None);
     service.close(service.active_dialog().unwrap(), Some(value.clone()));
-    assert!(Rc::ptr_eq(&task.result().unwrap().unwrap(), &value));
+    assert!(Rc::ptr_eq(&task.result().unwrap().unwrap().unwrap(), &value));
 }
 #[test]
 fn host_adapter_retains_all_six_actual_service_instances() {
@@ -265,46 +265,35 @@ fn host_adapter_retains_all_six_actual_service_instances() {
 
 #[test]
 fn same_context_closes_and_cancels_directly_and_posting_failure_faults_show_task() {
-    use ferroui_system::threading::{set_synchronization_context, SynchronizationContext};
+    use ferroui_system::task::{set_current_schedule, Schedule};
     use std::sync::Arc;
+    // The synchronization contexts of the reference are schedules.
     struct Context;
-    impl SynchronizationContext for Context {
-        fn post(&self, work: Box<dyn FnOnce() + Send>) {
+    impl Schedule for Context {
+        fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
             work();
         }
-        fn send(&self, work: Box<dyn FnOnce() + Send>) {
-            work();
-        }
-        fn post_local(&self, work: Box<dyn FnOnce()>) {
-            work();
-        }
-        fn send_local(&self, work: Box<dyn FnOnce()>) {
+        fn schedule_local(&self, work: Box<dyn FnOnce()>) {
             work();
         }
     }
     let _environment = Environment::new();
-    set_synchronization_context(Some(Arc::new(Context)));
+    drop(set_current_schedule(Some(Arc::new(Context))));
     let confirmations = DockConfirmationService::new(None, None);
     let task = confirmations.confirm_async_default("t".into(), "m".into());
     confirmations.cancel_all();
-    assert!(!task.result().unwrap());
+    assert!(!task.result().unwrap().unwrap());
     let dialogs = DockDialogService::new(None, None);
     let task = dialogs.show_async::<i32>(DialogContent::new(Rc::new("content")), None);
     dialogs.cancel_all();
-    assert_eq!(task.result().unwrap(), 0);
+    assert_eq!(task.result().unwrap().unwrap(), 0);
     struct Throwing;
-    impl SynchronizationContext for Throwing {
-        fn post(&self, _work: Box<dyn FnOnce() + Send>) {
+    impl Schedule for Throwing {
+        fn schedule(&self, _work: Box<dyn FnOnce() + Send>) {
             panic!("post failed");
         }
-        fn send(&self, _work: Box<dyn FnOnce() + Send>) {
-            panic!("send failed");
-        }
-        fn post_local(&self, _work: Box<dyn FnOnce()>) {
+        fn schedule_local(&self, _work: Box<dyn FnOnce()>) {
             panic!("post failed");
-        }
-        fn send_local(&self, _work: Box<dyn FnOnce()>) {
-            panic!("send failed");
         }
     }
     let dialogs = DockDialogService::new(None, Some(Arc::new(Throwing)));

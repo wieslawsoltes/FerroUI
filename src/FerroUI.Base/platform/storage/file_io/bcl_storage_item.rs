@@ -1,12 +1,10 @@
 use super::{BclStorageFile, BclStorageFolder, StorageBookmarkHelper, StorageProviderHelpers};
-use crate::animation::TimeSpan;
 use crate::platform::storage::{IStorageFolder, IStorageItem, StorageItemProperties};
-use crate::utilities::{DateTimeOffset, Uri, UriKind};
+use crate::utilities::UriRef;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use std::time::SystemTime;
 
 /// An entry of the local file system: a file or a directory, by its full
 /// path (the counterpart of the file-system info objects of the .NET base
@@ -87,16 +85,6 @@ impl FileSystemInfo {
     }
 }
 
-fn to_date_time_offset(time: SystemTime) -> DateTimeOffset {
-    const NANOSECONDS_PER_TICK: u128 = 100;
-
-    let ticks = match time.duration_since(SystemTime::UNIX_EPOCH) {
-        Ok(after) => (after.as_nanos() / NANOSECONDS_PER_TICK) as i64,
-        Err(before) => -((before.duration().as_nanos() / NANOSECONDS_PER_TICK) as i64),
-    };
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(ticks))
-}
-
 /// The base of the storage items backed by an entry of the local file
 /// system: the entry, and the operations on it.
 ///
@@ -130,7 +118,7 @@ impl BclStorageItem {
         true
     }
 
-    pub fn path(&self) -> Uri {
+    pub fn path(&self) -> UriRef {
         Self::get_path_core(&self.file_system_info)
     }
 
@@ -173,26 +161,27 @@ impl BclStorageItem {
         }
     }
 
-    pub fn get_path_core(file_system_info: &FileSystemInfo) -> Uri {
+    /// The file URL of the entry, or, for the root of a file system, the
+    /// relative reference of its name (`/`, `C:\`), as upstream.
+    pub fn get_path_core(file_system_info: &FileSystemInfo) -> UriRef {
         if file_system_info.path().parent().is_some() {
-            return StorageProviderHelpers::uri_from_file_path(
+            return UriRef::Absolute(StorageProviderHelpers::uri_from_file_path(
                 &file_system_info.full_name(),
                 file_system_info.is_directory(),
-            );
+            ));
         }
 
-        Uri::new(&file_system_info.name(), UriKind::Relative)
-            .expect("the name of a file-system root is a valid relative URI")
+        UriRef::Relative(file_system_info.name().into())
     }
 
     pub fn get_basic_properties_async_core(file_system_info: &FileSystemInfo) -> StorageItemProperties {
         if file_system_info.exists() {
             if let Ok(metadata) = fs::metadata(file_system_info.path()) {
                 let size = if file_system_info.is_directory() { 0 } else { metadata.len() };
-                let date_modified = metadata.modified().ok().map(to_date_time_offset);
+                let date_modified = metadata.modified().ok();
                 // File systems without a creation time report the time of
                 // the last change.
-                let date_created = metadata.created().ok().map(to_date_time_offset).or(date_modified);
+                let date_created = metadata.created().ok().or(date_modified);
                 return StorageItemProperties::new(Some(size), date_created, date_modified);
             }
         }
@@ -307,7 +296,7 @@ macro_rules! impl_bcl_storage_item {
                 self.base.name()
             }
 
-            fn path(&self) -> $crate::utilities::Uri {
+            fn path(&self) -> $crate::utilities::UriRef {
                 self.base.path()
             }
 

@@ -3,13 +3,13 @@
 use crate::DockFluentTheme;
 use ferrodock_ferro::themes::{DockPresetThemeManagerBase, DockPresetThemeManagerHooks};
 use ferrodock_model::collections::ReadOnlyListHandle;
-use ferroui_base::{controls::IResourceDictionary, utilities::Uri};
+use ferroui_base::{controls::IResourceDictionary, utilities::UriRef};
 use ferroui_controls::Application;
 use std::rc::Rc;
 const PRESET_URI_PREFIX: &str = "ferres://FerroDock.Ferro.Themes.Fluent/Presets/Ide/";
 ferroui_base::ferro_thread_local! {
     static PRESET_NAMES:ReadOnlyListHandle<String>=ReadOnlyListHandle::from_items(vec!["Default".into(),"VS Code Light".into(),"VS Code Dark".into(),"Rider Light".into(),"Rider Dark".into()]);
-    static PRESET_URIS:ReadOnlyListHandle<Uri>=ReadOnlyListHandle::from_items(["Default","VsCodeLight","VsCodeDark","RiderLight","RiderDark"].into_iter().map(|name|Uri::absolute(&format!("{PRESET_URI_PREFIX}{name}.xaml")).expect("a source constant preset URI")).collect());
+    static PRESET_URIS:ReadOnlyListHandle<url::Url>=ReadOnlyListHandle::from_items(["Default","VsCodeLight","VsCodeDark","RiderLight","RiderDark"].into_iter().map(|name|UriRef::parse_absolute(&format!("{PRESET_URI_PREFIX}{name}.xaml")).expect("a source constant preset URI")).collect());
 }
 /// Provides the original light/dark and preset switching for Dock Fluent resources.
 pub struct DockFluentThemeManager {

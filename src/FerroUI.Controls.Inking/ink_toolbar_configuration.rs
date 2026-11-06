@@ -12,7 +12,7 @@ use ferroui_controls::{
     Slider, SliderImpl, StackPanel, StackPanelImpl, TextBlock, WrapPanel,
 };
 use ferroui_base::animation::easings::CubicEaseOut;
-use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, KeyFrame, SignedDuration};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::{
@@ -26,7 +26,7 @@ use ferroui_base::media::{
     BackgroundSizing, BoxShadows, DrawingContext, FontWeight, IBrush, ITransform, MatrixTransform,
     PenLineCap, PenLineJoin, PolylineGeometry, TransformGroup, TranslateTransform,
 };
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Observable};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Observable, Subscription};
 use ferroui_base::styling::Setter;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -83,7 +83,7 @@ pub struct InkToolbarPenConfigurationControl {
     base: StackPanel,
     // The pen's flyout owns its configuration. Keep the reverse owner link weak.
     pen: RefCell<Option<WeakRef<InkToolbarPenButton>>>,
-    pen_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    pen_subscription: RefCell<Option<Subscription>>,
     palette_subscription: RefCell<Option<(FerroList<Rc<dyn IBrush>>, u64)>>,
     palette_panel: RefCell<Option<Ref<WrapPanel>>>,
     slider: RefCell<Option<Ref<InkToolbarStrokeWidthSlider>>>,
@@ -391,8 +391,8 @@ impl InkToolbarPenConfigurationControl {
                 subscriptions.add(overlay);
             }
             let animation = Animation::new();
-            animation.set_duration(TimeSpan::from_milliseconds(200.0));
-            animation.set_delay(TimeSpan::from_milliseconds(index as f64 * 30.0));
+            animation.set_duration(SignedDuration::from_milliseconds(200.0));
+            animation.set_delay(SignedDuration::from_milliseconds(index as f64 * 30.0));
             animation.set_fill_mode(FillMode::Backward);
             animation.set_easing(CubicEaseOut::new());
             animation.children().add(KeyFrame::with_cue(
@@ -464,7 +464,7 @@ impl InkToolbarPenConfigurationControl {
                     config.synchronize();
                 }
             });
-            *self.pen_subscription.borrow_mut() = Some(subscription);
+            *self.pen_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         self.bind_palette();
         self.synchronize();

@@ -1,7 +1,7 @@
 //! Independent language, shaping, history and RTF contract regressions.
 use super::{CharacterFormat, Paragraph, RichTextDocument, Run, Span, TextElement};
 use crate::test_support::test_scope;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{locale, Locale};
 use ferroui_base::{Rect, Size};
 #[allow(unused_imports)]
 use crate::{RichTextBlock, RichTextBlockOverflow};
@@ -13,18 +13,13 @@ use crate::{RichEditBox, RichEditBoxTextPresenter};
 #[test]
 fn rich_language_source_validation_and_patch_assignment_are_atomic() {
     let mut format = CharacterFormat::default();
-    for tag in [
-        "",
-        "en",
-        "en-US",
-        "zh-Hans-CN",
-        "es-419",
-        "x-private",
-        "abcdefgh-12345678",
-    ] {
+    for tag in ["", "en", "en-US", "zh-Hans-CN", "es-419"] {
         format.set_language_tag(tag).unwrap();
-        assert_eq!(format.language_tag(), Some(tag));
+        assert_eq!(format.language_tag().as_deref(), Some(tag));
     }
+    // The locale holds a tag with the case of its subtags normalized.
+    format.set_language_tag("EN-us").unwrap();
+    assert_eq!(format.language_tag().as_deref(), Some("en-US"));
     let before = format.clone();
     for tag in [
         "en_US",
@@ -37,15 +32,17 @@ fn rich_language_source_validation_and_patch_assignment_are_atomic() {
         "é",
         "en US",
         "en\0US",
+        // Deviation (DEVIATIONS.md, Text block; C5 of #423): XML language tags
+        // that are no BCP-47 tags, which a locale cannot hold.
+        "x-private",
+        "abcdefgh-12345678",
     ] {
         assert!(format.set_language_tag(tag).is_err(), "{tag:?}");
         assert_eq!(format, before);
-        let malformed = CharacterFormat {
-            language: Some(CultureInfo::get_culture_info(tag)),
-            ..Default::default()
-        };
-        assert!(malformed.validate().is_err());
     }
+    // Every locale is a valid language.
+    let format = CharacterFormat { language: Some(locale!("ja-JP")), ..Default::default() };
+    assert!(format.validate().is_ok());
 }
 
 /// Deviation (DEVIATIONS.md, Text block): the runs of a text element without
@@ -60,16 +57,16 @@ fn runs_get_a_culture_only_from_a_set_language() {
     assert!(!run.has_language());
     assert!(run.run_culture().is_none());
 
-    span.set_language(CultureInfo::get_culture_info("ja-JP"));
+    span.set_language(locale!("ja-JP"));
     assert!(run.has_language());
-    assert_eq!(run.run_culture().map(|culture| culture.name().to_owned()).as_deref(), Some("ja-JP"));
+    assert_eq!(run.run_culture(), Some(locale!("ja-JP")));
 }
 
 #[test]
 fn rich_language_inherits_into_shaping_and_local_values_override() {
     let _scope = test_scope();
     let view = RichTextBlock::new();
-    view.set_language(CultureInfo::get_culture_info("ja-JP"));
+    view.set_language(locale!("ja-JP"));
     let paragraph = Paragraph::new();
     let span = Span::new();
     let run = Run::with_text(Some("漢字"));
@@ -82,20 +79,20 @@ fn rich_language_inherits_into_shaping_and_local_values_override() {
             .cloned()
             .unwrap()
     };
-    assert_eq!(culture().name(), "ja-JP");
-    span.set_language(CultureInfo::get_culture_info("zh-CN"));
-    assert_eq!(culture().name(), "zh-CN");
-    run.set_language(CultureInfo::get_culture_info("zh-TW"));
-    assert_eq!(culture().name(), "zh-TW");
+    assert_eq!(culture(), locale!("ja-JP"));
+    span.set_language(locale!("zh-CN"));
+    assert_eq!(culture(), locale!("zh-CN"));
+    run.set_language(locale!("zh-TW"));
+    assert_eq!(culture(), locale!("zh-TW"));
     view.measure(Size::new(200.0, 100.0));
     view.arrange(Rect::new(0.0, 0.0, 200.0, 100.0));
     assert!(view.is_measure_valid());
     run.clear_value(TextElement::language_property());
     assert!(!view.is_measure_valid());
-    assert_eq!(culture().name(), "zh-CN");
-    run.set_language(CultureInfo::invariant_culture());
+    assert_eq!(culture(), locale!("zh-CN"));
+    run.set_language(Locale::UNKNOWN);
     assert!(
-        !culture().is_invariant(),
+        culture() != Locale::UNKNOWN,
         "an empty assigned language resolves for shaping"
     );
 }
@@ -115,7 +112,7 @@ fn rich_language_snapshots_and_editor_history_preserve_tags() {
         .unwrap();
     let changed = document.snapshot();
     assert_eq!(
-        document.character_format_at(1).unwrap().language_tag(),
+        document.character_format_at(1).unwrap().language_tag().as_deref(),
         Some("tr-TR")
     );
     services.undo().unwrap();
@@ -124,7 +121,7 @@ fn rich_language_snapshots_and_editor_history_preserve_tags() {
     assert_eq!(document.snapshot(), changed);
     document.replace_text(1..1, "x\ny").unwrap();
     assert_eq!(
-        document.character_format_at(2).unwrap().language_tag(),
+        document.character_format_at(2).unwrap().language_tag().as_deref(),
         Some("tr-TR")
     );
     document.restore(&changed).unwrap();
@@ -148,7 +145,7 @@ fn rich_language_rtf_default_scope_plain_and_round_trip() {
         .character_format()
         .unwrap()
     {
-        TextFormatValue::Uniform(format) => format.language_tag().unwrap().to_owned(),
+        TextFormatValue::Uniform(format) => format.language_tag().unwrap(),
         TextFormatValue::Mixed => panic!("one scalar cannot have mixed formatting"),
     };
     for (offset, language) in [(0, "en-US"), (1, "ja-JP"), (2, "en-US"), (3, "en-US")] {
@@ -190,7 +187,7 @@ fn rich_language_rtf_reports_unrepresentable_tags_and_unknown_ids() {
     ));
     let no_language = RtfReader::read_str(r"{\rtf1\lang1024 text}").unwrap();
     assert_eq!(
-        no_language.paragraphs[0].inlines[0].format.language_tag(),
+        no_language.paragraphs[0].inlines[0].format.language_tag().as_deref(),
         Some("")
     );
     assert!(RtfWriter::write(&no_language)
@@ -202,12 +199,12 @@ fn rich_language_rtf_reports_unrepresentable_tags_and_unknown_ids() {
 fn rich_language_owner_uses_the_same_inherited_presenter_value() {
     let _scope = test_scope();
     let editor = RichEditBox::new();
-    editor.set_language(CultureInfo::get_culture_info("ko-KR"));
-    assert_eq!(editor.text_presenter().language().name(), "ko-KR");
+    editor.set_language(locale!("ko-KR"));
+    assert_eq!(editor.text_presenter().language(), locale!("ko-KR"));
     editor.set_rich_document(RichTextDocument::from_text("한글"));
     let block = editor.blocks().get(0);
-    assert_eq!(block.language().name(), "ko-KR");
-    editor.set_language(CultureInfo::get_culture_info("ja-JP"));
-    assert_eq!(editor.text_presenter().language().name(), "ja-JP");
-    assert_eq!(block.language().name(), "ja-JP");
+    assert_eq!(block.language(), locale!("ko-KR"));
+    editor.set_language(locale!("ja-JP"));
+    assert_eq!(editor.text_presenter().language(), locale!("ja-JP"));
+    assert_eq!(block.language(), locale!("ja-JP"));
 }

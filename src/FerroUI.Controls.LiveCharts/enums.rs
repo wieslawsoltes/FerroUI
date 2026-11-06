@@ -1,13 +1,25 @@
-/// The chart calculation selected by a native host. The polar, Sankey, treemap and geographic
-/// families join with their engines (docs/porting/livecharts2.md, L4), hence `non_exhaustive`.
+/// The chart calculation selected by a native host: the Cartesian and pie charts (L2), the polar
+/// chart (L4), the Sankey and treemap charts (L4b) and the geographic map (L4c) of
+/// docs/porting/livecharts2.md. `non_exhaustive`, so that a chart family can still join.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 #[non_exhaustive]
 pub enum ChartKind {
     #[default]
     Cartesian,
     Pie,
+    Polar,
+    Sankey,
+    Treemap,
+    GeoMap,
 }
-ferroui_base::ferro_markup_enum!(ChartKind { Cartesian, Pie });
+ferroui_base::ferro_markup_enum!(ChartKind {
+    Cartesian,
+    Pie,
+    Polar,
+    Sankey,
+    Treemap,
+    GeoMap
+});
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum LegendPosition {
@@ -69,4 +81,20 @@ ferroui_base::ferro_markup_enum!(flags ZoomAndPanMode {
     X=ZoomAndPanMode::X,Y=ZoomAndPanMode::Y,Both=ZoomAndPanMode::BOTH,
     NoFit=ZoomAndPanMode::NO_FIT,NoZoomBySection=ZoomAndPanMode::NO_ZOOM_BY_SECTION,
     InvertPanningPointerTrigger=ZoomAndPanMode::INVERT_PANNING_POINTER_TRIGGER
+});
+
+bitflags::bitflags! {
+    /// The interactions of a geographic map (`MapInteractionMode`): none by default, the wheel
+    /// zoom, the drag pan, or both.
+    #[derive(Clone,Copy,Debug,Default,PartialEq,Eq,Hash)]
+    pub struct MapInteractionMode:u32 {
+        const NONE=0;
+        const PAN=1;
+        const ZOOM=2;
+        const BOTH=Self::PAN.bits()|Self::ZOOM.bits();
+    }
+}
+ferroui_base::ferro_markup_enum!(flags MapInteractionMode {
+    None=MapInteractionMode::NONE,Pan=MapInteractionMode::PAN,Zoom=MapInteractionMode::ZOOM,
+    Both=MapInteractionMode::BOTH
 });

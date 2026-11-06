@@ -3,14 +3,16 @@
 //! Task<IObservable<TResult>>>)` is `Observable::using_async`. The work that
 //! `Task.Factory.StartNew` runs on a worker thread is split: the worker (`tasks::run`) does what
 //! upstream's work does apart from building the resource or the sequence, which is built on the
-//! test thread when the work ends, as they are not `Send`. `ToEnumerable()` is `block_on` of
-//! `to_list().to_task()`; `ManualResetEvent` and `CountdownEvent` are a local event of a mutex and
-//! a condition variable and a flag; the resource is disposed on the test thread, so the loop that
+//! test thread when the work ends, as they are not `Send`; the `Shared` of the work gives its
+//! future with `flatten()`. `ToEnumerable()` is `block_on` of `to_list().to_task().flatten()`;
+//! `ManualResetEvent` and `CountdownEvent` are a local event of a mutex and a condition variable and
+//! a flag; the resource is disposed on the test thread, so the loop that
 //! waits for it under a lock is an assertion.
 
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{IDisposable, Observable, ObservableError, ObservableExt};
-use ferroui_system::threading::tasks::{block_on, run};
+use ferroui_system::task::block_on;
+use ferroui_system::threading::tasks::run;
 use ferroui_system::threading::CancellationToken;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -45,17 +47,17 @@ fn using_async_simple() {
         move |_ct: CancellationToken| {
             let signal = signal.clone();
             async move {
-                run(|| Ok(())).await?;
+                run(|| Ok(())).flatten().await?;
                 Ok::<Rc<dyn IDisposable>, ObservableError>(Disposable::create(move || signal.set(true)))
             }
         },
         |_, _ct| async {
-            let value = run(|| Ok(42)).await?;
+            let value = run(|| Ok(42)).flatten().await?;
             Ok::<_, ObservableError>(Observable::return_(value))
         },
     );
 
-    let res = block_on(xs.to_list().to_task()).unwrap();
+    let res = block_on(xs.to_list().to_task().flatten()).unwrap();
 
     assert_eq!(vec![42], res);
     assert!(done.get(), "done.Wait(5000)");
@@ -80,13 +82,14 @@ fn using_async_cancel_resource() {
                     run(move || {
                         s.set();
                         e.wait_one();
-                        while !ct.is_cancellation_requested() {
+                        while !ct.is_cancelled() {
                             std::hint::spin_loop();
                         }
 
                         x.set();
                         Ok(())
                     })
+                    .flatten()
                     .await?;
                     Ok::<Rc<dyn IDisposable>, ObservableError>(Disposable::empty())
                 }
@@ -94,7 +97,7 @@ fn using_async_cancel_resource() {
             move |_, _ct| {
                 flag.set(true);
                 async {
-                    let value = run(|| Ok(42)).await?;
+                    let value = run(|| Ok(42)).flatten().await?;
                     Ok::<_, ObservableError>(Observable::return_(value))
                 }
             },
@@ -130,7 +133,7 @@ fn using_async_cancel_factory() {
             move |_ct: CancellationToken| {
                 let released = released.clone();
                 async move {
-                    run(|| Ok(())).await?;
+                    run(|| Ok(())).flatten().await?;
                     Ok::<Rc<dyn IDisposable>, ObservableError>(Disposable::create(move || released.set(true)))
                 }
             },
@@ -141,13 +144,14 @@ fn using_async_cancel_factory() {
                     run(move || {
                         s.set();
                         e.wait_one();
-                        while !ct.is_cancellation_requested() {
+                        while !ct.is_cancelled() {
                             std::hint::spin_loop();
                         }
 
                         x.set();
                         Ok(())
                     })
+                    .flatten()
                     .await?;
                     Ok::<_, ObservableError>(Observable::defer(move || {
                         called.set(true);
@@ -162,10 +166,13 @@ fn using_async_cancel_factory() {
         // `s.WaitOne()`: the resource arrives through the queue of the test thread, which `block_on`
         // runs while it waits.
         let started = s.clone();
-        block_on(run(move || {
-            started.wait_one();
-            Ok(())
-        }))
+        block_on(
+            run(move || {
+                started.wait_one();
+                Ok(())
+            })
+            .flatten(),
+        )
         .unwrap();
 
         //

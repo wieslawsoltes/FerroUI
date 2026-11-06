@@ -17,6 +17,8 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+# `url::Url`, the key of the font collection (C5 of #423).
+url.workspace = true
 
 [dev-dependencies]
 # The font manager that reads the embedded fonts in the tests. A path and no version: the Skia

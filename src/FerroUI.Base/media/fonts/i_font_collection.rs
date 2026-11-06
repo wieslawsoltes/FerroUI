@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use crate::media::fonts::font_collection_base::IFontCollectionBase;
 use crate::media::{FontFamily, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface};
-use crate::utilities::{CultureInfo, Uri};
+use crate::utilities::Locale;
 
 /// Represents a collection of font families and provides methods for
 /// retrieving font-related information, such as glyph typefaces and fallback
@@ -22,8 +22,10 @@ use crate::utilities::{CultureInfo, Uri};
 /// [`get`]: IFontCollection::get
 /// [`font_families`]: IFontCollection::font_families
 pub trait IFontCollection: 'static {
-    /// Gets the unique identifier for the font collection.
-    fn key(&self) -> Uri;
+    /// Gets the unique identifier for the font collection: a URL of the
+    /// `fonts:` scheme for a collection added to the font manager
+    /// (`fonts:SystemFonts`, `fonts:Inter`).
+    fn key(&self) -> url::Url;
 
     /// The number of font families in the collection.
     fn count(&self) -> usize;
@@ -56,7 +58,7 @@ pub trait IFontCollection: 'static {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface>;
 
     /// Tries to get a list of typefaces for the specified family name.

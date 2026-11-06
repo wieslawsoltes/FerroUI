@@ -11,7 +11,7 @@ use ferroui_base::input::{
     PointerPressedEventArgs,
 };
 use ferroui_base::interactivity::IRoutedEventArgs;
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, FerroSynchronizationContext};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::DateTimeOffset;
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, ElementRef, Ref, TypeInfo};
 use ferroui_controls::{Control, ItemsSource, UserControl};
@@ -94,15 +94,13 @@ impl DragLeaveEventTriggerView {
         let data: Rc<dyn IDataTransfer> = data;
         let pending = DragDrop::do_drag_drop_async(e, data, DragDropEffects::COPY);
         // The rest of the `async void` method runs on the dispatcher of the thread.
-        let context = FerroSynchronizationContext::current().unwrap_or_else(|| {
-            FerroSynchronizationContext::with_dispatcher(
-                &Dispatcher::current_dispatcher(),
-                DispatcherPriority::NORMAL,
-            )
-        });
-        drop(context.to_task_scheduler().start_local(async move {
-            let _ = pending.await;
-        }));
+        let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+        drop(Dispatcher::current_dispatcher().start_local_with_priority(
+            async move {
+                let _ = pending.await;
+            },
+            priority,
+        ));
     }
 }
 

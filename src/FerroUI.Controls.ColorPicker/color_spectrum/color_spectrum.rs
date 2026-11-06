@@ -47,8 +47,8 @@ pub struct ColorSpectrum {
     hsv_values: RefCell<Rc<Vec<Hsv>>>,
     pub(super) third_component: Cell<ColorComponent>,
 
-    layout_root_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
-    selection_ellipse_panel_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    layout_root_disposable: RefCell<Option<Subscription>>,
+    selection_ellipse_panel_disposable: RefCell<Option<Subscription>>,
     /// The handlers connected to the input target in `on_apply_template`
     /// (the original removes its handlers one by one with `-=`).
     input_target_disposables: RefCell<Vec<Subscription>>,
@@ -361,7 +361,7 @@ impl TemplatedControlImpl for ColorSpectrum {
         if let Some(layout_root) = &layout_root {
             let weak = this.to_ref().downgrade();
             let object: &FerroObject = layout_root;
-            let subscription = FerroObjectExtensions::get_observable(object, Visual::bounds_property()).subscribe_fn(
+            let subscription = FerroObjectExtensions::get_observable(object, Visual::bounds_property()).subscribe_fn_guard(
                 move |_| {
                     if let Some(this) = weak.upgrade() {
                         this.create_bitmaps_and_color_map();
@@ -375,7 +375,7 @@ impl TemplatedControlImpl for ColorSpectrum {
             let weak = this.to_ref().downgrade();
             let object: &FerroObject = selection_ellipse_panel;
             let subscription = FerroObjectExtensions::get_observable(object, Visual::flow_direction_property())
-                .subscribe_fn(move |_| {
+                .subscribe_fn_guard(move |_| {
                     if let Some(this) = weak.upgrade() {
                         this.update_ellipse();
                     }
@@ -1117,7 +1117,7 @@ impl ColorSpectrum {
     /// returns.
     fn create_bitmaps_and_color_map(&self) {
         let this = self.to_ref();
-        Dispatcher::current_dispatcher().to_task_scheduler().start_local(async move {
+        Dispatcher::current_dispatcher().start_local(async move {
             Self::create_bitmaps_and_color_map_async(this).await;
         });
     }

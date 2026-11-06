@@ -58,3 +58,108 @@ impl PieChart {
         instantiate(Self::construct())
     }
 }
+
+#[repr(C)]
+pub struct PolarChart {
+    base: Chart,
+}
+ferro_class!(PolarChart:Chart);
+ferro_class_info!(PolarChart {
+    new: PolarChart::new
+});
+ferro_impl_classes!(PolarChart:StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
+impl FerroObjectImpl for PolarChart {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.set_chart_kind(ChartKind::Polar);
+    }
+}
+impl PolarChart {
+    fn static_constructor() {
+        Chart::initial_rotation_property().override_default_value::<PolarChart>(-90.0);
+    }
+    pub fn construct() -> Self {
+        Self {
+            base: Chart::construct(),
+        }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+}
+
+#[repr(C)]
+pub struct SankeyChart {
+    base: Chart,
+}
+ferro_class!(SankeyChart:Chart);
+ferro_class_info!(SankeyChart {
+    new: SankeyChart::new
+});
+ferro_impl_classes!(SankeyChart:StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
+impl FerroObjectImpl for SankeyChart {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.set_chart_kind(ChartKind::Sankey);
+    }
+}
+impl SankeyChart {
+    pub fn construct() -> Self {
+        Self {
+            base: Chart::construct(),
+        }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+}
+
+#[repr(C)]
+pub struct TreemapChart {
+    base: Chart,
+}
+ferro_class!(TreemapChart:Chart);
+ferro_class_info!(TreemapChart {
+    new: TreemapChart::new
+});
+ferro_impl_classes!(TreemapChart:StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
+impl FerroObjectImpl for TreemapChart {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.set_chart_kind(ChartKind::Treemap);
+    }
+}
+impl TreemapChart {
+    pub fn construct() -> Self {
+        Self {
+            base: Chart::construct(),
+        }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+}
+
+#[repr(C)]
+pub struct GeoMap {
+    base: Chart,
+}
+ferro_class!(GeoMap:Chart);
+ferro_class_info!(GeoMap { new: GeoMap::new });
+ferro_impl_classes!(GeoMap:StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
+impl FerroObjectImpl for GeoMap {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.set_chart_kind(ChartKind::GeoMap);
+    }
+}
+impl GeoMap {
+    pub fn construct() -> Self {
+        Self {
+            base: Chart::construct(),
+        }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+}

@@ -1,11 +1,12 @@
 use super::*;
 use crate::overlays::services::DockGlobalBusyService;
-use crate::test_environment::Environment;
+use crate::test_environment::{completed_task, faulted_task, Environment, TaskState};
 use ferroui_reactive::concurrency::HistoricalScheduler;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::RxSchedulers;
 use ferroui_system::component_model::INotifyPropertyChanged;
-use ferroui_system::threading::tasks::{TaskCanceledError, TaskWorkError};
+use ferroui_system::task::Canceled;
+use ferroui_system::threading::tasks::TaskWorkError;
 
 #[test]
 fn defaults_scopes_messages_and_reload_visibility_are_independent() {
@@ -80,7 +81,7 @@ fn queued_updates_and_handler_installation_use_captured_dispatcher_order() {
     service
         .property_changed()
         .add(Rc::new(move |name| seen.borrow_mut().push(name.to_owned())));
-    service.set_reload_handler(Some(Rc::new(|| Task::from_result(()))));
+    service.set_reload_handler(Some(Rc::new(|| completed_task())));
     let handle = service.begin("first".into());
     service.update_message(Some("queued".into()));
     handle.dispose();
@@ -110,8 +111,7 @@ fn run_async_is_eager_holds_pending_scope_and_cleans_before_returned_completion(
     let _environment = Environment::new();
     let global = DockGlobalBusyService::new(None, None);
     let service = DockBusyService::new(Some(global.clone()), None);
-    let work = TaskCompletionSource::new();
-    let pending = work.task();
+    let (work, pending) = Shared::<Result<(), ObservableError>>::channel();
     let called = Rc::new(Cell::new(false));
     let seen = called.clone();
     let task = service.run_async(
@@ -129,13 +129,13 @@ fn run_async_is_eager_holds_pending_scope_and_cleans_before_returned_completion(
     let seen = observed.clone();
     let weak = Rc::downgrade(&service);
     let global_probe = global.clone();
-    task.continue_with(move |task| {
-        task.result().unwrap();
+    task.on_finished(move |outcome| {
+        assert!(matches!(outcome, Ok(Ok(()))));
         assert!(!weak.upgrade().unwrap().is_busy());
         assert!(!global_probe.is_busy());
         seen.set(true);
     });
-    work.set_result(());
+    work.send(Ok(()));
     assert!(task.is_completed_successfully());
     assert!(observed.get());
 }
@@ -150,22 +150,25 @@ fn run_async_preserves_task_error_identity_and_cancellation_and_handles_synchron
     let captured = error.clone();
     let task = service.run_async(
         "error".into(),
-        Rc::new(move || Task::from_exception(captured.clone())),
+        Rc::new(move || faulted_task(captured.clone())),
     );
     assert!(task.is_faulted());
     assert!(Rc::ptr_eq(&task.exception().unwrap(), &error));
     assert!(!service.is_busy());
-    let task = service.run_async("canceled".into(), Rc::new(Task::from_canceled));
+    let task = service.run_async(
+        "canceled".into(),
+        Rc::new(|| faulted_task(Rc::new(Canceled) as ObservableError)),
+    );
     assert!(task.is_canceled());
     assert!(!service.is_busy());
-    assert!(TaskCanceledError::is_cancellation(
-        &task.result().unwrap_err()
+    assert!(Canceled::is_cancellation(
+        &task.result().unwrap().unwrap_err()
     ));
     let task = service.run_async("panic".into(), Rc::new(|| panic!("sync action failed")));
     assert!(task.is_faulted());
     assert!(!service.is_busy());
     assert_eq!(task.exception().unwrap().to_string(), "sync action failed");
-    let task = service.run_async("success".into(), Rc::new(|| Task::from_result(())));
+    let task = service.run_async("success".into(), Rc::new(|| completed_task()));
     assert!(task.is_completed_successfully());
     assert!(!service.is_busy());
 }
@@ -176,8 +179,7 @@ fn reload_command_observes_handler_gate_executes_current_handler_and_tracks_pend
     let service = DockBusyService::new(None, None);
     let command = service.reload_command();
     assert!(Rc::ptr_eq(&command, &service.reload_command()));
-    let work = TaskCompletionSource::new();
-    let pending = work.task();
+    let (work, pending) = Shared::<Result<(), ObservableError>>::channel();
     let first = Rc::new(Cell::new(0));
     let calls = first.clone();
     let handler: BusyAction = Rc::new(move || {
@@ -197,9 +199,9 @@ fn reload_command_observes_handler_gate_executes_current_handler_and_tracks_pend
     let calls = second.clone();
     service.set_reload_handler(Some(Rc::new(move || {
         calls.set(calls.get() + 1);
-        Task::from_result(())
+        completed_task()
     })));
-    work.set_result(());
+    work.send(Ok(()));
     assert!(command.can_execute(None));
     command.execute(None);
     assert_eq!(second.get(), 1);
@@ -222,14 +224,14 @@ fn reload_replacement_notifications_and_reentrant_handler_changes_release_borrow
             weak.upgrade().unwrap().set_reload_handler(None);
         }
     }));
-    let handler: BusyAction = Rc::new(|| Task::from_result(()));
+    let handler: BusyAction = Rc::new(|| completed_task());
     service.set_reload_handler(Some(handler.clone()));
     assert!(!service.can_reload());
     assert!(!service.reload_command().can_execute(None));
     assert_eq!(&*changes.borrow(), &["CanReload", "CanReload"]);
     service.set_reload_handler(Some(handler.clone()));
     service.set_reload_handler(Some(handler));
-    service.set_reload_handler(Some(Rc::new(|| Task::from_result(()))));
+    service.set_reload_handler(Some(Rc::new(|| completed_task())));
     assert_eq!(changes.borrow().len(), 3);
     service.set_reload_handler(None);
     assert_eq!(changes.borrow().len(), 4);
@@ -252,7 +254,7 @@ fn reload_errors_are_published_through_actual_reactive_command() {
     });
     let captured = error.clone();
     service.set_reload_handler(Some(Rc::new(move || {
-        Task::from_exception(captured.clone())
+        faulted_task(captured.clone())
     })));
     service.reload_command().execute(None);
     assert!(Rc::ptr_eq(&errors.borrow()[0], &error));
@@ -277,12 +279,11 @@ fn scopes_and_pending_runs_retain_service_until_explicit_end_without_default_dro
     assert!(service.is_busy());
     let service = DockBusyService::new(None, None);
     let weak = Rc::downgrade(&service);
-    let work = TaskCompletionSource::new();
-    let pending = work.task();
+    let (work, pending) = Shared::<Result<(), ObservableError>>::channel();
     let task = service.run_async("held task".into(), Rc::new(move || pending.clone()));
     drop(service);
     assert!(weak.upgrade().is_some());
-    work.set_result(());
+    work.send(Ok(()));
     assert!(task.is_completed_successfully());
     assert!(weak.upgrade().is_none());
 }
@@ -337,7 +338,7 @@ fn run_async_captures_begin_failure_and_cleanup_failure_supersedes_work_failure(
         "not started".into(),
         Rc::new(move || {
             seen.set(true);
-            Task::from_result(())
+            completed_task()
         }),
     );
     assert!(task.is_faulted());
@@ -350,7 +351,7 @@ fn run_async_captures_begin_failure_and_cleanup_failure_supersedes_work_failure(
     let task = service.run_async(
         "cleanup failure".into(),
         Rc::new(|| {
-            Task::from_exception(Rc::new(TaskWorkError {
+            faulted_task(Rc::new(TaskWorkError {
                 message: "original work failure".into(),
             }))
         }),
@@ -363,7 +364,7 @@ fn run_async_captures_begin_failure_and_cleanup_failure_supersedes_work_failure(
     assert!(!service.is_busy());
     assert_eq!(global.ends.get(), 1);
     global.throw_end.set(false);
-    let task = service.run_async("normal".into(), Rc::new(|| Task::from_result(())));
+    let task = service.run_async("normal".into(), Rc::new(|| completed_task()));
     assert!(task.is_completed_successfully());
     assert_eq!(global.ends.get(), 2);
 }
@@ -379,7 +380,7 @@ fn synchronous_local_cleanup_notification_failure_prevents_later_global_disposal
             panic!("local notification failed");
         }
     }));
-    let task = service.run_async("scope".into(), Rc::new(|| Task::from_result(())));
+    let task = service.run_async("scope".into(), Rc::new(|| completed_task()));
     assert!(task.is_faulted());
     assert_eq!(
         task.exception().unwrap().to_string(),
@@ -393,36 +394,31 @@ fn synchronous_local_cleanup_notification_failure_prevents_later_global_disposal
 
 #[test]
 fn same_and_foreign_synchronization_contexts_cover_both_handler_dispatch_paths() {
-    use ferroui_system::threading::set_synchronization_context;
+    use ferroui_system::task::set_current_schedule;
     use std::sync::atomic::{AtomicUsize, Ordering};
+    // The synchronization context of the reference is a schedule.
     #[derive(Default)]
     struct Context {
         posts: AtomicUsize,
     }
-    impl SynchronizationContext for Context {
-        fn post(&self, work: Box<dyn FnOnce() + Send>) {
+    impl Schedule for Context {
+        fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
             work();
         }
-        fn send(&self, work: Box<dyn FnOnce() + Send>) {
-            work();
-        }
-        fn post_local(&self, work: Box<dyn FnOnce()>) {
+        fn schedule_local(&self, work: Box<dyn FnOnce()>) {
             self.posts.fetch_add(1, Ordering::Relaxed);
-            work();
-        }
-        fn send_local(&self, work: Box<dyn FnOnce()>) {
             work();
         }
     }
     let _environment = Environment::new();
     let context = Arc::new(Context::default());
-    set_synchronization_context(Some(context.clone()));
+    drop(set_current_schedule(Some(context.clone())));
     let service = DockBusyService::new(None, None);
-    service.set_reload_handler(Some(Rc::new(|| Task::from_result(()))));
+    service.set_reload_handler(Some(Rc::new(|| completed_task())));
     assert!(service.can_reload());
     service.begin("inline".into()).dispose();
     assert_eq!(context.posts.load(Ordering::Relaxed), 0);
-    set_synchronization_context(None);
+    drop(set_current_schedule(None));
     service.set_reload_handler(None);
     service.begin("posted".into()).dispose();
     service.update_message(Some("posted message".into()));

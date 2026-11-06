@@ -15,7 +15,7 @@ use crate::{
     Border, Button, ContentControl, Control, Grid, NavigationView, NavigationViewItem, NavigationViewItemHeader,
     NavigationViewItemSeparator, Panel, ScrollViewer, SplitView, StackPanel, TextBlock, Window,
 };
-use ferroui_base::animation::{ClockBase, IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{ClockBase, IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::data::{ReflectionBinding, RelativeSource, RelativeSourceMode, TemplateBinding};
 use ferroui_base::layout::Orientation;
@@ -32,8 +32,8 @@ use std::rc::Rc;
 #[derive(Default)]
 struct TestGlobalClock(ClockBase);
 
-impl IObservable<TimeSpan> for TestGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.0.subscribe(observer)
     }
 }

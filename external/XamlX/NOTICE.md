@@ -38,3 +38,9 @@ SOFTWARE.
 The markup extension tokenizer (`parsers/system_xaml_markup_extension_parser`) derives, through
 XamlX, from the System.Xaml sources, which are licensed to the .NET Foundation under one or more
 agreements and are made available by the .NET Foundation under the MIT license.
+
+The bracket characters of the path of `x:Bind` (`MeScannerSpecialBracketCharacters::for_property`)
+follow the WinUI XAML compiler (<https://github.com/microsoft/microsoft-ui-xaml>, MIT License,
+Copyright (c) Microsoft Corporation), at commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`:
+`src/XamlCompiler/BuildTasks/Microsoft/Xaml/DirectUI/ProxyDirectUIXamlMember.cs`
+(`LookupMarkupExtensionBracketCharacters`). No WinUI code is copied.

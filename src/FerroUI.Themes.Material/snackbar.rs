@@ -13,7 +13,7 @@
 use crate::motion::{
     animations_enabled, MaterialMotionRole, MaterialMotionScheme, MaterialSpringState,
 };
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
@@ -721,7 +721,7 @@ impl MaterialSnackbarHost {
         let weak = self.to_ref().downgrade();
         self.last_frame.set(None);
         let subscription =
-            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: TimeSpan| {
+            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     if !this.active() {
                         this.stop_clock();

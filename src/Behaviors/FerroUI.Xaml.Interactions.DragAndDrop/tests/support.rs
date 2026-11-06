@@ -21,7 +21,7 @@ use ferroui_base::interactivity::{Interactive, RoutedEvent};
 use ferroui_base::platform::storage::{IStorageFolder, IStorageItem, StorageItemProperties};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::{HandlerList, Uri};
+use ferroui_base::utilities::{HandlerList, UriRef};
 use ferroui_base::{BoxedValue, FerroObject, ObjectType, Point, Ref, Upcast, Visual};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Border, Control, Window};
@@ -409,8 +409,8 @@ impl IStorageItem for TestFile {
         self.name.to_owned()
     }
 
-    fn path(&self) -> Uri {
-        Uri::absolute(&format!("file:///files/{}", self.name)).expect("a file URI")
+    fn path(&self) -> UriRef {
+        UriRef::parse(&format!("file:///files/{}", self.name)).expect("a file URI")
     }
 
     fn get_basic_properties_async(&self) -> LocalBoxFuture<StorageItemProperties> {
@@ -453,14 +453,14 @@ pub(crate) fn files_drag_data(names: &[&'static str]) -> Rc<dyn IDataTransfer> {
 /// The global clock of the themed application: the transitions of the Fluent control themes need
 /// one. It never pulses.
 struct MockGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     play_state: Cell<ferroui_base::animation::PlayState>,
 }
 
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for MockGlobalClock {
     fn subscribe(
         &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
     }

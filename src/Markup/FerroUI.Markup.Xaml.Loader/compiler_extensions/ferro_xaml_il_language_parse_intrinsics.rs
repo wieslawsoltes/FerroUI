@@ -7,7 +7,7 @@
 
 use std::rc::Rc;
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::Color;
 use ferroui_base::utilities::span_helpers::{parse_double, try_parse_double, NumberStyles};
 use ferroui_base::utilities::{Uri, UriKind};
@@ -140,7 +140,7 @@ impl FerroXamlIlLanguageParseIntrinsics {
         if type_.is("System", "TimeSpan") {
             let ts_text = text.trim();
 
-            let time_span = match TimeSpan::parse(ts_text) {
+            let time_span = match SignedDuration::parse(ts_text) {
                 Ok(time_span) => time_span,
                 Err(_) => {
                     // shorthand seconds format (ie. "0.25")
@@ -717,20 +717,20 @@ fn property_getter(property: &dyn IXamlProperty) -> XamlResult<Rc<dyn xamlx::typ
 }
 
 /// `TimeSpan.FromSeconds(seconds)` with the argument checks reported as errors.
-fn time_span_from_seconds(seconds: f64) -> XamlResult<TimeSpan> {
+fn time_span_from_seconds(seconds: f64) -> XamlResult<SignedDuration> {
     if seconds.is_nan() {
         return Err(XamlError::argument(
             "TimeSpan does not accept floating point Not-a-Number values.",
         ));
     }
-    let ticks = seconds * TimeSpan::TICKS_PER_SECOND as f64;
+    let ticks = seconds * SignedDuration::TICKS_PER_SECOND as f64;
     if !(ticks <= i64::MAX as f64 && ticks >= i64::MIN as f64) {
         return Err(XamlError::internal(
             "OverflowException",
             "TimeSpan overflowed because the duration is too long.",
         ));
     }
-    Ok(TimeSpan::from_seconds(seconds))
+    Ok(SignedDuration::from_seconds(seconds))
 }
 
 /// `UriKind.ToString()`.

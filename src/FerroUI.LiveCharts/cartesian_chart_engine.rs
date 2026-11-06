@@ -1,7 +1,8 @@
 //! Cartesian measurement adapted from the pinned chart and series implementations.
 //! Pure calculation produces a retained FerroUI drawing scene; native controls own scheduling.
 
-use crate::axis::{format_number, Axis, AxisPosition, AxisScale};
+use crate::axis::{format_number, Axis, AxisPosition, AxisScale, CARTESIAN_LABELS_PADDING};
+use crate::heat_functions::HeatFunctions;
 use crate::kernel::Coordinate;
 use crate::measure::{AxisOrientation, Bounds};
 use crate::scene::*;
@@ -185,7 +186,7 @@ impl CartesianChartEngine {
                     SeriesKind::RangeColumn | SeriesKind::RangeRow | SeriesKind::RangeLine => {
                         c.tertiary_value
                     }
-                    SeriesKind::Financial | SeriesKind::Box => c.quinary_value,
+                    SeriesKind::Financial | SeriesKind::Ohlc | SeriesKind::Box => c.quinary_value,
                     _ => s.pivot,
                 };
                 if s.kind.is_stacked() {
@@ -224,8 +225,10 @@ impl CartesianChartEngine {
                         top,
                     )
                 };
-                if s.kind.is_bar() || s.kind.is_area() || s.fill.is_some() || s.fill_brush.is_some()
-                {
+                // The bounds of a bar include its base (the pivot, a range's low end or the
+                // stack below); a line series bounds its points only, as the source's
+                // DataFactory.GetCartesianBounds: its area reaches the pivot under the clip.
+                if s.kind.is_bar() || s.kind == SeriesKind::RangeLine {
                     if s.kind.is_row() {
                         xmin = xmin.min(bottom);
                         xmax = xmax.max(bottom);
@@ -234,16 +237,27 @@ impl CartesianChartEngine {
                         ymax = ymax.max(bottom);
                     }
                 }
+                // DataFactory.GetCartesianBounds: the errors widen the bounds whether they are
+                // drawn or not, the Y errors (top and bottom) the value and the X errors (left
+                // and right) the category, on the axes a row series swaps.
                 if !c.point_error.is_empty {
-                    let (cx, cy) = if s.kind.is_row() {
-                        (top, c.secondary_value)
+                    let e = c.point_error;
+                    let (value_min, value_max) = (top - e.yj.abs(), top + e.yi.abs());
+                    let (category_min, category_max) = (
+                        c.secondary_value - e.xi.abs(),
+                        c.secondary_value + e.xj.abs(),
+                    );
+                    if s.kind.is_row() {
+                        xmin = xmin.min(value_min);
+                        xmax = xmax.max(value_max);
+                        ymin = ymin.min(category_min);
+                        ymax = ymax.max(category_max);
                     } else {
-                        (c.secondary_value, top)
-                    };
-                    xmin = xmin.min(cx - c.point_error.xi.abs());
-                    xmax = xmax.max(cx + c.point_error.xj.abs());
-                    ymin = ymin.min(cy - c.point_error.yj.abs());
-                    ymax = ymax.max(cy + c.point_error.yi.abs());
+                        xmin = xmin.min(category_min);
+                        xmax = xmax.max(category_max);
+                        ymin = ymin.min(value_min);
+                        ymax = ymax.max(value_max);
+                    }
                 }
                 for value in [
                     xmin,
@@ -333,6 +347,15 @@ impl CartesianChartEngine {
                 }
             }
         }
+        // CartesianChartEngine.Measure: an axis without data spans ten unit widths from zero,
+        // and an axis of zero width (a single value) is widened before its labels, ticks and
+        // padding are measured.
+        for (bounds, axis) in x_bounds.iter_mut().zip(x_axes) {
+            *bounds = normalized_bounds(axis, *bounds);
+        }
+        for (bounds, axis) in y_bounds.iter_mut().zip(y_axes) {
+            *bounds = normalized_bounds(axis, *bounds);
+        }
         let x_label_sizes = x_axes
             .iter()
             .zip(&x_bounds)
@@ -376,7 +399,7 @@ impl CartesianChartEngine {
                 x_label_sizes[s.x_axis],
                 s.data_padding.x,
                 geometry_size,
-            )?;
+            );
             set_padding_request(
                 &mut bounds.y,
                 &y_axes[s.y_axis],
@@ -385,7 +408,7 @@ impl CartesianChartEngine {
                 y_label_sizes[s.y_axis],
                 s.data_padding.y,
                 geometry_size,
-            )?;
+            );
             bounds.x.min_delta = minimum_delta(measured[si].iter().flatten().map(|p| {
                 if s.kind.is_row() {
                     p.top
@@ -471,13 +494,19 @@ impl CartesianChartEngine {
                     draw_bars(&mut scene, si, s, series, points, xs, ys, x_axes, y_axes)
                 }
                 SeriesKind::Scatter => draw_scatter(&mut scene, si, s, points, xs, ys),
-                SeriesKind::Heat => draw_heat(&mut scene, si, s, points, xs, ys, x_axes, y_axes),
-                SeriesKind::Financial | SeriesKind::Box => {
-                    draw_financial(&mut scene, si, s, points, xs, ys, x_axes)
-                }
-                SeriesKind::Pie | SeriesKind::PolarLine => {
+                SeriesKind::Heat => draw_heat(&mut scene, si, s, points, xs, ys, x_axes, y_axes)?,
+                SeriesKind::Financial => draw_financial(&mut scene, si, s, points, xs, ys, x_axes),
+                SeriesKind::Ohlc => draw_ohlc(&mut scene, si, s, points, xs, ys, x_axes),
+                SeriesKind::Box => draw_box(&mut scene, si, s, series, points, xs, ys, x_axes),
+                SeriesKind::Pie
+                | SeriesKind::PolarLine
+                | SeriesKind::Sankey
+                | SeriesKind::Treemap
+                | SeriesKind::HeatLand => {
                     return Err(ChartError::InvalidData(
-                        "a pie or polar series requires its matching chart engine".into(),
+                        "a pie, polar, Sankey, treemap or heat land series requires its matching \
+                         chart engine"
+                            .into(),
                     ));
                 }
             }
@@ -491,6 +520,30 @@ impl CartesianChartEngine {
     }
 }
 
+/// The data bounds of an axis as `CartesianChartEngine.Measure` settles them before measuring
+/// labels and padding: no data spans `[0, 10 * UnitWidth]`; a visible axis of zero width grows
+/// by half a unit width on each side, an invisible one by 30% of its value (the source's
+/// `Min * 0.3`, taken as a magnitude so that a negative value does not invert the range).
+/// Logarithmic axes keep their bounds; their scale supplies positive defaults.
+fn normalized_bounds(axis: &Axis, (min, max): (f64, f64)) -> (f64, f64) {
+    if axis.logarithmic_base.is_some() {
+        return (min, max);
+    }
+    if !min.is_finite() || !max.is_finite() || min > max {
+        return (0.0, 10.0 * axis.unit_width.abs());
+    }
+    if min == max {
+        let c = if axis.visible {
+            axis.unit_width.abs() * 0.5
+        } else {
+            (min * 0.3).abs()
+        };
+        if c.is_finite() && c > 0.0 {
+            return (min - c, max + c);
+        }
+    }
+    (min, max)
+}
 fn data_bounds((min, max): (f64, f64)) -> Bounds {
     Bounds {
         min,
@@ -511,22 +564,22 @@ fn maximum_label_size(
         .max_limit
         .unwrap_or(if bounds.1.is_finite() { bounds.1 } else { 10.0 });
     let mut maximum = Size::new(0.0, 0.0);
+    let padding = axis.labels_padding_or(CARTESIAN_LABELS_PADDING);
     // Source CoreAxis.GetPossibleMaxLabelSize samples 25 intervals before ticks.
     for i in 0..=25 {
         let fraction = i as f64 / 25.0;
         let value = min * (1.0 - fraction) + max * fraction;
         let measured = measure(&axis.label(value), axis.text_size);
         if measured.width.is_finite() && measured.height.is_finite() {
-            maximum.width = maximum
-                .width
-                .max(measured.width + axis.labels_padding * 2.0);
-            maximum.height = maximum
-                .height
-                .max(measured.height + axis.labels_padding * 2.0);
+            maximum.width = maximum.width.max(measured.width + padding * 2.0);
+            maximum.height = maximum.height.max(measured.height + padding * 2.0);
         }
     }
     maximum
 }
+/// `CartesianSeries.GetBounds`: the padding a series requests is its `DataPadding` in steps of
+/// the tick of its own data bounds in the control size (a zero-width range takes 15% of its
+/// value, as `Extensions.GetTick`).
 fn set_padding_request(
     bounds: &mut Bounds,
     axis: &Axis,
@@ -535,12 +588,9 @@ fn set_padding_request(
     labels: Size,
     padding: f64,
     geometry: f64,
-) -> Result<(), ChartError> {
-    let mut axis = axis.clone();
-    axis.padding = 0.0;
-    let scale = AxisScale::new(&axis, bounds.min, bounds.max, 0.0, 1.0)?;
-    let request = scale
-        .tick_with_metrics(&axis, size, orientation, labels)
+) {
+    let request = axis
+        .tick(size, orientation, labels, bounds.min, bounds.max)
         .value
         * padding;
     bounds.padding_min = if request.is_finite() {
@@ -550,7 +600,6 @@ fn set_padding_request(
     };
     bounds.padding_max = bounds.padding_min;
     bounds.requested_geometry_size = geometry;
-    Ok(())
 }
 fn padded_scale(
     axis: &Axis,
@@ -660,7 +709,7 @@ fn valid_point(s: &Series, c: &Coordinate) -> bool {
         | SeriesKind::RangeLine
         | SeriesKind::Scatter
         | SeriesKind::Heat => c.tertiary_value.is_finite(),
-        SeriesKind::Financial => {
+        SeriesKind::Financial | SeriesKind::Ohlc => {
             c.tertiary_value.is_finite()
                 && c.quaternary_value.is_finite()
                 && c.quinary_value.is_finite()
@@ -693,10 +742,16 @@ fn validate_series(s: &Series, x: usize, y: usize) -> Result<(), ChartError> {
         s.data_labels_size,
         s.data_padding.x,
         s.data_padding.y,
+        s.point_padding.left,
+        s.point_padding.top,
+        s.point_padding.right,
+        s.point_padding.bottom,
     ]
     .iter()
     .any(|v| !v.is_finite())
         || s.dashes.iter().any(|d| !d.is_finite() || *d < 0.0)
+        || s.color_stops.iter().flatten().any(|v| !v.is_finite())
+        || [s.min_value, s.max_value].iter().flatten().any(|v| !v.is_finite())
         || s.data_padding.x < 0.0
         || s.data_padding.y < 0.0
     {
@@ -766,6 +821,8 @@ fn draw_axes(
     y_label_sizes: &[Size],
 ) {
     let r = scene.plot_bounds;
+    // CoreAxis.BeginMeasure takes the separator step from the draw margin, not the control.
+    let plot_size = Size::new(r.width, r.height);
     let mut x_offsets = [0.0, 0.0];
     let mut y_offsets = [0.0, 0.0];
     for ((axis, scale), labels) in x
@@ -780,7 +837,7 @@ fn draw_axes(
         } else {
             r.y - x_offsets[side]
         };
-        for value in scale.ticks_with_metrics(axis, scene.size, AxisOrientation::X, *labels) {
+        for value in scale.ticks_with_metrics(axis, plot_size, AxisOrientation::X, *labels) {
             let px = scale.to_pixels(value);
             if !px.is_finite() {
                 continue;
@@ -848,7 +905,7 @@ fn draw_axes(
         } else {
             r.x + r.width + y_offsets[side]
         };
-        for value in scale.ticks_with_metrics(axis, scene.size, AxisOrientation::Y, *labels) {
+        for value in scale.ticks_with_metrics(axis, plot_size, AxisOrientation::Y, *labels) {
             let py = scale.to_pixels(value);
             if !py.is_finite() {
                 continue;
@@ -1001,7 +1058,7 @@ fn append_hit(
             format_number(p.coordinate.tertiary_value),
             format_number(p.coordinate.primary_value)
         ),
-        SeriesKind::Financial => format!(
+        SeriesKind::Financial | SeriesKind::Ohlc => format!(
             "O {} H {} L {} C {}",
             format_number(p.coordinate.tertiary_value),
             format_number(p.coordinate.primary_value),
@@ -1034,14 +1091,29 @@ fn append_hit(
         ),
     });
     if s.data_labels {
+        // A heat cell centres its label (the source's `DataLabelsPosition.Middle`) and labels
+        // the primary value, as the default `DataLabelsFormatter` of a source series.
+        let (origin, anchor, text) = if s.kind == SeriesKind::Heat {
+            (
+                Point::new(center.x, center.y - s.data_labels_size * 0.6),
+                TextAnchor::Center,
+                format_number(p.coordinate.primary_value),
+            )
+        } else {
+            (
+                Point::new(center.x + 4.0, center.y - s.data_labels_size - 4.0),
+                TextAnchor::Start,
+                text,
+            )
+        };
         scene.primitives.push(
             Primitive::new(
                 Geometry::Text {
-                    origin: Point::new(center.x + 4.0, center.y - s.data_labels_size - 4.0),
+                    origin,
                     text,
                     size: s.data_labels_size,
                     rotation: 0.0,
-                    anchor: TextAnchor::Start,
+                    anchor,
                 },
                 PaintStyle::fill(s.data_labels_color.unwrap_or_else(|| s.color(si))),
             )
@@ -1083,6 +1155,38 @@ pub(crate) fn line_path(points: &[Point], smoothness: f64, step: bool) -> Vec<Pa
     }
     path
 }
+/// The same path walked from its end to its start: segments in reverse order, each Bezier with
+/// its control points swapped. `path` is an open figure from [`line_path`].
+fn reversed_path(path: &[PathCommand]) -> Vec<PathCommand> {
+    let ends: Vec<Point> = path
+        .iter()
+        .filter_map(|command| match command {
+            PathCommand::MoveTo(point) | PathCommand::LineTo(point) => Some(*point),
+            PathCommand::CubicTo { end, .. } => Some(*end),
+            PathCommand::Close => None,
+        })
+        .collect();
+    let Some(last) = ends.last() else {
+        return Vec::new();
+    };
+    let mut reversed = Vec::with_capacity(path.len());
+    reversed.push(PathCommand::MoveTo(*last));
+    for i in (1..ends.len().min(path.len())).rev() {
+        let start = ends[i - 1];
+        match &path[i] {
+            PathCommand::LineTo(_) => reversed.push(PathCommand::LineTo(start)),
+            PathCommand::CubicTo {
+                control1, control2, ..
+            } => reversed.push(PathCommand::CubicTo {
+                control1: *control2,
+                control2: *control1,
+                end: start,
+            }),
+            _ => {}
+        }
+    }
+    reversed
+}
 fn draw_line_series(
     scene: &mut Scene,
     si: usize,
@@ -1100,11 +1204,12 @@ fn draw_line_series(
         let top: Vec<_> = run.iter().map(|p| location(p, x, y)).collect();
         let step = matches!(s.kind, SeriesKind::StepLine | SeriesKind::StackedStepArea);
         let smooth = s.line_smoothness.clamp(0.0, 1.0);
-        let mut path = line_path(&top, smooth, step);
-        if s.kind.is_area() || s.fill.is_some() || s.fill_brush.is_some() {
+        if let Some(style) = s.area_style(si) {
+            let mut path = line_path(&top, smooth, step);
+            // The lower edge is the same curve or step path as the upper edge of the series
+            // below (or the pivot), walked backwards, so stacked areas share their edges.
             let bottom: Vec<_> = run
                 .iter()
-                .rev()
                 .map(|p| {
                     Point::new(
                         x.to_pixels(p.coordinate.secondary_value),
@@ -1112,17 +1217,12 @@ fn draw_line_series(
                     )
                 })
                 .collect();
-            if let Some(first) = bottom.first() {
+            let bottom = reversed_path(&line_path(&bottom, smooth, step));
+            if let Some(PathCommand::MoveTo(first)) = bottom.first() {
                 path.push(PathCommand::LineTo(*first));
             }
-            path.extend(line_path(&bottom, smooth, step).into_iter().skip(1));
+            path.extend(bottom.into_iter().skip(1));
             path.push(PathCommand::Close);
-            let mut style = s.style(si, true);
-            if s.fill.is_none() && s.fill_brush.is_none() {
-                style.opacity *= 0.35;
-            }
-            style.stroke = None;
-            style.stroke_brush = None;
             scene.primitives.push(
                 Primitive::new(Geometry::Path(path), style)
                     .clipped(scene.plot_bounds)
@@ -1132,9 +1232,10 @@ fn draw_line_series(
                     }),
             );
         }
-        let mut style = s.style(si, false);
-        style.fill = None;
-        style.fill_brush = None;
+        let Some(style) = s.line_style(si) else {
+            run.clear();
+            return;
+        };
         scene.primitives.push(
             Primitive::new(Geometry::Path(line_path(&top, smooth, step)), style.clone())
                 .clipped(scene.plot_bounds)
@@ -1203,7 +1304,7 @@ fn draw_line_series(
                             s.geometry_size,
                             s.geometry_size,
                         )),
-                        s.style(si, true),
+                        s.marker_style(si),
                     )
                     .clipped(scene.plot_bounds)
                     .identified(PointId {
@@ -1255,7 +1356,7 @@ fn draw_line_series(
             },
         );
         if !range {
-            draw_errors(scene, si, s, p, x, y);
+            draw_errors(scene, si, s, p, x, y, 0.0);
         }
     }
 }
@@ -1269,7 +1370,10 @@ fn bar_group(si: usize, s: &Series, all: &[Series]) -> (usize, usize) {
     for (i, candidate) in all.iter().enumerate().filter(|(_, a)| {
         a.visible
             && a.kind.is_bar()
-            && !matches!(a.kind, SeriesKind::Financial | SeriesKind::Box)
+            && !matches!(
+                a.kind,
+                SeriesKind::Financial | SeriesKind::Ohlc | SeriesKind::Box
+            )
             && a.kind.is_row() == s.kind.is_row()
             && a.x_axis == s.x_axis
             && a.y_axis == s.y_axis
@@ -1407,7 +1511,7 @@ fn draw_bars(
             },
             center,
         );
-        draw_errors(scene, si, s, p, x, y);
+        draw_errors(scene, si, s, p, x, y, offset);
     }
 }
 fn draw_scatter(
@@ -1461,9 +1565,15 @@ fn draw_scatter(
             },
             center,
         );
-        draw_errors(scene, si, s, p, x, y);
+        draw_errors(scene, si, s, p, x, y, 0.0);
     }
 }
+/// `CoreHeatSeries`: each cell spans the smallest step of the data on each axis (issue 1511;
+/// the axis unit width without one), inset by `PointPadding`, in the colour of its weight
+/// (`HeatFunctions.InterpolateColor`) between the weight bounds (`MinValue` and `MaxValue`, else
+/// the extremes of the weights) at the stops of its heat map (`ColorStops`, else spread evenly).
+/// The hover area is the whole cell. A heat map of fewer than two colours, or stops of another
+/// count, is an error where the source throws.
 fn draw_heat(
     scene: &mut Scene,
     si: usize,
@@ -1473,7 +1583,8 @@ fn draw_heat(
     y: AxisScale,
     xa: &[Axis],
     ya: &[Axis],
-) {
+) -> Result<(), ChartError> {
+    let stops = HeatFunctions::build_color_stops(&s.heat_map, s.color_stops.as_deref())?;
     let dx = minimum_delta(
         points
             .iter()
@@ -1483,11 +1594,17 @@ fn draw_heat(
     .unwrap_or(xa[s.x_axis].unit_width);
     let dy = minimum_delta(points.iter().flatten().map(|p| p.coordinate.primary_value))
         .unwrap_or(ya[s.y_axis].unit_width);
-    let (mut min, mut max) = (f64::INFINITY, f64::NEG_INFINITY);
+    let mut weights = Bounds::default();
     for p in points.iter().flatten() {
-        min = min.min(p.coordinate.tertiary_value);
-        max = max.max(p.coordinate.tertiary_value);
+        weights.append_value(p.coordinate.tertiary_value);
     }
+    if let Some(min) = s.min_value {
+        weights.min = min;
+    }
+    if let Some(max) = s.max_value {
+        weights.max = max;
+    }
+    let padding = s.point_padding;
     for p in points.iter().flatten() {
         let c = p.coordinate;
         let a = Point::new(
@@ -1501,18 +1618,20 @@ fn draw_heat(
         if !finite_point(a) || !finite_point(b) {
             continue;
         }
-        let rect = Rect::new(
+        let cell = Rect::new(
             a.x.min(b.x),
             a.y.min(b.y),
             (b.x - a.x).abs(),
             (b.y - a.y).abs(),
         );
-        let t = if max == min {
-            0.0
-        } else {
-            (c.tertiary_value - min) / (max - min)
-        };
-        let color = heat_color(&s.heat_map, t);
+        let rect = Rect::new(
+            cell.x + padding.left,
+            cell.y + padding.top,
+            (cell.width - padding.left - padding.right).max(0.0),
+            (cell.height - padding.top - padding.bottom).max(0.0),
+        );
+        let color =
+            HeatFunctions::interpolate_color(c.tertiary_value, &weights, &s.heat_map, &stops);
         scene.primitives.push(
             Primitive::new(
                 Geometry::Rectangle { rect, radius: 0.0 },
@@ -1532,24 +1651,11 @@ fn draw_heat(
             si,
             s,
             p,
-            HitShape::Rectangle(rect),
-            Point::new((a.x + b.x) * 0.5, (a.y + b.y) * 0.5),
+            HitShape::Rectangle(cell),
+            Point::new(cell.x + cell.width * 0.5, cell.y + cell.height * 0.5),
         );
     }
-}
-pub(crate) fn heat_color(colors: &[Color], t: f64) -> Color {
-    if colors.is_empty() {
-        return Color::from_argb(0, 0, 0, 0);
-    }
-    if colors.len() == 1 {
-        return colors[0];
-    }
-    let pos = t.clamp(0.0, 1.0) * (colors.len() - 1) as f64;
-    let i = (pos.floor() as usize).min(colors.len() - 2);
-    let f = (pos - i as f64).clamp(0.0, 1.0);
-    let (a, b) = (colors[i], colors[i + 1]);
-    let mix = |a: u8, b: u8| (a as f64 + (b as f64 - a as f64) * f) as u8;
-    Color::from_argb(mix(a.a, b.a), mix(a.r, b.r), mix(a.g, b.g), mix(a.b, b.b))
+    Ok(())
 }
 fn draw_financial(
     scene: &mut Scene,
@@ -1576,7 +1682,7 @@ fn draw_financial(
             continue;
         }
         let mut style = s.style(si, true);
-        if s.kind == SeriesKind::Financial && s.fill.is_none() && s.fill_brush.is_none() {
+        if s.fill.is_none() && s.fill_brush.is_none() {
             let color = if c.quaternary_value >= c.tertiary_value {
                 Color::from_rgb(22, 163, 74)
             } else {
@@ -1624,24 +1730,6 @@ fn draw_financial(
                 point: p.index,
             }),
         );
-        if s.kind == SeriesKind::Box {
-            for value in [high, low, y.to_pixels(c.senary_value)] {
-                scene.primitives.push(
-                    Primitive::new(
-                        Geometry::Line {
-                            start: Point::new(center - width / 2.0, value),
-                            end: Point::new(center + width / 2.0, value),
-                        },
-                        line_style.clone(),
-                    )
-                    .clipped(scene.plot_bounds)
-                    .identified(PointId {
-                        series: si,
-                        point: p.index,
-                    }),
-                );
-            }
-        }
         let hit = Rect::new(
             center - width / 2.0,
             high.min(low),
@@ -1666,6 +1754,211 @@ fn draw_financial(
         );
     }
 }
+/// `OhlcSeries`, the I-bars of `OhlcGeometry` over the measure of `CoreFinancialSeries`: a
+/// spine from the high to the low at the centre of the bar, the open as a tick to its left and
+/// the close as a tick to its right. The bar is the category width clamped to `MaxBarWidth`
+/// (25); a close above the open takes the theme's up stroke and the others its down stroke,
+/// unless the series has a stroke of its own. The bars have no body, so a fill draws nothing.
+fn draw_ohlc(
+    scene: &mut Scene,
+    si: usize,
+    s: &Series,
+    points: &[Option<MeasuredPoint>],
+    x: AxisScale,
+    y: AxisScale,
+    xa: &[Axis],
+) {
+    for p in points.iter().flatten() {
+        let c = p.coordinate;
+        let center = x.to_pixels(c.secondary_value);
+        let high = y.to_pixels(c.primary_value);
+        let open = y.to_pixels(c.tertiary_value);
+        let close = y.to_pixels(c.quaternary_value);
+        let low = y.to_pixels(c.quinary_value);
+        let category_width = category_width(x, c.secondary_value, xa[s.x_axis].unit_width);
+        let width = category_width.min(s.max_bar_width.max(1.0));
+        if ![center, high, low, open, close, width]
+            .iter()
+            .all(|v| v.is_finite())
+        {
+            continue;
+        }
+        let mut style = s.style(si, false);
+        style.fill = None;
+        style.fill_brush = None;
+        if s.stroke.is_none() && s.stroke_brush.is_none() {
+            // FinancialLayout.IsBullish: the open is below the close in pixels.
+            style.stroke = Some(if open > close {
+                crate::series::FINANCIAL_UP
+            } else {
+                crate::series::FINANCIAL_DOWN
+            });
+        }
+        let left = center - width * 0.5;
+        let id = PointId {
+            series: si,
+            point: p.index,
+        };
+        for (start, end) in [
+            (Point::new(center, high), Point::new(center, low)),
+            (Point::new(left, open), Point::new(center, open)),
+            (Point::new(center, close), Point::new(left + width, close)),
+        ] {
+            scene.primitives.push(
+                Primitive::new(Geometry::Line { start, end }, style.clone())
+                    .clipped(scene.plot_bounds)
+                    .identified(id),
+            );
+        }
+        let hit = Rect::new(left, high.min(low), width, (low - high).abs());
+        append_hit(
+            scene,
+            si,
+            s,
+            p,
+            HitShape::WithHoverArea {
+                shape: Box::new(HitShape::Rectangle(hit)),
+                bounds: Rect::new(
+                    center - category_width * 0.5,
+                    hit.y,
+                    category_width,
+                    hit.height.max(1.0),
+                ),
+            },
+            Point::new(center, (high + low) * 0.5),
+        );
+    }
+}
+/// `SeriesContext.GetBoxPosition` and `GetBoxSeriesCount`: the place of a box series among the
+/// visible box series of the chart, and their number.
+fn box_group(si: usize, all: &[Series]) -> (usize, usize) {
+    let mut count = 0;
+    let mut own = 0;
+    for (i, candidate) in all.iter().enumerate() {
+        if candidate.visible && candidate.kind == SeriesKind::Box {
+            if i == si {
+                own = count;
+            }
+            count += 1;
+        }
+    }
+    (count.max(1), own)
+}
+/// `BoxMeasureHelper`: the left edge and width of a box in its category, which the visible box
+/// series of a chart share side by side.
+fn box_layout(s: &Series, category: f64, unit: f64, group: (usize, usize)) -> (f64, f64) {
+    let (count, position) = (group.0 as f64, group.1 as f64);
+    let mut uw = unit;
+    let mut gp = s.padding;
+    if uw - gp < 1.0 {
+        gp -= uw - gp;
+    }
+    uw -= gp;
+    uw /= count;
+    if uw > s.max_bar_width {
+        uw = s.max_bar_width;
+    }
+    let mut uwm = 0.5 * uw;
+    let mut cp = (position - count / 2.0) * uw + uwm;
+    uw -= s.padding;
+    cp += s.padding * 0.5;
+    if uw < 1.0 {
+        uw = 1.0;
+        uwm = 0.5;
+    }
+    (category - uwm + cp, uw)
+}
+/// `CoreBoxSeries` with the source's `BoxGeometry`: the box from the first to the third
+/// quartile, the median across it, and the whiskers from the box to the maximum and minimum.
+fn draw_box(
+    scene: &mut Scene,
+    si: usize,
+    s: &Series,
+    all: &[Series],
+    points: &[Option<MeasuredPoint>],
+    x: AxisScale,
+    y: AxisScale,
+    xa: &[Axis],
+) {
+    let group = box_group(si, all);
+    let style = s.box_style(si);
+    let line_style = PaintStyle {
+        fill: None,
+        fill_brush: None,
+        ..style.clone()
+    };
+    for p in points.iter().flatten() {
+        let c = p.coordinate;
+        let secondary = x.to_pixels(c.secondary_value);
+        let unit = category_width(x, c.secondary_value, xa[s.x_axis].unit_width);
+        let (left, width) = box_layout(s, secondary, unit, group);
+        let high = y.to_pixels(c.primary_value);
+        let third = y.to_pixels(c.tertiary_value);
+        let first = y.to_pixels(c.quaternary_value);
+        let low = y.to_pixels(c.quinary_value);
+        let median = y.to_pixels(c.senary_value);
+        if ![
+            secondary, unit, left, width, high, third, first, low, median,
+        ]
+        .iter()
+        .all(|v| v.is_finite())
+        {
+            continue;
+        }
+        let center = left + width * 0.5;
+        let (yi, yj) = (third.min(first), third.max(first));
+        let id = PointId {
+            series: si,
+            point: p.index,
+        };
+        let body = Rect::new(left, yi, width, yj - yi);
+        scene.primitives.push(
+            Primitive::new(
+                Geometry::Rectangle {
+                    rect: body,
+                    radius: s.corner_radius.max(0.0),
+                },
+                style.clone(),
+            )
+            .clipped(scene.plot_bounds)
+            .identified(id),
+        );
+        for (start, end) in [
+            (Point::new(center, high), Point::new(center, yi)),
+            (Point::new(left, median), Point::new(left + width, median)),
+            (Point::new(center, yj), Point::new(center, low)),
+        ] {
+            scene.primitives.push(
+                Primitive::new(Geometry::Line { start, end }, line_style.clone())
+                    .clipped(scene.plot_bounds)
+                    .identified(id),
+            );
+        }
+        let hit = Rect::new(left, high.min(low), width, (low - high).abs());
+        append_hit(
+            scene,
+            si,
+            s,
+            p,
+            HitShape::WithHoverArea {
+                shape: Box::new(HitShape::Rectangle(hit)),
+                // The category-wide hover area of the source (categoryHoverX, actualUw).
+                bounds: Rect::new(secondary - unit * 0.5, hit.y, unit, hit.height.max(1.0)),
+            },
+            Point::new(center, (high + low) * 0.5),
+        );
+    }
+}
+/// The error bars of a point (`ErrorVisual`: the `YError` and `XError` lines of the error paint)
+/// when the series shows them (`ShowError`): a line across the value from its bottom error to
+/// its top error, and a line across the category from its left error to its right error, both
+/// through the point, which for a bar is the centre of its end, `offset` along the category from
+/// the category itself. There are no caps, as in the source. A row series swaps the axes, so its
+/// value errors are horizontal.
+///
+/// The source draws the top error (`Yi`) of a bar or scatter point below it, where its bounds,
+/// its line series and the documentation of `Error` put it above; here it is above for every
+/// series, and the bars of a stacked series take their errors at the top of their stack.
 fn draw_errors(
     scene: &mut Scene,
     si: usize,
@@ -1673,49 +1966,42 @@ fn draw_errors(
     p: &MeasuredPoint,
     x: AxisScale,
     y: AxisScale,
+    offset: f64,
 ) {
     let c = p.coordinate;
-    let error = c.point_error;
-    if error.is_empty {
+    let e = c.point_error;
+    if !s.show_error || !s.kind.has_error_bars() || e.is_empty {
         return;
     }
-    let (vx, vy) = if s.kind.is_row() {
-        (p.top, c.secondary_value)
-    } else {
-        (c.secondary_value, p.top)
+    let row = s.kind.is_row();
+    let (value_scale, category_scale) = if row { (x, y) } else { (y, x) };
+    let (value, category) = (p.top, c.secondary_value);
+    let v = value_scale.to_pixels(value);
+    let k = category_scale.to_pixels(category) + offset;
+    let category_end =
+        |d: f64| k + category_scale.to_pixels(category + d) - category_scale.to_pixels(category);
+    let (top, bottom) = (
+        value_scale.to_pixels(value + e.yi.abs()),
+        value_scale.to_pixels(value - e.yj.abs()),
+    );
+    let (left, right) = (category_end(-e.xi.abs()), category_end(e.xj.abs()));
+    if ![v, k, top, bottom, left, right]
+        .iter()
+        .all(|v| v.is_finite())
+    {
+        return;
+    }
+    let at = |value: f64, category: f64| {
+        if row {
+            Point::new(value, category)
+        } else {
+            Point::new(category, value)
+        }
     };
-    let center = Point::new(x.to_pixels(vx), y.to_pixels(vy));
-    let cap = 4.0;
-    let style = PaintStyle::stroke(s.color(si), s.stroke_width.max(1.0));
-    let left = x.to_pixels(vx - error.xi.abs());
-    let right = x.to_pixels(vx + error.xj.abs());
-    let top = y.to_pixels(vy + error.yi.abs());
-    let bottom = y.to_pixels(vy - error.yj.abs());
-    if ![left, right, top, bottom].iter().all(|v| v.is_finite()) {
-        return;
-    }
-    for (a, b) in [
-        (Point::new(left, center.y), Point::new(right, center.y)),
-        (
-            Point::new(left, center.y - cap),
-            Point::new(left, center.y + cap),
-        ),
-        (
-            Point::new(right, center.y - cap),
-            Point::new(right, center.y + cap),
-        ),
-        (Point::new(center.x, top), Point::new(center.x, bottom)),
-        (
-            Point::new(center.x - cap, top),
-            Point::new(center.x + cap, top),
-        ),
-        (
-            Point::new(center.x - cap, bottom),
-            Point::new(center.x + cap, bottom),
-        ),
-    ] {
+    let style = s.error_style();
+    for (start, end) in [(at(bottom, k), at(top, k)), (at(v, left), at(v, right))] {
         scene.primitives.push(
-            Primitive::new(Geometry::Line { start: a, end: b }, style.clone())
+            Primitive::new(Geometry::Line { start, end }, style.clone())
                 .clipped(scene.plot_bounds)
                 .identified(PointId {
                     series: si,
@@ -1738,6 +2024,20 @@ fn minimum_delta(values: impl Iterator<Item = f64>) -> Option<f64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn stroke_paths(scene: &Scene) -> usize {
+        scene
+            .primitives
+            .iter()
+            .filter(|p| matches!(p.geometry, Geometry::Path(_)) && p.style.stroke.is_some())
+            .count()
+    }
+    fn area_paths(scene: &Scene) -> usize {
+        scene
+            .primitives
+            .iter()
+            .filter(|p| matches!(p.geometry, Geometry::Path(_)) && p.style.fill.is_some())
+            .count()
+    }
     fn scene(series: &[Series]) -> Scene {
         CartesianChartEngine::measure(
             Size::new(640.0, 400.0),
@@ -1758,14 +2058,9 @@ mod tests {
             result.hits.iter().map(|h| h.id.point).collect::<Vec<_>>(),
             vec![0, 2, 3]
         );
-        assert_eq!(
-            result
-                .primitives
-                .iter()
-                .filter(|p| matches!(p.geometry, Geometry::Path(_)))
-                .count(),
-            2
-        );
+        // One stroke and one area under it per run.
+        assert_eq!(stroke_paths(&result), 2);
+        assert_eq!(area_paths(&result), 2);
     }
     #[test]
     fn line_can_connect_across_nulls() {
@@ -1773,14 +2068,7 @@ mod tests {
         s.values[1] = Coordinate::EMPTY;
         s.enable_null_splitting = false;
         s.geometry_size = 0.0;
-        assert_eq!(
-            scene(&[s])
-                .primitives
-                .iter()
-                .filter(|p| matches!(p.geometry, Geometry::Path(_)))
-                .count(),
-            1
-        );
+        assert_eq!(stroke_paths(&scene(&[s])), 1);
     }
     #[test]
     fn range_bounds_include_both_endpoints() {
@@ -1827,7 +2115,12 @@ mod tests {
             &CartesianOptions::default(),
         )
         .unwrap();
-        assert!(m.y_scales[0].max >= 100.0 && m.y_scales[0].max < 110.0);
+        // Both categories stack to 100. The axis adds one tick of padding above (DataPadding.Y
+        // of a column series, CartesianSeries.GetBounds): with the source's 16 px labels and
+        // the theme's label padding of 12, a 400 px control gives ten separations, so the tick
+        // of the series bounds (0 to 75, 20 to 100) is 10 and the maximum 110. Upstream has no
+        // 100% mode; its stacked columns of the same tops (75/20 under 25/80) pad to 110 too.
+        assert!(m.y_scales[0].max >= 100.0 && m.y_scales[0].max <= 110.0);
     }
     #[test]
     fn nonfinite_points_are_gaps_not_renderer_inputs() {
@@ -1876,6 +2169,7 @@ mod tests {
             SeriesKind::RangeRow,
             SeriesKind::RangeLine,
             SeriesKind::Financial,
+            SeriesKind::Ohlc,
             SeriesKind::Box,
         ] {
             let mut s = Series::new(kind);
@@ -2053,5 +2347,248 @@ mod tests {
         assert_eq!(single.y_scales, duplicate.y_scales);
         assert_eq!(single.scene.hits[0].value, 42.0);
         assert_eq!(single.scene.hits[0].label, "42");
+    }
+
+    fn measure_square(series: &[Series]) -> CartesianMeasurement {
+        CartesianChartEngine::measure_with_axes(
+            Size::new(600.0, 600.0),
+            series,
+            &[],
+            &[],
+            &CartesianOptions::default(),
+        )
+        .unwrap()
+    }
+    /// The axis separators: (vertical lines, horizontal lines) without a point identity.
+    fn separators(scene: &Scene) -> (usize, usize) {
+        let mut result = (0, 0);
+        for p in scene.primitives.iter().filter(|p| p.id.is_none()) {
+            if let Geometry::Line { start, end } = p.geometry {
+                if start.x == end.x {
+                    result.0 += 1;
+                } else if start.y == end.y {
+                    result.1 += 1;
+                }
+            }
+        }
+        result
+    }
+    fn path_vertices(primitive: &Primitive) -> Vec<Point> {
+        let Geometry::Path(commands) = &primitive.geometry else {
+            panic!("a path")
+        };
+        commands
+            .iter()
+            .filter_map(|c| match c {
+                PathCommand::MoveTo(p) | PathCommand::LineTo(p) => Some(*p),
+                PathCommand::CubicTo { end, .. } => Some(*end),
+                PathCommand::Close => None,
+            })
+            .collect()
+    }
+
+    // BoxSeriesTests.BasicBox (snapshot): the boxes of three series stand side by side in each
+    // category (SeriesContext.GetBoxPosition, BoxMeasureHelper), drawn as the source's
+    // BoxGeometry: whiskers from the box to the extremes and the median across, no caps.
+    #[test]
+    fn box_series_of_a_category_stand_side_by_side() {
+        let boxes: Vec<_> = (0..3)
+            .map(|i| {
+                let d = 10.0 * f64::from(i);
+                let mut s = Series::new(SeriesKind::Box);
+                s.values = vec![
+                    Coordinate::box_value(0.0, 100.0 - d, 80.0 - d, 60.0 - d, 20.0 - d, 70.0 - d),
+                    Coordinate::box_value(1.0, 90.0 - d, 70.0 - d, 50.0 - d, 30.0 - d, 60.0 - d),
+                ];
+                s
+            })
+            .collect();
+        let m = measure_square(&boxes);
+        let body = |series: usize| {
+            m.scene
+                .primitives
+                .iter()
+                .find_map(|p| match (&p.geometry, p.id) {
+                    (Geometry::Rectangle { rect, .. }, Some(id))
+                        if id.series == series && id.point == 0 =>
+                    {
+                        Some((*rect, p.style.clone()))
+                    }
+                    _ => None,
+                })
+                .unwrap()
+        };
+        let bodies: Vec<_> = (0..3).map(|i| body(i).0).collect();
+        assert!(bodies[0].x + bodies[0].width <= bodies[1].x);
+        assert!(bodies[1].x + bodies[1].width <= bodies[2].x);
+        assert!((bodies[0].width - bodies[2].width).abs() < 1e-9);
+        assert!(((bodies[1].x - bodies[0].x) - (bodies[2].x - bodies[1].x)).abs() < 1e-9);
+        let category = m.x_scales[0].to_pixels(0.0);
+        assert!((bodies[1].x + bodies[1].width * 0.5 - category).abs() < 1e-6);
+        // Padding 5 between the boxes, the source's CoreBoxSeries.Padding.
+        assert!((bodies[1].x - bodies[0].x - bodies[0].width - 5.0).abs() < 1e-6);
+        // The theme's outline of a box series over the palette fill.
+        let (_, style) = body(0);
+        assert_eq!(style.stroke, Some(crate::series::BOX_STROKE));
+        assert_eq!(style.fill, Some(palette_color(0)));
+        let lines: Vec<_> = m
+            .scene
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id == Some(PointId {
+                    series: 0,
+                    point: 0,
+                })
+            })
+            .filter_map(|p| match p.geometry {
+                Geometry::Line { start, end } => Some((start, end)),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(lines.iter().filter(|(a, b)| a.y == b.y).count(), 1);
+        assert_eq!(lines.iter().filter(|(a, b)| a.x == b.x).count(), 2);
+        // The whiskers stop at the box.
+        let box_y = m.y_scales[0].to_pixels(80.0);
+        assert!(lines
+            .iter()
+            .filter(|(a, b)| a.x == b.x)
+            .any(|(a, b)| (a.y.max(b.y) - box_y).abs() < 1e-6));
+    }
+
+    // LineSeriesTests.Gaps (snapshot): the single remaining point. A zero-width axis grows by
+    // half a unit width on each side, and its separators are as sparse as the labels allow.
+    #[test]
+    fn a_single_point_axis_spans_one_unit_with_sparse_separators() {
+        let mut s = Series::new(SeriesKind::Line);
+        s.values = vec![Coordinate::EMPTY, Coordinate::new(1.0, 1.0)];
+        let m = measure_square(&[s]);
+        for scale in [m.x_scales[0], m.y_scales[0]] {
+            assert!(scale.min > 0.45 && scale.min <= 0.5, "{scale:?}");
+            assert!(scale.max >= 1.5 && scale.max < 1.55, "{scale:?}");
+        }
+        let (vertical, horizontal) = separators(&m.scene);
+        assert_eq!(horizontal, 11, "0.5 to 1.5 by 0.1");
+        assert!(vertical <= 11, "{vertical}");
+        assert_eq!(
+            m.scene
+                .primitives
+                .iter()
+                .filter(|p| matches!(p.geometry, Geometry::Ellipse(_)))
+                .count(),
+            1
+        );
+    }
+
+    // LineSeriesTests.VectorOperationsClear (snapshot): an empty series leaves the default
+    // range of ten units from zero, in the order of the axis.
+    #[test]
+    fn an_empty_series_leaves_the_default_range() {
+        let m = measure_square(&[Series::new(SeriesKind::Line)]);
+        for scale in [m.x_scales[0], m.y_scales[0]] {
+            assert_eq!((scale.min, scale.max), (0.0, 10.0));
+        }
+        assert!(m.x_scales[0].pixel_start < m.x_scales[0].pixel_end);
+        assert!(m.y_scales[0].pixel_start > m.y_scales[0].pixel_end);
+        assert!(m.scene.hits.is_empty());
+    }
+
+    // StackedAreaTests.Step (snapshot): the lower edge of a stacked step area is the upper edge
+    // of the series below, walked backwards, so no cell between them is left unfilled.
+    #[test]
+    fn stacked_step_areas_share_their_edges() {
+        let series: Vec<_> = [
+            [3.0, 2.0, 3.0, 5.0, 3.0, 4.0, 6.0],
+            [6.0, 5.0, 6.0, 3.0, 8.0, 5.0, 2.0],
+            [4.0, 8.0, 2.0, 8.0, 9.0, 5.0, 3.0],
+        ]
+        .into_iter()
+        .map(|values| Series::from_values(SeriesKind::StackedStepArea, values))
+        .collect();
+        let result = measure_square(&series).scene;
+        let area = |series: usize| {
+            path_vertices(
+                result
+                    .primitives
+                    .iter()
+                    .find(|p| {
+                        p.id.is_some_and(|id| id.series == series)
+                            && matches!(p.geometry, Geometry::Path(_))
+                    })
+                    .unwrap(),
+            )
+        };
+        // Seven points: an edge of 13 vertices, horizontal first (StepLineAreaGeometry).
+        let edge = 13;
+        for upper in 1..3 {
+            let below = area(upper - 1);
+            let above = area(upper);
+            assert_eq!(above.len(), edge * 2);
+            let lower_edge: Vec<_> = above[edge..].iter().rev().copied().collect();
+            for (a, b) in lower_edge.iter().zip(&below[..edge]) {
+                assert!((a.x - b.x).abs() < 1e-9 && (a.y - b.y).abs() < 1e-9);
+            }
+            assert_eq!(below[1].y, below[0].y, "the step leaves horizontally");
+        }
+    }
+
+    // ThemesExtensions.AddDefaultTheme: the MaterialDesign500 palette, the area at alpha 50
+    // under a line series (none for the source's Fill = null), stacked areas in full colour
+    // without a stroke or geometry, and a line series bounding its points only.
+    #[test]
+    fn source_theme_defaults() {
+        assert_eq!(palette_color(0), Color::from_rgb(33, 150, 243));
+        assert_eq!(palette_color(2), Color::from_rgb(139, 195, 74));
+        assert_eq!(palette_color(9), palette_color(0));
+        let m = measure_square(&[Series::from_values(SeriesKind::Line, [5.0, 6.0, 7.0])]);
+        let fills: Vec<_> = m
+            .scene
+            .primitives
+            .iter()
+            .filter(|p| matches!(p.geometry, Geometry::Path(_)))
+            .map(|p| (p.style.fill, p.style.stroke))
+            .collect();
+        assert_eq!(
+            fills,
+            vec![
+                (Some(Color::from_argb(50, 33, 150, 243)), None),
+                (None, Some(Color::from_rgb(33, 150, 243)))
+            ]
+        );
+        assert!(m.y_scales[0].min > 4.0, "the pivot is not in the bounds");
+        let mut no_fill = Series::from_values(SeriesKind::Line, [5.0, 6.0, 7.0]);
+        no_fill.fill = Some(Color::from_argb(0, 0, 0, 0));
+        let result = measure_square(&[no_fill]).scene;
+        assert_eq!(area_paths(&result), 0);
+        assert_eq!(result.legend[0].color, palette_color(0));
+        let stacked = measure_square(&[
+            Series::from_values(SeriesKind::StackedArea, [1.0, 2.0]),
+            Series::from_values(SeriesKind::StackedArea, [2.0, 1.0]),
+        ])
+        .scene;
+        assert_eq!(stroke_paths(&stacked), 0);
+        assert!(!stacked
+            .primitives
+            .iter()
+            .any(|p| matches!(p.geometry, Geometry::Ellipse(_))));
+        let fills: Vec<_> = stacked
+            .primitives
+            .iter()
+            .filter(|p| matches!(p.geometry, Geometry::Path(_)))
+            .map(|p| p.style.fill)
+            .collect();
+        assert_eq!(fills, vec![Some(palette_color(0)), Some(palette_color(1))]);
+    }
+
+    // LineSeriesTests.Basic (snapshot): the separators of the source, a step of 0.5 on X and
+    // of 1 on Y, taken from the labels (16 px, padding 12) and the draw margin.
+    #[test]
+    fn separator_density_follows_the_labels_and_the_draw_margin() {
+        let m = measure_square(&[
+            Series::from_values(SeriesKind::Line, [1.0, 5.0, 7.0, 3.0]),
+            Series::from_values(SeriesKind::Line, [4.0, 2.0, 8.0, 6.0]),
+            Series::from_values(SeriesKind::Line, [2.0, 6.0, 4.0, 8.0]),
+        ]);
+        assert_eq!(separators(&m.scene), (7, 8));
     }
 }

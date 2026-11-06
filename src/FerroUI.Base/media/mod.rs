@@ -5,6 +5,7 @@ mod color;
 mod color_tests;
 mod colors;
 mod color_matrix;
+mod convolve_matrix;
 mod drawing_context;
 #[cfg(test)]
 mod drawing_context_tests;
@@ -124,6 +125,7 @@ mod translate_transform;
 
 pub use alignment_x::AlignmentX;
 pub use color_matrix::{ColorMatrix, ColorMatrixAlphaMode, LUMINANCE_WEIGHTS};
+pub use convolve_matrix::ConvolveMatrix;
 pub use alignment_y::AlignmentY;
 pub use arc_segment::ArcSegment;
 pub use bezier_segment::BezierSegment;
@@ -246,7 +248,7 @@ pub(crate) mod xaml_light;
 pub use acrylic_background_source::AcrylicBackgroundSource;
 pub use acrylic_brush::{
     acrylic_effect, acrylic_effect_with_source, AcrylicBrushBackgroundSource, luminosity_color, tint_opacity_modifier, AcrylicBrush, ACRYLIC_BLUR_AMOUNT, ACRYLIC_FALLBACK_CROSS_FADE,
-    ACRYLIC_NOISE_OPACITY,
+    ACRYLIC_NOISE_OPACITY, ACRYLIC_PREWARM_EFFECTS,
 };
 pub use material_policy::{MaterialPolicy, NOISE_ASSET_PNG};
 pub use background_sizing::BackgroundSizing;
@@ -258,10 +260,11 @@ pub use drawing_collection::DrawingCollection;
 pub use drawing_group::DrawingGroup;
 pub use drawing_image::DrawingImage;
 pub use effects::{
-    BlurEffect, DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions,
-    IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect, IMutableEffect,
-    ImmutableBlurEffect, ImmutableDropShadowDirectionEffect, ImmutableDropShadowEffect,
-    ImmutableLuminanceToAlphaEffect,
+    BlurEffect, CustomEffect, CustomEffectClass, CustomEffectRegistrationError, CustomEffectRegistry,
+    DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions, EffectHostContext,
+    EffectParameterValue, IBlurEffect, IEffectInputHandler, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect,
+    IMutableEffect, ImmutableBlurEffect, ImmutableCustomEffect, ImmutableDropShadowDirectionEffect,
+    ImmutableDropShadowEffect, ImmutableLuminanceToAlphaEffect,
 };
 pub use experimental_acrylic_material::ExperimentalAcrylicMaterial;
 pub use geometry_drawing::GeometryDrawing;

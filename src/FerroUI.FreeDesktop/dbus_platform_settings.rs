@@ -10,8 +10,8 @@ use ferroui_base::platform::{
     DefaultPlatformSettings, IPlatformSettings, PlatformColorValues,
     PlatformThemeVariant,
 };
-use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::Size;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -108,7 +108,7 @@ pub(crate) fn build_platform_color_values(
 pub struct DBusPlatformSettings {
     base: DefaultPlatformSettings,
     settings: RefCell<Option<SettingsProxy<'static>>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     color_values: Cell<PlatformColorValues>,
     theme_variant: Cell<Option<PlatformThemeVariant>>,
     accent_color: Cell<Option<Color>>,
@@ -146,43 +146,46 @@ impl DBusPlatformSettings {
         // the reads without awaiting either, and its proxy needs no call
         // to be made.
         let weak = Rc::downgrade(&this);
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let settings = SettingsProxy::builder(&conn)
-                .destination("org.freedesktop.portal.Desktop")
-                .and_then(|builder| builder.path("/org/freedesktop/portal/desktop"))
-                .map(|builder| builder.cache_properties(CacheProperties::No));
-            let Ok(settings) = settings else {
-                return;
-            };
-            let Ok(settings) = settings.build().await else {
-                return;
-            };
-            match weak.upgrade() {
-                Some(this) => *this.settings.borrow_mut() = Some(settings.clone()),
-                None => return,
-            }
-
-            if let Ok(changes) = settings.receive_setting_changed().await {
-                let handler = weak.clone();
-                let subscription = watch_stream(changes, move |signal| {
-                    if let (Some(this), Ok(args)) = (handler.upgrade(), signal.args()) {
-                        this.settings_changed_handler(args.namespace(), args.key(), args.value());
-                    }
-                });
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let settings = SettingsProxy::builder(&conn)
+                    .destination("org.freedesktop.portal.Desktop")
+                    .and_then(|builder| builder.path("/org/freedesktop/portal/desktop"))
+                    .map(|builder| builder.cache_properties(CacheProperties::No));
+                let Ok(settings) = settings else {
+                    return;
+                };
+                let Ok(settings) = settings.build().await else {
+                    return;
+                };
                 match weak.upgrade() {
-                    Some(this) => *this.subscription.borrow_mut() = Some(subscription),
-                    None => subscription.dispose(),
+                    Some(this) => *this.settings.borrow_mut() = Some(settings.clone()),
+                    None => return,
                 }
-            }
 
-            let theme_variant = Self::try_get_theme_variant_async(&settings).await;
-            let accent_color = Self::try_get_accent_color_async(&settings).await;
-            if let Some(this) = weak.upgrade() {
-                this.theme_variant.set(theme_variant);
-                this.accent_color.set(accent_color);
-                this.update_color_values();
-            }
-        }));
+                if let Ok(changes) = settings.receive_setting_changed().await {
+                    let handler = weak.clone();
+                    let subscription = watch_stream(changes, move |signal| {
+                        if let (Some(this), Ok(args)) = (handler.upgrade(), signal.args()) {
+                            this.settings_changed_handler(args.namespace(), args.key(), args.value());
+                        }
+                    });
+                    match weak.upgrade() {
+                        Some(this) => *this.subscription.borrow_mut() = Some(Subscription::new(subscription)),
+                        None => subscription.dispose(),
+                    }
+                }
+
+                let theme_variant = Self::try_get_theme_variant_async(&settings).await;
+                let accent_color = Self::try_get_accent_color_async(&settings).await;
+                if let Some(this) = weak.upgrade() {
+                    this.theme_variant.set(theme_variant);
+                    this.accent_color.set(accent_color);
+                    this.update_color_values();
+                }
+            },
+            DispatcherPriority::DEFAULT,
+        ));
 
         this
     }
@@ -233,14 +236,6 @@ impl DBusPlatformSettings {
                 self.update_color_values();
             }
             _ => {}
-        }
-    }
-}
-
-impl Drop for DBusPlatformSettings {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.subscription.borrow_mut().take() {
-            subscription.dispose();
         }
     }
 }

@@ -25,6 +25,8 @@ ferroui-microcom.workspace = true
 ferroui-metal.workspace = true
 # The OpenGL contracts the platform implements (the rendering mode OpenGL, over CGL).
 ferroui-opengl.workspace = true
+# The URLs of the storage and the activation (C5 of #423).
+url.workspace = true
 
 [dev-dependencies]
 ferroui-harfbuzz.workspace = true

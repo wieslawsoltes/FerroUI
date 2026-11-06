@@ -12,13 +12,23 @@
 //! The current context of a thread ([`current_synchronization_context`],
 //! `SynchronizationContext.Current`) is set with [`set_synchronization_context`]
 //! (`SynchronizationContext.SetSynchronizationContext`). Setting it also makes it the thread poster
-//! of the thread ([`tasks::set_thread_poster`](super::tasks::set_thread_poster)): a wake of a task
+//! of the thread ([`crate::task::set_thread_schedule`]): a wake of a task
 //! of the thread, or a cancellation registered there with
 //! [`CancellationToken::register_local`](super::CancellationToken::register_local), that comes from
 //! another thread is posted to the context. The context of a thread is therefore expected to run
 //! the work it is posted on that thread.
+//!
+//! Deprecated since 0.5.0 (step A5 of phase C4 of #423, docs/idiomatic-rust-async.md, section
+//! 3.4): where a wake goes and where posted work runs are the schedules of [`crate::task`]. A
+//! dispatcher is the schedule of its thread ([`crate::task::set_thread_schedule`]) and, in each of
+//! its jobs, the current schedule ([`crate::task::current_schedule`], the dispatcher at the
+//! priority of the job), which takes the place of `SynchronizationContext.Current`;
+//! [`Schedule::schedule_local`] is `Post` from the thread of the context. The items of this module
+//! keep working on top of that: setting a context makes an adapter of it the schedule of the
+//! thread and the current schedule ([`context_schedule`]).
+#![allow(deprecated)]
 
-use super::tasks::{set_thread_poster, ThreadPoster};
+use crate::task::{set_current_schedule, set_thread_schedule, Schedule};
 use std::cell::RefCell;
 use std::sync::Arc;
 
@@ -27,6 +37,10 @@ use std::sync::Arc;
 /// The base class of .NET posts to the thread pool and sends on the calling thread; here every
 /// implementation says where its work runs. An implementation is shared between threads, as the
 /// contexts of .NET are.
+#[deprecated(
+    since = "0.5.0",
+    note = "use a `ferroui_system::task::Schedule`: the dispatcher's `task_schedule(priority)`, `task::current_schedule()` and `Schedule::schedule_local`"
+)]
 pub trait SynchronizationContext: Send + Sync {
     /// Queues `work` to run on the context, from any thread, without waiting for it (`Post`).
     fn post(&self, work: Box<dyn FnOnce() + Send>);
@@ -55,24 +69,57 @@ crate::ferro_thread_local! {
     static CURRENT: RefCell<Option<Arc<dyn SynchronizationContext>>> = const { RefCell::new(None) };
 }
 
-/// The current context of the calling thread (`SynchronizationContext.Current`).
+/// The current context of the calling thread (`SynchronizationContext.Current`): the one set with
+/// [`set_synchronization_context`].
+#[deprecated(
+    since = "0.5.0",
+    note = "use `ferroui_system::task::current_schedule()`, the schedule of the running work (a dispatcher job)"
+)]
 pub fn current_synchronization_context() -> Option<Arc<dyn SynchronizationContext>> {
     CURRENT.try_with(|current| current.borrow().clone()).ok().flatten()
 }
 
-/// Sets the current context of the calling thread (`SynchronizationContext.SetSynchronizationContext`),
-/// and makes it the thread poster of the thread, through which other threads wake its tasks and
-/// run its cancellations; `None` clears both.
+/// Sets the current context of the calling thread (`SynchronizationContext.SetSynchronizationContext`).
+/// An adapter of it ([`context_schedule`]) becomes the schedule of the thread, through which other
+/// threads wake its tasks and run its cancellations, and the current schedule of the thread, which
+/// the tasks spawned here and the reactive libraries take; `None` clears all three.
+#[deprecated(
+    since = "0.5.0",
+    note = "a dispatcher is the schedule of its thread and of its jobs; elsewhere use `ferroui_system::task::set_thread_schedule` and `set_current_schedule`"
+)]
 pub fn set_synchronization_context(context: Option<Arc<dyn SynchronizationContext>>) {
-    let poster: Option<ThreadPoster> = context.as_ref().map(|context| {
-        let context = context.clone();
-        let poster: ThreadPoster = Arc::new(move |work: Box<dyn FnOnce() + Send>| context.post(work));
-        poster
-    });
+    let schedule = context.clone().map(context_schedule);
     // The previous context is dropped outside the borrow, in case its drop reads the current one.
     let previous = CURRENT.try_with(|current| current.replace(context)).ok().flatten();
     drop(previous);
-    set_thread_poster(poster);
+    let previous = set_current_schedule(schedule.clone());
+    drop(previous);
+    set_thread_schedule(schedule);
+}
+
+/// `context` as a [`Schedule`]: its work is posted to the context (`post`, and `post_local` for
+/// [`Schedule::schedule_local`]), and two adapters of the same context are the same schedule
+/// ([`Schedule::identity`]). For code that still has a context, where a schedule is taken now.
+#[deprecated(since = "0.5.0", note = "implement `ferroui_system::task::Schedule` instead of `SynchronizationContext`")]
+pub fn context_schedule(context: Arc<dyn SynchronizationContext>) -> Arc<dyn Schedule> {
+    Arc::new(ContextSchedule(context))
+}
+
+/// A context as a schedule ([`context_schedule`]).
+struct ContextSchedule(Arc<dyn SynchronizationContext>);
+
+impl Schedule for ContextSchedule {
+    fn schedule(&self, poll: Box<dyn FnOnce() + Send>) {
+        self.0.post(poll);
+    }
+
+    fn schedule_local(&self, work: Box<dyn FnOnce()>) {
+        self.0.post_local(work);
+    }
+
+    fn identity(&self) -> *const () {
+        Arc::as_ptr(&self.0).cast()
+    }
 }
 
 impl dyn SynchronizationContext {

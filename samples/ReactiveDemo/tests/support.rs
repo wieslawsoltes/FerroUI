@@ -1,16 +1,14 @@
 //! Shared helpers of the tests: the application scope with ReactiveUI built, the bodies of the
 //! generated per-document tests, a search service and a launcher that record what they are asked.
 
-use crate::crate_search::{CatalogueSearchService, CrateSearchMetadata, ICrateSearchService};
+use crate::crate_search::{CatalogueSearchService, CrateSearchMetadata, ICrateSearchService, SearchTask};
 use crate::{register_types, App, LauncherSource, SAMPLE};
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::Uri;
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use ferroui_reactiveui::{ReactiveUIBuilder, RxAppBuilder, RxSuspension};
 use ferroui_reactiveui_controls::StartupConfiguration;
-use ferroui_system::threading::tasks::Task;
 use ferroui_system::threading::CancellationToken;
 use sample_testing::TestGlobalClock;
 use std::cell::RefCell;
@@ -71,7 +69,7 @@ impl RecordingSearchService {
 }
 
 impl ICrateSearchService for RecordingSearchService {
-    fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
+    fn search(&self, term: &str, token: CancellationToken) -> SearchTask {
         self.terms.borrow_mut().push(term.to_owned());
         CatalogueSearchService::new().search(term, token)
     }
@@ -101,8 +99,8 @@ impl RecordingLauncher {
 }
 
 impl ILauncher for RecordingLauncher {
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool> {
-        self.uris.borrow_mut().push(uri.original_string().to_owned());
+    fn launch_uri_async(&self, uri: &url::Url) -> LocalBoxFuture<bool> {
+        self.uris.borrow_mut().push(uri.as_str().to_owned());
         Box::pin(std::future::ready(true))
     }
 

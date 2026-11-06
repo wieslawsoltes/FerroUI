@@ -9,30 +9,29 @@ use ferroui_reactive::concurrency::{IScheduler, ImmediateScheduler};
 use ferroui_reactiveui::{ICommand, RxSchedulers};
 use ferroui_system::component_model::INotifyPropertyChanged;
 use ferroui_system::events::Event;
-use ferroui_system::threading::{
-    current_synchronization_context, set_synchronization_context, tasks::Task,
-    SynchronizationContext,
-};
-use ferroui_system::IDisposable;
+use ferroui_system::task::{set_current_schedule, Schedule};
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::Arc;
 
-struct Environment(Option<Arc<dyn SynchronizationContext>>, Rc<dyn IScheduler>);
+/// No current schedule (the synchronization context of the reference), so that the services use
+/// the Rx main-thread scheduler, the immediate one; both are restored when dropped.
+struct Environment(Option<Arc<dyn Schedule>>, Rc<dyn IScheduler>);
 impl Environment {
     fn new() -> Self {
         let old = Self(
-            current_synchronization_context(),
+            set_current_schedule(None),
             RxSchedulers::main_thread_scheduler(),
         );
-        set_synchronization_context(None);
         RxSchedulers::set_main_thread_scheduler(ImmediateScheduler::instance());
         old
     }
 }
 impl Drop for Environment {
     fn drop(&mut self) {
-        set_synchronization_context(self.0.take());
+        drop(set_current_schedule(self.0.take()));
         RxSchedulers::set_main_thread_scheduler(self.1.clone());
     }
 }
@@ -131,7 +130,7 @@ fn reload_visibility_override_handler_enablement_and_identity_use_original_comma
         let called = calls.clone();
         service.set_reload_handler(Some(Rc::new(move || {
             called.set(called.get() + 1);
-            Task::from_result(())
+            Shared::<Result<(), ObservableError>>::ready(Ok(()))
         })));
         assert!(control.is_reload_enabled());
         let boxed: BoxedValue = Rc::new(command.clone());
@@ -453,7 +452,7 @@ impl IDockBusyService for BusyProbe {
     fn begin(&self, message: String) -> Rc<dyn IDisposable> {
         self.delegate.begin(message)
     }
-    fn run_async(&self, message: String, action: BusyAction) -> Task<()> {
+    fn run_async(&self, message: String, action: BusyAction) -> Shared<Result<(), ObservableError>> {
         self.delegate.run_async(message, action)
     }
     fn update_message(&self, message: Option<String>) {

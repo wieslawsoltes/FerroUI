@@ -1,17 +1,17 @@
 //! Port of `Pages/NavigationPage/Transitions/CompositeTransition.cs`.
 
 use ferroui_base::animation::easings::{Easing, LinearEasing};
-use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, SignedDuration};
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, JoinHandle};
 use ferroui_base::{Ref, Visual};
 use mini_mvvm::start_async;
 use std::cell::{Cell, RefCell};
 
 /// Example custom page transition: a combined slide and fade. Both pages slide and fade simultaneously.
 pub struct CompositeTransition {
-    duration: Cell<TimeSpan>,
+    duration: Cell<SignedDuration>,
     transition_easing: RefCell<Easing>,
 }
 
@@ -24,22 +24,22 @@ impl Default for CompositeTransition {
 impl CompositeTransition {
     /// `new CompositeTransition()`.
     pub fn new() -> Self {
-        Self { duration: Cell::new(TimeSpan::from_milliseconds(300.0)), transition_easing: RefCell::new(LinearEasing.into()) }
+        Self { duration: Cell::new(SignedDuration::from_milliseconds(300.0)), transition_easing: RefCell::new(LinearEasing.into()) }
     }
 
     /// `new CompositeTransition(duration)`.
-    pub fn with_duration(duration: TimeSpan) -> Self {
+    pub fn with_duration(duration: SignedDuration) -> Self {
         let result = Self::new();
         result.set_duration(duration);
         result
     }
 
     /// The duration of the transition.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.duration.get()
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.duration.set(value)
     }
 
@@ -83,14 +83,14 @@ impl IPageTransition for CompositeTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let duration = self.duration();
         let transition_easing = self.transition_easing();
         let from = from.cloned();
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -123,7 +123,7 @@ impl IPageTransition for CompositeTransition {
             when_all(tasks).await;
 
             if let Some(from) = &from {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
             }
@@ -138,7 +138,7 @@ mod tests {
 
     #[test]
     fn defaults_and_the_constructor_with_a_duration() {
-        assert_eq!(TimeSpan::from_milliseconds(300.0), CompositeTransition::new().duration());
-        assert_eq!(TimeSpan::from_milliseconds(120.0), CompositeTransition::with_duration(TimeSpan::from_milliseconds(120.0)).duration());
+        assert_eq!(SignedDuration::from_milliseconds(300.0), CompositeTransition::new().duration());
+        assert_eq!(SignedDuration::from_milliseconds(120.0), CompositeTransition::with_duration(SignedDuration::from_milliseconds(120.0)).duration());
     }
 }

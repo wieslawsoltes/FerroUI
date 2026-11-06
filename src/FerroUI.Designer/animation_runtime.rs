@@ -1,7 +1,7 @@
 //! Reuse the loaded framework animation objects for values owned by native animators.
 use crate::runtime::RuntimePreview;
 use crate::PreviewStatus;
-use ferroui_base::animation::{Animatable, Animation, IAnimation, IClock, PlayState, TimeSpan};
+use ferroui_base::animation::{Animatable, Animation, IAnimation, IClock, PlayState, SignedDuration};
 use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::styling::{IStyle, StyleBase, Styles};
@@ -79,8 +79,8 @@ impl NativeAnimations {
                 // Debug reload canonicalizes URI authority before supplying Document;
                 // direct release factories can retain the original spelling. Compare
                 // only those two exact identities, preserving path case and provenance.
-                let canonical = ferroui_base::utilities::Uri::absolute(preview.uri())
-                    .map(|uri| uri.absolute_uri().to_owned())
+                let canonical = ferroui_base::utilities::UriRef::parse_absolute(preview.uri())
+                    .map(String::from)
                     .unwrap_or_else(|_| preview.uri().to_owned());
                 [preview.uri(), canonical.as_str()]
                     .into_iter()
@@ -364,7 +364,7 @@ impl NativeAnimations {
 fn pulse(runs: &[NativeRun], seconds: f64) -> Result<(), String> {
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         for run in runs {
-            run.clock.subject.on_next(TimeSpan::from_seconds(seconds));
+            run.clock.subject.on_next(SignedDuration::from_seconds(seconds));
         }
     }))
     .map_err(|payload| format!("Native animation frame failed: {}", panic_message(payload)))
@@ -388,7 +388,7 @@ fn panic_message(value: Box<dyn std::any::Any + Send>) -> String {
         .unwrap_or_else(|| "runtime callback failed".into())
 }
 struct NativeClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
 impl Default for NativeClock {
@@ -399,8 +399,8 @@ impl Default for NativeClock {
         }
     }
 }
-impl IObservable<TimeSpan> for NativeClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for NativeClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

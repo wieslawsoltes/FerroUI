@@ -9,7 +9,9 @@ use ferrodock_model::services::{
 use ferrodock_model::BoxedValue;
 use ferroui_reactiveui::{reactive_object, IReactiveObject, IReactiveObjectExt, ReactiveObject};
 use ferroui_system::collections::object_model::ObservableCollection;
-use ferroui_system::threading::{tasks::Task, SynchronizationContext};
+use ferroui_system::task::Schedule;
+use ferroui_system::task::Shared;
+use ferroui_system::ObservableError;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
@@ -26,17 +28,18 @@ pub struct DockDialogService {
 }
 reactive_object!(DockDialogService);
 impl DockDialogService {
-    /// Creates a dialog service with optional global scope and notification context.
+    /// Creates a dialog service with optional global scope and notification schedule
+    /// (the `SynchronizationContext` of the reference; a dispatcher's `task_schedule(priority)`).
     pub fn new(
         global: Option<Rc<dyn IDockGlobalDialogService>>,
-        context: Option<Arc<dyn SynchronizationContext>>,
+        schedule: Option<Arc<dyn Schedule>>,
     ) -> Rc<Self> {
         Rc::new_cyclic(|runtime| {
             let requests = ObservableCollection::new();
             Self {
                 reactive: ReactiveObject::new(),
                 global,
-                dispatcher: ServiceDispatcher::new(context, None),
+                dispatcher: ServiceDispatcher::new(schedule, None),
                 read_only: ReadOnlyObservableCollection::new(requests.clone()),
                 requests,
                 active: RefCell::new(None),
@@ -62,7 +65,7 @@ impl DockDialogService {
         &self,
         content: DialogContent,
         title: Option<String>,
-    ) -> Task<Option<BoxedValue>> {
+    ) -> Shared<Result<Option<BoxedValue>, ObservableError>> {
         let service = self.runtime.upgrade().expect("live dialog service");
         spawn_catching(async move {
             let weak = service.runtime.clone();
@@ -90,7 +93,7 @@ impl DockDialogService {
             service
                 .dispatcher
                 .invoke_async(move || {
-                    if item.task().is_completed() {
+                    if item.task().is_finished() {
                         return;
                     }
                     target.requests.add(item.clone());
@@ -98,7 +101,7 @@ impl DockDialogService {
                     target.raise_property_changed("HasDialogs");
                 })
                 .await?;
-            request.task().await
+            request.task().flatten().await
         })
     }
     /// Closes the supplied request on the dispatcher, including foreign/removed requests.
@@ -166,7 +169,7 @@ impl IDockDialogService for DockDialogService {
         &self,
         content: DialogContent,
         title: Option<String>,
-    ) -> Task<Option<BoxedValue>> {
+    ) -> Shared<Result<Option<BoxedValue>, ObservableError>> {
         self.show_async_boxed(content, title)
     }
     fn close(&self, request: Rc<DialogRequest>, result: Option<BoxedValue>) {

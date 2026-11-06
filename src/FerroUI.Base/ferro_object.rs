@@ -1,5 +1,5 @@
 use crate::data::{BindingBase, BindingError, BindingExpressionBase, BindingPriority, BindingValue, BindingValueType};
-use crate::property_store::{BindingSource, ValueStore};
+use crate::property_store::{BindingSource, DirectBindingObserver, LocalValueBindingObserver, ValueStore};
 use crate::reactive::{Disposable, IDisposable, IObservable};
 use crate::threading::Dispatcher;
 use crate::type_system::{__forwards_to_parent, cast_this, parent_vtable};
@@ -466,6 +466,15 @@ impl FerroObject {
         }
     }
 
+    /// The number of entries of the list of inheritance children, children dropped and not yet
+    /// forgotten included: the length that adding and removing a child walks. For tests that
+    /// check that the list stays proportional to the live children.
+    #[cfg(feature = "testing")]
+    #[doc(hidden)]
+    pub fn inheritance_child_entries(&self) -> usize {
+        self.inheritance_children.borrow().len()
+    }
+
     pub(crate) fn inheritance_children(&self) -> Vec<Ref<FerroObject>> {
         let mut children = self.inheritance_children.borrow_mut();
         if children.is_empty() {
@@ -674,7 +683,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Typed(source), priority)
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_typed, BindingSource::typed,
+        )
     }
 
     /// Binds a property to an observable of binding values.
@@ -685,7 +696,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Value(source), priority)
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_value, BindingSource::value,
+        )
     }
 
     /// Binds a property to an observable of untyped values.
@@ -696,7 +709,7 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Untyped(source), priority)
+        self.values.add_boxed_binding(self, property, source, priority)
     }
 
     /// Coerces the specified property.
@@ -757,7 +770,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<T>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Typed(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_typed)
     }
 
     /// Binds a direct property to an observable of binding values.
@@ -767,7 +780,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<BindingValue<T>>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Value(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_value)
     }
 
     /// Binds a direct property to an observable of untyped values.
@@ -777,7 +790,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<BoxedValue>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Untyped(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_untyped)
     }
 
     fn writable_direct<T: PropertyValue>(
@@ -906,22 +919,28 @@ impl FerroObject {
         priority: BindingPriority,
         is_effective_value: bool,
     ) {
-        let e = FerroPropertyChangedEventArgs::new(
-            self,
-            property,
-            old_value.map(|v| v as &dyn Any),
-            new_value,
-            priority,
-            is_effective_value,
-        );
+        self.raise_property_changed_values(property, old_value.map(|v| v as &dyn Any), new_value, priority, is_effective_value);
+    }
+
+    /// [`raise_property_changed`](Self::raise_property_changed) with values
+    /// that are already untyped (compiled once, not per value type).
+    pub(crate) fn raise_property_changed_values(
+        &self,
+        property: &'static FerroProperty,
+        old_value: Option<&dyn Any>,
+        new_value: &dyn Any,
+        priority: BindingPriority,
+        is_effective_value: bool,
+    ) {
+        let e = FerroPropertyChangedEventArgs::new(self, property, old_value, new_value, priority, is_effective_value);
         self.notify_property_changed(&e);
     }
 
-    pub(crate) fn raise_inherited_property_changed<T: PropertyValue>(
+    pub(crate) fn raise_inherited_property_changed(
         &self,
         property: &'static FerroProperty,
-        old_value: &T,
-        new_value: &T,
+        old_value: &dyn Any,
+        new_value: &dyn Any,
         priority: BindingPriority,
     ) {
         let e = FerroPropertyChangedEventArgs::new(

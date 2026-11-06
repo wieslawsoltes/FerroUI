@@ -30,6 +30,8 @@ ferroui-remote-protocol.workspace = true
 uuid = { workspace = true, features = ["v4"] }
 # The errors of a document, for their class names, lines and positions.
 xamlx.workspace = true
+# The URLs of the transports (C5 of #423).
+url.workspace = true
 
 # The windowing platform of the `win32` method of the previewer.
 [target.'cfg(windows)'.dependencies]

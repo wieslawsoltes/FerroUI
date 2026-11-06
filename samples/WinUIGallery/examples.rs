@@ -9,6 +9,7 @@ use ferroui_controls::{
     Border, Button, ComboBox, Control, NumberBox, RadioButtons, Slider, SplitButton,
     TextBlock, TextBox, ToggleSplitButton,
 };
+use ferroui_markup_xaml::markup_extensions::XBindings;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::Cell;
@@ -19,6 +20,10 @@ pub struct PageAdaptation {
     pub page_id: &'static str,
     pub xaml: &'static str,
     pub notes: &'static str,
+    /// Whether the page is `ported` in `port-status.json`: every catalog example of the page has
+    /// a native adaptation with its events and bindings, or a recorded reason why it cannot.
+    /// Otherwise the page is `partial`.
+    pub ported: bool,
 }
 
 macro_rules! page {
@@ -27,6 +32,15 @@ macro_rules! page {
             page_id: $id,
             xaml: include_str!(concat!("Pages/", $id, ".xaml")),
             notes: $notes,
+            ported: false,
+        }
+    };
+    (ported $id:literal, $notes:literal) => {
+        PageAdaptation {
+            page_id: $id,
+            xaml: include_str!(concat!("Pages/", $id, ".xaml")),
+            notes: $notes,
+            ported: true,
         }
     };
 }
@@ -41,7 +55,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("NavigationView", "All eight source compositions use native NavigationView, items, hierarchy, footer, settings and Frame navigation. Model templates and C# handlers are explicitly adapted to Rust. Top overflow, selectors, transition effects and platform visual/accessibility acceptance remain pending."),
     page!("ProgressRing", "Both source examples use the native ProgressRing, active state, background options and original NumberBox empty-value recovery. Native arc animation is an explicit adaptation; exact Lottie motion, custom animated sources and platform accessibility acceptance remain pending."),
     page!("RatingControl", "Both source examples use native RatingControl input, caption changes, clearing/read-only options and half-step placeholder binding. Programmatic updates retain the original caption; user ValueChanged selects Your rating. Exact source animation and host accessibility acceptance remain pending."),
-    page!("InfoBar", "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."),
+    page!("InfoBar", "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."),
     page!("Popup", "The source open/close handlers and offset/light-dismiss options use the native Popup. Placement is explicitly relative to its button; WinUI absolute-placement, acrylic and screen-edge parity remain pending."),
     page!("Clipboard", "Text copy/paste, available formats and clear use the host clipboard service asynchronously. Bitmap/file operations, history/roaming, content-change notifications and original accessibility announcements remain pending."),
     page!("PullToRefresh", "The source RefreshContainer request/deferral behavior inserts NewControl on the UI dispatcher. ListView is explicitly adapted to ListBox; the custom visualizer and full gesture/animation parity remain pending."),
@@ -53,6 +67,8 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("AccessibilityColorContrast", "The original luminance/contrast calculation and pass thresholds run in Rust. Opaque RGB text inputs replace the Gallery's custom inline color pickers; those picker controls remain pending."),
     page!("AutoSuggestBox", "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending."),
     page!("NumberBox", "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending."),
+    page!(ported "PersonPicture", "The source example uses native PersonPicture (WinUI's control in ferroui-controls) with its RadioButtons handler: the profile image, the display name Jane Doe and the initials SB. The profile image is the gallery's PersonPicture image instead of the remote image of the source."),
+    page!(ported "PagerControl", "All three source examples use native PagerControl (WinUI's control in ferroui-controls): the basic pager, the number box and button panel display modes, and unbounded number box and button panel pagers. The page has no code-behind upstream."),
     page!("PipsPager", "The existing PipsPager provides page counts, selection and previous/next controls; wrapping remains explicit."),
     page!("TabView", "Native TabControl displays tab content; WinUI add/close/drag contracts remain pending."),
     page!("Pivot", "Native TabControl adapts the basic Pivot sample; Pivot-specific input and animation remain pending."),
@@ -60,7 +76,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("Geometry", "Shared Path geometry renders a triangle and a cubic curve; the upstream geometry editor remains pending."),
     page!("IconElement", "The original path, font and symbol icon examples use native PathIcon and the native FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending."),
     page!("Color", "Native brushes display the color swatches; the full upstream color tools are not claimed."),
-    page!("Spacing", "Native element binding changes StackPanel spacing interactively."),
+    page!("Spacing", "Native element x:Bind (the compiled x:Bind core) changes StackPanel spacing interactively."),
     page!("XamlStyles", "The explicit WinUI style example is adapted to an opt-in ControlTheme; implicit WinUI style semantics are not changed globally."),
     page!("Templates", "A shared ControlTemplate presents button content through TemplateBinding."),
     page!("CustomUserControls", "A native UserControl hosts the counter behavior; the original additional custom controls remain pending."),
@@ -103,10 +119,21 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("TreeView", "Native TreeViewItem hierarchy demonstrates expansion and selection; WinUI TreeViewNode parity is pending."),
     page!("MenuBar", "Native Menu with MenuItems represents WinUI MenuBar. Shortcuts remain shared key gestures."),
     page!("MenuFlyout", "Native MenuFlyout/MenuItem and separators preserve popup ownership and selection behavior."),
-    page!("SplitView", "Native SplitView uses explicit IsPaneOpen binding to a ToggleButton; no x:Bind rewrite is assumed."),
-    page!("Binding", "Element-name binding is explicitly ported to a normal shared Binding with an explicit mode."),
+    page!("SplitView", "Native SplitView binds IsPaneOpen to a ToggleButton with x:Bind, compiled by the x:Bind core."),
+    page!("Binding", "The element bindings are the source OneWay x:Bind, compiled by the x:Bind core."),
     page!("XamlResources", "Static and dynamic resource examples use the shared resource dictionary; broader WinUI lookup rules remain tracked."),
     page!("AccessibilityKeyboard", "Tab order examples use native enabled/focusable controls and explicit TabIndex."),
+    // G1 (#418): pages of controls that exist on main.
+    page!(ported "ThemeShadow", "The source example uses the native ThemeShadow as the Border's Shadow with its Loaded and ValueChanged handlers in Rust: the grid is a receiver of the shadow and the slider sets the Z of the Border's Translation, the elevation the shadow is drawn at. As in WinUI 3 the theme shadow is a drop shadow; the receivers are kept but draw nothing. Rendering parity against Windows remains pending."),
+    page!(ported "Acrylic", "All three source examples use the native AcrylicBrush: the theme's AcrylicInAppFillColorDefaultBrush, and the page's two brushes with the source's values, changed by the Loaded, Slider and ComboBox handlers in Rust (tint opacity, tint colour, fallback colour, tint luminosity opacity). The SolidColorBrush items and their ColorTemplate are composed swatches; the adaptive VisualStateManager sizes are the wide ones. Rendering parity against Windows remains pending."),
+    page!(ported "SystemBackdrops", "All three source examples open the source's sample windows: Window.SystemBackdrop with MicaBackdrop (Base, BaseAlt) and DesktopAcrylicBackdrop, and MicaController and DesktopAcrylicController (Base, Thin) with a SystemBackdropConfiguration that follows activation, the theme and high contrast; SetBackdrop falls back as the C# does where the platform has no material, and the theme box sets the window's theme. The announcement is a live region; the badge logo image of the window title is not shown."),
+    page!(ported "TitleBar", "All three source examples use the native TitleBar: title, subtitle and button visibility bound to the options, and the two sample windows (TitleBar.IsDragRegion on a status badge, RecomputeDragRegions after adding a button; the end-to-end window with the back button bound to Frame.CanGoBack, BackRequested, PaneToggleRequested and NavigationView navigation). ImageIconSource is a PathIconSource and PersonPicture a composed circle with the initials (neither exists in FerroUI)."),
+    page!("RichEditBox", "The simple editor, the custom context menu command and the formatting editor use the native RichEditBox and its text object model: bold/italic toggles, font colors with the TextChanged rule, FindText highlighting and RTF open/save through the window's storage provider. The context menu is the theme's MenuFlyout (no CommandBarFlyout or SelectionFlyout). Both math examples need the Windows RichEdit math mode and are recorded as not applicable with visible diagnostics."),
+    page!(ported "RichTextBlock", "All four source examples use the native RichTextBlock: formatted runs and a hyperlink, SelectionHighlightColor, OverflowContentTarget through two RichTextBlockOverflow columns, and a TextHighlighter that follows the ComboBox color over the source range. The overflow targets keep the source x:Bind of the elements; exact text layout and host accessibility remain pending."),
+    page!("ItemsRepeater", "All six source examples, and the nested repeaters of the source page, use the native ItemsRepeater of ferroui-controls-repeater: observable sources, the stack, uniform grid and flow layouts, ItemsRepeaterScrollHost, native IDataTemplateSelector selectors and the Gallery ActivityFeedLayout and VariedImageSizeLayout ported to Rust VirtualizingLayouts. x:Bind becomes {Binding} over markup types; the composition scale animation becomes a scale set after each layout pass. The accessibility announcements and the key-index mapping of the recipe source remain pending."),
+    page!(ported "LayoutPanel", "The source example uses the native LayoutPanel with the FeaturedTileLayout of the source ported to a Rust NonVirtualizingLayout; the options switch to a vertical StackLayout and set the spacing, as the C# handlers do."),
+    page!(ported "InkCanvas", "All three source examples use the native InkCanvas, InkPresenter and InkToolbar with the handlers of InkCanvasPage.xaml.cs in Rust: input devices, ink colour, stroke width, inking enabled and clear; the toolbar's available tools, active tool in both directions, flyout placement and clear; save, clear and restore with the source's messages. Header is composed, TargetInkCanvas is set in Rust and the saved strokes are the bytes of InkStrokeContainer::save in memory. Routed window input and rendering acceptance remain pending."),
+    page!("Chart", "The seven source examples map onto the native CartesianChart with the data and option handlers of ChartPage.xaml.cs in Rust: category labels, legend, bar orientation and category sort, grid lines and axis visibility, series visibility, dash style, thickness, markers and data labels, a day axis for the DateTimeAxis with its intervals and label formats, and the live series. LegendTitle, tick marks, axis brushes, marker shapes and per-point overrides are not available; rendering parity remains pending."),
 ];
 
 pub fn find(page_id: &str) -> Option<&'static PageAdaptation> {
@@ -118,6 +145,9 @@ pub fn find(page_id: &str) -> Option<&'static PageAdaptation> {
 pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::assets::register();
     ferroui_controls_color_picker::register_types();
+    ferroui_controls_repeater::register_types();
+    ferroui_controls_inking::register_types();
+    ferroui_controls_livecharts::register_types();
     let root = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(sample.xaml, None)?;
     crate::frame_sample::wire(&root)?;
     crate::navigation_view_samples::wire(&root)?;
@@ -129,8 +159,28 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::color_picker_samples::wire(&root);
     crate::connected_animation_samples::wire(&root)?;
     crate::media_samples::wire(&root);
+    crate::materials_samples::wire(&root);
+    crate::window_samples::wire(&root);
+    crate::text_samples::wire(&root);
+    crate::repeater_samples::wire(&root);
+    crate::ink_samples::wire(&root);
+    crate::chart_samples::wire(&root);
     wire(&root);
+    initialize_x_bind(&root)?;
     Ok(root)
+}
+
+/// The `{x:Bind}` bindings of a page (#525): initialized once the page and its Rust code-behind
+/// are wired, as WinUI's `Bindings.Initialize` runs on `Loading` after the constructor. A page that
+/// is attached to a window later is not read again (the attach finds them initialized). A
+/// binding that cannot be read is an error of the page.
+fn initialize_x_bind(root: &Ref<Control>) -> Result<(), XamlLoadError> {
+    match XBindings::get_for_root(root) {
+        Some(bindings) => bindings
+            .initialize()
+            .map_err(|errors| XamlLoadError::with_message(format!("x:Bind: {errors}"))),
+        None => Ok(()),
+    }
 }
 
 fn wire(root: &Ref<Control>) {

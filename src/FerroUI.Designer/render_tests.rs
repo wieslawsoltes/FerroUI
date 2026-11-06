@@ -3,7 +3,7 @@ use crate::{
     AssetViewMode, DesignerWorkspace, NavigationPane, PreviewStatus, STARTER_XAML,
     WorkspaceViewMode,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::imaging::{PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
@@ -26,7 +26,7 @@ use std::rc::Rc;
 // WinUI control transitions require the same global clock service as a running application.
 // Keep theme transitions deterministic; document animation uses its own seekable native clocks.
 struct RenderClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
     now: Cell<f64>,
 }
@@ -34,11 +34,11 @@ impl RenderClock {
     fn pulse(&self) {
         let now = self.now.get() + 1.0;
         self.now.set(now);
-        self.subject.on_next(TimeSpan::from_seconds(now));
+        self.subject.on_next(SignedDuration::from_seconds(now));
     }
 }
-impl IObservable<TimeSpan> for RenderClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for RenderClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

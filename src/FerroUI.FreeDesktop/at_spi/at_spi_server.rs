@@ -16,8 +16,8 @@ use super::dbus::proxies::{OrgA11yAtspiSocketProxy, OrgA11yBusProxy};
 use super::dbus::types::AtSpiObjectReference;
 use super::handlers::at_spi_event_object_handler::AtSpiEventObjectHandler;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::reactive::Subscription;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::Ref;
 use ferroui_controls::automation::peers::AutomationPeer;
 use std::cell::{Cell, RefCell};
@@ -39,8 +39,8 @@ pub struct AtSpiServer {
     cache_handler: RefCell<Option<Rc<AtSpiCacheHandler>>>,
     app_root_event_handler: RefCell<Option<Rc<AtSpiEventObjectHandler>>>,
     registry_tracker: RefCell<Option<Rc<AtSpiRegistryEventTracker>>>,
-    app_root_registration: RefCell<Option<Rc<dyn IDisposable>>>,
-    cache_registration: RefCell<Option<Rc<dyn IDisposable>>>,
+    app_root_registration: RefCell<Option<Subscription>>,
+    cache_registration: RefCell<Option<Subscription>>,
     /// An embed call is in flight (`_embedTask`).
     embed_in_flight: Cell<bool>,
     is_embedded: Cell<bool>,
@@ -119,9 +119,12 @@ impl AtSpiServer {
         let tracker = AtSpiRegistryEventTracker::new(connection.connection().clone());
         *self.registry_tracker.borrow_mut() = Some(tracker.clone());
         // Registry tracking is best-effort; AT-SPI server remains functional without it.
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            tracker.initialize_async().await;
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                tracker.initialize_async().await;
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     pub fn add_window(&self, window_peer: &Ref<AutomationPeer>) {
@@ -162,9 +165,12 @@ impl AtSpiServer {
         }
 
         let Some(this) = self.weak_self.upgrade() else { return };
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            this.embed_and_announce_once_async().await;
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                this.embed_and_announce_once_async().await;
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     async fn embed_and_announce_once_async(&self) {
@@ -440,7 +446,7 @@ impl AtSpiServer {
         *self.app_root_event_handler.borrow_mut() = Some(event_handler.clone());
 
         let targets: Vec<Rc<dyn DBusInterface>> = vec![accessible_handler, application_handler, event_handler];
-        *self.app_root_registration.borrow_mut() = Some(connection.register_objects(ROOT_PATH, targets));
+        *self.app_root_registration.borrow_mut() = Some(Subscription::new(connection.register_objects(ROOT_PATH, targets)));
     }
 
     fn register_cache_path(&self) {
@@ -454,7 +460,7 @@ impl AtSpiServer {
         }
 
         let targets: Vec<Rc<dyn DBusInterface>> = vec![cache_handler];
-        *self.cache_registration.borrow_mut() = Some(connection.register_objects(CACHE_PATH, targets));
+        *self.cache_registration.borrow_mut() = Some(Subscription::new(connection.register_objects(CACHE_PATH, targets)));
     }
 
     async fn get_accessibility_bus_address_async() -> String {

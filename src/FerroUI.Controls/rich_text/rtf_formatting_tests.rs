@@ -13,13 +13,13 @@ use ferroui_base::media::{
     TextDecorationLocation, TextDecorationUnit, TextDecorations,
 };
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::locale;
 use ferroui_base::Thickness;
 
 fn empty_paragraph_format() -> ParagraphFormat {
     ParagraphFormat {
         character: CharacterFormat {
-            language: Some(CultureInfo::get_culture_info("pl-PL")),
+            language: Some(locale!("pl-PL")),
             font_family: Some(FontFamily::new("Empty paragraph font")),
             font_size: Some(24.0),
             font_style: Some(FontStyle::Italic),

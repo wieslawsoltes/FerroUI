@@ -194,6 +194,8 @@ mod button_tests;
 #[cfg(test)]
 mod property_defaults_tests;
 #[cfg(test)]
+mod timer_interval_tests;
+#[cfg(test)]
 mod control_focus_adorner_tests;
 #[cfg(test)]
 mod hotkey_manager_tests;
@@ -343,6 +345,20 @@ mod number_box_tests;
 mod radio_buttons_tests;
 #[cfg(test)]
 mod rating_control_tests;
+// WinUI's PersonPicture and the contact it shows (docs/porting/winui-controls.md, G2 of #418).
+mod contact;
+mod person_picture;
+pub use contact::Contact;
+pub use person_picture::PersonPicture;
+#[cfg(test)]
+mod person_picture_tests;
+// WinUI's PagerControl (docs/porting/winui-controls.md, G2 of #418).
+mod pager_control;
+pub use pager_control::{
+    PagerControl, PagerControlButtonVisibility, PagerControlDisplayMode, PagerControlSelectedIndexChangedEventArgs,
+};
+#[cfg(test)]
+mod pager_control_tests;
 // WinUI's navigation: Frame, its pages and the navigation model in the namespace
 // FerroUI.Navigation (docs/porting/winui-controls.md, section 7).
 pub mod navigation;
@@ -550,6 +566,8 @@ pub use rich_text_block_overflow::RichTextBlockOverflow;
 pub use rich_text_layout::RichTextLineMetrics;
 #[cfg(test)]
 mod rich_text_block_tests;
+#[cfg(test)]
+mod rich_text_selection_overlay_tests;
 mod text_changed_event_args;
 mod text_changing_event_args;
 mod text_layout_rounding_placement;

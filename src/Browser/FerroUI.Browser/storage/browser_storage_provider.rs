@@ -4,7 +4,6 @@ use crate::browser_app_builder::BrowserPlatformOptions;
 use crate::interop::completion_helper::PromiseError;
 use crate::interop::storage_helper::{self, StorageItemProperties};
 use crate::interop::{ferro_module, non_null, JsObject};
-use ferroui_base::animation::TimeSpan;
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::file_io::{DecodeResult, StorageBookmarkHelper, StorageProviderHelpers};
 use ferroui_base::platform::storage::{
@@ -14,12 +13,14 @@ use ferroui_base::platform::storage::{
     WellKnownFolder,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{DateTimeOffset, Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use std::any::Any;
 use std::cell::RefCell;
 use std::io::{self, Read, Write};
 use std::rc::{Rc, Weak};
+use std::time::{Duration, SystemTime};
+use url::Url;
 use wasm_bindgen::JsCast;
 
 /// The platform key of the bookmarks of the browser.
@@ -252,11 +253,11 @@ impl IStorageProvider for BrowserStorageProvider {
         })
     }
 
-    fn try_get_file_from_path_async(&self, _file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
+    fn try_get_file_from_path_async(&self, _file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
         ready(None)
     }
 
-    fn try_get_folder_from_path_async(&self, _folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
+    fn try_get_folder_from_path_async(&self, _folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
         ready(None)
     }
 
@@ -336,12 +337,11 @@ impl JsStorageItem {
         self.file_handle().and_then(|handle| storage_helper::name_of(&handle)).unwrap_or_default()
     }
 
-    fn path(&self) -> Uri {
-        let name = self.name();
-        // A name with a colon would read as a scheme; such a relative reference starts with "./".
-        Uri::new(&name, UriKind::Relative)
-            .or_else(|_| Uri::new(&format!("./{name}"), UriKind::Relative))
-            .expect("a dot segment makes any name a relative reference")
+    /// The relative reference of the name, as upstream (`new Uri(Name, UriKind.Relative)`):
+    /// the items of the page have no path of a file system, so no URL (F12 of
+    /// docs/idiomatic-rust-signatures.md), and the local path of the item is none.
+    fn path(&self) -> UriRef {
+        relative_path_of_name(self.name())
     }
 
     fn get_basic_properties_async(&self) -> LocalBoxFuture<ItemProperties> {
@@ -451,8 +451,27 @@ impl JsStorageItem {
     }
 }
 
-fn from_unix_time_milliseconds(milliseconds: i64) -> DateTimeOffset {
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(milliseconds * 10_000))
+/// The path of an item of the page: the relative reference of its name. A
+/// name that would read as a scheme (`a:b`) starts with `./`, so that the
+/// text of the path is a relative reference again (`UriRef::parse`).
+fn relative_path_of_name(name: String) -> UriRef {
+    match UriRef::parse(&name) {
+        Ok(UriRef::Relative(_)) => UriRef::Relative(name.into()),
+        _ => UriRef::Relative(format!("./{name}").into()),
+    }
+}
+
+/// The instant of a time stamp of the page (`lastModified`), in milliseconds
+/// since the Unix epoch; the epoch when the platform's `SystemTime` cannot
+/// hold it.
+fn from_unix_time_milliseconds(milliseconds: i64) -> SystemTime {
+    let duration = Duration::from_millis(milliseconds.unsigned_abs());
+    let instant = if milliseconds < 0 {
+        SystemTime::UNIX_EPOCH.checked_sub(duration)
+    } else {
+        SystemTime::UNIX_EPOCH.checked_add(duration)
+    };
+    instant.unwrap_or(SystemTime::UNIX_EPOCH)
 }
 
 macro_rules! impl_js_storage_item {
@@ -468,7 +487,7 @@ macro_rules! impl_js_storage_item {
                 self.base.name()
             }
 
-            fn path(&self) -> Uri {
+            fn path(&self) -> UriRef {
                 self.base.path()
             }
 
@@ -750,7 +769,26 @@ mod tests {
     #[test]
     fn last_modified_converts_from_unix_milliseconds() {
         let date = from_unix_time_milliseconds(86_400_000);
-        assert_eq!(date, DateTimeOffset::UNIX_EPOCH.add_days(1.0));
+        assert_eq!(date, SystemTime::UNIX_EPOCH + Duration::from_secs(86_400));
+    }
+
+    #[test]
+    fn the_path_of_an_item_is_the_relative_reference_of_its_name_and_no_local_path() {
+        // F12 of docs/idiomatic-rust-signatures.md: an item of the page has no file URL, so
+        // the storage helpers give it no local path on the browser either.
+        let path = relative_path_of_name("notes 1.txt".to_owned());
+        assert_eq!(UriRef::Relative("notes 1.txt".into()), path);
+        assert_eq!(None, StorageProviderHelpers::try_get_path_from_file_uri(path.as_url()));
+        // A name that reads as a URL is made relative, and the path reads back as relative.
+        for name in ["a:b.txt", "mailto:b.txt"] {
+            let path = relative_path_of_name(name.to_owned());
+            assert!(UriRef::parse(&path.to_string()).unwrap().is_relative(), "{path}");
+        }
+
+        // A file URL made on the browser has the path it was made from, as on every target.
+        let url = StorageProviderHelpers::uri_from_file_path("/documents/a b.txt", false);
+        assert_eq!("file:///documents/a%20b.txt", url.as_str());
+        assert_eq!(Some("/documents/a b.txt"), StorageProviderHelpers::try_get_path_from_file_uri(Some(&url)).as_deref());
     }
 
     #[test]

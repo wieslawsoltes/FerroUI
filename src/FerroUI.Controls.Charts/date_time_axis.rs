@@ -1,5 +1,5 @@
 use crate::{CartesianAxis, ChartError, DateTimeIntervalType};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::utilities::{CultureInfo, DateTime, DateTimeOffset};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroObject,
@@ -300,7 +300,7 @@ impl DateTimeAxis {
             other => other,
         };
         value
-            .try_to_string_format(format, &CultureInfo::current_culture())
+            .try_to_string_format(format, &CultureInfo::current_formatting())
             .unwrap_or_else(|_| {
                 format!(
                     "{:04}-{:02}-{:02}",
@@ -330,15 +330,15 @@ fn default_format(interval: DateTimeIntervalType) -> &'static str {
 
 fn span_in_days(minimum: DateTimeOffset, maximum: DateTimeOffset) -> f64 {
     (maximum.utc_date_time().ticks() - minimum.utc_date_time().ticks()) as f64
-        / TimeSpan::TICKS_PER_DAY as f64
+        / SignedDuration::TICKS_PER_DAY as f64
 }
 
 /// Ticks at whole minutes or hours (the smallest step of 1, 5, 15 or 30 minutes or 1, 2, 3,
 /// 6 or 12 hours that gives at most `target` ticks), or the two bounds when the range is
 /// shorter than a minute.
 fn sub_day_ticks(min: DateTime, max: DateTime, target: i64) -> Vec<DateTimeOffset> {
-    const MINUTE: i64 = TimeSpan::TICKS_PER_MINUTE;
-    const HOUR: i64 = TimeSpan::TICKS_PER_HOUR;
+    const MINUTE: i64 = SignedDuration::TICKS_PER_MINUTE;
+    const HOUR: i64 = SignedDuration::TICKS_PER_HOUR;
     let (low, high) = (min.ticks(), max.ticks());
     let span = high - low;
     let step = [
@@ -361,7 +361,7 @@ fn sub_day_ticks(min: DateTime, max: DateTime, target: i64) -> Vec<DateTimeOffse
         tick += step;
     }
     while tick <= high {
-        ticks.push(DateTimeOffset::from_ticks(tick, TimeSpan::ZERO));
+        ticks.push(DateTimeOffset::from_ticks(tick, SignedDuration::ZERO));
         tick += step;
     }
     if ticks.len() < 2 {
@@ -371,7 +371,7 @@ fn sub_day_ticks(min: DateTime, max: DateTime, target: i64) -> Vec<DateTimeOffse
 }
 
 fn from_utc(value: DateTime) -> DateTimeOffset {
-    DateTimeOffset::from_ticks(value.ticks(), TimeSpan::ZERO)
+    DateTimeOffset::from_ticks(value.ticks(), SignedDuration::ZERO)
 }
 
 fn validate_bounds(

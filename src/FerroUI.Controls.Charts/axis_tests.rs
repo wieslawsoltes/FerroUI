@@ -3,7 +3,7 @@ use crate::{
     Axis, CartesianAxis, CategoryAxis, CategorySortKey, DateTimeAxis, DateTimeIntervalType,
     GridLines, LinearAxis, NumericRange, SortOrder,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Colors, IBrush};
 use ferroui_base::utilities::{CultureInfo, DateTimeOffset};
@@ -11,7 +11,7 @@ use ferroui_base::{Ref, StyledProperty};
 use std::rc::Rc;
 
 fn date(year: i32, month: i32, day: i32) -> DateTimeOffset {
-    DateTimeOffset::new(year, month, day, 0, 0, 0, TimeSpan::ZERO)
+    DateTimeOffset::new(year, month, day, 0, 0, 0, SignedDuration::ZERO)
 }
 
 fn brush_properties() -> [&'static StyledProperty<Option<Rc<dyn IBrush>>>; 5] {
@@ -355,7 +355,7 @@ fn invalid_raw_date_bounds_preserve_instants_and_compare_offsets() {
         (Some(minimum), Some(maximum)),
         (axis.minimum(), axis.maximum())
     );
-    let same_instant = DateTimeOffset::new(2020, 1, 1, 2, 0, 0, TimeSpan::from_hours(2.0));
+    let same_instant = DateTimeOffset::new(2020, 1, 1, 2, 0, 0, SignedDuration::from_hours(2.0));
     assert!(axis.set_maximum(Some(same_instant)).is_err());
 }
 
@@ -542,7 +542,7 @@ fn automatic_date_labels_use_the_interval_the_ticks_were_made_with() {
         axis.resolved_interval(date(2020, 1, 1), date(2020, 7, 1), 8)
     );
     assert_eq!(
-        date(2020, 1, 1).try_to_string_format("MMM yyyy", &CultureInfo::current_culture()).unwrap(),
+        date(2020, 1, 1).try_to_string_format("MMM yyyy", &CultureInfo::current_formatting()).unwrap(),
         months[0].1
     );
     // An explicit format still wins.
@@ -552,7 +552,7 @@ fn automatic_date_labels_use_the_interval_the_ticks_were_made_with() {
 
 #[test]
 fn a_date_range_inside_one_day_has_time_ticks() {
-    let at = |hour: i32, minute: i32| DateTimeOffset::new(2024, 3, 5, hour, minute, 0, TimeSpan::ZERO);
+    let at = |hour: i32, minute: i32| DateTimeOffset::new(2024, 3, 5, hour, minute, 0, SignedDuration::ZERO);
     let axis = DateTimeAxis::new();
     let ticks = axis.labeled_ticks(at(6, 0), at(12, 0), 8);
     assert!(ticks.len() >= 2, "{ticks:?}");
@@ -565,6 +565,6 @@ fn a_date_range_inside_one_day_has_time_ticks() {
     assert!(axis.ticks(at(6, 0), at(12, 0), 8).len() >= 2);
     // Shorter than a minute: the two bounds.
     let start = at(6, 0);
-    let end = DateTimeOffset::new(2024, 3, 5, 6, 0, 30, TimeSpan::ZERO);
+    let end = DateTimeOffset::new(2024, 3, 5, 6, 0, 30, SignedDuration::ZERO);
     assert_eq!(vec![start, end], axis.ticks(start, end, 8));
 }

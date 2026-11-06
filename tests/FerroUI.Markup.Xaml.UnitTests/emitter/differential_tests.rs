@@ -94,6 +94,219 @@ fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
     ), "the fused resource factory must retain its scoped namespace provider");
 }
 
+/// Not from upstream (C5 of #423, decision O2 of docs/idiomatic-rust-signatures.md): the
+/// compiled form of the test of `xaml::ferro_intrinsics_tests`. A time span literal for a
+/// property that declares a `Duration` (`AcrylicBrush.TintTransitionDuration`) is set as the
+/// duration of the same value (`rt::duration`, which the compiler writes only for a literal
+/// that is not negative); the run-time loader sets the same value.
+#[test]
+fn a_time_span_literal_sets_a_duration_property() {
+    let _app = xaml_test_base();
+    let document = ("acrylic_brush_duration.xaml", "<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='0:0:1.5'/>");
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    assert!(
+        generated.source.contains("SignedDuration::__markup_FromTicks_0(15000000_i64);")
+            && generated.source.contains("tint_transition_duration_property(), rt::duration(value_0));"),
+        "{}",
+        generated.source
+    );
+
+    let loaded = try_load(document.1).expect("the brush loads");
+    let brush = ValueTypes::as_object(&*loaded).and_then(|object| object.cast::<ferroui_base::media::AcrylicBrush>()).expect("a brush");
+    assert_eq!(brush.tint_transition_duration(), std::time::Duration::from_millis(1500));
+}
+
+/// Not from upstream (C5 of #423, decision O2): a negative time span literal for a property
+/// that declares a `Duration` is an error of the compiler, which names the property and the
+/// time span, and a load error of the run-time loader.
+#[test]
+fn a_negative_time_span_literal_for_a_duration_property_is_an_error() {
+    let _app = xaml_test_base();
+    let document = ("acrylic_brush_negative_duration.xaml", "<AcrylicBrush xmlns='https://github.com/ferroui' TintTransitionDuration='-0:0:1'/>");
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+    assert!(
+        reason.contains("TintTransitionDuration: the time span -00:00:01 is negative, and a `Duration` cannot be negative"),
+        "{reason}"
+    );
+    assert!(!generated.source.contains("tint_transition_duration_property()"), "{}", generated.source);
+
+    let error = match try_load(document.1) {
+        Ok(_) => panic!("a negative time span is not a duration"),
+        Err(error) => error,
+    };
+    let described = describe(&error);
+    assert!(described.contains("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration."), "{described}");
+}
+
+/// Not from upstream (C5 of #423, step T3, decision O2): the compiled form of
+/// `xaml::ferro_intrinsics_tests::a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error`.
+/// The timer properties of the controls declare a `Duration`: the compiler sets a literal that
+/// is not negative with `rt::duration` and refuses a negative one, naming the property.
+#[test]
+fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error() {
+    let _app = xaml_test_base();
+    let documents = [
+        ("CaretBlinkInterval", "<TextBox xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+        ("CaretBlinkInterval", "<TextPresenter xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+        ("CaretBlinkInterval", "<RichEditBox xmlns='https://github.com/ferroui' CaretBlinkInterval='{}'/>"),
+        ("HideDelay", "<ScrollBar xmlns='https://github.com/ferroui' HideDelay='{}'/>"),
+        ("ShowDelay", "<ScrollBar xmlns='https://github.com/ferroui' ShowDelay='{}'/>"),
+        ("MinimumPopulateDelay", "<AutoCompleteBox xmlns='https://github.com/ferroui' MinimumPopulateDelay='{}'/>"),
+    ];
+    for (property, document) in documents {
+        let positive = document.replace("{}", "0:0:0.5");
+        let generated = generate_file(
+            generated::ASSEMBLY_NAME,
+            generated::ROOT_URI,
+            &[("control_timer_duration.xaml", positive.as_str())],
+            &RuntimeXamlLoaderConfiguration::new(),
+            &[],
+        );
+        assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{property}: {:?}", generated.documents);
+        assert!(generated.source.contains("rt::duration(value_"), "{property}: {}", generated.source);
+
+        let negative = document.replace("{}", "-0:0:1");
+        let generated = generate_file(
+            generated::ASSEMBLY_NAME,
+            generated::ROOT_URI,
+            &[("control_timer_negative_duration.xaml", negative.as_str())],
+            &RuntimeXamlLoaderConfiguration::new(),
+            &[],
+        );
+        let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+        assert!(
+            reason.contains(&format!("{property}: the time span -00:00:01 is negative, and a `Duration` cannot be negative")),
+            "{reason}"
+        );
+    }
+}
+
+/// A `Linked` (`support::emitter`) with the attributes `attributes`.
+fn linked(attributes: &str) -> String {
+    format!(
+        "<t:Linked xmlns='https://github.com/ferroui' xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests' {attributes}/>"
+    )
+}
+
+/// Not from upstream (C5 of #423, section 3.5 of docs/idiomatic-rust-signatures.md): the
+/// compiled form of `xaml::ferro_intrinsics_tests::a_uri_literal_sets_a_uri_ref_and_a_url_property`.
+/// A URI literal for a property that declares a `UriRef` or a `url::Url` is passed through the
+/// cast of the untyped value conversions (`rt::cast`), which the compiler writes only for a
+/// literal that is one; the run-time loader sets the same values.
+#[test]
+fn a_uri_literal_sets_a_uri_ref_and_a_url_property() {
+    use crate::support::emitter::Linked;
+    use ferroui_base::utilities::UriRef;
+
+    let _app = xaml_test_base();
+    let document = linked("Source='Values.xaml' Address='https://ferroui.net/a'");
+    let generated = generate_file(
+        generated::ASSEMBLY_NAME,
+        generated::ROOT_URI,
+        &[("linked_uris.xaml", document.as_str())],
+        &RuntimeXamlLoaderConfiguration::new(),
+        &[],
+    );
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    for accessor in ["source_property(), rt::cast(", "address_property(), rt::cast("] {
+        assert!(generated.source.contains(accessor), "{accessor}: {}", generated.source);
+    }
+
+    let loaded = try_load(&document).expect("the control loads");
+    let target = ValueTypes::as_object(&*loaded).and_then(|object| object.cast::<Linked>()).expect("a linked control");
+    assert_eq!(target.source(), Some(UriRef::Relative("Values.xaml".into())));
+    assert_eq!(target.address().as_ref().map(url::Url::as_str), Some("https://ferroui.net/a"));
+}
+
+/// Not from upstream (C5 of #423): a relative URI literal for a property that declares a
+/// `url::Url` is an error of the compiler, which names the property and the URI, and a load
+/// error of the run-time loader; so is a text the URL parser rejects, for a `UriRef` too.
+#[test]
+fn a_relative_uri_literal_for_a_url_property_is_an_error() {
+    let _app = xaml_test_base();
+    for (attributes, refused, loaded) in [
+        (
+            "Address='Values.xaml'",
+            "Address: the URI Values.xaml is relative, and a `Url` cannot be relative",
+            "The URI Values.xaml is relative and cannot be converted to a Url.",
+        ),
+        (
+            "Source='http://host:99999/'",
+            "Source: the URI http://host:99999/ is not a valid URL (invalid port number)",
+            "The URI http://host:99999/ is not a valid Url: invalid port number.",
+        ),
+    ] {
+        let document = linked(attributes);
+        let generated = generate_file(
+            generated::ASSEMBLY_NAME,
+            generated::ROOT_URI,
+            &[("linked_relative_url.xaml", document.as_str())],
+            &RuntimeXamlLoaderConfiguration::new(),
+            &[],
+        );
+        let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+        assert!(reason.contains(refused), "{reason}");
+
+        let error = match try_load(&document) {
+            Ok(_) => panic!("{attributes}: the URI is refused"),
+            Err(error) => error,
+        };
+        let described = describe(&error);
+        assert!(described.contains(loaded), "{described}");
+    }
+}
+
+/// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md section 3.4): the
+/// compiled form of the test of `xaml::ferro_intrinsics_tests`. A culture literal for a
+/// property that declares a `Locale` (`RichTextBlock.Language`) is the culture of the text
+/// cast to its locale; the run-time loader sets the same value.
+#[test]
+fn a_language_literal_sets_a_locale_property() {
+    let _app = xaml_test_base();
+    let document = ("rich_text_block_language.xaml", "<RichTextBlock xmlns='https://github.com/ferroui' Language='ja-JP'/>");
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    assert!(generated.source.contains("language_property(), rt::cast("), "{}", generated.source);
+
+    let loaded = try_load(document.1).expect("the text block loads");
+    let block = ValueTypes::as_object(&*loaded).and_then(|object| object.cast::<ferroui_controls::RichTextBlock>()).expect("a text block");
+    assert_eq!(block.language(), ferroui_base::utilities::locale!("ja-JP"));
+}
+
+/// Not from upstream (C5 of #423): a culture literal that is no BCP-47 tag (`x-private`, a
+/// private name, or `zh-CHT`, an old name), which no locale can be parsed from (L2), for a
+/// property that declares a `Locale` is an error of the compiler, which names the property and
+/// the tag, and a load error of the run-time loader, both with the error of the converter of
+/// an IETF tag.
+#[test]
+fn an_invalid_language_tag_for_a_locale_property_is_an_error() {
+    let _app = xaml_test_base();
+    for (tag, compiled, loaded) in [
+        (
+            "x-private",
+            "Language: Culture IETF Name x-private is not a recognized IETF name.",
+            "Culture IETF Name x-private is not a recognized IETF name.",
+        ),
+        ("zh-CHT", "Language: Culture IETF Name zh-CHT is not a recognized IETF name.", "Culture IETF Name zh-CHT is not a recognized IETF name."),
+    ] {
+        let xaml = format!("<RichTextBlock xmlns='https://github.com/ferroui' Language='{tag}'/>");
+        let document = ("rich_text_block_invalid_language.xaml", xaml.as_str());
+        let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+        let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+        assert!(reason.contains(compiled), "{reason}");
+        assert!(!generated.source.contains("language_property()"), "{}", generated.source);
+
+        let error = match try_load(&xaml) {
+            Ok(_) => panic!("the tag {tag} is not a locale"),
+            Err(error) => error,
+        };
+        let described = describe(&error);
+        assert!(described.contains(loaded), "{described}");
+    }
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")
@@ -764,7 +977,7 @@ fn documents_that_read_their_base_uri_build_equal_object_trees() {
     for name in BASE_URI_DOCUMENTS {
         let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| document == name).unwrap_or_else(|| panic!("{name} is not a document of the corpus"));
         let uri = format!("{}{name}", generated::ROOT_URI);
-        let base_uri = ferroui_base::utilities::Uri::new(&uri, ferroui_base::utilities::UriKind::Absolute).expect("the URI of the document");
+        let base_uri = ferroui_base::utilities::UriRef::parse_absolute(&uri).expect("the URI of the document");
         let interpreted = match try_load_with(xaml, None, None, Some(base_uri), false) {
             Ok(root) => dump_root(&root),
             Err(error) => failure(&error),
@@ -1092,7 +1305,7 @@ fn a_failed_end_init_is_the_error_of_the_run_time_loader() {
 #[test]
 fn compiled_documents_are_registered_by_uri() {
     use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::FerroLocator;
     use ferroui_markup_xaml::FerroXamlLoader;
 
@@ -1117,7 +1330,7 @@ fn compiled_documents_are_registered_by_uri() {
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
     let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
-    let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
+    let parsed = UriRef::parse(&uri).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
     ferroui_markup_xaml::FerroXamlLoader::unregister_compiled_xaml(generated::ASSEMBLY_NAME);
     match loaded {
@@ -1135,7 +1348,7 @@ fn compiled_documents_are_registered_by_uri() {
 #[test]
 fn a_compiled_document_that_fails_to_build_fails_the_load() {
     use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::FerroLocator;
     use ferroui_markup_xaml::FerroXamlLoader;
 
@@ -1154,7 +1367,7 @@ fn a_compiled_document_that_fails_to_build_fails_the_load() {
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
     let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
-    let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
+    let parsed = UriRef::parse(&uri).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
     FerroXamlLoader::unregister_compiled_xaml(generated::ASSEMBLY_NAME);
     let error = loaded.err().expect("the load through FerroXamlLoader fails");

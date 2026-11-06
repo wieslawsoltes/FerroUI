@@ -8,95 +8,99 @@
 //! handler with each, on the UI thread, until it is disposed.
 
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, WaitForCancellation};
 use futures_util::future::{select, Either};
 use futures_util::{Stream, StreamExt};
-use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::{pin, Pin};
 use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
+use std::task::{Context, Poll};
 
-struct CancellationState {
-    cancelled: Cell<bool>,
-    wakers: RefCell<Vec<Waker>>,
+/// Runs `future` until it completes or `token` is canceled; `None` when the token was canceled
+/// first, at once when it already is. The future is polled before the cancellation, so a future
+/// that completes in the poll that sees the cancellation gives its value.
+pub async fn run_until_cancelled<T>(token: &CancellationToken, future: impl Future<Output = T>) -> Option<T> {
+    if token.is_cancelled() {
+        return None;
+    }
+    match select(pin!(future), token.cancelled()).await {
+        Either::Left((value, _)) => Some(value),
+        Either::Right(_) => None,
+    }
 }
 
 /// A flag that is set once and that any number of tasks of the UI thread
 /// can wait for.
+#[deprecated(
+    since = "0.5.0",
+    note = "use `ferroui_base::threading::CancellationToken` (`cancelled()`) and `run_until_cancelled`"
+)]
 #[derive(Clone)]
 pub struct CancellationFlag {
-    state: Rc<CancellationState>,
+    token: CancellationToken,
 }
 
+#[allow(deprecated)]
 impl Default for CancellationFlag {
     fn default() -> Self {
         Self::new()
     }
 }
 
+#[allow(deprecated)]
 impl CancellationFlag {
     pub fn new() -> Self {
-        Self { state: Rc::new(CancellationState { cancelled: Cell::new(false), wakers: RefCell::new(Vec::new()) }) }
+        Self { token: CancellationToken::new() }
     }
 
     pub fn cancel(&self) {
-        self.state.cancelled.set(true);
-        let wakers = std::mem::take(&mut *self.state.wakers.borrow_mut());
-        for waker in wakers {
-            waker.wake();
-        }
+        self.token.cancel();
     }
 
     pub fn is_cancellation_requested(&self) -> bool {
-        self.state.cancelled.get()
+        self.token.is_cancelled()
     }
 
     /// Resolves when the flag is set.
     pub fn cancelled(&self) -> Cancelled {
-        Cancelled { state: self.state.clone() }
+        Cancelled(self.token.cancelled())
     }
 
     /// Runs `future` until it completes or the flag is set; `None` when
     /// the flag was set first.
     pub async fn run<T>(&self, future: impl Future<Output = T>) -> Option<T> {
-        if self.is_cancellation_requested() {
-            return None;
-        }
-        match select(pin!(future), self.cancelled()).await {
-            Either::Left((value, _)) => Some(value),
-            Either::Right(_) => None,
-        }
+        run_until_cancelled(&self.token, future).await
+    }
+}
+
+/// The token of the flag.
+#[allow(deprecated)]
+impl From<CancellationFlag> for CancellationToken {
+    fn from(flag: CancellationFlag) -> Self {
+        flag.token
     }
 }
 
 /// The future of [`CancellationFlag::cancelled`].
-pub struct Cancelled {
-    state: Rc<CancellationState>,
-}
+#[deprecated(since = "0.5.0", note = "use `CancellationToken::cancelled`")]
+pub struct Cancelled(WaitForCancellation);
 
+#[allow(deprecated)]
 impl Future for Cancelled {
     type Output = ();
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        if self.state.cancelled.get() {
-            return Poll::Ready(());
-        }
-        let mut wakers = self.state.wakers.borrow_mut();
-        if !wakers.iter().any(|waker| waker.will_wake(cx.waker())) {
-            wakers.push(cx.waker().clone());
-        }
-        Poll::Pending
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
+        Pin::new(&mut self.0).poll(cx)
     }
 }
 
 struct Subscription {
-    flag: CancellationFlag,
+    token: CancellationToken,
 }
 
 impl IDisposable for Subscription {
     fn dispose(&self) {
-        self.flag.cancel();
+        self.token.cancel();
     }
 }
 
@@ -111,19 +115,22 @@ pub fn watch_stream<S>(stream: S, mut handler: impl FnMut(S::Item) + 'static) ->
 where
     S: Stream + 'static,
 {
-    let flag = CancellationFlag::new();
-    let task_flag = flag.clone();
-    drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-        let mut stream = pin!(stream);
-        while let Some(Some(item)) = task_flag.run(stream.next()).await {
-            if task_flag.is_cancellation_requested() {
-                break;
+    let token = CancellationToken::new();
+    let task_token = token.clone();
+    drop(Dispatcher::ui_thread().spawn_local_with_priority(
+        async move {
+            let mut stream = pin!(stream);
+            while let Some(Some(item)) = run_until_cancelled(&task_token, stream.next()).await {
+                if task_token.is_cancelled() {
+                    break;
+                }
+                handler(item);
             }
-            handler(item);
-        }
-    }));
+        },
+        DispatcherPriority::DEFAULT,
+    ));
 
-    Rc::new(Subscription { flag })
+    Rc::new(Subscription { token })
 }
 
 #[cfg(test)]
@@ -131,36 +138,39 @@ mod tests {
     // Not from the reference: these types stand for facilities of its
     // runtime and of its D-Bus library.
     use super::*;
-    use crate::dbus_call_queue::completion;
+    use ferroui_system::task::oneshot;
+    use std::cell::RefCell;
 
     #[test]
-    fn a_future_runs_until_the_flag_is_set() {
+    fn a_future_runs_until_the_token_is_canceled() {
         let _scope = crate::test_support::scope();
-        let flag = CancellationFlag::new();
-        let (_never, pending) = completion::<()>();
+        let token = CancellationToken::new();
+        let (_never, pending) = oneshot::channel::<()>();
         let outcome = Rc::new(RefCell::new(Vec::new()));
 
         {
-            let (flag, outcome) = (flag.clone(), outcome.clone());
-            drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                let first = flag.run(async { 7 }).await;
-                outcome.borrow_mut().push(first);
-                let second = flag
-                    .run(async {
-                        pending.await;
+            let (token, outcome) = (token.clone(), outcome.clone());
+            drop(Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    let first = run_until_cancelled(&token, async { 7 }).await;
+                    outcome.borrow_mut().push(first);
+                    let second = run_until_cancelled(&token, async {
+                        let _ = pending.await;
                         8
                     })
                     .await;
-                outcome.borrow_mut().push(second);
-                // Once set, nothing is started.
-                let third = flag.run(async { 9 }).await;
-                outcome.borrow_mut().push(third);
-            }));
+                    outcome.borrow_mut().push(second);
+                    // Once canceled, nothing is started.
+                    let third = run_until_cancelled(&token, async { 9 }).await;
+                    outcome.borrow_mut().push(third);
+                },
+                DispatcherPriority::DEFAULT,
+            ));
         }
         Dispatcher::ui_thread().run_jobs(None);
         assert_eq!(*outcome.borrow(), [Some(7)]);
 
-        flag.cancel();
+        token.cancel();
         Dispatcher::ui_thread().run_jobs(None);
         assert_eq!(*outcome.borrow(), [Some(7), None, None]);
     }

@@ -16,8 +16,8 @@ use super::interface::{
 };
 use crate::signal_watch::watch_stream;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::rc::{Rc, Weak};
@@ -157,7 +157,7 @@ pub(crate) struct AtSpiConnection {
     objects: Rc<ObjectTable>,
     outbox: RefCell<VecDeque<zbus::Message>>,
     sending: Cell<bool>,
-    message_loop: RefCell<Option<Rc<dyn IDisposable>>>,
+    message_loop: RefCell<Option<Subscription>>,
     weak_self: Weak<AtSpiConnection>,
 }
 
@@ -187,7 +187,7 @@ impl AtSpiConnection {
                 this.on_method_call(&message);
             }
         });
-        *this.message_loop.borrow_mut() = Some(subscription);
+        *this.message_loop.borrow_mut() = Some(Subscription::new(subscription));
         this
     }
 
@@ -255,16 +255,19 @@ impl AtSpiConnection {
         }
 
         let Some(this) = self.weak_self.upgrade() else { return };
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            loop {
-                let next = this.outbox.borrow_mut().pop_front();
-                let Some(message) = next else { break };
-                if let Err(e) = this.connection.send(&message).await {
-                    Self::log(&format!("AT-SPI message could not be sent: {e}"));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                loop {
+                    let next = this.outbox.borrow_mut().pop_front();
+                    let Some(message) = next else { break };
+                    if let Err(e) = this.connection.send(&message).await {
+                        Self::log(&format!("AT-SPI message could not be sent: {e}"));
+                    }
                 }
-            }
-            this.sending.set(false);
-        }));
+                this.sending.set(false);
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     /// Stops answering (`DisposeAsync`). Messages already queued are still sent.

@@ -3,8 +3,8 @@
 use super::subject::{throw_disposed, ObserverList, SubjectBase, SubjectSubscription};
 use crate::disposables::Disposable;
 use crate::linq::SequenceError;
-use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
-use ferroui_system::threading::{current_synchronization_context, SynchronizationContext};
+use crate::internal::TaskCompletion;
+use ferroui_system::task::{current_schedule, Schedule, Shared};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -61,33 +61,34 @@ impl<T: Clone + 'static> AsyncSubject<T> {
         }
     }
 
-    /// The awaiter of the subject (`GetAwaiter`): a task that ends when the subject ends, with its
-    /// last value, with its error (a `TaskCanceledError` cancels it), or with
-    /// [`SequenceError::NoElements`] when it ended without a value (`GetResult`'s
-    /// `InvalidOperationException`). `async` code awaits it.
+    /// The awaiter of the subject (`GetAwaiter`): a task, the [`Shared`] of a result, that ends
+    /// when the subject ends, with its last value, with its error (a cancellation's included), or
+    /// with [`SequenceError::NoElements`] when it ended without a value (`GetResult`'s
+    /// `InvalidOperationException`). `async` code awaits its `flatten()`.
     ///
     /// Upstream's subject is its own awaiter; its members are those of the task: `IsCompleted` is
-    /// [`Task::is_completed`], `OnCompleted(Action)` is [`Task::continue_with`] and `GetResult` is
-    /// [`Task::result`] once the task has ended.
+    /// [`Shared::is_finished`], `OnCompleted(Action)` is [`Shared::on_finished`] and `GetResult` is
+    /// [`Shared::result`] once the task has ended.
     ///
     /// The awaiter captures the current `SynchronizationContext` of the thread, as upstream's
-    /// `AwaitObserver` does: when there is one, the end of the subject is posted to it (with
-    /// [`post_local`](SynchronizationContext::post_local)), and the task ends, running its
-    /// continuations, when the context runs that work; without one, the task ends where the subject
-    /// does.
+    /// `AwaitObserver` does, which is its current schedule (`ferroui_system::task::current_schedule`;
+    /// in a dispatcher job the dispatcher at the priority of the job): when there is one, the end of
+    /// the subject is posted to it (with [`schedule_local`](Schedule::schedule_local)), and the task
+    /// ends, running its continuations, when the schedule runs that work; without one, the task ends
+    /// where the subject does.
     ///
     /// Deviation (DEVIATIONS.md, Reactive): upstream posts only the continuation of `OnCompleted`
     /// and its `IsCompleted` is true as soon as the subject has ended; the task of the port ends
-    /// when the posted work runs, so its [`is_completed`](Task::is_completed) is false until then.
+    /// when the posted work runs, so its [`is_finished`](Shared::is_finished) is false until then.
     /// The context is captured when the awaiter is made, where upstream captures it when the
     /// continuation is given (`OnCompleted`).
     ///
     /// # Panics
     /// When the subject is disposed (`ObjectDisposedException`).
-    pub fn get_awaiter(&self) -> Task<T> {
-        let completion = TaskCompletionSource::new();
-        let task = completion.task();
-        let context = current_synchronization_context();
+    pub fn get_awaiter(&self) -> Shared<Result<T, ObservableError>> {
+        let completion = TaskCompletion::new();
+        let task = completion.shared();
+        let context = current_schedule();
         self.subscribe(Rc::new(AwaitObserver { subject: self.this.clone(), completion, context }));
         task
     }
@@ -106,8 +107,8 @@ impl<T: Clone + 'static> AsyncSubject<T> {
 /// (`InvokeOnOriginalContext`).
 struct AwaitObserver<T> {
     subject: Weak<AsyncSubject<T>>,
-    completion: TaskCompletionSource<T>,
-    context: Option<Arc<dyn SynchronizationContext>>,
+    completion: TaskCompletion<T>,
+    context: Option<Arc<dyn Schedule>>,
 }
 
 impl<T: Clone + 'static> AwaitObserver<T> {
@@ -127,7 +128,7 @@ impl<T: Clone + 'static> AwaitObserver<T> {
             }
         };
         match &self.context {
-            Some(context) => context.post_local(Box::new(end)),
+            Some(context) => context.schedule_local(Box::new(end)),
             None => end(),
         }
     }

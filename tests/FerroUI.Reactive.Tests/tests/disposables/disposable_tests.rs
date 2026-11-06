@@ -8,6 +8,10 @@
 //! context `MySync` of `ContextDisposable` runs the work it is posted at once, from `post` and
 //! `post_local` alike (the disposal is posted with `post_local`), and records it in an atomic flag,
 //! since a context is shared between threads.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::{IScheduler, Scheduler};
 use ferroui_reactive::disposables::{
@@ -17,7 +21,7 @@ use ferroui_reactive::disposables::{
 };
 use ferroui_reactive::IDisposable;
 use ferroui_reactive_testing::assert_throws;
-use ferroui_system::threading::{CancellationTokenSource, SynchronizationContext};
+use ferroui_system::threading::{CancellationToken, SynchronizationContext};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -425,26 +429,26 @@ fn composite_disposable_get_enumerator_disposed_entries() {
 #[test]
 fn cancellation_disposable_default_ctor() {
     let c = CancellationDisposable::new();
-    assert!(!c.token().is_cancellation_requested());
-    assert!(c.token().can_be_canceled());
+    assert!(!c.token().is_cancelled());
+    assert!(c.token().can_be_cancelled());
     c.dispose();
     assert!(c.is_disposed());
-    assert!(c.token().is_cancellation_requested());
+    assert!(c.token().is_cancelled());
 }
 
 #[test]
 fn cancellation_disposable_token_ctor() {
-    let t = CancellationTokenSource::new();
-    let c = CancellationDisposable::with_source(t.clone());
-    // `t.Token == c.Token`: tokens have no equality in the port; that both observe the same source
-    // is checked by the cancellation of `t` below.
-    assert!(!t.token().is_cancellation_requested());
-    assert!(!c.token().is_cancellation_requested());
-    assert!(c.token().can_be_canceled());
+    let t = CancellationToken::new();
+    let c = CancellationDisposable::with_token(t.clone());
+    // `t.Token == c.Token`: tokens have no equality in the port; that both are the same token is
+    // checked by the cancellation of `t` below.
+    assert!(!t.is_cancelled());
+    assert!(!c.token().is_cancelled());
+    assert!(c.token().can_be_cancelled());
     c.dispose();
     assert!(c.is_disposed());
-    assert!(c.token().is_cancellation_requested());
-    assert!(t.token().is_cancellation_requested());
+    assert!(c.token().is_cancelled());
+    assert!(t.is_cancelled());
 }
 
 #[test]

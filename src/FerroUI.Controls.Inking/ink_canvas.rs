@@ -13,8 +13,8 @@ use ferroui_base::media::{
     StreamGeometry, Typeface,
 };
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::reactive::Subscription;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, FerroObjectImplExt,
     FerroPropertyChangedEventArgs, Point, Rect, Ref, Size, StyledElementImpl, VisualImpl,
@@ -44,7 +44,7 @@ pub struct InkCanvas {
     captured: RefCell<BTreeMap<i32, Rc<dyn IPointer>>>,
     stencil_input: RefCell<InkStencilInput>,
     stencil_labels: RefCell<[Option<CachedStencilLabel>; 2]>,
-    color_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    color_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(InkCanvas: Control);
@@ -111,7 +111,7 @@ impl VisualImpl for InkCanvas {
                     canvas.invalidate_visual();
                 }
             }));
-            let old = this.color_subscription.replace(Some(subscription));
+            let old = this.color_subscription.replace(Some(Subscription::new(subscription)));
             if let Some(old) = old {
                 old.dispose();
             }
@@ -585,7 +585,7 @@ impl InkCanvas {
         }
         let text = Rc::new(FormattedText::new(
             &format!("{}.{:01}°", tenths / 10, tenths % 10),
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             Typeface::default_typeface(),
             14.0,

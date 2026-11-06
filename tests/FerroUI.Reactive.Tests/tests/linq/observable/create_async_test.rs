@@ -2,24 +2,63 @@
 //! Adapted: `Create` with an asynchronous subscription is `Observable::create_async` (`Task`),
 //! `create_async_with_disposable` (`Task<IDisposable>`) and `create_async_with_action`
 //! (`Task<Action>`), with `_with_token` for the forms with a `CancellationToken`; the producers
-//! return the task of a `TaskCompletionSource<()>` (`TaskCompletionSource<object>`), a producer
-//! that throws returns a task that has failed (the same error, at the same time), and
+//! return the task of a `TaskCompletionSource<object>`, the `flatten()` of a `Shared` that a
+//! `SharedSender` ends (`TaskSource`; a `Shared`, not a `oneshot` channel, because a producer
+//! that never ends its source leaves its task pending, as upstream's, where a dropped `oneshot`
+//! sender would cancel it), a producer that throws returns a task that has failed (the same
+//! error, at the same time), and
 //! `token.Register` is `register_local`. `RunSynchronously` (a synchronous task scheduler) is not
 //! needed: the continuations of the tasks run on the thread that ends them. The work that
 //! `Task.Factory.StartNew` runs on a worker thread is split: the worker (`tasks::run`) produces
 //! the value and the observer is called on the test thread when it arrives, as the observers are
-//! not `Send`; the blocking `ForEach` and `Wait()` are `block_on` of `to_list().to_task()` and
-//! `to_task()`, and the `ManualResetEvent` that waits for the resource is a flag set when it is
+//! not `Send`; the blocking `ForEach` and `Wait()` are `block_on` of the `flatten()` of
+//! `to_list().to_task()` and `to_task()`, and the `ManualResetEvent` that waits for the resource is a flag set when it is
 //! released (on the test thread, before `block_on` returns).
 
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{IDisposable, IObserver, NotificationKind, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, new_error, ticks_to_duration, ReactiveTest as RT, TestScheduler};
-use ferroui_system::threading::tasks::{block_on, run, Task, TaskCanceledError, TaskCompletionSource};
+use ferroui_system::task::{block_on, Canceled, Flatten, Shared, SharedSender};
+use ferroui_system::threading::tasks::run;
 use ferroui_system::threading::CancellationToken;
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+
+/// The task of a producer (`Task`).
+type ProducerTask = Flatten<()>;
+
+/// The `TaskCompletionSource<object>` of a producer: the sender of a `Shared`, whose `flatten()`
+/// is the task; dropping every clone without ending it leaves the task pending.
+#[derive(Clone)]
+struct TaskSource(Rc<RefCell<Option<SharedSender<Result<(), ObservableError>>>>>);
+
+impl TaskSource {
+    fn new() -> (Self, ProducerTask) {
+        let (sender, task) = Shared::channel();
+        (Self(Rc::new(RefCell::new(Some(sender)))), task.flatten())
+    }
+
+    fn take(&self) -> SharedSender<Result<(), ObservableError>> {
+        let sender = self.0.borrow_mut().take();
+        sender.expect("An attempt was made to transition a task to a final state when it had already completed.")
+    }
+
+    /// `SetResult`.
+    fn set_result(&self) {
+        self.take().send(Ok(()));
+    }
+
+    /// `SetException`.
+    fn set_exception(&self, error: ObservableError) {
+        self.take().send(Err(error));
+    }
+
+    /// `SetCanceled`.
+    fn set_canceled(&self) {
+        self.take().cancel();
+    }
+}
 
 /// A producer of a value every 100 ticks, from 300 (`self(TimeSpan.FromTicks(100))`): `step` runs
 /// with the count of the values produced before, then the next value is produced; the token
@@ -39,15 +78,15 @@ fn produce(
         recurse(ticks_to_duration(100));
     });
 
-    let _ = token.register_local(move || d.dispose());
+    token.register_local(move || d.dispose()).detach();
 }
 
-fn producer1(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer1(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> ProducerTask {
+    let (_tcs, task) = TaskSource::new();
 
     produce(results, scheduler, token, |_, _| {});
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -69,17 +108,17 @@ fn create_async_never() {
     );
 }
 
-fn producer2(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer2(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> ProducerTask {
+    let (tcs, task) = TaskSource::new();
 
     let source = tcs.clone();
     produce(results, scheduler, token, move |x, _| {
         if x == 4 {
-            source.set_result(());
+            source.set_result();
         }
     });
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -99,8 +138,8 @@ fn create_async_completed1() {
     );
 }
 
-fn producer3(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer3(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> ProducerTask {
+    let (_tcs, task) = TaskSource::new();
 
     produce(results, scheduler, token, |x, results| {
         if x == 4 {
@@ -108,7 +147,7 @@ fn producer3(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, tok
         }
     });
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -128,8 +167,8 @@ fn create_async_completed2() {
     );
 }
 
-fn producer4(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, exception: ObservableError, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer4(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, exception: ObservableError, token: CancellationToken) -> ProducerTask {
+    let (_tcs, task) = TaskSource::new();
 
     produce(results, scheduler, token, move |x, results| {
         if x == 4 {
@@ -137,7 +176,7 @@ fn producer4(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, exc
         }
     });
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -160,8 +199,8 @@ fn create_async_error1() {
     );
 }
 
-fn producer5(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, exception: ObservableError, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer5(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, exception: ObservableError, token: CancellationToken) -> ProducerTask {
+    let (tcs, task) = TaskSource::new();
 
     let source = tcs.clone();
     produce(results, scheduler, token, move |x, _| {
@@ -170,7 +209,7 @@ fn producer5(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, exc
         }
     });
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -194,8 +233,8 @@ fn create_async_error2() {
 }
 
 /// `throw exception`: a task that has failed with it.
-fn producer6(_results: Rc<dyn IObserver<i32>>, exception: ObservableError, _token: CancellationToken) -> Task<()> {
-    Task::from_exception(exception)
+fn producer6(_results: Rc<dyn IObserver<i32>>, exception: ObservableError, _token: CancellationToken) -> ProducerTask {
+    Shared::<Result<(), ObservableError>>::ready(Err(exception)).flatten()
 }
 
 #[test]
@@ -210,17 +249,17 @@ fn create_async_error3() {
     assert_messages!(res.messages(), RT::on_error::<i32>(200, exception));
 }
 
-fn producer7(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer7(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> ProducerTask {
+    let (tcs, task) = TaskSource::new();
 
     let source = tcs.clone();
     produce(results, scheduler, token, move |x, _| {
         if x == 4 {
-            source.set_result(());
+            source.set_result();
         }
     });
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -233,8 +272,8 @@ fn create_async_cancel1() {
     assert_messages!(res.messages(), RT::on_next(300, 1), RT::on_next(400, 2), RT::on_next(500, 3), RT::on_next(600, 4));
 }
 
-fn producer8(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer8(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> ProducerTask {
+    let (_tcs, task) = TaskSource::new();
 
     produce(results, scheduler, token, |x, results| {
         if x == 4 {
@@ -242,7 +281,7 @@ fn producer8(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, tok
         }
     });
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -255,8 +294,8 @@ fn create_async_cancel2() {
     assert_messages!(res.messages(), RT::on_next(300, 1), RT::on_next(400, 2), RT::on_next(500, 3), RT::on_next(600, 4));
 }
 
-fn producer9(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer9(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> ProducerTask {
+    let (_tcs, task) = TaskSource::new();
 
     produce(results, scheduler, token, |x, results| {
         if x == 4 {
@@ -264,7 +303,7 @@ fn producer9(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, tok
         }
     });
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -284,8 +323,8 @@ fn create_async_cancel3() {
     );
 }
 
-fn producer10(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> Task<()> {
-    let tcs = TaskCompletionSource::<()>::new();
+fn producer10(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> ProducerTask {
+    let (tcs, task) = TaskSource::new();
 
     let source = tcs.clone();
     produce(results, scheduler, token, move |x, _| {
@@ -294,7 +333,7 @@ fn producer10(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, to
         }
     });
 
-    tcs.task()
+    task
 }
 
 #[test]
@@ -312,19 +351,19 @@ fn create_async_cancel4() {
 
     assert_eq!(700, messages[4].time);
     assert_eq!(NotificationKind::OnError, messages[4].value.kind());
-    assert!(messages[4].value.exception().is_some_and(TaskCanceledError::is_cancellation));
+    assert!(messages[4].value.exception().is_some_and(Canceled::is_cancellation));
 }
 
 #[test]
 fn create_async_task_simple() {
     let xs = Observable::create_async(|observer: Rc<dyn IObserver<i32>>| async move {
-        let value = run(|| Ok(42)).await?;
+        let value = run(|| Ok(42)).flatten().await?;
         observer.on_next(value);
         observer.on_completed();
         Ok::<(), ObservableError>(())
     });
 
-    let lst = block_on(xs.to_list().to_task()).unwrap();
+    let lst = block_on(xs.to_list().to_task().flatten()).unwrap();
 
     assert_eq!(vec![42], lst);
 }
@@ -338,7 +377,7 @@ fn create_async_i_disposable_simple() {
     let xs = Observable::create_async_with_disposable(move |observer: Rc<dyn IObserver<i32>>| {
         let s = s.clone();
         async move {
-            let value = run(|| Ok(42)).await?;
+            let value = run(|| Ok(42)).flatten().await?;
             observer.on_next(value);
             observer.on_completed();
 
@@ -346,7 +385,7 @@ fn create_async_i_disposable_simple() {
         }
     });
 
-    let lst = block_on(xs.to_list().to_task()).unwrap();
+    let lst = block_on(xs.to_list().to_task().flatten()).unwrap();
 
     assert!(stopped.get());
 
@@ -361,7 +400,7 @@ fn create_async_action_simple() {
     let xs = Observable::create_async_with_action(move |observer: Rc<dyn IObserver<i32>>| {
         let flag = flag.clone();
         async move {
-            let value = run(|| Ok(42)).await?;
+            let value = run(|| Ok(42)).flatten().await?;
             observer.on_next(value);
             observer.on_completed();
 
@@ -370,7 +409,7 @@ fn create_async_action_simple() {
         }
     });
 
-    let lst = block_on(xs.to_list().to_task()).unwrap();
+    let lst = block_on(xs.to_list().to_task().flatten()).unwrap();
 
     assert!(stopped.get());
 
@@ -390,7 +429,7 @@ fn create_with_task_disposable_no_premature_termination() {
         }))
     });
 
-    let _result = block_on(obs.take(1).to_task()).unwrap();
+    let _result = block_on(obs.take(1).to_task().flatten()).unwrap();
 }
 
 #[test]
@@ -409,7 +448,7 @@ fn create_with_task_action_no_premature_termination() {
         Ok::<_, ObservableError>(a)
     });
 
-    let _result = block_on(obs.take(1).to_task()).unwrap();
+    let _result = block_on(obs.take(1).to_task().flatten()).unwrap();
 }
 
 // Not ported: CreateAsync_ArgumentChecking - argument validation

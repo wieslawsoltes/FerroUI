@@ -12,7 +12,7 @@ use crate::time_picker::MaterialTimePicker;
 use crate::time_picker_state::{
     DialGeometry, MaterialTimeDisplayMode, MaterialTimeSelection, angle_for, shortest_target,
 };
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::input::{
     IPointer, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers,
     KeyboardDevice, KeyboardNavigation, NavigationMethod, PointerCaptureLostEventArgs,
@@ -26,7 +26,7 @@ use ferroui_base::media::{
     IBrush, IPen, PenLineCap, PenLineJoin, Typeface,
 };
 use ferroui_base::reactive::{AnonymousObserver, Subscription};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::{
     FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, LocatorExtensions, Point, Rect, Ref, Size, StyledElementImpl,
@@ -617,7 +617,7 @@ impl MaterialTimePickerDial {
         self.last_frame.set(None);
         let weak = self.to_ref().downgrade();
         let subscription =
-            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: TimeSpan| {
+            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     if !this.is_attached_to_visual_tree() || !this.is_effectively_visible() {
                         this.cancel_interaction();
@@ -662,7 +662,7 @@ impl MaterialTimePickerDial {
         );
         let normal = FormattedText::new(
             text,
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             typeface.clone(),
             number.font_size(),
@@ -670,7 +670,7 @@ impl MaterialTimePickerDial {
         );
         let selected = FormattedText::new(
             text,
-            CultureInfo::current_culture(),
+            current_locale(),
             FlowDirection::LeftToRight,
             typeface,
             number.font_size(),

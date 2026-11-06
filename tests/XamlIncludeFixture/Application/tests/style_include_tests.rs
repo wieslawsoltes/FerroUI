@@ -21,7 +21,7 @@ use std::rc::{Rc, Weak};
 use ferroui_base::metadata::{from_markup_value, IServiceProvider};
 use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
 use ferroui_base::styling::{styles_as_style, IStyle, Style, Styles};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, FerroLocator, Ref};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{ContentControl, Control};
@@ -239,7 +239,7 @@ fn style_include_from_code_behind_resolves_compiled() {
     let sp = TestServiceProvider::new();
     let service_provider: Rc<dyn IServiceProvider> = sp.clone();
     let style_include = StyleInclude::with_service_provider(service_provider.clone());
-    style_include.set_source(Some(Uri::absolute("ferres://Tests/Xaml/StyleWithServiceProvider.xaml").expect("a valid URI")));
+    style_include.set_source(Some(UriRef::parse("ferres://Tests/Xaml/StyleWithServiceProvider.xaml").expect("a valid URI")));
 
     let loaded = style_include.loaded();
     let loaded = loaded.as_object().expect("the loaded style is an object of the class model");
@@ -261,7 +261,7 @@ fn style_include_from_code_behind_resolves_compiled() {
 struct TestServiceProvider {
     this: Weak<TestServiceProvider>,
     root: Rc<dyn IServiceProvider>,
-    base_uri: RefCell<Option<Uri>>,
+    base_uri: RefCell<Option<url::Url>>,
     parents_stack: Rc<Vec<BoxedValue>>,
 }
 
@@ -295,11 +295,11 @@ impl IServiceProvider for TestServiceProvider {
 }
 
 impl IUriContext for TestServiceProvider {
-    fn base_uri(&self) -> Option<Uri> {
+    fn base_uri(&self) -> Option<url::Url> {
         self.base_uri.borrow().clone()
     }
 
-    fn set_base_uri(&self, value: Option<Uri>) {
+    fn set_base_uri(&self, value: Option<url::Url>) {
         *self.base_uri.borrow_mut() = value;
     }
 }

@@ -533,6 +533,8 @@ ports a control updates its state by porting it, not by editing the table.
 | `NumberBox.xaml` | `{NumberBox}` | NumberBox: {NumberBox} (NumberBox.xaml, NumberBox_themeresources.xaml), with NumberBoxTextBoxStyle, NumberBoxSpinButtonStyle and NumberBoxPopupSpinButtonStyle, which NumericUpDown.xaml ports. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B2 | ported |
 | `RadioButtons.xaml` | `{RadioButtons}` | RadioButtons: DefaultRadioButtonsStyle and the implicit style (RadioButtons.xaml, RadioButtons_themeresources.xaml), the layout ColumnMajorUniformToLargestGridLayout as the items panel RadioButtonsPanel. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B3 | ported |
 | `RatingControl.xaml` | `{RatingControl}` | RatingControl: {RatingControl} (RatingControl.xaml, RatingControl_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B2 | ported |
+| `PersonPicture.xaml` | `{PersonPicture}` | PersonPicture: {PersonPicture}, DefaultPersonPictureStyle (PersonPicture.xaml, PersonPicture_themeresources.xaml). A WinUI control in ferroui-controls (G2 of #418); the Fluent theme has no document for it. | B1 | ported |
+| `PagerControl.xaml` | `{PagerControl}` | PagerControl: {PagerControl} (PagerControl.xaml), PagerControlPageNavigationButtonStyle, PagerControlNumberPanelButtonStyle (PagerControl_themeresources.xaml). A WinUI control in ferroui-controls (G2 of #418); the Fluent theme has no document for it. | B2 | ported |
 | `PipsPager.xaml` | `{PipsPager}` | PipsPager: {PipsPager} (PipsPager.xaml), PipsPagerNavigationButtonBaseStyle, PipsPagerPreviousPageButtonStyle, PipsPagerNextPageButtonStyle, PipsPagerButtonBaseStyle, PipsPagerSelectedPipButtonStyle, PipsPagerNormalPipButtonStyle (PipsPager_themeresources.xaml). | B2 | ported |
 | `PopupRoot.xaml` | `{PopupRoot}` | No WinUI style: the text of the window (TextFillColorPrimaryBrush, ContentControlThemeFontFamily, ControlContentThemeFontSize). | F | ported |
 | `ProgressBar.xaml` | `{ProgressBar}` | ProgressBar: {ProgressBar} (ProgressBar.xaml, ProgressBar_themeresources.xaml), DefaultProgressBarStyle (Deprecated_themeresources.xaml). | B1 | ported |
@@ -623,7 +625,9 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `NavigationViewItemPresenter` | `NavigationViewItem` | B5 | no FerroUI control: the presenter is folded into the template of NavigationViewItem |
 | `NavigationViewItemSeparator` | `NavigationViewItemSeparator` | B5 |  |
 | `NumberBox` | `NumberBox` | B2 | WinUI's NumberBox in ferroui-controls; NumericUpDown is drawn with the styles of NumberBox too |
+| `PagerControl` | `PagerControl` | B2 | WinUI's PagerControl in ferroui-controls |
 | `PasswordBox` | `TextBox` | B3 | FerroUI's TextBox with a PasswordChar; ported as the keyed DefaultPasswordBoxStyle |
+| `PersonPicture` | `PersonPicture` | B1 | WinUI's PersonPicture in ferroui-controls |
 | `PipsPager` | `PipsPager` | B2 |  |
 | `ProgressBar` | `ProgressBar` | B1 |  |
 | `ProgressRing` | `ProgressRing` | B1 |  |
@@ -661,7 +665,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `TreeView` | `TreeView` | B3 |  |
 | `TreeViewItem` | `TreeViewItem` | B3 |  |
 
-Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListView`, `ListViewHeaderItem`, `MapControl`, `MediaPlayerElement`, `MediaTransportControls`, `PagerControl`, `PersonPicture`, `PickerFlyoutPresenter`, `Pivot`, `PivotHeaderItem`, `PivotItem`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `SwipeControl`, `TeachingTip`, `TwoPaneView`.
+Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListView`, `ListViewHeaderItem`, `MapControl`, `MediaPlayerElement`, `MediaTransportControls`, `PickerFlyoutPresenter`, `Pivot`, `PivotHeaderItem`, `PivotItem`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `SwipeControl`, `TeachingTip`, `TwoPaneView`.
 
 <!-- mapping:end -->
 

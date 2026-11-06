@@ -29,7 +29,7 @@
 
 use ferroui_base::media::text_formatting::testing::TestTextShaperImpl;
 use ferroui_base::platform::ITextShaperImpl;
-use ferroui_base::threading::{CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{FerroLocator, Ref};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::testing::top_level_template;
@@ -87,11 +87,11 @@ pub fn run() -> ExitCode {
         .setup_without_starting();
     let _application = builder.instance();
 
-    let done = CancellationTokenSource::new();
+    let done = CancellationToken::new();
     DONE.with(|slot| *slot.borrow_mut() = Some(done.clone()));
     let window = create_main_window();
     window.show();
-    Dispatcher::ui_thread().main_loop(&done.token());
+    Dispatcher::ui_thread().main_loop(&done);
 
     let failed = FAILED.with(|failed| failed.get());
     if failed == 0 {
@@ -114,7 +114,7 @@ struct Ui {
 ferroui_base::ferro_thread_local! {
     static UI: RefCell<Option<Ui>> = const { RefCell::new(None) };
     /// Ends the message loop of the phase.
-    static DONE: RefCell<Option<CancellationTokenSource>> = const { RefCell::new(None) };
+    static DONE: RefCell<Option<CancellationToken>> = const { RefCell::new(None) };
     /// The number of checks that failed; one before the checks ran.
     static FAILED: Cell<usize> = const { Cell::new(1) };
 }

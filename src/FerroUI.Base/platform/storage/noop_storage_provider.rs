@@ -128,14 +128,14 @@ impl super::IStorageProvider for NoopStorageProvider {
 
     fn try_get_file_from_path_async(
         &self,
-        _file_path: &crate::utilities::Uri,
+        _file_path: &url::Url,
     ) -> LocalBoxFuture<Option<Rc<dyn super::IStorageFile>>> {
         ready(None)
     }
 
     fn try_get_folder_from_path_async(
         &self,
-        _folder_path: &crate::utilities::Uri,
+        _folder_path: &url::Url,
     ) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
         ready(None)
     }

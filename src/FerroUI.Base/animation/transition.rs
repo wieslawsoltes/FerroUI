@@ -116,7 +116,7 @@ macro_rules! ferro_transition_class {
             /// Creates a transition of `property` that takes `duration`.
             pub fn with_property(
                 property: &'static $crate::FerroProperty,
-                duration: $crate::animation::TimeSpan,
+                duration: $crate::animation::SignedDuration,
             ) -> $crate::Ref<Self> {
                 let result = Self::new();
                 result.set_property(Some(property));

@@ -1,14 +1,17 @@
 //! Not from upstream: editing a large rich text document shown by a `RichTextBlock` (F1 of
 //! `docs/porting/winui-rich-text.md`; #243 review S7 and S9). Each benchmark changes the document
 //! or the selection by one step and measures and arranges the view again, as a keystroke does:
-//! the time of a step against the size of the document.
+//! the time of a step against the size of the document. `move_selection_and_render` also draws
+//! the view, which is where the selection is painted since it is an overlay.
 
 use crate::harness::Registry;
 use ferroui_base::{Ref, Size};
-use ferroui_controls::documents::{Paragraph, RichTextDocument};
+use ferroui_base::media::{DrawingContext, FontWeight, PlatformDrawingContext};
+use ferroui_controls::documents::{CharacterFormat, Paragraph, RichTextDocument};
 use ferroui_controls::rich_text::{EditKind, EditorSelection, RichTextEditor};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::RichTextBlock;
+use ferroui_headless::testing::headless_drawing_context_stub;
 use std::cell::Cell;
 
 const SENTENCE: &str = "Start with a thought, add emphasis, and mark the next step of the plan. ";
@@ -19,6 +22,10 @@ pub struct RichTextEditing {
     editor: RichTextEditor,
     caret: Cell<usize>,
     length: usize,
+    /// The paragraph mark nearest after the middle of the document.
+    boundary: usize,
+    bold: Cell<bool>,
+    drawing_context: DrawingContext<'static>,
     _app: UnitTestApplicationScope,
 }
 
@@ -32,7 +39,21 @@ impl RichTextEditing {
         let document = view.rich_document();
         let editor = RichTextEditor::new(document.clone());
         let length = document.text_length();
-        let this = Self { view, document, editor, caret: Cell::new(length / 2), length, _app: app };
+        // The text is ASCII: byte offsets are UTF-16 offsets.
+        let boundary = document.text()[length / 2..].find('\n').map_or(length / 2, |index| length / 2 + index);
+        let this = Self {
+            view,
+            document,
+            editor,
+            caret: Cell::new(length / 2),
+            length,
+            boundary,
+            bold: Cell::new(false),
+            drawing_context: DrawingContext::owned(Box::new(PlatformDrawingContext::new(
+                headless_drawing_context_stub(),
+            ))),
+            _app: app,
+        };
         this.layout();
         this
     }
@@ -59,7 +80,7 @@ impl RichTextEditing {
     }
 
     /// One paragraph break in the middle of the document, and its deletion on the next call:
-    /// structural edits that rebuild the document from a snapshot through its content pool.
+    /// structural edits, which rebuild the paragraphs they change (F1c).
     pub fn split_paragraph(&self) {
         let caret = self.caret.get();
         let _ = self.editor.set_selection(EditorSelection::caret(caret));
@@ -73,12 +94,44 @@ impl RichTextEditing {
         self.layout();
     }
 
+    /// A character format of text across the paragraph mark in the middle of the document, bold
+    /// and normal on alternate calls: a format change of two paragraphs (F1c).
+    pub fn format_paragraphs(&self) {
+        let bold = !self.bold.get();
+        self.bold.set(bold);
+        let _ = self.editor.set_selection(EditorSelection::new(self.boundary - 10, self.boundary + 10));
+        let weight = if bold { FontWeight::Bold } else { FontWeight::Normal };
+        self.editor
+            .apply_format(&CharacterFormat { font_weight: Some(weight), ..CharacterFormat::default() })
+            .unwrap();
+        self.layout();
+    }
+
+    /// One paragraph break in the middle of the document, and its undo on the next call: the
+    /// undo restores the snapshot from before the break, rebuilding the paragraphs it changes
+    /// (F1c).
+    pub fn undo_paragraph_break(&self) {
+        if self.document.text_length() > self.length {
+            self.editor.undo().unwrap();
+        } else {
+            let _ = self.editor.set_selection(EditorSelection::caret(self.length / 2));
+            self.editor.insert_text("\n", EditKind::Typing).unwrap();
+        }
+        self.layout();
+    }
+
     /// One step of the selection of the view.
     pub fn move_selection(&self) {
         let caret = (self.caret.get() + 1) % self.length;
         self.caret.set(caret);
         self.view.select(caret, caret + 1);
         self.layout();
+    }
+
+    /// One step of the selection of the view, and a drawing of the view.
+    pub fn move_selection_and_render(&mut self) {
+        self.move_selection();
+        self.view.render(&mut self.drawing_context);
     }
 
     /// One update of the preview of an input method.
@@ -99,8 +152,11 @@ pub fn register(registry: &mut Registry) {
         let parameters = format!("Paragraphs={paragraphs}");
         class.benchmark("type_character", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.type_character());
         class.benchmark("move_selection", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.move_selection());
+        class.benchmark("move_selection_and_render", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.move_selection_and_render());
         class.benchmark("update_ime_preview", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.update_ime_preview());
-        class.benchmark("split_paragraph", parameters, move || RichTextEditing::new(paragraphs), |b| b.split_paragraph());
+        class.benchmark("split_paragraph", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.split_paragraph());
+        class.benchmark("format_paragraphs", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.format_paragraphs());
+        class.benchmark("undo_paragraph_break", parameters, move || RichTextEditing::new(paragraphs), |b| b.undo_paragraph_break());
     }
 }
 

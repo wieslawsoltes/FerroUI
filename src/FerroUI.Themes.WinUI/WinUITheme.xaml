@@ -65,6 +65,7 @@
         <MergeResourceInclude Source="/Resources/InfoBadge_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/NavigationView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/NavigationBackButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/PersonPicture_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RefreshContainer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RefreshVisualizer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/MenuBar_themeresources.xaml" />
@@ -80,6 +81,7 @@
         <MergeResourceInclude Source="/Resources/ProgressRing_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/NumberBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/Expander_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/PagerControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/InfoBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/PipsPager_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SelectorBar_themeresources.xaml" />

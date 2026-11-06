@@ -11,7 +11,7 @@ use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{IImage, Stretch};
 use ferroui_base::platform::storage::IStorageItem;
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref, WeakRef};
 use ferroui_controls::{Border, ContentControl, ContentPage, Control, Image, TextBlock, TopLevel};
 use mini_mvvm::start_async;
@@ -103,7 +103,7 @@ impl DragAndDropPage {
         this.setup_dnd_sync(
             "Bitmap",
             |d| {
-                let uri = Uri::absolute("ferres://ControlCatalog/Assets/image1.jpg").unwrap_or_else(|e| panic!("{e}"));
+                let uri = UriRef::parse("ferres://ControlCatalog/Assets/image1.jpg").unwrap_or_else(|e| panic!("{e}"));
                 let mut asset = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
                 let bitmap = Rc::new(Bitmap::from_stream(&mut asset).unwrap_or_else(|e| panic!("{e}")));
                 d.add(DataTransferItem::create(&DataFormat::bitmap(), Some(bitmap)));

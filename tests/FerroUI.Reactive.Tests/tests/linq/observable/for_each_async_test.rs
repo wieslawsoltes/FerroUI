@@ -1,21 +1,53 @@
 //! Ported from `Tests.System.Reactive/Tests/Linq/Observable/ForEachAsyncTest.cs` of Rx.NET.
-//! Adapted: the task is a `Task<()>`; the overloads with a token are `_with_token`, those with an
-//! index `_with_index`, and an action that throws is the `try_` form returning `Err(ex)`. The
-//! blocking `Wait()` is `block_on`. The list the actions fill and the task a scheduled action
-//! assigns are shared cells.
+//! Adapted: the task is the `Shared` of a `Result<(), ObservableError>`, whose `Status` is read
+//! from its outcome (`status`: pending, a result, an error, or a cancellation, the error
+//! `Canceled`); the overloads with a token are `_with_token`, those with an index `_with_index`,
+//! and an action that throws is the `try_` form returning `Err(ex)`. The blocking `Wait()` is
+//! `block_on` of its `flatten()`. The list the actions fill and the task a scheduled action assigns
+//! are shared cells.
 
 use ferroui_reactive::{Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{assert_subscriptions, new_error, ReactiveTest as RT, Recorded, TestScheduler};
-use ferroui_system::threading::tasks::{block_on, Task, TaskStatus};
-use ferroui_system::threading::CancellationTokenSource;
+use ferroui_system::task::{block_on, Canceled, Shared};
+use ferroui_system::threading::CancellationToken;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// The task that a scheduled action assigns (`var task = default(Task);`).
-type TaskSlot = Rc<RefCell<Option<Task<()>>>>;
+/// The task of `ForEachAsync`.
+type ForEachTask = Shared<Result<(), ObservableError>>;
 
-fn get(task: &TaskSlot) -> Task<()> {
+/// The task that a scheduled action assigns (`var task = default(Task);`).
+type TaskSlot = Rc<RefCell<Option<ForEachTask>>>;
+
+fn get(task: &TaskSlot) -> ForEachTask {
     task.borrow().clone().expect("the task has been assigned")
+}
+
+/// The states of a task that the tests read (`TaskStatus`).
+#[derive(Debug, PartialEq, Eq)]
+enum Status {
+    WaitingForActivation,
+    RanToCompletion,
+    Faulted,
+    Canceled,
+}
+
+/// `Task.Status`, from the outcome.
+fn status(task: &ForEachTask) -> Status {
+    match task.result() {
+        None => Status::WaitingForActivation,
+        Some(Ok(())) => Status::RanToCompletion,
+        Some(Err(error)) if Canceled::is_cancellation(&error) => Status::Canceled,
+        Some(Err(_)) => Status::Faulted,
+    }
+}
+
+/// `Task.Exception` of a faulted task.
+fn task_exception(task: &ForEachTask) -> Option<ObservableError> {
+    match task.result() {
+        Some(Err(error)) if !Canceled::is_cancellation(&error) => Some(error),
+        _ => None,
+    }
 }
 
 /// `Assert.Same` of two errors.
@@ -36,11 +68,11 @@ fn for_each_async_never() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -53,7 +85,7 @@ fn for_each_async_never() {
 
     assert_eq!(vec![Recorded::new(200, 2), Recorded::new(300, 3), Recorded::new(400, 4), Recorded::new(500, 5)], *list.borrow());
 
-    assert_eq!(TaskStatus::WaitingForActivation, get(&task).status());
+    assert_eq!(Status::WaitingForActivation, status(&get(&task)));
 }
 
 #[test]
@@ -70,11 +102,11 @@ fn for_each_async_completed() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -87,7 +119,7 @@ fn for_each_async_completed() {
 
     assert_eq!(vec![Recorded::new(200, 2), Recorded::new(300, 3), Recorded::new(400, 4), Recorded::new(500, 5)], *list.borrow());
 
-    assert_eq!(TaskStatus::RanToCompletion, get(&task).status());
+    assert_eq!(Status::RanToCompletion, status(&get(&task)));
 }
 
 #[test]
@@ -106,11 +138,11 @@ fn for_each_async_error() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -124,8 +156,8 @@ fn for_each_async_error() {
     assert_eq!(vec![Recorded::new(200, 2), Recorded::new(300, 3), Recorded::new(400, 4), Recorded::new(500, 5)], *list.borrow());
 
     let task = get(&task);
-    assert_eq!(TaskStatus::Faulted, task.status());
-    assert!(same(&exception, &task.exception().expect("the task is faulted")));
+    assert_eq!(Status::Faulted, status(&task));
+    assert!(same(&exception, &task_exception(&task).expect("the task is faulted")));
 }
 
 #[test]
@@ -144,11 +176,11 @@ fn for_each_async_throw() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token, exception) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token(), exception.clone());
+        let (xs, task, list, clock, token, exception) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone(), exception.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() = Some(xs.as_observable().try_for_each_async_with_token(
                 move |x| {
@@ -171,8 +203,8 @@ fn for_each_async_throw() {
     assert_eq!(vec![Recorded::new(200, 2), Recorded::new(300, 3), Recorded::new(400, 4)], *list.borrow());
 
     let task = get(&task);
-    assert_eq!(TaskStatus::Faulted, task.status());
-    assert!(same(&exception, &task.exception().expect("the task is faulted")));
+    assert_eq!(Status::Faulted, status(&task));
+    assert!(same(&exception, &task_exception(&task).expect("the task is faulted")));
 }
 
 #[test]
@@ -189,11 +221,11 @@ fn for_each_async_cancel_during() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -210,7 +242,7 @@ fn for_each_async_cancel_during() {
 
     assert_eq!(vec![Recorded::new(200, 2), Recorded::new(300, 3)], *list.borrow());
 
-    assert_eq!(TaskStatus::Canceled, get(&task).status());
+    assert_eq!(Status::Canceled, status(&get(&task)));
 }
 
 #[test]
@@ -227,13 +259,13 @@ fn for_each_async_cancel_before() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     cts.cancel();
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -246,7 +278,7 @@ fn for_each_async_cancel_before() {
 
     assert_eq!(Vec::<Recorded<i32>>::new(), *list.borrow());
 
-    assert_eq!(TaskStatus::Canceled, get(&task).status());
+    assert_eq!(Status::Canceled, status(&get(&task)));
 }
 
 #[test]
@@ -263,11 +295,11 @@ fn for_each_async_cancel_after() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -284,14 +316,14 @@ fn for_each_async_cancel_after() {
 
     assert_eq!(vec![Recorded::new(200, 2), Recorded::new(300, 3), Recorded::new(400, 4), Recorded::new(500, 5)], *list.borrow());
 
-    assert_eq!(TaskStatus::RanToCompletion, get(&task).status());
+    assert_eq!(Status::RanToCompletion, status(&get(&task)));
 }
 
 #[test]
 fn for_each_async_default() {
     let list = Rc::new(RefCell::new(Vec::new()));
     let sink = list.clone();
-    block_on(Observable::range(1, 10).for_each_async(move |x| sink.borrow_mut().push(x))).unwrap();
+    block_on(Observable::range(1, 10).for_each_async(move |x| sink.borrow_mut().push(x)).flatten()).unwrap();
     assert_eq!(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10], *list.borrow());
 }
 
@@ -299,7 +331,7 @@ fn for_each_async_default() {
 fn for_each_async_index() {
     let list = Rc::new(RefCell::new(Vec::new()));
     let sink = list.clone();
-    block_on(Observable::range(3, 5).for_each_async_with_index(move |x, i| sink.borrow_mut().push(x * i as i32))).unwrap();
+    block_on(Observable::range(3, 5).for_each_async_with_index(move |x, i| sink.borrow_mut().push(x * i as i32)).flatten()).unwrap();
     // 3 * 0, 4 * 1, 5 * 2, 6 * 3, 7 * 4.
     assert_eq!(vec![0, 4, 10, 18, 28], *list.borrow());
 }

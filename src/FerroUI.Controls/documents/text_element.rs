@@ -6,8 +6,8 @@ use ferroui_base::media::{
     subscribe_invalidated, Brushes, FontFamily, FontFeatureCollection, FontStretch, FontStyle,
     FontWeight, IBrush,
 };
-use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::reactive::Subscription;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{
     ferro_class, ferro_property, AttachedProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, Ref,
     FerroProperty, FerroPropertyChangedEventArgs, StyledElement, StyledElementImpl, StyledProperty,
@@ -34,7 +34,7 @@ mod text_element_namescope_tests;
 pub struct TextElement {
     base: StyledElement,
     inline_host: RefCell<Option<Rc<dyn IInlineHost>>>,
-    media_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    media_subscriptions: RefCell<Vec<Subscription>>,
 }
 
 ferro_class! {
@@ -77,13 +77,6 @@ impl FerroObjectImpl for TextElement {
     }
 }
 
-impl Drop for TextElement {
-    fn drop(&mut self) {
-        for subscription in self.media_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-    }
-}
 
 impl TextElementImpl for TextElement {
     fn on_inline_host_changed(
@@ -96,15 +89,15 @@ impl TextElementImpl for TextElement {
 
 ferroui_base::ferro_properties! { impl TextElement {
     ferro_property!(
-        /// The inherited text language, represented by FerroUI's culture value.
-        /// Markup accepts a language tag, and an empty tag resolves to the
-        /// preferred application language when text is shaped.
-        pub fn language_property() -> AttachedProperty<CultureInfo> {
+        /// The inherited text language, a locale. Markup accepts a BCP-47
+        /// language tag (an IETF tag, as for a culture), and an empty tag (the
+        /// invariant culture, the unknown locale `und`) resolves to the preferred
+        /// application language when text is shaped. A locale is always a valid
+        /// XML language tag.
+        pub fn language_property() -> AttachedProperty<Locale> {
             FerroProperty::register_attached_with::<TextElement, Control, _>(
                 "Language",
-                StyledPropertyOptions::new(super::text_language::default_language())
-                    .inherits(true)
-                    .validate(|language: &CultureInfo| super::text_language::is_valid_language_tag(language.name())),
+                StyledPropertyOptions::new(super::text_language::default_language()).inherits(true),
             )
         }
     );
@@ -254,16 +247,16 @@ impl TextElement {
     }
 
     /// Gets the assigned or inherited language before empty-tag resolution.
-    pub fn language(&self) -> CultureInfo {
+    pub fn language(&self) -> Locale {
         self.get_value(Self::language_property())
     }
 
-    pub fn set_language(&self, value: CultureInfo) {
+    pub fn set_language(&self, value: Locale) {
         self.set_value(Self::language_property(), value);
     }
 
     /// The language passed to font fallback and shaping for this element.
-    pub fn resolved_language(&self) -> CultureInfo {
+    pub fn resolved_language(&self) -> Locale {
         super::text_language::resolved_language(&self.language())
     }
 
@@ -286,7 +279,7 @@ impl TextElement {
     /// Deviation (DEVIATIONS.md, Text block): `Inline.CreateTextRunProperties` passes no
     /// culture; a run with a language gets it (WinUI's `TextElement.Language`), and one
     /// without keeps upstream's `None`, so text with Inlines shapes as plain text.
-    pub fn run_culture(&self) -> Option<CultureInfo> {
+    pub fn run_culture(&self) -> Option<Locale> {
         self.has_language().then(|| self.resolved_language())
     }
 
@@ -300,10 +293,7 @@ impl TextElement {
     }
 
     fn refresh_media_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.media_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(self.media_subscriptions.take());
         let mut subscriptions = Vec::new();
         if let Some(features) = self.font_features() {
             let weak = self.to_ref().downgrade();
@@ -320,7 +310,7 @@ impl TextElement {
                         }
                     }
                 }
-            }).detach());
+            }));
         }
         for brush in [self.foreground(), self.background()] {
             if brush.as_ref().and_then(|brush| brush.as_object()).is_none() {
@@ -333,7 +323,7 @@ impl TextElement {
                 }
             });
             if let Some(subscription) = subscribe_invalidated(&brush, changed) {
-                subscriptions.push(subscription);
+                subscriptions.push(Subscription::new(subscription));
             }
         }
         *self.media_subscriptions.borrow_mut() = subscriptions;

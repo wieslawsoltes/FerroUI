@@ -40,7 +40,7 @@ mod macos {
         IRenderTarget, RenderTargetSceneInfo,
     };
     use ferroui_base::rendering::composition::CompositionTransparencyLevel;
-    use ferroui_base::threading::{CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
+    use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTimer};
     use ferroui_base::{
         FerroLocator, LocatorExtensions, Matrix, PixelPoint, PixelSize, Rect, Ref, RelativePoint, RelativeUnit,
         RoundedRect, Size,
@@ -266,7 +266,7 @@ mod macos {
             resizes: Cell::new(0),
             closed: Cell::new(false),
         });
-        let loop_cancellation = CancellationTokenSource::new();
+        let loop_cancellation = CancellationToken::new();
 
         window.set_input_root(Rc::new(InputRoot {
             root: InputElement::new(),
@@ -336,7 +336,7 @@ mod macos {
         });
 
         println!("Entering main loop");
-        Dispatcher::ui_thread().main_loop(&loop_cancellation.token());
+        Dispatcher::ui_thread().main_loop(&loop_cancellation);
         println!("Main loop exited");
 
         let (frames, resizes, closed) = (state.frames.get(), state.resizes.get(), state.closed.get());

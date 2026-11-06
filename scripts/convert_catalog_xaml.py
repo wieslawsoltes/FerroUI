@@ -202,6 +202,10 @@ PORT_DOCUMENTS = [
     ("Pages/VisualStatesPage.xaml", "the page of WinUI's visual state manager (docs/porting/winui-calculator-gaps.md)"),
     ("Pages/CartesianChartPage.xaml", "the page of the Cartesian chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
     ("Pages/PieChartPage.xaml", "the page of the pie chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
+    ("Pages/PolarChartPage.xaml", "the page of the polar chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
+    ("Pages/SankeyChartPage.xaml", "the page of the Sankey chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
+    ("Pages/TreemapChartPage.xaml", "the page of the treemap chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
+    ("Pages/GeoMapPage.xaml", "the page of the geographic map of the LiveCharts2 port (docs/porting/livecharts2.md)"),
 ]
 
 

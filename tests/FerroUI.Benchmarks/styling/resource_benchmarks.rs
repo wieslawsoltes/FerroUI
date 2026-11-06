@@ -5,7 +5,7 @@
 use crate::harness::Registry;
 use crate::test_root::TestRoot;
 use crate::test_styles::TestStyles;
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::platform::{StandardAssetLoader, StandardRuntimePlatform};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
@@ -116,7 +116,7 @@ impl ResourceBenchmarks {
 /// the upstream test library): it ticks when it is told to, which the
 /// benchmark never does.
 struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
@@ -126,8 +126,8 @@ impl MockGlobalClock {
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

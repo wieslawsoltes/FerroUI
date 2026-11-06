@@ -27,8 +27,10 @@
 //! to `ThrownExceptions` upstream. Here the `try_` form of a factory takes a function returning a
 //! `Result`, whose `Err` takes that path; a panic of the function of any form is caught where
 //! upstream catches the exception, and takes it as a [`PanicError`](crate::PanicError). A
-//! task is a closure returning a future (a `Task<R>` is one), run as a task of the thread when the
-//! execution is subscribed (docs/porting/reactive.md, section 5.8). The null checks of the
+//! task is a closure returning a future of a `Result<R, ObservableError>` (the `flatten()` of a
+//! `ferroui_system::task::Shared` or of a `oneshot` receiver is one), run as a task of the thread
+//! when the execution is subscribed (`ferroui_system::task::spawn_local`, its outcome shared;
+//! docs/porting/reactive.md, section 5.8). The null checks of the
 //! arguments (`ArgumentNullException`) have no counterpart: the arguments cannot be null.
 
 use super::combined_reactive_command::CombinedReactiveCommand;
@@ -40,7 +42,6 @@ use crate::primitives::start_signal::StartSignal;
 use crate::RxSchedulers;
 use ferroui_reactive::concurrency::{IScheduler, ImmediateScheduler};
 use ferroui_reactive::ObservableExt;
-use ferroui_system::threading::tasks::Task;
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IObservable, ObservableError};
 use std::future::Future;
@@ -373,7 +374,7 @@ impl ReactiveCommand<(), ()> {
     ) -> ReactiveCommand<(), R> {
         Self::create_from_observable_with(
             move || {
-                let source: Rc<dyn IObservable<R>> = TaskObservable::new(Task::spawn_local(execute()));
+                let source: Rc<dyn IObservable<R>> = TaskObservable::new(ferroui_system::task::spawn_local(execute()).shared());
                 source
             },
             can_execute,
@@ -399,7 +400,7 @@ impl ReactiveCommand<(), ()> {
     ) -> ReactiveCommand<P, R> {
         Self::create_from_observable_param_with(
             move |parameter| {
-                let source: Rc<dyn IObservable<R>> = TaskObservable::new(Task::spawn_local(execute(parameter)));
+                let source: Rc<dyn IObservable<R>> = TaskObservable::new(ferroui_system::task::spawn_local(execute(parameter)).shared());
                 source
             },
             can_execute,

@@ -45,6 +45,25 @@ fn native_documents_are_identity_and_migration_is_idempotent() {
 }
 
 #[test]
+fn native_and_winui_documents_keep_the_directives_of_x_bind() {
+    // Steps X5 and X6 of #525 (docs/porting/x-bind.md): x:DefaultBindMode, x:Phase, x:Load and
+    // x:DeferLoadStrategy are directives of the x:Bind core of the XAML compiler, which checks
+    // them with WinUI's messages; the importer keeps them in both dialects.
+    let original = format!(
+        "<StackPanel xmlns='{FERRO_XML_NAMESPACE}' xmlns:x='{XAML_NAMESPACE}' x:DefaultBindMode='OneWay'><Border x:Name='lazy' x:Load='False'/><TextBlock x:Name='later' x:DeferLoadStrategy='Lazy'/><TextBlock x:Phase='1'/></StackPanel>"
+    );
+    let result = migrate_winui_xaml(&original, &WinUIXamlOptions::default()).unwrap();
+    assert_eq!(result.xaml, original);
+    assert!(result.edits.is_empty());
+    assert!(!result.diagnostics.iter().any(|d| d.code == "WXAML1002"));
+    let body = "<Border x:Name='lazy' x:Load='False'/><TextBlock x:Name='later' x:DeferLoadStrategy='Lazy'/><StackPanel x:DefaultBindMode='OneWay'><TextBlock x:Phase='1' Text='{x:Bind Name}'/></StackPanel>";
+    let winui = migrate(body);
+    assert!(!winui.has_errors(), "{:?}", winui.diagnostics);
+    assert!(winui.diagnostics.is_empty(), "{:?}", winui.diagnostics);
+    assert!(winui.xaml.ends_with(&format!("{body}</Grid>")), "the directives and the x:Bind stay as written");
+}
+
+#[test]
 fn source_page_maps_to_native_frame_page_with_balanced_property_elements() {
     let result = migrate("<Page><Page.Content><Frame/></Page.Content></Page>");
     assert!(!result.has_errors());
@@ -477,9 +496,12 @@ fn binding_modes_inside_nested_extensions_or_quoted_values_do_not_count() {
 }
 
 #[test]
-fn xbind_reports_root_source_semantics_even_with_an_alternative_xaml_prefix() {
+fn xbind_is_kept_or_rejected_with_an_alternative_xaml_prefix() {
     let input = format!("<Grid xmlns='{WINUI_PRESENTATION_NAMESPACE}' xmlns:language='{XAML_NAMESPACE}'>\n  <TextBlock Text='{{language:Bind Name}}'/>\n</Grid>");
-    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    let kept = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    assert!(kept.diagnostics.is_empty(), "{:?}", kept.diagnostics);
+    assert!(kept.xaml.contains("Text='{language:Bind Name}'"));
+    let result = migrate_winui_xaml(&input, &reject_options()).unwrap();
     let error = result
         .diagnostics
         .iter()
@@ -539,17 +561,18 @@ fn only_audited_style_resources_are_control_themes() {
 
 #[test]
 fn unknown_state_lifecycle_and_localization_contracts_are_not_discarded() {
-    let result = migrate("<Button x:Load='False' x:Uid='SaveButton'/><VisualStateManager.VisualStateGroups><VisualStateGroup/></VisualStateManager.VisualStateGroups>");
-    assert_eq!(
-        result
-            .diagnostics
-            .iter()
-            .filter(|d| d.code == "WXAML1002")
-            .count(),
-        2
-    );
+    let result = migrate("<Button x:Name='save' x:Load='False' x:Uid='SaveButton'/><VisualStateManager.VisualStateGroups><VisualStateGroup/></VisualStateManager.VisualStateGroups>");
+    // x:Uid (localization) is reported; x:Load is a directive of the x:Bind core.
+    let reported: Vec<_> = result
+        .diagnostics
+        .iter()
+        .filter(|d| d.code == "WXAML1002")
+        .collect();
+    assert_eq!(reported.len(), 1);
+    assert!(reported[0].message.contains("x:Uid"));
     assert!(result.diagnostics.iter().any(|d| d.code == "WXAML1001"));
     assert!(result.xaml.contains("x:Uid='SaveButton'"));
+    assert!(result.xaml.contains("x:Load='False'"));
 }
 
 #[test]
@@ -740,7 +763,7 @@ fn ignored_design_attributes_and_subtrees_remain_verbatim() {
 #[test]
 fn shadowing_an_ignorable_prefix_does_not_ignore_a_different_namespace() {
     let input = source("<Grid xmlns:mc='http://schemas.openxmlformats.org/markup-compatibility/2006' xmlns:d='urn:Designer' mc:Ignorable='d'><Button xmlns:d='urn:Runtime' d:Unknown='{x:Bind StillRuntime}'/></Grid>");
-    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    let result = migrate_winui_xaml(&input, &reject_options()).unwrap();
     assert!(result
         .diagnostics
         .iter()
@@ -750,7 +773,7 @@ fn shadowing_an_ignorable_prefix_does_not_ignore_a_different_namespace() {
 #[test]
 fn unsupported_features_in_unused_resources_still_report_original_locations() {
     let input = source("<Grid.Resources>\n<DataTemplate x:Key='Unused'><TextBlock Text='{x:Bind Name}'/></DataTemplate>\n</Grid.Resources>");
-    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    let result = migrate_winui_xaml(&input, &reject_options()).unwrap();
     let diagnostic = result
         .diagnostics
         .iter()
@@ -800,7 +823,7 @@ fn runtime_rejects_semantic_diagnostics_before_instantiating_unknown_controls() 
     let error = crate::parse_winui(
         &input,
         None,
-        &WinUIXamlOptions::default(),
+        &reject_options(),
     )
     .err()
     .unwrap();
@@ -827,136 +850,163 @@ fn fresh_root_deferred_resource_error_is_returned_and_default_loader_still_throw
     );
 }
 
-fn xbind_options() -> WinUIXamlOptions {
+fn reject_options() -> WinUIXamlOptions {
     WinUIXamlOptions {
-        x_bind: WinUIXBindPolicy::PropertyPathsWithExplicitLifecycle,
+        x_bind: WinUIXBindPolicy::Reject,
         ..Default::default()
     }
 }
 
 #[test]
-fn property_path_xbind_is_a_separate_extension_with_original_location_and_explicit_scope() {
-    let input = source("\n<TextBox Text='{x:Bind ViewModel.Name, Mode=TwoWay}'/>");
-    let result = migrate_winui_xaml(&input, &xbind_options()).unwrap();
-    assert!(!result.has_errors(), "{:?}", result.diagnostics);
-    let doc = Document::parse(&result.xaml).unwrap();
-    let value = doc
-        .descendants()
-        .find(|n| n.has_tag_name("TextBox"))
-        .unwrap()
-        .attribute("Text")
-        .unwrap();
-    assert!(value.contains(":WinUIBind Path=ViewModel.Name, Mode=TwoWay, Scope=Root"));
-    assert!(value.contains("SourceLine=2"));
-    assert!(!value.contains("UpdateSourceTrigger="));
-    assert!(result
-        .diagnostics
-        .iter()
-        .any(|d| d.code == "WXAML2004" && d.span.line == 2));
-    assert!(result.xaml.contains("using:FerroUI.Markup.Xaml.WinUI"));
-    let twice = migrate_winui_xaml(&result.xaml, &xbind_options()).unwrap();
-    assert_eq!(twice.xaml, result.xaml);
-    assert!(twice.edits.is_empty());
+fn compile_is_the_default_x_bind_policy() {
+    assert_eq!(WinUIXBindPolicy::default(), WinUIXBindPolicy::Compile);
+    assert_eq!(WinUIXamlOptions::default().x_bind, WinUIXBindPolicy::Compile);
+    assert_eq!(WinUIXamlOptions::for_winui_theme().x_bind, WinUIXBindPolicy::Compile);
 }
 
 #[test]
-fn property_path_policy_still_rejects_functions_events_casts_indexers_and_unknown_parameters() {
-    for body in [
-        "<TextBlock Text='{x:Bind Format(Name)}'/>",
+fn xbind_is_kept_as_written_for_the_compiler_core() {
+    // Step X6 of #525 (docs/porting/x-bind.md): every form of WinUI's grammar, the parameters,
+    // event bindings and the directives go to the x:Bind core unchanged; the compiler checks
+    // them with WinUI's messages.
+    let bodies = [
+        "<TextBox Text='{x:Bind ViewModel.Name, Mode=TwoWay}'/>",
+        "<TextBlock Text='{x:Bind Format(Name, &apos;a, b&apos;, 3)}'/>",
         "<TextBlock Text='{x:Bind Items[0].Name}'/>",
-        "<TextBlock Text='{x:Bind ((Model)Data).Name}'/>",
+        "<TextBlock Text=\"{x:Bind Map['key']}\"/>",
+        "<TextBlock Text='{x:Bind ((local:Model)Data).Name}' xmlns:local='using:App.Models'/>",
+        "<TextBlock Text='{x:Bind local:Helpers.Format(Name)}' xmlns:local='using:App.Models'/>",
         "<Button Click='{x:Bind OnClick}'/>",
-        "<TextBox Loaded='{x:Bind OnLoaded}'/>",
-        "<TextBlock Text='{x:Bind Name, Converter={StaticResource Converter}}'/>",
+        "<Button Click='{x:Bind ViewModel.Save}'/>",
+        "<TextBox Text='{x:Bind Name, Mode=TwoWay, BindBack=SetName}'/>",
+        "<TextBlock Text='{x:Bind Name, Converter={StaticResource Converter}, ConverterParameter=x}'/>",
+        "<TextBlock Text='{x:Bind Name, FallbackValue=none, TargetNullValue={x:Null}}'/>",
+        "<TextBox Text='{x:Bind Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}'/>",
+        "<TextBlock Text='{x:Bind}'/>",
+        "<TextBlock Text='{x:Bind Path=Name, Mode=OneWay}'/>",
+        "<ListView><ListView.ItemTemplate><DataTemplate x:DataType='local:Person' xmlns:local='using:App.Models'><TextBlock x:Phase='1' Text='{x:Bind Name}'/></DataTemplate></ListView.ItemTemplate></ListView>",
+        "<Border x:Name='details' x:Load='{x:Bind IsExpanded, Mode=OneWay}'/>",
+        "<StackPanel x:DefaultBindMode='OneWay'><TextBlock Text='{x:Bind Title}'/></StackPanel>",
+    ];
+    for body in bodies {
+        let input = source(&format!("\n{body}"));
+        let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+        assert!(result.diagnostics.is_empty(), "{body}: {:?}", result.diagnostics);
+        assert!(result.xaml.ends_with(&format!("{body}</Grid>")), "{body}: {}", result.xaml);
+        assert!(!result.xaml.contains("using:FerroUI.Markup.Xaml.WinUI"));
+        let twice = migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap();
+        assert_eq!(twice.xaml, result.xaml);
+        assert!(twice.edits.is_empty());
+    }
+}
+
+#[test]
+fn forms_the_core_checks_are_not_reported_by_the_importer() {
+    // A template without x:DataType, a control template without TargetType, a mode or a
+    // trigger WinUI rejects: the x:Bind core reports them with WinUI's messages (x_bind_tests).
+    for body in [
+        "<ContentControl><ContentControl.ContentTemplate><DataTemplate><TextBlock Text='{x:Bind Name}'/></DataTemplate></ContentControl.ContentTemplate></ContentControl>",
+        "<ContentControl><ContentControl.Template><ControlTemplate><TextBlock Text='{x:Bind Name}'/></ControlTemplate></ContentControl.Template></ContentControl>",
         "<TextBox Text='{x:Bind Name, Mode=Default}'/>",
-        "<TextBox Text='{x:Bind Name, UpdateSourceTrigger=PropertyChanged}'/>",
         "<TextBox Text='{x:Bind Name, Mode=TwoWay, UpdateSourceTrigger=Explicit}'/>",
-        "<TextBlock Text='{x:Bind Name, Mode=OneTime, Mode=OneWay}'/>",
+    ] {
+        let result = migrate_winui_xaml(&source(body), &WinUIXamlOptions::default()).unwrap();
+        assert!(!result.has_errors(), "{body}: {:?}", result.diagnostics);
+        assert!(result.xaml.contains(body));
+    }
+}
+
+#[test]
+fn nested_extensions_of_an_x_bind_are_migrated_and_a_nested_x_bind_is_reported() {
+    let input = source("<TextBlock Text='{x:Bind Name, TargetNullValue={ThemeResource MissingName}}'/>");
+    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::for_winui_theme()).unwrap();
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    assert!(result
+        .xaml
+        .contains("Text='{x:Bind Name, TargetNullValue={DynamicResource MissingName}}'"));
+    assert!(result.diagnostics.iter().any(|d| d.code == "WXAML2001"));
+    let rejected = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    assert!(rejected.diagnostics.iter().any(|d| d.code == "WXAML1008"));
+
+    // WinUI's XamlDomValidator rejects an x:Bind in an x:Bind (WMC1122); an x:Bind in another
+    // extension is left to the compiler.
+    let input = source("\n<TextBlock Text='{x:Bind Name, FallbackValue={x:Bind Other}}'/>");
+    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    let nested: Vec<_> = result
+        .diagnostics
+        .iter()
+        .filter(|d| d.code == "WXAML1007")
+        .collect();
+    assert_eq!(nested.len(), 1, "{:?}", result.diagnostics);
+    assert_eq!(nested[0].message, "Nested x:Bind expressions are not supported");
+    assert_eq!(nested[0].span.line, 2);
+    assert_eq!(
+        &input[nested[0].span.bytes.clone()],
+        "{x:Bind Name, FallbackValue={x:Bind Other}}"
+    );
+    assert!(result.into_xaml().is_err());
+    let other = migrate("<TextBlock Text='{Binding Name, FallbackValue={x:Bind Other}}'/>");
+    assert!(!other.diagnostics.iter().any(|d| d.code == "WXAML1007"));
+}
+
+#[test]
+fn reject_policy_reports_every_x_bind_with_its_original_location() {
+    for body in [
+        "<TextBlock Text='{x:Bind Name}'/>",
+        "<TextBlock Text='{x:Bind Format(Name)}'/>",
+        "<Button Click='{x:Bind OnClick}'/>",
+        "<Border x:Name='details' x:Load='{x:Bind IsExpanded}'/>",
         "<TextBlock Text='{Binding Name, FallbackValue={x:Bind Other}}'/>",
+        "<ContentControl><ContentControl.ContentTemplate><DataTemplate x:DataType='Button'><TextBlock Text='{x:Bind Content}'/></DataTemplate></ContentControl.ContentTemplate></ContentControl>",
     ] {
         let input = source(body);
-        let result = migrate_winui_xaml(&input, &xbind_options()).unwrap();
+        let result = migrate_winui_xaml(&input, &reject_options()).unwrap();
         let diagnostic = result
             .diagnostics
             .iter()
             .find(|d| d.code == "WXAML1007")
             .expect(body);
-        assert!(input[diagnostic.span.bytes.clone()].contains("{x:Bind"));
+        assert!(diagnostic.message.contains("WinUIXBindPolicy::Reject"), "{body}");
+        assert!(input[diagnostic.span.bytes.clone()].contains("{x:Bind"), "{body}");
         assert!(result.into_xaml().is_err(), "{body}");
     }
 }
 
 #[test]
-fn event_rejection_resolves_the_declaring_namespace_and_inherited_members() {
-    let input = format!("<Grid xmlns='{WINUI_PRESENTATION_NAMESPACE}' xmlns:x='{XAML_NAMESPACE}' xmlns:ui='using:Microsoft.UI.Xaml.Controls' xmlns:custom='using:MyControls'><ui:Button Click='{{x:Bind ClickHandler}}'/><custom:Button Click='{{x:Bind Label}}'/></Grid>");
-    let mut options = xbind_options();
-    options.namespaces.push(WinUIXamlNamespaceMapping::new(
-        "using:MyControls",
-        "using:PortedControls",
-    ));
-    let result = migrate_winui_xaml(&input, &options).unwrap();
-    assert_eq!(
-        result
-            .diagnostics
-            .iter()
-            .filter(|d| d.code == "WXAML1007")
-            .count(),
-        1
-    );
-    assert!(result.xaml.contains("Click='{fui"));
-}
-
-#[test]
-fn typed_template_scope_captures_its_type_namespace_even_when_the_prefix_is_shadowed() {
+fn typed_template_scope_keeps_its_type_namespace_even_when_the_prefix_is_shadowed() {
     let input = format!("<DataTemplate xmlns='{WINUI_PRESENTATION_NAMESPACE}' xmlns:x='{XAML_NAMESPACE}' xmlns:item='using:OriginalModels' x:DataType='item:Person'><TextBlock xmlns:item='using:OtherModels' Text='{{x:Bind Name}}'/></DataTemplate>");
-    let mut options = xbind_options();
+    let mut options = WinUIXamlOptions::default();
     options.namespaces.push(WinUIXamlNamespaceMapping::new(
         "using:OriginalModels",
         "using:PortedModels",
     ));
     let result = migrate_winui_xaml(&input, &options).unwrap();
-    assert!(!result.has_errors());
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
     let doc = Document::parse(&result.xaml).unwrap();
+    let template = doc.root_element();
+    // The compiler reads the x:DataType of the template where it is declared, so the prefix
+    // shadowed below it does not change the type of the item.
+    assert_eq!(template.attribute((XAML_NAMESPACE, "DataType")), Some("item:Person"));
+    assert_eq!(
+        template.lookup_namespace_uri(Some("item")),
+        Some("using:PortedModels")
+    );
     let text = doc
         .descendants()
         .find(|node| node.has_tag_name("TextBlock"))
         .unwrap();
-    let binding = text.attribute("Text").unwrap();
-    assert!(binding.contains("Scope=Template"));
-    assert!(binding.contains("Mode=OneTime"));
-    let type_ = binding
-        .split("Type ")
-        .nth(1)
-        .unwrap()
-        .split('}')
-        .next()
-        .unwrap();
-    let (prefix, name) = type_.split_once(':').unwrap();
-    assert_eq!(name, "Person");
-    assert_eq!(
-        text.lookup_namespace_uri(Some(prefix)),
-        Some("using:PortedModels")
-    );
-    for body in [
-        "<DataTemplate><TextBlock Text='{x:Bind Name}'/></DataTemplate>",
-        "<ControlTemplate><TextBlock Text='{x:Bind Name}'/></ControlTemplate>",
-    ] {
-        assert!(migrate_winui_xaml(&source(body), &xbind_options())
-            .unwrap()
-            .has_errors());
-    }
+    assert_eq!(text.attribute("Text"), Some("{x:Bind Name}"));
 }
 
 #[test]
-fn migrated_xbind_stays_dormant_until_the_host_initializes_the_document() {
+fn migrated_xbind_stays_dormant_until_the_document_is_initialized() {
     use ferroui_base::data::core::ValueTypes;
     use ferroui_base::data::BindingPriority;
     use ferroui_base::{BoxedValue, FerroPropertyRegistry};
-    use crate::WinUIBindings;
-    
+    use ferroui_markup_xaml::markup_extensions::XBindings;
     use std::rc::Rc;
     let input = format!("<TextBlock xmlns='{WINUI_PRESENTATION_NAMESPACE}' xmlns:x='{XAML_NAMESPACE}' Tag='initial' Text='{{x:Bind Tag}}'/>");
-    let value = crate::parse_winui(&input, None, &xbind_options()).unwrap();
+    let value = crate::parse_winui(&input, None, &WinUIXamlOptions::default()).unwrap();
     let root = ValueTypes::as_object(&*value).unwrap();
     let text = FerroPropertyRegistry::instance()
         .find_registered_for(&root, "Text")
@@ -967,9 +1017,9 @@ fn migrated_xbind_stays_dormant_until_the_host_initializes_the_document() {
     assert!(ValueTypes::normalize(root.get_value_untyped(text)).is_none());
     let late: Option<BoxedValue> = Some(Rc::new("after code-behind".to_string()));
     root.set_value_untyped(tag, &late, BindingPriority::LocalValue);
-    let group = WinUIBindings::get_for_root(&root).unwrap();
-    assert!(!group.is_initialized());
-    group.initialize().unwrap();
+    let bindings = XBindings::get_for_root(&root).unwrap();
+    assert!(!bindings.is_initialized());
+    bindings.initialize().unwrap();
     let text_value = ValueTypes::normalize(root.get_value_untyped(text)).unwrap();
     assert_eq!(
         text_value.downcast_ref::<String>().map(String::as_str),
@@ -981,13 +1031,13 @@ fn migrated_xbind_stays_dormant_until_the_host_initializes_the_document() {
 fn migrated_template_xbind_uses_each_deferred_instance_and_typed_item() {
     use ferroui_base::data::core::ValueTypes;
     use ferroui_base::FerroPropertyRegistry;
+    use ferroui_markup_xaml::markup_extensions::XBindings;
     use ferroui_markup_xaml::templates::DataTemplate;
-    use crate::WinUIBindings;
     use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
     use std::rc::Rc;
     let input = format!("<DataTemplate xmlns='{WINUI_PRESENTATION_NAMESPACE}' xmlns:x='{XAML_NAMESPACE}' x:DataType='Button'><TextBlock Text='{{x:Bind Content}}'/></DataTemplate>");
     let template: Rc<DataTemplate> =
-        crate::parse_winui_as(&input, None, &xbind_options()).unwrap();
+        crate::parse_winui_as(&input, None, &WinUIXamlOptions::default()).unwrap();
     let first = template.build(None).unwrap();
     let second = template.build(None).unwrap();
     let first_item = FerroRuntimeXamlLoader::parse(
@@ -1000,16 +1050,11 @@ fn migrated_template_xbind_uses_each_deferred_instance_and_typed_item() {
         None,
     )
     .unwrap();
+    // The data context of an instance drives it, as WinUI's DataContextChanged handler.
     first.set_data_context(Some(first_item));
     second.set_data_context(Some(second_item));
-    WinUIBindings::get_for_root(&first)
-        .unwrap()
-        .initialize()
-        .unwrap();
-    WinUIBindings::get_for_root(&second)
-        .unwrap()
-        .initialize()
-        .unwrap();
+    assert!(XBindings::get_for_root(&first).unwrap().is_initialized());
+    assert!(XBindings::get_for_root(&second).unwrap().is_initialized());
     let text = FerroPropertyRegistry::instance()
         .find_registered_for(&first, "Text")
         .unwrap();
@@ -1023,7 +1068,7 @@ fn migrated_template_xbind_uses_each_deferred_instance_and_typed_item() {
     assert_eq!(read(first.get_value_untyped(text)), "first");
     assert_eq!(read(second.get_value_untyped(text)), "second");
     assert!(!Rc::ptr_eq(
-        &WinUIBindings::get_for_root(&first).unwrap(),
-        &WinUIBindings::get_for_root(&second).unwrap()
+        &XBindings::get_for_root(&first).unwrap(),
+        &XBindings::get_for_root(&second).unwrap()
     ));
 }

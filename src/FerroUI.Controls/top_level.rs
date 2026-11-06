@@ -33,7 +33,8 @@ use ferroui_base::rendering::{IHitTester, IRenderer, RendererDiagnostics};
 use ferroui_base::styling::{
     Container, ContainerSizing, IGlobalStyles, IStyle, IStyleHost, IThemeVariantHost, StyleHostRef, ThemeVariant,
 };
-use ferroui_base::threading::{Dispatcher, DispatcherTask};
+use ferroui_base::threading::Dispatcher;
+use ferroui_system::task::JoinHandle;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, AttachedProperty, DirectProperty,
@@ -62,7 +63,7 @@ pub struct TopLevel {
     access_key_handler: RefCell<Option<Rc<dyn IAccessKeyHandler>>>,
     keyboard_navigation_handler: RefCell<Option<Rc<dyn IKeyboardNavigationHandler>>>,
     global_styles: RefCell<Option<Rc<dyn IGlobalStyles>>>,
-    global_styles_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    global_styles_subscriptions: RefCell<Vec<Subscription>>,
     application_theme_host: RefCell<Option<Rc<dyn IThemeVariantHost>>>,
     application_theme_subscription: RefCell<Option<Subscription>>,
     back_gesture_subscription: RefCell<Option<Subscription>>,
@@ -203,9 +204,7 @@ impl TopLevelImpl for TopLevel {
         }
         this.scaling.set(1.0);
 
-        for subscription in this.global_styles_subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(this.global_styles_subscriptions.take());
         if let Some(subscription) = this.application_theme_subscription.borrow_mut().take() {
             subscription.dispose();
         }
@@ -673,7 +672,9 @@ impl TopLevel {
                     }
                 }
             }));
-            self.global_styles_subscriptions.borrow_mut().extend([added, removed]);
+            self.global_styles_subscriptions
+                .borrow_mut()
+                .extend([Subscription::new(added), Subscription::new(removed)]);
         }
 
         let application_theme_host = self.application_theme_host.borrow().clone();
@@ -1205,8 +1206,8 @@ impl TopLevel {
     /// supported the request will have no effect.
     ///
     /// Like the asynchronous method of the reference, the request is sent to
-    /// the platform before this returns; the returned task completes, from
-    /// a dispatcher job unless the platform completed at once, when the
+    /// the platform before this returns; the returned handle ends, in a
+    /// dispatcher job unless the platform completed at once, when the
     /// platform has applied it. Disposing the result starts the request
     /// that lifts the inhibition and returns without waiting for the
     /// platform to complete it.
@@ -1214,11 +1215,11 @@ impl TopLevel {
         &self,
         type_: PlatformInhibitionType,
         reason: &str,
-    ) -> DispatcherTask<Rc<dyn IDisposable>> {
+    ) -> JoinHandle<Rc<dyn IDisposable>> {
         let platform_behavior_inhibition = self.optional_feature::<dyn IPlatformBehaviorInhibition>();
         let reason = reason.to_owned();
 
-        Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        Dispatcher::ui_thread().start_local(async move {
             let Some(platform_behavior_inhibition) = platform_behavior_inhibition else {
                 return Disposable::create(|| {});
             };
@@ -1228,7 +1229,7 @@ impl TopLevel {
                     platform_behavior_inhibition.set_inhibit_app_sleep(true, &reason).await;
                     Disposable::create(move || {
                         let lifted = platform_behavior_inhibition.set_inhibit_app_sleep(false, &reason);
-                        drop(Dispatcher::ui_thread().to_task_scheduler().start_local(lifted));
+                        drop(Dispatcher::ui_thread().start_local(lifted));
                     })
                 }
             }
@@ -1236,7 +1237,7 @@ impl TopLevel {
     }
 
     /// Enqueues a callback to be called on the next animation tick.
-    pub fn request_animation_frame(&self, action: impl FnOnce(ferroui_base::animation::TimeSpan) + 'static) {
+    pub fn request_animation_frame(&self, action: impl FnOnce(ferroui_base::animation::SignedDuration) + 'static) {
         Dispatcher::ui_thread().verify_access();
         MediaContext::instance().request_animation_frame(action);
     }

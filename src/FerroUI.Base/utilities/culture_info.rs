@@ -1,24 +1,37 @@
-//! A minimal counterpart of .NET's `System.Globalization.CultureInfo`: a
-//! BCP-47 language tag plus its Windows LCID where known. It carries no
-//! formatting data; the text subsystem only needs culture identity (font
-//! matching, shaping language, localized font names).
+//! A counterpart of .NET's `System.Globalization.CultureInfo`, on ICU4X: a
+//! culture is made from a [`Locale`](icu_locale_core::Locale)
+//! ([`CultureInfo::from_locale`]) and gives it ([`CultureInfo::locale`]); its
+//! name and its Windows LCID derive from the locale. It is the formatting
+//! parameter of the converters, the bindings and `StringFormat` (decision O3
+//! of docs/idiomatic-rust-signatures.md): beside its locale it carries the
+//! number and date conventions the .NET format strings need, the ones the
+//! registered [`ICultureDataProvider`] has for its locale or conventions
+//! attached to it ([`CultureInfo::with_number_format`],
+//! [`CultureInfo::with_date_time_format`]), which a locale cannot hold.
 //!
 //! Date and time conventions are reached through
 //! [`CultureInfo::date_time_format`]; see
 //! [`DateTimeFormatInfo`](super::DateTimeFormatInfo) for the cultures that
 //! have data of their own.
 //!
-//! At the edges the type converts from and to the ICU4X
-//! [`Locale`](icu_locale_core::Locale) by its name: the invariant culture is
-//! the unknown locale `und`.
+//! The invariant culture is the unknown locale `und`. A name that is not a
+//! BCP-47 language tag (a .NET sort-order name such as `es-ES_tradnl`, a
+//! private name such as `x-custom`) still names a culture, which keeps the
+//! name as it was given and has no locale of its own (its
+//! [`locale`](CultureInfo::locale) is `und`, and `Locale::try_from` refuses
+//! it). The identity of text (its language, font matching, shaping) is a
+//! `Locale`. The ambient values of a thread are in
+//! [`current_locale`](super::current_locale()): its locale, and the culture
+//! it formats with ([`CultureInfo::current_formatting`]).
 
 use super::{DateTimeFormatInfo, GregorianCalendar, ICultureDataProvider, NumberFormatInfo};
 use crate::{FerroLocator, LocatorExtensions};
 use bitflags::bitflags;
-use std::cell::RefCell;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
+
+use icu_locale_core::Locale;
 
 /// LCID of the invariant culture.
 const INVARIANT_LCID: i32 = 0x007F;
@@ -64,90 +77,105 @@ bitflags! {
     }
 }
 
-crate::ferro_thread_local! {
-    static CURRENT_CULTURE: RefCell<CultureInfo> = RefCell::new(CultureInfo::invariant_culture());
-    static CURRENT_UI_CULTURE: RefCell<CultureInfo> = RefCell::new(CultureInfo::invariant_culture());
+/// The identity of a culture: its locale, and the name and the Windows
+/// language identifier that derive from it. Shared by the clones of a
+/// culture and by the cultures made from it with attached conventions.
+struct CultureIdentity {
+    /// The locale; the unknown locale `und` for the invariant culture and
+    /// for a name that is not a BCP-47 tag.
+    locale: Locale,
+    /// The BCP-47 text of the locale (empty for the invariant culture), or
+    /// the name as it was given when it is not a BCP-47 tag.
+    name: Box<str>,
+    lcid: i32,
 }
 
-/// Identifies a culture by its language tag.
+/// A culture: a locale, with the number and date conventions it formats
+/// with.
 ///
-/// Cloning is cheap (one reference count). Equality compares names ignoring
-/// ASCII case.
+/// Cloning is cheap (one reference count, and one more per attached
+/// conventions). Equality compares the names ignoring ASCII case: two
+/// cultures of the same locale are equal, the conventions attached to them
+/// are not compared.
 #[derive(Clone)]
 pub struct CultureInfo {
-    name: Rc<str>,
-    lcid: i32,
+    identity: Rc<CultureIdentity>,
     /// Date and time conventions attached to this instance; they replace
-    /// the ones the culture data provider has for the name.
+    /// the ones the culture data provider has for the locale.
     date_time_format: Option<Rc<DateTimeFormatInfo>>,
     /// Number conventions attached to this instance.
     number_format: Option<Rc<NumberFormatInfo>>,
 }
 
 impl CultureInfo {
-    /// The culture-independent (invariant) culture; its name is empty.
+    /// A culture of the identity, without attached conventions.
+    fn of_identity(locale: Locale, name: Box<str>, lcid: i32) -> CultureInfo {
+        CultureInfo { identity: Rc::new(CultureIdentity { locale, name, lcid }), date_time_format: None, number_format: None }
+    }
+
+    /// The culture-independent (invariant) culture; its name is empty and its
+    /// locale is the unknown locale `und`.
     pub fn invariant_culture() -> CultureInfo {
         crate::ferro_thread_local! {
-            static INVARIANT: CultureInfo = CultureInfo { name: Rc::from(""), lcid: INVARIANT_LCID, date_time_format: None, number_format: None };
+            static INVARIANT: CultureInfo = CultureInfo::of_identity(Locale::UNKNOWN, Box::from(""), INVARIANT_LCID);
         }
         INVARIANT.with(Clone::clone)
     }
 
-    /// The culture used by the current thread. Defaults to the invariant
-    /// culture until the platform layer sets it.
-    pub fn current_culture() -> CultureInfo {
-        CURRENT_CULTURE.with(|culture| culture.borrow().clone())
+    /// The culture of a locale: its name is the BCP-47 text of the locale
+    /// (`en-US`, `zh-Hant-TW`, `en-US-u-hc-h12`), its Windows language
+    /// identifier the one of the locale where one is known
+    /// ([`lcid`](Self::lcid)), and its conventions the ones the registered
+    /// [`ICultureDataProvider`] has for the locale or the nearest of its
+    /// parents. The unknown locale `und` is the invariant culture.
+    pub fn from_locale(locale: Locale) -> CultureInfo {
+        if locale == Locale::UNKNOWN {
+            return Self::invariant_culture();
+        }
+        let lcid = KNOWN_CULTURES
+            .iter()
+            .find(|(_, known)| locale.normalizing_eq(known))
+            .map_or(CUSTOM_UNSPECIFIED_LCID, |(lcid, _)| *lcid);
+        let name = locale.to_string().into_boxed_str();
+        Self::of_identity(locale, name, lcid)
     }
 
-    /// Sets the culture used by the current thread.
-    pub fn set_current_culture(culture: CultureInfo) {
-        CURRENT_CULTURE.with(|current| *current.borrow_mut() = culture);
-    }
-
-    /// The UI culture used by the current thread. Defaults to the invariant
-    /// culture until the platform layer sets it.
-    pub fn current_ui_culture() -> CultureInfo {
-        CURRENT_UI_CULTURE.with(|culture| culture.borrow().clone())
-    }
-
-    /// Sets the UI culture used by the current thread.
-    pub fn set_current_ui_culture(culture: CultureInfo) {
-        CURRENT_UI_CULTURE.with(|current| *current.borrow_mut() = culture);
-    }
-
-    /// The culture for a language tag such as `en-US` (C# `GetCultureInfo(string)`).
+    /// The culture for a name such as `en-US` (C# `GetCultureInfo(string)`).
     /// An empty name gives the invariant culture.
+    ///
+    /// A name that is a BCP-47 language tag gives the culture of its locale
+    /// ([`from_locale`](Self::from_locale)), so the case of its subtags is
+    /// normalized as .NET normalizes it (`EN-us` is `en-US`) and `und` is the
+    /// invariant culture. A name that is not one (`es-ES_tradnl`, `x-custom`)
+    /// gives a culture that keeps the name as it is, with the Windows language
+    /// identifier of the name where one is known, and no locale.
     pub fn get_culture_info(name: &str) -> CultureInfo {
         if name.is_empty() {
             return Self::invariant_culture();
         }
-
-        let lcid = KNOWN_CULTURES
-            .iter()
-            .find(|(_, known)| known.eq_ignore_ascii_case(name))
-            .map_or(CUSTOM_UNSPECIFIED_LCID, |(lcid, _)| *lcid);
-
-        CultureInfo { name: Rc::from(name), lcid, date_time_format: None, number_format: None }
+        match Locale::try_from_str(name) {
+            Ok(locale) => Self::from_locale(locale),
+            Err(_) => {
+                let lcid = KNOWN_CULTURES
+                    .iter()
+                    .find(|(_, known)| known.eq_ignore_ascii_case(name))
+                    .map_or(CUSTOM_UNSPECIFIED_LCID, |(lcid, _)| *lcid);
+                Self::of_identity(Locale::UNKNOWN, Box::from(name), lcid)
+            }
+        }
     }
 
-    /// The culture for an IETF language tag (C# `GetCultureInfoByIetfLanguageTag`),
-    /// or `None` for a name that is not an IETF tag (C# throws
-    /// `CultureNotFoundException`): the old names `zh-CHT` and `zh-CHS`, an
-    /// alternate sort order and the traditional sort of Spanish.
+    /// The culture for an IETF language tag (C# `GetCultureInfoByIetfLanguageTag`):
+    /// the culture of the locale the tag is parsed into, the invariant culture
+    /// for the empty tag, or `None` for a text that is not a BCP-47 language
+    /// tag (C# throws `CultureNotFoundException`): the old names `zh-CHT` and
+    /// `zh-CHS`, the traditional sort of Spanish `es-ES_tradnl`, a private name
+    /// such as `x-custom`, a text with `_` as separator.
     pub fn get_culture_info_by_ietf_language_tag(name: &str) -> Option<CultureInfo> {
-        // Disallow old zh-CHT/zh-CHS names
-        if name == "zh-CHT" || name == "zh-CHS" {
-            return None;
+        if name.is_empty() {
+            return Some(Self::invariant_culture());
         }
-
-        let ci = Self::get_culture_info(name);
-
-        // Disallow alt sorts and es-es_TS
-        if ci.lcid > 0xffff || ci.lcid == 0x040a {
-            return None;
-        }
-
-        Some(ci)
+        Locale::try_from_str(name).ok().map(Self::from_locale)
     }
 
     /// The culture for a Windows language identifier (C# `GetCultureInfo(int)`),
@@ -157,10 +185,7 @@ impl CultureInfo {
             return Some(Self::invariant_culture());
         }
 
-        KNOWN_CULTURES
-            .iter()
-            .find(|(known, _)| *known == lcid)
-            .map(|(lcid, name)| CultureInfo { name: Rc::from(*name), lcid: *lcid, date_time_format: None, number_format: None })
+        KNOWN_CULTURES.iter().find(|(known, _)| *known == lcid).map(|(_, name)| Self::get_culture_info(name))
     }
 
     /// The cultures of the given types (C# `GetCultures`).
@@ -168,8 +193,9 @@ impl CultureInfo {
     /// The managed runtime lists the cultures of its globalization library.
     /// The base library has the data of the invariant culture only, so the
     /// list is the one the registered
-    /// [`ICultureDataProvider`](super::ICultureDataProvider) gives
-    /// ([`get_culture_names`](super::ICultureDataProvider::get_culture_names)),
+    /// [`ICultureDataProvider`](super::ICultureDataProvider) gives, the
+    /// cultures of its locales
+    /// ([`get_locales`](super::ICultureDataProvider::get_locales)),
     /// preceded by the invariant culture when the neutral cultures are asked
     /// for. Without a provider the list is the invariant culture alone,
     /// whatever the types: what the managed runtime returns in its invariant
@@ -183,42 +209,78 @@ impl CultureInfo {
         if types.contains(CultureTypes::NEUTRAL_CULTURES) {
             cultures.push(Self::invariant_culture());
         }
-        cultures.extend(provider.get_culture_names(types).iter().map(|name| Self::get_culture_info(name)));
+        cultures.extend(provider.get_locales(types).into_iter().map(Self::from_locale));
         cultures
     }
 
-    /// The language tag (C# `Name`); empty for the invariant culture.
+    /// The locale of the culture: the unknown locale `und` for the invariant
+    /// culture, and for a culture whose name is not a BCP-47 language tag
+    /// (`es-ES_tradnl`), which has no locale of its own (the conversion
+    /// `Locale::try_from(&culture)` refuses such a culture instead).
     #[inline]
-    pub fn name(&self) -> &str {
-        &self.name
+    pub fn locale(&self) -> &Locale {
+        &self.identity.locale
     }
 
-    /// The Windows language identifier (C# `LCID`).
+    /// Whether the culture is the culture of its [`locale`](Self::locale): the
+    /// invariant culture, or a culture of a BCP-47 language tag.
+    #[inline]
+    pub(crate) fn is_locale(&self) -> bool {
+        self.is_invariant() || self.identity.locale != Locale::UNKNOWN
+    }
+
+    /// The name (C# `Name`): the BCP-47 text of the locale, empty for the
+    /// invariant culture, or the name as it was given when it is not a BCP-47
+    /// tag.
+    #[inline]
+    pub fn name(&self) -> &str {
+        &self.identity.name
+    }
+
+    /// The Windows language identifier (C# `LCID`): the one of the locale
+    /// where one is known, `0x007F` for the invariant culture, else
+    /// `0x1000` (`LOCALE_CUSTOM_UNSPECIFIED`).
     #[inline]
     pub fn lcid(&self) -> i32 {
-        self.lcid
+        self.identity.lcid
     }
 
     /// The primary language subtag (C# `TwoLetterISOLanguageName`); `iv` for
     /// the invariant culture.
     pub fn two_letter_iso_language_name(&self) -> &str {
-        if self.name.is_empty() {
+        if self.is_invariant() {
             return "iv";
         }
-        let end = self.name.find(['-', '_']).unwrap_or(self.name.len());
-        &self.name[..end]
+        if self.is_locale() {
+            return self.identity.locale.id.language.as_str();
+        }
+        let name = self.name();
+        let end = name.find(['-', '_']).unwrap_or(name.len());
+        &name[..end]
     }
 
-    /// The culture this one specializes (C# `Parent`): the tag without its
-    /// last subtag; the parent of a language-only culture is the invariant
-    /// culture. Chinese regional cultures have their script culture as parent
-    /// (`zh-CN` -> `zh-Hans`, `zh-TW` -> `zh-Hant`), as in .NET.
+    /// The culture this one specializes (C# `Parent`): the culture of the
+    /// parent of its locale, the locale without its last variant, else
+    /// without its region, else without its script; the parent of a
+    /// language-only culture is the invariant culture. Chinese regional
+    /// cultures have their script culture as parent (`zh-CN` -> `zh-Hans`,
+    /// `zh-TW` -> `zh-Hant`), as in .NET. A culture whose name is not a
+    /// BCP-47 tag has the culture of its name without its last subtag as
+    /// parent (`es-ES_tradnl` -> `es-ES`).
     pub fn parent(&self) -> CultureInfo {
-        let Some(separator) = self.name.rfind(['-', '_']) else {
+        if self.is_invariant() {
+            return Self::invariant_culture();
+        }
+        if self.is_locale() {
+            return Self::from_locale(parent_locale(&self.identity.locale));
+        }
+
+        let name = self.name();
+        let Some(separator) = name.rfind(['-', '_']) else {
             return Self::invariant_culture();
         };
 
-        let (language, last) = (&self.name[..separator], &self.name[separator + 1..]);
+        let (language, last) = (&name[..separator], &name[separator + 1..]);
 
         if language.eq_ignore_ascii_case("zh") {
             const SIMPLIFIED: [&str; 3] = ["CN", "SG", "MY"];
@@ -239,14 +301,15 @@ impl CultureInfo {
     /// Whether this is the invariant culture.
     #[inline]
     pub fn is_invariant(&self) -> bool {
-        self.name.is_empty()
+        self.identity.name.is_empty()
     }
 
     /// The date and time conventions of the culture (C# `DateTimeFormat`):
     /// the ones attached with [`with_date_time_format`](Self::with_date_time_format),
     /// else the data the registered
     /// [`ICultureDataProvider`](super::ICultureDataProvider) has for the
-    /// culture or the nearest of its parents, else the invariant conventions.
+    /// locale of the culture or the nearest of its parents, else the
+    /// invariant conventions.
     ///
     /// Unlike .NET, the library itself carries the data of the invariant
     /// culture only.
@@ -276,8 +339,8 @@ impl CultureInfo {
 
     /// The text conventions of the culture (C# `TextInfo`): the data the
     /// registered [`ICultureDataProvider`](super::ICultureDataProvider) has
-    /// for the culture or the nearest of its parents, else the invariant
-    /// conventions.
+    /// for the locale of the culture or the nearest of its parents, else the
+    /// invariant conventions.
     pub fn text_info(&self) -> Rc<super::TextInfo> {
         super::TextInfo::for_culture(self)
     }
@@ -292,8 +355,8 @@ impl CultureInfo {
     /// without data gets the conventions of its nearest parent that has
     /// data and finally the invariant ones.
     pub fn number_format(&self) -> Rc<super::NumberFormatInfo> {
-        // number format: owned by numeric agent (the lookup of the data of a culture name
-        // belongs in `NumberFormatInfo::for_culture`, through `ICultureDataProvider::get_number_format`).
+        // number format: owned by numeric agent (the lookup of the data of a locale belongs in
+        // `NumberFormatInfo::for_culture`, through `ICultureDataProvider::get_number_format_by_locale`).
         match &self.number_format {
             Some(info) => Rc::clone(info),
             None => super::NumberFormatInfo::for_culture(self),
@@ -301,9 +364,45 @@ impl CultureInfo {
     }
 }
 
+/// The locale `locale` specializes, the locale of the parent of its culture
+/// ([`CultureInfo::parent`]): the locale without its last variant, else without its region, else without
+/// its script; the parent of a language alone is the unknown locale `und` (the invariant
+/// culture), and so is the parent of `und`. Chinese regional locales without a script have
+/// their script locale as parent (`zh-CN` -> `zh-Hans`, `zh-TW` -> `zh-Hant`), as in .NET.
+/// A locale with extensions (`en-US-u-hc-h12`) has the locale without them as its parent.
+pub(crate) fn parent_locale(locale: &Locale) -> Locale {
+    if !locale.extensions.is_empty() {
+        return Locale::from(locale.id.clone());
+    }
+    let mut id = locale.id.clone();
+    if !id.variants.is_empty() {
+        let mut variants: Vec<_> = id.variants.iter().copied().collect();
+        variants.pop();
+        id.variants = icu_locale_core::subtags::Variants::from_vec_unchecked(variants);
+        return Locale::from(id);
+    }
+    if let Some(region) = id.region.take() {
+        if id.script.is_none() && id.language.as_str() == "zh" {
+            const SIMPLIFIED: [&str; 3] = ["CN", "SG", "MY"];
+            const TRADITIONAL: [&str; 3] = ["TW", "HK", "MO"];
+            if SIMPLIFIED.contains(&region.as_str()) {
+                return icu_locale_core::locale!("zh-Hans");
+            }
+            if TRADITIONAL.contains(&region.as_str()) {
+                return icu_locale_core::locale!("zh-Hant");
+            }
+        }
+        return Locale::from(id);
+    }
+    if id.script.take().is_some() {
+        return Locale::from(id);
+    }
+    Locale::UNKNOWN
+}
+
 impl PartialEq for CultureInfo {
     fn eq(&self, other: &Self) -> bool {
-        self.name.eq_ignore_ascii_case(&other.name)
+        self.name().eq_ignore_ascii_case(other.name())
     }
 }
 
@@ -311,7 +410,7 @@ impl Eq for CultureInfo {}
 
 impl Hash for CultureInfo {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        for byte in self.name.bytes() {
+        for byte in self.name().bytes() {
             state.write_u8(byte.to_ascii_lowercase());
         }
     }
@@ -319,48 +418,51 @@ impl Hash for CultureInfo {
 
 impl fmt::Display for CultureInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.name)
+        f.write_str(self.name())
     }
 }
 
 impl fmt::Debug for CultureInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "CultureInfo({:?})", &*self.name)
+        write!(f, "CultureInfo({:?})", self.name())
     }
 }
 
 impl TryFrom<&CultureInfo> for icu_locale_core::Locale {
     type Error = icu_locale_core::ParseError;
 
-    /// The locale of the name of the culture. The invariant culture, whose
-    /// name is empty, is the unknown locale `und`
+    /// The locale of the culture ([`CultureInfo::locale`]). The invariant
+    /// culture, whose name is empty, is the unknown locale `und`
     /// ([`Locale::UNKNOWN`](icu_locale_core::Locale::UNKNOWN)), the locale
     /// ICU4X formats with its root data.
     ///
-    /// [`CultureInfo::get_culture_info`] takes any name, so a name that is
-    /// not a well-formed BCP-47 tag is an error: a .NET sort-order name such
-    /// as `es-ES_tradnl` (ICU4X does not take `_` as a separator) or a
-    /// private-use name such as `x-custom`. The case of the subtags is
-    /// normalized (`EN-us` is `en-US`).
+    /// [`CultureInfo::get_culture_info`] takes any name, so a culture whose
+    /// name is not a well-formed BCP-47 tag is an error, the error of the
+    /// parser for the name: a .NET sort-order name such as `es-ES_tradnl`
+    /// (ICU4X does not take `_` as a separator) or a private-use name such as
+    /// `x-custom`. The case of the subtags is normalized (`EN-us` is `en-US`).
     fn try_from(value: &CultureInfo) -> Result<Self, Self::Error> {
-        if value.is_invariant() {
-            return Ok(icu_locale_core::Locale::UNKNOWN);
+        if value.is_locale() {
+            return Ok(value.locale().clone());
         }
         icu_locale_core::Locale::try_from_str(value.name())
     }
 }
 
 impl From<&icu_locale_core::Locale> for CultureInfo {
-    /// The culture of the BCP-47 text of the locale
-    /// ([`CultureInfo::get_culture_info`]); the unknown locale `und` is the
-    /// invariant culture. Extensions stay in the name
+    /// The culture of the locale ([`CultureInfo::from_locale`]); the unknown
+    /// locale `und` is the invariant culture. Extensions stay in the name
     /// (`en-US-u-hc-h12`), and the culture has the Windows language
-    /// identifier of its name where one is known.
+    /// identifier of the locale where one is known.
     fn from(value: &icu_locale_core::Locale) -> Self {
-        if *value == icu_locale_core::Locale::UNKNOWN {
-            return CultureInfo::invariant_culture();
-        }
-        CultureInfo::get_culture_info(&value.to_string())
+        CultureInfo::from_locale(value.clone())
+    }
+}
+
+impl From<icu_locale_core::Locale> for CultureInfo {
+    /// The culture of the locale ([`CultureInfo::from_locale`]).
+    fn from(value: icu_locale_core::Locale) -> Self {
+        CultureInfo::from_locale(value)
     }
 }
 
@@ -410,6 +512,19 @@ mod tests {
         assert_eq!(CultureInfo::get_culture_info("zh-Hant").parent().name(), "zh");
     }
 
+    /// Not from upstream (C5 of #423): the parent of a locale is the locale of the parent
+    /// of its culture.
+    #[test]
+    fn the_parent_of_a_locale_is_the_one_of_its_culture() {
+        for name in ["ja-JP", "ja", "zh-Hans-CN", "zh-CN", "zh-TW", "zh-Hant", "sr-Cyrl-RS", "de-DE-1996", "und"] {
+            let locale = Locale::try_from_str(name).unwrap();
+            let culture = CultureInfo::from(&locale);
+            assert_eq!(parent_locale(&locale), Locale::try_from(&culture.parent()).unwrap(), "{name}");
+        }
+        assert_eq!(parent_locale(&Locale::try_from_str("en-US-u-hc-h12").unwrap()), Locale::try_from_str("en-US").unwrap());
+        assert_eq!(parent_locale(&Locale::UNKNOWN), Locale::UNKNOWN);
+    }
+
     #[test]
     fn converts_to_and_from_icu_locales() {
         use icu_locale_core::Locale;
@@ -446,6 +561,102 @@ mod tests {
         assert!(CultureInfo::from(&Locale::try_from_str("und").unwrap()).is_invariant());
         // Only `und` alone: with a region it names a culture.
         assert_eq!(CultureInfo::from(&Locale::try_from_str("und-US").unwrap()).name(), "und-US");
+    }
+
+    /// Not from upstream (C5 of #423, L2): a culture is made from a locale and gives it; the
+    /// name and the Windows language identifier derive from the locale.
+    #[test]
+    fn a_culture_is_made_from_and_gives_its_locale() {
+        use icu_locale_core::locale;
+
+        for (locale, name, lcid) in [
+            (locale!("ja-JP"), "ja-JP", 0x0411),
+            (locale!("zh-Hant-TW"), "zh-Hant-TW", 0x1000),
+            (locale!("pt-BR"), "pt-BR", 0x0416),
+            (locale!("en-US-u-hc-h12"), "en-US-u-hc-h12", 0x1000),
+            (locale!("und-US"), "und-US", 0x1000),
+        ] {
+            let culture = CultureInfo::from_locale(locale.clone());
+            assert_eq!(culture.locale(), &locale);
+            assert_eq!(culture.name(), name);
+            assert_eq!(culture.lcid(), lcid, "{name}");
+            assert!(!culture.is_invariant());
+            assert_eq!(Locale::try_from(&culture), Ok(locale.clone()));
+            assert_eq!(CultureInfo::from(locale.clone()), culture);
+            assert_eq!(CultureInfo::from(&locale), culture);
+            assert_eq!(CultureInfo::get_culture_info(name), culture);
+        }
+
+        let invariant = CultureInfo::from_locale(Locale::UNKNOWN);
+        assert!(invariant.is_invariant());
+        assert_eq!(invariant.locale(), &Locale::UNKNOWN);
+        assert_eq!(invariant.name(), "");
+        assert_eq!(invariant.lcid(), INVARIANT_LCID);
+        assert_eq!(CultureInfo::invariant_culture().locale(), &Locale::UNKNOWN);
+
+        // Attached conventions keep the locale.
+        let culture = CultureInfo::from_locale(locale!("de-DE")).with_number_format(NumberFormatInfo::new());
+        assert_eq!(culture.locale(), &locale!("de-DE"));
+        assert_eq!(culture, CultureInfo::get_culture_info("de-DE"));
+    }
+
+    /// Not from upstream (C5 of #423, L2): the name of a culture of a language tag is the text
+    /// of its locale, normalized as .NET normalizes the name (`EN-us` is `en-US`; the variants
+    /// of ICU4X are sorted), and `und` is the invariant culture.
+    #[test]
+    fn the_name_of_a_language_tag_is_the_text_of_its_locale() {
+        use icu_locale_core::locale;
+
+        let culture = CultureInfo::get_culture_info("EN-us");
+        assert_eq!(culture.name(), "en-US");
+        assert_eq!(culture.locale(), &locale!("en-US"));
+        assert_eq!(culture.lcid(), 0x0409);
+        assert_eq!(CultureInfo::get_culture_info("zh-hant-tw").name(), "zh-Hant-TW");
+        assert_eq!(CultureInfo::get_culture_info("sl-rozaj-biske").name(), "sl-biske-rozaj");
+        assert_eq!(CultureInfo::get_culture_info("de-DE-U-CO-PHONEBK").name(), "de-DE-u-co-phonebk");
+        assert!(CultureInfo::get_culture_info("und").is_invariant());
+        assert_eq!(CultureInfo::get_culture_info_by_lcid(0x0804).map(|culture| culture.locale().clone()), Some(locale!("zh-CN")));
+        assert_eq!(CultureInfo::get_culture_info("ZH-cn").two_letter_iso_language_name(), "zh");
+        // The parent of a culture is the culture of the parent of its locale.
+        assert_eq!(CultureInfo::get_culture_info("de-DE-u-co-phonebk").parent().name(), "de-DE");
+        assert_eq!(CultureInfo::get_culture_info("sl-rozaj-biske").parent().name(), "sl-biske");
+        assert_eq!(CultureInfo::get_culture_info("und-US").parent(), CultureInfo::invariant_culture());
+    }
+
+    /// Not from upstream (C5 of #423, L2): a name that is no BCP-47 tag still names a culture,
+    /// which keeps the name as it was given and has no locale of its own.
+    #[test]
+    fn a_name_that_is_no_language_tag_keeps_its_name_and_has_no_locale() {
+        use icu_locale_core::locale;
+
+        let culture = CultureInfo::get_culture_info("es-ES_tradnl");
+        assert_eq!(culture.name(), "es-ES_tradnl");
+        assert_eq!(culture.lcid(), 0x040A);
+        assert_eq!(culture.locale(), &Locale::UNKNOWN);
+        assert!(!culture.is_invariant());
+        assert_eq!(culture.two_letter_iso_language_name(), "es");
+        assert_eq!(culture.parent(), CultureInfo::from_locale(locale!("es-ES")));
+        assert_eq!(CultureInfo::get_culture_info_by_lcid(0x040A), Some(culture.clone()));
+        assert_eq!(CultureInfo::get_culture_info("ES-es_TRADNL"), culture);
+
+        let custom = CultureInfo::get_culture_info("x-custom");
+        assert_eq!((custom.name(), custom.lcid(), custom.locale()), ("x-custom", CUSTOM_UNSPECIFIED_LCID, &Locale::UNKNOWN));
+        assert_eq!(custom.parent().name(), "x");
+        assert!(custom.parent().parent().is_invariant());
+    }
+
+    /// Not from upstream (C5 of #423, L2): an IETF language tag is parsed into a locale.
+    #[test]
+    fn an_ietf_language_tag_is_parsed_into_a_locale() {
+        use icu_locale_core::locale;
+
+        let culture = CultureInfo::get_culture_info_by_ietf_language_tag("ar-sa").expect("a culture");
+        assert_eq!((culture.name(), culture.locale()), ("ar-SA", &locale!("ar-SA")));
+        assert!(CultureInfo::get_culture_info_by_ietf_language_tag("").expect("the invariant culture").is_invariant());
+        assert!(CultureInfo::get_culture_info_by_ietf_language_tag("und").expect("the invariant culture").is_invariant());
+        for name in ["zh-CHT", "zh-CHS", "es-ES_tradnl", "x-custom", "en_US", "en-"] {
+            assert!(CultureInfo::get_culture_info_by_ietf_language_tag(name).is_none(), "{name}");
+        }
     }
 
     #[test]

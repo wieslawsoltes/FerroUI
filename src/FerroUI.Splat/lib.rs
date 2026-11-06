@@ -29,6 +29,7 @@ pub mod logging;
 pub mod mode_detection;
 pub mod service_location;
 
+#[allow(deprecated)]
 pub use application_performance_monitoring::{
     DefaultFeatureUsageTrackingManager, DefaultFeatureUsageTrackingSession,
     EnableFeatureUsageTrackingExt, FeatureUsageTrackingSessionExt, FuncFeatureUsageTrackingManager,

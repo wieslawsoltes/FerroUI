@@ -4,7 +4,7 @@ use super::*;
 use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerOpenOptions, FilePickerSaveOptions, IStorageFile,
 };
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_controls::{Border, ThemeVariantScope, TopLevel};
 use std::io::{Read, Write};
 
@@ -158,13 +158,11 @@ impl DesignerWorkspace {
             return;
         }
         let this = self.clone();
-        Dispatcher::ui_thread()
-            .to_task_scheduler()
-            .spawn_local(async move {
-                let result = this.choose_open().await;
-                this.file_busy.set(false);
-                this.report(result);
-            });
+        Dispatcher::ui_thread().spawn_local(async move {
+            let result = this.choose_open().await;
+            this.file_busy.set(false);
+            this.report(result);
+        });
     }
     async fn choose_open(self: &Rc<Self>) -> Result<(), String> {
         let top = TopLevel::get_top_level(Some(&self.root))
@@ -193,8 +191,8 @@ impl DesignerWorkspace {
             .read_to_string(&mut source)
             .map_err(|e| e.to_string())?;
         let path = file.path();
-        let uri = if path.is_absolute_uri() {
-            path.absolute_uri().to_owned()
+        let uri = if let Some(url) = path.as_url() {
+            url.as_str().to_owned()
         } else {
             format!(
                 "ferres://FerroUI.Designer/{}",
@@ -244,17 +242,15 @@ impl DesignerWorkspace {
             return;
         }
         let this = self.clone();
-        Dispatcher::ui_thread()
-            .to_task_scheduler()
-            .spawn_local(async move {
-                let result = match this.save_file(save_as).await {
-                    Ok(true) if then_open => this.complete_open(),
-                    Ok(_) => Ok(()),
-                    Err(error) => Err(error),
-                };
-                this.file_busy.set(false);
-                this.report(result);
-            });
+        Dispatcher::ui_thread().spawn_local(async move {
+            let result = match this.save_file(save_as).await {
+                Ok(true) if then_open => this.complete_open(),
+                Ok(_) => Ok(()),
+                Err(error) => Err(error),
+            };
+            this.file_busy.set(false);
+            this.report(result);
+        });
     }
     /// Save the authored buffer, including incomplete XAML. Returns false on picker cancellation.
     /// The saved snapshot is tracked independently of later editor changes, so a concurrent
@@ -273,7 +269,7 @@ impl DesignerWorkspace {
         if file.is_none() && !save_as {
             let uri = self.session.borrow().document_uri().to_owned();
             if uri.starts_with("file:") {
-                if let Ok(uri) = Uri::absolute(&uri) {
+                if let Ok(uri) = UriRef::parse_absolute(&uri) {
                     file = provider.try_get_file_from_path_async(&uri).await;
                 }
             }
@@ -299,8 +295,8 @@ impl DesignerWorkspace {
         };
         self.ensure_save_document(&previous_uri)?;
         let destination = file.path();
-        let saved_uri = if destination.is_absolute_uri() {
-            super::project::document_identity(destination.absolute_uri())?
+        let saved_uri = if let Some(url) = destination.as_url() {
+            super::project::document_identity(url.as_str())?
         } else {
             previous_uri.clone()
         };

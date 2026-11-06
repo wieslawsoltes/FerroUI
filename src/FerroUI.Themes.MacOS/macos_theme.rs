@@ -10,7 +10,7 @@ use ferroui_base::controls::{
 use ferroui_base::metadata::{from_markup_value, IServiceProvider};
 use ferroui_base::media::Color;
 use ferroui_base::platform::{ColorContrastPreference, IPlatformSettings};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::styling::{IStyle, Styles, ThemeVariant};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_markup_enum, ferro_properties, instantiate, BoxedValue, DirectProperty,
@@ -80,7 +80,7 @@ pub struct MacOSTheme {
     window_active: Cell<bool>,
     accent_color: Cell<Option<Color>>,
     platform_settings: RefCell<Option<Rc<dyn IPlatformSettings>>>,
-    accessibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    accessibility_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(MacOSTheme: Styles);
@@ -262,7 +262,7 @@ impl MacOSTheme {
                     }
                 }
             }));
-            *self.accessibility_subscription.borrow_mut() = Some(subscription);
+            *self.accessibility_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
 
@@ -316,13 +316,6 @@ impl MacOSTheme {
     }
 }
 
-impl Drop for MacOSTheme {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.accessibility_subscription.get_mut().take() {
-            subscription.dispose();
-        }
-    }
-}
 
 /// The style and resource provider interfaces of the theme: those of a
 /// styles collection, with the resource lookup of the theme.

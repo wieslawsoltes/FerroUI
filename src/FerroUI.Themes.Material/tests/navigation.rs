@@ -3,7 +3,7 @@
 //! their selection/editing contract after replacing the Windows visual structure.
 
 use crate::{register_types, MaterialTheme};
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
@@ -20,12 +20,12 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 struct FrozenClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
 
-impl IObservable<TimeSpan> for FrozenClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for FrozenClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

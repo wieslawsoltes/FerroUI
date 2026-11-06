@@ -3,8 +3,8 @@
 //!
 //! This is the layer the GPU forms of WinUI's composition effects are built
 //! on (the lights and the pixel operations, docs/porting/winui-composition.md,
-//! "How the effects are drawn"), and the one user-defined effects are to be
-//! built on:
+//! "How the effects are drawn"), and the one the runtime shader effects of
+//! custom effects are built on (#455, E4, `custom_shader_effects.rs`):
 //!
 //! - [`compile`] compiles an SkSL program as a shader, a blender or a colour
 //!   filter ([`ProgramKind`]) once per thread: the compiled effects are kept
@@ -91,6 +91,16 @@ ferroui_base::ferro_thread_local! {
     static STATIC_CACHE: RefCell<HashMap<(ProgramKind, usize, usize), Option<sk::RuntimeEffect>>> =
         RefCell::new(HashMap::new());
     static ENABLED: Cell<bool> = Cell::new(true);
+    /// How many programs this thread compiled (#455, E7): the tests hold
+    /// frames that change only uniforms to compiling nothing.
+    static COMPILATIONS: Cell<u64> = const { Cell::new(0) };
+}
+
+/// How many SkSL programs this thread compiled, failures included: a frame
+/// of an effect whose program is in the cache compiles none.
+#[allow(dead_code)]
+pub(crate) fn compilation_count() -> u64 {
+    COMPILATIONS.with(Cell::get)
 }
 
 /// Switches the runtime effects of this thread on or off; off, nothing is
@@ -113,7 +123,11 @@ pub(crate) fn compile(kind: ProgramKind, source: &str) -> Option<sk::RuntimeEffe
     compile_named(kind, source, "runtime effect")
 }
 
-fn compile_named(kind: ProgramKind, source: &str, name: &str) -> Option<sk::RuntimeEffect> {
+/// Compiles `source` as `kind`, once per thread, naming the program `name` in
+/// the log; `None` when it does not compile (logged once) or runtime effects
+/// are off. The programs of custom shader effects (#455, E4) are compiled
+/// here, named after their effect.
+pub(crate) fn compile_named(kind: ProgramKind, source: &str, name: &str) -> Option<sk::RuntimeEffect> {
     if !is_enabled() {
         return None;
     }
@@ -121,6 +135,7 @@ fn compile_named(kind: ProgramKind, source: &str, name: &str) -> Option<sk::Runt
     if let Some(compiled) = CACHE.with(|cache| cache.borrow()[index].get(source).cloned()) {
         return compiled;
     }
+    COMPILATIONS.with(|count| count.set(count.get() + 1));
     let result = match kind {
         ProgramKind::Shader => sk::RuntimeEffect::make_for_shader(source, None),
         ProgramKind::Blender => sk::RuntimeEffect::make_for_blender(source, None),

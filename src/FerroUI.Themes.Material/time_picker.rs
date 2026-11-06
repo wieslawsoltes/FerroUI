@@ -10,7 +10,7 @@ use crate::time_picker_dial::MaterialTimePickerDial;
 use crate::time_picker_state::{
     MaterialTimeDisplayMode, MaterialTimeSelection, TimePickerMetrics, display_hour, parse_input,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::BindingMode;
 use ferroui_base::input::platform::{ClipboardErrorKind, ClipboardExtensions};
 use ferroui_base::input::text_input::{
@@ -26,7 +26,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{LayoutableImpl, Orientation};
 use ferroui_base::media::FlowDirection;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
     DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -60,15 +60,15 @@ static GROUP_ID: AtomicU64 = AtomicU64::new(1);
 #[derive(Clone, Default)]
 pub struct MaterialTimeChangedEventArgs {
     base: RoutedEventArgs,
-    old_time: TimeSpan,
-    new_time: TimeSpan,
+    old_time: SignedDuration,
+    new_time: SignedDuration,
 }
 ferro_routed_event_args!(MaterialTimeChangedEventArgs: RoutedEventArgs);
 impl MaterialTimeChangedEventArgs {
-    pub fn old_time(&self) -> TimeSpan {
+    pub fn old_time(&self) -> SignedDuration {
         self.old_time
     }
-    pub fn new_time(&self) -> TimeSpan {
+    pub fn new_time(&self) -> SignedDuration {
         self.new_time
     }
 }
@@ -95,10 +95,10 @@ struct Parts {
 pub struct MaterialTimePicker {
     base: TemplatedControl,
     parts: RefCell<Parts>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     synchronizing: Cell<bool>,
     editing: Cell<bool>,
-    selected_time: Cell<TimeSpan>,
+    selected_time: Cell<SignedDuration>,
     hour_valid: Cell<bool>,
     minute_valid: Cell<bool>,
     input_valid: Cell<bool>,
@@ -244,7 +244,7 @@ impl TemplatedControlImpl for MaterialTimePicker {
                         }
                     }
                 });
-                this.subscriptions.borrow_mut().push(subscription);
+                this.subscriptions.borrow_mut().push(Subscription::new(subscription));
                 if role < 2 {
                     let owner = weak.clone();
                     let subscription = button.add_disposable_handler_with(
@@ -256,7 +256,7 @@ impl TemplatedControlImpl for MaterialTimePicker {
                         },
                         RoutingStrategies::BUBBLE,
                         false,
-                    ).detach();
+                    );
                     this.subscriptions.borrow_mut().push(subscription);
                 }
             }
@@ -314,7 +314,7 @@ ferro_properties! { impl MaterialTimePicker {
     pub fn pm_label_property() -> StyledProperty<String> { FerroProperty::register::<Self,_>("PmLabel", "PM".to_owned()) }
     pub fn hour_error_text_property() -> StyledProperty<String> { FerroProperty::register::<Self,_>("HourErrorText", "Enter a valid hour".to_owned()) }
     pub fn minute_error_text_property() -> StyledProperty<String> { FerroProperty::register::<Self,_>("MinuteErrorText", "Enter a minute from 0 to 59".to_owned()) }
-    pub fn selected_time_property() -> DirectProperty<MaterialTimePicker, TimeSpan> { FerroProperty::register_direct::<Self,_>("SelectedTime", |o| o.selected_time(), Some(|o,v| o.set_selected_time(v)), TimeSpan::ZERO) }
+    pub fn selected_time_property() -> DirectProperty<MaterialTimePicker, SignedDuration> { FerroProperty::register_direct::<Self,_>("SelectedTime", |o| o.selected_time(), Some(|o,v| o.set_selected_time(v)), SignedDuration::ZERO) }
     pub fn is_hour_input_valid_property() -> DirectProperty<MaterialTimePicker,bool> { FerroProperty::register_direct::<Self,_>("IsHourInputValid", |o| o.is_hour_input_valid(), None, true) }
     pub fn is_minute_input_valid_property() -> DirectProperty<MaterialTimePicker,bool> { FerroProperty::register_direct::<Self,_>("IsMinuteInputValid", |o| o.is_minute_input_valid(), None, true) }
     pub fn is_input_valid_property() -> DirectProperty<MaterialTimePicker,bool> { FerroProperty::register_direct::<Self,_>("IsInputValid", |o| o.is_input_valid(), None, true) }
@@ -348,7 +348,7 @@ impl MaterialTimePicker {
             subscriptions: RefCell::new(Vec::new()),
             synchronizing: Cell::new(false),
             editing: Cell::new(false),
-            selected_time: Cell::new(TimeSpan::ZERO),
+            selected_time: Cell::new(SignedDuration::ZERO),
             hour_valid: Cell::new(true),
             minute_valid: Cell::new(true),
             input_valid: Cell::new(true),
@@ -425,7 +425,7 @@ impl MaterialTimePicker {
         minute_error_text_property,
         String
     );
-    pub fn selected_time(&self) -> TimeSpan {
+    pub fn selected_time(&self) -> SignedDuration {
         self.selected_time.get()
     }
     pub fn is_hour_input_valid(&self) -> bool {
@@ -456,7 +456,7 @@ impl MaterialTimePicker {
         self.synchronize(!self.editing.get());
         self.publish_time();
     }
-    pub fn set_selected_time(&self, value: TimeSpan) {
+    pub fn set_selected_time(&self, value: SignedDuration) {
         let minutes = value.total_minutes();
         assert!(
             minutes.is_finite() && (0.0..1440.0).contains(&minutes),
@@ -499,7 +499,7 @@ impl MaterialTimePicker {
         }
     }
     fn publish_time(&self) {
-        let time = TimeSpan::from_minutes((self.hour() * 60 + self.minute()) as f64);
+        let time = SignedDuration::from_minutes((self.hour() * 60 + self.minute()) as f64);
         let old = self.selected_time();
         if old == time {
             return;
@@ -513,9 +513,7 @@ impl MaterialTimePicker {
         self.raise_event(&e);
     }
     fn release_parts(&self) {
-        for subscription in self.subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(self.subscriptions.take());
         let old = self.parts.replace(Parts::default());
         if let Some(layout) = old.layout {
             layout.owner.borrow_mut().take();
@@ -784,13 +782,6 @@ impl MaterialTimePicker {
         }
     }
 }
-impl Drop for MaterialTimePicker {
-    fn drop(&mut self) {
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-    }
-}
 
 /// TextBox subclass keeps the platform editor, IME, clipboard, selection, and value provider.
 #[repr(C)]
@@ -820,36 +811,32 @@ impl FerroObjectImpl for MaterialTimePickerField {
             // Paste uses the same input transformation as typing and IME commits. The
             // ordinary TextBox paste path bypasses on_text_input and would update its
             // presenter/caret after a rejected Text property replacement.
-            drop(
-                Dispatcher::ui_thread()
-                    .to_task_scheduler()
-                    .start_local(async move {
-                        match clipboard.try_get_text_async().await {
-                            Ok(Some(text)) => {
-                                if let Some(field) =
-                                    weak.upgrade().filter(|f| f.is_attached_to_visual_tree())
-                                {
-                                    let mut input = TextInputEventArgs::new();
-                                    input.text = Some(text);
-                                    input.set_routed_event(Some(InputElement::text_input_event()));
-                                    field.raise_event(&input);
-                                }
-                            }
-                            Ok(None) => {}
-                            Err(error) => {
-                                if !matches!(
-                                    error.kind(),
-                                    ClipboardErrorKind::Timeout
-                                        | ClipboardErrorKind::Canceled
-                                        | ClipboardErrorKind::AccessDenied
-                                        | ClipboardErrorKind::Platform
-                                ) {
-                                    panic!("Unhandled time-input clipboard error: {error}");
-                                }
-                            }
+            drop(Dispatcher::ui_thread().start_local(async move {
+                match clipboard.try_get_text_async().await {
+                    Ok(Some(text)) => {
+                        if let Some(field) =
+                            weak.upgrade().filter(|f| f.is_attached_to_visual_tree())
+                        {
+                            let mut input = TextInputEventArgs::new();
+                            input.text = Some(text);
+                            input.set_routed_event(Some(InputElement::text_input_event()));
+                            field.raise_event(&input);
                         }
-                    }),
-            );
+                    }
+                    Ok(None) => {}
+                    Err(error) => {
+                        if !matches!(
+                            error.kind(),
+                            ClipboardErrorKind::Timeout
+                                | ClipboardErrorKind::Canceled
+                                | ClipboardErrorKind::AccessDenied
+                                | ClipboardErrorKind::Platform
+                        ) {
+                            panic!("Unhandled time-input clipboard error: {error}");
+                        }
+                    }
+                }
+            }));
         });
     }
     fn on_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {

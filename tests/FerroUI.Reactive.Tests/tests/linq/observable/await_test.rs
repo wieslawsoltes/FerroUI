@@ -1,30 +1,36 @@
 //! Ported from `Tests.System.Reactive/Tests/Linq/Observable/AwaitTest.cs` of Rx.NET.
-//! Adapted: `GetAwaiter` gives the task of its `AsyncSubject<T>` (the subject's awaiter), so
-//! `awaiter.OnCompleted(continuation)` is `task.continue_with(continuation)` and
-//! `awaiter.GetResult()` is `task.result()`; the `InvalidOperationException` of a sequence without
+//! Adapted: `GetAwaiter` gives the task of its `AsyncSubject<T>` (the subject's awaiter), the
+//! `Shared` of its result, so `awaiter.OnCompleted(continuation)` is
+//! `task.on_finished(continuation)` and `awaiter.GetResult()` is the outcome given to the
+//! continuation (`get_result(outcome)`); the `InvalidOperationException` of a sequence without
 //! a value is `SequenceError::NoElements`. `SynchronizationContext.SetSynchronizationContext(null)`
-//! is `set_synchronization_context(None)`: without a context, the task of the awaiter ends, running
-//! its continuations, where the subject ends. The variables that scheduled actions assign are
-//! shared cells.
+//! is `set_current_schedule(None)` (the current schedule of the thread is its context): without a
+//! context, the task of the awaiter ends, running its continuations, where the subject ends. The
+//! variables that scheduled actions assign are shared cells.
 
 use ferroui_reactive::disposables::StableCompositeDisposable;
 use ferroui_reactive::linq::SequenceError;
 use ferroui_reactive::{ConnectableObservableExt, IDisposable, IObserver, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{assert_subscriptions, new_error, ReactiveTest as RT, TestScheduler};
-use ferroui_system::threading::set_synchronization_context;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::set_current_schedule;
+use ferroui_system::task::{JoinError, Shared};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// The awaiter that a scheduled action assigns (`var awaiter = default(AsyncSubject<int>);`).
-type Awaiter = Rc<RefCell<Option<Task<i32>>>>;
+type Awaiter = Rc<RefCell<Option<Shared<Result<i32, ObservableError>>>>>;
 
 fn awaiter() -> Awaiter {
     Rc::new(RefCell::new(None))
 }
 
-fn get(awaiter: &Awaiter) -> Task<i32> {
+fn get(awaiter: &Awaiter) -> Shared<Result<i32, ObservableError>> {
     awaiter.borrow().clone().expect("the awaiter has been assigned")
+}
+
+/// `GetResult` of an ended awaiter: the outcome given to its continuation.
+fn get_result(outcome: &Result<Result<i32, ObservableError>, JoinError>) -> Result<i32, ObservableError> {
+    outcome.as_ref().expect("the task of an awaiter is not aborted").clone()
 }
 
 /// `Assert.Same` of two errors.
@@ -34,7 +40,7 @@ fn same(a: &ObservableError, b: &ObservableError) -> bool {
 
 #[test]
 fn await_() {
-    set_synchronization_context(None);
+    set_current_schedule(None);
 
     let scheduler = TestScheduler::new();
 
@@ -60,9 +66,9 @@ fn await_() {
     {
         let (scheduler_, awaiter, result, t) = (scheduler.clone(), awaiter.clone(), result.clone(), t.clone());
         scheduler.schedule_absolute_action(200, move || {
-            get(&awaiter).continue_with(move |task| {
+            get(&awaiter).on_finished(move |outcome| {
                 t.set(scheduler_.clock());
-                result.set(task.result().unwrap());
+                result.set(get_result(outcome).unwrap());
             });
         });
     }
@@ -77,7 +83,7 @@ fn await_() {
 
 #[test]
 fn await_connectable() {
-    set_synchronization_context(None);
+    set_current_schedule(None);
 
     let scheduler = TestScheduler::new();
 
@@ -112,9 +118,9 @@ fn await_connectable() {
     {
         let (scheduler_, awaiter, result, t) = (scheduler.clone(), awaiter.clone(), result.clone(), t.clone());
         scheduler.schedule_absolute_action(200, move || {
-            get(&awaiter).continue_with(move |task| {
+            get(&awaiter).on_finished(move |outcome| {
                 t.set(scheduler_.clock());
-                result.set(task.result().unwrap());
+                result.set(get_result(outcome).unwrap());
             });
         });
     }
@@ -128,7 +134,7 @@ fn await_connectable() {
 
 #[test]
 fn await_error() {
-    set_synchronization_context(None);
+    set_current_schedule(None);
 
     let scheduler = TestScheduler::new();
 
@@ -155,9 +161,9 @@ fn await_error() {
     {
         let (scheduler_, awaiter, t, ex) = (scheduler.clone(), awaiter.clone(), t.clone(), ex.clone());
         scheduler.schedule_absolute_action(200, move || {
-            get(&awaiter).continue_with(move |task| {
+            get(&awaiter).on_finished(move |outcome| {
                 t.set(scheduler_.clock());
-                assert!(same(&task.result().unwrap_err(), &ex));
+                assert!(same(&get_result(outcome).unwrap_err(), &ex));
             });
         });
     }
@@ -171,7 +177,7 @@ fn await_error() {
 
 #[test]
 fn await_never() {
-    set_synchronization_context(None);
+    set_current_schedule(None);
 
     let scheduler = TestScheduler::new();
 
@@ -196,9 +202,9 @@ fn await_never() {
     {
         let (scheduler_, awaiter, has_value, t) = (scheduler.clone(), awaiter.clone(), has_value.clone(), t.clone());
         scheduler.schedule_absolute_action(200, move || {
-            get(&awaiter).continue_with(move |task| {
+            get(&awaiter).on_finished(move |outcome| {
                 t.set(scheduler_.clock());
-                let _ = task.result();
+                let _ = get_result(outcome);
                 has_value.set(true);
             });
         });
@@ -214,7 +220,7 @@ fn await_never() {
 
 #[test]
 fn await_empty() {
-    set_synchronization_context(None);
+    set_current_schedule(None);
 
     let scheduler = TestScheduler::new();
 
@@ -232,9 +238,9 @@ fn await_empty() {
     {
         let (scheduler_, awaiter, t) = (scheduler.clone(), awaiter.clone(), t.clone());
         scheduler.schedule_absolute_action(200, move || {
-            get(&awaiter).continue_with(move |task| {
+            get(&awaiter).on_finished(move |outcome| {
                 t.set(scheduler_.clock());
-                let error = task.result().unwrap_err();
+                let error = get_result(outcome).unwrap_err();
                 assert_eq!(Some(&SequenceError::NoElements), error.downcast_ref::<SequenceError>());
             });
         });

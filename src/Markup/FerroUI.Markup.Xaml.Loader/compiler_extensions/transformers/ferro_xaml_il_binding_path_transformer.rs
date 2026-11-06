@@ -20,7 +20,8 @@ use crate::compiler_extensions::XamlIlBindingPathHelper;
 
 /// Resolves the parsed path of every compiled binding extension against its start type (the
 /// type of its `Source`, its `DataType` or the data context type in scope) and replaces it with
-/// the resolved path node.
+/// the resolved path node. The path of an `{x:Bind}` starts at its root source instead
+/// ([`super::x_bind::transform_path`]).
 pub struct FerroXamlIlBindingPathTransformer;
 
 /// `Enumerable.First()` on an empty sequence.
@@ -30,7 +31,7 @@ fn sequence_contains_no_elements() -> XamlError {
 
 impl FerroXamlIlBindingPathTransformer {
     /// The local function `matchProperty`.
-    fn match_property(
+    pub(super) fn match_property(
         node: &Rc<dyn IXamlAstNode>,
         styled_element_type: &Rc<dyn IXamlType>,
         property_name: &str,
@@ -63,7 +64,7 @@ impl FerroXamlIlBindingPathTransformer {
     }
 
     /// The local function `getResourceValue_Type`.
-    fn get_resource_value_type(
+    pub(super) fn get_resource_value_type(
         node: &XamlPropertyAssignmentNode,
         xaml_type: Option<Rc<dyn IXamlType>>,
     ) -> XamlResult<Option<Rc<dyn IXamlType>>> {
@@ -77,7 +78,7 @@ impl FerroXamlIlBindingPathTransformer {
 
     /// The local iterator `getResourceValues`, searched for the first resource whose key is
     /// `key` (`getResourceValues(node).FirstOrDefault(r => getResourceValue_xKey(r) == key)`).
-    fn find_resource_value(
+    pub(super) fn find_resource_value(
         node: &Rc<dyn IXamlAstNode>,
         key: &str,
     ) -> XamlResult<Option<Rc<XamlPropertyAssignmentNode>>> {
@@ -129,11 +130,13 @@ impl IXamlAstTransformer for FerroXamlIlBindingPathTransformer {
             return Ok(node);
         };
         let types = context.try_get_ferro_types()?;
-        if !binding
-            .type_()
-            .get_clr_type()?
-            .equals(&*types.compiled_binding_extension)
-        {
+        let binding_type = binding.type_().get_clr_type()?;
+        if super::x_bind::is_x_bind_extension(&binding_type) {
+            // The root source and the checks of `{x:Bind}` (docs/porting/x-bind.md).
+            super::x_bind::transform_path(context, &binding)?;
+            return Ok(node);
+        }
+        if !binding_type.equals(&*types.compiled_binding_extension) {
             return Ok(node);
         }
 

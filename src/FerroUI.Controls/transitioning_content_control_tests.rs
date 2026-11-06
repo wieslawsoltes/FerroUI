@@ -16,7 +16,8 @@ use crate::{
     Button, Canvas, Control, Panel, TransitionCompletedEventArgs, TransitioningContentControl,
 };
 use ferroui_base::animation::IPageTransition;
-use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{BoxedValue, Ref, StaticType, StyledElement, Visual};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -98,12 +99,14 @@ ferroui_base::ferro_thread_local! {
 fn register_cancel_action(token: &CancellationToken, action: impl FnOnce() + 'static) {
     let id = NEXT_CANCEL_ACTION.with(|next| next.replace(next.get() + 1));
     CANCEL_ACTIONS.with(|actions| actions.borrow_mut().insert(id, Box::new(action)));
-    let _ = token.register(move || {
-        let action = CANCEL_ACTIONS.with(|actions| actions.borrow_mut().remove(&id));
-        if let Some(action) = action {
-            action();
-        }
-    });
+    token
+        .register(move || {
+            let action = CANCEL_ACTIONS.with(|actions| actions.borrow_mut().remove(&id));
+            if let Some(action) = action {
+                action();
+            }
+        })
+        .detach();
 }
 
 /// The stand-in for a task completion source: its task completes when the
@@ -115,8 +118,8 @@ struct TaskGate {
 }
 
 impl TaskGate {
-    fn task(self: &Rc<Self>) -> DispatcherTask<()> {
-        Dispatcher::current_dispatcher().to_task_scheduler().start_local(TaskGateFuture(self.clone()))
+    fn task(self: &Rc<Self>) -> JoinHandle<()> {
+        Dispatcher::current_dispatcher().start_local(TaskGateFuture(self.clone()))
     }
 
     /// Sets the result; false if it was set already.
@@ -171,7 +174,7 @@ impl TestTransitionState {
         }
         *self.tcs.borrow_mut() = None;
 
-        if !token.is_cancellation_requested() {
+        if !token.is_cancelled() {
             self.finish_count.set(self.finish_count.get() + 1);
         } else {
             self.cancel_count.set(self.cancel_count.get() + 1);
@@ -213,7 +216,7 @@ impl IPageTransition for TestTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let state = &self.state;
         state.start_count.set(state.start_count.get() + 1);
         let started = state.started.borrow().clone();

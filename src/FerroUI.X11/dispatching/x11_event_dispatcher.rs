@@ -76,7 +76,7 @@ impl X11EventDispatcher {
             return;
         };
         while self.is_pending() {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 

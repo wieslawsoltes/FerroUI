@@ -5,7 +5,7 @@
 //! track.
 
 use super::support::*;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::media::{TransformGroup, TranslateTransform};
 use ferroui_base::threading::Dispatcher;
@@ -88,7 +88,7 @@ fn the_indeterminate_animations_follow_the_template_settings_after_a_size_change
     let _app = start_themed_application_with_clock(clock.clone());
     let shown = indeterminate_progress_bar(300.0);
     let settings = shown.progress_bar.template_settings();
-    let seconds = |seconds: f64| TimeSpan::from_milliseconds(seconds * 1000.0);
+    let seconds = |seconds: f64| SignedDuration::from_milliseconds(seconds * 1000.0);
 
     // The animations take two seconds and repeat. The first indicator is at its start position
     // at the start and at its end position from 1.5 seconds on; the second one is at its start

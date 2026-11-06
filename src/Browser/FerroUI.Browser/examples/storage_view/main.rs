@@ -305,7 +305,12 @@ async fn scenario(name: String, argument: String) -> Result<String, String> {
                 .try_get_well_known_folder_async(WellKnownFolder::Documents)
                 .await
                 .ok_or("no well-known folder")?;
-            let by_path = provider.try_get_file_from_path_async(&folder.path()).await.is_none();
+            // The path of an item of the page is relative, so no URL to look up by.
+            let path = folder.path();
+            let by_path = match path.as_url() {
+                Some(url) => provider.try_get_file_from_path_async(url).await.is_none(),
+                None => true,
+            };
             Ok(format!("name={};path_lookup_none={}", folder.name(), by_path))
         }
         "pick_folder_start_in_documents" => {
@@ -324,7 +329,7 @@ async fn scenario(name: String, argument: String) -> Result<String, String> {
 
 fn start(name: String, future: impl Future<Output = Result<String, String>> + 'static) {
     RESULTS.with(|results| results.borrow_mut().remove(&name));
-    Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+    Dispatcher::ui_thread().start_local(async move {
         let result = match future.await {
             Ok(result) => result,
             Err(error) => format!("error={error}"),

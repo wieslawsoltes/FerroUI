@@ -10,6 +10,7 @@
 //! table.
 
 use crate::utilities::CultureInfo;
+use icu_locale_core::Locale;
 use crate::{AnyValue, BoxedValue, FerroObject, ObjectType, PropertyValue, Ref, StyledElement, TypeInfo, Upcast};
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -131,22 +132,47 @@ type IdMap<K, V> = HashMap<K, V, BuildHasherDefault<IdHasher>>;
 type ConvertFn = Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>;
 type AnyConvertFn = Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>>;
 type DisplayFn = fn(&dyn AnyValue) -> String;
-type UnwrapFn = fn(&dyn AnyValue) -> Option<BoxedValue>;
-type NullFn = fn() -> BoxedValue;
+
+// The request borrows its input: the caller retains the original owning box
+// through conversion and unwinding. Each nullable type supplies one operation
+// entry instead of separately address-taken unwrap, null and wrap leaves.
+enum NullableRequest<'a> {
+    /// The contents of a `Some` of the nullable type, `None` for a null.
+    Unwrap(&'a dyn AnyValue),
+    /// A boxed null of the nullable type.
+    Null,
+    /// A value of the inner type wrapped in the nullable type, `None` for a
+    /// value of another type.
+    Wrap(&'a dyn std::any::Any),
+}
+
+type NullableOperation = for<'a> fn(NullableRequest<'a>) -> Option<BoxedValue>;
+
+/// The typed leaf of `Option<T>`: the only nullable code compiled per type.
+fn nullable_operation<T: PropertyValue>(request: NullableRequest<'_>) -> Option<BoxedValue> {
+    match request {
+        NullableRequest::Unwrap(value) => match value.downcast_ref::<Option<T>>() {
+            Some(Some(v)) => Some(Rc::new(v.clone())),
+            _ => None,
+        },
+        NullableRequest::Null => Some(Rc::new(Option::<T>::None)),
+        NullableRequest::Wrap(value) => Some(Rc::new(Some(value.downcast_ref::<T>()?.clone()))),
+    }
+}
 type ObjectFn = fn(&dyn AnyValue) -> Option<Ref<FerroObject>>;
 type FromObjectFn = fn(Ref<FerroObject>) -> Option<BoxedValue>;
 type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
 type ReferenceIdentityFn = Rc<dyn Fn(&dyn AnyValue) -> Option<*const ()>>;
 type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
 type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
+type CastErrorFn = Rc<dyn Fn(&dyn AnyValue) -> Option<String>>;
 
 #[derive(Default)]
 struct Registry {
     display: IdMap<TypeId, DisplayFn>,
-    /// `Option<T>` → unwraps to the contained `T`.
-    nullable: IdMap<TypeId, UnwrapFn>,
-    /// `Option<T>` → a boxed `None`.
-    null_values: IdMap<TypeId, NullFn>,
+    /// `Option<T>` → its operation: unwraps to the contained `T`, makes a
+    /// boxed `None`, wraps a `T`.
+    nullable: IdMap<TypeId, NullableOperation>,
     objects: IdMap<TypeId, (ObjectFn, FromObjectFn, &'static TypeInfo)>,
     /// Model types: values whose box is the shared object itself.
     references: IdMap<TypeId, ()>,
@@ -160,6 +186,9 @@ struct Registry {
     /// The conversions that are assignability casts: the value is the same
     /// value, seen as a wider type.
     casts: IdMap<(TypeId, TypeId), ConvertFn>,
+    /// Why a value is refused by a cast that holds for some values of its
+    /// type only ([`ValueTypes::register_try_cast`]).
+    cast_errors: IdMap<(TypeId, TypeId), CastErrorFn>,
     /// `Option<T>` → the type of the value it unwraps to.
     nullable_inner: IdMap<TypeId, ValueType>,
     /// `ElementRef<T>` and `Option<ElementRef<T>>` → the class `T` and
@@ -298,11 +327,20 @@ fn insert_display(id: TypeId, display: DisplayFn) {
     });
 }
 
-fn insert_nullable(id: TypeId, unwrap: UnwrapFn, null: NullFn, inner: ValueType) {
+/// Registers the nullable form `id` of `inner` and the assignability cast of
+/// a value of `inner` to it (as `register_cast::<T, Option<T>>` does), all
+/// through the one typed operation.
+#[inline(never)]
+fn insert_nullable(id: TypeId, inner: ValueType, operation: NullableOperation) {
+    let key = (inner.id(), id);
+    let wrap: ConvertFn = Rc::new(move |v: &BoxedValue| operation(NullableRequest::Wrap(v.as_any())));
+    let wrap_any: AnyConvertFn = Rc::new(move |v: &dyn std::any::Any| operation(NullableRequest::Wrap(v)));
     with_registry(|r| {
-        r.nullable.insert(id, unwrap);
-        r.null_values.insert(id, null);
+        r.nullable.insert(id, operation);
         r.nullable_inner.insert(id, inner);
+        r.conversions.insert(key, wrap.clone());
+        r.casts.insert(key, wrap);
+        r.any_conversions.insert(key, wrap_any);
     });
 }
 
@@ -387,17 +425,7 @@ impl ValueTypes {
     /// treat `None` as null and `Some(v)` as `v`, and convert a `T` (or null)
     /// to `Option<T>` when a target requires it.
     pub fn register_nullable<T: PropertyValue>() {
-        fn unwrap<T: PropertyValue>(value: &dyn AnyValue) -> Option<BoxedValue> {
-            match value.downcast_ref::<Option<T>>() {
-                Some(Some(v)) => Some(Rc::new(v.clone())),
-                _ => None,
-            }
-        }
-        fn null<T: PropertyValue>() -> BoxedValue {
-            Rc::new(Option::<T>::None)
-        }
-        insert_nullable(TypeId::of::<Option<T>>(), unwrap::<T>, null::<T>, ValueType::of::<T>());
-        Self::register_cast::<T, Option<T>>(|v| Some(v.clone()));
+        insert_nullable(TypeId::of::<Option<T>>(), ValueType::of::<T>(), nullable_operation::<T>);
     }
 
     /// Registers an assignability cast: values of `TFrom` are values of
@@ -416,6 +444,50 @@ impl ValueTypes {
         with_registry(|r| {
             r.any_conversions.insert((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert_any);
         });
+    }
+
+    /// Registers an assignability cast that holds for some values of `TFrom`
+    /// only: a value `cast` converts is a value of `TTo`, and a value it
+    /// refuses is not one (a negative `SignedDuration` is not a
+    /// [`Duration`](std::time::Duration)). The cast applies wherever one of
+    /// [`register_cast`](Self::register_cast) does ([`is_assignable`](Self::is_assignable)
+    /// states it of the two types, [`try_cast`](Self::try_cast),
+    /// [`try_convert`](Self::try_convert) and the untyped property routes
+    /// perform it); a refused value is a value that does not convert, which a
+    /// binding reports as a conversion error and a markup loader as a load
+    /// error, and [`cast_error`](Self::cast_error) gives the error of `cast`.
+    pub fn register_try_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> Result<TTo, String> + 'static) {
+        let key = (TypeId::of::<TFrom>(), TypeId::of::<TTo>());
+        let cast = Rc::new(cast);
+        let boxed = cast.clone();
+        let convert: ConvertFn = Rc::new(move |v: &BoxedValue| {
+            v.downcast_ref::<TFrom>().and_then(|v| boxed(v).ok()).map(|v| Rc::new(v) as BoxedValue)
+        });
+        insert_cast(key, convert);
+        let borrowed = cast.clone();
+        let convert_any: AnyConvertFn = Rc::new(move |v: &dyn std::any::Any| {
+            v.downcast_ref::<TFrom>().and_then(|v| borrowed(v).ok()).map(|v| Rc::new(v) as BoxedValue)
+        });
+        let error: CastErrorFn = Rc::new(move |v: &dyn AnyValue| cast(v.downcast_ref::<TFrom>()?).err());
+        with_registry(|r| {
+            r.any_conversions.insert(key, convert_any);
+            r.cast_errors.insert(key, error);
+        });
+    }
+
+    /// Why `value` does not cast to `target` although its type is assignable
+    /// to it: the error of the cast registered with
+    /// [`register_try_cast`](Self::register_try_cast). `None` when no such
+    /// cast is registered between the two types, or when the value casts. For
+    /// the nullable form of a type (`Option<Url>`), the error of the cast to
+    /// the type, which the cast to the nullable form performs.
+    pub fn cast_error(value: &BoxedValue, target: ValueType) -> Option<String> {
+        let key = (value_type_id(&**value), target.id());
+        let (error, inner) = with_registry(|r| (r.cast_errors.get(&key).cloned(), r.nullable_inner.get(&target.id()).copied()));
+        match error {
+            Some(error) => error(&**value),
+            None => Self::cast_error(value, inner?),
+        }
     }
 
     /// States that the Rust type `TFrom` dereferences to `TTo`: `&TFrom`
@@ -622,9 +694,9 @@ impl ValueTypes {
                     _ => return None,
                 }
             }
-            let unwrap = with_registry(|r| r.nullable.get(&id).copied());
-            return match unwrap {
-                Some(unwrap) => unwrap(&*value),
+            let operation = with_registry(|r| r.nullable.get(&id).copied());
+            return match operation {
+                Some(operation) => operation(NullableRequest::Unwrap(&*value)),
                 None => Some(value),
             };
         }
@@ -822,14 +894,18 @@ impl ValueTypes {
     /// weakly, treat null as a valid value of the type, and convert between
     /// the object and `Rc<T>` / `Option<Rc<T>>` typed properties.
     pub fn register_reference<T: PartialEq + 'static>() {
-        fn unwrap<T: PartialEq + 'static>(value: &dyn AnyValue) -> Option<BoxedValue> {
-            match value.downcast_ref::<Option<Rc<T>>>() {
-                Some(Some(v)) => Some(v.clone() as BoxedValue),
-                _ => None,
+        // The nullable handle of a model unwraps to the model object itself,
+        // cloning its Rc, never the object (the type need not be Clone).
+        fn nullable<T: PartialEq + 'static>(request: NullableRequest<'_>) -> Option<BoxedValue> {
+            match request {
+                NullableRequest::Unwrap(value) => match value.downcast_ref::<Option<Rc<T>>>() {
+                    Some(Some(v)) => Some(v.clone() as BoxedValue),
+                    _ => None,
+                },
+                NullableRequest::Null => Some(Rc::new(Option::<Rc<T>>::None)),
+                // The wrapping casts of a model are the boxed casts below.
+                NullableRequest::Wrap(_) => None,
             }
-        }
-        fn null<T: PartialEq + 'static>() -> BoxedValue {
-            Rc::new(Option::<Rc<T>>::None)
         }
         fn to_rc<T: PartialEq + 'static>(value: &BoxedValue) -> Option<Rc<T>> {
             let any: Rc<dyn std::any::Any> = value.clone();
@@ -841,8 +917,7 @@ impl ValueTypes {
         }
         Self::register_reference_identity::<Rc<T>>(|value| Rc::as_ptr(value) as *const ());
         with_registry(|r| {
-            r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), unwrap::<T>);
-            r.null_values.insert(TypeId::of::<Option<Rc<T>>>(), null::<T>);
+            r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), nullable::<T>);
             r.nullable_inner.insert(TypeId::of::<Option<Rc<T>>>(), ValueType::of::<T>());
             r.reference_handles.insert(TypeId::of::<Rc<T>>(), TypeId::of::<T>());
             r.reference_objects.insert(TypeId::of::<T>(), TypeId::of::<Rc<T>>());
@@ -900,7 +975,7 @@ impl ValueTypes {
     /// Whether `target` accepts null.
     pub fn accepts_null(target: ValueType) -> bool {
         target.is_object()
-            || with_registry(|r| r.null_values.contains_key(&target.id()) || r.references.contains_key(&target.id()))
+            || with_registry(|r| r.nullable.contains_key(&target.id()) || r.references.contains_key(&target.id()))
     }
 
     /// The boxed null of a nullable target type.
@@ -908,8 +983,8 @@ impl ValueTypes {
         if target.is::<Option<BoxedValue>>() {
             return Some(Rc::new(Option::<BoxedValue>::None));
         }
-        let f = with_registry(|r| r.null_values.get(&target.id()).copied());
-        f.map(|f| f())
+        let f = with_registry(|r| r.nullable.get(&target.id()).copied());
+        f.and_then(|f| f(NullableRequest::Null))
     }
 
     /// Looks up a registered conversion.
@@ -1818,10 +1893,104 @@ fn register_defaults() {
     }
     orderings!(
         i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, bool, char, String,
-        crate::utilities::Decimal, crate::utilities::DateTime, crate::utilities::DateTimeOffset, crate::animation::TimeSpan
+        crate::utilities::Decimal, crate::utilities::DateTime, crate::utilities::DateTimeOffset, crate::animation::SignedDuration
     );
     ValueTypes::register_ordering_by::<f64>(|a, b| Some(float_order(*a, *b)));
     ValueTypes::register_ordering_by::<f32>(|a, b| Some(float_order(f64::from(*a), f64::from(*b))));
+
+    // A `Duration` is the other Rust form of `System.TimeSpan` (C5 of #423, decision O2 of
+    // docs/idiomatic-rust-signatures.md): a non-negative time span is a duration, a negative
+    // one is refused (never clamped), and a duration is a time span, saturating at the
+    // largest one. Its text and its order are the ones of the time span.
+    fn display_duration(value: &dyn AnyValue) -> String {
+        value
+            .downcast_ref::<std::time::Duration>()
+            .map(|duration| crate::animation::SignedDuration::from(*duration).to_string())
+            .unwrap_or_default()
+    }
+    ValueTypes::register_display::<crate::animation::SignedDuration>();
+    with_registry(|r| {
+        r.display.insert(TypeId::of::<std::time::Duration>(), display_duration);
+    });
+    ValueTypes::register_nullable::<std::time::Duration>();
+    ValueTypes::register_ordering::<std::time::Duration>();
+    ValueTypes::register_try_cast::<crate::animation::SignedDuration, std::time::Duration>(|span| {
+        std::time::Duration::try_from(*span).map_err(|error| error.to_string())
+    });
+    ValueTypes::register_cast::<std::time::Duration, crate::animation::SignedDuration>(|duration| {
+        crate::animation::SignedDuration::from(*duration)
+    });
+    // Text converts to a duration as it converts to a time span, and a negative one does not
+    // convert.
+    fn parse_duration(text: &str) -> Option<std::time::Duration> {
+        crate::animation::SignedDuration::parse(text).ok()?.to_duration()
+    }
+    ValueTypes::register_parse::<std::time::Duration>(parse_duration);
+    ValueTypes::register_conversion::<String, Option<std::time::Duration>>(|text| parse_duration(text).map(Some));
+
+    // `UriRef` and `url::Url` are the other Rust forms of `System.Uri` (C5 of #423, section 3.5
+    // of docs/idiomatic-rust-signatures.md). A `Uri` is the reference of the same text, and an
+    // absolute `Uri` or `UriRef` the URL of its text; a relative reference is not a URL, and a
+    // text the URL parser rejects is neither: the casts refuse them with their error. A
+    // reference and a URL are the `Uri` of the same text. Their text is the one of their
+    // `Display`, and text converts to them with the rule of markup (`UriRef::parse`).
+    fn uri_is_relative(uri: &dyn fmt::Display) -> String {
+        format!("The URI {uri} is relative and cannot be converted to a Url.")
+    }
+    fn uri_is_not_a_url(uri: &dyn fmt::Display, error: ::url::ParseError) -> String {
+        format!("The URI {uri} is not a valid Url: {error}.")
+    }
+    ValueTypes::register_nullable::<crate::utilities::UriRef>();
+    ValueTypes::register_nullable::<::url::Url>();
+    ValueTypes::register_display::<crate::utilities::UriRef>();
+    ValueTypes::register_display::<::url::Url>();
+    ValueTypes::register_try_cast::<crate::utilities::Uri, crate::utilities::UriRef>(|uri| {
+        crate::utilities::UriRef::try_from(uri).map_err(|error| uri_is_not_a_url(uri, error))
+    });
+    ValueTypes::register_try_cast::<crate::utilities::Uri, ::url::Url>(|uri| match ::url::Url::try_from(uri) {
+        Ok(url) => Ok(url),
+        Err(crate::utilities::UriToUrlError::Relative) => Err(uri_is_relative(uri)),
+        Err(crate::utilities::UriToUrlError::Invalid(error)) => Err(uri_is_not_a_url(uri, error)),
+    });
+    ValueTypes::register_try_cast::<crate::utilities::UriRef, ::url::Url>(|reference| {
+        reference.as_url().cloned().ok_or_else(|| uri_is_relative(reference))
+    });
+    ValueTypes::register_cast::<crate::utilities::UriRef, crate::utilities::Uri>(|reference| {
+        crate::utilities::Uri::from(reference)
+    });
+    ValueTypes::register_cast::<::url::Url, crate::utilities::Uri>(|url| crate::utilities::Uri::from(url.clone()));
+    ValueTypes::register_cast::<::url::Url, crate::utilities::UriRef>(|url| crate::utilities::UriRef::Absolute(url.clone()));
+    fn parse_uri_ref(text: &str) -> Option<crate::utilities::UriRef> {
+        crate::utilities::UriRef::parse(text).ok()
+    }
+    fn parse_url(text: &str) -> Option<::url::Url> {
+        parse_uri_ref(text)?.as_url().cloned()
+    }
+    ValueTypes::register_parse::<crate::utilities::UriRef>(parse_uri_ref);
+    ValueTypes::register_parse::<::url::Url>(parse_url);
+    ValueTypes::register_conversion::<String, Option<crate::utilities::UriRef>>(|text| parse_uri_ref(text).map(Some));
+    ValueTypes::register_conversion::<String, Option<::url::Url>>(|text| parse_url(text).map(Some));
+
+    // A `Locale` is the other Rust form of `System.Globalization.CultureInfo` (C5 of #423,
+    // docs/idiomatic-rust-signatures.md section 3.4): the identity of a culture. A locale is
+    // the culture made from it; a culture is a locale unless its name is not a BCP-47
+    // language tag (`es-ES_tradnl`, `x-custom`, a culture made from a name in code), which
+    // the cast refuses with its error. Text converts to a locale as it converts to a culture
+    // in markup (an IETF language tag parsed into a locale, the empty text the invariant
+    // culture, the unknown locale `und`), and the text of a locale is its tag.
+    ValueTypes::register_display::<Locale>();
+    ValueTypes::register_nullable::<Locale>();
+    ValueTypes::register_cast::<Locale, CultureInfo>(|locale: &Locale| CultureInfo::from(locale));
+    ValueTypes::register_try_cast::<CultureInfo, Locale>(|culture| {
+        Locale::try_from(culture).map_err(|error| {
+            format!("The culture name '{}' is not a BCP-47 language tag and cannot be converted to a Locale: {error}.", culture.name())
+        })
+    });
+    fn parse_locale(text: &str) -> Option<Locale> {
+        crate::data::CultureInfoIetfLanguageTagConverter::convert_to_locale(text).ok()
+    }
+    ValueTypes::register_parse::<Locale>(parse_locale);
+    ValueTypes::register_conversion::<String, Option<Locale>>(|text| parse_locale(text).map(Some));
 }
 
 impl ValueTypes {
@@ -1846,6 +2015,10 @@ impl ValueTypes {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "value_type_nullable_operation_tests.rs"]
+mod nullable_operation_tests;
 
 #[cfg(test)]
 mod tests {
@@ -2650,5 +2823,195 @@ mod tests {
         ValueTypes::register_ordering_by::<Reversed>(|a, b| Some(b.0.cmp(&a.0)));
         let reversed = |value: i32| -> BoxedValue { Rc::new(Reversed(value)) };
         assert_eq!(ValueTypes::compare(&reversed(1), &reversed(2)), Some(std::cmp::Ordering::Greater));
+    }
+
+    /// Not from upstream (C5 of #423, decision O2): `SignedDuration` and `Duration` are the
+    /// two Rust forms of a time span. A duration is a time span; a time span is a duration
+    /// unless it is negative, which the cast refuses with its error instead of clamping it.
+    #[test]
+    fn signed_durations_and_durations_are_two_forms_of_a_time_span() {
+        use crate::animation::SignedDuration;
+        use std::time::Duration;
+
+        let b = |value: SignedDuration| -> BoxedValue { Rc::new(value) };
+        let duration = ValueType::of::<Duration>();
+        let span = ValueType::of::<SignedDuration>();
+        assert!(ValueTypes::is_assignable(span, duration));
+        assert!(ValueTypes::is_assignable(duration, span));
+        assert!(ValueTypes::is_assignable(span, ValueType::of::<Option<Duration>>()));
+
+        // A time span that is not negative casts and converts to the duration of the same value.
+        let cast = ValueTypes::try_cast(&b(SignedDuration::from_seconds(1.5)), duration).expect("a duration");
+        assert_eq!(cast.downcast_ref::<Duration>(), Some(&Duration::from_millis(1500)));
+        let converted = ValueTypes::try_convert(Some(&b(SignedDuration::ZERO)), duration).flatten().expect("a duration");
+        assert_eq!(converted.downcast_ref::<Duration>(), Some(&Duration::ZERO));
+        let nullable = ValueTypes::try_cast(&b(SignedDuration::from_seconds(2.0)), ValueType::of::<Option<Duration>>());
+        assert_eq!(nullable.expect("a nullable duration").downcast_ref::<Option<Duration>>(), Some(&Some(Duration::from_secs(2))));
+        let implicit = ValueTypes::try_convert_implicit(&SignedDuration::from_seconds(3.0), duration.id()).expect("a duration");
+        assert_eq!(implicit.downcast_ref::<Duration>(), Some(&Duration::from_secs(3)));
+        assert_eq!(ValueTypes::cast_error(&b(SignedDuration::from_seconds(1.0)), duration), None);
+
+        // A negative one is refused by every route, with the error of the cast.
+        let negative = b(SignedDuration::from_seconds(-1.0));
+        assert!(ValueTypes::try_cast(&negative, duration).is_none());
+        assert!(ValueTypes::try_convert(Some(&negative), duration).is_none());
+        assert!(ValueTypes::try_cast(&negative, ValueType::of::<Option<Duration>>()).is_none());
+        assert!(ValueTypes::try_convert_implicit(&SignedDuration::from_seconds(-1.0), duration.id()).is_none());
+        assert_eq!(
+            ValueTypes::cast_error(&negative, duration).as_deref(),
+            Some("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration.")
+        );
+        assert_eq!(ValueTypes::cast_error(&negative, ValueType::of::<String>()), None);
+
+        // A duration is the time span of the same value, saturating at the largest one.
+        let back = ValueTypes::try_cast(&(Rc::new(Duration::from_millis(250)) as BoxedValue), span).expect("a time span");
+        assert_eq!(back.downcast_ref::<SignedDuration>(), Some(&SignedDuration::from_seconds(0.25)));
+        let longest = ValueTypes::try_cast(&(Rc::new(Duration::MAX) as BoxedValue), span).expect("a time span");
+        assert_eq!(longest.downcast_ref::<SignedDuration>(), Some(&SignedDuration::MAX_VALUE));
+
+        // Its text and its order are the ones of the time span, and text converts to it as
+        // to a time span.
+        let text = ValueTypes::to_display_string(Some(&(Rc::new(Duration::from_millis(1500)) as BoxedValue)));
+        assert_eq!(text, "00:00:01.5000000");
+        let parsed = ValueTypes::try_convert(Some(&(Rc::new(text) as BoxedValue)), duration).flatten().expect("a duration");
+        assert_eq!(parsed.downcast_ref::<Duration>(), Some(&Duration::from_millis(1500)));
+        let nullable_text: BoxedValue = Rc::new("0:0:2".to_string());
+        let parsed = ValueTypes::try_convert(Some(&nullable_text), ValueType::of::<Option<Duration>>()).flatten();
+        assert_eq!(parsed.expect("a nullable duration").downcast_ref::<Option<Duration>>(), Some(&Some(Duration::from_secs(2))));
+        assert!(ValueTypes::try_convert(Some(&(Rc::new("-0:0:1".to_string()) as BoxedValue)), duration).is_none());
+        let shorter: BoxedValue = Rc::new(Duration::from_secs(1));
+        let longer: BoxedValue = Rc::new(Duration::from_secs(2));
+        assert_eq!(ValueTypes::compare(&shorter, &longer), Some(std::cmp::Ordering::Less));
+        assert_eq!(ValueTypes::compare(&shorter, &b(SignedDuration::from_seconds(1.0))), Some(std::cmp::Ordering::Equal));
+        assert_eq!(ValueTypes::compare(&b(SignedDuration::from_seconds(-1.0)), &longer), Some(std::cmp::Ordering::Less));
+    }
+
+    /// Not from upstream (C5 of #423, section 3.5 of docs/idiomatic-rust-signatures.md): `Uri`,
+    /// `UriRef` and `url::Url` are the three Rust forms of `System.Uri`. A `Uri` is the reference
+    /// of the same text, and an absolute one the URL of it; a relative reference is not a URL,
+    /// and the casts refuse it with their error.
+    #[test]
+    fn uris_uri_refs_and_urls_are_three_forms_of_a_uri() {
+        use crate::utilities::{Uri, UriKind, UriRef};
+
+        let uri = |text: &str| -> BoxedValue { Rc::new(Uri::new(text, UriKind::RelativeOrAbsolute).unwrap()) };
+        let reference = |text: &str| -> BoxedValue { Rc::new(UriRef::parse(text).unwrap()) };
+        let address = |text: &str| -> BoxedValue { Rc::new(::url::Url::parse(text).unwrap()) };
+        let (uri_type, reference_type, url_type) = (ValueType::of::<Uri>(), ValueType::of::<UriRef>(), ValueType::of::<::url::Url>());
+        for (from, to) in [
+            (uri_type, reference_type),
+            (uri_type, url_type),
+            (reference_type, uri_type),
+            (reference_type, url_type),
+            (url_type, uri_type),
+            (url_type, reference_type),
+        ] {
+            assert!(ValueTypes::is_assignable(from, to), "{} to {}", from.name(), to.name());
+        }
+        assert!(ValueTypes::is_assignable(uri_type, ValueType::of::<Option<UriRef>>()));
+        assert!(ValueTypes::is_assignable(uri_type, ValueType::of::<Option<::url::Url>>()));
+
+        // A `Uri` is the reference of the same text, relative or absolute.
+        let cast = ValueTypes::try_cast(&uri("/Styles/Base.xaml"), reference_type).expect("a reference");
+        assert_eq!(cast.downcast_ref::<UriRef>(), Some(&UriRef::Relative("/Styles/Base.xaml".into())));
+        let cast = ValueTypes::try_cast(&uri("fonts:SystemFonts#Inter"), reference_type).expect("a reference");
+        assert_eq!(cast.downcast_ref::<UriRef>(), Some(&UriRef::parse("fonts:SystemFonts#Inter").unwrap()));
+        let nullable = ValueTypes::try_cast(&uri("Values.xaml"), ValueType::of::<Option<UriRef>>()).expect("a nullable reference");
+        assert_eq!(nullable.downcast_ref::<Option<UriRef>>(), Some(&Some(UriRef::Relative("Values.xaml".into()))));
+
+        // An absolute `Uri` or reference is its URL, a relative one is refused with its error.
+        let cast = ValueTypes::try_cast(&uri("https://example.com/a"), url_type).expect("a URL");
+        assert_eq!(cast.downcast_ref::<::url::Url>().map(::url::Url::as_str), Some("https://example.com/a"));
+        let cast = ValueTypes::try_cast(&reference("ferres://app/a.xaml"), url_type).expect("a URL");
+        assert_eq!(cast.downcast_ref::<::url::Url>().map(::url::Url::as_str), Some("ferres://app/a.xaml"));
+        for relative in [uri("Values.xaml"), reference("Values.xaml")] {
+            assert!(ValueTypes::try_cast(&relative, url_type).is_none());
+            assert!(ValueTypes::try_convert(Some(&relative), url_type).is_none());
+            assert!(ValueTypes::try_cast(&relative, ValueType::of::<Option<::url::Url>>()).is_none());
+            let expected = Some("The URI Values.xaml is relative and cannot be converted to a Url.");
+            assert_eq!(ValueTypes::cast_error(&relative, url_type).as_deref(), expected);
+            // The nullable form of the target refuses it with the same error.
+            assert_eq!(ValueTypes::cast_error(&relative, ValueType::of::<Option<::url::Url>>()).as_deref(), expected);
+        }
+        // A text the URL parser rejects is neither a reference nor a URL.
+        let invalid = uri("http://host:99999/");
+        assert!(ValueTypes::try_cast(&invalid, reference_type).is_none());
+        assert_eq!(
+            ValueTypes::cast_error(&invalid, reference_type).as_deref(),
+            Some("The URI http://host:99999/ is not a valid Url: invalid port number.")
+        );
+        assert_eq!(ValueTypes::cast_error(&uri("https://example.com/"), url_type), None);
+
+        // A reference and a URL are the `Uri` of the same text.
+        let cast = ValueTypes::try_cast(&reference("../Fonts/#Name"), uri_type).expect("a URI");
+        assert_eq!(cast.downcast_ref::<Uri>().map(Uri::original_string), Some("../Fonts/#Name"));
+        let cast = ValueTypes::try_cast(&address("fonts:SystemFonts"), uri_type).expect("a URI");
+        assert_eq!(cast.downcast_ref::<Uri>(), Some(&Uri::absolute("fonts:SystemFonts").unwrap()));
+        let cast = ValueTypes::try_cast(&address("fonts:SystemFonts"), reference_type).expect("a reference");
+        assert_eq!(cast.downcast_ref::<UriRef>(), Some(&UriRef::parse("fonts:SystemFonts").unwrap()));
+
+        // Their text, and text converts to them with the rule of markup.
+        assert_eq!(ValueTypes::to_display_string(Some(&reference("/Styles/Base.xaml"))), "/Styles/Base.xaml");
+        assert_eq!(ValueTypes::to_display_string(Some(&address("http://host"))), "http://host/");
+        let text = |text: &str| -> BoxedValue { Rc::new(text.to_string()) };
+        let parsed = ValueTypes::try_convert(Some(&text("/Styles/Base.xaml")), reference_type).flatten().expect("a reference");
+        assert_eq!(parsed.downcast_ref::<UriRef>(), Some(&UriRef::Relative("/Styles/Base.xaml".into())));
+        let parsed = ValueTypes::try_convert(Some(&text("fonts:SystemFonts")), url_type).flatten().expect("a URL");
+        assert_eq!(parsed.downcast_ref::<::url::Url>().map(::url::Url::as_str), Some("fonts:SystemFonts"));
+        let parsed = ValueTypes::try_convert(Some(&text("fonts:SystemFonts")), ValueType::of::<Option<::url::Url>>()).flatten();
+        assert!(parsed.expect("a nullable URL").downcast_ref::<Option<::url::Url>>().is_some_and(Option::is_some));
+        assert!(ValueTypes::try_convert(Some(&text("/Styles/Base.xaml")), url_type).is_none());
+    }
+
+    /// Not from upstream (C5 of #423): `CultureInfo` and `Locale` are the two Rust forms of
+    /// `System.Globalization.CultureInfo`. A locale is the culture of its name; a culture is
+    /// a locale unless its name is not a BCP-47 language tag, which the cast refuses with its
+    /// error.
+    #[test]
+    fn cultures_and_locales_are_two_forms_of_a_culture() {
+        use icu_locale_core::locale;
+
+        let culture = |name: &str| -> BoxedValue { Rc::new(CultureInfo::get_culture_info(name)) };
+        let locale_type = ValueType::of::<Locale>();
+        let culture_type = ValueType::of::<CultureInfo>();
+        assert!(ValueTypes::is_assignable(culture_type, locale_type));
+        assert!(ValueTypes::is_assignable(locale_type, culture_type));
+
+        // A culture of a language tag casts to its locale, the invariant culture to `und`.
+        let cast = ValueTypes::try_cast(&culture("ja-JP"), locale_type).expect("a locale");
+        assert_eq!(cast.downcast_ref::<Locale>(), Some(&locale!("ja-JP")));
+        let invariant: BoxedValue = Rc::new(CultureInfo::invariant_culture());
+        let cast = ValueTypes::try_cast(&invariant, locale_type).expect("a locale");
+        assert_eq!(cast.downcast_ref::<Locale>(), Some(&Locale::UNKNOWN));
+        let nullable = ValueTypes::try_cast(&culture("de-DE"), ValueType::of::<Option<Locale>>()).expect("a nullable locale");
+        assert_eq!(nullable.downcast_ref::<Option<Locale>>(), Some(&Some(locale!("de-DE"))));
+        assert_eq!(ValueTypes::cast_error(&culture("de-DE"), locale_type), None);
+
+        // A culture whose name is no language tag is refused, with the error of the cast.
+        let custom = culture("es-ES_tradnl");
+        assert!(ValueTypes::try_cast(&custom, locale_type).is_none());
+        assert!(ValueTypes::try_convert(Some(&custom), locale_type).is_none());
+        let error = ValueTypes::cast_error(&custom, locale_type).expect("the error of the cast");
+        assert!(error.starts_with("The culture name 'es-ES_tradnl' is not a BCP-47 language tag"), "{error}");
+
+        // A locale is the culture of its name.
+        let back = ValueTypes::try_cast(&(Rc::new(locale!("zh-Hant-TW")) as BoxedValue), culture_type).expect("a culture");
+        assert_eq!(back.downcast_ref::<CultureInfo>(), Some(&CultureInfo::get_culture_info("zh-Hant-TW")));
+        let back = ValueTypes::try_cast(&(Rc::new(Locale::UNKNOWN) as BoxedValue), culture_type).expect("a culture");
+        assert!(back.downcast_ref::<CultureInfo>().is_some_and(CultureInfo::is_invariant));
+
+        // Text converts to a locale as to a culture in markup; the text of a locale is its tag.
+        let text = |text: &str| -> BoxedValue { Rc::new(text.to_string()) };
+        let parsed = ValueTypes::try_convert(Some(&text("ko-KR")), locale_type).flatten().expect("a locale");
+        assert_eq!(parsed.downcast_ref::<Locale>(), Some(&locale!("ko-KR")));
+        let parsed = ValueTypes::try_convert(Some(&text("")), locale_type).flatten().expect("the unknown locale");
+        assert_eq!(parsed.downcast_ref::<Locale>(), Some(&Locale::UNKNOWN));
+        let parsed = ValueTypes::try_convert(Some(&text("en-GB")), ValueType::of::<Option<Locale>>()).flatten();
+        assert_eq!(parsed.expect("a nullable locale").downcast_ref::<Option<Locale>>(), Some(&Some(locale!("en-GB"))));
+        for invalid in ["zh-CHT", "x-private", "en_US"] {
+            assert!(ValueTypes::try_convert(Some(&text(invalid)), locale_type).is_none(), "{invalid}");
+        }
+        let shown = ValueTypes::to_display_string(Some(&(Rc::new(locale!("pt-BR")) as BoxedValue)));
+        assert_eq!(shown, "pt-BR");
     }
 }

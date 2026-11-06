@@ -1,3 +1,4 @@
+use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition};
 use ferroui_base::TypeInfo;
 
@@ -17,8 +18,14 @@ const TYPES: &[&TypeInfo] = &[
     crate::ChartPoint::TYPE,
     crate::ChartSeries::TYPE,
     crate::Axis::TYPE,
+    crate::DateTimeAxis::TYPE,
+    crate::TimeSpanAxis::TYPE,
     crate::CartesianChart::TYPE,
     crate::PieChart::TYPE,
+    crate::PolarChart::TYPE,
+    crate::SankeyChart::TYPE,
+    crate::TreemapChart::TYPE,
+    crate::GeoMap::TYPE,
     crate::LineSeries::TYPE,
     crate::StepLineSeries::TYPE,
     crate::AreaSeries::TYPE,
@@ -34,19 +41,39 @@ const TYPES: &[&TypeInfo] = &[
     crate::RangeRowSeries::TYPE,
     crate::RangeLineSeries::TYPE,
     crate::CandlesticksSeries::TYPE,
+    crate::OhlcSeries::TYPE,
     crate::BoxSeries::TYPE,
     crate::PieSeries::TYPE,
+    crate::PolarLineSeries::TYPE,
+    crate::SankeySeries::TYPE,
+    crate::TreemapSeries::TYPE,
+    crate::SankeyNode::TYPE,
+    crate::SankeyLink::TYPE,
+    crate::TreemapNode::TYPE,
+    crate::HeatLandSeries::TYPE,
+    crate::HeatLand::TYPE,
+    crate::GeoMarker::TYPE,
+    crate::ChartVisualElement::TYPE,
+    crate::AngularTicksVisual::TYPE,
+    crate::NeedleVisual::TYPE,
     crate::ChartAutomationPeer::TYPE,
 ];
 ferroui_base::ferro_rust_paths! {
-    classes:[crate::Chart,crate::ChartPoint,crate::ChartSeries,crate::Axis,
-        crate::CartesianChart,crate::PieChart,
+    classes:[crate::Chart,crate::ChartPoint,crate::ChartSeries,crate::Axis,crate::DateTimeAxis,crate::TimeSpanAxis,
+        crate::CartesianChart,crate::PieChart,crate::PolarChart,crate::SankeyChart,crate::TreemapChart,crate::GeoMap,
         crate::LineSeries,crate::StepLineSeries,crate::AreaSeries,crate::StackedAreaSeries,crate::StackedStepAreaSeries,
         crate::ColumnSeries,crate::RowSeries,crate::StackedColumnSeries,crate::StackedRowSeries,crate::ScatterSeries,
         crate::HeatSeries,crate::RangeColumnSeries,crate::RangeRowSeries,crate::RangeLineSeries,
-        crate::CandlesticksSeries,crate::BoxSeries,crate::PieSeries,crate::ChartAutomationPeer],
+        crate::CandlesticksSeries,crate::OhlcSeries,crate::BoxSeries,crate::PieSeries,crate::PolarLineSeries,
+        crate::SankeySeries,crate::TreemapSeries,crate::SankeyNode,crate::SankeyLink,crate::TreemapNode,
+        crate::HeatLandSeries,crate::HeatLand,crate::GeoMarker,
+        crate::ChartVisualElement,crate::AngularTicksVisual,crate::NeedleVisual,
+        crate::ChartAutomationPeer],
     types:[crate::ChartKind,crate::LegendPosition,crate::TooltipPosition,crate::ZoomAndPanMode,
-        crate::ChartPoints,crate::ChartSeriesCollection,crate::Axes],
+        crate::MapInteractionMode,
+        crate::ChartPoints,crate::ChartSeriesCollection,crate::Axes,
+        crate::SankeyNodes,crate::SankeyLinks,crate::TreemapNodes,crate::HeatLands,crate::GeoMarkers,
+        crate::ChartVisualElements],
     contracts:[],generics:[],generic_contracts:[],
 }
 
@@ -64,10 +91,26 @@ pub fn register_types() {
             <crate::LegendPosition as MarkupTyped>::MARKUP,
             <crate::TooltipPosition as MarkupTyped>::MARKUP,
             <crate::ZoomAndPanMode as MarkupTyped>::MARKUP,
+            <crate::MapInteractionMode as MarkupTyped>::MARKUP,
             <crate::ChartPoints as MarkupTyped>::MARKUP,
             <crate::ChartSeriesCollection as MarkupTyped>::MARKUP,
             <crate::Axes as MarkupTyped>::MARKUP,
+            <crate::SankeyNodes as MarkupTyped>::MARKUP,
+            <crate::SankeyLinks as MarkupTyped>::MARKUP,
+            <crate::TreemapNodes as MarkupTyped>::MARKUP,
+            <crate::HeatLands as MarkupTyped>::MARKUP,
+            <crate::GeoMarkers as MarkupTyped>::MARKUP,
+            <crate::ChartVisualElements as MarkupTyped>::MARKUP,
         ]);
+        ValueTypes::register_global(register_value_types);
         register_rust_paths();
     });
+}
+
+/// What the untyped value conversions must know: the children of a treemap node and the ends of a
+/// Sankey link are nullable, so a collection or a node object converts to them (a null child list
+/// is a leaf).
+fn register_value_types() {
+    ValueTypes::register_nullable::<crate::TreemapNodes>();
+    ValueTypes::register_object::<crate::SankeyNode>();
 }

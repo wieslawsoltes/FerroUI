@@ -2,6 +2,8 @@
 //! styled property values.
 
 mod binding_entry;
+mod boxed_binding_entry;
+mod boxed_local_value_binding_observer;
 mod effective_value;
 mod frame_priority;
 mod immediate_value_frame;
@@ -11,7 +13,9 @@ mod value_frame;
 mod value_store;
 
 pub(crate) use binding_entry::{BindingEntry, BindingSource};
-pub(crate) use effective_value::{EffectiveValue, EffectiveValueDyn};
+pub(crate) use boxed_binding_entry::{create_boxed_binding_entry, BoxedBindingValue};
+pub(crate) use boxed_local_value_binding_observer::{BoxedLocalBindingValue, BoxedLocalValueBindingObserver};
+pub(crate) use effective_value::{EffectiveValue, EffectiveValueDyn, UncommonFields};
 pub(crate) use frame_priority::{FramePriority, FrameType};
 pub use immediate_value_frame::ImmediateValueFrame;
 pub(crate) use local_value_binding_observer::{DirectBindingObserver, LocalValueBindingObserver};

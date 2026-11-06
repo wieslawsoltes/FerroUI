@@ -10,8 +10,8 @@
 
 use ferroui_base::platform::storage::file_io::{DecodeResult, StorageBookmarkHelper};
 use ferroui_base::platform::storage::{FilePickerFileType, FilePickerFileTypes, WellKnownFolder};
-use ferroui_base::utilities::Uri;
 use std::rc::Rc;
+use url::Url;
 
 /// The platform key of the bookmarks of this provider (`AndroidKey`).
 pub(crate) const ANDROID_KEY: &[u8] = b"android";
@@ -55,10 +55,10 @@ pub(crate) fn all_mime_type() -> String {
         .expect("the file type of all files has a MIME type")
 }
 
-/// Whether a path is what the provider reads items from: an absolute link
-/// with the scheme `file` or `content`.
-pub(crate) fn is_file_or_content_uri(path: &Uri) -> bool {
-    path.is_absolute_uri() && matches!(path.scheme(), FILE_URI_SCHEME | CONTENT_URI_SCHEME)
+/// Whether a path is what the provider reads items from: a link with the
+/// scheme `file` or `content`.
+pub(crate) fn is_file_or_content_uri(path: &Url) -> bool {
+    matches!(path.scheme(), FILE_URI_SCHEME | CONTENT_URI_SCHEME)
 }
 
 /// The type of the directory of the files of the application
@@ -141,9 +141,7 @@ mod imp {
         new_string_array, JavaClass, JavaLocal, JavaObject, JavaRef, JavaValue,
     };
     use crate::interop::natives::sdk_int;
-    use crate::platform::platform_support::{
-        add_activity_result, get_next_request_code, ActivityResultSubscription, Completion,
-    };
+    use crate::platform::platform_support::{add_activity_result, get_next_request_code, ActivityResultSubscription};
     use crate::platform::storage::android_storage_item::{
         helper, object, take_last_error, text_of, uri_of, Activity, AndroidStorageFile, AndroidStorageFolder,
         AndroidStorageItem, AndroidUri, COLUMN_MIME_TYPE, MIME_TYPE_DIR,
@@ -155,7 +153,8 @@ mod imp {
         IStorageBookmarkFolder, IStorageFile, IStorageFolder, IStorageItem, IStorageProvider, OpenFilePickerResult,
         SaveFilePickerResult, WellKnownFolder,
     };
-    use ferroui_base::utilities::Uri;
+    use ferroui_system::task::oneshot;
+    use url::Url;
     use std::cell::RefCell;
     use std::io;
     use std::rc::Rc;
@@ -260,10 +259,9 @@ mod imp {
             Rc::new(Self { activity })
         }
 
-        fn try_get_file_from_path(&self, file_path: &Uri) -> Option<Rc<dyn IStorageFile>> {
-            // The text the path was created from: the URI of the system is parsed from what
-            // the caller gave.
-            let android_uri = parse_uri(file_path.original_string())?;
+        fn try_get_file_from_path(&self, file_path: &Url) -> Option<Rc<dyn IStorageFile>> {
+            // The text of the URL: the URI of the system is parsed from what the caller gave.
+            let android_uri = parse_uri(file_path.as_str())?;
             let android_uri_path = text_of(call_object(&android_uri, "getPath", "()Ljava/lang/String;", &[]))?;
 
             // About the READ_EXTERNAL_STORAGE permission:
@@ -305,8 +303,8 @@ mod imp {
             None
         }
 
-        fn try_get_folder_from_path(&self, folder_path: &Uri) -> Option<Rc<dyn IStorageFolder>> {
-            let android_uri = parse_uri(folder_path.original_string())?;
+        fn try_get_folder_from_path(&self, folder_path: &Url) -> Option<Rc<dyn IStorageFolder>> {
+            let android_uri = parse_uri(folder_path.as_str())?;
             let android_uri_path = text_of(call_object(&android_uri, "getPath", "()Ljava/lang/String;", &[]))?;
 
             if folder_path.scheme() == FILE_URI_SCHEME {
@@ -394,7 +392,10 @@ mod imp {
             picker_intent: Option<&JavaLocal>,
             single_result: bool,
         ) -> LocalBoxFuture<io::Result<Vec<AndroidUri>>> {
-            let (tcs, task) = Completion::<Option<JavaObject>>::new();
+            let (tcs, task) = oneshot::channel::<Option<JavaObject>>();
+            // The handler is called for every result of the activity: the first of its request
+            // takes the sender.
+            let tcs = RefCell::new(Some(tcs));
             let current_request_code = get_next_request_code();
 
             let Some(main_activity) = FerroActivity::from_java(&self.activity) else {
@@ -416,7 +417,10 @@ mod imp {
                         subscription.remove(&*main_activity);
                     }
 
-                    let _ = tcs.try_set_result(if result_code == RESULT_OK { data.cloned() } else { None });
+                    if let Some(tcs) = tcs.take() {
+                        // A pick whose wait was dropped does not want the result.
+                        let _ = tcs.send(if result_code == RESULT_OK { data.cloned() } else { None });
+                    }
                 })
             };
             *subscription.borrow_mut() = Some(add_activity_result(&*main_activity, on_activity_result));
@@ -432,7 +436,10 @@ mod imp {
 
             Box::pin(async move {
                 let mut result_list = Vec::with_capacity(1);
-                let result = task.await;
+                // Deviation (DEVIATIONS.md, Android platform): a handler that is dropped without a
+                // result (its activity is gone) is a canceled pick; the task of the reference would
+                // never complete.
+                let result = task.await.ok().flatten();
 
                 if let Some(result) = &result {
                     // ClipData first to avoid issue with multiple files selection.
@@ -503,9 +510,9 @@ mod imp {
         }
 
         /// # Panics
-        /// Panics when the path is not an absolute link with the scheme
-        /// `file` or `content` (the reference throws `ArgumentException`).
-        fn try_get_file_from_path_async(&self, file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
+        /// Panics when the path is not a link with the scheme `file` or
+        /// `content` (the reference throws `ArgumentException`).
+        fn try_get_file_from_path_async(&self, file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
             if !is_file_or_content_uri(file_path) {
                 panic!("File path is expected to be an absolute link with \"file\" or \"content\" scheme.");
             }
@@ -514,9 +521,9 @@ mod imp {
         }
 
         /// # Panics
-        /// Panics when the path is not an absolute link with the scheme
-        /// `file` or `content` (the reference throws `ArgumentException`).
-        fn try_get_folder_from_path_async(&self, folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
+        /// Panics when the path is not a link with the scheme `file` or
+        /// `content` (the reference throws `ArgumentException`).
+        fn try_get_folder_from_path_async(&self, folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
             if !is_file_or_content_uri(folder_path) {
                 panic!("Folder path is expected to be an absolute link with \"file\" or \"content\" scheme.");
             }
@@ -672,7 +679,7 @@ mod tests {
     // Not from the reference, which has no tests of the Android backend that run without a
     // device.
     use super::*;
-    use ferroui_base::utilities::UriKind;
+    use ferroui_base::platform::storage::file_io::StorageProviderHelpers;
 
     #[test]
     fn the_mime_type_of_every_file_is_any_type() {
@@ -681,14 +688,26 @@ mod tests {
 
     #[test]
     fn a_path_is_read_when_it_is_an_absolute_file_or_content_link() {
-        let uri = |text: &str, kind: UriKind| Uri::try_create(text, kind).expect("the text is a URI");
-        assert!(is_file_or_content_uri(&uri("file:///storage/emulated/0/Download/a.txt", UriKind::Absolute)));
-        assert!(is_file_or_content_uri(&uri(
-            "content://com.android.externalstorage.documents/tree/primary%3ADownload",
-            UriKind::Absolute
-        )));
-        assert!(!is_file_or_content_uri(&uri("https://example.org/a.txt", UriKind::Absolute)));
-        assert!(!is_file_or_content_uri(&uri("Download/a.txt", UriKind::Relative)));
+        let uri = |text: &str| Url::parse(text).expect("the text is a URL");
+        assert!(is_file_or_content_uri(&uri("file:///storage/emulated/0/Download/a.txt")));
+        assert!(is_file_or_content_uri(&uri("content://com.android.externalstorage.documents/tree/primary%3ADownload")));
+        assert!(!is_file_or_content_uri(&uri("https://example.org/a.txt")));
+        // A relative reference ("Download/a.txt") is no `Url`, so it cannot be passed.
+    }
+
+    #[test]
+    fn a_file_uri_converts_to_a_path_on_android() {
+        // The file URL of a path of the device, and the path back, with the storage helpers;
+        // a content link has no local path.
+        let url = StorageProviderHelpers::uri_from_file_path("/storage/emulated/0/Download/a b.txt", false);
+        assert_eq!("file:///storage/emulated/0/Download/a%20b.txt", url.as_str());
+        assert!(is_file_or_content_uri(&url));
+        assert_eq!(
+            Some("/storage/emulated/0/Download/a b.txt"),
+            StorageProviderHelpers::try_get_path_from_file_uri(Some(&url)).as_deref()
+        );
+        let content = Url::parse("content://com.android.externalstorage.documents/document/primary%3Aa.txt").unwrap();
+        assert_eq!(None, StorageProviderHelpers::try_get_path_from_file_uri(Some(&content)));
     }
 
     #[test]

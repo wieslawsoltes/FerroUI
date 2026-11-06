@@ -6,7 +6,7 @@ use crate::{ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::IAssetLoader;
-use ferroui_base::utilities::{CultureInfo, Uri, UriExtensions, UriKind};
+use ferroui_base::utilities::{CultureInfo, UriExtensions, UriRef};
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions};
 use std::rc::Rc;
 
@@ -14,15 +14,15 @@ use std::rc::Rc;
 /// which may be relative to the base URI of the document.
 pub struct BitmapTypeConverter;
 
-/// `s.StartsWith("/") ? new Uri(s, Relative) : new Uri(s, RelativeOrAbsolute)`.
-pub(crate) fn asset_uri(s: &str) -> Result<Uri, XamlLoadError> {
-    let kind = if s.starts_with('/') { UriKind::Relative } else { UriKind::RelativeOrAbsolute };
-    Uri::new(s, kind).map_err(|e| XamlLoadError::with_inner(e.to_string(), e))
+/// `s.StartsWith("/") ? new Uri(s, Relative) : new Uri(s, RelativeOrAbsolute)`: the
+/// rule of [`UriRef::parse`].
+pub(crate) fn asset_uri(s: &str) -> Result<UriRef, XamlLoadError> {
+    UriRef::parse(s).map_err(|e| XamlLoadError::with_inner(e.to_string(), e))
 }
 
-/// The path of an absolute file URI, `None` for every other URI.
-pub(crate) fn local_file_path(uri: &Uri) -> Option<String> {
-    (uri.is_absolute_uri() && uri.scheme() == "file").then(|| UriExtensions::get_unescape_absolute_path(uri))
+/// The path of an absolute file URL, `None` for every other reference.
+pub(crate) fn local_file_path(uri: &UriRef) -> Option<String> {
+    uri.as_url().filter(|url| url.scheme() == "file").map(UriExtensions::get_unescape_absolute_path)
 }
 
 fn io_error(e: std::io::Error) -> XamlLoadError {

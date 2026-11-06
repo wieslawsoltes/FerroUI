@@ -11,13 +11,15 @@ use crate::platform::storage::{
     ILauncher, IStorageFile, IStorageFolder, IStorageItem, IStorageProvider, NoopStorageProvider,
 };
 use crate::reactive::Disposable;
-use crate::utilities::{DateTimeOffset, Uri, UriKind};
+use crate::utilities::UriRef;
+use url::Url;
 use std::cell::{Cell, RefCell};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::task::{Context, Poll, Waker};
+use std::time::SystemTime;
 
 fn ready<T>(mut future: LocalBoxFuture<T>) -> T {
     match future.as_mut().poll(&mut Context::from_waker(Waker::noop())) {
@@ -138,11 +140,11 @@ fn files_are_read_and_written_and_report_their_properties() {
     write_all(&*file, "short");
     assert_eq!("short", read_all(&*file));
 
-    let now = DateTimeOffset::utc_now();
-    let is_recent = |date: Option<DateTimeOffset>| {
+    let now = SystemTime::now();
+    let is_recent = |date: Option<SystemTime>| {
         let date = date.expect("the file system reports the date");
-        let seconds = now.subtract_date_time_offset(date).ticks().abs() / 10_000_000;
-        seconds < 3600
+        let distance = now.duration_since(date).unwrap_or_else(|error| error.duration());
+        distance.as_secs() < 3600
     };
 
     let properties = ready(file.get_basic_properties_async());
@@ -177,12 +179,12 @@ fn items_know_their_name_path_parent_and_local_path() {
     assert_eq!(Some(file_path.to_str().unwrap()), item.try_get_local_path().as_deref());
 
     // The path is an escaped file URI, which gives the local path back.
-    let uri = file.path();
-    assert!(uri.is_absolute_uri());
+    let path = file.path();
+    let uri = path.as_url().expect("the path of a file is a URL");
     assert_eq!("file", uri.scheme());
-    assert!(uri.absolute_uri().ends_with("/my%20file%20%5B1%5D.txt"), "{uri}");
-    assert_eq!(file_path.to_str().unwrap(), uri.local_path());
-    assert!(folder.path().absolute_uri().ends_with("with%20space/"), "{}", folder.path());
+    assert!(uri.as_str().ends_with("/my%20file%20%5B1%5D.txt"), "{uri}");
+    assert_eq!(file_path.to_str().unwrap(), StorageProviderHelpers::local_path(uri));
+    assert!(folder.path().to_string().ends_with("with%20space/"), "{}", folder.path());
 
     let parent = ready(file.get_parent_async()).expect("a file has a parent folder");
     assert_eq!(folder.name(), parent.name());
@@ -203,7 +205,7 @@ fn the_root_directory_has_no_parent_and_a_relative_path() {
 
     assert_eq!("/", root.name());
     assert!(ready(root.get_parent_async()).is_none());
-    assert_eq!(Uri::new("/", UriKind::Relative).unwrap(), root.path());
+    assert_eq!(UriRef::Relative("/".into()), root.path());
 }
 
 #[test]
@@ -298,8 +300,10 @@ fn the_storage_provider_finds_files_and_folders_by_path() {
     assert!(ready(provider.try_get_folder_from_path_async(&folder_uri)).is_some());
     assert!(ready(provider.try_get_folder_from_path_async(&file_uri)).is_none());
     assert!(ready(provider.try_get_file_from_path_async(&folder_uri)).is_none());
-    let relative = Uri::new("100%.txt", UriKind::Relative).unwrap();
-    assert!(ready(provider.try_get_file_from_path_async(&relative)).is_none());
+    // A URL that names no entry (a relative reference cannot be passed: the path is a `Url`).
+    let missing = Url::parse("file:///missing-directory-of-the-test/100%25.txt").unwrap();
+    assert!(ready(provider.try_get_file_from_path_async(&missing)).is_none());
+    assert!(ready(provider.try_get_folder_from_path_async(&missing)).is_none());
 
     // By path, without going through a URI.
     assert!(ready(provider.try_get_file_from_path_str_async(file_path.to_str().unwrap())).is_some());
@@ -396,8 +400,6 @@ fn the_launcher_refuses_what_it_cannot_launch_without_starting_a_process() {
         }
     });
 
-    // A relative URI is not launched.
-    assert!(!ready(launcher.launch_uri_async(&Uri::new("page.html", UriKind::Relative).unwrap())));
     // A file the launcher may not open is not launched.
     let item: Rc<dyn IStorageItem> = file;
     assert!(!ready(launcher.launch_file_async(item)));
@@ -411,7 +413,7 @@ struct RecordingLauncher {
 }
 
 impl ILauncher for RecordingLauncher {
-    fn launch_uri_async(&self, _uri: &Uri) -> LocalBoxFuture<bool> {
+    fn launch_uri_async(&self, _uri: &Url) -> LocalBoxFuture<bool> {
         Box::pin(std::future::ready(false))
     }
 

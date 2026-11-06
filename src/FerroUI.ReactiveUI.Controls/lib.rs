@@ -5,8 +5,9 @@
 //! ReactiveUI.Binding and ReactiveUI.Primitives:
 //!
 //! - the scheduler of the user-interface thread, [`FerroScheduler`], which the application sets as
-//!   `RxSchedulers::main_thread_scheduler`, and [`FerroScheduler::install_on_ui_thread`], which
-//!   makes the dispatcher's synchronization context the context of the user-interface thread;
+//!   `RxSchedulers::main_thread_scheduler` (the dispatcher is the schedule of its thread, and of
+//!   its jobs, for the tasks and the reactive libraries; the deprecated
+//!   `FerroScheduler::install_on_ui_thread` installed its synchronization context);
 //! - the property observation of FerroUI objects ([`FerroObjectObservableForProperty`]), the
 //!   command binding of FerroUI controls ([`FerroCreatesCommandBinding`], with
 //!   [`ReactiveCommandAdapter`], a command of ReactiveUI as a command of FerroUI) and the view

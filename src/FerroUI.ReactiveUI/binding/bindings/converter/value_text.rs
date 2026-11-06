@@ -2,7 +2,6 @@
 //! and `Boolean.TryParse`, `Guid.ToString("D")` and `Guid.TryParse`, `TimeSpan.ToString()` and
 //! `TimeSpan.TryParse` with the invariant culture.
 
-use ferroui_splat::Guid;
 use std::time::Duration;
 use uuid::Uuid;
 
@@ -25,7 +24,7 @@ pub(crate) fn parse_bool(text: &str) -> Option<bool> {
 }
 
 /// `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` in lower case (`Guid.ToString("D")`).
-pub(crate) fn format_guid(value: Guid) -> String {
+pub(crate) fn format_guid(value: Uuid) -> String {
     value.to_string()
 }
 
@@ -61,16 +60,16 @@ fn parse_guid_x(text: &str) -> Option<u128> {
 /// An identifier in any of the formats of `Guid.TryParse`: `N` (32 digits), `D` (with hyphens),
 /// `B` (`D` in braces), `P` (`D` in parentheses) or `X` (the fields in hexadecimal), with white
 /// space around it. `N`, `D`, `B` and `P` are read by `uuid::Uuid`, the identifier type of the workspace.
-pub(crate) fn parse_guid(text: &str) -> Option<Guid> {
+pub(crate) fn parse_guid(text: &str) -> Option<Uuid> {
     let text = text.trim();
     let bytes = text.as_bytes();
     let digits = match bytes.len() {
         32 | 36 => text,
         38 if (bytes[0] == b'{' && bytes[37] == b'}') || (bytes[0] == b'(' && bytes[37] == b')') => &text[1..37],
-        _ if bytes.first() == Some(&b'{') => return parse_guid_x(text).map(Guid::from_u128),
+        _ if bytes.first() == Some(&b'{') => return parse_guid_x(text).map(Uuid::from_u128),
         _ => return None,
     };
-    Uuid::try_parse(digits).ok().map(Guid::from)
+    Uuid::try_parse(digits).ok()
 }
 
 const SECONDS_PER_DAY: u64 = 86_400;

@@ -476,6 +476,22 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for CompositorDrawingC
         }
     }
 
+    fn push_convolve_matrix_layer(&mut self, bounds: Rect, convolution: &crate::media::ConvolveMatrix) {
+        self.flush();
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => layers.push_convolve_matrix_layer(bounds, convolution),
+            None => self.inner.push_layer(bounds),
+        }
+    }
+
+    fn pop_convolve_matrix_layer(&mut self) {
+        self.flush();
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => layers.pop_convolve_matrix_layer(),
+            None => self.inner.pop_layer(),
+        }
+    }
+
     fn draw_lighting(&mut self, rect: Rect, lighting: &crate::platform::LightingParameters) -> bool {
         self.flush();
         self.inner.as_drawing_context_impl_with_layer_effects().is_some_and(|layers| layers.draw_lighting(rect, lighting))

@@ -20,7 +20,7 @@ use crate::{
     unbox_item, Border, Control, Grid, ItemsControl, ItemsSource, ListBox, ListBoxItem, Panel, RowDefinitions,
     ScrollViewer, SelectionMode, SplitView, SplitViewDisplayMode, TextBlock, VirtualizingStackPanel, Window,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::{BindingMode, IndexerBinding};
 use ferroui_base::input::platform::PlatformHotkeyConfiguration;
@@ -180,12 +180,12 @@ struct SizedItem {
 
 /// The global clock of the split view tests: never pulses.
 struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

@@ -8,9 +8,6 @@
 python3 scripts/winui-gallery/scan.py --winui-root ../microsoft-ui-xaml --gallery-root ../WinUI-Gallery
 python3 scripts/winui-gallery/scan.py --check --winui-root ../microsoft-ui-xaml --gallery-root ../WinUI-Gallery
 
-# The event-target table of the WinUI XAML importer, from the scanned API.
-python3 scripts/winui-gallery/event_targets.py --check
-
 python3 -m unittest discover -s scripts/winui-gallery -p 'test_*.py'
 ```
 
@@ -18,4 +15,4 @@ Committed (`docs/porting/winui-gallery/data/`): `sources.lock.json` (the two pin
 
 The page states come from `samples/WinUIGallery/port-status.json`: `pending`, `partial` or `ported`. A page cannot be `verified`, which would need a record of a test run (per-run evidence, O8).
 
-The workflow `.github/workflows/winui-gallery-scan.yml` checks out the pins, runs the tests, `scan.py --check` and `event_targets.py --check`, puts the report in the run summary and keeps the inventories as an artifact. On a pull request it runs for the paths of the scanner and fails on a stale report; at night it reports the drift that changes of the controls make, without failing.
+The workflow `.github/workflows/winui-gallery-scan.yml` checks out the pins, runs the tests and `scan.py --check`, puts the report in the run summary and keeps the inventories as an artifact. On a pull request it runs for the paths of the scanner and fails on a stale report; at night it reports the drift that changes of the controls make, without failing.

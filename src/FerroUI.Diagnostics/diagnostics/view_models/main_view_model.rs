@@ -140,7 +140,7 @@ pub struct MainViewModel {
     visual_tree: OnceCell<Rc<TreePageViewModel>>,
     events: Rc<EventsPageViewModel>,
     hot_keys: Rc<HotKeyPageViewModel>,
-    pointer_over_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    pointer_over_subscription: RefCell<Option<Subscription>>,
     keyboard_property_changed_subscription: RefCell<Option<Subscription>>,
     content: RefCell<Option<MainContent>>,
     selected_tab: Cell<i32>,
@@ -161,7 +161,7 @@ pub struct MainViewModel {
     show_implemented_interfaces: Cell<bool>,
     pinned_properties: Rc<RefCell<HashSet<String>>>,
     focus_highlighter: RefCell<Option<Rc<dyn IBrush>>>,
-    current_focus_highlight_adorner: RefCell<Option<Rc<dyn IDisposable>>>,
+    current_focus_highlight_adorner: RefCell<Option<Subscription>>,
     startup_screen_index: Cell<Option<i32>>,
     /// Addition of the port: the pages registered when the window was
     /// created.
@@ -304,7 +304,7 @@ impl MainViewModel {
                 None => Disposable::empty(),
             }
         };
-        *this.pointer_over_subscription.borrow_mut() = Some(pointer_over_subscription);
+        *this.pointer_over_subscription.borrow_mut() = Some(Subscription::new(pointer_over_subscription));
 
         this
     }
@@ -616,17 +616,11 @@ impl MainViewModel {
         if let Some(subscription) = self.keyboard_property_changed_subscription.borrow_mut().take() {
             subscription.dispose();
         }
-        let pointer_over_subscription = self.pointer_over_subscription.borrow().clone();
-        if let Some(pointer_over_subscription) = pointer_over_subscription {
-            pointer_over_subscription.dispose();
-        }
+        drop(self.pointer_over_subscription.take());
         self.combined_tree().dispose();
         self.logical_tree().dispose();
         self.visual_tree().dispose();
-        let current_focus_highlight_adorner = self.current_focus_highlight_adorner.borrow().clone();
-        if let Some(current_focus_highlight_adorner) = current_focus_highlight_adorner {
-            current_focus_highlight_adorner.dispose();
-        }
+        drop(self.current_focus_highlight_adorner.take());
         if let Some(renderer) = self.try_get_renderer() {
             renderer.diagnostics().set_debug_overlays(RendererDebugOverlays::NONE);
         }
@@ -642,7 +636,7 @@ impl MainViewModel {
         if let (Some(brush), Some(input)) = (self.focus_highlighter(), element) {
             if !DevTools::does_belong_to_dev_tool(&input) {
                 let adorner = ControlHighlightAdorner::add(&input, brush);
-                *self.current_focus_highlight_adorner.borrow_mut() = adorner;
+                *self.current_focus_highlight_adorner.borrow_mut() = adorner.map(Subscription::new);
             }
         }
     }
@@ -694,15 +688,18 @@ impl MainViewModel {
             // `async void`: the screenshot is taken on the dispatcher; a failure is written to
             // the debug output.
             let take = screenshot_handler.take(&control);
-            let _ = Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                if let Err(ex) = take.await {
-                    if cfg!(debug_assertions) {
-                        // `Debug.WriteLine` of upstream: written in debug builds only.
-                        eprintln!("{ex}");
+            let _ = Dispatcher::ui_thread().spawn_local_with_priority(
+                async move {
+                    if let Err(ex) = take.await {
+                        if cfg!(debug_assertions) {
+                            // `Debug.WriteLine` of upstream: written in debug builds only.
+                            eprintln!("{ex}");
+                        }
+                        //TODO: Notify error
                     }
-                    //TODO: Notify error
-                }
-            });
+                },
+                DispatcherPriority::DEFAULT,
+            );
         }
     }
 

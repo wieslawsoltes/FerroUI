@@ -13,13 +13,13 @@
 use crate::dbus_call_queue::{DBusCallError, DBusCallQueue, DBusResult};
 use crate::event::Event;
 use crate::ix11_input_method::{IX11InputMethodControl, IX11InputMethodFactory, X11InputMethodForwardedKey};
-use crate::signal_watch::CancellationFlag;
+use crate::signal_watch::run_until_cancelled;
 use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions};
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
 use ferroui_base::{PixelPoint, PixelRect, PixelVector, Rect};
 use ferroui_controls::Application;
 use futures_util::StreamExt;
@@ -92,12 +92,12 @@ pub trait DBusTextInputMethodCore {
 pub struct DBusTextInputMethodBase {
     weak_self: Weak<DBusTextInputMethodBase>,
     core: Rc<dyn DBusTextInputMethodCore>,
-    disposables: RefCell<Vec<Rc<dyn IDisposable>>>,
+    disposables: RefCell<Vec<Subscription>>,
     /// The names that came online, each with the unique name of the owner it came with.
     online_names_queue: RefCell<VecDeque<(String, String)>>,
     connection: Connection,
     known_names: Vec<String>,
-    watch_cts: RefCell<Option<CancellationFlag>>,
+    watch_cts: RefCell<Option<CancellationToken>>,
     connecting: Cell<bool>,
     /// The name and owner a connect is in progress for.
     connecting_owner: RefCell<Option<(String, String)>>,
@@ -159,7 +159,7 @@ impl DBusSignalGuard {
 /// Runs an `async void` of the reference: a task of the UI dispatcher
 /// nobody waits for.
 fn spawn(future: impl Future<Output = ()> + 'static) {
-    drop(Dispatcher::ui_thread().invoke_async_task_local(move || future));
+    drop(Dispatcher::ui_thread().spawn_local_with_priority(future, DispatcherPriority::DEFAULT));
 }
 
 fn log_error(area: &'static str, message: &str) {
@@ -240,7 +240,7 @@ impl DBusTextInputMethodBase {
     }
 
     fn watch_async(&self) {
-        let cancellation_token = CancellationFlag::new();
+        let cancellation_token = CancellationToken::new();
         *self.watch_cts.borrow_mut() = Some(cancellation_token.clone());
         for name in &self.known_names {
             spawn(Self::watch_name_async(
@@ -261,7 +261,7 @@ impl DBusTextInputMethodBase {
         this: Weak<Self>,
         connection: Connection,
         name: String,
-        cancellation_token: CancellationFlag,
+        cancellation_token: CancellationToken,
     ) {
         let on_owner_changed = |owner: Option<String>| {
             if let Some(this) = this.upgrade() {
@@ -284,8 +284,8 @@ impl DBusTextInputMethodBase {
             };
             on_owner_changed(owner);
 
-            while !cancellation_token.is_cancellation_requested() {
-                let Some(Some(signal)) = cancellation_token.run(changes.next()).await else {
+            while !cancellation_token.is_cancelled() {
+                let Some(Some(signal)) = run_until_cancelled(&cancellation_token, changes.next()).await else {
                     break;
                 };
                 let args = signal.args()?;
@@ -295,8 +295,8 @@ impl DBusTextInputMethodBase {
             Ok::<(), zbus::Error>(())
         };
 
-        if let Some(Err(e)) = cancellation_token.run(watch).await {
-            if !cancellation_token.is_cancellation_requested() {
+        if let Some(Err(e)) = run_until_cancelled(&cancellation_token, watch).await {
+            if !cancellation_token.is_cancelled() {
                 log_error(LogArea::FREE_DESKTOP_PLATFORM, &format!("WatchNameOwner for '{name}' failed: {e}"));
             }
         }
@@ -408,10 +408,7 @@ impl DBusTextInputMethodBase {
     }
 
     fn dispose_disposables(&self) {
-        let disposables = std::mem::take(&mut *self.disposables.borrow_mut());
-        for s in disposables {
-            s.dispose();
-        }
+        drop(self.disposables.take());
     }
 
     /// `Reset` of the reference: the part of the input method, then the
@@ -453,7 +450,7 @@ impl DBusTextInputMethodBase {
         if self.disposed.get() {
             d.dispose();
         } else {
-            self.disposables.borrow_mut().push(d);
+            self.disposables.borrow_mut().push(Subscription::new(d));
         }
     }
 
@@ -597,7 +594,8 @@ impl IX11InputMethodControl for DBusTextInputMethodBase {
             return;
         }
         self.retire_connection();
-        if let Some(watch_cts) = self.watch_cts.borrow().as_ref() {
+        let watch_cts = self.watch_cts.borrow().clone();
+        if let Some(watch_cts) = watch_cts {
             watch_cts.cancel();
         }
         self.dispose_disposables();

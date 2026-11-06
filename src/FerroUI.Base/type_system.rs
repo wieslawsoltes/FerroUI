@@ -635,6 +635,18 @@ pub trait Subclassable<T>: ObjectType {
     fn build_vtable() -> Self::VTable;
 }
 
+/// Initialises a class table through the common callback type for its layout.
+///
+/// The accessor keeps its initialized read inline. This slow path specializes
+/// on the table type, rather than on each class's distinct builder function
+/// item. `OnceLock` retains its synchronization and retry-after-panic behavior.
+#[doc(hidden)]
+#[cold]
+#[inline(never)]
+pub fn __init_vtable<V: 'static>(cell: &'static std::sync::OnceLock<V>, initialize: fn() -> V) -> &'static V {
+    cell.get_or_init(initialize)
+}
+
 /// Reinterprets a reference to base class data as a reference to the derived
 /// class `T`.
 ///
@@ -1156,7 +1168,13 @@ macro_rules! ferro_class {
             fn vtable() -> &'static Self::VTable {
                 static VTABLE: ::std::sync::OnceLock<<$base as $crate::ObjectType>::VTable> =
                     ::std::sync::OnceLock::new();
-                VTABLE.get_or_init(<$name as $crate::Subclassable<$name>>::build_vtable)
+                match VTABLE.get() {
+                    ::std::option::Option::Some(table) => table,
+                    ::std::option::Option::None => $crate::__init_vtable(
+                        &VTABLE,
+                        <$name as $crate::Subclassable<$name>>::build_vtable as fn() -> Self::VTable,
+                    ),
+                }
             }
 
             $crate::ferro_class!(@register_class $name: $base);
@@ -1201,7 +1219,13 @@ macro_rules! ferro_class {
 
                 fn vtable() -> &'static Self::VTable {
                     static VTABLE: ::std::sync::OnceLock<[<$name VTable>]> = ::std::sync::OnceLock::new();
-                    VTABLE.get_or_init(<$name as $crate::Subclassable<$name>>::build_vtable)
+                    match VTABLE.get() {
+                        ::std::option::Option::Some(table) => table,
+                        ::std::option::Option::None => $crate::__init_vtable(
+                            &VTABLE,
+                            <$name as $crate::Subclassable<$name>>::build_vtable as fn() -> Self::VTable,
+                        ),
+                    }
                 }
 
                 $crate::ferro_class!(@register_class $name: $base);
@@ -1353,7 +1377,7 @@ macro_rules! ferro_class_info {
         impl $name {
             #[doc(hidden)]
             pub const __INTERFACES: &'static [$crate::metadata::TypeOf] =
-                &[$(|| $crate::data::core::ValueType::of::<$interface>()),*];
+                &[$($crate::data::core::ValueType::of::<$interface>),*];
 
             #[doc(hidden)]
             pub fn __register_interfaces() {
@@ -1380,8 +1404,8 @@ macro_rules! ferro_class_info {
                         ::std::module_path!(),
                     );
                     markup.handles = &[
-                        || $crate::data::core::ValueType::of::<$crate::Ref<$name>>(),
-                        || $crate::data::core::ValueType::of::<::std::option::Option<$crate::Ref<$name>>>(),
+                        $crate::data::core::ValueType::of::<$crate::Ref<$name>>,
+                        $crate::data::core::ValueType::of::<::std::option::Option<$crate::Ref<$name>>>,
                     ];
                     markup.type_info = ::std::option::Option::Some(|| <$name as $crate::StaticType>::TYPE);
                     markup.interfaces = {
@@ -1390,8 +1414,8 @@ macro_rules! ferro_class_info {
                         <$name>::__INTERFACES
                     };
                     $crate::__ferro_compiler_metadata!(
-                        markup.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
-                        markup.value = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
+                        markup.this = ::std::option::Option::Some($crate::data::core::ValueType::of::<$crate::Ref<$name>>);
+                        markup.value = ::std::option::Option::Some($crate::data::core::ValueType::of::<$crate::Ref<$name>>);
                     );
                     $crate::__ferro_markup_items!(markup, $crate::Ref<$name>; $($body)*);
                     markup

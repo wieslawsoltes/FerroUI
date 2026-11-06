@@ -11,7 +11,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::layout::{Layoutable, LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::text_formatting::ShapedTextRun;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, FerroObjectImplExt,
@@ -52,7 +52,7 @@ pub struct TextSelectionHandleCanvas {
     text_box: RefCell<Option<WeakRef<TextBox>>>,
     subscriptions: RefCell<Option<PresenterSubscriptions>>,
     show_handle: Cell<bool>,
-    show_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    show_disposable: RefCell<Option<Subscription>>,
     layout_listener: PresenterVisualListener,
     saved_selection_start: Cell<Option<i32>>,
     save_selection_end: Cell<Option<i32>>,
@@ -373,16 +373,12 @@ impl TextSelectionHandleCanvas {
                     move || {
                         if let Some(this) = weak.upgrade() {
                             this.set_show_handles(false);
-                            let show_disposable = this.show_disposable.borrow().clone();
-                            if let Some(show_disposable) = show_disposable {
-                                show_disposable.dispose();
-                            }
+                            drop(this.show_disposable.take());
                         }
                     },
                     Duration::from_secs(5),
                     DispatcherPriority::BACKGROUND,
-                )
-                .detach();
+                );
                 *self.show_disposable.borrow_mut() = Some(show_disposable);
             }
         }
@@ -861,7 +857,7 @@ impl TextSelectionHandleCanvas {
 struct PresenterVisualListener {
     presenter: RefCell<Option<WeakRef<TextPresenter>>>,
     invalidated: RefCell<Option<Rc<dyn Fn()>>>,
-    disposables: RefCell<Option<Vec<Rc<dyn IDisposable>>>>,
+    disposables: RefCell<Option<Vec<Subscription>>>,
 }
 
 impl PresenterVisualListener {
@@ -891,7 +887,7 @@ impl PresenterVisualListener {
         *self.disposables.borrow_mut() = Some(disposables);
     }
 
-    fn attach_events(&self, visual: &Ref<Visual>, disposables: &mut Vec<Rc<dyn IDisposable>>) {
+    fn attach_events(&self, visual: &Ref<Visual>, disposables: &mut Vec<Subscription>) {
         let invalidated = self.invalidated.borrow().clone();
         let on_invalidated = move || {
             if let Some(invalidated) = &invalidated {
@@ -901,24 +897,21 @@ impl PresenterVisualListener {
 
         if let Some(layoutable) = visual.cast::<Layoutable>() {
             let on_invalidated = on_invalidated.clone();
-            disposables.push(layoutable.effective_viewport_changed(move |_| on_invalidated()).detach());
+            disposables.push(layoutable.effective_viewport_changed(move |_| on_invalidated()));
         }
         if let Some(control) = visual.cast::<Control>() {
             let token = control.size_changed(move |_, _| on_invalidated());
             let control = control.downgrade();
-            disposables.push(Disposable::create(move || {
+            disposables.push(Subscription::new(Disposable::create(move || {
                 if let Some(control) = control.upgrade() {
                     control.remove_handler(Control::size_changed_event(), token);
                 }
-            }));
+            })));
         }
     }
 
     fn dispose_all(&self) {
-        let disposables = self.disposables.take();
-        for disposable in disposables.into_iter().flatten() {
-            disposable.dispose();
-        }
+        drop(self.disposables.take());
     }
 
     fn detach(&self) {

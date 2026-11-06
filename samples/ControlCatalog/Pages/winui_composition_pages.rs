@@ -6,7 +6,8 @@
 //! (visuals, brushes, animations, shadows and lights, the interaction tracker, effect brushes),
 //! `winui_composition_phase7.rs` (alpha mask shadows, `ThemeShadow`, zoom) and
 //! `winui_materials_page.rs` (acrylic, blend and colour effects, lights, Reveal, system backdrops,
-//! menus).
+//! menus). The custom effects of `Visual.Effect` (#455) have a section of their own
+//! (`custom_effects_pages.rs`).
 //!
 //! The headers here are the ones of the entries of the page list
 //! (`ViewModels/main_window_view_model_page_list.rs`).

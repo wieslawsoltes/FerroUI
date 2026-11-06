@@ -5,7 +5,7 @@
 use crate::leak::Tracked;
 use crate::services::{collect_garbage_loaded, styled_window, MockGlobalClock};
 use ferroui_base::animation::{
-    Animatable, DoubleTransition, ITransition, TimeSpan, TransformOperationsTransition, Transitions,
+    Animatable, DoubleTransition, ITransition, SignedDuration, TransformOperationsTransition, Transitions,
 };
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::styling::{ControlTheme, Setter};
@@ -20,7 +20,7 @@ use std::rc::Rc;
 fn theme_with_shared_transitions() -> Ref<ControlTheme> {
     let transition: Rc<dyn ITransition> = TransformOperationsTransition::with_property(
         Visual::render_transform_property().as_property(),
-        TimeSpan::from_seconds(0.750),
+        SignedDuration::from_seconds(0.750),
     )
     .into();
     let shared_transitions = Transitions::from_items([transition]);
@@ -47,7 +47,7 @@ fn transition_on_styled_property_is_freed() {
 
     let transition_instance = {
         let opacity_transition: Rc<dyn ITransition> =
-            DoubleTransition::with_property(Visual::opacity_property().as_property(), TimeSpan::from_seconds(1.0)).into();
+            DoubleTransition::with_property(Visual::opacity_property().as_property(), SignedDuration::from_seconds(1.0)).into();
 
         let border = Border::new();
         border.set_transitions(Some(Transitions::from_items([opacity_transition.clone()])));
@@ -57,15 +57,15 @@ fn transition_on_styled_property_is_freed() {
 
         border.set_opacity(0.0);
 
-        clock.pulse(TimeSpan::from_seconds(0.0));
-        clock.pulse(TimeSpan::from_seconds(0.5));
+        clock.pulse(SignedDuration::from_seconds(0.0));
+        clock.pulse(SignedDuration::from_seconds(0.5));
 
         assert_eq!(0.5, border.opacity());
 
         let transition_instance =
             border.try_get_transition_instance(&opacity_transition).expect("the transition has an instance while it runs");
 
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::from_seconds(1.0));
 
         assert_eq!(0.0, border.opacity());
 

@@ -14,10 +14,14 @@ categories.workspace = true
 [lib]
 path = "lib.rs"
 
-# A leaf library, as the upstream project: nothing of the framework and no
-# external crate. The two key enumerations are compiled in from the sources of
-# the base library (see `lib.rs`), as the upstream project file does.
+# A leaf library, as the upstream project: nothing of the framework, only the
+# port of the runtime library's types the upstream project uses
+# (`ferroui-system`: the one-shot channel behind `Task` and
+# `TaskCompletionSource`) and `uuid` for `Guid`. The two key enumerations are
+# compiled in from the sources of the base library (see `lib.rs`), as the
+# upstream project file does.
 [dependencies]
+ferroui-system = { workspace = true }
 uuid = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).

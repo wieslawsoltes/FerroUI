@@ -656,25 +656,24 @@ pub fn class_document_group(
     documents: &[(&str, &str)],
     class_document: &str,
 ) -> Result<Vec<(String, String, Option<String>)>, String> {
-    use ferroui_base::utilities::{Uri, UriKind};
-    let mut uris: Vec<Uri> = Vec::with_capacity(documents.len());
+    use ferroui_base::utilities::UriRef;
+    // The URL of each document, and the documents its includes resolve to, as the run-time
+    // loader finds them (`FerroRuntimeXamlLoader::document_group_without`).
+    let mut uris: Vec<url::Url> = Vec::with_capacity(documents.len());
     for (name, _) in documents {
         let text = format!("{root_uri}{name}");
-        uris.push(Uri::new(&text, UriKind::Absolute).map_err(|e| format!("The URI '{text}' of the XAML document {name} is invalid: {e}"))?);
+        uris.push(UriRef::parse_absolute(&text).map_err(|e| format!("The URI '{text}' of the XAML document {name} is invalid: {e}"))?);
     }
     let start = documents
         .iter()
         .position(|(name, _)| *name == class_document)
         .ok_or_else(|| format!("the document `{class_document}` of the class is not a document of the group"))?;
     // The documents in the order they are found; a document is found once.
-    fn collect(documents: &[(&str, &str)], uris: &[Uri], index: usize, found: &mut Vec<usize>) {
+    fn collect(documents: &[(&str, &str)], uris: &[url::Url], index: usize, found: &mut Vec<usize>) {
         for source in crate::back_end::include_sources(documents[index].1) {
-            let Some(relative) = Uri::try_create(&source, UriKind::RelativeOrAbsolute) else { continue };
-            let included = match relative.is_absolute_uri() {
-                true => relative,
-                false => Uri::combine(&uris[index], &relative),
-            };
-            let Some(next) = uris.iter().position(|uri| uri.absolute_uri() == included.absolute_uri()) else { continue };
+            let Ok(reference) = UriRef::parse(&source) else { continue };
+            let Ok(included) = reference.resolve(&uris[index]) else { continue };
+            let Some(next) = uris.iter().position(|uri| uri.as_str() == included.as_str()) else { continue };
             if found.contains(&next) {
                 continue;
             }
@@ -686,7 +685,7 @@ pub fn class_document_group(
     collect(documents, &uris, start, &mut found);
     Ok(found
         .into_iter()
-        .map(|index| (uris[index].absolute_path().trim_start_matches('/').to_string(), documents[index].1.to_string(), Some(uris[index].to_string())))
+        .map(|index| (uris[index].path().trim_start_matches('/').to_string(), documents[index].1.to_string(), Some(uris[index].to_string())))
         .collect())
 }
 
@@ -779,6 +778,9 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
     let mut sources = Vec::with_capacity(documents.len());
     let mut not_eligible = Vec::new();
     let mut emitted: Vec<usize> = Vec::new();
+    // Whether the document of the class uses `{x:Bind}`: the class then gets the accessor of the
+    // bindings of its root (`bindings()`, docs/porting/x-bind.md, section 6).
+    let mut class_uses_x_bind = false;
     let loadable: Vec<usize> =
         (1..documents.len()).filter(|index| public[*index] && has_build[*index]).collect();
     let mut pending: Vec<usize> = loadable.iter().rev().copied().collect();
@@ -810,7 +812,12 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
             &functions,
             populate,
         ) {
-            Ok(source) => sources.push(source),
+            Ok(source) => {
+                if index == 0 && source.contains(X_BIND_EXTENSION_PATH) {
+                    class_uses_x_bind = true;
+                }
+                sources.push(source)
+            }
             Err(reason) => not_eligible.push(format!("{}: {reason}", document.0)),
         }
         // A question the type system of the host could not answer: the document is
@@ -868,6 +875,10 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
     source.push_str("        ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);\n");
     source.push_str(&format!("    {}(::core::option::Option::Some(service_provider), root)\n", names[0]));
     source.push_str("}\n");
+    if class_uses_x_bind {
+        source.push('\n');
+        source.push_str(&x_bind_accessor(class_path));
+    }
     for function in &sources {
         source.push('\n');
         source.push_str(function);
@@ -910,6 +921,27 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         crate_name: own_crate.to_string(),
         documents: exported,
     })
+}
+
+/// The path generated code creates an `{x:Bind}` with: a document whose code names it uses
+/// `x:Bind`.
+const X_BIND_EXTENSION_PATH: &str = "::ferroui_markup_xaml::markup_extensions::XBindExtension::";
+
+/// The accessor of the `{x:Bind}` bindings of a class whose document uses `x:Bind` (step X7 of
+/// #525, docs/porting/x-bind.md, section 6): `MyPage::bindings()`, WinUI's `this.Bindings`, over
+/// `XBindings::get_for_root`. It is an inherent method of the class, in the crate of the class,
+/// as the file is a module of that crate.
+fn x_bind_accessor(class_path: &str) -> String {
+    let mut source = String::new();
+    source.push_str(&format!("impl ::{} {{\n", class_path.trim_start_matches("::")));
+    source.push_str("    /// The `{x:Bind}` bindings of the root of the document of this class (WinUI's\n");
+    source.push_str("    /// `this.Bindings`): `initialize`, `update` and `stop_tracking`. `None` until the document\n");
+    source.push_str("    /// has populated the instance, or when it has no `x:Bind` of its root.\n");
+    source.push_str("    pub fn bindings(&self) -> ::core::option::Option<::std::rc::Rc<::ferroui_markup_xaml::markup_extensions::XBindings>> {\n");
+    source.push_str("        ::ferroui_markup_xaml::markup_extensions::XBindings::get_for_root(self)\n");
+    source.push_str("    }\n");
+    source.push_str("}\n");
+    source
 }
 
 /// The generated file of the documents of a class ([`generate_class_file`]).

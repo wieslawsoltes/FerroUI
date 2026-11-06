@@ -12,7 +12,7 @@ use ferroui_base::data::core::ValueTypes;
 use ferroui_base::diagnostics::FerroObjectDiagnosticExtensions as _;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::styling::{IStyle, Styles};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, Ref, StyledElement};
 use ferroui_controls::{Application, Control, Window};
 use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
@@ -23,7 +23,7 @@ use std::rc::Rc;
 fn document(sample: &Sample, xaml: &str, path: Option<&str>) -> Result<RuntimeXamlLoaderDocument, XamlLoadError> {
     let mut document = RuntimeXamlLoaderDocument::new(xaml);
     if let Some(path) = path {
-        let uri = Uri::absolute(&sample.document_uri(path))
+        let uri = UriRef::parse_absolute(&sample.document_uri(path))
             .map_err(|e| XamlLoadError::with_message(format!("Invalid document URI for {path}: {e}")))?;
         document.base_uri = Some(uri);
         document.document = Some(path.trim_start_matches('/').to_string());

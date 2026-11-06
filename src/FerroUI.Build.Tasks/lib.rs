@@ -152,17 +152,34 @@
 //! ```ignore
 //! println!("cargo::metadata=xamlmeta={}/compiled_xaml.xamlmeta", env!("CARGO_MANIFEST_DIR"));
 //! ```
+//!
+//! # The GLSL of the runtime shader effects
+//!
+//! [`shader_effects`] translates the WGSL module of a custom effect that is a
+//! runtime shader into GLSL ES 3.0 at build time, for the WebGL2 renderer of
+//! the browser, which has no WGSL compiler (decision 2 of
+//! docs/porting/custom-effects.md): [`write_shader_effect_glsl`] writes
+//! `$OUT_DIR/shader_effects/<name>.vert.glsl` and `.frag.glsl` from a build
+//! script. It is behind the feature `shader-effects`, so that a build script
+//! that only compiles markup does not build the translator.
 
 #![forbid(unsafe_code)]
 
 pub mod deterministic_id_generator;
 mod diagnostics;
+#[cfg(feature = "shader-effects")]
+pub mod shader_effects;
 // The model, the scanner and the export are the crate the framework crates scan themselves
 // with (`ferroui-build-scan`, which links nothing of the framework); they are exported
 // here under the names they had in this crate.
 pub use ferroui_build_scan::{call_forms, export, model, model_set, scanner};
 pub mod type_system;
 pub mod xaml_compiler_diagnostics_filter;
+#[cfg(feature = "shader-effects")]
+pub use shader_effects::{
+    shader_effect_glsl, translate_shader_effect_module, write_shader_effect_glsl, write_shader_effect_glsl_to,
+    ShaderEffectGlsl, ShaderEffectGlslError, ShaderEffectGlslFiles,
+};
 
 use std::env;
 use std::fs;
@@ -345,7 +362,10 @@ impl Build {
     }
 
     /// Emits source metadata when enabled and the target has debug assertions enabled.
-    /// Requires Cargo 1.93 or newer to detect the target profile configuration.
+    /// Cargo 1.93 and later state the target profile configuration; with older Cargo the
+    /// root of the profile (`PROFILE`, else `OPT_LEVEL`) decides, and an explicit
+    /// `-C debug-assertions` rustflag wins on every version. The build fails when the
+    /// configuration cannot be determined.
     pub fn hot_reload_manifest(mut self, enabled: bool) -> Self {
         self.hot_reload = enabled;
         self
@@ -526,6 +546,16 @@ impl Build {
             return Outcome { lines, errors };
         }
 
+        // Whether the build writes the hot-reload manifest: requested and a target with debug
+        // assertions; an error when the target configuration cannot be determined.
+        let hot_reload = match hot_reload_profile::enabled(self.hot_reload) {
+            Ok(enabled) => enabled,
+            Err(error) => {
+                errors.push(error);
+                return Outcome { lines, errors };
+            }
+        };
+
         // 1. The compiled markup and the type models of the dependencies.
         let mut report = ScanReport { crate_name: self.crate_name.clone(), ..ScanReport::default() };
         let started = Instant::now();
@@ -539,7 +569,7 @@ impl Build {
         report.read_dependencies = started.elapsed();
         report.dependency_files = dependency_files.len();
         report.dependency_models = models.len();
-        let mut manifest_models = if hot_reload_profile::enabled(self.hot_reload) {
+        let mut manifest_models = if hot_reload {
             models.clone()
         } else {
             Vec::new()
@@ -623,7 +653,7 @@ impl Build {
             let _ = assembly;
         }
 
-        if hot_reload_profile::enabled(self.hot_reload) {
+        if hot_reload {
             if let Some(model) = &model {
                 let mut own = model.clone();
                 own.name = assembly_name.clone();

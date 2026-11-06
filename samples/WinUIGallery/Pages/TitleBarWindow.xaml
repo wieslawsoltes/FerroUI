@@ -1,0 +1,54 @@
+<!-- Ported from TitleBarWindow.xaml of the pinned WinUI Gallery (14061eea,
+     SampleSupport/SamplePages); see ../NOTICE.md. The content of the sample window; the window
+     (its Mica backdrop, ExtendsContentIntoTitleBar) and the handlers are in Rust
+     (window_samples.rs); IsBackButtonVisible keeps the source's x:Bind to the frame's CanGoBack,
+     compiled by the x:Bind core (#525). The ImageIconSource is a PathIconSource and the PersonPicture a composed circle
+     with the initials. The pages of the frame are the NavigationView sample pages of the
+     gallery. -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      x:Name="TitleBarWindowRoot" RowDefinitions="Auto,*">
+  <TitleBar x:Name="titleBar" Title="WinUI Gallery" Subtitle="TitleBar sample"
+            IsBackButtonVisible="{x:Bind navFrame.CanGoBack, Mode=OneWay}"
+            IsPaneToggleButtonVisible="True">
+    <TitleBar.Resources>
+      <!-- Make TitleBar.Content stretch (default is Center). -->
+      <HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment>
+    </TitleBar.Resources>
+    <TitleBar.IconSource>
+      <PathIconSource Data="M2,2 L14,2 L14,14 L2,14 Z M5,5 L5,11 L11,11 L11,5 Z" />
+    </TitleBar.IconSource>
+    <TitleBar.RightHeader>
+      <Border Width="30" Height="30" CornerRadius="15"
+              Background="{DynamicResource ControlAltFillColorQuarternaryBrush}"
+              AutomationProperties.Name="JD">
+        <TextBlock Text="JD" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+    </TitleBar.RightHeader>
+    <TitleBar.Content>
+      <AutoSuggestBox MaxWidth="580" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      PlaceholderText="Search...">
+        <AutoSuggestBox.QueryIcon><SymbolIcon Symbol="Find" /></AutoSuggestBox.QueryIcon>
+      </AutoSuggestBox>
+    </TitleBar.Content>
+  </TitleBar>
+  <NavigationView x:Name="navView" Grid.Row="1"
+                  IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="False"
+                  IsSettingsVisible="False">
+    <NavigationView.MenuItems>
+      <NavigationViewItem Content="Menu Item1" Tag="SamplePage1">
+        <NavigationViewItem.Icon><SymbolIcon Symbol="Play" /></NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Menu Item2" Tag="SamplePage2">
+        <NavigationViewItem.Icon><SymbolIcon Symbol="Save" /></NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Menu Item3" Tag="SamplePage3">
+        <NavigationViewItem.Icon><SymbolIcon Symbol="Refresh" /></NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Menu Item4" Tag="SamplePage4">
+        <NavigationViewItem.Icon><SymbolIcon Symbol="Download" /></NavigationViewItem.Icon>
+      </NavigationViewItem>
+    </NavigationView.MenuItems>
+    <Frame x:Name="navFrame" />
+  </NavigationView>
+</Grid>

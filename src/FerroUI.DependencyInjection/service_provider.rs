@@ -5,7 +5,8 @@
 //! `ServiceLookup/CallSiteRuntimeResolver.cs` and `ServiceLookup/ServiceProviderEngineScope.cs`.
 
 use crate::*;
-use ferroui_system::{threading::tasks::Task, IDisposable};
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::rc::{Rc, Weak};
@@ -196,13 +197,13 @@ impl AsyncServiceScope {
     pub fn dispose(&self) -> ServiceResult<()> {
         self.scope.dispose_scope()
     }
-    pub fn dispose_async(&self) -> Task<()> {
+    pub fn dispose_async(&self) -> DisposeTask {
         if let Some(scope) = self.scope.async_disposable() {
             scope.dispose_async()
         } else {
             match self.scope.dispose_scope() {
-                Ok(()) => Task::from_result(()),
-                Err(error) => Task::from_exception(Rc::new(error)),
+                Ok(()) => Shared::ready(Ok(())),
+                Err(error) => Shared::ready(Err(Rc::new(error) as ObservableError)),
             }
         }
     }
@@ -213,7 +214,7 @@ impl IDisposable for AsyncServiceScope {
     }
 }
 impl IAsyncDisposable for AsyncServiceScope {
-    fn dispose_async(&self) -> Task<()> {
+    fn dispose_async(&self) -> DisposeTask {
         self.dispose_async()
     }
 }
@@ -246,7 +247,7 @@ impl ServiceScope {
     pub fn dispose(&self) -> ServiceResult<()> {
         self.provider.dispose()
     }
-    pub fn dispose_async(&self) -> Task<()> {
+    pub fn dispose_async(&self) -> DisposeTask {
         self.provider.dispose_async()
     }
 }
@@ -256,7 +257,7 @@ impl IDisposable for ServiceScope {
     }
 }
 impl IAsyncDisposable for ServiceScope {
-    fn dispose_async(&self) -> Task<()> {
+    fn dispose_async(&self) -> DisposeTask {
         self.dispose_async()
     }
 }
@@ -684,23 +685,24 @@ impl ServiceProvider {
         drop(cache);
         Ok(())
     }
-    pub fn dispose_async(&self) -> Task<()> {
+    pub fn dispose_async(&self) -> DisposeTask {
         if self.scope.disposed.replace(true) {
-            return Task::from_result(());
+            return Shared::ready(Ok(()));
         }
         let disposables = std::mem::take(&mut *self.scope.disposables.borrow_mut());
         let cache = std::mem::take(&mut *self.scope.cache.borrow_mut());
-        Task::spawn_local(async move {
+        ferroui_system::task::spawn_local(async move {
             for captured in disposables.into_iter().rev() {
                 if let Some(dispose) = captured.dispose_async {
-                    dispose(&captured.value).await?;
+                    dispose(&captured.value).flatten().await?;
                 } else if let Some(dispose) = captured.dispose {
                     dispose(&captured.value);
                 }
             }
             drop(cache);
-            Ok(())
+            Ok::<(), ObservableError>(())
         })
+        .shared()
     }
 }
 impl IServiceProvider for ServiceProvider {
@@ -773,7 +775,7 @@ impl IDisposable for ServiceProvider {
     }
 }
 impl IAsyncDisposable for ServiceProvider {
-    fn dispose_async(&self) -> Task<()> {
+    fn dispose_async(&self) -> DisposeTask {
         self.dispose_async()
     }
 }

@@ -11,8 +11,8 @@ use std::rc::Rc;
 /// cancellation of the token disposes the subscription. A terminal notification removes the
 /// registration (the resource of the safe observer), not the subscription.
 pub(crate) fn subscribe_with_token<T: 'static>(source: Rc<dyn IObservable<T>>, observer: Rc<dyn IObserver<T>>, token: CancellationToken) {
-    if token.can_be_canceled() {
-        if !token.is_cancellation_requested() {
+    if token.can_be_cancelled() {
+        if !token.is_cancelled() {
             let consumer = SafeObserver::wrap(observer);
             let subscription = source.subscribe(consumer.clone());
             consumer.set_resource(TokenRegistration::register(&token, move || subscription.dispose()));
@@ -65,6 +65,44 @@ macro_rules! subscribe_methods {
             on_completed: impl Fn() + 'static,
         ) -> std::rc::Rc<dyn ferroui_system::IDisposable> {
             self.observable().subscribe(std::rc::Rc::new(crate::observer::AnonymousObserver::new(on_next, on_error, on_completed)))
+        }
+
+        /// [`subscribe_next`](Self::subscribe_next) that returns the guard of the subscription:
+        /// dropping it unsubscribes (the handle of `subscribe_next` keeps the subscription when it
+        /// is dropped).
+        fn subscribe_next_guard(&self, on_next: impl Fn(T) + 'static) -> ferroui_system::Subscription {
+            ferroui_system::Subscription::new(self.subscribe_next(on_next))
+        }
+
+        /// [`subscribe_next_error`](Self::subscribe_next_error) that returns the guard of the
+        /// subscription: dropping it unsubscribes.
+        fn subscribe_next_error_guard(
+            &self,
+            on_next: impl Fn(T) + 'static,
+            on_error: impl Fn(ferroui_system::ObservableError) + 'static,
+        ) -> ferroui_system::Subscription {
+            ferroui_system::Subscription::new(self.subscribe_next_error(on_next, on_error))
+        }
+
+        /// [`subscribe_next_completed`](Self::subscribe_next_completed) that returns the guard of
+        /// the subscription: dropping it unsubscribes.
+        fn subscribe_next_completed_guard(
+            &self,
+            on_next: impl Fn(T) + 'static,
+            on_completed: impl Fn() + 'static,
+        ) -> ferroui_system::Subscription {
+            ferroui_system::Subscription::new(self.subscribe_next_completed(on_next, on_completed))
+        }
+
+        /// [`subscribe_all`](Self::subscribe_all) that returns the guard of the subscription:
+        /// dropping it unsubscribes.
+        fn subscribe_all_guard(
+            &self,
+            on_next: impl Fn(T) + 'static,
+            on_error: impl Fn(ferroui_system::ObservableError) + 'static,
+            on_completed: impl Fn() + 'static,
+        ) -> ferroui_system::Subscription {
+            ferroui_system::Subscription::new(self.subscribe_all(on_next, on_error, on_completed))
         }
 
         /// Subscribes an observer until `token` is canceled

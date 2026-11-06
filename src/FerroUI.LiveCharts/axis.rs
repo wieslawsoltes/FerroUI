@@ -1,8 +1,11 @@
 //! Chart axis snapshots and stable value/pixel conversion.
 
+use crate::labelers::Labeler;
 use crate::measure::{AxisOrientation, AxisTick, TickOptions};
 use crate::scene::ChartError;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::Color;
+use ferroui_base::utilities::DateTime;
 use ferroui_base::Size;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -34,12 +37,20 @@ pub struct Axis {
     pub labels_angle: f64,
     /// Explicit axis separators; an empty list uses automatically calculated ticks.
     pub custom_separators: Vec<f64>,
-    /// Padding around polar labels, in FerroUI logical pixels.
-    pub labels_padding: f64,
+    /// Padding around each label, in FerroUI logical pixels. `None` takes the default of the
+    /// chart family: [`CARTESIAN_LABELS_PADDING`] (the source theme's `Padding` of Cartesian
+    /// axes) or [`POLAR_LABELS_PADDING`] (the `LabelsPadding` of a source polar axis).
+    pub labels_padding: Option<f64>,
     pub labels_color: Color,
     pub separators_color: Color,
     pub logarithmic_base: Option<f64>,
     pub padding: f64,
+    /// The label of a value (`Labeler`); `None` takes the native number format. The `labels`
+    /// win over it, as in the source's `GetActualLabeler`.
+    pub labeler: Option<Labeler>,
+    /// The background of the labels of a polar axis (`LabelsBackground`); `None` takes the
+    /// source's white ([`POLAR_LABELS_BACKGROUND`]) and a transparent colour draws none.
+    pub labels_background: Option<Color>,
 }
 impl Default for Axis {
     fn default() -> Self {
@@ -56,20 +67,87 @@ impl Default for Axis {
             visible: true,
             show_separator_lines: true,
             position: AxisPosition::Start,
-            text_size: 12.0,
+            // CoreAxis.TextSize and CorePolarAxis.TextSize.
+            text_size: 16.0,
             labels_rotation: 0.0,
             labels_density: 0.85,
             labels_angle: 0.0,
             custom_separators: Vec::new(),
-            labels_padding: 3.0,
+            labels_padding: None,
             labels_color: Color::from_rgb(75, 85, 99),
             separators_color: Color::from_argb(50, 107, 114, 128),
             logarithmic_base: None,
             padding: 0.0,
+            labeler: None,
+            labels_background: None,
         }
     }
 }
+/// The label padding of a Cartesian axis in the source's default theme (`Padding = new(12)`).
+pub const CARTESIAN_LABELS_PADDING: f64 = 12.0;
+/// The default `LabelsPadding` of a source polar axis.
+pub const POLAR_LABELS_PADDING: f64 = 3.0;
+/// The default `LabelsBackground` of a source polar axis (and of its light theme).
+pub const POLAR_LABELS_BACKGROUND: Color = Color::from_rgb(255, 255, 255);
+
 impl Axis {
+    /// A `DateTimeAxis`: its unit width and minimum step are the ticks of `unit`, and it labels
+    /// the date of a value (`AsDate`) with `formatter`.
+    pub fn date_time(
+        unit: SignedDuration,
+        formatter: impl Fn(DateTime) -> String + 'static,
+    ) -> Self {
+        Self {
+            unit_width: unit.ticks() as f64,
+            min_step: unit.ticks() as f64,
+            labeler: Some(Labeler::date_time(formatter)),
+            ..Self::default()
+        }
+    }
+    /// A `TimeSpanAxis`: its unit width and minimum step are the ticks of `unit`, and it labels
+    /// the interval of a value (`AsTimeSpan`) with `formatter`.
+    pub fn time_span(
+        unit: SignedDuration,
+        formatter: impl Fn(SignedDuration) -> String + 'static,
+    ) -> Self {
+        Self {
+            unit_width: unit.ticks() as f64,
+            min_step: unit.ticks() as f64,
+            labeler: Some(Labeler::time_span(formatter)),
+            ..Self::default()
+        }
+    }
+    /// The label padding, or the given family default when none is set.
+    pub fn labels_padding_or(&self, default: f64) -> f64 {
+        self.labels_padding.unwrap_or(default)
+    }
+    /// `Extensions.GetTick` of a Cartesian axis: the nice step for the given bounds (the axis
+    /// limits win over them) in a control of the given size, with the label size measured by
+    /// the host. Zero-width bounds take 15% of the maximum as their range, as the source does.
+    pub fn tick(
+        &self,
+        size: Size,
+        orientation: AxisOrientation,
+        labels: Size,
+        min: f64,
+        max: f64,
+    ) -> AxisTick {
+        AxisTick::cartesian(
+            size,
+            self.min_limit.unwrap_or(min),
+            self.max_limit.unwrap_or(max),
+            TickOptions {
+                orientation,
+                label_size: labels,
+                labels_rotation: self.labels_rotation,
+                labels_density: self.labels_density,
+                unit_width: self.unit_width,
+                min_step: self.min_step,
+                min_separators: self.min_separators,
+                force_step_to_min: self.force_step,
+            },
+        )
+    }
     pub fn label(&self, value: f64) -> String {
         if !self.labels.is_empty() {
             let index = value.round();
@@ -77,7 +155,10 @@ impl Axis {
                 return self.labels.get(index as usize).cloned().unwrap_or_default();
             }
         }
-        format_number(value)
+        match &self.labeler {
+            Some(labeler) => labeler.label(value),
+            None => format_number(value),
+        }
     }
 }
 
@@ -106,7 +187,7 @@ impl AxisScale {
             axis.labels_rotation,
             axis.labels_density,
             axis.labels_angle,
-            axis.labels_padding,
+            axis.labels_padding.unwrap_or(0.0),
             axis.padding,
         ]
         .iter()
@@ -115,7 +196,7 @@ impl AxisScale {
             || axis.min_step < 0.0
             || axis.text_size < 0.0
             || axis.labels_density <= -1.0
-            || axis.labels_padding < 0.0
+            || axis.labels_padding.is_some_and(|v| v < 0.0)
             || axis.custom_separators.iter().any(|v| !v.is_finite())
         {
             return Err(ChartError::InvalidAxis(
@@ -228,21 +309,7 @@ impl AxisScale {
         orientation: AxisOrientation,
         labels: Size,
     ) -> AxisTick {
-        AxisTick::cartesian(
-            size,
-            self.min,
-            self.max,
-            TickOptions {
-                orientation,
-                label_size: labels,
-                labels_rotation: axis.labels_rotation,
-                labels_density: axis.labels_density,
-                unit_width: axis.unit_width,
-                min_step: axis.min_step,
-                min_separators: axis.min_separators,
-                force_step_to_min: axis.force_step,
-            },
-        )
+        axis.tick(size, orientation, labels, self.min, self.max)
     }
     pub fn ticks_with_metrics(
         self,

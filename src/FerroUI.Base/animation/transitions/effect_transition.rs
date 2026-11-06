@@ -1,7 +1,7 @@
-use crate::animation::animators::{BlurEffectAnimator, DropShadowEffectAnimator};
+use crate::animation::animators::{BlurEffectAnimator, CustomEffectAnimator, DropShadowEffectAnimator};
 use crate::animation::{AnimatorTransitionObservable, Transition, TransitionBase, TransitionObservableBase};
 use crate::ferro_transition_class;
-use crate::media::effects::{IEffect, ImmutableBlurEffect, ImmutableDropShadowDirectionEffect};
+use crate::media::effects::{EffectExtensions, IEffect, ImmutableBlurEffect, ImmutableDropShadowDirectionEffect};
 use crate::media::Color;
 use crate::reactive::IObservable;
 use std::rc::Rc;
@@ -10,8 +10,10 @@ ferro_transition_class!(
     /// Transition class that handles effect properties.
     ///
     /// Blur effects transition to and from blur effects, drop shadows to
-    /// and from drop shadows; a missing effect stands for an effect of the
-    /// other value's kind that has no visible result.
+    /// and from drop shadows, custom effects to and from custom effects of
+    /// the same type; a missing effect stands for an effect of the other
+    /// value's kind that has no visible result (for a custom effect, its
+    /// neutral value, when the type has one).
     EffectTransition: Option<Rc<dyn IEffect>>
 );
 
@@ -39,6 +41,23 @@ fn try_with_kind(
         Some((Some(default_value()), new_value.clone()))
     } else {
         None
+    }
+}
+
+/// Pairs the values up for the custom effect animator (#455): two custom
+/// effects of the same type, or one and the neutral value of its type in
+/// place of a missing effect. `None` otherwise.
+fn try_with_custom(old_value: &EffectValue, new_value: &EffectValue) -> Option<(EffectValue, EffectValue)> {
+    let old = old_value.as_ref().and_then(|effect| EffectExtensions::to_custom_effect(&**effect));
+    let new = new_value.as_ref().and_then(|effect| EffectExtensions::to_custom_effect(&**effect));
+    let value = |effect: crate::media::effects::ImmutableCustomEffect| -> EffectValue { Some(Rc::new(effect)) };
+    match (old, new) {
+        (Some(old), Some(new)) if old.value_type_id() == new.value_type_id() => {
+            Some((old_value.clone(), new_value.clone()))
+        }
+        (Some(old), None) if new_value.is_none() => old.neutral().map(|neutral| (old_value.clone(), value(neutral))),
+        (None, Some(new)) if old_value.is_none() => new.neutral().map(|neutral| (value(neutral), new_value.clone())),
+        _ => None,
     }
 }
 
@@ -73,6 +92,16 @@ impl Transition<EffectValue> for EffectTransition {
             ) {
                 return AnimatorTransitionObservable::create(
                     DropShadowEffectAnimator::interpolate_core,
+                    progress,
+                    this.easing(),
+                    old_i,
+                    new_i,
+                );
+            }
+
+            if let Some((old_i, new_i)) = try_with_custom(&old_value, &new_value) {
+                return AnimatorTransitionObservable::create(
+                    CustomEffectAnimator::interpolate_core,
                     progress,
                     this.easing(),
                     old_i,

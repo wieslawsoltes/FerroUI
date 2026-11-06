@@ -178,8 +178,15 @@ impl CompositorCanvas {
     }
 
     fn with_size(size: Size) -> CompositorCanvas {
+        Self::with_size_and_setup(size, |_| {})
+    }
+
+    /// A canvas whose render interface `setup` configures before the first
+    /// frame (a backend context factory).
+    fn with_size_and_setup(size: Size, setup: impl FnOnce(&MockPlatformRenderInterface)) -> CompositorCanvas {
         let dispatcher_scope = Dispatcher::unit_test_scope();
         let (locator_scope, render_interface) = MockPlatformRenderInterface::install();
+        setup(render_interface.as_ref());
         let render_loop = ManualRenderLoop::new();
         let compositor = Compositor::with_scheduler(
             render_loop.clone(),
@@ -1636,6 +1643,11 @@ mod composition_theme_shadow_tests;
 #[path = "composition_winui_effect_tests.rs"]
 mod composition_winui_effect_tests;
 
+// The tests of the custom effects of `Visual.Effect` (#455) use the fixture
+// of this module.
+#[path = "composition_custom_effect_tests.rs"]
+mod composition_custom_effect_tests;
+
 // The tests of the WinUI materials (winui-materials.md) use the fixture of
 // this module.
 #[path = "composition_winui_material_tests.rs"]
@@ -1645,3 +1657,271 @@ mod composition_winui_material_tests;
 // (winui-materials.md) use the fixture of this module.
 #[path = "composition_winui_lighting_tests.rs"]
 mod composition_winui_lighting_tests;
+
+/// The prewarm of the GPU programs (#437): a registered graph is painted
+/// through the painting of the effect brushes, so the drawing context makes
+/// what a brush of the graph makes. For the acrylic material: the blur, the
+/// luminosity and colour blend layers, and its two sources (the backdrop
+/// and the noise) drawn as the stand-in image.
+#[test]
+fn the_prewarm_paints_an_effect_graph_through_the_effect_brushes() {
+    use crate::platform::{AlphaFormat, IPlatformRenderInterface, PixelFormats};
+    use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl};
+
+    let s = CompositorCanvas::new();
+    let (effect, animatable) = crate::media::acrylic_effect(
+        false,
+        false,
+        crate::media::Color::from_argb(38, 44, 44, 44),
+        crate::media::Color::from_argb(245, 44, 44, 44),
+        crate::media::Color::from_rgb(44, 44, 44),
+    );
+    let graph = Arc::new(super::effects::EffectGraph::load(&effect, &animatable).expect("the acrylic loads"));
+    let stand_in = s.render_interface.load_bitmap_from_pixels(
+        PixelFormats::RGBA8888,
+        AlphaFormat::Premul,
+        &[255u8; 16],
+        PixelSize::new(2, 2),
+        Vector::new(96.0, 96.0),
+        8,
+    );
+
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_effects = true;
+    context.supports_layer_effects = true;
+    super::brushes::paint_effect_graph_for_prewarm(
+        s.compositor.server(),
+        graph.clone(),
+        Some(stand_in),
+        &mut context,
+        Rect::new(0.0, 0.0, 64.0, 64.0),
+    );
+    let entries = log.entries();
+    assert_eq!(1, log.count("PushEffect"), "{entries:?}");
+    assert_eq!(log.count("PushEffect"), log.count("PopEffect"), "{entries:?}");
+    let blend = |mode: &str| entries.iter().filter(|e| e.starts_with("PushBlendLayer") && e.ends_with(mode)).count();
+    assert_eq!((1, 1), (blend("Luminosity"), blend("Color")), "{entries:?}");
+    assert_eq!(log.count("PushBlendLayer"), log.count("PopBlendLayer"), "{entries:?}");
+    assert_eq!(log.count("PushLayer"), log.count("PopLayer"), "{entries:?}");
+    assert_eq!(log.count("PushClip"), log.count("PopClip"), "{entries:?}");
+    // The backdrop (inside the blur) and the noise.
+    assert_eq!(2, log.count("DrawBitmap"), "{entries:?}");
+
+    // Without a stand-in, the sources draw nothing; the rest is the same.
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_effects = true;
+    context.supports_layer_effects = true;
+    super::brushes::paint_effect_graph_for_prewarm(
+        s.compositor.server(),
+        graph,
+        None,
+        &mut context,
+        Rect::new(0.0, 0.0, 64.0, 64.0),
+    );
+    assert_eq!(0, log.count("DrawBitmap"), "{:?}", log.entries());
+    assert_eq!(1, log.count("PushEffect"), "{:?}", log.entries());
+}
+
+/// The prewarm of the GPU programs by the composition target (#437).
+mod effect_prewarm_tests {
+    use super::*;
+    use crate::platform::surfaces::IPlatformRenderSurface;
+    use crate::platform::{
+        IDrawingContextImpl, IDrawingContextLayerImpl, IOptionalFeatureProvider, IPlatformGraphicsContext,
+        IPlatformRenderInterfaceContext, IRenderTarget, RenderTargetDrawingContextProperties, RenderTargetProperties,
+        RenderTargetSceneInfo,
+    };
+    use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl, MockDrawingContextLayerImpl, MockRenderTarget};
+    use std::any::{Any, TypeId};
+
+    /// A backend context whose render targets prewarm into a log of their
+    /// own.
+    struct PrewarmingContext {
+        log: DrawingLog,
+        prewarm_log: DrawingLog,
+    }
+
+    impl IOptionalFeatureProvider for PrewarmingContext {
+        fn try_get_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+            None
+        }
+    }
+
+    impl IPlatformRenderInterfaceContext for PrewarmingContext {
+        fn create_render_target(&self, _surfaces: &[Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+            Rc::new(PrewarmingTarget { inner: MockRenderTarget::new(self.log.clone()), prewarm_log: self.prewarm_log.clone() })
+        }
+
+        fn create_offscreen_render_target(
+            &self,
+            pixel_size: PixelSize,
+            _scaling: Vector,
+            _enable_text_antialiasing: bool,
+        ) -> Rc<dyn IDrawingContextLayerImpl> {
+            Rc::new(MockDrawingContextLayerImpl::new(self.log.clone(), pixel_size))
+        }
+
+        fn is_lost(&self) -> bool {
+            false
+        }
+
+        fn max_offscreen_render_target_pixel_size(&self) -> Option<PixelSize> {
+            None
+        }
+
+        fn dispose(&self) {}
+    }
+
+    struct PrewarmingTarget {
+        inner: Rc<MockRenderTarget>,
+        prewarm_log: DrawingLog,
+    }
+
+    impl IRenderTarget for PrewarmingTarget {
+        fn properties(&self) -> RenderTargetProperties {
+            self.inner.properties()
+        }
+
+        fn create_drawing_context(
+            &self,
+            scene_info: &RenderTargetSceneInfo,
+        ) -> (Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties) {
+            self.inner.create_drawing_context(scene_info)
+        }
+
+        fn prewarm(&self, scene_info: &RenderTargetSceneInfo, paint: &mut dyn FnMut(&mut dyn IDrawingContextImpl)) -> bool {
+            self.prewarm_log.push(format!("Prewarm {} {}", scene_info.size.width, scene_info.size.height));
+            let mut context = MockDrawingContextImpl::new(self.prewarm_log.clone());
+            context.supports_effects = true;
+            context.supports_layer_effects = true;
+            context.log_effects = true;
+            paint(&mut context);
+            true
+        }
+
+        fn dispose(&self) {
+            self.inner.dispose();
+        }
+    }
+
+    #[test]
+    fn a_target_prewarms_a_registered_effect_once_after_a_frame() {
+        // A colour no other test registers.
+        crate::rendering::composition::effects::register_effect_prewarm(
+            "compositor_tests.a_target_prewarms_a_registered_effect_once_after_a_frame",
+            crate::rendering::composition::effects::ColorSourceEffect {
+                name: "Fill".into(),
+                color: crate::media::Color::from_rgb(1, 2, 3),
+            },
+            &[],
+        )
+        .expect("a colour fill loads");
+        let fill = "DrawRectangle #ff010203";
+
+        let prewarm_log = DrawingLog::new();
+        let shared = prewarm_log.clone();
+        let s = CompositorCanvas::with_size_and_setup(Size::new(100.0, 100.0), move |render_interface| {
+            render_interface.set_backend_context_factory(
+                move |log: &DrawingLog, _graphics: Option<Rc<dyn IPlatformGraphicsContext>>| {
+                    let context: Rc<dyn IPlatformRenderInterfaceContext> =
+                        Rc::new(PrewarmingContext { log: log.clone(), prewarm_log: shared.clone() });
+                    context
+                },
+            );
+        });
+
+        // The first frame was drawn: the effect is drawn once offscreen.
+        assert_eq!(1, prewarm_log.count(fill), "{:?}", prewarm_log.entries());
+        assert!(prewarm_log.count("Prewarm ") >= 1, "{:?}", prewarm_log.entries());
+        // Not into the frames.
+        assert_eq!(0, s.render_interface.log().count(fill), "{:?}", s.render_interface.log().entries());
+
+        // The frames that follow do not draw it again.
+        let child = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+        s.canvas.add(&child);
+        s.run_jobs();
+        child.set_background(Some(Brushes::blue()));
+        s.run_jobs();
+        assert_eq!(1, prewarm_log.count(fill), "{:?}", prewarm_log.entries());
+        assert_eq!(0, s.render_interface.log().count(fill));
+    }
+
+    /// The custom effects FerroUI ships are prewarmed by the first frame of a
+    /// composition target (#455, E9): each type of the library registers its
+    /// graph or its runtime shader when the registry is first read, and the
+    /// target draws each once offscreen after its first frame, as the render
+    /// walk draws it: a runtime shader pushed as an effect of the drawing
+    /// context at the value its type registered, a graph around the image as
+    /// its layers (the colour matrices, the convolutions, the drop shadow of
+    /// the glow). The frames that follow draw none of them again.
+    #[test]
+    fn a_target_prewarms_the_custom_effects_of_the_library_after_its_first_frame() {
+        crate::media::effects::library::register_library_effects();
+        let shaders = [
+            "pixelate",
+            "scanline",
+            "spotlight",
+            "dissolve-transition",
+            "mask-transition",
+            "pointer-spotlight",
+            "reactive-grid",
+            "water-ripple",
+            "burning-flame",
+        ];
+        let graphs = ["tint", "grayscale", "sepia", "saturation", "brightness-contrast", "invert", "glow", "sharpen", "edge-detect"];
+        let names = crate::rendering::composition::effects::effect_prewarm_names();
+        for name in shaders.iter().chain(graphs.iter()) {
+            assert!(names.contains(&format!("custom-effect:{name}")), "{name}: {names:?}");
+        }
+
+        let prewarm_log = DrawingLog::new();
+        let shared = prewarm_log.clone();
+        let s = CompositorCanvas::with_size_and_setup(Size::new(100.0, 100.0), move |render_interface| {
+            render_interface.set_backend_context_factory(
+                move |log: &DrawingLog, _graphics: Option<Rc<dyn IPlatformGraphicsContext>>| {
+                    let context: Rc<dyn IPlatformRenderInterfaceContext> =
+                        Rc::new(PrewarmingContext { log: log.clone(), prewarm_log: shared.clone() });
+                    context
+                },
+            );
+        });
+
+        let pushed_shader = |log: &DrawingLog, name: &str| {
+            let marker = format!(" shader {name}(");
+            log.entries().iter().filter(|entry| entry.starts_with("PushEffect ") && entry.contains(&marker)).count()
+        };
+        let entries = prewarm_log.entries();
+        for name in shaders {
+            assert_eq!(1, pushed_shader(&prewarm_log, name), "{name}: {entries:?}");
+        }
+        // A graph is drawn at the values of its description: the colour
+        // matrix layers of grayscale (a saturation of 0) and sepia (an
+        // intensity of 1); the tint (white), the saturation (1) and the
+        // linear transfers of brightness and contrast and of invert are the
+        // identity there and draw no layer, a colour matrix layer being one
+        // program whatever its matrix. Sharpen and edge detect are
+        // convolution layers, the glow a drop shadow. Other effects
+        // registered by the process add to these.
+        assert!(prewarm_log.count("PushColorMatrixLayer") >= 2, "{entries:?}");
+        assert!(prewarm_log.count("PushConvolveMatrixLayer") >= 2, "{entries:?}");
+        assert!(entries.iter().any(|entry| entry.starts_with("PushEffect ") && entry.contains("drop-shadow(")), "{entries:?}");
+        assert_eq!(prewarm_log.count("PushEffect"), prewarm_log.count("PopEffect"), "{entries:?}");
+        assert_eq!(prewarm_log.count("PushColorMatrixLayer"), prewarm_log.count("PopColorMatrixLayer"), "{entries:?}");
+        // Nothing of it into the frames.
+        for name in shaders {
+            assert_eq!(0, pushed_shader(s.render_interface.log(), name), "{name}");
+        }
+
+        // The frames that follow prewarm nothing again.
+        let child = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+        s.canvas.add(&child);
+        s.run_jobs();
+        child.set_background(Some(Brushes::blue()));
+        s.run_jobs();
+        for name in shaders {
+            assert_eq!(1, pushed_shader(&prewarm_log, name), "{name}");
+        }
+    }
+}

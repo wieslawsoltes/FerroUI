@@ -13,6 +13,7 @@ mod dispatcher_options;
 mod dispatcher_priority;
 mod dispatcher_priority_awaitable;
 mod dispatcher_priority_queue;
+mod dispatcher_spawn;
 mod dispatcher_task;
 mod dispatcher_queue;
 mod dispatcher_thread_storage;
@@ -24,21 +25,29 @@ mod ferro_synchronization_context;
 mod i_dispatcher;
 mod i_dispatcher_impl;
 
-pub use ferroui_system::threading::{CancellationToken, CancellationTokenRegistration, CancellationTokenSource};
+pub use ferroui_system::task::Canceled;
+// The handle of a task of the dispatcher (`Dispatcher::spawn_local`, `spawn`, `start_local`) and how
+// it ends without an output: the types of `ferroui-system`, for the crates that use the dispatcher.
+pub use ferroui_system::task::{AbortHandle, JoinError, JoinHandle};
+pub use ferroui_system::threading::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
+#[allow(deprecated)]
+pub use ferroui_system::threading::{CancellationTokenRegistration, CancellationTokenSource};
 pub use dispatcher::{
     Dispatcher, DispatcherUnhandledExceptionEventHandler, DispatcherUnhandledExceptionFilterEventHandler,
 };
 pub use dispatcher_event_args::DispatcherEventArgs;
 pub use dispatcher_frame::DispatcherFrame;
 pub use dispatcher_main_loop::DispatcherProcessingDisabled;
-pub use dispatcher_operation::{
-    DispatcherException, DispatcherOperation, DispatcherOperationStatus, OperationCanceledError,
-};
+pub use dispatcher_operation::{DispatcherException, DispatcherOperation, DispatcherOperationStatus};
+#[allow(deprecated)]
+pub use dispatcher_operation::OperationCanceledError;
 pub use dispatcher_options::DispatcherOptions;
 pub use dispatcher_priority::{DispatcherPriority, DispatcherPriorityOutOfRangeError};
 pub use dispatcher_invoke::DispatcherInvokeError;
 pub use dispatcher_priority_awaitable::{DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable};
+#[allow(deprecated)]
 pub use dispatcher_task::DispatcherTask;
+#[allow(deprecated)]
 pub use ferro_synchronization_context::{DispatcherTaskScheduler, FerroSynchronizationContext, RestoreContext};
 mod thread_safe_object_pool;
 pub use thread_safe_object_pool::ThreadSafeObjectPool;

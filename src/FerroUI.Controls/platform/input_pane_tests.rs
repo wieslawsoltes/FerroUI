@@ -12,7 +12,7 @@ use crate::{
     InputPaneAwareDecorator, TopLevel, TopLevelImpl,
 };
 use ferroui_base::animation::easings::IEasing;
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::data::{BindingMode, IndexerBinding};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -28,7 +28,7 @@ use std::time::Duration;
 
 /// The global clock of a test: pulses every subscriber.
 struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
@@ -37,13 +37,13 @@ impl MockGlobalClock {
         Rc::new(Self { subject: LightweightSubject::new(), play_state: Cell::new(PlayState::Run) })
     }
 
-    fn pulse(&self, time: TimeSpan) {
+    fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -208,7 +208,7 @@ fn input_pane_aware_view_resizes_content_when_behavior_resize() {
 
     target.input_pane.open();
 
-    target.clock.pulse(TimeSpan::from_seconds(5.0));
+    target.clock.pulse(SignedDuration::from_seconds(5.0));
 
     target.top_level.layout_manager().execute_layout_pass();
 
@@ -227,7 +227,7 @@ fn input_pane_aware_view_resizes_content_when_behavior_pan() {
 
     target.input_pane.open();
 
-    target.clock.pulse(TimeSpan::from_seconds(5.0));
+    target.clock.pulse(SignedDuration::from_seconds(5.0));
 
     target.top_level.layout_manager().execute_layout_pass();
 
@@ -270,8 +270,8 @@ fn content_height_halfway(easing: Option<Rc<dyn IEasing>>) -> f64 {
 
     target.input_pane.open_animated(Duration::from_secs(10), easing);
 
-    target.clock.pulse(TimeSpan::from_seconds(0.0));
-    target.clock.pulse(TimeSpan::from_seconds(5.0));
+    target.clock.pulse(SignedDuration::from_seconds(0.0));
+    target.clock.pulse(SignedDuration::from_seconds(5.0));
 
     target.top_level.layout_manager().execute_layout_pass();
 
@@ -326,7 +326,7 @@ fn input_pane_state_changes_are_observed_only_while_the_view_is_attached() {
     target.top_level.layout_manager().execute_layout_pass();
     assert_eq!(1, handler_count());
 
-    target.clock.pulse(TimeSpan::from_seconds(5.0));
+    target.clock.pulse(SignedDuration::from_seconds(5.0));
     target.top_level.layout_manager().execute_layout_pass();
     assert_eq!(300.0, target.border.bounds().height);
 }

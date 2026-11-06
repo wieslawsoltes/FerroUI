@@ -6,7 +6,7 @@ use crate::{assets, register_types, ASSEMBLY};
 use ferroui_base::controls::{IResourceProvider, ResourceDictionary};
 use ferroui_base::metadata::{from_markup_value, MarkupAttribute, MarkupAttributeValue};
 use ferroui_base::styling::{ControlTheme, IStyle, Style, Styles};
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, FerroObject, Ref, TypeInfo};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
@@ -39,7 +39,7 @@ pub fn try_load_document(path: &str) -> Result<BoxedValue, XamlLoadError> {
     register_types();
     let content = assets::document(path).unwrap_or_else(|| panic!("{path} is not a document of the theme"));
     let text = std::str::from_utf8(content).unwrap_or_else(|e| panic!("{path} is not UTF-8: {e}"));
-    let uri = Uri::absolute(&format!("ferres://{}{path}", ASSEMBLY.name)).expect("a valid URI");
+    let uri = UriRef::parse_absolute(&format!("ferres://{}{path}", ASSEMBLY.name)).expect("a valid URI");
     let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), text);
     document.document = Some(path.trim_start_matches('/').to_string());
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
@@ -149,7 +149,7 @@ pub fn start_themed_application_with_clock(clock: Rc<MockGlobalClock>) -> UnitTe
 /// The global clock of the themed application: the transitions of the control themes need one.
 /// It pulses when a test tells it to ([`pulse`](Self::pulse)), which most tests never do.
 pub struct MockGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     play_state: std::cell::Cell<ferroui_base::animation::PlayState>,
 }
 
@@ -162,16 +162,16 @@ impl MockGlobalClock {
     }
 
     /// Ticks the clock: its subscribers are told that the time is `time`.
-    pub fn pulse(&self, time: ferroui_base::animation::TimeSpan) {
+    pub fn pulse(&self, time: ferroui_base::animation::SignedDuration) {
         use ferroui_base::reactive::IObserver;
         self.subject.on_next(time);
     }
 }
 
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for MockGlobalClock {
     fn subscribe(
         &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
     }

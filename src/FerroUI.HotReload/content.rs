@@ -1,5 +1,4 @@
 use crate::{PreparedReload, ReloadError, ReloadTarget};
-use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{BoxedValue, Ref, WeakRef};
 use ferroui_controls::ContentControl;
 use ferroui_markup_xaml::{
@@ -115,7 +114,7 @@ impl ReloadTarget for ContentReloadTarget {
                 "A class root requires an explicit reload adapter".into(),
             ));
         }
-        let uri = Uri::try_create(&self.uri, UriKind::Absolute)
+        let uri = crate::document_url(&self.uri)
             .ok_or_else(|| ReloadError::Failed("Document URI must be absolute".into()))?;
         let runtime_source = crate::identity::runtime_source(source)?;
         let document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &runtime_source);

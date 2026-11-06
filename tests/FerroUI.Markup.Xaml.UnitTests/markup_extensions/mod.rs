@@ -10,3 +10,4 @@ pub(crate) mod on_form_factor_extension_tests;
 pub(crate) mod options_markup_extension_tests;
 pub(crate) mod resource_include_tests;
 pub(crate) mod static_resource_extension_tests;
+pub(crate) mod x_bind_extension_tests;

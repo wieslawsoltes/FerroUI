@@ -1,6 +1,6 @@
 use super::document_snapshot::{normalize_paragraph_breaks, slice_inlines, utf16_to_byte};
 use super::{
-    BlockCollection, Bold, CharacterFormat, DocumentLinkField, DocumentSnapshot, Hyperlink,
+    Block, BlockCollection, Bold, CharacterFormat, DocumentLinkField, DocumentSnapshot, Hyperlink,
     IInlineHost, Inline, InlineCollection, InlineSnapshot, InlineSnapshotKind, InlineUIContainer,
     Italic, LineBreak, Paragraph, ParagraphFormat, ParagraphSnapshot, Run, Span, TextElement,
     TextGravity, TextPointer, TextPosition, TextRange, Underline,
@@ -231,6 +231,21 @@ struct RichTextDocumentData {
     /// Set while the fast path of `replace_text_core` splices one run: the tree's text is then
     /// the observed text with the pending edit applied, without reading the tree (F1b).
     exact_splice: Cell<bool>,
+    /// The text of the tree after a replacement of some of its blocks, set just before the
+    /// replacement is observed (F1c): the observed text with the replaced paragraphs swapped,
+    /// so the observation reads no other paragraph of the tree.
+    exact_text: RefCell<Option<String>>,
+    /// Test only: every installation replaces all blocks, the path before F1c, the reference the
+    /// incremental paths are compared with.
+    #[cfg(test)]
+    full_rebuild: Cell<bool>,
+    /// The open journals of the blocks the edits being recorded change (S8), one per edit of an
+    /// editor, in the order they began.
+    journals: RefCell<Vec<delta::JournalFrame>>,
+    next_journal: Cell<u64>,
+    /// Set while the document makes a change of blocks that it notes in the journals itself: any
+    /// other change of the tree is one the journals cannot follow.
+    journaling: Cell<usize>,
     text_changes: RefCell<Vec<DocumentTextChange>>,
     installing: Cell<bool>,
     delivering: Cell<bool>,
@@ -315,6 +330,12 @@ impl RichTextDocument {
             observed_text: RefCell::new(text),
             observed_version: Cell::new(u64::MAX),
             exact_splice: Cell::new(false),
+            exact_text: RefCell::new(None),
+            #[cfg(test)]
+            full_rebuild: Cell::new(false),
+            journals: RefCell::new(Vec::new()),
+            next_journal: Cell::new(0),
+            journaling: Cell::new(0),
             text_changes: RefCell::new(Vec::new()),
             installing: Cell::new(false),
             delivering: Cell::new(false),
@@ -544,25 +565,7 @@ impl RichTextDocument {
 
     pub fn snapshot(&self) -> DocumentSnapshot {
         DocumentSnapshot {
-            paragraphs: self
-                .0
-                .blocks
-                .snapshot()
-                .iter()
-                .map(|block| {
-                    if let Some(paragraph) = block.cast::<Paragraph>() {
-                        ParagraphSnapshot::from_paragraph(&paragraph)
-                    } else {
-                        ParagraphSnapshot {
-                            format: ParagraphFormat {
-                                character: CharacterFormat::from_element(block),
-                                ..Default::default()
-                            },
-                            inlines: vec![InlineSnapshot::run(block.text())],
-                        }
-                    }
-                })
-                .collect(),
+            paragraphs: self.0.blocks.snapshot().iter().map(block_snapshot).collect(),
             link_fields: self.0.link_fields.borrow().clone(),
             next_link_field_id: self.0.next_link_field_id.get(),
         }
@@ -670,7 +673,12 @@ impl RichTextDocument {
                 self.0.exact_splice.set(
                     self.mutation_version() == start_version && self.0.observed_version.get() == start_version,
                 );
+                // The journals of the edits being recorded hold this paragraph, or cannot follow
+                // the change (S8): the splice reads nothing more.
+                self.journal_replacement(found.block, 1, 1, None);
+                let journaling = self.journaling();
                 found.run.set_text(Some(&value));
+                drop(journaling);
                 self.0.exact_splice.set(false);
                 if tracking
                     .as_ref()
@@ -681,8 +689,23 @@ impl RichTextDocument {
                 return Ok(());
             }
         }
-        let snapshot = self.snapshot();
-        let (paragraph_index, offset) = snapshot.locate(range.start);
+        // A document that can be edited a paragraph at a time reads the paragraph of the
+        // insertion alone (F1c); any other takes a snapshot of the whole document.
+        let table = self.paragraph_table();
+        let snapshot = table.is_none().then(|| self.snapshot());
+        let (paragraph_index, offset) = match (&table, &snapshot) {
+            (Some(table), _) => table.locate(range.start),
+            (None, Some(snapshot)) => snapshot.locate(range.start),
+            (None, None) => (0, 0),
+        };
+        let paragraph = match (&table, &snapshot) {
+            (Some(table), _) => table
+                .paragraphs
+                .get(paragraph_index)
+                .map(|paragraph| ParagraphSnapshot::from_paragraph(paragraph)),
+            (None, Some(snapshot)) => snapshot.paragraphs.get(paragraph_index).cloned(),
+            (None, None) => None,
+        };
         let format = self
             .element_at(range.start, TextGravity::Backward)
             .map(|element| CharacterFormat::from_element(&element))
@@ -696,7 +719,7 @@ impl RichTextDocument {
                 });
             }
         }
-        if let Some(paragraph) = snapshot.paragraphs.get(paragraph_index) {
+        if let Some(paragraph) = &paragraph {
             let context = insertion_context(&paragraph.inlines, offset);
             for replacement_paragraph in &mut replacement.paragraphs {
                 replacement_paragraph.format = paragraph.format.clone();
@@ -759,7 +782,8 @@ impl RichTextDocument {
             for paragraph in &mut replacement.paragraphs {
                 clear_empty_projection(&mut paragraph.inlines);
             }
-        } else {
+        } else if let Some(snapshot) = &snapshot {
+            // A document read a paragraph at a time has no link fields to inherit.
             if let Some(field) =
                 inherited.and_then(|id| snapshot.link_fields.iter().find(|field| field.id == id))
             {
@@ -829,6 +853,22 @@ impl RichTextDocument {
         if range.is_empty() && fragment.text_length() == 0 {
             return Ok(());
         }
+        // Without link fields the replacement reads and rebuilds the paragraphs it spans,
+        // not the document (F1c).
+        let version = self.mutation_version();
+        if fragment.link_fields.is_empty() {
+            if let Some(table) = self.paragraph_table() {
+                let edit = ParagraphEdit {
+                    range: range.clone(),
+                    inherited,
+                    alignment_source,
+                    paired_tracking,
+                };
+                if let Some(result) = self.replace_paragraphs(version, &table, edit, fragment) {
+                    return result;
+                }
+            }
+        }
         let before = self.snapshot();
         let mut next = before.next_link_field_id.max(self.link_allocation_floor());
         let mut fragment = fragment.clone();
@@ -843,53 +883,122 @@ impl RichTextDocument {
         }
         let (start_index, start_offset) = snapshot.locate(range.start);
         let (end_index, end_offset) = snapshot.locate(range.end);
-        let first = &snapshot.paragraphs[start_index];
-        let last = &snapshot.paragraphs[end_index];
-        let prefix = slice_inlines(&first.inlines, 0..start_offset);
-        let mut suffix = slice_inlines(&last.inlines, end_offset..last.text_length());
-        if start_index != end_index && first.format.character != last.format.character {
-            suffix = wrap_with_format(suffix, &last.format.character);
-        }
-        let mut inserted = if fragment.paragraphs.is_empty() {
-            vec![ParagraphSnapshot::default()]
-        } else {
-            fragment.paragraphs.clone()
-        };
-        if inserted.len() == 1 {
-            let mut middle = wrap_with_format(
-                std::mem::take(&mut inserted[0].inlines),
-                &inserted[0].format.character,
-            );
-            let mut inlines = prefix;
-            inlines.append(&mut middle);
-            inlines.append(&mut suffix);
-            inserted[0].inlines = inlines;
-            inserted[0].format = first.format.clone();
-        } else {
-            let mut middle = wrap_with_format(
-                std::mem::take(&mut inserted[0].inlines),
-                &inserted[0].format.character,
-            );
-            inserted[0].inlines = prefix;
-            inserted[0].inlines.append(&mut middle);
-            inserted[0].format = first.format.clone();
-            let inserted_last = inserted.len() - 1;
-            inserted[inserted_last].inlines.append(&mut suffix);
-        }
-        if alignment_source == ParagraphAlignmentSource::Trailing && start_index != end_index {
-            // A typed break creates another paragraph in the merged context;
-            // every inserted paragraph therefore receives the same alignment.
-            // Preserve None exactly so inherited alignment remains inherited.
-            for paragraph in &mut inserted {
-                paragraph.format.text_alignment = last.format.text_alignment;
-            }
-        }
+        let inserted = replacement_paragraphs(
+            &snapshot.paragraphs[start_index..=end_index],
+            start_offset..end_offset,
+            &fragment,
+            alignment_source,
+        );
         snapshot
             .paragraphs
             .splice(start_index..=end_index, inserted);
         let tracked = paired_tracking.then(|| (range.clone(), fragment.text()));
         snapshot.replace_link_fields(&before, range, &fragment, next)?;
         self.install_with_range_change(&snapshot, DocumentChangeKind::Content, tracked)
+    }
+
+    /// The replacement of `edit.range` by `fragment` (which has no link fields) in a document
+    /// without link fields, reading and rebuilding only the paragraphs the range spans (F1c).
+    /// It has the result of the path through a snapshot of the document: the same paragraphs,
+    /// the same identity allocation for fields. `None` when it does not apply (the inserted
+    /// content holds an embedded control from another paragraph or from outside the document);
+    /// nothing has changed then.
+    fn replace_paragraphs(
+        &self,
+        version: u64,
+        table: &ParagraphTable,
+        edit: ParagraphEdit,
+        fragment: &DocumentSnapshot,
+    ) -> Option<Result<(), DocumentError>> {
+        let mut next = self
+            .0
+            .next_link_field_id
+            .get()
+            .max(self.link_allocation_floor());
+        let mut fragment = fragment.clone();
+        if !edit.inherited {
+            if let Err(error) = fragment.remap_link_field_ids(&mut next) {
+                return Some(Err(error));
+            }
+        } else {
+            next = next.max(fragment.next_link_field_id);
+        }
+        let (start_index, start_offset) = table.locate(edit.range.start);
+        let (end_index, end_offset) = table.locate(edit.range.end);
+        let old = table.snapshots(start_index..end_index + 1);
+        let inserted = replacement_paragraphs(
+            &old,
+            start_offset..end_offset,
+            &fragment,
+            edit.alignment_source,
+        );
+        // A control of another paragraph would be a duplicate, one from outside may have a
+        // parent: the path through a snapshot of the document tells them apart.
+        let controls = embedded_controls(&old);
+        if embedded_controls(&inserted)
+            .iter()
+            .any(|control| !controls.contains(control))
+        {
+            return None;
+        }
+        let candidate = DocumentSnapshot {
+            paragraphs: inserted,
+            link_fields: Vec::new(),
+            next_link_field_id: next,
+        };
+        if let Err(error) = candidate.validate() {
+            return Some(Err(error));
+        }
+        let tracked = edit
+            .paired_tracking
+            .then(|| (edit.range.clone(), fragment.text()));
+        Some(self.install_paragraph_change(
+            version,
+            table,
+            ParagraphChange {
+                start: start_index,
+                old: &old,
+                new: &candidate.paragraphs,
+            },
+            Some((Vec::new(), next)),
+            DocumentChangeKind::Content,
+            tracked,
+        ))
+    }
+
+    /// Installs `change.new` in place of the paragraphs of `table` that `change.old` holds the
+    /// snapshots of, leaving alone the paragraphs at either end that do not change (F1c).
+    fn install_paragraph_change(
+        &self,
+        version: u64,
+        table: &ParagraphTable,
+        change: ParagraphChange<'_>,
+        fields: Option<(Vec<DocumentLinkField>, u64)>,
+        kind: DocumentChangeKind,
+        range_change: Option<(Range<usize>, String)>,
+    ) -> Result<(), DocumentError> {
+        let ParagraphChange { start, old, new } = change;
+        let (prefix, suffix) = common_paragraphs(&|_| true, old, new);
+        let removed = start + prefix..start + old.len() - suffix;
+        let inserted = &new[prefix..new.len() - suffix];
+        let text = self.replaced_text(version, &table.lengths, removed.clone(), inserted);
+        let blocks: Vec<Ref<Block>> = table.paragraphs[removed.clone()]
+            .iter()
+            .map(|paragraph| paragraph.clone().upcast::<Block>())
+            .collect();
+        self.install_blocks(
+            version,
+            BlockReplacement {
+                start: removed.start,
+                removed: &blocks,
+                before: Some(&old[prefix..old.len() - suffix]),
+                inserted,
+                text,
+            },
+            fields,
+            kind,
+            range_change,
+        )
     }
 
     pub fn apply_format(
@@ -907,19 +1016,52 @@ impl RichTextDocument {
             self.format_run(found, range, format)?;
             return Ok(());
         }
+        // Without link fields only the paragraphs of the range are read and rebuilt (F1c).
+        let version = self.mutation_version();
+        if let Some(table) = self.paragraph_table() {
+            let mut touched: Option<Range<usize>> = None;
+            let mut offset = 0;
+            for (index, length) in table.lengths.iter().copied().enumerate() {
+                if formats_paragraph(&range, offset, length) {
+                    let start = touched.as_ref().map_or(index, |touched| touched.start);
+                    touched = Some(start..index + 1);
+                }
+                offset += length + 1;
+            }
+            let Some(touched) = touched else {
+                return Ok(());
+            };
+            let old = table.snapshots(touched.clone());
+            let mut offset = table.start(touched.start);
+            let mut new = old.clone();
+            for paragraph in &mut new {
+                let length = paragraph.text_length();
+                format_paragraph(paragraph, &range, offset, length, format);
+                offset += length + 1;
+            }
+            let candidate = DocumentSnapshot {
+                paragraphs: new,
+                ..DocumentSnapshot::default()
+            };
+            candidate.validate()?;
+            return self.install_paragraph_change(
+                version,
+                &table,
+                ParagraphChange {
+                    start: touched.start,
+                    old: &old,
+                    new: &candidate.paragraphs,
+                },
+                None,
+                DocumentChangeKind::Formatting,
+                None,
+            );
+        }
         let mut snapshot = self.snapshot();
         let mut offset = 0;
         for paragraph in &mut snapshot.paragraphs {
             let length = paragraph.text_length();
-            if range.start < offset + length && range.end > offset {
-                paragraph.inlines = format_inlines(
-                    &paragraph.inlines,
-                    range.start.saturating_sub(offset)..range.end.min(offset + length) - offset,
-                    format,
-                );
-            } else if length == 0 && range.start <= offset && range.end > offset {
-                paragraph.format.character = paragraph.format.character.overlay(format);
-            }
+            format_paragraph(paragraph, &range, offset, length, format);
             offset += length + 1;
         }
         self.install(&snapshot, DocumentChangeKind::Formatting)
@@ -933,6 +1075,37 @@ impl RichTextDocument {
         self.ensure_available()?;
         self.validate_range(range.clone())?;
         format.validate()?;
+        // Without link fields only the paragraphs of the range are read and rebuilt (F1c).
+        let version = self.mutation_version();
+        if let Some(table) = self.paragraph_table() {
+            let (start, _) = table.locate(range.start);
+            let (mut end, end_offset) = table.locate(range.end);
+            if end > start && end_offset == 0 && !range.is_empty() {
+                end -= 1;
+            }
+            let old = table.snapshots(start..end + 1);
+            let mut new = old.clone();
+            for paragraph in &mut new {
+                paragraph.format = paragraph.format.overlay(format);
+            }
+            let candidate = DocumentSnapshot {
+                paragraphs: new,
+                ..DocumentSnapshot::default()
+            };
+            candidate.validate()?;
+            return self.install_paragraph_change(
+                version,
+                &table,
+                ParagraphChange {
+                    start,
+                    old: &old,
+                    new: &candidate.paragraphs,
+                },
+                None,
+                DocumentChangeKind::Formatting,
+                None,
+            );
+        }
         let mut snapshot = self.snapshot();
         if snapshot.paragraphs.is_empty() {
             snapshot.paragraphs.push(ParagraphSnapshot::default());
@@ -1077,19 +1250,68 @@ impl RichTextDocument {
         if unchanged {
             return Ok(());
         }
-        let mut pool = ContentPool::capture(&self.blocks());
-        let current_controls: HashSet<usize> = pool
-            .inlines
+        // The paragraphs at either end that are the same before and after stay in the tree
+        // with their elements, and so with their layout in the views (F1c): an undo, a restore
+        // or a structural edit through a snapshot rebuilds the paragraphs it changes.
+        let blocks = self.blocks().snapshot();
+        let (prefix, suffix) = if self.rebuilds_everything() {
+            (0, 0)
+        } else {
+            common_paragraphs(
+                &|index| blocks[index].is::<Paragraph>(),
+                &old.paragraphs,
+                &snapshot.paragraphs,
+            )
+        };
+        let removed = prefix..old.paragraphs.len() - suffix;
+        let inserted = &snapshot.paragraphs[prefix..snapshot.paragraphs.len() - suffix];
+        let lengths: Vec<usize> = old
+            .paragraphs
             .iter()
-            .filter_map(|entry| {
-                if let InlineSnapshotKind::Embedded(Some(control)) = &entry.snapshot.kind {
-                    Some(&**control as *const Control as usize)
-                } else {
-                    None
-                }
-            })
+            .map(ParagraphSnapshot::text_length)
             .collect();
-        validate_control_parents(snapshot, &current_controls)?;
+        let text = if self.rebuilds_everything() {
+            None
+        } else {
+            self.replaced_text(version, &lengths, removed.clone(), inserted)
+        };
+        self.install_blocks(
+            version,
+            BlockReplacement {
+                start: prefix,
+                removed: &blocks[removed.clone()],
+                before: Some(&old.paragraphs[removed]),
+                inserted,
+                text,
+            },
+            Some((snapshot.link_fields.clone(), snapshot.next_link_field_id)),
+            kind,
+            range_change,
+        )
+    }
+
+    /// Replaces the blocks `replacement.removed` (at `replacement.start`) with paragraphs built
+    /// from `replacement.inserted`, reusing the elements of the removed paragraphs; every other
+    /// block stays as it is (F1c). `fields` are the link fields and the next field identity
+    /// after the replacement (`None` keeps them). `version` is the mutation version every read
+    /// of the caller was made at: a write since rejects the installation.
+    fn install_blocks(
+        &self,
+        version: u64,
+        replacement: BlockReplacement<'_>,
+        fields: Option<(Vec<DocumentLinkField>, u64)>,
+        kind: DocumentChangeKind,
+        range_change: Option<(Range<usize>, String)>,
+    ) -> Result<(), DocumentError> {
+        self.ensure_available()?;
+        let fields_unchanged = fields.as_ref().is_none_or(|(fields, next)| {
+            *self.0.link_fields.borrow() == *fields && self.0.next_link_field_id.get() == *next
+        });
+        if replacement.removed.is_empty() && replacement.inserted.is_empty() && fields_unchanged {
+            return self.ensure_install_read(version);
+        }
+        let mut pool = ContentPool::capture_blocks(replacement.removed);
+        validate_control_parents(replacement.inserted, &pool.controls())?;
         // Reuse preparation captures formatting again. Fence its final read
         // before clearing the live tree or reserving structural installation.
         self.ensure_install_read(version)?;
@@ -1098,26 +1320,41 @@ impl RichTextDocument {
         let range_change = range_change
             .map(|(range, inserted)| (range, inserted, self.0.range_position_changed.snapshot()));
         let _batch = self.begin_edit();
+        self.journal_replacement(
+            replacement.start,
+            replacement.removed.len(),
+            replacement.inserted.len(),
+            replacement.before,
+        );
+        let journaling = self.journaling();
         self.0.installing.set(true);
         self.0.change_kind.set(Some(kind));
-        self.blocks().clear();
+        self.blocks()
+            .remove_range(replacement.start, replacement.removed.len());
         pool.detach_contents();
-        for paragraph in &snapshot.paragraphs {
-            let value = pool.build_paragraph(paragraph);
-            self.blocks().add(value);
+        let built: Vec<Ref<Block>> = replacement
+            .inserted
+            .iter()
+            .map(|paragraph| pool.build_paragraph(paragraph).upcast::<Block>())
+            .collect();
+        self.blocks().insert_range(replacement.start, built);
+        if let Some((fields, next)) = fields {
+            *self.0.link_fields.borrow_mut() = fields;
+            self.0.next_link_field_id.set(next);
         }
-        *self.0.link_fields.borrow_mut() = snapshot.link_fields.clone();
-        self.0.next_link_field_id.set(snapshot.next_link_field_id);
         self.0.link_allocation_floor.set(
             self.link_allocation_floor()
-                .max(snapshot.next_link_field_id),
+                .max(self.0.next_link_field_id.get()),
         );
         self.0.installed_field_snapshot.set(true);
         self.0.installing.set(false);
         let tracking = range_change.and_then(|(range, inserted, handlers)| {
             self.begin_range_text_change(range, inserted, handlers)
         });
+        *self.0.exact_text.borrow_mut() = replacement.text;
         self.on_invalidated();
+        self.0.exact_text.borrow_mut().take();
+        drop(journaling);
         if tracking
             .as_ref()
             .is_some_and(|scope| scope.was_interrupted())
@@ -1125,6 +1362,117 @@ impl RichTextDocument {
             return Err(DocumentError::EditInProgress);
         }
         Ok(())
+    }
+
+    /// The text of the tree once the paragraphs `removed` of a tree whose paragraphs have the
+    /// UTF-16 `lengths` are replaced by `inserted`, made from the observed text (F1c). `None`
+    /// when the observed text is not the tree's at `version` or does not have those lengths:
+    /// the observation of the replacement then reads the tree.
+    fn replaced_text(
+        &self,
+        version: u64,
+        lengths: &[usize],
+        removed: Range<usize>,
+        inserted: &[ParagraphSnapshot],
+    ) -> Option<String> {
+        if self.0.observed_version.get() != version {
+            return None;
+        }
+        let observed = self.0.observed_text.borrow().clone();
+        let count = lengths.len();
+        let first_start = lengths[..removed.start].iter().sum::<usize>() + removed.start;
+        let rest_start =
+            first_start + lengths[removed.clone()].iter().sum::<usize>() + removed.len();
+        let total = lengths.iter().sum::<usize>() + count.saturating_sub(1);
+        if utf16_to_byte(&observed, total)? != observed.len() {
+            return None;
+        }
+        // The text before the replaced paragraphs, without the separator that follows it, and
+        // the text after them; each next to a paragraph separator of the observed text.
+        let before_end = if removed.start > 0 {
+            Some(utf16_to_byte(&observed, first_start - 1)?)
+        } else {
+            None
+        };
+        let after_start = if removed.end < count {
+            Some(utf16_to_byte(&observed, rest_start)?)
+        } else {
+            None
+        };
+        let separator_at = |byte: Option<usize>| {
+            byte.and_then(|byte| observed.as_bytes().get(byte)) == Some(&b'\n')
+        };
+        if (removed.start > 0 && removed.start < count && !separator_at(before_end))
+            || (removed.end > 0
+                && removed.end < count
+                && !separator_at(after_start.and_then(|start| start.checked_sub(1))))
+        {
+            return None;
+        }
+        let mut middle = String::new();
+        for (index, paragraph) in inserted.iter().enumerate() {
+            if index != 0 {
+                middle.push('\n');
+            }
+            for inline in &paragraph.inlines {
+                inline.append_text(&mut middle);
+            }
+        }
+        let parts = [
+            before_end.map(|end| &observed[..end]),
+            (!inserted.is_empty()).then_some(middle.as_str()),
+            after_start.map(|start| &observed[start..]),
+        ];
+        let mut text = String::with_capacity(observed.len() + middle.len() + 1);
+        for (index, part) in parts.iter().flatten().enumerate() {
+            if index != 0 {
+                text.push('\n');
+            }
+            text.push_str(part);
+        }
+        Some(text)
+    }
+
+    /// The paragraphs of a document that an edit can read and rebuild a paragraph at a time
+    /// (F1c): one whose blocks are all paragraphs, with no link fields (their extents span the
+    /// document). `None` for any other document, which edits through a snapshot of it.
+    fn paragraph_table(&self) -> Option<ParagraphTable> {
+        if self.rebuilds_everything() || !self.0.link_fields.borrow().is_empty() {
+            return None;
+        }
+        let blocks = self.0.blocks.snapshot();
+        if blocks.is_empty() {
+            return None;
+        }
+        let mut paragraphs = Vec::with_capacity(blocks.len());
+        let mut lengths = Vec::with_capacity(blocks.len());
+        for block in blocks.iter() {
+            let paragraph = block.cast::<Paragraph>()?;
+            lengths.push(paragraph.text_length());
+            paragraphs.push(paragraph);
+        }
+        Some(ParagraphTable {
+            paragraphs,
+            lengths,
+        })
+    }
+
+    #[cfg(not(test))]
+    fn rebuilds_everything(&self) -> bool {
+        false
+    }
+
+    /// Test only: whether every installation replaces all blocks (`full_rebuild`).
+    #[cfg(test)]
+    fn rebuilds_everything(&self) -> bool {
+        self.0.full_rebuild.get()
+    }
+
+    /// Test only: makes every edit and installation take the path before F1c (a snapshot of the
+    /// document, all blocks rebuilt), the reference of the incremental paths.
+    #[cfg(test)]
+    pub(crate) fn set_full_rebuild(&self, value: bool) {
+        self.0.full_rebuild.set(value);
     }
 
     fn ensure_install_read(&self, version: u64) -> Result<(), DocumentError> {
@@ -1160,12 +1508,13 @@ impl RichTextDocument {
 
     fn find_splice_run(&self, range: Range<usize>) -> Option<RunLocation> {
         let mut offset = 0;
-        for block in self.0.blocks.snapshot().iter() {
+        for (index, block) in self.0.blocks.snapshot().iter().enumerate() {
             if let Some(paragraph) = block.cast::<Paragraph>() {
                 if range.start >= offset && range.end <= offset + paragraph.text_length() {
-                    if let Some(found) =
+                    if let Some(mut found) =
                         find_run_in_collection(&paragraph.inlines(), &range, offset)
                     {
+                        found.block = index;
                         return Some(found);
                     }
                 }
@@ -1181,6 +1530,7 @@ impl RichTextDocument {
         range: Range<usize>,
         format: &CharacterFormat,
     ) -> Result<(), DocumentError> {
+        let version = self.mutation_version();
         let source = found.run.text().unwrap_or_default();
         let length = source.encode_utf16().count();
         let local = range.start - found.offset..range.end - found.offset;
@@ -1191,6 +1541,15 @@ impl RichTextDocument {
         }
         let _batch = self.begin_edit();
         self.0.change_kind.set(Some(DocumentChangeKind::Formatting));
+        // The journals of the edits being recorded hold this paragraph (S8). With link fields
+        // the observation of the change reconciles fields in any paragraph, and a write while
+        // the format was read may have moved the paragraph: the journals cannot follow those.
+        if self.0.link_fields.borrow().is_empty() && self.mutation_version() == version {
+            self.journal_replacement(found.block, 1, 1, None);
+        } else {
+            self.journal_untracked_change();
+        }
+        let _journaling = self.journaling();
         if local.start == 0 && local.end == length {
             self.0.installing.set(true);
             format.apply_to(&found.run);
@@ -1238,6 +1597,10 @@ impl RichTextDocument {
         if self.0.silent_depth.get() != 0 {
             return;
         }
+        if self.0.journaling.get() == 0 {
+            // A write to the tree that went around the document's edits (S8).
+            self.journal_untracked_change();
+        }
         self.0
             .mutation_version
             .set(self.mutation_version().wrapping_add(1));
@@ -1260,9 +1623,13 @@ impl RichTextDocument {
             |tracked| tracked.handlers.clone(),
         );
         let mutation = self.mutation_version();
+        // A replacement of some blocks gives the new text, made from the observed one (F1c).
         // One run spliced by the editor's fast path: the new text is the observed one with the
         // edit applied (no read of the tree, which can call application code, and no diff).
-        let spliced = if self.0.exact_splice.get() {
+        let replaced = self.0.exact_text.borrow_mut().take();
+        let spliced = if replaced.is_some() {
+            replaced
+        } else if self.0.exact_splice.get() {
             pending_edit.as_ref().and_then(|(range, inserted)| {
                 let before = self.0.observed_text.borrow().clone();
                 let start = utf16_to_byte(&before, range.start)?;
@@ -1516,7 +1883,7 @@ fn validate_text_range_of_length(text: &str, length: usize, range: Range<usize>)
             end: range.end,
         });
     }
-    let length = text.encode_utf16().count();
+    // The length is the one kept with the text (F1c: no count of the document per edit).
     if range.end > length {
         return Err(DocumentError::OffsetOutOfRange {
             offset: range.end,
@@ -1617,6 +1984,249 @@ fn wrap_with_format(inlines: Vec<InlineSnapshot>, format: &CharacterFormat) -> V
     }
 }
 
+/// The paragraphs that take the place of `paragraphs` (those a replacement spans, in order)
+/// when the text from `offsets.start` in the first of them to `offsets.end` in the last is
+/// replaced by `fragment`: the first keeps its format and its text before the range, the last
+/// its text after the range.
+fn replacement_paragraphs(
+    paragraphs: &[ParagraphSnapshot],
+    offsets: Range<usize>,
+    fragment: &DocumentSnapshot,
+    alignment_source: ParagraphAlignmentSource,
+) -> Vec<ParagraphSnapshot> {
+    let first = &paragraphs[0];
+    let last = &paragraphs[paragraphs.len() - 1];
+    let spans_paragraphs = paragraphs.len() > 1;
+    let prefix = slice_inlines(&first.inlines, 0..offsets.start);
+    let mut suffix = slice_inlines(&last.inlines, offsets.end..last.text_length());
+    let mut inserted = if fragment.paragraphs.is_empty() {
+        vec![ParagraphSnapshot::default()]
+    } else {
+        fragment.paragraphs.clone()
+    };
+    let inserted_last = inserted.len() - 1;
+    let single = inserted.len() == 1;
+    if spans_paragraphs && first.format.character != last.format.character {
+        suffix = wrap_with_format(suffix, &last.format.character);
+    }
+    if single {
+        let mut middle = wrap_with_format(
+            std::mem::take(&mut inserted[0].inlines),
+            &inserted[0].format.character,
+        );
+        let mut inlines = prefix;
+        inlines.append(&mut middle);
+        inlines.append(&mut suffix);
+        inserted[0].inlines = inlines;
+        inserted[0].format = first.format.clone();
+    } else {
+        let mut middle = wrap_with_format(
+            std::mem::take(&mut inserted[0].inlines),
+            &inserted[0].format.character,
+        );
+        inserted[0].inlines = prefix;
+        inserted[0].inlines.append(&mut middle);
+        inserted[0].format = first.format.clone();
+        inserted[inserted_last].inlines.append(&mut suffix);
+    }
+    if alignment_source == ParagraphAlignmentSource::Trailing && spans_paragraphs {
+        // A typed break creates another paragraph in the merged context;
+        // every inserted paragraph therefore receives the same alignment.
+        // Preserve None exactly so inherited alignment remains inherited.
+        for paragraph in &mut inserted {
+            paragraph.format.text_alignment = last.format.text_alignment;
+        }
+    }
+    // A replacement of text carries its format in an empty run, and a break leaves one at the
+    // end of the first part and at the start of the second; a merge kept the second part's and
+    // added its own, so every break and merge of a paragraph added inlines to it (#439). Where
+    // the parts meet, the empty inlines are reduced to the one that finding an element or a run
+    // at that offset gives (`collapse_empty_inlines`).
+    for paragraph in &mut inserted {
+        paragraph.inlines = collapse_empty_inlines(std::mem::take(&mut paragraph.inlines));
+    }
+    inserted
+}
+
+/// Whether an inline holds nothing: a run without text, or a span (bold, italic, underline, a
+/// hyperlink that projects no link field) that holds only such inlines.
+fn is_empty_inline(inline: &InlineSnapshot) -> bool {
+    match &inline.kind {
+        InlineSnapshotKind::Run(text) => text.is_empty(),
+        InlineSnapshotKind::Span(children)
+        | InlineSnapshotKind::Bold(children)
+        | InlineSnapshotKind::Italic(children)
+        | InlineSnapshotKind::Underline(children)
+        | InlineSnapshotKind::Hyperlink {
+            inlines: children,
+            field_id: None,
+            ..
+        } => children.iter().all(is_empty_inline),
+        _ => false,
+    }
+}
+
+/// `inlines` with each group of consecutive inlines that hold nothing (`is_empty_inline`)
+/// reduced to its first, and the last inline kept: the others are never what an element or a
+/// run at an offset resolves to (an empty inline is found only as the first at its offset with
+/// nothing before it, or as the last inline), so the change is not visible to typing, formats
+/// or gravity.
+fn collapse_empty_inlines(inlines: Vec<InlineSnapshot>) -> Vec<InlineSnapshot> {
+    let empty: Vec<bool> = inlines.iter().map(is_empty_inline).collect();
+    let count = inlines.len();
+    inlines
+        .into_iter()
+        .enumerate()
+        .filter(|(index, _)| {
+            !empty[*index] || *index == 0 || !empty[*index - 1] || *index + 1 == count
+        })
+        .map(|(_, inline)| inline)
+        .collect()
+}
+
+/// Whether a character format of `range` changes the paragraph at `offset` of `length` units:
+/// its text in the range, or an empty paragraph whose mark the range covers.
+fn formats_paragraph(range: &Range<usize>, offset: usize, length: usize) -> bool {
+    (range.start < offset + length && range.end > offset)
+        || (length == 0 && range.start <= offset && range.end > offset)
+}
+
+/// Applies a character format of `range` to the paragraph at `offset` of `length` units.
+fn format_paragraph(
+    paragraph: &mut ParagraphSnapshot,
+    range: &Range<usize>,
+    offset: usize,
+    length: usize,
+    format: &CharacterFormat,
+) {
+    if range.start < offset + length && range.end > offset {
+        paragraph.inlines = format_inlines(
+            &paragraph.inlines,
+            range.start.saturating_sub(offset)..range.end.min(offset + length) - offset,
+            format,
+        );
+    } else if length == 0 && range.start <= offset && range.end > offset {
+        paragraph.format.character = paragraph.format.character.overlay(format);
+    }
+}
+
+/// The snapshot of a block, as a snapshot of the document has it: a block that is not a
+/// `Paragraph` is a paragraph of its text in its character format.
+fn block_snapshot(block: &Ref<Block>) -> ParagraphSnapshot {
+    if let Some(paragraph) = block.cast::<Paragraph>() {
+        ParagraphSnapshot::from_paragraph(&paragraph)
+    } else {
+        ParagraphSnapshot {
+            format: ParagraphFormat {
+                character: CharacterFormat::from_element(block),
+                ..Default::default()
+            },
+            inlines: vec![InlineSnapshot::run(block.text())],
+        }
+    }
+}
+
+/// How many paragraphs at the start and at the end of a replacement of `old` by `new` stay as
+/// they are: the same snapshot before and after, of a block that is a paragraph
+/// (`is_paragraph`, by the index in `old`; another block is always rebuilt as a paragraph).
+/// The two never overlap.
+fn common_paragraphs(
+    is_paragraph: &dyn Fn(usize) -> bool,
+    old: &[ParagraphSnapshot],
+    new: &[ParagraphSnapshot],
+) -> (usize, usize) {
+    let limit = old.len().min(new.len());
+    let prefix = (0..limit)
+        .take_while(|&index| is_paragraph(index) && old[index] == new[index])
+        .count();
+    let suffix = (0..limit - prefix)
+        .take_while(|&index| {
+            let at = old.len() - 1 - index;
+            is_paragraph(at) && old[at] == new[new.len() - 1 - index]
+        })
+        .count();
+    (prefix, suffix)
+}
+
+/// The embedded controls of some paragraphs, by identity.
+fn embedded_controls(paragraphs: &[ParagraphSnapshot]) -> Vec<usize> {
+    let mut controls = Vec::new();
+    let mut pending: Vec<&InlineSnapshot> =
+        paragraphs.iter().flat_map(|p| p.inlines.iter()).collect();
+    while let Some(inline) = pending.pop() {
+        if let InlineSnapshotKind::Embedded(Some(control)) = &inline.kind {
+            controls.push(&**control as *const Control as usize);
+        }
+        if let Some(children) = inline.children() {
+            pending.extend(children);
+        }
+    }
+    controls
+}
+
+/// The paragraphs of a document that an edit reads a paragraph at a time, and their UTF-16
+/// lengths (F1c; `RichTextDocument::paragraph_table`).
+struct ParagraphTable {
+    paragraphs: Vec<Ref<Paragraph>>,
+    lengths: Vec<usize>,
+}
+
+impl ParagraphTable {
+    /// The paragraph of `offset` and the offset in it, as `DocumentSnapshot::locate` gives them.
+    fn locate(&self, offset: usize) -> (usize, usize) {
+        let mut remaining = offset;
+        for (index, length) in self.lengths.iter().copied().enumerate() {
+            if remaining <= length || index + 1 == self.lengths.len() {
+                return (index, remaining.min(length));
+            }
+            remaining -= length + 1;
+        }
+        (0, 0)
+    }
+
+    /// The UTF-16 offset of the start of the paragraph `index`.
+    fn start(&self, index: usize) -> usize {
+        self.lengths[..index].iter().sum::<usize>() + index
+    }
+
+    fn snapshots(&self, range: Range<usize>) -> Vec<ParagraphSnapshot> {
+        self.paragraphs[range]
+            .iter()
+            .map(|paragraph| ParagraphSnapshot::from_paragraph(paragraph))
+            .collect()
+    }
+}
+
+/// A replacement of text by a fragment, read a paragraph at a time (F1c).
+struct ParagraphEdit {
+    range: Range<usize>,
+    /// The fragment keeps the identities of its link fields (no new ones are allocated).
+    inherited: bool,
+    alignment_source: ParagraphAlignmentSource,
+    paired_tracking: bool,
+}
+
+/// The paragraphs from `start` of a document read a paragraph at a time (`old`, their
+/// snapshots) and the paragraphs that take their place (`new`) (F1c).
+struct ParagraphChange<'a> {
+    start: usize,
+    old: &'a [ParagraphSnapshot],
+    new: &'a [ParagraphSnapshot],
+}
+
+/// Some consecutive blocks of the tree and the paragraphs that take their place (F1c).
+struct BlockReplacement<'a> {
+    /// The index of the first block replaced (or of the insertion).
+    start: usize,
+    removed: &'a [Ref<Block>],
+    /// The snapshots of the removed blocks, when the caller has them: the journals of the edits
+    /// being recorded keep them (S8).
+    before: Option<&'a [ParagraphSnapshot]>,
+    inserted: &'a [ParagraphSnapshot],
+    /// The text of the tree after the replacement, when the observed text gives it.
+    text: Option<String>,
+}
+
 fn insertion_context(inlines: &[InlineSnapshot], offset: usize) -> Vec<InlineSnapshot> {
     let mut position = 0;
     for inline in inlines {
@@ -1709,14 +2319,11 @@ fn find_inline(
 }
 
 fn validate_control_parents(
-    snapshot: &DocumentSnapshot,
+    paragraphs: &[ParagraphSnapshot],
     current: &HashSet<usize>,
 ) -> Result<(), DocumentError> {
-    let mut pending: Vec<&InlineSnapshot> = snapshot
-        .paragraphs
-        .iter()
-        .flat_map(|p| p.inlines.iter())
-        .collect();
+    let mut pending: Vec<&InlineSnapshot> =
+        paragraphs.iter().flat_map(|p| p.inlines.iter()).collect();
     while let Some(inline) = pending.pop() {
         if let InlineSnapshotKind::Embedded(Some(control)) = &inline.kind {
             if control.parent().is_some()
@@ -1737,6 +2344,8 @@ struct RunLocation {
     collection: InlineCollection,
     index: usize,
     offset: usize,
+    /// The index of the block of the run.
+    block: usize,
 }
 
 fn find_run_in_collection(
@@ -1753,6 +2362,7 @@ fn find_run_in_collection(
                     collection: collection.clone(),
                     index,
                     offset,
+                    block: 0,
                 });
             }
             length
@@ -1796,18 +2406,15 @@ struct ContentPool {
 }
 
 impl ContentPool {
-    fn capture(blocks: &BlockCollection) -> Self {
+    /// The elements of the paragraphs among `blocks` (the blocks an installation replaces).
+    fn capture_blocks(blocks: &[Ref<Block>]) -> Self {
         let mut pool = Self {
             paragraphs: Vec::new(),
             inlines: Vec::new(),
             next_paragraph: 0,
             next_inline: 0,
         };
-        for paragraph in blocks
-            .snapshot()
-            .iter()
-            .filter_map(|block| block.cast::<Paragraph>())
-        {
+        for paragraph in blocks.iter().filter_map(|block| block.cast::<Paragraph>()) {
             pool.capture_inlines(&paragraph.inlines());
             let snapshot = ParagraphSnapshot::from_paragraph(&paragraph);
             pool.paragraphs.push(ParagraphEntry {
@@ -1831,6 +2438,20 @@ impl ContentPool {
                 self.capture_inlines(&span.inlines());
             }
         }
+    }
+
+    /// The embedded controls of the pooled elements, by identity.
+    fn controls(&self) -> HashSet<usize> {
+        self.inlines
+            .iter()
+            .filter_map(|entry| {
+                if let InlineSnapshotKind::Embedded(Some(control)) = &entry.snapshot.kind {
+                    Some(&**control as *const Control as usize)
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 
     fn detach_contents(&self) {
@@ -2017,3 +2638,12 @@ fn compatible(a: &InlineSnapshotKind, b: &InlineSnapshotKind) -> bool {
         _ => std::mem::discriminant(a) == std::mem::discriminant(b),
     }
 }
+
+#[path = "document_delta.rs"]
+mod delta;
+
+pub(crate) use delta::{BlockJournal, DocumentDelta};
+
+#[cfg(test)]
+#[path = "rich_text_structural_edit_tests.rs"]
+mod structural_edit_tests;

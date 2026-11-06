@@ -7,8 +7,8 @@ use crate::internal::DeliveryQueue;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::subjects::{BehaviorSubject, Subject, SubjectBase};
 use ferroui_reactive::{Observable, ObservableExt};
-use ferroui_system::collections::generic::Dictionary;
-use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
+use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
+use indexmap::IndexMap;
 use std::cell::{Cell, RefCell};
 use std::hash::Hash;
 use std::rc::{Rc, Weak};
@@ -52,8 +52,8 @@ pub trait IObservableCache<T, K>: IConnectableCache<T, K> + IDisposable {
     fn items(&self) -> Vec<T>;
     /// The keys (`Keys`).
     fn keys(&self) -> Vec<K>;
-    /// The keys and items (`KeyValues`).
-    fn key_values(&self) -> Dictionary<K, T>;
+    /// The keys and items, in the order of enumeration of the cache (`KeyValues`).
+    fn key_values(&self) -> IndexMap<K, T>;
     /// The item of `key` (`Lookup`).
     fn lookup(&self, key: &K) -> Option<T>;
 }
@@ -101,7 +101,7 @@ struct Inner<T, K> {
     edit_level: Cell<usize>,
     current_version: Cell<u64>,
     current_delivery_version: Cell<u64>,
-    loader: RefCell<Option<Rc<dyn IDisposable>>>,
+    loader: RefCell<Option<Subscription>>,
     disposed: Cell<bool>,
 }
 
@@ -154,7 +154,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ObservableCache<T, K> {
         let cache = Self::create(None);
         let inner = Rc::downgrade(&cache.inner);
         let (error_target, completed_target) = (inner.clone(), inner.clone());
-        let loader = source.change_sets().subscribe_all(
+        let loader = source.change_sets().subscribe_all_guard(
             move |change_set| {
                 if let Some(inner) = inner.upgrade() {
                     let notifications = inner.notifications.acquire();
@@ -606,7 +606,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IObservableCache<T, K> 
         self.inner.reader_writer.keys()
     }
 
-    fn key_values(&self) -> Dictionary<K, T> {
+    fn key_values(&self) -> IndexMap<K, T> {
         self.inner.reader_writer.key_values()
     }
 
@@ -621,10 +621,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IDisposable for Observa
         if self.inner.disposed.replace(true) {
             return;
         }
-        let loader = self.inner.loader.borrow_mut().take();
-        if let Some(loader) = loader {
-            loader.dispose();
-        }
+        drop(self.inner.loader.take());
         self.inner.notify_completed();
     }
 }

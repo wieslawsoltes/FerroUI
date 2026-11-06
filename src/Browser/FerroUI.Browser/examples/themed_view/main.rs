@@ -36,7 +36,7 @@ use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, FontManagerOptions};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroLocator, FerroObjectImpl, LocatorExtensions,
@@ -347,7 +347,7 @@ pub fn themed_view_services() -> String {
 pub fn themed_view_read_clipboard() {
     let Some(clipboard) = top_level().and_then(|top_level| top_level.clipboard()) else { return };
     with_services(|services| services.clipboard = None);
-    drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+    drop(Dispatcher::ui_thread().start_local(async move {
         let text = match clipboard.try_get_text_async().await {
             Ok(text) => format!("ok:{}", text.unwrap_or_default()),
             Err(error) => format!("error:{:?}", error.kind()),
@@ -362,7 +362,7 @@ pub fn themed_view_write_clipboard(text: &str) {
     let Some(clipboard) = top_level().and_then(|top_level| top_level.clipboard()) else { return };
     let text = text.to_string();
     with_services(|services| services.clipboard = None);
-    drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+    drop(Dispatcher::ui_thread().start_local(async move {
         let result = match clipboard.set_text_async(Some(&text)).await {
             Ok(()) => "written".to_string(),
             Err(error) => format!("error:{:?}", error.kind()),
@@ -376,7 +376,7 @@ pub fn themed_view_write_clipboard(text: &str) {
 #[wasm_bindgen(js_name = themedViewRequestScreenDetails)]
 pub fn themed_view_request_screen_details() {
     let Some(screens) = top_level().and_then(|top_level| top_level.screens()) else { return };
-    drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+    drop(Dispatcher::ui_thread().start_local(async move {
         let granted = screens.request_screen_details().await;
         with_services(|services| services.screen_details = Some(granted));
     }));
@@ -387,9 +387,13 @@ pub fn themed_view_request_screen_details() {
 #[wasm_bindgen(js_name = themedViewLaunch)]
 pub fn themed_view_launch(uri: &str) {
     let Some(launcher) = top_level().map(|top_level| top_level.launcher()) else { return };
-    let Ok(uri) = Uri::new(uri, UriKind::RelativeOrAbsolute) else { return };
-    drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
-        let launched = launcher.launch_uri_async(&uri).await;
+    let Ok(uri) = UriRef::parse(uri) else { return };
+    drop(Dispatcher::ui_thread().start_local(async move {
+        // A relative reference names nothing to open: the launcher takes a `Url`.
+        let launched = match uri.as_url() {
+            Some(url) => launcher.launch_uri_async(url).await,
+            None => false,
+        };
         with_services(|services| services.launched = Some(launched));
     }));
 }

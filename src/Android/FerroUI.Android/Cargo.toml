@@ -18,9 +18,13 @@ path = "lib.rs"
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-opengl.workspace = true
+# The one-shot channel the requests to an activity wait on.
+ferroui-system.workspace = true
 # The Vulkan rendering mode (`platform/vulkan`): the contracts and the platform graphics of Vulkan.
 # Nothing is linked: the loader of the system is opened at run time.
 ferroui-vulkan.workspace = true
+# The URLs of the launcher, the storage and the activation (C5 of #423).
+url.workspace = true
 
 # What exists on Android only. The renderer and the text shaper are selected by `use_android`, as
 # the reference does; the declarations of the Java Native Interface and the C library (`dlopen` for

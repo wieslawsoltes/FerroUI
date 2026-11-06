@@ -14,7 +14,7 @@ use ferrodock_model_reactiveui::{
     impl_factory, Factory, FactoryImpl,
 };
 use ferrodock_settings::DockSettings;
-use ferroui_system::collections::generic::Dictionary;
+use std::collections::HashMap;
 use std::{
     cell::RefCell,
     rc::{Rc, Weak},
@@ -199,16 +199,16 @@ impl FactoryImpl for DockFactory {
         window
     }
     fn init_layout(this: &Self, layout: Rc<dyn IDockable>) {
-        let contexts: ContextLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+        let contexts: ContextLocatorMap = Rc::new(RefCell::new(HashMap::new()));
         for id in ["Document1", "Document2", "Document3"] {
-            contexts.borrow_mut().add(
+            contexts.borrow_mut().insert(
                 id.into(),
                 Some(Rc::new(|| Some(DemoDocument::new() as BoxedValue))),
             );
         }
         macro_rules! tool_context {
             ($id:literal,$type:ty) => {
-                contexts.borrow_mut().add(
+                contexts.borrow_mut().insert(
                     $id.into(),
                     Some(Rc::new(|| Some(<$type>::new() as BoxedValue))),
                 );
@@ -223,21 +223,21 @@ impl FactoryImpl for DockFactory {
         tool_context!("Tool7", Tool7);
         tool_context!("Tool8", Tool8);
         let dashboard = layout.clone();
-        contexts.borrow_mut().add(
+        contexts.borrow_mut().insert(
             "Dashboard".into(),
             Some(Rc::new(move || {
                 Some(Rc::new(dashboard.clone()) as BoxedValue)
             })),
         );
         let owner = this.runtime.upgrade().expect("enclosing source factory");
-        contexts.borrow_mut().add(
+        contexts.borrow_mut().insert(
             "Home".into(),
             Some(Rc::new(move || Some(owner.context.clone()))),
         );
         this.set_context_locator(Some(contexts));
-        let dockables: DockableLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+        let dockables: DockableLocatorMap = Rc::new(RefCell::new(HashMap::new()));
         let owner = this.runtime.upgrade().expect("enclosing source factory");
-        dockables.borrow_mut().add(
+        dockables.borrow_mut().insert(
             "Root".into(),
             Some(Rc::new(move || {
                 owner
@@ -248,7 +248,7 @@ impl FactoryImpl for DockFactory {
             })),
         );
         let owner = this.runtime.upgrade().expect("enclosing source factory");
-        dockables.borrow_mut().add(
+        dockables.borrow_mut().insert(
             "Documents".into(),
             Some(Rc::new(move || {
                 owner
@@ -259,8 +259,8 @@ impl FactoryImpl for DockFactory {
             })),
         );
         this.set_dockable_locator(Some(dockables));
-        let hosts: HostWindowLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
-        hosts.borrow_mut().add(
+        let hosts: HostWindowLocatorMap = Rc::new(RefCell::new(HashMap::new()));
+        hosts.borrow_mut().insert(
             "IDockWindow".into(),
             Some(Rc::new(|| {
                 Some(if DockSettings::use_managed_windows() {

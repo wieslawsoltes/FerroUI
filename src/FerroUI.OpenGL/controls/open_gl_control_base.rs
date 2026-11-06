@@ -1,5 +1,5 @@
 use super::open_gl_control_resources::OpenGlControlBaseResources;
-use crate::composition::task_support::start;
+use crate::composition::task_support::{join, start};
 use crate::composition::{ICompositionGlContext, OpenGlCompositionInterop};
 use crate::{GlInterface, GlVersion};
 use ferroui_base::input::InputElementImpl;
@@ -245,7 +245,7 @@ impl OpenGlControlBase {
 
         if generation != this.generation.get() {
             // The control was detached while we were awaiting
-            let _ = context.dispose_async().await;
+            let _ = join(context.dispose_async()).await;
             return false;
         }
         this.create_resources(&compositor, context)

@@ -17,7 +17,7 @@ use crate::templates::{
 };
 use crate::{ContentControl, Control, LayoutTransformControl, StackPanel, TextBlock};
 use ferroui_base::animation::easings::QuadraticEaseOut;
-use ferroui_base::animation::{Animation, Cue, FillMode, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, Cue, FillMode, KeyFrame, SignedDuration};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::{ReflectionBinding, TemplateBinding};
 use ferroui_base::layout::{HorizontalAlignment, Layoutable, VerticalAlignment};
@@ -180,7 +180,7 @@ pub fn notification_card_theme() -> Ref<ControlTheme> {
     let animation = Animation::new();
     animation.set_easing(QuadraticEaseOut::new());
     animation.set_fill_mode(FillMode::Forward);
-    animation.set_duration(TimeSpan::from_seconds(1.25));
+    animation.set_duration(SignedDuration::from_seconds(1.25));
     animation
         .children()
         .add(KeyFrame::with_cue(Cue::new(1.0), [Setter::new(NotificationCard::is_closed_property(), true) as _]));

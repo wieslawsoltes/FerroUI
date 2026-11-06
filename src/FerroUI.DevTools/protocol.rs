@@ -2,7 +2,7 @@ use crate::input::Input;
 use base64::Engine;
 use ferroui_base::input::InputElement;
 use ferroui_base::interactivity::RoutingStrategies;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::{Point, Rect, Ref, StyledElement};
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::{Control, TopLevel};
@@ -119,7 +119,7 @@ pub struct CdpSession {
     input: Input,
     pub(crate) enabled: HashSet<String>,
     target_id: String,
-    inspect_subscriptions: Vec<Rc<dyn IDisposable>>,
+    inspect_subscriptions: Vec<Subscription>,
     picked: Rc<RefCell<Vec<(Point, bool)>>>,
     events: Vec<Value>,
     last_tree: Option<Vec<Node>>,
@@ -333,9 +333,7 @@ impl CdpSession {
         format!("ferroui://{}", self.target_id)
     }
     fn stop_inspecting(&mut self) {
-        for s in self.inspect_subscriptions.drain(..) {
-            s.dispose();
-        }
+        self.inspect_subscriptions.clear();
         self.picked.borrow_mut().clear();
     }
     fn inspect_mode(&mut self, mode: &str) -> Result<()> {
@@ -364,11 +362,12 @@ impl CdpSession {
             true,
         );
         let weak = root.downgrade();
-        self.inspect_subscriptions.push(Disposable::create(move || {
-            if let Some(root) = weak.upgrade() {
-                root.remove_handler(InputElement::pointer_moved_event(), token);
-            }
-        }));
+        self.inspect_subscriptions
+            .push(Subscription::new(Disposable::create(move || {
+                if let Some(root) = weak.upgrade() {
+                    root.remove_handler(InputElement::pointer_moved_event(), token);
+                }
+            })));
         let queue = self.picked.clone();
         let weak = root.downgrade();
         let token = root.add_handler_with(
@@ -386,11 +385,12 @@ impl CdpSession {
             true,
         );
         let weak = root.downgrade();
-        self.inspect_subscriptions.push(Disposable::create(move || {
-            if let Some(root) = weak.upgrade() {
-                root.remove_handler(InputElement::pointer_pressed_event(), token);
-            }
-        }));
+        self.inspect_subscriptions
+            .push(Subscription::new(Disposable::create(move || {
+                if let Some(root) = weak.upgrade() {
+                    root.remove_handler(InputElement::pointer_pressed_event(), token);
+                }
+            })));
         Ok(())
     }
     /// Poll on the UI thread, typically every 100 ms. Tree changes invalidate the document.

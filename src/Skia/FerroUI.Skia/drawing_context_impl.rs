@@ -290,6 +290,9 @@ pub struct DrawingContextImpl {
     multiply_stack: Vec<MultiplyLayer>,
     /// The pixel operations that are pushed.
     pixel_operation_stack: Vec<PixelOperationLayer>,
+    /// The effects that are pushed (`push_effect`), with what popping each
+    /// restores and draws.
+    effect_stack: Vec<PushedEffect>,
     /// The save counts of the canvas at which a rounded rectangle is in the
     /// clip stack of the canvas as a clip of its own (not a shader).
     rounded_clip_elements: Vec<usize>,
@@ -348,12 +351,17 @@ impl DrawingContextImpl {
             .or_else(SkiaPlatform::options)
             .is_some_and(|options| options.use_opacity_save_layer);
 
+        // The Skia images of effect images whose last handle was dropped
+        // (#455, E6) go with this frame, and their textures with its flush.
+        crate::custom_shader_effects::release_dropped_images();
+
         let mut context = Self {
             disposables,
             intermediate_surface_dpi: create_info.dpi,
             mask_stack: Vec::new(),
             multiply_stack: Vec::new(),
             pixel_operation_stack: Vec::new(),
+            effect_stack: Vec::new(),
             rounded_clip_elements: Vec::new(),
             opacity_stack: Vec::new(),
             compositing_opacity_stack: Vec::new(),
@@ -1073,7 +1081,76 @@ impl DrawingContextImpl {
             );
         }
 
+        // A custom effect (#455) without a factory in this backend: its
+        // content is drawn unchanged, in a layer without a filter. A shader
+        // effect whose program failed was reported by
+        // `custom_shader_effects` already.
+        if let Some(custom) = effect.as_custom_effect() {
+            if !custom.has_shader() {
+                custom.report_unhandled("Skia");
+            }
+        }
+
         None
+    }
+
+    /// Pushes the custom effect `effect` as its runtime shader (#455, E4),
+    /// over `clip_rect` (the area of the effect; the clip of the canvas
+    /// without one): a save of the canvas under the matrix of the layer of
+    /// the shader (`custom_shader_effects::ShaderLayer`), clipped to its
+    /// area, and a save layer, with the runtime shader image filter of a
+    /// content-sampling program, without a filter for an overlay, which is
+    /// drawn over the content when the effect is popped. The layer is
+    /// composed with the opacity in effect, and its content drawn with full
+    /// opacity. `None`, pushing nothing, when the effect is not a shader
+    /// effect or its program failed (reported once).
+    fn try_push_shader_effect(
+        &mut self,
+        clip_rect: Option<Rect>,
+        effect: &ferroui_base::media::effects::ImmutableCustomEffect,
+    ) -> Option<PushedEffect> {
+        use crate::custom_shader_effects::{content_filter, overlay_shader, program, ShaderLayer};
+
+        let program = program(effect)?;
+        let inherited_opacity = self.current_opacity;
+        let canvas = self.canvas.get();
+        let bounds = match clip_rect {
+            Some(clip_rect) => to_sk_rect(clip_rect),
+            None => canvas.local_clip_bounds()?,
+        };
+        let matrix = canvas.local_to_device();
+        let layer = ShaderLayer::new(&matrix, bounds)?;
+        let mut paint = SkPaintCache::get();
+        paint.set_alpha_f(inherited_opacity.clamp(0.0, 1.0) as f32);
+        let pushed = if program.samples_content {
+            let Some(filter) = content_filter(&program, effect, &layer) else {
+                SkPaintCache::return_reset(paint);
+                return None;
+            };
+            paint.set_image_filter(filter);
+            PushedEffect::Shader { inherited_opacity }
+        } else {
+            let Some(shader) = overlay_shader(&program, effect, &layer, self.gr_context.as_deref()) else {
+                SkPaintCache::return_reset(paint);
+                return None;
+            };
+            PushedEffect::Overlay {
+                shader,
+                blend_mode: program.blend_mode,
+                to_device: layer.to_device.clone(),
+                bounds: layer.bounds,
+                inherited_opacity,
+            }
+        };
+        canvas.save();
+        canvas.set_matrix(&layer.to_device);
+        canvas.clip_rect(layer.bounds, sk::ClipOp::Intersect, false);
+        canvas.save_layer(&SaveLayerRec::default().bounds(&layer.bounds).paint(&paint));
+        // The content is drawn with its own transform.
+        canvas.set_matrix(&matrix);
+        SkPaintCache::return_reset(paint);
+        self.current_opacity = 1.0;
+        Some(pushed)
     }
 
     /// Creates a paint wrapper for the given brush.
@@ -1826,6 +1903,14 @@ impl IDrawingContextImpl for DrawingContextImpl {
 impl IDrawingContextImplWithEffects for DrawingContextImpl {
     fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
         self.check_lease();
+        // A runtime shader effect (#455, E4).
+        if let Some(custom) = effect.as_custom_effect() {
+            if let Some(pushed) = self.try_push_shader_effect(clip_rect, custom) {
+                self.effect_stack.push(pushed);
+                return;
+            }
+        }
+        self.effect_stack.push(PushedEffect::Layer);
         let filter = self.create_effect(effect);
         let mut paint = SkPaintCache::get();
         paint.set_image_filter(filter);
@@ -1845,8 +1930,52 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
 
     fn pop_effect(&mut self) {
         self.check_lease();
-        self.restore_canvas();
+        match self.effect_stack.pop() {
+            Some(PushedEffect::Shader { inherited_opacity }) => {
+                // The layer, through the runtime shader image filter, then
+                // the save of the matrix and the clip of the layer.
+                self.restore_canvas();
+                self.restore_canvas();
+                self.current_opacity = inherited_opacity;
+            }
+            Some(PushedEffect::Overlay { shader, blend_mode, to_device, bounds, inherited_opacity }) => {
+                // The overlay over the content, in the coordinates of the
+                // layer, blended with the content only.
+                let mut paint = SkPaintCache::get();
+                paint.set_shader(shader);
+                paint.set_blend_mode(blend_mode);
+                let canvas = self.canvas.get();
+                canvas.set_matrix(&to_device);
+                canvas.draw_rect(bounds, &paint);
+                SkPaintCache::return_reset(paint);
+                self.restore_canvas();
+                self.restore_canvas();
+                self.current_opacity = inherited_opacity;
+            }
+            Some(PushedEffect::Layer) | None => self.restore_canvas(),
+        }
     }
+}
+
+/// An effect that is pushed (`push_effect`).
+enum PushedEffect {
+    /// A save layer, with the image filter of the effect or without one.
+    Layer,
+    /// A content-sampling shader effect (#455, E4): a save of the canvas
+    /// under the matrix of the layer, and the save layer with the runtime
+    /// shader image filter; the opacity in effect when it was pushed.
+    Shader { inherited_opacity: f64 },
+    /// An overlay shader effect: a save of the canvas and the save layer of
+    /// the content; the shader of the overlay with its uniforms and blend
+    /// mode, drawn over `bounds` under `to_device` when it is popped; the
+    /// opacity in effect when it was pushed.
+    Overlay {
+        shader: sk::Shader,
+        blend_mode: sk::BlendMode,
+        to_device: sk::M44,
+        bounds: sk::Rect,
+        inherited_opacity: f64,
+    },
 }
 
 /// The layers of the effects of WinUI's composition: a save layer whose
@@ -1953,6 +2082,52 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
                 self.restore_canvas();
             }
         }
+    }
+
+    /// A save layer whose paint has Skia's matrix convolution: the kernel
+    /// turned by half a turn (Skia correlates, SVG and Direct2D convolve),
+    /// the bias on Skia's scale of 0 to 255; the hard edges are a crop of
+    /// the layer to the bounds that repeats its edge pixels.
+    fn push_convolve_matrix_layer(&mut self, bounds: Rect, convolution: &ferroui_base::media::ConvolveMatrix) {
+        self.check_lease();
+        let kernel = convolution.correlation_kernel();
+        let (target_x, target_y) = convolution.target();
+        let size = sk::ISize::new(convolution.kernel_width as i32, convolution.kernel_height as i32);
+        let bounds = to_sk_rect(bounds);
+        let (tile_mode, crop) = if convolution.clamp_edges {
+            (sk::TileMode::Clamp, sk::image_filters::CropRect::from(bounds))
+        } else {
+            (sk::TileMode::Decal, sk::image_filters::CropRect::NO_CROP_RECT)
+        };
+        let filter = if (size.width * size.height) as usize == kernel.len() {
+            sk::image_filters::matrix_convolution(
+                size,
+                &kernel,
+                convolution.gain(),
+                convolution.bias * 255.0,
+                sk::IPoint::new(target_x as i32, target_y as i32),
+                tile_mode,
+                !convolution.preserve_alpha,
+                None,
+                crop,
+            )
+        } else {
+            None
+        };
+        let mut paint = SkPaintCache::get();
+        paint.set_image_filter(filter);
+        let canvas = self.canvas.get();
+        canvas.save();
+        // Nothing outside the bounds is kept.
+        canvas.clip_rect(bounds, sk::ClipOp::Intersect, false);
+        canvas.save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+        SkPaintCache::return_reset(paint);
+    }
+
+    fn pop_convolve_matrix_layer(&mut self) {
+        self.check_lease();
+        self.restore_canvas();
+        self.restore_canvas();
     }
 
     fn draw_lighting(&mut self, rect: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {

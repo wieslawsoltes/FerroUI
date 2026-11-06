@@ -13,9 +13,8 @@
 //! (`std::io::Result`), and otherwise writes it to the log (error level)
 //! and answers as if nothing was found.
 
-use ferroui_base::animation::TimeSpan;
-use ferroui_base::utilities::DateTimeOffset;
 use std::io::{self, Read, Seek, SeekFrom, Write};
+use std::time::{Duration, SystemTime};
 
 /// The class of the Java layer the storage calls go through.
 pub(crate) const STORAGE_HELPER: &str = "org/ferroui/android/StorageHelper";
@@ -80,12 +79,12 @@ pub(crate) fn is_virtual_document_flags(value: Option<&str>) -> bool {
 /// The date of the last-modified column of a document
 /// (`longValue > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(longValue) : null`).
 /// A number that is no date gives none, where the reference catches the
-/// exception of the conversion.
-pub(crate) fn date_from_unix_time_milliseconds(long_value: i64) -> Option<DateTimeOffset> {
+/// exception of the conversion. The date is the instant, a [`SystemTime`].
+pub(crate) fn date_from_unix_time_milliseconds(long_value: i64) -> Option<SystemTime> {
     if long_value <= 0 || long_value > MAX_UNIX_TIME_MILLISECONDS {
         return None;
     }
-    Some(DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(long_value * 10_000)))
+    SystemTime::UNIX_EPOCH.checked_add(Duration::from_millis(long_value as u64))
 }
 
 /// A column `StorageHelper.queryLongs` read from a row.
@@ -203,7 +202,7 @@ mod imp {
         IStorageItem, StorageItemProperties,
     };
     use ferroui_base::reactive::IDisposable;
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use std::any::Any;
     use std::cell::RefCell;
     use std::fmt::Display;
@@ -515,15 +514,18 @@ mod imp {
                 })
         }
 
-        /// The URI of the item (`new Uri(Uri.ToString())`).
+        /// The URI of the item (`new Uri(Uri.ToString())`): the URL of the
+        /// text of the `android.net.Uri`.
         ///
         /// # Panics
-        /// Panics when the URI is not absolute (the reference throws
+        /// Panics when the text is not a URL (the reference throws
         /// `UriFormatException`).
-        fn path(&self) -> Uri {
+        fn path(&self) -> UriRef {
             let text = uri_to_string(&self.uri());
-            Uri::try_create(&text, UriKind::Absolute)
-                .unwrap_or_else(|| panic!("Invalid URI: The format of the URI could not be determined: {text}"))
+            match url::Url::parse(&text) {
+                Ok(url) => UriRef::Absolute(url),
+                Err(error) => panic!("Invalid URI: The format of the URI could not be determined: {text} ({error})"),
+            }
         }
 
         fn can_bookmark(&self) -> bool {
@@ -725,7 +727,7 @@ mod imp {
                     $type::name(self)
                 }
 
-                fn path(&self) -> Uri {
+                fn path(&self) -> UriRef {
                     self.base.path()
                 }
 
@@ -1552,12 +1554,9 @@ mod tests {
     fn a_number_of_milliseconds_is_a_date_when_it_is_positive() {
         assert_eq!(None, date_from_unix_time_milliseconds(0));
         assert_eq!(None, date_from_unix_time_milliseconds(-1));
+        assert_eq!(Some(SystemTime::UNIX_EPOCH + Duration::from_millis(1)), date_from_unix_time_milliseconds(1));
         assert_eq!(
-            Some(DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(10_000))),
-            date_from_unix_time_milliseconds(1)
-        );
-        assert_eq!(
-            Some(DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(864_000_000_000))),
+            Some(SystemTime::UNIX_EPOCH + Duration::from_secs(86_400)),
             date_from_unix_time_milliseconds(86_400_000)
         );
         assert!(date_from_unix_time_milliseconds(MAX_UNIX_TIME_MILLISECONDS).is_some());

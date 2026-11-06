@@ -6,7 +6,6 @@
 //! several builders, and a second build would fail, so the build is guarded.
 
 use crate::app_builder_extensions::ReactiveUIBuilderFerroExtensions;
-use crate::FerroScheduler;
 use ferroui_reactiveui::{ReactiveUIBuilder, RxAppBuilderMixins};
 use ferroui_splat::{AppBuilder as SplatAppBuilder, AppLocator};
 
@@ -19,7 +18,7 @@ impl SplatApp {
     /// configuration and builds it, unless an application was built already
     /// (`BuildWithFerro`).
     pub fn build_with_ferro(with_reactive_ui_builder: Option<&dyn Fn(&ReactiveUIBuilder)>) {
-        FerroScheduler::install_on_ui_thread();
+        crate::ferro_scheduler::prepare_ui_thread();
 
         let rxui_builder = AppLocator::current_mutable().create_reactive_ui_builder();
         let _ = rxui_builder.with_ferro();

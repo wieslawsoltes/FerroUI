@@ -6,7 +6,6 @@
 //! time they run.
 
 use crate::app_builder_extensions::{main_thread_scheduler, ReactiveUIBuilderFerroExtensions};
-use crate::FerroScheduler;
 use ferroui_reactiveui::{RxAppBuilder, RxSchedulers, ReactiveUIBuilder};
 use ferroui_splat::{AppBuilder as SplatAppBuilder, AppLocator, IDependencyResolver, IMutableDependencyResolver, MutableDependencyResolverExt};
 use std::rc::Rc;
@@ -21,10 +20,12 @@ impl StartupConfiguration {
     /// ([`with_ferro`](ReactiveUIBuilderFerroExtensions::with_ferro)), then the application's
     /// configuration, then the build, unless an application was built already.
     ///
-    /// The synchronization context of the dispatcher becomes the one of the user interface thread
-    /// ([`FerroScheduler::install_on_ui_thread`]).
+    /// The code of the user interface thread that runs outside of a dispatcher job continues at
+    /// Normal unless it has a priority (`Dispatcher::set_current_priority`), where the reference
+    /// installs the synchronization context of the dispatcher; the dispatcher is the schedule of
+    /// its thread already.
     pub fn configure_reactive_ui(configure_reactive_ui: &dyn Fn(&ReactiveUIBuilder)) {
-        FerroScheduler::install_on_ui_thread();
+        crate::ferro_scheduler::prepare_ui_thread();
 
         let rxui_builder = RxAppBuilder::create_reactive_ui_builder();
         let _ = rxui_builder.with_ferro();

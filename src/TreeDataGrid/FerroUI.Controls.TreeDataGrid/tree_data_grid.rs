@@ -823,12 +823,15 @@ impl TreeDataGrid {
         }
         let transfer: Rc<dyn IDataTransfer> = transfer;
         let operation = DragDrop::do_drag_drop_async(trigger, transfer, allowed_effects);
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let _ = operation.await;
-            AUTO_DRAG_DATA.with(|data| {
-                data.borrow_mut().remove(&token);
-            });
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let _ = operation.await;
+                AUTO_DRAG_DATA.with(|data| {
+                    data.borrow_mut().remove(&token);
+                });
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     fn on_click(&self, e: &RoutedEventArgs) {

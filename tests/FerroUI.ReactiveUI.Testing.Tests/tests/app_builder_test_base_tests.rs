@@ -3,7 +3,8 @@
 use crate::mocks::{is_invalid_operation, yield_now, InvalidOperationException};
 use ferroui_reactiveui::PanicError;
 use ferroui_reactiveui_testing::AppBuilderTestBase;
-use ferroui_system::threading::tasks::{block_on, Task};
+use ferroui_system::task::block_on;
+use ferroui_system::ObservableError;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -22,12 +23,13 @@ fn run_app_builder_test_async_with_async_test_body_executes_test() {
 
     // Act
     let flag = executed.clone();
-    block_on(TestHelper::run_app_builder_test_async(move || {
-        Task::spawn_local(async move {
+    block_on(
+        TestHelper::run_app_builder_test_async(move || async move {
             flag.set(true);
-            Ok(())
+            Ok::<(), ObservableError>(())
         })
-    }))
+        .flatten(),
+    )
     .expect("the test passes");
 
     // Assert
@@ -41,7 +43,7 @@ fn run_app_builder_test_async_with_sync_test_body_executes_test() {
 
     // Act
     let flag = executed.clone();
-    block_on(TestHelper::run_app_builder_test_action(move || flag.set(true))).expect("the test passes");
+    block_on(TestHelper::run_app_builder_test_action(move || flag.set(true)).flatten()).expect("the test passes");
 
     // Assert
     assert!(executed.get());
@@ -49,12 +51,13 @@ fn run_app_builder_test_async_with_sync_test_body_executes_test() {
 
 #[test]
 fn run_app_builder_test_async_with_async_test_body_propagates_exceptions() {
-    let error = block_on(TestHelper::run_app_builder_test_async(|| {
-        Task::spawn_local(async {
+    let error = block_on(
+        TestHelper::run_app_builder_test_async(|| async {
             yield_now().await?;
-            Err::<(), _>(InvalidOperationException::error("Test exception"))
+            Err::<(), ObservableError>(InvalidOperationException::error("Test exception"))
         })
-    }))
+        .flatten(),
+    )
     .expect_err("the exception of the test is passed on");
 
     assert!(is_invalid_operation(&error));
@@ -63,7 +66,7 @@ fn run_app_builder_test_async_with_async_test_body_propagates_exceptions() {
 #[test]
 fn run_app_builder_test_async_with_sync_test_body_propagates_exceptions() {
     // The synchronous body throws: here it panics, and the task ends with the error of the panic.
-    let error = block_on(TestHelper::run_app_builder_test_action(|| panic!("Test exception"))).expect_err("the panic of the test is passed on");
+    let error = block_on(TestHelper::run_app_builder_test_action(|| panic!("Test exception")).flatten()).expect_err("the panic of the test is passed on");
 
     assert_eq!(error.downcast_ref::<PanicError>().map(|exception| exception.message.as_str()), Some("Test exception"));
 }
@@ -76,7 +79,7 @@ fn run_app_builder_test_async_allows_multiple_sequential_calls() {
     // Act
     for _ in 0..EXPECTED_EXECUTION_COUNT {
         let count = execution_count.clone();
-        block_on(TestHelper::run_app_builder_test_action(move || count.set(count.get() + 1))).expect("the test passes");
+        block_on(TestHelper::run_app_builder_test_action(move || count.set(count.get() + 1)).flatten()).expect("the test passes");
     }
 
     // Assert

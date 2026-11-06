@@ -25,7 +25,7 @@ use crate::media::{
     FontSimulations, FontStretch, FontStyle, FontWeight, GlyphMetrics, GlyphTypeface, IFontMemory, IPlatformTypeface,
 };
 use crate::platform::{register_manifest_resources, IAssetLoader, StandardAssetLoader};
-use crate::utilities::{CultureInfo, ReadOnlyMemory, Uri};
+use crate::utilities::{Locale, ReadOnlyMemory, UriRef};
 
 const INTER_FONT_URI: &str = "resm:FerroUI.Base.UnitTests.Assets.Inter-Regular.ttf?assembly=ferroui-base";
 const BLANK_FONT_URI: &str = "resm:FerroUI.Base.UnitTests.Assets.AdobeBlank2VF.ttf?assembly=ferroui-base";
@@ -58,7 +58,7 @@ fn standard_asset_loader() -> StandardAssetLoader {
 }
 
 fn open(asset_loader: &StandardAssetLoader, uri: &str) -> Box<dyn crate::platform::AssetStream> {
-    asset_loader.open(&Uri::absolute(uri).unwrap(), None).unwrap()
+    asset_loader.open(&UriRef::parse(uri).unwrap(), None).unwrap()
 }
 
 /// C# `new GlyphTypeface(platformTypeface, fontSimulations)`.
@@ -612,7 +612,7 @@ fn family_names_should_contain_invariant_culture_entry() {
     let typeface = load(INTER_FONT_URI);
 
     assert!(
-        typeface.family_names().contains_key(&CultureInfo::invariant_culture()) || !typeface.family_names().is_empty()
+        typeface.family_names().contains_key(&Locale::UNKNOWN) || !typeface.family_names().is_empty()
     );
 }
 
@@ -620,7 +620,7 @@ fn family_names_should_contain_invariant_culture_entry() {
 fn face_names_should_contain_invariant_culture_entry() {
     let typeface = load(INTER_FONT_URI);
 
-    assert!(typeface.face_names().contains_key(&CultureInfo::invariant_culture()) || !typeface.face_names().is_empty());
+    assert!(typeface.face_names().contains_key(&Locale::UNKNOWN) || !typeface.face_names().is_empty());
 }
 
 /// C# `private class CustomPlatformTypeface : IPlatformTypeface`: a platform
@@ -728,6 +728,33 @@ fn supported_unicode_range_follows_the_character_map() {
     assert!(!range.is_in_range(0x4E2D));
 }
 
+/// Not from upstream (C5 of #423): the family names are keyed by the locale of the Windows
+/// language identifier of their records, the key the font fallback looks a locale up by; an
+/// identifier whose culture name is no language tag (`es-ES_tradnl`) is the invariant
+/// culture's, the unknown locale `und`, as an identifier that is not known is.
+#[test]
+fn family_names_are_keyed_by_the_locale_of_the_language_identifier() {
+    let typeface = GlyphTypeface::new(
+        TestFontBuilder::new("Test Gothic")
+            .localized_family_name(0x0411, "Japanese")
+            .localized_family_name(0x0804, "Chinese")
+            .localized_family_name(0x040A, "Spanish")
+            .build(),
+        FontSimulations::None,
+    )
+    .unwrap();
+
+    let name = |tag: &str| {
+        let locale = if tag.is_empty() { Locale::UNKNOWN } else { Locale::try_from_str(tag).unwrap() };
+        typeface.family_names().get(&locale).cloned()
+    };
+    assert_eq!(name("en-US").as_deref(), Some("Test Gothic"));
+    assert_eq!(name("ja-JP").as_deref(), Some("Japanese"));
+    assert_eq!(name("zh-CN").as_deref(), Some("Chinese"));
+    assert_eq!(name("").as_deref(), Some("Spanish"));
+    assert_eq!(name("es-ES"), None);
+}
+
 #[test]
 fn declared_coverage_and_scripts_are_read_from_the_font() {
     let japanese = GlyphTypeface::new(
@@ -743,8 +770,8 @@ fn declared_coverage_and_scripts_are_read_from_the_font() {
 
     assert_eq!(japanese.code_page_coverage(), FontCodePageCoverage::JapaneseJis);
     assert_eq!(japanese.design_languages(), ["ja"]);
-    assert!(japanese.declares_language_coverage(Some(&CultureInfo::get_culture_info("ja-JP"))));
-    assert!(!japanese.declares_language_coverage(Some(&CultureInfo::get_culture_info("ko-KR"))));
+    assert!(japanese.declares_language_coverage(Some(&Locale::try_from_str("ja-JP").unwrap())));
+    assert!(!japanese.declares_language_coverage(Some(&Locale::try_from_str("ko-KR").unwrap())));
     assert!(!japanese.declares_language_coverage(None));
     // Declared by the Unicode range bit, and proven by the probe codepoint.
     assert!(japanese.supports_script(Script::Han));
@@ -814,8 +841,8 @@ fn missing_name_table_falls_back_to_unknown_family() {
     let typeface = try_create(&font).unwrap();
 
     assert_eq!(typeface.family_name(), "unknown");
-    assert_eq!(typeface.family_names()[&CultureInfo::invariant_culture()], "unknown");
-    assert_eq!(typeface.face_names()[&CultureInfo::invariant_culture()], FontWeight::Normal.to_string());
+    assert_eq!(typeface.family_names()[&Locale::UNKNOWN], "unknown");
+    assert_eq!(typeface.face_names()[&Locale::UNKNOWN], FontWeight::Normal.to_string());
 }
 
 #[test]

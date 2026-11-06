@@ -4,7 +4,7 @@ use std::rc::Rc;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
-use super::{CancellationToken, Dispatcher, DispatcherFrame, DispatcherPriority, FerroSynchronizationContext};
+use super::{CancellationToken, Dispatcher, DispatcherFrame, DispatcherPriority};
 use crate::reactive::{Disposable, IDisposable};
 
 impl Dispatcher {
@@ -78,7 +78,7 @@ impl Dispatcher {
         self.lock().frames.push(frame.clone());
         let result = catch_unwind(AssertUnwindSafe(|| {
             if let Some(controlled) = impl_.as_controlled() {
-                let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, DispatcherPriority::NORMAL);
+                let _restore = self.enter_job(DispatcherPriority::NORMAL);
                 frame.run(controlled);
             }
         }));

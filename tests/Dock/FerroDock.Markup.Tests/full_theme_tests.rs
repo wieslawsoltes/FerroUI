@@ -246,10 +246,10 @@ fn original_mdi_window_template_routes_minimize_maximize_and_restore_to_the_mode
 #[test]
 fn public_loader_retains_root_theme_and_all_original_preset_exports() {
     run(|| {
-        use ferroui_base::utilities::Uri;
+        use ferroui_base::utilities::UriRef;
         use ferroui_markup_xaml::FerroXamlLoader;
         let theme = FerroXamlLoader::load(
-            &Uri::absolute("ferres://FerroDock.Ferro.Themes.Fluent/DockFluentTheme.xaml").unwrap(),
+            &UriRef::parse("ferres://FerroDock.Ferro.Themes.Fluent/DockFluentTheme.xaml").unwrap(),
             None,
         )
         .unwrap();
@@ -262,7 +262,7 @@ fn public_loader_retains_root_theme_and_all_original_preset_exports() {
             "VsCodeLight",
         ] {
             let value = FerroXamlLoader::load(
-                &Uri::absolute(&format!(
+                &UriRef::parse(&format!(
                     "ferres://FerroDock.Ferro.Themes.Fluent/Presets/Ide/{name}.xaml"
                 ))
                 .unwrap(),

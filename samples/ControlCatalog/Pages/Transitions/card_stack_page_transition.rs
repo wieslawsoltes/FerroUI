@@ -2,11 +2,11 @@
 
 use ferroui_base::animation::{
     Animation, AnimationTask, Cue, IPageTransition, IProgressPageTransition, KeyFrame, PageSlide, PageTransitionItem,
-    SlideAxis, TimeSpan,
+    SlideAxis, SignedDuration,
 };
 use ferroui_base::media::{ITransform, RotateTransform, ScaleTransform, TransformGroup, TranslateTransform};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, JoinHandle};
 use ferroui_base::{Ref, RelativePoint, RelativeUnit, Visual};
 use mini_mvvm::start_async;
 use std::cell::Cell;
@@ -69,7 +69,7 @@ impl CardStackPageTransition {
 
     /// `new CardStackPageTransition(duration, orientation)`: `duration` is the duration of
     /// the animation and `orientation` the axis on which the animation occurs.
-    pub fn with_duration(duration: TimeSpan, orientation: SlideAxis) -> Self {
+    pub fn with_duration(duration: SignedDuration, orientation: SlideAxis) -> Self {
         Self::from_slide(PageSlide::with_duration(duration, orientation))
     }
 
@@ -318,7 +318,7 @@ impl IPageTransition for CardStackPageTransition {
         to: Option<&Ref<Visual>>,
         forward: bool,
         cancellation_token: CancellationToken,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let orientation = self.base.orientation();
         let duration = self.base.duration();
         let fill_mode = self.base.fill_mode();
@@ -331,7 +331,7 @@ impl IPageTransition for CardStackPageTransition {
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -411,13 +411,13 @@ impl IPageTransition for CardStackPageTransition {
             when_all(tasks).await;
 
             if let Some(from) = &from {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
             }
 
             if let Some(to) = &to {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     let (scale, translate) = Self::ensure_back_transforms(to);
                     scale.set_scale_x(1.0);
                     scale.set_scale_y(1.0);
@@ -529,8 +529,8 @@ mod tests {
         assert_eq!(0.0, transition.back_card_offset());
         assert_eq!(SlideAxis::Horizontal, transition.page_slide().orientation());
 
-        let transition = CardStackPageTransition::with_duration(TimeSpan::from_seconds(0.5), SlideAxis::Vertical);
-        assert_eq!(TimeSpan::from_seconds(0.5), transition.page_slide().duration());
+        let transition = CardStackPageTransition::with_duration(SignedDuration::from_seconds(0.5), SlideAxis::Vertical);
+        assert_eq!(SignedDuration::from_seconds(0.5), transition.page_slide().duration());
         assert_eq!(SlideAxis::Vertical, transition.page_slide().orientation());
     }
 

@@ -466,10 +466,16 @@ struct GraphiteTarget {
 
 impl GraphiteTarget {
     fn new(device: &Rc<TestMetalDevice>) -> Self {
+        Self::with_side(device, 64, 1.0)
+    }
+
+    /// A render target of `side` by `side` pixels at `scaling` (its DPI; the
+    /// drawing is not scaled to it, a test sets the transform).
+    fn with_side(device: &Rc<TestMetalDevice>, side: i32, scaling: f64) -> Self {
         let gpu = super::SkiaMetalGpu::new(device.clone(), None, None);
         let gr_context = gpu.gr_context();
         let context = crate::SkiaContext::new(Some(gpu));
-        let layer = context.create_offscreen_render_target(PixelSize::new(64, 64), Vector::new(1.0, 1.0), true);
+        let layer = context.create_offscreen_render_target(PixelSize::new(side, side), Vector::new(scaling, scaling), true);
         Self { gr_context, context, layer }
     }
 
@@ -1399,4 +1405,895 @@ fn graphite_prewarms_the_runtime_effects_without_drawing_anything() {
     }
     layer.dispose();
     context.dispose();
+}
+
+// ---------------------------------------------------------------------------
+// The prewarm of the GPU pipelines (#437)
+// ---------------------------------------------------------------------------
+
+/// A Graphite prewarm draws onto a recorder of its own, whose recording (where
+/// the pipelines compile) a thread of its own makes; the prewarm records
+/// nothing afterwards, and the context of the frames is untouched.
+#[test]
+fn graphite_prewarms_pipelines_on_a_recorder_and_a_thread_of_their_own() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let gpu = super::SkiaMetalGpu::new(device.clone(), None, None);
+    let gr_context = gpu.gr_context();
+    let prewarm = gr_context.begin_prewarm().expect("Graphite prewarms on a recorder of its own");
+    let prewarm_context = prewarm
+        .gr_context
+        .as_any()
+        .downcast_ref::<crate::gpu::graphite::GraphitePrewarmContext>()
+        .expect("the context of a Graphite prewarm");
+    let info = skia_safe::ImageInfo::new((64, 64), ColorType::N32, skia_safe::AlphaType::Premul, None);
+    let props = skia_safe::SurfaceProps::default();
+    {
+        let mut surface = prewarm.gr_context.create_surface(&info, &props).expect("a surface of the prewarm");
+        // A blur and an advanced blend layer, as the acrylic draws them.
+        let mut paint = skia_safe::Paint::default();
+        paint.set_image_filter(skia_safe::image_filters::blur((8.0, 8.0), None, None, None));
+        surface.canvas().draw_rect(skia_safe::Rect::from_wh(32.0, 32.0), &paint);
+        let mut layer = skia_safe::Paint::default();
+        layer.set_blend_mode(skia_safe::BlendMode::Luminosity);
+        surface.canvas().save_layer(&skia_safe::canvas::SaveLayerRec::default().paint(&layer));
+        surface.canvas().draw_color(skia_safe::Color::RED, None);
+        surface.canvas().restore();
+    }
+    let thread = prewarm_context.finish().expect("a thread compiles the pipelines");
+    assert!(thread.join().expect("the thread ends"), "the recording is made");
+
+    assert!(prewarm_context.is_finished());
+    assert!(prewarm.gr_context.create_surface(&info, &props).is_none(), "a finished prewarm records nothing");
+    assert!(prewarm_context.finish().is_none(), "a prewarm is finished once");
+    assert!(gr_context.create_surface(&info, &props).is_some());
+}
+
+/// The render target of a window prewarms with the drawing context of its
+/// frames, offscreen: nothing is presented. With the option off it does not.
+#[test]
+fn a_graphite_render_target_prewarms_off_its_frames() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+
+    let size = PixelSize::new(32, 32);
+    // SAFETY: the device handle is valid for the lifetime of `device`.
+    let texture = unsafe { create_texture(device.device, 32, 32) };
+    assert!(!texture.is_null());
+    let presented = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+    let surface: std::sync::Arc<dyn IPlatformRenderSurface> =
+        std::sync::Arc::new(TextureSurface { texture: texture as usize, size, presented: presented.clone() });
+    let context = crate::SkiaContext::new(Some(super::SkiaMetalGpu::new(device.clone(), None, None)));
+    let render_target = context.create_render_target(std::slice::from_ref(&surface));
+
+    let scene_info = RenderTargetSceneInfo::new(size, 2.0, CompositionTransparencyLevel::None);
+    let (mut drawing_context, _) = render_target.create_drawing_context(&scene_info);
+    drawing_context.clear(Colors::BLUE);
+    drawing_context.dispose();
+    assert_eq!(1, presented.load(std::sync::atomic::Ordering::SeqCst));
+
+    let prewarm_scene = RenderTargetSceneInfo::new(PixelSize::new(256, 256), 2.0, CompositionTransparencyLevel::None);
+    let mut painted = 0;
+    let prewarmed = render_target.prewarm(&prewarm_scene, &mut |context: &mut dyn IDrawingContextImpl| {
+        painted += 1;
+        let blur = ferroui_base::media::ImmutableBlurEffect::new(30.0);
+        if let Some(effects) = context.as_drawing_context_impl_with_effects() {
+            effects.push_effect(Some(Rect::new(0.0, 0.0, 64.0, 64.0)), &blur);
+        }
+        context.draw_rectangle(
+            Some(&red()),
+            None,
+            RoundedRect::from_rect(Rect::new(0.0, 0.0, 32.0, 32.0)),
+            &BoxShadows::default(),
+        );
+        if let Some(effects) = context.as_drawing_context_impl_with_effects() {
+            effects.pop_effect();
+        }
+    });
+    assert!(prewarmed);
+    assert_eq!(1, painted);
+    assert_eq!(1, presented.load(std::sync::atomic::Ordering::SeqCst), "a prewarm presents nothing");
+
+    let scope = ferroui_base::FerroLocator::enter_scope();
+    ferroui_base::FerroLocator::current_mutable().bind_to_self(Rc::new(crate::SkiaOptions {
+        prewarm_effect_pipelines: false,
+        ..crate::SkiaOptions::default()
+    }));
+    let mut called = false;
+    assert!(!render_target.prewarm(&prewarm_scene, &mut |_: &mut dyn IDrawingContextImpl| called = true));
+    assert!(!called, "the option turns the prewarm off");
+    scope.dispose();
+
+    render_target.dispose();
+    context.dispose();
+
+    // SAFETY: balances the +1 of `newTextureWithDescriptor:`; Skia no longer
+    // references the texture.
+    unsafe { send(texture, sel(b"release\0")) };
+}
+
+/// The custom effects FerroUI ships, drawn as their graphs by Graphite on
+/// the Metal device (#455, E2): the colour matrix layers and the drop
+/// shadow of the glow on the GPU, compared with the CPU reference of each
+/// effect applied to the same scene drawn plain by Graphite.
+#[test]
+fn graphite_draws_the_library_effects_as_their_cpu_references() {
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+        SepiaEffect, SharpenEffect, TintEffect,
+    };
+    use ferroui_base::media::effects::ImmutableCustomEffect;
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    const SIZE: i32 = 64;
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(32.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    // The premultiplied RGBA pixels of the target, read back once.
+    fn pixels(target: &GraphiteTarget) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                // `pixel` gives the colour un-premultiplied.
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+
+    let effects = [
+        (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), 3u8),
+        (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), 3),
+        (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), 3),
+        (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), 3),
+        (ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }), 3),
+        (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 3),
+        (ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 3.0, intensity: 0.8 }), 14),
+        // The convolutions of E3: Skia's matrix convolution on the GPU.
+        (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), 4),
+        (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), 4),
+    ];
+    for (effect, largest) in effects {
+        let plain = GraphiteTarget::new(&device);
+        plain.draw(|context| {
+            context.clear(Colors::TRANSPARENT);
+            scene(context);
+        });
+        let mut expected = pixels(&plain);
+        plain.dispose();
+        assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+
+        let target = GraphiteTarget::new(&device);
+        target.draw(|context| {
+            context.clear(Colors::TRANSPARENT);
+            let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+            assert!(push_custom_effect_graph(context, &effect, bounds));
+            scene(context);
+            assert!(pop_custom_effect_graph(context, &effect, bounds));
+        });
+        let actual = pixels(&target);
+        target.dispose();
+        let most = expected.iter().zip(&actual).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+        let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+        let mean = total as f64 / expected.len() as f64;
+        assert!(most <= largest && mean <= 0.75, "{effect}: largest difference {most}, mean {mean}");
+    }
+}
+
+/// The runtime shader effects of the library drawn by Graphite on the Metal
+/// device (#455, E4): the SkSL programs on the GPU (the content of a
+/// content-sampling program the layer's texture, an overlay drawn into the
+/// layer), compared with the CPU reference of each effect applied to the same
+/// scene drawn plain by Graphite.
+#[test]
+fn graphite_draws_the_library_shader_effects_as_their_cpu_references() {
+    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+    use ferroui_base::media::effects::ImmutableCustomEffect;
+
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    const SIZE: i32 = 64;
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(32.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    // The premultiplied RGBA pixels of the target, read back once.
+    fn pixels(target: &GraphiteTarget) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                // `pixel` gives the colour un-premultiplied.
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+
+    let spotlight = SpotlightShaderEffect { center_x: 0.4, center_y: 0.5, radius: 0.5, strength: 0.8, color: Colors::ORANGE };
+    let effects = [
+        (ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), 3u8),
+        (ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }), 3),
+        (ImmutableCustomEffect::new(spotlight), 4),
+    ];
+    for (effect, largest) in effects {
+        assert!(effect.has_shader(), "{effect}");
+        let plain = GraphiteTarget::new(&device);
+        plain.draw(|context| {
+            context.clear(Colors::TRANSPARENT);
+            scene(context);
+        });
+        let mut expected = pixels(&plain);
+        plain.dispose();
+        assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+
+        let target = GraphiteTarget::new(&device);
+        target.draw(|context| {
+            context.clear(Colors::TRANSPARENT);
+            let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+            scene(context);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+        });
+        let actual = pixels(&target);
+        target.dispose();
+        let most = expected.iter().zip(&actual).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+        let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+        let mean = total as f64 / expected.len() as f64;
+        assert!(most <= largest && mean <= 0.75, "{effect}: largest difference {most}, mean {mean}");
+    }
+}
+
+/// The interactive effects of the library drawn by Graphite on the Metal device (#455, E7): the
+/// overlays within a few levels of their CPU references, the programs that move the content
+/// within a mean of a level and a half with at most 1% of the pixels further (the texel a moved coordinate
+/// falls in can differ by the last bit of the GPU's `sin` and `exp` at the edge of a square), and
+/// frames that change only their uniforms compile no program.
+#[test]
+fn graphite_draws_the_interactive_effects_as_their_cpu_references() {
+    use ferroui_base::media::effects::library::{
+        BurningFlameShaderEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::media::effects::ImmutableCustomEffect;
+    use ferroui_base::Point;
+
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    const SIZE: i32 = 64;
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(32.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    // The premultiplied RGBA pixels of the target, read back once.
+    fn pixels(target: &GraphiteTarget) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+    let effects = |t: f64| {
+        let mut ripple = WaterRippleShaderEffect { pointer_x: 0.3 + 0.4 * t, is_pointer_over: true, ..WaterRippleShaderEffect::default() };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.2 + 0.3 * t;
+        [
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.3 + 0.4 * t,
+                is_pointer_over: true,
+                radius: 0.4,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                is_pointer_over: true,
+                cell_size: 12.0,
+                strength: 0.8,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ripple),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.6 + 0.4 * t,
+                flame_phase: 3.0 * t,
+                ignition_y: 0.6,
+                ..BurningFlameShaderEffect::default()
+            }),
+        ]
+    };
+    let mut compiled_after_first = None;
+    for (frame, t) in [0.0, 0.5, 1.0].into_iter().enumerate() {
+        for (index, effect) in effects(t).into_iter().enumerate() {
+            let plain = GraphiteTarget::new(&device);
+            plain.draw(|context| {
+                context.clear(Colors::TRANSPARENT);
+                scene(context);
+            });
+            let mut expected = pixels(&plain);
+            plain.dispose();
+            assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+
+            let target = GraphiteTarget::new(&device);
+            target.draw(|context| {
+                context.clear(Colors::TRANSPARENT);
+                let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+                context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+                scene(context);
+                context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+            });
+            let actual = pixels(&target);
+            target.dispose();
+            let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+            let mean = total as f64 / expected.len() as f64;
+            let far = expected
+                .chunks_exact(4)
+                .zip(actual.chunks_exact(4))
+                .filter(|(a, b)| a.iter().zip(b.iter()).any(|(a, b)| a.abs_diff(*b) > 4))
+                .count();
+            // The overlays as the other overlays; the programs that move the content with their
+            // outliers.
+            let (allowed, mean_allowed) = if index < 2 { (0, 0.75) } else { ((SIZE * SIZE / 100) as usize, 1.5) };
+            assert!(far <= allowed && mean <= mean_allowed, "{effect}: {far} pixels differ by more than 4, mean {mean}");
+        }
+        let compiled = crate::runtime_effects::compilation_count();
+        match compiled_after_first {
+            None => compiled_after_first = Some(compiled),
+            Some(first) => assert_eq!(first, compiled, "frame {frame} compiled a program"),
+        }
+    }
+}
+
+/// The page transitions of the library drawn by Graphite (#455, E6): their
+/// images are textures of the recorder, uploaded once (the upload count is
+/// constant over frames that change only the progress), drawn as the CPU
+/// references of the effects; and the textures are released once the
+/// handles of the images are dropped.
+#[test]
+fn graphite_draws_the_page_transitions_from_textures_uploaded_once() {
+    use ferroui_base::media::effects::library::{DissolveTransitionEffect, MaskTransitionEffect};
+    use ferroui_base::media::effects::{EffectImage, ImmutableCustomEffect};
+
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    const SIZE: i32 = 64;
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    // The premultiplied RGBA pixels of the target, read back once.
+    fn pixels(target: &GraphiteTarget) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+    fn image(pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = ImmutableBitmap::from_pixels(
+            PixelSize::new(SIZE, SIZE),
+            Vector::new(96.0, 96.0),
+            SIZE * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .unwrap();
+        EffectImage::from_impl(std::sync::Arc::new(bitmap))
+    }
+    fn transitions(progress: f64, from: &EffectImage, to: &EffectImage, pattern: &EffectImage) -> [ImmutableCustomEffect; 2] {
+        [
+            ImmutableCustomEffect::new(DissolveTransitionEffect {
+                from_page: from.clone(),
+                to_page: to.clone(),
+                pattern: pattern.clone(),
+                progress,
+                center_x: 0.3,
+                center_y: 0.6,
+                ..DissolveTransitionEffect::default()
+            }),
+            ImmutableCustomEffect::new(MaskTransitionEffect {
+                to_page: to.clone(),
+                mask: pattern.clone(),
+                progress,
+                softness: 0.2,
+            }),
+        ]
+    }
+    fn draw(target: &GraphiteTarget, effect: Option<&ImmutableCustomEffect>) {
+        target.draw(|context| {
+            context.clear(Colors::TRANSPARENT);
+            if let Some(effect) = effect {
+                let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+                context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), effect);
+            }
+            scene(context);
+            if effect.is_some() {
+                context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+            }
+        });
+    }
+
+    let target = GraphiteTarget::new(&device);
+    let uploads_before = target.gr_context.uploaded_image_count();
+    {
+        let from = image(|x, y| [(x * 4) as u8, (y * 4) as u8, 200, 255]);
+        let to = image(|x, y| [40, (255 - x * 4) as u8, (y * 4) as u8, 255]);
+        let pattern = image(|x, y| {
+            let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+            [level, level, level, 255]
+        });
+
+        // Against the CPU references.
+        draw(&target, None);
+        let plain = pixels(&target);
+        for effect in transitions(0.45, &from, &to, &pattern) {
+            let mut expected = plain.clone();
+            assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+            draw(&target, Some(&effect));
+            let actual = pixels(&target);
+            let most = expected.iter().zip(&actual).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+            let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+            let mean = total as f64 / expected.len() as f64;
+            assert!(most <= 4 && mean <= 0.75, "{effect}: largest difference {most}, mean {mean}");
+        }
+
+        // Steady frames: the progress changes, the textures stay.
+        let uploads = target.gr_context.upload_count();
+        assert_eq!(uploads_before + 3, target.gr_context.uploaded_image_count(), "the three images are textures");
+        for frame in 0..6 {
+            for effect in transitions(0.1 * f64::from(frame), &from, &to, &pattern) {
+                draw(&target, Some(&effect));
+            }
+            target.gr_context.flush();
+            assert_eq!(uploads, target.gr_context.upload_count(), "frame {frame} uploaded an image");
+        }
+    }
+
+    // The handles are dropped: the next frame drops the Skia images, its
+    // flush the textures.
+    draw(&target, None);
+    target.gr_context.flush();
+    assert_eq!(uploads_before, target.gr_context.uploaded_image_count(), "the textures are released");
+
+    // New images in every frame: no more textures than a frame draws.
+    for frame in 0..12 {
+        let page = image(|x, y| [frame as u8 * 20, x as u8, y as u8, 255]);
+        let effect = ImmutableCustomEffect::new(MaskTransitionEffect {
+            to_page: page,
+            progress: 0.5,
+            softness: 1.0,
+            ..MaskTransitionEffect::default()
+        });
+        draw(&target, Some(&effect));
+        target.gr_context.flush();
+        assert!(target.gr_context.uploaded_image_count() <= uploads_before + 1, "frame {frame}");
+    }
+    draw(&target, None);
+    target.gr_context.flush();
+    assert_eq!(uploads_before, target.gr_context.uploaded_image_count());
+    target.dispose();
+}
+
+/// The custom effects FerroUI ships on Graphite at twice the scale, and their
+/// prewarm by a render target of a window (#455, E9).
+mod custom_effect_validation {
+    use super::*;
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, BurningFlameShaderEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect,
+        GrayscaleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, PointerSpotlightShaderEffect,
+        ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
+        SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::media::effects::{CustomEffect, EffectImage, ImmutableCustomEffect};
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+    use ferroui_base::{Matrix, Point};
+
+    /// The logical size of the scenes.
+    const SIZE: i32 = 64;
+
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(16.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(32.0, 16.0, 14.0, 14.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(16.0, 32.0, 30.0, 14.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+
+    /// The premultiplied RGBA pixels of a target of `side` by `side` pixels,
+    /// read back once.
+    fn pixels(target: &GraphiteTarget, side: i32) -> Vec<u8> {
+        let snapshot = target.snapshot();
+        let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let mut rgba = Vec::with_capacity((side * side * 4) as usize);
+        for y in 0..side {
+            for x in 0..side {
+                // `pixel` gives the colour un-premultiplied.
+                let (r, g, b, a) = pixel(bitmap, x, y);
+                let premultiply = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                rgba.extend_from_slice(&[premultiply(r), premultiply(g), premultiply(b), a]);
+            }
+        }
+        rgba
+    }
+
+    /// An image of `SIZE` by `SIZE` premultiplied RGBA pixels made by `pixel`.
+    fn image(pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = ImmutableBitmap::from_pixels(
+            PixelSize::new(SIZE, SIZE),
+            Vector::new(96.0, 96.0),
+            SIZE * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .unwrap();
+        EffectImage::from_impl(std::sync::Arc::new(bitmap))
+    }
+
+    /// How an effect of the library is held to its CPU reference.
+    #[derive(Clone, Copy)]
+    enum Tolerance {
+        /// Within the largest difference of a channel, and a mean of 0.75.
+        Largest(u8),
+        /// A program that moves the content: at most 1% of the pixels further
+        /// than 4 levels, a mean within 1.5 (the texel a moved coordinate
+        /// falls in can differ by the last bit of the GPU's `sin` and `exp` at
+        /// the edge of a square).
+        Moves,
+    }
+
+    /// Every effect of the library at values that draw something, with the
+    /// tolerances of the tests at one device pixel per unit.
+    fn library(pages: &(EffectImage, EffectImage, EffectImage)) -> Vec<(ImmutableCustomEffect, Tolerance)> {
+        let (from, to, pattern) = pages;
+        let mut ripple = WaterRippleShaderEffect { pointer_x: 0.5, is_pointer_over: true, ..WaterRippleShaderEffect::default() };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.35;
+        vec![
+            (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), Tolerance::Largest(3)),
+            (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), Tolerance::Largest(3)),
+            (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), Tolerance::Largest(3)),
+            (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), Tolerance::Largest(3)),
+            (
+                ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }),
+                Tolerance::Largest(3),
+            ),
+            (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), Tolerance::Largest(3)),
+            (
+                ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 3.0, intensity: 0.8 }),
+                Tolerance::Largest(14),
+            ),
+            (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), Tolerance::Largest(4)),
+            (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), Tolerance::Largest(4)),
+            (ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), Tolerance::Largest(3)),
+            (ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }), Tolerance::Largest(3)),
+            (
+                ImmutableCustomEffect::new(SpotlightShaderEffect {
+                    center_x: 0.4,
+                    center_y: 0.5,
+                    radius: 0.5,
+                    strength: 0.8,
+                    color: Colors::ORANGE,
+                }),
+                Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(DissolveTransitionEffect {
+                    from_page: from.clone(),
+                    to_page: to.clone(),
+                    pattern: pattern.clone(),
+                    progress: 0.45,
+                    center_x: 0.3,
+                    center_y: 0.6,
+                    ..DissolveTransitionEffect::default()
+                }),
+                Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(MaskTransitionEffect {
+                    to_page: to.clone(),
+                    mask: pattern.clone(),
+                    progress: 0.45,
+                    softness: 0.2,
+                }),
+                Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                    pointer_x: 0.45,
+                    is_pointer_over: true,
+                    radius: 0.4,
+                    ..PointerSpotlightShaderEffect::default()
+                }),
+                Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                    is_pointer_over: true,
+                    cell_size: 12.0,
+                    strength: 0.8,
+                    ..ReactiveGridShaderEffect::default()
+                }),
+                Tolerance::Largest(4),
+            ),
+            (ImmutableCustomEffect::new(ripple), Tolerance::Moves),
+            (
+                ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                    burn_amount: 0.9,
+                    flame_phase: 1.4,
+                    ignition_y: 0.6,
+                    ..BurningFlameShaderEffect::default()
+                }),
+                Tolerance::Moves,
+            ),
+        ]
+    }
+
+    fn pages() -> (EffectImage, EffectImage, EffectImage) {
+        (
+            image(|x, y| [(x * 4) as u8, (y * 4) as u8, 200, 255]),
+            image(|x, y| [40, (255 - x * 4) as u8, (y * 4) as u8, 255]),
+            image(|x, y| {
+                let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+                [level, level, level, 255]
+            }),
+        )
+    }
+
+    /// Draws `effect` around `content` over `bounds` as the render walk
+    /// draws it: a graph effect as its graph, any other as an effect of the
+    /// drawing context.
+    fn draw_with(
+        context: &mut dyn IDrawingContextImpl,
+        effect: &ImmutableCustomEffect,
+        bounds: Rect,
+        content: impl FnOnce(&mut dyn IDrawingContextImpl),
+    ) {
+        if effect.has_graph() {
+            assert!(push_custom_effect_graph(context, effect, bounds), "{effect}");
+            content(context);
+            assert!(pop_custom_effect_graph(context, effect, bounds), "{effect}");
+        } else {
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), effect);
+            content(context);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+        }
+    }
+
+    /// Every effect of the library drawn by Graphite under a transform of
+    /// scale 2 (two device pixels per unit, as on a display of 192 DPI),
+    /// against its CPU reference at that scale applied to the scene drawn
+    /// plain by Graphite at the same scale: the tolerances of one pixel per
+    /// unit (`graphite_draws_the_library_effects_as_their_cpu_references`
+    /// and the tests after it).
+    #[test]
+    fn graphite_draws_the_library_at_twice_the_scale_as_the_cpu_references() {
+        let Some(device) = TestMetalDevice::try_new() else {
+            eprintln!("skipped: no Metal device available");
+            return;
+        };
+        let scale = 2;
+        let side = SIZE * scale;
+        let transform = Matrix::create_scale(f64::from(scale), f64::from(scale));
+        let pages = pages();
+        for (effect, tolerance) in library(&pages) {
+            let plain = GraphiteTarget::with_side(&device, side, f64::from(scale));
+            plain.draw(|context| {
+                context.clear(Colors::TRANSPARENT);
+                context.set_transform(transform);
+                scene(context);
+            });
+            let mut expected = pixels(&plain, side);
+            plain.dispose();
+            assert!(effect.cpu_reference(&mut expected, side as usize, side as usize, f64::from(scale)), "{effect}");
+
+            let target = GraphiteTarget::with_side(&device, side, f64::from(scale));
+            target.draw(|context| {
+                context.clear(Colors::TRANSPARENT);
+                context.set_transform(transform);
+                draw_with(context, &effect, Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)), scene);
+            });
+            let actual = pixels(&target, side);
+            target.dispose();
+            let most = expected.iter().zip(&actual).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+            let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+            let mean = total as f64 / expected.len() as f64;
+            match tolerance {
+                Tolerance::Largest(largest) => {
+                    assert!(most <= largest && mean <= 0.75, "{effect} at 2x: largest difference {most}, mean {mean}");
+                }
+                Tolerance::Moves => {
+                    let far = expected
+                        .chunks_exact(4)
+                        .zip(actual.chunks_exact(4))
+                        .filter(|(a, b)| a.iter().zip(b.iter()).any(|(a, b)| a.abs_diff(*b) > 4))
+                        .count();
+                    let allowed = (side * side / 100) as usize;
+                    assert!(far <= allowed && mean <= 1.5, "{effect} at 2x: {far} pixels differ by more than 4, mean {mean}");
+                }
+            }
+        }
+    }
+
+    /// The prewarm of the custom effects by the render target of a window
+    /// (`SkiaGpuRenderTarget::prewarm`, onto a recorder of its own): each
+    /// type of the library drawn once at the value it registers for the
+    /// prewarm (its default) around an image, at the scaling of the scene, as
+    /// `ServerCompositionTarget::prewarm_effects` draws the registered
+    /// effects. The prewarm compiles the program of every runtime shader of
+    /// the library, so the next frame of the window, which draws the library
+    /// at other values, compiles none; nothing of the prewarm is presented.
+    #[test]
+    fn a_graphite_render_target_prewarms_the_library_ahead_of_the_frame_that_shows_it() {
+        let Some(device) = TestMetalDevice::try_new() else {
+            eprintln!("skipped: no Metal device available");
+            return;
+        };
+        let (side, scaling) = (128, 2.0);
+        let size = PixelSize::new(side, side);
+        // SAFETY: the device handle is valid for the lifetime of `device`.
+        let texture = unsafe { create_texture(device.device, side as usize, side as usize) };
+        assert!(!texture.is_null());
+        let presented = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+        let surface: std::sync::Arc<dyn IPlatformRenderSurface> =
+            std::sync::Arc::new(TextureSurface { texture: texture as usize, size, presented: presented.clone() });
+        let context = crate::SkiaContext::new(Some(super::super::SkiaMetalGpu::new(device.clone(), None, None)));
+        let render_target = context.create_render_target(std::slice::from_ref(&surface));
+        let scene_info = RenderTargetSceneInfo::new(size, scaling, CompositionTransparencyLevel::None);
+
+        // The first two frames: the second prewarms the programs of the
+        // drawing context itself (`prewarm_runtime_effects`).
+        for _ in 0..2 {
+            let (mut frame, _) = render_target.create_drawing_context(&scene_info);
+            frame.clear(Colors::WHITE);
+            frame.dispose();
+        }
+        assert_eq!(2, presented.load(std::sync::atomic::Ordering::SeqCst));
+
+        // The prewarm, as the composition target draws it after a frame.
+        let before = crate::runtime_effects::compilation_count();
+        let stand_in = image(|x, y| [(x * 4) as u8, 128, (y * 4) as u8, 255]);
+        let stand_in_bitmap = stand_in.bitmap().expect("the image of the stand-in");
+        let registered: Vec<ImmutableCustomEffect> = {
+            fn of<T: CustomEffect>() -> ImmutableCustomEffect {
+                ImmutableCustomEffect::new(T::default())
+            }
+            vec![
+                of::<TintEffect>(),
+                of::<GrayscaleEffect>(),
+                of::<SepiaEffect>(),
+                of::<SaturationEffect>(),
+                of::<BrightnessContrastEffect>(),
+                of::<InvertEffect>(),
+                of::<GlowEffect>(),
+                of::<SharpenEffect>(),
+                of::<EdgeDetectEffect>(),
+                of::<PixelateEffect>(),
+                of::<ScanlineShaderEffect>(),
+                of::<SpotlightShaderEffect>(),
+                of::<DissolveTransitionEffect>(),
+                of::<MaskTransitionEffect>(),
+                of::<PointerSpotlightShaderEffect>(),
+                of::<ReactiveGridShaderEffect>(),
+                of::<WaterRippleShaderEffect>(),
+                of::<BurningFlameShaderEffect>(),
+            ]
+        };
+        let prewarm_scene = RenderTargetSceneInfo::new(PixelSize::new(256, 256), scaling, CompositionTransparencyLevel::None);
+        let area = Rect::new(32.0, 32.0, 64.0, 64.0);
+        let prewarmed = render_target.prewarm(&prewarm_scene, &mut |context: &mut dyn IDrawingContextImpl| {
+            context.set_transform(Matrix::create_scale(scaling, scaling));
+            for effect in &registered {
+                draw_with(context, effect, area, |context| {
+                    context.push_clip(area);
+                    context.draw_bitmap(
+                        &*stand_in_bitmap,
+                        1.0,
+                        Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)),
+                        Rect::new(area.x, area.y, f64::from(SIZE), f64::from(SIZE)),
+                    );
+                    context.pop_clip();
+                });
+            }
+        });
+        assert!(prewarmed, "a Graphite render target prewarms");
+        assert_eq!(2, presented.load(std::sync::atomic::Ordering::SeqCst), "a prewarm presents nothing");
+        let compiled = crate::runtime_effects::compilation_count();
+        let shaders = registered.iter().filter(|effect| effect.has_shader()).count() as u64;
+        assert_eq!(9, shaders, "the runtime shaders of the library");
+        assert!(compiled - before >= shaders, "the prewarm compiled {} programs", compiled - before);
+
+        // The frame that shows the library compiles nothing.
+        let pages = pages();
+        let (mut frame, _) = render_target.create_drawing_context(&scene_info);
+        frame.clear(Colors::WHITE);
+        frame.set_transform(Matrix::create_scale(scaling, scaling));
+        for (effect, _) in library(&pages) {
+            draw_with(&mut *frame, &effect, Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)), scene);
+        }
+        frame.dispose();
+        assert_eq!(compiled, crate::runtime_effects::compilation_count(), "the frame compiled a program");
+        for effect in &registered {
+            assert_eq!(0, crate::custom_shader_effects::failure_reports(effect.name()), "{effect}");
+        }
+
+        render_target.dispose();
+        context.dispose();
+        // SAFETY: balances the +1 of `newTextureWithDescriptor:`; Skia no
+        // longer references the texture.
+        unsafe { send(texture, sel(b"release\0")) };
+    }
 }

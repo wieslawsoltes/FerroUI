@@ -6,7 +6,7 @@ use crate::interop::*;
 use crate::popup_impl::PopupImpl;
 use crate::window_impl::WindowImpl;
 use crate::window_impl_base::WindowBaseParent;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::Ref;
 use ferroui_controls::automation::peers::{
     AutomationPeer, ControlAutomationPeer, InteropAutomationPeer, ScrollViewerAutomationPeer,
@@ -85,7 +85,7 @@ pub(crate) struct FrnAutomationPeer {
     inner: Ref<AutomationPeer>,
     node: RefCell<Option<ComPtr<IFrnAutomationNode>>>,
     /// The handlers on the events of the peer, removed with the wrapper.
-    subscriptions: Vec<Rc<dyn IDisposable>>,
+    subscriptions: Vec<Subscription>,
 }
 
 impl FrnAutomationPeer {
@@ -98,24 +98,24 @@ impl FrnAutomationPeer {
                 if let Some(node) = weak.upgrade().and_then(|this| this.node()) {
                     node.children_changed();
                 }
-            }).detach());
+            }));
 
             let weak = this.clone();
             subscriptions.push(inner.property_changed(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.on_peer_property_changed(e);
                 }
-            }).detach());
+            }));
 
             // The reference tests the class of the peer for the contract;
             // the provider lookup of a peer answers the same question.
             if let Some(root) = inner.get_provider::<dyn IRootProvider>() {
                 let weak = this.clone();
-                subscriptions.push(root.focus_changed(Rc::new(move || {
+                subscriptions.push(Subscription::new(root.focus_changed(Rc::new(move || {
                     if let Some(node) = weak.upgrade().and_then(|this| this.node()) {
                         node.focus_changed();
                     }
-                })));
+                }))));
             }
 
             Self { inner, node: RefCell::new(None), subscriptions }
@@ -186,9 +186,7 @@ impl FrnAutomationPeer {
 
 impl Drop for FrnAutomationPeer {
     fn drop(&mut self) {
-        for subscription in self.subscriptions.drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(&mut self.subscriptions));
         let key = peer_key(&self.inner);
         let _ = WRAPPERS.try_with(|wrappers| {
             if let Ok(mut wrappers) = wrappers.try_borrow_mut() {

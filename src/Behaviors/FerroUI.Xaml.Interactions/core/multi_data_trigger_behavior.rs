@@ -3,7 +3,7 @@
 use super::ReversibleActionExecution;
 use ferroui_base::collections::{NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
 use ferroui_base::controls::{NameScope, NameScopeExtensions};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{ObservableExt, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObject, FerroObjectExtensions,
@@ -31,9 +31,9 @@ pub struct MultiDataTriggerBehavior {
     has_condition_state: Cell<bool>,
     applied_actions: RefCell<Vec<Ref<FerroObject>>>,
     /// The conditions the trigger listens to, with the subscription to their property changes.
-    subscribed_conditions: RefCell<Vec<(Ref<Condition>, Rc<dyn IDisposable>)>>,
+    subscribed_conditions: RefCell<Vec<(Ref<Condition>, Subscription)>>,
     /// The subscriptions to the property of the source of the conditions that name one.
-    property_subscriptions: RefCell<Vec<(Ref<Condition>, Option<Rc<dyn IDisposable>>)>>,
+    property_subscriptions: RefCell<Vec<(Ref<Condition>, Option<Subscription>)>>,
     subscribed_conditions_collection: RefCell<Option<(ConditionCollection, u64)>>,
     subscribed_actions: RefCell<Option<(ActionCollection, u64)>>,
 }
@@ -308,7 +308,7 @@ impl MultiDataTriggerBehavior {
                 behavior.condition_property_changed(&sender, e);
             }
         });
-        self.subscribed_conditions.borrow_mut().push((condition.clone(), subscription));
+        self.subscribed_conditions.borrow_mut().push((condition.clone(), Subscription::new(subscription)));
         self.update_condition_subscription(condition);
     }
 
@@ -365,7 +365,7 @@ impl MultiDataTriggerBehavior {
 
         let observable = FerroObjectExtensions::get_observable_untyped(&*target, property);
         let behavior = self.to_ref().downgrade();
-        let subscription = observable.subscribe_fn(move |_value: BoxedValue| {
+        let subscription = observable.subscribe_fn_guard(move |_value: BoxedValue| {
             if let Some(behavior) = behavior.upgrade() {
                 behavior.schedule_execute(None);
             }
@@ -436,8 +436,8 @@ impl MultiDataTriggerBehavior {
                 .map(|index| subscriptions.remove(index))
         };
 
-        if let Some((_, Some(disposable))) = removed {
-            disposable.dispose();
+        if let Some((_, Some(subscription))) = removed {
+            subscription.dispose();
         }
     }
 

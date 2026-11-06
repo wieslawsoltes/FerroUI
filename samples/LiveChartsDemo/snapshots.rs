@@ -1,22 +1,38 @@
-//! The Cartesian and pie scenarios of LiveCharts2's `tests/SnapshotTests` at the pin, restated
-//! with the native controls. Each scenario keeps the source's chart, series, values, axes and
-//! size; `livecharts-snapshots` renders them through Vello CPU, and the render job of
+//! The Cartesian, pie, polar, Sankey, treemap and map scenarios of LiveCharts2's
+//! `tests/SnapshotTests` at the pin, with the OHLC, error, heat, date axis and angular gauge
+//! suites, restated with the native controls. Each scenario keeps the source's chart, series,
+//! values, axes and size; `livecharts-snapshots` renders them through Vello CPU, and the render job of
 //! `livecharts.yml` keeps the images beside the upstream reference images. The upstream suite
 //! compares SkiaSharp images pixel by pixel, which a native renderer cannot reproduce, so the
 //! images are a visual reference and the tests check that every scenario measures its data.
 //!
 //! Source settings without a native counterpart are left out and named in a comment: tooltip
-//! label formatters, `TicksAtCenter`, `IsHoverable`, paints of geometries and separators.
+//! label formatters, `TicksAtCenter`, `IsHoverable`, paints of geometries and separators. The
+//! node and link colours of a Sankey series stand for its `NodeColorMapper`, and the labels a
+//! `LabelMapper` builds are the names of the nodes. The hover scenarios move the pointer after the
+//! first measure, so their renders show the native tooltip. The city markers of the map
+//! scenarios are native `GeoMarker`s in place of `GeoVisualElement`s around circle visuals, and
+//! the custom map is the source sample's `mexico-states.geojson`, copied beside this file. The
+//! dates of the date axis scenarios are their ticks, as the source maps a `DateTimePoint`, and the
+//! label formats are .NET format strings.
 
 use ferroui_base::media::Color;
-use ferroui_base::{Ref, Size};
+use ferroui_base::{Point, Ref, Size};
+use ferroui_base::animation::SignedDuration;
+use ferroui_base::utilities::DateTime;
 use ferroui_controls_livecharts::{
-    Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint, ChartSeries,
-    ColumnSeries, LineSeries, PieChart, PieSeries, PolarLabelsPosition, RangeColumnSeries,
-    RangeLineSeries, RangeRowSeries, RowSeries, ScatterSeries, StackedAreaSeries,
-    StackedColumnSeries, StackedRowSeries, StackedStepAreaSeries, StepLineSeries,
+    AngularTicksVisual, Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint,
+    ChartSeries, ChartVisualElement, ColumnSeries, DateTimeAxis, GeoMap, GeoMarker, HeatLand,
+    HeatLandSeries, HeatLands, HeatSeries, Labeler, LegendPosition, LineSeries, MapProjection,
+    Maps, NeedleVisual, OhlcSeries, PieChart, PieSeries, PolarChart, PolarLabelsPosition,
+    PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries, RowSeries, SankeyChart,
+    SankeyLayoutKind, SankeyLink, SankeyLinks, SankeyNode, SankeyNodes, SankeySeries,
+    ScatterSeries, StackedAreaSeries, StackedColumnSeries, StackedRowSeries,
+    StackedStepAreaSeries, StepLineSeries, TreemapChart, TreemapNode, TreemapNodes,
+    TreemapSeries,
 };
-use ferroui_livecharts::kernel::Coordinate;
+use ferroui_livecharts::kernel::{Coordinate, Error};
+use ferroui_livecharts::{COTANGENT_ANGLE, TANGENT_ANGLE};
 
 /// One scenario: the name of its upstream reference image (`<Class>_<Test>`), its size and a
 /// builder. `then` runs after a first measure, for the source tests that change data after
@@ -45,6 +61,15 @@ fn changed(name: &'static str, build: fn() -> Ref<Chart>, then: fn(&Chart)) -> S
         size: SQUARE,
         build,
         then: Some(then),
+    }
+}
+
+fn sized(name: &'static str, width: f64, height: f64, build: fn() -> Ref<Chart>) -> Scenario {
+    Scenario {
+        name,
+        size: Size::new(width, height),
+        build,
+        then: None,
     }
 }
 
@@ -117,6 +142,34 @@ pub fn scenarios() -> Vec<Scenario> {
         scenario("StackedRowSeriesTests_Issue2152_MixedSigns", stacked_rows_mixed),
         scenario("BoxSeriesTests_BasicBox", box_basic),
         scenario("CandlesticksSeriesTests_Basic", candlesticks_basic),
+        scenario("CandlesticksSeriesTests_DateTime", candlesticks_date_time),
+        scenario("OhlcSeriesTests_Basic", ohlc_basic),
+        scenario("OhlcSeriesTests_DateTime", ohlc_date_time),
+        scenario("AxesTests_DateTimeScaled", axes_date_time_scaled),
+        scenario("ErrorSeriesTests_ColumnWithError", errors_column),
+        scenario("ErrorSeriesTests_RowWithError", errors_row),
+        scenario("ErrorSeriesTests_LineWithError", errors_line),
+        scenario("ErrorSeriesTests_ScatterWithError", errors_scatter),
+        scenario("HeatSeriesTests_Basic", heat_basic),
+        sized(
+            "HeatSeriesTests_Issue1511_ContinuousYAxis_FractionalStep",
+            600.,
+            400.,
+            heat_fractional_limits,
+        ),
+        sized(
+            "HeatSeriesTests_Issue1511_AutoAxisBounds_FractionalStep",
+            600.,
+            400.,
+            heat_fractional_auto,
+        ),
+        sized(
+            "HeatSeriesTests_Issue1511_EmptyPointsDoNotContaminateStep",
+            600.,
+            400.,
+            heat_empty_points,
+        ),
+        scenario("DataLabelsTests_HeatWithLabels", heat_with_labels),
         scenario("RangeSeriesTests_RangeColumn", range_column),
         scenario("RangeSeriesTests_RangeRow", range_row),
         scenario("RangeSeriesTests_RangeColumn_SwappedEndpoints", range_column_swapped),
@@ -139,6 +192,65 @@ pub fn scenarios() -> Vec<Scenario> {
             build: pie_gauge_tight,
             then: None,
         },
+        scenario("PolarChartTests_Basic", polar_basic),
+        scenario("PolarChartTests_MultipleSeries", polar_multiple),
+        scenario("PolarChartTests_FilledArea", polar_filled),
+        scenario("PolarChartTests_WithInnerRadius", polar_inner_radius),
+        scenario("PolarChartTests_OpenLine", polar_open_line),
+        scenario("AngularGaugeTests_AngularGauge", angular_gauge),
+        scenario("AngularGaugeTests_AngularGaugeAtMinValue", angular_gauge_at_min),
+        sized("SankeySeriesTests_TwoLevelFlow", 600., 400., sankey_two_level),
+        sized("SankeySeriesTests_WithLabels", 700., 400., sankey_with_labels),
+        sized("SankeySeriesTests_JobApplicationFunnel", 900., 600., sankey_funnel),
+        sized("SankeySeriesTests_BipartiteArc", 700., 600., sankey_bipartite_arc),
+        sized(
+            "SankeySeriesTests_BipartiteArcWithLabels",
+            700.,
+            600.,
+            sankey_bipartite_arc_labels,
+        ),
+        Scenario {
+            name: "SankeySeriesTests_HoverTooltip_Vertical",
+            size: Size::new(600., 400.),
+            build: sankey_hover_vertical,
+            then: Some(|c| c.move_pointer(Point::new(8., 80.))),
+        },
+        changed(
+            "SankeySeriesTests_HoverTooltip_BipartiteArc",
+            sankey_hover_arc,
+            |c| c.move_pointer(Point::new(590., 300.)),
+        ),
+        sized("SankeySeriesTests_DefaultTheme_AppliesPaletteColor", 600., 400., sankey_theme),
+        sized("SankeySeriesTests_ThreeColumnsWithBranching", 700., 400., sankey_three_columns),
+        scenario("TreemapSeriesTests_FlatBasic", treemap_flat),
+        scenario("TreemapSeriesTests_WithDataLabels", treemap_labels),
+        changed("TreemapSeriesTests_HoverTooltip", treemap_population, |c| {
+            c.move_pointer(Point::new(150., 150.))
+        }),
+        sized(
+            "TreemapSeriesTests_TwoSeriesWithTitleAndLegend",
+            900.,
+            600.,
+            treemap_two_series,
+        ),
+        scenario("TreemapSeriesTests_HierarchicalTwoLevel", treemap_hierarchical),
+        scenario("MapsTests_Basic", map_basic),
+        scenario("MapsTests_OrthographicDefault", map_orthographic),
+        scenario("MapsTests_OrthographicRotated", map_orthographic_rotated),
+        scenario("MapsTests_OrthographicHorizonClipsAlongDiscRim", map_horizon),
+        sized("MapsTests_BasicWithTitleAndLegend", 800., 600., map_title_and_legend),
+        scenario("MapsTests_DefaultProjection", map_default),
+        scenario("MapsTests_MercatorEuropeView", map_mercator_europe),
+        scenario("MapsTests_DefaultProjectionEuropeView", map_default_europe),
+        sized("MapsTests_MarkersOnMap", 800., 600., map_markers),
+        scenario("MapsTests_CustomMap_LoadsAndRendersMexicoStates", map_mexico),
+        sized("MapsTests_MarkersOnMap_RemovedBetweenFrames_0", 800., 600., map_two_markers),
+        Scenario {
+            name: "MapsTests_MarkersOnMap_RemovedBetweenFrames_1",
+            size: Size::new(800., 600.),
+            build: map_two_markers,
+            then: Some(|c| c.markers().clear()),
+        },
     ]
 }
 
@@ -155,6 +267,16 @@ fn cartesian(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
 
 fn pie_chart(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
     let chart = PieChart::new().upcast::<Chart>();
+    for s in series {
+        chart.series().add(s);
+    }
+    chart.set_animations_speed(0.0);
+    chart
+}
+
+/// A polar chart: its X axes are the angle axes, its Y axes the radius axes.
+fn polar_chart(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
+    let chart = PolarChart::new().upcast::<Chart>();
     for s in series {
         chart.series().add(s);
     }
@@ -328,13 +450,10 @@ fn line_curved() -> Ref<Chart> {
     line_smoothness(1.)
 }
 
-/// The source's `Fill = null`: no area under the line. A native series takes its stroke colour
-/// from its fill when it has no stroke, so the stroke is the palette colour of the series.
+/// The source's `Fill = null`: no area under the line. A transparent fill removes the area of the
+/// theme; the stroke keeps the palette colour of the series.
 fn no_fill(series: Ref<ChartSeries>) -> Ref<ChartSeries> {
     series.set_fill(Some(Color::from_argb(0, 0, 0, 0)));
-    if series.stroke().is_none() {
-        series.set_stroke(Some(ferroui_livecharts::scene::palette_color(0)));
-    }
     series
 }
 
@@ -682,6 +801,256 @@ fn candlesticks_basic() -> Ref<Chart> {
     )])
 }
 
+/// The six prices of the financial suites: high, open, close and low.
+const PRICES: [(f64, f64, f64, f64); 6] = [
+    (523., 500., 450., 400.),
+    (500., 450., 425., 400.),
+    (490., 425., 400., 380.),
+    (420., 400., 420., 380.),
+    (520., 420., 490., 400.),
+    (580., 490., 560., 440.),
+];
+
+/// The ticks of a day after 2021-01-01, the first date of the date suites.
+fn day(index: usize) -> f64 {
+    DateTime::new(2021, 1, 1).add_days(index as f64).ticks() as f64
+}
+
+fn prices<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(
+    series: Ref<T>,
+    x: fn(usize) -> f64,
+) -> Ref<ChartSeries> {
+    coordinates(
+        series,
+        PRICES
+            .iter()
+            .enumerate()
+            .map(|(i, (h, o, c, l))| Coordinate::financial(x(i), *h, *o, *c, *l)),
+    )
+}
+
+/// The X axis of the financial date scenarios: a unit width of a day and the labeler
+/// `new DateTime((long)value).ToString("MM dd")`.
+fn daily_axis() -> Ref<Axis> {
+    axis(|a| {
+        a.set_unit_width(SignedDuration::TICKS_PER_DAY as f64);
+        a.set_labeler(Some(Labeler::date_time_format("MM dd")));
+    })
+}
+
+fn candlesticks_date_time() -> Ref<Chart> {
+    let chart = cartesian(vec![prices(CandlesticksSeries::new(), day)]);
+    chart.x_axes().add(daily_axis());
+    chart
+}
+
+// OhlcSeriesTests.
+
+fn ohlc_basic() -> Ref<Chart> {
+    // FinancialPointI: high, open, close, low, at the index.
+    cartesian(vec![prices(OhlcSeries::new(), |i| i as f64)])
+}
+
+fn ohlc_date_time() -> Ref<Chart> {
+    let chart = cartesian(vec![prices(OhlcSeries::new(), day)]);
+    chart.x_axes().add(daily_axis());
+    chart
+}
+
+// AxesTests.DateTimeScaled: a DateTimeAxis of a day, labelled "MM dd".
+
+fn axes_date_time_scaled() -> Ref<Chart> {
+    let series = coordinates(
+        ColumnSeries::new(),
+        [3., 6., 5., 3., 5., 8., 6.]
+            .iter()
+            .enumerate()
+            .map(|(i, y)| Coordinate::new(day(i), *y)),
+    );
+    let chart = cartesian(vec![series]);
+    let x = DateTimeAxis::new();
+    x.set_date_format("MM dd".into());
+    chart.x_axes().add(x.upcast::<Axis>());
+    chart.y_axes().add(Axis::new());
+    chart
+}
+
+// ErrorSeriesTests: ErrorValue(y, y error) and ErrorValue(y, top error, bottom error) at their
+// index; ErrorPoint(x, y, x error, y error) and ErrorPoint(x, y, left, right, top, bottom).
+
+fn error_values() -> Vec<Coordinate> {
+    [
+        (65., 6., 6.),
+        (70., 15., 4.),
+        (35., 4., 4.),
+        (70., 6., 6.),
+        (30., 5., 5.),
+        (60., 4., 16.),
+        (65., 6., 6.),
+    ]
+    .iter()
+    .enumerate()
+    .map(|(i, (y, top, bottom))| {
+        Coordinate::new(i as f64, *y).with_error(Error::new(0., 0., *top, *bottom))
+    })
+    .collect()
+}
+
+/// The ErrorPoints of the suite, at the X of `x`.
+fn error_points(x: fn(usize) -> f64) -> Vec<Coordinate> {
+    [
+        (50., 0.2, 0.2, 8., 8.),
+        (45., 0.1, 0.3, 15., 4.),
+        (25., 0.3, 0.3, 4., 4.),
+        (30., 0.2, 0.2, 6., 6.),
+        (70., 0.2, 0.2, 8., 8.),
+        (30., 0.4, 0.4, 4., 4.),
+        (50., 0.3, 0.3, 6., 6.),
+    ]
+    .iter()
+    .enumerate()
+    .map(|(i, (y, left, right, top, bottom))| {
+        Coordinate::new(x(i), *y).with_error(Error::new(*left, *right, *top, *bottom))
+    })
+    .collect()
+}
+
+fn showing_errors(series: Ref<ChartSeries>) -> Ref<ChartSeries> {
+    series.set_show_error(true);
+    series
+}
+
+fn errors_column() -> Ref<Chart> {
+    cartesian(vec![
+        showing_errors(coordinates(ColumnSeries::new(), error_values())),
+        showing_errors(coordinates(ColumnSeries::new(), error_points(|i| i as f64))),
+    ])
+}
+
+fn errors_row() -> Ref<Chart> {
+    cartesian(vec![
+        showing_errors(coordinates(RowSeries::new(), error_values())),
+        showing_errors(coordinates(RowSeries::new(), error_points(|i| i as f64))),
+    ])
+}
+
+fn errors_line() -> Ref<Chart> {
+    // The source's LineWithError draws a column series of ErrorValues.
+    cartesian(vec![showing_errors(coordinates(
+        ColumnSeries::new(),
+        error_values(),
+    ))])
+}
+
+fn errors_scatter() -> Ref<Chart> {
+    // ErrorDateTimePoints from DateTime.Today: the first date of the date suites here, on a
+    // hidden X axis, so the image does not depend on the day it is drawn.
+    let chart = cartesian(vec![showing_errors(coordinates(
+        ScatterSeries::new(),
+        error_points(day),
+    ))]);
+    chart.x_axes().add(axis(|a| a.set_visible(false)));
+    chart
+}
+
+// HeatSeriesTests and DataLabelsTests.HeatWithLabels: WeightedPoint(x, y, weight).
+
+fn heat(values: impl IntoIterator<Item = Coordinate>, map: &[u32]) -> Ref<ChartSeries> {
+    let series = coordinates(HeatSeries::new(), values);
+    series.set_heat_map(map.iter().map(|hex| rgb(*hex)).collect());
+    series
+}
+
+fn heat_basic() -> Ref<Chart> {
+    // The SKHeatLegend on the right (its gradient and BadgePadding) has no native counterpart.
+    let weights: [[f64; 6]; 4] = [
+        [150., 123., 310., 225., 473., 373.],
+        [432., 312., 135., 78., 124., 423.],
+        [543., 134., 524., 315., 145., 80.],
+        [90., 123., 70., 123., 432., 142.],
+    ];
+    let chart = cartesian(vec![heat(
+        weights.iter().enumerate().flat_map(|(x, column)| {
+            column
+                .iter()
+                .enumerate()
+                .map(move |(y, w)| Coordinate::weighted(x as f64, y as f64, *w))
+        }),
+        &[0xFFF176, 0x2F4F4F, 0x0000FF],
+    )]);
+    chart
+        .x_axes()
+        .add(axis(|a| a.set_labels(labels(&["Charles", "Richard", "Ana", "Mari"]))));
+    chart.y_axes().add(axis(|a| {
+        a.set_labels(labels(&["Jan", "Feb", "Mar", "Apr", "May", "Jun"]))
+    }));
+    chart
+}
+
+/// The data of issue 1511: sixteen columns of six rows from 0.5 by steps of 0.1.
+fn fractional_steps() -> Vec<Coordinate> {
+    let mut values = Vec::new();
+    for x in 0..16 {
+        for i in 0..6 {
+            let y = 0.5 + i as f64 * 0.1;
+            let t = (x + (5 - i)) as f64 / 20.0;
+            let w = 1 + ((1.0 - t) * 399.0) as i32;
+            values.push(Coordinate::weighted(x as f64, y, w as f64));
+        }
+    }
+    values
+}
+
+fn fractional_heat() -> Ref<ChartSeries> {
+    let series = heat(fractional_steps(), &[0xF27A7D, 0xF7D486, 0xC5F9D7]);
+    let heat = series.cast::<HeatSeries>().unwrap();
+    heat.set_color_stops(Some(vec![0., 0.5, 1.]));
+    heat.set_point_padding(ferroui_base::Thickness::uniform(0.));
+    series
+}
+
+fn heat_fractional_limits() -> Ref<Chart> {
+    let chart = cartesian(vec![fractional_heat()]);
+    chart.x_axes().add(limits(0., 15.));
+    chart.y_axes().add(limits(0.5, 1.));
+    chart
+}
+
+fn heat_fractional_auto() -> Ref<Chart> {
+    cartesian(vec![fractional_heat()])
+}
+
+fn heat_empty_points() -> Ref<Chart> {
+    // The first point is empty (`WeightedPoint(null, null, null)`).
+    let mut values = vec![Coordinate::EMPTY];
+    for x in 0..6 {
+        for i in 0..6 {
+            let w = 1 + (x + i) * 10;
+            values.push(Coordinate::weighted(x as f64, 0.5 + i as f64, w as f64));
+        }
+    }
+    let series = heat(values, &[0xF27A7D, 0xC5F9D7]);
+    series
+        .cast::<HeatSeries>()
+        .unwrap()
+        .set_point_padding(ferroui_base::Thickness::uniform(0.));
+    let chart = cartesian(vec![series]);
+    chart.x_axes().add(limits(-0.5, 5.5));
+    chart.y_axes().add(limits(0., 6.));
+    chart
+}
+
+fn heat_with_labels() -> Ref<Chart> {
+    let series = coordinates(
+        HeatSeries::new(),
+        (0..9).map(|i| Coordinate::weighted((i / 3) as f64, (i % 3) as f64, 5. + i as f64 * 5.)),
+    );
+    series.set_data_labels(true);
+    series.set_data_labels_size(12.);
+    series.set_data_labels_color(Some(Color::from_rgb(0, 0, 0)));
+    cartesian(vec![series])
+}
+
 // RangeSeriesTests: RangeValue(low, high).
 
 const RANGES: [(f64, f64); 7] = [
@@ -889,6 +1258,634 @@ fn pie_gauge_tight() -> Ref<Chart> {
     chart.set_max_angle(360.);
     chart.set_min_value(0.);
     chart.set_max_value(Some(100.));
+    chart
+}
+
+// AngularGaugeTests: GaugeGenerator.BuildAngularGaugeSections of 60, 30 and 10 with an outer
+// offset of 130 and a radial width of 20, the ticks of the test and a needle.
+
+fn angular_gauge_chart(needle: f64) -> Ref<Chart> {
+    // BuildAngularGaugeSections: each section a gauge series relative to the minimum, without
+    // data labels or a hover push-out; the theme's gauge rule (no stroke, corner radius 8),
+    // which the native controls do not apply by themselves yet.
+    let mut series = as_pie_series(&[60., 30., 10.], |_, s| {
+        s.set_is_gauge(true);
+        s.set_is_relative_to_min_value(true);
+        s.set_hover_push_out(0.);
+        s.set_stroke(None);
+        s.set_corner_radius(8.);
+        s.set_outer_radius_offset(130.);
+        s.set_max_radial_column_width(20.);
+    });
+    // The background of the generator: a fill series of a zero for each item but itself, in the
+    // theme's fill.
+    let fill = values(PieSeries::new(), &[0., 0., 0.]);
+    fill.set_is_gauge(true);
+    fill.set_is_fill_series(true);
+    fill.set_hover_push_out(0.);
+    fill.set_fill(Some(Color::from_argb(10, 30, 30, 30)));
+    series.push(fill);
+    let chart = pie_chart(series);
+    chart.set_initial_rotation(-225.);
+    chart.set_max_angle(270.);
+    chart.set_min_value(0.);
+    chart.set_max_value(Some(100.));
+    let ticks = AngularTicksVisual::new();
+    ticks.set_labeler(Some(Labeler::new(|value| format!("{value:.1}"))));
+    ticks.set_labels_size(16.);
+    ticks.set_labels_outer_offset(15.);
+    ticks.set_outer_offset(65.);
+    ticks.set_ticks_length(20.);
+    chart.visual_elements().add(ticks.upcast::<ChartVisualElement>());
+    let pointer = NeedleVisual::new();
+    pointer.set_numeric_value(needle);
+    chart.visual_elements().add(pointer.upcast::<ChartVisualElement>());
+    chart
+}
+
+fn angular_gauge() -> Ref<Chart> {
+    angular_gauge_chart(45.)
+}
+
+fn angular_gauge_at_min() -> Ref<Chart> {
+    angular_gauge_chart(0.)
+}
+
+// PolarChartTests.
+
+fn polar_basic() -> Ref<Chart> {
+    let s = values(
+        PolarLineSeries::new(),
+        &[
+            15., 14., 13., 12., 11., 10., 9., 8., 7., 6., 5., 4., 3., 2., 1.,
+        ],
+    );
+    s.set_data_labels(true);
+    s.set_geometry_size(15.);
+    s.set_data_labels_size(8.);
+    s.set_polar_labels_position(PolarLabelsPosition::Middle);
+    s.set_data_labels_rotation(COTANGENT_ANGLE);
+    s.set_polar_closed(true);
+    let chart = polar_chart(vec![s]);
+    chart.y_axes().add(axis(|a| {
+        a.set_labels_angle(-60.);
+        a.set_max_limit(Some(30.));
+    }));
+    chart.x_axes().add(axis(|a| a.set_labels_rotation(TANGENT_ANGLE)));
+    chart
+}
+
+const POLAR_1: [f64; 6] = [10., 8., 12., 6., 14., 4.];
+const POLAR_2: [f64; 6] = [6., 14., 4., 10., 8., 12.];
+const POLAR_3: [f64; 6] = [12., 6., 10., 14., 4., 8.];
+
+fn radius_to_20(chart: Ref<Chart>) -> Ref<Chart> {
+    chart.y_axes().add(axis(|a| a.set_max_limit(Some(20.))));
+    chart
+}
+
+fn polar_multiple() -> Ref<Chart> {
+    radius_to_20(polar_chart(vec![
+        values(PolarLineSeries::new(), &POLAR_1),
+        values(PolarLineSeries::new(), &POLAR_2),
+        values(PolarLineSeries::new(), &POLAR_3),
+    ]))
+}
+
+fn polar_filled() -> Ref<Chart> {
+    let filled = |v: &[f64], fill: Color| {
+        let s = values(PolarLineSeries::new(), v);
+        s.set_fill(Some(fill));
+        s.set_geometry_size(0.);
+        s
+    };
+    radius_to_20(polar_chart(vec![
+        filled(&POLAR_1, Color::from_argb(0x33, 0x64, 0x95, 0xED)),
+        filled(&POLAR_2, Color::from_argb(0x33, 0xF0, 0x80, 0x80)),
+    ]))
+}
+
+fn polar_inner_radius() -> Ref<Chart> {
+    let chart = radius_to_20(polar_chart(vec![values(PolarLineSeries::new(), &POLAR_1)]));
+    chart.set_inner_radius(50.);
+    chart
+}
+
+fn polar_open_line() -> Ref<Chart> {
+    // GeometryFill and GeometryStroke have no native counterpart; the markers take the series
+    // paint.
+    let s = values(PolarLineSeries::new(), &POLAR_1);
+    s.set_polar_closed(false);
+    s.set_geometry_size(12.);
+    radius_to_20(polar_chart(vec![s]))
+}
+
+// SankeySeriesTests.
+
+const SANKEY_BLUE: Color = Color::from_rgb(96, 138, 218);
+const SANKEY_LINK: Color = Color::from_argb(90, 96, 138, 218);
+const BLACK: Color = Color::from_rgb(0, 0, 0);
+const WHITE: Color = Color::from_rgb(255, 255, 255);
+
+fn sankey_chart(series: Ref<SankeySeries>) -> Ref<Chart> {
+    let chart = SankeyChart::new().upcast::<Chart>();
+    chart.series().add(series.upcast());
+    chart.set_animations_speed(0.0);
+    chart
+}
+
+/// A Sankey series of the named nodes, linked by their indexes, with the source's fill and link
+/// fill (`None` leaves them to the theme).
+fn sankey(
+    names: &[&str],
+    links: &[(usize, usize, f64)],
+    fill: Option<Color>,
+    link_fill: Option<Color>,
+) -> Ref<SankeySeries> {
+    let nodes: Vec<_> = names.iter().map(|name| SankeyNode::with_name(*name)).collect();
+    let series = SankeySeries::new();
+    series.set_links(SankeyLinks::from_items(links.iter().map(
+        |&(source, target, weight)| SankeyLink::with_nodes(&nodes[source], &nodes[target], weight),
+    )));
+    series.set_nodes(SankeyNodes::from_items(nodes));
+    series.set_fill(fill);
+    series.set_link_fill(link_fill);
+    series
+}
+
+/// The node colours of a series, in place of the source's `NodeColorMapper`.
+fn colour_nodes(series: &SankeySeries, colours: &[Color]) {
+    for (node, colour) in series.nodes().to_vec().iter().zip(colours) {
+        node.set_color(Some(*colour));
+    }
+}
+
+fn sankey_labels(series: &SankeySeries, colour: Color, size: f64) {
+    series.set_data_labels(true);
+    series.set_data_labels_color(Some(colour));
+    series.set_data_labels_size(size);
+}
+
+const TWO_LEVEL: [(usize, usize, f64); 5] =
+    [(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (1, 4, 2.), (2, 4, 10.)];
+
+fn sankey_two_level() -> Ref<Chart> {
+    let s = sankey(
+        &["A", "B", "C", "X", "Y"],
+        &TWO_LEVEL,
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_node_width(16.);
+    sankey_chart(s)
+}
+
+fn sankey_with_labels() -> Ref<Chart> {
+    let s = sankey(
+        &["Alice", "Bob", "Carol", "Trips", "Other"],
+        &TWO_LEVEL,
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_node_width(16.);
+    sankey_labels(&s, BLACK, 16.);
+    sankey_chart(s)
+}
+
+fn sankey_funnel() -> Ref<Chart> {
+    // The source's LabelMapper writes the node value before the name; the names say it here.
+    let s = sankey(
+        &[
+            "9 Applications",
+            "4 1st Interviews",
+            "3 Rejected",
+            "2 No Reply",
+            "2 2nd Interviews",
+            "1 Dropped by Myself",
+            "1 No Offer Received",
+            "2 Offers",
+            "1 Accepted",
+            "1 Declined",
+        ],
+        &[
+            (0, 1, 4.),
+            (0, 2, 3.),
+            (0, 3, 2.),
+            (1, 4, 2.),
+            (1, 5, 1.),
+            (1, 6, 1.),
+            (4, 7, 2.),
+            (7, 8, 1.),
+            (7, 9, 1.),
+        ],
+        Some(SANKEY_BLUE),
+        Some(WHITE),
+    );
+    let orange = Color::from_rgb(220, 130, 50);
+    colour_nodes(
+        &s,
+        &[
+            SANKEY_BLUE,
+            SANKEY_BLUE,
+            Color::from_rgb(210, 80, 80),
+            Color::from_rgb(180, 180, 180),
+            SANKEY_BLUE,
+            orange,
+            orange,
+            SANKEY_BLUE,
+            Color::from_rgb(64, 175, 110),
+            orange,
+        ],
+    );
+    s.set_node_width(18.);
+    s.set_node_padding(14.);
+    s.set_node_corner_radius(3.);
+    sankey_labels(&s, BLACK, 13.);
+    sankey_chart(s)
+}
+
+fn sankey_bipartite_arc() -> Ref<Chart> {
+    let s = sankey(
+        &[
+            "Furniture",
+            "Technology",
+            "Office Supplies",
+            "Chairs",
+            "Phones",
+            "Storage",
+            "Tables",
+            "Paper",
+        ],
+        &[
+            (0, 3, 12.),
+            (0, 6, 6.),
+            (1, 4, 14.),
+            (1, 5, 8.),
+            (2, 5, 4.),
+            (2, 7, 9.),
+            (2, 3, 2.),
+        ],
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    colour_nodes(
+        &s,
+        &[
+            SANKEY_BLUE,
+            Color::from_rgb(52, 78, 144),
+            Color::from_rgb(150, 188, 232),
+            SANKEY_BLUE,
+            Color::from_rgb(52, 78, 144),
+            Color::from_rgb(120, 158, 220),
+            Color::from_rgb(170, 60, 80),
+            Color::from_rgb(232, 168, 130),
+        ],
+    );
+    s.set_layout(SankeyLayoutKind::BipartiteArc);
+    s.set_arc_span_degrees(150.);
+    s.set_node_width(20.);
+    s.set_node_padding(8.);
+    sankey_chart(s)
+}
+
+fn sankey_bipartite_arc_labels() -> Ref<Chart> {
+    let s = sankey(
+        &["Alpha", "Beta", "Gamma", "Xenon", "Yttrium", "Zinc"],
+        &[(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (1, 5, 5.), (2, 4, 10.), (2, 5, 3.)],
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_layout(SankeyLayoutKind::BipartiteArc);
+    s.set_node_width(14.);
+    sankey_labels(&s, BLACK, 14.);
+    sankey_chart(s)
+}
+
+fn sankey_hover_vertical() -> Ref<Chart> {
+    let s = sankey(
+        &["A", "B", "C", "X", "Y"],
+        &[(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (2, 4, 10.)],
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_node_width(16.);
+    sankey_chart(s)
+}
+
+fn sankey_hover_arc() -> Ref<Chart> {
+    let s = sankey(
+        &["Furniture", "Technology", "Chairs", "Phones", "Storage"],
+        &[(0, 2, 12.), (1, 3, 14.), (1, 4, 8.)],
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_layout(SankeyLayoutKind::BipartiteArc);
+    s.set_node_width(20.);
+    sankey_chart(s)
+}
+
+fn sankey_theme() -> Ref<Chart> {
+    // No fill and no link fill: the theme's palette colour and its LinkFill at alpha 90.
+    let s = sankey(
+        &["A", "B", "X", "Y"],
+        &[(0, 2, 5.), (0, 3, 3.), (1, 3, 7.)],
+        None,
+        None,
+    );
+    s.set_node_width(16.);
+    sankey_chart(s)
+}
+
+fn sankey_three_columns() -> Ref<Chart> {
+    let s = sankey(
+        &["A", "B", "C", "M", "N", "P", "Q"],
+        &[
+            (0, 3, 10.),
+            (1, 3, 5.),
+            (1, 4, 3.),
+            (2, 4, 12.),
+            (3, 5, 8.),
+            (3, 6, 7.),
+            (4, 5, 5.),
+            (4, 6, 10.),
+        ],
+        Some(Color::from_rgb(232, 105, 105)),
+        Some(Color::from_argb(80, 232, 105, 105)),
+    );
+    s.set_node_width(14.);
+    s.set_node_padding(12.);
+    sankey_chart(s)
+}
+
+// TreemapSeriesTests.
+
+fn treemap_chart(series: Vec<Ref<TreemapSeries>>) -> Ref<Chart> {
+    let chart = TreemapChart::new().upcast::<Chart>();
+    for s in series {
+        chart.series().add(s.upcast());
+    }
+    chart.set_animations_speed(0.0);
+    chart
+}
+
+/// A treemap series with the source's fill and white stroke of 2.
+fn treemap(nodes: Vec<Ref<TreemapNode>>, padding: f64, fill: Color) -> Ref<TreemapSeries> {
+    let series = TreemapSeries::new();
+    series.set_nodes(TreemapNodes::from_items(nodes));
+    series.set_padding(padding);
+    series.set_fill(Some(fill));
+    series.set_stroke(Some(WHITE));
+    series.set_stroke_width(2.);
+    series
+}
+
+fn leaves(values: &[(f64, &str)]) -> Vec<Ref<TreemapNode>> {
+    values
+        .iter()
+        .map(|&(value, name)| TreemapNode::with_value(value, name))
+        .collect()
+}
+
+fn branch(name: &str, values: &[(f64, &str)]) -> Ref<TreemapNode> {
+    TreemapNode::with_children(name, TreemapNodes::from_items(leaves(values)))
+}
+
+fn treemap_flat() -> Ref<Chart> {
+    // The default padding of 2.
+    treemap_chart(vec![treemap(
+        leaves(&[(40., "A"), (25., "B"), (15., "C"), (10., "D"), (7., "E"), (3., "F")]),
+        2.,
+        SANKEY_BLUE,
+    )])
+}
+
+fn treemap_labels() -> Ref<Chart> {
+    let s = treemap(
+        leaves(&[
+            (40., "Asia"),
+            (25., "Europe"),
+            (15., "Americas"),
+            (10., "Africa"),
+            (7., "Oceania"),
+            (3., "Antarctica"),
+        ]),
+        4.,
+        SANKEY_BLUE,
+    );
+    s.set_data_labels(true);
+    s.set_data_labels_color(Some(WHITE));
+    s.set_data_labels_size(18.);
+    treemap_chart(vec![s])
+}
+
+const ASIA: [(f64, &str); 4] = [
+    (1400., "China"),
+    (1300., "India"),
+    (125., "Japan"),
+    (270., "Indonesia"),
+];
+const EUROPE: [(f64, &str); 4] = [
+    (83., "Germany"),
+    (67., "France"),
+    (60., "Italy"),
+    (46., "Spain"),
+];
+
+fn treemap_population() -> Ref<Chart> {
+    treemap_chart(vec![treemap(
+        vec![branch("Asia", &ASIA), branch("Europe", &EUROPE)],
+        4.,
+        SANKEY_BLUE,
+    )])
+}
+
+fn treemap_two_series() -> Ref<Chart> {
+    let year = |name: &str, values: &[(f64, &str)], fill: Color| {
+        let s = treemap(leaves(values), 4., fill);
+        s.set_name(name.into());
+        s.set_data_labels(true);
+        s.set_data_labels_color(Some(WHITE));
+        s.set_data_labels_size(16.);
+        s
+    };
+    let chart = treemap_chart(vec![
+        year(
+            "2023",
+            &[(60., "Americas"), (50., "EMEA"), (28., "APAC"), (15., "Other")],
+            SANKEY_BLUE,
+        ),
+        year(
+            "2024",
+            &[(40., "Americas"), (28., "EMEA"), (16., "APAC"), (8., "Other")],
+            Color::from_rgb(232, 105, 105),
+        ),
+    ]);
+    // The source title is a 22 px label with a padding of 12 in black.
+    chart.set_title("Sales by Region".into());
+    chart.set_title_size(22.);
+    chart.set_legend_position(LegendPosition::Right);
+    chart
+}
+
+fn treemap_hierarchical() -> Ref<Chart> {
+    let s = treemap(
+        vec![
+            branch("Asia", &ASIA),
+            branch("Europe", &EUROPE),
+            branch("Americas", &[(330., "USA"), (220., "Brazil"), (130., "Mexico")]),
+        ],
+        4.,
+        Color::from_argb(160, 96, 138, 218),
+    );
+    s.set_corner_radius(4.);
+    treemap_chart(vec![s])
+}
+
+// MapsTests.
+
+/// The lands of the source's `CreateHeatSeries`.
+const MAP_LANDS: [(&str, f64); 14] = [
+    ("bra", 13.),
+    ("mex", 10.),
+    ("usa", 15.),
+    ("can", 8.),
+    ("ind", 12.),
+    ("deu", 13.),
+    ("jpn", 15.),
+    ("chn", 14.),
+    ("rus", 11.),
+    ("fra", 8.),
+    ("esp", 7.),
+    ("kor", 10.),
+    ("zaf", 12.),
+    ("are", 13.),
+];
+
+fn heat_series(lands: &[(&str, f64)]) -> Ref<ChartSeries> {
+    let series = HeatLandSeries::new();
+    series.set_lands(HeatLands::from_items(
+        lands
+            .iter()
+            .map(|&(name, value)| HeatLand::with_value(name, value)),
+    ));
+    series.upcast()
+}
+
+/// A map of the source's heat series on the bundled world map.
+fn map(projection: MapProjection) -> Ref<Chart> {
+    let chart = GeoMap::new().upcast::<Chart>();
+    chart.set_animations_speed(0.0);
+    chart.set_map_projection(projection);
+    chart.series().add(heat_series(&MAP_LANDS));
+    chart
+}
+
+fn map_basic() -> Ref<Chart> {
+    map(MapProjection::Mercator)
+}
+
+fn map_orthographic() -> Ref<Chart> {
+    map(MapProjection::Orthographic)
+}
+
+fn globe(longitude: f64, latitude: f64) -> Ref<Chart> {
+    let chart = map(MapProjection::Orthographic);
+    chart.set_center_longitude(longitude);
+    chart.set_center_latitude(latitude);
+    chart
+}
+
+/// Centred on Europe and Africa.
+fn map_orthographic_rotated() -> Ref<Chart> {
+    globe(15., 20.)
+}
+
+/// Centred on Central Asia: Russia, China and India cross the horizon.
+fn map_horizon() -> Ref<Chart> {
+    globe(80., 20.)
+}
+
+fn map_title_and_legend() -> Ref<Chart> {
+    // The source title is a 20 px label with a padding of 12 in black; its legend is the
+    // gradient bar of an SKHeatLegend on the right, where the native legend lists the series.
+    let chart = map(MapProjection::Mercator);
+    chart.set_title("World population by country".into());
+    chart.set_title_size(20.);
+    chart.set_legend_position(LegendPosition::Right);
+    chart
+}
+
+fn map_default() -> Ref<Chart> {
+    map(MapProjection::Default)
+}
+
+/// Iceland to the Caucasus, North Africa to the North Cape.
+fn europe(projection: MapProjection) -> Ref<Chart> {
+    let chart = map(projection);
+    chart.set_min_latitude(Some(35.));
+    chart.set_max_latitude(Some(72.));
+    chart.set_min_longitude(Some(-25.));
+    chart.set_max_longitude(Some(45.));
+    chart
+}
+
+fn map_mercator_europe() -> Ref<Chart> {
+    europe(MapProjection::Mercator)
+}
+
+fn map_default_europe() -> Ref<Chart> {
+    europe(MapProjection::Default)
+}
+
+/// New York, Tokyo, Madrid, Sao Paulo and Sydney.
+const CITIES: [(f64, f64); 5] = [
+    (-74.00, 40.71),
+    (139.69, 35.69),
+    (-3.70, 40.42),
+    (-46.63, -23.55),
+    (151.21, -33.87),
+];
+
+/// The source's 14 px orange red markers with a white outline of 2, the native defaults.
+fn with_markers(cities: &[(f64, f64)]) -> Ref<Chart> {
+    let chart = map(MapProjection::Mercator);
+    for &(longitude, latitude) in cities {
+        chart.markers().add(GeoMarker::at(longitude, latitude));
+    }
+    chart
+}
+
+fn map_markers() -> Ref<Chart> {
+    with_markers(&CITIES)
+}
+
+fn map_two_markers() -> Ref<Chart> {
+    with_markers(&CITIES[..2])
+}
+
+/// The states of Mexico of the source sample, keyed by their ISO 3166-2 codes, framed on Mexico.
+/// The source's `cmx` matches no state of the file (Mexico City is `dif`), as upstream.
+fn map_mexico() -> Ref<Chart> {
+    let chart = GeoMap::new().upcast::<Chart>();
+    chart.set_animations_speed(0.0);
+    let mexico = Maps::map_from_geojson(include_str!("mexico-states.geojson"))
+        .expect("the sample map is valid GeoJSON");
+    chart.set_active_map(Some(std::rc::Rc::new(mexico)));
+    chart.set_map_projection(MapProjection::Mercator);
+    chart.set_min_latitude(Some(13.));
+    chart.set_max_latitude(Some(33.));
+    chart.set_min_longitude(Some(-120.));
+    chart.set_max_longitude(Some(-85.));
+    chart.series().add(heat_series(&[
+        ("cmx", 92.),
+        ("mex", 70.),
+        ("jal", 84.),
+        ("nle", 58.),
+        ("pue", 65.),
+        ("ver", 80.),
+        ("yuc", 23.),
+        ("bcn", 36.),
+    ]));
     chart
 }
 

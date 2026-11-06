@@ -6,7 +6,7 @@
   <!-- Not from upstream: the Cartesian chart of the LiveCharts2 port (docs/porting/livecharts2.md). -->
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <StackPanel Orientation="Vertical" Spacing="16">
-      <TextBlock Classes="h2">Columns, lines, areas and financial series on X and Y axes</TextBlock>
+      <TextBlock Classes="h2">Columns, lines, areas, financial and heat series on X and Y axes</TextBlock>
 
       <TextBlock Classes="h3">Columns and a line</TextBlock>
       <lc:CartesianChart Height="300" LegendPosition="Bottom" ZoomMode="X">
@@ -74,6 +74,52 @@
             <lc:ChartPoint X="3" Y="7" />
             <lc:ChartPoint X="4" Y="4" />
         </lc:RowSeries>
+      </lc:CartesianChart>
+
+      <TextBlock Classes="h3">OHLC bars on a date axis</TextBlock>
+      <!-- The page class adds the daily prices: their X values are the ticks of their dates. -->
+      <lc:CartesianChart x:Name="PricesChart" Height="260">
+        <lc:CartesianChart.XAxes>
+          <lc:DateTimeAxis Interval="1.00:00:00" DateFormat="MMM dd" />
+        </lc:CartesianChart.XAxes>
+        <lc:OhlcSeries Name="Prices" />
+      </lc:CartesianChart>
+
+      <TextBlock Classes="h3">Error bars</TextBlock>
+      <lc:CartesianChart Height="260">
+        <lc:ColumnSeries Name="Measured" ShowError="True" MaxBarWidth="36">
+            <lc:ChartPoint X="0" Y="65" HasError="True" ErrorYPlus="6" ErrorYMinus="6" />
+            <lc:ChartPoint X="1" Y="70" HasError="True" ErrorYPlus="15" ErrorYMinus="4" />
+            <lc:ChartPoint X="2" Y="35" HasError="True" ErrorYPlus="4" ErrorYMinus="4" />
+            <lc:ChartPoint X="3" Y="70" HasError="True" ErrorYPlus="6" ErrorYMinus="6" />
+            <lc:ChartPoint X="4" Y="30" HasError="True" ErrorYPlus="5" ErrorYMinus="5" />
+        </lc:ColumnSeries>
+        <lc:LineSeries Name="Expected" ShowError="True" GeometrySize="10">
+            <lc:ChartPoint X="0" Y="50" HasError="True" ErrorXMinus="0.2" ErrorXPlus="0.2" ErrorYPlus="8" ErrorYMinus="8" />
+            <lc:ChartPoint X="1" Y="45" HasError="True" ErrorXMinus="0.1" ErrorXPlus="0.3" ErrorYPlus="15" ErrorYMinus="4" />
+            <lc:ChartPoint X="2" Y="25" HasError="True" ErrorXMinus="0.3" ErrorXPlus="0.3" ErrorYPlus="4" ErrorYMinus="4" />
+            <lc:ChartPoint X="3" Y="30" HasError="True" ErrorXMinus="0.2" ErrorXPlus="0.2" ErrorYPlus="6" ErrorYMinus="6" />
+            <lc:ChartPoint X="4" Y="70" HasError="True" ErrorXMinus="0.2" ErrorXPlus="0.2" ErrorYPlus="8" ErrorYMinus="8" />
+        </lc:LineSeries>
+      </lc:CartesianChart>
+
+      <TextBlock Classes="h3">Heat map</TextBlock>
+      <!-- The page class sets the three colours of the heat map and their stops. -->
+      <lc:CartesianChart x:Name="HeatChart" Height="260">
+        <lc:HeatSeries Name="Sales" PointPadding="2">
+            <lc:ChartPoint X="0" Y="0" TertiaryValue="150" />
+            <lc:ChartPoint X="0" Y="1" TertiaryValue="123" />
+            <lc:ChartPoint X="0" Y="2" TertiaryValue="310" />
+            <lc:ChartPoint X="1" Y="0" TertiaryValue="432" />
+            <lc:ChartPoint X="1" Y="1" TertiaryValue="312" />
+            <lc:ChartPoint X="1" Y="2" TertiaryValue="135" />
+            <lc:ChartPoint X="2" Y="0" TertiaryValue="543" />
+            <lc:ChartPoint X="2" Y="1" TertiaryValue="134" />
+            <lc:ChartPoint X="2" Y="2" TertiaryValue="524" />
+            <lc:ChartPoint X="3" Y="0" TertiaryValue="90" />
+            <lc:ChartPoint X="3" Y="1" TertiaryValue="123" />
+            <lc:ChartPoint X="3" Y="2" TertiaryValue="70" />
+        </lc:HeatSeries>
       </lc:CartesianChart>
     </StackPanel>
   </ScrollViewer>

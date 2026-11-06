@@ -484,7 +484,7 @@ impl DatePickerPresenter {
     }
 
     fn set_grid(&self, items: &TemplateItems) {
-        let date_time_format = CultureInfo::current_culture().date_time_format();
+        let date_time_format = CultureInfo::current_formatting().date_time_format();
         let fmt = date_time_format.short_date_pattern();
         let mut columns = [
             (&items.month_host, if self.month_visible() { index_of_ignore_case(fmt, 'm') } else { -1 }),

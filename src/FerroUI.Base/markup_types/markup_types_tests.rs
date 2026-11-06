@@ -2,7 +2,7 @@
 //! is consistent and its members work when invoked through metadata only.
 
 use super::TYPE_LISTS;
-use crate::animation::{KeyFrame, KeySpline, TimeSpan, Transitions};
+use crate::animation::{KeyFrame, KeySpline, SignedDuration, Transitions};
 use crate::controls::{NameScope, NameScopeRef, ResourceDictionary, ResourceKey};
 use crate::data::core::{ValueType, ValueTypes};
 use crate::data::RelativeSourceMode;
@@ -337,10 +337,10 @@ fn value_types_parse_and_construct_through_metadata() {
     let value = (from_rgb.invoke)(&[boxed(255u8), boxed(0u8), boxed(0u8)]).unwrap();
     assert_eq!(unbox::<Color>(&value), Colors::RED);
 
-    let time_span = <TimeSpan as MarkupTyped>::MARKUP;
+    let time_span = <SignedDuration as MarkupTyped>::MARKUP;
     assert_eq!(time_span.namespace(), "System");
     let parsed = (time_span.parse.unwrap())(&[text("0:0:1.5")]).unwrap();
-    assert_eq!(unbox::<TimeSpan>(&parsed), TimeSpan::from_milliseconds(1500.0));
+    assert_eq!(unbox::<SignedDuration>(&parsed), SignedDuration::from_milliseconds(1500.0));
 
     let gesture = <KeyGesture as MarkupTyped>::MARKUP;
     let parsed = (gesture.parse.unwrap())(&[text("Ctrl+A")]).unwrap();
@@ -748,7 +748,7 @@ fn the_well_known_members_have_the_signatures_the_compiler_asks_for() {
     constructor(find("FerroUI", "CornerRadius"), &[f64_; 4]);
     constructor(find("FerroUI", "RelativePoint"), &[f64_, f64_, ValueType::of::<crate::RelativeUnit>()]);
     constructor(find("FerroUI.Input", "Cursor"), &[ValueType::of::<crate::input::StandardCursorType>()]);
-    constructor(find("FerroUI.Media", "FontFamily"), &[ValueType::of::<Option<crate::utilities::Uri>>(), ValueType::of::<String>()]);
+    constructor(find("FerroUI.Media", "FontFamily"), &[ValueType::of::<Option<url::Url>>(), ValueType::of::<String>()]);
     constructor(find("FerroUI.Media.Immutable", "ImmutableSolidColorBrush"), &[ValueType::of::<u32>()]);
     constructor(find("System", "Uri"), &[ValueType::of::<String>(), ValueType::of::<crate::utilities::UriKind>()]);
 
@@ -1525,7 +1525,7 @@ fn easings_and_page_transitions_are_created_and_configured_through_metadata() {
     // <PageSlide Duration='0:0:0.3' Orientation='Horizontal' FillMode='Forward' SlideInEasing=..>
     let slide = MarkupType::find("FerroUI.Animation", "PageSlide").unwrap();
     let transition = (slide.constructors.iter().find(|c| c.parameters.is_empty()).unwrap().invoke)(&[]).unwrap();
-    (slide.find_property("Duration").unwrap().set.unwrap())(&[transition.clone(), boxed(TimeSpan::from_seconds(0.3))])
+    (slide.find_property("Duration").unwrap().set.unwrap())(&[transition.clone(), boxed(SignedDuration::from_seconds(0.3))])
         .unwrap();
     (slide.find_property("Orientation").unwrap().set.unwrap())(&[transition.clone(), boxed(SlideAxis::Vertical)]).unwrap();
     (slide.find_property("FillMode").unwrap().set.unwrap())(&[transition.clone(), boxed(crate::animation::FillMode::Forward)])
@@ -1533,16 +1533,16 @@ fn easings_and_page_transitions_are_created_and_configured_through_metadata() {
     // The easing element is assigned as it was created (its concrete handle).
     (slide.find_property("SlideInEasing").unwrap().set.unwrap())(&[transition.clone(), easing.clone()]).unwrap();
     let concrete = unbox::<Rc<PageSlide>>(&transition);
-    assert_eq!(concrete.duration(), TimeSpan::from_seconds(0.3));
+    assert_eq!(concrete.duration(), SignedDuration::from_seconds(0.3));
     assert_eq!(concrete.orientation(), SlideAxis::Vertical);
     assert!(from_markup_value::<Rc<dyn IPageTransition>>(&transition).is_some());
 
     // <CrossFade Duration='00:00:00.25' />
     let fade = MarkupType::find("FerroUI.Animation", "CrossFade").unwrap();
     let transition = (fade.constructors.iter().find(|c| c.parameters.is_empty()).unwrap().invoke)(&[]).unwrap();
-    (fade.find_property("Duration").unwrap().set.unwrap())(&[transition.clone(), boxed(TimeSpan::from_seconds(0.25))])
+    (fade.find_property("Duration").unwrap().set.unwrap())(&[transition.clone(), boxed(SignedDuration::from_seconds(0.25))])
         .unwrap();
-    assert_eq!(unbox::<Rc<CrossFade>>(&transition).duration(), TimeSpan::from_seconds(0.25));
+    assert_eq!(unbox::<Rc<CrossFade>>(&transition).duration(), SignedDuration::from_seconds(0.25));
     assert!(from_markup_value::<Option<Rc<dyn IPageTransition>>>(&transition).is_some_and(|t| t.is_some()));
     for name in ["FadeInEasing", "FadeOutEasing", "FillMode"] {
         assert!(fade.find_property(name).is_some(), "{name}");

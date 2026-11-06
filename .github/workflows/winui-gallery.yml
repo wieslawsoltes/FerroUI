@@ -20,6 +20,15 @@ on:
       - 'src/FerroUI.Controls/radio_buttons*'
       - 'src/FerroUI.Controls/rating_*'
       - 'src/FerroUI.Controls/icon*'
+      # The controls of the G1 pages (#418).
+      - 'src/FerroUI.Controls/title_bar*'
+      - 'src/FerroUI.Controls/rich_*'
+      - 'src/FerroUI.Controls/media/system_backdrop*'
+      - 'src/FerroUI.Base/media/acrylic_brush*'
+      - 'src/FerroUI.Base/media/theme_shadow*'
+      - 'src/FerroUI.Controls.Repeater/**'
+      - 'src/FerroUI.Controls.Inking/**'
+      - 'src/FerroUI.Controls.LiveCharts/**'
   schedule:
     - cron: '17 3 * * *'
   workflow_dispatch:
@@ -78,7 +87,7 @@ jobs:
       - name: Render the WinUI controls in the dark theme
         run: >-
           cargo run --locked -p winui-gallery --features capture
-          --bin winui-gallery-capture -- --pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,CompactSizing,NavigationView,ColorPicker,ConnectedAnimation,Image,FlipView
+          --bin winui-gallery-capture -- --pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,PersonPicture,PagerControl,CompactSizing,NavigationView,ColorPicker,ConnectedAnimation,Image,FlipView
           --dark --query=Button --output-dir=gallery-captures/dark
       - name: Render the eight NavigationView compositions in both themes
         run: |

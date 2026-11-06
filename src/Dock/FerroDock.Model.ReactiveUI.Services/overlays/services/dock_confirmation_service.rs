@@ -8,12 +8,14 @@ use ferrodock_model::services::{
 };
 use ferroui_reactiveui::{reactive_object, IReactiveObject, IReactiveObjectExt, ReactiveObject};
 use ferroui_system::collections::object_model::ObservableCollection;
-use ferroui_system::threading::{tasks::Task, SynchronizationContext};
+use ferroui_system::task::Schedule;
+use ferroui_system::task::Shared;
+use ferroui_system::ObservableError;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
-/// Source per-host confirmation stack, dispatching mutation to its captured context.
+/// Source per-host confirmation stack, dispatching mutation to its captured schedule.
 pub struct DockConfirmationService {
     reactive: ReactiveObject,
     global: Option<Rc<dyn IDockGlobalConfirmationService>>,
@@ -25,17 +27,18 @@ pub struct DockConfirmationService {
 }
 reactive_object!(DockConfirmationService);
 impl DockConfirmationService {
-    /// Creates a service with an optional global scope service and notification context.
+    /// Creates a service with an optional global scope service and notification schedule
+    /// (the `SynchronizationContext` of the reference; a dispatcher's `task_schedule(priority)`).
     pub fn new(
         global: Option<Rc<dyn IDockGlobalConfirmationService>>,
-        context: Option<Arc<dyn SynchronizationContext>>,
+        schedule: Option<Arc<dyn Schedule>>,
     ) -> Rc<Self> {
         Rc::new_cyclic(|runtime| {
             let requests = ObservableCollection::new();
             Self {
                 reactive: ReactiveObject::new(),
                 global,
-                dispatcher: ServiceDispatcher::new(context, None),
+                dispatcher: ServiceDispatcher::new(schedule, None),
                 read_only: ReadOnlyObservableCollection::new(requests.clone()),
                 requests,
                 active: RefCell::new(None),
@@ -63,7 +66,7 @@ impl DockConfirmationService {
         message: String,
         confirm_text: String,
         cancel_text: String,
-    ) -> Task<bool> {
+    ) -> Shared<Result<bool, ObservableError>> {
         let service = self.runtime.upgrade().expect("live confirmation service");
         spawn_catching(async move {
             let weak = service.runtime.clone();
@@ -93,11 +96,11 @@ impl DockConfirmationService {
                     target.raise_property_changed("HasConfirmations");
                 })
                 .await?;
-            request.task().await
+            request.task().flatten().await
         })
     }
     /// Uses the source Confirm/Cancel default labels.
-    pub fn confirm_async_default(&self, title: String, message: String) -> Task<bool> {
+    pub fn confirm_async_default(&self, title: String, message: String) -> Shared<Result<bool, ObservableError>> {
         self.confirm_async(title, message, "Confirm".into(), "Cancel".into())
     }
     /// Closes the supplied request on the dispatcher, even when it is not in this collection.
@@ -167,7 +170,7 @@ impl IDockConfirmationService for DockConfirmationService {
         message: String,
         confirm_text: String,
         cancel_text: String,
-    ) -> Task<bool> {
+    ) -> Shared<Result<bool, ObservableError>> {
         self.confirm_async(title, message, confirm_text, cancel_text)
     }
     fn close(&self, request: Rc<ConfirmationRequest>, result: bool) {

@@ -9,7 +9,7 @@ use ferroui_base::media::{
     FontManager, FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface,
 };
 use ferroui_base::platform::{IAssetLoader, IFontManagerImpl};
-use ferroui_base::utilities::{CultureInfo, Uri, UriKind};
+use ferroui_base::utilities::{current_locale, Locale, UriRef};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use skia_safe::font_style::{Weight, Width};
 use skia_safe::{Data, FontMgr};
@@ -30,12 +30,15 @@ pub struct CustomFontManagerImpl {
 impl CustomFontManagerImpl {
     pub fn new() -> Self {
         // Seam: upstream passes the culture's `ThreeLetterISOLanguageName`
-        // before its `TwoLetterISOLanguageName`; the port's `CultureInfo`
-        // has no `ThreeLetterISOLanguageName` yet, so only the two letter
-        // name is passed.
+        // before its `TwoLetterISOLanguageName`; only the language subtag of
+        // the current locale (its `TwoLetterISOLanguageName`, `iv` for the
+        // invariant culture) is passed.
         Self {
             default_family_name: format!("{}#Noto Mono", FontManager::system_fonts_key()),
-            bcp47: [CultureInfo::current_culture().two_letter_iso_language_name().to_owned()],
+            bcp47: [match current_locale() {
+                locale if locale == Locale::UNKNOWN => "iv".to_owned(),
+                locale => locale.id.language.as_str().to_owned(),
+            }],
             system_fonts: RefCell::new(None),
         }
     }
@@ -45,7 +48,7 @@ impl CustomFontManagerImpl {
             return system_fonts.clone();
         }
 
-        let source = Uri::try_create(ASSETS, UriKind::Absolute).unwrap();
+        let source = UriRef::parse_absolute(ASSETS).unwrap();
 
         let system_fonts: Rc<dyn IFontCollection> =
             Rc::new(EmbeddedFontCollection::new(FontManager::system_fonts_key(), source));
@@ -63,7 +66,7 @@ impl IFontManagerImpl for CustomFontManagerImpl {
 
     fn get_installed_font_family_names(&self, _check_for_updates: bool) -> Vec<String> {
         // Directly load from assets to avoid creating the full font collection
-        let key = Uri::try_create(ASSETS, UriKind::Absolute).unwrap();
+        let key = UriRef::parse_absolute(ASSETS).unwrap();
 
         let asset_loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
 
@@ -72,7 +75,7 @@ impl IFontManagerImpl for CustomFontManagerImpl {
         let mut seen = HashSet::new();
 
         for font_asset in font_assets {
-            let Ok(mut stream) = asset_loader.open(&font_asset, None) else {
+            let Ok(mut stream) = asset_loader.open(&UriRef::from(font_asset.clone()), None) else {
                 // Ignore faulty assets
                 continue;
             };
@@ -102,7 +105,7 @@ impl IFontManagerImpl for CustomFontManagerImpl {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         if let Some(glyph_typeface) = self.system_fonts().try_match_character(
             codepoint,

@@ -318,7 +318,9 @@ impl DrawingContextImpl {
                 ShadowPictures::insert(key, image.clone());
                 self.draw_image_at_pixels(image, bounds.x0, bounds.y0);
             }
-            None => self.draw_filter_scene(&mut *scene, bounds.x0, bounds.y0, crate::perf::Phase::ShadowAsImage),
+            None => {
+                self.draw_filter_scene(&mut *scene, bounds.x0, bounds.y0, width, height, crate::perf::Phase::ShadowAsImage)
+            }
         }
     }
 

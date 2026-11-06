@@ -59,12 +59,61 @@ pub struct ServerCompositionTarget {
     /// diagnostic that measures render backends in a window on screen
     /// (docs/porting/vello-backend.md, section 14).
     frame_times: RefCell<Option<Vec<std::time::Duration>>>,
+    /// The time in milliseconds from which a frame is printed to the
+    /// standard error with its number and time, when the environment asks
+    /// for it (`FERROUI_SLOW_FRAME_MS`): what finds the frame that stalls
+    /// (docs/porting/gpu-rendering.md, "Pipelines made ahead of their first
+    /// draw"). Not from the reference.
+    slow_frame_ms: Option<f64>,
+    /// How many frames the target drew while it measures them.
+    frames_drawn: Cell<u64>,
+    /// The generation of the effect prewarm list
+    /// (`effects::register_effect_prewarm`) the target prewarmed up to.
+    prewarmed_effects: Cell<u64>,
+    /// Whether the environment turns the prewarm of the effects off
+    /// (`FERROUI_EFFECT_PREWARM=0`): what measures a frame without it.
+    effect_prewarm_disabled: bool,
     /// Whether the render that is running drew a frame.
     drew_frame: Cell<bool>,
     /// The backdrops drawn in the frames so far (winui-materials.md): the
     /// visual that painted each and its area in device pixels. A dirty
     /// rectangle that touches one makes all of it dirty.
     backdrop_regions: RefCell<Vec<(Weak<ServerCompositionVisual>, LtrbRect)>>,
+}
+
+/// The side, in logical units, of the offscreen scene the effects are
+/// prewarmed in; each is drawn over the middle half of it.
+const EFFECT_PREWARM_SIZE: f64 = 128.0;
+
+crate::ferro_thread_local! {
+    /// The generation of the effect prewarm list each compositor of this
+    /// thread prewarmed up to, by scaling (the programs of a blur depend on
+    /// its radius in pixels).
+    static PREWARMED_EFFECTS: RefCell<Vec<(Weak<ServerCompositor>, u64, u64)>> = const { RefCell::new(Vec::new()) };
+}
+
+fn compositor_prewarmed_effects(compositor: &Rc<ServerCompositor>, scaling: f64) -> u64 {
+    PREWARMED_EFFECTS.with(|prewarmed| {
+        let mut prewarmed = prewarmed.borrow_mut();
+        prewarmed.retain(|(owner, ..)| owner.strong_count() > 0);
+        prewarmed
+            .iter()
+            .find(|(owner, bits, _)| *bits == scaling.to_bits() && std::ptr::eq(owner.as_ptr(), Rc::as_ptr(compositor)))
+            .map_or(0, |(.., generation)| *generation)
+    })
+}
+
+fn set_compositor_prewarmed_effects(compositor: &Rc<ServerCompositor>, scaling: f64, generation: u64) {
+    PREWARMED_EFFECTS.with(|prewarmed| {
+        let mut prewarmed = prewarmed.borrow_mut();
+        match prewarmed
+            .iter_mut()
+            .find(|(owner, bits, _)| *bits == scaling.to_bits() && std::ptr::eq(owner.as_ptr(), Rc::as_ptr(compositor)))
+        {
+            Some(entry) => entry.2 = entry.2.max(generation),
+            None => prewarmed.push((Rc::downgrade(compositor), scaling.to_bits(), generation)),
+        }
+    });
 }
 
 impl ServerCompositionTarget {
@@ -124,6 +173,13 @@ impl ServerCompositionTarget {
                 frame_times: RefCell::new(
                     std::env::var("FERROUI_FRAME_TIMES").is_ok_and(|value| value == "1").then(Vec::new),
                 ),
+                slow_frame_ms: std::env::var("FERROUI_SLOW_FRAME_MS")
+                    .ok()
+                    .and_then(|value| value.trim().parse::<f64>().ok())
+                    .filter(|value| value.is_finite() && *value >= 0.0),
+                frames_drawn: Cell::new(0),
+                prewarmed_effects: Cell::new(0),
+                effect_prewarm_disabled: std::env::var("FERROUI_EFFECT_PREWARM").is_ok_and(|value| value == "0"),
                 drew_frame: Cell::new(false),
                 backdrop_regions: RefCell::new(Vec::new()),
             }
@@ -280,15 +336,22 @@ impl ServerCompositionTarget {
     }
 
     pub fn render(self: &Rc<Self>) {
-        if self.frame_times.borrow().is_none() {
+        if self.frame_times.borrow().is_none() && self.slow_frame_ms.is_none() {
             return self.render_frame();
         }
         self.drew_frame.set(false);
         let start = std::time::Instant::now();
         self.render_frame();
         if self.drew_frame.get() {
+            let elapsed = start.elapsed();
             if let Some(times) = self.frame_times.borrow_mut().as_mut() {
-                times.push(start.elapsed());
+                times.push(elapsed);
+            }
+            let frame = self.frames_drawn.get();
+            self.frames_drawn.set(frame + 1);
+            let ms = elapsed.as_secs_f64() * 1000.0;
+            if self.slow_frame_ms.is_some_and(|threshold| ms >= threshold) {
+                eprintln!("slow frame of composition target {}: frame {frame} took {ms:.3} ms", self.id);
             }
         }
     }
@@ -458,6 +521,99 @@ impl ServerCompositionTarget {
             self.dirty_rects.initialize(render_bounds);
         }
         render_target_context.dispose();
+
+        self.prewarm_effects(&compositor, &render_target, &scene_info);
+    }
+
+    /// After a frame: has the render target make the GPU programs of the
+    /// effects registered for the prewarm (`effects::register_effect_prewarm`,
+    /// #437) that neither this target nor another target of the compositor
+    /// at the same scaling prewarmed, by drawing each once offscreen, through
+    /// the painting of the effect brushes, at the scaling of the scene. A
+    /// target tries each generation of the list once: one that does not
+    /// prewarm (a raster target) is not asked again.
+    fn prewarm_effects(
+        &self,
+        compositor: &Rc<ServerCompositor>,
+        render_target: &Rc<dyn IRenderTarget>,
+        scene_info: &RenderTargetSceneInfo,
+    ) {
+        use crate::rendering::composition::effects::{
+            effect_prewarm_effects_since, effect_prewarm_generation, effect_prewarm_since,
+        };
+
+        let prewarmed = self.prewarmed_effects.get();
+        if self.effect_prewarm_disabled || effect_prewarm_generation() <= prewarmed {
+            return;
+        }
+        let scaling = scene_info.scaling;
+        let floor = prewarmed.max(compositor_prewarmed_effects(compositor, scaling));
+        let (generation, graphs) = effect_prewarm_since(floor);
+        // The custom effects that are runtime shaders (#455, E4).
+        let effects = effect_prewarm_effects_since(floor);
+        self.prewarmed_effects.set(generation);
+        if graphs.is_empty() && effects.is_empty() {
+            return;
+        }
+
+        let started = std::time::Instant::now();
+        let side = (EFFECT_PREWARM_SIZE * scaling).ceil().clamp(1.0, 4096.0) as i32;
+        let prewarm_scene = RenderTargetSceneInfo {
+            size: PixelSize::new(side, side),
+            logical_size: Size::new(EFFECT_PREWARM_SIZE, EFFECT_PREWARM_SIZE),
+            ..scene_info.clone()
+        };
+        let area = crate::Rect::new(
+            EFFECT_PREWARM_SIZE / 4.0,
+            EFFECT_PREWARM_SIZE / 4.0,
+            EFFECT_PREWARM_SIZE / 2.0,
+            EFFECT_PREWARM_SIZE / 2.0,
+        );
+        let mut stand_in: Option<Option<Arc<crate::platform::SharedBitmapImpl>>> = None;
+        let drew = render_target.prewarm(&prewarm_scene, &mut |context: &mut dyn IDrawingContextImpl| {
+            // The source parameters are drawn as the noise of the materials:
+            // an image decoded as the images of the application are.
+            let stand_in = stand_in
+                .get_or_insert_with(|| {
+                    compositor
+                        .render_interface()
+                        .with_platform_render_interface(|render_interface| {
+                            render_interface.load_bitmap(&mut std::io::Cursor::new(crate::media::NOISE_ASSET_PNG)).ok()
+                        })
+                        .flatten()
+                })
+                .clone();
+            context.set_transform(Matrix::create_scale(scaling, scaling));
+            for graph in &graphs {
+                crate::rendering::composition::brushes::paint_effect_graph_for_prewarm(
+                    compositor,
+                    graph.clone(),
+                    stand_in.clone(),
+                    context,
+                    area,
+                );
+            }
+            for effect in &effects {
+                crate::rendering::composition::brushes::paint_custom_effect_for_prewarm(
+                    effect,
+                    stand_in.clone(),
+                    context,
+                    area,
+                );
+            }
+        });
+        if !drew {
+            return;
+        }
+        set_compositor_prewarmed_effects(compositor, scaling, generation);
+        if self.frame_times.borrow().is_some() || self.slow_frame_ms.is_some() {
+            eprintln!(
+                "effect prewarm of composition target {}: {} effects drawn offscreen in {:.3} ms",
+                self.id,
+                graphs.len() + effects.len(),
+                started.elapsed().as_secs_f64() * 1000.0
+            );
+        }
     }
 
     fn render_root_to_context_with_clip(

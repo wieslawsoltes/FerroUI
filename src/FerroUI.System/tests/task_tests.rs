@@ -1,4 +1,7 @@
-//! Tests of `threading::tasks`: tasks, completion sources, and futures run on their thread.
+//! Tests of `threading::tasks`: tasks, completion sources, and futures run on their thread. The
+//! types and functions they test are deprecated since 0.5.0 (wrappers over `crate::task`, step A7
+//! of phase C4 of #423) and keep their behaviour; `run` gives a `Shared` of its result.
+#![allow(deprecated)]
 
 use crate::threading::tasks::{block_on, run, run_pending_wakes, set_thread_poster, Task, TaskCanceledError, TaskCompletionSource, TaskStatus, ThreadPoster};
 use crate::ObservableError;
@@ -43,6 +46,8 @@ fn completed_tasks() {
 #[test]
 fn a_cancellation_error_cancels() {
     let task = Task::<i32>::from_exception(Rc::new(TaskCanceledError::default()));
+    assert_eq!(task.status(), TaskStatus::Canceled);
+    let task = Task::<i32>::from_exception(Rc::new(crate::task::Canceled));
     assert_eq!(task.status(), TaskStatus::Canceled);
 }
 
@@ -146,12 +151,12 @@ fn a_wake_from_another_thread_waits_for_run_pending_wakes() {
     let task = run(|| Ok(5));
     // Without a poster the wake waits in the queue of the thread.
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
-    while !task.is_completed() {
+    while !task.is_finished() {
         run_pending_wakes();
         assert!(std::time::Instant::now() < deadline, "the work did not come back");
         std::thread::yield_now();
     }
-    assert_eq!(task.result().unwrap(), 5);
+    assert_eq!(task.result().unwrap().unwrap(), 5);
 }
 
 #[test]
@@ -181,23 +186,23 @@ fn a_wake_from_another_thread_goes_through_the_poster() {
         std::thread::yield_now();
     }
     set_thread_poster(None);
-    assert_eq!(task.result().unwrap(), "done");
+    assert_eq!(task.result().unwrap().unwrap(), "done");
 }
 
 #[test]
 fn run_faults_with_the_error_or_the_panic_of_the_work() {
-    let failed = block_on(run::<i32>(|| Err("no".into())));
+    let failed = block_on(run::<i32>(|| Err("no".into())).flatten());
     assert_eq!(failed.unwrap_err().to_string(), "no");
 
-    let panicked = block_on(run::<i32>(|| panic!("boom")));
+    let panicked = block_on(run::<i32>(|| panic!("boom")).flatten());
     assert_eq!(panicked.unwrap_err().to_string(), "boom");
 }
 
 #[test]
 fn block_on_waits_for_work_of_other_threads() {
     let value = block_on(async {
-        let a = run(|| Ok(20)).await?;
-        let b = run(|| Ok(22)).await?;
+        let a = run(|| Ok(20)).flatten().await?;
+        let b = run(|| Ok(22)).flatten().await?;
         Ok(a + b)
     });
     assert_eq!(value.unwrap(), 42);
@@ -220,36 +225,81 @@ fn a_removed_continuation_does_not_run() {
 
 #[test]
 fn register_local_runs_on_the_thread_that_registered() {
-    use crate::threading::CancellationTokenSource;
+    use crate::threading::CancellationToken;
 
     // Canceled on this thread: at once.
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     let ran = Rc::new(Cell::new(0));
     let r = ran.clone();
-    let _registration = source.token().register_local(move || r.set(r.get() + 1));
+    let _registration = source.register_local(move || r.set(r.get() + 1));
     source.cancel();
     assert_eq!(ran.get(), 1);
 
     // Canceled already: at once.
     let r = ran.clone();
-    let _registration = source.token().register_local(move || r.set(r.get() + 1));
+    let _registration = source.register_local(move || r.set(r.get() + 1));
     assert_eq!(ran.get(), 2);
 
     // Disposed: never.
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     let r = ran.clone();
-    let registration = source.token().register_local(move || r.set(r.get() + 100));
+    let registration = source.register_local(move || r.set(r.get() + 100));
     registration.dispose();
     source.cancel();
     assert_eq!(ran.get(), 2);
 
     // Canceled on another thread: when this thread runs its pending wakes.
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     let r = ran.clone();
-    let _registration = source.token().register_local(move || r.set(r.get() + 10));
+    let _registration = source.register_local(move || r.set(r.get() + 10));
     let remote = source.clone();
     std::thread::spawn(move || remote.cancel()).join().unwrap();
     assert_eq!(ran.get(), 2);
     assert!(run_pending_wakes());
     assert_eq!(ran.get(), 12);
+}
+
+#[test]
+fn a_panic_in_a_spawned_future_faults_its_task_and_the_other_awaiters_still_resume() {
+    // F2 of docs/idiomatic-rust-async.md: the panic used to leave through `set_result`, with the
+    // task left running and the awaiters that were not woken yet never woken.
+    let source = TaskCompletionSource::<i32>::new();
+    let awaited = source.task();
+    let panicking = Task::spawn_local(async move {
+        let value = awaited.await?;
+        if value > 0 {
+            panic!("boom");
+        }
+        Ok(value)
+    });
+    let awaited = source.task();
+    let resumed = Rc::new(Cell::new(0));
+    let r = resumed.clone();
+    let after = Task::spawn_local(async move {
+        let value = awaited.await?;
+        r.set(value);
+        Ok(value)
+    });
+
+    // The panic does not leave through the call that woke the future.
+    source.set_result(5);
+    assert!(panicking.is_faulted());
+    let error = panicking.exception().unwrap();
+    assert!(error.downcast_ref::<crate::threading::tasks::TaskWorkError>().is_some());
+    assert_eq!(error.to_string(), "boom");
+    assert_eq!(resumed.get(), 5);
+    assert_eq!(after.result().unwrap(), 5);
+}
+
+#[test]
+fn a_panic_after_the_task_has_ended_goes_on_from_the_call_that_polled_it() {
+    // A continuation that the end of the task runs, inside the poll of its future, panics: the
+    // task has its outcome already, so the panic leaves through the call that woke the future.
+    let source = TaskCompletionSource::<i32>::new();
+    let awaited = source.task();
+    let task = Task::spawn_local(async move { awaited.await });
+    let _ = task.continue_with(|_| panic!("in a continuation"));
+    let woke = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| source.set_result(1)));
+    assert!(woke.is_err());
+    assert_eq!(task.result().unwrap(), 1);
 }

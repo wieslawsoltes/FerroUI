@@ -13,7 +13,7 @@ use crate::ui_thread_object::UiThreadHandle;
 use ferroui_base::collections::CollectionChangedHandler;
 use ferroui_base::input::KeyModifiers;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
 use ferroui_controls::platform::{INativeMenuExporter, IPlatformIconLoader, ITopLevelNativeMenuExporter};
@@ -174,7 +174,7 @@ pub struct DBusMenuExporterImpl {
     items_to_ids: RefCell<HashMap<Ref<NativeMenuItemBase>, i32>>,
     /// The subscriptions to the property changes of the items that have
     /// an identifier.
-    item_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    item_subscriptions: RefCell<Vec<Subscription>>,
     /// The menus of items whose collection of items is listened to.
     menus: RefCell<Vec<(Ref<NativeMenu>, u64)>>,
     xid: u32,
@@ -250,49 +250,52 @@ impl DBusMenuExporterImpl {
         let Some(this) = self.this.upgrade() else {
             return;
         };
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            if this.disposed.get() {
-                return;
-            }
-
-            // Connection.AddMethodHandler(this)
-            let handle = UiThreadHandle::register(this.clone());
-            *this.handle.borrow_mut() = Some(handle.clone());
-            let object = DBusMenuObject { exporter: handle };
-            if let Err(e) = this.connection.object_server().at(this.path.as_str(), object).await {
-                if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::PLATFORM) {
-                    logger.log(None, &format!("DBusMenu: the menu could not be exported: {e}"));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                if this.disposed.get() {
+                    return;
                 }
-                return;
-            }
-            if !this.app_menu {
-                return;
-            }
 
-            let Ok(path) = ObjectPath::try_from(this.path.as_str()) else {
-                return;
-            };
-            let registrar = async {
-                RegistrarProxy::builder(&this.connection)
-                    .destination(REGISTRAR_NAME)?
-                    .path(REGISTRAR_PATH)?
-                    .cache_properties(CacheProperties::No)
-                    .build()
-                    .await
-            }
-            .await;
-            let Ok(registrar) = registrar else {
-                return;
-            };
-            *this.registrar.borrow_mut() = Some(registrar.clone());
-            if !this.disposed.get() && registrar.register_window(this.xid, &path).await.is_err() {
-                // It's not really important if this code succeeds,
-                // and it's not important to know if it succeeds
-                // since even if we register the window it's not guaranteed that
-                // menu will be actually exported
-                *this.registrar.borrow_mut() = None;
-            }
-        }));
+                // Connection.AddMethodHandler(this)
+                let handle = UiThreadHandle::register(this.clone());
+                *this.handle.borrow_mut() = Some(handle.clone());
+                let object = DBusMenuObject { exporter: handle };
+                if let Err(e) = this.connection.object_server().at(this.path.as_str(), object).await {
+                    if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::PLATFORM) {
+                        logger.log(None, &format!("DBusMenu: the menu could not be exported: {e}"));
+                    }
+                    return;
+                }
+                if !this.app_menu {
+                    return;
+                }
+
+                let Ok(path) = ObjectPath::try_from(this.path.as_str()) else {
+                    return;
+                };
+                let registrar = async {
+                    RegistrarProxy::builder(&this.connection)
+                        .destination(REGISTRAR_NAME)?
+                        .path(REGISTRAR_PATH)?
+                        .cache_properties(CacheProperties::No)
+                        .build()
+                        .await
+                }
+                .await;
+                let Ok(registrar) = registrar else {
+                    return;
+                };
+                *this.registrar.borrow_mut() = Some(registrar.clone());
+                if !this.disposed.get() && registrar.register_window(this.xid, &path).await.is_err() {
+                    // It's not really important if this code succeeds,
+                    // and it's not important to know if it succeeds
+                    // since even if we register the window it's not guaranteed that
+                    // menu will be actually exported
+                    *this.registrar.borrow_mut() = None;
+                }
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     /*
@@ -304,10 +307,7 @@ impl DBusMenuExporterImpl {
      */
     fn do_layout_reset(&self) {
         self.reset_queued.set(false);
-        let subscriptions = std::mem::take(&mut *self.item_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.item_subscriptions.take());
         let menus = std::mem::take(&mut *self.menus.borrow_mut());
         for (menu, token) in menus {
             menu.items().remove_collection_changed(token);
@@ -317,18 +317,21 @@ impl DBusMenuExporterImpl {
         self.revision.set(self.revision.get().wrapping_add(1));
 
         let (connection, path, revision) = (self.connection.clone(), self.path.clone(), self.revision.get());
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let emitted = async {
-                let emitter = SignalEmitter::new(&connection, path.as_str())?;
-                DBusMenuObject::layout_updated(&emitter, revision, 0).await
-            }
-            .await;
-            if let Err(e) = emitted {
-                if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::PLATFORM) {
-                    logger.log(None, &format!("DBusMenu: LayoutUpdated could not be sent: {e}"));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let emitted = async {
+                    let emitter = SignalEmitter::new(&connection, path.as_str())?;
+                    DBusMenuObject::layout_updated(&emitter, revision, 0).await
                 }
-            }
-        }));
+                .await;
+                if let Err(e) = emitted {
+                    if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::PLATFORM) {
+                        logger.log(None, &format!("DBusMenu: LayoutUpdated could not be sent: {e}"));
+                    }
+                }
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     fn queue_reset(&self) {
@@ -390,7 +393,7 @@ impl DBusMenuExporterImpl {
                 this.queue_reset();
             }
         });
-        self.item_subscriptions.borrow_mut().push(subscription);
+        self.item_subscriptions.borrow_mut().push(Subscription::new(subscription));
         self.ensure_subscribed(menu_of(item));
         id
     }
@@ -557,19 +560,22 @@ impl IDisposable for DBusMenuExporterImpl {
         let registrar = self.registrar.borrow().clone();
         let (connection, path, xid) = (self.connection.clone(), self.path.clone(), self.xid);
         // Fire and forget
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            if let Some(registrar) = registrar {
-                if let Err(e) = registrar.unregister_window(xid).await {
-                    if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::PLATFORM) {
-                        logger.log(None, &format!("DBusMenu UnregisterWindowAsync failed: {e}"));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                if let Some(registrar) = registrar {
+                    if let Err(e) = registrar.unregister_window(xid).await {
+                        if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::PLATFORM) {
+                            logger.log(None, &format!("DBusMenu UnregisterWindowAsync failed: {e}"));
+                        }
                     }
                 }
-            }
-            // Connection.RemoveMethodHandler(Path)
-            if handle.is_some() {
-                let _ = connection.object_server().remove::<DBusMenuObject, _>(path.as_str()).await;
-            }
-        }));
+                // Connection.RemoveMethodHandler(Path)
+                if handle.is_some() {
+                    let _ = connection.object_server().remove::<DBusMenuObject, _>(path.as_str()).await;
+                }
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 }
 

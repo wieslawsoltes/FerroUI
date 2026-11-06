@@ -3,7 +3,7 @@ use crate::vello_typeface::VelloTypeface;
 use ferroui_base::media::text_formatting::unicode::{Codepoint, Script};
 use ferroui_base::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface};
 use ferroui_base::platform::IFontManagerImpl;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{current_ui_locale, Locale};
 use fontique::{
     Collection, CollectionOptions, FallbackKey, FamilyId, FamilyInfo, FontInfo, GenericFamily, Language, SourceCache,
     SourceCacheOptions,
@@ -225,9 +225,11 @@ impl FontManagerImpl {
         style: FontStyle,
         weight: FontWeight,
         stretch: FontStretch,
-        culture: &CultureInfo,
+        culture: &Locale,
     ) -> Option<FamilyId> {
-        let key = (codepoint, culture.name().to_owned());
+        // The BCP-47 tag of the locale; empty for the invariant culture, the unknown locale.
+        let culture_name = if *culture == Locale::UNKNOWN { String::new() } else { culture.to_string() };
+        let key = (codepoint, culture_name);
 
         if let Some(family) = system_fonts.fallbacks.get(&key) {
             return *family;
@@ -250,7 +252,7 @@ impl FontManagerImpl {
         // What the system falls back to for the script of the character in
         // the language of the culture.
         if !matches!(script, Script::Unknown | Script::Common | Script::Inherited) {
-            let language = Language::parse(culture.name()).ok();
+            let language = Language::parse(&key.1).ok();
             let fallback_key = FallbackKey::new(fontique::Script::from_bytes(script_tag(script)), language.as_ref());
 
             candidates.extend(system_fonts.collection.fallback_families(fallback_key));
@@ -360,7 +362,7 @@ impl IFontManagerImpl for FontManagerImpl {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         let codepoint = u32::try_from(codepoint).ok()?;
 
@@ -368,7 +370,7 @@ impl IFontManagerImpl for FontManagerImpl {
         let culture = match culture {
             Some(culture) => culture,
             None => {
-                current_culture = CultureInfo::current_ui_culture();
+                current_culture = current_ui_locale();
                 &current_culture
             }
         };

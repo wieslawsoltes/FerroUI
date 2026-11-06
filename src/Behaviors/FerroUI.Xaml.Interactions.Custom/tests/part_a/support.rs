@@ -59,14 +59,14 @@ pub(crate) fn find<T: ObjectType>(root: &StyledElement, name: &str) -> Ref<T> {
 /// The global clock of the themed application: the transitions of the Fluent control themes need
 /// one. It never pulses.
 struct MockGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     play_state: Cell<ferroui_base::animation::PlayState>,
 }
 
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for MockGlobalClock {
     fn subscribe(
         &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
     }

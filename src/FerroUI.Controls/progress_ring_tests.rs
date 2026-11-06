@@ -10,7 +10,7 @@ use crate::shapes::Arc;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use crate::{Border, Control, Grid, ProgressBar, ProgressRing, Window};
-use ferroui_base::animation::{IClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::layout::ILayoutManager;
 use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::{FerroObject, Rect, Ref, Size, Thickness};
@@ -24,13 +24,13 @@ fn start() -> UnitTestApplicationScope {
 /// A clock the test advances, which counts its subscriptions.
 #[derive(Default)]
 struct TestClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     subscriptions: Rc<Cell<usize>>,
 }
 
 impl TestClock {
     fn tick(&self, seconds: f64) {
-        self.subject.on_next(TimeSpan::from_seconds(seconds));
+        self.subject.on_next(SignedDuration::from_seconds(seconds));
     }
 
     fn active(&self) -> usize {
@@ -38,8 +38,8 @@ impl TestClock {
     }
 }
 
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subscriptions.set(self.active() + 1);
         let subscription = self.subject.subscribe(observer);
         let count = self.subscriptions.clone();

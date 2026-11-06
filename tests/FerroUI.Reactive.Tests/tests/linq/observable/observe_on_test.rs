@@ -4,6 +4,10 @@
 //! the scheduler in a slot of the thread that made it, since a context is shared between threads
 //! and a scheduler is not; it is used on that thread only. `ObserveOn(SynchronizationContext)` is
 //! `observe_on_context`.
+//!
+//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
+//! of #423); the tests of them keep them, with their assertions.
+#![allow(deprecated)]
 
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt};
 use ferroui_reactive::ObservableExt;

@@ -1,6 +1,8 @@
 use super::{INavigation, Page};
 use ferroui_base::animation::IPageTransition;
+#[allow(deprecated)]
 use ferroui_base::threading::DispatcherTask;
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{BoxedValue, ObjectType, Ref, Upcast};
 use std::rc::Rc;
 
@@ -11,21 +13,54 @@ pub trait PageNavigationExtensions {
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()>;
+    ) -> JoinHandle<()>;
 
     /// Replaces the current top page with a new page of class `T`.
     fn replace_async_of<T: ObjectType + Upcast<Page>>(
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()>;
+    ) -> JoinHandle<()>;
 
     /// Pushes a new page of class `T` as a modal.
     fn push_modal_async_of<T: ObjectType + Upcast<Page>>(
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()>;
+    ) -> JoinHandle<()>;
+
+    /// The deprecated form of [`push_async_of`](Self::push_async_of): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `push_async_of`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    fn push_async_of_task<T: ObjectType + Upcast<Page>>(
+        &self,
+        transition: Option<Rc<dyn IPageTransition>>,
+        parameter: Option<BoxedValue>,
+    ) -> DispatcherTask<()> {
+        self.push_async_of::<T>(transition, parameter).into()
+    }
+
+    /// The deprecated form of [`replace_async_of`](Self::replace_async_of): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `replace_async_of`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    fn replace_async_of_task<T: ObjectType + Upcast<Page>>(
+        &self,
+        transition: Option<Rc<dyn IPageTransition>>,
+        parameter: Option<BoxedValue>,
+    ) -> DispatcherTask<()> {
+        self.replace_async_of::<T>(transition, parameter).into()
+    }
+
+    /// The deprecated form of [`push_modal_async_of`](Self::push_modal_async_of): a `DispatcherTask`.
+    #[deprecated(since = "0.5.0", note = "use `push_modal_async_of`, which gives a `JoinHandle`")]
+    #[allow(deprecated)]
+    fn push_modal_async_of_task<T: ObjectType + Upcast<Page>>(
+        &self,
+        transition: Option<Rc<dyn IPageTransition>>,
+        parameter: Option<BoxedValue>,
+    ) -> DispatcherTask<()> {
+        self.push_modal_async_of::<T>(transition, parameter).into()
+    }
 }
 
 /// C# `new T()` for a page class.
@@ -44,7 +79,7 @@ impl<N: INavigation + ?Sized> PageNavigationExtensions for N {
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let page = create_page::<T>();
         self.push_async_with_parameter(page, transition, parameter)
     }
@@ -53,7 +88,7 @@ impl<N: INavigation + ?Sized> PageNavigationExtensions for N {
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let page = create_page::<T>();
         self.replace_async_with_parameter(page, transition, parameter)
     }
@@ -62,7 +97,7 @@ impl<N: INavigation + ?Sized> PageNavigationExtensions for N {
         &self,
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
+    ) -> JoinHandle<()> {
         let page = create_page::<T>();
         self.push_modal_async_with_parameter(page, transition, parameter)
     }

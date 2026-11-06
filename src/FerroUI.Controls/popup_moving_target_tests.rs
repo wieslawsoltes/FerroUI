@@ -24,10 +24,10 @@ use crate::primitives::popup_positioning::{IPopupPositioner, PopupPositionerPara
 use crate::primitives::Popup;
 use crate::testing::{MockWindowImpl, MockWindowingPlatform, TestServices, UnitTestApplication};
 use crate::{Border, Control, PlacementMode, Window};
-use ferroui_base::animation::{IGlobalClock, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{Brushes, MediaContext};
-use ferroui_base::threading::DispatcherTask;
+use ferroui_system::task::JoinHandle;
 use ferroui_base::{FerroLocator, PixelPoint, Point, Rect, Ref, Size, Visual};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -89,7 +89,7 @@ fn shell(transition_milliseconds: f64) -> Shell {
 
     let nav = NavigationPage::new();
     let transition: Rc<dyn IPageTransition> = Rc::new(PageSlide::with_duration(
-        TimeSpan::from_milliseconds(transition_milliseconds),
+        SignedDuration::from_milliseconds(transition_milliseconds),
         SlideAxis::Horizontal,
     ));
     nav.set_page_transition(Some(transition));
@@ -101,7 +101,7 @@ fn shell(transition_milliseconds: f64) -> Shell {
     // The first page is shown without a transition.
     let first = nav.push_async(page_with(None));
     frame();
-    assert!(first.is_completed());
+    assert!(first.is_finished());
 
     Shell { window, nav, updates, popups }
 }
@@ -138,10 +138,10 @@ fn position_in(target: &Border, root: &Visual) -> Option<Rect> {
 /// Runs frames until the page of `target` is on its way in: the target is
 /// in the tree of the window and at least 120 to the right of its place at
 /// rest, with the transition still running. Returns where the target is.
-fn run_to_the_middle(shell: &Shell, target: &Border, navigation: &DispatcherTask<()>) -> Rect {
+fn run_to_the_middle(shell: &Shell, target: &Border, navigation: &JoinHandle<()>) -> Rect {
     for _ in 0..2000 {
         frame();
-        assert!(!navigation.is_completed(), "the transition ended before the target was seen moving");
+        assert!(!navigation.is_finished(), "the transition ended before the target was seen moving");
         if let Some(at) = position_in(target, &shell.window) {
             if at.x > at_rest().x + 120.0 && at.x < 300.0 {
                 return at;
@@ -219,7 +219,7 @@ fn popup_opened_during_the_transition_is_placed_where_its_target_is_then() {
 
     popup.open();
     frame();
-    assert!(!navigation.is_completed(), "the popup was opened in the middle of the transition");
+    assert!(!navigation.is_finished(), "the popup was opened in the middle of the transition");
 
     // The positioner was given the rectangle of the moving target: its
     // size, at the place it had when the popup opened (at or left of where

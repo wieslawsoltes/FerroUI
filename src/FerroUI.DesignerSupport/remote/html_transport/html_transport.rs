@@ -2,7 +2,6 @@ use crate::remote::html_transport::simple_web_socket_http_server::{
     SimpleWebSocket, SimpleWebSocketHttpRequest, SimpleWebSocketHttpServer,
 };
 use crate::remote::remote_designer_entry_point::{host_and_port_or, new_guid};
-use ferroui_base::utilities::Uri;
 use ferroui_remote_protocol::input::{
     InputModifiers, MouseButton, PointerEventMessageBase, PointerMovedEventMessage, PointerPressedEventMessage,
     PointerReleasedEventMessage, ScrollEventMessage,
@@ -11,7 +10,7 @@ use ferroui_remote_protocol::viewport::{
     ClientSupportedPixelFormatsMessage, FrameMessage, FrameReceivedMessage, PixelFormat, RequestViewportResizeMessage,
 };
 use ferroui_remote_protocol::{
-    exception_handler, message_handler, Delegate, Error, ExceptionHandler, Guid, HandlerToken, HtmlTransportStartedMessage,
+    exception_handler, message_handler, Delegate, Error, ExceptionHandler, HandlerToken, HtmlTransportStartedMessage,
     IFerroRemoteTransportConnection, Message, MessageHandler, Task,
 };
 use std::collections::HashMap;
@@ -20,6 +19,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError, Weak};
 use std::time::Duration;
+use url::Url;
 
 /// The files of the page, by the names the resources of the original have
 /// without their prefix: what the build of the web application leaves in
@@ -116,9 +116,12 @@ pub struct HtmlWebSocketTransport {
     resources: HashMap<String, Vec<u8>>,
     disposed: AtomicBool,
     lock: Mutex<State>,
-    // `_listenUri.OriginalString`, all that is read of the URI later.
+    // The origin of `_listenUri`, all that is read of the URI later (the
+    // original compares `_listenUri.OriginalString`).
+    // Deviation (DEVIATIONS.md, Designer support): the origin of the URL,
+    // which is what a page states.
     listen_uri: String,
-    secret_cookie: Guid,
+    secret_cookie: uuid::Uuid,
     wakeup: AutoResetEvent,
     // One event at a time, whichever thread raises it.
     raising: Mutex<()>,
@@ -132,7 +135,7 @@ impl HtmlWebSocketTransport {
     /// that is not an IP address, an address that cannot be listened on.
     pub fn new(
         signal_transport: Arc<dyn IFerroRemoteTransportConnection>,
-        listen_uri: &Uri,
+        listen_uri: &Url,
     ) -> Result<Arc<HtmlWebSocketTransport>, Error> {
         if listen_uri.scheme() != "http" {
             return Err(Error::Argument("URI scheme is not HTTP. (Parameter 'listenUri')".to_string()));
@@ -154,7 +157,7 @@ impl HtmlWebSocketTransport {
         // `listenUri.Host` and `listenUri.Port`, which is the port of the
         // scheme when the URI names none.
         let (host, port) = host_and_port_or(listen_uri, Some(80))
-            .ok_or_else(|| Error::Format(format!("Invalid URI: no host in '{}'", listen_uri.original_string())))?;
+            .ok_or_else(|| Error::Format(format!("Invalid URI: no host in '{listen_uri}'")))?;
         let address: IpAddr =
             host.parse().map_err(|_| Error::Format("An invalid IP address was specified.".to_string()))?;
 
@@ -175,7 +178,7 @@ impl HtmlWebSocketTransport {
                 signal_on_message: None,
                 signal_on_exception: None,
             }),
-            listen_uri: listen_uri.original_string().to_string(),
+            listen_uri: listen_uri.origin().ascii_serialization(),
             secret_cookie,
             wakeup: AutoResetEvent::new(false),
             raising: Mutex::new(()),
@@ -645,7 +648,6 @@ mod tests {
     use crate::remote::html_transport::simple_web_socket_http_server::tests::{TestClient, TIMEOUT};
     use crate::remote::remote_rendering_tests::{is_red, red_server, Services};
     use crate::remote::test_connection::TestConnection;
-    use ferroui_base::utilities::UriKind;
     use ferroui_remote_protocol::viewport::{ClientViewportAllocatedMessage, MeasureViewportMessage};
     use std::path::{Path, PathBuf};
     use std::sync::mpsc::{Receiver, RecvTimeoutError};
@@ -658,7 +660,7 @@ mod tests {
     /// over a signal transport of the tests.
     fn start_transport() -> (Arc<HtmlWebSocketTransport>, Arc<TestConnection>, SocketAddr) {
         let signal = TestConnection::new();
-        let listen_uri = Uri::new(LISTEN_URI, UriKind::Absolute).unwrap();
+        let listen_uri = Url::parse(LISTEN_URI).unwrap();
         let transport = HtmlWebSocketTransport::new(signal.clone(), &listen_uri).expect("the loopback interface can be listened on");
         let address = transport.local_addr().expect("the address of the server");
         (transport, signal, address)
@@ -827,7 +829,7 @@ mod tests {
     fn the_listen_uri_has_to_be_an_http_uri_with_an_ip_address() {
         let new = |uri: &str| {
             let signal = TestConnection::new();
-            let result = HtmlWebSocketTransport::new(signal.clone(), &Uri::new(uri, UriKind::Absolute).unwrap());
+            let result = HtmlWebSocketTransport::new(signal.clone(), &Url::parse(uri).unwrap());
             // Nothing was started.
             assert!(signal.sent().is_empty());
             result.err().expect("an error")
@@ -861,7 +863,7 @@ mod tests {
         );
         assert!(!page.contains("PREVIEWER_SECURITY_COOKIE"));
         let cookie = cookie_of(address);
-        assert!(Guid::parse(&cookie).is_ok());
+        assert!(uuid::Uuid::parse_str(&cookie).is_ok());
         assert_eq!(cookie, transport.secret_cookie.to_string());
         assert!(page.contains("<script type=\"module\" src=\"index.js\"></script>"));
         assert_eq!((head, page.into_bytes()), TestClient::get(address, "/index.html"));

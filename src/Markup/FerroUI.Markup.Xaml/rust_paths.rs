@@ -7,6 +7,7 @@
 ferroui_base::ferro_rust_paths! {
     classes: [
         crate::diagnostics::XamlSourceInfo,
+        crate::markup_extensions::DeferredElement,
     ],
     types: [
         crate::FerroXamlLoader,
@@ -28,6 +29,9 @@ ferroui_base::ferro_rust_paths! {
         crate::markup_extensions::RelativeSourceExtension,
         crate::markup_extensions::ResolveByNameExtension,
         crate::markup_extensions::StaticResourceExtension,
+        crate::markup_extensions::XBindExtension,
+        crate::markup_extensions::XBinding,
+        crate::markup_extensions::XBindings,
         crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory,
         crate::styling::MergeResourceInclude,
         crate::styling::ResourceInclude,

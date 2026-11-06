@@ -520,7 +520,7 @@ fn text_reaches_the_server_through_a_batch() {
     let fixture = Fixture::new();
     let text = FormattedText::new(
         "abc",
-        crate::utilities::CultureInfo::invariant_culture(),
+        crate::utilities::Locale::UNKNOWN,
         crate::media::FlowDirection::LeftToRight,
         Typeface::default_typeface(),
         12.0,

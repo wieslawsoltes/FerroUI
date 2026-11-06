@@ -4,7 +4,7 @@
 use std::any::Any;
 use std::rc::Rc;
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::metadata::MarkupValue;
 use ferroui_base::utilities::Uri;
 use xamlx::ast::{
@@ -134,8 +134,8 @@ fn error(type_arguments: &str, provided: &str) -> &'static str {
     host().error(&xaml(type_arguments, provided), None).type_name()
 }
 
-fn time_span() -> TimeSpan {
-    TimeSpan::from_seconds(45296.789)
+fn time_span() -> SignedDuration {
+    SignedDuration::from_seconds(45296.789)
 }
 
 #[test]
@@ -164,12 +164,12 @@ fn dynamic_setter_with_value_types() {
     let arguments = "sys:Int32,sys:TimeSpan";
     assert_eq!(error(arguments, "Null"), "NullReferenceException");
 
-    let result = run::<i32, TimeSpan>(arguments, "Int32");
+    let result = run::<i32, SignedDuration>(arguments, "Int32");
     assert!(result.is_value_set.get());
     assert_eq!(*result.value.borrow(), 1234);
     assert!(!result.special_handler.called.get());
 
-    let result = run::<i32, TimeSpan>(arguments, "TimeSpan");
+    let result = run::<i32, SignedDuration>(arguments, "TimeSpan");
     assert!(!result.is_value_set.get());
     assert_eq!(*result.value.borrow(), 0);
     assert!(result.special_handler.called.get());
@@ -180,17 +180,17 @@ fn dynamic_setter_with_value_types() {
 fn dynamic_setter_with_nullable_value_types() {
     let arguments = "sys:Nullable(sys:Int32),sys:Nullable(sys:TimeSpan)";
     // A null argument matches the first setter.
-    let result = run::<Option<i32>, Option<TimeSpan>>(arguments, "Null");
+    let result = run::<Option<i32>, Option<SignedDuration>>(arguments, "Null");
     assert!(result.is_value_set.get());
     assert!(result.value.borrow().is_none());
     assert!(!result.special_handler.called.get());
 
-    let result = run::<Option<i32>, Option<TimeSpan>>(arguments, "Int32");
+    let result = run::<Option<i32>, Option<SignedDuration>>(arguments, "Int32");
     assert!(result.is_value_set.get());
     assert_eq!(*result.value.borrow(), Some(1234));
     assert!(!result.special_handler.called.get());
 
-    let result = run::<Option<i32>, Option<TimeSpan>>(arguments, "TimeSpan");
+    let result = run::<Option<i32>, Option<SignedDuration>>(arguments, "TimeSpan");
     assert!(!result.is_value_set.get());
     assert!(result.value.borrow().is_none());
     assert!(result.special_handler.called.get());

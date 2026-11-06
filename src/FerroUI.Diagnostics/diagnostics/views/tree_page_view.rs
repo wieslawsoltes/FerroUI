@@ -14,7 +14,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::from_markup_value;
-use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -37,7 +37,7 @@ pub struct TreePageView {
     // recycled for other nodes as the grid scrolls).
     hovered: RefCell<Option<Rc<TreeNode>>>,
     tree: RefCell<Option<Ref<TreeDataGrid>>>,
-    adorner: RefCell<Option<Rc<dyn IDisposable>>>,
+    adorner: RefCell<Option<Subscription>>,
     clipboard_copy_requested: RefCell<Option<Subscription>>,
     selected_node_changed: RefCell<Option<(Rc<TreePageViewModel>, u64)>>,
 }
@@ -203,10 +203,7 @@ impl TreePageView {
             return;
         }
 
-        let adorner = self.adorner.borrow().clone();
-        if let Some(adorner) = adorner {
-            adorner.dispose();
-        }
+        drop(self.adorner.take());
 
         let Some(node) = node else {
             *self.hovered.borrow_mut() = None;
@@ -223,7 +220,8 @@ impl TreePageView {
             return;
         };
 
-        *self.adorner.borrow_mut() = ControlHighlightAdorner::add_visual(&visual, should_visualize_margin_padding);
+        *self.adorner.borrow_mut() =
+            ControlHighlightAdorner::add_visual(&visual, should_visualize_margin_padding).map(Subscription::new);
     }
 
     /// `RemoveAdorner`: removes the highlight when the pointer leaves the
@@ -296,9 +294,12 @@ impl TreePageView {
         let data_transfer: Rc<dyn IAsyncDataTransfer> = data_transfer;
 
         // The original does not await the task.
-        let _ = Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            let _ = clipboard.set_data_async(Some(data_transfer)).await;
-        });
+        let _ = Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                let _ = clipboard.set_data_async(Some(data_transfer)).await;
+            },
+            DispatcherPriority::DEFAULT,
+        );
     }
 
     /// The text of a selector: the selector without the parts in braces

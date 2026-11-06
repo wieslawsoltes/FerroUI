@@ -11,7 +11,7 @@ use ferroui_base::{
     instantiate,
     interactivity::{InteractiveImpl, RoutingStrategies},
     layout::LayoutableImpl,
-    reactive::IDisposable,
+    reactive::{SubscribeGuard, Subscription},
     BoxedValue, FerroObjectImpl, FerroProperty, Ref, StyledElementImpl, StyledProperty, VisualImpl,
     VisualImplExt, VisualTreeAttachmentEventArgs,
 };
@@ -27,8 +27,8 @@ use ferroui_controls::{
 };
 use std::cell::Cell;
 use std::{cell::RefCell, rc::Rc};
-struct Subscription(Box<dyn Fn()>);
-impl Subscription {
+struct ClosureSubscription(Box<dyn Fn()>);
+impl ClosureSubscription {
     fn dispose(self) {
         (self.0)()
     }
@@ -37,11 +37,11 @@ impl Subscription {
 #[repr(C)]
 pub struct DocumentControl {
     base: TemplatedControl,
-    pressed: RefCell<Option<Rc<dyn IDisposable>>>,
-    dock_subscription: RefCell<Option<Subscription>>,
-    dockables_subscription: RefCell<Option<Subscription>>,
+    pressed: RefCell<Option<Subscription>>,
+    dock_subscription: RefCell<Option<ClosureSubscription>>,
+    dockables_subscription: RefCell<Option<ClosureSubscription>>,
     current_dock: RefCell<Option<Rc<dyn IDock>>>,
-    data_context_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    data_context_subscription: RefCell<Option<Subscription>>,
     has_visible_dockables: Cell<bool>,
 }
 ferro_class!(DocumentControl:TemplatedControl);
@@ -84,11 +84,11 @@ impl VisualImpl for DocumentControl {
             move |_, _| owner.pressed_handler(),
             RoutingStrategies::TUNNEL,
             false,
-        ).detach();
+        );
         this.pressed.replace(Some(pressed));
         let owner = this.to_ref();
         let subscription =
-            FerroObject::get_observable(this, StyledElement::data_context_property()).subscribe(
+            FerroObject::get_observable(this, StyledElement::data_context_property()).subscribe_guard(
                 Rc::new(AnonymousObserver::new(move |value: Option<BoxedValue>| {
                     owner.on_dock_changed(value.as_ref())
                 })),
@@ -97,15 +97,8 @@ impl VisualImpl for DocumentControl {
     }
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
-        let pressed = this.pressed.borrow().clone();
-        if let Some(pressed) = pressed {
-            pressed.dispose();
-        }
-        let context = this.data_context_subscription.borrow().clone();
-        if let Some(context) = context {
-            context.dispose();
-        }
-        this.data_context_subscription.replace(None);
+        drop(this.pressed.take());
+        drop(this.data_context_subscription.take());
         this.detach_dock_subscriptions();
     }
 }
@@ -251,7 +244,7 @@ impl DocumentControl {
                 .add(Rc::new(move |name| owner.dock_property_changed(name)));
             let original = dock.clone();
             self.dock_subscription
-                .replace(Some(Subscription(Box::new(move || {
+                .replace(Some(ClosureSubscription(Box::new(move || {
                     if let Some(notifier) = original.as_notify_property_changed() {
                         notifier.property_changed().remove(token);
                     }
@@ -294,7 +287,7 @@ impl DocumentControl {
             .collection_changed()
             .add(Rc::new(move |_| owner.update_has_visible_dockables()));
         self.dockables_subscription
-            .replace(Some(Subscription(Box::new(move || {
+            .replace(Some(ClosureSubscription(Box::new(move || {
                 if let Some(notifier) = list.as_notify_collection_changed() {
                     notifier.collection_changed().remove(token);
                 }

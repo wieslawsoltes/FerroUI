@@ -30,7 +30,8 @@ macos-theme = ["dep:ferroui-themes-macos"]
 material-theme = ["dep:ferroui-themes-material"]
 # The XAML run-time library and the run-time loader of markup.
 xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
-# The WinUI XAML compatibility: the importer, its loading entry points and x:Bind.
+# The WinUI XAML compatibility: the importer and its loading entry points (its x:Bind is compiled
+# by the x:Bind core of the XAML library).
 winui-xaml = ["xaml", "dep:ferroui-markup-xaml-winui"]
 # The libraries of controls beside the control set.
 color-picker = ["dep:ferroui-controls-color-picker"]
@@ -43,6 +44,9 @@ treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-c
 dialogs = ["dep:ferroui-dialogs"]
 # The developer tools (F12 on a window or an application in debug builds).
 diagnostics = ["dep:ferroui-diagnostics"]
+# The visual designer of FerroUI Designer Studio: the designer surface, its document, tools and
+# language services, as a library for an application that embeds the designer.
+designer = ["dep:ferroui-designer"]
 # Localhost CDP inspection and automation; no listener starts until explicitly requested.
 # The endpoint on native targets, the JavaScript bridge in the browser (each feature is gated to
 # its target inside the crate).
@@ -93,6 +97,7 @@ ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
 ferroui-diagnostics = { workspace = true, optional = true }
+ferroui-designer = { workspace = true, optional = true }
 ferroui-devtools = { workspace = true, optional = true, features = ["server"] }
 ferroui-system = { workspace = true, optional = true }
 ferroui-reactive = { workspace = true, optional = true }

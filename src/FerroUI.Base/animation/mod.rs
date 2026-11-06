@@ -11,7 +11,6 @@ mod animation_task;
 mod animator_driven_transition;
 mod animator_key_frame;
 mod animator_transition_observable;
-mod cancellation;
 mod clock;
 mod clock_base;
 mod composite_page_transition;
@@ -85,6 +84,8 @@ pub use play_state::PlayState;
 pub use playback_behavior::PlaybackBehavior;
 pub use playback_direction::PlaybackDirection;
 pub use spring::Spring;
+pub use time_span::{NegativeDurationError, SignedDuration};
+#[allow(deprecated)]
 pub use time_span::{NegativeTimeSpanError, TimeSpan};
 pub use transition::{apply_transition, Transition};
 pub use transition_base::{TransitionBase, TransitionBaseImpl, TransitionBaseImplExt, TransitionBaseVTable};

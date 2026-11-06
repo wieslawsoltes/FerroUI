@@ -64,6 +64,14 @@ separately.
   scopes. External interleaving/removal of owned children, items-host panels, root
   assignment edits without explicit ownership and unsupported handler/resource
   ownership require restart.
+- `{x:Bind}` (#525, X7, [x-bind.md](../porting/x-bind.md) section 3.13): a component or panel
+  reload of markup with x:Bind compiles the candidate against the preserved root as its
+  code-behind; the bindings of the document root belong to the preserved root, and its
+  `XBindings` are updated after the commit and again after a rollback, so `OneTime` values
+  reflect the new markup. A root that a document populates while it is live (a populate
+  override, a designer preview) is updated or initialized by the run-time loader
+  (`XBindings::update_populated`). An x:Bind of an event is an event of the document and needs
+  `with_owned_handlers`.
 - Component and panel adapters expose `with_owned_handlers` for routed XAML events.
   Call after initial population; generated markup and the runtime interpreter both
   record the exact subscriptions they install. Replacement delegates invoke the
@@ -308,11 +316,22 @@ separately.
   weak-reference release, grouped-source invalidation and eviction checks.
 - `Build::hot_reload_manifest(true)` writes a versioned JSON development manifest
   and `FERROUI_HOT_RELOAD_MANIFEST` only when the target enables debug assertions.
-  Manifest generation requires Cargo 1.93 or newer to detect the target profile.
-  The gate also handles custom profiles, build-dependency overrides and explicit
-  `-C debug-assertions` rustflags (the last override wins);
-  the build script's own debug configuration is not used. The dependency-free
-  `python scripts/hot-reload/profile_probe.py` checks these boundaries with Cargo.
+  The gate (`hot_reload_profile` in `ferroui-build-tasks`) decides in this order:
+  an explicit `-C debug-assertions[=value]` in the target rustflags wins (the last
+  one; `CARGO_ENCODED_RUSTFLAGS`, else `RUSTFLAGS`); `CARGO_CFG_DEBUG_ASSERTIONS`
+  set means on; otherwise the root of the profile decides (`PROFILE` `debug` on,
+  `release` off; without it `OPT_LEVEL` 0 on, other levels off). For a `debug`
+  root without the variable the version of Cargo (`$CARGO -V`) decides: Cargo 1.93
+  and later set the variable from the profile, so its absence means a profile that
+  turns debug assertions off; older Cargo, including the workspace minimum 1.89,
+  never sets it, and the dev root means on (#444). When neither the profile nor
+  that version can be read, a build that requests the manifest fails with an error
+  that names the values it saw, instead of writing no manifest. With Cargo before
+  1.93 a custom profile that changes the `debug-assertions` it inherits follows its
+  root; a `-C debug-assertions` rustflag decides such a build. The build script's
+  own debug configuration (`build-override`) is not used. The dependency-free
+  `python scripts/hot-reload/profile_probe.py` (Cargo 1.93 or newer) checks these
+  boundaries with Cargo, and checks the pre-1.93 rule on the values Cargo passes.
   It records the build's source baseline, paths,
   classes, names, expanded data types, member attributes and includes. Handler
   contracts include resolved event signatures, inherited events and qualified

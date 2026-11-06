@@ -1,6 +1,6 @@
 use crate::{ChartKind, ChartPointerEventArgs, LegendPosition, TooltipPosition};
 use ferroui_base::media::{Color, FlowDirection, FormattedText, Typeface};
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{Point, Rect, Size};
 use ferroui_livecharts::{Geometry, PaintStyle, Primitive, Scene, TextAnchor};
 
@@ -71,7 +71,7 @@ pub(crate) fn text_size(value: &str, size: f64) -> Size {
     }
     let text = FormattedText::new(
         value,
-        CultureInfo::invariant_culture(),
+        Locale::UNKNOWN,
         FlowDirection::LeftToRight,
         Typeface::default(),
         size.min(4096.0),
@@ -162,14 +162,15 @@ pub(crate) fn tooltip_scene(
     color: Color,
 ) -> Scene {
     let mut scene = Scene::new(size, Rect::from_size(size));
+    // A label of several lines (the land and its series values of a map) takes a line each.
     let lines: Vec<_> = args
         .points
         .iter()
-        .map(|point| {
+        .flat_map(|point| {
             if point.label.is_empty() {
-                ferroui_livecharts::axis::format_number(point.value)
+                vec![ferroui_livecharts::axis::format_number(point.value)]
             } else {
-                point.label.clone()
+                point.label.lines().map(str::to_owned).collect()
             }
         })
         .collect();

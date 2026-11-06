@@ -1,0 +1,17 @@
+<local:XBindPage xmlns="https://github.com/ferroui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:local="clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests"
+                 Title="Ada">
+  <local:XBindPage.Resources>
+    <local:XBindTagConverter x:Key="tag" />
+  </local:XBindPage.Resources>
+  <TextBlock x:Name="converted" Text="{x:Bind Title, Mode=OneWay, Converter={StaticResource tag}}" />
+  <TextBlock x:Name="parameter" Text="{x:Bind Title, Converter={StaticResource tag}, ConverterParameter=param, ConverterLanguage=fr-FR}" />
+  <TextBox x:Name="convertBack" Text="{x:Bind Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource tag}, ConverterParameter=back}" />
+  <TextBlock x:Name="fallbackOnce" Text="{x:Bind ((local:XBindModel)Tag).Name, FallbackValue='no model'}" />
+  <TextBlock x:Name="fallback" Text="{x:Bind ((local:XBindModel)Tag).Name, Mode=OneWay, FallbackValue='no model'}" />
+  <TextBox x:Name="fallbackTwoWay" Text="{x:Bind ((local:XBindModel)Tag).Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue='no model'}" />
+  <TextBlock x:Name="nullFallback" Text="{x:Bind ((local:XBindModel)Tag).Name, Mode=OneWay, FallbackValue={x:Null}}" />
+  <TextBlock x:Name="nullValue" Text="{x:Bind Title, Mode=OneWay, TargetNullValue='untitled'}" />
+  <TextBox x:Name="nullTwoWay" Text="{x:Bind Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue='untitled'}" />
+</local:XBindPage>

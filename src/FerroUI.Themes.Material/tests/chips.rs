@@ -4,7 +4,7 @@ use crate::{
     MaterialChip, MaterialChipDismissButton, MaterialChipKind, MaterialChipLayout,
     MaterialMotionRole, MaterialMotionScheme, MaterialTheme, register_types,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::input::{
     ICommand, InputElement, Key, KeyEventArgs, KeyModifiers, KeyboardDevice, NavigationMethod,
@@ -541,11 +541,11 @@ fn rtl_mirrors_logical_slots_once_and_keeps_check_glyph_and_label_readable() {
 }
 
 struct TestClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -594,8 +594,8 @@ fn standard_slots_use_distinct_native_entry_and_exit_specs_and_retain_departing_
     let layout = moving_layout(false);
     let _window = host(&layout);
     layout.set_leading_icon(Some(box_content(18.0, 18.0)));
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     let scheme = MaterialMotionScheme::Expressive;
     let entry = scheme
         .spring(MaterialMotionRole::FastSpatial)
@@ -608,7 +608,7 @@ fn standard_slots_use_distinct_native_entry_and_exit_specs_and_retain_departing_
     layout.set_leading_icon(None);
     assert!(layout.show_leading_icon());
     assert!(layout.displayed_leading_icon().is_some());
-    clock.subject.on_next(TimeSpan::from_seconds(0.10));
+    clock.subject.on_next(SignedDuration::from_seconds(0.10));
     let exit = scheme.spring(MaterialMotionRole::DefaultEffects).sample(
         0.05,
         entry.value,
@@ -623,7 +623,7 @@ fn standard_slots_use_distinct_native_entry_and_exit_specs_and_retain_departing_
     );
     near(exit.value.max(0.0), layout.slot_widths().0);
     near(fade.value.clamp(0.0, 1.0), layout.slot_opacities().0);
-    clock.subject.on_next(TimeSpan::from_seconds(2.0));
+    clock.subject.on_next(SignedDuration::from_seconds(2.0));
     assert_eq!((0.0, 0.0), layout.slot_widths());
     assert!(layout.displayed_leading_icon().is_none());
     assert!(!layout.show_leading_icon());
@@ -635,8 +635,8 @@ fn expressive_slot_reversal_preserves_velocity_with_fast_spatial_and_default_eff
     let layout = moving_layout(true);
     let _window = host(&layout);
     layout.set_is_selected(true);
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     let scheme = MaterialMotionScheme::Expressive;
     let width = scheme
         .spring(MaterialMotionRole::FastSpatial)
@@ -648,7 +648,7 @@ fn expressive_slot_reversal_preserves_velocity_with_fast_spatial_and_default_eff
     near(alpha.value, layout.slot_opacities().0);
     layout.set_is_selected(false);
     assert!(layout.show_check());
-    clock.subject.on_next(TimeSpan::from_seconds(0.1));
+    clock.subject.on_next(SignedDuration::from_seconds(0.1));
     let reversed = scheme.spring(MaterialMotionRole::FastSpatial).sample(
         0.05,
         width.value,

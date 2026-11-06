@@ -8,7 +8,7 @@ use crate::{
     MaterialAppBarFling, MaterialMotionRole, MaterialMotionScheme, MaterialSheetAnchors,
     MaterialSheetState, MaterialSpringSpec,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::BindingMode;
 use ferroui_base::input::{
     FocusManager, IPointer, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs,
@@ -63,7 +63,7 @@ pub struct MaterialBottomSheetHost {
     changing: Cell<bool>,
     frame_pending: Cell<bool>,
     frame_generation: Cell<u64>,
-    last_frame: Cell<Option<TimeSpan>>,
+    last_frame: Cell<Option<SignedDuration>>,
     visibility_subscription: RefCell<Option<Subscription>>,
 }
 

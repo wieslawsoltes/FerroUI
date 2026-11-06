@@ -313,7 +313,7 @@ impl<T: 'static> IObservable<T> for TakeUntilToken<T> {
                 Rc::new(TakeUntilTokenSink { sink: Sink::new(observer), registration: SingleAssignmentDisposableValue::new(), serializer: HalfSerializer::new() })
             },
             move |sink: &Rc<TakeUntilTokenSink<T>>| {
-                if token.is_cancellation_requested() {
+                if token.is_cancelled() {
                     sink.on_completed();
                     return;
                 }

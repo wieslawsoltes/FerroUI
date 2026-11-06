@@ -3,15 +3,21 @@
 //! `Observable::merge_all_on`, `Observable.Merge(xs, ys, scheduler)` is `merge_on`, `Merge()` and
 //! `Merge(int)` on a sequence of sequences are `merge_inner` and `merge_inner_max`; the inner
 //! sequences of a sequence of sequences are `Rc<dyn IObservable<i32>>` handles of the test
-//! observables. `Merge` of a sequence of tasks is `merge_inner` (a `Task` is an `ObservableSource`);
-//! `Task.Factory.StartNew` is `tasks::run` and the blocking `Single()` is `block_on` of
-//! `single_async().to_task()`; the `ManualResetEvent`s that only wait for the end are the flags of
+//! observables. `Merge` of a sequence of tasks is `merge_inner` (the `Shared` of a result is an
+//! `ObservableSource`); `Task.Factory.StartNew` is `tasks::run`, which gives such a `Shared`, and
+//! the blocking `Single()` is `block_on` of `single_async().to_task().flatten()`. A
+//! `TaskCompletionSource<int>` is a `TaskSource`, the sender of a `Shared` (`Shared::channel`) whose
+//! continuations run inside the call that ends it, as upstream's; the tests of a canceled task
+//! (`_Canceled_Async`, `_Canceled_Sync`) check that the cancellation names that task
+//! (`tcException.Task == tcss[1].Task`), which only the deprecated `TaskCompletionSource` of
+//! `ferroui_system::threading::tasks` gives, so they keep it; the `ManualResetEvent`s that only wait for the end are the flags of
 //! the subscription (the continuations of the tasks run when the tasks end, on the test thread).
 
 use ferroui_reactive::subjects::Subject;
 use ferroui_reactive::{IObservable, IObserver, Notification, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, Recorded, TestScheduler};
-use ferroui_system::threading::tasks::{block_on, run, Task, TaskCanceledError, TaskCompletionSource};
+use ferroui_system::task::{block_on, Shared, SharedSender};
+use ferroui_system::threading::tasks::run;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -1049,13 +1055,68 @@ fn merge_concat_inner_error() {
 
     assert_subscriptions!(ys4.subscriptions(), RT::subscribe(460, 490));
 }
+/// The task of a completion source (`Task<int>`).
+type SourceTask = Shared<Result<i32, ObservableError>>;
+
+/// A completion source (`TaskCompletionSource<int>`): the sender of a `Shared`, which the first
+/// `Set` takes; its task is the `Shared`. Clones are the same source.
+#[derive(Clone)]
+struct TaskSource {
+    sender: Rc<RefCell<Option<SharedSender<Result<i32, ObservableError>>>>>,
+    task: SourceTask,
+}
+
+impl TaskSource {
+    fn new() -> Self {
+        let (sender, task) = Shared::channel();
+        Self { sender: Rc::new(RefCell::new(Some(sender))), task }
+    }
+
+    /// `Task`.
+    fn task(&self) -> SourceTask {
+        self.task.clone()
+    }
+
+    fn take(&self) -> SharedSender<Result<i32, ObservableError>> {
+        let sender = self.sender.borrow_mut().take();
+        sender.expect("An attempt was made to transition a task to a final state when it had already completed.")
+    }
+
+    /// `SetResult`.
+    fn set_result(&self, value: i32) {
+        self.take().send(Ok(value));
+    }
+
+    /// `SetException`.
+    fn set_exception(&self, error: ObservableError) {
+        self.take().send(Err(error));
+    }
+}
+
 /// `n` completion sources (`new TaskCompletionSource<int>[n]`).
-fn completion_sources(n: usize) -> Vec<TaskCompletionSource<i32>> {
-    (0..n).map(|_| TaskCompletionSource::new()).collect()
+fn completion_sources(n: usize) -> Vec<TaskSource> {
+    (0..n).map(|_| TaskSource::new()).collect()
 }
 
 /// `xs.Select(x => tcss[x].Task)`.
-fn tasks_of(xs: Rc<dyn IObservable<i32>>, tcss: &[TaskCompletionSource<i32>]) -> Rc<dyn IObservable<Task<i32>>> {
+fn tasks_of(xs: Rc<dyn IObservable<i32>>, tcss: &[TaskSource]) -> Rc<dyn IObservable<SourceTask>> {
+    let tcss = tcss.to_vec();
+    xs.select(move |x| tcss[x as usize].task())
+}
+
+/// `n` completion sources of the deprecated `Task` (`new TaskCompletionSource<int>[n]`), for the
+/// tests that check the task a cancellation names.
+#[allow(deprecated)]
+fn named_completion_sources(n: usize) -> Vec<ferroui_system::threading::tasks::TaskCompletionSource<i32>> {
+    (0..n).map(|_| ferroui_system::threading::tasks::TaskCompletionSource::new()).collect()
+}
+
+/// `xs.Select(x => tcss[x].Task)` of the sources of [`named_completion_sources`].
+#[allow(deprecated)]
+fn named_tasks_of(
+    xs: Rc<dyn IObservable<i32>>,
+    tcss: &[ferroui_system::threading::tasks::TaskCompletionSource<i32>],
+) -> Rc<dyn IObservable<ferroui_system::threading::tasks::Task<i32>>> {
     let tcss = tcss.to_vec();
     xs.select(move |x| tcss[x as usize].task())
 }
@@ -1101,7 +1162,7 @@ fn same_error(a: &ObservableError, b: &ObservableError) -> bool {
 fn merge_task() {
     let tss = Observable::to_observable(vec![run(|| Ok(1)), run(|| Ok(2)), run(|| Ok(3))]).merge_inner::<i32>();
 
-    let mut res = block_on(tss.to_array().single_async().to_task()).unwrap();
+    let mut res = block_on(tss.to_array().single_async().to_task().flatten()).unwrap();
 
     res.sort();
     assert_eq!(vec![1, 2, 3], res);
@@ -1174,10 +1235,11 @@ fn merge_task_with_completion_source_faulted_sync() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn merge_task_with_completion_source_canceled_async() {
-    let tcss = completion_sources(3);
+    let tcss = named_completion_sources(3);
 
-    let res = tasks_of(Observable::range(0, 3), &tcss).merge_inner::<i32>();
+    let res = named_tasks_of(Observable::range(0, 3), &tcss).merge_inner::<i32>();
 
     let received = receive(&res);
 
@@ -1187,16 +1249,17 @@ fn merge_task_with_completion_source_canceled_async() {
 
     assert!(received.values.borrow().is_empty());
     let error = received.error().unwrap();
-    assert!(error.downcast_ref::<TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(tcss[1].task().id())));
+    assert!(error.downcast_ref::<ferroui_system::threading::tasks::TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(tcss[1].task().id())));
 }
 
 #[test]
+#[allow(deprecated)]
 fn merge_task_with_completion_source_canceled_sync() {
-    let tcss = completion_sources(3);
+    let tcss = named_completion_sources(3);
 
     tcss[1].set_canceled();
 
-    let res = tasks_of(Observable::range(0, 3), &tcss).merge_inner::<i32>();
+    let res = named_tasks_of(Observable::range(0, 3), &tcss).merge_inner::<i32>();
 
     let received = receive(&res);
 
@@ -1204,7 +1267,7 @@ fn merge_task_with_completion_source_canceled_sync() {
 
     assert!(received.values.borrow().is_empty());
     let error = received.error().unwrap();
-    assert!(error.downcast_ref::<TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(tcss[1].task().id())));
+    assert!(error.downcast_ref::<ferroui_system::threading::tasks::TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(tcss[1].task().id())));
 }
 
 #[test]

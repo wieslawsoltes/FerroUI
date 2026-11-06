@@ -3,7 +3,11 @@ use crate::animation::{
     CompositePageTransition, CrossFade, IPageTransition, IProgressPageTransition, IterationCount, PageSlide,
     Rotate3DTransition, SlideAxis,
 };
-use crate::threading::{CancellationToken, CancellationTokenSource, Dispatcher};
+use crate::threading::{CancellationToken, Dispatcher};
+use ferroui_system::task::{JoinError, JoinHandle};
+use std::future::Future;
+use std::pin::Pin;
+use std::task::{Context, Poll, Waker};
 
 fn pages() -> (Ref<TestRoot>, Ref<Visual>, Ref<Visual>) {
     let root = TestRoot::new();
@@ -20,17 +24,30 @@ fn run_jobs() {
     Dispatcher::current_dispatcher().run_jobs(None);
 }
 
+/// The outcome of a transition that has ended, taken from its handle; `None` while it runs.
+fn outcome(task: &mut JoinHandle<()>) -> Option<Result<(), JoinError>> {
+    match Pin::new(task).poll(&mut Context::from_waker(Waker::noop())) {
+        Poll::Ready(outcome) => Some(outcome),
+        Poll::Pending => None,
+    }
+}
+
+/// Whether the transition has ended with `Ok(())`; takes the outcome.
+fn succeeded(task: &mut JoinHandle<()>) -> bool {
+    matches!(outcome(task), Some(Ok(())))
+}
+
 #[test]
 fn cross_fade_fades_and_hides_the_old_page_through_the_dispatcher() {
     let clock = start();
     let (_root, from, to) = pages();
     let transition = CrossFade::with_duration(seconds(1.0));
 
-    let task = transition.start(Some(&from), Some(&to), true, CancellationToken::none());
+    let mut task = transition.start(Some(&from), Some(&to), true, CancellationToken::none());
 
     // The body runs up to its first await right away.
     assert!(to.is_visible());
-    assert!(!task.is_completed());
+    assert!(!task.is_finished());
 
     clock.pulse(seconds(0.0));
     clock.pulse(seconds(0.5));
@@ -44,9 +61,9 @@ fn cross_fade_fades_and_hides_the_old_page_through_the_dispatcher() {
     // The animations have ended; the continuation is resumed by the
     // dispatcher.
     assert!(from.is_visible());
-    assert!(!task.is_completed());
+    assert!(!task.is_finished());
     run_jobs();
-    assert!(task.is_completed_successfully());
+    assert!(succeeded(&mut task));
     assert!(!from.is_visible());
 }
 
@@ -55,16 +72,16 @@ fn cancelled_cross_fade_completes_and_leaves_the_old_page_visible() {
     let clock = start();
     let (_root, from, to) = pages();
     let transition = CrossFade::with_duration(seconds(1.0));
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
 
-    let task = transition.start(Some(&from), Some(&to), true, source.token());
+    let mut task = transition.start(Some(&from), Some(&to), true, source.clone());
     clock.pulse(seconds(0.0));
     clock.pulse(seconds(0.5));
 
     source.cancel();
     run_jobs();
 
-    assert!(task.is_completed_successfully());
+    assert!(succeeded(&mut task));
     assert!(from.is_visible());
 }
 
@@ -72,17 +89,17 @@ fn cancelled_cross_fade_completes_and_leaves_the_old_page_visible() {
 fn transition_started_with_a_cancelled_token_completes_immediately() {
     start();
     let (_root, from, to) = pages();
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     source.cancel();
 
-    let task = PageSlide::with_duration(seconds(1.0), SlideAxis::Horizontal).start(
+    let mut task = PageSlide::with_duration(seconds(1.0), SlideAxis::Horizontal).start(
         Some(&from),
         Some(&to),
         true,
-        source.token(),
+        source.clone(),
     );
 
-    assert!(task.is_completed_successfully());
+    assert!(succeeded(&mut task));
     assert!(!to.is_visible());
 }
 
@@ -92,7 +109,7 @@ fn page_slide_slides_both_pages_and_resets_them() {
     let (_root, from, to) = pages();
     let transition = PageSlide::with_duration(seconds(1.0), SlideAxis::Horizontal);
 
-    let task = transition.start(Some(&from), Some(&to), true, CancellationToken::none());
+    let mut task = transition.start(Some(&from), Some(&to), true, CancellationToken::none());
 
     clock.pulse(seconds(0.0));
     clock.pulse(seconds(0.5));
@@ -102,7 +119,7 @@ fn page_slide_slides_both_pages_and_resets_them() {
     clock.pulse(seconds(1.0));
     run_jobs();
 
-    assert!(task.is_completed_successfully());
+    assert!(succeeded(&mut task));
     assert!(!from.is_visible());
     assert!(to.is_visible());
     assert!(from.render_transform().is_none());
@@ -115,7 +132,7 @@ fn rotate_3d_transition_ends_with_the_new_page_on_top() {
     let (_root, from, to) = pages();
     let transition = Rotate3DTransition::with_duration(seconds(1.0), SlideAxis::Horizontal, None);
 
-    let task = transition.start(Some(&from), Some(&to), true, CancellationToken::none());
+    let mut task = transition.start(Some(&from), Some(&to), true, CancellationToken::none());
 
     clock.pulse(seconds(0.0));
     clock.pulse(seconds(0.5));
@@ -125,7 +142,7 @@ fn rotate_3d_transition_ends_with_the_new_page_on_top() {
     run_jobs();
     run_jobs();
 
-    assert!(task.is_completed_successfully());
+    assert!(succeeded(&mut task));
     assert_eq!(to.z_index(), 2);
     assert_eq!(from.z_index(), 1);
     assert!(!from.is_visible());
@@ -140,17 +157,17 @@ fn composite_page_transition_completes_when_all_transitions_have() {
     composite.add(Rc::new(CrossFade::with_duration(seconds(1.0))));
     composite.add(Rc::new(PageSlide::with_duration(seconds(2.0), SlideAxis::Vertical)));
 
-    let task = composite.start(Some(&from), Some(&to), true, CancellationToken::none());
+    let mut task = composite.start(Some(&from), Some(&to), true, CancellationToken::none());
 
     clock.pulse(seconds(0.0));
     clock.pulse(seconds(1.0));
     run_jobs();
-    assert!(!task.is_completed());
+    assert!(!task.is_finished());
 
     clock.pulse(seconds(2.0));
     run_jobs();
     run_jobs();
-    assert!(task.is_completed_successfully());
+    assert!(succeeded(&mut task));
 }
 
 #[test]
@@ -191,8 +208,61 @@ fn transition_whose_animation_cannot_run_fails() {
     let animation = crate::animation::Animation::new();
     animation.set_iteration_count(IterationCount::INFINITE);
     let run = animation.run_async(&from, CancellationToken::none());
-    let task = crate::animation::start_page_transition(async move {
+    let mut task = crate::animation::start_page_transition(async move {
         crate::animation::when_all_animations(vec![run]).await;
     });
-    assert!(task.is_faulted());
+    assert!(matches!(outcome(&mut task), Some(Err(JoinError::Panicked(_)))));
+}
+
+#[test]
+fn an_aborted_transition_ends_canceled_and_stops_where_it_was() {
+    let clock = start();
+    let (_root, from, to) = pages();
+    let transition = CrossFade::with_duration(seconds(1.0));
+
+    let mut task = transition.start(Some(&from), Some(&to), true, CancellationToken::none());
+    clock.pulse(seconds(0.0));
+    clock.pulse(seconds(0.5));
+    task.abort();
+    run_jobs();
+
+    assert!(task.is_finished());
+    assert!(matches!(outcome(&mut task), Some(Err(JoinError::Canceled))));
+    // The continuation that hides the old page never runs.
+    assert!(from.is_visible());
+}
+
+/// A transition whose body panics at once.
+struct FailingTransition;
+
+impl IPageTransition for FailingTransition {
+    fn start(
+        &self,
+        _from: Option<&Ref<Visual>>,
+        _to: Option<&Ref<Visual>>,
+        _forward: bool,
+        _cancellation_token: CancellationToken,
+    ) -> JoinHandle<()> {
+        crate::animation::start_page_transition(async {
+            panic!("the member failed");
+        })
+    }
+}
+
+#[test]
+fn a_composite_with_a_failing_member_fails_with_its_panic_as_a_value() {
+    start();
+    let (_root, from, to) = pages();
+    let composite = CompositePageTransition::new();
+    composite.add(Rc::new(FailingTransition));
+
+    let mut task = composite.start(Some(&from), Some(&to), true, CancellationToken::none());
+    run_jobs();
+
+    match outcome(&mut task) {
+        Some(Err(JoinError::Panicked(payload))) => {
+            assert_eq!(payload.downcast_ref::<&str>(), Some(&"the member failed"));
+        }
+        other => panic!("the composite did not fail: {other:?}"),
+    }
 }

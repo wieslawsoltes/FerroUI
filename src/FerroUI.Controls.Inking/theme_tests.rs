@@ -11,7 +11,7 @@ use ferroui_base::styling::{ControlTheme, IStyle, Setter, SetterValue, StyleBase
 use ferroui_base::{CornerRadius, FerroObject, Ref, Thickness, TypeInfo};
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_controls::{Application, Control, Window};
 use ferroui_markup_xaml::styling::StyleInclude;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -28,7 +28,7 @@ fn start_themed_application() -> UnitTestApplicationScope {
     let scope = UnitTestApplication::start(services);
     FerroRuntimeXamlLoader::register();
     let styles = StyleInclude::new(None);
-    styles.set_source(Some(Uri::new("ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml", UriKind::Absolute).expect("a URI")));
+    styles.set_source(Some(UriRef::parse("ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml").expect("a URI")));
     Application::current().expect("an application").styles().add(styles as Rc<dyn IStyle>);
     scope
 }
@@ -36,7 +36,7 @@ fn start_themed_application() -> UnitTestApplicationScope {
 /// The global clock of the themed application: the transitions of the control themes need one.
 /// It never pulses, so a transition keeps its start value.
 pub struct MockGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     play_state: std::cell::Cell<ferroui_base::animation::PlayState>,
 }
 
@@ -49,10 +49,10 @@ impl MockGlobalClock {
     }
 }
 
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for MockGlobalClock {
     fn subscribe(
         &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
     }

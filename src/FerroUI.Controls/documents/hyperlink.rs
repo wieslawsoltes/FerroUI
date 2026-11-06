@@ -3,8 +3,8 @@ use crate::{Control, TopLevel};
 use ferroui_base::input::Key;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
-use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::{HandlerList, Uri};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_base::utilities::{HandlerList, UriRef};
 use ferroui_base::{
     ferro_class, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty,
@@ -410,7 +410,7 @@ impl Hyperlink {
         let Some(uri) = args
             .navigate_uri
             .as_deref()
-            .and_then(|s| Uri::absolute(s).ok())
+            .and_then(|s| UriRef::parse_absolute(s).ok())
         else {
             return;
         };
@@ -421,13 +421,16 @@ impl Hyperlink {
                     return;
                 };
                 let weak = self.to_ref().downgrade();
-                let _ = Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                    if top_level.launcher().launch_uri_async(&uri).await {
-                        if let Some(link) = weak.upgrade() {
-                            link.set_is_visited(true);
+                let _ = Dispatcher::ui_thread().spawn_local_with_priority(
+                    async move {
+                        if top_level.launcher().launch_uri_async(&uri).await {
+                            if let Some(link) = weak.upgrade() {
+                                link.set_is_visited(true);
+                            }
                         }
-                    }
-                });
+                    },
+                    DispatcherPriority::DEFAULT,
+                );
                 return;
             }
             parent = element.parent();

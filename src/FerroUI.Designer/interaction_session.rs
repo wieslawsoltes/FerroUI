@@ -1,6 +1,6 @@
 //! Visual-state and behavior authoring through native styles/classes and Xaml.Behaviors.
 use crate::DesignerSession;
-use ferroui_base::animation::{IClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::{BoxedValue, StyledElement};
 use ferroui_designer_animation::{BehaviorAction, BehaviorModel, Sample, VisualStateGroup};
@@ -219,8 +219,8 @@ impl DesignerSession {
         }
         self.interactions.active_states = next;
         self.preview.host.update_layout();
-        clock.subject.on_next(TimeSpan::ZERO);
-        clock.subject.on_next(TimeSpan::from_seconds(time));
+        clock.subject.on_next(SignedDuration::ZERO);
+        clock.subject.on_next(SignedDuration::from_seconds(time));
         self.interactions.clock = Some(clock);
         self.interactions.clock_time = time;
         self.interactions.behavior_modified = true;
@@ -248,7 +248,7 @@ impl DesignerSession {
             .as_ref()
             .ok_or("No state preview is active")?;
         self.preview.clear_animation();
-        clock.subject.on_next(TimeSpan::from_seconds(time));
+        clock.subject.on_next(SignedDuration::from_seconds(time));
         self.interactions.clock_time = time;
         self.preview.host.update_layout();
         self.generation += 1;
@@ -428,7 +428,7 @@ impl DesignerSession {
 }
 
 struct StatePreviewClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
 impl Default for StatePreviewClock {
@@ -439,8 +439,8 @@ impl Default for StatePreviewClock {
         }
     }
 }
-impl IObservable<TimeSpan> for StatePreviewClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for StatePreviewClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

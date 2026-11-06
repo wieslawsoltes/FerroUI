@@ -4,7 +4,8 @@ use super::{DialogContent, DialogRequest, DialogResult};
 use crate::collections::ReadOnlyObservableCollection;
 use crate::BoxedValue;
 use ferroui_system::component_model::INotifyPropertyChanged;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
+use ferroui_system::ObservableError;
 use std::rc::Rc;
 /// Object-safe source dialog service, with its generic result cast in the extension trait.
 pub trait IDockDialogService: INotifyPropertyChanged {
@@ -19,7 +20,7 @@ pub trait IDockDialogService: INotifyPropertyChanged {
         &self,
         content: DialogContent,
         title: Option<String>,
-    ) -> Task<Option<BoxedValue>>;
+    ) -> Shared<Result<Option<BoxedValue>, ObservableError>>;
     /// Closes a request with a nullable shared result.
     fn close(&self, request: Rc<DialogRequest>, result: Option<BoxedValue>);
     /// Cancels a snapshot of currently pending dialogs.
@@ -32,9 +33,10 @@ pub trait DockDialogServiceExt: IDockDialogService {
         &self,
         content: impl Into<DialogContent>,
         title: Option<String>,
-    ) -> Task<T> {
+    ) -> Shared<Result<T, ObservableError>> {
         let task = self.show_async_boxed(content.into(), title);
-        Task::spawn_local(async move { Ok(T::from_dialog_result(task.await?)) })
+        ferroui_system::task::spawn_local(async move { Ok::<T, ObservableError>(T::from_dialog_result(task.flatten().await?)) })
+            .shared()
     }
 }
 impl<S: IDockDialogService + ?Sized> DockDialogServiceExt for S {}

@@ -7,7 +7,6 @@ use std::rc::Rc;
 use ferroui_base::controls::{NameScope, NameScopeRef};
 use ferroui_base::metadata::{from_markup_value, MarkupValue};
 use ferroui_base::styling::{Selector, Selectors, StyleQueries, StyleQuery};
-use ferroui_base::utilities::Uri;
 use ferroui_base::{BoxedValue, StyledElement, TypeInfo};
 use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
@@ -162,7 +161,7 @@ fn font_family(node: &Rc<FerroXamlIlFontFamilyAstNode>, context: &mut EvalContex
     if context.configuration().type_mappings.uri_context_provider.is_none() {
         return Err(XamlError::internal("NullReferenceException", "XamlLanguageTypeMappings.UriContextProvider is not set"));
     }
-    let base_uri: MarkupValue = context.runtime_context()?.base_uri().map(|uri: Uri| Rc::new(uri) as BoxedValue);
+    let base_uri: MarkupValue = context.runtime_context()?.base_uri().map(|uri: url::Url| Rc::new(uri) as BoxedValue);
     let value = context.call_constructor(
         &types.font_family_constructor_uri_name,
         &[base_uri, boxed(node.text().to_string())],

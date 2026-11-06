@@ -7,7 +7,7 @@ use ferroui_base::platform::storage::{
     IStorageBookmarkFolder, IStorageFile, IStorageFolder, IStorageProvider, OpenFilePickerResult,
     SaveFilePickerResult, WellKnownFolder,
 };
-use ferroui_base::utilities::Uri;
+use url::Url;
 use std::rc::Rc;
 
 /// The storage provider of a top-level of this backend: the pickers are the
@@ -92,11 +92,11 @@ impl IStorageProvider for StorageProviderImpl {
         Box::pin(std::future::ready(self.native.try_get_storage_item(uri.as_ref(), false).and_then(|item| item.into_bookmark_folder())))
     }
 
-    fn try_get_file_from_path_async(&self, file_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
+    fn try_get_file_from_path_async(&self, file_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFile>>> {
         Box::pin(std::future::ready(self.native.try_get_storage_item(Some(file_path), false).and_then(|item| item.into_file())))
     }
 
-    fn try_get_folder_from_path_async(&self, folder_path: &Uri) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
+    fn try_get_folder_from_path_async(&self, folder_path: &Url) -> LocalBoxFuture<Option<Rc<dyn IStorageFolder>>> {
         Box::pin(std::future::ready(self.native.try_get_storage_item(Some(folder_path), false).and_then(|item| item.into_folder())))
     }
 

@@ -15,6 +15,10 @@ pub mod diagnostics;
 pub(crate) mod internal;
 pub mod list;
 
+/// The map of the keys and items of a cache, in the order of enumeration of the cache
+/// (`IObservableCache::key_values`, `ChangeAwareCache::from_dictionary` and `into_dictionary`).
+pub use indexmap::IndexMap;
+
 pub use cache::{
     Change, ChangeAwareCache, ChangeReason, ChangeSet, ICache, ICacheUpdater, IChangeSet, IConnectableCache, IObservableCache, IQuery, ISourceCache, ISourceUpdater,
     ObservableCache, ObservableCacheEx, SourceCache,

@@ -9,11 +9,10 @@
 //! cancel it when the subscription is disposed.
 
 use crate::disposables::SingleAssignmentDisposableValue;
-use crate::linq::select_many::future_as_task;
-use crate::linq::task_observable::task_to_observable;
+use crate::linq::task_observable::{future_to_shared, task_to_observable};
 use crate::linq::Observable;
 use crate::ObservableBase;
-use ferroui_system::threading::{CancellationToken, CancellationTokenSource};
+use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::future::Future;
@@ -41,7 +40,7 @@ impl<T> IObserver<()> for TaskCompletionObserver<T> {
 
 /// The subscription of the forms without a resource (`CreateWithTaskTokenObservable.Subscription`).
 struct TaskTokenSubscription {
-    cancel: CancellationTokenSource,
+    cancel: CancellationToken,
     subscription: Rc<dyn IDisposable>,
 }
 
@@ -82,7 +81,7 @@ impl<T> IDisposable for TaskDisposeCompletionObserver<T> {
 /// (`CreateWithTaskDisposable.Subscription`, `CreateWithTaskActionObservable.Subscription`): the
 /// subscription to the task is never disposed, so that the resource is always released.
 struct TaskResourceSubscription {
-    cancel: CancellationTokenSource,
+    cancel: CancellationToken,
     observer: Rc<dyn IDisposable>,
 }
 
@@ -143,8 +142,8 @@ fn create_with_task_token<T: 'static, Fut: Future<Output = Result<(), Observable
     subscribe_async: impl Fn(Rc<dyn IObserver<T>>, CancellationToken) -> Fut + 'static,
 ) -> Rc<dyn IObservable<T>> {
     Rc::new(ObservableBase::from_fn(move |observer: Rc<dyn IObserver<T>>| -> Rc<dyn IDisposable> {
-        let cancel = CancellationTokenSource::new();
-        let task = future_as_task(subscribe_async(observer.clone(), cancel.token()));
+        let cancel = CancellationToken::new();
+        let task = future_to_shared(subscribe_async(observer.clone(), cancel.clone()));
         let subscription = task_to_observable(task, None).subscribe(Rc::new(TaskCompletionObserver { observer }));
         Rc::new(TaskTokenSubscription { cancel, subscription })
     }))
@@ -155,8 +154,8 @@ fn create_with_task_disposable<T: 'static, Fut: Future<Output = Result<Rc<dyn ID
     subscribe_async: impl Fn(Rc<dyn IObserver<T>>, CancellationToken) -> Fut + 'static,
 ) -> Rc<dyn IObservable<T>> {
     Rc::new(ObservableBase::from_fn(move |observer: Rc<dyn IObserver<T>>| -> Rc<dyn IDisposable> {
-        let cancel = CancellationTokenSource::new();
-        let task = future_as_task(subscribe_async(observer.clone(), cancel.token()));
+        let cancel = CancellationToken::new();
+        let task = future_to_shared(subscribe_async(observer.clone(), cancel.clone()));
         let completion = Rc::new(TaskDisposeCompletionObserver { observer, disposable: SingleAssignmentDisposableValue::new() });
         // Never disposed: the disposable has to arrive to be released.
         let _ = task_to_observable(task, None).subscribe(completion.clone());
@@ -170,11 +169,11 @@ fn create_with_task_action<T: 'static, A: FnOnce() + 'static, Fut: Future<Output
     subscribe_async: impl Fn(Rc<dyn IObserver<T>>, CancellationToken) -> Fut + 'static,
 ) -> Rc<dyn IObservable<T>> {
     Rc::new(ObservableBase::from_fn(move |observer: Rc<dyn IObserver<T>>| -> Rc<dyn IDisposable> {
-        let cancel = CancellationTokenSource::new();
+        let cancel = CancellationToken::new();
         let result = Rc::new(RefCell::new(None));
-        let future = subscribe_async(observer.clone(), cancel.token());
+        let future = subscribe_async(observer.clone(), cancel.clone());
         let slot = result.clone();
-        let task = future_as_task(async move {
+        let task = future_to_shared(async move {
             let action = future.await?;
             *slot.borrow_mut() = Some(action);
             Ok::<(), ObservableError>(())
@@ -188,8 +187,8 @@ fn create_with_task_action<T: 'static, A: FnOnce() + 'static, Fut: Future<Output
 
 impl Observable {
     /// A sequence whose subscription is an asynchronous function: the future it returns runs as a
-    /// task (a `Task` is used as it is), and the sequence ends when the task ends, with its error
-    /// when it fails, or a `TaskCanceledError` when it is canceled
+    /// task (the `flatten()` of a `Shared` is used as it is), and the sequence ends when the task
+    /// ends, with its error when it fails or is canceled
     /// (`Create<TResult>(Func<IObserver<TResult>, Task>)`).
     pub fn create_async<T: 'static, Fut: Future<Output = Result<(), ObservableError>> + 'static>(
         subscribe_async: impl Fn(Rc<dyn IObserver<T>>) -> Fut + 'static,

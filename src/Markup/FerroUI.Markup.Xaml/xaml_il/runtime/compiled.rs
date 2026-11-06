@@ -20,12 +20,15 @@ use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{
     from_markup_value, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
 };
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_base::data::core::{
     BoxedPropertyGetter, BoxedPropertySetter, ClrPropertyInfo, FalliblePropertyGetter, IPropertyInfo, PropertySetter,
 };
 use ferroui_base::data::core::plugins::PropertyAccessorFactory;
-use ferroui_base::data::{BindingBase, BindingError, BindingPriority, CompiledBindingPathBuilder};
+use ferroui_base::data::{
+    BindingBase, BindingError, BindingPriority, CompiledBindingPath, CompiledBindingPathBuilder, PathBindBackInvoke,
+    PathEventHandlerInvoke, PathFunctionArgument, PathFunctionInvoke,
+};
 use ferroui_base::metadata::{MarkupInvoke, MarkupProperty, MarkupType};
 use ferroui_base::AnyValue;
 use ferroui_base::styling::{Setter, SetterBase, StyleBase};
@@ -236,6 +239,11 @@ pub fn exact<T: Clone + 'static>(
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
         Some(converted) => Ok(converted.clone()),
         None => {
+            // A value whose cast refuses it (a negative time span for a `Duration`): the
+            // error of the cast, as the run-time loader reports it (`to_exact`).
+            if let Some(error) = value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+                return Err(at(TARGET_INVOCATION_EXCEPTION, error, line, position));
+            }
             let error = MarkupInvokeError::Argument {
                 index,
                 expected: target.name(),
@@ -715,6 +723,46 @@ pub fn path_indexer(
         .iter()
         .find(|indexer| matches!(indexer.parameters, [parameter] if parameter().is::<i32>()))
         .unwrap_or_else(|| panic!("{} declares no indexer with one 32-bit integer argument", markup.full_name()));
+    let info = declared_indexer_info(markup, declared, Rc::new(move || into_markup_value(index)));
+    let factory: PropertyAccessorFactory = match notifying {
+        true => Rc::new(move |target, property| PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)),
+        false => Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor),
+    };
+    builder.property(info, factory)
+}
+
+/// The element of a compiled binding path for the indexer with one text argument that
+/// `markup` declares, at `key` (`Map['key']` of `{x:Bind}`): as [`path_indexer`], with the
+/// accessor factory that follows the property change notifications of the owner, as the
+/// run-time loader takes it for an indexer whose argument is not an integer.
+///
+/// # Panics
+/// Panics if `markup` declares no such indexer: the emitter writes the call only for a
+/// declared indexer.
+pub fn path_key_indexer(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    key: &'static str,
+) -> CompiledBindingPathBuilder {
+    let declared = markup
+        .indexers
+        .iter()
+        .find(|indexer| {
+            matches!(indexer.parameters, [parameter] if parameter().is::<String>() || parameter().is::<Option<String>>())
+        })
+        .unwrap_or_else(|| panic!("{} declares no indexer with one text argument", markup.full_name()));
+    let info = declared_indexer_info(markup, declared, Rc::new(move || into_markup_value(key.to_string())));
+    builder.property(info, Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor))
+}
+
+/// The description of a declared indexer applied to the argument `argument` gives: its
+/// accessors invoked with the owner, the argument and, for the setter, the value, with a
+/// failure named by the accessor.
+fn declared_indexer_info(
+    markup: &'static MarkupType,
+    declared: &'static ferroui_base::metadata::MarkupIndexer,
+    argument: Rc<dyn Fn() -> MarkupValue>,
+) -> Rc<dyn IPropertyInfo> {
     let owner = markup.full_name();
     let invoke = move |accessor: &str, invoke: MarkupInvoke, arguments: &[MarkupValue]| -> Result<MarkupValue, BindingError> {
         let result = invoke(arguments).map_err(|error| {
@@ -727,36 +775,30 @@ pub fn path_indexer(
         Ok(result.map(normalize_object))
     };
     let invoke = Rc::new(invoke);
-    let argument = move || into_markup_value(index);
     let getter: Option<FalliblePropertyGetter> = declared.get.map(|get| {
-        let invoke = invoke.clone();
+        let (invoke, argument) = (invoke.clone(), argument.clone());
         Rc::new(move |target: &dyn AnyValue| invoke("get", get, &[owner_handle(target)?, argument()])) as FalliblePropertyGetter
     });
     let setter: Option<PropertySetter> = declared.set.map(|set| {
-        let invoke = invoke.clone();
+        let (invoke, argument) = (invoke.clone(), argument.clone());
         Rc::new(move |target: &dyn AnyValue, value: Option<&BoxedValue>| {
             invoke("set", set, &[owner_handle(target)?, argument(), value.cloned()]).map(|_| ())
         }) as PropertySetter
     });
     let boxed_getter: Option<BoxedPropertyGetter> = declared.get.map(|get| {
-        let invoke = invoke.clone();
+        let (invoke, argument) = (invoke.clone(), argument.clone());
         Rc::new(move |target: &BoxedValue| invoke("get", get, &[Some(target.clone()), argument()])) as BoxedPropertyGetter
     });
     let boxed_setter: Option<BoxedPropertySetter> = declared.set.map(|set| {
-        let invoke = invoke.clone();
+        let (invoke, argument) = (invoke.clone(), argument.clone());
         Rc::new(move |target: &BoxedValue, value: Option<&BoxedValue>| {
             invoke("set", set, &[Some(target.clone()), argument(), value.cloned()]).map(|_| ())
         }) as BoxedPropertySetter
     });
-    let info: Rc<dyn IPropertyInfo> = Rc::new(
+    Rc::new(
         ClrPropertyInfo::new_fallible(ferroui_base::data::core::INDEXER_NAME, getter, setter, (declared.type_)())
             .with_boxed_accessors(boxed_getter, boxed_setter),
-    );
-    let factory: PropertyAccessorFactory = match notifying {
-        true => Rc::new(move |target, property| PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)),
-        false => Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor),
-    };
-    builder.property(info, factory)
+    )
 }
 
 /// The name scope of an element name in a binding path: the name scope field
@@ -978,8 +1020,9 @@ pub fn create_context(
 ) -> Rc<XamlIlContext> {
     let static_providers: Rc<[Rc<dyn IStaticServiceProvider>]> =
         Rc::new([Rc::new(CompiledXmlNamespaceInfo { table: namespaces }) as Rc<dyn IStaticServiceProvider>]);
-    // The emitter writes the URI of the document, which is absolute.
-    let base_uri = base_uri.and_then(|uri| Uri::absolute(uri).ok());
+    // The emitter writes the URI of the document, which is absolute; its scheme and authority are
+    // read in lower case, as the run-time loader reads the URI of a document.
+    let base_uri = base_uri.and_then(|uri| UriRef::parse_absolute(uri).ok());
     let context =
         XamlIlContext::new(FRAMEWORK_CONTEXT, Rc::new(FrameworkContextServices), parent, static_providers, base_uri);
     context.initialize_name_scope_field();
@@ -1025,7 +1068,7 @@ pub fn deferred_content(
         .map_err(|error| at("InvalidOperationException", error.message(), line, position))?;
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     content.set_declaration(crate::reload_templates::Declaration {
-        uri: context.base_uri().map(|uri| uri.absolute_uri().to_owned()),
+        uri: context.base_uri().map(String::from),
         line, column: position, source: None,
     });
     Ok(content)
@@ -1311,15 +1354,28 @@ pub fn instance<'a, T: 'static>(
 /// the `InvalidCastException` of the loader at `line`, `position`.
 pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadError> {
     let target = ValueType::of::<T>();
-    let converted = match into_markup_value(value) {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
+    let value = into_markup_value(value);
+    let converted = match &value {
+        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed.clone()),
+        Some(boxed) => ValueTypes::try_cast(boxed, target),
         None => ValueTypes::try_convert(None, target).flatten(),
     };
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
         Some(value) => Ok(value.clone()),
-        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+        None => match value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+            // A value whose cast refuses it (a negative time span for a `Duration`).
+            Some(error) => Err(at(TARGET_INVOCATION_EXCEPTION, error, line, position)),
+            None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+        },
     }
+}
+
+/// A time span literal of markup as the `Duration` a member declares. The emitter writes
+/// it only for a literal it checked is not negative (a negative one is an error of the
+/// document, decision O2 of docs/idiomatic-rust-signatures.md), so the conversion does not
+/// fail.
+pub fn duration(literal: ferroui_base::animation::SignedDuration) -> std::time::Duration {
+    std::time::Duration::try_from(literal).unwrap_or_default()
 }
 
 /// `value` cast to the type with the handle `target`, then held untyped as the run-time
@@ -1572,6 +1628,186 @@ pub fn path_command_with_can_execute<This: Clone + 'static>(
         Some(Rc::new(can_execute)),
         depends_on_properties,
     )
+}
+
+/// The element of a compiled binding path for a function of `{x:Bind}` (docs/porting/x-bind.md,
+/// step X2): the instance method `name` that the metadata `declaring` declares, called on the
+/// owner the path before the element produces, as the run-time loader builds it. `method`
+/// calls the typed function of the method with the owner, as the Rust type instance members
+/// take (`This`), and the values of `arguments` (paths read from the root source, or
+/// constants), which it reads from [`DelegateArguments`] in the types the method declares.
+/// The function is called again when the owner, viewed as a notifier by the declaration of
+/// `declaring`, reports a change of the property named as the function. An owner or an
+/// argument that is not of the type the method declares, and a failure of the method, are
+/// errors of the binding.
+pub fn path_function<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    arguments: Vec<PathFunctionArgument>,
+    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let owner = declaring.full_name();
+    let invoke: PathFunctionInvoke = Rc::new(move |this: &BoxedValue, arguments: &[MarkupValue]| {
+        invoke_command_method::<This>(&method, this, arguments)
+            .map_err(|error| BindingError::message(format!("{owner}.{name}: {error}")))
+    });
+    builder.function(name, arguments, invoke, declaring.notify_property_changed)
+}
+
+/// [`path_function`] of a static method (`local:Helpers.Format(Name)`): `method` reads the
+/// arguments only; the function has no owner.
+pub fn path_static_function(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    arguments: Vec<PathFunctionArgument>,
+    method: impl Fn(&mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let owner = declaring.full_name();
+    let invoke: PathFunctionInvoke = Rc::new(move |_root: &BoxedValue, arguments: &[MarkupValue]| {
+        method(&mut DelegateArguments { arguments, next: 0 })
+            .map_err(|error| BindingError::message(format!("{owner}.{name}: {error}")))
+    });
+    builder.function(name, arguments, invoke, None)
+}
+
+/// The `BindBack` of the function a path ends with (`{x:Bind Format(Name), Mode=TwoWay,
+/// BindBack=ParseName}`): the instance method `name` of `declaring`, called on the owner
+/// `owner` reads from the root source (`None`: the root source itself) with the value of the
+/// target, converted to `value_type`, the type of its one parameter. `method` calls its typed
+/// function as [`path_function`] does.
+pub fn path_bind_back<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    owner: Option<CompiledBindingPath>,
+    value_type: ValueType,
+    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let declaring_name = declaring.full_name();
+    let invoke: PathBindBackInvoke = Rc::new(move |this: &BoxedValue, value: Option<&BoxedValue>| {
+        invoke_command_method::<This>(&method, this, &[value.cloned()])
+            .map(|_| ())
+            .map_err(|error| BindingError::message(format!("{declaring_name}.{name}: {error}")))
+    });
+    builder.bind_back(owner, value_type, invoke)
+}
+
+/// [`path_bind_back`] of a static method: `method` reads the value only.
+pub fn path_static_bind_back(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    value_type: ValueType,
+    method: impl Fn(&mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let declaring_name = declaring.full_name();
+    let invoke: PathBindBackInvoke = Rc::new(move |_root: &BoxedValue, value: Option<&BoxedValue>| {
+        method(&mut DelegateArguments { arguments: &[value.cloned()], next: 0 })
+            .map(|_| ())
+            .map_err(|error| BindingError::message(format!("{declaring_name}.{name}: {error}")))
+    });
+    builder.bind_back(None, value_type, invoke)
+}
+
+/// The element of a compiled binding path for the method an event binding of `{x:Bind}` calls
+/// (docs/porting/x-bind.md, step X4): the instance method `name` that the metadata `declaring`
+/// declares, called on the owner the path before the element produces (read when the event is
+/// raised) with the arguments of the event, as the run-time loader builds it. `method` calls the
+/// typed function of the method with the owner, as the Rust type instance members take
+/// (`This`), and reads the arguments it declares from [`DelegateArguments`] (a method without
+/// parameters reads none). An owner or an argument that is not of the type the method declares,
+/// and a failure of the method, are the failure of the call.
+pub fn path_event_handler<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let owner = declaring.full_name();
+    let invoke: PathEventHandlerInvoke = Rc::new(move |this: &BoxedValue, arguments: &[MarkupValue]| {
+        invoke_command_method::<This>(&method, this, arguments)
+            .map(|_| ())
+            .map_err(|error| BindingError::message(format!("{owner}.{name}: {error}")))
+    });
+    builder.event_handler(name, invoke)
+}
+
+/// [`path_event_handler`] of a static method (`Click="{x:Bind local:Handlers.OnClick}"`):
+/// `method` reads the arguments only; the method has no owner.
+pub fn path_static_event_handler(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    method: impl Fn(&mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    let owner = declaring.full_name();
+    let invoke: PathEventHandlerInvoke = Rc::new(move |_root: &BoxedValue, arguments: &[MarkupValue]| {
+        method(&mut DelegateArguments { arguments, next: 0 })
+            .map(|_| ())
+            .map_err(|error| BindingError::message(format!("{owner}.{name}: {error}")))
+    });
+    builder.event_handler(name, invoke)
+}
+
+/// The event binding of `{x:Bind}` on a routed event (`Click="{x:Bind OnClick}"`, step X4):
+/// `binding` is the value the extension provided (`XBinding`), which subscribes its handler to
+/// `event` of `target` while the bindings of its root are initialized. What the run-time loader
+/// does for the setter of an x:Bind event; a failure is its load error at `line`, `position`.
+pub fn x_bind_routed_event<Target, EventArgs: ?Sized, V: PartialEq + 'static>(
+    target: &Ref<Target>,
+    event: &ferroui_base::interactivity::RoutedEvent<EventArgs>,
+    binding: V,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError>
+where
+    Target: ferroui_base::ObjectType + ferroui_base::Upcast<ferroui_base::interactivity::Interactive>,
+{
+    let binding = x_bind_binding(binding, line, position)?;
+    let target = target.upcast_ref::<ferroui_base::interactivity::Interactive>();
+    invoked(binding.bind_routed_event(target, &event.as_routed_event()), line, position)
+}
+
+/// The event binding of `{x:Bind}` on an event that is not a routed event, which metadata
+/// declares with its subscription (`events:`): the event `event` the metadata `declaring`
+/// declares, on `target` (step X4). As [`x_bind_routed_event`].
+pub fn x_bind_event<V: PartialEq + 'static>(
+    declaring: &'static MarkupType,
+    event: &str,
+    target: MarkupValue,
+    binding: V,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    let binding = x_bind_binding(binding, line, position)?;
+    let declared = declaring.find_event(event).ok_or_else(|| {
+        at(
+            TARGET_INVOCATION_EXCEPTION,
+            format!("Method {}.add_{event} has no invoker", declaring.full_name()),
+            line,
+            position,
+        )
+    })?;
+    invoked(binding.bind_markup_event(declared, target), line, position)
+}
+
+/// The `XBinding` an x:Bind extension provided, from the value generated code holds.
+fn x_bind_binding<V: PartialEq + 'static>(
+    binding: V,
+    line: i32,
+    position: i32,
+) -> Result<Rc<crate::markup_extensions::XBinding>, XamlLoadError> {
+    let value = to_value(binding);
+    from_markup_value::<Rc<crate::markup_extensions::XBinding>>(&value).ok_or_else(|| {
+        at(
+            "InvalidCastException",
+            "The value of an x:Bind event is not the binding of an x:Bind",
+            line,
+            position,
+        )
+    })
 }
 
 /// `target.AddHandler(event, handler, RoutingStrategies.Direct | RoutingStrategies.Bubble, false)`:

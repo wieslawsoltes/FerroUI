@@ -6,7 +6,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::{ITransform, MatrixTransform};
-use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::math_utilities::min;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroProperty,
@@ -33,7 +33,7 @@ const DECIMALS_AFTER_ROUND: i32 = 8;
 #[repr(C)]
 pub struct LayoutTransformControl {
     base: Decorator,
-    render_transform_changed_event: RefCell<Option<Rc<dyn IDisposable>>>,
+    render_transform_changed_event: RefCell<Option<Subscription>>,
     /// Actual desired size of the child when arranged.
     child_actual_size: Cell<Size>,
     /// Render transform / matrix transform applied to the transform root.
@@ -231,12 +231,9 @@ impl LayoutTransformControl {
                     target.set_layout_transform(target.render_transform());
                 }
             });
-            *self.render_transform_changed_event.borrow_mut() = Some(subscription.detach());
+            *self.render_transform_changed_event.borrow_mut() = Some(subscription);
         } else {
-            let subscription = self.render_transform_changed_event.borrow().clone();
-            if let Some(subscription) = subscription {
-                subscription.dispose();
-            }
+            drop(self.render_transform_changed_event.take());
             self.clear_value(Self::layout_transform_property());
         }
     }

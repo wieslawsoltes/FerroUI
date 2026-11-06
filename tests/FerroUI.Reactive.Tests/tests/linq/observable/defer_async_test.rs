@@ -3,11 +3,13 @@
 //! `DeferAsync(Func<CancellationToken, Task<IObservable<T>>>)` is `defer_async_with_token`. The work
 //! that `Task.Factory.StartNew` runs on a worker thread is split: the worker (`tasks::run`) does
 //! what upstream's work does apart from building the sequence, which is built on the test thread
-//! when the work ends, as the sequences are not `Send`. `ToEnumerable()` is `block_on` of
-//! `to_list().to_task()`; `ManualResetEvent` is a local event of a mutex and a condition variable.
+//! when the work ends, as the sequences are not `Send`; the `Shared` of the work gives its future
+//! with `flatten()`. `ToEnumerable()` is `block_on` of `to_list().to_task().flatten()`;
+//! `ManualResetEvent` is a local event of a mutex and a condition variable.
 
 use ferroui_reactive::{Observable, ObservableError, ObservableExt};
-use ferroui_system::threading::tasks::{block_on, run};
+use ferroui_system::task::block_on;
+use ferroui_system::threading::tasks::run;
 use ferroui_system::threading::CancellationToken;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -36,11 +38,11 @@ impl ManualResetEvent {
 #[test]
 fn defer_async_simple() {
     let xs = Observable::defer_async(|| async {
-        let value = run(|| Ok(42)).await?;
+        let value = run(|| Ok(42)).flatten().await?;
         Ok::<_, ObservableError>(Observable::return_(value))
     });
 
-    let res = block_on(xs.to_list().to_task()).unwrap();
+    let res = block_on(xs.to_list().to_task().flatten()).unwrap();
 
     assert_eq!(vec![42], res);
 }
@@ -48,11 +50,11 @@ fn defer_async_simple() {
 #[test]
 fn defer_async_with_cancel_simple() {
     let xs = Observable::defer_async_with_token(|_ct: CancellationToken| async {
-        let value = run(|| Ok(42)).await?;
+        let value = run(|| Ok(42)).flatten().await?;
         Ok::<_, ObservableError>(Observable::return_(value))
     });
 
-    let res = block_on(xs.to_list().to_task()).unwrap();
+    let res = block_on(xs.to_list().to_task().flatten()).unwrap();
 
     assert_eq!(vec![42], res);
 }
@@ -72,12 +74,13 @@ fn defer_async_with_cancel_cancel() {
                 run(move || {
                     e.set();
 
-                    while !ct.is_cancellation_requested() {
+                    while !ct.is_cancelled() {
                         std::hint::spin_loop();
                     }
 
                     Ok(())
                 })
+                .flatten()
                 .await?;
 
                 Ok::<_, ObservableError>(Observable::defer(move || {

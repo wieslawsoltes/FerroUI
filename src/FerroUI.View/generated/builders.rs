@@ -1037,6 +1037,19 @@ pub fn page_navigation_host() -> El<ferroui_controls::PageNavigationHost> {
     El::new()
 }
 
+pub use ferroui_controls::PagerControl;
+
+impl ViewClass for ferroui_controls::PagerControl {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PagerControl>::new()
+    }
+}
+
+/// Starts an element of [`PagerControl`](ferroui_controls::PagerControl).
+pub fn pager_control() -> El<ferroui_controls::PagerControl> {
+    El::new()
+}
+
 pub use ferroui_controls::Panel;
 
 impl ViewClass for ferroui_controls::Panel {
@@ -1073,6 +1086,19 @@ impl ViewClass for ferroui_controls::PathIcon {
 
 /// Starts an element of [`PathIcon`](ferroui_controls::PathIcon).
 pub fn path_icon() -> El<ferroui_controls::PathIcon> {
+    El::new()
+}
+
+pub use ferroui_controls::PersonPicture;
+
+impl ViewClass for ferroui_controls::PersonPicture {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::PersonPicture>::new()
+    }
+}
+
+/// Starts an element of [`PersonPicture`](ferroui_controls::PersonPicture).
+pub fn person_picture() -> El<ferroui_controls::PersonPicture> {
     El::new()
 }
 
@@ -2236,7 +2262,7 @@ pub trait AutoCompleteBoxProps: ElementBuilder {
     }
 
     /// Sets [`AutoCompleteBox::minimum_populate_delay_property`](ferroui_controls::AutoCompleteBox::minimum_populate_delay_property).
-    fn minimum_populate_delay<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn minimum_populate_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::minimum_populate_delay_property(), value)
     }
 
@@ -3052,6 +3078,50 @@ pub trait ConicGradientBrushProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::ConicGradientBrush>> ConicGradientBrushProps for El<T> {}
+
+/// The properties and routed events of [`Contact`](ferroui_controls::Contact).
+pub trait ContactProps: ElementBuilder {
+    /// Sets [`Contact::id_property`](ferroui_controls::Contact::id_property).
+    fn id<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::id_property(), value)
+    }
+
+    /// Sets [`Contact::first_name_property`](ferroui_controls::Contact::first_name_property).
+    fn first_name<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::first_name_property(), value)
+    }
+
+    /// Sets [`Contact::last_name_property`](ferroui_controls::Contact::last_name_property).
+    fn last_name<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::last_name_property(), value)
+    }
+
+    /// Sets [`Contact::display_name_override_property`](ferroui_controls::Contact::display_name_override_property).
+    fn display_name_override<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::display_name_override_property(), value)
+    }
+
+    /// Sets [`Contact::small_display_picture_property`](ferroui_controls::Contact::small_display_picture_property).
+    fn small_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::small_display_picture_property(), value)
+    }
+
+    /// Sets [`Contact::large_display_picture_property`](ferroui_controls::Contact::large_display_picture_property).
+    fn large_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::large_display_picture_property(), value)
+    }
+
+    /// Sets [`Contact::source_display_picture_property`](ferroui_controls::Contact::source_display_picture_property).
+    fn source_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::source_display_picture_property(), value)
+    }
+
+    /// Sets [`Contact::thumbnail_property`](ferroui_controls::Contact::thumbnail_property).
+    fn thumbnail<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::Contact>::thumbnail_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::Contact>> ContactProps for El<T> {}
 
 /// The properties and routed events of [`ContentControl`](ferroui_controls::ContentControl).
 pub trait ContentControlProps: ElementBuilder {
@@ -4282,7 +4352,7 @@ pub trait HyperlinkButtonProps: ElementBuilder {
     }
 
     /// Sets [`HyperlinkButton::navigate_uri_property`](ferroui_controls::HyperlinkButton::navigate_uri_property).
-    fn navigate_uri<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::Uri>, M>) -> Self {
+    fn navigate_uri<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::UriRef>, M>) -> Self {
         self.prop(<ferroui_controls::HyperlinkButton>::navigate_uri_property(), value)
     }
 }
@@ -5731,6 +5801,110 @@ pub trait PageNavigationHostProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::PageNavigationHost>> PageNavigationHostProps for El<T> {}
 
+/// The properties and routed events of [`PagerControl`](ferroui_controls::PagerControl).
+pub trait PagerControlProps: ElementBuilder {
+    /// Sets [`PagerControl::display_mode_property`](ferroui_controls::PagerControl::display_mode_property).
+    fn display_mode<M>(self, value: impl IntoProp<ferroui_controls::PagerControlDisplayMode, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::display_mode_property(), value)
+    }
+
+    /// Sets [`PagerControl::number_of_pages_property`](ferroui_controls::PagerControl::number_of_pages_property).
+    fn number_of_pages<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::number_of_pages_property(), value)
+    }
+
+    /// Sets [`PagerControl::selected_page_index_property`](ferroui_controls::PagerControl::selected_page_index_property).
+    fn selected_page_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::selected_page_index_property(), value)
+    }
+
+    /// Sets [`PagerControl::first_button_visibility_property`](ferroui_controls::PagerControl::first_button_visibility_property).
+    fn first_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::first_button_visibility_property(), value)
+    }
+
+    /// Sets [`PagerControl::previous_button_visibility_property`](ferroui_controls::PagerControl::previous_button_visibility_property).
+    fn previous_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::previous_button_visibility_property(), value)
+    }
+
+    /// Sets [`PagerControl::next_button_visibility_property`](ferroui_controls::PagerControl::next_button_visibility_property).
+    fn next_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::next_button_visibility_property(), value)
+    }
+
+    /// Sets [`PagerControl::last_button_visibility_property`](ferroui_controls::PagerControl::last_button_visibility_property).
+    fn last_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::last_button_visibility_property(), value)
+    }
+
+    /// Sets [`PagerControl::first_button_command_property`](ferroui_controls::PagerControl::first_button_command_property).
+    fn first_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::first_button_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::previous_button_command_property`](ferroui_controls::PagerControl::previous_button_command_property).
+    fn previous_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::previous_button_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::next_button_command_property`](ferroui_controls::PagerControl::next_button_command_property).
+    fn next_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::next_button_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::last_button_command_property`](ferroui_controls::PagerControl::last_button_command_property).
+    fn last_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::last_button_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::pager_input_command_property`](ferroui_controls::PagerControl::pager_input_command_property).
+    fn pager_input_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::pager_input_command_property(), value)
+    }
+
+    /// Sets [`PagerControl::first_button_style_property`](ferroui_controls::PagerControl::first_button_style_property).
+    fn first_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::first_button_style_property(), value)
+    }
+
+    /// Sets [`PagerControl::previous_button_style_property`](ferroui_controls::PagerControl::previous_button_style_property).
+    fn previous_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::previous_button_style_property(), value)
+    }
+
+    /// Sets [`PagerControl::next_button_style_property`](ferroui_controls::PagerControl::next_button_style_property).
+    fn next_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::next_button_style_property(), value)
+    }
+
+    /// Sets [`PagerControl::last_button_style_property`](ferroui_controls::PagerControl::last_button_style_property).
+    fn last_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::last_button_style_property(), value)
+    }
+
+    /// Sets [`PagerControl::button_panel_always_show_first_last_page_index_property`](ferroui_controls::PagerControl::button_panel_always_show_first_last_page_index_property).
+    fn button_panel_always_show_first_last_page_index<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::button_panel_always_show_first_last_page_index_property(), value)
+    }
+
+    /// Sets [`PagerControl::prefix_text_property`](ferroui_controls::PagerControl::prefix_text_property).
+    fn prefix_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::prefix_text_property(), value)
+    }
+
+    /// Sets [`PagerControl::suffix_text_property`](ferroui_controls::PagerControl::suffix_text_property).
+    fn suffix_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::suffix_text_property(), value)
+    }
+
+    /// Sets [`PagerControl::template_settings_property`](ferroui_controls::PagerControl::template_settings_property).
+    fn template_settings<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::PagerControlTemplateSettings>>, M>) -> Self {
+        self.prop(<ferroui_controls::PagerControl>::template_settings_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::PagerControl>> PagerControlProps for El<T> {}
+
 /// The properties and routed events of [`Panel`](ferroui_controls::Panel).
 pub trait PanelProps: ElementBuilder {
     /// Sets [`Panel::background_property`](ferroui_controls::Panel::background_property).
@@ -5886,6 +6060,79 @@ pub trait PenProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::Pen>> PenProps for El<T> {}
+
+/// The properties and routed events of [`PersonPicture`](ferroui_controls::PersonPicture).
+pub trait PersonPictureProps: ElementBuilder {
+    /// Sets [`PersonPicture::badge_number_property`](ferroui_controls::PersonPicture::badge_number_property).
+    fn badge_number<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::badge_number_property(), value)
+    }
+
+    /// Sets [`PersonPicture::badge_glyph_property`](ferroui_controls::PersonPicture::badge_glyph_property).
+    fn badge_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::badge_glyph_property(), value)
+    }
+
+    /// Sets [`PersonPicture::badge_image_source_property`](ferroui_controls::PersonPicture::badge_image_source_property).
+    fn badge_image_source<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::badge_image_source_property(), value)
+    }
+
+    /// Sets [`PersonPicture::badge_text_property`](ferroui_controls::PersonPicture::badge_text_property).
+    fn badge_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::badge_text_property(), value)
+    }
+
+    /// Sets [`PersonPicture::is_group_property`](ferroui_controls::PersonPicture::is_group_property).
+    fn is_group<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::is_group_property(), value)
+    }
+
+    /// Sets [`PersonPicture::contact_property`](ferroui_controls::PersonPicture::contact_property).
+    fn contact<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Contact>>, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::contact_property(), value)
+    }
+
+    /// Sets [`PersonPicture::display_name_property`](ferroui_controls::PersonPicture::display_name_property).
+    fn display_name<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::display_name_property(), value)
+    }
+
+    /// Sets [`PersonPicture::initials_property`](ferroui_controls::PersonPicture::initials_property).
+    fn initials<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::initials_property(), value)
+    }
+
+    /// Sets [`PersonPicture::prefer_small_image_property`](ferroui_controls::PersonPicture::prefer_small_image_property).
+    fn prefer_small_image<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::prefer_small_image_property(), value)
+    }
+
+    /// Sets [`PersonPicture::profile_picture_property`](ferroui_controls::PersonPicture::profile_picture_property).
+    fn profile_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::profile_picture_property(), value)
+    }
+
+    /// Sets [`PersonPicture::template_settings_property`](ferroui_controls::PersonPicture::template_settings_property).
+    fn template_settings<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::PersonPictureTemplateSettings>>, M>) -> Self {
+        self.prop(<ferroui_controls::PersonPicture>::template_settings_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::PersonPicture>> PersonPictureProps for El<T> {}
+
+/// The properties and routed events of [`PersonPictureTemplateSettings`](ferroui_controls::primitives::PersonPictureTemplateSettings).
+pub trait PersonPictureTemplateSettingsProps: ElementBuilder {
+    /// Sets [`PersonPictureTemplateSettings::actual_initials_property`](ferroui_controls::primitives::PersonPictureTemplateSettings::actual_initials_property).
+    fn actual_initials<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::PersonPictureTemplateSettings>::actual_initials_property(), value)
+    }
+
+    /// Sets [`PersonPictureTemplateSettings::actual_image_brush_property`](ferroui_controls::primitives::PersonPictureTemplateSettings::actual_image_brush_property).
+    fn actual_image_brush<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::ImageBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::PersonPictureTemplateSettings>::actual_image_brush_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::primitives::PersonPictureTemplateSettings>> PersonPictureTemplateSettingsProps for El<T> {}
 
 /// The properties and routed events of [`PipsPager`](ferroui_controls::PipsPager).
 pub trait PipsPagerProps: ElementBuilder {
@@ -6760,7 +7007,7 @@ pub trait RichEditBoxProps: ElementBuilder {
     }
 
     /// Sets [`RichEditBox::caret_blink_interval_property`](ferroui_controls::RichEditBox::caret_blink_interval_property).
-    fn caret_blink_interval<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::caret_blink_interval_property(), value)
     }
 
@@ -7163,12 +7410,12 @@ pub trait ScrollBarProps: ElementBuilder {
     }
 
     /// Sets [`ScrollBar::hide_delay_property`](ferroui_controls::primitives::ScrollBar::hide_delay_property).
-    fn hide_delay<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn hide_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::hide_delay_property(), value)
     }
 
     /// Sets [`ScrollBar::show_delay_property`](ferroui_controls::primitives::ScrollBar::show_delay_property).
-    fn show_delay<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn show_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::show_delay_property(), value)
     }
 }
@@ -8243,7 +8490,7 @@ pub trait TextBoxProps: ElementBuilder {
     }
 
     /// Sets [`TextBox::caret_blink_interval_property`](ferroui_controls::TextBox::caret_blink_interval_property).
-    fn caret_blink_interval<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::caret_blink_interval_property(), value)
     }
 
@@ -8426,7 +8673,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::TextDecoration>> TextDecoration
 /// The properties and routed events of [`TextElement`](ferroui_controls::documents::TextElement).
 pub trait TextElementProps: ElementBuilder {
     /// Sets [`TextElement::language_property`](ferroui_controls::documents::TextElement::language_property).
-    fn language<M>(self, value: impl IntoProp<ferroui_base::utilities::CultureInfo, M>) -> Self {
+    fn language<M>(self, value: impl IntoProp<ferroui_base::utilities::Locale, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::language_property(), value)
     }
 
@@ -8529,7 +8776,7 @@ pub trait TextPresenterProps: ElementBuilder {
     }
 
     /// Sets [`TextPresenter::caret_blink_interval_property`](ferroui_controls::presenters::TextPresenter::caret_blink_interval_property).
-    fn caret_blink_interval<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::caret_blink_interval_property(), value)
     }
 
@@ -8696,7 +8943,7 @@ pub trait TimePickerProps: ElementBuilder {
     }
 
     /// Sets [`TimePicker::selected_time_property`](ferroui_controls::TimePicker::selected_time_property).
-    fn selected_time<M>(self, value: impl IntoProp<Option<ferroui_base::animation::TimeSpan>, M>) -> Self {
+    fn selected_time<M>(self, value: impl IntoProp<Option<ferroui_base::animation::SignedDuration>, M>) -> Self {
         self.prop(<ferroui_controls::TimePicker>::selected_time_property(), value)
     }
 }
@@ -8725,7 +8972,7 @@ pub trait TimePickerPresenterProps: ElementBuilder {
     }
 
     /// Sets [`TimePickerPresenter::time_property`](ferroui_controls::TimePickerPresenter::time_property).
-    fn time<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_controls::TimePickerPresenter>::time_property(), value)
     }
 }
@@ -9021,12 +9268,12 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::Track>> TrackProps for
 /// The properties and routed events of [`TransitionBase`](ferroui_base::animation::TransitionBase).
 pub trait TransitionBaseProps: ElementBuilder {
     /// Sets [`TransitionBase::duration_property`](ferroui_base::animation::TransitionBase::duration_property).
-    fn duration<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn duration<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_base::animation::TransitionBase>::duration_property(), value)
     }
 
     /// Sets [`TransitionBase::delay_property`](ferroui_base::animation::TransitionBase::delay_property).
-    fn delay<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
+    fn delay<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_base::animation::TransitionBase>::delay_property(), value)
     }
 
@@ -10117,7 +10364,7 @@ pub trait AttachedProps: ElementBuilder {
     }
 
     /// Sets the attached [`TextElement::language_property`](ferroui_controls::documents::TextElement::language_property).
-    fn text_element_language<M>(self, value: impl IntoProp<ferroui_base::utilities::CultureInfo, M>) -> Self {
+    fn text_element_language<M>(self, value: impl IntoProp<ferroui_base::utilities::Locale, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::language_property(), value)
     }
 
@@ -10579,6 +10826,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`XamlAmbientLight::is_target_property`](ferroui_controls::media::XamlAmbientLight::is_target_property).
     fn xaml_ambient_light_is_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::media::XamlAmbientLight>::is_target_property(), value)
+    }
+
+    /// Sets the attached [`XamlBindingHelper::data_template_component_property`](ferroui_controls::templates::XamlBindingHelper::data_template_component_property).
+    fn xaml_binding_helper_data_template_component<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplateComponent>>, M>) -> Self {
+        self.prop(<ferroui_controls::templates::XamlBindingHelper>::data_template_component_property(), value)
     }
 }
 impl<T: ObjectType> AttachedProps for El<T> {}

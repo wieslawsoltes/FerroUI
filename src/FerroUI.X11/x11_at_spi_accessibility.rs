@@ -4,12 +4,12 @@
 
 use crate::x11_window::X11Window;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::Ref;
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::Control;
 use ferroui_freedesktop::at_spi::{AtSpiAccessibilityWatcher, AtSpiServer};
-use ferroui_freedesktop::signal_watch::CancellationFlag;
+use ferroui_freedesktop::signal_watch::run_until_cancelled;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use std::time::Duration;
@@ -40,9 +40,12 @@ impl X11AtSpiAccessibility {
     pub(crate) fn initialize(&self) {
         *self.watcher.borrow_mut() = Some(AtSpiAccessibilityWatcher::new());
         let Some(this) = self.this.upgrade() else { return };
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            this.initialize_async().await;
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                this.initialize_async().await;
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     pub(crate) fn track_window(&self, window: &X11Window) {
@@ -84,16 +87,15 @@ impl X11AtSpiAccessibility {
     async fn wait_for_ui_thread_settle_async() {
         // Wait until UI work is drained to context-idle so AT-SPI handlers
         // are responsive when clients start querying immediately after embed.
-        let settle = Dispatcher::ui_thread()
-            .invoke_async_task_local_with_priority(|| async {}, DispatcherPriority::CONTEXT_IDLE);
+        let settle = Dispatcher::ui_thread().spawn_local_with_priority(async {}, DispatcherPriority::CONTEXT_IDLE);
 
         // Keep startup bounded in case the UI thread never reaches idle
         // (e.g., continuous high-priority work).
-        let timed_out = CancellationFlag::new();
+        let timed_out = CancellationToken::new();
         let flag = timed_out.clone();
         let timer =
             DispatcherTimer::run_once(move || flag.cancel(), Duration::from_millis(100), DispatcherPriority::DEFAULT);
-        if timed_out.run(settle).await.is_none() {
+        if run_until_cancelled(&timed_out, settle).await.is_none() {
             if let Some(logger) = Logger::try_get(LogEventLevel::Debug, LogArea::X11_PLATFORM) {
                 logger.log(None, "AT-SPI startup wait timed out before UI thread reached idle");
             }
@@ -103,15 +105,18 @@ impl X11AtSpiAccessibility {
 
     fn on_accessibility_enabled_changed(self: &Rc<Self>, enabled: bool) {
         let this = self.clone();
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            if enabled {
-                this.enable_accessibility_async().await;
-            } else if !this.server_started_unconditionally.get() {
-                // Only tear down if server wasn't started unconditionally.
-                // When started unconditionally, event listener tracking handles suppression.
-                this.disable_accessibility();
-            }
-        }));
+        drop(Dispatcher::ui_thread().spawn_local_with_priority(
+            async move {
+                if enabled {
+                    this.enable_accessibility_async().await;
+                } else if !this.server_started_unconditionally.get() {
+                    // Only tear down if server wasn't started unconditionally.
+                    // When started unconditionally, event listener tracking handles suppression.
+                    this.disable_accessibility();
+                }
+            },
+            DispatcherPriority::DEFAULT,
+        ));
     }
 
     async fn try_start_server_async(&self) -> bool {

@@ -5,8 +5,11 @@
 use super::{paint_composition_brush, ServerCompositionSurfaceBrush};
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::imaging::BitmapBlendingMode;
-use crate::media::{BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, EffectExtensions, IEffect, ImmutableBlurEffect};
-use crate::platform::{AlphaFormat, IDrawingContextImpl, PixelFormat, PixelFormats, PixelOperation};
+use crate::media::{
+    BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, EffectExtensions, IEffect, ImmutableBlurEffect,
+    ImmutableDropShadowEffect,
+};
+use crate::platform::{AlphaFormat, IDrawingContextImpl, PixelFormat, PixelFormats, PixelOperation, SharedBitmapImpl};
 use crate::rendering::composition::effects::{
     blur_amount_to_radius, BlendEffectMode, EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind,
     EffectScalar, PixelOp,
@@ -65,6 +68,10 @@ pub struct ServerCompositionEffectBrush {
     /// Set while the brush paints: a source that contains the brush is not
     /// painted inside itself.
     painting: Cell<bool>,
+    /// The image an unbound source parameter is drawn as, in the prewarm
+    /// of the GPU programs ([`paint_effect_graph_for_prewarm`]); `None` for
+    /// a brush of a visual, whose unbound sources draw nothing.
+    stand_in: RefCell<Option<Arc<SharedBitmapImpl>>>,
 }
 
 impl ServerCompositionEffectBrush {
@@ -83,6 +90,7 @@ impl ServerCompositionEffectBrush {
             properties: RefCell::new(None),
             sources: RefCell::new(Vec::new()),
             painting: Cell::new(false),
+            stand_in: RefCell::new(None),
         });
         brush.base.object().activate();
         brush
@@ -168,9 +176,69 @@ impl ServerCompositionEffectBrush {
         }
     }
 
-    /// The current value of a scalar member: the entry of the property set
-    /// for an animatable member, the value of the description otherwise.
-    fn scalar(&self, value: &EffectScalar) -> f64 {
+    /// Paints the brush over `rect`, in the coordinates of `canvas`: the
+    /// graph over its bound sources. A brush whose factory did not load its
+    /// effect paints nothing.
+    pub fn paint(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        let Some(root) = self.graph.root.as_ref() else { return };
+        let opacity = self.props.opacity();
+        if opacity <= 0.0 || is_empty(&rect) || self.painting.replace(true) {
+            return;
+        }
+        if opacity != 1.0 {
+            canvas.push_opacity(opacity, Some(rect));
+        }
+        self.painter().paint_node(root, canvas, rect);
+        if opacity != 1.0 {
+            canvas.pop_opacity();
+        }
+        self.painting.set(false);
+    }
+
+    /// What a layer visual whose effect is the brush draws before its
+    /// children, over `rect` (the bounds of the composed layer): the parts
+    /// of the graph under the layer, and what wraps the layer (blurs,
+    /// opacities) pushed. The children are the first source parameter of the
+    /// graph; [`pop_for_layer`](Self::pop_for_layer) is called after them
+    /// with the same rectangle.
+    ///
+    /// A graph without a source parameter is drawn whole and the children
+    /// are not shown; a brush whose factory did not load its effect shows
+    /// nothing.
+    pub fn push_for_layer(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        let opacity = self.props.opacity();
+        if opacity != 1.0 {
+            canvas.push_opacity(opacity.max(0.0), Some(rect));
+        }
+        self.painter().push_around_layer(&self.graph, canvas, rect);
+    }
+
+    /// What a layer visual whose effect is the brush draws after its
+    /// children: see [`push_for_layer`](Self::push_for_layer).
+    pub fn pop_for_layer(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        self.painter().pop_around_layer(&self.graph, canvas, rect);
+        if self.props.opacity() != 1.0 {
+            canvas.pop_opacity();
+        }
+    }
+
+    /// How far the output of the brush as the effect of a layer extends
+    /// beyond the composed layer: the padding of the blurs around it.
+    pub fn layer_padding(&self) -> Thickness {
+        self.painter().layer_padding(&self.graph)
+    }
+
+    /// The painter of the graph of the brush: the values of its property
+    /// set, the brushes bound to its source parameters.
+    fn painter(&self) -> EffectGraphPainter<'_> {
+        EffectGraphPainter::new(self)
+    }
+}
+
+impl EffectGraphHost for ServerCompositionEffectBrush {
+    /// The entry of the property set for an animatable member, the value of
+    /// the description otherwise.
+    fn scalar_value(&self, value: &EffectScalar) -> f64 {
         if let (Some(key), Some(properties)) = (&value.key, self.properties.borrow().as_ref()) {
             if let Some(current) = properties.get_value(key).try_cast::<f64>() {
                 return current;
@@ -179,14 +247,98 @@ impl ServerCompositionEffectBrush {
         value.value as f64
     }
 
-    /// The current value of a colour member; see [`scalar`](Self::scalar).
-    fn color(&self, value: &EffectColor) -> Color {
+    /// See [`scalar_value`](Self::scalar_value).
+    fn color_value(&self, value: &EffectColor) -> Color {
         if let (Some(key), Some(properties)) = (&value.key, self.properties.borrow().as_ref()) {
             if let Some(current) = properties.get_value(key).try_cast::<Color>() {
                 return current;
             }
         }
         value.value
+    }
+
+    /// The brush bound to the parameter; in the prewarm the image that
+    /// stands in for it.
+    fn paint_source(&self, name: &str, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        if let Some(source) = self.source(name).filter(|source| !self.is_self(source)) {
+            paint_composition_brush(canvas, &source, rect);
+        } else if let Some(bitmap) = self.stand_in.borrow().clone() {
+            draw_stand_in(&bitmap, canvas, rect);
+        }
+    }
+
+    fn paint_tiled_source(&self, name: &str, canvas: &mut dyn IDrawingContextImpl, rect: Rect) -> bool {
+        let source = self.source(name);
+        match source.as_ref().and_then(|source| source.as_any().downcast_ref::<ServerCompositionSurfaceBrush>()) {
+            Some(surface) => {
+                surface.paint_tiled(canvas, rect);
+                true
+            }
+            None => false,
+        }
+    }
+
+    fn pixel_compositor(&self) -> Option<Rc<ServerCompositor>> {
+        self.base.compositor()
+    }
+}
+
+/// Where the painter of an effect graph reads the current values of the
+/// animatable members and how it draws the source parameters: an effect
+/// brush (its property set and bound brushes), the snapshot of a custom
+/// effect (#455), the prewarm.
+pub(crate) trait EffectGraphHost {
+    /// The current value of a scalar member; the value of the description
+    /// by default.
+    fn scalar_value(&self, value: &EffectScalar) -> f64 {
+        value.value as f64
+    }
+
+    /// The current value of a colour member; the value of the description
+    /// by default.
+    fn color_value(&self, value: &EffectColor) -> Color {
+        value.value
+    }
+
+    /// Paints the source parameter `name` over `rect`; nothing by default.
+    fn paint_source(&self, _name: &str, _canvas: &mut dyn IDrawingContextImpl, _rect: Rect) {}
+
+    /// Paints the source parameter `name` tiled over `rect` (the input of a
+    /// tiling border effect), when it is a surface; returns whether it did.
+    fn paint_tiled_source(&self, _name: &str, _canvas: &mut dyn IDrawingContextImpl, _rect: Rect) -> bool {
+        false
+    }
+
+    /// The compositor whose render interface draws the operations on
+    /// pixels the drawing context cannot do itself; without one they draw
+    /// nothing.
+    fn pixel_compositor(&self) -> Option<Rc<ServerCompositor>> {
+        None
+    }
+}
+
+/// Paints the nodes of an effect graph with the layers and effects of a
+/// drawing context: the painter the effect brushes, the layer visuals and
+/// the custom effects of `Visual.Effect` (#455) share. The values of the
+/// members and the sources come from its host.
+pub(crate) struct EffectGraphPainter<'a> {
+    host: &'a dyn EffectGraphHost,
+}
+
+impl<'a> EffectGraphPainter<'a> {
+    /// A painter of the values and sources of `host`.
+    pub(crate) fn new(host: &'a dyn EffectGraphHost) -> Self {
+        Self { host }
+    }
+
+    /// The current value of a scalar member.
+    fn scalar(&self, value: &EffectScalar) -> f64 {
+        self.host.scalar_value(value)
+    }
+
+    /// The current value of a colour member.
+    fn color(&self, value: &EffectColor) -> Color {
+        self.host.color_value(value)
     }
 
     /// The blur radius of the drawing contexts for a blur node, 0 for none.
@@ -269,6 +421,18 @@ impl ServerCompositionEffectBrush {
                 let color = self.color(color);
                 ColorMatrix::tint([color.r, color.g, color.b, color.a].map(|channel| channel as f32 / 255.0))
             }
+            EffectMatrix::Sepia(intensity) => ColorMatrix::sepia(self.scalar(intensity) as f32),
+            EffectMatrix::LinearTransfer { slopes, offsets, disabled } => {
+                let mut scale = [1.0f32; 4];
+                let mut offset = [0.0f32; 4];
+                for channel in 0..4 {
+                    if !disabled[channel] {
+                        scale[channel] = self.scalar(&slopes[channel]) as f32;
+                        offset[channel] = self.scalar(&offsets[channel]) as f32;
+                    }
+                }
+                ColorMatrix::scale_and_offset(scale, offset)
+            }
         }
     }
 
@@ -348,14 +512,59 @@ impl ServerCompositionEffectBrush {
         }
     }
 
+    /// The current convolution of a convolution node; `None` when it has no
+    /// kernel the drawing contexts take (the loader checks its size).
+    #[allow(clippy::too_many_arguments)]
+    fn convolution(
+        &self,
+        kernel_width: u32,
+        kernel_height: u32,
+        kernel: &[EffectScalar],
+        divisor: &EffectScalar,
+        bias: &EffectScalar,
+        clamp_edges: bool,
+        preserve_alpha: bool,
+    ) -> Option<crate::media::ConvolveMatrix> {
+        let elements: Vec<f32> = kernel.iter().map(|element| self.scalar(element) as f32).collect();
+        let mut convolution = crate::media::ConvolveMatrix::new(kernel_width, kernel_height, &elements)?;
+        convolution.divisor = self.scalar(divisor) as f32;
+        convolution.bias = self.scalar(bias) as f32;
+        convolution.clamp_edges = clamp_edges;
+        convolution.preserve_alpha = preserve_alpha;
+        Some(convolution)
+    }
+
+    /// Pushes a convolution layer when the canvas has the layers and the
+    /// node has a kernel; returns whether it did.
+    fn push_convolution(
+        canvas: &mut dyn IDrawingContextImpl,
+        rect: Rect,
+        convolution: Option<&crate::media::ConvolveMatrix>,
+    ) -> bool {
+        let Some(convolution) = convolution else { return false };
+        match canvas.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => {
+                layers.push_convolve_matrix_layer(rect, convolution);
+                true
+            }
+            // Deviation (winui-composition.md): without the layers of the
+            // drawing context the source is drawn unchanged.
+            None => false,
+        }
+    }
+
+    fn pop_convolution(canvas: &mut dyn IDrawingContextImpl, pushed: bool) {
+        if pushed {
+            if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
+                layers.pop_convolve_matrix_layer();
+            }
+        }
+    }
+
     /// Paints `node` over `rect`.
     fn paint_node(&self, node: &EffectNode, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
         match &node.kind {
-            EffectNodeKind::Parameter(name) => {
-                if let Some(source) = self.source(name).filter(|source| !self.is_self(source)) {
-                    paint_composition_brush(canvas, &source, rect);
-                }
-            }
+            EffectNodeKind::Parameter(name) => self.host.paint_source(name, canvas, rect),
             EffectNodeKind::GaussianBlur { amount, hard, source } => {
                 let radius = self.blur_radius(amount);
                 if *hard && Self::blur_is_pushed(canvas, radius) {
@@ -446,13 +655,12 @@ impl ServerCompositionEffectBrush {
                 canvas.pop_layer();
             }
             EffectNodeKind::Border { tile, source } => {
-                let surface = match &source.kind {
-                    EffectNodeKind::Parameter(name) if *tile => self.source(name),
-                    _ => None,
+                let tiled = match &source.kind {
+                    EffectNodeKind::Parameter(name) if *tile => self.host.paint_tiled_source(name, canvas, rect),
+                    _ => false,
                 };
-                match surface.as_ref().and_then(|surface| surface.as_any().downcast_ref::<ServerCompositionSurfaceBrush>()) {
-                    Some(surface) => surface.paint_tiled(canvas, rect),
-                    None => self.paint_node(source, canvas, rect),
+                if !tiled {
+                    self.paint_node(source, canvas, rect);
                 }
             }
             EffectNodeKind::ArithmeticWithColor { multiply, source1, source2, offset, image_is_source1, image, color } => {
@@ -471,6 +679,29 @@ impl ServerCompositionEffectBrush {
                 Self::pop_blur(canvas, blurred);
             }
             EffectNodeKind::Pixels { op, sources } => self.paint_pixels(op, sources, canvas, rect),
+            EffectNodeKind::ConvolveMatrix {
+                kernel_width,
+                kernel_height,
+                kernel,
+                divisor,
+                bias,
+                clamp_edges,
+                preserve_alpha,
+                source,
+            } => {
+                let convolution = self.convolution(
+                    *kernel_width,
+                    *kernel_height,
+                    kernel,
+                    divisor,
+                    bias,
+                    *clamp_edges,
+                    *preserve_alpha,
+                );
+                let pushed = Self::push_convolution(canvas, rect, convolution.as_ref());
+                self.paint_node(source, canvas, rect);
+                Self::pop_convolution(canvas, pushed);
+            }
             EffectNodeKind::SceneLighting { ambient, diffuse, specular, shine } => {
                 let material = crate::rendering::composition::server::LightingMaterial {
                     ambient: self.scalar(ambient),
@@ -487,7 +718,7 @@ impl ServerCompositionEffectBrush {
     /// `canvas` and returns its premultiplied RGBA pixels, or `None` when the
     /// compositor has no render interface.
     fn render_node_pixels(&self, node: &EffectNode, canvas: &dyn IDrawingContextImpl, rect: Rect, size: PixelSize) -> Option<Vec<u8>> {
-        let compositor = self.base.compositor()?;
+        let compositor = self.host.pixel_compositor()?;
         let transform = Matrix::create_translation(-rect.x, -rect.y)
             * Matrix::create_scale(size.width as f64 / rect.width, size.height as f64 / rect.height);
         let _ = canvas;
@@ -583,7 +814,7 @@ impl ServerCompositionEffectBrush {
         for other in images.take(count.saturating_sub(1)) {
             operation.apply_to_premultiplied_rgba8(&mut result, &other, width);
         }
-        let Some(compositor) = self.base.compositor() else { return };
+        let Some(compositor) = self.host.pixel_compositor() else { return };
         let bitmap = compositor.render_interface().with_platform_render_interface(|render_interface| {
             render_interface.load_bitmap_from_pixels(
                 PixelFormats::RGBA8888,
@@ -598,25 +829,6 @@ impl ServerCompositionEffectBrush {
             let source = Rect::new(0.0, 0.0, size.width as f64, size.height as f64);
             canvas.draw_bitmap(&*bitmap, 1.0, source, rect);
         }
-    }
-
-    /// Paints the brush over `rect`, in the coordinates of `canvas`: the
-    /// graph over its bound sources. A brush whose factory did not load its
-    /// effect paints nothing.
-    pub fn paint(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
-        let Some(root) = self.graph.root.as_ref() else { return };
-        let opacity = self.props.opacity();
-        if opacity <= 0.0 || is_empty(&rect) || self.painting.replace(true) {
-            return;
-        }
-        if opacity != 1.0 {
-            canvas.push_opacity(opacity, Some(rect));
-        }
-        self.paint_node(root, canvas, rect);
-        if opacity != 1.0 {
-            canvas.pop_opacity();
-        }
-        self.painting.set(false);
     }
 
     /// One side of the drawing of `node` around the composed layer, which is
@@ -668,6 +880,20 @@ impl ServerCompositionEffectBrush {
                         self.paint_node_with_opacity(source1, canvas, rect, 1.0 - weight);
                     }
                     self.wrap_layer_in_opacity(source2, rest, canvas, rect, phase, weight);
+                }
+            }
+            EffectNodeKind::Composite { .. } if shadow_under_layer(node, path).is_some() => {
+                // The shadow of the layer under the layer itself: the drop
+                // shadow effect of the drawing context around the layer, which
+                // draws both from the one layer (a glow, #455).
+                let Some((amount, color)) = shadow_under_layer(node, path) else { return };
+                let Some(effects) = canvas.as_drawing_context_impl_with_effects() else { return };
+                match phase {
+                    LayerPhase::Before => {
+                        let (radius, color) = (self.blur_radius(amount), self.color(color));
+                        effects.push_effect(Some(rect), &ImmutableDropShadowEffect::new(0.0, 0.0, radius, color, 1.0));
+                    }
+                    LayerPhase::After => effects.pop_effect(),
                 }
             }
             EffectNodeKind::Composite { mode, sources } => {
@@ -779,6 +1005,35 @@ impl ServerCompositionEffectBrush {
             EffectNodeKind::Border { source, .. } => {
                 self.paint_around_layer(source, rest, canvas, rect, phase);
             }
+            EffectNodeKind::ConvolveMatrix {
+                kernel_width,
+                kernel_height,
+                kernel,
+                divisor,
+                bias,
+                clamp_edges,
+                preserve_alpha,
+                source,
+            } => {
+                // The kernel has the size the loader checked: the answer of
+                // the push is the same on both sides of the layer.
+                let convolution = self.convolution(
+                    *kernel_width,
+                    *kernel_height,
+                    kernel,
+                    divisor,
+                    bias,
+                    *clamp_edges,
+                    *preserve_alpha,
+                );
+                if before {
+                    Self::push_convolution(canvas, rect, convolution.as_ref());
+                    self.paint_around_layer(source, rest, canvas, rect, phase);
+                } else {
+                    self.paint_around_layer(source, rest, canvas, rect, phase);
+                    Self::pop_convolution(canvas, has_layers && convolution.is_some());
+                }
+            }
             EffectNodeKind::Shadow { amount, color, source } => {
                 let radius = self.blur_radius(amount);
                 let matrix = shadow_matrix(self.color(color));
@@ -831,54 +1086,43 @@ impl ServerCompositionEffectBrush {
         }
     }
 
-    /// What a layer visual whose effect is the brush draws before its
-    /// children, over `rect` (the bounds of the composed layer): the parts
-    /// of the graph under the layer, and what wraps the layer (blurs,
-    /// opacities) pushed. The children are the first source parameter of the
-    /// graph; [`pop_for_layer`](Self::pop_for_layer) is called after them
-    /// with the same rectangle.
-    ///
-    /// A graph without a source parameter is drawn whole and the children
-    /// are not shown; a brush whose factory did not load its effect shows
-    /// nothing.
-    pub fn push_for_layer(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
-        let opacity = self.props.opacity();
-        if opacity != 1.0 {
-            canvas.push_opacity(opacity.max(0.0), Some(rect));
-        }
-        match (self.graph.root.as_ref(), self.graph.layer_path.as_deref()) {
+    /// Draws what is under the composed layer and pushes what wraps it, over
+    /// `rect` (the bounds of the layer), for the graph `graph` whose first
+    /// source parameter is the layer; [`pop_around_layer`](Self::pop_around_layer)
+    /// is called after the layer with the same rectangle. A graph without a
+    /// source parameter is drawn whole and the layer is not shown; a graph
+    /// that was not loaded shows nothing.
+    pub(crate) fn push_around_layer(&self, graph: &EffectGraph, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        match (graph.root.as_ref(), graph.layer_path.as_deref()) {
             (Some(root), Some(path)) => self.paint_around_layer(root, path, canvas, rect, LayerPhase::Before),
             (root, _) => {
                 if let Some(root) = root {
                     self.paint_node(root, canvas, rect);
                 }
-                // Nothing of the children is shown.
+                // Nothing of the layer is shown.
                 canvas.push_clip(Rect::new(rect.x, rect.y, 0.0, 0.0));
             }
         }
     }
 
-    /// What a layer visual whose effect is the brush draws after its
-    /// children: see [`push_for_layer`](Self::push_for_layer).
-    pub fn pop_for_layer(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
-        match (self.graph.root.as_ref(), self.graph.layer_path.as_deref()) {
+    /// Pops what [`push_around_layer`](Self::push_around_layer) pushed and
+    /// draws what is over the layer.
+    pub(crate) fn pop_around_layer(&self, graph: &EffectGraph, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        match (graph.root.as_ref(), graph.layer_path.as_deref()) {
             (Some(root), Some(path)) => self.paint_around_layer(root, path, canvas, rect, LayerPhase::After),
             _ => canvas.pop_clip(),
         }
-        if self.props.opacity() != 1.0 {
-            canvas.pop_opacity();
-        }
     }
 
-    /// How far the output of the brush as the effect of a layer extends
-    /// beyond the composed layer: the padding of the blurs around it.
-    pub fn layer_padding(&self) -> Thickness {
+    /// How far the output of `graph` drawn around a layer extends beyond the
+    /// layer: the padding of the blurs and shadows around it.
+    pub(crate) fn layer_padding(&self, graph: &EffectGraph) -> Thickness {
         let mut padding = Thickness::default();
-        let (Some(mut node), Some(path)) = (self.graph.root.as_ref(), self.graph.layer_path.as_deref()) else {
+        let (Some(mut node), Some(path)) = (graph.root.as_ref(), graph.layer_path.as_deref()) else {
             return padding;
         };
         for &index in path {
-            if let EffectNodeKind::GaussianBlur { amount, .. } = &node.kind {
+            if let EffectNodeKind::GaussianBlur { amount, .. } | EffectNodeKind::Shadow { amount, .. } = &node.kind {
                 let radius = self.blur_radius(amount);
                 if radius > 0.0 {
                     let blur = ImmutableBlurEffect::new(radius);
@@ -1126,6 +1370,105 @@ impl IServerObject for ServerCompositionHostBackdropBrush {
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
+    }
+}
+
+/// Paints `graph` over `rect` of `canvas` once, for the prewarm of the GPU
+/// programs (`effects::register_effect_prewarm`, #437): with the values of
+/// its description, its source parameters drawn as `stand_in` (nothing
+/// without one), through the painting of the effect brushes, so that the
+/// drawing context makes the draws, layers and filters a brush of the graph
+/// makes. The brush made for it lives for the call only.
+pub(crate) fn paint_effect_graph_for_prewarm(
+    compositor: &Rc<ServerCompositor>,
+    graph: Arc<EffectGraph>,
+    stand_in: Option<Arc<SharedBitmapImpl>>,
+    canvas: &mut dyn IDrawingContextImpl,
+    rect: Rect,
+) {
+    if is_empty(&rect) {
+        return;
+    }
+    if graph.around_content {
+        // The graph of a custom effect (#455): around the image, as the
+        // render walk draws it around the content of a visual.
+        struct Prewarm(Option<Rc<ServerCompositor>>);
+        impl EffectGraphHost for Prewarm {
+            fn pixel_compositor(&self) -> Option<Rc<ServerCompositor>> {
+                self.0.clone()
+            }
+        }
+        let host = Prewarm(Some(compositor.clone()));
+        let painter = EffectGraphPainter::new(&host);
+        painter.push_around_layer(&graph, canvas, rect);
+        if let Some(bitmap) = &stand_in {
+            draw_stand_in(bitmap, canvas, rect);
+        }
+        painter.pop_around_layer(&graph, canvas, rect);
+        return;
+    }
+    let brush = ServerCompositionEffectBrush::new(compositor, graph);
+    *brush.stand_in.borrow_mut() = stand_in;
+    if let Some(root) = brush.graph.root.as_ref() {
+        brush.painter().paint_node(root, canvas, rect);
+    }
+    IServerObject::dispose(&*brush);
+}
+
+/// Draws a custom effect that is a runtime shader (#455, E4) once for the
+/// prewarm of the GPU programs: pushed as an effect of the drawing context
+/// around `stand_in` (nothing inside without one), as the render walk pushes
+/// it around the content of a visual, so that the backend compiles its
+/// program and makes the pipeline of the draw. A drawing context without
+/// effects draws nothing.
+pub(crate) fn paint_custom_effect_for_prewarm(
+    effect: &crate::media::effects::ImmutableCustomEffect,
+    stand_in: Option<Arc<SharedBitmapImpl>>,
+    canvas: &mut dyn IDrawingContextImpl,
+    rect: Rect,
+) {
+    if is_empty(&rect) {
+        return;
+    }
+    let Some(effects) = canvas.as_drawing_context_impl_with_effects() else { return };
+    effects.push_effect(Some(rect), effect);
+    if let Some(bitmap) = &stand_in {
+        draw_stand_in(bitmap, canvas, rect);
+    }
+    if let Some(effects) = canvas.as_drawing_context_impl_with_effects() {
+        effects.pop_effect();
+    }
+}
+
+/// Draws the image that stands in for a source parameter in the prewarm:
+/// at its size from the top left of the area, as a surface brush draws a
+/// tile of it.
+fn draw_stand_in(bitmap: &Arc<SharedBitmapImpl>, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+    let size = bitmap.pixel_size().to_size_with_dpi_vector(bitmap.dpi());
+    canvas.push_clip(rect);
+    canvas.draw_bitmap(
+        &**bitmap,
+        1.0,
+        Rect::from_size(bitmap.pixel_size().to_size(1.0)),
+        Rect::new(rect.x, rect.y, size.width, size.height),
+    );
+    canvas.pop_clip();
+}
+
+/// The shadow of the composed layer drawn under the layer itself: a
+/// source-over composite of a shadow of a source parameter and the same
+/// parameter (the Win2D way of writing a drop shadow or a glow), with the
+/// layer at `path` (the indices from `node`) inside the shadow. Its blur
+/// amount and colour.
+fn shadow_under_layer<'n>(node: &'n EffectNode, path: &[usize]) -> Option<(&'n EffectScalar, &'n EffectColor)> {
+    let EffectNodeKind::Composite { mode: BitmapBlendingMode::SourceOver, sources } = &node.kind else { return None };
+    if path != [0, 0] || sources.len() != 2 {
+        return None;
+    }
+    let EffectNodeKind::Shadow { amount, color, source } = &sources[0].kind else { return None };
+    match (&source.kind, &sources[1].kind) {
+        (EffectNodeKind::Parameter(shadowed), EffectNodeKind::Parameter(over)) if shadowed == over => Some((amount, color)),
+        _ => None,
     }
 }
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Generate repetitive native property declarations, not chart algorithms.
 
-From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2;
-the polar, Sankey, treemap and geographic charts add their rows with their engines (L4).
+From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2,
+the polar chart of L4, the Sankey and treemap charts of L4b, the geographic map of L4c, and the
+OHLC series, error bars, date and time axes, heat series properties and angular gauge visuals of
+L5.
 
 The generated classes remain ordinary FerroUI classes visible to the XAML source
 scanner. This replaces the managed UI-property generator for this native host.
@@ -25,8 +27,10 @@ def properties(cls, props):
                   f'        FerroProperty::register::<{cls}, _>("{xaml}", {default})', '    }']
     lines += ['} }', f'impl {cls} {{']
     for rust, _, typ, _ in props:
+        # A `Value` is set by `set_numeric_value`, apart from the property system's `set_value`.
+        setter = 'set_numeric_value' if rust == 'value' else f'set_{rust}'
         lines += [f'    pub fn {rust}(&self) -> {typ} {{ self.get_value(Self::{rust}_property()) }}',
-                  f'    pub fn set_{rust}(&self, value: {typ}) {{ self.set_value(Self::{rust}_property(), value); }}']
+                  f'    pub fn {setter}(&self, value: {typ}) {{ self.set_value(Self::{rust}_property(), value); }}']
     return '\n'.join(lines) + '\n}\n'
 
 point_props = [(n,n.upper() if n in ('x','y') else ''.join(p.title() for p in n.split('_')),'f64','0.0') for n in
@@ -72,15 +76,26 @@ axis_props = [
  ('min_step','MinStep','f64','0.0'),('force_step','ForceStep','bool','false'),
  ('unit_width','UnitWidth','f64','1.0'),('inverted','IsInverted','bool','false'),
  ('visible','IsVisible','bool','true'),('show_separator_lines','ShowSeparatorLines','bool','true'),
- ('position','Position','AxisPosition','AxisPosition::Start'),('text_size','TextSize','f64','12.0'),
+ ('position','Position','AxisPosition','AxisPosition::Start'),('text_size','TextSize','f64','16.0'),
  ('labels_rotation','LabelsRotation','f64','0.0'),('labels_color','LabelsColor','Color','Color::from_rgb(75,85,99)'),
  ('separators_color','SeparatorsColor','Color','Color::from_argb(50,107,114,128)'),
  ('logarithmic_base','LogarithmicBase','Option<f64>','None'),('padding','Padding','f64','0.0'),
  ('min_separators','MinSeparators','u32','3'),('labels_angle','LabelsAngle','f64','0.0'),
- ('custom_separators','CustomSeparators','Vec<f64>','Vec::new()'),('labels_padding','LabelsPadding','f64','3.0'),
- ('labels_density','LabelsDensity','f64','0.85')]
-axis = HEADER + IMPORTS + '''use ferroui_base::media::Color;
-use ferroui_livecharts::{Axis as AxisSnapshot, AxisPosition};
+ ('custom_separators','CustomSeparators','Vec<f64>','Vec::new()'),('labels_padding','LabelsPadding','Option<f64>','None'),
+ ('labels_density','LabelsDensity','f64','0.85'),
+ # The label function (code only) and the label background of a polar axis (L5).
+ ('labeler','Labeler','Option<Labeler>','None'),('labels_background','LabelsBackground','Option<Color>','None')]
+# The date and time axes of the source (XamlDateTimeAxis, XamlTimeSpanAxis): an Interval sets the
+# UnitWidth and MinStep of the axis to its ticks (OnAxisIntervalChanged), and the format, the
+# native counterpart of the DateFormatter and TimeFormatter delegates, sets its Labeler. The
+# defaults are the source's: a day and the short date "d"; a millisecond and "fff" milliseconds.
+time_axes = [
+ ('DateTimeAxis','date_format','DateFormat','SignedDuration::from_ticks(SignedDuration::TICKS_PER_DAY)','"d"','date_time_format'),
+ ('TimeSpanAxis','time_format','TimeFormat','SignedDuration::from_ticks(SignedDuration::TICKS_PER_MILLISECOND)','"fff\'ms\'"','time_span_format')]
+axis = HEADER + IMPORTS + '''use ferroui_base::animation::SignedDuration;
+use ferroui_base::media::Color;
+use ferroui_base::{FerroObjectImplExt, FerroPropertyChangedEventArgs};
+use ferroui_livecharts::{Axis as AxisSnapshot, AxisPosition, Labeler};
 #[repr(C)]
 pub struct Axis { base: FerroObject }
 ferro_class!(Axis: FerroObject);
@@ -95,6 +110,35 @@ impl Axis {
     }
 }
 ''' + properties('Axis',axis_props)
+for cls,fmt,fmt_xaml,interval,fmt_default,labeler in time_axes:
+    axis += f'''
+#[repr(C)]
+pub struct {cls} {{ base: Axis }}
+ferro_class!({cls}: Axis);
+ferro_class_info!({cls} {{ new: {cls}::new }});
+impl FerroObjectImpl for {cls} {{
+    fn constructed(this: &Self) {{
+        Self::parent_constructed(this);
+        this.apply_interval();
+        this.apply_format();
+    }}
+    fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {{
+        Self::parent_on_property_changed(this, change);
+        if change.property() == Self::interval_property().as_property() {{ this.apply_interval(); }}
+        if change.property() == Self::{fmt}_property().as_property() {{ this.apply_format(); }}
+    }}
+}}
+impl {cls} {{
+    pub fn construct() -> Self {{ Self {{ base: Axis::construct() }} }}
+    pub fn new() -> Ref<Self> {{ instantiate(Self::construct()) }}
+    fn apply_interval(&self) {{
+        let ticks = self.interval().ticks() as f64;
+        self.set_unit_width(ticks);
+        self.set_min_step(ticks);
+    }}
+    fn apply_format(&self) {{ self.set_labeler(Some(Labeler::{labeler}(self.{fmt}()))); }}
+}}
+''' + properties(cls,[('interval','Interval','SignedDuration',interval),(fmt,fmt_xaml,'String',f'String::from({fmt_default})')])
 
 series_props = [
  ('kind','Kind','SeriesKind','SeriesKind::Line'),('name','Name','String','String::new()'),
@@ -124,7 +168,10 @@ series_props = [
  ('inverted_corner_radius','InvertedCornerRadius','bool','false'),
  ('polar_labels_position','PolarLabelsPosition','PolarLabelsPosition','PolarLabelsPosition::Middle'),
  ('data_labels_rotation','DataLabelsRotation','f64','0.0'),
- ('polar_stacked','IsStacked','bool','false'),('data_padding','DataPadding','Point','Point::new(0.5,1.0)')]
+ ('polar_stacked','IsStacked','bool','false'),('data_padding','DataPadding','Point','Point::new(0.5,1.0)'),
+ # The error bars (IErrorSeries) and the marker paints of a line series (L5).
+ ('show_error','ShowError','bool','false'),('error_paint','ErrorPaint','Option<Color>','None'),
+ ('geometry_fill','GeometryFill','Option<Color>','None'),('geometry_stroke','GeometryStroke','Option<Color>','None')]
 series = HEADER + IMPORTS + '''use crate::{ChartPoints, ChartPoint};
 use ferroui_base::{FerroObjectImplExt,FerroPropertyChangedEventArgs,Point};
 use ferroui_base::media::{Color,IBrush,PenLineCap,PenLineJoin};
@@ -140,7 +187,7 @@ pub struct ChartSeries {
     base: FerroObject,
     entity_id:u64,
     values_listener: RefCell<Option<(ChartPoints,u64)>>,
-    point_listeners: RefCell<Vec<Rc<dyn IDisposable>>>,
+    point_listeners: RefCell<Vec<Subscription>>,
     brush_listeners: RefCell<Vec<Subscription>>,
     changed: HandlerList<dyn Fn()>,
 }
@@ -192,8 +239,7 @@ impl ChartSeries {
     fn clear_values_listener(&self) {
         let old=self.values_listener.borrow_mut().take();
         if let Some((values,token))=old { values.remove_collection_changed(token); }
-        let previous=std::mem::take(&mut *self.point_listeners.borrow_mut());
-        for listener in previous {listener.dispose();}
+        drop(self.point_listeners.take());
     }
     fn rebind_values(&self) {
         self.clear_values_listener();
@@ -205,18 +251,20 @@ impl ChartSeries {
         let mut listeners=Vec::new();
         for point in values.to_vec() {
             let weak=self.to_ref().downgrade();
-            listeners.push(point.property_changed(move |_|{if let Some(this)=weak.upgrade(){this.notify_changed();}}));
+            listeners.push(Subscription::new(point.property_changed(move |_|{if let Some(this)=weak.upgrade(){this.notify_changed();}})));
         }
         *self.point_listeners.borrow_mut()=listeners;
     }
     pub fn snapshot(&self)->SeriesSnapshot {
         SeriesSnapshot {
-''' + ''.join(f'            {n}: '+('self.values().to_vec().iter().map(|point|point.snapshot()).collect()' if n=='values' else f'self.{n}().as_ref().map(ferroui_livecharts::paint::snapshot_brush)' if n in ('fill_brush','stroke_brush') else f'self.{n}()')+',\n' for n,_,_,_ in series_props) + '''        }
+''' + ''.join(f'            {n}: '+('self.values().to_vec().iter().map(|point|point.snapshot()).collect()' if n=='values' else f'self.{n}().as_ref().map(ferroui_livecharts::paint::snapshot_brush)' if n in ('fill_brush','stroke_brush') else f'self.{n}()')+',\n' for n,_,_,_ in series_props) + '''            // The properties of one family (the heat series) are read by the chart.
+            ..SeriesSnapshot::new(self.kind())
+        }
     }
 }
 impl Drop for ChartSeries { fn drop(&mut self) {
     if let Some((values,token))=self.values_listener.get_mut().take(){values.remove_collection_changed(token);}
-    for listener in self.point_listeners.get_mut().drain(..){listener.dispose();}
+    drop(std::mem::take(self.point_listeners.get_mut()));
     for listener in self.brush_listeners.get_mut().drain(..){listener.dispose();}
 } }
 ''' + properties('ChartSeries',series_props)
@@ -226,34 +274,72 @@ families = [('LineSeries','Line'),('StepLineSeries','StepLine'),('AreaSeries','A
 ('ColumnSeries','Column'),('RowSeries','Row'),('StackedColumnSeries','StackedColumn'),
 ('StackedRowSeries','StackedRow'),('ScatterSeries','Scatter'),('HeatSeries','Heat'),
 ('RangeColumnSeries','RangeColumn'),('RangeRowSeries','RangeRow'),('RangeLineSeries','RangeLine'),
-('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie')]
-classes = HEADER + '''use crate::ChartSeries;
-use ferroui_base::{ferro_class,ferro_class_info,instantiate,FerroObjectImpl,FerroObjectImplExt,Ref};
-use ferroui_livecharts::SeriesKind;
+('CandlesticksSeries','Financial'),('OhlcSeries','Ohlc'),('BoxSeries','Box'),('PieSeries','Pie'),('PolarLineSeries','PolarLine'),
+('SankeySeries','Sankey'),('TreemapSeries','Treemap'),('HeatLandSeries','HeatLand')]
+# The Sankey and treemap series hold nodes (and links) and the heat land series lands instead of
+# chart points: the collections each instance owns, its markup content (`Nodes`, `Lands`) and the
+# properties of the source series (ISankeySeries; the treemap's padding and corner radius are the
+# shared Padding and CornerRadius; the ColorStops, MinValue and MaxValue of CoreHeatLandSeries,
+# whose HeatMap is the shared one with the source's default).
+node_collections = {'SankeySeries':[('nodes','SankeyNodes'),('links','SankeyLinks')],
+                    'TreemapSeries':[('nodes','TreemapNodes')],
+                    'HeatLandSeries':[('lands','HeatLands')]}
+node_content = {'SankeySeries':'Nodes','TreemapSeries':'Nodes','HeatLandSeries':'Lands'}
+family_overrides = {'HeatLandSeries':['heat_map'],'HeatSeries':['heat_map'],'OhlcSeries':['stroke_width']}
+node_props = {
+ 'SankeySeries':[('nodes','Nodes','SankeyNodes','SankeyNodes::new()'),('links','Links','SankeyLinks','SankeyLinks::new()'),
+  ('node_width','NodeWidth','f64','12.0'),('node_padding','NodePadding','f64','8.0'),
+  ('node_corner_radius','NodeCornerRadius','f64','0.0'),('layout_iterations','LayoutIterations','u32','32'),
+  ('node_label_position','NodeLabelPosition','SankeyLabelPosition','SankeyLabelPosition::Auto'),
+  ('layout','Layout','SankeyLayoutKind','SankeyLayoutKind::Vertical'),
+  ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None')],
+ 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()')],
+ 'HeatLandSeries':[('lands','Lands','HeatLands','HeatLands::new()'),('color_stops','ColorStops','Option<Vec<f64>>','None'),
+  ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
+ # The ColorStops, PointPadding, MinValue and MaxValue of CoreHeatSeries (L5).
+ 'HeatSeries':[('color_stops','ColorStops','Option<Vec<f64>>','None'),('point_padding','PointPadding','Thickness','Thickness::uniform(4.0)'),
+  ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')]}
+classes = HEADER + '''use crate::{ChartSeries,HeatLands,SankeyLinks,SankeyNodes,TreemapNodes};
+use ferroui_base::{ferro_class,ferro_class_info,ferro_properties,instantiate,FerroObjectImpl,FerroObjectImplExt,FerroProperty,Ref,StyledProperty,Thickness};
+use ferroui_base::media::Color;
+use ferroui_livecharts::{SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
 '''
 for name,kind in families:
+    owned=''.join(f'this.set_{prop}({typ}::new());' for prop,typ in node_collections.get(name,[]))
+    info=(f'ferro_class_info!({name} {{ new: {name}::new, markup: {{ content: {node_content[name]} }} }});' if name in node_collections
+          else f'ferro_class_info!({name} {{ new:{name}::new }});')
+    extra=''.join(f'ChartSeries::{prop}_property().override_default_value::<{name}>(defaults.{prop});' for prop in family_overrides.get(name,[]))
     classes += f'''\n#[repr(C)]
 pub struct {name} {{ base:ChartSeries }}
 ferro_class!({name}: ChartSeries);
-ferro_class_info!({name} {{ new:{name}::new }});
+{info}
 impl FerroObjectImpl for {name} {{
-    fn constructed(this:&Self) {{ Self::parent_constructed(this);this.set_kind(SeriesKind::{kind}); }}
+    fn constructed(this:&Self) {{ Self::parent_constructed(this);this.set_kind(SeriesKind::{kind});{owned} }}
 }}
 impl {name} {{
     fn static_constructor() {{
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults=ferroui_livecharts::Series::new(SeriesKind::{kind});
         ChartSeries::kind_property().override_default_value::<{name}>(SeriesKind::{kind});
-        ChartSeries::data_padding_property().override_default_value::<{name}>(ferroui_livecharts::Series::default_data_padding(SeriesKind::{kind}));
+        ChartSeries::data_padding_property().override_default_value::<{name}>(defaults.data_padding);
+        ChartSeries::geometry_size_property().override_default_value::<{name}>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<{name}>(defaults.padding);
+        ChartSeries::max_bar_width_property().override_default_value::<{name}>(defaults.max_bar_width);{extra}
     }}
     pub fn construct()->Self {{Self{{base:ChartSeries::construct()}}}}
     pub fn new()->Ref<Self> {{instantiate(Self::construct())}}
 }}
 '''
+for name,props in node_props.items():
+    classes += '\n' + properties(name,props)
 
-collections = HEADER + '''use crate::{ChartPoint,ChartSeries,Axis};
+collections = HEADER + '''use crate::{ChartPoint,ChartSeries,Axis,SankeyNode,SankeyLink,TreemapNode,HeatLand,GeoMarker,ChartVisualElement};
 use ferroui_base::{collections::FerroList,ferro_markup_type,Ref};
 use std::ops::Deref;
 '''
-for name,typ in [('ChartPoints','ChartPoint'),('ChartSeriesCollection','ChartSeries'),('Axes','Axis')]:
+for name,typ in [('ChartPoints','ChartPoint'),('ChartSeriesCollection','ChartSeries'),('Axes','Axis'),
+                 ('SankeyNodes','SankeyNode'),('SankeyLinks','SankeyLink'),('TreemapNodes','TreemapNode'),
+                 ('HeatLands','HeatLand'),('GeoMarkers','GeoMarker'),('ChartVisualElements','ChartVisualElement')]:
     collections += f'''
 #[derive(Clone,Debug,PartialEq)]
 pub struct {name}(FerroList<Ref<{typ}>>);
@@ -293,11 +379,27 @@ chart_props = [
  ('fit_to_bounds','FitToBounds','bool','false'),
  ('min_value','MinValue','f64','0.0'),('max_value','MaxValue','Option<f64>','None'),
  ('clockwise','Clockwise','bool','true'),
+ # The geographic map (IGeoMapView, and the CenterLongitude and CenterLatitude of GeoMapChart):
+ # no ActiveMap is the bundled world map; no latitude or longitude bound is the projection's
+ # default; the stroke and fill of the lands are the source's white and light grey.
+ ('active_map','ActiveMap','Option<Rc<DrawnMap>>','None'),
+ ('map_projection','MapProjection','MapProjection','MapProjection::Default'),
+ ('min_latitude','MinLatitude','Option<f64>','None'),('max_latitude','MaxLatitude','Option<f64>','None'),
+ ('min_longitude','MinLongitude','Option<f64>','None'),('max_longitude','MaxLongitude','Option<f64>','None'),
+ ('interaction_mode','InteractionMode','MapInteractionMode','MapInteractionMode::NONE'),
+ ('min_zoom_level','MinZoomLevel','f64','1.0'),('max_zoom_level','MaxZoomLevel','f64','100.0'),
+ ('stroke','Stroke','Option<Color>','Some(Color::from_rgb(255,255,255))'),
+ ('fill','Fill','Option<Color>','Some(Color::from_rgb(240,240,240))'),
+ ('center_longitude','CenterLongitude','f64','0.0'),('center_latitude','CenterLatitude','f64','0.0'),
+ ('markers','Markers','GeoMarkers','GeoMarkers::new()'),
+ # The visual elements of a pie chart: the ticks and needle of an angular gauge (L5).
+ ('visual_elements','VisualElements','ChartVisualElements','ChartVisualElements::new()'),
 ]
-chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartSeriesCollection,Axes,LegendPosition,TooltipPosition,ZoomAndPanMode};
+chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartSeriesCollection,ChartVisualElements,Axes,GeoMarkers,LegendPosition,MapInteractionMode,TooltipPosition,ZoomAndPanMode};
 use ferroui_base::{ferro_properties,FerroProperty,StyledProperty,Rect};
 use ferroui_base::media::Color;
-use ferroui_livecharts::{FindingStrategy,Section};
+use ferroui_livecharts::{DrawnMap,FindingStrategy,MapProjection,Section};
+use std::rc::Rc;
 '''+properties('Chart',chart_props)
 
 chart_classes=HEADER+'''use crate::{Chart,ChartKind};
@@ -305,7 +407,14 @@ use ferroui_base::{ferro_class,ferro_class_info,ferro_impl_classes,instantiate,F
 use ferroui_base::{input::InputElementImpl,interactivity::InteractiveImpl,layout::LayoutableImpl};
 use ferroui_controls::ControlImpl;
 '''
-for cls,kind in [('CartesianChart','Cartesian'),('PieChart','Pie')]:
+# The chart classes, their kind and the defaults their source view takes from LiveChartsSettings
+# (PolarInitialRotation = -90: the angle zero points up).
+chart_families=[('CartesianChart','Cartesian',[]),('PieChart','Pie',[]),
+                ('PolarChart','Polar',[('initial_rotation','-90.0')]),
+                ('SankeyChart','Sankey',[]),('TreemapChart','Treemap',[]),('GeoMap','GeoMap',[])]
+for cls,kind,defaults in chart_families:
+    overrides=''.join(f'Chart::{prop}_property().override_default_value::<{cls}>({value});' for prop,value in defaults)
+    static=f'fn static_constructor(){{{overrides}}}' if overrides else ''
     chart_classes+=f'''
 #[repr(C)]
 pub struct {cls}{{base:Chart}}
@@ -316,13 +425,78 @@ impl FerroObjectImpl for {cls}{{
     fn constructed(this:&Self){{Self::parent_constructed(this);this.set_chart_kind(ChartKind::{kind});}}
 }}
 impl {cls}{{
+    {static}
     pub fn construct()->Self{{Self{{base:Chart::construct()}}}}
     pub fn new()->Ref<Self>{{instantiate(Self::construct())}}
 }}
 '''
 
+# The visual elements of a pie chart (L5): the AngularTicksVisual and NeedleVisual of the source with
+# the paints of its light theme (the BaseAngularTicksVisual and BaseNeedleVisual rules), under the
+# ChartVisualElement of the VisualElements collection of a chart.
+ticks_props = [
+ ('stroke','Stroke','Option<Color>','Some(Color::from_rgb(30,30,30))'),('stroke_thickness','StrokeThickness','f64','1.0'),
+ ('labels_color','LabelsColor','Option<Color>','Some(Color::from_rgb(30,30,30))'),
+ ('outer_offset','OuterOffset','f64','0.0'),('labels_outer_offset','LabelsOuterOffset','f64','0.0'),
+ ('ticks_length','TicksLength','f64','0.0'),('labels_size','LabelsSize','f64','12.0'),
+ ('labeler','Labeler','Option<Labeler>','None')]
+needle_props = [
+ ('value','Value','f64','0.0'),('width','Width','f64','20.0'),('translate','Translate','Point','Point::new(0.0,0.0)'),
+ ('fill','Fill','Option<Color>','Some(Color::from_rgb(30,30,30))')]
+visual_elements = HEADER + IMPORTS + '''use ferroui_base::media::Color;
+use ferroui_base::Point;
+use ferroui_livecharts::pie_chart_engine::{AngularTicks, Needle, PieVisual};
+use ferroui_livecharts::Labeler;
+
+/// A visual element of a chart (`VisualElements`): the base of the angular gauge visuals.
+#[repr(C)]
+pub struct ChartVisualElement { base: FerroObject }
+ferro_class!(ChartVisualElement: FerroObject);
+ferro_class_info!(ChartVisualElement { new: ChartVisualElement::new });
+impl FerroObjectImpl for ChartVisualElement {}
+impl ChartVisualElement {
+    pub fn construct() -> Self { Self { base: FerroObject::construct() } }
+    pub fn new() -> Ref<Self> { instantiate(Self::construct()) }
+    /// The engine visual of an element, `None` for an element without one.
+    pub fn snapshot(this: &Ref<Self>) -> Option<PieVisual> {
+        if let Some(ticks) = this.cast::<AngularTicksVisual>() {
+            return Some(PieVisual::AngularTicks(AngularTicks {
+                stroke: ticks.stroke(),
+                stroke_width: ticks.stroke_thickness(),
+                labels_color: ticks.labels_color(),
+                outer_offset: ticks.outer_offset(),
+                labels_outer_offset: ticks.labels_outer_offset(),
+                ticks_length: ticks.ticks_length(),
+                labels_size: ticks.labels_size(),
+                labeler: ticks.labeler(),
+            }));
+        }
+        let needle = this.cast::<NeedleVisual>()?;
+        Some(PieVisual::Needle(Needle {
+            value: needle.value(),
+            width: needle.width(),
+            translate: needle.translate(),
+            fill: needle.fill(),
+        }))
+    }
+}
+'''
+for cls in ('AngularTicksVisual','NeedleVisual'):
+    visual_elements += f'''
+#[repr(C)]
+pub struct {cls} {{ base: ChartVisualElement }}
+ferro_class!({cls}: ChartVisualElement);
+ferro_class_info!({cls} {{ new: {cls}::new }});
+impl FerroObjectImpl for {cls} {{}}
+impl {cls} {{
+    pub fn construct() -> Self {{ Self {{ base: ChartVisualElement::construct() }} }}
+    pub fn new() -> Ref<Self> {{ instantiate(Self::construct()) }}
+}}
+'''
+visual_elements += properties('AngularTicksVisual',ticks_props) + properties('NeedleVisual',needle_props)
+
 FILES={'chart_point.rs':point,'axis.rs':axis,'chart_series.rs':series,'series_classes.rs':classes,'collections.rs':collections,
-       'chart_properties.rs':chart_properties,'chart_classes.rs':chart_classes}
+       'chart_properties.rs':chart_properties,'chart_classes.rs':chart_classes,'visual_elements.rs':visual_elements}
 def main():
     args=argparse.ArgumentParser();args.add_argument('--check',action='store_true')
     args.add_argument('--rustfmt',default='rustfmt',help='Rust formatter executable')

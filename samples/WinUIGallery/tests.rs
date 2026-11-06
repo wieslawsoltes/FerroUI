@@ -36,12 +36,46 @@ pub(crate) fn start() -> ferroui_controls::testing::UnitTestApplicationScope {
 pub(crate) fn start_winui() -> ferroui_controls::testing::UnitTestApplicationScope {
     ferroui_markup_xaml::register_types();
     ferroui_themes_winui::register_types();
-    let services =
-        TestServices::styled_window().with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style());
+    let services = TestServices::styled_window()
+        .with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style())
+        .with_global_clock(std::rc::Rc::new(IdleClock::default()));
     let scope = UnitTestApplication::start(services);
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
     scope
 }
+
+/// The clock of the transitions of the WinUI theme in the tests: it never pulses, as the clock of
+/// the theme's own test host, so a transition stays at its start until a test moves it.
+#[cfg(feature = "theme")]
+#[derive(Default)]
+struct IdleClock {
+    ticks: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
+    state: std::cell::Cell<ferroui_base::animation::PlayState>,
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for IdleClock {
+    fn subscribe(
+        &self,
+        observer: std::rc::Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
+    ) -> std::rc::Rc<dyn ferroui_base::reactive::IDisposable> {
+        self.ticks.subscribe(observer)
+    }
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::animation::IClock for IdleClock {
+    fn play_state(&self) -> ferroui_base::animation::PlayState {
+        self.state.get()
+    }
+
+    fn set_play_state(&self, value: ferroui_base::animation::PlayState) {
+        self.state.set(value);
+    }
+}
+
+#[cfg(feature = "theme")]
+impl ferroui_base::animation::IGlobalClock for IdleClock {}
 
 /// Raises a key event of `key` on `element`, as the keyboard does: `KeyDown`, or `KeyUp` with
 /// `up` (the NumberBox commits its text on the key-up of Enter, as WinUI's does).
@@ -118,6 +152,22 @@ fn all_reviewed_native_adaptations_load_real_controls() {
         }
     }
     assert!(errors.is_empty(), "{}", errors.join("\n"));
+}
+
+#[test]
+fn adaptation_port_states_match_port_status() {
+    // `port-status.json` is written with an indent of two spaces: a page is a key of `pages` and
+    // its status is the first member of its entry.
+    let status = include_str!("port-status.json");
+    for adaptation in examples::ADAPTATIONS {
+        let state = if adaptation.ported { "ported" } else { "partial" };
+        let entry = format!("\n    \"{}\": {{\n      \"status\": \"{state}\"", adaptation.page_id);
+        assert!(
+            status.contains(&entry),
+            "{}: port-status.json does not record it as {state}",
+            adaptation.page_id
+        );
+    }
 }
 
 #[test]
@@ -366,14 +416,36 @@ fn source_preview_preserves_unported_bindings_and_substitution_tokens() {
 }
 
 #[test]
-fn winui_preview_uses_opt_in_public_loader_and_rejects_unported_bindings() {
+fn winui_preview_uses_opt_in_public_loader_and_compiles_x_bind() {
     let _application = start();
     let root = crate::gallery::load_winui_preview("<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Text=\"Preview\"/>").unwrap();
     assert_eq!(
         root.cast::<TextBlock>().unwrap().text().as_deref(),
         Some("Preview")
     );
-    assert!(crate::gallery::load_winui_preview("<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Text=\"{x:Bind Text}\"/>").is_err());
+    // x:Bind goes to the compiled x:Bind core (#525, X6): a path of the root loads, and the
+    // root's bindings read it when they are initialized; a path the root does not have is a
+    // compile error of the loader, and the Reject policy is a migration error.
+    let bound = crate::gallery::load_winui_preview("<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Tag=\"From the root\" Text=\"{x:Bind Tag}\"/>").unwrap();
+    ferroui_markup_xaml::markup_extensions::XBindings::get_for_root(&bound)
+        .expect("the bindings of the root")
+        .initialize()
+        .unwrap();
+    assert_eq!(
+        bound.cast::<TextBlock>().unwrap().text().as_deref(),
+        Some("From the root")
+    );
+    let unresolved = "<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Text=\"{x:Bind CodeBehindField}\"/>";
+    assert!(crate::gallery::load_winui_preview(unresolved).is_err());
+    let reject = ferroui_markup_xaml_winui::WinUIXamlOptions {
+        x_bind: ferroui_markup_xaml_winui::WinUIXBindPolicy::Reject,
+        ..Default::default()
+    };
+    let bound = "<TextBlock xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Text=\"{x:Bind Tag}\"/>";
+    assert!(crate::gallery::load_winui_preview_with_options(bound, &reject)
+        .unwrap_err()
+        .to_string()
+        .contains("WXAML1007"));
 }
 
 #[test]
@@ -992,7 +1064,7 @@ fn control_search_uses_chosen_suggestion_before_free_query_and_preserves_no_resu
 #[test]
 fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     use ferroui_base::platform::AssetLoader;
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use std::io::Read;
     let _application = start();
     crate::assets::register();
@@ -1011,7 +1083,7 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
             .find(|(registered, _)| *registered == path)
             .unwrap()
             .1;
-        let uri = Uri::new(entry.image_uri, UriKind::Absolute).unwrap();
+        let uri = UriRef::from(UriRef::parse_absolute(entry.image_uri).unwrap());
         let mut actual = Vec::new();
         AssetLoader::open(&uri, None)
             .unwrap()
@@ -1029,7 +1101,7 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
 #[test]
 fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
     use ferroui_base::platform::AssetLoader;
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use std::io::Read;
     let _application = start();
     crate::assets::register();
@@ -1039,7 +1111,7 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
         .collect();
     assert_eq!(media.len(), 22);
     for (path, expected) in media {
-        let uri = Uri::new(&format!("ferres://WinUIGallery/{path}"), UriKind::Absolute).unwrap();
+        let uri = UriRef::from(UriRef::parse_absolute(&format!("ferres://WinUIGallery/{path}")).unwrap());
         let mut actual = Vec::new();
         AssetLoader::open(&uri, None).unwrap().read_to_end(&mut actual).unwrap();
         assert_eq!(&actual, expected, "{path} resolves its original source bytes");

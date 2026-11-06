@@ -11,7 +11,7 @@ use crate::{
     Button, Control, DataValidationErrors, Grid, GridLength, ListBoxItem, Panel, RowDefinition, ScrollViewer, StackPanel,
     TextBlock, Window,
 };
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
 use ferroui_base::input::{InputElement, Key, KeyEventArgs};
 use ferroui_base::layout::{ILayoutManager, VerticalAlignment};
@@ -50,18 +50,18 @@ struct CultureScope(CultureInfo);
 
 impl CultureScope {
     fn new() -> Self {
-        Self(CultureInfo::current_culture())
+        Self(CultureInfo::current_formatting())
     }
 }
 
 impl Drop for CultureScope {
     fn drop(&mut self) {
-        CultureInfo::set_current_culture(self.0.clone());
+        CultureInfo::set_current_formatting(self.0.clone());
     }
 }
 
 fn date(year: i32, month: i32, day: i32) -> DateTimeOffset {
-    DateTimeOffset::new(year, month, day, 0, 0, 0, TimeSpan::default())
+    DateTimeOffset::new(year, month, day, 0, 0, 0, SignedDuration::default())
 }
 
 fn named<T>(control: Ref<T>, name: &str) -> Ref<T>
@@ -352,7 +352,7 @@ fn selected_date_enable_data_validation() {
     assert_errors_are(&date_picker, &exception);
 
     Dispatcher::ui_thread().run_jobs(None);
-    date_picker.set_selected_date(Some(DateTimeOffset::new(2005, 5, 10, 11, 12, 13, TimeSpan::default())));
+    date_picker.set_selected_date(Some(DateTimeOffset::new(2005, 5, 10, 11, 12, 13, SignedDuration::default())));
     assert!(handled.get());
 }
 
@@ -438,8 +438,8 @@ fn set_initial_focus_should_focus_day_selector_for_day_first_locale() {
     let _app = start(focus_services());
     // en-GB uses dd/MM/yyyy: the day appears first in the short date pattern
     TestCultureDataProvider::register();
-    CultureInfo::set_current_culture(CultureInfo::get_culture_info("en-GB"));
-    assert_eq!("dd/MM/yyyy", CultureInfo::current_culture().date_time_format().short_date_pattern());
+    CultureInfo::set_current_formatting(CultureInfo::get_culture_info("en-GB"));
+    assert_eq!("dd/MM/yyyy", CultureInfo::current_formatting().date_time_format().short_date_pattern());
 
     let presenter = DatePickerPresenter::new();
     presenter.set_template(Some(create_picker_template()));

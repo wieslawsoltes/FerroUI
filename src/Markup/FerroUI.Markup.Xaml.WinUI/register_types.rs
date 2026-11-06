@@ -1,8 +1,9 @@
 use ferroui_base::metadata::MarkupAssembly;
 use ferroui_base::TypeInfo;
 
-/// The namespace of the markup types of the crate (`using:FerroUI.Markup.Xaml.WinUI`, which the
-/// importer writes; not in the default XML namespace).
+/// The namespace of the markup types of the crate (`using:FerroUI.Markup.Xaml.WinUI`; not in the
+/// default XML namespace). The crate declares none since the x:Bind adapter was removed (#525,
+/// X6): an imported x:Bind is the `XBindExtension` of `ferroui-markup-xaml`.
 const NAMESPACES: &[(&str, &str)] = &[("ferroui_markup_xaml_winui", "FerroUI.Markup.Xaml.WinUI")];
 
 /// The markup assembly of the crate.
@@ -14,10 +15,11 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     metadata: &[],
 };
 
-/// The classes of the object model of the crate: none (its markup types are in `bindings`).
+/// The classes of the object model of the crate: none.
 const TYPES: &[&TypeInfo] = &[];
 
-/// Registers the x:Bind types for markup, after the XAML runtime library they build on.
+/// Registers the crate for markup, after the XAML runtime library, whose types (the x:Bind core
+/// among them) a migrated document names.
 pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
@@ -26,6 +28,5 @@ pub fn register_types() {
         TypeInfo::register_all(TYPES);
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
-        crate::bindings::register_markup_types();
     });
 }

@@ -1,0 +1,87 @@
+<!-- Ported from the three pinned TitleBar examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The bindings to the named options are x:Bind, compiled by the x:Bind core (#525). The
+     ImageIconSource of the gallery icon is a PathIconSource (FerroUI has no ImageIconSource) and
+     the PersonPicture of the right header a composed circle with the initials (FerroUI has no
+     PersonPicture). The two "Show window" buttons open the source's sample windows
+     (TitleBarDragRegionsWindow.xaml and TitleBarWindow.xaml, built by window_samples.rs). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="20" Margin="0,12,0,0">
+  <TextBlock TextWrapping="Wrap"
+             Text="For full title bar customization without using the TitleBar control, see the AppWindowTitleBar sample." />
+
+  <StackPanel x:Name="TitleBarExample1" Spacing="12">
+    <TextBlock Text="TitleBar configuration" FontSize="18" />
+    <Grid ColumnDefinitions="*,240" ColumnSpacing="24">
+      <!-- The source's Grid with a background, a border and corners is a Border (a FerroUI panel
+           has no border). -->
+      <Border HorizontalAlignment="Stretch" VerticalAlignment="Center"
+              Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+              BorderBrush="{DynamicResource SurfaceStrokeColorDefaultBrush}"
+              BorderThickness="1" CornerRadius="8">
+        <TitleBar x:Name="TitleBarControl"
+                  Title="{x:Bind TitleBox.Text, Mode=OneWay}"
+                  Subtitle="{x:Bind SubtitleBox.Text, Mode=OneWay}"
+                  IsBackButtonVisible="{x:Bind BackButtonToggle.IsChecked, Mode=OneWay}"
+                  IsPaneToggleButtonVisible="{x:Bind PaneToggle.IsChecked, Mode=OneWay}">
+          <TitleBar.Resources>
+            <!-- TitleBar.Content uses Center alignment by default. Override to Stretch so the
+                 search box can grow with the title bar. -->
+            <HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment>
+          </TitleBar.Resources>
+          <TitleBar.IconSource>
+            <PathIconSource Data="M2,2 L14,2 L14,14 L2,14 Z M5,5 L5,11 L11,11 L11,5 Z" />
+          </TitleBar.IconSource>
+          <TitleBar.RightHeader>
+            <Border x:Name="TitleBarPersonPicture" Width="30" Height="30" CornerRadius="15"
+                    Background="{DynamicResource ControlAltFillColorQuarternaryBrush}"
+                    AutomationProperties.Name="JD">
+              <TextBlock Text="JD" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </TitleBar.RightHeader>
+          <TitleBar.Content>
+            <AutoSuggestBox MaxWidth="580" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                            PlaceholderText="Search...">
+              <AutoSuggestBox.QueryIcon><SymbolIcon Symbol="Find" /></AutoSuggestBox.QueryIcon>
+            </AutoSuggestBox>
+          </TitleBar.Content>
+        </TitleBar>
+      </Border>
+      <StackPanel Grid.Column="1" Width="240" Orientation="Vertical" Spacing="12">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Title" />
+          <TextBox x:Name="TitleBox" Text="WinUI Gallery" AutomationProperties.Name="Title" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Subtitle" />
+          <TextBox x:Name="SubtitleBox" Text="Preview" AutomationProperties.Name="Subtitle" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="IsBackButtonVisible" />
+          <ToggleSwitch x:Name="BackButtonToggle" IsChecked="False" AutomationProperties.Name="IsBackButtonVisible" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="IsPaneToggleButtonVisible" />
+          <ToggleSwitch x:Name="PaneToggle" IsChecked="False" AutomationProperties.Name="IsPaneToggleButtonVisible" />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="TitleBarExample2" MaxWidth="560" HorizontalAlignment="Left" Spacing="12">
+    <TextBlock Text="Drag regions" FontSize="18" />
+    <TextBlock HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+               Text="Drag regions can only be observed on a real window. Click the button below to open a sample window where you can toggle TitleBar.IsDragRegion on a status badge and call RecomputeDragRegions() after dynamic content changes." />
+    <Button x:Name="ShowTitleBarDragRegionsWindow" HorizontalAlignment="Center"
+            Content="Show window" Classes="accent" />
+  </StackPanel>
+
+  <StackPanel x:Name="TitleBarExample3" MaxWidth="560" HorizontalAlignment="Left" Spacing="12">
+    <TextBlock Text="End-to-end TitleBar sample" FontSize="18" />
+    <TextBlock HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+               Text="Click the button below to see an end to end sample of a TitleBar in an new window, binding some of its properties to the NavigationView and navigation frame." />
+    <Button x:Name="ShowTitleBarWindow" HorizontalAlignment="Center"
+            Content="Show window" Classes="accent" />
+  </StackPanel>
+  <TextBlock x:Name="WindowSampleError" IsVisible="False" TextWrapping="Wrap"
+             Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+</StackPanel>
