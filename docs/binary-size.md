@@ -335,6 +335,22 @@ algorithms under injected panics and reentrant reads and writes. One corner case
 the metadata of a type is unregistered, a derived type that had cached it now resolves its
 metadata again instead of keeping the stale entry.
 
+### 4.5 Handle conversions derived, not registered (#566, part 1)
+
+Every class registered two conversions of the root handle with the value type registry, to
+`Ref<T>` and to `Option<Ref<T>>`: two closures and their vtables and drop glue per class, in
+every application whether it converts handles or not. The registry already has the object entry
+of each class (its `from_object` function), so it derives both conversions when they are looked
+up (`Conversion::find` in `data/core/value_type.rs`). Behaviour is unchanged: the conversion is
+found and refused exactly as before.
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | main | after | Change |
+|---|---:|---:|---:|
+| Executable | 51.26 MB | 50.71 MB | -0.55 MB (-1.1 %) |
+
+The rest of #566 makes the tables of types that every crate registers at start-up (6.5 MB of hello
+world, measured by building it without them) registered only by what looks types up by name.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
