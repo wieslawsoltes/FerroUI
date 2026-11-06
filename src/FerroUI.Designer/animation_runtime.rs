@@ -182,10 +182,18 @@ impl NativeAnimations {
                     &(dictionary.clone().into()),
                     key.clone(),
                 );
-                let value =
-                    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| dictionary.get(&key)))
+                // A deferred resource that fails to build reports its error to the error scope
+                // and is left out, without unwinding (#567).
+                // Boundary (#567): the builder runs constructors of the previewed application,
+                // whose panic leaves the key out too; isolating them needs a build that unwinds
+                // (`dev` or `release-unwind` profile).
+                let value = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| Ok(dictionary.get(&key)))
                         .ok()
-                        .flatten();
+                        .flatten()
+                }))
+                .ok()
+                .flatten();
                 if let Some(value) = value {
                     if let Some(animation) = Ref::<Animation>::from_xaml_object(&value) {
                         animations.push((animation.into(), source_info));
