@@ -57,8 +57,11 @@ impl StyleInclude {
     }
 
     /// The owner of the loaded style, if it is a resource provider.
+    ///
+    /// Inside an error scope of a load, a document that cannot be loaded is
+    /// the error of the scope and there is no owner.
     pub fn owner(&self) -> Option<ResourceHostRef> {
-        self.loaded().as_resource_provider()?.owner()
+        self.loaded_or_reported()?.as_resource_provider()?.owner()
     }
 
     /// The source URL: an absolute URL, or a reference relative to the base
@@ -90,6 +93,16 @@ impl StyleInclude {
     /// loaded.
     pub fn loaded(&self) -> Rc<dyn IStyle> {
         crate::throw(self.try_loaded())
+    }
+
+    /// The loaded style for the members of the resource contracts, which have
+    /// no error channel: inside an error scope of a load
+    /// ([`with_xaml_errors`](crate::xaml_error_scope::with_xaml_errors)), a
+    /// document that cannot be loaded is the error of the scope, and the
+    /// include acts as if it were empty (#567); outside, it panics as
+    /// [`loaded`](Self::loaded) does.
+    fn loaded_or_reported(&self) -> Option<Rc<dyn IStyle>> {
+        crate::throw_or(self.try_loaded().map(Some), || None)
     }
 
     /// The loaded style; loads it on first use. A missing
@@ -134,12 +147,12 @@ impl StyleInclude {
 
 impl IResourceNode for StyleInclude {
     fn has_resources(&self) -> bool {
-        self.loaded().has_resources()
+        self.loaded_or_reported().is_some_and(|loaded| loaded.has_resources())
     }
 
     fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
         if !self.is_loading.get() {
-            return self.loaded().try_get_resource(key, theme);
+            return self.loaded_or_reported()?.try_get_resource(key, theme);
         }
 
         None
@@ -179,20 +192,23 @@ impl IResourceProvider for StyleInclude {
     }
 
     fn owner_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        match self.loaded().as_resource_provider() {
+        let loaded = self.loaded_or_reported();
+        match loaded.as_ref().and_then(|loaded| loaded.as_resource_provider()) {
             Some(rp) => rp.owner_changed(handler),
             None => Disposable::empty(),
         }
     }
 
     fn add_owner(&self, owner: &ResourceHostRef) {
-        if let Some(rp) = self.loaded().as_resource_provider() {
+        let loaded = self.loaded_or_reported();
+        if let Some(rp) = loaded.as_ref().and_then(|loaded| loaded.as_resource_provider()) {
             rp.add_owner(owner);
         }
     }
 
     fn remove_owner(&self, owner: &ResourceHostRef) {
-        if let Some(rp) = self.loaded().as_resource_provider() {
+        let loaded = self.loaded_or_reported();
+        if let Some(rp) = loaded.as_ref().and_then(|loaded| loaded.as_resource_provider()) {
             rp.remove_owner(owner);
         }
     }
